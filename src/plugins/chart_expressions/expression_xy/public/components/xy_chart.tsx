@@ -52,7 +52,7 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
 import type {
   FilterEvent,
   BrushEvent,
@@ -146,6 +146,8 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   renderComplete: () => void;
   uiState?: PersistedState;
   timeFormat: string;
+  setChartSize: (chartSizeSpec: ChartSizeSpec) => void;
+  shouldShowLegendAction?: (actionId: string) => boolean;
 };
 
 function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -199,6 +201,7 @@ export function XYChart({
   onClickMultiValue,
   layerCellValueActions,
   onSelectRange,
+  setChartSize,
   interactive = true,
   syncColors,
   syncTooltips,
@@ -293,6 +296,32 @@ export function XYChart({
   );
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
+
+  const isTimeViz = isTimeChart(dataLayers);
+
+  useEffect(() => {
+    const chartSizeSpec: ChartSizeSpec =
+      isTimeViz && !isHorizontalChart(dataLayers)
+        ? {
+            aspectRatio: {
+              x: 16,
+              y: 9,
+            },
+            minDimensions: {
+              y: { value: 300, unit: 'pixels' },
+              x: { value: 100, unit: 'percentage' },
+            },
+          }
+        : {
+            maxDimensions: {
+              x: { value: 100, unit: 'percentage' },
+              y: { value: 100, unit: 'percentage' },
+            },
+          };
+
+    setChartSize(chartSizeSpec);
+  }, [dataLayers, isTimeViz, setChartSize]);
+
   const formattedDatatables = useMemo(
     () =>
       getFormattedTablesByLayers(dataLayers, formatFactory, splitColumnAccessor, splitRowAccessor),
@@ -370,8 +399,6 @@ export function XYChart({
     filteredBarLayers.some(
       (layer) => isDataLayer(layer) && layer.splitAccessors && layer.splitAccessors.length
     );
-
-  const isTimeViz = isTimeChart(dataLayers);
 
   const defaultXScaleType = isTimeViz ? XScaleTypes.TIME : XScaleTypes.ORDINAL;
 
@@ -982,7 +1009,7 @@ export function XYChart({
             <Annotations
               rangeAnnotations={rangeAnnotations}
               groupedLineAnnotations={groupedLineAnnotations}
-              formatter={xAxisFormatter}
+              timeFormat={timeFormat}
               isHorizontal={shouldRotate}
               paddingMap={linesPaddings}
               isBarChart={filteredBarLayers.length > 0}

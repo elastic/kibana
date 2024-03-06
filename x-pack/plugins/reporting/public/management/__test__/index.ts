@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export { mockJobs } from '../../../common/test';
-
 export { setup } from './report_listing.test.helpers';
-
 export type { TestBed, TestDependencies } from './report_listing.test.helpers';

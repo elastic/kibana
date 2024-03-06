@@ -24,13 +24,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clickKibanaIndexPatterns();
     });
 
+    after(async function () {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
     beforeEach(async function () {
       await PageObjects.settings.createIndexPattern('logstash-*');
     });
 
     afterEach(async function () {
       await PageObjects.settings.removeIndexPattern();
-      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should filter indexed fields by type', async function () {
@@ -166,6 +169,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.settings.clickIndexPatternLogstash();
+
+      await PageObjects.settings.refreshDataViewFieldList();
 
       await testSubjects.existOrFail('dataViewMappingConflict');
 

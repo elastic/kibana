@@ -1,0 +1,2298 @@
+{
+  "id": "@kbn/lens-formula-docs",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.getTypeI18n",
+        "type": "Function",
+        "tags": [],
+        "label": "getTypeI18n",
+        "description": [],
+        "signature": [
+          "(type: string) => string"
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.getTypeI18n.$1",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.AVG_ID",
+        "type": "string",
+        "tags": [],
+        "label": "AVG_ID",
+        "description": [],
+        "signature": [
+          "\"average\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/average.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.AVG_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "AVG_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/average.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.CARDINALITY_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CARDINALITY_ID",
+        "description": [],
+        "signature": [
+          "\"unique_count\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/cardinality.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.CARDINALITY_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "CARDINALITY_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/cardinality.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.COUNT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "COUNT_ID",
+        "description": [],
+        "signature": [
+          "\"count\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/count.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.COUNT_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "COUNT_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/count.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.COUNTER_RATE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "COUNTER_RATE_ID",
+        "description": [],
+        "signature": [
+          "\"counter_rate\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/counter_rate.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.COUNTER_RATE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "COUNTER_RATE_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/counter_rate.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.CUMULATIVE_SUM_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CUMULATIVE_SUM_ID",
+        "description": [],
+        "signature": [
+          "\"cumulative_sum\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/cumulative_sum.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.CUMULATIVE_SUM_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "CUMULATIVE_SUM_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/cumulative_sum.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.DIFFERENCES_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DIFFERENCES_ID",
+        "description": [],
+        "signature": [
+          "\"differences\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/differences.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.DIFFERENCES_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "DIFFERENCES_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/differences.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.INTERVAL_ID",
+        "type": "string",
+        "tags": [],
+        "label": "INTERVAL_ID",
+        "description": [],
+        "signature": [
+          "\"interval\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/interval.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.INTERVAL_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "INTERVAL_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/interval.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.LAST_VALUE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LAST_VALUE_ID",
+        "description": [],
+        "signature": [
+          "\"last_value\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/last_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.LAST_VALUE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "LAST_VALUE_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/last_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.MAX_ID",
+        "type": "string",
+        "tags": [],
+        "label": "MAX_ID",
+        "description": [],
+        "signature": [
+          "\"max\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/max.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.MAX_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "MAX_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/max.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.MEDIAN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "MEDIAN_ID",
+        "description": [],
+        "signature": [
+          "\"median\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/median.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.MEDIAN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "MEDIAN_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/median.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.MIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "MIN_ID",
+        "description": [],
+        "signature": [
+          "\"min\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/min.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.MIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "MIN_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/min.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.MOVING_AVERAGE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "MOVING_AVERAGE_ID",
+        "description": [],
+        "signature": [
+          "\"moving_average\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/moving_average.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.MOVING_AVERAGE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "MOVING_AVERAGE_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/moving_average.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.MOVING_AVERAGE_WINDOW_DEFAULT_VALUE",
+        "type": "number",
+        "tags": [],
+        "label": "MOVING_AVERAGE_WINDOW_DEFAULT_VALUE",
+        "description": [],
+        "signature": [
+          "5"
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/moving_average.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.NORMALIZE_BY_UNIT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "NORMALIZE_BY_UNIT_ID",
+        "description": [],
+        "signature": [
+          "\"normalize_by_unit\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/normalize_by_unit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.NORMALIZE_BY_UNIT_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "NORMALIZE_BY_UNIT_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/normalize_by_unit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.NOW_ID",
+        "type": "string",
+        "tags": [],
+        "label": "NOW_ID",
+        "description": [],
+        "signature": [
+          "\"now\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/now.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.NOW_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "NOW_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/now.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.OVERALL_AVERAGE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OVERALL_AVERAGE_ID",
+        "description": [],
+        "signature": [
+          "\"overall_average\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/overall_average.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.OVERALL_AVERAGE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "OVERALL_AVERAGE_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/overall_average.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.OVERALL_MAX_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OVERALL_MAX_ID",
+        "description": [],
+        "signature": [
+          "\"overall_max\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/overall_max.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.OVERALL_MAX_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "OVERALL_MAX_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/overall_max.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.OVERALL_MIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OVERALL_MIN_ID",
+        "description": [],
+        "signature": [
+          "\"overall_min\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/overall_min.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.OVERALL_MIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "OVERALL_MIN_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/overall_min.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.OVERALL_SUM_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OVERALL_SUM_ID",
+        "description": [],
+        "signature": [
+          "\"overall_sum\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/overall_sum.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.OVERALL_SUM_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "OVERALL_SUM_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/overall_sum.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.PERCENTILE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PERCENTILE_ID",
+        "description": [],
+        "signature": [
+          "\"percentile\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/percentile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.PERCENTILE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PERCENTILE_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/percentile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.PERCENTILE_RANK_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PERCENTILE_RANK_ID",
+        "description": [],
+        "signature": [
+          "\"percentile_rank\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/percentile_ranks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.PERCENTILE_RANK_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PERCENTILE_RANK_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/percentile_ranks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.STD_DEVIATION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STD_DEVIATION_ID",
+        "description": [],
+        "signature": [
+          "\"standard_deviation\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/std_deviation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.STD_DEVIATION_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "STD_DEVIATION_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/std_deviation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.SUM_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SUM_ID",
+        "description": [],
+        "signature": [
+          "\"sum\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/sum.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.SUM_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "SUM_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/sum.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.TIME_RANGE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "TIME_RANGE_ID",
+        "description": [],
+        "signature": [
+          "\"time_range\""
+        ],
+        "path": "packages/kbn-lens-formula-docs/src/operations/time_range.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.TIME_RANGE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "TIME_RANGE_NAME",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/operations/time_range.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.documentationMap",
+        "type": "Object",
+        "tags": [],
+        "label": "documentationMap",
+        "description": [],
+        "signature": [
+          "{ [x: string]: ",
+          "OperationDocumentationType",
+          "; }"
+        ],
+        "path": "packages/kbn-lens-formula-docs/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.sections",
+        "type": "Object",
+        "tags": [],
+        "label": "sections",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/sections/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.sections.howTo",
+            "type": "string",
+            "tags": [],
+            "label": "howTo",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/sections/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.sections.elasticsearch",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch",
+            "description": [],
+            "signature": [
+              "{ label: string; description: string; }"
+            ],
+            "path": "packages/kbn-lens-formula-docs/src/sections/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.sections.common",
+            "type": "Object",
+            "tags": [],
+            "label": "common",
+            "description": [],
+            "signature": [
+              "{ label: string; description: string; items: { label: string; description: string; }[]; }"
+            ],
+            "path": "packages/kbn-lens-formula-docs/src/sections/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.sections.comparison",
+            "type": "Object",
+            "tags": [],
+            "label": "comparison",
+            "description": [],
+            "signature": [
+              "{ label: string; description: string; }"
+            ],
+            "path": "packages/kbn-lens-formula-docs/src/sections/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.sections.math",
+            "type": "Object",
+            "tags": [],
+            "label": "math",
+            "description": [],
+            "signature": [
+              "{ label: string; description: string; }"
+            ],
+            "path": "packages/kbn-lens-formula-docs/src/sections/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.sections.calculations",
+            "type": "Object",
+            "tags": [],
+            "label": "calculations",
+            "description": [],
+            "signature": [
+              "{ label: string; description: string; }"
+            ],
+            "path": "packages/kbn-lens-formula-docs/src/sections/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.sections.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "{ label: string; description: string; }"
+            ],
+            "path": "packages/kbn-lens-formula-docs/src/sections/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-formula-docs",
+        "id": "def-common.tinymathFunctions",
+        "type": "Object",
+        "tags": [],
+        "label": "tinymathFunctions",
+        "description": [],
+        "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.add",
+            "type": "Object",
+            "tags": [],
+            "label": "add",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.add.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.add.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.add.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.subtract",
+            "type": "Object",
+            "tags": [],
+            "label": "subtract",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.subtract.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.subtract.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.subtract.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.multiply",
+            "type": "Object",
+            "tags": [],
+            "label": "multiply",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.multiply.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.multiply.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.multiply.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.divide",
+            "type": "Object",
+            "tags": [],
+            "label": "divide",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.divide.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.divide.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.divide.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.abs",
+            "type": "Object",
+            "tags": [],
+            "label": "abs",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.abs.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.abs.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.abs.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.cbrt",
+            "type": "Object",
+            "tags": [],
+            "label": "cbrt",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.cbrt.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.cbrt.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.cbrt.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.ceil",
+            "type": "Object",
+            "tags": [],
+            "label": "ceil",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.ceil.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.ceil.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.ceil.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.clamp",
+            "type": "Object",
+            "tags": [],
+            "label": "clamp",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.clamp.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.clamp.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "({ name: string; type: string; } | { name: string; type: string; alternativeWhenMissing: string; })[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.clamp.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.cube",
+            "type": "Object",
+            "tags": [],
+            "label": "cube",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.cube.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.cube.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.cube.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.exp",
+            "type": "Object",
+            "tags": [],
+            "label": "exp",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.exp.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.exp.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.exp.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.fix",
+            "type": "Object",
+            "tags": [],
+            "label": "fix",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.fix.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.fix.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.fix.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.floor",
+            "type": "Object",
+            "tags": [],
+            "label": "floor",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.floor.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.floor.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.floor.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.log",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.log.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.log.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "({ name: string; type: string; } | { name: string; optional: true; defaultValue: string; type: string; })[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.log.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.mod",
+            "type": "Object",
+            "tags": [],
+            "label": "mod",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.mod.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.mod.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.mod.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.pow",
+            "type": "Object",
+            "tags": [],
+            "label": "pow",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.pow.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.pow.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.pow.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.round",
+            "type": "Object",
+            "tags": [],
+            "label": "round",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.round.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.round.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "({ name: string; type: string; } | { name: string; optional: true; defaultValue: number; type: string; })[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.round.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.sqrt",
+            "type": "Object",
+            "tags": [],
+            "label": "sqrt",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.sqrt.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.sqrt.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.sqrt.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.square",
+            "type": "Object",
+            "tags": [],
+            "label": "square",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.square.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.square.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.square.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.pick_max",
+            "type": "Object",
+            "tags": [],
+            "label": "pick_max",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.pick_max.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.pick_max.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.pick_max.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.pick_min",
+            "type": "Object",
+            "tags": [],
+            "label": "pick_min",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.pick_min.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.pick_min.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.pick_min.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.defaults",
+            "type": "Object",
+            "tags": [],
+            "label": "defaults",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.defaults.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"math\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.defaults.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.defaults.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.lt",
+            "type": "Object",
+            "tags": [],
+            "label": "lt",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.lt.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"comparison\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.lt.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.lt.outputType",
+                "type": "string",
+                "tags": [],
+                "label": "outputType",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.lt.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.gt",
+            "type": "Object",
+            "tags": [],
+            "label": "gt",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.gt.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"comparison\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.gt.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.gt.outputType",
+                "type": "string",
+                "tags": [],
+                "label": "outputType",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.gt.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.eq",
+            "type": "Object",
+            "tags": [],
+            "label": "eq",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.eq.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"comparison\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.eq.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.eq.outputType",
+                "type": "string",
+                "tags": [],
+                "label": "outputType",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.eq.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.lte",
+            "type": "Object",
+            "tags": [],
+            "label": "lte",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.lte.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"comparison\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.lte.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.lte.outputType",
+                "type": "string",
+                "tags": [],
+                "label": "outputType",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.lte.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.gte",
+            "type": "Object",
+            "tags": [],
+            "label": "gte",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.gte.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"comparison\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.gte.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.gte.outputType",
+                "type": "string",
+                "tags": [],
+                "label": "outputType",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.gte.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/lens-formula-docs",
+            "id": "def-common.tinymathFunctions.ifelse",
+            "type": "Object",
+            "tags": [],
+            "label": "ifelse",
+            "description": [],
+            "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.ifelse.section",
+                "type": "string",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"comparison\""
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.ifelse.positionalArguments",
+                "type": "Array",
+                "tags": [],
+                "label": "positionalArguments",
+                "description": [],
+                "signature": [
+                  "{ name: string; type: string; }[]"
+                ],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/lens-formula-docs",
+                "id": "def-common.tinymathFunctions.ifelse.help",
+                "type": "string",
+                "tags": [],
+                "label": "help",
+                "description": [],
+                "path": "packages/kbn-lens-formula-docs/src/math/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

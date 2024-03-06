@@ -67,8 +67,17 @@ export interface Conversation {
 
 export interface AssistantTelemetry {
   reportAssistantInvoked: (params: { invokedBy: string; conversationId: string }) => void;
-  reportAssistantMessageSent: (params: { conversationId: string; role: string }) => void;
+  reportAssistantMessageSent: (params: {
+    conversationId: string;
+    role: string;
+    isEnabledKnowledgeBase: boolean;
+    isEnabledRAGAlerts: boolean;
+  }) => void;
   reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
+  reportAssistantSettingToggled: (params: {
+    isEnabledKnowledgeBase?: boolean;
+    isEnabledRAGAlerts?: boolean;
+  }) => void;
 }
 
 export interface AssistantAvailability {

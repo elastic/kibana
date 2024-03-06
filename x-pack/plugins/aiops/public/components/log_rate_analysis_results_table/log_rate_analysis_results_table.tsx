@@ -136,6 +136,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
                   key,
                   count,
                   examples: [],
+                  regex: '',
                 },
               ]);
         return (

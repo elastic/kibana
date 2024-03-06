@@ -7,7 +7,8 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import { dump } from '../../utils/dump';
+import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
+import { stringify } from '../../utils/stringify';
 import { getResponseActionsClient } from '../../services';
 import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
@@ -292,13 +293,13 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
   const logger = endpointContext.logFactory.get('responseActionsHandler');
 
   return async (context, req, res) => {
-    logger.debug(`response action [${command}]:\n${dump(req.body)}`);
+    logger.debug(`response action [${command}]:\n${stringify(req.body)}`);
 
     // Note:  because our API schemas are defined as module static variables (as opposed to a
     //        `getter` function), we need to include this additional validation here, since
     //        `agent_type` is included in the schema independent of the feature flag
     if (
-      req.body.agent_type &&
+      req.body.agent_type === 'sentinel_one' &&
       !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled
     ) {
       return errorHandler(
@@ -374,9 +375,16 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 
       const { action: actionId, ...data } = action;
 
+      // `action` is deprecated, but still returned in order to ensure backwards compatibility
+      const legacyResponseData = responseActionsWithLegacyActionProperty.includes(command)
+        ? {
+            action: actionId ?? data.id ?? '',
+          }
+        : {};
+
       return res.ok({
         body: {
-          action: actionId,
+          ...legacyResponseData,
           data,
         },
       });

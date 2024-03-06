@@ -308,6 +308,7 @@ describe('Alerts Client', () => {
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           notifyOnActionGroupChange: true,
           maintenanceWindowIds: [],
+          alertDelay: 0,
         };
       });
 
@@ -514,6 +515,25 @@ describe('Alerts Client', () => {
               getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
             ],
           });
+        });
+
+        test('should not index new alerts if the activeCount is less than the rule alertDelay', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            rule: { ...alertsClientParams.rule, alertDelay: 3 },
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          // Report 1 new alerts
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+
+          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          expect(clusterClient.bulk).not.toHaveBeenCalled();
         });
 
         test('should update ongoing alerts in existing index', async () => {
@@ -2218,6 +2238,99 @@ describe('Alerts Client', () => {
               },
             ],
           });
+        });
+
+        test('should return undefined if an alert doc with provided id do not exist', async () => {
+          const mockAlertPayload = { count: 1, url: `https://url1` };
+          const alertInstanceId = 'existing_alert';
+          const alertSource = {
+            ...mockAlertPayload,
+            [ALERT_INSTANCE_ID]: alertInstanceId,
+          };
+
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 1 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _source: alertSource,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              [alertInstanceId]: {},
+            },
+          });
+
+          const { alertDoc } = alertsClient.report({
+            id: 'another_alert',
+            actionGroup: 'default',
+            state: {},
+            context: {},
+          });
+
+          expect(alertDoc).toBeUndefined();
+        });
+
+        test('should return a previous alert payload if one exists', async () => {
+          const mockAlertPayload = { count: 1, url: `https://url1` };
+          const alertInstanceId = 'existing_alert';
+          const alertSource = {
+            ...mockAlertPayload,
+            [ALERT_INSTANCE_ID]: alertInstanceId,
+          };
+
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 1 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _source: alertSource,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<
+            { count: number; url: string },
+            {},
+            {},
+            'default',
+            'recovered'
+          >(alertsClientParams);
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              [alertInstanceId]: {},
+            },
+          });
+
+          // Report the same alert again
+          const { alertDoc } = alertsClient.report({
+            id: alertInstanceId,
+            actionGroup: 'default',
+          });
+
+          expect(alertDoc).toEqual(alertSource);
         });
       });
 

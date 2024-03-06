@@ -47,9 +47,15 @@ export function processCategoryResults(
       subFieldExamples:
         b.sub_time_range?.buckets[0].examples.hits.hits.map((h) => get(h._source, field)) ??
         undefined,
+      regex: b.regex,
     };
   });
+
+  // check the first category for examples to determine if examples are available
+  const hasExamples = categories[0]?.examples.some((e) => e !== undefined);
+
   return {
     categories,
+    hasExamples,
   };
 }

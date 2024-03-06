@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AssetCriticalityRecord } from '../../../common/api/entity_analytics/asset_criticality';
 import type { RiskScoreEntity } from '../../../common/search_strategy';
 import {
   RISK_ENGINE_STATUS_URL,
@@ -14,7 +15,9 @@ import {
   RISK_ENGINE_INIT_URL,
   RISK_ENGINE_PRIVILEGES_URL,
   ASSET_CRITICALITY_PRIVILEGES_URL,
+  ASSET_CRITICALITY_URL,
   RISK_SCORE_INDEX_STATUS_API_URL,
+  RISK_ENGINE_SETTINGS_URL,
 } from '../../../common/constants';
 
 import type {
@@ -26,6 +29,8 @@ import type {
 } from '../../../server/lib/entity_analytics/types';
 import type { RiskScorePreviewRequestSchema } from '../../../common/entity_analytics/risk_engine/risk_score_preview/request_schema';
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics/common';
+import type { RiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
+import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
 export const useEntityAnalyticsRoutes = () => {
@@ -103,6 +108,35 @@ export const useEntityAnalyticsRoutes = () => {
       method: 'GET',
     });
 
+  /**
+   * Create asset criticality
+   */
+  const createAssetCriticality = async (
+    params: Pick<AssetCriticality, 'idField' | 'idValue' | 'criticalityLevel'>
+  ): Promise<AssetCriticalityRecord> =>
+    http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_URL, {
+      version: '1',
+      method: 'POST',
+      body: JSON.stringify({
+        id_value: params.idValue,
+        id_field: params.idField,
+        criticality_level: params.criticalityLevel,
+      }),
+    });
+
+  /**
+   * Get asset criticality
+   */
+  const fetchAssetCriticality = async (
+    params: Pick<AssetCriticality, 'idField' | 'idValue'>
+  ): Promise<AssetCriticalityRecord> => {
+    return http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_URL, {
+      version: '1',
+      method: 'GET',
+      query: { id_value: params.idValue, id_field: params.idField },
+    });
+  };
+
   const getRiskScoreIndexStatus = ({
     query,
     signal,
@@ -124,6 +158,15 @@ export const useEntityAnalyticsRoutes = () => {
       signal,
     });
 
+  /**
+   * Fetches risk engine settings
+   */
+  const fetchRiskEngineSettings = () =>
+    http.fetch<RiskEngineSettingsResponse>(RISK_ENGINE_SETTINGS_URL, {
+      version: '1',
+      method: 'GET',
+    });
+
   return {
     fetchRiskScorePreview,
     fetchRiskEngineStatus,
@@ -132,6 +175,11 @@ export const useEntityAnalyticsRoutes = () => {
     disableRiskEngine,
     fetchRiskEnginePrivileges,
     fetchAssetCriticalityPrivileges,
+    createAssetCriticality,
+    fetchAssetCriticality,
     getRiskScoreIndexStatus,
+    fetchRiskEngineSettings,
   };
 };
+
+export type AssetCriticality = SnakeToCamelCase<AssetCriticalityRecord>;

@@ -14,21 +14,30 @@ import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies
 import { registerExistingIndicesPath } from './rest_api_routes/internal/existing_indices';
 import { registerFieldForWildcard } from './rest_api_routes/internal/fields_for';
 import { registerHasDataViewsRoute } from './rest_api_routes/internal/has_data_views';
+import { registerFields } from './rest_api_routes/internal/fields';
 
-export function registerRoutes(
-  http: HttpServiceSetup,
+interface RegisterRoutesArgs {
+  http: HttpServiceSetup;
   getStartServices: StartServicesAccessor<
     DataViewsServerPluginStartDependencies,
     DataViewsServerPluginStart
-  >,
-  isRollupsEnabled: () => boolean,
-  dataViewRestCounter?: UsageCounter
-) {
+  >;
+  isRollupsEnabled: () => boolean;
+  dataViewRestCounter?: UsageCounter;
+}
+
+export function registerRoutes({
+  http,
+  getStartServices,
+  dataViewRestCounter,
+  isRollupsEnabled,
+}: RegisterRoutesArgs) {
   const router = http.createRouter();
 
   routes.forEach((route) => route(router, getStartServices, dataViewRestCounter));
 
   registerExistingIndicesPath(router);
   registerFieldForWildcard(router, getStartServices, isRollupsEnabled);
+  registerFields(router, getStartServices, isRollupsEnabled);
   registerHasDataViewsRoute(router);
 }

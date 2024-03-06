@@ -76,7 +76,10 @@ export const getCategoryRequest = (
     timeFieldName,
     undefined,
     query,
-    wrap
+    wrap,
+    undefined,
+    undefined,
+    false
   );
 
   // In this case we're only interested in the aggregation which
@@ -169,6 +172,7 @@ export const fetchCategories = async (
         count: b.doc_count,
         examples: b.examples.hits.hits.map((h) => get(h._source, fieldName)),
         sparkline,
+        regex: b.regex,
       };
     });
     result.push({

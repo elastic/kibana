@@ -11,6 +11,7 @@ import type { TextBasedPrivateState } from '../types';
 import type { GetDropPropsArgs } from '../../../types';
 import { isDraggedField, isOperationFromTheSameGroup } from '../../../utils';
 import { canColumnBeDroppedInMetricDimension } from '../utils';
+import { retrieveLayerColumnsFromCache } from '../fieldlist_cache';
 
 export const getDropProps = (
   props: GetDropPropsArgs<TextBasedPrivateState>
@@ -20,9 +21,10 @@ export const getDropProps = (
     return;
   }
   const layer = state.layers[target.layerId];
+  const allColumns = retrieveLayerColumnsFromCache(layer.columns, layer.query);
   const targetColumn = layer.columns.find((f) => f.columnId === target.columnId);
-  const targetField = layer.allColumns.find((f) => f.columnId === target.columnId);
-  const sourceField = layer.allColumns.find((f) => f.columnId === source.id);
+  const targetField = allColumns.find((f) => f.columnId === target.columnId);
+  const sourceField = allColumns.find((f) => f.columnId === source.id);
 
   if (isDraggedField(source)) {
     const nextLabel = source.humanData.label;
@@ -46,12 +48,12 @@ export const getDropProps = (
     }
 
     const sourceFieldCanMoveToMetricDimension = canColumnBeDroppedInMetricDimension(
-      layer.allColumns,
+      allColumns,
       sourceField?.meta?.type
     );
 
     const targetFieldCanMoveToMetricDimension = canColumnBeDroppedInMetricDimension(
-      layer.allColumns,
+      allColumns,
       targetField?.meta?.type
     );
 

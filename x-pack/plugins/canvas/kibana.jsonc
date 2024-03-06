@@ -38,7 +38,6 @@
       "reporting",
       "spaces",
       "usageCollection",
-      "savedObjects",
     ],
     "requiredBundles": [
       "kibanaReact",

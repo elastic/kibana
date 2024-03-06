@@ -22,10 +22,10 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
-import { usePanel } from './panel';
 import { isActiveFromUrl } from '../../utils';
+import type { NavigateToUrlFn } from '../../types';
+import { usePanel } from './panel';
 
 const getStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   * {

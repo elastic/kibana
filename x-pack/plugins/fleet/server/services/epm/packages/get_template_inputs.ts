@@ -11,7 +11,7 @@ import { safeDump } from 'js-yaml';
 
 import { packageToPackagePolicy } from '../../../../common/services/package_to_package_policy';
 import { getInputsWithStreamIds, _compilePackagePolicyInputs } from '../../package_policy';
-
+import { appContextService } from '../../app_context';
 import type {
   PackageInfo,
   NewPackagePolicy,
@@ -22,6 +22,7 @@ import type {
 import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
 
 import { getPackageInfo } from '.';
+import { getPackageAssetsMap } from './get';
 
 type Format = 'yml' | 'json';
 
@@ -73,7 +74,8 @@ export async function getTemplateInputs(
   soClient: SavedObjectsClientContract,
   pkgName: string,
   pkgVersion: string,
-  format: Format
+  format: Format,
+  prerelease?: boolean
 ) {
   const packageInfoMap = new Map<string, PackageInfo>();
   let packageInfo: PackageInfo;
@@ -85,15 +87,21 @@ export async function getTemplateInputs(
       savedObjectsClient: soClient,
       pkgName,
       pkgVersion,
+      prerelease,
     });
   }
   const emptyPackagePolicy = packageToPackagePolicy(packageInfo, '');
   const inputsWithStreamIds = getInputsWithStreamIds(emptyPackagePolicy, undefined, true);
-
+  const assetsMap = await getPackageAssetsMap({
+    logger: appContextService.getLogger(),
+    packageInfo,
+    savedObjectsClient: soClient,
+  });
   const compiledInputs = await _compilePackagePolicyInputs(
     packageInfo,
     emptyPackagePolicy.vars || {},
-    inputsWithStreamIds
+    inputsWithStreamIds,
+    assetsMap
   );
   const packagePolicyWithInputs: NewPackagePolicy = {
     ...emptyPackagePolicy,

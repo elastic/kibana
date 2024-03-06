@@ -6,90 +6,52 @@
  * Side Public License, v 1.
  */
 
-import {
-  ContactCardEmbeddable,
-  ContactCardEmbeddableFactory,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
-} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
+import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { BehaviorSubject } from 'rxjs';
+import { ReplacePanelSOFinder } from '.';
+import { ReplacePanelAction, ReplacePanelActionApi } from './replace_panel_action';
 
-import { ReplacePanelAction } from './replace_panel_action';
-import { pluginServices } from '../services/plugin_services';
-import { buildMockDashboard, getSampleDashboardPanel } from '../mocks';
-import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
+const mockOpenReplacePanelFlyout = jest.fn();
+jest.mock('./open_replace_panel_flyout', () => ({
+  openReplacePanelFlyout: () => mockOpenReplacePanelFlyout(),
+}));
 
-const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-  .fn()
-  .mockReturnValue(mockEmbeddableFactory);
+describe('replace panel action', () => {
+  let action: ReplacePanelAction;
+  let context: { embeddable: ReplacePanelActionApi };
 
-let container: DashboardContainer;
-let embeddable: ContactCardEmbeddable;
-beforeEach(async () => {
-  container = buildMockDashboard({
-    overrides: {
-      panels: {
-        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-          explicitInput: { firstName: 'Sam', id: '123' },
-          type: CONTACT_CARD_EMBEDDABLE,
-        }),
+  const savedObjectFinder = {} as unknown as ReplacePanelSOFinder;
+
+  beforeEach(() => {
+    action = new ReplacePanelAction(savedObjectFinder);
+    context = {
+      embeddable: {
+        uuid: 'superId',
+        viewMode: new BehaviorSubject<ViewMode>('edit'),
+        parentApi: getMockPresentationContainer(),
       },
-    },
+    };
   });
 
-  const contactCardEmbeddable = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Kibana',
+  it('is compatible when api meets all conditions', async () => {
+    expect(await action.isCompatible(context)).toBe(true);
   });
 
-  if (isErrorEmbeddable(contactCardEmbeddable)) {
-    throw new Error('Failed to create embeddable');
-  } else {
-    embeddable = contactCardEmbeddable;
-  }
-});
+  it('is incompatible when context lacks necessary functions', async () => {
+    const emptyContext = {
+      embeddable: {},
+    };
+    expect(await action.isCompatible(emptyContext)).toBe(false);
+  });
 
-test('Executes the replace panel action', () => {
-  let SavedObjectFinder: any;
-  const action = new ReplacePanelAction(SavedObjectFinder);
-  action.execute({ embeddable });
-});
+  it('is incompatible when view mode is view', async () => {
+    (context.embeddable as PublishesViewMode).viewMode = new BehaviorSubject<ViewMode>('view');
+    expect(await action.isCompatible(context)).toBe(false);
+  });
 
-test('Is not compatible when embeddable is not in a dashboard container', async () => {
-  let SavedObjectFinder: any;
-  const action = new ReplacePanelAction(SavedObjectFinder);
-  expect(
-    await action.isCompatible({
-      embeddable: new ContactCardEmbeddable(
-        { firstName: 'sue', id: '123' },
-        { execAction: (() => null) as any }
-      ),
-    })
-  ).toBe(false);
-});
-
-test('Execute throws an error when called with an embeddable not in a parent', async () => {
-  let SavedObjectFinder: any;
-  const action = new ReplacePanelAction(SavedObjectFinder);
-  async function check() {
-    await action.execute({ embeddable: container });
-  }
-  await expect(check()).rejects.toThrow(Error);
-});
-
-test('Returns title', () => {
-  let SavedObjectFinder: any;
-  const action = new ReplacePanelAction(SavedObjectFinder);
-  expect(action.getDisplayName({ embeddable })).toBeDefined();
-});
-
-test('Returns an icon', () => {
-  let SavedObjectFinder: any;
-  const action = new ReplacePanelAction(SavedObjectFinder);
-  expect(action.getIconType({ embeddable })).toBeDefined();
+  it('calls open replace panel flyout on execute', async () => {
+    action.execute(context);
+    expect(mockOpenReplacePanelFlyout).toHaveBeenCalled();
+  });
 });

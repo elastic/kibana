@@ -10,7 +10,7 @@ import { createMemoryHistory } from 'history';
 import React, { memo } from 'react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender, act } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, type WrapperComponent } from '@testing-library/react-hooks';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -55,7 +55,8 @@ export interface TestRenderer {
   HookWrapper: React.FC<any>;
   render: UiRender;
   renderHook: <TProps, TResult>(
-    callback: (props: TProps) => TResult
+    callback: (props: TProps) => TResult,
+    wrapper?: WrapperComponent<any>
   ) => RenderHookResult<TProps, TResult>;
   setHeaderActionMenu: Function;
 }
@@ -189,9 +190,17 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
       });
       return renderResponse!;
     },
-    renderHook: (callback) => {
+    renderHook: (
+      callback,
+      ExtraWrapper: WrapperComponent<any> = memo(({ children }) => <>{children}</>)
+    ) => {
+      const wrapper: WrapperComponent<any> = ({ children }) => (
+        <testRendererMocks.HookWrapper>
+          <ExtraWrapper>{children}</ExtraWrapper>
+        </testRendererMocks.HookWrapper>
+      );
       return renderHook(callback, {
-        wrapper: testRendererMocks.HookWrapper,
+        wrapper,
       });
     },
   };

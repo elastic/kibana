@@ -14,6 +14,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import {
   type SearchResponseWarning,
@@ -38,6 +39,7 @@ import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
+import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -92,6 +94,7 @@ export function ContextAppContent({
 }: ContextAppContentProps) {
   const { uiSettings: config, uiActions } = useDiscoverServices();
   const services = useDiscoverServices();
+  const [gridSettings, setGridSettings] = useState<DiscoverGridSettings>();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const isAnchorLoading =
@@ -146,6 +149,15 @@ export function ContextAppContent({
       />
     ),
     [addFilter, dataView, onAddColumn, onRemoveColumn]
+  );
+
+  const onResize = useCallback(
+    (colSettings) => {
+      setGridSettings((currentGridSettings) =>
+        onResizeGridColumn(colSettings, currentGridSettings)
+      );
+    },
+    [setGridSettings]
   );
 
   return (
@@ -208,6 +220,9 @@ export function ContextAppContent({
               maxDocFieldsDisplayed={services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
               renderDocumentView={renderDocumentView}
               services={services}
+              configHeaderRowHeight={3}
+              settings={gridSettings}
+              onResize={onResize}
             />
           </CellActionsProvider>
         </div>

@@ -15,6 +15,7 @@ import { container } from './container';
 interface PodDocument extends Fields {
   'kubernetes.pod.uid': string;
   'kubernetes.node.name': string;
+  'metricset.name'?: string;
 }
 
 export class Pod extends Entity<PodDocument> {

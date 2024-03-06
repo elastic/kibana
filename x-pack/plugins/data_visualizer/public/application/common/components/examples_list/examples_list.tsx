@@ -19,7 +19,7 @@ interface Props {
   examples: Array<string | GeoPointExample | object>;
 }
 
-const EMPTY_EXAMPLE = i18n.translate(
+export const EMPTY_EXAMPLE = i18n.translate(
   'xpack.dataVisualizer.dataGrid.field.examplesList.emptyExampleMessage',
   { defaultMessage: '(empty)' }
 );

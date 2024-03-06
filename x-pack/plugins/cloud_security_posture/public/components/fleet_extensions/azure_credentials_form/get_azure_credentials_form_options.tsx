@@ -26,15 +26,17 @@ export const getAzureCredentialsFormManualOptions = (): Array<{
   value: AzureCredentialsType;
   text: string;
 }> => {
-  return (
-    Object.entries(getAzureCredentialsFormOptions())
-      .map(([key, value]) => ({
-        value: key as AzureCredentialsType,
-        text: value.label,
-      }))
-      // TODO: remove 'manual' for stack version 8.13
-      .filter(({ value }) => value !== 'arm_template' && value !== 'manual')
-  );
+  return Object.entries(getAzureCredentialsFormOptions())
+    .map(([key, value]) => ({
+      value: key as AzureCredentialsType,
+      text: value.label,
+    }))
+    .filter(
+      ({ value }) =>
+        value !== 'arm_template' && // we remove this in order to hide it from the selectable options in the manual drop down
+        value !== 'manual' && // TODO: remove 'manual' for stack version 8.13
+        value !== 'service_principal_with_client_username_and_password' // this option is temporarily hidden
+    );
 };
 
 export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AzureCredentialsFields) =>

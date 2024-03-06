@@ -64,7 +64,17 @@ export const MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH = 300;
 export const FIELDS_FOR_WILDCARD_PATH = '/internal/data_views/_fields_for_wildcard';
 
 /**
+ * Fields path. Like fields for wildcard but GET only
+ * @public
+ */
+export const FIELDS_PATH = '/internal/data_views/fields';
+
+/**
  * Existing indices path
  * @public
  */
 export const EXISTING_INDICES_PATH = '/internal/data_views/_existing_indices';
+
+export const DATA_VIEWS_FIELDS_EXCLUDED_TIERS = 'data_views:fields_excluded_data_tiers';
+
+export const DEFAULT_DATA_VIEW_ID = 'defaultIndex';

@@ -36,12 +36,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const spaces = getService('spaces');
   const elasticChart = getService('elasticChart');
+  const toasts = getService('toasts');
 
   const createDrilldown = async () => {
     await PageObjects.dashboard.gotoDashboardEditMode(
       dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
     );
-    await PageObjects.common.clearAllToasts(); // toasts get in the way of bottom "Create drilldown" button in flyout
+    await toasts.dismissAll(); // toasts get in the way of bottom "Create drilldown" button in flyout
 
     // create drilldown
     await dashboardPanelActions.openContextMenu();
@@ -77,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     controls: Array<{ field: string; type: string }>
   ) => {
     await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-    await PageObjects.common.clearAllToasts(); // toasts get in the way of bottom "Save and close" button in create control flyout
+    await toasts.dismissAll(); // toasts get in the way of bottom "Save and close" button in create control flyout
 
     for (const control of controls) {
       await PageObjects.dashboardControls.createControl({

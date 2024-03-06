@@ -702,8 +702,6 @@
         ],
         "signature": [
           "string | ",
-          "ErrorResponseBase",
-          " | ",
           {
             "pluginId": "@kbn/ml-error-utils",
             "scope": "common",
@@ -711,6 +709,8 @@
             "section": "def-common.MLHttpFetchError",
             "text": "MLHttpFetchError"
           },
+          " | ",
+          "ErrorResponseBase",
           " | ",
           "Boom",
           "<any> | undefined"

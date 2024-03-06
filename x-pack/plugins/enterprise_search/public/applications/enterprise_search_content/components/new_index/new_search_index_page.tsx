@@ -147,7 +147,9 @@ export const NewSearchIndexPage: React.FC = () => {
               <EuiIcon type={getIngestionMethodIconType(type)} size="xxl" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{getTitle(type, serviceType)}</EuiFlexItem>
-            <EuiFlexItem grow={false}>{getConnectorModeBadge(isNative)}</EuiFlexItem>
+            {type === INGESTION_METHOD_IDS.CONNECTOR && (
+              <EuiFlexItem grow={false}>{getConnectorModeBadge(isNative)}</EuiFlexItem>
+            )}
           </EuiFlexGroup>
         ),
       }}

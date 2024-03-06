@@ -101,6 +101,7 @@ describe('saved search embeddable', () => {
       sort: [['message', 'asc']] as Array<[string, string]>,
       searchSource,
       viewMode: viewModeMockValue,
+      managed: false,
     };
     executeTriggerActions = jest.fn();
     jest
@@ -117,6 +118,7 @@ describe('saved search embeddable', () => {
       timeRange: { from: 'now-15m', to: 'now' },
       columns: ['message', 'extension'],
       rowHeight: 30,
+      headerRowHeight: 5,
       rowsPerPage: 50,
       sampleSize: 250,
     };
@@ -190,15 +192,24 @@ describe('saved search embeddable', () => {
     await waitOneTick();
     expect(searchProps.rowHeightState).toEqual(40);
 
+    expect(searchProps.headerRowHeightState).toEqual(5);
+    searchProps.onUpdateHeaderRowHeight!(3);
+    await waitOneTick();
+    expect(searchProps.headerRowHeightState).toEqual(3);
+
     expect(searchProps.rowsPerPageState).toEqual(50);
     searchProps.onUpdateRowsPerPage!(100);
     await waitOneTick();
     expect(searchProps.rowsPerPageState).toEqual(100);
 
-    expect(searchProps.sampleSizeState).toEqual(250);
+    expect(
+      discoverComponent.find(SavedSearchEmbeddableComponent).prop('fetchedSampleSize')
+    ).toEqual(250);
     searchProps.onUpdateSampleSize!(300);
     await waitOneTick();
-    expect(searchProps.sampleSizeState).toEqual(300);
+    expect(
+      discoverComponent.find(SavedSearchEmbeddableComponent).prop('fetchedSampleSize')
+    ).toEqual(300);
 
     searchProps.onFilter!({ name: 'customer_id', type: 'string', scripted: false }, [17], '+');
     await waitOneTick();

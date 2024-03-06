@@ -11,7 +11,7 @@ import React from 'react';
 import { getDashboardLocatorParamsFromEmbeddable } from '@kbn/dashboard-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
-import { createEvent, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { createEvent, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
@@ -104,8 +104,15 @@ describe('Dashboard link component', () => {
     expect(fetchDashboard).toHaveBeenCalledWith(defaultLinkInfo.destination);
     await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
 
+    // renders dashboard title
     const link = await screen.findByTestId('dashboardLink--foo');
     expect(link).toHaveTextContent('another dashboard');
+
+    // does not render external link icon
+    const externalIcon = within(link).queryByText('External link');
+    expect(externalIcon).toBeNull();
+
+    // calls `navigate` on click
     userEvent.click(link);
     expect(dashboardContainer.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
@@ -134,7 +141,7 @@ describe('Dashboard link component', () => {
     expect(preventDefault).toHaveBeenCalledTimes(0);
   });
 
-  test('openInNewTab uses window.open, not navigateToApp', async () => {
+  test('openInNewTab uses window.open, not navigateToApp, and renders external icon', async () => {
     const linkInfo = {
       ...defaultLinkInfo,
       options: { ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS, openInNewTab: true },
@@ -155,6 +162,12 @@ describe('Dashboard link component', () => {
     await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
     const link = await screen.findByTestId('dashboardLink--foo');
     expect(link).toBeInTheDocument();
+
+    // external link icon is rendered
+    const externalIcon = within(link).getByText('External link');
+    expect(externalIcon?.getAttribute('data-euiicon-type')).toBe('popout');
+
+    // calls `window.open`
     userEvent.click(link);
     expect(dashboardContainer.locator?.navigate).toBeCalledTimes(0);
     expect(window.open).toHaveBeenCalledWith('https://my-kibana.com/dashboard/123', '_blank');

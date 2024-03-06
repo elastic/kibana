@@ -16,12 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common']);
   const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/173580
-  // FLAKY: https://github.com/elastic/kibana/issues/173558
-  // FLAKY: https://github.com/elastic/kibana/issues/173572
+  // Failing: See https://github.com/elastic/kibana/issues/173558
   describe.skip('runtime fields', function () {
-    this.tags(['skipFirefox']);
-
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -64,6 +60,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should modify runtime field', async function () {
         await PageObjects.settings.filterField(fieldName);
         await testSubjects.click('editFieldFormat');
+        await retry.try(async () => {
+          await testSubjects.existOrFail('flyoutTitle');
+        });
         await PageObjects.settings.setFieldType('Long');
         await PageObjects.settings.setFieldScriptWithoutToggle('emit(6);');
         await PageObjects.settings.toggleRow('formatRow');

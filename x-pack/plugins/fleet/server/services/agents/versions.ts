@@ -88,11 +88,12 @@ export const getAvailableVersions = async ({
     .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
     .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
 
-  // If the current stack version isn't included in the list of available versions, add it
-  // at the front of the array
-  const hasCurrentVersion = availableVersions.some((v) => v === kibanaVersion);
-  if (includeCurrentVersion && !hasCurrentVersion) {
-    availableVersions = [kibanaVersion, ...availableVersions];
+  // if api versions are empty (air gapped or API not available), we add current kibana version, as the build file might not contain the latest released version
+  if (
+    includeCurrentVersion ||
+    (apiVersions.length === 0 && !config?.internal?.onlyAllowAgentUpgradeToKnownVersions)
+  ) {
+    availableVersions = uniq([kibanaVersion, ...availableVersions]);
   }
 
   // Allow upgrading to the current stack version if this override flag is provided via `kibana.yml`.
@@ -111,6 +112,11 @@ export const getAvailableVersions = async ({
 };
 
 async function fetchAgentVersionsFromApi() {
+  // If the airgapped flag is set, do not attempt to reach out to the product versions API
+  if (appContextService.getConfig()?.isAirGapped) {
+    return [];
+  }
+
   const logger = appContextService.getLogger();
 
   const options = {

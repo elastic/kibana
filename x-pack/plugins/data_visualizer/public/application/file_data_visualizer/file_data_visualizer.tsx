@@ -20,7 +20,7 @@ interface Props {
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
 export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks }) => {
   const coreStart = getCoreStart();
-  const { data, maps, embeddable, discover, share, security, fileUpload, cloud } =
+  const { data, maps, embeddable, discover, share, security, fileUpload, cloud, fieldFormats } =
     getPluginsStart();
   const services = {
     data,
@@ -30,6 +30,7 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks }) => {
     share,
     security,
     fileUpload,
+    fieldFormats,
     ...coreStart,
   };
 
@@ -42,6 +43,7 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks }) => {
         <CloudContext>
           <FileDataVisualizerView
             dataViewsContract={data.dataViews}
+            dataStart={data}
             http={coreStart.http}
             fileUpload={fileUpload}
             getAdditionalLinks={getAdditionalLinks}

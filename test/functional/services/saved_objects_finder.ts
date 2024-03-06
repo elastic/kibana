@@ -7,8 +7,8 @@
  */
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from './lib/web_element_wrapper';
 
 export class SavedObjectsFinderService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
@@ -1272,6 +1272,19 @@ test('throws an error when failing to load action through savedObjectsClient', a
   } catch (e) {
     expect(e.message).toBe('No access');
     expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
+  }
+});
+
+test('throws a USER error when the action SO is not found', async () => {
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(
+    SavedObjectsErrorHelpers.createGenericNotFoundError()
+  );
+
+  try {
+    await actionExecutor.execute(executeParams);
+  } catch (e) {
+    expect(e.message).toBe('Not Found');
+    expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
   }
 });
 

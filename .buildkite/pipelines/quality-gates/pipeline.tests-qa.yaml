@@ -11,6 +11,7 @@ steps:
         ENVIRONMENT: ${ENVIRONMENT}
         EC_ENV: qa
         EC_REGION: aws-eu-west-1
+        RETRY_TESTS_ON_FAIL: "true"
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
 
   # TODO: Uncomment this code when the integration is ready.

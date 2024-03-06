@@ -136,7 +136,7 @@ export function useChangePointResults(
   /**
    * null also means the fetching has been complete
    */
-  const [progress, setProgress] = useState<number | null>(null);
+  const [progress, setProgress] = useState<number | null>(0);
 
   const isSingleMetric = !isDefined(fieldConfig.splitField);
 

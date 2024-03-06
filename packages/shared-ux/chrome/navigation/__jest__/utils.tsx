@@ -7,69 +7,54 @@
  */
 import React from 'react';
 import { render, type RenderResult } from '@testing-library/react';
-import type { ChromeProjectNavigation } from '@kbn/core-chrome-browser';
-
+import { BehaviorSubject, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import type {
+  NavigationTreeDefinitionUI,
+  ChromeProjectNavigationNode,
+} from '@kbn/core-chrome-browser';
 import { EuiThemeProvider } from '@elastic/eui';
-import { getServicesMock } from '../mocks/src/jest';
+
 import { NavigationProvider } from '../src/services';
-import { DefaultNavigation } from '../src/ui/default_navigation';
+import { Navigation } from '../src/ui/navigation';
 import type { PanelContentProvider } from '../src/ui';
-import type { NavigationTreeDefinition, ProjectNavigationTreeDefinition } from '../src/ui/types';
-import { NavigationServices } from '../types';
+import { NavigationServices } from '../src/types';
+
+const activeNodes: ChromeProjectNavigationNode[][] = [];
+
+export const getServicesMock = (): NavigationServices => {
+  const navigateToUrl = jest.fn().mockResolvedValue(undefined);
+  const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
+  const recentlyAccessed$ = new BehaviorSubject([]);
+
+  return {
+    basePath,
+    recentlyAccessed$,
+    navIsOpen: true,
+    navigateToUrl,
+    activeNodes$: of(activeNodes),
+    isSideNavCollapsed: false,
+  };
+};
 
 const services = getServicesMock();
 
-export type ProjectNavigationChangeListener = (projectNavigation: ChromeProjectNavigation) => void;
-export type TestType = 'treeDef' | 'uiComponents';
-
 export const renderNavigation = ({
   navTreeDef,
-  projectNavigationTree,
-  navigationElement,
   services: overrideServices = {},
-  onProjectNavigationChange = () => undefined,
   panelContentProvider,
 }: {
-  navTreeDef?: NavigationTreeDefinition;
-  projectNavigationTree?: ProjectNavigationTreeDefinition;
-  navigationElement?: React.ReactElement;
+  navTreeDef: Observable<NavigationTreeDefinitionUI>;
   services?: Partial<NavigationServices>;
-  onProjectNavigationChange?: ProjectNavigationChangeListener;
   panelContentProvider?: PanelContentProvider;
 }): RenderResult => {
-  const element = navigationElement ?? (
-    <DefaultNavigation
-      projectNavigationTree={projectNavigationTree}
-      navigationTree={navTreeDef}
-      panelContentProvider={panelContentProvider}
-    />
-  );
-
   const renderResult = render(
     <EuiThemeProvider>
-      <NavigationProvider
-        {...services}
-        {...overrideServices}
-        onProjectNavigationChange={onProjectNavigationChange}
-      >
-        {element}
+      <NavigationProvider {...services} {...overrideServices}>
+        <Navigation navigationTree$={navTreeDef} panelContentProvider={panelContentProvider} />
       </NavigationProvider>
     </EuiThemeProvider>
   );
 
   return renderResult;
 };
-
-export const errorHandler = (type: TestType) => (e: Error) => {
-  const err = new Error(`Failed to run tests for ${type}.`);
-  err.stack = e.stack;
-  // eslint-disable-next-line no-console
-  console.error(err.message);
-  throw err;
-};
-
-type ArgsType<T> = T extends (...args: infer A) => any ? A : never;
-
-export function getMockFn<T extends (...args: any[]) => any>() {
-  return jest.fn() as jest.Mock<T, ArgsType<T>>;
-}

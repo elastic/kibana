@@ -1,0 +1,21 @@
+---
+name: admin_console
+fields:
+  base:
+    fields: "*"
+  event:
+    fields:
+      module: {}
+      dataset: {}
+      duration: {}
+      code: {}
+  log:
+    fields:
+      level: {}
+      logger: {}
+  host:
+    fields:
+      name: {}
+  metricset:
+    fields: '*'
+

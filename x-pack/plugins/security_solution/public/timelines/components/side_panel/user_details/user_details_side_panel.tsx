@@ -7,8 +7,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { AssetCriticalityAccordion } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import {
   ExpandableUserDetailsTitle,
   ExpandableUserDetailsPageLink,
@@ -41,37 +42,41 @@ export const UserDetailsSidePanel = ({
 }: Pick<
   UserDetailsProps,
   'scopeId' | 'contextID' | 'userName' | 'isDraggable' | 'handleOnClose'
->) => (
-  <>
-    <StyledEuiFlexGroup justifyContent="spaceBetween" wrap={false}>
-      <EuiFlexItem grow={false}>
-        <ExpandableUserDetailsTitle userName={userName} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="cross"
-          aria-label={i18n.translate(
-            'xpack.securitySolution.timeline.sidePanel.networkDetails.close',
-            {
-              defaultMessage: 'close',
-            }
-          )}
-          onClick={handleOnClose}
+>) => {
+  const entity = useMemo(() => ({ name: userName, type: 'user' as const }), [userName]);
+  return (
+    <>
+      <StyledEuiFlexGroup justifyContent="spaceBetween" wrap={false}>
+        <EuiFlexItem grow={false}>
+          <ExpandableUserDetailsTitle userName={userName} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="cross"
+            aria-label={i18n.translate(
+              'xpack.securitySolution.timeline.sidePanel.networkDetails.close',
+              {
+                defaultMessage: 'close',
+              }
+            )}
+            onClick={handleOnClose}
+          />
+        </EuiFlexItem>
+      </StyledEuiFlexGroup>
+      <EuiSpacer size="m" />
+      <StyledEuiFlexButtonWrapper grow={false}>
+        <ExpandableUserDetailsPageLink userName={userName} />
+      </StyledEuiFlexButtonWrapper>
+      <EuiSpacer size="m" />
+      <AssetCriticalityAccordion entity={entity} />
+      <StyledPanelContent>
+        <ExpandableUserDetails
+          contextID={contextID}
+          scopeId={scopeId}
+          userName={userName}
+          isDraggable={isDraggable}
         />
-      </EuiFlexItem>
-    </StyledEuiFlexGroup>
-    <EuiSpacer size="m" />
-    <StyledEuiFlexButtonWrapper grow={false}>
-      <ExpandableUserDetailsPageLink userName={userName} />
-    </StyledEuiFlexButtonWrapper>
-    <EuiSpacer size="m" />
-    <StyledPanelContent>
-      <ExpandableUserDetails
-        contextID={contextID}
-        scopeId={scopeId}
-        userName={userName}
-        isDraggable={isDraggable}
-      />
-    </StyledPanelContent>
-  </>
-);
+      </StyledPanelContent>
+    </>
+  );
+};

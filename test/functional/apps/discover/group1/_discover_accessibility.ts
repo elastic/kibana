@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 
-import { WebElementWrapper } from '../../../services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

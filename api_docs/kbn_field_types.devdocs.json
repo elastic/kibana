@@ -175,6 +175,46 @@
       },
       {
         "parentPluginId": "@kbn/field-types",
+        "id": "def-common.esFieldTypeToKibanaFieldType",
+        "type": "Function",
+        "tags": [],
+        "label": "esFieldTypeToKibanaFieldType",
+        "description": [],
+        "signature": [
+          "(type: string) => ",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          }
+        ],
+        "path": "packages/kbn-field-types/src/kbn_field_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/field-types",
+            "id": "def-common.esFieldTypeToKibanaFieldType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-field-types/src/kbn_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/field-types",
         "id": "def-common.getFilterableKbnTypeNames",
         "type": "Function",
         "tags": [

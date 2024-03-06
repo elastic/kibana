@@ -55,19 +55,17 @@ export const ConnectorsCallout = () => {
       </p>
       <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem grow={false}>
-          <p>
-            <EuiButton
-              color="primary"
-              fill
-              data-test-subj="connectors-callout-cta"
-              onClick={() => createConnector()}
-              isLoading={isLoading}
-            >
-              {i18n.translate('xpack.serverlessSearch.selectClient.connectorsCallout.cta', {
-                defaultMessage: 'Create a connector',
-              })}
-            </EuiButton>
-          </p>
+          <EuiButton
+            color="primary"
+            fill
+            data-test-subj="connectors-callout-cta"
+            onClick={() => createConnector()}
+            isLoading={isLoading}
+          >
+            {i18n.translate('xpack.serverlessSearch.selectClient.connectorsCallout.cta', {
+              defaultMessage: 'Create a connector',
+            })}
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem />
         {showConnectors &&
@@ -85,14 +83,12 @@ export const ConnectorsCallout = () => {
           ))}
         {showConnectors && (
           <EuiFlexItem grow={false}>
-            <p>
-              <EuiText color="subdued" size="s">
-                <FormattedMessage
-                  id="xpack.serverlessSearch.selectClient.connectorsCallout.etc"
-                  defaultMessage="and more"
-                />
-              </EuiText>
-            </p>
+            <EuiText color="subdued" size="s">
+              <FormattedMessage
+                id="xpack.serverlessSearch.selectClient.connectorsCallout.etc"
+                defaultMessage="and more"
+              />
+            </EuiText>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

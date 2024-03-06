@@ -45,7 +45,7 @@ export const initComponent = memoize(
         return (
           <>
             <EuiDescriptionList compressed type={'inline'} listItems={listItems} />
-            <EmbeddableComponent {...inputProps} />
+            <EmbeddableComponent {...inputProps} embeddingOrigin={'cases'} />
           </>
         );
       },

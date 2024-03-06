@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { Dispatch, SetStateAction, useCallback } from 'react';
-import { type DataView } from '@kbn/data-views-plugin/common';
 import { BoolQuery, Filter } from '@kbn/es-query';
 import { CriteriaWithPagination } from '@elastic/eui';
 import { DataTableRecord } from '@kbn/discover-utils/types';
@@ -46,13 +45,11 @@ export interface CloudPostureDataTableResult {
 */
 export const useCloudPostureDataTable = ({
   defaultQuery = getDefaultQuery,
-  dataView,
   paginationLocalStorageKey,
   columnsLocalStorageKey,
   nonPersistedFilters,
 }: {
   defaultQuery?: (params: FindingsBaseURLQuery) => FindingsBaseURLQuery;
-  dataView: DataView;
   paginationLocalStorageKey: string;
   columnsLocalStorageKey?: string;
   nonPersistedFilters?: Filter[];
@@ -116,7 +113,6 @@ export const useCloudPostureDataTable = ({
    * Page URL query to ES query
    */
   const baseEsQuery = useBaseEsQuery({
-    dataView,
     filters: urlQuery.filters,
     query: urlQuery.query,
     ...(nonPersistedFilters ? { nonPersistedFilters } : {}),

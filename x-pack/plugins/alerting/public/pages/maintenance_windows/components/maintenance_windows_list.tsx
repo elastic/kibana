@@ -18,12 +18,16 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { MaintenanceWindowFindResponse, SortDirection } from '../types';
+import { SortDirection } from '../types';
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
-import { MaintenanceWindowStatus, MAINTENANCE_WINDOW_DATE_FORMAT } from '../../../../common';
+import {
+  MaintenanceWindowStatus,
+  MAINTENANCE_WINDOW_DATE_FORMAT,
+  MaintenanceWindow,
+} from '../../../../common';
 import { StatusFilter } from './status_filter';
 import { TableActionsPopover } from './table_actions_popover';
 import { useFinishMaintenanceWindow } from '../../../hooks/use_finish_maintenance_window';
@@ -32,12 +36,12 @@ import { useFinishAndArchiveMaintenanceWindow } from '../../../hooks/use_finish_
 
 interface MaintenanceWindowsListProps {
   loading: boolean;
-  items: MaintenanceWindowFindResponse[];
+  items: MaintenanceWindow[];
   readOnly: boolean;
   refreshData: () => void;
 }
 
-const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
+const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindow>> = [
   {
     field: 'title',
     name: i18n.NAME,
@@ -58,7 +62,7 @@ const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
     field: 'eventStartTime',
     name: i18n.TABLE_START_TIME,
     dataType: 'date',
-    render: (startDate: string, item: MaintenanceWindowFindResponse) => {
+    render: (startDate: string, item: MaintenanceWindow) => {
       return (
         <EuiFlexGroup responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
@@ -89,7 +93,7 @@ const sorting = {
   },
 };
 
-const rowProps = (item: MaintenanceWindowFindResponse) => ({
+const rowProps = (item: MaintenanceWindow) => ({
   className: item.status,
   'data-test-subj': 'list-item',
 });
@@ -148,7 +152,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       `;
     }, [euiTheme.colors.highlight]);
 
-    const actions: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = useMemo(
+    const actions: Array<EuiBasicTableColumn<MaintenanceWindow>> = useMemo(
       () => [
         {
           name: '',

@@ -11,6 +11,7 @@ import { Subject } from 'rxjs';
 import { pick } from 'lodash';
 import useMount from 'react-use/lib/useMount';
 import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
 import type { UnifiedHistogramInputMessage, UnifiedHistogramRequestContext } from '../types';
 import {
@@ -43,6 +44,7 @@ export type UnifiedHistogramContainerProps = {
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
   requestAdapter?: UnifiedHistogramRequestContext['adapter'];
   isChartLoading?: boolean;
+  table?: Datatable;
 } & Pick<
   UnifiedHistogramLayoutProps,
   | 'services'
@@ -54,12 +56,13 @@ export type UnifiedHistogramContainerProps = {
   | 'relativeTimeRange'
   | 'columns'
   | 'container'
-  | 'appendHitsCounter'
+  | 'renderCustomChartToggleActions'
   | 'children'
   | 'onBrushEnd'
   | 'onFilter'
   | 'withDefaultActions'
   | 'disabledActions'
+  | 'abortController'
 >;
 
 /**

@@ -34,6 +34,7 @@ export const EditQueryDelay: FC<{
   queryDelay: Datafeed['query_delay'];
   isEnabled: boolean;
 }> = ({ datafeedId, queryDelay, isEnabled }) => {
+  const [currentQueryDelay, setCurrentQueryDelay] = useState(queryDelay);
   const [newQueryDelay, setNewQueryDelay] = useState<string | undefined>();
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const { updateDatafeed } = useMlApiContext();
@@ -45,6 +46,7 @@ export const EditQueryDelay: FC<{
         datafeedId,
         datafeedConfig: { query_delay: newQueryDelay },
       });
+      setCurrentQueryDelay(newQueryDelay);
       displaySuccessToast(
         i18n.translate(
           'xpack.ml.jobsList.datafeedChart.editQueryDelay.changesSavedNotificationMessage',
@@ -120,7 +122,12 @@ export const EditQueryDelay: FC<{
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="none" direction="column">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty color="primary" size="xs" onClick={updateQueryDelay}>
+                  <EuiButtonEmpty
+                    disabled={newQueryDelay === currentQueryDelay}
+                    color="primary"
+                    size="xs"
+                    onClick={updateQueryDelay}
+                  >
                     <FormattedMessage
                       id="xpack.ml.jobsList.datafeedChart.applyQueryDelayLabel"
                       defaultMessage="Apply"

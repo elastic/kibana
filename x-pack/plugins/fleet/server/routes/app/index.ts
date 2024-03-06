@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { APP_API_ROUTES } from '../../constants';
-import { API_VERSIONS, INTERNAL_API_ACCESS } from '../../../common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
@@ -141,11 +141,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { all: true },
       },
-      access: INTERNAL_API_ACCESS,
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {},
       },
       generateServiceTokenHandler

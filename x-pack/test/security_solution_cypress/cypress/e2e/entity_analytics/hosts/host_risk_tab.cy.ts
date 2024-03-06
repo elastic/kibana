@@ -20,15 +20,12 @@ import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { hostsUrl } from '../../../urls/navigation';
 import { kqlSearch } from '../../../tasks/security_header';
-import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
-import { enableRiskEngine } from '../../../tasks/entity_analytics';
+import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
-// Tracked by https://github.com/elastic/security-team/issues/7696
 describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
-  describe('with legacy risk score', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/174859
+  describe.skip('with legacy risk score', () => {
     before(() => {
-      login();
-      deleteRiskEngineConfiguration();
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
     });
 
@@ -38,6 +35,11 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
       // by some reason after navigate to host risk, page is sometimes is reload or go to all host tab
       // this fix wait until we fave host in all host table, and then we go to risk tab
       cy.contains('siem-kibana');
+
+      // Sometimes it doesn't navigate to the risk tab an causes flakiness
+      // Curiously the "renders the table" test doesn't fail
+      // https://github.com/elastic/kibana/issues/174860
+      // https://github.com/elastic/kibana/issues/174859
       navigateToHostRiskDetailTab();
     });
 
@@ -53,6 +55,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(7).should('have.text', 'Low');
     });
 
+    // Flaky
     it.skip('filters the table', () => {
       openRiskTableFilterAndSelectTheCriticalOption();
 
@@ -77,12 +80,11 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   describe('with new risk score', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
-      login();
-      enableRiskEngine();
     });
 
     beforeEach(() => {
       login();
+      mockRiskEngineEnabled();
       visitWithTimeRange(hostsUrl('allHosts'));
       // by some reason after navigate to host risk, page is sometimes is reload or go to all host tab
       // this fix wait until we fave host in all host table, and then we go to risk tab
@@ -92,7 +94,6 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
 
     after(() => {
       cy.task('esArchiverUnload', 'risk_scores_new');
-      deleteRiskEngineConfiguration();
     });
 
     it('renders the table', () => {
@@ -103,6 +104,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(7).should('have.text', 'Critical');
     });
 
+    // Flaky
     it.skip('filters the table', () => {
       openRiskTableFilterAndSelectTheCriticalOption();
 

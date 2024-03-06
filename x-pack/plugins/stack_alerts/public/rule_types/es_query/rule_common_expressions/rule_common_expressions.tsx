@@ -7,15 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiCheckbox, EuiFormRow, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   builtInAggregationTypes,
@@ -98,22 +90,23 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
   }, [groupBy]);
   return (
     <>
-      <EuiTitle size="xs">
-        <h4>
+      <EuiFormRow
+        fullWidth
+        label={[
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.conditionsPrompt"
             defaultMessage="Set the group, threshold, and time window"
-          />{' '}
-          <QueryThresholdHelpPopover />
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <WhenExpression
-        display="fullWidth"
-        data-test-subj="whenExpression"
-        aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
-        onChangeSelectedAggType={onChangeSelectedAggType}
-      />
+          />,
+          <QueryThresholdHelpPopover />,
+        ]}
+      >
+        <WhenExpression
+          display="fullWidth"
+          data-test-subj="whenExpression"
+          aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
+          onChangeSelectedAggType={onChangeSelectedAggType}
+        />
+      </EuiFormRow>
       {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
         <OfExpression
           aggField={aggField}
@@ -159,18 +152,13 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
         onChangeWindowUnit={onChangeWindowUnit}
       />
       <EuiSpacer size="s" />
-      <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h5>
-              <FormattedMessage
-                id="xpack.stackAlerts.esQuery.ui.selectSizePrompt"
-                defaultMessage="Set the number of documents to send"
-              />
-            </h5>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+      <EuiFormRow
+        fullWidth
+        label={[
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.selectSizePrompt"
+            defaultMessage="Set the number of documents to send"
+          />,
           <EuiIconTip
             position="right"
             color="subdued"
@@ -179,21 +167,21 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
               defaultMessage:
                 'Specify the number of documents to pass to the configured actions when the threshold condition is met.',
             })}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <ValueExpression
-        description={i18n.translate('xpack.stackAlerts.esQuery.ui.sizeExpression', {
-          defaultMessage: 'Size',
-        })}
-        data-test-subj="sizeValueExpression"
-        value={size}
-        errors={errors.size}
-        display="fullWidth"
-        popupPosition="upLeft"
-        onChangeSelectedValue={onChangeSizeValue}
-      />
+          />,
+        ]}
+      >
+        <ValueExpression
+          description={i18n.translate('xpack.stackAlerts.esQuery.ui.sizeExpression', {
+            defaultMessage: 'Size',
+          })}
+          data-test-subj="sizeValueExpression"
+          value={size}
+          errors={errors.size}
+          display="fullWidth"
+          popupPosition="upLeft"
+          onChangeSelectedValue={onChangeSizeValue}
+        />
+      </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiFormRow>
         <EuiCheckbox

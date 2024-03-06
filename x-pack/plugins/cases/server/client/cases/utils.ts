@@ -16,6 +16,7 @@ import type {
   Case,
   CaseAssignees,
   CaseAttributes,
+  CaseCustomField,
   ConnectorMappings,
   ConnectorMappingSource,
   ConnectorMappingTarget,
@@ -469,13 +470,22 @@ export const fillMissingCustomFields = ({
   const customFieldsKeys = new Set(customFields.map((customField) => customField.key));
   const missingCustomFields: CaseRequestCustomFields = [];
 
+  // only populate with the default value required custom fields missing from the request
   for (const confCustomField of customFieldsConfiguration) {
     if (!customFieldsKeys.has(confCustomField.key)) {
-      missingCustomFields.push({
-        key: confCustomField.key,
-        type: confCustomField.type,
-        value: null,
-      });
+      if (confCustomField?.defaultValue !== null && confCustomField?.defaultValue !== undefined) {
+        missingCustomFields.push({
+          key: confCustomField.key,
+          type: confCustomField.type,
+          value: confCustomField.defaultValue,
+        } as CaseCustomField);
+      } else if (!confCustomField.required) {
+        missingCustomFields.push({
+          key: confCustomField.key,
+          type: confCustomField.type,
+          value: null,
+        } as CaseCustomField);
+      } // else, missing required custom fields without default are not touched
     }
   }
 

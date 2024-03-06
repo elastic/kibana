@@ -7,3 +7,4 @@
 
 export { upgradePackageInstallVersion } from './upgrade_package_install_version';
 export { upgradeAgentPolicySchemaVersion } from './upgrade_agent_policy_schema_version';
+export { ensureAgentPoliciesFleetServerKeysAndPolicies } from './fleet_server_policies_enrollment_keys';

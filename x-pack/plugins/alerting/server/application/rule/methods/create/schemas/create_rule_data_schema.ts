@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { validateDuration } from '../../../validation';
-import { notifyWhenSchema, actionAlertsFilterSchema } from '../../../schemas';
+import { notifyWhenSchema, actionAlertsFilterSchema, alertDelaySchema } from '../../../schemas';
 
 export const createRuleDataSchema = schema.object({
   name: schema.string(),
@@ -40,4 +40,5 @@ export const createRuleDataSchema = schema.object({
     { defaultValue: [] }
   ),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
+  alertDelay: schema.maybe(alertDelaySchema),
 });

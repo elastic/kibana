@@ -19,7 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedHTMLMessage, FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../../../shared/doc_links';
 

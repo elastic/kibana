@@ -13,6 +13,7 @@ import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { ApmApiClient } from '../../../common/config';
 
 export const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-*';
@@ -173,13 +174,7 @@ export async function clearKibanaApmEventLog(es: Client) {
   });
 }
 
-export type ApmAlertFields = ParsedTechnicalFields & {
-  'service.name': string;
-  'service.environment': string;
-  'transaction.name': string;
-  'error.grouping_key': string;
-  'error.grouping_name': string;
-};
+export type ApmAlertFields = ParsedTechnicalFields & ObservabilityApmAlert;
 
 export async function createIndexConnector({
   supertest,

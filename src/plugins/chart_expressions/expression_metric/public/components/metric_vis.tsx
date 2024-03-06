@@ -29,7 +29,6 @@ import type {
   DatatableColumn,
   DatatableRow,
   IInterpreterRenderHandlers,
-  RenderMode,
 } from '@kbn/expressions-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import {
@@ -41,13 +40,13 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useResizeObserver, useEuiScrollBar, EuiIcon } from '@elastic/eui';
 import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { type ChartSizeEvent, getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
 import { getPaletteService, getThemeService, getFormatService } from '../services';
 import { getDataBoundsForPalette } from '../utils';
 
-export const defaultColor = euiThemeVars.euiColorLightestShade;
+export const defaultColor = euiThemeVars.euiColorEmptyShade;
 
 function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undefined) {
   const formatId = serializedFieldFormat?.id || 'number';
@@ -140,7 +139,6 @@ export interface MetricVisComponentProps {
   config: Pick<VisParams, 'metric' | 'dimensions'>;
   renderComplete: IInterpreterRenderHandlers['done'];
   fireEvent: IInterpreterRenderHandlers['event'];
-  renderMode: RenderMode;
   filterable: boolean;
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 }
@@ -150,10 +148,11 @@ export const MetricVis = ({
   config,
   renderComplete,
   fireEvent,
-  renderMode,
   filterable,
   overrides,
 }: MetricVisComponentProps) => {
+  const grid = useRef<MetricSpec['data']>([[]]);
+
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
       if (isRendered) {
@@ -162,6 +161,20 @@ export const MetricVis = ({
     },
     [renderComplete]
   );
+
+  const onWillRender = useCallback(() => {
+    const maxTileSideLength = grid.current.length * grid.current[0].length > 1 ? 200 : 300;
+    const event: ChartSizeEvent = {
+      name: 'chartSize',
+      data: {
+        maxDimensions: {
+          y: { value: grid.current.length * maxTileSideLength, unit: 'pixels' },
+          x: { value: grid.current[0]?.length * maxTileSideLength, unit: 'pixels' },
+        },
+      },
+    };
+    fireEvent(event);
+  }, [fireEvent, grid]);
 
   const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -289,28 +302,19 @@ export const MetricVis = ({
     'settings'
   ) as Partial<SettingsProps>;
 
-  const grid: MetricSpec['data'] = [];
+  const newGrid: MetricSpec['data'] = [];
   for (let i = 0; i < metricConfigs.length; i += maxCols) {
-    grid.push(metricConfigs.slice(i, i + maxCols));
+    newGrid.push(metricConfigs.slice(i, i + maxCols));
   }
 
-  let pixelHeight;
-  let pixelWidth;
-  if (renderMode === 'edit') {
-    // In the editor, we constrain the maximum size of the tiles for aesthetic reasons
-    const maxTileSideLength = metricConfigs.flat().length > 1 ? 200 : 300;
-    pixelHeight = grid.length * maxTileSideLength;
-    pixelWidth = grid[0]?.length * maxTileSideLength;
-  }
+  grid.current = newGrid;
 
   return (
     <div
       ref={scrollContainerRef}
       css={css`
-        height: ${pixelHeight ? `${pixelHeight}px` : '100%'};
-        width: ${pixelWidth ? `${pixelWidth}px` : '100%'};
-        max-height: 100%;
-        max-width: 100%;
+        height: 100%;
+        width: 100%;
         overflow-y: auto;
         ${useEuiScrollBar()}
       `}
@@ -322,6 +326,7 @@ export const MetricVis = ({
       >
         <Chart {...getOverridesFor(overrides, 'chart')}>
           <Settings
+            onWillRender={onWillRender}
             locale={i18n.getLocale()}
             theme={[
               {
@@ -342,7 +347,7 @@ export const MetricVis = ({
               filterable
                 ? (events) => {
                     const colRef = breakdownByColumn ?? primaryMetricColumn;
-                    const rowLength = grid[0].length;
+                    const rowLength = grid.current[0].length;
                     events.forEach((event) => {
                       if (isMetricElementEvent(event)) {
                         const colIdx = data.columns.findIndex((col) => col === colRef);
@@ -360,7 +365,7 @@ export const MetricVis = ({
             }
             {...settingsOverrides}
           />
-          <Metric id="metric" data={grid} />
+          <Metric id="metric" data={grid.current} />
         </Chart>
       </div>
     </div>

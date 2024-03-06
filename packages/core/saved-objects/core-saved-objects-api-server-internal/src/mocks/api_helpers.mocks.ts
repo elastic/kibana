@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SavedObject } from '@kbn/core-saved-objects-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   CommonHelper,
@@ -22,10 +23,14 @@ const createMigrationHelperMock = (): MigrationHelperMock => {
   const mock: MigrationHelperMock = {
     migrateInputDocument: jest.fn(),
     migrateStorageDocument: jest.fn(),
+    migrateAndDecryptStorageDocument: jest.fn(),
   };
 
   mock.migrateInputDocument.mockImplementation((doc) => doc);
   mock.migrateStorageDocument.mockImplementation((doc) => doc);
+  mock.migrateAndDecryptStorageDocument.mockImplementation(({ document }) =>
+    Promise.resolve(document as SavedObject)
+  );
 
   return mock;
 };

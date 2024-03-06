@@ -5,34 +5,41 @@
  * 2.0.
  */
 
-import { cpuUsage } from './cpu_usage';
-import { cpuUsageIowait } from './cpu_usage_iowait';
-import { cpuUsageIrq } from './cpu_usage_irq';
-import { cpuUsageNice } from './cpu_usage_nice';
-import { cpuUsageSoftirq } from './cpu_usage_softirq';
-import { cpuUsageSteal } from './cpu_usage_steal';
-import { cpuUsageUser } from './cpu_usage_user';
-import { cpuUsageSystem } from './cpu_usage_system';
-import { diskIORead } from './disk_read_iops';
-import { diskIOWrite } from './disk_write_iops';
-import { diskReadThroughput } from './disk_read_throughput';
-import { diskWriteThroughput } from './disk_write_throughput';
-import { diskSpaceAvailability } from './disk_space_availability';
-import { diskSpaceAvailable } from './disk_space_available';
-import { diskUsage } from './disk_usage';
+import {
+  cpuUsage,
+  cpuUsageIowait,
+  cpuUsageIrq,
+  cpuUsageNice,
+  cpuUsageSoftirq,
+  cpuUsageSteal,
+  cpuUsageSystem,
+  cpuUsageUser,
+  load1m,
+  load15m,
+  load5m,
+  normalizedLoad1m,
+} from './cpu';
+
+import {
+  diskIORead,
+  diskIOWrite,
+  diskReadThroughput,
+  diskSpaceAvailable,
+  diskSpaceAvailability,
+  diskUsage,
+  diskWriteThroughput,
+} from './disk';
+
 import { hostCount } from './host_count';
 import { logRate } from './log_rate';
-import { normalizedLoad1m } from './normalized_load_1m';
-import { load1m } from './load_1m';
-import { load5m } from './load_5m';
-import { load15m } from './load_15m';
-import { memoryUsage } from './memory_usage';
-import { memoryFree } from './memory_free';
-import { memoryUsed } from './memory_used';
-import { memoryFreeExcludingCache } from './memory_free_excluding_cache';
-import { memoryCache } from './memory_cache';
-import { rx } from './rx';
-import { tx } from './tx';
+import {
+  memoryUsage,
+  memoryCache,
+  memoryFreeExcludingCache,
+  memoryUsed,
+  memoryFree,
+} from './memory';
+import { rx, tx } from './network';
 
 export const formulas = {
   cpuUsage,
@@ -63,7 +70,6 @@ export const formulas = {
   memoryCache,
   rx,
   tx,
-};
+} as const;
 
 export type HostFormulas = typeof formulas;
-export type HostFormulaNames = keyof HostFormulas;

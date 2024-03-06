@@ -273,11 +273,11 @@ export const buildPalettes: (
       title: i18n.translate('charts.palettes.temperatureLabel', { defaultMessage: 'Temperature' }),
       ...buildGradient('temperature', euiPaletteForTemperature),
     },
-    complimentary: {
-      title: i18n.translate('charts.palettes.complimentaryLabel', {
-        defaultMessage: 'Complimentary',
+    complementary: {
+      title: i18n.translate('charts.palettes.complementaryLabel', {
+        defaultMessage: 'Complementary',
       }),
-      ...buildGradient('complimentary', euiPaletteComplementary),
+      ...buildGradient('complementary', euiPaletteComplementary),
     },
     negative: {
       title: i18n.translate('charts.palettes.negativeLabel', { defaultMessage: 'Negative' }),

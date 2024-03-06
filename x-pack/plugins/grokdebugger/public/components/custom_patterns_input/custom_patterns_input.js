@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiCallOut, EuiCodeBlock, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 
 export function CustomPatternsInput({ value, onChange }) {
   const sampleCustomPatterns = `POSTFIX_QUEUEID [0-9A-F]{10,11}

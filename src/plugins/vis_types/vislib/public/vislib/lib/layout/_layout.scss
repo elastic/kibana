@@ -203,7 +203,7 @@
   }
 
   .slice {
-    stroke-width: $euiSizeXS / 2;
+    stroke-width: calc($euiSizeXS / 2);
     stroke: $euiColorEmptyShade;
 
     &:hover {

@@ -87,17 +87,6 @@ export const getTotalIndicesChecked = (patternRollups: Record<string, PatternRol
   );
 };
 
-export const onPatternRollupUpdated = ({
-  patternRollup,
-  patternRollups,
-}: {
-  patternRollup: PatternRollup;
-  patternRollups: Record<string, PatternRollup>;
-}): Record<string, PatternRollup> => ({
-  ...patternRollups,
-  [patternRollup.pattern]: patternRollup,
-});
-
 export const updateResultOnCheckCompleted = ({
   error,
   formatBytes,
@@ -151,6 +140,7 @@ export const updateResultOnCheckCompleted = ({
 
     const incompatible = partitionedFieldMetadata?.incompatible.length;
     const sameFamily = partitionedFieldMetadata?.sameFamily.length;
+    const checkedAt = partitionedFieldMetadata ? Date.now() : undefined;
 
     return {
       ...patternRollups,
@@ -167,6 +157,7 @@ export const updateResultOnCheckCompleted = ({
             markdownComments,
             pattern,
             sameFamily,
+            checkedAt,
           },
         },
       },

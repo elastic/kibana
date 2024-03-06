@@ -21,91 +21,87 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
         class="emotion-euiPageSection__content-l-center"
       >
         <div
-          class="euiPanel euiPanel--plain euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-plain-hasShadow"
+          class="euiPanel euiPanel--plain euiEmptyPrompt emotion-euiPanel-m-plain-hasShadow-euiEmptyPrompt-vertical"
         >
           <div
-            class="euiEmptyPrompt__main"
+            class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
           >
             <div
-              class="euiEmptyPrompt__icon"
+              class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
             >
               <span
                 data-euiicon-type="monitoringApp"
               />
             </div>
             <div
-              class="euiEmptyPrompt__content"
+              class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
             >
-              <div
-                class="euiEmptyPrompt__contentInner"
+              <h2
+                class="euiTitle emotion-euiTitle-m"
               >
-                <h2
-                  class="euiTitle emotion-euiTitle-m"
-                >
-                  No monitoring data found
-                </h2>
+                No monitoring data found
+              </h2>
+              <div
+                class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+              />
+              <div
+                class="euiText emotion-euiText-m-euiTextColor-subdued"
+              >
                 <div
-                  class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-                />
-                <div
-                  class="euiText emotion-euiText-m-euiTextColor-subdued"
+                  class="euiText emotion-euiText-m"
                 >
-                  <div
-                    class="euiText emotion-euiText-m"
-                  >
-                    <p>
-                      Have you set up monitoring yet? If so, make sure that the selected time period in the upper right includes monitoring data.
-                    </p>
-                    <p>
-                      If you have configured monitoring data to be sent to a dedicated monitoring cluster you should access that data with the Kibana instance attached to the monitoring cluster.
-                    </p>
-                  </div>
+                  <p>
+                    Have you set up monitoring yet? If so, make sure that the selected time period in the upper right includes monitoring data.
+                  </p>
+                  <p>
+                    If you have configured monitoring data to be sent to a dedicated monitoring cluster you should access that data with the Kibana instance attached to the monitoring cluster.
+                  </p>
                 </div>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+              />
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
+              >
                 <div
-                  class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-                />
-                <div
-                  class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
-                  <div
-                    class="euiFlexItem emotion-euiFlexItem-growZero"
-                  >
-                    <button
-                      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-                      data-test-subj="enableCollectionInterval"
-                      type="button"
-                    >
-                      <span
-                        class="emotion-euiButtonDisplayContent"
-                      >
-                        Set up monitoring with Metricbeat
-                      </span>
-                    </button>
-                  </div>
-                </div>
-                <hr
-                  class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
-                />
-                <button
-                  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-                  data-test-subj="useInternalCollection"
-                  type="button"
-                >
-                  <span
-                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  <button
+                    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                    data-test-subj="enableCollectionInterval"
+                    type="button"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="emotion-euiButtonDisplayContent"
                     >
-                      <span
-                        class="emotion-euiTextColor-subdued"
-                      >
-                        Or, set up with self monitoring
-                      </span>
+                      Set up monitoring with Metricbeat
+                    </span>
+                  </button>
+                </div>
+              </div>
+              <hr
+                class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
+              />
+              <button
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+                data-test-subj="useInternalCollection"
+                type="button"
+              >
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text"
+                  >
+                    <span
+                      class="emotion-euiTextColor-subdued"
+                    >
+                      Or, set up with self monitoring
                     </span>
                   </span>
-                </button>
-              </div>
+                </span>
+              </button>
             </div>
           </div>
         </div>
@@ -136,91 +132,87 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
         class="emotion-euiPageSection__content-l-center"
       >
         <div
-          class="euiPanel euiPanel--plain euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-plain-hasShadow"
+          class="euiPanel euiPanel--plain euiEmptyPrompt emotion-euiPanel-m-plain-hasShadow-euiEmptyPrompt-vertical"
         >
           <div
-            class="euiEmptyPrompt__main"
+            class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
           >
             <div
-              class="euiEmptyPrompt__icon"
+              class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
             >
               <span
                 data-euiicon-type="monitoringApp"
               />
             </div>
             <div
-              class="euiEmptyPrompt__content"
+              class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
             >
-              <div
-                class="euiEmptyPrompt__contentInner"
+              <h2
+                class="euiTitle emotion-euiTitle-m"
               >
-                <h2
-                  class="euiTitle emotion-euiTitle-m"
-                >
-                  No monitoring data found
-                </h2>
+                No monitoring data found
+              </h2>
+              <div
+                class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+              />
+              <div
+                class="euiText emotion-euiText-m-euiTextColor-subdued"
+              >
                 <div
-                  class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-                />
-                <div
-                  class="euiText emotion-euiText-m-euiTextColor-subdued"
+                  class="euiText emotion-euiText-m"
                 >
-                  <div
-                    class="euiText emotion-euiText-m"
-                  >
-                    <p>
-                      Have you set up monitoring yet? If so, make sure that the selected time period in the upper right includes monitoring data.
-                    </p>
-                    <p>
-                      If you have configured monitoring data to be sent to a dedicated monitoring cluster you should access that data with the Kibana instance attached to the monitoring cluster.
-                    </p>
-                  </div>
+                  <p>
+                    Have you set up monitoring yet? If so, make sure that the selected time period in the upper right includes monitoring data.
+                  </p>
+                  <p>
+                    If you have configured monitoring data to be sent to a dedicated monitoring cluster you should access that data with the Kibana instance attached to the monitoring cluster.
+                  </p>
                 </div>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+              />
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
+              >
                 <div
-                  class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-                />
-                <div
-                  class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
-                  <div
-                    class="euiFlexItem emotion-euiFlexItem-growZero"
-                  >
-                    <button
-                      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-                      data-test-subj="enableCollectionInterval"
-                      type="button"
-                    >
-                      <span
-                        class="emotion-euiButtonDisplayContent"
-                      >
-                        Set up monitoring with Metricbeat
-                      </span>
-                    </button>
-                  </div>
-                </div>
-                <hr
-                  class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
-                />
-                <button
-                  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-                  data-test-subj="useInternalCollection"
-                  type="button"
-                >
-                  <span
-                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  <button
+                    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                    data-test-subj="enableCollectionInterval"
+                    type="button"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="emotion-euiButtonDisplayContent"
                     >
-                      <span
-                        class="emotion-euiTextColor-subdued"
-                      >
-                        Or, set up with self monitoring
-                      </span>
+                      Set up monitoring with Metricbeat
+                    </span>
+                  </button>
+                </div>
+              </div>
+              <hr
+                class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
+              />
+              <button
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+                data-test-subj="useInternalCollection"
+                type="button"
+              >
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text"
+                  >
+                    <span
+                      class="emotion-euiTextColor-subdued"
+                    >
+                      Or, set up with self monitoring
                     </span>
                   </span>
-                </button>
-              </div>
+                </span>
+              </button>
             </div>
           </div>
         </div>

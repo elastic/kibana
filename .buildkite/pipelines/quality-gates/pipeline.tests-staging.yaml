@@ -19,6 +19,7 @@ steps:
         ENVIRONMENT: ${ENVIRONMENT}
         EC_ENV: staging
         EC_REGION: aws-us-east-1
+        RETRY_TESTS_ON_FAIL: "true"
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)"
 
   - wait: ~

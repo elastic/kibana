@@ -12,13 +12,14 @@ import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { EXPANDABLE_FLYOUT_URL_KEY } from '../../../common/hooks/use_url_state';
 import { SecuritySolutionFlyout } from '../../../flyout';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
-import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
+import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { GlobalKQLHeader } from './global_kql_header';
-import { SecuritySolutionBottomBar } from './bottom_bar';
+import { Timeline } from './timeline';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
 import { SecurityPageName } from '../../types';
@@ -34,7 +35,7 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
     theme: EuiThemeComputed; // using computed EUI theme to be consistent with user profile theming
   }
 >`
-  .kbnSolutionNav {
+  .kbnSolutionNav__sidebar:not(.kbnSolutionNav__sidebar--shrink) {
     background-color: ${({ theme }) => theme.colors.emptyShade};
   }
 
@@ -67,7 +68,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
      * between EuiPageTemplate and the security solution pages.
      */
     return (
-      <ExpandableFlyoutProvider storage={isPreview ? 'memory' : 'url'}>
+      <ExpandableFlyoutProvider urlKey={isPreview ? undefined : EXPANDABLE_FLYOUT_URL_KEY}>
         <StyledKibanaPageTemplate
           theme={euiTheme}
           $isShowingTimelineOverlay={isShowingTimelineOverlay}
@@ -90,7 +91,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
           {isTimelineBottomBarVisible && (
             <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">
               <EuiThemeProvider colorMode={globalColorMode}>
-                <SecuritySolutionBottomBar />
+                <Timeline />
               </EuiThemeProvider>
             </KibanaPageTemplate.BottomBar>
           )}

@@ -16,7 +16,7 @@ import { useFetchDetectionRulesAlertsStatus } from '../common/api/use_fetch_dete
 import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
 import { RuleResponse } from '../common/types';
 import { useKibana } from '../common/hooks/use_kibana';
-import { showSuccessToast } from './take_action';
+import { showCreateDetectionRuleSuccessToast } from './take_action';
 import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
 
 const RULES_PAGE_PATH = '/rules/management';
@@ -61,7 +61,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
     setIsCreateRuleLoading(true);
     const ruleResponse = await createRuleFn(http);
     setIsCreateRuleLoading(false);
-    showSuccessToast(notifications, http, ruleResponse);
+    showCreateDetectionRuleSuccessToast(notifications, http, ruleResponse);
     // Triggering a refetch of rules and alerts to update the UI
     queryClient.invalidateQueries([DETECTION_ENGINE_RULES_KEY]);
     queryClient.invalidateQueries([DETECTION_ENGINE_ALERTS_KEY]);

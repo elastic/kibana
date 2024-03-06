@@ -97,7 +97,11 @@ export const SelectConnector: React.FC = () => {
           a.name.localeCompare(b.name)
         )
       : CONNECTORS.sort((a, b) => a.name.localeCompare(b.name));
-    const connectors = [...nativeConnectors, ...nonNativeConnectors];
+    const connectors =
+      !hasNativeAccess || useClientsFilter
+        ? CONNECTORS.sort((a, b) => a.name.localeCompare(b.name))
+        : [...nativeConnectors, ...nonNativeConnectors];
+
     return connectors
       .filter((connector) => (showBeta ? true : !connector.isBeta))
       .filter((connector) => (showTechPreview ? true : !connector.isTechPreview))
@@ -105,7 +109,7 @@ export const SelectConnector: React.FC = () => {
       .filter((connector) =>
         searchTerm ? connector.name.toLowerCase().includes(searchTerm.toLowerCase()) : true
       );
-  }, [showBeta, showTechPreview, useNativeFilter, searchTerm]);
+  }, [hasNativeAccess, useClientsFilter, showBeta, showTechPreview, useNativeFilter, searchTerm]);
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -140,40 +144,68 @@ export const SelectConnector: React.FC = () => {
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem grow={false}>
               <EuiFacetGroup>
+                {hasNativeAccess && (
+                  <EuiFacetButton
+                    quantity={CONNECTORS.length}
+                    isSelected={!useNativeFilter && !useClientsFilter}
+                    onClick={() => setSelectedConnectorFilter(null)}
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.selectConnector.allConnectorsLabel',
+                      { defaultMessage: 'All connectors' }
+                    )}
+                  </EuiFacetButton>
+                )}
+
+                {hasNativeAccess && (
+                  <EuiFacetButton
+                    key="native"
+                    quantity={CONNECTORS.filter((connector) => connector.isNative).length}
+                    isSelected={useNativeFilter}
+                    onClick={() =>
+                      setSelectedConnectorFilter(!useNativeFilter ? CONNECTOR_NATIVE_TYPE : null)
+                    }
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.selectConnector.nativeLabel',
+                      {
+                        defaultMessage: 'Native connectors',
+                      }
+                    )}
+                  </EuiFacetButton>
+                )}
+
                 <EuiFacetButton
                   quantity={CONNECTORS.length}
-                  isSelected={!useNativeFilter && !useClientsFilter}
-                  onClick={() => setSelectedConnectorFilter(null)}
-                >
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.selectConnector.allConnectorsLabel',
-                    { defaultMessage: 'All connectors' }
-                  )}
-                </EuiFacetButton>
-                <EuiFacetButton
-                  quantity={CONNECTORS.filter((connector) => connector.isNative).length}
-                  isSelected={useNativeFilter}
-                  onClick={() =>
-                    setSelectedConnectorFilter(!useNativeFilter ? CONNECTOR_NATIVE_TYPE : null)
-                  }
-                >
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.selectConnector.nativeLabel',
-                    { defaultMessage: 'Native connectors' }
-                  )}
-                </EuiFacetButton>
-                <EuiFacetButton
-                  quantity={CONNECTORS.length}
-                  isSelected={useClientsFilter}
+                  isSelected={(!hasNativeAccess && !useNativeFilter) || useClientsFilter}
                   onClick={() =>
                     setSelectedConnectorFilter(!useClientsFilter ? CONNECTOR_CLIENTS_TYPE : null)
                   }
                 >
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.indices.selectConnector.connectorClients',
-                    { defaultMessage: 'Connector clients' }
+                    {
+                      defaultMessage: 'Connector clients',
+                    }
                   )}
                 </EuiFacetButton>
+                {!hasNativeAccess && (
+                  <EuiFacetButton
+                    key="native"
+                    quantity={CONNECTORS.filter((connector) => connector.isNative).length}
+                    isSelected={useNativeFilter}
+                    onClick={() =>
+                      setSelectedConnectorFilter(!useNativeFilter ? CONNECTOR_NATIVE_TYPE : null)
+                    }
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.selectConnector.nativeLabel',
+                      {
+                        defaultMessage: 'Native connectors',
+                      }
+                    )}
+                  </EuiFacetButton>
+                )}
               </EuiFacetGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -287,13 +319,11 @@ export const SelectConnector: React.FC = () => {
           <EuiSpacer size="s" />
           <EuiFlexGrid columns={3}>
             {filteredConnectors.map((connector) => (
-              <EuiFlexItem key={connector.serviceType} grow>
+              <EuiFlexItem key={connector.name} grow>
                 <ConnectorCheckable
-                  isDisabled={
-                    ((connector.platinumOnly && !(hasPlatinumLicense || isCloud)) ||
-                      (!hasNativeAccess && useNativeFilter)) ??
-                    false
-                  }
+                  showNativePopover={(!hasNativeAccess && useNativeFilter) ?? false}
+                  showLicensePopover={connector.platinumOnly && !hasPlatinumLicense && !isCloud}
+                  isDisabled={(!hasNativeAccess && useNativeFilter) ?? false}
                   iconType={connector.icon}
                   isBeta={connector.isBeta}
                   isTechPreview={Boolean(connector.isTechPreview)}
@@ -341,7 +371,7 @@ export const SelectConnector: React.FC = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.content.indices.selectConnector.cloudCallout.description"
-                    defaultMessage="Native connectors are hosted on Elastic Cloud. Get started with a free day trial."
+                    defaultMessage="Native connectors are hosted on Elastic Cloud. Get started with a free 14-day trial."
                   />
                 </p>
                 <EuiButton

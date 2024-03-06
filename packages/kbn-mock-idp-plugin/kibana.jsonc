@@ -6,6 +6,13 @@
   "plugin": {
     "id": "mockIdpPlugin",
     "server": true,
-    "browser": false
+    "browser": true,
+    "enabledOnAnonymousPages": true,
+    "requiredPlugins": [
+      "cloud"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

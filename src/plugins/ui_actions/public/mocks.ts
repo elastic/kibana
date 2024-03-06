@@ -8,7 +8,7 @@
 
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { Action } from '.';
+import { Action, FrequentCompatibilityChangeAction } from '.';
 import { UiActionsPublicSetup, UiActionsPublicStart } from './plugin';
 import { plugin as pluginInitializer } from '.';
 
@@ -42,6 +42,9 @@ const createStartContract = (): Start => {
     getTriggerActions: jest.fn((id: string) => []),
     getTriggerCompatibleActions: jest.fn((triggerId: string, context: object) =>
       Promise.resolve([] as Array<Action<object>>)
+    ),
+    getFrequentlyChangingActionsForTrigger: jest.fn(
+      (triggerId: string, context: object) => [] as Array<FrequentCompatibilityChangeAction<object>>
     ),
     registerAction: jest.fn(),
     registerTrigger: jest.fn(),

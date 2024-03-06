@@ -31,7 +31,7 @@ const CloseButton = styled(EuiButtonIcon)`
   top: 4px;
 `;
 
-const ViewSelect = styled(EuiSuperSelect)`
+const ViewSelect = styled(EuiSuperSelect<string>)`
   width: 170px;
 `;
 

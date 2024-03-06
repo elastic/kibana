@@ -22,6 +22,7 @@ export interface FieldBase {
   timeSeriesMetric?: DataViewField['timeSeriesMetric'];
   esTypes?: DataViewField['esTypes'];
   scripted?: DataViewField['scripted'];
+  isNull?: DataViewField['isNull'];
   conflictDescriptions?: Record<string, string[]>;
 }
 

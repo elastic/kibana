@@ -68,11 +68,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const transactionsGroupsPrimaryStatistics = await callApi();
 
         expect(transactionsGroupsPrimaryStatistics.transactionGroups).to.empty();
-        expect(transactionsGroupsPrimaryStatistics.maxTransactionGroupsExceeded).to.be(false);
+        expect(transactionsGroupsPrimaryStatistics.maxCountExceeded).to.be(false);
       });
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177620
   registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
     describe('Transaction groups main statistics', () => {
       const GO_PROD_RATE = 75;
@@ -138,7 +139,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           transactionsGroupsPrimaryStatisticsWithDurationSummaryTrue,
         ].forEach((statistics) => {
           expect(statistics.transactionGroups.length).to.be(3);
-          expect(statistics.maxTransactionGroupsExceeded).to.be(false);
+          expect(statistics.maxCountExceeded).to.be(false);
           expect(statistics.transactionGroups.map(({ name }) => name)).to.eql(
             transactions.map(({ name }) => name)
           );

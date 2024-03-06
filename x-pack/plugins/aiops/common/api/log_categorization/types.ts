@@ -15,6 +15,7 @@ export interface Category {
   subFieldExamples?: string[];
   examples: string[];
   sparkline?: Record<number, number>;
+  regex: string;
 }
 
 interface CategoryExamples {
@@ -27,6 +28,7 @@ export interface CategoriesAgg {
       key: string;
       doc_count: number;
       examples: CategoryExamples;
+      regex: string;
       sparkline: {
         buckets: Array<{ key_as_string: string; key: number; doc_count: number }>;
       };

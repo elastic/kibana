@@ -17,7 +17,7 @@ import { useKibana } from '../../common/lib/kibana';
 
 const mockedUseKibana = mockUseKibana();
 
-jest.mock('../../common/components/landing_page');
+jest.mock('../../common/components/empty_prompt');
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
 
@@ -117,7 +117,7 @@ describe('DataQuality', () => {
     });
 
     test('it does NOT render the landing page', () => {
-      expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-prompt')).not.toBeInTheDocument();
     });
   });
 
@@ -149,7 +149,7 @@ describe('DataQuality', () => {
     });
 
     test('it does NOT render the landing page', () => {
-      expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-prompt')).not.toBeInTheDocument();
     });
   });
 
@@ -181,7 +181,7 @@ describe('DataQuality', () => {
     });
 
     test('it does NOT render the landing page', () => {
-      expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-prompt')).not.toBeInTheDocument();
     });
   });
 
@@ -218,7 +218,7 @@ describe('DataQuality', () => {
     });
 
     test('it renders the landing page', () => {
-      expect(screen.getByTestId('siem-landing-page')).toBeInTheDocument();
+      expect(screen.getByTestId('empty-prompt')).toBeInTheDocument();
     });
   });
 
@@ -255,7 +255,7 @@ describe('DataQuality', () => {
     });
 
     test('it does NOT render the landing page', () => {
-      expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-prompt')).not.toBeInTheDocument();
     });
   });
 
@@ -292,7 +292,7 @@ describe('DataQuality', () => {
     });
 
     test('it does NOT render the landing page', () => {
-      expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-prompt')).not.toBeInTheDocument();
     });
   });
 

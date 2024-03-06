@@ -12,7 +12,10 @@ import { loadExecutionKPIAggregations } from '../../../lib/rule_api/load_executi
 import { loadGlobalExecutionKPIAggregations } from '../../../lib/rule_api/load_global_execution_kpi_aggregations';
 import { RuleEventLogListKPI } from './rule_event_log_list_kpi';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { useKibana } from '../../../../common/lib';
+import { IToasts } from '@kbn/core/public';
 
+const addDangerMock = jest.fn();
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
@@ -20,6 +23,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
     },
   }),
 }));
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 jest.mock('../../../lib/rule_api/load_execution_kpi_aggregations', () => ({
   loadExecutionKPIAggregations: jest.fn(),
@@ -53,6 +57,9 @@ const loadGlobalExecutionKPIAggregationsMock =
 describe('rule_event_log_list_kpi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useKibanaMock().services.notifications.toasts = {
+      addDanger: addDangerMock,
+    } as unknown as IToasts;
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
     loadExecutionKPIAggregationsMock.mockResolvedValue(mockKpiResponse);
     loadGlobalExecutionKPIAggregationsMock.mockResolvedValue(mockKpiResponse);
@@ -225,5 +232,45 @@ describe('rule_event_log_list_kpi', () => {
         outcomeFilter: ['status: 123', 'test:456'],
       })
     );
+  });
+
+  it('Should call addDanger function when an the API throw an error', async () => {
+    loadGlobalExecutionKPIAggregationsMock.mockRejectedValue({ body: { statusCode: 400 } });
+    const wrapper = mountWithIntl(
+      <RuleEventLogListKPI
+        ruleId="*"
+        dateStart="now-24h"
+        dateEnd="now"
+        loadExecutionKPIAggregations={loadExecutionKPIAggregationsMock}
+        loadGlobalExecutionKPIAggregations={loadGlobalExecutionKPIAggregationsMock}
+      />
+    );
+    // Let the load resolve
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(addDangerMock).toHaveBeenCalled();
+  });
+
+  it('Should NOT call addDanger function when an the API throw a 413 error', async () => {
+    loadGlobalExecutionKPIAggregationsMock.mockRejectedValue({ body: { statusCode: 413 } });
+    const wrapper = mountWithIntl(
+      <RuleEventLogListKPI
+        ruleId="*"
+        dateStart="now-24h"
+        dateEnd="now"
+        loadExecutionKPIAggregations={loadExecutionKPIAggregationsMock}
+        loadGlobalExecutionKPIAggregations={loadGlobalExecutionKPIAggregationsMock}
+      />
+    );
+    // Let the load resolve
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(addDangerMock).not.toHaveBeenCalled();
   });
 });

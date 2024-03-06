@@ -44,7 +44,8 @@ describe('createSearchItems', () => {
       [],
       {
         getField: getFieldMock(searchSource),
-      } as unknown as ISearchSource
+      } as unknown as ISearchSource,
+      false
     );
 
   test('should match data view', () => {

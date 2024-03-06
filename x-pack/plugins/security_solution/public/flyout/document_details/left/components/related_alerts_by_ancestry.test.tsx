@@ -27,7 +27,6 @@ jest.mock('../hooks/use_paginated_alerts');
 const documentId = 'documentId';
 const indices = ['index1'];
 const scopeId = 'scopeId';
-const eventId = 'eventId';
 
 const TOGGLE_ICON = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID
@@ -42,12 +41,7 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
 const renderRelatedAlertsByAncestry = () =>
   render(
     <TestProviders>
-      <RelatedAlertsByAncestry
-        documentId={documentId}
-        indices={indices}
-        scopeId={scopeId}
-        eventId={eventId}
-      />
+      <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
     </TestProviders>
   );
 

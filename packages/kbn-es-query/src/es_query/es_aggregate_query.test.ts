@@ -6,14 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  isOfQueryType,
-  isOfAggregateQueryType,
-  getAggregateQueryMode,
-  getIndexPatternFromSQLQuery,
-  getIndexPatternFromESQLQuery,
-  cleanupESQLQueryForLensSuggestions,
-} from './es_aggregate_query';
+import { isOfQueryType, isOfAggregateQueryType, getAggregateQueryMode } from './es_aggregate_query';
 
 describe('sql query helpers', () => {
   describe('isOfQueryType', () => {
@@ -54,80 +47,6 @@ describe('sql query helpers', () => {
     it('should return esql for an ESQL AggregateQuery type', () => {
       const mode = getAggregateQueryMode({ esql: 'foo | where field > 100' });
       expect(mode).toBe('esql');
-    });
-  });
-
-  describe('getIndexPatternFromSQLQuery', () => {
-    it('should return the index pattern string from sql queries', () => {
-      const idxPattern1 = getIndexPatternFromSQLQuery('SELECT * FROM foo');
-      expect(idxPattern1).toBe('foo');
-
-      const idxPattern2 = getIndexPatternFromSQLQuery('SELECT woof, meow FROM "foo"');
-      expect(idxPattern2).toBe('foo');
-
-      const idxPattern3 = getIndexPatternFromSQLQuery('SELECT woof, meow FROM "the_index_pattern"');
-      expect(idxPattern3).toBe('the_index_pattern');
-
-      const idxPattern4 = getIndexPatternFromSQLQuery('SELECT woof, meow FROM "the-index-pattern"');
-      expect(idxPattern4).toBe('the-index-pattern');
-
-      const idxPattern5 = getIndexPatternFromSQLQuery('SELECT woof, meow from "the-index-pattern"');
-      expect(idxPattern5).toBe('the-index-pattern');
-
-      const idxPattern6 = getIndexPatternFromSQLQuery('SELECT woof, meow from "logstash-*"');
-      expect(idxPattern6).toBe('logstash-*');
-
-      const idxPattern7 = getIndexPatternFromSQLQuery(
-        'SELECT woof, meow from logstash-1234! WHERE field > 100'
-      );
-      expect(idxPattern7).toBe('logstash-1234!');
-
-      const idxPattern8 = getIndexPatternFromSQLQuery(
-        'SELECT * FROM (SELECT woof, miaou FROM "logstash-1234!" GROUP BY woof)'
-      );
-      expect(idxPattern8).toBe('logstash-1234!');
-    });
-  });
-
-  describe('getIndexPatternFromESQLQuery', () => {
-    it('should return the index pattern string from esql queries', () => {
-      const idxPattern1 = getIndexPatternFromESQLQuery('FROM foo');
-      expect(idxPattern1).toBe('foo');
-
-      const idxPattern3 = getIndexPatternFromESQLQuery('from foo | project abc, def');
-      expect(idxPattern3).toBe('foo');
-
-      const idxPattern4 = getIndexPatternFromESQLQuery('from foo | project a | limit 2');
-      expect(idxPattern4).toBe('foo');
-
-      const idxPattern5 = getIndexPatternFromESQLQuery('from foo | limit 2');
-      expect(idxPattern5).toBe('foo');
-
-      const idxPattern6 = getIndexPatternFromESQLQuery('from foo-1,foo-2 | limit 2');
-      expect(idxPattern6).toBe('foo-1,foo-2');
-
-      const idxPattern7 = getIndexPatternFromESQLQuery('from foo-1, foo-2 | limit 2');
-      expect(idxPattern7).toBe('foo-1, foo-2');
-
-      const idxPattern8 = getIndexPatternFromESQLQuery('FROM foo-1,  foo-2');
-      expect(idxPattern8).toBe('foo-1,  foo-2');
-
-      const idxPattern9 = getIndexPatternFromESQLQuery('FROM foo-1, foo-2 [metadata _id]');
-      expect(idxPattern9).toBe('foo-1, foo-2');
-    });
-  });
-
-  describe('cleanupESQLQueryForLensSuggestions', () => {
-    it('should not remove anything if a drop command is not present', () => {
-      expect(cleanupESQLQueryForLensSuggestions('from a | eval b = 1')).toBe('from a | eval b = 1');
-    });
-
-    it('should remove multiple drop statement if present', () => {
-      expect(
-        cleanupESQLQueryForLensSuggestions(
-          'from a | drop @timestamp | drop a | drop b | keep c | drop d'
-        )
-      ).toBe('from a | keep c ');
     });
   });
 });

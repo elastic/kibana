@@ -14,8 +14,8 @@ import { NoFindingsStates } from '../../components/no_findings_states';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
-import { FindingsByResourceContainer } from './latest_findings_by_resource/findings_by_resource_container';
 import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
+import { DataViewContext } from '../../common/contexts/data_view_context';
 
 export const Configurations = () => {
   const location = useLocation();
@@ -29,7 +29,13 @@ export const Configurations = () => {
   const noFindingsForPostureType =
     getSetupStatus?.cspm.status !== 'not-installed' ? 'cspm' : 'kspm';
 
-  if (!hasConfigurationFindings) return <NoFindingsStates posturetype={noFindingsForPostureType} />;
+  if (!hasConfigurationFindings) return <NoFindingsStates postureType={noFindingsForPostureType} />;
+
+  const dataViewContextValue = {
+    dataView: dataViewQuery.data!,
+    dataViewRefetch: dataViewQuery.refetch,
+    dataViewIsRefetching: dataViewQuery.isRefetching,
+  };
 
   return (
     <CloudPosturePage query={dataViewQuery}>
@@ -50,13 +56,11 @@ export const Configurations = () => {
           path={findingsNavigation.findings_default.path}
           render={() => (
             <TrackApplicationView viewId={findingsNavigation.findings_default.id}>
-              <LatestFindingsContainer dataView={dataViewQuery.data!} />
+              <DataViewContext.Provider value={dataViewContextValue}>
+                <LatestFindingsContainer />
+              </DataViewContext.Provider>
             </TrackApplicationView>
           )}
-        />
-        <Route
-          path={findingsNavigation.findings_by_resource.path}
-          render={() => <FindingsByResourceContainer dataView={dataViewQuery.data!} />}
         />
         <Route path="*" render={() => <Redirect to={findingsNavigation.findings_default.path} />} />
       </Routes>

@@ -46,7 +46,8 @@ import {
   DataViewsPublicPluginStart,
   FieldSpec,
 } from '@kbn/data-views-plugin/public';
-import { context as contextType, CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { context as contextType } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,

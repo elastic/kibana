@@ -12,9 +12,10 @@ import type { ILicense } from '@kbn/licensing-plugin/public';
 import { IlmPolicyMigrationStatus } from '@kbn/reporting-common/types';
 
 import { ListingProps as Props } from '.';
-import { Job } from '../lib/job';
-import { TestBed, TestDependencies, mockJobs, setup } from './__test__';
+import { mockJobs } from '../../common/test';
+import { TestBed, TestDependencies, setup } from './__test__';
 import { mockConfig } from './__test__/report_listing.test.helpers';
+import { Job } from '@kbn/reporting-public';
 
 describe('ReportListing', () => {
   let testBed: TestBed;

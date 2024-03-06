@@ -37,7 +37,7 @@ describe('useLoadActionTypes', () => {
       await waitForNextUpdate();
 
       expect(defaultProps.http.get).toHaveBeenCalledWith('/api/actions/connector_types', {
-        query: { feature_id: 'generativeAI' },
+        query: { feature_id: 'generativeAIForSecurity' },
       });
       expect(toasts.addError).not.toHaveBeenCalled();
     });

@@ -113,5 +113,9 @@
     "@kbn/securitysolution-ecs",
     "@kbn/ml-data-view-utils",
     "@kbn/ml-creation-wizard-utils",
+    "@kbn/deeplinks-management",
+    "@kbn/code-editor",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-elasticsearch-client-server-mocks",
   ],
 }

@@ -811,10 +811,6 @@
     },
     "settings": {
       "index": {
-        "lifecycle": {
-          "name": "filebeat",
-          "rollover_alias": "filebeat-7.12.0"
-        },
         "mapping": {
           "total_fields": {
             "limit": "10000"

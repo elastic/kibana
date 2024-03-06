@@ -8,6 +8,7 @@
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import type {
@@ -250,14 +251,15 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
 }
 
 function renderParameterTemplates(
+  logger: Logger,
   params: ActionParamsType,
   variables: Record<string, unknown>
 ): ActionParamsType {
   return {
     // most of the params need no escaping
-    ...renderMustacheObject(params, variables),
+    ...renderMustacheObject(logger, params, variables),
     // message however, needs to escaped as markdown
-    message: renderMustacheString(params.message, variables, 'markdown'),
+    message: renderMustacheString(logger, params.message, variables, 'markdown'),
   };
 }
 

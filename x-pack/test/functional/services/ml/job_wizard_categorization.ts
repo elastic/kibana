@@ -21,6 +21,7 @@ export function MachineLearningJobWizardCategorizationProvider(
   return {
     async assertCategorizationDetectorTypeSelectionExists() {
       await testSubjects.existOrFail('~mlJobWizardCategorizationDetectorCountCard');
+      await testSubjects.existOrFail('~mlJobWizardCategorizationDetectorHighCountCard');
       await testSubjects.existOrFail('~mlJobWizardCategorizationDetectorRareCard');
     },
 

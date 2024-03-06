@@ -253,6 +253,29 @@ describe('kuery functions', () => {
         expect(result).toEqual(expected);
       });
 
+      test('should create a wildcard query with backslashes properly escaped', () => {
+        const expected = {
+          bool: {
+            should: [
+              {
+                wildcard: {
+                  'machine.os.keyword': { value: '*\\\\*' },
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+        const node = nodeTypes.function.buildNode(
+          'is',
+          'machine.os.keyword',
+          '*\\\\*'
+        ) as KqlIsFunctionNode;
+        const result = is.toElasticsearchQuery(node, indexPattern);
+
+        expect(result).toEqual(expected);
+      });
+
       test('should support scripted fields', () => {
         const node = nodeTypes.function.buildNode(
           'is',

@@ -1,0 +1,244 @@
+{
+  "id": "@kbn/test-eui-helpers",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.EuiSuperDatePickerTestHarness",
+        "type": "Class",
+        "tags": [],
+        "label": "EuiSuperDatePickerTestHarness",
+        "description": [],
+        "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperDatePickerTestHarness.currentCommonlyUsedRange",
+            "type": "string",
+            "tags": [],
+            "label": "currentCommonlyUsedRange",
+            "description": [
+              "\nThis method returns the currently selected commonly-used range as a string\n\nThe empty string is returned if a commonly-used range is not currently selected"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperDatePickerTestHarness.currentRange",
+            "type": "Object",
+            "tags": [],
+            "label": "currentRange",
+            "description": [
+              "\nThis method returns the currently selected range as a pair of strings"
+            ],
+            "signature": [
+              "{ from: string | null; to: string | null; }"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperDatePickerTestHarness.assertCurrentRange",
+            "type": "Function",
+            "tags": [],
+            "label": "assertCurrentRange",
+            "description": [
+              "\nThis method runs an assertion against the currently selected range using\nUNIX timestamps.\n\nNOTE: it does not (yet) support commonly-used (textual) ranges like \"Last 15 minutes\""
+            ],
+            "signature": [
+              "(range: { from: number; to: number; }, expect: jest.Expect) => void"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiSuperDatePickerTestHarness.assertCurrentRange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/test-eui-helpers",
+                    "id": "def-common.EuiSuperDatePickerTestHarness.assertCurrentRange.$1.from",
+                    "type": "number",
+                    "tags": [],
+                    "label": "from",
+                    "description": [],
+                    "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/test-eui-helpers",
+                    "id": "def-common.EuiSuperDatePickerTestHarness.assertCurrentRange.$1.to",
+                    "type": "number",
+                    "tags": [],
+                    "label": "to",
+                    "description": [],
+                    "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiSuperDatePickerTestHarness.assertCurrentRange.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "expect",
+                "description": [],
+                "signature": [
+                  "jest.Expect"
+                ],
+                "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperDatePickerTestHarness.togglePopover",
+            "type": "Function",
+            "tags": [],
+            "label": "togglePopover",
+            "description": [
+              "\nOpens the popover for the date picker"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperDatePickerTestHarness.selectCommonlyUsedRange",
+            "type": "Function",
+            "tags": [],
+            "label": "selectCommonlyUsedRange",
+            "description": [
+              "\nSelects a commonly-used range from the date picker (opens the popover if it's not already open)"
+            ],
+            "signature": [
+              "(label: string) => Promise<void>"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiSuperDatePickerTestHarness.selectCommonlyUsedRange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperDatePickerTestHarness.refresh",
+            "type": "Function",
+            "tags": [],
+            "label": "refresh",
+            "description": [
+              "\nActivates the refresh button"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.getButtonGroupInputValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getButtonGroupInputValue",
+        "description": [],
+        "signature": [
+          "(testId: string) => () => HTMLElement"
+        ],
+        "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.getButtonGroupInputValue.$1",
+            "type": "string",
+            "tags": [],
+            "label": "testId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

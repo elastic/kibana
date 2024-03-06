@@ -8,31 +8,25 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
-import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import {
   mockManagedUserData,
-  mockObservedUser,
   mockRiskScoreState,
 } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
 import { UserPanelContent } from './content';
-
-const flyoutContextValue = {
-  openLeftPanel: () => window.alert('openLeftPanel called'),
-  panels: {},
-} as unknown as ExpandableFlyoutContextValue;
+import { mockObservedUser } from './mocks';
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
 
 storiesOf('Components/UserPanelContent', module)
   .addDecorator((storyFn) => (
     <StorybookProviders>
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+      <TestProvider>
         <EuiFlyout size="m" onClose={() => {}}>
           {storyFn()}
         </EuiFlyout>
-      </ExpandableFlyoutContext.Provider>
+      </TestProvider>
     </StorybookProviders>
   ))
   .add('default', () => (
@@ -44,6 +38,7 @@ storiesOf('Components/UserPanelContent', module)
       scopeId={'test-scopeId'}
       isDraggable={false}
       openDetailsPanel={() => {}}
+      userName={'test-user-name'}
     />
   ))
   .add('integration disabled', () => (
@@ -59,6 +54,7 @@ storiesOf('Components/UserPanelContent', module)
       scopeId={'test-scopeId'}
       isDraggable={false}
       openDetailsPanel={() => {}}
+      userName={'test-user-name'}
     />
   ))
   .add('no managed data', () => (
@@ -74,6 +70,7 @@ storiesOf('Components/UserPanelContent', module)
       scopeId={'test-scopeId'}
       isDraggable={false}
       openDetailsPanel={() => {}}
+      userName={'test-user-name'}
     />
   ))
   .add('no observed data', () => (
@@ -109,6 +106,7 @@ storiesOf('Components/UserPanelContent', module)
       scopeId={'test-scopeId'}
       isDraggable={false}
       openDetailsPanel={() => {}}
+      userName={'test-user-name'}
     />
   ))
   .add('loading', () => (
@@ -148,5 +146,6 @@ storiesOf('Components/UserPanelContent', module)
       scopeId={'test-scopeId'}
       isDraggable={false}
       openDetailsPanel={() => {}}
+      userName={'test-user-name'}
     />
   ));

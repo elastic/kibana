@@ -21,3 +21,6 @@ export function AgentIcon({ agentName, size = 'l', ...props }: AgentIconProps) {
 
   return <EuiIcon type={icon} size={size} title={agentName} {...props} />;
 }
+
+// eslint-disable-next-line import/no-default-export
+export default AgentIcon;

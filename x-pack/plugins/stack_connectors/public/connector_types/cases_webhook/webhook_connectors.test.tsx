@@ -10,9 +10,7 @@ import CasesWebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import * as i18n from './translations';
-const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
@@ -23,16 +21,6 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
         docLinks: { ELASTIC_WEBSITE_URL: 'url' },
       },
     }),
-  };
-});
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
   };
 });
 

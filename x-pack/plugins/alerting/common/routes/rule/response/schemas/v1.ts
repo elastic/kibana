@@ -182,6 +182,10 @@ export const ruleSnoozeScheduleSchema = schema.object({
   skipRecurrences: schema.maybe(schema.arrayOf(schema.string())),
 });
 
+export const alertDelaySchema = schema.object({
+  active: schema.number(),
+});
+
 export const ruleResponseSchema = schema.object({
   id: schema.string(),
   enabled: schema.boolean(),
@@ -214,6 +218,7 @@ export const ruleResponseSchema = schema.object({
   revision: schema.number(),
   running: schema.maybe(schema.nullable(schema.boolean())),
   view_in_app_relative_url: schema.maybe(schema.nullable(schema.string())),
+  alert_delay: schema.maybe(alertDelaySchema),
 });
 
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));

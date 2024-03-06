@@ -179,7 +179,7 @@ describe('RulesSettingsQueryDelayClient', () => {
       attributes: mockAttributes,
       references: [],
     });
-
+    // @ts-expect-error access private method
     const result = await client.createSettings();
 
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -221,7 +221,7 @@ describe('RulesSettingsQueryDelayClient', () => {
       attributes: mockAttributes,
       references: [],
     });
-
+    // @ts-expect-error access private method
     const result = await client.createSettings();
 
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -254,6 +254,7 @@ describe('RulesSettingsQueryDelayClient', () => {
       attributes: mockAttributes,
       references: [],
     });
+    // @ts-expect-error access private method
     const result = await client.getSettings();
     expect(result.attributes).toEqual(mockAttributes);
   });

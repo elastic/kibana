@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TransactionActionMenu  matches the snapshot 1`] = `
+<div>
+  <div
+    class="euiPopover emotion-euiPopover-inline-block"
+    id="transactionActionMenu"
+  >
+    <button
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+      data-test-subj="apmActionMenuButtonInvestigateButton"
+      type="button"
+    >
+      <span
+        class="emotion-euiButtonDisplayContent"
+      >
+        <span
+          class="eui-textTruncate"
+        >
+          Investigate
+        </span>
+        <span
+          color="inherit"
+          data-euiicon-type="arrowDown"
+        />
+      </span>
+    </button>
+  </div>
+</div>
+`;

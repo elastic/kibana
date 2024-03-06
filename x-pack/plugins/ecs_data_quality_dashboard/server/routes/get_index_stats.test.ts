@@ -12,7 +12,8 @@ import { serverMock } from '../__mocks__/server';
 import { requestMock } from '../__mocks__/request';
 import { requestContextMock } from '../__mocks__/request_context';
 import { getIndexStatsRoute } from './get_index_stats';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 jest.mock('../lib', () => ({
   fetchStats: jest.fn(),

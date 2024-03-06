@@ -39,6 +39,8 @@ export interface Props {
   returnToOrigin?: boolean;
   onClose: () => void;
   onSave: (props: SaveProps, options: { saveToLibrary: boolean }) => void;
+
+  managed: boolean;
 }
 
 export const SaveModal = (props: Props) => {
@@ -57,6 +59,7 @@ export const SaveModal = (props: Props) => {
     onClose,
     onSave,
     returnToOrigin,
+    managed,
   } = props;
 
   // Use the modal with return-to-origin features if we're in an app's edit flow or if by-value embeddables are disabled
@@ -104,6 +107,14 @@ export const SaveModal = (props: Props) => {
       })}
       data-test-subj="lnsApp_saveModalDashboard"
       getOriginatingPath={getOriginatingPath}
+      mustCopyOnSaveMessage={
+        managed
+          ? i18n.translate('xpack.lens.app.mustCopyOnSave', {
+              defaultMessage:
+                'This visualization is managed by Elastic. Changes here must be saved to a new visualization.',
+            })
+          : undefined
+      }
     />
   );
 };

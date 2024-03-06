@@ -34,7 +34,7 @@ import React, {
   useCallback,
 } from 'react';
 import type { DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
 import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { FilterEditor } from '../filter_editor/filter_editor';
@@ -62,6 +62,7 @@ export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps 
   readOnly?: boolean;
   suggestionsAbstraction?: SuggestionsAbstraction;
   filtersCount?: number;
+  dataViews?: DataViewsContract;
 }
 
 type FilterPopoverProps = HTMLAttributes<HTMLDivElement> & EuiPopoverProps;
@@ -399,6 +400,7 @@ function FilterItemComponent(props: FilterItemProps) {
                 suggestionsAbstraction={props.suggestionsAbstraction}
                 docLinks={docLinks}
                 filtersCount={props.filtersCount}
+                dataViews={props.dataViews}
               />
             </div>,
           ]}

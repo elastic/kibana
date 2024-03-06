@@ -31,7 +31,10 @@ export const getAlertFlyout =
       <EuiPanel>
         <EuiDescriptionList
           listItems={columns.map((column) => {
-            const value = get(alert, column.id)?.[0];
+            const alertFieldValue = get(alert, column.id);
+            const value = (
+              Array.isArray(alertFieldValue) ? alertFieldValue.at(-1) : alertFieldValue
+            ) as string;
 
             return {
               title: column.displayAsText as string,

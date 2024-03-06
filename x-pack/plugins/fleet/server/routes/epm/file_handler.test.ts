@@ -15,7 +15,7 @@ import { getBundledPackageByPkgKey } from '../../services/epm/packages/bundled_p
 import { getFile, getInstallation } from '../../services/epm/packages/get';
 import type { FleetRequestHandlerContext } from '../..';
 import { appContextService } from '../../services';
-import { unpackBufferEntries, getArchiveEntry } from '../../services/epm/archive';
+import { unpackBufferEntries } from '../../services/epm/archive';
 import { getAsset } from '../../services/epm/archive/storage';
 
 import { getFileHandler } from './file_handler';
@@ -29,7 +29,6 @@ jest.mock('../../services/epm/packages/get');
 const mockedGetBundledPackageByPkgKey = jest.mocked(getBundledPackageByPkgKey);
 const mockedGetInstallation = jest.mocked(getInstallation);
 const mockedGetFile = jest.mocked(getFile);
-const mockedGetArchiveEntry = jest.mocked(getArchiveEntry);
 const mockedUnpackBufferEntries = jest.mocked(unpackBufferEntries);
 const mockedGetAsset = jest.mocked(getAsset);
 
@@ -61,7 +60,6 @@ describe('getFileHandler', () => {
     mockedUnpackBufferEntries.mockReset();
     mockedGetFile.mockReset();
     mockedGetInstallation.mockReset();
-    mockedGetArchiveEntry.mockReset();
     mockedGetAsset.mockReset();
   });
 
@@ -207,7 +205,15 @@ describe('getFileHandler', () => {
     const context = mockContext();
 
     mockedGetInstallation.mockResolvedValue({ version: '1.0.0' } as any);
-    mockedGetArchiveEntry.mockReturnValue(Buffer.from('test'));
+    mockedGetAsset.mockResolvedValue({
+      asset_path: '/test/1.0.0/README.md',
+      data_utf8: 'test',
+      data_base64: '',
+      media_type: 'text/markdown; charset=utf-8',
+      package_name: 'test',
+      package_version: '1.0.0',
+      install_source: 'registry',
+    });
 
     await getFileHandler(context, request, response);
 

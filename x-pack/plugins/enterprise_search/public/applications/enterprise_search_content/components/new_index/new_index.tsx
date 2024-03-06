@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import { useValues } from 'kea';
 
@@ -29,9 +29,9 @@ import { NewIndexCard } from './new_index_card';
 
 const getAvailableMethodOptions = (productFeatures: ProductFeatures): INGESTION_METHOD_IDS[] => {
   return [
+    INGESTION_METHOD_IDS.API,
     ...(productFeatures.hasWebCrawler ? [INGESTION_METHOD_IDS.CRAWLER] : []),
     ...(productFeatures.hasConnectors ? [INGESTION_METHOD_IDS.CONNECTOR] : []),
-    INGESTION_METHOD_IDS.API,
   ];
 };
 
@@ -40,7 +40,6 @@ export const NewIndex: React.FC = () => {
   const availableIngestionMethodOptions = getAvailableMethodOptions(productFeatures);
   const { errorConnectingMessage } = useValues(HttpLogic);
 
-  const [selectedMethod, setSelectedMethod] = useState<string>('');
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
@@ -75,7 +74,6 @@ export const NewIndex: React.FC = () => {
                     )}
                     type={type}
                     onSelect={() => {
-                      setSelectedMethod(type);
                       if (type === INGESTION_METHOD_IDS.CONNECTOR) {
                         KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
                       } else {
@@ -84,7 +82,6 @@ export const NewIndex: React.FC = () => {
                         );
                       }
                     }}
-                    isSelected={selectedMethod === type}
                   />
                 </EuiFlexItem>
               ))}

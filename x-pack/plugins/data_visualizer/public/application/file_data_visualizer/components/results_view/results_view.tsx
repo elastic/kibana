@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 
+import { FILE_FORMATS } from '../../../../../common/constants';
 import { FileContents } from '../file_contents';
 import { AnalysisSummary } from '../analysis_summary';
 import { FieldsStatsGrid } from '../../../common/components/fields_stats_grid';
@@ -48,6 +49,17 @@ export const ResultsView: FC<Props> = ({
   onCancel,
   disableImport,
 }) => {
+  const semiStructureTextData =
+    results.format === FILE_FORMATS.SEMI_STRUCTURED_TEXT
+      ? {
+          grokPattern: results.grok_pattern,
+          multilineStartPattern: results.multiline_start_pattern,
+          sampleStart: results.sample_start,
+          excludeLinesPattern: results.exclude_lines_pattern,
+          mappings: results.mappings,
+          ecsCompatibility: results.ecs_compatibility,
+        }
+      : null;
   return (
     <EuiPageBody data-test-subj="dataVisualizerPageFileResults">
       <EuiFlexGroup>
@@ -77,6 +89,7 @@ export const ResultsView: FC<Props> = ({
             data={data}
             format={results.format}
             numberOfLines={results.num_lines_analyzed}
+            semiStructureTextData={semiStructureTextData}
           />
         </EuiPanel>
 

@@ -19,10 +19,10 @@ import { ServerlessSearchContext } from './hooks/use_kibana';
 export async function renderApp(
   element: HTMLElement,
   core: CoreStart,
-  services: ServerlessSearchContext
+  services: ServerlessSearchContext,
+  queryClient: QueryClient
 ) {
   const { ElasticsearchOverview } = await import('./components/overview');
-  const queryClient = new QueryClient();
   ReactDOM.render(
     <KibanaThemeProvider theme={core.theme}>
       <KibanaContextProvider services={{ ...core, ...services }}>

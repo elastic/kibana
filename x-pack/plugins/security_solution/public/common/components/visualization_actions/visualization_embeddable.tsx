@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { css } from 'styled-components';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
@@ -38,9 +38,9 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
   const { indicesExist } = useSourcererDataView(lensProps.scopeId);
 
   const memorizedTimerange = useRef(lensProps.timerange);
-  const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
+  const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
   const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
-  const visualizationData = useVisualizationResponse({ visualizationId: id });
+  const { responses: visualizationData } = useVisualizationResponse({ visualizationId: id });
   const dataExists = visualizationData != null && visualizationData[0]?.hits?.total !== 0;
   const donutTextWrapperStyles = dataExists
     ? css`
@@ -125,7 +125,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
         isChartEmbeddablesEnabled={true}
         dataExists={dataExists}
         label={label}
-        title={dataExists ? <ChartLabel count={visualizationData[0]?.hits?.total} /> : null}
+        title={visualizationData ? <ChartLabel count={visualizationData[0]?.hits?.total} /> : null}
         donutTextWrapperClassName={donutTextWrapperClassName}
         donutTextWrapperStyles={donutTextWrapperStyles}
       >

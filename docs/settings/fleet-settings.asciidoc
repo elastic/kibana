@@ -24,6 +24,8 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information about {fleet
 `xpack.fleet.agents.enabled` {ess-icon}::
 Set to `true` (default) to enable {fleet}.
 
+`xpack.fleet.isAirGapped`::
+Set to `true` to indicate {fleet} is running in an air-gapped environment. Refer to {fleet-guide}/air-gapped.html[Air-gapped environments] for details. Enabling this flag helps Fleet skip needless requests and improve the user experience for air-gapped environments.
 
 [[fleet-data-visualizer-settings]]
 
@@ -205,6 +207,8 @@ NOTE: The `xpack.fleet.outputs` settings are intended for advanced configuration
     If `true`, the output specified in `xpack.fleet.outputs` will be the one used to send agent data unless there is another one configured specifically for the agent policy.
   `is_default_monitoring`::: 
     If `true`, the output specified in `xpack.fleet.outputs` will be the one used to send agent monitoring data unless there is another one configured specifically for the agent policy.
+  `is_internal`:::
+    If `true`, the output specified in `xpack.fleet.outputs` will not appear in the UI, and can only be managed via `kibana.yml` or the Fleet API.
   `config`::: 
     Extra config for that output.
   `proxy_id`:::
@@ -265,6 +269,8 @@ List of {fleet-server} hosts that are configured when the {fleet} app starts.
 =====
   `is_default`:::
     Whether or not this host should be the default to use for {fleet-server}.
+  `is_internal`:::
+    If `true` the host will not appear in the UI, and can only be managed through `kibana.yml` or the {fleet} API.
   `proxy_id`::: 
     Unique ID of the proxy to access the {fleet-server} host.
 =====

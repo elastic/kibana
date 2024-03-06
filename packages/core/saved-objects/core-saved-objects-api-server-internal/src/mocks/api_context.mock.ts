@@ -28,7 +28,11 @@ export type ApiExecutionContextMock = Pick<ApiExecutionContext, 'allowedTypes' |
   logger: MockedLogger;
 };
 
-const createApiExecutionContextMock = (): ApiExecutionContextMock => {
+const createApiExecutionContextMock = ({
+  allowedTypes = ['foo', 'bar'],
+}: {
+  allowedTypes?: string[];
+} = {}): ApiExecutionContextMock => {
   return {
     registry: new SavedObjectTypeRegistry(),
     helpers: apiHelperMocks.create(),
@@ -37,7 +41,7 @@ const createApiExecutionContextMock = (): ApiExecutionContextMock => {
     serializer: serializerMock.create(),
     migrator: createMigratorMock(),
     logger: loggerMock.create(),
-    allowedTypes: ['foo', 'bar'],
+    allowedTypes,
     mappings: { properties: { mockMappings: { type: 'text' } } },
   };
 };

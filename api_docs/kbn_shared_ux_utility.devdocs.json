@@ -21,6 +21,70 @@
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.dynamic",
+        "type": "Function",
+        "tags": [],
+        "label": "dynamic",
+        "description": [
+          "\nLazy load and wrap with Suspense any component.\n"
+        ],
+        "signature": [
+          "(loader: Loader<TElement>, options: ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.DynamicOptions",
+            "text": "DynamicOptions"
+          },
+          ") => React.ForwardRefExoticComponent<React.PropsWithoutRef<React.ComponentPropsWithRef<TElement>> & React.RefAttributes<TRef>>"
+        ],
+        "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-utility",
+            "id": "def-common.dynamic.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "loader",
+            "description": [],
+            "signature": [
+              "Loader<TElement>"
+            ],
+            "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-utility",
+            "id": "def-common.dynamic.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-utility",
+                "scope": "common",
+                "docId": "kibKbnSharedUxUtilityPluginApi",
+                "section": "def-common.DynamicOptions",
+                "text": "DynamicOptions"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
         "id": "def-common.Fallback",
         "type": "Function",
         "tags": [],
@@ -187,6 +251,36 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.DynamicOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "DynamicOptions",
+        "description": [
+          "\nOptions for the lazy loaded component"
+        ],
+        "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-utility",
+            "id": "def-common.DynamicOptions.fallback",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fallback",
+            "description": [],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/shared-ux-utility",
         "id": "def-common.WithSuspenseExtendedDeps",

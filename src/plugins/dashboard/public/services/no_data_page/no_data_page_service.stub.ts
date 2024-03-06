@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { noDataPagePublicMock } from '@kbn/no-data-page-plugin/public/mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { NoDataPageService } from './types';
 
 export type NoDataPageServiceFactory = PluginServiceFactory<NoDataPageService>;
 
-export const noDataPageServiceFactory: NoDataPageServiceFactory = () => {
-  return { getAnalyticsNoDataPageFlavor: () => 'kibana' };
-};
+export const noDataPageServiceFactory: NoDataPageServiceFactory = () =>
+  noDataPagePublicMock.createSetup();

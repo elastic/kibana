@@ -37,6 +37,7 @@ export const AliasesDetails: FunctionComponent<{ aliases: Index['aliases'] }> = 
   }
   const aliasesBadges = aliases.slice(0, MAX_VISIBLE_ALIASES).map((alias) => (
     <EuiBadge
+      key={alias}
       css={css`
         max-width: 250px;
       `}

@@ -36,6 +36,7 @@ export const selectVisualizationState = (state: LensState) => state.lens.visuali
 export const selectActiveDatasourceId = (state: LensState) => state.lens.activeDatasourceId;
 export const selectActiveData = (state: LensState) => state.lens.activeData;
 export const selectDataViews = (state: LensState) => state.lens.dataViews;
+export const selectIsManaged = (state: LensState) => state.lens.managed;
 export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
 

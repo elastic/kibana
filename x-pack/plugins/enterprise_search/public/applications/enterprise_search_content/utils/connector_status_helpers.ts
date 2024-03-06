@@ -30,6 +30,12 @@ export function connectorStatusToText(connectorStatus: ConnectorStatus): string 
       { defaultMessage: 'Configured' }
     );
   }
+  if (connectorStatus === ConnectorStatus.CONNECTED) {
+    return i18n.translate(
+      'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.connected.label',
+      { defaultMessage: 'Connected' }
+    );
+  }
 
   return i18n.translate(
     'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.incomplete.label',

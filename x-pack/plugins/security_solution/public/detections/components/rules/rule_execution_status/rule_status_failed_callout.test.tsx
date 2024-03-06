@@ -15,6 +15,7 @@ import { AssistantProvider } from '@kbn/elastic-assistant';
 import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -32,29 +33,44 @@ const mockAssistantAvailability: AssistantAvailability = {
   hasConnectorsReadPrivilege: true,
   isAssistantEnabled: true,
 };
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+  logger: {
+    log: jest.fn(),
+    warn: jest.fn(),
+    error: () => {},
+  },
+});
+
 const ContextWrapper: React.FC = ({ children }) => (
-  <AssistantProvider
-    actionTypeRegistry={actionTypeRegistry}
-    assistantAvailability={mockAssistantAvailability}
-    augmentMessageCodeBlocks={jest.fn()}
-    baseAllow={[]}
-    baseAllowReplacement={[]}
-    basePath={'https://localhost:5601/kbn'}
-    defaultAllow={[]}
-    defaultAllowReplacement={[]}
-    docLinks={{
-      ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-      DOC_LINK_VERSION: 'current',
-    }}
-    getInitialConversations={mockGetInitialConversations}
-    getComments={mockGetComments}
-    http={mockHttp}
-    setConversations={jest.fn()}
-    setDefaultAllow={jest.fn()}
-    setDefaultAllowReplacement={jest.fn()}
-  >
-    {children}
-  </AssistantProvider>
+  <QueryClientProvider client={queryClient}>
+    <AssistantProvider
+      actionTypeRegistry={actionTypeRegistry}
+      assistantAvailability={mockAssistantAvailability}
+      augmentMessageCodeBlocks={jest.fn()}
+      baseAllow={[]}
+      baseAllowReplacement={[]}
+      basePath={'https://localhost:5601/kbn'}
+      defaultAllow={[]}
+      defaultAllowReplacement={[]}
+      docLinks={{
+        ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        DOC_LINK_VERSION: 'current',
+      }}
+      getInitialConversations={mockGetInitialConversations}
+      getComments={mockGetComments}
+      http={mockHttp}
+      setConversations={jest.fn()}
+      setDefaultAllow={jest.fn()}
+      setDefaultAllowReplacement={jest.fn()}
+    >
+      {children}
+    </AssistantProvider>
+  </QueryClientProvider>
 );
 
 describe('RuleStatusFailedCallOut', () => {

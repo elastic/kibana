@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash';
 import moment from 'moment';
-import Puid from 'puid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { JOB_STATUS } from '@kbn/reporting-common';
 import {
@@ -19,7 +19,6 @@ import {
 
 import type { ReportTaskParams } from '../tasks';
 
-const puid = new Puid();
 export const MIGRATION_VERSION = '7.14.0';
 
 /*
@@ -45,6 +44,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public readonly kibana_name: ReportSource['kibana_name'];
   public readonly kibana_id: ReportSource['kibana_id'];
   public readonly output: ReportSource['output'];
+  public readonly error: ReportSource['error'];
   public readonly started_at: ReportSource['started_at'];
   public readonly completed_at: ReportSource['completed_at'];
   public readonly timeout: ReportSource['timeout'];
@@ -62,7 +62,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
    * Index string is required
    */
   constructor(opts: Partial<ReportSource> & Partial<ReportDocumentHead>, fields?: ReportFields) {
-    this._id = opts._id != null ? opts._id : puid.generate();
+    this._id = opts._id != null ? opts._id : uuidv4();
     this._index = opts._index;
     this._primary_term = opts._primary_term;
     this._seq_no = opts._seq_no;
@@ -95,6 +95,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
 
     this.status = opts.status || JOB_STATUS.PENDING;
     this.output = opts.output || null;
+    this.error = opts.error;
 
     this.queue_time_ms = fields?.queue_time_ms;
     this.execution_time_ms = fields?.execution_time_ms;

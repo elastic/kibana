@@ -43,6 +43,7 @@ export const UNIVERSAL_PROFILING_PERMISSIONS = [
 
 export function storedPackagePoliciesToAgentPermissions(
   packageInfoCache: Map<string, PackageInfo>,
+  agentPolicyNamespace: string,
   packagePolicies?: PackagePolicy[]
 ): FullAgentPolicyOutputPermissions | undefined {
   // I'm not sure what permissions to return for this case, so let's return the defaults
@@ -155,13 +156,12 @@ export function storedPackagePoliciesToAgentPermissions(
         cluster,
       };
     }
-
+    // namespace is either the package policy's or the agent policy one
+    const namespace = packagePolicy?.namespace || agentPolicyNamespace;
     return [
       packagePolicy.id,
       {
-        indices: dataStreamsForPermissions.map((ds) =>
-          getDataStreamPrivileges(ds, packagePolicy.namespace)
-        ),
+        indices: dataStreamsForPermissions.map((ds) => getDataStreamPrivileges(ds, namespace)),
         ...clusterRoleDescriptor,
       },
     ];

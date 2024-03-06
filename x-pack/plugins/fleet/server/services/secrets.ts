@@ -47,7 +47,11 @@ import type {
 } from '../types';
 
 import { FleetError } from '../errors';
-import { SECRETS_ENDPOINT_PATH, SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../constants';
+import {
+  OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+  SECRETS_ENDPOINT_PATH,
+  SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+} from '../constants';
 
 import { retryTransientEsErrors } from './epm/elasticsearch/retry';
 
@@ -241,7 +245,11 @@ export async function extractAndWriteSecrets(opts: {
     values: secretsToCreate.map((secretPath) => secretPath.value.value),
   });
 
-  const policyWithSecretRefs = getPolicyWithSecretReferences(secretPaths, secrets, packagePolicy);
+  const policyWithSecretRefs = getPolicyWithSecretReferences(
+    secretsToCreate,
+    secrets,
+    packagePolicy
+  );
 
   return {
     packagePolicy: policyWithSecretRefs,
@@ -639,6 +647,65 @@ export async function isSecretStorageEnabled(
   }
 
   logger.info('Secrets storage is disabled as minimum fleet server version has not been met');
+  return false;
+}
+
+export async function isOutputSecretStorageEnabled(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract
+): Promise<boolean> {
+  const logger = appContextService.getLogger();
+
+  // first check if the feature flag is enabled, if not output secrets are disabled
+  const { outputSecretsStorage: outputSecretsStorageEnabled } =
+    appContextService.getExperimentalFeatures();
+  if (!outputSecretsStorageEnabled) {
+    logger.debug('Output secrets storage is disabled by feature flag');
+    return false;
+  }
+
+  // if serverless then output secrets will always be supported
+  const isFleetServerStandalone =
+    appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
+
+  if (isFleetServerStandalone) {
+    logger.trace('Output secrets storage is enabled as fleet server is standalone');
+    return true;
+  }
+
+  // now check the flag in settings to see if the fleet server requirement has already been met
+  // once the requirement has been met, output secrets are always on
+  const settings = await settingsService.getSettingsOrUndefined(soClient);
+
+  if (settings && settings.output_secret_storage_requirements_met) {
+    logger.debug('Output secrets storage requirements already met, turned on in settings');
+    return true;
+  }
+
+  // otherwise check if we have the minimum fleet server version and enable secrets if so
+  if (
+    await allFleetServerVersionsAreAtLeast(
+      esClient,
+      soClient,
+      OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION
+    )
+  ) {
+    logger.debug('Enabling output secrets storage as minimum fleet server version has been met');
+    try {
+      await settingsService.saveSettings(soClient, {
+        output_secret_storage_requirements_met: true,
+      });
+    } catch (err) {
+      // we can suppress this error as it will be retried on the next function call
+      logger.warn(`Failed to save settings after enabling output secrets storage: ${err.message}`);
+    }
+
+    return true;
+  }
+
+  logger.info(
+    'Output secrets storage is disabled as minimum fleet server version has not been met'
+  );
   return false;
 }
 

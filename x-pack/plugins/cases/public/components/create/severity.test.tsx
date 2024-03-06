@@ -31,7 +31,9 @@ const MockHookWrapperComponent: React.FC = ({ children }) => {
 
   return <Form form={form}>{children}</Form>;
 };
-describe('Severity form field', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/175934
+// FLAKY: https://github.com/elastic/kibana/issues/175935
+describe.skip('Severity form field', () => {
   let appMockRender: AppMockRenderer;
   beforeEach(() => {
     appMockRender = createAppMockRenderer();

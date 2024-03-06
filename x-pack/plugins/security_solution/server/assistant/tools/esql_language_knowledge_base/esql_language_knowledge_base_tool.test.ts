@@ -19,7 +19,7 @@ describe('EsqlLanguageKnowledgeBaseTool', () => {
   } as unknown as ElasticsearchClient;
   const request = {
     body: {
-      assistantLangChain: false,
+      isEnabledKnowledgeBase: false,
       alertsIndexPattern: '.alerts-security.alerts-default',
       allow: ['@timestamp', 'cloud.availability_zone', 'user.name'],
       allowReplacement: ['user.name'],
@@ -34,9 +34,9 @@ describe('EsqlLanguageKnowledgeBaseTool', () => {
   };
 
   describe('isSupported', () => {
-    it('returns false if assistantLangChain is false', () => {
+    it('returns false if isEnabledKnowledgeBase is false', () => {
       const params = {
-        assistantLangChain: false,
+        isEnabledKnowledgeBase: false,
         modelExists: true,
         ...rest,
       };
@@ -46,7 +46,7 @@ describe('EsqlLanguageKnowledgeBaseTool', () => {
 
     it('returns false if modelExists is false (the ELSER model is not installed)', () => {
       const params = {
-        assistantLangChain: true,
+        isEnabledKnowledgeBase: true,
         modelExists: false, // <-- ELSER model is not installed
         ...rest,
       };
@@ -54,9 +54,9 @@ describe('EsqlLanguageKnowledgeBaseTool', () => {
       expect(ESQL_KNOWLEDGE_BASE_TOOL.isSupported(params)).toBe(false);
     });
 
-    it('returns true if assistantLangChain and modelExists are true', () => {
+    it('returns true if isEnabledKnowledgeBase and modelExists are true', () => {
       const params = {
-        assistantLangChain: true,
+        isEnabledKnowledgeBase: true,
         modelExists: true,
         ...rest,
       };
@@ -66,9 +66,9 @@ describe('EsqlLanguageKnowledgeBaseTool', () => {
   });
 
   describe('getTool', () => {
-    it('returns null if assistantLangChain is false', () => {
+    it('returns null if isEnabledKnowledgeBase is false', () => {
       const tool = ESQL_KNOWLEDGE_BASE_TOOL.getTool({
-        assistantLangChain: false,
+        isEnabledKnowledgeBase: false,
         modelExists: true,
         ...rest,
       });
@@ -78,7 +78,7 @@ describe('EsqlLanguageKnowledgeBaseTool', () => {
 
     it('returns null if modelExists is false (the ELSER model is not installed)', () => {
       const tool = ESQL_KNOWLEDGE_BASE_TOOL.getTool({
-        assistantLangChain: true,
+        isEnabledKnowledgeBase: true,
         modelExists: false, // <-- ELSER model is not installed
         ...rest,
       });
@@ -86,9 +86,9 @@ describe('EsqlLanguageKnowledgeBaseTool', () => {
       expect(tool).toBeNull();
     });
 
-    it('should return a Tool instance if assistantLangChain and modelExists are true', () => {
+    it('should return a Tool instance if isEnabledKnowledgeBase and modelExists are true', () => {
       const tool = ESQL_KNOWLEDGE_BASE_TOOL.getTool({
-        assistantLangChain: true,
+        isEnabledKnowledgeBase: true,
         modelExists: true,
         ...rest,
       });
@@ -98,7 +98,7 @@ describe('EsqlLanguageKnowledgeBaseTool', () => {
 
     it('should return a tool with the expected tags', () => {
       const tool = ESQL_KNOWLEDGE_BASE_TOOL.getTool({
-        assistantLangChain: true,
+        isEnabledKnowledgeBase: true,
         modelExists: true,
         ...rest,
       }) as DynamicTool;

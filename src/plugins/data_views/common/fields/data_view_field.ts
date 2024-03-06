@@ -69,6 +69,10 @@ export class DataViewField implements DataViewFieldBase {
     this.spec.count = count;
   }
 
+  public get defaultFormatter() {
+    return this.spec.defaultFormatter;
+  }
+
   /**
    * Returns runtime field definition or undefined if field is not runtime field.
    */
@@ -322,6 +326,14 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
+   * Returns true if field is Empty
+   */
+
+  public get isNull() {
+    return Boolean(this.spec.isNull);
+  }
+
+  /**
    * Returns true if field is subtype nested
    */
   public isSubtypeNested() {
@@ -379,6 +391,7 @@ export class DataViewField implements DataViewFieldBase {
       subType: this.subType,
       customLabel: this.customLabel,
       customDescription: this.customDescription,
+      defaultFormatter: this.defaultFormatter,
     };
   }
 
@@ -413,6 +426,7 @@ export class DataViewField implements DataViewFieldBase {
       timeSeriesMetric: this.spec.timeSeriesMetric,
       timeZone: this.spec.timeZone,
       fixedInterval: this.spec.fixedInterval,
+      defaultFormatter: this.defaultFormatter,
     };
 
     // Filter undefined values from the spec

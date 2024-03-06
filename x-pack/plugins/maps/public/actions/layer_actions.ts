@@ -61,8 +61,9 @@ import {
   VectorStyleDescriptor,
 } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
-import { IVectorLayer } from '../classes/layers/vector_layer';
+import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
 import { OnSourceChangeArgs } from '../classes/sources/source';
+import { isESVectorTileSource } from '../classes/sources/es_source';
 import {
   DRAW_MODE,
   LAYER_STYLE_TYPE,
@@ -74,7 +75,7 @@ import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
-import type { IESSource } from '../classes/sources/es_source';
+import type { IVectorSource } from '../classes/sources/vector_source';
 import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
 import { isSpatialJoin } from '../classes/joins/is_spatial_join';
@@ -265,7 +266,7 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
     }
 
     if (isLayerGroup(layer)) {
-      (layer as LayerGroup).getChildren().forEach((childLayer) => {
+      layer.getChildren().forEach((childLayer) => {
         dispatch(setLayerVisibility(childLayer.getId(), makeVisible));
       });
     }
@@ -401,7 +402,8 @@ function updateMetricsProp(layerId: string, value: unknown) {
     getState: () => MapStoreState
   ) => {
     const layer = getLayerById(layerId, getState());
-    const previousFields = await (layer as IVectorLayer).getFields();
+    const previousFields =
+      layer && hasVectorLayerMethod(layer, 'getFields') ? await layer.getFields() : [];
     dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
@@ -694,7 +696,7 @@ function removeLayerFromLayerList(layerId: string) {
     }
 
     if (isLayerGroup(layerGettingRemoved)) {
-      (layerGettingRemoved as LayerGroup).getChildren().forEach((childLayer) => {
+      layerGettingRemoved.getChildren().forEach((childLayer) => {
         dispatch(removeLayerFromLayerList(childLayer.getId()));
       });
     }
@@ -716,11 +718,11 @@ function updateStyleProperties(layerId: string, previousFields?: IField[]) {
       return;
     }
 
-    if (!('getFields' in targetLayer)) {
+    if (!hasVectorLayerMethod(targetLayer, 'getFields')) {
       return;
     }
 
-    const nextFields = await (targetLayer as IVectorLayer).getFields(); // take into account all fields, since labels can be driven by any field (source or join)
+    const nextFields = await targetLayer.getFields(); // take into account all fields, since labels can be driven by any field (source or join)
     const { hasChanges, nextStyleDescriptor } = await (
       style as IVectorStyle
     ).getDescriptorWithUpdatedStyleProps(nextFields, getMapColors(getState()), previousFields);
@@ -769,7 +771,7 @@ export function updateLayerStyleForSelectedLayer(styleDescriptor: StyleDescripto
 
 export function setJoinsForLayer(layer: ILayer, joins: Array<Partial<JoinDescriptor>>) {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
-    const previousFields = await (layer as IVectorLayer).getFields();
+    const previousFields = hasVectorLayerMethod(layer, 'getFields') ? await layer.getFields() : [];
     dispatch({
       type: SET_JOINS,
       layerId: layer.getId(),
@@ -826,7 +828,7 @@ export function setTileState(
       newValue: tileErrors,
     });
 
-    if (!isLayerGroup(layer) && layer.getSource().isESSource()) {
+    if (!isLayerGroup(layer) && isESVectorTileSource(layer.getSource())) {
       getInspectorAdapters(getState()).vectorTiles.setTileResults(
         layerId,
         tileMetaFeatures,
@@ -849,7 +851,7 @@ export function setTileState(
 }
 
 function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
-  if (isLayerGroup(layer) || !layer.getSource().isESSource()) {
+  if (isLayerGroup(layer)) {
     return;
   }
 
@@ -857,10 +859,15 @@ function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
     adapters.vectorTiles.removeLayer(layer.getId());
   }
 
-  if (adapters.requests && 'getValidJoins' in layer) {
-    const vectorLayer = layer as IVectorLayer;
-    adapters.requests!.resetRequest((layer.getSource() as IESSource).getId());
-    vectorLayer.getValidJoins().forEach((join) => {
+  const source = layer.getSource();
+  if ('getInspectorRequestIds' in source) {
+    (source as IVectorSource).getInspectorRequestIds().forEach((id) => {
+      adapters.requests!.resetRequest(id);
+    });
+  }
+
+  if (adapters.requests && hasVectorLayerMethod(layer, 'getValidJoins')) {
+    layer.getValidJoins().forEach((join) => {
       adapters.requests!.resetRequest(join.getRightJoinSource().getId());
     });
   }
@@ -911,7 +918,7 @@ export function ungroupLayer(layerId: string) {
       return;
     }
 
-    (layer as LayerGroup).getChildren().forEach((childLayer) => {
+    layer.getChildren().forEach((childLayer) => {
       dispatch(setLayerParent(childLayer.getId(), layer.getParent()));
     });
   };
@@ -945,7 +952,7 @@ export function moveLayerToLeftOfTarget(moveLayerId: string, targetLayerId: stri
     dispatch(updateLayerOrder(newOrder));
 
     if (isLayerGroup(moveLayer)) {
-      (moveLayer as LayerGroup).getChildren().forEach((childLayer) => {
+      moveLayer.getChildren().forEach((childLayer) => {
         dispatch(moveLayerToLeftOfTarget(childLayer.getId(), targetLayerId));
       });
     }

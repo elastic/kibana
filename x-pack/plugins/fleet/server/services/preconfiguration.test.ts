@@ -283,6 +283,7 @@ jest.mock('./app_context', () => ({
     getUninstallTokenService: () => ({
       generateTokenForPolicyId: jest.fn(),
     }),
+    getExternalCallbacks: jest.fn(),
   },
 }));
 

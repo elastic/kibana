@@ -18,7 +18,7 @@ import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { mouseoverOnToOverflowItem, openHoverActions } from '../../../tasks/network/flows';
 
-import { NETWORK_URL } from '../../../urls/navigation';
+import { networkUrl } from '../../../urls/navigation';
 
 const testDomainOne = 'myTest';
 const testDomainTwo = 'myTest2';
@@ -33,7 +33,7 @@ describe.skip('Overflow items', { tags: ['@ess', '@serverless', '@brokenInServer
 
     beforeEach(() => {
       login();
-      visitWithTimeRange(NETWORK_URL);
+      visitWithTimeRange(networkUrl('flows'));
       cy.get(DESTINATION_DOMAIN).should('not.exist');
       cy.get(FILTER_IN).should('not.exist');
       cy.get(FILTER_OUT).should('not.exist');

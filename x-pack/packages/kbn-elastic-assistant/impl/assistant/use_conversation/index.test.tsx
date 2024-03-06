@@ -36,6 +36,9 @@ const mockConvo = {
 };
 
 describe('useConversation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it('should append a message to an existing conversation when called with valid conversationId and message', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
@@ -60,6 +63,43 @@ describe('useConversation', () => {
       });
       expect(appendResult).toHaveLength(3);
       expect(appendResult[2]).toEqual(message);
+    });
+  });
+
+  it('should report telemetry when a message has been sent', async () => {
+    await act(async () => {
+      const reportAssistantMessageSent = jest.fn();
+      const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
+        wrapper: ({ children }) => (
+          <TestProviders
+            providerContext={{
+              getInitialConversations: () => ({
+                [alertConvo.id]: alertConvo,
+                [welcomeConvo.id]: welcomeConvo,
+              }),
+              assistantTelemetry: {
+                reportAssistantInvoked: () => {},
+                reportAssistantQuickPrompt: () => {},
+                reportAssistantSettingToggled: () => {},
+                reportAssistantMessageSent,
+              },
+            }}
+          >
+            {children}
+          </TestProviders>
+        ),
+      });
+      await waitForNextUpdate();
+      result.current.appendMessage({
+        conversationId: welcomeConvo.id,
+        message,
+      });
+      expect(reportAssistantMessageSent).toHaveBeenCalledWith({
+        conversationId: 'Welcome',
+        isEnabledKnowledgeBase: false,
+        isEnabledRAGAlerts: false,
+        role: 'user',
+      });
     });
   });
 
