@@ -32,7 +32,8 @@
       "lens"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "triggersActionsUi"
     ],
     "extraPublicDirs": [
       "common",

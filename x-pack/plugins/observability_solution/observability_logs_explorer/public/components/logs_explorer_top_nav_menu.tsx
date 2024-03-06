@@ -21,7 +21,6 @@ import { LogsExplorerTabs } from '@kbn/discover-plugin/public';
 import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { filter, take } from 'rxjs';
-import { CreateSloLinkForValidState } from './create_slo_link';
 import { betaBadgeDescription, betaBadgeTitle } from '../../common/translations';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { ConnectedDiscoverLink } from './discover_link';
@@ -64,7 +63,6 @@ const ServerlessTopNav = () => {
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
-            <CreateSloLinkForValidState observability={services.observability} />
             <ConnectedDiscoverLink />
             <VerticalRule />
             <FeedbackLink />
@@ -90,7 +88,6 @@ const StatefulTopNav = () => {
   const {
     services: {
       appParams: { setHeaderActionMenu },
-      observability,
       observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
       chrome,
       i18n: i18nStart,
@@ -147,19 +144,16 @@ const StatefulTopNav = () => {
       <EuiHeaderSection data-test-subj="logsExplorerHeaderMenu">
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
-            <CreateSloLinkForValidState observability={observability} />
             <ConnectedDiscoverLink />
             <VerticalRule />
             <AlertsPopover />
             <VerticalRule />
+            {ObservabilityAIAssistantActionMenuItem ? (
+              <ObservabilityAIAssistantActionMenuItem />
+            ) : null}
             <ConnectedOnboardingLink />
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
-        {ObservabilityAIAssistantActionMenuItem ? (
-          <EuiHeaderSectionItem>
-            <ObservabilityAIAssistantActionMenuItem />
-          </EuiHeaderSectionItem>
-        ) : null}
       </EuiHeaderSection>
     </HeaderMenuPortal>
   );
