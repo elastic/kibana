@@ -51,8 +51,8 @@ export const fetchMlModels = async (
     trainedModelsProvider
   );
 
-  // This array will contain all models, let's add placeholders first (compatible variants only)
-  const models: MlModel[] = [
+  // Get compatible variants of placeholder models
+  const modelPlaceholders: MlModel[] = [
     ELSER_MODEL_PLACEHOLDER,
     ELSER_LINUX_OPTIMIZED_MODEL_PLACEHOLDER,
     E5_MODEL_PLACEHOLDER,
@@ -62,11 +62,10 @@ export const fetchMlModels = async (
   // Fetch all models and their deployment stats using the ML client
   const modelsResponse = await trainedModelsProvider.getTrainedModels({});
   if (modelsResponse.count === 0) {
-    return models;
+    return modelPlaceholders;
   }
   const modelsStatsResponse = await trainedModelsProvider.getTrainedModelsStats({});
-
-  modelsResponse.trained_model_configs
+  const fetchedModels = modelsResponse.trained_model_configs
     // Filter unsupported models
     .filter((modelConfig) => isSupportedModel(modelConfig))
     // Get corresponding model stats and compose full model object
@@ -75,20 +74,20 @@ export const fetchMlModels = async (
         modelConfig,
         modelsStatsResponse.trained_model_stats.find((m) => m.model_id === modelConfig.model_id)
       )
-    )
-    // Merge models with placeholders
-    // (Note: properties from the placeholder that are undefined in the model are preserved)
-    .forEach((model) => mergeModel(model, models));
+    );
+
+  // Merge fetched models with placeholders
+  const mergedModels = mergeModels(modelPlaceholders, fetchedModels);
 
   // Undeployed placeholder models might be in the Downloading phase; let's evaluate this with a call
   // We must do this one by one because the API doesn't support fetching multiple models with include=definition_status
-  const enrichmentCalls = models
-    .filter((model) => model.isPromoted && !model.isPlaceholder && !model.hasStats)
-    .map((model) => enrichModelWithDownloadStatus(model, trainedModelsProvider, log));
-  await Promise.all(enrichmentCalls);
+  const enrichedModelPromises = mergedModels.map((model) =>
+    enrichModelWithDownloadStatus(model, trainedModelsProvider, log)
+  );
+  const enrichedModels = await Promise.all(enrichedModelPromises);
 
   // Pin ELSER to the top, then E5 below, then the rest of the models sorted alphabetically
-  return models.sort(sortModels);
+  return enrichedModels.sort(sortModels);
 };
 
 /**
@@ -153,37 +152,53 @@ const enrichModelWithDownloadStatus = (
   trainedModelsProvider: MlTrainedModels,
   log: Logger
 ) => {
+  // Only enrich promoted non-placeholder models
+  if (!model.isPromoted || model.isPlaceholder || model.hasStats) {
+    return Promise.resolve(model);
+  }
+
   return trainedModelsProvider
     .getTrainedModels({
       model_id: model.modelId,
       include: 'definition_status',
     })
     .then((modelConfigWithDefinitionStatus) => {
-      if (modelConfigWithDefinitionStatus && modelConfigWithDefinitionStatus.count > 0) {
-        // We're using NotDeployed for downloaded models. Downloaded is also a valid status, but we want to have the same
-        // status badge as for 3rd party models.
-        model.deploymentState = modelConfigWithDefinitionStatus.trained_model_configs[0]
-          .fully_defined
-          ? MlModelDeploymentState.NotDeployed
-          : MlModelDeploymentState.Downloading;
-      }
+      // We're using NotDeployed for downloaded models. Downloaded is also a valid status, but we want to have the same
+      // status badge as for 3rd party models.
+      return {
+        ...model,
+        ...(modelConfigWithDefinitionStatus.count > 0
+          ? {
+              deploymentState: modelConfigWithDefinitionStatus.trained_model_configs[0]
+                .fully_defined
+                ? MlModelDeploymentState.NotDeployed
+                : MlModelDeploymentState.Downloading,
+            }
+          : {}),
+      };
     })
     .catch((err) => {
       // Log and swallow error
       log.warn(`Failed to retrieve definition status of model ${model.modelId}: ${err}`);
+      return model;
     });
 };
 
-const mergeModel = (model: MlModel, models: MlModel[]) => {
-  const i = models.findIndex((m) => m.modelId === model.modelId);
-  if (i >= 0) {
-    const { title, ...modelWithoutTitle } = model;
+const mergeModels = (modelPlaceholders: MlModel[], fetchedModels: MlModel[]) => [
+  // Placeholder models that have no fetched model counterparts
+  ...modelPlaceholders.filter((m) => !fetchedModels.find((f) => f.modelId === m.modelId)),
+  // Combined fetched and placeholder models
+  ...fetchedModels.map((f) => {
+    const modelPlaceholder = modelPlaceholders.find((m) => m.modelId === f.modelId);
+    if (modelPlaceholder) {
+      // Keep title and other properties from placeholder that are undefined in fetched model
+      const { title, ...modelWithoutTitle } = f;
+      return Object.assign({}, modelPlaceholder, modelWithoutTitle);
+    }
 
-    models[i] = Object.assign({}, models[i], modelWithoutTitle);
-  } else {
-    models.push(model);
-  }
-};
+    return f;
+  }),
+];
 
 const isCompatiblePromotedModelId = (modelId: string) =>
   [compatibleElserModelId, compatibleE5ModelId].includes(modelId);
