@@ -66,7 +66,7 @@ export interface V2AlgoIndexMappingMeta {
    * the md5 hash of that mapping's value when the index was created.
    *
    * @remark: Only defined for indices using the v2 migration algorithm.
-   * @deprecated Replaced by mappingVersions and docVersions (FIPS-compliant initiative)
+   * @deprecated Replaced by mappingVersions (FIPS-compliant initiative)
    */
   migrationMappingPropertyHashes?: { [k: string]: string };
   /**
@@ -79,10 +79,6 @@ export interface V2AlgoIndexMappingMeta {
    * The current virtual version of the mapping of the index.
    */
   mappingVersions?: { [k: string]: string };
-  /**
-   * The current virtual versions of the documents of the index.
-   */
-  docVersions?: { [k: string]: string };
 }
 
 /** @internal */

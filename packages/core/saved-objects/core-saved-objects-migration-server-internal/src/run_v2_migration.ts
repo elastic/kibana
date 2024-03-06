@@ -133,11 +133,12 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
         // a migrator's index might no longer have any associated types to it
         const typeDefinitions = indexMap[indexName]?.typeMappings ?? {};
 
+        // store only the model versions of SO types that belong to the index
         const mappingVersions = pick(appVersions, Object.keys(typeDefinitions));
+
         const _meta: IndexMappingMeta = {
           indexTypesMap,
           mappingVersions,
-          docVersions: mappingVersions,
         };
 
         return runResilientMigrator({

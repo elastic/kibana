@@ -71,11 +71,6 @@ describe('buildActiveMappings', () => {
         bar: '10.2.0',
         baz: '10.3.0',
       },
-      docVersions: {
-        foo: '10.1.0',
-        bar: '10.2.0',
-        baz: '10.3.0',
-      },
     };
 
     const mappings = buildActiveMappings(properties, ourExternallyBuiltMeta);

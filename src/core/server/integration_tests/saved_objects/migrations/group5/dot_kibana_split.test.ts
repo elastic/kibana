@@ -135,7 +135,6 @@ describe('split .kibana index into multiple system indices', () => {
             dynamic: 'strict',
             _meta: {
               mappingVersions: expect.any(Object),
-              docVersions: expect.any(Object),
               indexTypesMap: expect.any(Object),
             },
             properties: expect.any(Object),
@@ -151,7 +150,6 @@ describe('split .kibana index into multiple system indices', () => {
             dynamic: 'strict',
             _meta: {
               mappingVersions: expect.any(Object),
-              docVersions: expect.any(Object),
               indexTypesMap: expect.any(Object),
             },
             properties: expect.any(Object),
@@ -167,7 +165,6 @@ describe('split .kibana index into multiple system indices', () => {
             dynamic: 'strict',
             _meta: {
               mappingVersions: expect.any(Object),
-              docVersions: expect.any(Object),
               indexTypesMap: expect.any(Object),
             },
             properties: expect.any(Object),

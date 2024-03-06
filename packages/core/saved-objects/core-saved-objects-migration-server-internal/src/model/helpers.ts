@@ -62,11 +62,6 @@ export function mergeMappingMeta(targetMappings: IndexMapping, indexMappings: In
     ...targetMappings._meta?.mappingVersions,
   };
 
-  const docVersions = {
-    ...indexMappings._meta?.docVersions,
-    ...targetMappings._meta?.docVersions,
-  };
-
   const migrationMappingPropertyHashes = {
     ...indexMappings._meta?.migrationMappingPropertyHashes,
     ...targetMappings._meta?.migrationMappingPropertyHashes,
@@ -77,7 +72,6 @@ export function mergeMappingMeta(targetMappings: IndexMapping, indexMappings: In
     _meta: {
       ...targetMappings._meta,
       ...(Object.keys(mappingVersions).length && { mappingVersions }),
-      ...(Object.keys(docVersions).length && { docVersions }),
       ...(Object.keys(migrationMappingPropertyHashes).length && { migrationMappingPropertyHashes }),
     },
   };

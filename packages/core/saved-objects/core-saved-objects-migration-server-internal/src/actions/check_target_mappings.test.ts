@@ -46,7 +46,6 @@ const expectedMappings: IndexMapping = {
   dynamic: 'strict',
   _meta: {
     migrationMappingPropertyHashes, // deprecated, but preserved to facilitate rollback
-    docVersions: modelVersions,
     mappingVersions: modelVersions,
   },
 };
@@ -206,7 +205,6 @@ describe('checkTargetMappings', () => {
                 properties,
                 dynamic: 'strict',
                 _meta: {
-                  docVersions: outdatedModelVersions,
                   mappingVersions: outdatedModelVersions,
                 },
               },

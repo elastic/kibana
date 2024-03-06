@@ -120,17 +120,13 @@ describe('V2 algorithm', () => {
       result = await runMigrations();
     });
 
-    it('creates the SO indices, storing modelVersions in meta.mappingVersions and meta.docVersions', async () => {
+    it('creates the SO indices, storing modelVersions in meta.mappingVersions', async () => {
       expect(result[0].status === 'skipped');
       expect(await getMappingMeta()).toEqual({
         indexTypesMap: {
           '.kibana': ['another-type', 'some-type'],
         },
         mappingVersions: {
-          'another-type': '10.1.0',
-          'some-type': '10.1.0',
-        },
-        docVersions: {
           'another-type': '10.1.0',
           'some-type': '10.1.0',
         },
@@ -158,10 +154,6 @@ describe('V2 algorithm', () => {
             '.kibana': ['another-type', 'some-type'],
           },
           mappingVersions: {
-            'another-type': '10.2.0', // switched to modelVersion: 2
-            'some-type': '10.1.0',
-          },
-          docVersions: {
             'another-type': '10.2.0', // switched to modelVersion: 2
             'some-type': '10.1.0',
           },
@@ -230,12 +222,8 @@ describe('V2 algorithm', () => {
       });
     });
 
-    it('adds the mappingVersions and docVersions with the current modelVersions', () => {
+    it('adds the mappingVersions with the current modelVersions', () => {
       expect(indexMetaAfterMigration?.mappingVersions).toEqual({
-        'some-type': '10.1.0',
-        'another-type': '10.2.0',
-      });
-      expect(indexMetaAfterMigration?.docVersions).toEqual({
         'some-type': '10.1.0',
         'another-type': '10.2.0',
       });
