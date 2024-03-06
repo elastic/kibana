@@ -6,9 +6,9 @@
  */
 import { snapshot } from './snapshot';
 import { tsvb } from './tsvb';
-import { InventoryMetricsWithDashboards } from '../../types';
-import { type HostFormulas } from './formulas';
-import { type HostDashboards } from './dashboards';
+import { InventoryMetricsWithCharts } from '../../types';
+import type { HostFormulas } from './formulas';
+import type { HostCharts } from './charts';
 
 // not sure why this is the only model with "count"
 const { count, ...exposedHostSnapshotMetrics } = snapshot;
@@ -17,12 +17,11 @@ export const hostSnapshotMetricTypes = Object.keys(exposedHostSnapshotMetrics) a
   keyof typeof exposedHostSnapshotMetrics
 >;
 
-export const metrics: InventoryMetricsWithDashboards<HostFormulas, HostDashboards> = {
+export const metrics: InventoryMetricsWithCharts<HostFormulas, HostCharts> = {
   tsvb,
   snapshot,
-  getFormulas: async () => await import('./formulas').then(({ formulas }) => ({ ...formulas })),
-  getDashboards: async () =>
-    await import('./dashboards').then(({ dashboards }) => ({ ...dashboards })),
+  getFormulas: async () => await import('./formulas').then(({ formulas }) => formulas),
+  getCharts: async () => await import('./charts').then(({ charts }) => charts),
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 3600, // 1 hour
 };
