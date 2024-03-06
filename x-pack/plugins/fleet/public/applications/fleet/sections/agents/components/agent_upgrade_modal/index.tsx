@@ -20,6 +20,7 @@ import {
   EuiCallOut,
   EuiDatePicker,
   EuiFieldText,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -28,9 +29,12 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import semverGt from 'semver/functions/gt';
 import semverLt from 'semver/functions/lt';
 
-import { AGENT_UPGRADE_COOLDOWN_IN_MIN } from '../../../../../../../common/services';
+import {
+  AGENT_UPGRADE_COOLDOWN_IN_MIN,
+  getMinVersion,
+  checkFleetServerVersion,
+} from '../../../../../../../common/services';
 
-import { getMinVersion } from '../../../../../../../common/services/get_min_max_version';
 import {
   AGENT_UPDATING_TIMEOUT_HOURS,
   isStuckInUpdating,
@@ -59,7 +63,7 @@ import {
   MAINTENANCE_VALUES,
   ROLLING_UPGRADE_MINIMUM_SUPPORTED_VERSION,
 } from './constants';
-import { useScheduleDateTime } from './hooks';
+import { useScheduleDateTime, sendAllFleetServerAgents } from './hooks';
 
 export interface AgentUpgradeAgentModalProps {
   onClose: () => void;
@@ -86,7 +90,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   isScheduled = false,
   isUpdating = false,
 }) => {
-  const { notifications } = useStartServices();
+  const { notifications, docLinks } = useStartServices();
   const kibanaVersion = useKibanaVersion() || '';
   const config = useConfig();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -99,6 +103,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
 
   const [updatingAgents, setUpdatingAgents] = useState<number>(0);
   const [updatingQuery, setUpdatingQuery] = useState<Agent[] | string>('');
+
+  const [fleetServerAgents, setfleetServerAgents] = useState<Agent[]>([]);
 
   const QUERY_STUCK_UPDATING = `status:updating AND upgrade_started_at:* AND NOT upgraded_at:* AND upgrade_started_at < now-${AGENT_UPDATING_TIMEOUT_HOURS}h`;
   const EMPTY_VALUE = useMemo(() => ({ label: '', value: '' }), []);
@@ -155,6 +161,19 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     getVersions();
   }, [kibanaVersion]);
 
+  useEffect(() => {
+    const fetchFleetServerVersions = async () => {
+      try {
+        const { allFleetServerAgents } = await sendAllFleetServerAgents();
+        setfleetServerAgents(allFleetServerAgents);
+      } catch (error) {
+        return;
+      }
+    };
+
+    fetchFleetServerVersions();
+  }, [kibanaVersion]);
+
   const minVersion = useMemo(() => {
     if (!Array.isArray(agents)) {
       // when agent is a query, don't set minVersion, so the versions are available to select
@@ -208,7 +227,6 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     },
   ];
   const [selectedVersion, setSelectedVersion] = useState(preselected);
-
   const [selectedVersionStr, setSelectedVersionStr] = useState('');
 
   // latest agent version might be earlier than kibana version
@@ -223,6 +241,18 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       ]);
     }
   }, [latestAgentVersion]);
+
+  useEffect(() => {
+    try {
+      if (!!selectedVersion[0]?.value) {
+        checkFleetServerVersion(selectedVersion[0].value, fleetServerAgents);
+        // clean up the error
+        setErrors('');
+      }
+    } catch (error) {
+      setErrors(error?.message);
+    }
+  }, [selectedVersion, fleetServerAgents]);
 
   const [selectedMaintenanceWindow, setSelectedMaintenanceWindow] = useState([
     isSmallBatch ? maintenanceOptions[0] : maintenanceOptions[1],
@@ -426,10 +456,22 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
                   <em>
                     <FormattedMessage
                       id="xpack.fleet.upgradeAgents.upgradeSingleTimeout"
-                      // TODO: Add link to docs regarding agent upgrade cooldowns
-                      defaultMessage="Note that you may only restart an upgrade every {minutes} minutes to ensure that the upgrade will not be rolled back."
+                      defaultMessage="Note that you may only restart an upgrade every {minutes} minutes to ensure that the upgrade will not be rolled back. {learnMore}"
                       values={{
                         minutes: AGENT_UPGRADE_COOLDOWN_IN_MIN,
+                        learnMore: (
+                          <div>
+                            <EuiLink
+                              href={docLinks.links.fleet.upgradeElasticAgent}
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
+                                defaultMessage="Learn more"
+                              />
+                            </EuiLink>
+                          </div>
+                        ),
                       }}
                     />
                   </em>
@@ -596,9 +638,19 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           >
             <FormattedMessage
               id="xpack.fleet.upgradeAgents.warningCalloutErrorMessage"
-              defaultMessage="{originalMessage}"
+              defaultMessage="{originalMessage}. {learnMore}"
               values={{
                 originalMessage: errors,
+                learnMore: (
+                  <div>
+                    <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
+                      <FormattedMessage
+                        id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
+                        defaultMessage="Learn more"
+                      />
+                    </EuiLink>
+                  </div>
+                ),
               }}
             />
           </EuiCallOut>
