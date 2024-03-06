@@ -96,17 +96,29 @@ const parseIsNativeParam = (queryString: string | string[] | null): boolean | un
   return undefined;
 };
 
-const getBreadcrumb = (method: string) => {
+const getBreadcrumb = (method: string, service_type: string): string[] => {
   switch (method) {
-    case INGESTION_METHOD_IDS.API:
-      return baseBreadcrumbs;
-    case INGESTION_METHOD_IDS.CONNECTOR: {
-      return connectorsBreadcrumbs;
-    }
+    case INGESTION_METHOD_IDS.CONNECTOR:
+      const connector = Boolean(service_type) && CONNECTORS.find((item) => item.serviceType === service_type);
+
+      const this_connector_breadcrumb = connector ? 
+      i18n.translate('xpack.enterpriseSearch.content.new_connector_with_service_type.breadcrumbs', {
+        defaultMessage: `New ${ connector.name } connector`,
+      })
+      : 
+      i18n.translate('xpack.enterpriseSearch.content.new_connector.breadcrumbs', {
+        defaultMessage: `New connector`,
+      })
+
+      return [...connectorsBreadcrumbs, this_connector_breadcrumb];
     case INGESTION_METHOD_IDS.CRAWLER:
-      return crawlersBreadcrumbs;
+      return [...crawlersBreadcrumbs, i18n.translate('xpack.enterpriseSearch.content.new_web_crawler.breadcrumbs', {
+        defaultMessage: 'New web crawler',
+      })];
     default:
-      return baseBreadcrumbs;
+      return [...baseBreadcrumbs, i18n.translate('xpack.enterpriseSearch.content.new_index.breadcrumbs', {
+        defaultMessage: 'New search index',
+      })];
   }
 };
 
@@ -132,8 +144,10 @@ const getConnectorModeBadge = (isNative?: boolean) => {
   }
   return undefined;
 };
-
-export const NewSearchIndexPage: React.FC = ({ type }) => {
+export interface NewSearchIndexPageProps {
+  type: string;
+}
+export const NewSearchIndexPage: React.FC<NewSearchIndexPageProps> = ({ type }) => {
   const { search } = useLocation();
   const { service_type: inputServiceType, connector_type: inputConnectorType } =
     parseQueryParams(search);
@@ -145,12 +159,7 @@ export const NewSearchIndexPage: React.FC = ({ type }) => {
 
   return (
     <EnterpriseSearchContentPageTemplate
-      pageChrome={[
-        ...getBreadcrumb(type),
-        i18n.translate('xpack.enterpriseSearch.content.new_index.breadcrumbs', {
-          defaultMessage: 'New search index',
-        }),
-      ]}
+      pageChrome={getBreadcrumb(type, serviceType)}
       pageViewTelemetry="New Index"
       isLoading={false}
       pageHeader={{
