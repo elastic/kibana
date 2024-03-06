@@ -48,7 +48,6 @@ export interface ShareContextTabProps {
   isEmbedded: boolean;
 }
 
-// this file is intended to replace share_context_menu
 export const ShareMenuTabs = ({
   allowEmbed,
   shareMenuItems,
