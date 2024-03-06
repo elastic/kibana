@@ -270,6 +270,10 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
         await observability.alerts.rulesPage.clickRuleStatusDropDownMenu();
         await observability.alerts.rulesPage.clickDisableFromDropDownMenu();
+
+        await testSubjects.click('confirmModalConfirmButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
         await retry.waitFor('The rule to be disabled', async () => {
           const tableRows = await find.allByCssSelector('.euiTableRow');
           const rows = await getRulesList(tableRows);

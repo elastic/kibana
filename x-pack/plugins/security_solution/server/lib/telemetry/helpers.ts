@@ -22,7 +22,6 @@ import type {
   ExceptionListItem,
   ExtraInfo,
   ListTemplate,
-  TaskMetric,
   TelemetryEvent,
   TimeFrame,
   TimelineResult,
@@ -294,20 +293,18 @@ export const tlog = (logger: Logger, message: string) => {
   }
 };
 
-export const createTaskMetric = (
-  name: string,
-  passed: boolean,
-  startTime: number,
-  errorMessage?: string
-): TaskMetric => {
-  const endTime = Date.now();
+export interface TelemetryLogger extends Logger {
+  l: (message: string) => void;
+}
+
+export const newTelemetryLogger = (logger: Logger): TelemetryLogger => {
   return {
-    name,
-    passed,
-    time_executed_in_ms: endTime - startTime,
-    start_time: startTime,
-    end_time: endTime,
-    error_message: errorMessage,
+    ...logger,
+    error: logger.error,
+    info: logger.info,
+    debug: logger.debug,
+    warn: logger.warn,
+    l: (message: string) => tlog(logger, message),
   };
 };
 
@@ -366,14 +363,12 @@ export const ranges = (
 };
 
 export class TelemetryTimelineFetcher {
-  startTime: number;
   private receiver: ITelemetryReceiver;
   private extraInfo: Promise<ExtraInfo>;
   private timeFrame: TimeFrame;
 
   constructor(receiver: ITelemetryReceiver) {
     this.receiver = receiver;
-    this.startTime = Date.now();
     this.extraInfo = this.lookupExtraInfo();
     this.timeFrame = this.calculateTimeFrame();
   }

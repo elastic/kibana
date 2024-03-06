@@ -18,6 +18,7 @@ import {
   getCapabilitiesForRollupIndices,
   mergeCapabilitiesWithFields,
 } from './lib';
+import { DataViewType } from '../../common/types';
 
 export interface FieldDescriptor {
   aggregatable: boolean;
@@ -73,6 +74,7 @@ export class IndexPatternsFetcher {
     indexFilter?: QueryDslQueryContainer;
     fields?: string[];
     allowHidden?: boolean;
+    includeEmptyFields?: boolean;
   }): Promise<{ fields: FieldDescriptor[]; indices: string[] }> {
     const {
       pattern,
@@ -82,6 +84,7 @@ export class IndexPatternsFetcher {
       rollupIndex,
       indexFilter,
       allowHidden,
+      includeEmptyFields,
     } = options;
     const allowNoIndices = fieldCapsOptions
       ? fieldCapsOptions.allow_no_indices
@@ -100,9 +103,10 @@ export class IndexPatternsFetcher {
       indexFilter,
       fields: options.fields || ['*'],
       expandWildcards,
+      includeEmptyFields,
     });
 
-    if (this.rollupsEnabled && type === 'rollup' && rollupIndex) {
+    if (this.rollupsEnabled && type === DataViewType.ROLLUP && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
       const capabilityCheck = getCapabilitiesForRollupIndices(
         await this.elasticsearchClient.rollup.getRollupIndexCaps({

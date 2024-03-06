@@ -20,7 +20,7 @@ import { getESQLNumericFieldStats } from '../../search_strategy/esql_requests/ge
 import { getESQLKeywordFieldStats } from '../../search_strategy/esql_requests/get_keyword_fields';
 import { getESQLDateFieldStats } from '../../search_strategy/esql_requests/get_date_field_stats';
 import { getESQLBooleanFieldStats } from '../../search_strategy/esql_requests/get_boolean_field_stats';
-import { getESQLTextFieldStats } from '../../search_strategy/esql_requests/get_text_field_stats';
+import { getESQLExampleFieldValues } from '../../search_strategy/esql_requests/get_text_field_stats';
 
 export const useESQLFieldStatsData = <T extends Column>({
   searchQuery,
@@ -56,13 +56,13 @@ export const useESQLFieldStatsData = <T extends Column>({
       const fetchFieldStats = async () => {
         cancelRequest();
 
-        if (!isESQLQuery(searchQuery) || !allColumns) return;
-
         setFetchState({
           ...getInitialProgress(),
           isRunning: true,
           error: undefined,
         });
+        if (!isESQLQuery(searchQuery) || !allColumns) return;
+
         try {
           // By default, limit the source data to 100,000 rows
           const esqlBaseQuery = searchQuery.esql + getSafeESQLLimitSize(limitSize);
@@ -114,8 +114,13 @@ export const useESQLFieldStatsData = <T extends Column>({
             }).then(addToProcessedFieldStats);
 
             // GETTING STATS FOR TEXT FIELDS
-            await getESQLTextFieldStats({
-              columns: columns.filter((f) => f.secondaryType === 'text'),
+            await getESQLExampleFieldValues({
+              columns: columns.filter(
+                (f) =>
+                  f.secondaryType === 'text' ||
+                  f.secondaryType === 'geo_point' ||
+                  f.secondaryType === 'geo_shape'
+              ),
               filter,
               runRequest,
               esqlBaseQuery,

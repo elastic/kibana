@@ -318,6 +318,53 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         ]);
       });
+
+      it('creates a case with missing optional custom fields and default values', async () => {
+        const customFieldsConfiguration = [
+          {
+            key: 'text_custom_field',
+            label: 'text',
+            type: CustomFieldTypes.TEXT,
+            required: false,
+            defaultValue: 'default value',
+          },
+          {
+            key: 'toggle_custom_field',
+            label: 'toggle',
+            type: CustomFieldTypes.TOGGLE,
+            defaultValue: false,
+            required: false,
+          },
+        ];
+
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: customFieldsConfiguration,
+            },
+          })
+        );
+        const createdCase = await createCase(
+          supertest,
+          getPostCaseRequest({
+            customFields: [],
+          })
+        );
+
+        expect(createdCase.customFields).to.eql([
+          {
+            key: customFieldsConfiguration[0].key,
+            type: customFieldsConfiguration[0].type,
+            value: 'default value',
+          },
+          {
+            key: customFieldsConfiguration[1].key,
+            type: customFieldsConfiguration[1].type,
+            value: false,
+          },
+        ]);
+      });
     });
 
     describe('unhappy path', () => {

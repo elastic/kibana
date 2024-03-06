@@ -17,13 +17,8 @@ import { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detec
 import {
   createLegacyRuleAction,
   createWebHookRuleAction,
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getEqlRuleForAlertTesting,
   fetchRule,
-  getRuleForAlertTesting,
   getRuleWithWebHookAction,
   getSimpleMlRule,
   getSimpleRule,
@@ -31,11 +26,18 @@ import {
   getStats,
   getThresholdRuleForAlertTesting,
   installMockPrebuiltRules,
-  waitForRuleSuccess,
-  waitForAlertsToBePresent,
   updateRule,
   deleteAllEventLogExecutionEvents,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+} from '../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 

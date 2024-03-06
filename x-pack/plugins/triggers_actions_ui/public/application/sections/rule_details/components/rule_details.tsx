@@ -70,6 +70,7 @@ import {
 } from '../../rules_list/translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import { RefreshToken } from './types';
+import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -115,6 +116,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
+  const [isUntrackAlertsModalOpen, setIsUntrackAlertsModalOpen] = useState<boolean>(false);
 
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
     useState<boolean>(false);
@@ -288,9 +290,37 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     setRulesToDelete([]);
     goToRulesList();
   };
+
   const onDeleteCancel = () => {
     setIsDeleteModalVisibility(false);
     setRulesToDelete([]);
+  };
+
+  const onDisableModalOpen = () => {
+    setIsUntrackAlertsModalOpen(true);
+  };
+
+  const onDisableModalClose = () => {
+    setIsUntrackAlertsModalOpen(false);
+  };
+
+  const onEnable = async () => {
+    await bulkEnableRules({ ids: [rule.id] });
+    requestRefresh();
+  };
+
+  const onDisable = async (untrack: boolean) => {
+    onDisableModalClose();
+    await bulkDisableRules({ ids: [rule.id], untrack });
+    requestRefresh();
+  };
+
+  const onEnableDisable = (enable: boolean) => {
+    if (enable) {
+      onEnable();
+    } else {
+      onDisableModalOpen();
+    }
   };
 
   return (
@@ -310,6 +340,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             MULTIPLE_RULE_TITLE
           )}
         />
+      )}
+      {isUntrackAlertsModalOpen && (
+        <UntrackAlertsModal onCancel={onDisableModalClose} onConfirm={onDisable} />
       )}
       <UpdateApiKeyModalConfirmation
         onCancel={() => {
@@ -400,14 +433,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             onApiKeyUpdate={(ruleId) => {
               setRulesToUpdateAPIKey([ruleId]);
             }}
-            onEnableDisable={async (enable) => {
-              if (enable) {
-                await bulkEnableRules({ ids: [rule.id] });
-              } else {
-                await bulkDisableRules({ ids: [rule.id] });
-              }
-              requestRefresh();
-            }}
+            onEnableDisable={onEnableDisable}
             onRunRule={onRunRule}
           />,
           editButton,

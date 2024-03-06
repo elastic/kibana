@@ -17,6 +17,9 @@ export type EnhancedEmbeddable<E extends IEmbeddable = IEmbeddable> = E & {
   };
 };
 
+/**
+ * @deprecated use `EmbeddableApiContext` from `@kbn/presentation-publishing`
+ */
 export interface EnhancedEmbeddableContext {
   embeddable: EnhancedEmbeddable;
 }

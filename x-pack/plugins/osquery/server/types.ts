@@ -21,7 +21,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
-import type { CasesSetup } from '@kbn/cases-plugin/server';
+import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { createActionService } from './handlers/action/create_action_service';
 
@@ -34,7 +34,7 @@ export interface OsqueryPluginStart {}
 
 export interface SetupPlugins {
   actions: ActionsPlugin['setup'];
-  cases: CasesSetup;
+  cases: CasesServerSetup;
   data: DataPluginSetup;
   features: PluginSetupContract;
   security: SecurityPluginStart;

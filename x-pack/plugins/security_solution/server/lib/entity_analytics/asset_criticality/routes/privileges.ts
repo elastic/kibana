@@ -7,12 +7,17 @@
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ASSET_CRITICALITY_PRIVILEGES_URL, APP_ID } from '../../../../../common/constants';
+import {
+  ASSET_CRITICALITY_PRIVILEGES_URL,
+  APP_ID,
+  ENABLE_ASSET_CRITICALITY_SETTING,
+} from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { getUserAssetCriticalityPrivileges } from '../get_user_asset_criticality_privileges';
 
 import type { StartPlugins } from '../../../../plugin';
+import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 export const assetCriticalityPrivilegesRoute = (
   router: SecuritySolutionPluginRouter,
   getStartServices: StartServicesAccessor<StartPlugins>,
@@ -34,6 +39,8 @@ export const assetCriticalityPrivilegesRoute = (
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
+          await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
+
           await checkAndInitAssetCriticalityResources(context, logger);
 
           const [_, { security }] = await getStartServices();

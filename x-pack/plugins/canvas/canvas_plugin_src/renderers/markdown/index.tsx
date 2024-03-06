@@ -11,7 +11,7 @@ import { CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { StartInitializer } from '../../plugin';
 import { RendererStrings } from '../../../i18n';
 import { Return as Config } from '../../functions/browser/markdown';
@@ -29,20 +29,24 @@ export const getMarkdownRenderer =
     render(domNode, config, handlers) {
       const fontStyle = config.font ? config.font.spec : {};
 
-      ReactDOM.render(
-        <KibanaThemeProvider theme={{ theme$ }}>
-          <Markdown
-            className="canvasMarkdown"
-            style={fontStyle as CSSProperties}
-            markdown={config.content}
-            openLinksInNewTab={config.openLinksInNewTab}
-          />
-        </KibanaThemeProvider>,
-        domNode,
-        () => handlers.done()
-      );
+      if (config.content) {
+        ReactDOM.render(
+          <KibanaThemeProvider theme={{ theme$ }}>
+            <Markdown
+              className="canvasMarkdown"
+              style={fontStyle as CSSProperties}
+              openLinksInNewTab={config.openLinksInNewTab}
+              readOnly
+            >
+              {config.content}
+            </Markdown>
+          </KibanaThemeProvider>,
+          domNode,
+          () => handlers.done()
+        );
 
-      handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+        handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+      }
     },
   });
 

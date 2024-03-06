@@ -37,6 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/176119
   registry.when(
     'field candidates with data and default args',
     { config: 'trial', archives: ['8.0.0'] },

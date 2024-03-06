@@ -35,16 +35,16 @@ export function PaletteColors({
   selectColor: (color: ColorMapping.CategoricalColor | ColorMapping.ColorCode) => void;
 }) {
   const colors = Array.from({ length: palette.colorCount }, (d, i) => {
-    return palette.getColor(i, isDarkMode);
+    return palette.getColor(i, isDarkMode, false);
   });
   const neutralColors = Array.from({ length: NeutralPalette.colorCount }, (d, i) => {
-    return NeutralPalette.getColor(i, isDarkMode);
+    return NeutralPalette.getColor(i, isDarkMode, false);
   });
   const originalColor =
     color.type === 'categorical'
       ? color.paletteId === NeutralPalette.id
-        ? NeutralPalette.getColor(color.colorIndex, isDarkMode)
-        : getPaletteFn(color.paletteId).getColor(color.colorIndex, isDarkMode)
+        ? NeutralPalette.getColor(color.colorIndex, isDarkMode, false)
+        : getPaletteFn(color.paletteId).getColor(color.colorIndex, isDarkMode, false)
       : color.colorCode;
   return (
     <>

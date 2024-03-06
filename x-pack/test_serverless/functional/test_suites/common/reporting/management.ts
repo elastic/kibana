@@ -24,7 +24,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const navigateToReportingManagement = async () => {
     log.debug(`navigating to reporting management app`);
     await retry.tryForTime(60 * 1000, async () => {
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('reportingManagement');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('reportingPageHeader', { timeout: 2000 });

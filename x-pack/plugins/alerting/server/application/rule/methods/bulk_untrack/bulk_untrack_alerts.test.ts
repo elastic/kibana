@@ -79,6 +79,7 @@ describe('bulkUntrackAlerts()', () => {
     ]);
 
     await rulesClient.bulkUntrackAlerts({
+      isUsingQuery: true,
       indices: [
         'she had them apple bottom jeans (jeans)',
         'boots with the fur (with the fur)',
@@ -160,6 +161,7 @@ describe('bulkUntrackAlerts()', () => {
     ]);
 
     await rulesClient.bulkUntrackAlerts({
+      isUsingQuery: true,
       indices: ["honestly who cares we're not even testing the index right now"],
       alertUuids: [mockAlertUuid],
     });
