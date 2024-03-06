@@ -61,13 +61,17 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
                 <EuiText>
                   {!isCrawler
                     ? i18n.translate('xpack.enterpriseSearch.connectorStats.connectorsTextLabel', {
-                        defaultMessage: hasMultipleConnectors ? '{count} connectors' : '{count} connector',
+                        defaultMessage: hasMultipleConnectors
+                          ? '{count} connectors'
+                          : '{count} connector',
                         values: {
                           count: connectorCount,
                         },
                       })
                     : i18n.translate('xpack.enterpriseSearch.connectorStats.crawlersTextLabel', {
-                        defaultMessage: hasMultipleConnectors ? '{count} web crawlers' : '{count} web crawler',
+                        defaultMessage: hasMultipleConnectors
+                          ? '{count} web crawlers'
+                          : '{count} web crawler',
                         values: {
                           count: connectorCount,
                         },
