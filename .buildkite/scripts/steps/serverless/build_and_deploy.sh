@@ -22,6 +22,7 @@ deploy() {
   esac
 
   PROJECT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST-$PROJECT_TYPE"
+  VAULT_KEY_NAME="$PROJECT_NAME"
   is_pr_with_label "ci:project-persist-deployment" && PROJECT_NAME="keep_$PROJECT_NAME"
   PROJECT_CREATE_CONFIGURATION='{
     "name": "'"$PROJECT_NAME"'",
@@ -81,9 +82,9 @@ deploy() {
 
     # TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
     if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
-      vault_set "cloud-deploy/$PROJECT_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
+      vault_set "cloud-deploy/$VAULT_KEY_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
     else
-      vault_kv_set "cloud-deploy/$PROJECT_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
+      vault_kv_set "cloud-deploy/$VAULT_KEY_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
     fi
 
   else
@@ -101,9 +102,9 @@ deploy() {
 
   # TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
   if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
-    VAULT_READ_COMMAND="vault read $VAULT_PATH_PREFIX/cloud-deploy/$PROJECT_NAME"
+    VAULT_READ_COMMAND="vault read $VAULT_PATH_PREFIX/cloud-deploy/$VAULT_KEY_NAME"
   else
-    VAULT_READ_COMMAND="vault kv get $VAULT_KV_PREFIX/cloud-deploy/$PROJECT_NAME"
+    VAULT_READ_COMMAND="vault kv get $VAULT_KV_PREFIX/cloud-deploy/$VAULT_KEY_NAME"
   fi
 
   cat << EOF | buildkite-agent annotate --style "info" --context "project-$PROJECT_TYPE"

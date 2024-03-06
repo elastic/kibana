@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON, ALERT_ACTION_GROUP, ALERT_EVALUATION_VALUES } from '@kbn/rule-data-utils';
+import {
+  ALERT_REASON,
+  ALERT_ACTION_GROUP,
+  ALERT_EVALUATION_VALUES,
+  ALERT_EVALUATION_THRESHOLD,
+} from '@kbn/rule-data-utils';
 import { first, get } from 'lodash';
 import {
   ActionGroup,
@@ -18,7 +23,11 @@ import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { getAlertUrl } from '@kbn/observability-plugin/common';
 import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
-import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
+import {
+  AlertStates,
+  InventoryMetricConditions,
+  InventoryMetricThresholdParams,
+} from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
@@ -40,6 +49,7 @@ import {
   getInventoryViewInAppUrlWithSpaceId,
   UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
+import { getEvaluationValues, getThresholds } from '../common/get_values';
 import { evaluateCondition, ConditionResult } from './evaluate_condition';
 
 type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
@@ -65,7 +75,8 @@ type InventoryMetricThresholdAlertFactory = (
   reason: string,
   actionGroup: InventoryThrehsoldActionGroup,
   additionalContext?: AdditionalContext | null,
-  evaluationValues?: Array<number | null>
+  evaluationValues?: Array<number | null>,
+  thresholds?: Array<number | null>
 ) => InventoryMetricThresholdAlert;
 
 export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =>
@@ -104,13 +115,15 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         getAlertStartedDate,
         getAlertUuid,
         getAlertByAlertUuid,
+        alertFactory: baseAlertFactory,
       } = services;
       const alertFactory: InventoryMetricThresholdAlertFactory = (
         id,
         reason,
         actionGroup,
         additionalContext,
-        evaluationValues
+        evaluationValues,
+        thresholds
       ) =>
         alertWithLifecycle({
           id,
@@ -118,6 +131,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             [ALERT_REASON]: reason,
             [ALERT_ACTION_GROUP]: actionGroup,
             [ALERT_EVALUATION_VALUES]: evaluationValues,
+            [ALERT_EVALUATION_THRESHOLD]: thresholds,
             ...flattenAdditionalContext(additionalContext),
           },
         });
@@ -194,8 +208,15 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       );
 
       let scheduledActionsCount = 0;
+      const alertLimit = baseAlertFactory.alertLimit.getValue();
+      let hasReachedLimit = false;
       const inventoryItems = Object.keys(first(results)!);
       for (const group of inventoryItems) {
+        if (scheduledActionsCount >= alertLimit) {
+          // need to set this so that warning is displayed in the UI and in the logs
+          hasReachedLimit = true;
+          break; // once limit is reached, we break out of the loop and don't schedule any more alerts
+        }
         // AND logic; all criteria must be across the threshold
         const shouldAlertFire = results.every((result) => result[group]?.shouldFire);
         const shouldAlertWarn = results.every((result) => result[group]?.shouldWarn);
@@ -252,17 +273,16 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             new Set([...(additionalContext.tags ?? []), ...ruleTags])
           );
 
-          const evaluationValues = results.reduce((acc: Array<number | null>, result) => {
-            acc.push(result[group].currentValue);
-            return acc;
-          }, []);
+          const evaluationValues = getEvaluationValues<ConditionResult>(results, group);
+          const thresholds = getThresholds<InventoryMetricConditions>(criteria);
 
           const alert = alertFactory(
             group,
             reason,
             actionGroupId,
             additionalContext,
-            evaluationValues
+            evaluationValues,
+            thresholds
           );
           const indexedStartedAt = getAlertStartedDate(group) ?? startedAt.toISOString();
           const alertUuid = getAlertUuid(group);
@@ -300,6 +320,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         }
       }
 
+      baseAlertFactory.alertLimit.setLimitReached(hasReachedLimit);
       const { getRecoveredAlerts } = services.alertFactory.done();
       const recoveredAlerts = getRecoveredAlerts();
 
