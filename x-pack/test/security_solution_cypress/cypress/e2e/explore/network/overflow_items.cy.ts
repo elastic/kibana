@@ -23,7 +23,7 @@ import { networkUrl } from '../../../urls/navigation';
 const testDomainOne = 'myTest';
 const testDomainTwo = 'myTest2';
 
-describe('Overflow items', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Overflow items', { tags: ['@ess', '@serverless'] }, () => {
   context('Network stats and tables', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'network' });
