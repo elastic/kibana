@@ -72,7 +72,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
 
-  describe('push_case', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/157588
+  describe.skip('push_case', () => {
     describe('incident recorder server', () => {
       const actionsRemover = new ActionsRemover(supertest);
       let serviceNowSimulatorURL: string = '';
