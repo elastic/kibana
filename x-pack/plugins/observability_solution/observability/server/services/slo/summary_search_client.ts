@@ -9,14 +9,10 @@ import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
-import _ from 'lodash';
 import { partition } from 'lodash';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
-import { SLO, SLOId, Summary } from '../../domain/models';
-import { SLOId, Status, Summary, Groupings } from '../../domain/models';
+import { SLO, SLOId, Status, Summary, Groupings } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
-import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { getFlattenedGroupings } from './utils';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
 
@@ -147,27 +143,9 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         total: finalTotal,
         perPage: pagination.perPage,
         page: pagination.page,
-        results: finalResults.map((doc) => ({
-          id: doc._source!.slo.id,
-          instanceId: doc._source!.slo.instanceId ?? ALL_VALUE,
-          summary: {
-            errorBudget: {
-              initial: toHighPrecision(doc._source!.errorBudgetInitial),
-              consumed: toHighPrecision(doc._source!.errorBudgetConsumed),
-              remaining: toHighPrecision(doc._source!.errorBudgetRemaining),
-              isEstimated: doc._source!.errorBudgetEstimated,
-            },
-            sliValue: toHighPrecision(doc._source!.sliValue),
-            status: doc._source!.status,
-          },
-          groupings: getFlattenedGroupings({
-            groupings: doc._source!.slo.groupings,
-            groupBy: doc._source!.slo.groupBy,
-          }),
-        })),
         results: finalResults.map((doc) => {
           const unsafeIsRemote = doc._index.includes('remote_cluster:');
-          let unsafeSlo = undefined;
+          let unsafeSlo;
           if (unsafeIsRemote) {
             unsafeSlo = fromSummaryDocumentToSlo(doc._source!);
             if (unsafeSlo === undefined) {
@@ -190,11 +168,15 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
               sliValue: toHighPrecision(doc._source!.sliValue),
               status: doc._source!.status,
             },
+            groupings: getFlattenedGroupings({
+              groupings: doc._source!.slo.groupings,
+              groupBy: doc._source!.slo.groupBy,
+            }),
           };
         }),
       };
     } catch (err) {
-      this.logger.error(new Error('Summary search query error', { cause: err }));
+      this.logger.error(new Error(`Summary search query error, ${err.message}`, { cause: err }));
       return { total: 0, perPage: pagination.perPage, page: pagination.page, results: [] };
     }
   }
@@ -214,28 +196,3 @@ function toDocumentSortField(field: SortField) {
       assertNever(field);
   }
 }
-
-/**
-"slo": {
-"indicator": {
-  "type": "sli.apm.transactionErrorRate"
-},
-"timeWindow": {
-  "duration": "7d",
-  "type": "rolling"
-},
-"instanceId": "*",
-"name": "API backend java Availability",
-"description": "",
-"id": "api-backend-java",
-"groupBy": "*",
-"budgetingMethod": "occurrences",
-"revision": 1,
-"tags": [
-  "prod",
-  "api"
-],
-"objective": {
-  "target": 0.795
-}
- */

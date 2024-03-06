@@ -1,6 +1,13 @@
-import { SLO } from '@kbn/observability-plugin/server/domain/models';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { sloSchema } from '@kbn/slo-schema';
 import { isLeft } from 'fp-ts/lib/Either';
+import { SLO } from '../../../domain/models';
 import { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
 
 export function fromSummaryDocumentToSlo(summaryDoc: EsSummaryDocument): SLO | undefined {
@@ -21,8 +28,6 @@ export function fromSummaryDocumentToSlo(summaryDoc: EsSummaryDocument): SLO | u
     updatedAt: '2024-01-01T00:00:00.000Z',
     version: 1,
   });
-
-  console.dir(res, { depth: 3 });
 
   if (isLeft(res)) {
     return undefined;

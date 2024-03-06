@@ -6,8 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '@kbn/observability-plugin/common/slo/constants';
 import { ALL_VALUE, GetSLOParams, GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
+import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { Groupings, SLO, Summary } from '../../domain/models';
 import { SLORepository } from './slo_repository';
 import { SummaryClient } from './summary_client';
@@ -22,10 +22,7 @@ export class GetSLO {
   ) {}
 
   public async execute(sloId: string, params: GetSLOParams = {}): Promise<GetSLOResponse> {
-    const slo = await this.repository.findById(sloId);
-
     const instanceId = params.instanceId ?? ALL_VALUE;
-    const { summary, groupings } = await this.summaryClient.computeSummary(slo, instanceId);
     // find a way to set this based on the sloId used
     const unsafeIsRemote = true;
     let slo;
@@ -47,14 +44,13 @@ export class GetSLO {
         throw new Error('SLO not found');
       }
 
-    return getSLOResponseSchema.encode(mergeSloWithSummary(slo, summary, instanceId, groupings));
       slo = fromSummaryDocumentToSlo(summarySearch.hits.hits[0]._source!);
     } else {
       slo = await this.repository.findById(sloId);
     }
+    const { summary, groupings } = await this.summaryClient.computeSummary(slo!, instanceId);
 
-    const summary = await this.summaryClient.computeSummary(slo!, instanceId);
-    return getSLOResponseSchema.encode(mergeSloWithSummary(slo!, summary, instanceId));
+    return getSLOResponseSchema.encode(mergeSloWithSummary(slo, summary, instanceId, groupings));
   }
 }
 
