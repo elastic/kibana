@@ -12,7 +12,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CoreStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { EuiWrappingPopover } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaThemeProvider } from '@kbn/kibana-utils-plugin/public/theme';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
