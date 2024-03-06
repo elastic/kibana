@@ -7,30 +7,22 @@
 
 import React, { useEffect } from 'react';
 
-import { useActions } from 'kea';
-
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { CONNECTOR_DETAIL_PATH, CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 
 import { IndexNameLogic } from '../search_index/index_name_logic';
 
-import { IndexViewLogic } from '../search_index/index_view_logic';
-
 import { ConnectorDetail } from './connector_detail';
 import { ConnectorViewLogic } from './connector_view_logic';
 
 export const ConnectorDetailRouter: React.FC = () => {
-  const { stopFetchIndexPoll } = useActions(IndexViewLogic);
   useEffect(() => {
     const unmountName = IndexNameLogic.mount();
     const unmountView = ConnectorViewLogic.mount();
-    const unmountIndexView = IndexViewLogic.mount();
     return () => {
-      stopFetchIndexPoll();
       unmountName();
       unmountView();
-      unmountIndexView();
     };
   }, []);
   return (
