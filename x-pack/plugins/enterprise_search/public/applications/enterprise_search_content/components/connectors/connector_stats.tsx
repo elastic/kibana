@@ -58,24 +58,26 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiText>
-                  {!isCrawler
-                    ? i18n.translate('xpack.enterpriseSearch.connectorStats.connectorsTextLabel', {
-                        defaultMessage: hasMultipleConnectors
-                          ? '{count} connectors'
-                          : '{count} connector',
-                        values: {
-                          count: connectorCount,
-                        },
+              <EuiText>
+                {!isCrawler
+                  ? hasMultipleConnectors
+                    ? i18n.translate('xpack.enterpriseSearch.connectorStats.multipleConnectorsText', {
+                        defaultMessage: '{count} connectors',
+                        values: { count: connectorCount },
                       })
-                    : i18n.translate('xpack.enterpriseSearch.connectorStats.crawlersTextLabel', {
-                        defaultMessage: hasMultipleConnectors
-                          ? '{count} web crawlers'
-                          : '{count} web crawler',
-                        values: {
-                          count: connectorCount,
-                        },
-                      })}
+                    : i18n.translate('xpack.enterpriseSearch.connectorStats.singleConnectorText', {
+                        defaultMessage: '{count} connector',
+                        values: { count: connectorCount },
+                      })
+                  : hasMultipleConnectors
+                  ? i18n.translate('xpack.enterpriseSearch.connectorStats.multipleCrawlersText', {
+                      defaultMessage: '{count} web crawlers',
+                      values: { count: connectorCount },
+                    })
+                  : i18n.translate('xpack.enterpriseSearch.connectorStats.singleCrawlerText', {
+                      defaultMessage: '{count} web crawler',
+                      values: { count: connectorCount },
+                    })}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
