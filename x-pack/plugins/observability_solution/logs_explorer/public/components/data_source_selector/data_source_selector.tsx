@@ -224,7 +224,7 @@ export function DataSourceSelector({
     >
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <Tabs bottomBorder={false}>{tabEntries}</Tabs>
-        <AddDataButton />
+        {tabId === INTEGRATIONS_TAB_ID && <AddDataButton />}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="none" />
       <SearchControls
