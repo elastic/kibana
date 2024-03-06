@@ -31,6 +31,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { useCreateDataView } from '../../hooks/use_create_data_view';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -45,6 +46,7 @@ jest.mock('../../hooks/slo/use_fetch_active_alerts');
 jest.mock('../../hooks/slo/use_fetch_slo_details');
 jest.mock('../../hooks/slo/use_fetch_historical_summary');
 jest.mock('../../hooks/slo/use_delete_slo');
+jest.mock('../../hooks/use_create_data_view');
 
 const useKibanaMock = useKibana as jest.Mock;
 
@@ -54,6 +56,8 @@ const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
+const useCreateDataViewsMock = useCreateDataView as jest.Mock;
+
 const TagsListMock = TagsList as jest.Mock;
 TagsListMock.mockReturnValue(<div>Tags list</div>);
 
@@ -124,6 +128,9 @@ describe('SLO Details Page', () => {
     jest.clearAllMocks();
     mockKibana();
     useCapabilitiesMock.mockReturnValue({ hasWriteCapabilities: true, hasReadCapabilities: true });
+    useCreateDataViewsMock.mockReturnValue({
+      dataView: { getName: () => 'dataview', getIndexPattern: () => '.dataview-index' },
+    });
     useFetchHistoricalSummaryMock.mockReturnValue({
       isLoading: false,
       data: historicalSummaryData,
