@@ -14,6 +14,8 @@ import type {
 import pMap from 'p-map';
 import { isResponseError } from '@kbn/es-errors';
 
+import { STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS } from '../../../../constants/fleet_es_assets';
+
 import type { Field, Fields } from '../../fields/field';
 import type {
   RegistryDataStream,
@@ -120,6 +122,7 @@ export function getTemplate({
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
       : []),
+    ...(type === 'logs' ? [STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS] : []),
   ];
 
   template.ignore_missing_component_templates = template.composed_of.filter(isUserSettingsTemplate);

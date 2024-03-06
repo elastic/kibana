@@ -82,6 +82,7 @@ export const FLEET_COMPONENT_TEMPLATES = [
 ];
 
 export const STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS = `logs@settings`;
+export const STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS = `logs@mappings`;
 export const STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS = `metrics@settings`;
 export const STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS = `metrics@tsdb-settings`;
 export const STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS = 'ecs@mappings';

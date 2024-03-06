@@ -85,6 +85,7 @@ describe('EPM template', () => {
       ...composedOfTemplates,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
+      'logs@mappings',
     ]);
   });
 
@@ -130,6 +131,7 @@ describe('EPM template', () => {
       ...composedOfTemplates,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+      'logs@mappings',
     ]);
   });
 
@@ -149,6 +151,7 @@ describe('EPM template', () => {
       'logs@settings',
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
+      'logs@mappings',
     ]);
   });
 
