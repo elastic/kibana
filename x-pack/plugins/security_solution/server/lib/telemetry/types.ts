@@ -464,6 +464,12 @@ export interface TelemetryConfiguration {
   sender_channels?: {
     [key: string]: TelemetrySenderChannelConfiguration;
   };
+  pagination_config?: PaginationConfiguration;
+}
+
+export interface PaginationConfiguration {
+  max_page_size_bytes: number;
+  num_docs_to_sample: number;
 }
 
 export interface TelemetrySenderChannelConfiguration {
