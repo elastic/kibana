@@ -8,7 +8,6 @@
 
 export const UI_SETTINGS = {
   META_FIELDS: 'metaFields',
-  DEFAULT_DATA_VIEW_ID: 'defaultIndex',
   DOC_HIGHLIGHT: 'doc_table:highlight',
   QUERY_STRING_OPTIONS: 'query:queryString:options',
   QUERY_ALLOW_LEADING_WILDCARDS: 'query:allowLeadingWildcards',
