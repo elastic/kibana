@@ -678,14 +678,17 @@ export const UnifiedDataTable = ({
         : undefined,
     [cellActionsTriggerId, isPlainRecord, visibleColumns, dataView]
   );
-  const cellActionsMetadata = useMemo(() => ({ dataViewId: dataView.id }), [dataView]);
+  const allCellActionsMetadata = useMemo(
+    () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
+    [dataView, cellActionsMetadata]
+  );
 
   const columnsCellActions = useDataGridColumnsCellActions({
     fields: cellActionsFields,
     getCellValue,
     triggerId: cellActionsTriggerId,
     dataGridRef,
-    metadata: cellActionsMetadata,
+    metadata: allCellActionsMetadata,
   });
 
   const {
