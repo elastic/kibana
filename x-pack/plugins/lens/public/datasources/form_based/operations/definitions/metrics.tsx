@@ -33,6 +33,7 @@ import {
   getFilter,
   combineErrorMessages,
   isColumnOfType,
+  hasUncompatibleBreakdown,
 } from './helpers';
 import {
   FieldBasedIndexPatternColumn,
@@ -243,10 +244,13 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       const counterField =
         _indexPattern.getFieldByName(column.sourceField)?.timeSeriesMetric === 'counter';
 
-      if (counterRateColumn && counterField) {
+      const uncompatibleBreakdown = hasUncompatibleBreakdown(layer, _indexPattern);
+
+      if (counterRateColumn && counterField && !uncompatibleBreakdown) {
         const unit = timeScaleToUnit(
           layer.columns[counterRateColumn].timeScale || column.timeScale
         );
+
         return buildExpressionFunction<AggFunctionsMapping['aggBucketSum']>('aggBucketSum', {
           id: columnId,
           enabled: true,

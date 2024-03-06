@@ -19,7 +19,12 @@ import {
 } from './utils';
 import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn, getFilter, isColumnOfType } from '../helpers';
+import {
+  getFormatFromPreviousColumn,
+  getFilter,
+  isColumnOfType,
+  hasUncompatibleBreakdown,
+} from '../helpers';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.CounterRateOf', {
@@ -83,7 +88,10 @@ export const counterRateOperation: OperationDefinition<
     const metric =
       layer.columns[(layer.columns[columnId] as ReferenceBasedIndexPatternColumn).references[0]];
 
+    const uncompatibleBreakdown = hasUncompatibleBreakdown(layer, indexPattern);
+
     if (
+      !uncompatibleBreakdown &&
       metric &&
       isColumnOfType('max', metric) &&
       'sourceField' in metric &&

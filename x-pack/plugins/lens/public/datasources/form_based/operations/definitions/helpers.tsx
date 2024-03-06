@@ -237,3 +237,11 @@ export function getFilter(
 export function isMetricCounterField(field?: IndexPatternField) {
   return field?.timeSeriesMetric === 'counter';
 }
+
+export function hasUncompatibleBreakdown(layer: FormBasedLayer, _indexPattern: IndexPattern) {
+  const uncompatibleBreakdowns = Object.values(layer.columns).filter(
+    (col) => col.isBucketed && !['date_histogram'].includes(col.operationType)
+  );
+
+  return uncompatibleBreakdowns.length > 0;
+}
