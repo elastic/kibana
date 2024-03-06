@@ -12,6 +12,7 @@ import type {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
@@ -42,48 +43,50 @@ export async function importRulesChunk({
   existingLists: Record<string, ExceptionListSchema>;
   allowMissingConnectorSecrets?: boolean;
 }): Promise<ImportRuleResponse[]> {
-  const result: ImportRuleResponse[] = [];
-  const importRulePromises: Array<Promise<ImportRuleResponse>> = [];
+  return withSecuritySpan(`importRulesChunk (${rulesToImport.length})`, async () => {
+    const result: ImportRuleResponse[] = [];
+    const importRulePromises: Array<Promise<ImportRuleResponse>> = [];
 
-  for (const ruleToImport of rulesToImport) {
-    if (ruleToImport instanceof Error) {
-      // If the JSON object had a validation or parse error then we return
-      // early with the error and an (unknown) for the ruleId
-      result.push(
-        createBulkErrorObject({
-          statusCode: 400,
-          message: ruleToImport.message,
+    for (const ruleToImport of rulesToImport) {
+      if (ruleToImport instanceof Error) {
+        // If the JSON object had a validation or parse error then we return
+        // early with the error and an (unknown) for the ruleId
+        result.push(
+          createBulkErrorObject({
+            statusCode: 400,
+            message: ruleToImport.message,
+          })
+        );
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      const exceptionErrors = sanitizeRuleExceptionReferences({
+        rule: ruleToImport,
+        existingLists,
+      });
+
+      for (const exceptionError of exceptionErrors) {
+        result.push(exceptionError);
+      }
+
+      importRulePromises.push(
+        importRule({
+          ruleToImport,
+          mlAuthz,
+          overwriteExisting: overwriteExistingRules,
+          rulesClient,
+          allowMissingConnectorSecrets,
         })
       );
-      // eslint-disable-next-line no-continue
-      continue;
     }
 
-    const exceptionErrors = sanitizeRuleExceptionReferences({
-      rule: ruleToImport,
-      existingLists,
-    });
+    const importRuleResults = await Promise.all(importRulePromises);
 
-    for (const exceptionError of exceptionErrors) {
-      result.push(exceptionError);
+    for (const importRuleResult of importRuleResults) {
+      result.push(importRuleResult);
     }
 
-    importRulePromises.push(
-      importRule({
-        ruleToImport,
-        mlAuthz,
-        overwriteExisting: overwriteExistingRules,
-        rulesClient,
-        allowMissingConnectorSecrets,
-      })
-    );
-  }
-
-  const importRuleResults = await Promise.all(importRulePromises);
-
-  for (const importRuleResult of importRuleResults) {
-    result.push(importRuleResult);
-  }
-
-  return result;
+    return result;
+  });
 }

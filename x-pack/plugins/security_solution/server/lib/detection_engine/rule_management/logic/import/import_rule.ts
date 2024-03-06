@@ -6,6 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
@@ -28,26 +29,40 @@ export async function importRule({
   mlAuthz: MlAuthz;
   allowMissingConnectorSecrets?: boolean;
 }): Promise<ImportRuleResponse> {
-  try {
-    throwAuthzError(await mlAuthz.validateRuleType(ruleToImport.type));
-    const existingRule = await readRules({
-      rulesClient,
-      ruleId: ruleToImport.rule_id,
-      id: undefined,
-    });
-
-    if (existingRule != null && !overwriteExisting) {
-      return createBulkErrorObject({
-        ruleId: ruleToImport.rule_id,
-        statusCode: 409,
-        message: `rule_id: "${ruleToImport.rule_id}" already exists`,
-      });
-    }
-
-    if (existingRule == null) {
-      await createRules({
+  return withSecuritySpan('importRule', async () => {
+    try {
+      throwAuthzError(await mlAuthz.validateRuleType(ruleToImport.type));
+      const existingRule = await readRules({
         rulesClient,
-        params: ruleToImport,
+        ruleId: ruleToImport.rule_id,
+        id: undefined,
+      });
+
+      if (existingRule != null && !overwriteExisting) {
+        return createBulkErrorObject({
+          ruleId: ruleToImport.rule_id,
+          statusCode: 409,
+          message: `rule_id: "${ruleToImport.rule_id}" already exists`,
+        });
+      }
+
+      if (existingRule == null) {
+        await createRules({
+          rulesClient,
+          params: ruleToImport,
+          allowMissingConnectorSecrets,
+        });
+
+        return {
+          rule_id: ruleToImport.rule_id,
+          status_code: 200,
+        };
+      }
+
+      await updateRules({
+        rulesClient,
+        existingRule,
+        ruleUpdate: ruleToImport,
         allowMissingConnectorSecrets,
       });
 
@@ -55,24 +70,12 @@ export async function importRule({
         rule_id: ruleToImport.rule_id,
         status_code: 200,
       };
+    } catch (err) {
+      return createBulkErrorObject({
+        ruleId: ruleToImport.rule_id,
+        statusCode: err.statusCode ?? 400,
+        message: err.message,
+      });
     }
-
-    await updateRules({
-      rulesClient,
-      existingRule,
-      ruleUpdate: ruleToImport,
-      allowMissingConnectorSecrets,
-    });
-
-    return {
-      rule_id: ruleToImport.rule_id,
-      status_code: 200,
-    };
-  } catch (err) {
-    return createBulkErrorObject({
-      ruleId: ruleToImport.rule_id,
-      statusCode: err.statusCode ?? 400,
-      message: err.message,
-    });
-  }
+  });
 }
