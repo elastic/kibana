@@ -257,7 +257,7 @@ Escape formula values in cells with a `'`. See OWASP: https://www.owasp.org/inde
 deprecated:[8.14.0,This setting will be removed in an upcoming version of {kib}.] When `true`, this
 setting enables a deprecated feature which allows users to download a CSV export from a saved search
 panel on a dashboard. When `false`, users can generate regular CSV reports from a saved search panel on a
-dashboard and later download the report in *Stack Management > Reporting*. Defaults to `false`.
+dashboard and later download them in *Stack Management > Reporting*. Defaults to `false`.
 
 `xpack.reporting.csv.useByteOrderMarkEncoding`::
 Adds a byte order mark (`\ufeff`) at the beginning of the CSV file. Defaults to `false`.
