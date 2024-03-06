@@ -42,7 +42,6 @@ import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { AppNavLinkStatus } from '@kbn/core/public';
 import {
   UiActionsStart,
   ACTION_VISUALIZE_FIELD,
@@ -451,7 +450,7 @@ export class LensPlugin {
     core.application.register({
       id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: async (params: AppMountParameters) => {
         const { core: coreStart, plugins: deps } = startServices();
 
