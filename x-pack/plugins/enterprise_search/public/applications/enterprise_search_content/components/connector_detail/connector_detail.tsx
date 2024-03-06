@@ -26,6 +26,7 @@ import { SearchIndexIndexMappings } from '../search_index/index_mappings';
 import { SearchIndexPipelines } from '../search_index/pipelines/pipelines';
 
 import { ConnectorConfiguration } from './connector_configuration';
+import { ConnectorNameAndDescription } from './connector_name_and_description';
 import { ConnectorViewLogic } from './connector_view_logic';
 import { ConnectorDetailOverview } from './overview';
 
@@ -225,7 +226,12 @@ export const ConnectorDetail: React.FC = () => {
       pageViewTelemetry={tabId}
       isLoading={isLoading}
       pageHeader={{
-        pageTitle: connector?.name ?? '...',
+        pageTitle: connector ? <ConnectorNameAndDescription connector={connector} /> : '...',
+        rightSideGroupProps: {
+          gutterSize: 's',
+          responsive: false,
+          wrap: false,
+        },
         rightSideItems: getHeaderActions(index, hasAppSearchAccess),
         tabs,
       }}

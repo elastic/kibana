@@ -42,7 +42,7 @@ import { escapeQuotes } from '@kbn/es-query';
 import { isQuery } from '@kbn/data-plugin/public';
 
 import { PLUGIN_ID } from '../../../../common/constants/app';
-import { findMessageField, getDataViewIdFromName } from '../../util/index_utils';
+import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
 import { parseInterval } from '../../../../common/util/parse_interval';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
@@ -61,6 +61,7 @@ import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useMlKibana } from '../../contexts/kibana';
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
+import { useMlIndexUtils } from '../../util/index_service';
 
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
 
@@ -97,6 +98,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   const {
     services: { data, share, application, uiActions },
   } = kibana;
+  const { getDataViewIdFromName } = useMlIndexUtils();
 
   const job = useMemo(() => {
     return mlJobService.getJob(props.anomaly.jobId);
