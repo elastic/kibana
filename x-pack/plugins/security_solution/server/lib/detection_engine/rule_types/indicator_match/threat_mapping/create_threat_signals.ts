@@ -224,10 +224,7 @@ export const createThreatSignals = async ({
     completeRule.ruleParams.alertSuppression?.groupBy?.length
   );
 
-  const isAlertSuppressionActive =
-    isAlertSuppressionConfigured &&
-    Boolean(runOpts.experimentalFeatures?.alertSuppressionForIndicatorMatchRuleEnabled) &&
-    hasPlatinumLicense;
+  const isAlertSuppressionActive = isAlertSuppressionConfigured && hasPlatinumLicense;
 
   // alert suppression needs to be performed on results searched in ascending order, so alert's suppression boundaries would be set correctly
   // at the same time, there are concerns on performance of IM rule when sorting is set to asc, as it may lead to longer rule runs, since it will
