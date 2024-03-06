@@ -484,7 +484,7 @@ export function CasesTableServiceProvider(
 
     async setFiltersConfigurationInLocalStorage(state: Array<{ key: string; isActive: boolean }>) {
       await browser.setLocalStorageItem(
-        'management.cases.list.tableFiltersConfig',
+        'cases.cases.list.tableFiltersConfig',
         JSON.stringify(state)
       );
 
