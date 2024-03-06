@@ -44,7 +44,11 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
     [onStateChange]
   );
   return (
-    <Container>
+    <Container
+      onClick={(evt) => {
+        evt.stopPropagation();
+      }}
+    >
       <EuiFlexGroup direction="row" responsive={false} gutterSize="xs" alignItems="center" wrap>
         {!slo.summary ? (
           <LoadingBadges />
