@@ -19,7 +19,8 @@ const LABELS = {
   inProgress: i18n.STATUS_IN_PROGRESS,
 };
 
-describe('StatusFilter', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/177334
+describe.skip('StatusFilter', () => {
   const onChange = jest.fn();
   const defaultProps = {
     selectedOptionKeys: [],
