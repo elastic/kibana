@@ -101,6 +101,11 @@ const getInstalledPackagePolicies = (
       const agentCounts =
         agentPolicies?.find((agentPolicy) => agentPolicy?.id === packagePolicy.policy_id)?.agents ??
         0;
+      const isAgentless =
+        agentPolicies?.find((agentPolicy) => 'agentless' === packagePolicy.policy_id) !== undefined
+          ? true
+          : false;
+
       const isSetupAutomatic = getEnabledIsSetupAutomatic(packagePolicy);
 
       return {
@@ -111,6 +116,7 @@ const getInstalledPackagePolicies = (
         created_at: packagePolicy.created_at,
         agent_policy_id: packagePolicy.policy_id,
         agent_count: agentCounts,
+        is_agentless: isAgentless,
         account_type: getAccountTypeField(packagePolicy),
         is_setup_automatic: isSetupAutomatic,
         setup_access_option: isSetupAutomatic ? null : getSetupAccessOption(packagePolicy),
