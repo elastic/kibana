@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { createPromiseFromStreams } from '@kbn/utils';
-import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 import {
   ImportRulesRequestQuery,
@@ -34,8 +33,6 @@ import {
   migrateLegacyActionsIds,
 } from '../../../utils/utils';
 
-const CHUNK_PARSED_OBJECT_SIZE = 50;
-
 export const importRulesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
@@ -50,6 +47,11 @@ export const importRulesRoute = (
         body: {
           maxBytes: config.maxRuleImportPayloadBytes,
           output: 'stream',
+        },
+        timeout: {
+          // Rule import rule may take a significant amount of time
+          // socket shouldn't be closed during this period
+          idleSocket: 3600 * 1000,
         },
       },
     })
@@ -157,10 +159,8 @@ export const importRulesRoute = (
             savedObjectsClient,
           });
 
-          const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
-
           const importRuleResponse: ImportRuleResponse[] = await importRulesHelper({
-            ruleChunks: chunkParseObjects,
+            rules: parsedRules,
             rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
             mlAuthz,
             overwriteRules: request.query.overwrite,

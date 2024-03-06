@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash/fp';
 import type { SavedObject } from '@kbn/core/server';
 import type {
   ImportExceptionsListSchema,
@@ -16,13 +17,9 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
-import { createBulkErrorObject } from '../../../routes/utils';
-import { createRules } from '../crud/create_rules';
-import { readRules } from '../crud/read_rules';
-import { updateRules } from '../crud/update_rules';
 import type { MlAuthz } from '../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../machine_learning/validation';
-import { checkRuleExceptionReferences } from './check_rule_exception_references';
+import { wrapInMacrotask } from '../../utils/wrap_in_macrotask';
+import { importRulesChunk } from './import_rules_chunk';
 
 export type PromiseFromStreams = RuleToImport | Error;
 export interface RuleExceptionsPromiseFromStreams {
@@ -31,10 +28,12 @@ export interface RuleExceptionsPromiseFromStreams {
   actionConnectors: SavedObject[];
 }
 
+const IMPORT_RULES_CHUNK_SIZE = 50;
+
 /**
  * Takes rules to be imported and either creates or updates rules
  * based on user overwrite preferences
- * @param ruleChunks {array} - rules being imported
+ * @param rules {array} - rules being imported
  * @param rulesResponseAcc {array} - the accumulation of success and
  * error messages gathered through the rules import logic
  * @param mlAuthz {object}
@@ -46,7 +45,7 @@ export interface RuleExceptionsPromiseFromStreams {
  * @returns {Promise} an array of error and success messages from import
  */
 export const importRules = async ({
-  ruleChunks,
+  rules,
   rulesResponseAcc,
   mlAuthz,
   overwriteRules,
@@ -54,108 +53,40 @@ export const importRules = async ({
   existingLists,
   allowMissingConnectorSecrets,
 }: {
-  ruleChunks: PromiseFromStreams[][];
+  rules: PromiseFromStreams[];
   rulesResponseAcc: ImportRuleResponse[];
   mlAuthz: MlAuthz;
   overwriteRules: boolean;
   rulesClient: RulesClient;
   existingLists: Record<string, ExceptionListSchema>;
   allowMissingConnectorSecrets?: boolean;
-}) => {
-  let importRuleResponse: ImportRuleResponse[] = [...rulesResponseAcc];
-
+}): Promise<ImportRuleResponse[]> => {
   // If we had 100% errors and no successful rule could be imported we still have to output an error.
   // otherwise we would output we are success importing 0 rules.
-  if (ruleChunks.length === 0) {
-    return importRuleResponse;
+  if (rules.length === 0) {
+    return [...rulesResponseAcc];
   }
 
-  while (ruleChunks.length) {
-    const batchParseObjects = ruleChunks.shift() ?? [];
-    const newImportRuleResponse = await Promise.all(
-      batchParseObjects.reduce<Array<Promise<ImportRuleResponse>>>((accum, parsedRule) => {
-        const importsWorkerPromise = new Promise<ImportRuleResponse>(async (resolve, reject) => {
-          try {
-            if (parsedRule instanceof Error) {
-              // If the JSON object had a validation or parse error then we return
-              // early with the error and an (unknown) for the ruleId
-              resolve(
-                createBulkErrorObject({
-                  statusCode: 400,
-                  message: parsedRule.message,
-                })
-              );
-              return null;
-            }
+  const result = [...rulesResponseAcc];
+  const ruleChunks = chunk(IMPORT_RULES_CHUNK_SIZE, rules);
 
-            try {
-              const [exceptionErrors, exceptions] = checkRuleExceptionReferences({
-                rule: parsedRule,
-                existingLists,
-              });
-
-              importRuleResponse = [...importRuleResponse, ...exceptionErrors];
-
-              throwAuthzError(await mlAuthz.validateRuleType(parsedRule.type));
-              const rule = await readRules({
-                rulesClient,
-                ruleId: parsedRule.rule_id,
-                id: undefined,
-              });
-
-              if (rule == null) {
-                await createRules({
-                  rulesClient,
-                  params: {
-                    ...parsedRule,
-                    exceptions_list: [...exceptions],
-                  },
-                  allowMissingConnectorSecrets,
-                });
-                resolve({
-                  rule_id: parsedRule.rule_id,
-                  status_code: 200,
-                });
-              } else if (rule != null && overwriteRules) {
-                await updateRules({
-                  rulesClient,
-                  existingRule: rule,
-                  ruleUpdate: {
-                    ...parsedRule,
-                    exceptions_list: [...exceptions],
-                  },
-                });
-                resolve({
-                  rule_id: parsedRule.rule_id,
-                  status_code: 200,
-                });
-              } else if (rule != null) {
-                resolve(
-                  createBulkErrorObject({
-                    ruleId: parsedRule.rule_id,
-                    statusCode: 409,
-                    message: `rule_id: "${parsedRule.rule_id}" already exists`,
-                  })
-                );
-              }
-            } catch (err) {
-              resolve(
-                createBulkErrorObject({
-                  ruleId: parsedRule.rule_id,
-                  statusCode: err.statusCode ?? 400,
-                  message: err.message,
-                })
-              );
-            }
-          } catch (error) {
-            reject(error);
-          }
-        });
-        return [...accum, importsWorkerPromise];
-      }, [])
+  for (const rulesChunk of ruleChunks) {
+    const importRulesChunkInMacrotask = wrapInMacrotask(() =>
+      importRulesChunk({
+        rulesToImport: rulesChunk,
+        mlAuthz,
+        overwriteExistingRules: overwriteRules,
+        rulesClient,
+        existingLists,
+        allowMissingConnectorSecrets,
+      })
     );
-    importRuleResponse = [...importRuleResponse, ...newImportRuleResponse];
+    const importRulesChunkResponses = await importRulesChunkInMacrotask();
+
+    for (const importResponse of importRulesChunkResponses) {
+      result.push(importResponse);
+    }
   }
 
-  return importRuleResponse;
+  return result;
 };
