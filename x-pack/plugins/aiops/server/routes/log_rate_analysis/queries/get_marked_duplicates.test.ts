@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { significantItemGroups } from '../../../../common/__mocks__/farequote/significant_item_groups';
-import { fields } from '../../../../common/__mocks__/artificial_logs/fields';
-import { filteredFrequentItemSets } from '../../../../common/__mocks__/artificial_logs/filtered_frequent_item_sets';
-import { significantTerms } from '../../../../common/__mocks__/artificial_logs/significant_terms';
+import { significantItemGroups } from '@kbn/aiops-test-utils/farequote/significant_item_groups';
+import { fields } from '@kbn/aiops-test-utils/artificial_logs/fields';
+import { filteredFrequentItemSets } from '@kbn/aiops-test-utils/artificial_logs/filtered_frequent_item_sets';
+import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
 
 import { getFieldValuePairCounts } from './get_field_value_pair_counts';
 import { getMarkedDuplicates } from './get_marked_duplicates';

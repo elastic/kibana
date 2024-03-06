@@ -8,10 +8,9 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
+import { frequentItemSetsLargeArraysSource } from '@kbn/aiops-test-utils/frequent_item_sets_large_arrays';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-import { frequentItemSetsLargeArraysSource } from '../../apps/aiops/log_rate_analysis/test_data/__mocks__/frequent_item_sets_large_arrays';
 
 const LOG_RATE_ANALYSYS_DATA_GENERATOR = {
   KIBANA_SAMPLE_DATA_LOGS: 'kibana_sample_data_logs',
