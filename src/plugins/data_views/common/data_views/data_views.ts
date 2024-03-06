@@ -296,6 +296,9 @@ export interface DataViewsServicePublicMethods {
    * Returns whether a default data view exists.
    */
   defaultDataViewExists: () => Promise<boolean>;
+
+  getMetaFields: () => Promise<string[] | undefined>;
+  getShortDotsEnable: () => Promise<boolean | undefined>;
 }
 
 /**
