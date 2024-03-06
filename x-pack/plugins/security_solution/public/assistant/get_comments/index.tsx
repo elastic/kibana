@@ -11,6 +11,7 @@ import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import { AssistantAvatar } from '@kbn/elastic-assistant';
+import type { SelectMessage } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import { getMessageContentWithReplacements } from '../helpers';
 import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
@@ -48,12 +49,14 @@ export const getComments = ({
   isFetchingResponse,
   regenerateMessage,
   showAnonymizedValues,
+  selectMessage,
 }: {
   amendMessage: ({ conversationId, content }: { conversationId: string; content: string }) => void;
   currentConversation: Conversation;
   isFetchingResponse: boolean;
   regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
+  selectMessage: SelectMessage;
 }): EuiCommentProps[] => {
   const amendMessageOfConversation = (content: string) => {
     amendMessage({
@@ -107,7 +110,7 @@ export const getComments = ({
           message.timestamp.length === 0 ? new Date().toLocaleString() : message.timestamp
         ),
         username: isUser ? i18n.YOU : i18n.ASSISTANT,
-        eventColor: message.isError ? 'danger' : undefined,
+        eventColor: message.isSelected ? 'primary' : message.isError ? 'danger' : undefined,
       };
 
       const transformMessage = (content: string) =>
@@ -140,9 +143,20 @@ export const getComments = ({
       // transform message here so we can send correct message to CommentActions
       const transformedMessage = transformMessage(message.content ?? '');
 
+      // Wrap
+      const handleSelectMessage = () => {
+        selectMessage({
+          conversationId: currentConversation.id,
+          isSelected: !message.isSelected,
+          messageIndex: index,
+        });
+      };
+
       return {
         ...messageProps,
-        actions: <CommentActions message={transformedMessage} />,
+        actions: (
+          <CommentActions message={transformedMessage} selectMessage={handleSelectMessage} />
+        ),
         children: (
           <StreamComment
             amendMessage={amendMessageOfConversation}

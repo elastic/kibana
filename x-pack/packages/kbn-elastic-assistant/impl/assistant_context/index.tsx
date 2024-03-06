@@ -39,6 +39,7 @@ import {
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
 import { AssistantAvailability, AssistantTelemetry } from './types';
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
+import { SelectMessage } from '../assistant/use_conversation';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -121,6 +122,7 @@ export interface UseAssistantContext {
     showAnonymizedValues,
     amendMessage,
     isFetchingResponse,
+    selectMessage,
   }: {
     currentConversation: Conversation;
     isFetchingResponse: boolean;
@@ -133,6 +135,7 @@ export interface UseAssistantContext {
     }) => void;
     regenerateMessage: () => void;
     showAnonymizedValues: boolean;
+    selectMessage: SelectMessage;
   }) => EuiCommentProps[];
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;

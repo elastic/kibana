@@ -1,0 +1,86 @@
+openapi: 3.0.0
+info:
+  title: Post Datasets API endpoint
+  version: '1'
+paths:
+  /internal/elastic_assistant/datasets:
+    post:
+      operationId: PostDatasets
+      x-codegen-enabled: true
+      description: Create or append messages to a dataset
+      summary: Create or append messages to a dataset
+      tags:
+        - Datasets API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostDatasetsBody'
+      parameters:
+        - name: datasetId
+          in: query
+          description: Id of dataset to add datasetItem to
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  datasetId:
+                    type: string
+                  success:
+                    type: boolean
+                required:
+                  - datasetId
+                  - success
+        '400':
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+components:
+  schemas:
+    DatasetItem:
+      type: object
+      properties:
+        id:
+          type: string
+        input:
+          type: string
+        prediction:
+          type: string
+        reference:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+      required:
+        - input
+        - reference
+    Dataset:
+      type: array
+      items:
+        $ref: '#/components/schemas/DatasetItem'
+      default: []
+    PostDatasetsBody:
+      type: object
+      properties:
+        dataset:
+          $ref: '#/components/schemas/Dataset'
+      required:
+        - dataset

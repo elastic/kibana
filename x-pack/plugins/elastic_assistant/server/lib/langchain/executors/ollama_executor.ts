@@ -10,19 +10,18 @@ import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { Tool } from 'langchain/tools';
 
+import { Ollama } from '@langchain/community/llms/ollama';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
-import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
-import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
+import type { AgentExecutorParams, AgentExecutorResponse } from './types';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
 import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
 
-export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
+export const DEFAULT_AGENT_EXECUTOR_ID = 'Ollama Agent Executor';
 
 /**
- * The default agent executor used by the Elastic AI Assistant. Main agent/chain that wraps the ActionsClientLlm,
- * sets up a conversation BufferMemory from chat history, and registers tools like the ESQLKnowledgeBaseTool.
+ * An Ollama agent executor for using local models deployed via Ollama.
  *
  */
 export const callAgentExecutor = async ({
@@ -46,7 +45,10 @@ export const callAgentExecutor = async ({
   telemetry,
   traceOptions,
 }: AgentExecutorParams): AgentExecutorResponse => {
-  const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
+  const ollama = new Ollama({
+    baseUrl: 'http://localhost:11434', // Default value
+    model: 'llama2', // Default value
+  });
 
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message
@@ -72,7 +74,7 @@ export const callAgentExecutor = async ({
   const modelExists = await esStore.isModelInstalled();
 
   // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
-  const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
+  const chain = RetrievalQAChain.fromLLM(ollama, esStore.asRetriever(10));
 
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {
@@ -92,7 +94,7 @@ export const callAgentExecutor = async ({
 
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
-  const executor = await initializeAgentExecutorWithOptions(tools, llm, {
+  const executor = await initializeAgentExecutorWithOptions(tools, ollama, {
     agentType: 'chat-conversational-react-description',
     memory,
     verbose: false,
@@ -125,15 +127,9 @@ export const callAgentExecutor = async ({
     );
   });
 
-  console.log('hello there');
-  console.log(apmTracer.lastRunId);
-  // const client = new Client();
-  // const runUrl = await client.getRunUrl({ runId: apmTracer.lastRunId });
-  // console.log(runUrl);
-
   return {
     connector_id: connectorId,
-    data: llm.getActionResultData(), // the response from the actions framework
+    data: '', // ollama.getActionResultData(), // the response from the actions framework
     trace_data: traceData,
     replacements,
     status: 'ok',

@@ -59,6 +59,18 @@ interface SetConversationProps {
   conversation: Conversation;
 }
 
+interface SelectMessageProps {
+  conversationId: string;
+  isSelected?: boolean;
+  messageIndex: number;
+}
+
+export type SelectMessage = (props: SelectMessageProps) => void;
+
+interface ClearMessageSelectionProps {
+  conversationId: string;
+}
+
 interface UseConversation {
   appendMessage: ({ conversationId, message }: AppendMessageProps) => Message[];
   amendMessage: ({ conversationId, content }: AmendMessageProps) => void;
@@ -72,6 +84,8 @@ interface UseConversation {
   removeLastMessage: (conversationId: string) => Message[];
   setApiConfig: ({ conversationId, apiConfig }: SetApiConfigProps) => void;
   setConversation: ({ conversation }: SetConversationProps) => void;
+  selectMessage: ({ conversationId, messageIndex, isSelected }: SelectMessageProps) => void;
+  clearMessageSelection: ({ conversationId }: ClearMessageSelectionProps) => void;
 }
 
 export const useConversation = (): UseConversation => {
@@ -335,6 +349,53 @@ export const useConversation = (): UseConversation => {
     [setConversations]
   );
 
+  /**
+   * Select a message within a conversation
+   */
+  const selectMessage = useCallback(
+    ({ conversationId, isSelected = true, messageIndex }: SelectMessageProps): void => {
+      setConversations((prev: Record<string, Conversation>) => {
+        return {
+          ...prev,
+          [conversationId]: {
+            ...prev[conversationId],
+            messages: prev[conversationId].messages.map((message, index) => {
+              if (index === messageIndex) {
+                return {
+                  ...message,
+                  isSelected,
+                };
+              }
+              return message;
+            }),
+          },
+        };
+      });
+    },
+    [setConversations]
+  );
+
+  /**
+   * Clears selection of all messages within a conversation
+   */
+  const clearMessageSelection = useCallback(
+    ({ conversationId }: ClearMessageSelectionProps): void => {
+      setConversations((prev: Record<string, Conversation>) => {
+        return {
+          ...prev,
+          [conversationId]: {
+            ...prev[conversationId],
+            messages: prev[conversationId].messages.map((message, index) => ({
+              ...message,
+              isSelected: false,
+            })),
+          },
+        };
+      });
+    },
+    [setConversations]
+  );
+
   return {
     amendMessage,
     appendMessage,
@@ -345,5 +406,7 @@ export const useConversation = (): UseConversation => {
     removeLastMessage,
     setApiConfig,
     setConversation,
+    selectMessage,
+    clearMessageSelection,
   };
 };

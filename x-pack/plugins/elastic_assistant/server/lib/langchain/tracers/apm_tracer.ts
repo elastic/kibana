@@ -23,6 +23,7 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
   name = 'apm_tracer';
   projectName?: string;
   exampleId?: string;
+  lastRunId?: string;
   logger: Logger;
 
   retrieverSpans: Span[] = [];
@@ -93,6 +94,7 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
   }
 
   async onLLMStart(run: Run): Promise<void> {
+    this.lastRunId = run.id;
     this.logger.debug(`onLLMStart: run:\n${JSON.stringify(run, null, 2)}`);
     this.createAndAddSpanFromRun(run, this.llmSpans);
   }

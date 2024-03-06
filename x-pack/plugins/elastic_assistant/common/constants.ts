@@ -18,5 +18,8 @@ export const KNOWLEDGE_BASE = `${BASE_PATH}/knowledge_base/{resource?}`;
 // Model Evaluation
 export const EVALUATE = `${BASE_PATH}/evaluate`;
 
+// Datasets
+export const DATASETS = `${BASE_PATH}/datasets`;
+
 // Capabilities
 export const CAPABILITIES = `${BASE_PATH}/capabilities`;

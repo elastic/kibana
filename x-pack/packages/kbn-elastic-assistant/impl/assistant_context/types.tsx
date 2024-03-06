@@ -20,6 +20,7 @@ export interface Message {
   content?: string;
   timestamp: string;
   isError?: boolean;
+  isSelected?: boolean;
   presentation?: MessagePresentation;
   traceData?: {
     transactionId: string;

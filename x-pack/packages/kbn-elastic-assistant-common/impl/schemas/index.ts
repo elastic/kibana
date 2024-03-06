@@ -24,3 +24,14 @@ export * from './evaluation/get_evaluate_route.gen';
 
 // Capabilities Schemas
 export * from './capabilities/get_capabilities_route.gen';
+
+// Dataset Schemas
+export * from './datasets/get_datasets_route.gen';
+export {
+  DatasetItem as PostDatasetItem,
+  Dataset as PostDataset,
+  PostDatasetsResponse,
+  PostDatasetsRequestBody,
+  PostDatasetsBody,
+  PostDatasetsRequestQuery,
+} from './datasets/post_datasets_route.gen';

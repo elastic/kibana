@@ -23,6 +23,7 @@ import { AssistantTitle } from '../assistant_title';
 import { ConversationSelector } from '../conversations/conversation_selector';
 import { AssistantSettingsButton } from '../settings/assistant_settings_button';
 import * as i18n from '../translations';
+import { AddToDatasetButton } from '../evaluation/add_to_dataset/add_to_dataset_button';
 
 interface OwnProps {
   currentConversation: Conversation;
@@ -123,17 +124,23 @@ export const AssistantHeader: React.FC<Props> = ({
                 </EuiToolTip>
               </EuiFlexItem>
 
-              <EuiFlexItem grow={false}>
-                <AssistantSettingsButton
-                  defaultConnectorId={defaultConnectorId}
-                  defaultProvider={defaultProvider}
-                  isDisabled={isDisabled}
-                  isSettingsModalVisible={isSettingsModalVisible}
-                  selectedConversation={currentConversation}
-                  setIsSettingsModalVisible={setIsSettingsModalVisible}
-                  setSelectedConversationId={setSelectedConversationId}
-                />
-              </EuiFlexItem>
+              <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <AddToDatasetButton selectedConversation={currentConversation} />
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <AssistantSettingsButton
+                    defaultConnectorId={defaultConnectorId}
+                    defaultProvider={defaultProvider}
+                    isDisabled={isDisabled}
+                    isSettingsModalVisible={isSettingsModalVisible}
+                    selectedConversation={currentConversation}
+                    setIsSettingsModalVisible={setIsSettingsModalVisible}
+                    setSelectedConversationId={setSelectedConversationId}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexGroup>
           </>
         </EuiFlexItem>

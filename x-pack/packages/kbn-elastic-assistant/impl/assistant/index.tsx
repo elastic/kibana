@@ -96,7 +96,7 @@ const AssistantComponent: React.FC<Props> = ({
     [selectedPromptContexts]
   );
 
-  const { amendMessage, createConversation } = useConversation();
+  const { amendMessage, createConversation, selectMessage } = useConversation();
 
   // Connector details
   const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({ http });
@@ -368,6 +368,7 @@ const AssistantComponent: React.FC<Props> = ({
             amendMessage,
             regenerateMessage: handleRegenerateResponse,
             isFetchingResponse: isLoadingChatSend,
+            selectMessage,
           })}
           css={css`
             margin-right: 20px;
@@ -405,6 +406,7 @@ const AssistantComponent: React.FC<Props> = ({
       isSettingsModalVisible,
       promptContexts,
       promptTextPreview,
+      selectMessage,
       selectedPromptContexts,
       selectedPromptContextsCount,
       showAnonymizedValues,

@@ -44,6 +44,8 @@ import {
 } from './services/app_context';
 import { getCapabilitiesRoute } from './routes/capabilities/get_capabilities_route';
 import { getEvaluateRoute } from './routes/evaluate/get_evaluate';
+import { getDatasetsRoute } from './routes/datasets/get_datasets';
+import { postDatasetsRoute } from './routes/datasets/post_datasets';
 
 interface CreateRouteHandlerContextParams {
   core: CoreSetup<ElasticAssistantPluginStart, unknown>;
@@ -126,6 +128,9 @@ export class ElasticAssistantPlugin
     // Evaluate
     postEvaluateRoute(router, getElserId);
     getEvaluateRoute(router);
+    // Datasets
+    getDatasetsRoute(router);
+    postDatasetsRoute(router);
     // Capabilities
     getCapabilitiesRoute(router);
     return {
