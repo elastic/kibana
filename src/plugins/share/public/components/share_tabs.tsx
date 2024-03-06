@@ -8,9 +8,19 @@
 
 import { Capabilities } from '@kbn/core-capabilities-common';
 import React from 'react';
-import { EuiModal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ShareModal } from '@kbn/share-modal';
 import { LocatorPublic, AnonymousAccessServiceContract } from '../../common';
 import { ShareMenuItem, UrlParamExtension, BrowserUrlService } from '../types';
+import { LinkModal } from './link_modal';
+import { EmbedModal } from './embed_modal';
+
+export interface ModalTabActionHandler {
+  id: string;
+  dataTestSubj: string;
+  formattedMessageId: string;
+  defaultMessage: string;
+}
 
 export interface ModalTabActionHandler {
   id: string;
@@ -44,6 +54,63 @@ export interface ShareContextTabProps {
   isEmbedded: boolean;
 }
 
-export const ShareMenuTabs = ({ onClose }: ShareContextTabProps) => {
-  return <EuiModal onClose={onClose}>{'placeholder'}</EuiModal>;
+export const ShareMenuTabs = ({
+  allowEmbed,
+  shareMenuItems,
+  urlService,
+  onClose,
+  objectType,
+  embedUrlParamExtensions,
+  objectId,
+  isDirty,
+  isEmbedded,
+}: ShareContextTabProps) => {
+  const getTabs = () => {
+    const tabs: any[] = [];
+
+    tabs.push({
+      id: 'link',
+      name: i18n.translate('share.contextMenu.permalinksTab', {
+        defaultMessage: 'Links',
+      }),
+      // do not break functional tests
+      'data-test-subj': 'Permalinks',
+      content: (
+        <LinkModal
+          objectType={objectType}
+          objectId={objectId}
+          isDirty={isDirty}
+          isEmbedded={isEmbedded}
+          onClose={onClose}
+          urlService={urlService}
+        />
+      ),
+    });
+
+    shareMenuItems.map(({ shareMenuItem, panel }) => {
+      tabs.push({
+        ...shareMenuItem,
+        id: panel.id,
+      });
+    });
+
+    if (allowEmbed) {
+      tabs.push({
+        id: 'embed',
+        name: i18n.translate('share.contextMenu.embedCodeTab', {
+          defaultMessage: 'Embed',
+        }),
+        content: (
+          <EmbedModal
+            objectType={objectType}
+            urlParamExtensions={embedUrlParamExtensions}
+            urlService={urlService}
+          />
+        ),
+      });
+    }
+    return tabs;
+  };
+
+  return <ShareModal objectType={objectType} onClose={onClose} tabs={getTabs()} />;
 };
