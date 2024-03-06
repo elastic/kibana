@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 
 import { ActionBarStatusItem } from './action_bar_status_item';
 
@@ -15,20 +15,13 @@ describe('ActionBarStatusItem', () => {
     const title = 'Title';
     const status = 'Online';
 
-    const wrapper = mount(
+    render(
       <ActionBarStatusItem title={title}>
         <span>{status}</span>
       </ActionBarStatusItem>
     );
 
-    const titleElement = wrapper.find('strong');
-
-    expect(titleElement.exists()).toBeTruthy();
-    expect(titleElement.text()).toBe(title);
-
-    const childrenElement = wrapper.find(`span`);
-
-    expect(childrenElement.exists()).toBeTruthy();
-    expect(childrenElement.text()).toBe(status);
+    expect(screen.getByText(title)).toBeInTheDocument();
+    expect(screen.getByText(status)).toBeInTheDocument();
   });
 });
