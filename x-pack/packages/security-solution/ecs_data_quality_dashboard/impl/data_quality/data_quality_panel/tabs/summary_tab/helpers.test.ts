@@ -38,10 +38,65 @@ import {
 describe('helpers', () => {
   describe('getSummaryData', () => {
     test('it returns the expected `SummaryData`', () => {
-      expect(getSummaryData(mockPartitionedFieldMetadata)).toEqual([
+      expect(
+        getSummaryData({
+          ...mockPartitionedFieldMetadata,
+          sameFamily: [
+            {
+              dashed_name: 'source-ip',
+              description: 'IP address of the source (IPv4 or IPv6).',
+              flat_name: 'source.ip',
+              level: 'core',
+              name: 'ip',
+              normalize: [],
+              short: 'IP address of the source.',
+              type: 'ip',
+              indexFieldName: 'source.ip',
+              indexFieldType: 'ip',
+              indexInvalidValues: [],
+              hasEcsMetadata: true,
+              isEcsCompliant: true,
+              isInSameFamily: true,
+            },
+            {
+              indexFieldName: 'source.ip.keyword2',
+              indexFieldType: 'keyword2',
+              indexInvalidValues: [],
+              hasEcsMetadata: false,
+              isEcsCompliant: false,
+              isInSameFamily: true,
+            },
+            {
+              indexFieldName: 'source.ip.text',
+              indexFieldType: 'text',
+              indexInvalidValues: [],
+              hasEcsMetadata: false,
+              isEcsCompliant: false,
+              isInSameFamily: true,
+            },
+            {
+              indexFieldName: 'source.ip.text2',
+              indexFieldType: 'text2',
+              indexInvalidValues: [],
+              hasEcsMetadata: false,
+              isEcsCompliant: false,
+              isInSameFamily: true,
+            },
+            {
+              indexFieldName: 'source.port.keyword',
+              indexFieldType: 'keyword',
+              indexInvalidValues: [],
+              hasEcsMetadata: false,
+              isEcsCompliant: false,
+              isInSameFamily: true,
+            },
+          ],
+        })
+      ).toEqual([
         { categoryId: 'incompatible', mappings: 3 },
         { categoryId: 'custom', mappings: 4 },
         { categoryId: 'ecs-compliant', mappings: 2 },
+        { categoryId: 'same-family', mappings: 5 },
       ]);
     });
   });
