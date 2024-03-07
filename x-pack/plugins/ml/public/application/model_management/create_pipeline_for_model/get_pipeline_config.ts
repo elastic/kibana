@@ -15,6 +15,7 @@ export function getPipelineConfig(state: InferecePipelineCreationState): estypes
       ? initialPipelineConfig?.processors[0]
       : {};
 
+  // @ts-expect-error pipeline._meta is defined as mandatory
   return {
     description: pipelineDescription,
     processors: [
