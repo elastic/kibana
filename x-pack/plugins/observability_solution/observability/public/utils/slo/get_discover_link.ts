@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { kqlWithFiltersSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, kqlWithFiltersSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Filter, FilterStateStore, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { v4 } from 'uuid';
 import { buildEsQuery } from '../build_es_query';
 
 function createDiscoverLocator(
@@ -16,6 +17,7 @@ function createDiscoverLocator(
   showGood = false,
   timeRange?: TimeRange
 ) {
+  const indexId = v4();
   const filters: Filter[] = [];
 
   if (kqlWithFiltersSchema.is(slo.indicator.params.filter)) {
@@ -44,8 +46,8 @@ function createDiscoverLocator(
           defaultMessage: 'Good events',
         }),
         disabled: !showGood,
-        index: `${slo.indicator.params.index}-id`,
         value: JSON.stringify(customGoodFilter),
+        index: indexId,
       },
       query: customGoodFilter as Record<string, any>,
     });
@@ -58,10 +60,38 @@ function createDiscoverLocator(
           defaultMessage: 'Bad events',
         }),
         disabled: !showBad,
-        index: `${slo.indicator.params.index}-id`,
         value: JSON.stringify(customBadFilter),
+        index: indexId,
       },
       query: customBadFilter as Record<string, any>,
+    });
+  }
+
+  const groupBy = [slo.groupBy].flat();
+
+  if (groupBy.length > 0 && groupBy.every((field) => field === ALL_VALUE) === false) {
+    groupBy.forEach((field) => {
+      filters.push({
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: field,
+          params: {
+            query: slo.groupings[field],
+          },
+          type: 'phrase',
+          index: indexId,
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+        query: {
+          match_phrase: {
+            [field]: slo.groupings[field],
+          },
+        },
+      });
     });
   }
 
@@ -79,7 +109,7 @@ function createDiscoverLocator(
     },
     filters,
     dataViewSpec: {
-      id: `${slo.indicator.params.index}-id`,
+      id: indexId,
       title: slo.indicator.params.index,
       timeFieldName,
     },
