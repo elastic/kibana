@@ -9964,14 +9964,6 @@
           {
             "plugin": "embeddableEnhanced",
             "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
           }
         ],
         "children": [

@@ -24,7 +24,6 @@ import { HttpLogic } from '../../../../../shared/http';
 import { LicensingLogic } from '../../../../../shared/licensing';
 
 import { ConnectorConfigurationApiLogic } from '../../../../api/connector/update_connector_configuration_api_logic';
-import { IndexNameLogic } from '../../index_name_logic';
 import { ConnectorDefinition } from '../types';
 
 interface NativeConnectorConfigurationConfigProps {
@@ -37,7 +36,6 @@ export const NativeConnectorConfigurationConfig: React.FC<
   NativeConnectorConfigurationConfigProps
 > = ({ connector, nativeConnector, status }) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
-  const { indexName } = useValues(IndexNameLogic);
   const { status: updateStatus } = useValues(ConnectorConfigurationApiLogic);
   const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
   const { http } = useValues(HttpLogic);
@@ -50,7 +48,6 @@ export const NativeConnectorConfigurationConfig: React.FC<
         makeRequest({
           configuration,
           connectorId: connector.id,
-          indexName,
         })
       }
       subscriptionLink={docLinks.licenseManagement}
