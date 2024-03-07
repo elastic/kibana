@@ -11,6 +11,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { EMPTY_STAT } from '../../../helpers';
 
 import { mockPartitionedFieldMetadata } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
+import { mockPartitionedFieldMetadataWithSameFamily } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata_with_same_family';
 import { PartitionedFieldMetadata } from '../../../types';
 import {
   ALL_TAB_ID,
@@ -38,65 +39,11 @@ import {
 describe('helpers', () => {
   describe('getSummaryData', () => {
     test('it returns the expected `SummaryData`', () => {
-      expect(
-        getSummaryData({
-          ...mockPartitionedFieldMetadata,
-          sameFamily: [
-            {
-              dashed_name: 'source-ip',
-              description: 'IP address of the source (IPv4 or IPv6).',
-              flat_name: 'source.ip',
-              level: 'core',
-              name: 'ip',
-              normalize: [],
-              short: 'IP address of the source.',
-              type: 'ip',
-              indexFieldName: 'source.ip',
-              indexFieldType: 'ip',
-              indexInvalidValues: [],
-              hasEcsMetadata: true,
-              isEcsCompliant: true,
-              isInSameFamily: true,
-            },
-            {
-              indexFieldName: 'source.ip.keyword2',
-              indexFieldType: 'keyword2',
-              indexInvalidValues: [],
-              hasEcsMetadata: false,
-              isEcsCompliant: false,
-              isInSameFamily: true,
-            },
-            {
-              indexFieldName: 'source.ip.text',
-              indexFieldType: 'text',
-              indexInvalidValues: [],
-              hasEcsMetadata: false,
-              isEcsCompliant: false,
-              isInSameFamily: true,
-            },
-            {
-              indexFieldName: 'source.ip.text2',
-              indexFieldType: 'text2',
-              indexInvalidValues: [],
-              hasEcsMetadata: false,
-              isEcsCompliant: false,
-              isInSameFamily: true,
-            },
-            {
-              indexFieldName: 'source.port.keyword',
-              indexFieldType: 'keyword',
-              indexInvalidValues: [],
-              hasEcsMetadata: false,
-              isEcsCompliant: false,
-              isInSameFamily: true,
-            },
-          ],
-        })
-      ).toEqual([
+      expect(getSummaryData(mockPartitionedFieldMetadataWithSameFamily)).toEqual([
         { categoryId: 'incompatible', mappings: 3 },
         { categoryId: 'custom', mappings: 4 },
         { categoryId: 'ecs-compliant', mappings: 2 },
-        { categoryId: 'same-family', mappings: 5 },
+        { categoryId: 'same-family', mappings: 1 },
       ]);
     });
   });
