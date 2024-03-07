@@ -839,6 +839,7 @@
             "type": "text"
           },
           "showApplySelections": {
+            "doc_values": false,
             "index": false,
             "type": "boolean"
           }
