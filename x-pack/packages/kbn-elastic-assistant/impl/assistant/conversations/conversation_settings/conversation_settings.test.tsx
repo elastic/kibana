@@ -15,9 +15,9 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/c
 import { mockConnectors } from '../../../mock/connectors';
 
 const mockConvos = {
-  [welcomeConvo.title]: welcomeConvo,
-  [alertConvo.title]: alertConvo,
-  [customConvo.title]: customConvo,
+  [welcomeConvo.title]: { ...welcomeConvo, id: '1234' },
+  [alertConvo.title]: { ...alertConvo, id: '12345' },
+  [customConvo.title]: { ...customConvo, id: '123' },
 };
 const onSelectedConversationChange = jest.fn();
 
@@ -31,7 +31,7 @@ const testProps = {
   defaultProvider: OpenAiProviderType.OpenAi,
   http: { basePath: { get: jest.fn() } },
   onSelectedConversationChange,
-  selectedConversation: welcomeConvo,
+  selectedConversation: mockConvos[welcomeConvo.title],
   setConversationSettings,
   conversationsSettingsBulkActions: {},
   setConversationsSettingsBulkActions,
@@ -45,7 +45,7 @@ jest.mock('../../../connectorland/use_load_connectors', () => ({
   }),
 }));
 
-const mockConvo = alertConvo;
+const mockConvo = mockConvos[alertConvo.title];
 jest.mock('../conversation_selector_settings', () => ({
   // @ts-ignore
   ConversationSelectorSettings: ({ onConversationDeleted, onConversationSelectionChange }) => (
@@ -59,6 +59,11 @@ jest.mock('../conversation_selector_settings', () => ({
         type="button"
         data-test-subj="change-convo"
         onClick={() => onConversationSelectionChange(mockConvo)}
+      />
+      <button
+        type="button"
+        data-test-subj="change-new-convo"
+        onClick={() => onConversationSelectionChange({ ...mockConvo, id: '' })}
       />
       <button
         type="button"
@@ -124,7 +129,7 @@ describe('ConversationSettings', () => {
     expect(setConversationSettings).toHaveBeenLastCalledWith({
       ...mockConvos,
       [welcomeConvo.title]: {
-        ...welcomeConvo,
+        ...mockConvos[welcomeConvo.title],
         apiConfig: {
           ...welcomeConvo.apiConfig,
           defaultSystemPromptId: 'mock-superhero-system-prompt-1',
@@ -164,11 +169,22 @@ describe('ConversationSettings', () => {
     );
     fireEvent.click(getByTestId('change-convo'));
 
-    expect(setConversationSettings).toHaveBeenLastCalledWith(mockConvos);
-    expect(onSelectedConversationChange).toHaveBeenCalledWith(alertConvo);
+    expect(setConversationSettings).toHaveBeenCalled();
+    expect(onSelectedConversationChange).toHaveBeenCalledWith(mockConvo);
+  });
+
+  it('Selecting a new conversation updates the selected convo and does not update convo settings', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <ConversationSettings {...testProps} />
+      </TestProviders>
+    );
+    fireEvent.click(getByTestId('change-new-convo'));
+
+    expect(onSelectedConversationChange).toHaveBeenCalledWith({ ...mockConvo, id: '' });
     expect(setConversationsSettingsBulkActions).toHaveBeenCalledWith({
       create: {
-        [alertConvo.title]: alertConvo,
+        [mockConvo.title]: { ...mockConvo, id: '' },
       },
     });
   });
@@ -216,12 +232,25 @@ describe('ConversationSettings', () => {
     expect(setConversationSettings).toHaveBeenLastCalledWith({
       ...mockConvos,
       [welcomeConvo.title]: {
-        ...welcomeConvo,
+        ...mockConvos[welcomeConvo.title],
         apiConfig: {
           connectorId: mockConnector.id,
           connectorTypeTitle: 'OpenAI',
           model: undefined,
           provider: undefined,
+        },
+      },
+    });
+    expect(setConversationsSettingsBulkActions).toHaveBeenLastCalledWith({
+      update: {
+        [welcomeConvo.title]: {
+          ...mockConvos[welcomeConvo.title],
+          apiConfig: {
+            connectorId: mockConnector.id,
+            connectorTypeTitle: 'OpenAI',
+            model: undefined,
+            provider: undefined,
+          },
         },
       },
     });
@@ -236,10 +265,21 @@ describe('ConversationSettings', () => {
     expect(setConversationSettings).toHaveBeenLastCalledWith({
       ...mockConvos,
       [welcomeConvo.title]: {
-        ...welcomeConvo,
+        ...mockConvos[welcomeConvo.title],
         apiConfig: {
           ...welcomeConvo.apiConfig,
           model: 'MODEL_GPT_4',
+        },
+      },
+    });
+    expect(setConversationsSettingsBulkActions).toHaveBeenLastCalledWith({
+      update: {
+        [welcomeConvo.title]: {
+          ...mockConvos[welcomeConvo.title],
+          apiConfig: {
+            ...welcomeConvo.apiConfig,
+            model: 'MODEL_GPT_4',
+          },
         },
       },
     });

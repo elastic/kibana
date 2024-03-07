@@ -164,10 +164,12 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               update: {
                 ...(conversationsSettingsBulkActions.update ?? {}),
                 [updatedConversation.title]: {
+                  ...updatedConversation,
                   ...(conversationsSettingsBulkActions.update
                     ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
                     : {}),
                   apiConfig: {
+                    ...updatedConversation.apiConfig,
                     ...((conversationsSettingsBulkActions.update
                       ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
                       : {}
@@ -228,21 +230,24 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             ...conversationSettings,
             [selectedConversation.title]: updatedConversation,
           });
-          if (selectedConversation.id !== selectedConversation.title) {
+          if (selectedConversation.id !== '') {
             setConversationsSettingsBulkActions({
               ...conversationsSettingsBulkActions,
               update: {
                 ...(conversationsSettingsBulkActions.update ?? {}),
                 [updatedConversation.title]: {
+                  ...updatedConversation,
                   ...(conversationsSettingsBulkActions.update
                     ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
                     : {}),
                   apiConfig: {
+                    ...updatedConversation.apiConfig,
                     ...((conversationsSettingsBulkActions.update
                       ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
                       : {}
                     ).apiConfig ?? {}),
                     connectorId: connector?.id,
+                    connectorTypeTitle: connector?.connectorTypeTitle,
                     provider: config?.apiProvider,
                     model: config?.defaultModel,
                   },
@@ -295,10 +300,12 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               update: {
                 ...(conversationsSettingsBulkActions.update ?? {}),
                 [updatedConversation.title]: {
+                  ...updatedConversation,
                   ...(conversationsSettingsBulkActions.update
                     ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
                     : {}),
                   apiConfig: {
+                    ...updatedConversation.apiConfig,
                     ...((conversationsSettingsBulkActions.update
                       ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
                       : {}
