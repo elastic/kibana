@@ -10,7 +10,7 @@ import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 
-import { PivotGroupByConfig } from '.';
+import type { PivotGroupByConfig } from '.';
 
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
