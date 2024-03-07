@@ -9,7 +9,10 @@ import type { ItemSet } from '../../types';
 
 export const frequentItemSets: ItemSet[] = [
   {
-    set: { response_code: '500', url: 'home.php' },
+    set: [
+      { fieldName: 'response_code', fieldValue: '500' },
+      { fieldName: 'url', fieldValue: 'home.php' },
+    ],
     size: 2,
     maxPValue: 0.00974308761016614,
     doc_count: 792,
@@ -17,7 +20,10 @@ export const frequentItemSets: ItemSet[] = [
     total_doc_count: 2929,
   },
   {
-    set: { response_code: '500', url: 'login.php' },
+    set: [
+      { fieldName: 'response_code', fieldValue: '500' },
+      { fieldName: 'url', fieldValue: 'login.php' },
+    ],
     size: 2,
     maxPValue: 0.012783309213417932,
     doc_count: 790,
@@ -25,7 +31,10 @@ export const frequentItemSets: ItemSet[] = [
     total_doc_count: 2929,
   },
   {
-    set: { user: 'Peter', url: 'home.php' },
+    set: [
+      { fieldName: 'user', fieldValue: 'Peter' },
+      { fieldName: 'url', fieldValue: 'home.php' },
+    ],
     size: 2,
     maxPValue: 0.00974308761016614,
     doc_count: 636,
@@ -33,7 +42,10 @@ export const frequentItemSets: ItemSet[] = [
     total_doc_count: 2929,
   },
   {
-    set: { user: 'Peter', url: 'login.php' },
+    set: [
+      { fieldName: 'user', fieldValue: 'Peter' },
+      { fieldName: 'url', fieldValue: 'login.php' },
+    ],
     size: 2,
     maxPValue: 0.012783309213417932,
     doc_count: 632,
@@ -41,7 +53,10 @@ export const frequentItemSets: ItemSet[] = [
     total_doc_count: 2929,
   },
   {
-    set: { response_code: '500', user: 'Peter' },
+    set: [
+      { fieldName: 'response_code', fieldValue: '500' },
+      { fieldName: 'user', fieldValue: 'Peter' },
+    ],
     size: 2,
     maxPValue: 3.6085657805889595e-12,
     doc_count: 79,

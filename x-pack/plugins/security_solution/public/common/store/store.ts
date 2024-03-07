@@ -57,7 +57,10 @@ export const createStoreFactory = async (
   storage: Storage,
   enableExperimental: ExperimentalFeatures
 ): Promise<Store<State, Action>> => {
-  let signal: { name: string | null } = { name: null };
+  let signal: { name: string | null; index_mapping_outdated: null | boolean } = {
+    name: null,
+    index_mapping_outdated: null,
+  };
   try {
     if (coreStart.application.capabilities[SERVER_APP_ID].show === true) {
       signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
@@ -66,7 +69,7 @@ export const createStoreFactory = async (
       });
     }
   } catch {
-    signal = { name: null };
+    signal = { name: null, index_mapping_outdated: null };
   }
 
   const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
@@ -144,6 +147,7 @@ export const createStoreFactory = async (
       defaultDataView,
       kibanaDataViews,
       signalIndexName: signal.name,
+      signalIndexMappingOutdated: signal.index_mapping_outdated,
       enableExperimental,
     },
     dataTableInitialState,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CharStreams } from 'antlr4ts';
+import { CharStreams } from 'antlr4';
 import type { monaco } from '../../monaco_imports';
 import type { BaseWorkerDefinition } from '../../types';
 import { getParser, ROOT_STATEMENT } from '../lib/antlr_facade';

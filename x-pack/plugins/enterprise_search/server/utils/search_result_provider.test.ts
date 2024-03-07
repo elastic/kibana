@@ -42,7 +42,31 @@ describe('Enterprise Search search provider', () => {
     title: 'MongoDB',
     type: 'Search',
     url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/new_index/connector?service_type=mongodb`,
+      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/new_index/connector?connector_type=connector_client&service_type=mongodb`,
+      prependBasePath: true,
+    },
+  };
+
+  const nativeMongoResult = {
+    icon: '/kbn/plugins/enterpriseSearch/assets/source_icons/mongodb.svg',
+    id: 'mongodb',
+    score: 75,
+    title: 'MongoDB',
+    type: 'Search',
+    url: {
+      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/new_index/connector?connector_type=native&service_type=mongodb`,
+      prependBasePath: true,
+    },
+  };
+
+  const customizedConnectorResult = {
+    icon: '/kbn/plugins/enterpriseSearch/assets/source_icons/custom.svg',
+    id: '',
+    score: 75,
+    title: 'Customized connector',
+    type: 'Search',
+    url: {
+      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/new_index/connector?connector_type=connector_client&service_type=`,
       prependBasePath: true,
     },
   };
@@ -59,10 +83,14 @@ describe('Enterprise Search search provider', () => {
     },
   };
 
-  const searchResultProvider = getSearchResultProvider(basePathMock, {
-    hasConnectors: true,
-    hasWebCrawler: true,
-  } as any);
+  const searchResultProvider = getSearchResultProvider(
+    basePathMock,
+    {
+      hasConnectors: true,
+      hasWebCrawler: true,
+    } as any,
+    false
+  );
 
   beforeEach(() => {});
 
@@ -117,10 +145,14 @@ describe('Enterprise Search search provider', () => {
     });
 
     it('omits crawler if config has crawler disabled', () => {
-      const searchProvider = getSearchResultProvider(basePathMock, {
-        hasConnectors: true,
-        hasWebCrawler: false,
-      } as any);
+      const searchProvider = getSearchResultProvider(
+        basePathMock,
+        {
+          hasConnectors: true,
+          hasWebCrawler: false,
+        } as any,
+        false
+      );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
           searchProvider.find(
@@ -135,10 +167,14 @@ describe('Enterprise Search search provider', () => {
     });
 
     it('omits connectors if config has connectors disabled', () => {
-      const searchProvider = getSearchResultProvider(basePathMock, {
-        hasConnectors: false,
-        hasWebCrawler: true,
-      } as any);
+      const searchProvider = getSearchResultProvider(
+        basePathMock,
+        {
+          hasConnectors: false,
+          hasWebCrawler: true,
+        } as any,
+        false
+      );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
           searchProvider.find(
@@ -205,11 +241,15 @@ describe('Enterprise Search search provider', () => {
       });
     });
     it('returns results for legacy app search', () => {
-      const searchProvider = getSearchResultProvider(basePathMock, {
-        hasConnectors: false,
-        hasWebCrawler: false,
-        canDeployEntSearch: true,
-      } as any);
+      const searchProvider = getSearchResultProvider(
+        basePathMock,
+        {
+          canDeployEntSearch: true,
+          hasConnectors: false,
+          hasWebCrawler: false,
+        } as any,
+        false
+      );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
           searchProvider.find(
@@ -223,11 +263,15 @@ describe('Enterprise Search search provider', () => {
       });
     });
     it('does not return results for legacy workplace search', () => {
-      const searchProvider = getSearchResultProvider(basePathMock, {
-        hasConnectors: false,
-        hasWebCrawler: false,
-        canDeployEntSearch: true,
-      } as any);
+      const searchProvider = getSearchResultProvider(
+        basePathMock,
+        {
+          canDeployEntSearch: true,
+          hasConnectors: false,
+          hasWebCrawler: false,
+        } as any,
+        false
+      );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
           searchProvider.find(
@@ -237,6 +281,31 @@ describe('Enterprise Search search provider', () => {
           )
         ).toBe('(a|)', {
           a: [],
+        });
+      });
+    });
+
+    it('returns appropriate native flags when on cloud', () => {
+      const searchProvider = getSearchResultProvider(
+        basePathMock,
+        {
+          hasConnectors: true,
+          hasWebCrawler: true,
+        } as any,
+        true
+      );
+      getTestScheduler().run(({ expectObservable }) => {
+        expectObservable(
+          searchProvider.find(
+            { term: '' },
+            { aborted$: NEVER, maxResults: 100, preference: '' },
+            {} as any
+          )
+        ).toBe('(a|)', {
+          a: expect.arrayContaining([
+            { ...nativeMongoResult, score: 80 },
+            { ...customizedConnectorResult, score: 80 },
+          ]),
         });
       });
     });
