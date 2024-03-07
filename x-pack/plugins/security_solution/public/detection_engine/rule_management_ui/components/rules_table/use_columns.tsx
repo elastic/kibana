@@ -433,7 +433,7 @@ export const useMonitoringColumns = ({
             title={i18n.COLUMN_GAP}
             customTooltip={
               <div style={{ maxWidth: '20px' }}>
-                <PopoverTooltip columnName={i18n.COLUMN_GAP} colorAnchor="subdued">
+                <PopoverTooltip columnName={i18n.COLUMN_GAP} anchorColor="subdued">
                   <EuiText style={{ width: 300 }}>
                     <FormattedMessage
                       defaultMessage="Duration of most recent gap in Rule execution. Adjust Rule look-back or {seeDocs} for mitigating gaps."

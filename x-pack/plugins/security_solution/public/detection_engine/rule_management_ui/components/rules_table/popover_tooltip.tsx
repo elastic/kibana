@@ -13,7 +13,7 @@ import * as i18n from '../../../../detections/pages/detection_engine/rules/trans
 interface PopoverTooltipProps {
   columnName: string;
   children: React.ReactNode;
-  colorAnchor?: IconColor;
+  anchorColor?: IconColor;
 }
 
 /**
@@ -24,7 +24,7 @@ interface PopoverTooltipProps {
 const PopoverTooltipComponent = ({
   columnName,
   children,
-  colorAnchor = 'primary',
+  anchorColor = 'primary',
 }: PopoverTooltipProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -58,7 +58,7 @@ const PopoverTooltipComponent = ({
           tabIndex={0}
           onClick={onClick}
           onKeyDown={onKeyDown}
-          color={colorAnchor}
+          color={anchorColor}
           type="questionInCircle"
         />
       }
