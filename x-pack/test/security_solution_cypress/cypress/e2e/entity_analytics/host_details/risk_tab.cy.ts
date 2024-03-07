@@ -8,7 +8,6 @@
 import { login } from '../../../tasks/login';
 import { visitHostDetailsPage } from '../../../tasks/navigation';
 
-import { waitForTableToLoad } from '../../../tasks/common';
 import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';
 import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
 import { openRiskInformationFlyout, mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
@@ -32,7 +31,6 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     it('renders risk tab', () => {
       visitHostDetailsPage('siem-kibana');
       navigateToHostRiskDetailTab();
-      waitForTableToLoad();
 
       cy.get('[data-test-subj="topRiskScoreContributors"]')
         .find(TABLE_ROWS)
@@ -44,7 +42,6 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     it('shows risk information overlay when button is clicked', () => {
       visitHostDetailsPage('siem-kibana');
       navigateToHostRiskDetailTab();
-      waitForTableToLoad();
 
       openRiskInformationFlyout();
 
@@ -69,7 +66,6 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     it('renders risk tab', () => {
       visitHostDetailsPage('Host-fwarau82er');
       navigateToHostRiskDetailTab();
-      waitForTableToLoad();
 
       cy.get(ALERTS_COUNT).should('have.text', '1 alert');
       cy.get(ALERT_GRID_CELL).contains('Endpoint Security');
@@ -78,7 +74,6 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     it('shows risk information overlay when button is clicked', () => {
       visitHostDetailsPage('siem-kibana');
       navigateToHostRiskDetailTab();
-      waitForTableToLoad();
 
       openRiskInformationFlyout();
 
