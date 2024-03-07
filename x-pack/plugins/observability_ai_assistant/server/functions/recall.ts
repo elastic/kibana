@@ -115,7 +115,7 @@ export function registerRecallFunction({
         connectorId,
         signal,
       });
-      
+
       if (scores.length === 0) {
         return {
           content: { learnings: relevantDocuments as unknown as Serializable },
@@ -130,7 +130,7 @@ export function registerRecallFunction({
       resources.logger.debug(JSON.stringify(relevantDocuments, null, 2));
 
       return {
-        content: { learnings: relevantDocuments as unknown as Serializable }
+        content: { learnings: relevantDocuments as unknown as Serializable },
       };
     }
   );
