@@ -13,7 +13,7 @@ import { Logger } from '@kbn/logging';
 import { IRouter, RequestHandler } from '@kbn/core/server';
 import { fetchFields } from './utils/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
-import { ConversationalChain } from './utils/conversationalChain';
+import { ConversationalChain } from './utils/conversational_chain';
 import { Prompt } from './utils/prompt';
 
 export function registerPlaygroundRoutes(

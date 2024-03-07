@@ -14,10 +14,10 @@ import { AddIndicesField } from './add_indices_field';
 import { IndicesTable } from './indices_table';
 import { StartChatPanel } from '../start_chat_panel';
 import { CreateIndexCallout } from './create_index_callout';
-import { useSourceIndicesField } from '../../hooks/useSourceIndicesField';
-import { useQueryIndices } from '../../hooks/useQueryIndices';
+import { useSourceIndicesField } from '../../hooks/use_source_indices_field';
+import { useQueryIndices } from '../../hooks/use_query_indices';
 import { ChatFormFields } from '../../../types';
-import { useIndicesFields } from '../../hooks/useIndicesFields';
+import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { createQuery, getDefaultQueryFields } from '../../utils/create_query';
 
 export const SourcesPanelForStartChat: React.FC = () => {

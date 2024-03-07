@@ -7,7 +7,7 @@
  */
 
 import { AIMessage, Message, MessageRole, UseChatHelpers } from '../../types';
-import { transformAnnotationToDoc } from './transformAnnotationToDoc';
+import { transformAnnotationToDoc } from './transform_annotation_to_doc';
 
 export const transformFromChatMessages = (messages: UseChatHelpers['messages']): Message[] =>
   messages.map(({ id, content, createdAt, role, annotations }) => {

@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AIPlaygroundPluginStartDeps } from '../../../types';
-import { useCreateApiKeyQuery } from '../../hooks/useCreateApiKeyQuery';
+import { useCreateApiKeyQuery } from '../../hooks/use_create_api_key_query';
 
 enum ApiKeyFormFields {
   Name = 'name',

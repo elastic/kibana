@@ -10,7 +10,7 @@ import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { useChatContext } from '../../hooks/useChatContext';
+import { useChatContext } from '../../hooks/use_chat_context';
 
 export const CreateIndexCallout: React.FC = () => {
   const { navigateToIndexPage } = useChatContext();

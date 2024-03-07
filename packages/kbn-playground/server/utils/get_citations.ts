@@ -18,7 +18,7 @@ export function getCitations(
 
   return docs.filter((doc, i) => {
     return gatheredCitations.some((citation) => {
-      return i + 1 === parseInt(citation.slice(1, -1));
+      return i + 1 === parseInt(citation.slice(1, -1), 10);
     });
   });
 }

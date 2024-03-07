@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { useController, useFormContext } from 'react-hook-form';
 import { ChatForm, ChatFormFields } from '../../../types';
-import { useIndicesFields } from '../../hooks/useIndicesFields';
+import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { createQuery, getDefaultQueryFields } from '../../utils/create_query';
 
 export const ViewQueryAction: React.FC = () => {

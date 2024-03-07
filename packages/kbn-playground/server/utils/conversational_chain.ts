@@ -18,11 +18,11 @@ import {
   experimental_StreamData,
   Message as VercelChatMessage,
 } from 'ai';
-import { ElasticsearchRetriever } from './elasticsearchRetriever';
-import { renderTemplate } from './renderTemplate';
+import { ElasticsearchRetriever } from './elasticsearch_retriever';
+import { renderTemplate } from './render_template';
 
 import { AssistClient } from './assist';
-import { getCitations } from './getCitations';
+import { getCitations } from './get_citations';
 
 interface RAGOptions {
   index: string;

@@ -7,7 +7,7 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useAIAssistChat } from './useAIAssistChat';
+import { useAIAssistChat } from './use_ai_assist_chat';
 import { AIPlaygroundPluginStartDeps, UseChatHelpers } from '../../types';
 
 export const useChat = (): UseChatHelpers => {

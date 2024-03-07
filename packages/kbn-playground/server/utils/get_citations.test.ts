@@ -7,7 +7,7 @@
  */
 
 import { Document } from '@langchain/core/documents';
-import { getCitations } from './getCitations';
+import { getCitations } from './get_citations';
 
 describe('getCitations', () => {
   test('should enrich citations', () => {

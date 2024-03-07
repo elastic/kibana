@@ -23,7 +23,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 
 import { ChatSidebar } from './chat_sidebar';
-import { useChat } from '../hooks/useChat';
+import { useChat } from '../hooks/use_chat';
 import { ChatForm, ChatFormFields, MessageRole, SummarizationModelName } from '../../types';
 
 import { MessageList } from './message_list/message_list';
@@ -31,7 +31,7 @@ import { QuestionInput } from './question_input';
 import { StartNewChat } from './start_new_chat';
 
 import { TelegramIcon } from './telegram_icon';
-import { transformFromChatMessages } from '../utils/transformToMessages';
+import { transformFromChatMessages } from '../utils/transform_to_messages';
 
 export const Chat = () => {
   const [showStartPage, setShowStartPage] = useState(true);

@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import { IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { useQueryIndices } from '../../hooks/useQueryIndices';
+import { useQueryIndices } from '../../hooks/use_query_indices';
 
 interface AddIndicesFieldProps {
   selectedIndices: IndexName[];
