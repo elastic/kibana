@@ -41,7 +41,10 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
     query: QuerySchema,
   },
   handler: async (route): Promise<any> => {
-    const { savedObjectsClient } = route;
+    const {
+      savedObjectsClient,
+      server: { logger },
+    } = route;
     const { tags, locations, projects, monitorQueryIds, query } = route.request.query;
 
     const { filtersStr } = await getMonitorFilters({
@@ -52,46 +55,48 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
       context: route,
     });
     const { allLocations = [] } = await getAllLocations(route);
-    const data = await savedObjectsClient.find<EncryptedSyntheticsMonitorAttributes>({
-      type: syntheticsMonitorType,
-      perPage: 0,
-      fields: ['name', 'id'],
-      filter: filtersStr ? `${filtersStr}` : undefined,
-      aggs,
-      search: query ? `${query}*` : undefined,
-      searchFields: SEARCH_FIELDS,
-    });
+    try {
+      const data = await savedObjectsClient.find<EncryptedSyntheticsMonitorAttributes>({
+        type: syntheticsMonitorType,
+        perPage: 0,
+        filter: filtersStr ? `${filtersStr}` : undefined,
+        aggs,
+        search: query ? `${query}*` : undefined,
+        searchFields: SEARCH_FIELDS,
+      });
 
-    const { tagsAggs, locationsAggs, projectsAggs } = (data?.aggregations as AggsResponse) ?? {};
-    const allLocationsMap = new Map(allLocations.map((obj) => [obj.id, obj.label]));
+      const { tagsAggs, locationsAggs, projectsAggs, monitorIdsAggs } =
+        (data?.aggregations as AggsResponse) ?? {};
+      const allLocationsMap = new Map(allLocations.map((obj) => [obj.id, obj.label]));
 
-    return {
-      monitorIds: data.saved_objects.map(({ attributes }) => ({
-        label: attributes.name,
-        value: attributes.id,
-        count: 1,
-      })),
-      tags:
-        tagsAggs?.buckets?.map(({ key, doc_count: count }) => ({
-          label: key,
+      return {
+        monitorIds: monitorIdsAggs?.buckets?.map(({ key, doc_count: count, name }) => ({
+          label: name?.hits?.hits[0]?._source?.[syntheticsMonitorType]?.[ConfigKey.NAME] || key,
           value: key,
           count,
-        })) ?? [],
-      locations:
-        locationsAggs?.buckets?.map(({ key, doc_count: count }) => ({
-          label: allLocationsMap.get(key) || key,
-          value: key,
-          count,
-        })) ?? [],
-      projects:
-        projectsAggs?.buckets
-          ?.filter(({ key }) => key)
-          .map(({ key, doc_count: count }) => ({
+        })),
+        tags:
+          tagsAggs?.buckets?.map(({ key, doc_count: count }) => ({
             label: key,
             value: key,
             count,
           })) ?? [],
-    };
+        locations:
+          locationsAggs?.buckets?.map(({ key, doc_count: count }) => ({
+            label: allLocationsMap.get(key) || key,
+            value: key,
+            count,
+          })) ?? [],
+        projects:
+          projectsAggs?.buckets?.map(({ key, doc_count: count }) => ({
+            label: key,
+            value: key,
+            count,
+          })) ?? [],
+      };
+    } catch (error) {
+      logger.error(`Failed to fetch synthetics suggestions: ${error}`);
+    }
   },
 });
 
@@ -115,6 +120,21 @@ const aggs = {
       field: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}`,
       size: 10000,
       exclude: [''],
+    },
+  },
+  monitorIdsAggs: {
+    terms: {
+      field: `${syntheticsMonitorType}.attributes.${ConfigKey.MONITOR_QUERY_ID}`,
+      size: 10000,
+      exclude: [''],
+    },
+    aggs: {
+      name: {
+        top_hits: {
+          _source: [`${syntheticsMonitorType}.${ConfigKey.NAME}`],
+          size: 1,
+        },
+      },
     },
   },
 };
