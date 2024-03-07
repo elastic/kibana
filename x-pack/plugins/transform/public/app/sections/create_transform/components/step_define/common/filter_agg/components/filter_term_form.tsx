@@ -11,7 +11,8 @@ import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -21,7 +22,7 @@ import { useDataSearch } from '../../../../../../../hooks/use_data_search';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { useToastNotifications } from '../../../../../../../app_dependencies';
 
-import { FilterAggConfigTerm } from '../types';
+import type { FilterAggConfigTerm } from '../types';
 
 /**
  * Form component for the term filter aggregation.
