@@ -76,7 +76,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             <EuiSpacer size="s" />
             <EuiText size="s">
               {i18n.translate(
-                'xpack.enterpriseSearch.content.connectors.overview.connectorNoIndexCallOut.title',
+                'xpack.enterpriseSearch.content.connectors.overview.connectorNoIndexCallOut.description',
                 {
                   defaultMessage:
                     "You won't be able to start syncing content until your connector is attached to an index.",
@@ -90,7 +90,7 @@ export const ConnectorDetailOverview: React.FC = () => {
               to={`${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
                 connectorId: connector.id,
                 tabId: ConnectorDetailTabId.CONFIGURATION,
-              })}`}
+              })}#attachIndexBox`}
             >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.connectors.overview.connectorNoIndexCallOut.buttonLabel',
@@ -117,7 +117,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             <EuiSpacer size="s" />
             <EuiText size="s">
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.connectors.overview.connectorIndexDoesntExistCallOut.title"
+                id="xpack.enterpriseSearch.content.connectors.overview.connectorIndexDoesntExistCallOut.description"
                 defaultMessage="The connector will create the index on its next sync, or you can manually create the index {indexName} with your desired settings and mappings."
                 values={{
                   indexName: <EuiCode>{connector.index_name}</EuiCode>,

@@ -58,7 +58,7 @@ export const StatCard: React.FC<StatCardProps> = ({ title, content, footer }) =>
           <EuiFlexItem grow={false}>{content}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="s">
+      <EuiSplitPanel.Inner grow={false} color="subdued">
         {footer}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
@@ -103,7 +103,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
               gutterSize="m"
               responsive={false}
               alignItems="center"
-              justifyContent="center"
+              justifyContent="spaceBetween"
             >
               {connectorDefinition && connectorDefinition.icon && (
                 <EuiFlexItem grow={false}>
@@ -127,32 +127,28 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
           footer={
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem>
-                <EuiFlexGroup alignItems="center" responsive={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiIcon type="documents" />
                   </EuiFlexItem>
-                  {connector.index_name && indexData ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s">
-                        <p>
-                          {i18n.translate(
-                            'xpack.enterpriseSearch.connectors.connectorStats.p.DocumentsLabel',
-                            {
-                              defaultMessage: '{documentAmount} Documents',
-                              values: {
-                                documentAmount: indexData?.count ?? '-',
-                              },
-                            }
-                          )}
-                        </p>
-                      </EuiText>
-                    </EuiFlexItem>
-                  ) : (
-                    <></>
-                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <p>
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.connectors.connectorStats.p.DocumentsLabel',
+                          {
+                            defaultMessage: '{documentAmount} Documents',
+                            values: {
+                              documentAmount: indexData?.count ?? 0,
+                            },
+                          }
+                        )}
+                      </p>
+                    </EuiText>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiButtonEmptyTo
                   isDisabled={!(connector.index_name && indexData)}
                   size="s"
@@ -185,7 +181,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
               ) : (
                 <EuiText size="s" color="warning">
                   {i18n.translate(
-                    'xpack.enterpriseSearch.connectors.connectorStats.configureLink',
+                    'xpack.enterpriseSearch.connectors.connectorStats.indexDoesntExistLabel',
                     {
                       defaultMessage: "Index doesn't exist",
                     }
@@ -194,7 +190,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
               )
             ) : (
               <EuiText size="s" color="danger">
-                {i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.configureLink', {
+                {i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.noIndexLabel', {
                   defaultMessage: 'No index attached yet',
                 })}
               </EuiText>

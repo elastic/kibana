@@ -7,6 +7,8 @@
 
 import React, { useEffect } from 'react';
 
+import { useActions, useValues } from 'kea';
+
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { CONNECTOR_DETAIL_PATH, CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
@@ -25,6 +27,12 @@ export const ConnectorDetailRouter: React.FC = () => {
       unmountView();
     };
   }, []);
+  const { setIndexName } = useActions(IndexNameLogic);
+  const { connector } = useValues(ConnectorViewLogic);
+  const indexName = connector?.index_name || '';
+  useEffect(() => {
+    setIndexName(indexName);
+  }, [indexName]);
   return (
     <Routes>
       <Route path={CONNECTOR_DETAIL_PATH} exact>
