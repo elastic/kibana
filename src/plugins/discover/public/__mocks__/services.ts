@@ -15,6 +15,7 @@ import {
   chromeServiceMock,
   coreMock,
   docLinksServiceMock,
+  scopedHistoryMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
 import {
@@ -153,6 +154,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       },
       listen: jest.fn(),
     }),
+    scopedHistory: () => scopedHistoryMock.create(),
     data: dataPlugin,
     docLinks: docLinksServiceMock.createStartContract(),
     capabilities: {
