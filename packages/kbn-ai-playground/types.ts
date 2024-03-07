@@ -26,18 +26,18 @@ export interface Message {
   id: string;
   content: string | React.ReactNode;
   createdAt?: Date;
-  annotations?: Annotations[];
+  annotations?: Annotation[];
   role: MessageRole;
 }
 
-export interface Annotation {
+export interface DocAnnotation {
   metadata: { id: string; score: number };
   pageContent: string;
 }
 
-export interface Annotations {
+export interface Annotation {
   type: 'citations' | 'retrieved_docs';
-  documents: Annotation[];
+  documents: DocAnnotation[];
 }
 
 export interface Doc {
@@ -119,39 +119,33 @@ export enum SummarizationModelName {
   gpt3_5_turbo = 'gpt-3.5-turbo-instruct',
 }
 
-export type JSONValue =
-  | null
-  | string
-  | number
-  | boolean
-  | { [x: string]: JSONValue }
-  | Array<JSONValue>;
+export type JSONValue = null | string | number | boolean | { [x: string]: JSONValue } | JSONValue[];
 
-export type ChatRequestOptions = {
+export interface ChatRequestOptions {
   options?: RequestOptions;
   data?: Record<string, string>;
-};
+}
 
 export type CreateMessage = Omit<Message, 'id'> & {
   id?: Message['id'];
 };
 
-export type ChatRequest = {
+export interface ChatRequest {
   messages: Message[];
   options?: RequestOptions;
   data?: Record<string, string>;
-};
+}
 
-export type UseChatOptions = {
+export interface UseChatOptions {
   api?: string | ((init: RequestInit) => Promise<Response>);
   id?: string;
   initialInput?: string;
   onError?: (error: Error) => void;
   headers?: Record<string, string> | Headers;
   body?: object;
-};
+}
 
-export type AssistantMessage = {
+export interface AssistantMessage {
   id: string;
   role: 'assistant';
   content: Array<{
@@ -160,14 +154,14 @@ export type AssistantMessage = {
       value: string;
     };
   }>;
-};
+}
 
-export type RequestOptions = {
+export interface RequestOptions {
   headers?: Record<string, string> | Headers;
   body?: object;
-};
+}
 
-export type UseChatHelpers = {
+export interface UseChatHelpers {
   messages: Message[];
   error: undefined | Error;
   append: (
@@ -187,4 +181,4 @@ export type UseChatHelpers = {
     chatRequestOptions?: ChatRequestOptions
   ) => void;
   isLoading: boolean;
-};
+}

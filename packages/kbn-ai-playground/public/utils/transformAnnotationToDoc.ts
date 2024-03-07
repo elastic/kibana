@@ -6,5 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './public/components';
-export * from './public/providers/ai_playground_provider';
+import { DocAnnotation, Doc } from '../../types';
+
+export const transformAnnotationToDoc = (docAnnotation: DocAnnotation): Doc => ({
+  id: docAnnotation.metadata.id,
+  content: docAnnotation.pageContent,
+});

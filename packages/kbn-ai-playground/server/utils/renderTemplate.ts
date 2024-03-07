@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './public/components';
-export * from './public/providers/ai_playground_provider';
+import { renderTemplate as lcRenderTemplate } from '@langchain/core/prompts';
+
+export function renderTemplate(template: string, inputValues: Record<string, string>) {
+  return lcRenderTemplate(template, 'f-string', inputValues);
+}
