@@ -9,6 +9,7 @@
 import React from 'react';
 import { EuiIcon, EuiText, EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 
 export const ChartSwitchTrigger = function ({
@@ -67,7 +68,7 @@ const LayerChartSwitchLabel = function ({ label, icon }: { label: string; icon?:
           css={css`
             font-weight: 600;
             display: inline;
-            padding-left: 8px;
+            padding-left: ${euiThemeVars.euiSizeS};
           `}
         >
           {label}

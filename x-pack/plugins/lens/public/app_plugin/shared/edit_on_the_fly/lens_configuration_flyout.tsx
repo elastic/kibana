@@ -461,6 +461,7 @@ export function LensEditConfigurationFlyout({
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
+                position: relative;
                 padding-left: ${euiThemeVars.euiSizeS};
                 padding-right: ${euiThemeVars.euiSizeS};
                 .euiAccordion__childWrapper {
@@ -480,8 +481,8 @@ export function LensEditConfigurationFlyout({
             `}
                 >
                   <h5>
-                    {i18n.translate('xpack.lens.config.chartConfigurationLabel', {
-                      defaultMessage: 'Chart configuration',
+                    {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
+                      defaultMessage: 'Visualization configuration',
                     })}
                   </h5>
                 </EuiTitle>
