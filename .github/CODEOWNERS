@@ -13,6 +13,7 @@ packages/kbn-actions-types @elastic/response-ops
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/platform-deployment-management
 src/plugins/ai_assistant_management/observability @elastic/obs-knowledge-team
 src/plugins/ai_assistant_management/selection @elastic/obs-knowledge-team
+packages/kbn-ai-playground @elastic/enterprise-search-frontend
 x-pack/packages/ml/aiops_components @elastic/ml-ui
 x-pack/plugins/aiops @elastic/ml-ui
 x-pack/packages/ml/aiops_utils @elastic/ml-ui
