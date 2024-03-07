@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-export type { StepDefineExposedState } from './common';
+export type { StepDefineState } from './common';
 export {
   defaultSearch,
   applyTransformConfigToDefineState,
   getDefaultStepDefineState,
   QUERY_LANGUAGE_KUERY,
 } from './common';
-export type { StepDefineFormHook } from './hooks/use_step_define_form';
+export { euiStepDefine } from './step_define';
 export { StepDefineForm } from './step_define_form';
 export { StepDefineSummary } from './step_define_summary';

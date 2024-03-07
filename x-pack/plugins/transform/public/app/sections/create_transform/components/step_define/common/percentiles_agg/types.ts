@@ -5,13 +5,26 @@
  * 2.0.
  */
 
-import { PivotAggsConfigWithExtra } from '../../../../../../common/pivot_aggs';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
+import { PIVOT_SUPPORTED_AGGS } from '../../../../../../../../common/types/pivot_aggs';
+
+import type {
+  PivotAggsConfigWithExtra,
+  PivotAggsUtilsWithExtra,
+} from '../../../../../../common/pivot_aggs';
 
 export interface PercentilesAggConfig {
   /** Comma separated list */
   percents: string;
 }
-export type IPivotAggsConfigPercentiles = PivotAggsConfigWithExtra<
+export type IPivotAggsConfigPercentiles = PivotAggsConfigWithExtra<PercentilesAggConfig>;
+
+export const isPivotAggsConfigPercentiles = (arg: unknown): arg is IPivotAggsConfigPercentiles =>
+  isPopulatedObject(arg, ['aggFormComponent']) &&
+  arg.aggFormComponent === PIVOT_SUPPORTED_AGGS.PERCENTILES;
+
+export type IPivotAggsUtilsPercentiles = PivotAggsUtilsWithExtra<
   PercentilesAggConfig,
   { field: string; percents: number[] }
 >;

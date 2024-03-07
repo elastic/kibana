@@ -6,50 +6,59 @@
  */
 
 import React, { type FC } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { EuiButton } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { useIsFormTouched } from '@kbn/ml-form-utils/use_is_form_touched';
+import { useUpdatedConfig } from '@kbn/ml-form-utils/use_updated_config';
 
+import { useIsFormValid } from '@kbn/ml-form-utils/use_is_form_valid';
 import { getErrorMessage } from '../../../../../common/utils/errors';
 
 import { useUpdateTransform } from '../../../hooks';
 
+import { useTransformConfig } from '../../create_transform/components/wizard/wizard';
 import {
-  useEditTransformFlyoutActions,
-  useEditTransformFlyoutContext,
+  editTransformFlyoutSlice,
+  setSubmitErrorMessage,
 } from '../state_management/edit_transform_flyout_state';
-import { useIsFormTouched } from '../state_management/selectors/is_form_touched';
-import { useIsFormValid } from '../state_management/selectors/is_form_valid';
-import { useUpdatedTransformConfig } from '../state_management/selectors/updated_transform_config';
+import {
+  getEditTransformFormFields,
+  getEditTransformFormSections,
+} from '../state_management/get_default_state';
 
 interface EditTransformUpdateButtonProps {
   closeFlyout: () => void;
 }
 
 export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ closeFlyout }) => {
-  const { config } = useEditTransformFlyoutContext();
-  const isFormValid = useIsFormValid();
-  const isFormTouched = useIsFormTouched();
-  const requestConfig = useUpdatedTransformConfig();
+  const dispatch = useDispatch();
+  const config = useTransformConfig();
+  const isFormValid = useIsFormValid(editTransformFlyoutSlice);
+  const isFormTouched = useIsFormTouched(
+    editTransformFlyoutSlice,
+    getEditTransformFormFields(config),
+    getEditTransformFormSections(config)
+  );
+  const requestConfig = useUpdatedConfig(editTransformFlyoutSlice, config);
   const isUpdateButtonDisabled = !isFormValid || !isFormTouched;
-
-  const { setApiError } = useEditTransformFlyoutActions();
 
   const updateTransfrom = useUpdateTransform(config.id, requestConfig);
 
   async function submitFormHandler() {
-    setApiError(undefined);
+    dispatch(setSubmitErrorMessage(undefined));
 
     updateTransfrom(undefined, {
-      onError: (error) => setApiError(getErrorMessage(error)),
+      onError: (error) => dispatch(setSubmitErrorMessage(getErrorMessage(error))),
       onSuccess: () => closeFlyout(),
     });
   }
 
   return (
     <EuiButton
-      data-test-subj="transformEditFlyoutUpdateButton"
+      data-test-subj="editTransformFlyoutUpdateButton"
       onClick={submitFormHandler}
       fill
       isDisabled={isUpdateButtonDisabled}

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { PercentilesAggForm } from './percentiles_form_component';
-import { IPivotAggsConfigPercentiles } from './types';
+import type { IPivotAggsConfigPercentiles, IPivotAggsUtilsPercentiles } from './types';
 import {
   isPivotAggsConfigWithUiBase,
   PERCENTILES_AGG_DEFAULT_PERCENTS,
@@ -44,6 +43,35 @@ function isValidPercentsInput(inputValue: string) {
   return /^[0-9]+(,[0-9]+)*$/.test(inputValue);
 }
 
+export const getPercentilesAggUtils = (
+  config: IPivotAggsConfigPercentiles
+): IPivotAggsUtilsPercentiles => {
+  return {
+    setUiConfigFromEs(esAggDefinition) {
+      const { field: esField, percents } = esAggDefinition;
+
+      config.field = esField;
+      config.aggConfig.percents = percents.join(',');
+    },
+    getEsAggConfig() {
+      if (!this.isValid()) {
+        return null;
+      }
+
+      return {
+        field: config.field as string,
+        percents: parsePercentsInput(config.aggConfig.percents),
+      };
+    },
+    isValid() {
+      return (
+        typeof config.aggConfig.percents === 'string' &&
+        isValidPercentsInput(config.aggConfig.percents)
+      );
+    },
+  };
+};
+
 export function getPercentilesAggConfig(
   commonConfig: PivotAggsConfigWithUiBase | PivotAggsConfigBase
 ): IPivotAggsConfigPercentiles {
@@ -53,31 +81,10 @@ export function getPercentilesAggConfig(
     ...commonConfig,
     isSubAggsSupported: false,
     isMultiField: false,
-    AggFormComponent: PercentilesAggForm,
+    aggFormComponent: 'percentiles',
     field,
     aggConfig: {
       percents: PERCENTILES_AGG_DEFAULT_PERCENTS.toString(),
-    },
-    setUiConfigFromEs(esAggDefinition) {
-      const { field: esField, percents } = esAggDefinition;
-
-      this.field = esField;
-      this.aggConfig.percents = percents.join(',');
-    },
-    getEsAggConfig() {
-      if (!this.isValid()) {
-        return null;
-      }
-
-      return {
-        field: this.field as string,
-        percents: parsePercentsInput(this.aggConfig.percents),
-      };
-    },
-    isValid() {
-      return (
-        typeof this.aggConfig.percents === 'string' && isValidPercentsInput(this.aggConfig.percents)
-      );
     },
   };
 }

@@ -16,7 +16,7 @@ import { useSearchItems } from '../../hooks/use_search_items';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 
-import { Wizard } from './components/wizard';
+import { Wizard, WizardContext } from './components/wizard';
 
 type Props = RouteComponentProps<{ savedObjectId: string }>;
 export const CreateTransformSection: FC<Props> = ({ match }) => {
@@ -74,7 +74,15 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
             <EuiSpacer size="l" />
           </>
         )}
-        {searchItems !== undefined && <Wizard searchItems={searchItems} />}
+        {searchItems !== undefined && (
+          <WizardContext.Provider
+            value={{
+              searchItems,
+            }}
+          >
+            <Wizard />
+          </WizardContext.Provider>
+        )}
       </EuiPageTemplate.Section>
     </CapabilitiesWrapper>
   );

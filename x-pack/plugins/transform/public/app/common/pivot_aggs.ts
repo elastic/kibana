@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FC } from 'react';
+import type { FC } from 'react';
+import { nanoid } from '@reduxjs/toolkit';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -20,6 +21,7 @@ import { PIVOT_SUPPORTED_AGGS, PivotAgg } from '../../../common/types/pivot_aggs
 import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
 import type { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
 import type { PivotAggsConfigTopMetrics } from '../sections/create_transform/components/step_define/common/top_metrics_agg/types';
+import { getAggConfigUtils } from '../sections/create_transform/components/step_define/common/agg_utils';
 
 export function isPivotSupportedAggs(arg: unknown): arg is PivotSupportedAggs {
   return (
@@ -152,6 +154,7 @@ export const MAX_NESTING_SUB_AGGS = 10;
 export interface PivotAggsConfigBase {
   agg: PivotSupportedAggs;
   aggName: AggName;
+  aggId: string;
   dropDownName: string;
   /**
    * Indicates if aggregation supports multiple fields
@@ -159,10 +162,12 @@ export interface PivotAggsConfigBase {
   isMultiField?: boolean;
   /** Indicates if aggregation supports sub-aggregations */
   isSubAggsSupported?: boolean;
-  /** Dictionary of the sub-aggregations */
-  subAggs?: PivotAggsConfigDict;
+  /** String of the sub-aggregation ids */
+  subAggs?: string[];
   /** Reference to the parent aggregation */
-  parentAgg?: PivotAggsConfig;
+  parentAggId?: string;
+  /** Nesting level to allow checks if another sub aggregation can be added */
+  nestingLevel?: number;
 }
 
 /**
@@ -170,8 +175,9 @@ export interface PivotAggsConfigBase {
  */
 export function getAggConfigFromEsAgg(
   esAggDefinition: Record<string, any>,
-  aggName: string,
-  parentRef?: PivotAggsConfig
+  aggName: AggName,
+  nestingLevel?: number,
+  parentAggId?: string
 ) {
   const aggKeys = Object.keys(esAggDefinition);
 
@@ -188,48 +194,60 @@ export function getAggConfigFromEsAgg(
     ...esAggDefinition[agg],
     agg,
     aggName,
+    aggId: nanoid(),
+    parentAggId,
     dropDownName: aggName,
   };
 
   const config = getAggFormConfig(agg, commonConfig);
 
-  if (parentRef) {
-    config.parentAgg = parentRef;
+  if (nestingLevel) {
+    config.nestingLevel = nestingLevel + 1;
   }
 
   if (isPivotAggsWithExtendedForm(config)) {
-    config.setUiConfigFromEs(esAggDefinition[agg]);
+    const utils = getAggConfigUtils(config);
+    if (utils) utils.setUiConfigFromEs(esAggDefinition[agg]);
   }
 
+  const subAggs: PivotAggsConfigBase[] = [];
   if (aggKeys.includes('aggs')) {
-    config.subAggs = {};
     for (const [subAggName, subAggConfigs] of Object.entries(
       esAggDefinition.aggs as Record<string, object>
     )) {
-      config.subAggs[subAggName] = getAggConfigFromEsAgg(subAggConfigs, subAggName, config);
+      subAggs.push(
+        ...getAggConfigFromEsAgg(subAggConfigs, subAggName, config.nestingLevel, config.aggId)
+      );
     }
+
+    config.subAggs = subAggs.map((d) => d.aggId);
   }
 
-  return config;
+  return [config, ...subAggs];
 }
 
 export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
   field: EsFieldName | EsFieldName[] | null;
 }
 
-export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: any }>
-  extends PivotAggsConfigWithUiBase {
-  /** Form component */
-  AggFormComponent: FC<{
-    aggConfig: Partial<T>;
-    onChange: (arg: Partial<T>) => void;
-    selectedField: string;
-    isValid?: boolean;
-  }>;
-  /** Aggregation specific configuration */
+export type AggFormComponentNames =
+  | typeof PIVOT_SUPPORTED_AGGS.FILTER
+  | typeof PIVOT_SUPPORTED_AGGS.PERCENTILES
+  | typeof PIVOT_SUPPORTED_AGGS.TERMS
+  | typeof PIVOT_SUPPORTED_AGGS.TOP_METRICS;
+
+/** Form component */
+interface AggFormComponentProps<T> {
   aggConfig: Partial<T>;
+  onChange: (arg: Partial<T>) => void;
+  selectedField: string;
+  isValid?: boolean;
+}
+export type AggFormComponent<T> = FC<AggFormComponentProps<T>>;
+
+export interface PivotAggsUtilsWithExtra<T, ESConfig extends { [key: string]: any }> {
   /** Set UI configuration from ES aggregation definition */
-  setUiConfigFromEs: (arg: ESConfig) => void;
+  setUiConfigFromEs: (esConfig: ESConfig) => void;
   /** Converts UI agg config form to ES agg request object */
   getEsAggConfig: () => ESConfig | null;
   /** Indicates if the configuration is valid */
@@ -238,6 +256,13 @@ export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: a
   getAggName?: () => string | undefined;
   /** Helper text for the aggregation reflecting some configuration info */
   helperText?: () => string | undefined;
+}
+
+export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
+  /** Form component */
+  aggFormComponent: AggFormComponentNames;
+  /** Aggregation specific configuration */
+  aggConfig: Partial<T>;
 }
 
 interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {
@@ -269,9 +294,7 @@ export function isPivotAggsConfigWithUiBase(arg: unknown): arg is PivotAggsConfi
 type PivotAggsConfigWithExtendedForm = PivotAggsConfigFilter | PivotAggsConfigTopMetrics;
 
 export function isPivotAggsWithExtendedForm(arg: unknown): arg is PivotAggsConfigWithExtendedForm {
-  return (
-    isPopulatedObject(arg, ['setUiConfigFromEs']) || isPopulatedObject(arg, ['AggFormComponent'])
-  );
+  return isPopulatedObject(arg, ['aggFormComponent']);
 }
 
 export function isPivotAggConfigTopMetric(arg: unknown): arg is PivotAggsConfigTopMetrics {
@@ -299,17 +322,23 @@ export type PivotAggsConfigDict = Dictionary<PivotAggsConfig>;
  * from the UI config
  */
 export function getEsAggFromAggConfig(
-  pivotAggsConfig: PivotAggsConfigBase | PivotAggsConfigWithExtendedForm
+  pivotAggsConfig: PivotAggsConfigBase | PivotAggsConfigWithExtendedForm,
+  allConfigs: PivotAggsConfigDict
 ): PivotAgg | null {
   let esAgg: { [key: string]: any } = { ...pivotAggsConfig };
 
   delete esAgg.agg;
   delete esAgg.aggName;
+  delete esAgg.aggId;
   delete esAgg.dropDownName;
-  delete esAgg.parentAgg;
+  delete esAgg.nestingLevel;
+  delete esAgg.parentAggId;
 
   if (isPivotAggsWithExtendedForm(pivotAggsConfig)) {
-    esAgg = pivotAggsConfig.getEsAggConfig() as PivotAgg;
+    const utils = getAggConfigUtils(pivotAggsConfig);
+    if (utils) {
+      esAgg = utils.getEsAggConfig() as PivotAgg;
+    }
 
     if (esAgg === null) {
       return null;
@@ -326,8 +355,12 @@ export function getEsAggFromAggConfig(
     Object.keys(pivotAggsConfig.subAggs).length > 0
   ) {
     result.aggs = {};
-    for (const subAggConfig of Object.values(pivotAggsConfig.subAggs)) {
-      result.aggs[subAggConfig.aggName] = getEsAggFromAggConfig(subAggConfig) as PivotAgg;
+    for (const subAggId of pivotAggsConfig.subAggs) {
+      const subAggConfig = allConfigs[subAggId];
+      result.aggs[subAggConfig.aggName] = getEsAggFromAggConfig(
+        subAggConfig,
+        allConfigs
+      ) as PivotAgg;
     }
   }
 

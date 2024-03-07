@@ -25,3 +25,4 @@ export { useStartTransforms } from './use_start_transform';
 export { useStopTransforms } from './use_stop_transform';
 export { useTransformCapabilities } from './use_transform_capabilities';
 export { useUpdateTransform } from './use_update_transform';
+export { useDestIndexAvailableTimeFields } from './use_dest_index_available_time_fields';

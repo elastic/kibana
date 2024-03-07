@@ -62,6 +62,18 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
     }
   }
 
+  async function loadDataViewByEsIndexPattern(esIndexPattern: string | string[]) {
+    await loadDataViews(dataViewsContract);
+    const dataViewTitle = Array.isArray(esIndexPattern) ? esIndexPattern.join(',') : esIndexPattern;
+    const dataViewId = getDataViewIdByTitle(dataViewTitle);
+
+    if (dataViewId) {
+      setSavedObjectId(dataViewId);
+    }
+
+    return { dataViewId, dataViewTitle };
+  }
+
   useEffect(() => {
     if (savedObjectId !== undefined) {
       fetchSavedObject(savedObjectId);
@@ -73,6 +85,7 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
   return {
     error,
     getDataViewIdByTitle,
+    loadDataViewByEsIndexPattern,
     loadDataViews,
     searchItems,
     setSavedObjectId,

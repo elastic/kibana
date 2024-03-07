@@ -47,6 +47,7 @@ interface GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS;
   aggName: AggName;
   dropDownName: string;
+  groupById: string;
 }
 
 // Don't allow an interval of '0', but allow a float interval of '0.1' with a leading zero.
@@ -111,7 +112,7 @@ export function isPivotGroupByConfigWithUiSupport(arg: unknown): arg is GroupByC
 }
 
 export function getEsAggFromGroupByConfig(groupByConfig: GroupByConfigBase): GenericAgg {
-  const { agg, aggName, dropDownName, ...esAgg } = groupByConfig;
+  const { agg, aggName, dropDownName, groupById, ...esAgg } = groupByConfig;
 
   return {
     [agg]: esAgg,

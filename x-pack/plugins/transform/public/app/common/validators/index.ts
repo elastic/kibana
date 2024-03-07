@@ -6,6 +6,7 @@
  */
 
 export { frequencyValidator } from './frequency_validator';
+export { indexNameValidator } from './index_name_validator';
 export { integerRangeMinus1To100Validator } from './integer_range_minus_1_to_100_validator';
 export { integerAboveZeroValidator } from './integer_above_zero_validator';
 export { isJsonString } from './is_json_string';
@@ -17,4 +18,4 @@ export { retentionPolicyMaxAgeValidator } from './retention_policy_max_age_valid
 export { stringValidator } from './string_validator';
 export { transformSettingsNumberOfRetriesValidator } from './transform_settings_number_of_retries_validator';
 export { transformSettingsPageSearchSizeValidator } from './transform_settings_page_search_size_validator';
-export type { Validator } from './types';
+export { transformIdValidator } from './transform_id_validator';

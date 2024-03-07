@@ -8,9 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import { IPivotAggsConfigPercentiles } from './types';
+import { AggFormComponent } from '../../../../../../common/pivot_aggs';
+import type { PercentilesAggConfig } from './types';
 
-export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent'] = ({
+export const PercentilesAggForm: AggFormComponent<PercentilesAggConfig> = ({
   aggConfig,
   onChange,
   isValid,

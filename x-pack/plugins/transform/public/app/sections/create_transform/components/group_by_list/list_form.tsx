@@ -5,34 +5,20 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, type FC } from 'react';
 
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { AggName } from '../../../../../../common/types/aggregations';
 
-import {
-  PivotGroupByConfig,
-  PivotGroupByConfigDict,
-  PivotGroupByConfigWithUiSupportDict,
-} from '../../../../common';
+import { useWizardSelector } from '../../state_management/create_transform_store';
 
 import { GroupByLabelForm } from './group_by_label_form';
 
-interface ListProps {
-  list: PivotGroupByConfigDict;
-  options: PivotGroupByConfigWithUiSupportDict;
-  deleteHandler(l: string): void;
-  onChange(id: string, item: PivotGroupByConfig): void;
-}
-
-export const GroupByListForm: React.FC<ListProps> = ({
-  deleteHandler,
-  list,
-  onChange,
-  options,
-}) => {
+export const GroupByListForm: FC = () => {
+  const list = useWizardSelector((s) => s.stepDefine.groupByList);
   const listKeys = Object.keys(list);
+
   return (
     <>
       {listKeys.map((aggName: AggName, i) => {
@@ -40,13 +26,7 @@ export const GroupByListForm: React.FC<ListProps> = ({
         return (
           <Fragment key={aggName}>
             <EuiPanel paddingSize="s" data-test-subj={`transformGroupByEntry ${i}`}>
-              <GroupByLabelForm
-                deleteHandler={deleteHandler}
-                item={list[aggName]}
-                otherAggNames={otherAggNames}
-                onChange={(item) => onChange(aggName, item)}
-                options={options}
-              />
+              <GroupByLabelForm item={list[aggName]} otherAggNames={otherAggNames} />
             </EuiPanel>
             {listKeys.length > 0 && <EuiSpacer size="s" />}
           </Fragment>

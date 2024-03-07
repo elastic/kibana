@@ -10,7 +10,6 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { EsFieldName } from '../../../../../../../common/types/fields';
 
@@ -34,28 +33,17 @@ export interface Field {
   type: KBN_FIELD_TYPES | TIME_SERIES_METRIC_TYPES.COUNTER;
 }
 
-export interface StepDefineExposedState {
+export interface StepDefineState {
   transformFunction: TransformFunction;
   aggList: PivotAggsConfigDict;
   groupByList: PivotGroupByConfigDict | PivotGroupByConfigWithUiSupportDict;
   latestConfig: LatestFunctionConfigUI;
-  isAdvancedPivotEditorEnabled: boolean;
-  isAdvancedSourceEditorEnabled: boolean;
   searchLanguage: QUERY_LANGUAGE;
   searchString: string | undefined;
   searchQuery: string | SavedSearchQuery;
-  sourceConfigUpdated: boolean;
-  valid: boolean;
   validationStatus: { isValid: boolean; errorMessage?: string };
-  runtimeMappings?: RuntimeMappings;
-  runtimeMappingsUpdated: boolean;
-  isRuntimeMappingsEditorEnabled: boolean;
   timeRangeMs?: TimeRangeMs;
   isDatePickerApplyEnabled: boolean;
-  /**
-   * Undefined when the form is incomplete or invalid
-   */
-  previewRequest: { latest: LatestFunctionConfig } | { pivot: PivotConfigDefinition } | undefined;
 }
 
 export function isPivotPartialRequest(arg: unknown): arg is { pivot: PivotConfigDefinition } {

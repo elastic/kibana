@@ -5,98 +5,110 @@
  * 2.0.
  */
 
+import { initializeFormField } from '@kbn/ml-form-utils/form_field';
+import { initializeFormSection } from '@kbn/ml-form-utils/form_section';
+
 import {
   DEFAULT_CONTINUOUS_MODE_DELAY,
   DEFAULT_TRANSFORM_FREQUENCY,
   DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
   DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
 } from '../../../../../../common/constants';
-import type { TransformConfigUnion, TransformId } from '../../../../../../common/types/transform';
+import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
-export type EsIndexName = string;
-export type EsIngestPipelineName = string;
-export type DataViewTitle = string;
-
-export interface StepDetailsExposedState {
-  continuousModeDateField: string;
-  continuousModeDelay: string;
-  createDataView: boolean;
-  destinationIndex: EsIndexName;
-  destinationIngestPipeline: EsIngestPipelineName;
-  isContinuousModeEnabled: boolean;
-  isRetentionPolicyEnabled: boolean;
-  retentionPolicyDateField: string;
-  retentionPolicyMaxAge: string;
-  touched: boolean;
-  transformId: TransformId;
-  transformDescription: string;
+export interface StepDetailsState {
   transformFrequency: string;
   transformSettingsMaxPageSearchSize?: number;
   transformSettingsDocsPerSecond: number | null;
-  transformSettingsNumFailureRetries?: number;
+  transformSettingsNumFailureRetries?: number | string;
   valid: boolean;
-  dataViewTimeField?: string | undefined;
   _meta?: Record<string, unknown>;
 }
 
-export function getDefaultStepDetailsState(): StepDetailsExposedState {
+export const getStepDetailsFormFields = (
+  config?: TransformConfigUnion,
+  existingTransforms: string[] = []
+) => [
+  // top level attributes
+  initializeFormField('description', 'description', config),
+  initializeFormField('transformId', undefined, undefined, {
+    isOptional: false,
+    validator: 'transformIdValidator',
+    reservedValues: existingTransforms,
+  }),
+
+  // destination index
+  initializeFormField('destinationIndex', 'dest.index', undefined, {
+    isOptional: false,
+    validator: 'indexNameValidator',
+  }),
+  // optional ingest pipeline
+  initializeFormField('destinationIngestPipeline', 'dest.pipeline', config),
+  initializeFormField('dataViewTimeField', undefined, config, {
+    validator: 'stringValidator',
+    section: 'createDataView',
+  }),
+  // retention_policy.*
+  initializeFormField('retentionPolicyField', 'retention_policy.time.field', config, {
+    dependsOn: ['retentionPolicyMaxAge'],
+    isNullable: false,
+    isOptional: true,
+    isOptionalInSection: false,
+    section: 'retentionPolicy',
+  }),
+  initializeFormField('retentionPolicyMaxAge', 'retention_policy.time.max_age', config, {
+    dependsOn: ['retentionPolicyField'],
+    isNullable: false,
+    isOptional: true,
+    isOptionalInSection: false,
+    section: 'retentionPolicy',
+    validator: 'retentionPolicyMaxAgeValidator',
+  }),
+  // continuous mode
+  initializeFormField('continuousModeDelay', 'sync.time.delay', config, {
+    dependsOn: ['continuousModeDateField'],
+    defaultValue: DEFAULT_CONTINUOUS_MODE_DELAY,
+    isNullable: false,
+    isOptional: true,
+    isOptionalInSection: true,
+    section: 'continuousMode',
+    validator: 'stringValidator',
+  }),
+  initializeFormField('continuousModeDateField', 'sync.time.field', config, {
+    isNullable: false,
+    isOptional: true,
+    isOptionalInSection: false,
+    section: 'continuousMode',
+  }),
+];
+
+export const getStepDetailsFormSections = (config?: TransformConfigUnion) => [
+  initializeFormSection('createDataView', undefined, undefined, {
+    defaultEnabled: true,
+  }),
+  initializeFormSection('retentionPolicy', 'retention_policy', config),
+  initializeFormSection('continuousMode', 'sync.time', config),
+];
+
+export function getDefaultStepDetailsState(): StepDetailsState {
   return {
-    continuousModeDateField: '',
-    continuousModeDelay: DEFAULT_CONTINUOUS_MODE_DELAY,
-    createDataView: true,
-    isContinuousModeEnabled: false,
-    isRetentionPolicyEnabled: false,
-    retentionPolicyDateField: '',
-    retentionPolicyMaxAge: '',
-    transformId: '',
-    transformDescription: '',
     transformFrequency: DEFAULT_TRANSFORM_FREQUENCY,
     transformSettingsMaxPageSearchSize: DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
     transformSettingsDocsPerSecond: DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
     transformSettingsNumFailureRetries: undefined,
-    destinationIndex: '',
-    destinationIngestPipeline: '',
-    touched: false,
     valid: false,
-    dataViewTimeField: undefined,
   };
 }
 
 export function applyTransformConfigToDetailsState(
-  state: StepDetailsExposedState,
+  state: StepDetailsState,
   transformConfig?: TransformConfigUnion
-): StepDetailsExposedState {
+): StepDetailsState {
   // apply the transform configuration to wizard DETAILS state
   if (transformConfig !== undefined) {
-    // Continuous mode
-    const continuousModeTime = transformConfig.sync?.time;
-    if (continuousModeTime !== undefined) {
-      state.continuousModeDateField = continuousModeTime.field;
-      state.continuousModeDelay = continuousModeTime?.delay ?? DEFAULT_CONTINUOUS_MODE_DELAY;
-      state.isContinuousModeEnabled = true;
-    }
-
-    // Description
-    if (transformConfig.description !== undefined) {
-      state.transformDescription = transformConfig.description;
-    }
-
-    // Ingest Pipeline
-    if (transformConfig.dest.pipeline !== undefined) {
-      state.destinationIngestPipeline = transformConfig.dest.pipeline;
-    }
-
     // Frequency
     if (transformConfig.frequency !== undefined) {
       state.transformFrequency = transformConfig.frequency;
-    }
-
-    // Retention policy
-    const retentionPolicyTime = transformConfig.retention_policy?.time;
-    if (retentionPolicyTime !== undefined) {
-      state.retentionPolicyDateField = retentionPolicyTime.field;
-      state.retentionPolicyMaxAge = retentionPolicyTime.max_age;
-      state.isRetentionPolicyEnabled = true;
     }
 
     // Settings

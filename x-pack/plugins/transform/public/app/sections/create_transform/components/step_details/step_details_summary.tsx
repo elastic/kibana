@@ -11,30 +11,43 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiAccordion, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
-import { StepDetailsExposedState } from './common';
+import { useWizardSelector } from '../../state_management/create_transform_store';
 
-export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props) => {
+export const StepDetailsSummary: FC = () => {
   const {
     continuousModeDateField,
-    createDataView,
     isContinuousModeEnabled,
-    isRetentionPolicyEnabled,
-    retentionPolicyDateField,
-    retentionPolicyMaxAge,
-    transformId,
-    transformDescription,
     transformFrequency,
     transformSettingsMaxPageSearchSize,
     transformSettingsNumFailureRetries,
-    destinationIndex,
     destinationIngestPipeline,
-    touched,
-    dataViewTimeField,
-  } = props;
+    valid,
+  } = useWizardSelector((s) => s.stepDetails);
+  const createDataView = useWizardSelector(
+    (s) => s.stepDetailsForm.formSections.createDataView.enabled
+  );
+  const transformId = useWizardSelector((s) => s.stepDetailsForm.formFields.transformId.value);
+  const dataViewTimeField = useWizardSelector(
+    (s) => s.stepDetailsForm.formFields.dataViewTimeField.value
+  );
+  const transformDescription = useWizardSelector(
+    (s) => s.stepDetailsForm.formFields.description.value
+  );
+  const destinationIndex = useWizardSelector(
+    (s) => s.stepDetailsForm.formFields.destinationIndex.value
+  );
 
-  if (touched === false) {
-    return null;
-  }
+  const isRetentionPolicyEnabled = useWizardSelector(
+    (s) => s.stepDetailsForm.formSections.retentionPolicy.enabled
+  );
+  const retentionPolicyDateField = useWizardSelector(
+    (s) => s.stepDetailsForm.formFields.retentionPolicyField.value
+  );
+  const retentionPolicyMaxAge = useWizardSelector(
+    (s) => s.stepDetailsForm.formFields.retentionPolicyMaxAge.value
+  );
+
+  if (!valid) return null;
 
   const destinationIndexHelpText = createDataView
     ? i18n.translate('xpack.transform.stepDetailsSummary.createDataViewMessage', {
@@ -167,4 +180,4 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
       </EuiAccordion>
     </div>
   );
-});
+};

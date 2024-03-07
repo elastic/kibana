@@ -5,228 +5,71 @@
  * 2.0.
  */
 
-import React, { type FC, useRef, useState, createContext, useMemo } from 'react';
+import React, { type FC, createContext, useContext, useMemo } from 'react';
+import { Provider as ReduxProvider } from 'react-redux';
 import { pick } from 'lodash';
 
-import { EuiSteps, EuiStepStatus } from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
-import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { useEnabledFeatures } from '../../../../serverless_context';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
-import { getCreateTransformRequestBody } from '../../../../common';
-import { SearchItems } from '../../../../hooks/use_search_items';
+import type { SearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies } from '../../../../app_dependencies';
 
-import {
-  applyTransformConfigToDefineState,
-  getDefaultStepDefineState,
-  StepDefineExposedState,
-  StepDefineForm,
-  StepDefineSummary,
-} from '../step_define';
-import { getDefaultStepCreateState, StepCreateForm, StepCreateSummary } from '../step_create';
-import {
-  applyTransformConfigToDetailsState,
-  getDefaultStepDetailsState,
-  StepDetailsForm,
-  StepDetailsSummary,
-} from '../step_details';
-import { WizardNav } from '../wizard_nav';
+import { getTransformWizardStore } from '../../state_management/create_transform_store';
 
 import { TRANSFORM_STORAGE_KEYS } from './storage';
+import { WizardSteps } from './wizard_steps';
 
 const localStorage = new Storage(window.localStorage);
 
-enum WIZARD_STEPS {
-  DEFINE,
-  DETAILS,
-  CREATE,
-}
-
-interface DefinePivotStepProps {
-  isCurrentStep: boolean;
-  stepDefineState: StepDefineExposedState;
-  setCurrentStep: React.Dispatch<React.SetStateAction<WIZARD_STEPS>>;
-  setStepDefineState: React.Dispatch<React.SetStateAction<StepDefineExposedState>>;
+export interface WizardContextValue {
+  config?: TransformConfigUnion;
   searchItems: SearchItems;
 }
 
-const StepDefine: FC<DefinePivotStepProps> = ({
-  isCurrentStep,
-  stepDefineState,
-  setCurrentStep,
-  setStepDefineState,
-  searchItems,
-}) => {
-  const definePivotRef = useRef(null);
+export const WizardContext = createContext<WizardContextValue | null>(null);
 
-  return (
-    <>
-      <div ref={definePivotRef} />
-      {isCurrentStep && (
-        <>
-          <StepDefineForm
-            onChange={setStepDefineState}
-            overrides={{ ...stepDefineState }}
-            searchItems={searchItems}
-          />
-          <WizardNav
-            next={() => setCurrentStep(WIZARD_STEPS.DETAILS)}
-            nextActive={stepDefineState.valid}
-          />
-        </>
-      )}
-      {!isCurrentStep && (
-        <StepDefineSummary formState={{ ...stepDefineState }} searchItems={searchItems} />
-      )}
-    </>
-  );
+export const useWizardContext = () => {
+  const value = useContext(WizardContext);
+
+  if (value === null) {
+    throw new Error('Wizard Context not set');
+  }
+
+  return value;
 };
 
-interface WizardProps {
-  cloneConfig?: TransformConfigUnion;
-  searchItems: SearchItems;
-}
+export const useTransformConfig = () => {
+  const value = useWizardContext();
 
-export const CreateTransformWizardContext = createContext<{
-  dataView: DataView | null;
-  runtimeMappings: RuntimeMappings | undefined;
-}>({
-  dataView: null,
-  runtimeMappings: undefined,
-});
+  if (value.config === undefined) {
+    throw new Error('Transform config in Wizard Context not set');
+  }
 
-export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
-  const { showNodeInfo } = useEnabledFeatures();
+  return value.config;
+};
+
+export const useDataView = () => {
+  const { searchItems } = useWizardContext();
+  return searchItems.dataView;
+};
+
+export const useSearchItems = () => {
+  const { searchItems } = useWizardContext();
+  return searchItems;
+};
+
+export const Wizard: FC = () => {
   const appDependencies = useAppDependencies();
-  const {
-    ml: { FieldStatsFlyoutProvider },
-    uiSettings,
-    data,
-    fieldFormats,
-    charts,
-  } = appDependencies;
-  const { dataView } = searchItems;
+  const { showNodeInfo } = useEnabledFeatures();
 
-  // The current WIZARD_STEP
-  const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
-
-  // The DEFINE state
-  const [stepDefineState, setStepDefineState] = useState(
-    applyTransformConfigToDefineState(getDefaultStepDefineState(searchItems), cloneConfig, dataView)
-  );
-
-  // The DETAILS state
-  const [stepDetailsState, setStepDetailsState] = useState(
-    applyTransformConfigToDetailsState(getDefaultStepDetailsState(), cloneConfig)
-  );
-
-  // The CREATE state
-  const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
-
-  const transformConfig = getCreateTransformRequestBody(
-    dataView,
-    stepDefineState,
-    stepDetailsState
-  );
-
-  const stepDefine = useMemo(() => {
-    return {
-      title: i18n.translate('xpack.transform.transformsWizard.stepConfigurationTitle', {
-        defaultMessage: 'Configuration',
-      }),
-      children: (
-        <StepDefine
-          isCurrentStep={currentStep === WIZARD_STEPS.DEFINE}
-          stepDefineState={stepDefineState}
-          setCurrentStep={setCurrentStep}
-          setStepDefineState={setStepDefineState}
-          searchItems={searchItems}
-        />
-      ),
-    };
-  }, [currentStep, stepDefineState, setCurrentStep, setStepDefineState, searchItems]);
-
-  const stepDetails = useMemo(() => {
-    return {
-      title: i18n.translate('xpack.transform.transformsWizard.stepDetailsTitle', {
-        defaultMessage: 'Transform details',
-      }),
-      children: (
-        <>
-          {currentStep === WIZARD_STEPS.DETAILS ? (
-            <StepDetailsForm
-              onChange={setStepDetailsState}
-              overrides={stepDetailsState}
-              searchItems={searchItems}
-              stepDefineState={stepDefineState}
-            />
-          ) : (
-            <StepDetailsSummary {...stepDetailsState} />
-          )}
-          {currentStep === WIZARD_STEPS.DETAILS && (
-            <WizardNav
-              previous={() => {
-                setCurrentStep(WIZARD_STEPS.DEFINE);
-              }}
-              next={() => setCurrentStep(WIZARD_STEPS.CREATE)}
-              nextActive={stepDetailsState.valid}
-            />
-          )}
-        </>
-      ),
-      status: currentStep >= WIZARD_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
-    };
-  }, [currentStep, setStepDetailsState, stepDetailsState, searchItems, stepDefineState]);
-
-  const stepCreate = useMemo(() => {
-    return {
-      title: i18n.translate('xpack.transform.transformsWizard.stepCreateTitle', {
-        defaultMessage: 'Create',
-      }),
-      children: (
-        <>
-          {currentStep === WIZARD_STEPS.CREATE ? (
-            <StepCreateForm
-              createDataView={stepDetailsState.createDataView}
-              transformId={stepDetailsState.transformId}
-              transformConfig={transformConfig}
-              onChange={setStepCreateState}
-              overrides={stepCreateState}
-              timeFieldName={stepDetailsState.dataViewTimeField}
-            />
-          ) : (
-            <StepCreateSummary />
-          )}
-          {currentStep === WIZARD_STEPS.CREATE && !stepCreateState.created && (
-            <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.DETAILS)} />
-          )}
-        </>
-      ),
-      status: currentStep >= WIZARD_STEPS.CREATE ? undefined : ('incomplete' as EuiStepStatus),
-    };
-  }, [
-    currentStep,
-    setCurrentStep,
-    stepDetailsState.createDataView,
-    stepDetailsState.transformId,
-    transformConfig,
-    setStepCreateState,
-    stepCreateState,
-    stepDetailsState.dataViewTimeField,
-  ]);
-
-  const stepsConfig = [stepDefine, stepDetails, stepCreate];
+  const reduxStore = useMemo(() => getTransformWizardStore(), []);
 
   const datePickerDeps: DatePickerDependencies = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
@@ -234,35 +77,15 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
     showFrozenDataTierChoice: showNodeInfo,
   };
 
-  const fieldStatsServices: FieldStatsServices = useMemo(
-    () => ({
-      uiSettings,
-      dataViews: data.dataViews,
-      data,
-      fieldFormats,
-      charts,
-    }),
-    [uiSettings, data, fieldFormats, charts]
-  );
-
   return (
-    <FieldStatsFlyoutProvider
-      dataView={dataView}
-      fieldStatsServices={fieldStatsServices}
-      timeRangeMs={stepDefineState.timeRangeMs}
-      dslQuery={transformConfig.source.query}
-    >
-      <CreateTransformWizardContext.Provider
-        value={{ dataView, runtimeMappings: stepDefineState.runtimeMappings }}
-      >
-        <UrlStateProvider>
-          <StorageContextProvider storage={localStorage} storageKeys={TRANSFORM_STORAGE_KEYS}>
-            <DatePickerContextProvider {...datePickerDeps}>
-              <EuiSteps className="transform__steps" steps={stepsConfig} />
-            </DatePickerContextProvider>
-          </StorageContextProvider>
-        </UrlStateProvider>
-      </CreateTransformWizardContext.Provider>
-    </FieldStatsFlyoutProvider>
+    <ReduxProvider store={reduxStore}>
+      <UrlStateProvider>
+        <StorageContextProvider storage={localStorage} storageKeys={TRANSFORM_STORAGE_KEYS}>
+          <DatePickerContextProvider {...datePickerDeps}>
+            <WizardSteps />
+          </DatePickerContextProvider>
+        </StorageContextProvider>
+      </UrlStateProvider>
+    </ReduxProvider>
   );
-});
+};

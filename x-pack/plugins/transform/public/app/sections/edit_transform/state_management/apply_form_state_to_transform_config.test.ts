@@ -5,22 +5,18 @@
  * 2.0.
  */
 
-import { getTransformConfigMock } from './__mocks__/transform_config';
+import { applyFormStateToConfig } from '@kbn/ml-form-utils/apply_form_state_to_config';
 
-import { applyFormStateToTransformConfig } from './apply_form_state_to_transform_config';
+import { getTransformConfigMock } from './__mocks__/transform_config';
 import { getDefaultState } from './get_default_state';
 
-describe('Transform: applyFormStateToTransformConfig()', () => {
+describe('Transform: applyFormStateToConfig()', () => {
   it('should exclude unchanged form fields', () => {
     const transformConfigMock = getTransformConfigMock();
 
     const { formFields, formSections } = getDefaultState(transformConfigMock);
 
-    const updateConfig = applyFormStateToTransformConfig(
-      transformConfigMock,
-      formFields,
-      formSections
-    );
+    const updateConfig = applyFormStateToConfig(transformConfigMock, formFields, formSections);
 
     // This case will return an empty object. In the actual UI, this case should not happen
     // because the Update-Button will be disabled when no form field was changed.
@@ -73,11 +69,7 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
       },
     });
 
-    const updateConfig = applyFormStateToTransformConfig(
-      transformConfigMock,
-      formFields,
-      formSections
-    );
+    const updateConfig = applyFormStateToConfig(transformConfigMock, formFields, formSections);
 
     expect(Object.keys(updateConfig)).toHaveLength(2);
     expect(updateConfig.description).toBe('the-updated-description');
@@ -126,11 +118,7 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
       },
     });
 
-    const updateConfig = applyFormStateToTransformConfig(
-      transformConfigMock,
-      formFields,
-      formSections
-    );
+    const updateConfig = applyFormStateToConfig(transformConfigMock, formFields, formSections);
     expect(Object.keys(updateConfig)).toHaveLength(1);
     // It should include the dependent unchanged destination index
     expect(updateConfig.dest?.index).toBe(transformConfigMock.dest.index);
@@ -145,11 +133,7 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
       description: 'the-updated-description',
     });
 
-    const updateConfig = applyFormStateToTransformConfig(
-      transformConfigMock,
-      formFields,
-      formSections
-    );
+    const updateConfig = applyFormStateToConfig(transformConfigMock, formFields, formSections);
     expect(Object.keys(updateConfig)).toHaveLength(1);
     // It should exclude the dependent unchanged destination section
     expect(typeof updateConfig.dest).toBe('undefined');
@@ -168,11 +152,7 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
 
     formSections.retentionPolicy.enabled = false;
 
-    const updateConfig = applyFormStateToTransformConfig(
-      transformConfigMock,
-      formFields,
-      formSections
-    );
+    const updateConfig = applyFormStateToConfig(transformConfigMock, formFields, formSections);
 
     expect(Object.keys(updateConfig)).toHaveLength(1);
     // It should exclude the dependent unchanged destination section

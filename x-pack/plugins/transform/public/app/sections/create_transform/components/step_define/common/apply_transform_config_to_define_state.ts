@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 
-import { getCombinedRuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { Dictionary } from '../../../../../../../common/types/common';
 import { PivotSupportedAggs } from '../../../../../../../common/types/pivot_aggs';
@@ -19,31 +19,23 @@ import {
 
 import {
   matchAllQuery,
-  PivotAggsConfig,
   PivotAggsConfigDict,
   PivotGroupByConfig,
   PivotGroupByConfigDict,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../../common';
 
-import { StepDefineExposedState } from './types';
+import { StepDefineState } from './types';
 import { getAggConfigFromEsAgg } from '../../../../../common/pivot_aggs';
 import { TRANSFORM_FUNCTION } from '../../../../../../../common/constants';
-import { StepDefineFormProps } from '../step_define_form';
 import { validateLatestConfig } from '../hooks/use_latest_function_config';
 import { validatePivotConfig } from '../hooks/use_pivot_config';
 
 export function applyTransformConfigToDefineState(
-  state: StepDefineExposedState,
+  state: StepDefineState,
   transformConfig?: TransformBaseConfig,
-  dataView?: StepDefineFormProps['searchItems']['dataView']
-): StepDefineExposedState {
-  // apply runtime fields from both the index pattern and inline configurations
-  state.runtimeMappings = getCombinedRuntimeMappings(
-    dataView,
-    transformConfig?.source?.runtime_mappings
-  );
-
+  dataView?: DataView
+): StepDefineState {
   if (transformConfig === undefined) {
     return state;
   }
@@ -53,13 +45,22 @@ export function applyTransformConfigToDefineState(
 
     // apply the transform configuration to wizard DEFINE state
     // transform aggregations config to wizard state
-    state.aggList = Object.keys(transformConfig.pivot.aggregations).reduce((aggList, aggName) => {
-      const aggConfig = transformConfig.pivot.aggregations[
-        aggName as PivotSupportedAggs
-      ] as Dictionary<any>;
-      aggList[aggName] = getAggConfigFromEsAgg(aggConfig, aggName) as PivotAggsConfig;
-      return aggList;
-    }, {} as PivotAggsConfigDict);
+    state.aggList = Object.keys(transformConfig.pivot.aggregations).reduce<PivotAggsConfigDict>(
+      (aggList, aggName) => {
+        const aggConfig = transformConfig.pivot.aggregations[
+          aggName as PivotSupportedAggs
+        ] as Dictionary<any>;
+        const aggListArray = getAggConfigFromEsAgg(aggConfig, aggName);
+        return {
+          ...aggList,
+          ...aggListArray.reduce<PivotAggsConfigDict>((p, c) => {
+            p[c.aggId] = c;
+            return p;
+          }, {}),
+        };
+      },
+      {}
+    );
 
     // transform group by config to wizard state
     state.groupByList = Object.keys(transformConfig.pivot.group_by).reduce(
@@ -76,10 +77,6 @@ export function applyTransformConfigToDefineState(
       },
       {} as PivotGroupByConfigDict
     );
-
-    state.previewRequest = {
-      pivot: transformConfig.pivot,
-    };
 
     state.validationStatus = validatePivotConfig(transformConfig.pivot);
   }
@@ -99,21 +96,14 @@ export function applyTransformConfigToDefineState(
           : transformConfig.latest.sort,
       },
     };
-    state.previewRequest = {
-      latest: transformConfig.latest,
-    };
     state.validationStatus = validateLatestConfig(transformConfig.latest);
   }
 
   // only apply the query from the transform config to wizard state if it's not the default query
   const query = transformConfig.source.query;
   if (query !== undefined && !isEqual(query, matchAllQuery)) {
-    state.isAdvancedSourceEditorEnabled = true;
     state.searchQuery = query;
-    state.sourceConfigUpdated = true;
   }
 
-  // applying a transform config to wizard state will always result in a valid configuration
-  state.valid = true;
   return state;
 }

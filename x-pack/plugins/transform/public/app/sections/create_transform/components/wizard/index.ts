@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Wizard } from './wizard';
+export { Wizard, WizardContext } from './wizard';

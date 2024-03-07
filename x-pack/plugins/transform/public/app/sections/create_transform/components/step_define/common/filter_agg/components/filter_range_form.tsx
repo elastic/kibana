@@ -15,16 +15,13 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FilterAggConfigRange } from '../types';
+import type { FilterAggForm, FilterAggTypeConfigRange } from '../types';
 
 const BUTTON_SIZE = 40;
 /**
  * Form component for the range filter aggregation for number type fields.
  */
-export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFormComponent'] = ({
-  config,
-  onChange,
-}) => {
+export const FilterRangeForm: FilterAggForm<FilterAggTypeConfigRange> = ({ config, onChange }) => {
   const from = config?.from ?? '';
   const to = config?.to ?? '';
   const includeFrom = config?.includeFrom ?? false;

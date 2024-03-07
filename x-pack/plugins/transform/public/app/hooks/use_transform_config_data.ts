@@ -7,6 +7,7 @@
 
 import moment from 'moment-timezone';
 import { useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
@@ -32,15 +33,18 @@ import type { PreviewMappingsProperties } from '../../../common/api_schemas/tran
 
 import { getErrorMessage } from '../../../common/utils/errors';
 
-import { getPreviewTransformRequestBody, type TransformConfigQuery } from '../common';
-
-import { SearchItems } from './use_search_items';
 import { useGetTransformsPreview } from './use_get_transforms_preview';
-import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import {
   isLatestPartialRequest,
   isPivotPartialRequest,
 } from '../sections/create_transform/components/step_define/common/types';
+import { useDataView } from '../sections/create_transform/components/wizard/wizard';
+import {
+  selectTransformConfigQuery,
+  selectValidatedRequestPayload,
+  selectPreviewRequest,
+} from '../sections/create_transform/state_management/step_define_selectors';
+import { useWizardSelector } from '../sections/create_transform/state_management/create_transform_store';
 
 function sortColumns(groupByArr: string[]) {
   return (a: string, b: string) => {
@@ -100,14 +104,12 @@ export function getCombinedProperties(
   };
 }
 
-export const useTransformConfigData = (
-  dataView: SearchItems['dataView'],
-  query: TransformConfigQuery,
-  validationStatus: StepDefineExposedState['validationStatus'],
-  requestPayload: StepDefineExposedState['previewRequest'],
-  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'],
-  timeRangeMs?: StepDefineExposedState['timeRangeMs']
-): UseIndexDataReturnType => {
+export const useTransformConfigData = (): UseIndexDataReturnType => {
+  const dataView = useDataView();
+
+  const query = useSelector(selectTransformConfigQuery);
+  const { requestPayload, validationStatus } = useSelector(selectValidatedRequestPayload);
+
   const [previewMappingsProperties, setPreviewMappingsProperties] =
     useState<PreviewMappingsProperties>({});
 
@@ -145,17 +147,7 @@ export const useTransformConfigData = (
     tableItems,
   } = dataGrid;
 
-  const previewRequest = useMemo(
-    () =>
-      getPreviewTransformRequestBody(
-        dataView,
-        query,
-        requestPayload,
-        combinedRuntimeMappings,
-        timeRangeMs
-      ),
-    [dataView, query, requestPayload, combinedRuntimeMappings, timeRangeMs]
-  );
+  const previewRequest = useWizardSelector((s) => selectPreviewRequest(s, dataView));
 
   const {
     error: previewError,

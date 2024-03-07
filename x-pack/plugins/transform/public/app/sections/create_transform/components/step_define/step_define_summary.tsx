@@ -15,64 +15,45 @@ import { EuiBadge, EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer, EuiText } from 
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { DataGrid } from '@kbn/ml-data-grid';
 
+import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
+
 import { useToastNotifications } from '../../../../app_dependencies';
 import {
   getTransformConfigQuery,
   getTransformPreviewDevConsoleStatement,
-  getPreviewTransformRequestBody,
   isDefaultQuery,
   isMatchAllQuery,
 } from '../../../../common';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
-import { SearchItems } from '../../../../hooks/use_search_items';
+
+import { useWizardContext } from '../wizard/wizard';
 
 import { AggListSummary } from '../aggregation_list';
 import { GroupByListSummary } from '../group_by_list';
 
-import { StepDefineExposedState } from './common';
-import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import { isLatestPartialRequest } from './common/types';
 
-interface Props {
-  formState: StepDefineExposedState;
-  searchItems: SearchItems;
-}
+import { useWizardSelector } from '../../state_management/create_transform_store';
+import { selectPreviewRequest } from '../../state_management/step_define_selectors';
 
-export const StepDefineSummary: FC<Props> = ({
-  formState: {
+export const StepDefineSummary: FC = () => {
+  const {
     isDatePickerApplyEnabled,
     timeRangeMs,
-    runtimeMappings,
     searchString,
     searchQuery,
     groupByList,
     aggList,
     transformFunction,
-    previewRequest: partialPreviewRequest,
-    validationStatus,
-  },
-  searchItems,
-}) => {
+  } = useWizardSelector((s) => s.stepDefine);
+  const { searchItems } = useWizardContext();
   const toastNotifications = useToastNotifications();
 
   const transformConfigQuery = getTransformConfigQuery(searchQuery);
 
-  const previewRequest = getPreviewTransformRequestBody(
-    searchItems.dataView,
-    transformConfigQuery,
-    partialPreviewRequest,
-    runtimeMappings,
-    isDatePickerApplyEnabled ? timeRangeMs : undefined
-  );
+  const previewRequest = useWizardSelector((s) => selectPreviewRequest(s, searchItems.dataView));
 
-  const pivotPreviewProps = useTransformConfigData(
-    searchItems.dataView,
-    transformConfigQuery,
-    validationStatus,
-    partialPreviewRequest,
-    runtimeMappings,
-    isDatePickerApplyEnabled ? timeRangeMs : undefined
-  );
+  const pivotPreviewProps = useTransformConfigData();
 
   const isModifiedQuery =
     typeof searchString === 'undefined' &&

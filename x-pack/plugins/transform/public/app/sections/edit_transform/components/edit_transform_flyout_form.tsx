@@ -5,26 +5,50 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { useMemo, type FC } from 'react';
 
 import { EuiAccordion, EuiForm, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormTextInput } from '@kbn/ml-form-utils/components/form_text_input';
+import { FormTextArea } from '@kbn/ml-form-utils/components/form_text_area';
 
-import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
-import { EditTransformFlyoutFormTextArea } from './edit_transform_flyout_form_text_area';
-import { EditTransformRetentionPolicy } from './edit_transform_retention_policy';
-import { EditTransformIngestPipeline } from './edit_transform_ingest_pipeline';
+import type { PostTransformsPreviewRequestSchema } from '../../../../../common/api_schemas/transforms';
+import { isLatestTransform, isPivotTransform } from '../../../../../common/types/transform';
+
+import { TransformIngestPipelineNamesForm } from '../../../components/transform_ingest_pipeline_names_form';
+import { TransformRetentionPolicy } from '../../../components/transform_retention_policy';
+
+import { useTransformConfig } from '../../create_transform/components/wizard/wizard';
+import { editTransformFlyoutSlice } from '../state_management/edit_transform_flyout_state';
+
+const EditTransformRetentionPolicy: FC = () => {
+  const config = useTransformConfig();
+  const previewRequest: PostTransformsPreviewRequestSchema = useMemo(() => {
+    return {
+      source: config.source,
+      ...(isPivotTransform(config) ? { pivot: config.pivot } : {}),
+      ...(isLatestTransform(config) ? { latest: config.latest } : {}),
+    };
+  }, [config]);
+
+  return (
+    <TransformRetentionPolicy slice={editTransformFlyoutSlice} previewRequest={previewRequest} />
+  );
+};
 
 export const EditTransformFlyoutForm: FC = () => (
   <EuiForm>
-    <EditTransformFlyoutFormTextArea
+    <FormTextArea
+      slice={editTransformFlyoutSlice}
       field="description"
       label={i18n.translate('xpack.transform.transformList.editFlyoutFormDescriptionLabel', {
         defaultMessage: 'Description',
       })}
     />
-    <EditTransformFlyoutFormTextInput
+
+    <FormTextInput
+      slice={editTransformFlyoutSlice}
       field="frequency"
       label={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyLabel', {
         defaultMessage: 'Frequency',
@@ -34,11 +58,9 @@ export const EditTransformFlyoutForm: FC = () => (
           'The interval to check for changes in source indices when the transform runs continuously.',
       })}
     />
-
     <EuiSpacer size="l" />
 
     <EditTransformRetentionPolicy />
-
     <EuiSpacer size="l" />
 
     <EuiAccordion
@@ -53,7 +75,8 @@ export const EditTransformFlyoutForm: FC = () => (
       paddingSize="s"
     >
       <div data-test-subj="transformEditAccordionDestinationContent">
-        <EditTransformFlyoutFormTextInput
+        <FormTextInput
+          slice={editTransformFlyoutSlice}
           field="destinationIndex"
           label={i18n.translate(
             'xpack.transform.transformList.editFlyoutFormDestinationIndexLabel',
@@ -62,15 +85,13 @@ export const EditTransformFlyoutForm: FC = () => (
             }
           )}
         />
-
         <EuiSpacer size="m" />
 
         <div data-test-subj="transformEditAccordionIngestPipelineContent">
-          <EditTransformIngestPipeline />
+          <TransformIngestPipelineNamesForm slice={editTransformFlyoutSlice} />
         </div>
       </div>
     </EuiAccordion>
-
     <EuiSpacer size="l" />
 
     <EuiAccordion
@@ -85,7 +106,8 @@ export const EditTransformFlyoutForm: FC = () => (
       paddingSize="s"
     >
       <div data-test-subj="transformEditAccordionAdvancedSettingsContent">
-        <EditTransformFlyoutFormTextInput
+        <FormTextInput
+          slice={editTransformFlyoutSlice}
           field="docsPerSecond"
           helpText={i18n.translate(
             'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelpText',
@@ -97,7 +119,8 @@ export const EditTransformFlyoutForm: FC = () => (
             defaultMessage: 'Documents per second',
           })}
         />
-        <EditTransformFlyoutFormTextInput
+        <FormTextInput
+          slice={editTransformFlyoutSlice}
           field="maxPageSearchSize"
           helpText={i18n.translate(
             'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeHelpText',
@@ -114,7 +137,8 @@ export const EditTransformFlyoutForm: FC = () => (
           )}
           placeHolder={true}
         />
-        <EditTransformFlyoutFormTextInput
+        <FormTextInput
+          slice={editTransformFlyoutSlice}
           field="numFailureRetries"
           helpText={i18n.translate(
             'xpack.transform.transformList.editFlyoutFormNumFailureRetriesHelpText',

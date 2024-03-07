@@ -5,20 +5,28 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo, type FC, type PropsWithChildren } from 'react';
-import { configureStore, createSlice } from '@reduxjs/toolkit';
-import { useDispatch, Provider } from 'react-redux';
-import { bindActionCreators } from 'redux';
+import React, { useEffect, useMemo, useState, type FC, type PropsWithChildren } from 'react';
 import useMount from 'react-use/lib/useMount';
+import { configureStore } from '@reduxjs/toolkit';
+import { Provider } from 'react-redux';
+
+import { EuiCallOut } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import type { State } from '@kbn/ml-form-utils/form_slice';
+import { createFormSlice } from '@kbn/ml-form-utils/form_slice';
 
 import type { TransformConfigUnion } from '../../../../../common/types/transform';
+import { useSearchItems } from '../../../hooks/use_search_items';
 
-import { initialize, setApiError, setFormField, setFormSection } from './actions';
-import { type FormFieldsState } from './form_field';
-import { type FormSectionsState } from './form_section';
-import { getDefaultState } from './get_default_state';
+import type { FormFields } from './form_field';
+import { validators, type ValidatorName } from './validators';
+import type { FormSections } from './form_section';
+import { getEditTransformFormFields, getEditTransformFormSections } from './get_default_state';
 
-// The edit transform flyout uses a redux-toolkit to manage its form state with
+import { WizardContext } from '../../create_transform/components/wizard/wizard';
+
+// The edit transform flyout uses redux-toolkit to manage its form state with
 // support for applying its state to a nested configuration object suitable for passing on
 // directly to the API call. For now this is only used for the transform edit form.
 // Once we apply the functionality to other places, e.g. the transform creation wizard,
@@ -29,55 +37,108 @@ export interface ProviderProps {
   dataViewId?: string;
 }
 
-export interface State {
-  apiErrorMessage?: string;
-  formFields: FormFieldsState;
-  formSections: FormSectionsState;
-}
+export type EditTransformFlyoutState = State<FormFields, FormSections, ValidatorName>;
+export const editTransformFlyoutSlice = createFormSlice(
+  'editTransformFlyout',
+  getEditTransformFormFields(),
+  getEditTransformFormSections(),
+  validators
+);
 
-const editTransformFlyoutSlice = createSlice({
-  name: 'editTransformFlyout',
-  initialState: getDefaultState(),
-  reducers: {
-    initialize,
-    setApiError,
-    setFormField,
-    setFormSection,
-  },
-});
+export const { initialize, setFormField, setFormSection, setSubmitErrorMessage } =
+  editTransformFlyoutSlice.actions;
 
 const getReduxStore = () =>
   configureStore({
-    reducer: editTransformFlyoutSlice.reducer,
+    reducer: {
+      [editTransformFlyoutSlice.name]: editTransformFlyoutSlice.reducer,
+    },
   });
 
-const EditTransformFlyoutContext = createContext<ProviderProps | null>(null);
+// Because we get the redux store with a factory function we need to
+// use these nested ReturnTypes to dynamically get the StoreState.
+export type StoreState = ReturnType<ReturnType<typeof getReduxStore>['getState']>;
 
 export const EditTransformFlyoutProvider: FC<PropsWithChildren<ProviderProps>> = ({
   children,
   ...props
 }) => {
-  const store = useMemo(getReduxStore, []);
+  const {
+    error: searchItemsError,
+    loadDataViewByEsIndexPattern,
+    searchItems,
+  } = useSearchItems(undefined);
+
+  const [errorMessage, setErrorMessage] = useState<string>();
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    async function initializeSearchItems() {
+      const { dataViewId, dataViewTitle } = await loadDataViewByEsIndexPattern(
+        props.config.source.index
+      );
+
+      if (dataViewId === undefined) {
+        setErrorMessage(
+          i18n.translate('xpack.transformList.preview.noDataViewErrorPromptText', {
+            defaultMessage:
+              'Unable to preview the transform {transformId}. No data view exists for {dataViewTitle}.',
+            values: { dataViewTitle, transformId: props.config.id },
+          })
+        );
+      }
+    }
+
+    initializeSearchItems();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (searchItemsError !== undefined) {
+      setErrorMessage(searchItemsError);
+      setIsInitialized(true);
+    }
+  }, [searchItemsError]);
+
+  useEffect(() => {
+    if (searchItems !== undefined && searchItemsError === undefined) {
+      setIsInitialized(true);
+    }
+  }, [searchItems, searchItemsError]);
+
+  const reduxStore = useMemo(getReduxStore, []);
 
   // Apply original transform config to redux form state.
   useMount(() => {
-    store.dispatch(editTransformFlyoutSlice.actions.initialize(props));
+    reduxStore.dispatch(
+      initialize({
+        formFields: getEditTransformFormFields(props.config),
+        formSections: getEditTransformFormSections(props.config),
+      })
+    );
   });
 
+  if (errorMessage) {
+    return (
+      <>
+        <EuiCallOut
+          title={i18n.translate('xpack.transform.clone.errorPromptTitle', {
+            defaultMessage: 'An error occurred getting the data view for the transform config.',
+          })}
+          color="danger"
+          iconType="warning"
+        >
+          <pre>{JSON.stringify(errorMessage)}</pre>
+        </EuiCallOut>
+      </>
+    );
+  }
+
+  if (searchItems === undefined || !isInitialized) return null;
+
   return (
-    <EditTransformFlyoutContext.Provider value={props}>
-      <Provider store={store}>{children}</Provider>
-    </EditTransformFlyoutContext.Provider>
+    <WizardContext.Provider value={{ config: props.config, searchItems }}>
+      <Provider store={reduxStore}>{children}</Provider>
+    </WizardContext.Provider>
   );
-};
-
-export const useEditTransformFlyoutContext = () => {
-  const c = useContext(EditTransformFlyoutContext);
-  if (c === null) throw new Error('EditTransformFlyoutContext not set.');
-  return c;
-};
-
-export const useEditTransformFlyoutActions = () => {
-  const dispatch = useDispatch();
-  return useMemo(() => bindActionCreators(editTransformFlyoutSlice.actions, dispatch), [dispatch]);
 };

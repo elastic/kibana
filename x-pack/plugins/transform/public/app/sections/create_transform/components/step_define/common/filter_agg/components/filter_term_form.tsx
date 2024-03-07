@@ -6,7 +6,7 @@
  */
 
 import { debounce } from 'lodash';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -18,20 +18,22 @@ import { i18n } from '@kbn/i18n';
 import { isMultiBucketAggregate } from '@kbn/ml-agg-utils';
 
 import { useDataSearch } from '../../../../../../../hooks/use_data_search';
-import { CreateTransformWizardContext } from '../../../../wizard/wizard';
+import { useWizardSelector } from '../../../../../state_management/create_transform_store';
 import { useToastNotifications } from '../../../../../../../app_dependencies';
+import { useWizardContext } from '../../../../wizard/wizard';
 
-import { FilterAggConfigTerm } from '../types';
+import type { FilterAggForm, FilterAggTypeConfigTerm } from '../types';
 
 /**
  * Form component for the term filter aggregation.
  */
-export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggFormComponent'] = ({
+export const FilterTermForm: FilterAggForm<FilterAggTypeConfigTerm> = ({
   config,
   onChange,
   selectedField,
 }) => {
-  const { dataView, runtimeMappings } = useContext(CreateTransformWizardContext);
+  const { searchItems } = useWizardContext();
+  const runtimeMappings = useWizardSelector((d) => d.advancedRuntimeMappingsEditor.runtimeMappings);
   const toastNotifications = useToastNotifications();
 
   const [searchValue, setSearchValue] = useState('');
@@ -63,7 +65,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
 
   const { data, isError, isLoading } = useDataSearch(
     {
-      index: dataView!.title,
+      index: searchItems.dataView.title,
       body: {
         ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
         query: {

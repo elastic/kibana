@@ -9,20 +9,24 @@ import React, { type FC } from 'react';
 
 import { EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useWizardSelector, useWizardActions } from '../../state_management/create_transform_store';
 import { SwitchModal } from './switch_modal';
-import { useAdvancedRuntimeMappingsEditor } from '../step_define/hooks/use_advanced_runtime_mappings_editor';
 
-type Props = ReturnType<typeof useAdvancedRuntimeMappingsEditor>;
-export const AdvancedRuntimeMappingsEditorSwitch: FC<Props> = (props) => {
-  const {
-    actions: { toggleRuntimeMappingsEditor, setRuntimeMappingsEditorSwitchModalVisible },
-    state: {
-      isRuntimeMappingsEditorEnabled,
-      isRuntimeMappingsEditorSwitchModalVisible,
-      advancedEditorRuntimeMappingsLastApplied,
-      advancedRuntimeMappingsConfig,
-    },
-  } = props;
+export const AdvancedRuntimeMappingsEditorSwitch: FC = () => {
+  const isRuntimeMappingsEditorEnabled = useWizardSelector(
+    (s) => s.advancedRuntimeMappingsEditor.isRuntimeMappingsEditorEnabled
+  );
+  const isRuntimeMappingsEditorSwitchModalVisible = useWizardSelector(
+    (s) => s.advancedRuntimeMappingsEditor.isRuntimeMappingsEditorSwitchModalVisible
+  );
+  const advancedEditorRuntimeMappingsLastApplied = useWizardSelector(
+    (s) => s.advancedRuntimeMappingsEditor.advancedRuntimeMappingsConfigLastApplied
+  );
+  const advancedRuntimeMappingsConfig = useWizardSelector(
+    (s) => s.advancedRuntimeMappingsEditor.advancedRuntimeMappingsConfig
+  );
+  const { setRuntimeMappingsEditorSwitchModalVisible, toggleRuntimeMappingsEditor } =
+    useWizardActions();
 
   // If switching to KQL after updating via editor - reset search
   const toggleEditorHandler = (reset = false) => {

@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { memo, useEffect, useRef, FC } from 'react';
+import React, { memo, useEffect, useMemo, useRef, FC } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -151,6 +151,79 @@ export const DataGrid: FC<Props> = memo(
 
     const wrapperEl = useRef<HTMLDivElement>(null);
 
+    const columnsWithChartsAdjusted = useMemo(
+      () =>
+        columnsWithCharts.map((c) => {
+          c.initialWidth = 165;
+          if (chartsVisible) c.displayHeaderCellProps = histogramHeaderProps;
+          return c;
+        }),
+      [chartsVisible, columnsWithCharts]
+    );
+
+    const columnVisibility = useMemo(
+      () => ({ visibleColumns, setVisibleColumns }),
+      [visibleColumns, setVisibleColumns]
+    );
+
+    const dataGridAriaLabel = useMemo(
+      () => (isWithHeader(props) ? props.title : ''),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      []
+    );
+
+    const sorting = useMemo(() => ({ columns: sortingColumns, onSort }), [sortingColumns, onSort]);
+
+    const toolbarVisibility = useMemo(
+      () => ({
+        ...euiDataGridToolbarSettings,
+        ...(chartsButtonVisible
+          ? {
+              additionalControls: (
+                <EuiToolTip
+                  content={i18n.translate('xpack.ml.dataGrid.histogramButtonToolTipContent', {
+                    defaultMessage:
+                      'Queries run to fetch histogram chart data will use a sample size per shard of {samplerShardSize} documents.',
+                    values: {
+                      samplerShardSize: DEFAULT_SAMPLER_SHARD_SIZE,
+                    },
+                  })}
+                >
+                  <EuiButtonEmpty
+                    aria-pressed={chartsVisible === true}
+                    className={`euiDataGrid__controlBtn${
+                      chartsVisible === true ? ' euiDataGrid__controlBtn--active' : ''
+                    }`}
+                    data-test-subj={`${dataTestSubj}HistogramButton`}
+                    size="xs"
+                    iconType="visBarVertical"
+                    color="text"
+                    onClick={toggleChartVisibility}
+                    disabled={chartsVisible === undefined}
+                  >
+                    <FormattedMessage
+                      id="xpack.ml.dataGrid.histogramButtonText"
+                      defaultMessage="Histogram charts"
+                    />
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              ),
+            }
+          : {}),
+      }),
+      [chartsButtonVisible, chartsVisible, dataTestSubj, toggleChartVisibility]
+    );
+
+    const dataGridPagination = useMemo(
+      () => ({
+        ...pagination,
+        pageSizeOptions: [5, 10, 25],
+        onChangeItemsPerPage,
+        onChangePage,
+      }),
+      [onChangeItemsPerPage, onChangePage, pagination]
+    );
+
     if (status === INDEX_STATUS.LOADED && data.length === 0) {
       return (
         <div data-test-subj={`${dataTestSubj} empty`}>
@@ -293,64 +366,17 @@ export const DataGrid: FC<Props> = memo(
             {(mutationRef) => (
               <div css={cssOverride} ref={mutationRef}>
                 <EuiDataGrid
-                  aria-label={isWithHeader(props) ? props.title : ''}
-                  columns={columnsWithCharts.map((c) => {
-                    c.initialWidth = 165;
-                    if (chartsVisible) c.displayHeaderCellProps = histogramHeaderProps;
-                    return c;
-                  })}
-                  columnVisibility={{ visibleColumns, setVisibleColumns }}
+                  aria-label={dataGridAriaLabel}
+                  columns={columnsWithChartsAdjusted}
+                  columnVisibility={columnVisibility}
                   trailingControlColumns={trailingControlColumns}
                   gridStyle={euiDataGridStyle}
                   rowCount={rowCount}
                   renderCellValue={renderCellValue}
                   renderCellPopover={renderCellPopover}
-                  sorting={{ columns: sortingColumns, onSort }}
-                  toolbarVisibility={{
-                    ...euiDataGridToolbarSettings,
-                    ...(chartsButtonVisible
-                      ? {
-                          additionalControls: (
-                            <EuiToolTip
-                              content={i18n.translate(
-                                'xpack.ml.dataGrid.histogramButtonToolTipContent',
-                                {
-                                  defaultMessage:
-                                    'Queries run to fetch histogram chart data will use a sample size per shard of {samplerShardSize} documents.',
-                                  values: {
-                                    samplerShardSize: DEFAULT_SAMPLER_SHARD_SIZE,
-                                  },
-                                }
-                              )}
-                            >
-                              <EuiButtonEmpty
-                                aria-pressed={chartsVisible === true}
-                                className={`euiDataGrid__controlBtn${
-                                  chartsVisible === true ? ' euiDataGrid__controlBtn--active' : ''
-                                }`}
-                                data-test-subj={`${dataTestSubj}HistogramButton`}
-                                size="xs"
-                                iconType="visBarVertical"
-                                color="text"
-                                onClick={toggleChartVisibility}
-                                disabled={chartsVisible === undefined}
-                              >
-                                <FormattedMessage
-                                  id="xpack.ml.dataGrid.histogramButtonText"
-                                  defaultMessage="Histogram charts"
-                                />
-                              </EuiButtonEmpty>
-                            </EuiToolTip>
-                          ),
-                        }
-                      : {}),
-                  }}
-                  pagination={{
-                    ...pagination,
-                    pageSizeOptions: [5, 10, 25],
-                    onChangeItemsPerPage,
-                    onChangePage,
-                  }}
+                  sorting={sorting}
+                  toolbarVisibility={toolbarVisibility}
+                  pagination={dataGridPagination}
                 />
               </div>
             )}

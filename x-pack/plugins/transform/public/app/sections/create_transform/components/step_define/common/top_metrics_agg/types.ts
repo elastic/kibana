@@ -6,8 +6,11 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { PIVOT_SUPPORTED_AGGS } from '../../../../../../../../common/types/pivot_aggs';
 import type {
   PivotAggsConfigWithExtra,
+  PivotAggsUtilsWithExtra,
   SortDirection,
   SortMode,
   SortNumericFieldType,
@@ -23,7 +26,13 @@ export interface TopMetricsAggConfig {
   };
 }
 
-export type PivotAggsConfigTopMetrics = PivotAggsConfigWithExtra<
+export type PivotAggsConfigTopMetrics = PivotAggsConfigWithExtra<TopMetricsAggConfig>;
+
+export const isPivotAggsConfigTopMetrics = (arg: unknown): arg is PivotAggsConfigTopMetrics =>
+  isPopulatedObject(arg, ['aggFormComponent']) &&
+  arg.aggFormComponent === PIVOT_SUPPORTED_AGGS.TOP_METRICS;
+
+export type PivotAggsUtilsTopMetrics = PivotAggsUtilsWithExtra<
   TopMetricsAggConfig,
   {
     metrics?: estypes.AggregationsTopMetricsValue | estypes.AggregationsTopMetricsValue[];

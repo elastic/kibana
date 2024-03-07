@@ -5,54 +5,74 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiTextColor } from '@elastic/eui';
 
-import { AggName } from '../../../../../../common/types/aggregations';
+import type { AggName } from '../../../../../../common/types/aggregations';
 
-import {
-  isPivotAggsConfigWithUiBase,
-  PivotAggsConfig,
-  PivotAggsConfigWithUiSupportDict,
-} from '../../../../common';
+import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
+import { isPivotAggsConfigWithUiBase, PivotAggsConfig } from '../../../../common';
+import { useAppDependencies } from '../../../../app_dependencies';
+
+import { useWizardActions } from '../../state_management/create_transform_store';
+
+import { getAggConfigUtils } from '../step_define/common/agg_utils';
 
 import { PopoverForm } from './popover_form';
-import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
 import { SubAggsSection } from './sub_aggs_section';
+
+import { usePivotConfigOptions } from '../step_define/hooks/use_pivot_config';
 
 interface Props {
   item: PivotAggsConfig;
   otherAggNames: AggName[];
-  options: PivotAggsConfigWithUiSupportDict;
-  deleteHandler(l: AggName): void;
-  onChange(item: PivotAggsConfig): void;
+  parentAggId?: string;
 }
 
-export const AggLabelForm: React.FC<Props> = ({
-  deleteHandler,
-  item,
-  otherAggNames,
-  onChange,
-  options,
-}) => {
+export const AggLabelForm: FC<Props> = ({ item, otherAggNames, parentAggId }) => {
+  const {
+    ml: { useFieldStatsTrigger },
+  } = useAppDependencies();
+  const { closeFlyout } = useFieldStatsTrigger();
+
+  const { pivotConfig: actions } = useWizardActions();
+  const { deleteAggregation, deleteSubAggregation, updateAggregation, updateSubAggregation } =
+    actions;
+
+  const utils = isPivotAggsWithExtendedForm(item) ? getAggConfigUtils(item) : undefined;
   const [isPopoverVisible, setPopoverVisibility] = useState(
-    isPivotAggsWithExtendedForm(item) && !item.isValid()
+    isPivotAggsWithExtendedForm(item) && !utils?.isValid()
   );
 
-  function update(updateItem: PivotAggsConfig) {
-    onChange({ ...updateItem });
+  const { aggOptionsData: options } = usePivotConfigOptions();
+
+  function updateHandler(updateItem: PivotAggsConfig) {
+    if (parentAggId) {
+      updateSubAggregation(updateItem);
+    } else {
+      updateAggregation(updateItem);
+    }
     setPopoverVisibility(false);
+    closeFlyout();
   }
 
-  const helperText = isPivotAggsWithExtendedForm(item) && item.helperText && item.helperText();
+  function deleteHandler() {
+    if (parentAggId) {
+      deleteSubAggregation(item.aggId);
+    } else {
+      deleteAggregation(item.aggId);
+    }
+  }
+
+  const helperText = isPivotAggsWithExtendedForm(item) && utils?.helperText && utils.helperText();
 
   const isSubAggSupported =
     isPivotAggsConfigWithUiBase(item) &&
     item.isSubAggsSupported &&
-    (isPivotAggsWithExtendedForm(item) ? item.isValid() : true);
+    (isPivotAggsWithExtendedForm(item) ? utils?.isValid() : true);
 
   return (
     <>
@@ -94,7 +114,7 @@ export const AggLabelForm: React.FC<Props> = ({
           >
             <PopoverForm
               defaultData={item}
-              onChange={update}
+              onChange={updateHandler}
               otherAggNames={otherAggNames}
               options={options}
             />
@@ -107,7 +127,7 @@ export const AggLabelForm: React.FC<Props> = ({
             })}
             size="s"
             iconType="cross"
-            onClick={() => deleteHandler(item.aggName)}
+            onClick={deleteHandler}
             data-test-subj="transformAggregationEntryDeleteButton"
           />
         </EuiFlexItem>

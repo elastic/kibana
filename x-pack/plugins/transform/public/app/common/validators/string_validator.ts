@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { requiredErrorMessage, stringNotValidErrorMessage } from './messages';
+import type { Validator } from '@kbn/ml-form-utils/validator';
 
-import type { Validator } from './types';
+import { requiredErrorMessage, stringNotValidErrorMessage } from './messages';
 
 export const stringValidator: Validator = (value, isOptional = true) => {
   if (typeof value !== 'string') {

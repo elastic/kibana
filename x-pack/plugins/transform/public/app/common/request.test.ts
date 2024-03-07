@@ -12,8 +12,8 @@ import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 
 import { PivotGroupByConfig } from '.';
 
-import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
-import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
+import type { StepDefineState } from '../sections/create_transform/components/step_define';
+import type { StepDetailsState } from '../sections/create_transform/components/step_details';
 
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
 import type { PivotAggsConfig } from './pivot_aggs';
@@ -40,6 +40,7 @@ const groupByTerms: PivotGroupByConfig = {
   field: 'the-group-by-field',
   aggName: 'the-group-by-agg-name',
   dropDownName: 'the-group-by-drop-down-name',
+  groupById: 'the-group-by-id',
 };
 
 const aggsAvg: PivotAggsConfig = {
@@ -47,6 +48,7 @@ const aggsAvg: PivotAggsConfig = {
   field: 'the-agg-field',
   aggName: 'the-agg-agg-name',
   dropDownName: 'the-agg-drop-down-name',
+  aggId: 'the-agg-id',
 };
 
 describe('Transform: Common', () => {
@@ -232,33 +234,20 @@ describe('Transform: Common', () => {
   });
 
   test('getCreateTransformRequestBody() skips default values', () => {
-    const transformConfigState: StepDefineExposedState = {
+    const transformConfigState: StepDefineState = {
       aggList: { 'the-agg-name': aggsAvg },
       groupByList: { 'the-group-by-name': groupByTerms },
-      isAdvancedPivotEditorEnabled: false,
-      isAdvancedSourceEditorEnabled: false,
       isDatePickerApplyEnabled: false,
-      sourceConfigUpdated: false,
       searchLanguage: 'kuery',
       searchString: 'the-query',
       searchQuery: 'the-search-query',
-      valid: true,
       transformFunction: 'pivot',
       latestConfig: {} as LatestFunctionConfigUI,
-      previewRequest: {
-        pivot: {
-          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
-          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
-        },
-      },
       validationStatus: {
         isValid: true,
       },
-      runtimeMappings: undefined,
-      runtimeMappingsUpdated: false,
-      isRuntimeMappingsEditorEnabled: false,
     };
-    const transformDetailsState: StepDetailsExposedState = {
+    const transformDetailsState: StepDetailsState = {
       continuousModeDateField: 'the-continuous-mode-date-field',
       continuousModeDelay: '60s',
       createDataView: false,
@@ -273,15 +262,10 @@ describe('Transform: Common', () => {
       transformSettingsDocsPerSecond: null,
       destinationIndex: 'the-destination-index',
       destinationIngestPipeline: 'the-destination-ingest-pipeline',
-      touched: true,
       valid: true,
     };
 
-    const request = getCreateTransformRequestBody(
-      { getIndexPattern: () => 'the-data-view-title' } as DataView,
-      transformConfigState,
-      transformDetailsState
-    );
+    const request = getCreateTransformRequestBody(transformConfigState, transformDetailsState);
 
     expect(request).toEqual({
       description: 'the-transform-description',
@@ -312,33 +296,20 @@ describe('Transform: Common', () => {
       },
     };
 
-    const pivotState: StepDefineExposedState = {
+    const pivotState: StepDefineState = {
       aggList: { 'the-agg-name': aggsAvg },
       groupByList: { 'the-group-by-name': groupByTerms },
-      isAdvancedPivotEditorEnabled: false,
-      isAdvancedSourceEditorEnabled: false,
       isDatePickerApplyEnabled: false,
-      sourceConfigUpdated: false,
       searchLanguage: 'kuery',
       searchString: 'the-query',
       searchQuery: 'the-search-query',
-      valid: true,
       transformFunction: 'pivot',
       latestConfig: {} as LatestFunctionConfigUI,
-      previewRequest: {
-        pivot: {
-          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
-          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
-        },
-      },
       validationStatus: {
         isValid: true,
       },
-      runtimeMappings,
-      runtimeMappingsUpdated: false,
-      isRuntimeMappingsEditorEnabled: false,
     };
-    const transformDetailsState: StepDetailsExposedState = {
+    const transformDetailsState: StepDetailsState = {
       continuousModeDateField: 'the-continuous-mode-date-field',
       continuousModeDelay: '3600s',
       createDataView: false,
@@ -354,15 +325,10 @@ describe('Transform: Common', () => {
       transformSettingsNumFailureRetries: 5,
       destinationIndex: 'the-destination-index',
       destinationIngestPipeline: 'the-destination-ingest-pipeline',
-      touched: true,
       valid: true,
     };
 
-    const request = getCreateTransformRequestBody(
-      { getIndexPattern: () => 'the-data-view-title' } as DataView,
-      pivotState,
-      transformDetailsState
-    );
+    const request = getCreateTransformRequestBody(pivotState, transformDetailsState, {});
 
     expect(request).toEqual({
       description: 'the-transform-description',
@@ -392,7 +358,7 @@ describe('Transform: Common', () => {
   });
 
   test('getCreateTransformSettingsRequestBody() with multiple settings', () => {
-    const transformDetailsState: Partial<StepDetailsExposedState> = {
+    const transformDetailsState: Partial<StepDetailsState> = {
       transformSettingsDocsPerSecond: 400,
       transformSettingsMaxPageSearchSize: 100,
     };
@@ -408,7 +374,7 @@ describe('Transform: Common', () => {
   });
 
   test('getCreateTransformSettingsRequestBody() with one setting', () => {
-    const transformDetailsState: Partial<StepDetailsExposedState> = {
+    const transformDetailsState: Partial<StepDetailsState> = {
       transformSettingsDocsPerSecond: 400,
     };
 
@@ -422,7 +388,7 @@ describe('Transform: Common', () => {
   });
 
   test('getCreateTransformSettingsRequestBody() skips default settings', () => {
-    const transformDetailsState: Partial<StepDetailsExposedState> = {
+    const transformDetailsState: Partial<StepDetailsState> = {
       transformSettingsDocsPerSecond: null,
       transformSettingsMaxPageSearchSize: 500,
     };

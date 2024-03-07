@@ -6,12 +6,15 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+import { applyFormStateToConfig } from '@kbn/ml-form-utils/apply_form_state_to_config';
 
+import type { PivotConfigDefinition } from '../../../common/types/transform';
+import type { LatestFunctionConfig } from '../../../common/api_schemas/transforms';
 import {
-  DEFAULT_CONTINUOUS_MODE_DELAY,
   DEFAULT_TRANSFORM_FREQUENCY,
   DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
   DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
@@ -26,8 +29,9 @@ import type {
 import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
 
 import type { SavedSearchQuery } from '../hooks/use_search_items';
-import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
-import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
+import type { StepDefineState } from '../sections/create_transform/components/step_define';
+import type { StepDetailsState } from '../sections/create_transform/components/step_details';
+import type { StepDetailsFormState } from '../sections/create_transform/state_management/step_details_slice';
 
 import {
   getEsAggFromAggConfig,
@@ -37,8 +41,13 @@ import {
   isGroupByTerms,
   GroupByConfigWithUiSupport,
   PivotAggsConfig,
+  PivotAggsConfigDict,
   PivotGroupByConfig,
 } from '.';
+
+import type { AdvancedRuntimeMappingsEditorState } from '../sections/create_transform/state_management/advanced_runtime_mappings_editor_slice';
+
+type PreviewRequest = { latest: LatestFunctionConfig } | { pivot: PivotConfigDefinition };
 
 export interface SimpleQuery {
   query_string: {
@@ -152,8 +161,12 @@ export const getRequestPayload = (
     }
   });
 
+  const pivotAggsDict = pivotAggsArr.reduce<PivotAggsConfigDict>((p, c) => {
+    p[c.aggId] = c;
+    return p;
+  }, {});
   pivotAggsArr.forEach((agg) => {
-    const result = getEsAggFromAggConfig(agg);
+    const result = getEsAggFromAggConfig(agg, pivotAggsDict);
     if (result === null) {
       return;
     }
@@ -166,9 +179,9 @@ export const getRequestPayload = (
 export function getPreviewTransformRequestBody(
   dataView: DataView,
   transformConfigQuery: TransformConfigQuery,
-  partialRequest?: StepDefineExposedState['previewRequest'],
-  runtimeMappings?: StepDefineExposedState['runtimeMappings'],
-  timeRangeMs?: StepDefineExposedState['timeRangeMs']
+  partialRequest?: PreviewRequest,
+  runtimeMappings?: AdvancedRuntimeMappingsEditorState['runtimeMappings'],
+  timeRangeMs?: StepDefineState['timeRangeMs']
 ): PostTransformsPreviewRequestSchema {
   const dataViewTitle = dataView.getIndexPattern();
   const index = dataViewTitle.split(',').map((name: string) => name.trim());
@@ -204,7 +217,7 @@ export function getPreviewTransformRequestBody(
 }
 
 export const getCreateTransformSettingsRequestBody = (
-  transformDetailsState: Partial<StepDetailsExposedState>
+  transformDetailsState: Partial<StepDetailsState>
 ): { settings?: PutTransformsRequestSchema['settings'] } => {
   const settings: PutTransformsRequestSchema['settings'] = {
     // conditionally add optional max_page_search_size, skip if default value
@@ -227,63 +240,28 @@ export const getCreateTransformSettingsRequestBody = (
 };
 
 export const getCreateTransformRequestBody = (
-  dataView: DataView,
-  transformConfigState: StepDefineExposedState,
-  transformDetailsState: StepDetailsExposedState
-): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => ({
-  ...getPreviewTransformRequestBody(
-    dataView,
-    getTransformConfigQuery(transformConfigState.searchQuery),
-    transformConfigState.previewRequest,
-    transformConfigState.runtimeMappings,
-    transformConfigState.isDatePickerApplyEnabled && transformConfigState.timeRangeMs
-      ? transformConfigState.timeRangeMs
-      : undefined
-  ),
-  // conditionally add optional description
-  ...(transformDetailsState.transformDescription !== ''
-    ? { description: transformDetailsState.transformDescription }
-    : {}),
-  // conditionally add optional frequency, skip if default value
-  ...(transformDetailsState.transformFrequency !== '' &&
-  transformDetailsState.transformFrequency !== DEFAULT_TRANSFORM_FREQUENCY
-    ? { frequency: transformDetailsState.transformFrequency }
-    : {}),
-  dest: {
-    index: transformDetailsState.destinationIndex,
-    // conditionally add optional ingest pipeline
-    ...(transformDetailsState.destinationIngestPipeline !== ''
-      ? { pipeline: transformDetailsState.destinationIngestPipeline }
+  previewRequest: PostTransformsPreviewRequestSchema,
+  transformDetailsState: StepDetailsState,
+  transformDetailsFormState: StepDetailsFormState
+): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => {
+  const config = {
+    ...previewRequest,
+    // conditionally add optional frequency, skip if default value
+    ...(transformDetailsState.transformFrequency !== '' &&
+    transformDetailsState.transformFrequency !== DEFAULT_TRANSFORM_FREQUENCY
+      ? { frequency: transformDetailsState.transformFrequency }
       : {}),
-  },
-  // conditionally add continuous mode config
-  ...(transformDetailsState.isContinuousModeEnabled
-    ? {
-        sync: {
-          time: {
-            // conditionally add continuous mode delay, skip if default value
-            ...(transformDetailsState.continuousModeDelay !== DEFAULT_CONTINUOUS_MODE_DELAY
-              ? { delay: transformDetailsState.continuousModeDelay }
-              : {}),
-            field: transformDetailsState.continuousModeDateField,
-          },
-        },
-      }
-    : {}),
-  // conditionally add retention policy settings
-  ...(transformDetailsState.isRetentionPolicyEnabled &&
-  transformDetailsState.retentionPolicyDateField !== '' &&
-  transformDetailsState.retentionPolicyMaxAge !== ''
-    ? {
-        retention_policy: {
-          time: {
-            field: transformDetailsState.retentionPolicyDateField,
-            max_age: transformDetailsState.retentionPolicyMaxAge,
-          },
-        },
-      }
-    : {}),
-  ...(transformDetailsState._meta ? { _meta: transformDetailsState._meta } : {}),
-  // conditionally add additional settings
-  ...getCreateTransformSettingsRequestBody(transformDetailsState),
-});
+    ...(transformDetailsState._meta ? { _meta: transformDetailsState._meta } : {}),
+    // conditionally add additional settings
+    ...getCreateTransformSettingsRequestBody(transformDetailsState),
+  };
+
+  const configWithAppliedFormState = applyFormStateToConfig(
+    config,
+    transformDetailsFormState.formFields,
+    transformDetailsFormState.formSections,
+    true
+  );
+
+  return configWithAppliedFormState;
+};

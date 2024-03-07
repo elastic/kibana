@@ -43,12 +43,12 @@ export const EditTransformFlyout: FC<EditAction> = ({
       <EuiFlyout
         onClose={closeFlyout}
         hideCloseButton
-        aria-labelledby="transformEditFlyoutTitle"
-        data-test-subj="transformEditFlyout"
+        aria-labelledby="editTransformFlyoutTitle"
+        data-test-subj="editTransformFlyout"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id="transformEditFlyoutTitle">
+            <h2 id="editTransformFlyoutTitle">
               {i18n.translate('xpack.transform.transformList.editFlyoutTitle', {
                 defaultMessage: 'Edit {transformId}',
                 values: {
