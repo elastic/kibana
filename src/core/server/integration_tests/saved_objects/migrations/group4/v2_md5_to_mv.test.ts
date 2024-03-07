@@ -82,8 +82,18 @@ const ANOTHER_TYPE_UPDATED = createType({
   },
 });
 
+const TYPE_WITHOUT_MODEL_VERSIONS = createType({
+  name: 'no-mv-type',
+  mappings: {
+    properties: {
+      title: { type: 'text' },
+    },
+  },
+});
+
 const SOME_TYPE_HASH = 'someLongHashThatWeCanImagineWasCalculatedUsingMd5';
 const ANOTHER_TYPE_HASH = 'differentFromTheOneAboveAsTheRelatedTypeFieldsAreIntegers';
+const A_THIRD_HASH = 'yetAnotherHashUsedByTypeWithoutModelVersions';
 const HASH_TO_VERSION_MAP: Record<string, string> = {};
 HASH_TO_VERSION_MAP[`some-type|${SOME_TYPE_HASH}`] = '10.1.0';
 // simulate that transition to modelVersion happened before 'another-type' was updated
@@ -108,7 +118,7 @@ describe('V2 algorithm', () => {
     beforeAll(async () => {
       const { runMigrations, client } = await getKibanaMigratorTestKit({
         kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
-        types: [SOME_TYPE, ANOTHER_TYPE],
+        types: [SOME_TYPE, ANOTHER_TYPE, TYPE_WITHOUT_MODEL_VERSIONS],
         logFilePath,
       });
       esClient = client;
@@ -124,39 +134,49 @@ describe('V2 algorithm', () => {
       expect(result[0].status === 'skipped');
       expect(await getMappingMeta()).toEqual({
         indexTypesMap: {
-          '.kibana': ['another-type', 'some-type'],
+          '.kibana': ['another-type', 'no-mv-type', 'some-type'],
         },
         mappingVersions: {
           'another-type': '10.1.0',
+          'no-mv-type': '0.0.0',
           'some-type': '10.1.0',
         },
       });
     });
 
     describe('when upgrading to a more recent version', () => {
+      let indexMetaAfterMigration: Metadata | undefined;
+
       beforeAll(async () => {
         // start the migrator again, which will update meta with modelVersions
         const { runMigrations: restartKibana } = await getKibanaMigratorTestKit({
           kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
-          types: [SOME_TYPE, ANOTHER_TYPE_UPDATED], // note that we update 'another-type'
+          // note that we are updating 'another-type'
+          types: [SOME_TYPE, ANOTHER_TYPE_UPDATED, TYPE_WITHOUT_MODEL_VERSIONS],
           hashToVersionMap: HASH_TO_VERSION_MAP,
           logFilePath,
         });
 
         result = await restartKibana();
+
+        indexMetaAfterMigration = await getMappingMeta();
       });
 
-      it('updates the SO indices meta.migrationMappingPropertyHashes with the appropriate model versions', async () => {
-        expect(result[0].status).toEqual('patched'); // should be a compatible (non-reindexing) migration
+      it('performs a compatible (non-reindexing) migration', () => {
+        expect(result[0].status).toEqual('patched');
+      });
 
-        expect(await getMappingMeta()).toEqual({
-          indexTypesMap: {
-            '.kibana': ['another-type', 'some-type'],
-          },
-          mappingVersions: {
-            'another-type': '10.2.0', // switched to modelVersion: 2
-            'some-type': '10.1.0',
-          },
+      it('updates the SO indices meta.mappingVersions with the appropriate model versions', () => {
+        expect(indexMetaAfterMigration?.mappingVersions).toEqual({
+          'some-type': '10.1.0',
+          'another-type': '10.2.0',
+          'no-mv-type': '0.0.0',
+        });
+      });
+
+      it('stores a breakdown of indices => types in the meta', () => {
+        expect(indexMetaAfterMigration?.indexTypesMap).toEqual({
+          '.kibana': ['another-type', 'no-mv-type', 'some-type'],
         });
       });
 
@@ -175,7 +195,7 @@ describe('V2 algorithm', () => {
     beforeAll(async () => {
       const { runMigrations, client } = await getKibanaMigratorTestKit({
         kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
-        types: [SOME_TYPE, ANOTHER_TYPE],
+        types: [SOME_TYPE, ANOTHER_TYPE, TYPE_WITHOUT_MODEL_VERSIONS],
         logFilePath,
       });
       esClient = client;
@@ -193,6 +213,7 @@ describe('V2 algorithm', () => {
           migrationMappingPropertyHashes: {
             'some-type': SOME_TYPE_HASH,
             'another-type': ANOTHER_TYPE_HASH,
+            'no-mv-type': A_THIRD_HASH,
           },
         },
         allow_no_indices: true,
@@ -201,7 +222,8 @@ describe('V2 algorithm', () => {
       // we then start the migrator again, which will update meta with modelVersions
       const { runMigrations: restartKibana } = await getKibanaMigratorTestKit({
         kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
-        types: [SOME_TYPE, ANOTHER_TYPE_UPDATED],
+        // note that we are updating 'another-type'
+        types: [SOME_TYPE, ANOTHER_TYPE_UPDATED, TYPE_WITHOUT_MODEL_VERSIONS],
         hashToVersionMap: HASH_TO_VERSION_MAP,
         logFilePath,
       });
@@ -217,15 +239,23 @@ describe('V2 algorithm', () => {
 
     it('preserves the SO indices meta.migrationMappingPropertyHashes (although they are no longer up to date / in use)', () => {
       expect(indexMetaAfterMigration?.migrationMappingPropertyHashes).toEqual({
-        'some-type': 'someLongHashThatWeCanImagineWasCalculatedUsingMd5',
         'another-type': 'differentFromTheOneAboveAsTheRelatedTypeFieldsAreIntegers',
+        'no-mv-type': 'yetAnotherHashUsedByTypeWithoutModelVersions',
+        'some-type': 'someLongHashThatWeCanImagineWasCalculatedUsingMd5',
       });
     });
 
     it('adds the mappingVersions with the current modelVersions', () => {
       expect(indexMetaAfterMigration?.mappingVersions).toEqual({
-        'some-type': '10.1.0',
         'another-type': '10.2.0',
+        'no-mv-type': '0.0.0',
+        'some-type': '10.1.0',
+      });
+    });
+
+    it('stores a breakdown of indices => types in the meta', () => {
+      expect(indexMetaAfterMigration?.indexTypesMap).toEqual({
+        '.kibana': ['another-type', 'no-mv-type', 'some-type'],
       });
     });
 
