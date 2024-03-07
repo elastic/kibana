@@ -8,8 +8,6 @@
 
 import { once } from 'lodash';
 import { createHashHistory } from 'history';
-import type { ScopedHistory } from '@kbn/core/public';
-import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { HistoryLocationState } from './build_services';
 
 /**
@@ -35,6 +33,3 @@ export const syncHistoryLocations = () => {
   Object.assign(h.location, createHashHistory().location);
   return h;
 };
-
-export const [getScopedHistory, setScopedHistory] =
-  createGetterSetter<ScopedHistory>('scopedHistory');

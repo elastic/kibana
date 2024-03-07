@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { AppUpdater, CoreSetup } from '@kbn/core/public';
+import { AppUpdater, CoreSetup, ScopedHistory } from '@kbn/core/public';
 import type { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { createGetterSetter, createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import { isFilterPinned } from '@kbn/es-query';
-import { getScopedHistory } from '../kibana_services';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../constants';
 import type { DiscoverSetupPlugins } from '../plugin';
 
@@ -29,12 +28,19 @@ export const [getUrlTracking, setUrlTracking] = createGetterSetter<{
  * It creates the kbn url tracker for Discover to listens to history changes and optionally to global state
  * changes and updates the nav link url of to point to the last visited page
  */
-export function initializeKbnUrlTracking(
-  baseUrl: string,
-  core: CoreSetup,
-  navLinkUpdater$: BehaviorSubject<AppUpdater>,
-  plugins: DiscoverSetupPlugins
-) {
+export function initializeKbnUrlTracking({
+  baseUrl,
+  core,
+  navLinkUpdater$,
+  plugins,
+  getScopedHistory,
+}: {
+  baseUrl: string;
+  core: CoreSetup;
+  navLinkUpdater$: BehaviorSubject<AppUpdater>;
+  plugins: DiscoverSetupPlugins;
+  getScopedHistory: () => ScopedHistory<unknown>;
+}) {
   setUrlTracking({ enabled: true });
   const setTrackingEnabled = (value: boolean) => {
     setUrlTracking({ enabled: value });

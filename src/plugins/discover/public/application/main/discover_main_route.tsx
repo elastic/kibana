@@ -30,7 +30,6 @@ import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getScopedHistory } from '../../kibana_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
 import {
@@ -70,6 +69,7 @@ export function DiscoverMainRoute({
     http: { basePath },
     dataViewEditor,
     share,
+    scopedHistory,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
   const [stateContainer, { reset: resetStateContainer }] = useDiscoverStateContainer({
@@ -95,8 +95,8 @@ export function DiscoverMainRoute({
    * Get location state of scoped history only on initial load
    */
   const historyLocationState = useMemo(
-    () => getScopedHistory().location.state as MainHistoryLocationState | undefined,
-    []
+    () => scopedHistory<MainHistoryLocationState>()?.location.state,
+    [scopedHistory]
   );
 
   useAlertResultsToast({

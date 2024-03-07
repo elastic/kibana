@@ -15,6 +15,7 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
+  ScopedHistory,
 } from '@kbn/core/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -46,7 +47,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TRUNCATE_MAX_HEIGHT, ENABLE_ESQL } from '@kbn/discover-utils';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { PLUGIN_ID } from '../common';
-import { setScopedHistory, syncHistoryLocations } from './kibana_services';
+import { syncHistoryLocations } from './kibana_services';
 import { registerFeature } from './register_feature';
 import { buildServices, UrlTracker } from './build_services';
 import { SearchEmbeddableFactory } from './embeddable';
@@ -209,6 +210,7 @@ export class DiscoverPlugin
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private scopedHistory?: ScopedHistory<unknown>;
   private urlTracker?: UrlTracker;
   private stopUrlTracking: (() => void) | undefined = undefined;
   private profileRegistry = createProfileRegistry();
@@ -269,7 +271,13 @@ export class DiscoverPlugin
       appMounted,
       appUnMounted,
       setTrackingEnabled,
-    } = initializeKbnUrlTracking(baseUrl, core, this.appStateUpdater, plugins);
+    } = initializeKbnUrlTracking({
+      baseUrl,
+      core,
+      navLinkUpdater$: this.appStateUpdater,
+      plugins,
+      getScopedHistory: () => this.scopedHistory!,
+    });
 
     this.urlTracker = { setTrackedUrl, restorePreviousUrl, setTrackingEnabled };
     this.stopUrlTracking = stopUrlTracker;
@@ -298,13 +306,14 @@ export class DiscoverPlugin
       visibleIn: ['globalSearch', 'sideNav', 'kibanaOverview'],
       mount: async (params: AppMountParameters) => {
         const [coreStart, discoverStartPlugins] = await core.getStartServices();
-        setScopedHistory(params.history);
         syncHistoryLocations();
         appMounted();
 
+        this.scopedHistory = params.history;
+
         // dispatch synthetic hash change event to update hash history objects
         // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
-        const unlistenParentHistory = params.history.listen(() => {
+        const unlistenParentHistory = this.scopedHistory.listen(() => {
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
@@ -321,6 +330,7 @@ export class DiscoverPlugin
           locator,
           contextLocator,
           singleDocLocator,
+          scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
           setHeaderActionMenu: params.setHeaderActionMenu,
         });

@@ -21,6 +21,7 @@ import {
   ApplicationStart,
   AnalyticsServiceStart,
   AppMountParameters,
+  ScopedHistory,
 } from '@kbn/core/public';
 import {
   FilterManager,
@@ -84,6 +85,7 @@ export interface DiscoverServices {
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
   history: () => History<HistoryLocationState>;
+  scopedHistory: <T>() => ScopedHistory<T | undefined> | undefined;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   theme: CoreStart['theme'];
   filterManager: FilterManager;
@@ -130,6 +132,7 @@ export const buildServices = memoize(
     locator,
     contextLocator,
     singleDocLocator,
+    scopedHistory,
     urlTracker,
     setHeaderActionMenu,
   }: {
@@ -139,6 +142,7 @@ export const buildServices = memoize(
     locator: DiscoverAppLocator;
     contextLocator: DiscoverContextAppLocator;
     singleDocLocator: DiscoverSingleDocLocator;
+    scopedHistory?: ScopedHistory;
     urlTracker: UrlTracker;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }): DiscoverServices => {
@@ -159,6 +163,7 @@ export const buildServices = memoize(
       fieldFormats: plugins.fieldFormats,
       filterManager: plugins.data.query.filterManager,
       history: getHistory,
+      scopedHistory: <T>() => scopedHistory as ScopedHistory<T | undefined>,
       setHeaderActionMenu,
       dataViews: plugins.data.dataViews,
       inspector: plugins.inspector,
