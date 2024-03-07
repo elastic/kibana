@@ -146,6 +146,10 @@ export function TrainedModelsProvider({ getService }: FtrProviderContext, mlComm
         await testSubjects.missingOrFail('mlTestModelsFlyout');
       });
     },
+
+    async closeCheckingSpacePermissionsModal(): Promise<void> {
+      await testSubjects.click('mlDeleteSpaceAwareItemCheckModalOverlayCloseButton');
+    },
   };
 }
 

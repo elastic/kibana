@@ -232,7 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.assertSpaceAwareWarningCopy();
 
         await ml.testExecution.logTestStep('close the eui modal');
-        await find.clickByButtonText('Close');
+        await ml.trainedModels.closeCheckingSpacePermissionsModal();
       });
 
       it('renders trained models list', async () => {
