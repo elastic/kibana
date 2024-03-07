@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import {
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_ELASTICSEARCH_URL,
-  INGESTION_METHOD_IDS,
 } from '../../../../../common/constants';
 
 import apiLogo from '../../../../assets/images/api_image.png';

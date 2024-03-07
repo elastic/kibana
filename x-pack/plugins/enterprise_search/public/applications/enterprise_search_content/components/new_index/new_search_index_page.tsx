@@ -99,28 +99,38 @@ const parseIsNativeParam = (queryString: string | string[] | null): boolean | un
 const getBreadcrumb = (method: string, service_type: string): string[] => {
   switch (method) {
     case INGESTION_METHOD_IDS.CONNECTOR:
-      const connector = Boolean(service_type) && CONNECTORS.find((item) => item.serviceType === service_type);
+      const connector =
+        Boolean(service_type) && CONNECTORS.find((item) => item.serviceType === service_type);
 
       const this_connector_breadcrumb = connector
-        ? i18n.translate('xpack.enterpriseSearch.content.new_connector_with_service_type.breadcrumbs', {
-            defaultMessage: `New {name} connector`,
-            values: {
-              name: connector.name,
-            },
-          })
+        ? i18n.translate(
+            'xpack.enterpriseSearch.content.new_connector_with_service_type.breadcrumbs',
+            {
+              defaultMessage: `New {name} connector`,
+              values: {
+                name: connector.name,
+              },
+            }
+          )
         : i18n.translate('xpack.enterpriseSearch.content.new_connector.breadcrumbs', {
             defaultMessage: `New connector`,
-          })
+          });
 
       return [...connectorsBreadcrumbs, this_connector_breadcrumb];
     case INGESTION_METHOD_IDS.CRAWLER:
-      return [...crawlersBreadcrumbs, i18n.translate('xpack.enterpriseSearch.content.new_web_crawler.breadcrumbs', {
-        defaultMessage: 'New web crawler',
-      })];
+      return [
+        ...crawlersBreadcrumbs,
+        i18n.translate('xpack.enterpriseSearch.content.new_web_crawler.breadcrumbs', {
+          defaultMessage: 'New web crawler',
+        }),
+      ];
     default:
-      return [...baseBreadcrumbs, i18n.translate('xpack.enterpriseSearch.content.new_index.breadcrumbs', {
-        defaultMessage: 'New search index',
-      })];
+      return [
+        ...baseBreadcrumbs,
+        i18n.translate('xpack.enterpriseSearch.content.new_index.breadcrumbs', {
+          defaultMessage: 'New search index',
+        }),
+      ];
   }
 };
 
