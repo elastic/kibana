@@ -8,7 +8,7 @@ import { isEmpty } from 'lodash';
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { KibanaRequest } from '@kbn/core/server';
-import type { InfraPluginStartServicesAccessor } from '../../../../types';
+import type { InfraPluginStartServicesAccessor } from '../../types';
 
 type RequiredParams = ESSearchRequest & {
   size: number;
