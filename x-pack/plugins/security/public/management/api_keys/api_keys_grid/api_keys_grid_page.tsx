@@ -559,7 +559,6 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         defaultQuery={initialQuery}
         box={{
           placeholder: 'Search...',
-          incremental: true,
         }}
         filters={filters}
         onChange={onSearchChange}
