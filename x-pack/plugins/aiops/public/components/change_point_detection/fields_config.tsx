@@ -25,16 +25,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
-  SaveModalDashboardProps,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import { isDefined } from '@kbn/ml-is-defined';
 import { MaxSeriesControl } from './max_series_control';
+import type { ChangePointDetectionViewType } from '../../../common/constants';
 import {
-  ChangePointDetectionViewType,
   CHANGE_POINT_DETECTION_VIEW_TYPE,
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
 } from '../../../common/constants';
@@ -47,10 +47,10 @@ import { MAX_CHANGE_POINT_CONFIGS, SPLIT_FIELD_CARDINALITY_LIMIT } from './const
 import { FunctionPicker } from './function_picker';
 import { MetricFieldSelector } from './metric_field_selector';
 import { SplitFieldSelector } from './split_field_selector';
+import type { SelectedChangePoint } from './change_point_detection_context';
 import {
   type ChangePointAnnotation,
   type FieldConfig,
-  SelectedChangePoint,
   useChangePointDetectionContext,
 } from './change_point_detection_context';
 import { useChangePointResults } from './use_change_point_agg_request';
