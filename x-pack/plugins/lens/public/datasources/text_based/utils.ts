@@ -144,8 +144,7 @@ export function getIndexPatternFromTextBasedQuery(query: AggregateQuery): string
 
 export const isNumeric = (column: TextBasedLayerColumn | DatatableColumn) =>
   column?.meta?.type === 'number';
-export const isNotNumeric = (column: TextBasedLayerColumn | DatatableColumn) =>
-  column?.meta?.type !== 'number';
+export const isNotNumeric = (column: TextBasedLayerColumn | DatatableColumn) => !isNumeric(column);
 
 export function canColumnBeDroppedInMetricDimension(
   columns: TextBasedLayerColumn[] | DatatableColumn[],
