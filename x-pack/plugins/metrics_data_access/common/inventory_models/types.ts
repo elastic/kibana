@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { LensBaseLayer, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type {
+  ChartType,
+  LensBaseLayer,
+  LensConfig,
+} from '@kbn/lens-embeddable-utils/config_builder';
 import * as rt from 'io-ts';
 
 export const ItemTypeRT = rt.keyof({
@@ -385,12 +389,12 @@ export interface InventoryMetrics {
   defaultTimeRangeInSeconds: number;
 }
 
-export interface InventoryMetricsWithDashboards<
+export interface InventoryMetricsWithCharts<
   TFormula extends Record<string, LensBaseLayer>,
-  TDashboard extends Record<string, DashboardFn>
+  TChart extends Record<string, { [key in ChartType]?: Partial<Record<string, LensConfigWithId>> }>
 > extends InventoryMetrics {
   getFormulas: () => Promise<TFormula>;
-  getDashboards: () => Promise<TDashboard>;
+  getCharts: () => Promise<TChart>;
 }
 
 type Modules = 'aws' | 'docker' | 'system' | 'kubernetes';
@@ -420,11 +424,3 @@ export interface InventoryModel<TMetrics = InventoryMetrics> {
 }
 
 export type LensConfigWithId = LensConfig & { id: string };
-export interface DashboardFn {
-  get: (...args: any[]) => DashboardModel;
-}
-
-export interface DashboardModel {
-  charts: LensConfigWithId[];
-  dependsOn?: string[];
-}

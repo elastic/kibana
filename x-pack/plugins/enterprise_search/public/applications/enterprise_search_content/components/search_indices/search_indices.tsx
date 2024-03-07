@@ -34,12 +34,12 @@ import { NEW_API_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { CannotConnect } from '../search_index/components/cannot_connect';
+import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
 
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndicesLogic } from './indices_logic';
 import { IndicesStats } from './indices_stats';
 import { IndicesTable } from './indices_table';
-
 import './search_indices.scss';
 
 export const baseBreadcrumbs = [
@@ -54,8 +54,9 @@ export const SearchIndices: React.FC = () => {
   const [showHiddenIndices, setShowHiddenIndices] = useState(false);
   const [onlyShowSearchOptimizedIndices, setOnlyShowSearchOptimizedIndices] = useState(false);
   const [searchQuery, setSearchValue] = useState('');
-  const { config } = useValues(KibanaLogic);
+  const { config, productFeatures } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
+  const [showDefaultSettingsFlyout, setShowDefaultSettingsFlyout] = useState<boolean>(false);
 
   useEffect(() => {
     // We don't want to trigger loading for each search query change, so we need this
@@ -98,6 +99,9 @@ export const SearchIndices: React.FC = () => {
             ? undefined
             : {
                 pageTitle,
+                rightSideGroupProps: {
+                  gutterSize: 's',
+                },
                 rightSideItems: isLoading
                   ? []
                   : [
@@ -116,10 +120,29 @@ export const SearchIndices: React.FC = () => {
                           )}
                         </EuiButton>
                       </EuiLinkTo>,
+                      ...(productFeatures.hasDefaultIngestPipeline
+                        ? [
+                            <EuiButton
+                              color="primary"
+                              data-test-subj="entSearchContent-searchIndices-defaultSettings"
+                              onClick={() => setShowDefaultSettingsFlyout(true)}
+                            >
+                              {i18n.translate(
+                                'xpack.enterpriseSearch.content.searchIndices.defaultSettings',
+                                {
+                                  defaultMessage: 'Default settings',
+                                }
+                              )}
+                            </EuiButton>,
+                          ]
+                        : []),
                     ],
               }
         }
       >
+        {productFeatures.hasDefaultIngestPipeline && showDefaultSettingsFlyout && (
+          <DefaultSettingsFlyout closeFlyout={() => setShowDefaultSettingsFlyout(false)} />
+        )}
         {config.host && config.canDeployEntSearch && errorConnectingMessage && (
           <>
             <CannotConnect />
