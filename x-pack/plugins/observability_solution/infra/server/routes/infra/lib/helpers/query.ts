@@ -12,6 +12,7 @@ import {
   GetInfraMetricsRequestBodyPayload,
   InfraAssetMetricType,
 } from '../../../../../common/http_api/infra';
+import { BUCKET_KEY } from '../constants';
 
 export const createFilters = ({
   params,
@@ -31,7 +32,7 @@ export const createFilters = ({
     : [];
 
   const hostNamesFilter =
-    hostNamesShortList.length > 0 ? termsQuery('host.name', ...hostNamesShortList) : [];
+    hostNamesShortList.length > 0 ? termsQuery(BUCKET_KEY, ...hostNamesShortList) : [];
 
   return [
     ...hostNamesFilter,
@@ -39,7 +40,7 @@ export const createFilters = ({
     ...rangeQuery(new Date(params.range.from).getTime(), new Date(params.range.to).getTime()),
     {
       exists: {
-        field: 'host.name',
+        field: BUCKET_KEY,
       },
     },
   ];

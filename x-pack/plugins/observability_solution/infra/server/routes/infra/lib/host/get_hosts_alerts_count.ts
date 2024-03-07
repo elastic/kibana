@@ -61,6 +61,9 @@ export async function getHostsAlertsCount({
         terms: {
           field: BUCKET_KEY,
           size: maxNumHosts,
+          order: {
+            _key: 'asc',
+          },
         },
         aggs: {
           alerts_count: {

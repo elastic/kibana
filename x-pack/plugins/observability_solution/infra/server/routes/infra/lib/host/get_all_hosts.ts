@@ -37,7 +37,7 @@ export const getAllHosts = async (
 
       const metrics = params.metrics.map((metric) => ({
         name: metric.type,
-        value: metric.type in bucket ? getMetricValue(bucket[metric.type]) : null,
+        value: metric.type in bucket ? getMetricValue(bucket[metric.type]) ?? 0 : null,
       }));
 
       return {
@@ -75,6 +75,9 @@ const createQuery = (params: GetInfraMetricsRequestBodyPayload, hostNamesShortLi
           terms: {
             field: BUCKET_KEY,
             size: params.limit ?? MAX_SIZE,
+            order: {
+              _key: 'asc' as const,
+            },
           },
           aggs: {
             ...metricAggregations,
