@@ -19,6 +19,7 @@ import type { AssigneeWithProfile } from '../../user_profiles/types';
 jest.mock('../../../containers/user_profiles/api');
 
 // FLAKY: https://github.com/elastic/kibana/issues/171600
+// FLAKY: https://github.com/elastic/kibana/issues/171601
 describe.skip('SuggestUsersPopover', () => {
   let appMockRender: AppMockRenderer;
   let defaultProps: SuggestUsersPopoverProps;
