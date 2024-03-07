@@ -103,7 +103,7 @@ export class ObservabilityAIAssistantPlugin
     const service = (this.service = createService({
       analytics: coreStart.analytics,
       coreStart,
-      enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
+      enabled: coreStart.application.capabilities.observabilityAIAssistant?.show === true,
       licenseStart: pluginsStart.licensing,
       securityStart: pluginsStart.security,
       shareStart: pluginsStart.share,

@@ -3216,14 +3216,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-data-access-plugin@link:x-pack/plugins/observability_solution/apm_data_access":
-  version "0.0.0"
-  uid ""
-
-"@kbn/apm-plugin@link:x-pack/plugins/observability_solution/apm":
-  version "0.0.0"
-  uid ""
-
 "@kbn/apm-synthtrace-client@link:packages/kbn-apm-synthtrace-client":
   version "0.0.0"
   uid ""
@@ -4364,10 +4356,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dataset-quality-plugin@link:x-pack/plugins/observability_solution/dataset_quality":
-  version "0.0.0"
-  uid ""
-
 "@kbn/datemath@link:packages/kbn-datemath":
   version "0.0.0"
   uid ""
@@ -4625,10 +4613,6 @@
   uid ""
 
 "@kbn/exploratory-view-example-plugin@link:x-pack/examples/exploratory_view_example":
-  version "0.0.0"
-  uid ""
-
-"@kbn/exploratory-view-plugin@link:x-pack/plugins/observability_solution/exploratory_view":
   version "0.0.0"
   uid ""
 
@@ -4912,10 +4896,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/infra-plugin@link:x-pack/plugins/observability_solution/infra":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ingest-pipelines-plugin@link:x-pack/plugins/ingest_pipelines":
   version "0.0.0"
   uid ""
@@ -5065,10 +5045,6 @@
   uid ""
 
 "@kbn/logging@link:packages/kbn-logging":
-  version "0.0.0"
-  uid ""
-
-"@kbn/logs-explorer-plugin@link:x-pack/plugins/observability_solution/logs_explorer":
   version "0.0.0"
   uid ""
 
@@ -5352,15 +5328,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-logs-explorer-plugin@link:x-pack/plugins/observability_solution/observability_logs_explorer":
-  version "0.0.0"
-  uid ""
-
-"@kbn/observability-onboarding-plugin@link:x-pack/plugins/observability_solution/observability_onboarding":
-  version "0.0.0"
-  uid ""
-
-"@kbn/observability-plugin@link:x-pack/plugins/observability_solution/observability":
+"@kbn/observability-new-plugin@link:x-pack/plugins/observability_solution/observability_new":
   version "0.0.0"
   uid ""
 
@@ -5465,14 +5433,6 @@
   uid ""
 
 "@kbn/presentation-util-plugin@link:src/plugins/presentation_util":
-  version "0.0.0"
-  uid ""
-
-"@kbn/profiling-data-access-plugin@link:x-pack/plugins/observability_solution/profiling_data_access":
-  version "0.0.0"
-  uid ""
-
-"@kbn/profiling-plugin@link:x-pack/plugins/observability_solution/profiling":
   version "0.0.0"
   uid ""
 
@@ -6216,10 +6176,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/synthetics-plugin@link:x-pack/plugins/observability_solution/synthetics":
-  version "0.0.0"
-  uid ""
-
 "@kbn/task-manager-fixture-plugin@link:x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture":
   version "0.0.0"
   uid ""
@@ -6432,10 +6388,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/uptime-plugin@link:x-pack/plugins/observability_solution/uptime":
-  version "0.0.0"
-  uid ""
-
 "@kbn/url-drilldown-plugin@link:x-pack/plugins/drilldowns/url_drilldown":
   version "0.0.0"
   uid ""
@@ -6477,10 +6429,6 @@
   uid ""
 
 "@kbn/utils@link:packages/kbn-utils":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ux-plugin@link:x-pack/plugins/observability_solution/ux":
   version "0.0.0"
   uid ""
 
