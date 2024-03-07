@@ -16,7 +16,7 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  const twentySeconds = 10000 * 2;
+  const tenSeconds = 10000;
 
   return new (class ModelsFlyout {
     public async assertElserModelHeaderCopy(): Promise<void> {
@@ -55,14 +55,14 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
         testSubjects.exists('mlModelsAddTrainedModelButton')
       );
       await testSubjects.clickWhenNotDisabled('mlModelsAddTrainedModelButton', {
-        timeout: twentySeconds,
+        timeout: tenSeconds,
       });
     }
 
     public async assertOpen(): Promise<void> {
       await retry.try(async () => {
         await testSubjects.exists('mlAddTrainedModelFlyout', {
-          timeout: twentySeconds,
+          timeout: tenSeconds,
         });
       });
     }
@@ -73,7 +73,7 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
 
     public async assertClosed(): Promise<void> {
       await testSubjects.missingOrFail('mlAddTrainedModelFlyout', {
-        timeout: twentySeconds,
+        timeout: tenSeconds,
       });
     }
 
