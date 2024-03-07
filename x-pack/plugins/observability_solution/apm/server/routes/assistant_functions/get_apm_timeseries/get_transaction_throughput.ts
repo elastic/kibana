@@ -21,6 +21,7 @@ export async function getTransactionThroughput({
   bucketSize,
   filter,
   transactionType,
+  groupByFields = [],
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -29,6 +30,7 @@ export async function getTransactionThroughput({
   bucketSize: number;
   filter: QueryDslQueryContainer[];
   transactionType?: string;
+  groupByFields?: string[];
 }) {
   const bucketSizeInMinutes = bucketSize / 60;
   const rangeInMinutes = (end - start) / 1000 / 60;
@@ -44,7 +46,7 @@ export async function getTransactionThroughput({
       rollupInterval: RollupInterval.OneMinute,
       intervalString,
       filter: filter.concat(...termQuery(TRANSACTION_TYPE, transactionType)),
-      groupBy: 'transaction.type',
+      groupByFields: ['transaction.type', ...groupByFields],
       aggs: {
         value: {
           bucket_script: {

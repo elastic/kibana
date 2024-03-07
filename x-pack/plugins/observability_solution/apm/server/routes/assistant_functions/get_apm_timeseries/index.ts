@@ -48,6 +48,7 @@ export const getApmTimeseriesRt = t.type({
             }),
             t.partial({
               'transaction.type': t.string,
+              'transaction.name': t.string,
             }),
           ]),
           t.intersection([
@@ -73,6 +74,7 @@ export const getApmTimeseriesRt = t.type({
             }),
             t.partial({
               'transaction.type': t.string,
+              'transaction.name': t.string,
             }),
           ]),
           t.type({
@@ -81,6 +83,7 @@ export const getApmTimeseriesRt = t.type({
         ]),
       }),
       t.partial({
+        groupByFields: t.array(t.string),
         filter: t.string,
         offset: t.string,
         'service.environment': t.string,
@@ -128,19 +131,16 @@ export async function getApmTimeseries({
     numBuckets: 100,
   });
 
-  const sharedParameters = {
-    apmEventClient,
-    start,
-    end,
-    bucketSize,
-    intervalString,
-  };
-
   return (
     await Promise.all(
       args.stats.map(async (stat) => {
         const parameters = {
-          ...sharedParameters,
+          apmEventClient,
+          start,
+          end,
+          bucketSize,
+          intervalString,
+          groupByFields: stat.groupByFields,
           filter: [
             ...rangeQuery(start, end),
             ...termQuery(SERVICE_NAME, stat['service.name']),
@@ -168,6 +168,7 @@ export async function getApmTimeseries({
               return await getTransactionLatency({
                 ...parameters,
                 transactionType: stat.timeseries['transaction.type'],
+                transactionName: stat.timeseries['transaction.name'],
                 latencyAggregationType: stat.timeseries.function,
               });
 

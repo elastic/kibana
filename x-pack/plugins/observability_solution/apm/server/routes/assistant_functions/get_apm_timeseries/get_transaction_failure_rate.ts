@@ -21,6 +21,7 @@ export async function getTransactionFailureRate({
   intervalString,
   filter,
   transactionType,
+  groupByFields = [],
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -29,6 +30,7 @@ export async function getTransactionFailureRate({
   bucketSize: number;
   filter: QueryDslQueryContainer[];
   transactionType?: string;
+  groupByFields?: string[];
 }) {
   return (
     await fetchSeries({
@@ -41,7 +43,7 @@ export async function getTransactionFailureRate({
       rollupInterval: RollupInterval.OneMinute,
       intervalString,
       filter: filter.concat(...termQuery(TRANSACTION_TYPE, transactionType)),
-      groupBy: 'transaction.type',
+      groupByFields: ['transaction.type', ...groupByFields],
       aggs: {
         ...getOutcomeAggregation(ApmDocumentType.TransactionMetric),
         value: {

@@ -50,7 +50,7 @@ export async function getExitSpanFailureRate({
           spanDestinationServiceResource
         )
       ),
-      groupBy: SPAN_DESTINATION_SERVICE_RESOURCE,
+      groupByFields: [SPAN_DESTINATION_SERVICE_RESOURCE],
       aggs: {
         successful: {
           filter: {

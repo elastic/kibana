@@ -49,7 +49,7 @@ export async function getExitSpanThroughput({
           spanDestinationServiceResource
         )
       ),
-      groupBy: SPAN_DESTINATION_SERVICE_RESOURCE,
+      groupByFields: [SPAN_DESTINATION_SERVICE_RESOURCE],
       aggs: {
         value: {
           bucket_script: {

@@ -7,10 +7,13 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { omit } from 'lodash';
+import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
+import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+
 import {
   CorrelationValue,
   correlationValuesRouteRt,
@@ -21,16 +24,196 @@ import {
   getAssistantDownstreamDependencies,
   type APMDownstreamDependency,
 } from './get_apm_downstream_dependencies';
+import { ApmServicesListItem, getApmServiceList } from './get_apm_service_list';
 import {
   getApmServiceSummary,
   serviceSummaryRouteRt,
   type ServiceSummary,
 } from './get_apm_service_summary';
 import {
+  ApmTimeseriesType,
   getApmTimeseries,
   getApmTimeseriesRt,
   type ApmTimeseries,
 } from './get_apm_timeseries';
+import { getLogCategories, LogCategories } from './get_log_categories';
+
+const getApmAlertDetailsContextRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/assistant/get_apm_alert_details_context',
+  options: {
+    tags: ['access:apm', 'access:ai_assistant'],
+  },
+
+  params: t.type({
+    query: t.intersection([
+      t.type({
+        'service.name': t.string,
+        start: t.string,
+        end: t.string,
+      }),
+      t.partial({
+        'service.environment': t.string,
+        'transaction.type': t.string,
+        'transaction.name': t.string,
+      }),
+    ]),
+  }),
+  handler: async (
+    resources
+  ): Promise<{
+    serviceSummary: ServiceSummary;
+    downstreamDependencies: APMDownstreamDependency[];
+    serviceList: ApmServicesListItem[];
+    logCategories: LogCategories;
+    apmTimeseries: ApmTimeseries[];
+  }> => {
+    const { context, request, plugins, logger, params } = resources;
+    const { query } = params;
+    const apmEventClient = await getApmEventClient(resources);
+
+    const [
+      annotationsClient,
+      esClient,
+      apmAlertsClient,
+      mlClient,
+      randomSampler,
+    ] = await Promise.all([
+      plugins.observability.setup.getScopedAnnotationsClient(context, request),
+      context.core.then(
+        (coreContext): ElasticsearchClient =>
+          coreContext.elasticsearch.client.asCurrentUser
+      ),
+      getApmAlertsClient(resources),
+      getMlClient(resources),
+      getRandomSampler({
+        security: resources.plugins.security,
+        probability: 1,
+        request: resources.request,
+      }),
+    ]);
+
+    const serviceSummaryPromise = getApmServiceSummary({
+      apmEventClient,
+      annotationsClient,
+      esClient,
+      apmAlertsClient,
+      mlClient,
+      logger,
+      arguments: {
+        'service.name': query['service.name'],
+        'service.environment': query['service.environment'],
+        start: query.start,
+        end: query.end,
+      },
+    });
+
+    const downstreamDependenciesPromise = getAssistantDownstreamDependencies({
+      apmEventClient,
+      arguments: {
+        'service.name': query['service.name'],
+        'service.environment': query['service.environment'],
+        start: query.start,
+        end: query.end,
+      },
+    });
+
+    const serviceListPromise = getApmServiceList({
+      apmEventClient,
+      apmAlertsClient,
+      randomSampler,
+      mlClient,
+      logger,
+      arguments: {
+        'service.environment': query['service.environment'],
+        start: query.start,
+        end: query.end,
+      },
+    });
+
+    const logCategoriesPromise = getLogCategories({
+      esClient,
+      arguments: {
+        start: query.start,
+        end: query.end,
+      },
+    });
+
+    const apmTimeseriesPromise = getApmTimeseries({
+      apmEventClient,
+      arguments: {
+        start: query.start,
+        end: query.end,
+        stats: [
+          {
+            title: 'Latency',
+            groupByFields: ['transaction.name'],
+            'service.name': query['service.name'],
+            'service.environment': query['service.environment'],
+            timeseries: {
+              name: ApmTimeseriesType.transactionLatency,
+              function: LatencyAggregationType.p95,
+              'transaction.type': query['transaction.type'],
+              'transaction.name': query['transaction.name'],
+            },
+          },
+          {
+            title: 'Throughput',
+            groupByFields: ['transaction.name'],
+            'service.name': query['service.name'],
+            'service.environment': query['service.environment'],
+            timeseries: {
+              name: ApmTimeseriesType.transactionThroughput,
+              'transaction.type': query['transaction.type'],
+              'transaction.name': query['transaction.name'],
+            },
+          },
+          {
+            title: 'Failure rate',
+            groupByFields: ['transaction.name'],
+            'service.name': query['service.name'],
+            'service.environment': query['service.environment'],
+            timeseries: {
+              name: ApmTimeseriesType.transactionFailureRate,
+              'transaction.type': query['transaction.type'],
+              'transaction.name': query['transaction.name'],
+            },
+          },
+          {
+            title: 'Failure rate',
+            groupByFields: ['transaction.name'],
+            'service.name': query['service.name'],
+            'service.environment': query['service.environment'],
+            timeseries: {
+              name: ApmTimeseriesType.exitSpanLatency,
+            },
+          },
+        ],
+      },
+    });
+
+    const [
+      serviceSummary,
+      downstreamDependencies,
+      serviceList,
+      logCategories,
+      apmTimeseries,
+    ] = await Promise.all([
+      serviceSummaryPromise,
+      downstreamDependenciesPromise,
+      serviceListPromise,
+      logCategoriesPromise,
+      apmTimeseriesPromise,
+    ]);
+
+    return {
+      serviceSummary,
+      downstreamDependencies,
+      serviceList,
+      logCategories,
+      apmTimeseries,
+    };
+  },
+});
 
 const getApmTimeSeriesRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/assistant/get_apm_timeseries',
@@ -160,6 +343,7 @@ const getApmCorrelationValuesRoute = createApmServerRoute({
 
 export const assistantRouteRepository = {
   ...getApmTimeSeriesRoute,
+  ...getApmAlertDetailsContextRoute,
   ...getApmServiceSummaryRoute,
   ...getApmCorrelationValuesRoute,
   ...getDownstreamDependenciesRoute,

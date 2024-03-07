@@ -421,6 +421,7 @@ export type AggregateOf<
           {
             doc_count: number;
             key: string[];
+            key_as_string: string;
           } & SubAggregateOf<TAggregationContainer, TDocument>
         >;
       };
@@ -562,6 +563,14 @@ export type AggregateOf<
             key_as_string?: string;
           } & SubAggregateOf<TAggregationContainer, TDocument>
         >;
+      };
+      categorize_text: {
+        buckets: Array<{
+          doc_count: number;
+          key: string | number;
+          regex?: string;
+          max_matching_length: number;
+        }>;
       };
       top_hits: {
         hits: {

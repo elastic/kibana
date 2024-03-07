@@ -15,8 +15,8 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { cloneDeep, last } from 'lodash';
-import React, { useEffect, useRef, useState } from 'react';
+import { cloneDeep, isArray, last } from 'lodash';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common/types';
 import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
@@ -192,17 +192,40 @@ function PromptEdit({
 }
 
 export interface InsightProps {
-  messages: Message[];
+  messages: Message[] | (() => Promise<Message[] | undefined>);
   title: string;
   dataTestSubj?: string;
 }
 
-export function Insight({ messages, title, dataTestSubj }: InsightProps) {
-  const [initialMessages, setInitialMessages] = useState(messages);
+export function Insight({
+  messages: initialMessagesOrCallback,
+  title,
+  dataTestSubj,
+}: InsightProps) {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isEditingPrompt, setEditingPrompt] = useState(false);
   const [isInsightOpen, setInsightOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
   const [isPromptUpdated, setIsPromptUpdated] = useState(false);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(true);
+
+  const updateInitialMessages = useCallback(() => {
+    if (isArray(initialMessagesOrCallback)) {
+      setMessages(initialMessagesOrCallback);
+      setIsLoadingMessages(false);
+    } else {
+      initialMessagesOrCallback().then((data) => {
+        setMessages(data ?? []);
+        setIsLoadingMessages(false);
+      });
+    }
+  }, [initialMessagesOrCallback]);
+
+  useEffect(() => {
+    if (isInsightOpen) {
+      updateInitialMessages();
+    }
+  }, [updateInitialMessages, isInsightOpen]);
 
   const connectors = useGenAIConnectors();
 
@@ -222,7 +245,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
 
     userMessage.message.content = newPrompt;
     setIsPromptUpdated(true);
-    setInitialMessages(clonedMessages);
+    setMessages(clonedMessages);
     setEditingPrompt(false);
     return true;
   };
@@ -241,7 +264,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
 
   if (
     connectors.selectedConnector &&
-    ((!isInsightOpen && hasOpened) || (isInsightOpen && !isEditingPrompt))
+    ((!isInsightOpen && hasOpened) || (isInsightOpen && !isEditingPrompt && !isLoadingMessages))
   ) {
     children = (
       <>
@@ -262,7 +285,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
                     setIsPromptUpdated(false);
                     setHasOpened(false);
                     setInsightOpen(false);
-                    setInitialMessages(messages);
+                    updateInitialMessages();
                   }}
                 >
                   <EuiText size="xs">
@@ -281,7 +304,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
 
         <ChatContent
           title={title}
-          initialMessages={initialMessages}
+          initialMessages={messages}
           connectorId={connectors.selectedConnector}
         />
       </>
@@ -289,9 +312,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
   } else if (isEditingPrompt) {
     children = (
       <PromptEdit
-        initialPrompt={
-          getLastMessageOfType(initialMessages, MessageRole.User)?.message.content || ''
-        }
+        initialPrompt={getLastMessageOfType(messages, MessageRole.User)?.message.content || ''}
         onSend={handleSend}
         onCancel={handleCancel}
       />
