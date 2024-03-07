@@ -366,7 +366,7 @@ export function buildComponentTemplates(params: {
             ...templateSettings.index?.mapping,
             total_fields: {
               ...templateSettings.index?.mapping?.total_fields,
-              limit: '10000',
+              limit: '1000',
             },
           },
         },
