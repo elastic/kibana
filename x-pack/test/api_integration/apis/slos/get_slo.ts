@@ -14,7 +14,6 @@ import { SloEsClient } from './helper/es';
 import { sloData } from './fixtures/create_slo';
 
 export default function ({ getService }: FtrProviderContext) {
-  // FLAKY: https://github.com/elastic/kibana/issues/177806
   describe('Get SLOs', function () {
     this.tags('skipCloud');
 
