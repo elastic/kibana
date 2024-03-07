@@ -1,0 +1,1482 @@
+{
+  "viewMode": "view",
+  "timeRestore": false,
+  "query": {
+    "query": "",
+    "language": "kuery"
+  },
+  "description": "",
+  "filters": [],
+  "panels": {
+    "81f400af-196a-4ad4-820e-c5748779f4a4": {
+      "type": "lens",
+      "gridData": {
+        "x": 0,
+        "y": 0,
+        "w": 8,
+        "h": 6,
+        "i": "81f400af-196a-4ad4-820e-c5748779f4a4"
+      },
+      "explicitInput": {
+        "id": "81f400af-196a-4ad4-820e-c5748779f4a4",
+        "title": "CPU Usage",
+        "attributes": {
+          "title": "CPU Usage",
+          "description": "",
+          "visualizationType": "lnsMetric",
+          "type": "lens",
+          "references": [],
+          "state": {
+            "visualization": {
+              "layerId": "layer_0",
+              "layerType": "data",
+              "metricAccessor": "metric_formula_accessor",
+              "color": "#F1F4FA",
+              "subtitle": "",
+              "showBar": false
+            },
+            "query": {
+              "language": "kuery",
+              "query": ""
+            },
+            "filters": [],
+            "datasourceStates": {
+              "formBased": {
+                "layers": {
+                  "layer_0": {
+                    "columnOrder": [
+                      "metric_formula_accessor"
+                    ],
+                    "columns": {
+                      "metric_formula_accessor": {
+                        "label": "Hosts",
+                        "dataType": "number",
+                        "operationType": "unique_count",
+                        "scale": "ratio",
+                        "sourceField": "host.name",
+                        "isBucketed": false,
+                        "params": {
+                          "emptyAsNull": true
+                        },
+                        "customLabel": true
+                      }
+                    },
+                    "incompleteColumns": {}
+                  }
+                }
+              }
+            },
+            "internalReferences": [
+              {
+                "type": "index-pattern",
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "name": "indexpattern-datasource-layer-layer_0"
+              }
+            ],
+            "adHocDataViews": {
+              "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6": {
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "title": "remote_cluster:metricbeat-*,metricbeat-*,remote_cluster:metrics-*,metrics-*",
+                "timeFieldName": "@timestamp",
+                "sourceFilters": [],
+                "fieldFormats": {},
+                "runtimeFieldMap": {},
+                "fieldAttrs": {},
+                "allowNoIndex": false,
+                "name": "remote_cluster:metricbeat-*,metricbeat-*,remote_cluster:metrics-*,metrics-*",
+                "allowHidden": false
+              }
+            }
+          }
+        },
+        "hidePanelTitles": true,
+        "enhancements": {}
+      }
+    },
+    "9db57409-5b4e-49c0-8eed-8dd19e43fb04": {
+      "type": "lens",
+      "gridData": {
+        "x": 8,
+        "y": 0,
+        "w": 8,
+        "h": 6,
+        "i": "9db57409-5b4e-49c0-8eed-8dd19e43fb04"
+      },
+      "explicitInput": {
+        "id": "9db57409-5b4e-49c0-8eed-8dd19e43fb04",
+        "title": "CPU Usage",
+        "attributes": {
+          "title": "CPU Usage",
+          "description": "",
+          "visualizationType": "lnsMetric",
+          "type": "lens",
+          "references": [],
+          "state": {
+            "visualization": {
+              "layerId": "layer_0",
+              "layerType": "data",
+              "metricAccessor": "metric_formula_accessor",
+              "color": "#F1F4FA",
+              "subtitle": "Average",
+              "showBar": false,
+              "trendlineLayerId": "36c51eea-ab02-4711-a68d-c0887762a321",
+              "trendlineLayerType": "metricTrendline",
+              "trendlineTimeAccessor": "27fcfbec-cf85-4a54-ba3d-ec77a3363bcc",
+              "trendlineMetricAccessor": "d31d495c-076d-4c1d-be0a-3c7bc154d4eb"
+            },
+            "query": {
+              "language": "kuery",
+              "query": ""
+            },
+            "filters": [],
+            "datasourceStates": {
+              "formBased": {
+                "layers": {
+                  "layer_0": {
+                    "columnOrder": [
+                      "metric_formula_accessorX0",
+                      "metric_formula_accessorX1",
+                      "metric_formula_accessorX2",
+                      "metric_formula_accessorX3",
+                      "metric_formula_accessor"
+                    ],
+                    "columns": {
+                      "metric_formula_accessorX0": {
+                        "label": "Part of CPU Usage",
+                        "dataType": "number",
+                        "operationType": "average",
+                        "sourceField": "system.cpu.user.pct",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "metric_formula_accessorX1": {
+                        "label": "Part of CPU Usage",
+                        "dataType": "number",
+                        "operationType": "average",
+                        "sourceField": "system.cpu.system.pct",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "metric_formula_accessorX2": {
+                        "label": "Part of CPU Usage",
+                        "dataType": "number",
+                        "operationType": "max",
+                        "sourceField": "system.cpu.cores",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "metric_formula_accessorX3": {
+                        "label": "Part of CPU Usage",
+                        "dataType": "number",
+                        "operationType": "math",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "tinymathAst": {
+                            "type": "function",
+                            "name": "divide",
+                            "args": [
+                              {
+                                "type": "function",
+                                "name": "add",
+                                "args": [
+                                  "metric_formula_accessorX0",
+                                  "metric_formula_accessorX1"
+                                ],
+                                "location": {
+                                  "min": 1,
+                                  "max": 62
+                                },
+                                "text": "average(system.cpu.user.pct) + average(system.cpu.system.pct)"
+                              },
+                              "metric_formula_accessorX2"
+                            ],
+                            "location": {
+                              "min": 0,
+                              "max": 87
+                            },
+                            "text": "(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)"
+                          }
+                        },
+                        "references": [
+                          "metric_formula_accessorX0",
+                          "metric_formula_accessorX1",
+                          "metric_formula_accessorX2"
+                        ],
+                        "customLabel": true
+                      },
+                      "metric_formula_accessor": {
+                        "label": "CPU Usage",
+                        "customLabel": true,
+                        "operationType": "formula",
+                        "dataType": "number",
+                        "references": [
+                          "metric_formula_accessorX3"
+                        ],
+                        "isBucketed": false,
+                        "params": {
+                          "formula": "(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)",
+                          "format": {
+                            "id": "percent",
+                            "params": {
+                              "decimals": 1
+                            }
+                          },
+                          "isFormulaBroken": false
+                        }
+                      }
+                    }
+                  },
+                  "36c51eea-ab02-4711-a68d-c0887762a321": {
+                    "linkToLayers": [
+                      "layer_0"
+                    ],
+                    "columns": {
+                      "27fcfbec-cf85-4a54-ba3d-ec77a3363bcc": {
+                        "label": "@timestamp",
+                        "dataType": "date",
+                        "operationType": "date_histogram",
+                        "sourceField": "@timestamp",
+                        "isBucketed": true,
+                        "scale": "interval",
+                        "params": {
+                          "interval": "auto",
+                          "includeEmptyRows": true,
+                          "dropPartials": false
+                        }
+                      },
+                      "d31d495c-076d-4c1d-be0a-3c7bc154d4ebX0": {
+                        "label": "Part of CPU Usage",
+                        "dataType": "number",
+                        "operationType": "average",
+                        "sourceField": "system.cpu.user.pct",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "d31d495c-076d-4c1d-be0a-3c7bc154d4ebX1": {
+                        "label": "Part of CPU Usage",
+                        "dataType": "number",
+                        "operationType": "average",
+                        "sourceField": "system.cpu.system.pct",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "d31d495c-076d-4c1d-be0a-3c7bc154d4ebX2": {
+                        "label": "Part of CPU Usage",
+                        "dataType": "number",
+                        "operationType": "max",
+                        "sourceField": "system.cpu.cores",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "d31d495c-076d-4c1d-be0a-3c7bc154d4ebX3": {
+                        "label": "Part of CPU Usage",
+                        "dataType": "number",
+                        "operationType": "math",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "tinymathAst": {
+                            "type": "function",
+                            "name": "divide",
+                            "args": [
+                              {
+                                "type": "function",
+                                "name": "add",
+                                "args": [
+                                  "d31d495c-076d-4c1d-be0a-3c7bc154d4ebX0",
+                                  "d31d495c-076d-4c1d-be0a-3c7bc154d4ebX1"
+                                ],
+                                "location": {
+                                  "min": 1,
+                                  "max": 62
+                                },
+                                "text": "average(system.cpu.user.pct) + average(system.cpu.system.pct)"
+                              },
+                              "d31d495c-076d-4c1d-be0a-3c7bc154d4ebX2"
+                            ],
+                            "location": {
+                              "min": 0,
+                              "max": 87
+                            },
+                            "text": "(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)"
+                          }
+                        },
+                        "references": [
+                          "d31d495c-076d-4c1d-be0a-3c7bc154d4ebX0",
+                          "d31d495c-076d-4c1d-be0a-3c7bc154d4ebX1",
+                          "d31d495c-076d-4c1d-be0a-3c7bc154d4ebX2"
+                        ],
+                        "customLabel": true
+                      },
+                      "d31d495c-076d-4c1d-be0a-3c7bc154d4eb": {
+                        "label": "CPU Usage",
+                        "customLabel": true,
+                        "operationType": "formula",
+                        "dataType": "number",
+                        "references": [
+                          "d31d495c-076d-4c1d-be0a-3c7bc154d4ebX3"
+                        ],
+                        "isBucketed": false,
+                        "params": {
+                          "formula": "(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)",
+                          "format": {
+                            "id": "percent",
+                            "params": {
+                              "decimals": 1
+                            }
+                          },
+                          "isFormulaBroken": false
+                        }
+                      }
+                    },
+                    "columnOrder": [
+                      "27fcfbec-cf85-4a54-ba3d-ec77a3363bcc",
+                      "d31d495c-076d-4c1d-be0a-3c7bc154d4eb",
+                      "d31d495c-076d-4c1d-be0a-3c7bc154d4ebX0",
+                      "d31d495c-076d-4c1d-be0a-3c7bc154d4ebX1",
+                      "d31d495c-076d-4c1d-be0a-3c7bc154d4ebX2",
+                      "d31d495c-076d-4c1d-be0a-3c7bc154d4ebX3"
+                    ],
+                    "sampling": 1,
+                    "ignoreGlobalFilters": false,
+                    "incompleteColumns": {}
+                  }
+                }
+              }
+            },
+            "internalReferences": [
+              {
+                "type": "index-pattern",
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "name": "indexpattern-datasource-layer-layer_0"
+              },
+              {
+                "type": "index-pattern",
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "name": "indexpattern-datasource-layer-36c51eea-ab02-4711-a68d-c0887762a321"
+              }
+            ],
+            "adHocDataViews": {
+              "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6": {
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "title": "remote_cluster:metricbeat-*,metricbeat-*,remote_cluster:metrics-*,metrics-*",
+                "timeFieldName": "@timestamp",
+                "sourceFilters": [],
+                "fieldFormats": {},
+                "runtimeFieldMap": {},
+                "fieldAttrs": {},
+                "allowNoIndex": false,
+                "name": "remote_cluster:metricbeat-*,metricbeat-*,remote_cluster:metrics-*,metrics-*",
+                "allowHidden": false
+              }
+            }
+          }
+        },
+        "hidePanelTitles": true,
+        "enhancements": {}
+      }
+    },
+    "d4934d04-55ae-4ae1-9fea-b371c231487e": {
+      "type": "lens",
+      "gridData": {
+        "x": 16,
+        "y": 0,
+        "w": 8,
+        "h": 6,
+        "i": "d4934d04-55ae-4ae1-9fea-b371c231487e"
+      },
+      "explicitInput": {
+        "id": "d4934d04-55ae-4ae1-9fea-b371c231487e",
+        "title": "Normalized Load",
+        "attributes": {
+          "title": "Normalized Load",
+          "description": "",
+          "visualizationType": "lnsMetric",
+          "type": "lens",
+          "references": [
+            {
+              "type": "index-pattern",
+              "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+              "name": "indexpattern-datasource-layer-layer_0"
+            },
+            {
+              "type": "index-pattern",
+              "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+              "name": "indexpattern-datasource-layer-4c2406ac-f790-4c5d-9fb6-0f7110b8f243"
+            }
+          ],
+          "state": {
+            "visualization": {
+              "layerId": "layer_0",
+              "layerType": "data",
+              "metricAccessor": "metric_formula_accessor",
+              "color": "#F1F4FA",
+              "subtitle": "Average",
+              "showBar": false,
+              "trendlineLayerId": "4c2406ac-f790-4c5d-9fb6-0f7110b8f243",
+              "trendlineLayerType": "metricTrendline",
+              "trendlineTimeAccessor": "3e1d6c85-af28-4b1a-8701-a9f8f218e713",
+              "trendlineMetricAccessor": "8ce94bf2-b9f0-441f-84f4-e4292e748bb8"
+            },
+            "query": {
+              "language": "kuery",
+              "query": ""
+            },
+            "filters": [],
+            "datasourceStates": {
+              "formBased": {
+                "layers": {
+                  "layer_0": {
+                    "columnOrder": [
+                      "metric_formula_accessorX0",
+                      "metric_formula_accessorX1",
+                      "metric_formula_accessorX2",
+                      "metric_formula_accessor"
+                    ],
+                    "columns": {
+                      "metric_formula_accessorX0": {
+                        "label": "Part of Normalized Load",
+                        "dataType": "number",
+                        "operationType": "average",
+                        "sourceField": "system.load.1",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "metric_formula_accessorX1": {
+                        "label": "Part of Normalized Load",
+                        "dataType": "number",
+                        "operationType": "max",
+                        "sourceField": "system.load.cores",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "metric_formula_accessorX2": {
+                        "label": "Part of Normalized Load",
+                        "dataType": "number",
+                        "operationType": "math",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "tinymathAst": {
+                            "type": "function",
+                            "name": "divide",
+                            "args": [
+                              "metric_formula_accessorX0",
+                              "metric_formula_accessorX1"
+                            ],
+                            "location": {
+                              "min": 0,
+                              "max": 47
+                            },
+                            "text": "average(system.load.1) / max(system.load.cores)"
+                          }
+                        },
+                        "references": [
+                          "metric_formula_accessorX0",
+                          "metric_formula_accessorX1"
+                        ],
+                        "customLabel": true
+                      },
+                      "metric_formula_accessor": {
+                        "label": "Normalized Load",
+                        "customLabel": true,
+                        "operationType": "formula",
+                        "dataType": "number",
+                        "references": [
+                          "metric_formula_accessorX2"
+                        ],
+                        "isBucketed": false,
+                        "params": {
+                          "formula": "average(system.load.1) / max(system.load.cores)",
+                          "format": {
+                            "id": "percent",
+                            "params": {
+                              "decimals": 1
+                            }
+                          },
+                          "isFormulaBroken": false
+                        }
+                      }
+                    },
+                    "indexPatternId": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6"
+                  },
+                  "4c2406ac-f790-4c5d-9fb6-0f7110b8f243": {
+                    "indexPatternId": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                    "linkToLayers": [
+                      "layer_0"
+                    ],
+                    "columns": {
+                      "3e1d6c85-af28-4b1a-8701-a9f8f218e713": {
+                        "label": "@timestamp",
+                        "dataType": "date",
+                        "operationType": "date_histogram",
+                        "sourceField": "@timestamp",
+                        "isBucketed": true,
+                        "scale": "interval",
+                        "params": {
+                          "interval": "auto",
+                          "includeEmptyRows": true,
+                          "dropPartials": false
+                        }
+                      },
+                      "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X0": {
+                        "label": "Part of Normalized Load",
+                        "dataType": "number",
+                        "operationType": "average",
+                        "sourceField": "system.load.1",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X1": {
+                        "label": "Part of Normalized Load",
+                        "dataType": "number",
+                        "operationType": "max",
+                        "sourceField": "system.load.cores",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X2": {
+                        "label": "Part of Normalized Load",
+                        "dataType": "number",
+                        "operationType": "math",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "tinymathAst": {
+                            "type": "function",
+                            "name": "divide",
+                            "args": [
+                              "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X0",
+                              "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X1"
+                            ],
+                            "location": {
+                              "min": 0,
+                              "max": 47
+                            },
+                            "text": "average(system.load.1) / max(system.load.cores)"
+                          }
+                        },
+                        "references": [
+                          "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X0",
+                          "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X1"
+                        ],
+                        "customLabel": true
+                      },
+                      "8ce94bf2-b9f0-441f-84f4-e4292e748bb8": {
+                        "label": "Normalized Load",
+                        "customLabel": true,
+                        "operationType": "formula",
+                        "dataType": "number",
+                        "references": [
+                          "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X2"
+                        ],
+                        "isBucketed": false,
+                        "params": {
+                          "formula": "average(system.load.1) / max(system.load.cores)",
+                          "format": {
+                            "id": "percent",
+                            "params": {
+                              "decimals": 1
+                            }
+                          },
+                          "isFormulaBroken": false
+                        }
+                      }
+                    },
+                    "columnOrder": [
+                      "3e1d6c85-af28-4b1a-8701-a9f8f218e713",
+                      "8ce94bf2-b9f0-441f-84f4-e4292e748bb8",
+                      "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X0",
+                      "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X1",
+                      "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X2"
+                    ],
+                    "sampling": 1,
+                    "ignoreGlobalFilters": false,
+                    "incompleteColumns": {}
+                  }
+                },
+                "currentIndexPatternId": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6"
+              }
+            },
+            "internalReferences": [
+              {
+                "type": "index-pattern",
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "name": "indexpattern-datasource-layer-layer_0"
+              },
+              {
+                "type": "index-pattern",
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "name": "indexpattern-datasource-layer-layer_0_trendline"
+              }
+            ],
+            "adHocDataViews": {
+              "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6": {
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "title": "remote_cluster:metricbeat-*,metricbeat-*,remote_cluster:metrics-*,metrics-*",
+                "timeFieldName": "@timestamp",
+                "sourceFilters": [],
+                "fieldFormats": {},
+                "runtimeFieldMap": {},
+                "fieldAttrs": {},
+                "allowNoIndex": false,
+                "name": "remote_cluster:metricbeat-*,metricbeat-*,remote_cluster:metrics-*,metrics-*",
+                "allowHidden": false
+              }
+            }
+          }
+        },
+        "hidePanelTitles": true,
+        "enhancements": {}
+      }
+    },
+    "488c0b24-92e7-440d-816f-09669a31d3b2": {
+      "type": "lens",
+      "gridData": {
+        "x": 32,
+        "y": 0,
+        "w": 8,
+        "h": 6,
+        "i": "488c0b24-92e7-440d-816f-09669a31d3b2"
+      },
+      "explicitInput": {
+        "id": "488c0b24-92e7-440d-816f-09669a31d3b2",
+        "title": "Normalized Load",
+        "attributes": {
+          "title": "Normalized Load",
+          "description": "",
+          "visualizationType": "lnsMetric",
+          "type": "lens",
+          "references": [
+            {
+              "type": "index-pattern",
+              "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+              "name": "indexpattern-datasource-layer-layer_0"
+            },
+            {
+              "type": "index-pattern",
+              "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+              "name": "indexpattern-datasource-layer-4c2406ac-f790-4c5d-9fb6-0f7110b8f243"
+            }
+          ],
+          "state": {
+            "visualization": {
+              "layerId": "layer_0",
+              "layerType": "data",
+              "metricAccessor": "metric_formula_accessor",
+              "color": "#F1F4FA",
+              "subtitle": "Average",
+              "showBar": false,
+              "trendlineLayerId": "4c2406ac-f790-4c5d-9fb6-0f7110b8f243",
+              "trendlineLayerType": "metricTrendline",
+              "trendlineTimeAccessor": "3e1d6c85-af28-4b1a-8701-a9f8f218e713",
+              "trendlineMetricAccessor": "8ce94bf2-b9f0-441f-84f4-e4292e748bb8"
+            },
+            "query": {
+              "language": "kuery",
+              "query": ""
+            },
+            "filters": [],
+            "datasourceStates": {
+              "formBased": {
+                "layers": {
+                  "layer_0": {
+                    "columnOrder": [
+                      "metric_formula_accessorX0",
+                      "metric_formula_accessorX1",
+                      "metric_formula_accessorX2",
+                      "metric_formula_accessor"
+                    ],
+                    "columns": {
+                      "metric_formula_accessorX0": {
+                        "label": "Part of Memory free",
+                        "dataType": "number",
+                        "operationType": "max",
+                        "sourceField": "system.memory.total",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "metric_formula_accessorX1": {
+                        "label": "Part of Memory free",
+                        "dataType": "number",
+                        "operationType": "average",
+                        "sourceField": "system.memory.actual.used.bytes",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "metric_formula_accessorX2": {
+                        "label": "Part of Memory free",
+                        "dataType": "number",
+                        "operationType": "math",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "tinymathAst": {
+                            "type": "function",
+                            "name": "subtract",
+                            "args": [
+                              "metric_formula_accessorX0",
+                              "metric_formula_accessorX1"
+                            ],
+                            "location": {
+                              "min": 0,
+                              "max": 67
+                            },
+                            "text": "max(system.memory.total) - average(system.memory.actual.used.bytes)"
+                          }
+                        },
+                        "references": [
+                          "metric_formula_accessorX0",
+                          "metric_formula_accessorX1"
+                        ],
+                        "customLabel": true
+                      },
+                      "metric_formula_accessor": {
+                        "label": "Memory Free",
+                        "customLabel": true,
+                        "operationType": "formula",
+                        "dataType": "number",
+                        "references": [
+                          "metric_formula_accessorX2"
+                        ],
+                        "isBucketed": false,
+                        "params": {
+                          "formula": "max(system.memory.total) - average(system.memory.actual.used.bytes)",
+                          "format": {
+                            "id": "bytes",
+                            "params": {
+                              "decimals": 1
+                            }
+                          },
+                          "isFormulaBroken": false
+                        }
+                      }
+                    },
+                    "indexPatternId": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6"
+                  },
+                  "4c2406ac-f790-4c5d-9fb6-0f7110b8f243": {
+                    "indexPatternId": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                    "linkToLayers": [
+                      "layer_0"
+                    ],
+                    "columns": {
+                      "3e1d6c85-af28-4b1a-8701-a9f8f218e713": {
+                        "label": "@timestamp",
+                        "dataType": "date",
+                        "operationType": "date_histogram",
+                        "sourceField": "@timestamp",
+                        "isBucketed": true,
+                        "scale": "interval",
+                        "params": {
+                          "interval": "auto",
+                          "includeEmptyRows": true,
+                          "dropPartials": false
+                        }
+                      },
+                      "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X0": {
+                        "label": "Part of Memory Free",
+                        "dataType": "number",
+                        "operationType": "max",
+                        "sourceField": "system.memory.total",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X1": {
+                        "label": "Part of Memory Free",
+                        "dataType": "number",
+                        "operationType": "average",
+                        "sourceField": "system.memory.actual.used.bytes",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X2": {
+                        "label": "Part of Memory Free",
+                        "dataType": "number",
+                        "operationType": "math",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "tinymathAst": {
+                            "type": "function",
+                            "name": "subtract",
+                            "args": [
+                              "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X0",
+                              "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X1"
+                            ],
+                            "location": {
+                              "min": 0,
+                              "max": 67
+                            },
+                            "text": "max(system.memory.total) - average(system.memory.actual.used.bytes)"
+                          }
+                        },
+                        "references": [
+                          "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X0",
+                          "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X1"
+                        ],
+                        "customLabel": true
+                      },
+                      "8ce94bf2-b9f0-441f-84f4-e4292e748bb8": {
+                        "label": "Memory Free",
+                        "customLabel": true,
+                        "operationType": "formula",
+                        "dataType": "number",
+                        "references": [
+                          "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X2"
+                        ],
+                        "isBucketed": false,
+                        "params": {
+                          "formula": "max(system.memory.total) - average(system.memory.actual.used.bytes)",
+                          "format": {
+                            "id": "bytes",
+                            "params": {
+                              "decimals": 1
+                            }
+                          },
+                          "isFormulaBroken": false
+                        }
+                      }
+                    },
+                    "columnOrder": [
+                      "3e1d6c85-af28-4b1a-8701-a9f8f218e713",
+                      "8ce94bf2-b9f0-441f-84f4-e4292e748bb8",
+                      "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X0",
+                      "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X1",
+                      "8ce94bf2-b9f0-441f-84f4-e4292e748bb8X2"
+                    ],
+                    "sampling": 1,
+                    "ignoreGlobalFilters": false,
+                    "incompleteColumns": {}
+                  }
+                },
+                "currentIndexPatternId": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6"
+              }
+            },
+            "internalReferences": [
+              {
+                "type": "index-pattern",
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "name": "indexpattern-datasource-layer-layer_0"
+              },
+              {
+                "type": "index-pattern",
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "name": "indexpattern-datasource-layer-layer_0_trendline"
+              }
+            ],
+            "adHocDataViews": {
+              "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6": {
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "title": "remote_cluster:metricbeat-*,metricbeat-*,remote_cluster:metrics-*,metrics-*",
+                "timeFieldName": "@timestamp",
+                "sourceFilters": [],
+                "fieldFormats": {},
+                "runtimeFieldMap": {},
+                "fieldAttrs": {},
+                "allowNoIndex": false,
+                "name": "remote_cluster:metricbeat-*,metricbeat-*,remote_cluster:metrics-*,metrics-*",
+                "allowHidden": false
+              }
+            }
+          }
+        },
+        "hidePanelTitles": true,
+        "enhancements": {}
+      }
+    },
+    "736a1bd7-58e3-4a99-abe1-b532380e0e1c": {
+      "type": "lens",
+      "gridData": {
+        "x": 40,
+        "y": 0,
+        "w": 8,
+        "h": 6,
+        "i": "736a1bd7-58e3-4a99-abe1-b532380e0e1c"
+      },
+      "explicitInput": {
+        "id": "736a1bd7-58e3-4a99-abe1-b532380e0e1c",
+        "title": "Disk Usage",
+        "attributes": {
+          "title": "Disk Usage",
+          "description": "",
+          "visualizationType": "lnsMetric",
+          "type": "lens",
+          "references": [
+            {
+              "type": "index-pattern",
+              "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+              "name": "indexpattern-datasource-layer-layer_0"
+            },
+            {
+              "type": "index-pattern",
+              "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+              "name": "indexpattern-datasource-layer-9af3ce4f-a1c7-4401-97c0-8f019e9e870d"
+            }
+          ],
+          "state": {
+            "visualization": {
+              "layerId": "layer_0",
+              "layerType": "data",
+              "metricAccessor": "metric_formula_accessor",
+              "color": "#F1F4FA",
+              "subtitle": "Average",
+              "showBar": false,
+              "trendlineLayerId": "9af3ce4f-a1c7-4401-97c0-8f019e9e870d",
+              "trendlineLayerType": "metricTrendline",
+              "trendlineTimeAccessor": "58bb6149-d84b-49ce-a93a-53d26a2043d6",
+              "trendlineMetricAccessor": "e6ca6181-7e64-4efe-b2fe-aeb64e3bd97f"
+            },
+            "query": {
+              "language": "kuery",
+              "query": ""
+            },
+            "filters": [],
+            "datasourceStates": {
+              "formBased": {
+                "layers": {
+                  "layer_0": {
+                    "columnOrder": [
+                      "metric_formula_accessorX0",
+                      "metric_formula_accessor"
+                    ],
+                    "columns": {
+                      "metric_formula_accessorX0": {
+                        "label": "Part of Disk Usage",
+                        "dataType": "number",
+                        "operationType": "average",
+                        "sourceField": "system.filesystem.used.pct",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "metric_formula_accessor": {
+                        "label": "Disk Usage",
+                        "customLabel": true,
+                        "operationType": "formula",
+                        "dataType": "number",
+                        "references": [
+                          "metric_formula_accessorX0"
+                        ],
+                        "isBucketed": false,
+                        "params": {
+                          "formula": "average(system.filesystem.used.pct)",
+                          "format": {
+                            "id": "percent",
+                            "params": {
+                              "decimals": 1
+                            }
+                          },
+                          "isFormulaBroken": false
+                        }
+                      }
+                    },
+                    "indexPatternId": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6"
+                  },
+                  "9af3ce4f-a1c7-4401-97c0-8f019e9e870d": {
+                    "indexPatternId": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                    "linkToLayers": [
+                      "layer_0"
+                    ],
+                    "columns": {
+                      "58bb6149-d84b-49ce-a93a-53d26a2043d6": {
+                        "label": "@timestamp",
+                        "dataType": "date",
+                        "operationType": "date_histogram",
+                        "sourceField": "@timestamp",
+                        "isBucketed": true,
+                        "scale": "interval",
+                        "params": {
+                          "interval": "auto",
+                          "includeEmptyRows": true,
+                          "dropPartials": false
+                        }
+                      },
+                      "e6ca6181-7e64-4efe-b2fe-aeb64e3bd97fX0": {
+                        "label": "Part of Disk Usage",
+                        "dataType": "number",
+                        "operationType": "average",
+                        "sourceField": "system.filesystem.used.pct",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "e6ca6181-7e64-4efe-b2fe-aeb64e3bd97f": {
+                        "label": "Disk Usage",
+                        "customLabel": true,
+                        "operationType": "formula",
+                        "dataType": "number",
+                        "references": [
+                          "e6ca6181-7e64-4efe-b2fe-aeb64e3bd97fX0"
+                        ],
+                        "isBucketed": false,
+                        "params": {
+                          "formula": "average(system.filesystem.used.pct)",
+                          "format": {
+                            "id": "percent",
+                            "params": {
+                              "decimals": 1
+                            }
+                          },
+                          "isFormulaBroken": false
+                        }
+                      }
+                    },
+                    "columnOrder": [
+                      "58bb6149-d84b-49ce-a93a-53d26a2043d6",
+                      "e6ca6181-7e64-4efe-b2fe-aeb64e3bd97fX0",
+                      "e6ca6181-7e64-4efe-b2fe-aeb64e3bd97f"
+                    ],
+                    "sampling": 1,
+                    "ignoreGlobalFilters": false,
+                    "incompleteColumns": {}
+                  }
+                },
+                "currentIndexPatternId": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6"
+              }
+            },
+            "internalReferences": [
+              {
+                "type": "index-pattern",
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "name": "indexpattern-datasource-layer-layer_0"
+              },
+              {
+                "type": "index-pattern",
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "name": "indexpattern-datasource-layer-layer_0_trendline"
+              }
+            ],
+            "adHocDataViews": {
+              "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6": {
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "title": "remote_cluster:metricbeat-*,metricbeat-*,remote_cluster:metrics-*,metrics-*",
+                "timeFieldName": "@timestamp",
+                "sourceFilters": [],
+                "fieldFormats": {},
+                "runtimeFieldMap": {},
+                "fieldAttrs": {},
+                "allowNoIndex": false,
+                "name": "remote_cluster:metricbeat-*,metricbeat-*,remote_cluster:metrics-*,metrics-*",
+                "allowHidden": false
+              }
+            }
+          }
+        },
+        "enhancements": {},
+        "hidePanelTitles": true
+      }
+    },
+    "07e4891d-ed7d-476b-a1b2-f055ed9623ff": {
+      "type": "lens",
+      "gridData": {
+        "x": 24,
+        "y": 0,
+        "w": 8,
+        "h": 6,
+        "i": "07e4891d-ed7d-476b-a1b2-f055ed9623ff"
+      },
+      "explicitInput": {
+        "id": "07e4891d-ed7d-476b-a1b2-f055ed9623ff",
+        "title": "Memory Usage",
+        "attributes": {
+          "title": "Memory Usage",
+          "description": "",
+          "visualizationType": "lnsMetric",
+          "type": "lens",
+          "references": [
+            {
+              "type": "index-pattern",
+              "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+              "name": "indexpattern-datasource-layer-layer_0"
+            },
+            {
+              "type": "index-pattern",
+              "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+              "name": "indexpattern-datasource-layer-a0f73811-6912-4219-b00e-a875f1a96426"
+            }
+          ],
+          "state": {
+            "visualization": {
+              "layerId": "layer_0",
+              "layerType": "data",
+              "metricAccessor": "metric_formula_accessor",
+              "color": "#F1F4FA",
+              "subtitle": "Average",
+              "showBar": false,
+              "trendlineLayerId": "a0f73811-6912-4219-b00e-a875f1a96426",
+              "trendlineLayerType": "metricTrendline",
+              "trendlineTimeAccessor": "11238e67-baeb-41f4-aebf-ea90e431723a",
+              "trendlineMetricAccessor": "cc8d6fed-7ad0-4aa4-9bdf-46526647dee5"
+            },
+            "query": {
+              "language": "kuery",
+              "query": ""
+            },
+            "filters": [],
+            "datasourceStates": {
+              "formBased": {
+                "layers": {
+                  "layer_0": {
+                    "columnOrder": [
+                      "metric_formula_accessorX0",
+                      "metric_formula_accessor"
+                    ],
+                    "columns": {
+                      "metric_formula_accessorX0": {
+                        "label": "Part of Memory Usage",
+                        "dataType": "number",
+                        "operationType": "average",
+                        "sourceField": "system.memory.actual.used.pct",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "metric_formula_accessor": {
+                        "label": "Memory Usage",
+                        "customLabel": true,
+                        "operationType": "formula",
+                        "dataType": "number",
+                        "references": [
+                          "metric_formula_accessorX0"
+                        ],
+                        "isBucketed": false,
+                        "params": {
+                          "formula": "average(system.memory.actual.used.pct)",
+                          "format": {
+                            "id": "percent",
+                            "params": {
+                              "decimals": 1
+                            }
+                          },
+                          "isFormulaBroken": false
+                        }
+                      }
+                    },
+                    "indexPatternId": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6"
+                  },
+                  "a0f73811-6912-4219-b00e-a875f1a96426": {
+                    "indexPatternId": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                    "linkToLayers": [
+                      "layer_0"
+                    ],
+                    "columns": {
+                      "11238e67-baeb-41f4-aebf-ea90e431723a": {
+                        "label": "@timestamp",
+                        "dataType": "date",
+                        "operationType": "date_histogram",
+                        "sourceField": "@timestamp",
+                        "isBucketed": true,
+                        "scale": "interval",
+                        "params": {
+                          "interval": "auto",
+                          "includeEmptyRows": true,
+                          "dropPartials": false
+                        }
+                      },
+                      "cc8d6fed-7ad0-4aa4-9bdf-46526647dee5X0": {
+                        "label": "Part of Memory Usage",
+                        "dataType": "number",
+                        "operationType": "average",
+                        "sourceField": "system.memory.actual.used.pct",
+                        "isBucketed": false,
+                        "scale": "ratio",
+                        "params": {
+                          "emptyAsNull": false
+                        },
+                        "customLabel": true
+                      },
+                      "cc8d6fed-7ad0-4aa4-9bdf-46526647dee5": {
+                        "label": "Memory Usage",
+                        "customLabel": true,
+                        "operationType": "formula",
+                        "dataType": "number",
+                        "references": [
+                          "cc8d6fed-7ad0-4aa4-9bdf-46526647dee5X0"
+                        ],
+                        "isBucketed": false,
+                        "params": {
+                          "formula": "average(system.memory.actual.used.pct)",
+                          "format": {
+                            "id": "percent",
+                            "params": {
+                              "decimals": 1
+                            }
+                          },
+                          "isFormulaBroken": false
+                        }
+                      }
+                    },
+                    "columnOrder": [
+                      "11238e67-baeb-41f4-aebf-ea90e431723a",
+                      "cc8d6fed-7ad0-4aa4-9bdf-46526647dee5X0",
+                      "cc8d6fed-7ad0-4aa4-9bdf-46526647dee5"
+                    ],
+                    "sampling": 1,
+                    "ignoreGlobalFilters": false,
+                    "incompleteColumns": {}
+                  }
+                },
+                "currentIndexPatternId": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6"
+              }
+            },
+            "internalReferences": [
+              {
+                "type": "index-pattern",
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "name": "indexpattern-datasource-layer-layer_0"
+              },
+              {
+                "type": "index-pattern",
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "name": "indexpattern-datasource-layer-layer_0_trendline"
+              }
+            ],
+            "adHocDataViews": {
+              "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6": {
+                "id": "infra_metrics_8bf7e99f-ca01-5a18-b70d-573d73a17bb6",
+                "title": "remote_cluster:metricbeat-*,metricbeat-*,remote_cluster:metrics-*,metrics-*",
+                "timeFieldName": "@timestamp",
+                "sourceFilters": [],
+                "fieldFormats": {},
+                "runtimeFieldMap": {},
+                "fieldAttrs": {},
+                "allowNoIndex": false,
+                "name": "remote_cluster:metricbeat-*,metricbeat-*,remote_cluster:metrics-*,metrics-*",
+                "allowHidden": false
+              }
+            }
+          }
+        },
+        "enhancements": {},
+        "hidePanelTitles": true
+      }
+    },
+    "a21aa807-55ed-4b39-928c-57cf836373ba": {
+      "type": "hosts_table",
+      "gridData": {
+        "x": 0,
+        "y": 6,
+        "w": 48,
+        "h": 18,
+        "i": "a21aa807-55ed-4b39-928c-57cf836373ba"
+      },
+      "explicitInput": {
+        "id": "a21aa807-55ed-4b39-928c-57cf836373ba",
+        "enhancements": {}
+      }
+    },
+    "691b59a0-453c-4a31-853c-02ef3ab4b081": {
+      "type": "links",
+      "gridData": {
+        "x": 0,
+        "y": 24,
+        "w": 48,
+        "h": 2,
+        "i": "691b59a0-453c-4a31-853c-02ef3ab4b081"
+      },
+      "explicitInput": {
+        "id": "691b59a0-453c-4a31-853c-02ef3ab4b081",
+        "title": "Hosts links",
+        "disabledActions": [
+          "OPEN_FLYOUT_ADD_DRILLDOWN"
+        ],
+        "attributes": {
+          "links": [
+            {
+              "label": "Metrics",
+              "type": "externalLink",
+              "id": "e5addb82-5560-4d9f-824a-c135f52e021d",
+              "destination": "http://localhost:5601/app/metrics/hosts?tabId=metrics",
+              "options": {
+                "encodeUrl": false,
+                "openInNewTab": false
+              },
+              "order": 0
+            },
+            {
+              "label": "Logs",
+              "type": "externalLink",
+              "id": "62407dcd-e037-455d-b1bf-fefea0719faa",
+              "destination": "http://localhost:5601/app/metrics/hosts?tabId=logs",
+              "options": {
+                "encodeUrl": false,
+                "openInNewTab": false
+              },
+              "order": 1
+            },
+            {
+              "label": "Alerts",
+              "type": "externalLink",
+              "id": "b620d6be-dcfe-4390-ad6f-f456648157b3",
+              "destination": "http://localhost:5601/app/metrics/hosts?tabId=alerts",
+              "options": {
+                "encodeUrl": false,
+                "openInNewTab": false
+              },
+              "order": 2
+            }
+          ],
+          "layout": "horizontal"
+        },
+        "enhancements": {},
+        "hidePanelTitles": true
+      }
+    }
+  },
+  "title": "New hosts dashboard",
+  "tags": [],
+  "useMargins": true,
+  "syncColors": false,
+  "syncCursor": true,
+  "syncTooltips": false,
+  "hidePanelTitles": false,
+  "id": "6da5d2da-622d-4d2d-a105-7f41396633dc",
+  "timeRange": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "version": "1.0.0",
+  "executionContext": {
+    "type": "dashboard",
+    "description": "New hosts dashboard"
+  },
+  "controlGroupInput": {
+    "viewMode": "edit",
+    "id": "control_group_6da5d2da-622d-4d2d-a105-7f41396633dc",
+    "panels": {
+      "b38b88ad-ff00-45a1-ab8d-fe5cc77fed91": {
+        "type": "optionsListControl",
+        "order": 0,
+        "grow": false,
+        "width": "medium",
+        "explicitInput": {
+          "id": "b38b88ad-ff00-45a1-ab8d-fe5cc77fed91",
+          "fieldName": "host.os.platform",
+          "title": "Operating System",
+          "grow": false,
+          "width": "medium",
+          "searchTechnique": "wildcard",
+          "enhancements": {},
+          "dataViewId": "06fb290e-1f19-4a7e-b963-a5fabf653b8b"
+        }
+      },
+      "cf796337-1488-440d-ba8b-6159a01d0535": {
+        "type": "optionsListControl",
+        "order": 1,
+        "grow": false,
+        "width": "medium",
+        "explicitInput": {
+          "id": "cf796337-1488-440d-ba8b-6159a01d0535",
+          "fieldName": "cloud.provider",
+          "title": "Cloud Provider",
+          "grow": false,
+          "width": "medium",
+          "searchTechnique": "wildcard",
+          "enhancements": {},
+          "dataViewId": "06fb290e-1f19-4a7e-b963-a5fabf653b8b"
+        }
+      },
+      "6c901c42-79a9-4720-8975-91d70dd788b7": {
+        "type": "optionsListControl",
+        "order": 2,
+        "grow": false,
+        "width": "medium",
+        "explicitInput": {
+          "id": "6c901c42-79a9-4720-8975-91d70dd788b7",
+          "fieldName": "service.name",
+          "title": "Service Name",
+          "grow": false,
+          "width": "medium",
+          "searchTechnique": "wildcard",
+          "enhancements": {},
+          "dataViewId": "06fb290e-1f19-4a7e-b963-a5fabf653b8b"
+        }
+      }
+    },
+    "defaultControlWidth": "medium",
+    "defaultControlGrow": true,
+    "controlStyle": "oneLine",
+    "chainingSystem": "HIERARCHICAL",
+    "ignoreParentSettings": {
+      "ignoreFilters": false,
+      "ignoreQuery": false,
+      "ignoreTimerange": false,
+      "ignoreValidations": false
+    },
+    "timeRange": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "filters": [],
+    "query": {
+      "query": "",
+      "language": "kuery"
+    }
+  }
+}

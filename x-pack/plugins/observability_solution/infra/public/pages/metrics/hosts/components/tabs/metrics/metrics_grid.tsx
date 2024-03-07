@@ -4,46 +4,81 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { DashboardAPI, DashboardRenderer } from '@kbn/dashboard-plugin/public';
+import { DashboardContainerInput } from '@kbn/dashboard-plugin/common';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGrid, EuiFlexItem, EuiText, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import useAsync from 'react-use/lib/useAsync';
-import { HostMetricsExplanationContent } from '../../../../../../components/lens';
-import { Chart } from './chart';
-import { Popover } from '../../common/popover';
 import { useMetricsDataViewContext } from '../../../hooks/use_metrics_data_view';
+import metricsDashboardInput from './metrics_dashboard.json';
+import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
+import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build';
+import { useHostsTableContext } from '../../../hooks/use_hosts_table';
+import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
+import { useHostsViewContext } from '../../../hooks/use_hosts_view';
+import { HostMetricsExplanationContent } from '../../../../../../components/lens';
+import { Popover } from '../../common/popover';
 
 export const MetricsGrid = () => {
-  const model = findInventoryModel('host');
   const { dataView } = useMetricsDataViewContext();
+  const { currentPage = [] } = useHostsTableContext();
+  const { loading, searchSessionId, hostNodes } = useHostsViewContext();
+  const shouldUseSearchCriteria = currentPage.length === 0;
+  const [dashboard, setDashboard] = useState<DashboardAPI | null>(null);
 
-  const { value: charts = [] } = useAsync(async () => {
-    const { cpu, disk, memory, network } = await model.metrics.getCharts();
-    return [
-      cpu.xy.cpuUsage,
-      cpu.xy.normalizedLoad1m,
-      memory.xy.memoryUsage,
-      memory.xy.memoryFree,
-      disk.xy.diskUsage,
-      disk.xy.diskSpaceAvailable,
-      disk.xy.diskIORead,
-      disk.xy.diskIOWrite,
-      disk.xy.diskReadThroughput,
-      disk.xy.diskWriteThroughput,
-      network.xy.rx,
-      network.xy.tx,
-    ].map((chart) => ({
-      ...chart,
-      ...(dataView?.id
-        ? {
-            dataset: {
-              index: dataView.id,
-            },
-          }
-        : {}),
-    }));
-  }, [dataView?.id]);
+  const { parsedDateRange, searchCriteria } = useUnifiedSearchContext();
+
+  const filters = useMemo(() => {
+    return shouldUseSearchCriteria
+      ? searchCriteria.filters
+      : [
+          buildCombinedHostsFilter({
+            field: 'host.name',
+            values: hostNodes.map((p) => p.name),
+            dataView,
+          }),
+        ];
+  }, [shouldUseSearchCriteria, searchCriteria.filters, hostNodes, dataView]);
+
+  // prevents searchCriteria state from reloading the chart
+  // we want it to reload only once the table has finished loading.
+  // attributes passed to useAfterLoadedState don't need to be memoized
+  const { afterLoadedState } = useAfterLoadedState(loading, {
+    dateRange: searchCriteria.dateRange,
+    query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
+    searchSessionId,
+  });
+
+  useEffect(() => {
+    if (!dashboard) return;
+
+    dashboard.updateInput({
+      timeRange: afterLoadedState.dateRange,
+      query: afterLoadedState.query,
+      searchSessionId: afterLoadedState.searchSessionId,
+      filters,
+    });
+  }, [
+    afterLoadedState.dateRange,
+    afterLoadedState.query,
+    afterLoadedState.searchSessionId,
+    dashboard,
+    filters,
+  ]);
+
+  const getInitialInput = () =>
+    ({
+      ...metricsDashboardInput,
+      timeRange: parsedDateRange,
+    } as DashboardContainerInput);
+
+  const getCreationOptions = () => {
+    return Promise.resolve({
+      getInitialInput,
+      useControlGroupIntegration: true,
+      useUnifiedSearchIntegration: true,
+    });
+  };
 
   return (
     <>
@@ -63,13 +98,7 @@ export const MetricsGrid = () => {
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
-      <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
-        {charts.map((chartProp, index) => (
-          <EuiFlexItem key={index} grow={false}>
-            <Chart {...chartProp} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
+      <DashboardRenderer ref={setDashboard} getCreationOptions={getCreationOptions} />
     </>
   );
 };

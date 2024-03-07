@@ -44,6 +44,8 @@ import type {
   InfraClientStartExports,
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
+import { registerHostsTableEmbeddable } from './pages/metrics/hosts/components/hosts_table_react_embeddable';
+import { registerCreateHostsTableAction } from './pages/metrics/hosts/components/create_hosts_table_action';
 
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
@@ -393,6 +395,16 @@ export class Plugin implements InfraClientPluginClass {
       telemetry,
       locators: this.locators!,
     };
+
+    registerHostsTableEmbeddable({
+      core,
+      pluginStart: startContract,
+      plugins,
+      theme$: core.theme.theme$,
+      pluginConfig: this.config,
+    });
+
+    registerCreateHostsTableAction(plugins.uiActions);
 
     return startContract;
   }

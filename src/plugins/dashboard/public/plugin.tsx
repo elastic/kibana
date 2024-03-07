@@ -55,6 +55,7 @@ import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import React from 'react';
 import { DashboardContainerFactoryDefinition } from './dashboard_container/embeddable/dashboard_container_factory';
 import {
   type DashboardAppLocator,
@@ -70,6 +71,7 @@ import { DashboardMountContextProps } from './dashboard_app/types';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { addPanelMenuTrigger } from './triggers';
+import { SharePortableDashboard } from './dashboard_app/top_nav/share_portable_dashboard';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -318,6 +320,24 @@ export class DashboardPlugin
       },
       name: dashboardAppTitle,
     });
+
+    if (share && this.initializerContext.env.mode.dev) {
+      share.register({
+        id: 'copyPortableDashboardJSON',
+        getShareMenuItems: (context) => [
+          {
+            panel: {
+              id: 'copyPortableDashboardJSON',
+              title: 'Copy portable dashboard JSON',
+              content: <SharePortableDashboard context={context} />,
+            },
+            shareMenuItem: {
+              name: 'Copy portable dashboard JSON',
+            },
+          },
+        ],
+      });
+    }
 
     return {
       locator: this.locator,

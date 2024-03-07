@@ -112,7 +112,6 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         fields,
         // default to undefined to keep value out of URL params and improve caching
         allow_hidden: allowHidden || undefined,
-        include_empty_fields: includeEmptyFields,
         ...versionQueryParam,
       },
       indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined,

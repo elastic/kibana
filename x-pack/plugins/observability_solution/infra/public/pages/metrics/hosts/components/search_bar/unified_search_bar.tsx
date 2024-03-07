@@ -13,7 +13,6 @@ import { css } from '@emotion/react';
 import { useKibanaHeader } from '../../../../../hooks/use_kibana_header';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { ControlsContent } from './controls_content';
 import { useMetricsDataViewContext } from '../../hooks/use_metrics_data_view';
 import { LimitOptions } from './limit_options';
 import { HostLimitOptions } from '../../types';
@@ -72,7 +71,7 @@ export const UnifiedSearchBar = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="row" alignItems="center" wrap={false} gutterSize="s">
-            <EuiFlexItem>
+            {/* <EuiFlexItem>
               <ControlsContent
                 timeRange={searchCriteria.dateRange}
                 dataView={dataView}
@@ -80,7 +79,7 @@ export const UnifiedSearchBar = () => {
                 filters={searchCriteria.filters}
                 onFiltersChange={onPanelFiltersChange}
               />
-            </EuiFlexItem>
+            </EuiFlexItem> */}
             <EuiFlexItem grow={false}>
               <LimitOptions
                 limit={searchCriteria.limit as HostLimitOptions}
@@ -113,7 +112,6 @@ const StickyContainer = ({ children }: { children: React.ReactNode }) => {
         background: ${euiTheme.colors.emptyShade};
         padding: ${euiTheme.size.l} ${euiTheme.size.l} 0px;
         margin: -${euiTheme.size.l} -${euiTheme.size.l} 0px;
-        min-height: calc(${euiTheme.size.xxxl} * 2);
       `}
     >
       {children}

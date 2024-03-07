@@ -39,6 +39,7 @@ export interface NodeDetailsRedirectParams<T extends InventoryItemType> {
 
 export const useNodeDetailsRedirect = () => {
   const location = useLocation();
+
   const {
     services: {
       application: { currentAppId$ },

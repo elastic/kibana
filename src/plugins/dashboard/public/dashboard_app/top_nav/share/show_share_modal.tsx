@@ -24,7 +24,7 @@ import { shareModalStrings } from '../../_dashboard_app_strings';
 import { pluginServices } from '../../../services/plugin_services';
 import { convertPanelMapToSavedPanels } from '../../../../common';
 import { DASHBOARD_APP_LOCATOR } from '../../locator/locator';
-import { DashboardLocatorParams } from '../../../dashboard_container';
+import { DashboardContainer, DashboardLocatorParams } from '../../../dashboard_container';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -33,6 +33,7 @@ export interface ShowShareModalProps {
   savedObjectId?: string;
   dashboardTitle?: string;
   anchorElement: HTMLElement;
+  dashboard: DashboardContainer;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -48,6 +49,7 @@ export function ShowShareModal({
   anchorElement,
   savedObjectId,
   dashboardTitle,
+  dashboard,
 }: ShowShareModalProps) {
   const {
     dashboardCapabilities: { createShortUrl: allowShortUrl },
@@ -185,6 +187,10 @@ export function ShowShareModal({
       locatorParams: {
         id: DASHBOARD_APP_LOCATOR,
         params: locatorParams,
+      },
+      fullInput: {
+        ...dashboard.getInput(),
+        controlGroupInput: dashboard?.controlGroup?.getInput(),
       },
     },
     embedUrlParamExtensions: [
