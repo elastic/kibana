@@ -448,6 +448,7 @@ export function trainedModelsRoutes(
         try {
           const { pipeline, pipelineName } = request.body;
           const body = await modelsProvider(client, mlClient, cloud).createInferencePipeline(
+            // @ts-expect-error pipeline._meta is defined as mandatory
             pipeline!,
             pipelineName
           );
