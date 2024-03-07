@@ -11,22 +11,22 @@ import { pick } from 'lodash';
 
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { IContainer } from '@kbn/embeddable-plugin/public';
+import type { IContainer } from '@kbn/embeddable-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { EmbeddableSingleMetricViewerContainer } from './embeddable_single_metric_viewer_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
-import {
-  ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
+import type {
   SingleMetricViewerEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
   SingleMetricViewerServices,
 } from '..';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
 
 export const getDefaultSingleMetricViewerPanelTitle = (jobIds: JobId[]) =>
@@ -94,6 +94,7 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
                 ...this.services[2],
               },
               ...this.services[0],
+              ...this.services[1],
             }}
           >
             <DatePickerContextProvider {...datePickerDeps}>
