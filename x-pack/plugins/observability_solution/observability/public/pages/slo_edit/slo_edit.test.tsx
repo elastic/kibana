@@ -91,6 +91,7 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
       dataViews: {
         create: jest.fn().mockResolvedValue({
           getIndexPattern: jest.fn().mockReturnValue('some-index'),
+          getRuntimeMappings: jest.fn().mockReturnValue({}),
         }),
       },
       docLinks: {
@@ -157,11 +158,21 @@ describe('SLO Edit Page', () => {
 
     useFetchDataViewsMock.mockReturnValue({
       isLoading: false,
-      data: [{ getName: () => 'dataview', getIndexPattern: () => '.dataview-index' }],
+      data: [
+        {
+          getName: () => 'dataview',
+          getIndexPattern: () => '.dataview-index',
+          getRuntimeMappings: jest.fn().mockReturnValue({}),
+        },
+      ],
     });
 
     useCreateDataViewsMock.mockReturnValue({
-      dataView: { getName: () => 'dataview', getIndexPattern: () => '.dataview-index' },
+      dataView: {
+        getName: () => 'dataview',
+        getIndexPattern: () => '.dataview-index',
+        getRuntimeMappings: jest.fn().mockReturnValue({}),
+      },
     });
 
     useFetchIndicesMock.mockReturnValue({
