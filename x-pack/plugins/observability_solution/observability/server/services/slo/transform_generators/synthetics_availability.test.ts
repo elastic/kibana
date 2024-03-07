@@ -37,8 +37,8 @@ describe('Synthetics Availability Transform Generator', () => {
         aggregations: {
           'slo.denominator': {
             filter: {
-              exists: {
-                field: 'summary.final_attempt',
+              term: {
+                'summary.final_attempt': true,
               },
             },
           },
