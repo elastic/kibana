@@ -37,6 +37,7 @@ import { useDiscoverInTimelineContext } from '../../common/components/discover_i
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDiscoverState } from '../../timelines/components/timeline/esql_tab_content/use_discover_state';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;
@@ -60,6 +61,7 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
   const { showAssistantOverlay } = useAssistantContext();
   const [isTimelineBottomBarVisible] = useShowTimeline();
   const { discoverStateContainer, defaultDiscoverAppState } = useDiscoverInTimelineContext();
+  const { dataViewId: timelineDataViewId } = useSourcererDataView(SourcererScopeName.timeline);
   const { setDiscoverAppState } = useDiscoverState();
 
   const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
@@ -184,6 +186,7 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
                 alias: dataProviders[0].name,
                 key: 'query',
                 value: dataProviders[0].kqlQuery,
+                index: timelineDataViewId ?? undefined,
               },
               query: JSON.parse(dataProviders[0].kqlQuery),
             };
@@ -228,8 +231,9 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
     timeRange,
     keepDataView,
     dispatch,
-    clearTimeline,
     discoverStateContainer,
+    clearTimeline,
+    timelineDataViewId,
     defaultDataView.id,
     signalIndexName,
     setDiscoverAppState,

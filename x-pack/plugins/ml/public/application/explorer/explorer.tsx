@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -48,19 +49,22 @@ import {
   getKqlQueryValues,
   DEFAULT_QUERY_LANG,
 } from './components/explorer_query_bar/explorer_query_bar';
+import type {
+  OverallSwimlaneData,
+  AppStateSelectedCells,
+  SourceIndicesWithGeoFields,
+} from './explorer_utils';
 import {
   getDateFormatTz,
   removeFilterFromQueryString,
   getQueryPattern,
   escapeParens,
   escapeDoubleQuotes,
-  OverallSwimlaneData,
-  AppStateSelectedCells,
   getDataViewsAndIndicesWithGeoFields,
-  SourceIndicesWithGeoFields,
 } from './explorer_utils';
 import { AnomalyTimeline } from './anomaly_timeline';
-import { FILTER_ACTION, FilterAction } from './explorer_constants';
+import type { FilterAction } from './explorer_constants';
+import { FILTER_ACTION } from './explorer_constants';
 // Explorer Charts
 // @ts-ignore
 import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_container';
@@ -79,6 +83,7 @@ import { useMlKibana, useMlLocator } from '../contexts/kibana';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
 import { AlertsPanel } from './alerts';
+import { useMlIndexUtils } from '../util/index_service';
 
 interface ExplorerPageProps {
   jobSelectorProps: JobSelectorProps;
@@ -371,6 +376,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     },
   } = useMlKibana();
   const { euiTheme } = useEuiTheme();
+  const mlIndexUtils = useMlIndexUtils();
   const mlLocator = useMlLocator();
 
   const {
@@ -444,7 +450,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
   useEffect(() => {
     if (!noJobsSelected) {
-      getDataViewsAndIndicesWithGeoFields(selectedJobs, dataViewsService)
+      getDataViewsAndIndicesWithGeoFields(selectedJobs, dataViewsService, mlIndexUtils)
         .then(({ sourceIndicesWithGeoFieldsMap, dataViews: dv }) => {
           setSourceIndicesWithGeoFields(sourceIndicesWithGeoFieldsMap);
           setDataViews(dv);

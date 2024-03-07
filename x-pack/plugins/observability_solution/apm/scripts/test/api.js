@@ -102,11 +102,11 @@ if (server) {
 const cmd = [
   'node',
   ...(inspect ? ['--inspect-brk'] : []),
-  `../../../../../scripts/${ftrScript}`,
+  `../../../../../../scripts/${ftrScript}`,
   ...(grep ? [`--grep "${grep}"`] : []),
   ...(updateSnapshots ? [`--updateSnapshots`] : []),
   ...(bail ? [`--bail`] : []),
-  `--config ../../../../test/apm_api_integration/${license}/config.ts`,
+  `--config ../../../../../test/apm_api_integration/${license}/config.ts`,
 ].join(' ');
 
 console.log(`Running: "${cmd}"`);
