@@ -20,7 +20,7 @@ import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { GetPreviewDataResponse, SLO } from '@kbn/slo-schema';
+import { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useRef } from 'react';
 import { useKibana } from '../../../../utils/kibana_react';
@@ -28,7 +28,7 @@ import { openInDiscover } from '../../../../utils/slo/get_discover_link';
 
 export interface Props {
   data: GetPreviewDataResponse;
-  slo?: SLO;
+  slo?: SLOWithSummaryResponse;
   annotation?: React.ReactNode;
   isLoading?: boolean;
   bottomTitle?: string;
@@ -40,7 +40,6 @@ export function GoodBadEventsChart({
   data,
   slo,
   isLoading = false,
-  indicatorType,
 }: Props) {
   const { charts, uiSettings, discover } = useKibana().services;
   const { euiTheme } = useEuiTheme();
