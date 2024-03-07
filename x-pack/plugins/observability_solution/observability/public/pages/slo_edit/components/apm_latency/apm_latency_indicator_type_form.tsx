@@ -9,6 +9,7 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } fro
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { RunTimeFieldUsed } from '../common/runtime_field_used';
 import { GroupByField } from '../common/group_by_field';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
@@ -19,7 +20,7 @@ import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmLatencyIndicatorTypeForm() {
-  const { control, getFieldState, setValue } = useFormContext<CreateSLOForm>();
+  const { control, getFieldState, setValue, watch } = useFormContext<CreateSLOForm>();
   const { data: apmIndex } = useFetchApmIndex();
 
   useEffect(() => {
@@ -28,8 +29,11 @@ export function ApmLatencyIndicatorTypeForm() {
     }
   }, [setValue, apmIndex]);
 
+  const dataViewId = watch(DATA_VIEW_FIELD);
+
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
     indexPatternString: apmIndex,
+    dataViewId,
   });
 
   return (

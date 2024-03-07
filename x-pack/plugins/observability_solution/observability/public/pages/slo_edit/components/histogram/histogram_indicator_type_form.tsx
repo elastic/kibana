@@ -24,15 +24,17 @@ import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
 import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
-import { IndexSelection } from '../custom_common/index_selection';
+import { DATA_VIEW_FIELD, IndexSelection } from '../custom_common/index_selection';
 import { HistogramIndicator } from './histogram_indicator';
 
 export function HistogramIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
+  const dataViewId = watch(DATA_VIEW_FIELD);
 
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
     indexPatternString: index,
+    dataViewId,
   });
 
   const histogramFields = dataView?.fields.filter((field) => field.type === 'histogram');

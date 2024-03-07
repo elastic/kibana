@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { RunTimeFieldUsed } from '../common/runtime_field_used';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { GroupByField } from '../common/group_by_field';
@@ -19,8 +20,9 @@ import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmAvailabilityIndicatorTypeForm() {
-  const { setValue } = useFormContext<CreateSLOForm>();
+  const { setValue, watch } = useFormContext<CreateSLOForm>();
   const { data: apmIndex } = useFetchApmIndex();
+  const dataViewId = watch(DATA_VIEW_FIELD);
 
   useEffect(() => {
     if (apmIndex !== '') {
@@ -30,6 +32,7 @@ export function ApmAvailabilityIndicatorTypeForm() {
 
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
     indexPatternString: apmIndex,
+    dataViewId,
   });
 
   return (
