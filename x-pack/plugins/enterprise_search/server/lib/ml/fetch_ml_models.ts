@@ -191,9 +191,9 @@ const mergeModels = (modelPlaceholders: MlModel[], fetchedModels: MlModel[]) => 
   ...fetchedModels.map((f) => {
     const modelPlaceholder = modelPlaceholders.find((m) => m.modelId === f.modelId);
     if (modelPlaceholder) {
-      // Keep title and other properties from placeholder that are undefined in fetched model
-      const { title, ...modelWithoutTitle } = f;
-      return Object.assign({}, modelPlaceholder, modelWithoutTitle);
+      // Keep title, description and those properties from placeholder that are undefined in fetched model
+      const { title, description, ...modelWithoutTitleAndDescription } = f;
+      return Object.assign({}, modelPlaceholder, modelWithoutTitleAndDescription);
     }
 
     return f;
