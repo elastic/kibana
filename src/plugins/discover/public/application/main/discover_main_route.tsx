@@ -30,7 +30,7 @@ import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getScopedHistory, getUrlTracker } from '../../kibana_services';
+import { getScopedHistory } from '../../kibana_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
 import {
@@ -204,7 +204,7 @@ export function DiscoverMainRoute({
             },
             toastNotifications,
             onBeforeRedirect() {
-              getUrlTracker().setTrackedUrl('/');
+              services.urlTracker.setTrackedUrl('/');
             },
             theme: core.theme,
           })(e);

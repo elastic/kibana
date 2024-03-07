@@ -15,7 +15,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverMainRoute } from '../../application/main';
 import type { DiscoverServices } from '../../build_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
-import { setHeaderActionMenuMounter, setScopedHistory } from '../../kibana_services';
+import { setScopedHistory } from '../../kibana_services';
 import { LoadingIndicator } from '../common/loading_indicator';
 
 export interface DiscoverContainerInternalProps {
@@ -69,7 +69,6 @@ export const DiscoverContainerInternal = ({
 
   useEffect(() => {
     setScopedHistory(scopedHistory);
-    setHeaderActionMenuMounter(() => {});
     setInitialized(true);
   }, [scopedHistory]);
 

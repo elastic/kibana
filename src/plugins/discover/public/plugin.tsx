@@ -46,15 +46,9 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TRUNCATE_MAX_HEIGHT, ENABLE_ESQL } from '@kbn/discover-utils';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { PLUGIN_ID } from '../common';
-import {
-  setHeaderActionMenuMounter,
-  setScopedHistory,
-  setUiActions,
-  setUrlTracker,
-  syncHistoryLocations,
-} from './kibana_services';
+import { setScopedHistory, syncHistoryLocations } from './kibana_services';
 import { registerFeature } from './register_feature';
-import { buildServices } from './build_services';
+import { buildServices, UrlTracker } from './build_services';
 import { SearchEmbeddableFactory } from './embeddable';
 import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
 import { injectTruncateStyles } from './utils/truncate_styles';
@@ -215,6 +209,7 @@ export class DiscoverPlugin
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private urlTracker?: UrlTracker;
   private stopUrlTracking: (() => void) | undefined = undefined;
   private profileRegistry = createProfileRegistry();
   private locator?: DiscoverAppLocator;
@@ -275,10 +270,9 @@ export class DiscoverPlugin
       appUnMounted,
       setTrackingEnabled,
     } = initializeKbnUrlTracking(baseUrl, core, this.appStateUpdater, plugins);
-    setUrlTracker({ setTrackedUrl, restorePreviousUrl, setTrackingEnabled });
-    this.stopUrlTracking = () => {
-      stopUrlTracker();
-    };
+
+    this.urlTracker = { setTrackedUrl, restorePreviousUrl, setTrackingEnabled };
+    this.stopUrlTracking = stopUrlTracker;
 
     const appStateUpdater$ = combineLatest([
       this.appStateUpdater,
@@ -305,7 +299,6 @@ export class DiscoverPlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, discoverStartPlugins] = await core.getStartServices();
         setScopedHistory(params.history);
-        setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
 
@@ -321,14 +314,16 @@ export class DiscoverPlugin
           singleDocLocator: this.singleDocLocator!,
         });
 
-        const services = buildServices(
-          coreStart,
-          discoverStartPlugins,
-          this.initializerContext,
+        const services = buildServices({
+          core: coreStart,
+          plugins: discoverStartPlugins,
+          context: this.initializerContext,
           locator,
           contextLocator,
-          singleDocLocator
-        );
+          singleDocLocator,
+          urlTracker: this.urlTracker!,
+          setHeaderActionMenu: params.setHeaderActionMenu,
+        });
 
         // make sure the data view list is up to date
         discoverStartPlugins.dataViews.clearCache();
@@ -403,7 +398,6 @@ export class DiscoverPlugin
 
     plugins.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
     plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
-    setUiActions(plugins.uiActions);
     injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
     const getDiscoverServicesInternal = () => {
@@ -423,11 +417,9 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      DiscoverContainer: (props: DiscoverContainerProps) => {
-        return (
-          <DiscoverContainerInternal getDiscoverServices={getDiscoverServicesInternal} {...props} />
-        );
-      },
+      DiscoverContainer: (props: DiscoverContainerProps) => (
+        <DiscoverContainerInternal getDiscoverServices={getDiscoverServicesInternal} {...props} />
+      ),
       registerCustomizationProfile: createRegisterCustomizationProfile(this.profileRegistry),
     };
   }
@@ -445,14 +437,15 @@ export class DiscoverPlugin
       singleDocLocator: this.singleDocLocator!,
     });
 
-    return buildServices(
+    return buildServices({
       core,
       plugins,
-      this.initializerContext,
+      context: this.initializerContext,
       locator,
       contextLocator,
-      singleDocLocator
-    );
+      singleDocLocator,
+      urlTracker: this.urlTracker!,
+    });
   };
 
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
