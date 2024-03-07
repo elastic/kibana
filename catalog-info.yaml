@@ -36,7 +36,7 @@ metadata:
   name: kibana-buildkite-pipelines
   description: A location re-routing file, pointing to individual buildkite pipeline definition files
 spec:
-  type: url
+  type: file
   location: .buildkite/pipeline-resource-definitions/locations.yml
 
 ---
