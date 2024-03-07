@@ -85,7 +85,8 @@
     "@kbn/managed-content-badge",
     "@kbn/deeplinks-analytics",
     "@kbn/shared-ux-markdown",
-    "@kbn/data-view-utils"
+    "@kbn/data-view-utils",
+    "@kbn/presentation-publishing"
   ],
   "exclude": ["target/**/*"]
 }

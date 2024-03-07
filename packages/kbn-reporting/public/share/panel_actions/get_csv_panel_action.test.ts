@@ -1,24 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as Rx from 'rxjs';
-import { first } from 'rxjs/operators';
+
 import { CoreStart } from '@kbn/core/public';
-import type { SearchSource } from '@kbn/data-plugin/common';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { LicenseCheckState } from '@kbn/licensing-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { SearchSource } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import type { ReportingPublicPluginStartDependencies } from '../plugin';
-import type { ActionContext } from './get_csv_panel_action';
-import { ReportingCsvPanelAction } from './get_csv_panel_action';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { ReportingAPIClient } from '@kbn/reporting-public';
+import { LicenseCheckState } from '@kbn/licensing-plugin/public';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { ReportingAPIClient } from '../..';
+import {
+  ActionContext,
+  type PanelActionDependencies,
+  ReportingCsvPanelAction,
+} from './get_csv_panel_action';
 
 const core = coreMock.createSetup();
 let apiClient: ReportingAPIClient;
@@ -27,7 +30,7 @@ describe('GetCsvReportPanelAction', () => {
   let context: ActionContext;
   let mockLicenseState: LicenseCheckState;
   let mockSearchSource: SearchSource;
-  let mockStartServicesPayload: [CoreStart, ReportingPublicPluginStartDependencies, unknown];
+  let mockStartServicesPayload: [CoreStart, PanelActionDependencies, unknown];
   let mockStartServices$: Rx.Observable<typeof mockStartServicesPayload>;
 
   const mockLicense$ = () => {
@@ -65,7 +68,7 @@ describe('GetCsvReportPanelAction', () => {
       {
         data: dataPluginMock.createStartContract(),
         licensing: { ...licensingMock.createStart(), license$: mockLicense$() },
-      } as unknown as ReportingPublicPluginStartDependencies,
+      } as unknown as PanelActionDependencies,
       null,
     ];
     mockStartServices$ = Rx.from(Promise.resolve(mockStartServicesPayload));
@@ -106,7 +109,7 @@ describe('GetCsvReportPanelAction', () => {
       usesUiCapabilities: true,
     });
 
-    await mockStartServices$.pipe(first()).toPromise();
+    await Rx.firstValueFrom(mockStartServices$);
 
     await panel.execute(context);
 
@@ -142,7 +145,7 @@ describe('GetCsvReportPanelAction', () => {
       usesUiCapabilities: true,
     });
 
-    await mockStartServices$.pipe(first()).toPromise();
+    await Rx.firstValueFrom(mockStartServices$);
 
     await panel.execute(context);
 
@@ -164,7 +167,7 @@ describe('GetCsvReportPanelAction', () => {
       usesUiCapabilities: true,
     });
 
-    await mockStartServices$.pipe(first()).toPromise();
+    await Rx.firstValueFrom(mockStartServices$);
 
     await panel.execute(context);
 
@@ -179,7 +182,7 @@ describe('GetCsvReportPanelAction', () => {
       usesUiCapabilities: true,
     });
 
-    await mockStartServices$.pipe(first()).toPromise();
+    await Rx.firstValueFrom(mockStartServices$);
 
     await panel.execute(context);
 
@@ -196,7 +199,7 @@ describe('GetCsvReportPanelAction', () => {
       usesUiCapabilities: true,
     });
 
-    await mockStartServices$.pipe(first()).toPromise();
+    await Rx.firstValueFrom(mockStartServices$);
 
     await panel.execute(context);
 
@@ -213,7 +216,7 @@ describe('GetCsvReportPanelAction', () => {
       usesUiCapabilities: true,
     });
 
-    await mockStartServices$.pipe(first()).toPromise();
+    await Rx.firstValueFrom(mockStartServices$);
     expect(await plugin.isCompatible(context)).toEqual(false);
   });
 
@@ -225,10 +228,10 @@ describe('GetCsvReportPanelAction', () => {
       usesUiCapabilities: true,
     });
 
-    await mockStartServices$.pipe(first()).toPromise();
+    await Rx.firstValueFrom(mockStartServices$);
 
-    expect(panel.getIconType()).toMatchInlineSnapshot(`"document"`);
-    expect(panel.getDisplayName()).toMatchInlineSnapshot(`"Download CSV"`);
+    expect(panel.getIconType()).toBe('document');
+    expect(panel.getDisplayName()).toBe('Download CSV');
   });
 
   describe('Application UI Capabilities', () => {
@@ -241,7 +244,7 @@ describe('GetCsvReportPanelAction', () => {
         usesUiCapabilities: true,
       });
 
-      await mockStartServices$.pipe(first()).toPromise();
+      await Rx.firstValueFrom(mockStartServices$);
 
       expect(await plugin.isCompatible(context)).toEqual(false);
     });
@@ -254,7 +257,7 @@ describe('GetCsvReportPanelAction', () => {
         usesUiCapabilities: true,
       });
 
-      await mockStartServices$.pipe(first()).toPromise();
+      await Rx.firstValueFrom(mockStartServices$);
 
       expect(await plugin.isCompatible(context)).toEqual(true);
     });
