@@ -70,8 +70,8 @@ import {
   getMapReady,
   getMapSettings,
   getMapZoom,
-  getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
+  getLayerListRaw,
 } from '../selectors/map_selectors';
 import {
   APP_ID,
@@ -109,6 +109,11 @@ import {
   MapEmbeddableInput,
   MapEmbeddableOutput,
 } from './types';
+import { MapStoreState } from '../reducers/store';
+
+function getHiddenLayerIds(state: MapStoreState) {
+  return getLayerListRaw(state).filter((layer) => !layer.visible).map((layer) => layer.id)
+}
 
 async function getChartsPaletteServiceGetColor(): Promise<((value: string) => string) | null> {
   const chartsService = getCharts();

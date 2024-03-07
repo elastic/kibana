@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
 import { EuiEmptyPrompt } from '@elastic/eui';
@@ -17,7 +17,8 @@ import {
   initializeReactEmbeddableUuid,
   RegisterReactEmbeddable,
   useReactEmbeddableApiHandle,
-  useReactEmbeddableUnsavedChanges
+  useReactEmbeddableUnsavedChanges,
+  ReactEmbeddable
 } from '@kbn/embeddable-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { MapApi } from './types';
@@ -27,12 +28,13 @@ import { SavedMap } from '../routes/map_page';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 import { getSpacesApi } from '../kibana_services';
 import { MapContainer } from '../connected_components/map_container';
+import { initReduxStateSync } from './init_redux_state_sync';
 
 export async function getMapEmbeddable(
   factory: ReactEmbeddableFactory<MapEmbeddableInput, MapApi>,
   state: MapEmbeddableInput, 
   maybeId?: string
-) {
+): Promise<ReactEmbeddable<MapApi>> {
   const savedMap = new SavedMap({
     mapEmbeddableInput: state
   });
@@ -42,6 +44,12 @@ export async function getMapEmbeddable(
   const { titlesApi, titleComparators, serializeTitles } =
     initializeReactEmbeddableTitles(state);
   const timeRange = new BehaviorSubject<TimeRange | undefined>(state.timeRange);
+  
+  const {
+    cleanupReduxStateSync,
+    reduxStateComparators,
+    serializeReduxState,
+  } = initReduxStateSync(savedMap.getStore());
 
   return RegisterReactEmbeddable((apiRef) => {
     
@@ -50,6 +58,7 @@ export async function getMapEmbeddable(
       factory,
       {
         ...titleComparators,
+        ...reduxStateComparators,
       }
     );
 
@@ -65,7 +74,9 @@ export async function getMapEmbeddable(
         serializeState: async () => {
           return {
             rawState: {
+              ...state,
               ...serializeTitles(),
+              ...serializeReduxState(),
             },
           };
         },
@@ -75,6 +86,12 @@ export async function getMapEmbeddable(
     ) as MapApi;
 
     const { addFilters, getActionContext, getFilterActions, onSingleValueTrigger } = useActionHandlers(thisApi);
+
+    useEffect(() => {
+      return () => {
+        cleanupReduxStateSync();
+      }
+    }, []);
 
     const sharingSavedObjectProps = savedMap.getSharingSavedObjectProps();
       const spaces = getSpacesApi();

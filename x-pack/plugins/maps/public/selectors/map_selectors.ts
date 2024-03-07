@@ -373,10 +373,6 @@ export function getLayerById(layerId: string | null, state: MapStoreState): ILay
   });
 }
 
-export const getHiddenLayerIds = createSelector(getLayerListRaw, (layers) =>
-  layers.filter((layer) => !layer.visible).map((layer) => layer.id)
-);
-
 export const getSelectedLayer = createSelector(
   getSelectedLayerId,
   getLayerList,
