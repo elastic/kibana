@@ -103,11 +103,14 @@ export const useSettingsUpdater = (
   const saveSettings = useCallback(async (): Promise<boolean> => {
     setAllQuickPrompts(updatedQuickPromptSettings);
     setAllSystemPrompts(updatedSystemPromptSettings);
-    const bulkResult = await bulkChangeConversations(
-      http,
-      conversationsSettingsBulkActions,
-      toasts
-    );
+
+    const hasBulkConversations =
+      conversationsSettingsBulkActions.create ||
+      conversationsSettingsBulkActions.update ||
+      conversationsSettingsBulkActions.delete;
+    const bulkResult = hasBulkConversations
+      ? await bulkChangeConversations(http, conversationsSettingsBulkActions, toasts)
+      : undefined;
 
     const didUpdateKnowledgeBase =
       knowledgeBase.isEnabledKnowledgeBase !== updatedKnowledgeBaseSettings.isEnabledKnowledgeBase;
@@ -127,7 +130,7 @@ export const useSettingsUpdater = (
     setDefaultAllow(updatedDefaultAllow);
     setDefaultAllowReplacement(updatedDefaultAllowReplacement);
 
-    return bulkResult?.success ?? false;
+    return bulkResult?.success ?? true;
   }, [
     setAllQuickPrompts,
     updatedQuickPromptSettings,
