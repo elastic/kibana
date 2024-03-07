@@ -29,8 +29,8 @@ import { postActionsConnectorExecuteRoute } from './post_actions_connector_execu
 import { getCapabilitiesRoute } from './capabilities/get_capabilities_route';
 import { bulkPromptsRoute } from './prompts/bulk_actions_route';
 import { findPromptsRoute } from './prompts/find_route';
-import { bulkActionAnonymizationFieldsRoute } from './anonimization_fields/bulk_actions_route';
-import { findAnonymizationFieldsRoute } from './anonimization_fields/find_route';
+import { bulkActionAnonymizationFieldsRoute } from './anonymization_fields/bulk_actions_route';
+import { findAnonymizationFieldsRoute } from './anonymization_fields/find_route';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
