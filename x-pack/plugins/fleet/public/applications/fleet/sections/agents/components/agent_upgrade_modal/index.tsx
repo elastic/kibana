@@ -111,20 +111,6 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   const [isInvalid, setIsInvalid] = useState(false);
 
   useEffect(() => {
-    const fetchFleetServerVersions = async () => {
-      try {
-        const { allFleetServerAgents } = await sendAllFleetServerAgents();
-
-        setfleetServerAgents(allFleetServerAgents);
-      } catch (error) {
-        return;
-      }
-    };
-
-    fetchFleetServerVersions();
-  }, []);
-
-  useEffect(() => {
     const getStuckUpdatingAgentCount = async (agentsOrQuery: Agent[] | string) => {
       let newQuery;
       // find updating agents from array
@@ -259,7 +245,6 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   useEffect(() => {
     try {
       if (!!selectedVersion[0]?.value) {
-        console.log('## checkFleetServerVersion', fleetServerAgents);
         checkFleetServerVersion(selectedVersion[0].value, fleetServerAgents);
         // clean up the error
         setErrors('');
