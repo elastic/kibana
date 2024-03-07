@@ -30,7 +30,7 @@ export interface FieldDescriptionProps {
 
 export const FieldDescription: React.FC<FieldDescriptionProps> = ({
   field,
-  color,
+  color = 'text',
   truncate = true,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -45,7 +45,7 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
   return (
     <div data-test-subj={`fieldDescription-${field.name}`}>
       {isTruncated ? (
-        <EuiText color="subdued" size="xs" className="eui-textBreakWord eui-textLeft">
+        <EuiText color={color} size="xs" className="eui-textBreakWord eui-textLeft">
           <button
             data-test-subj={`toggleFieldDescription-${field.name}`}
             title={i18n.translate('fieldUtils.fieldDescription.viewMoreButton', {
@@ -62,7 +62,7 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
               &:hover,
               &:active,
               &:focus {
-                color: ${euiTheme.colors.text};
+                color: ${euiTheme.colors.link};
               }
             `}
           >
@@ -71,11 +71,7 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
         </EuiText>
       ) : (
         <>
-          <EuiText
-            color={color || (!isTooLong ? 'subdued' : 'text')}
-            size="xs"
-            className="eui-textBreakWord eui-textLeft"
-          >
+          <EuiText color={color} size="xs" className="eui-textBreakWord eui-textLeft">
             {customDescription}
           </EuiText>
           {isTooLong && (
