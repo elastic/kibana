@@ -7,12 +7,8 @@
 
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import {
-  EmbeddableFactory,
-  EmbeddableInput,
-  EmbeddableRoot,
-  useEmbeddableFactory,
-} from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRoot, useEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { EuiLoadingChart } from '@elastic/eui';
 import type { MappedEmbeddableTypeOf } from './types';
 import type { MlStartDependencies } from '../plugin';

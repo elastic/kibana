@@ -46,8 +46,6 @@ import {
   CONNECTORS,
   getConnectorTemplate,
 } from '../search_index/connector/constants';
-import { IndexNameLogic } from '../search_index/index_name_logic';
-import { IndexViewLogic } from '../search_index/index_view_logic';
 
 import { AttachIndexBox } from './attach_index_box';
 import { ConnectorDetailTabId } from './connector_detail';
@@ -56,18 +54,18 @@ import { NativeConnectorConfiguration } from './native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
-  const { index, recheckIndexLoading, connector } = useValues(ConnectorViewLogic);
-  const { indexName } = useValues(IndexNameLogic);
-  const { recheckIndex } = useActions(IndexViewLogic);
+  const { index, isLoading, connector } = useValues(ConnectorViewLogic);
   const cloudContext = useCloudDetails();
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
   const { http } = useValues(HttpLogic);
+  const { fetchConnector } = useActions(ConnectorViewLogic);
 
   if (!connector) {
     return <></>;
   }
+  const indexName = connector.index_name ?? '';
 
   // TODO make it work without index if possible
   if (connector.is_native && connector.service_type) {
@@ -89,12 +87,6 @@ export const ConnectorConfiguration: React.FC = () => {
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>
           <EuiPanel hasShadow={false} hasBorder>
-            {!connector.index_name && (
-              <>
-                <AttachIndexBox connector={connector} />
-                <EuiSpacer />
-              </>
-            )}
             <EuiSteps
               steps={[
                 {
@@ -103,7 +95,6 @@ export const ConnectorConfiguration: React.FC = () => {
                       indexName={indexName}
                       hasApiKey={!!connector.api_key_id}
                       isNative={false}
-                      secretId={null}
                     />
                   ),
                   status: hasApiKey ? 'complete' : 'incomplete',
@@ -234,10 +225,11 @@ export const ConnectorConfiguration: React.FC = () => {
                           )}
                           <EuiSpacer size="s" />
                           <EuiButton
+                            disabled={!index}
                             data-telemetry-id="entSearchContent-connector-configuration-recheckNow"
                             iconType="refresh"
-                            onClick={() => recheckIndex()}
-                            isLoading={recheckIndexLoading}
+                            onClick={() => fetchConnector({ connectorId: connector.id })}
+                            isLoading={isLoading}
                           >
                             {i18n.translate(
                               'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.waitingForConnector.button.label',
@@ -288,7 +280,7 @@ export const ConnectorConfiguration: React.FC = () => {
                         </EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiFlexGroup>
+                        <EuiFlexGroup responsive={false}>
                           <EuiFlexItem grow={false}>
                             <EuiButtonTo
                               data-test-subj="entSearchContent-connector-configuration-setScheduleAndSync"
@@ -325,6 +317,12 @@ export const ConnectorConfiguration: React.FC = () => {
               ]}
             />
           </EuiPanel>
+          {!connector.index_name && (
+            <>
+              <EuiSpacer />
+              <AttachIndexBox connector={connector} />
+            </>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiFlexGroup direction="column">

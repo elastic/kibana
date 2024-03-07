@@ -22,6 +22,7 @@ import {
 import { ESQLCallbacks } from '../shared/types';
 import { AstProviderFn, ESQLAst, ESQLCommand } from '../types';
 import { buildQueryForFieldsFromSource } from '../validation/helpers';
+import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 
 type GetSourceFn = () => Promise<string[]>;
 type GetFieldsByTypeFn = (type: string | string[], ignored?: string[]) => Promise<string[]>;
@@ -191,7 +192,7 @@ async function getQuotableActionForColumns(
   const actions = [];
   if (shouldBeQuotedText(errorText)) {
     const availableFields = new Set(await getFieldsByType('any'));
-    const solution = `\`${errorText}\``;
+    const solution = `\`${errorText.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``;
     if (availableFields.has(errorText) || availableFields.has(solution)) {
       actions.push(
         createAction(
@@ -331,10 +332,17 @@ function wrapIntoSpellingChangeAction(
   );
 }
 
-function inferCodeFromError(error: monaco.editor.IMarkerData & { owner?: string }) {
-  if (error.message.includes('missing STRING')) {
-    const [, value] = error.message.split('at ');
-    return value.startsWith("'") && value.endsWith("'") ? 'wrongQuotes' : undefined;
+function extractQuotedText(rawText: string, error: monaco.editor.IMarkerData) {
+  return rawText.substring(error.startColumn - 2, error.endColumn);
+}
+
+function inferCodeFromError(
+  error: monaco.editor.IMarkerData & { owner?: string },
+  rawText: string
+) {
+  if (error.message.endsWith('expecting STRING')) {
+    const value = extractQuotedText(rawText, error);
+    return /^'(.)*'$/.test(value) ? 'wrongQuotes' : undefined;
   }
 }
 
@@ -370,7 +378,7 @@ export async function getActions(
   // so unless there are multiple error/markers for the same area, there's just one
   // in some cases, like syntax + semantic errors (i.e. unquoted fields eval field-1 ), there might be more than one
   for (const error of context.markers) {
-    const code = error.code ?? inferCodeFromError(error);
+    const code = error.code ?? inferCodeFromError(error, innerText);
     switch (code) {
       case 'unknownColumn':
         const [columnsSpellChanges, columnsQuotedChanges] = await Promise.all([
@@ -420,7 +428,7 @@ export async function getActions(
         break;
       case 'wrongQuotes':
         // it is a syntax error, so location won't be helpful here
-        const [, errorText] = error.message.split('at ');
+        const errorText = extractQuotedText(innerText, error);
         actions.push(
           createAction(
             i18n.translate('monaco.esql.quickfix.replaceWithQuote', {
@@ -428,7 +436,11 @@ export async function getActions(
             }),
             errorText.replaceAll("'", '"'),
             // override the location
-            { ...error, endColumn: error.startColumn + errorText.length },
+            {
+              ...error,
+              startColumn: error.startColumn - 1,
+              endColumn: error.startColumn + errorText.length,
+            },
             model.uri
           )
         );

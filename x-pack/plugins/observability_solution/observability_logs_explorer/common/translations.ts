@@ -53,3 +53,10 @@ export const feedbackLinkTitle = i18n.translate(
     defaultMessage: 'Give feedback',
   }
 );
+
+export const datasetQualityLinkTitle = i18n.translate(
+  'xpack.observabilityLogsExplorer.datasetQualityLinkTitle',
+  {
+    defaultMessage: 'Datasets',
+  }
+);

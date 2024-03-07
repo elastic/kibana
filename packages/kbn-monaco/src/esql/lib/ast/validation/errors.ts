@@ -57,14 +57,39 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'wrongArgumentNumber':
       return {
-        message: i18n.translate('monaco.esql.validation.wrongArgumentNumber', {
+        message: i18n.translate('monaco.esql.validation.wrongArgumentExactNumber', {
           defaultMessage:
-            'Error building [{fn}]: expects {canHaveMoreArgs, plural, =0 {exactly } other {}}{numArgs, plural, one {one argument} other {{numArgs} arguments}}, passed {passedArgs} instead.',
+            'Error: [{fn}] function expects exactly {numArgs, plural, one {one argument} other {{numArgs} arguments}}, got {passedArgs}.',
           values: {
             fn: out.fn,
             numArgs: out.numArgs,
             passedArgs: out.passedArgs,
-            canHaveMoreArgs: out.exactly,
+          },
+        }),
+      };
+    case 'wrongArgumentNumberTooMany':
+      return {
+        message: i18n.translate('monaco.esql.validation.wrongArgumentTooManyNumber', {
+          defaultMessage:
+            'Error: [{fn}] function expects {extraArgs, plural, =0 {} other {no more than }}{numArgs, plural, one {one argument} other {{numArgs} arguments}}, got {passedArgs}.',
+          values: {
+            fn: out.fn,
+            numArgs: out.numArgs,
+            passedArgs: out.passedArgs,
+            extraArgs: out.extraArgs,
+          },
+        }),
+      };
+    case 'wrongArgumentNumberTooFew':
+      return {
+        message: i18n.translate('monaco.esql.validation.wrongArgumentTooFewNumber', {
+          defaultMessage:
+            'Error: [{fn}] function expects {missingArgs, plural, =0 {} other {at least }}{numArgs, plural, one {one argument} other {{numArgs} arguments}}, got {passedArgs}.',
+          values: {
+            fn: out.fn,
+            numArgs: out.numArgs,
+            passedArgs: out.passedArgs,
+            missingArgs: out.missingArgs,
           },
         }),
       };
@@ -89,7 +114,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         message: i18n.translate('monaco.esql.validation.unsupportedColumnTypeForCommand', {
           defaultMessage:
-            '{command} only supports {type} {typeCount, plural, one {type} other {types}} values, found [{column}] of type {givenType}',
+            '{command} only supports {type} {typeCount, plural, one {type} other {types}} values, found [{column}] of type [{givenType}]',
           values: {
             command: out.command,
             type: out.type,
@@ -162,9 +187,10 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unknownAggregateFunction':
       return {
         message: i18n.translate('monaco.esql.validation.unknowAggregateFunction', {
-          defaultMessage: '{command} expects an aggregate function, found [{value}]',
+          defaultMessage:
+            'Expected an aggregate function or group but got [{value}] of type [{type}]',
           values: {
-            command: out.command,
+            type: out.type,
             value: out.value,
           },
         }),
@@ -223,6 +249,17 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         }),
         type: 'error',
       };
+    case 'expectedConstant':
+      return {
+        message: i18n.translate('monaco.esql.validation.expectedConstantValue', {
+          defaultMessage: 'Argument of [{fn}] must be a constant, received [{given}]',
+          values: {
+            given: out.given,
+            fn: out.fn,
+          },
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }
@@ -251,4 +288,10 @@ export function createMessage(
     location,
     code: messageId,
   };
+}
+
+export function getUnknownTypeLabel() {
+  return i18n.translate('monaco.esql.validation.unknownColumnType', {
+    defaultMessage: 'Unknown type',
+  });
 }
