@@ -39,6 +39,8 @@ import {
   RuleTypeState,
   RuleAction,
   RuleAlertData,
+  RulesSettingsFlappingProperties,
+  RulesSettingsQueryDelayProperties,
 } from '../../common';
 import { ActionsConfigMap } from '../lib/get_actions_config_map';
 import { NormalizedRuleType } from '../rule_type_registry';
@@ -133,6 +135,17 @@ export type Executable<
       summarizedAlerts: CombinedSummarizedAlerts;
     }
 );
+
+export interface RuleTypeRunnerContext {
+  alertingEventLogger: AlertingEventLogger;
+  flappingSettings: RulesSettingsFlappingProperties;
+  namespace?: string;
+  queryDelaySettings: RulesSettingsQueryDelayProperties;
+  ruleId: string;
+  ruleLogPrefix: string;
+  ruleRunMetricsStore: RuleRunMetricsStore;
+  spaceId: string;
+}
 
 export interface TaskRunnerContext {
   actionsConfigMap: ActionsConfigMap;
