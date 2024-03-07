@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { SearchQueryVariant } from '../types';
+import type { SearchQueryVariant } from '../types';
 
 export const simpleQueryMock: SearchQueryVariant = { query_string: { query: 'airline:AAL' } };
