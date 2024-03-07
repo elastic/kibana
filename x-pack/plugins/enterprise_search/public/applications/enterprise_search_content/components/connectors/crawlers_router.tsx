@@ -9,19 +9,19 @@ import React from 'react';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { NEW_INDEX_PATH, NEW_API_PATH } from '../../routes';
+import { CRAWLERS_PATH, NEW_CRAWLER_PATH } from '../../routes';
+import { NewSearchIndexPage } from '../new_index/new_search_index_page';
 
-import { NewIndex } from './new_index';
-import { NewSearchIndexPage } from './new_search_index_page';
+import { Connectors } from './connectors';
 
-export const NewIndexRouter: React.FC = () => {
+export const CrawlersRouter: React.FC = () => {
   return (
     <Routes>
-      <Route path={NEW_INDEX_PATH} exact>
-        <NewIndex />
+      <Route path={NEW_CRAWLER_PATH}>
+        <NewSearchIndexPage type="crawler" />
       </Route>
-      <Route path={NEW_API_PATH} exact>
-        <NewSearchIndexPage type="api" />
+      <Route path={CRAWLERS_PATH}>
+        <Connectors isCrawler />
       </Route>
     </Routes>
   );
