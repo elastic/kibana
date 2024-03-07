@@ -224,9 +224,12 @@ export function useFleetServerHostsOptions(agentPolicy: Partial<NewAgentPolicy |
       ...fleetServerHostsRequest.data.items
         .filter((item) => !item.is_default)
         .map((item) => {
+          const isInternalFleetServerHost = !!item.is_internal;
+
           return {
             value: item.id,
             inputDisplay: item.name,
+            disabled: isInternalFleetServerHost,
           };
         }),
     ];

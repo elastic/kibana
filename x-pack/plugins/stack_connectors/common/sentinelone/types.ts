@@ -29,8 +29,6 @@ export type SentinelOneBaseApiResponse = TypeOf<typeof SentinelOneBaseApiRespons
 export type SentinelOneGetAgentsParams = Partial<TypeOf<typeof SentinelOneGetAgentsParamsSchema>>;
 export type SentinelOneGetAgentsResponse = TypeOf<typeof SentinelOneGetAgentsResponseSchema>;
 
-export type SentinelOneAgent = SentinelOneGetAgentsResponse['data'][0];
-
 export type SentinelOneKillProcessParams = TypeOf<typeof SentinelOneKillProcessParamsSchema>;
 
 export type SentinelOneExecuteScriptParams = TypeOf<typeof SentinelOneExecuteScriptParamsSchema>;

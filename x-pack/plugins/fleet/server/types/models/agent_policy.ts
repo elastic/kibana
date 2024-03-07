@@ -85,6 +85,7 @@ export const AgentPolicyBaseSchema = {
 
 export const NewAgentPolicySchema = schema.object({
   ...AgentPolicyBaseSchema,
+  force: schema.maybe(schema.boolean()),
 });
 
 export const AgentPolicySchema = schema.object({

@@ -88,11 +88,12 @@ export function getActionType(): TorqActionType {
 }
 
 function renderParameterTemplates(
+  logger: Logger,
   params: ActionParamsType,
   variables: Record<string, unknown>
 ): ActionParamsType {
   if (!params.body) return params;
-  return renderMustacheObject(params, variables);
+  return renderMustacheObject(logger, params, variables);
 }
 
 function validateActionTypeConfig(

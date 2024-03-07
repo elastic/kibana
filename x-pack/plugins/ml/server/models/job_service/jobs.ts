@@ -7,7 +7,7 @@
 
 import { uniq } from 'lodash';
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
@@ -16,14 +16,14 @@ import {
   isJobWithGeoData,
 } from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
+import type { JobAction } from '../../../common/constants/job_actions';
 import {
   getJobActionString,
   JOB_ACTION_TASK,
   JOB_ACTION_TASKS,
   JOB_ACTION,
-  JobAction,
 } from '../../../common/constants/job_actions';
-import {
+import type {
   MlSummaryJob,
   AuditMessage,
   DatafeedWithStats,
@@ -31,7 +31,7 @@ import {
   Datafeed,
   Job,
 } from '../../../common/types/anomaly_detection_jobs';
-import {
+import type {
   JobsExistResponse,
   BulkCreateResults,
   ResetJobsResponse,
@@ -49,7 +49,7 @@ import {
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
-import { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
+import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
 import { parseInterval } from '../../../common/util/parse_interval';
 
@@ -84,9 +84,36 @@ export function jobsProvider(
     });
   }
 
-  async function deleteJobs(jobIds: string[], deleteUserAnnotations = false) {
+  async function deleteJobs(
+    jobIds: string[],
+    deleteUserAnnotations = false,
+    deleteAlertingRules = false
+  ) {
     const results: Results = {};
     const datafeedIds = await getDatafeedIdsByJobId();
+
+    if (deleteAlertingRules && rulesClient) {
+      // Check what jobs have associated alerting rules
+      const anomalyDetectionAlertingRules = await rulesClient.find<MlAnomalyDetectionAlertParams>({
+        options: {
+          filter: `alert.attributes.alertTypeId:${ML_ALERT_TYPES.ANOMALY_DETECTION}`,
+          perPage: 10000,
+        },
+      });
+
+      const jobIdsSet = new Set(jobIds);
+      const ruleIds: string[] = anomalyDetectionAlertingRules.data
+        .filter((rule) => {
+          return jobIdsSet.has(rule.params.jobSelection.jobIds[0]);
+        })
+        .map((rule) => rule.id);
+
+      if (ruleIds.length > 0) {
+        await rulesClient.bulkDeleteRules({
+          ids: ruleIds,
+        });
+      }
+    }
 
     for (const jobId of jobIds) {
       try {

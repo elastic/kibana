@@ -20,11 +20,15 @@ jest.mock('react-redux', () => {
   };
 });
 
+const mockRef = {
+  current: null,
+};
+
 describe('TimelineBottomBar', () => {
   test('should render all components for bottom bar', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <TimelineBottomBar show={false} timelineId={TimelineId.test} />
+        <TimelineBottomBar show={false} timelineId={TimelineId.test} openToggleRef={mockRef} />
       </TestProviders>
     );
 
@@ -32,12 +36,13 @@ describe('TimelineBottomBar', () => {
     expect(getByTestId('timeline-event-count-badge')).toBeInTheDocument();
     expect(getByTestId('timeline-save-status')).toBeInTheDocument();
     expect(getByTestId('timeline-favorite-empty-star')).toBeInTheDocument();
+    expect(getByTestId('timeline-favorite-empty-star')).toHaveProperty('id', '');
   });
 
   test('should not render the event count badge if timeline is open', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <TimelineBottomBar show={true} timelineId={TimelineId.test} />
+        <TimelineBottomBar show={true} timelineId={TimelineId.test} openToggleRef={mockRef} />
       </TestProviders>
     );
 
@@ -49,7 +54,7 @@ describe('TimelineBottomBar', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <TimelineBottomBar show={true} timelineId={TimelineId.test} />
+        <TimelineBottomBar show={true} timelineId={TimelineId.test} openToggleRef={mockRef} />
       </TestProviders>
     );
 

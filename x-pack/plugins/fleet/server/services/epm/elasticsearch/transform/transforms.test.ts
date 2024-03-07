@@ -375,17 +375,6 @@ _meta:
         },
         { ignore: [404] },
       ],
-      [
-        {
-          name: 'logs-endpoint.metadata_current-template@custom',
-          body: {
-            template: { settings: {} },
-            _meta: { managed_by: 'fleet', managed: true, package: { name: 'endpoint' } },
-          },
-          create: true,
-        },
-        { ignore: [404] },
-      ],
     ]);
 
     // Index template composed of the two component templates created
@@ -402,6 +391,7 @@ _meta:
             index_patterns: ['.metrics-endpoint.metadata_united_default'],
             priority: 250,
             template: { mappings: undefined, settings: undefined },
+            ignore_missing_component_templates: ['logs-endpoint.metadata_current-template@custom'],
           },
           name: 'logs-endpoint.metadata_current-template',
         },
@@ -667,17 +657,6 @@ _meta:
         },
         { ignore: [404] },
       ],
-      [
-        {
-          name: 'logs-endpoint.metadata_current-template@custom',
-          body: {
-            template: { settings: {} },
-            _meta: { managed_by: 'fleet', managed: true, package: { name: 'endpoint' } },
-          },
-          create: true,
-        },
-        { ignore: [404] },
-      ],
     ]);
 
     // Index template composed of the two component templates created
@@ -694,6 +673,7 @@ _meta:
             index_patterns: ['.metrics-endpoint.metadata_united_default'],
             priority: 250,
             template: { mappings: undefined, settings: undefined },
+            ignore_missing_component_templates: ['logs-endpoint.metadata_current-template@custom'],
           },
           name: 'logs-endpoint.metadata_current-template',
         },
@@ -936,17 +916,6 @@ _meta:
         },
         { ignore: [404] },
       ],
-      [
-        {
-          name: 'logs-endpoint.metadata_current-template@custom',
-          body: {
-            template: { settings: {} },
-            _meta: { managed_by: 'fleet', managed: true, package: { name: 'endpoint' } },
-          },
-          create: true,
-        },
-        { ignore: [404] },
-      ],
     ]);
 
     // Index template composed of the two component templates created
@@ -963,6 +932,7 @@ _meta:
             index_patterns: ['.metrics-endpoint.metadata_united_default'],
             priority: 250,
             template: { mappings: undefined, settings: undefined },
+            ignore_missing_component_templates: ['logs-endpoint.metadata_current-template@custom'],
           },
           name: 'logs-endpoint.metadata_current-template',
         },

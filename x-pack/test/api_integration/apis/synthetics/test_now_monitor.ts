@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
       const resp = await monitorTestService.addMonitor(newMonitor);
 
       const res = await supertest
-        .get(SYNTHETICS_API_URLS.TRIGGER_MONITOR + `/${resp.id}`)
+        .post(SYNTHETICS_API_URLS.TRIGGER_MONITOR + `/${resp.id}`)
         .set('kbn-xsrf', 'true')
         .expect(200);
 
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const res = await supertest
-        .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.TRIGGER_MONITOR}/${resp.body.id}`)
+        .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.TRIGGER_MONITOR}/${resp.body.id}`)
         .set('kbn-xsrf', 'true')
         .expect(200);
 

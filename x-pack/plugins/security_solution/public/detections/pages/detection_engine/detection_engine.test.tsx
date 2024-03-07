@@ -9,18 +9,11 @@ import React, { useEffect } from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
 import '../../../common/mock/match_media';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  TestProviders,
-  SUB_PLUGINS_REDUCER,
-} from '../../../common/mock';
+import { mockGlobalState, TestProviders, createMockStore } from '../../../common/mock';
 import { DetectionEnginePage } from './detection_engine';
 import { useUserData } from '../../components/user_info';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import type { State } from '../../../common/store';
-import { createStore } from '../../../common/store';
 import { mockHistory, Router } from '../../../common/mock/router';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
@@ -167,27 +160,16 @@ jest.mock('../../../timelines/components/side_panel/hooks/use_detail_panel', () 
     }),
   };
 });
-
-const state: State = {
-  ...mockGlobalState,
-};
-
-const { storage } = createSecuritySolutionStorageMock();
-
-const getStoreWithCustomState = (newState: State = state) => {
-  return createStore(newState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-};
-
-const store = getStoreWithCustomState();
+const dataViewId = 'security-solution-default';
 
 const stateWithBuildingBlockAlertsEnabled: State = {
-  ...state,
+  ...mockGlobalState,
   dataTable: {
-    ...state.dataTable,
+    ...mockGlobalState.dataTable,
     tableById: {
-      ...state.dataTable.tableById,
+      ...mockGlobalState.dataTable.tableById,
       [TableId.test]: {
-        ...state.dataTable.tableById[TableId.test],
+        ...mockGlobalState.dataTable.tableById[TableId.test],
         additionalFilters: {
           showOnlyThreatIndicatorAlerts: false,
           showBuildingBlockAlerts: true,
@@ -198,13 +180,13 @@ const stateWithBuildingBlockAlertsEnabled: State = {
 };
 
 const stateWithThreatIndicatorsAlertEnabled: State = {
-  ...state,
+  ...mockGlobalState,
   dataTable: {
-    ...state.dataTable,
+    ...mockGlobalState.dataTable,
     tableById: {
-      ...state.dataTable.tableById,
+      ...mockGlobalState.dataTable.tableById,
       [TableId.test]: {
-        ...state.dataTable.tableById[TableId.test],
+        ...mockGlobalState.dataTable.tableById[TableId.test],
         additionalFilters: {
           showOnlyThreatIndicatorAlerts: true,
           showBuildingBlockAlerts: false,
@@ -248,7 +230,7 @@ describe('DetectionEnginePageComponent', () => {
   });
   it('renders correctly', async () => {
     const { getByTestId } = render(
-      <TestProviders store={store}>
+      <TestProviders>
         <Router history={mockHistory}>
           <DetectionEnginePage />
         </Router>
@@ -261,7 +243,7 @@ describe('DetectionEnginePageComponent', () => {
 
   it('renders the chart panels', async () => {
     const { getByTestId } = render(
-      <TestProviders store={store}>
+      <TestProviders>
         <Router history={mockHistory}>
           <DetectionEnginePage />
         </Router>
@@ -278,7 +260,7 @@ describe('DetectionEnginePageComponent', () => {
     MockedFilterGroup.mockImplementationOnce(getMockedFilterGroupWithCustomFilters());
     await waitFor(() => {
       render(
-        <TestProviders store={getStoreWithCustomState(stateWithBuildingBlockAlertsEnabled)}>
+        <TestProviders store={createMockStore(stateWithBuildingBlockAlertsEnabled)}>
           <Router history={mockHistory}>
             <DetectionEnginePage />
           </Router>
@@ -297,6 +279,7 @@ describe('DetectionEnginePageComponent', () => {
               type: 'exists',
               key: 'kibana.alert.building_block_type',
               value: 'exists',
+              index: dataViewId,
             },
             query: {
               exists: {
@@ -316,7 +299,7 @@ describe('DetectionEnginePageComponent', () => {
 
     await waitFor(() => {
       render(
-        <TestProviders store={getStoreWithCustomState(stateWithThreatIndicatorsAlertEnabled)}>
+        <TestProviders store={createMockStore(stateWithThreatIndicatorsAlertEnabled)}>
           <Router history={mockHistory}>
             <DetectionEnginePage />
           </Router>
@@ -335,6 +318,7 @@ describe('DetectionEnginePageComponent', () => {
               type: 'exists',
               key: 'kibana.alert.building_block_type',
               value: 'exists',
+              index: dataViewId,
             },
             query: {
               exists: {
@@ -362,7 +346,7 @@ describe('DetectionEnginePageComponent', () => {
     );
     await waitFor(() => {
       render(
-        <TestProviders store={store}>
+        <TestProviders>
           <Router history={mockHistory}>
             <DetectionEnginePage />
           </Router>
@@ -405,7 +389,7 @@ describe('DetectionEnginePageComponent', () => {
     );
     await waitFor(() => {
       render(
-        <TestProviders store={store}>
+        <TestProviders>
           <Router history={mockHistory}>
             <DetectionEnginePage />
           </Router>
@@ -436,7 +420,7 @@ describe('DetectionEnginePageComponent', () => {
     );
     await waitFor(() => {
       render(
-        <TestProviders store={store}>
+        <TestProviders>
           <Router history={mockHistory}>
             <DetectionEnginePage />
           </Router>

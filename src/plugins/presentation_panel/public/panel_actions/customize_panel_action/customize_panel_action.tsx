@@ -11,6 +11,7 @@ import {
   apiCanAccessViewMode,
   apiPublishesDataViews,
   apiPublishesLocalUnifiedSearch,
+  apiPublishesPanelTitle,
   CanAccessViewMode,
   EmbeddableApiContext,
   getInheritedViewMode,
@@ -26,9 +27,9 @@ import { openCustomizePanelFlyout } from './open_customize_panel';
 export const ACTION_CUSTOMIZE_PANEL = 'ACTION_CUSTOMIZE_PANEL';
 
 export type CustomizePanelActionApi = CanAccessViewMode &
-  PublishesDataViews &
   Partial<
-    PublishesWritableLocalUnifiedSearch &
+    PublishesDataViews &
+      PublishesWritableLocalUnifiedSearch &
       PublishesWritablePanelDescription &
       PublishesWritablePanelTitle &
       HasParentApi
@@ -37,7 +38,7 @@ export type CustomizePanelActionApi = CanAccessViewMode &
 export const isApiCompatibleWithCustomizePanelAction = (
   api: unknown | null
 ): api is CustomizePanelActionApi =>
-  Boolean(apiCanAccessViewMode(api) && apiPublishesDataViews(api));
+  apiCanAccessViewMode(api) && (apiPublishesDataViews(api) || apiPublishesPanelTitle(api));
 
 export class CustomizePanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CUSTOMIZE_PANEL;

@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import { createStore } from '../../store';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useVisualizationResponse } from './use_visualization_response';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
@@ -45,8 +38,7 @@ describe('useVisualizationResponse', () => {
     },
   };
 
-  const { storage } = createSecuritySolutionStorageMock();
-  const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const mockStore = createMockStore(mockState);
   const visualizationId = 'testId';
   beforeEach(() => {
     jest.clearAllMocks();

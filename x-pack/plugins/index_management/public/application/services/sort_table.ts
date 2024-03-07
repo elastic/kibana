@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { sortBy } from 'lodash';
+import { sortBy, get } from 'lodash';
+import { Index } from '../../../common';
+import type { ExtensionsService } from '../../services';
 
 type SortField =
   | 'name'
@@ -28,39 +30,57 @@ const unitMagnitude = {
   pb: 5,
 };
 
-const stringSort = (fieldName: SortField) => (item: { [key: string]: any }) => {
-  return item[fieldName];
-};
+type SortFunction = (index: Index) => any;
 
-const numericSort = (fieldName: SortField) => (item: { [key: string]: any }) => +item[fieldName];
+const numericSort =
+  (fieldName: SortField): SortFunction =>
+  (item) =>
+    Number(item[fieldName]);
 
-const byteSort = (fieldName: SortField) => (item: { [key: string]: any }) => {
-  const rawValue = item[fieldName];
-  // raw value can be missing if index is closed
-  if (!rawValue) {
-    return 0;
+const byteSort =
+  (fieldName: SortField): SortFunction =>
+  (item) => {
+    const rawValue = String(item[fieldName]);
+    // raw value can be missing if index is closed
+    if (!rawValue) {
+      return 0;
+    }
+    const matchResult = rawValue.match(/(.*)([kmgtp]b)/);
+    if (!matchResult) {
+      return 0;
+    }
+    const [, number, unit] = matchResult;
+    return +number * Math.pow(1024, unitMagnitude[unit as Unit]);
+  };
+
+const getSorters = (extensionsService?: ExtensionsService) => {
+  const sorters = {
+    primary: numericSort('primary'),
+    replica: numericSort('replica'),
+    documents: numericSort('documents'),
+    size: byteSort('size'),
+    primary_size: byteSort('primary_size'),
+  } as any;
+  const columns = extensionsService?.columns ?? [];
+  for (const column of columns) {
+    if (column.sort) {
+      sorters[column.fieldName] = column.sort;
+    }
   }
-  const matchResult = rawValue.match(/(.*)([kmgtp]b)/);
-  if (!matchResult) {
-    return 0;
+  return sorters;
+};
+
+export const sortTable = (
+  array: Index[] = [],
+  sortField: SortField | string,
+  isSortAscending: boolean,
+  extensionsService?: ExtensionsService
+) => {
+  const sorters = getSorters(extensionsService);
+  let sorter = sorters[sortField];
+  if (!sorter) {
+    sorter = (index: Index) => get(index, sortField);
   }
-  const [, number, unit]: [string, string, Unit] = matchResult;
-  return +number * Math.pow(1024, unitMagnitude[unit]);
-};
-
-const sorters = {
-  name: stringSort('name'),
-  status: stringSort('status'),
-  health: stringSort('health'),
-  primary: numericSort('primary'),
-  replica: numericSort('replica'),
-  documents: numericSort('documents'),
-  size: byteSort('size'),
-  primary_size: byteSort('primary_size'),
-  data_stream: stringSort('data_stream'),
-};
-
-export const sortTable = (array = [], sortField: SortField, isSortAscending: boolean) => {
-  const sorted = sortBy(array, sorters[sortField]);
+  const sorted = sortBy(array, sorter);
   return isSortAscending ? sorted : sorted.reverse();
 };

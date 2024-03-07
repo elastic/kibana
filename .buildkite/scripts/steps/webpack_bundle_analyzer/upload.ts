@@ -9,6 +9,7 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { getKibanaDir } from '#pipeline-utils';
 
 const GITHUB_CONTEXT = 'Build and Publish Webpack bundle analyzer reports';
 
@@ -54,7 +55,12 @@ const upload = () => {
 
     fs.writeFileSync('index.html', html);
     console.log('--- Uploading Webpack Bundle Analyzer reports');
+    const activateScript = path.relative(
+      process.cwd(),
+      path.join(getKibanaDir(), '.buildkite', 'scripts', 'common', 'activate_service_account.sh')
+    );
     exec(`
+      ${activateScript} gs://ci-artifacts.kibana.dev
       gsutil -q -m cp -r -z html '*' 'gs://${WEBPACK_REPORTS_BUCKET}/${WEBPACK_REPORTS}/${process.env.BUILDKITE_COMMIT}/'
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${WEBPACK_REPORTS_BUCKET}/${WEBPACK_REPORTS}/latest/'
     `);

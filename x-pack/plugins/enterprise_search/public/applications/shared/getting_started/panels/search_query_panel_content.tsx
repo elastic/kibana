@@ -47,6 +47,7 @@ export const SearchQueryPanelContent: React.FC<SearchQueryPanelContentProps> = (
       setSelectedLanguage={setSelectedLanguage}
       assetBasePath={assetBasePath}
       application={services.application}
+      consolePlugin={services.console}
       sharePlugin={services.share}
     />
   );

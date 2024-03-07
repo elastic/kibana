@@ -69,6 +69,7 @@ export function LensEditConfigurationFlyout({
   hidesSuggestions,
   onApplyCb,
   onCancelCb,
+  hideTimeFilterInfo,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
@@ -200,34 +201,36 @@ export function LensEditConfigurationFlyout({
   ]);
 
   const onApply = useCallback(() => {
+    const dsStates = Object.fromEntries(
+      Object.entries(datasourceStates).map(([id, ds]) => {
+        const dsState = ds.state;
+        return [id, dsState];
+      })
+    );
+    const references = extractReferencesFromState({
+      activeDatasources: Object.keys(datasourceStates).reduce(
+        (acc, id) => ({
+          ...acc,
+          [id]: datasourceMap[id],
+        }),
+        {}
+      ),
+      datasourceStates,
+      visualizationState: visualization.state,
+      activeVisualization,
+    });
+    const attrs = {
+      ...attributes,
+      state: {
+        ...attributes.state,
+        visualization: visualization.state,
+        datasourceStates: dsStates,
+      },
+      references,
+      visualizationType: visualization.activeId,
+      title: visualization.activeId ?? '',
+    };
     if (savedObjectId) {
-      const dsStates = Object.fromEntries(
-        Object.entries(datasourceStates).map(([id, ds]) => {
-          const dsState = ds.state;
-          return [id, dsState];
-        })
-      );
-      const references = extractReferencesFromState({
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, id) => ({
-            ...acc,
-            [id]: datasourceMap[id],
-          }),
-          {}
-        ),
-        datasourceStates,
-        visualizationState: visualization.state,
-        activeVisualization,
-      });
-      const attrs = {
-        ...attributes,
-        state: {
-          ...attributes.state,
-          visualization: visualization.state,
-          datasourceStates: dsStates,
-        },
-        references,
-      };
       saveByRef?.(attrs);
       updateByRefInput?.(savedObjectId);
     }
@@ -245,7 +248,7 @@ export function LensEditConfigurationFlyout({
       trackUiCounterEvents(telemetryEvents);
     }
 
-    onApplyCb?.();
+    onApplyCb?.(attrs as TypedLensByValueInput['attributes']);
     closeFlyout?.();
   }, [
     visualization.activeId,
@@ -256,9 +259,9 @@ export function LensEditConfigurationFlyout({
     visualization.state,
     activeVisualization,
     attributes,
+    datasourceMap,
     saveByRef,
     updateByRefInput,
-    datasourceMap,
   ]);
 
   const { getUserMessages } = useApplicationUserMessages({
@@ -277,14 +280,15 @@ export function LensEditConfigurationFlyout({
   const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
 
   const runQuery = useCallback(
-    async (q) => {
+    async (q, abortController) => {
       const attrs = await getSuggestions(
         q,
         startDependencies,
         datasourceMap,
         visualizationMap,
         adHocDataViews,
-        setErrors
+        setErrors,
+        abortController
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -428,6 +432,7 @@ export function LensEditConfigurationFlyout({
                 expandCodeEditor={(status: boolean) => {}}
                 isCodeEditorExpanded
                 detectTimestamp={Boolean(adHocDataViews?.[0]?.timeFieldName)}
+                hideTimeFilterInfo={hideTimeFilterInfo}
                 errors={errors}
                 warning={
                   suggestsLimitedColumns
@@ -440,13 +445,13 @@ export function LensEditConfigurationFlyout({
                 hideMinimizeButton
                 editorIsInline
                 hideRunQueryText
-                disableSubmitAction={isEqual(query, prevQuery.current)}
-                onTextLangQuerySubmit={(q) => {
+                onTextLangQuerySubmit={async (q, a) => {
                   if (q) {
-                    runQuery(q);
+                    await runQuery(q, a);
                   }
                 }}
                 isDisabled={false}
+                allowQueryCancellation={true}
               />
             </EuiFlexItem>
           )}

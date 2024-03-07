@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { HelpPopover } from '../components/help_popover/help_popover';
 
-export const TimeSeriesExplorerHelpPopover = () => {
+export const TimeSeriesExplorerHelpPopover: FC<{ embeddableMode: boolean }> = ({
+  embeddableMode,
+}) => {
   return (
     <HelpPopover
       anchorPosition="upCenter"
@@ -36,12 +39,14 @@ export const TimeSeriesExplorerHelpPopover = () => {
           defaultMessage="If you create a forecast, predicted data values are added to the chart. A shaded area around these values represents the confidence level; as you forecast further into the future, the confidence level generally decreases."
         />
       </p>
-      <p>
-        <FormattedMessage
-          id="xpack.ml.timeSeriesExplorer.popoverAnnotationsExplanation"
-          defaultMessage="You can also optionally annotate your job results by drag-selecting a period of time in the chart and adding a description. Some annotations are generated automatically to indicate noteworthy occurrences."
-        />
-      </p>
+      {!embeddableMode && (
+        <p>
+          <FormattedMessage
+            id="xpack.ml.timeSeriesExplorer.popoverAnnotationsExplanation"
+            defaultMessage="You can also optionally annotate your job results by drag-selecting a period of time in the chart and adding a description. Some annotations are generated automatically to indicate noteworthy occurrences."
+          />
+        </p>
+      )}
       <p>
         <FormattedMessage
           id="xpack.ml.timeSeriesExplorer.popoverModelPlotExplanation"

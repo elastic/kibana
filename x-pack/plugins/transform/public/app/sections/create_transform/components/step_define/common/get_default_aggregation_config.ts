@@ -6,12 +6,10 @@
  */
 
 import { getTermsAggConfig } from './terms_agg';
-import { EsFieldName } from '../../../../../../../common/types/fields';
-import {
-  PivotSupportedAggs,
-  PIVOT_SUPPORTED_AGGS,
-} from '../../../../../../../common/types/pivot_aggs';
-import { PivotAggsConfigWithUiSupport } from '../../../../../common';
+import type { EsFieldName } from '../../../../../../../common/types/fields';
+import type { PivotSupportedAggs } from '../../../../../../../common/types/pivot_aggs';
+import { PIVOT_SUPPORTED_AGGS } from '../../../../../../../common/types/pivot_aggs';
+import type { PivotAggsConfigWithUiSupport } from '../../../../../common';
 import { getFilterAggConfig } from './filter_agg/config';
 import { getPercentilesAggConfig } from './percentiles_agg';
 import { getTopMetricsAggConfig } from './top_metrics_agg';
