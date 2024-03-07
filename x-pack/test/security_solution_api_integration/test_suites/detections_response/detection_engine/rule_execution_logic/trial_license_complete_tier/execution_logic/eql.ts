@@ -581,7 +581,7 @@ export default ({ getService }: FtrProviderContext) => {
         from: 'now-35m',
         interval: '30m',
       };
-      const { previewId, logs } = await previewRule({
+      const { previewId } = await previewRule({
         supertest,
         rule,
         timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
@@ -592,10 +592,10 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts).to.have.length(3);
 
       const buildingBlockAlerts = previewAlerts.filter(
-        (a) => a._source['kibana.alert.building_block_type']
+        (alert) => alert._source?.['kibana.alert.building_block_type']
       );
       const shellAlert = previewAlerts.filter(
-        (a) => !a._source['kibana.alert.building_block_type']
+        (alert) => !alert._source?.['kibana.alert.building_block_type']
       )[0];
 
       // check building block alert retains all fields from source documents
@@ -611,14 +611,14 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       // shell alert should have only common properties from building block alerts
-      expect(shellAlert._source.agent).eql({
+      expect(shellAlert._source?.agent).eql({
         type: 'auditbeat',
         version: '8.13.0',
         // agent name is absent as this field is not common
       });
       // only common values in array are present
-      expect(shellAlert._source.client.ip).eql(['127.0.0.1']);
-      expect(shellAlert._source['host.name']).be('host-0');
+      expect(shellAlert._source?.client).eql({ ip: ['127.0.0.1'] });
+      expect(shellAlert._source?.['host.name']).be('host-0');
     });
 
     it('generates up to max_alerts with an EQL rule', async () => {
