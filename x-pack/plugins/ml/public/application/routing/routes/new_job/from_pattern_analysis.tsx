@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { parse } from 'query-string';
 import { useMlKibana } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../locator';
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
+import type { MlRoute, PageProps } from '../../router';
+import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { resolver } from '../../../jobs/new_job/job_from_pattern_analysis';
 

@@ -2838,6 +2838,38 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsService.getMetaFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getMetaFields",
+            "description": [],
+            "signature": [
+              "() => Promise<string[] | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsService.getShortDotsEnable",
+            "type": "Function",
+            "tags": [],
+            "label": "getShortDotsEnable",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-public.DataViewsService.getFieldsForWildcard",
             "type": "Function",
             "tags": [],
@@ -8316,6 +8348,38 @@
             ],
             "signature": [
               "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.DataViewsService.getMetaFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getMetaFields",
+            "description": [],
+            "signature": [
+              "() => Promise<string[] | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.DataViewsService.getShortDotsEnable",
+            "type": "Function",
+            "tags": [],
+            "label": "getShortDotsEnable",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean | undefined>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -14549,6 +14613,38 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsService.getMetaFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getMetaFields",
+            "description": [],
+            "signature": [
+              "() => Promise<string[] | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsService.getShortDotsEnable",
+            "type": "Function",
+            "tags": [],
+            "label": "getShortDotsEnable",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.DataViewsService.getFieldsForWildcard",
             "type": "Function",
             "tags": [],
@@ -18234,6 +18330,38 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsServicePublicMethods.getMetaFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getMetaFields",
+            "description": [],
+            "signature": [
+              "() => Promise<string[] | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsServicePublicMethods.getShortDotsEnable",
+            "type": "Function",
+            "tags": [],
+            "label": "getShortDotsEnable",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -20665,7 +20793,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getFieldsForWildcard: (options: ",
+          " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getMetaFields: () => Promise<string[] | undefined>; getShortDotsEnable: () => Promise<boolean | undefined>; getFieldsForWildcard: (options: ",
           {
             "pluginId": "dataViews",
             "scope": "common",

@@ -34,7 +34,7 @@ import React, { type FC, useMemo, useState } from 'react';
 import { groupBy } from 'lodash';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useMlKibana } from '../contexts/kibana';
-import { ModelItem } from './models_list';
+import type { ModelItem } from './models_list';
 
 export interface AddModelFlyoutProps {
   modelDownloads: ModelItem[];
