@@ -60,6 +60,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
   const createPipeline = async () => {
     setFormState({ ...formState, creatingPipeline: true });
     try {
+      // @ts-expect-error pipeline._meta is defined as mandatory
       await createInferencePipeline(formState.pipelineName, getPipelineConfig(formState));
       setFormState({
         ...formState,
@@ -167,6 +168,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
         )}
         {step === ADD_INFERENCE_PIPELINE_STEPS.CREATE && (
           <ReviewAndCreatePipeline
+            // @ts-expect-error pipeline._meta is defined as mandatory
             inferencePipeline={getPipelineConfig(formState)}
             modelType={modelType}
             pipelineName={formState.pipelineName}
