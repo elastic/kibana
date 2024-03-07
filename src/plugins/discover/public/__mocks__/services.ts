@@ -148,12 +148,12 @@ export function createDiscoverServicesMock(): DiscoverServices {
     core: corePluginMock,
     charts: chartPluginMock.createSetupContract(),
     chrome: chromeServiceMock.createStartContract(),
-    history: () => ({
+    history: {
       location: {
         search: '',
       },
       listen: jest.fn(),
-    }),
+    },
     scopedHistory: () => scopedHistoryMock.create(),
     data: dataPlugin,
     docLinks: docLinksServiceMock.createStartContract(),

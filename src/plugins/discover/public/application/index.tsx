@@ -27,9 +27,8 @@ export const renderApp = ({
   profileRegistry,
   customizationContext,
 }: RenderAppProps) => {
-  const { history: getHistory, capabilities, chrome, data, core } = services;
+  const { history, capabilities, chrome, data, core } = services;
 
-  const history = getHistory();
   if (!capabilities.discover.save) {
     chrome.setBadge({
       text: i18n.translate('discover.badge.readOnly.text', {

@@ -55,7 +55,6 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { memoize } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import { getHistory } from './kibana_services';
 import { DiscoverStartPlugins } from './plugin';
 import { DiscoverContextAppLocator } from './application/context/services/locator';
 import { DiscoverSingleDocLocator } from './application/doc/locator';
@@ -84,7 +83,7 @@ export interface DiscoverServices {
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
-  history: () => History<HistoryLocationState>;
+  history: History<HistoryLocationState>;
   scopedHistory: <T>() => ScopedHistory<T | undefined> | undefined;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   theme: CoreStart['theme'];
@@ -132,6 +131,7 @@ export const buildServices = memoize(
     locator,
     contextLocator,
     singleDocLocator,
+    history,
     scopedHistory,
     urlTracker,
     setHeaderActionMenu,
@@ -142,6 +142,7 @@ export const buildServices = memoize(
     locator: DiscoverAppLocator;
     contextLocator: DiscoverContextAppLocator;
     singleDocLocator: DiscoverSingleDocLocator;
+    history: History<HistoryLocationState>;
     scopedHistory?: ScopedHistory;
     urlTracker: UrlTracker;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
@@ -162,7 +163,7 @@ export const buildServices = memoize(
       theme: core.theme,
       fieldFormats: plugins.fieldFormats,
       filterManager: plugins.data.query.filterManager,
-      history: getHistory,
+      history,
       scopedHistory: <T>() => scopedHistory as ScopedHistory<T | undefined>,
       setHeaderActionMenu,
       dataViews: plugins.data.dataViews,

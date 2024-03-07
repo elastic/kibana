@@ -47,7 +47,6 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TRUNCATE_MAX_HEIGHT, ENABLE_ESQL } from '@kbn/discover-utils';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { PLUGIN_ID } from '../common';
-import { syncHistoryLocations } from './kibana_services';
 import { registerFeature } from './register_feature';
 import { buildServices, UrlTracker } from './build_services';
 import { SearchEmbeddableFactory } from './embeddable';
@@ -78,6 +77,7 @@ import {
   type DiscoverContainerProps,
 } from './components/discover_container';
 import { getESQLSearchProvider } from './global_search/search_provider';
+import { HistoryService } from './history_service';
 
 /**
  * @public
@@ -210,6 +210,7 @@ export class DiscoverPlugin
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private historyService = new HistoryService();
   private scopedHistory?: ScopedHistory<unknown>;
   private urlTracker?: UrlTracker;
   private stopUrlTracking: (() => void) | undefined = undefined;
@@ -306,9 +307,10 @@ export class DiscoverPlugin
       visibleIn: ['globalSearch', 'sideNav', 'kibanaOverview'],
       mount: async (params: AppMountParameters) => {
         const [coreStart, discoverStartPlugins] = await core.getStartServices();
-        syncHistoryLocations();
+        this.historyService.syncHistoryLocations();
         appMounted();
 
+        // Store the current scoped history so initializeKbnUrlTracking can access it
         this.scopedHistory = params.history;
 
         // dispatch synthetic hash change event to update hash history objects
@@ -317,7 +319,7 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
-        const { locator, contextLocator, singleDocLocator } = await getProfileAwareLocators({
+        const { locator, contextLocator, singleDocLocator } = await this.getProfileAwareLocators({
           locator: this.locator!,
           contextLocator: this.contextLocator!,
           singleDocLocator: this.singleDocLocator!,
@@ -330,6 +332,7 @@ export class DiscoverPlugin
           locator,
           contextLocator,
           singleDocLocator,
+          history: this.historyService.getHistory(),
           scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
           setHeaderActionMenu: params.setHeaderActionMenu,
@@ -441,7 +444,7 @@ export class DiscoverPlugin
   }
 
   private getDiscoverServices = async (core: CoreStart, plugins: DiscoverStartPlugins) => {
-    const { locator, contextLocator, singleDocLocator } = await getProfileAwareLocators({
+    const { locator, contextLocator, singleDocLocator } = await this.getProfileAwareLocators({
       locator: this.locator!,
       contextLocator: this.contextLocator!,
       singleDocLocator: this.singleDocLocator!,
@@ -454,9 +457,32 @@ export class DiscoverPlugin
       locator,
       contextLocator,
       singleDocLocator,
+      history: this.historyService.getHistory(),
       urlTracker: this.urlTracker!,
     });
   };
+
+  /**
+   * Create profile-aware locators for internal use
+   */
+  private async getProfileAwareLocators({
+    locator,
+    contextLocator,
+    singleDocLocator,
+  }: {
+    locator: DiscoverAppLocator;
+    contextLocator: DiscoverContextAppLocator;
+    singleDocLocator: DiscoverSingleDocLocator;
+  }) {
+    const { ProfileAwareLocator } = await import('./customizations/profile_aware_locator');
+    const history = this.historyService.getHistory();
+
+    return {
+      locator: new ProfileAwareLocator(locator, history),
+      contextLocator: new ProfileAwareLocator(contextLocator, history),
+      singleDocLocator: new ProfileAwareLocator(singleDocLocator, history),
+    };
+  }
 
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
     const getStartServices = async () => {
@@ -476,24 +502,3 @@ export class DiscoverPlugin
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 }
-
-/**
- * Create profile-aware locators for internal use
- */
-const getProfileAwareLocators = async ({
-  locator,
-  contextLocator,
-  singleDocLocator,
-}: {
-  locator: DiscoverAppLocator;
-  contextLocator: DiscoverContextAppLocator;
-  singleDocLocator: DiscoverSingleDocLocator;
-}) => {
-  const { ProfileAwareLocator } = await import('./customizations/profile_aware_locator');
-
-  return {
-    locator: new ProfileAwareLocator(locator),
-    contextLocator: new ProfileAwareLocator(contextLocator),
-    singleDocLocator: new ProfileAwareLocator(singleDocLocator),
-  };
-};

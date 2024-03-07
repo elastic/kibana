@@ -18,7 +18,7 @@ let bannerId: string | undefined;
 export function NotFoundRoute() {
   const services = useDiscoverServices();
   const { urlForwarding, urlTracker, core, history } = services;
-  const currentLocation = history().location.pathname;
+  const currentLocation = history.location.pathname;
 
   useEffect(() => {
     const path = window.location.hash.substr(1);
@@ -38,7 +38,7 @@ export function NotFoundRoute() {
               id="discover.noMatchRoute.bannerText"
               defaultMessage="Discover application doesn't recognize this route: {route}"
               values={{
-                route: history().location.state.referrer,
+                route: history.location.state.referrer,
               }}
             />
           </p>
