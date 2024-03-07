@@ -28,22 +28,6 @@ describe('checkIndexCurrentAlgorithm', () => {
     expect(checkIndexCurrentAlgorithm(mapping)).toEqual('unknown');
   });
 
-  it('returns `unknown` if both v2 and zdt metas are present', () => {
-    const mapping: IndexMapping = {
-      properties: {},
-      _meta: {
-        migrationMappingPropertyHashes: {
-          foo: 'someHash',
-        },
-        mappingVersions: {
-          foo: '8.8.0',
-        },
-      },
-    };
-
-    expect(checkIndexCurrentAlgorithm(mapping)).toEqual('unknown');
-  });
-
   it('returns `zdt` if all zdt metas are present', () => {
     const mapping: IndexMapping = {
       properties: {},
@@ -72,6 +56,23 @@ describe('checkIndexCurrentAlgorithm', () => {
 
     expect(checkIndexCurrentAlgorithm(mapping)).toEqual('v2-partially-migrated');
   });
+
+  it('returns `unknown` if if mappingVersions and v2 hashes are present', () => {
+    const mapping: IndexMapping = {
+      properties: {},
+      _meta: {
+        migrationMappingPropertyHashes: {
+          foo: 'someHash',
+        },
+        mappingVersions: {
+          foo: '8.8.0',
+        },
+      },
+    };
+
+    expect(checkIndexCurrentAlgorithm(mapping)).toEqual('v2-partially-migrated');
+  });
+
 
   it('returns `v2-incompatible` if v2 hashes are present but not indexTypesMap', () => {
     const mapping: IndexMapping = {
