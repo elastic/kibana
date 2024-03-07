@@ -69,6 +69,6 @@
     "@kbn/console-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/es-errors",
-    "@kbn/ai-playground"
+    "@kbn/playground"
   ]
 }

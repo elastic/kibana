@@ -90,7 +90,6 @@ export class ElasticsearchRetriever extends BaseRetriever {
 
       return documents;
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }

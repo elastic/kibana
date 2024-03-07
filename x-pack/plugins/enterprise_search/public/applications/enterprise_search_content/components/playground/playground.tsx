@@ -10,8 +10,8 @@ import React, { useCallback } from 'react';
 import { useValues } from 'kea';
 
 import { EuiPageTemplate } from '@elastic/eui';
-import { Chat, AIPlaygroundProvider, ViewQueryAction, ViewCodeAction } from '@kbn/ai-playground';
 import { i18n } from '@kbn/i18n';
+import { Chat, AIPlaygroundProvider, ViewQueryAction, ViewCodeAction } from '@kbn/playground';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { NEW_INDEX_PATH } from '../../routes';

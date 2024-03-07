@@ -1,5 +1,5 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/ai-playground",
+  "id": "@kbn/playground",
   "owner": "@elastic/enterprise-search-frontend"
 }
