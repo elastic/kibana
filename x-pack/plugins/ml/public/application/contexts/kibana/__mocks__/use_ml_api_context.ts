@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlApiServices } from '../../../services/ml_api_service';
+import type { MlApiServices } from '../../../services/ml_api_service';
 
 export const useMlApiContext: () => jest.Mocked<MlApiServices> = jest.fn(() => {
   return {

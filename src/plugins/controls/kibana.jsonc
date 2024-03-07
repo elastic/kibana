@@ -17,6 +17,7 @@
       "unifiedSearch",
       "uiActions"
     ],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": ["common"],
+    "requiredBundles": ["kibanaUtils"]
   }
 }
