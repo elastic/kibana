@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { EuiText, EuiCheckboxGroup, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import React, { Fragment } from 'react';
 
 import {
   StorybookMock as TabbedModalStorybookMock,
@@ -23,43 +24,142 @@ export default {
 const mock = new TabbedModalStorybookMock();
 const argTypes = mock.getArgumentTypes();
 
-export const Modal = (params: TabbedModalStorybookParams) => {
+export const TrivialExample = (params: TabbedModalStorybookParams) => {
   return (
     <TabbedModal
       {...params}
-      modalTitle="Try out!"
+      modalTitle="Trivial Example"
       tabs={[
         {
           id: 'hello',
           title: 'Hello',
-          content: ({ state, dispatch }) => {
-            return <h1>Hello World!!</h1>;
+          content: () => {
+            return (
+              <EuiText>
+                <p>Click the button to shout a message into the void</p>
+              </EuiText>
+            );
           },
           initialState: {
-            age: 42,
+            message: 'Hello World!!',
           },
           modalActionBtn: {
-            label: 'fire 🔥',
+            label: 'Say Hi 👋🏾',
             handler: ({ state }) => {
-              alert(JSON.stringify(state));
+              alert(state.message);
             },
           },
         },
-        {
-          id: 'pdf',
-          title: 'PDF',
-          content: ({ state }) => {
-            return <h1>PDF!!!</h1>;
-          },
-          modalActionBtn: {
-            label: 'print 🖨️',
-            handler: () => alert('printing...'),
-          },
-        },
       ]}
-      selectedTabId=""
+      selectedTabId="hello"
+      onClose={() => {}}
     />
   );
 };
 
-Modal.argTypes = argTypes;
+TrivialExample.argTypes = argTypes;
+
+export const NonTrivialExample = (params: TabbedModalStorybookParams) => {
+  enum ACTION_TYPES {
+    SelectOption,
+  }
+
+  const checkboxGroupItemId1 = useGeneratedHtmlId({
+    prefix: 'checkboxGroupItem',
+    suffix: 'first',
+  });
+  const checkboxGroupItemId2 = useGeneratedHtmlId({
+    prefix: 'checkboxGroupItem',
+    suffix: 'second',
+  });
+  const checkboxGroupItemId3 = useGeneratedHtmlId({
+    prefix: 'checkboxGroupItem',
+    suffix: 'third',
+  });
+
+  const checkboxes = [
+    {
+      id: checkboxGroupItemId1,
+      label: 'Margherita',
+      'data-test-sub': 'dts_test',
+    },
+    {
+      id: checkboxGroupItemId2,
+      label: 'Diavola',
+      className: 'classNameTest',
+    },
+    {
+      id: checkboxGroupItemId3,
+      label: 'Hawaiian Pizza',
+      disabled: true,
+    },
+  ];
+
+  const pizzaSelector = {
+    id: 'order',
+    title: 'Pizza of choice',
+    initialState: {
+      checkboxIdToSelectedMap: {
+        [checkboxGroupItemId2]: true,
+      },
+    },
+    reducer(state, action) {
+      switch (String(action.type)) {
+        case String(ACTION_TYPES.SelectOption):
+          return {
+            ...state,
+            checkboxIdToSelectedMap: action.payload,
+          };
+        default:
+          return state;
+      }
+    },
+    content: ({ state, dispatch }) => {
+      const { checkboxIdToSelectedMap } = state;
+
+      const onChange = (optionId) => {
+        const newCheckboxIdToSelectedMap = {
+          ...checkboxIdToSelectedMap,
+          ...{
+            [optionId]: !checkboxIdToSelectedMap[optionId],
+          },
+        };
+
+        dispatch({ type: ACTION_TYPES.SelectOption, payload: newCheckboxIdToSelectedMap });
+      };
+
+      return (
+        <Fragment>
+          <EuiSpacer size="m" />
+          <EuiText>
+            <h3>Select a Pizza (or more)</h3>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiCheckboxGroup
+            options={checkboxes}
+            idToSelectedMap={checkboxIdToSelectedMap}
+            onChange={(id) => onChange(id)}
+          />
+        </Fragment>
+      );
+    },
+    modalActionBtn: {
+      label: 'Order 🍕',
+      handler: ({ state }) => {
+        alert(JSON.stringify(state));
+      },
+    },
+  };
+
+  return (
+    <TabbedModal
+      {...params}
+      onClose={() => {}}
+      modalTitle="Non trivial example"
+      tabs={[pizzaSelector]}
+      selectedTabId="order"
+    />
+  );
+};
+
+NonTrivialExample.argTypes = argTypes;
