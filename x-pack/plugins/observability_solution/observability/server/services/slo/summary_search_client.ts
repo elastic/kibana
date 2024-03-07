@@ -12,7 +12,7 @@ import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
 import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { createEsParams, typedSearch } from '../../utils/queries';
-import { getSloSettings } from './slo_settings';
+import { getListOfSummaryIndices } from './slo_settings';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { SLO, SLOId, Summary, Groupings } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
@@ -23,7 +23,7 @@ import { fromSummaryDocumentToSlo } from './unsafe_federated/helper';
 
 export interface SLOSummary {
   id: SLOId;
-  remoteName: string;
+  remoteName?: string;
   unsafeSlo: SLO | undefined;
   instanceId: string;
   summary: Summary;
@@ -53,28 +53,6 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     private spaceId: string
   ) {}
 
-  getListOfIndices = async () => {
-    const indices: string[] = [SLO_SUMMARY_DESTINATION_INDEX_PATTERN];
-
-    const { useAllRemoteClusters, selectedRemoteClusters } = await getSloSettings(this.soClient);
-    if (!useAllRemoteClusters && selectedRemoteClusters.length === 0) {
-      return indices;
-    }
-    const clustersByName = await this.esClient.cluster.remoteInfo();
-    const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
-    clusterNames.forEach((clusterName) => {
-      const cluster = clustersByName[clusterName];
-      if (
-        cluster.connected &&
-        (useAllRemoteClusters || selectedRemoteClusters.includes(clusterName))
-      ) {
-        indices.push(`${clusterName}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`);
-      }
-    });
-
-    return indices.join(',');
-  };
-
   async search(
     kqlQuery: string,
     filters: string,
@@ -89,7 +67,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
       this.logger.error(`Failed to parse filters: ${e.message}`);
     }
 
-    const indices = await this.getListOfIndices();
+    const indices = await getListOfSummaryIndices(this.soClient, this.esClient);
     const esParams = createEsParams({
       index: indices,
       track_total_hits: true,
@@ -152,10 +130,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
           const remoteName = this.getNameOfRemoteCluster(doc._index);
           let unsafeSlo;
           if (remoteName) {
-            unsafeSlo = fromSummaryDocumentToSlo(summaryDoc);
-            if (unsafeSlo === undefined) {
-              this.logger.error(`Invalid remote stored SLO with id [${doc._source!.slo.id}]`);
-            }
+            unsafeSlo = fromSummaryDocumentToSlo(summaryDoc, this.logger);
           }
 
           return {
@@ -187,7 +162,9 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
   }
 
   getNameOfRemoteCluster = (index: string) => {
-    return index.split(':')?.[0];
+    if (index.includes(':')) {
+      return index.split(':')?.[0];
+    }
   };
 
   async deleteOutdatedSummaries(summarySloIds: string[]) {

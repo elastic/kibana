@@ -9,12 +9,17 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { useLocation } from 'react-router-dom';
 
 export const INSTANCE_SEARCH_PARAM = 'instanceId';
+export const REMOTE_NAME_PARAM = 'remoteName';
 
-export function useGetInstanceIdQueryParam(): string | undefined {
+export function useGetInstanceIdQueryParam() {
   const { search } = useLocation();
   const searchParams = new URLSearchParams(search);
 
   const instanceId = searchParams.get(INSTANCE_SEARCH_PARAM);
+  const remoteName = searchParams.get(REMOTE_NAME_PARAM);
 
-  return !!instanceId && instanceId !== ALL_VALUE ? instanceId : undefined;
+  return {
+    instanceId: !!instanceId && instanceId !== ALL_VALUE ? instanceId : undefined,
+    remoteName,
+  };
 }

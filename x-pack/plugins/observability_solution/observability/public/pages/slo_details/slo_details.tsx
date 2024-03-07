@@ -52,11 +52,12 @@ export function SloDetailsPage() {
   const hasRightLicense = hasAtLeast('platinum');
 
   const { sloId } = useParams<SloDetailsPathParams>();
-  const sloInstanceId = useGetInstanceIdQueryParam();
+  const { instanceId: sloInstanceId, remoteName } = useGetInstanceIdQueryParam();
   const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(getAutoRefreshState());
   const { isLoading, data: slo } = useFetchSloDetails({
     sloId,
+    remoteName,
     instanceId: sloInstanceId,
     shouldRefetch: isAutoRefreshing,
   });
@@ -124,7 +125,8 @@ export function SloDetailsPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <HeaderTitle isLoading={isPerformingAction} slo={slo} />,
+        pageTitle: slo?.name,
+        children: <HeaderTitle isLoading={isPerformingAction} slo={slo} />,
         rightSideItems: [
           <HeaderControl isLoading={isPerformingAction} slo={slo} />,
           <AutoRefreshButton

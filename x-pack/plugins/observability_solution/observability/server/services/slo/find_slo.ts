@@ -61,7 +61,6 @@ function mergeSloWithSummary(sloList: SLO[], sloSummaryList: SLOSummary[]): SLOW
         instanceId: remoteSloSummary.instanceId,
         summary: remoteSloSummary.summary,
         groupings: remoteSloSummary.groupings,
-        isRemote: true,
         remoteName: remoteSloSummary.remoteName,
       })),
   ];

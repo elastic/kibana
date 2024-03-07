@@ -251,7 +251,7 @@ const getSLORoute = createObservabilityServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const summaryClient = new DefaultSummaryClient(esClient);
-    const getSLO = new GetSLO(repository, summaryClient, esClient);
+    const getSLO = new GetSLO(repository, summaryClient, esClient, logger);
 
     return await getSLO.execute(params.path.id, params.query);
   },

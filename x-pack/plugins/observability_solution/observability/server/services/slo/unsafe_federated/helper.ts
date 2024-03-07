@@ -5,22 +5,79 @@
  * 2.0.
  */
 
-import { sloSchema } from '@kbn/slo-schema';
+import { Indicator, sloSchema } from '@kbn/slo-schema';
 import { isLeft } from 'fp-ts/lib/Either';
+import { Logger } from '@kbn/logging';
+import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { SLO } from '../../../domain/models';
 import { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
 
-export function fromSummaryDocumentToSlo(summaryDoc: EsSummaryDocument): SLO | undefined {
+export function fromSummaryDocumentToSlo(
+  summaryDoc: EsSummaryDocument,
+  logger: Logger
+): SLO | undefined {
+  let params: Indicator['params'];
+  switch (summaryDoc.slo.indicator.type) {
+    case 'sli.kql.custom':
+      params = {
+        index: '',
+        good: '',
+        total: '',
+        timestampField: '',
+      };
+      break;
+    case 'sli.apm.transactionDuration':
+      params = {
+        environment: '',
+        service: '',
+        transactionType: '',
+        transactionName: '',
+        threshold: 0,
+        index: '',
+      };
+      break;
+    case 'sli.apm.transactionErrorRate':
+      params = {
+        environment: '',
+        service: '',
+        transactionType: '',
+        transactionName: '',
+        index: '',
+      };
+      break;
+    case 'sli.metric.custom':
+      params = {
+        index: '',
+        good: '',
+        total: '',
+        timestampField: '',
+      };
+      break;
+    case 'sli.metric.timeslice':
+      params = {
+        index: '',
+        metric: {
+          metrics: [],
+          equation: '',
+          threshold: 0,
+          comparator: 'GT',
+        },
+        timestampField: '',
+      };
+      break;
+    case 'sli.histogram.custom':
+      params = {
+        index: '',
+        timestampField: '',
+        good: '',
+        total: '',
+      };
+  }
   const res = sloSchema.decode({
     ...summaryDoc.slo,
     indicator: {
       type: summaryDoc.slo.indicator.type,
-      params: {
-        index: 'irrelevant',
-        good: 'irrelevant',
-        total: 'irrelevant',
-        timestampField: 'irrelevant',
-      },
+      params,
     },
     settings: { syncDelay: '1m', frequency: '1m' },
     enabled: true,
@@ -30,6 +87,10 @@ export function fromSummaryDocumentToSlo(summaryDoc: EsSummaryDocument): SLO | u
   });
 
   if (isLeft(res)) {
+    const errors = formatErrors(res.left);
+    logger.error(`Invalid remote stored SLO with id [${summaryDoc.slo.id}]`);
+
+    logger.error(errors.join('|'));
     return undefined;
   } else {
     return res.right;

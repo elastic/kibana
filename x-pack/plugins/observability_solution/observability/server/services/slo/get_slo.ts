@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE, GetSLOParams, GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { Groupings, SLO, Summary } from '../../domain/models';
@@ -18,17 +18,18 @@ export class GetSLO {
   constructor(
     private repository: SLORepository,
     private summaryClient: SummaryClient,
-    private esClient: ElasticsearchClient
+    private esClient: ElasticsearchClient,
+    private logger: Logger
   ) {}
 
   public async execute(sloId: string, params: GetSLOParams = {}): Promise<GetSLOResponse> {
     const instanceId = params.instanceId ?? ALL_VALUE;
-    // find a way to set this based on the sloId used
-    const unsafeIsRemote = true;
+    const remoteName = params.remoteName;
+
     let slo;
-    if (unsafeIsRemote) {
+    if (remoteName) {
       const summarySearch = await this.esClient.search<EsSummaryDocument>({
-        index: `remote_cluster:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`,
+        index: `${remoteName}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`,
         query: {
           bool: {
             filter: [
@@ -44,16 +45,32 @@ export class GetSLO {
         throw new Error('SLO not found');
       }
 
-      slo = fromSummaryDocumentToSlo(summarySearch.hits.hits[0]._source!);
+      slo = fromSummaryDocumentToSlo(summarySearch.hits.hits[0]._source!, this.logger);
     } else {
       slo = await this.repository.findById(sloId);
     }
-    const { summary, groupings } = await this.summaryClient.computeSummary(slo!, instanceId);
+    if (slo) {
+      const { summary, groupings } = await this.summaryClient.computeSummary({
+        slo,
+        instanceId,
+        remoteName,
+      });
 
-    return getSLOResponseSchema.encode(mergeSloWithSummary(slo, summary, instanceId, groupings));
+      return getSLOResponseSchema.encode(
+        mergeSloWithSummary(slo, summary, instanceId, groupings, remoteName)
+      );
+    } else {
+      throw new Error('SLO not found');
+    }
   }
 }
 
-function mergeSloWithSummary(slo: SLO, summary: Summary, instanceId: string, groupings: Groupings) {
-  return { ...slo, instanceId, summary, groupings };
+function mergeSloWithSummary(
+  slo: SLO,
+  summary: Summary,
+  instanceId: string,
+  groupings: Groupings,
+  remoteName?: string
+) {
+  return { ...slo, instanceId, summary, groupings, remoteName };
 }

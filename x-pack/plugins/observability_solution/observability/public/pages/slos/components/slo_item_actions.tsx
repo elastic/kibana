@@ -134,6 +134,7 @@ export function SloItemActions({
       {...btnProps}
     />
   );
+  const isRemote = Boolean(slo.remoteName);
 
   return (
     <EuiPopover
@@ -159,7 +160,7 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="edit"
             icon="pencil"
-            disabled={!hasWriteCapabilities || slo.isRemote}
+            disabled={!hasWriteCapabilities || isRemote}
             onClick={handleEdit}
             data-test-subj="sloActionsEdit"
           >
@@ -170,7 +171,7 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="createRule"
             icon="bell"
-            disabled={!hasWriteCapabilities || slo.isRemote}
+            disabled={!hasWriteCapabilities || isRemote}
             onClick={handleCreateRule}
             data-test-subj="sloActionsCreateRule"
           >
@@ -181,7 +182,7 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="manageRules"
             icon="gear"
-            disabled={!hasWriteCapabilities || slo.isRemote}
+            disabled={!hasWriteCapabilities || isRemote}
             onClick={handleNavigateToRules}
             data-test-subj="sloActionsManageRules"
           >
@@ -191,7 +192,7 @@ export function SloItemActions({
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="clone"
-            disabled={!hasWriteCapabilities || slo.isRemote}
+            disabled={!hasWriteCapabilities || isRemote}
             icon="copy"
             onClick={handleClone}
             data-test-subj="sloActionsClone"
@@ -203,7 +204,7 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="delete"
             icon="trash"
-            disabled={!hasWriteCapabilities || slo.isRemote}
+            disabled={!hasWriteCapabilities || isRemote}
             onClick={handleDelete}
             data-test-subj="sloActionsDelete"
           >
@@ -215,6 +216,7 @@ export function SloItemActions({
             icon="dashboardApp"
             key="attachToDashboard"
             onClick={handleAttachToDashboard}
+            disabled={!hasWriteCapabilities || isRemote}
             data-test-subj="sloActinsAttachToDashboard"
           >
             {i18n.translate('xpack.observability.slo.item.actions.attachToDashboard', {

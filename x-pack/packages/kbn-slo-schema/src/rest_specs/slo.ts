@@ -146,7 +146,7 @@ const sloResponseSchema = t.intersection([
   }),
   t.partial({
     instanceId: allOrAnyString,
-    isRemote: t.boolean,
+    remoteName: t.string,
   }),
 ]);
 
@@ -164,6 +164,7 @@ const sloGroupWithSummaryResponseSchema = t.type({
 const getSLOQuerySchema = t.partial({
   query: t.partial({
     instanceId: allOrAnyString,
+    remoteName: t.string,
   }),
 });
 const getSLOParamsSchema = t.intersection([

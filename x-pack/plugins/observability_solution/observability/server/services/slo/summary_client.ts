@@ -21,21 +21,23 @@ import { computeSLI, computeSummaryStatus, toErrorBudget } from '../../domain/se
 import { toDateRange } from '../../domain/services/date_range';
 import { getFlattenedGroupings } from './utils';
 
+interface Props {
+  slo: SLO;
+  instanceId?: string;
+  remoteName?: string;
+}
 export interface SummaryClient {
-  computeSummary(
-    slo: SLO,
-    groupings?: string,
-    instanceId?: string
-  ): Promise<{ summary: Summary; groupings: Groupings }>;
+  computeSummary(props: Props): Promise<{ summary: Summary; groupings: Groupings }>;
 }
 
 export class DefaultSummaryClient implements SummaryClient {
   constructor(private esClient: ElasticsearchClient) {}
 
-  async computeSummary(
-    slo: SLO,
-    instanceId: string = ALL_VALUE
-  ): Promise<{ summary: Summary; groupings: Groupings }> {
+  async computeSummary({
+    instanceId,
+    slo,
+    remoteName,
+  }: Props): Promise<{ summary: Summary; groupings: Groupings }> {
     const dateRange = toDateRange(slo.timeWindow);
     const isDefinedWithGroupBy = ![slo.groupBy].flat().includes(ALL_VALUE);
     const hasInstanceId = instanceId !== ALL_VALUE;
@@ -62,7 +64,9 @@ export class DefaultSummaryClient implements SummaryClient {
     };
 
     const result = await this.esClient.search({
-      index: `remote_cluster:${SLO_DESTINATION_INDEX_PATTERN},${SLO_DESTINATION_INDEX_PATTERN}`,
+      index: remoteName
+        ? `${remoteName}:${SLO_DESTINATION_INDEX_PATTERN}`
+        : SLO_DESTINATION_INDEX_PATTERN,
       size: 0,
       query: {
         bool: {

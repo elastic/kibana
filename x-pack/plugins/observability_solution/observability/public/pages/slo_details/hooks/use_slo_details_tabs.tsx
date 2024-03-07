@@ -44,6 +44,7 @@ export const useSloDetailsTabs = ({
         defaultMessage: 'Alerts',
       }),
       'data-test-subj': 'alertsTab',
+      disabled: Boolean(slo?.remoteName),
       isSelected: selectedTabId === ALERTS_TAB_ID,
       append: slo ? (
         <EuiNotificationBadge className="eui-alignCenter" size="m">

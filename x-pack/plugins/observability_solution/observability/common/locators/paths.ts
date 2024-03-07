@@ -45,12 +45,16 @@ export const paths = {
       `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/edit/${encodeURIComponent(
         sloId
       )}?_a=${encodedParams}`,
-    sloDetails: (sloId: string, instanceId?: string) =>
+    sloDetails: (sloId: string, instanceId?: string, remoteName?: string) =>
       !!instanceId
         ? `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/${encodeURIComponent(
             sloId
-          )}?instanceId=${encodeURIComponent(instanceId)}`
-        : `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/${encodeURIComponent(sloId)}`,
+          )}?instanceId=${encodeURIComponent(instanceId)}${
+            remoteName ? `&remoteName=${remoteName}` : ''
+          }`
+        : `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/${encodeURIComponent(sloId)}${
+            remoteName ? `?remoteName=${remoteName}` : ''
+          }`,
   },
 };
 

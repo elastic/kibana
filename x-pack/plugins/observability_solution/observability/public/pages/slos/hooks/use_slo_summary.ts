@@ -48,7 +48,8 @@ export const getSloFormattedSummary = (
   const sloDetailsUrl = basePath.prepend(
     paths.observability.sloDetails(
       slo.id,
-      ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
+      ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined,
+      slo.remoteName
     )
   );
 
