@@ -55,7 +55,7 @@ export const createDashboardSavedObjectType = ({
           addedMappings: {
             controlGroupInput: {
               properties: {
-                showApplySelections: { type: 'boolean', index: false },
+                showApplySelections: { type: 'boolean', index: false, doc_values: false },
               },
             },
           },
