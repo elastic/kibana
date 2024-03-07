@@ -23,6 +23,7 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks }) => {
   const { data, maps, embeddable, discover, share, security, fileUpload, cloud, fieldFormats } =
     getPluginsStart();
   const services = {
+    ...coreStart,
     data,
     maps,
     embeddable,
@@ -31,7 +32,6 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks }) => {
     security,
     fileUpload,
     fieldFormats,
-    ...coreStart,
   };
 
   const EmptyContext: FC = ({ children }) => <>{children}</>;
