@@ -54,17 +54,19 @@ import { NativeConnectorConfiguration } from './native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
-  const { connector, fetchConnectorApiStatus } = useValues(ConnectorViewLogic);
   const { fetchConnector } = useActions(ConnectorViewLogic);
+  const { index, isLoading, connector } = useValues(ConnectorViewLogic);
   const cloudContext = useCloudDetails();
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
   const { http } = useValues(HttpLogic);
+  const { fetchConnector } = useActions(ConnectorViewLogic);
 
   if (!connector) {
     return <></>;
   }
+  const indexName = connector.index_name ?? '';
 
   // TODO make it work without index if possible
   if (connector.is_native && connector.service_type) {
@@ -227,10 +229,11 @@ export const ConnectorConfiguration: React.FC = () => {
                           )}
                           <EuiSpacer size="s" />
                           <EuiButton
+                            disabled={!index}
                             data-telemetry-id="entSearchContent-connector-configuration-recheckNow"
                             iconType="refresh"
                             onClick={() => fetchConnector({ connectorId: connector.id })}
-                            isLoading={fetchConnectorApiStatus === Status.LOADING}
+                            isLoading={isLoading}
                           >
                             {i18n.translate(
                               'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.waitingForConnector.button.label',
