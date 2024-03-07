@@ -96,11 +96,11 @@ const parseIsNativeParam = (queryString: string | string[] | null): boolean | un
   return undefined;
 };
 
-const getBreadcrumb = (method: string, service_type: string): string[] => {
+const getBreadcrumb = (method: string, serviceType: string): string[] => {
   switch (method) {
     case INGESTION_METHOD_IDS.CONNECTOR:
       const connector =
-        Boolean(service_type) && CONNECTORS.find((item) => item.serviceType === service_type);
+        Boolean(serviceType) && CONNECTORS.find((item) => item.serviceType === serviceType);
 
       const thisConnectorBreadcrumb = connector
         ? i18n.translate(
