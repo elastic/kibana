@@ -10,7 +10,6 @@ import React from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { CONNECTORS_PATH, NEW_INDEX_SELECT_CONNECTOR_PATH, NEW_CONNECTOR_PATH} from '../../routes';
-import { SelectConnector } from './select_connector/select_connector';
 import { NewSearchIndexPage } from '../new_index/new_search_index_page';
 
 import { Connectors } from './connectors';

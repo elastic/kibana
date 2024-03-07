@@ -101,14 +101,16 @@ const getBreadcrumb = (method: string, service_type: string): string[] => {
     case INGESTION_METHOD_IDS.CONNECTOR:
       const connector = Boolean(service_type) && CONNECTORS.find((item) => item.serviceType === service_type);
 
-      const this_connector_breadcrumb = connector ? 
-      i18n.translate('xpack.enterpriseSearch.content.new_connector_with_service_type.breadcrumbs', {
-        defaultMessage: `New ${ connector.name } connector`,
-      })
-      : 
-      i18n.translate('xpack.enterpriseSearch.content.new_connector.breadcrumbs', {
-        defaultMessage: `New connector`,
-      })
+      const this_connector_breadcrumb = connector
+        ? i18n.translate('xpack.enterpriseSearch.content.new_connector_with_service_type.breadcrumbs', {
+            defaultMessage: `New {name} connector`,
+            values: {
+              name: connector.name,
+            },
+          })
+        : i18n.translate('xpack.enterpriseSearch.content.new_connector.breadcrumbs', {
+            defaultMessage: `New connector`,
+          })
 
       return [...connectorsBreadcrumbs, this_connector_breadcrumb];
     case INGESTION_METHOD_IDS.CRAWLER:
