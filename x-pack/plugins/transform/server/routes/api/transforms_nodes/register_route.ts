@@ -7,7 +7,7 @@
 
 import { addInternalBasePath } from '../../../../common/constants';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 import { routeHandlerFactory } from './route_handler_factory';
 

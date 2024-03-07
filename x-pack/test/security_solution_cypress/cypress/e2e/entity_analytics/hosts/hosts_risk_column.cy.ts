@@ -16,7 +16,6 @@ import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
   describe('with legacy risk score', () => {
     before(() => {
-      // illegal_argument_exception: unknown setting [index.lifecycle.name]
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
     });
 
@@ -39,7 +38,6 @@ describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('with new risk score', () => {
     before(() => {
-      // illegal_argument_exception: unknown setting [index.lifecycle.name]
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
     });
 

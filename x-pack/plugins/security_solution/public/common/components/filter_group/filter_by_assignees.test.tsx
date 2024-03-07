@@ -53,7 +53,7 @@ const renderFilterByAssigneesPopover = (
   render(
     <TestProviders>
       <FilterByAssigneesPopover
-        assignedUserIds={alertAssignees}
+        selectedUserIds={alertAssignees}
         onSelectionChange={onUsersChange}
       />
     </TestProviders>

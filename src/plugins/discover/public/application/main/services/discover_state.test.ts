@@ -439,6 +439,7 @@ describe('Test discover state actions', () => {
         "columns": Array [
           "default_column",
         ],
+        "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
         "refreshInterval": undefined,

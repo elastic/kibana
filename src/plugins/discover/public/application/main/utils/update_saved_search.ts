@@ -62,6 +62,7 @@ export function updateSavedSearch({
     }
     savedSearch.hideChart = state.hideChart;
     savedSearch.rowHeight = state.rowHeight;
+    savedSearch.headerRowHeight = state.headerRowHeight;
     savedSearch.rowsPerPage = state.rowsPerPage;
     savedSearch.sampleSize = state.sampleSize;
 

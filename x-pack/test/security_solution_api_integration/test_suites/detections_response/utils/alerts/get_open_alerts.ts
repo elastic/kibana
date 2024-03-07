@@ -14,9 +14,8 @@ import {
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
-import { waitForRuleStatus } from '../rules';
 import { refreshIndex } from '..';
-import { getAlertsByIds } from './get_alerts_by_ids';
+import { getAlertsByIds, waitForRuleStatus } from '../../../../../common/utils/security_solution';
 
 export const getOpenAlerts = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,

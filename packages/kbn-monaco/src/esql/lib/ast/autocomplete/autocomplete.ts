@@ -33,6 +33,8 @@ import {
   isSourceItem,
   isTimeIntervalItem,
   monacoPositionToOffset,
+  getAllFunctions,
+  isSingleItem,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type {
@@ -69,7 +71,7 @@ import {
   buildOptionDefinition,
   buildSettingDefinitions,
 } from './factories';
-import { EDITOR_MARKER } from '../shared/constants';
+import { EDITOR_MARKER, SINGLE_BACKTICK } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
 import {
   buildQueryUntilPreviousCommand,
@@ -78,6 +80,7 @@ import {
   getSourcesHelper,
 } from '../shared/resources_helpers';
 import { ESQLCallbacks } from '../shared/types';
+import { getFunctionsToIgnoreForStats, isAggFunctionUsedAlready } from './helper';
 
 type GetSourceFn = () => Promise<AutocompleteCommandDefinition[]>;
 type GetFieldsByTypeFn = (
@@ -170,7 +173,8 @@ export async function suggest(
       unclosedRoundBrackets === 0 &&
       getLastCharFromTrimmed(innerText) !== '_') ||
     (context.triggerCharacter === ' ' &&
-      (isMathFunction(innerText, offset) || isComma(innerText[offset - 2])))
+      (isMathFunction(innerText, offset) ||
+        isComma(innerText.trimEnd()[innerText.trimEnd().length - 1])))
   ) {
     finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
   }
@@ -559,7 +563,7 @@ async function getExpressionSuggestionsByType(
 
   // collect all fields + variables to suggest
   const fieldsMap: Map<string, ESQLRealField> = await (argDef ? getFieldsMap() : new Map());
-  const anyVariables = collectVariables(commands, fieldsMap);
+  const anyVariables = collectVariables(commands, fieldsMap, innerText);
 
   // enrich with assignment has some special rules who are handled somewhere else
   const canHaveAssignments = ['eval', 'stats', 'row'].includes(command.name);
@@ -865,14 +869,17 @@ async function getExpressionSuggestionsByType(
     }
 
     if (!optionsAvailable.length || optionsAvailable.every(({ optional }) => optional)) {
+      const shouldPushItDown = command.name === 'eval' && !command.args.some(isFunctionItem);
       // now suggest pipe or comma
-      suggestions.push(
-        ...getFinalSuggestions({
-          comma:
-            commandDef.signature.multipleParams &&
-            optionsAvailable.length === commandDef.options.length,
-        })
-      );
+      const finalSuggestions = getFinalSuggestions({
+        comma:
+          commandDef.signature.multipleParams &&
+          optionsAvailable.length === commandDef.options.length,
+      }).map(({ sortText, ...rest }) => ({
+        ...rest,
+        sortText: shouldPushItDown ? `Z${sortText}` : sortText,
+      }));
+      suggestions.push(...finalSuggestions);
     }
   }
   // Due to some logic overlapping functions can be repeated
@@ -964,6 +971,16 @@ async function getBuiltinFunctionNextArgument(
   return suggestions;
 }
 
+function pushItUpInTheList(suggestions: AutocompleteCommandDefinition[], shouldPromote: boolean) {
+  if (!shouldPromote) {
+    return suggestions;
+  }
+  return suggestions.map(({ sortText, ...rest }) => ({
+    ...rest,
+    sortText: `1${sortText}`,
+  }));
+}
+
 async function getFieldsOrFunctionsSuggestions(
   types: string[],
   commandName: string,
@@ -986,9 +1003,10 @@ async function getFieldsOrFunctionsSuggestions(
     ignoreFields?: string[];
   } = {}
 ): Promise<AutocompleteCommandDefinition[]> {
-  const filteredFieldsByType = (await (fields
-    ? getFieldsByType(types, ignoreFields)
-    : [])) as AutocompleteCommandDefinition[];
+  const filteredFieldsByType = pushItUpInTheList(
+    (await (fields ? getFieldsByType(types, ignoreFields) : [])) as AutocompleteCommandDefinition[],
+    functions
+  );
 
   const filteredVariablesByType: string[] = [];
   if (variables) {
@@ -999,13 +1017,20 @@ async function getFieldsOrFunctionsSuggestions(
     }
     // due to a bug on the ES|QL table side, filter out fields list with underscored variable names (??)
     // avg( numberField ) => avg_numberField_
+    const ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
     if (
       filteredVariablesByType.length &&
-      filteredVariablesByType.some((v) => /[^a-zA-Z\d]/.test(v))
+      filteredVariablesByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
     ) {
       for (const variable of filteredVariablesByType) {
-        const underscoredName = variable.replace(/[^a-zA-Z\d]/g, '_');
-        const index = filteredFieldsByType.findIndex(({ label }) => underscoredName === label);
+        // remove backticks if present
+        const sanitizedVariable = variable.startsWith(SINGLE_BACKTICK)
+          ? variable.slice(1, variable.length - 1)
+          : variable;
+        const underscoredName = sanitizedVariable.replace(ALPHANUMERIC_REGEXP, '_');
+        const index = filteredFieldsByType.findIndex(
+          ({ label }) => underscoredName === label || `_${underscoredName}_` === label
+        );
         if (index >= 0) {
           filteredFieldsByType.splice(index);
         }
@@ -1015,16 +1040,13 @@ async function getFieldsOrFunctionsSuggestions(
 
   const suggestions = filteredFieldsByType.concat(
     functions ? getCompatibleFunctionDefinition(commandName, optionName, types, ignoreFn) : [],
-    variables ? buildVariablesDefinitions(filteredVariablesByType) : [],
-    getCompatibleLiterals(commandName, types) // literals are handled internally
+    variables
+      ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
+      : [],
+    getCompatibleLiterals(commandName, types)
   );
 
-  // rewrite the sortText here to have literals first, then fields, last functions
-  return suggestions.map(({ sortText, kind, ...rest }) => ({
-    ...rest,
-    kind,
-    sortText: String.fromCharCode(97 - kind),
-  }));
+  return suggestions;
 }
 
 async function getFunctionArgsSuggestions(
@@ -1052,7 +1074,8 @@ async function getFunctionArgsSuggestions(
   const variablesExcludingCurrentCommandOnes = excludeVariablesFromCurrentCommand(
     commands,
     command,
-    fieldsMap
+    fieldsMap,
+    innerText
   );
   // pick the type of the next arg
   const shouldGetNextArgument = node.text.includes(EDITOR_MARKER);
@@ -1064,25 +1087,57 @@ async function getFunctionArgsSuggestions(
     if (signature.params.length > argIndex) {
       return signature.params[argIndex].type;
     }
-    if (signature.infiniteParams) {
-      return signature.params[0].type;
+    if (signature.infiniteParams || signature.minParams) {
+      return signature.params[signature.params.length - 1].type;
     }
     return [];
   });
 
   const arg = node.args[argIndex];
 
+  // the first signature is used as reference
+  const refSignature = fnDefinition.signatures[0];
+
   const hasMoreMandatoryArgs =
-    fnDefinition.signatures[0].params.filter(({ optional }, index) => !optional && index > argIndex)
-      .length > argIndex;
+    refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
+      argIndex ||
+    ('minParams' in refSignature && refSignature.minParams
+      ? refSignature.minParams - 1 > argIndex
+      : false);
 
   const suggestions = [];
   const noArgDefined = !arg;
   const isUnknownColumn =
     arg &&
     isColumnItem(arg) &&
-    !columnExists(arg, { fields: fieldsMap, variables: variablesExcludingCurrentCommandOnes }).hit;
+    !columnExists(arg, {
+      fields: fieldsMap,
+      variables: variablesExcludingCurrentCommandOnes,
+    }).hit;
   if (noArgDefined || isUnknownColumn) {
+    const commandArgIndex = command.args.findIndex(
+      (cmdArg) => isSingleItem(cmdArg) && cmdArg.location.max >= node.location.max
+    );
+    const finalCommandArgIndex =
+      command.name !== 'stats'
+        ? -1
+        : commandArgIndex < 0
+        ? Math.max(command.args.length - 1, 0)
+        : commandArgIndex;
+
+    const fnToIgnore = [];
+    // just ignore the current function
+    if (command.name !== 'stats') {
+      fnToIgnore.push(node.name);
+    } else {
+      fnToIgnore.push(
+        ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
+        ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
+          ? getAllFunctions({ type: 'agg' }).map(({ name }) => name)
+          : [])
+      );
+    }
+
     // ... | EVAL fn( <suggest>)
     // ... | EVAL fn( field, <suggest>)
     suggestions.push(
@@ -1092,13 +1147,15 @@ async function getFunctionArgsSuggestions(
         option?.name,
         getFieldsByType,
         {
-          functions: command.name !== 'stats',
+          functions: true,
           fields: true,
           variables: variablesExcludingCurrentCommandOnes,
         },
         // do not repropose the same function as arg
         // i.e. avoid cases like abs(abs(abs(...))) with suggestions
-        { ignoreFn: [node.name] }
+        {
+          ignoreFn: fnToIgnore,
+        }
       ))
     );
   }
@@ -1167,7 +1224,7 @@ async function getListArgsSuggestions(
   // so extract the type of the first argument and suggest fields of that type
   if (node && isFunctionItem(node)) {
     const fieldsMap: Map<string, ESQLRealField> = await getFieldsMaps();
-    const anyVariables = collectVariables(commands, fieldsMap);
+    const anyVariables = collectVariables(commands, fieldsMap, innerText);
     // extract the current node from the variables inferred
     anyVariables.forEach((values, key) => {
       if (values.some((v) => v.location === node.location)) {
@@ -1255,7 +1312,7 @@ async function getOptionArgsSuggestions(
   const isNewExpression = isRestartingExpression(innerText) || option.args.length === 0;
 
   const fieldsMap = await getFieldsMaps();
-  const anyVariables = collectVariables(commands, fieldsMap);
+  const anyVariables = collectVariables(commands, fieldsMap, innerText);
 
   const references = {
     fields: fieldsMap,
@@ -1293,7 +1350,8 @@ async function getOptionArgsSuggestions(
         const policyMetadata = await getPolicyMetadata(policyName);
         const anyEnhancedVariables = collectVariables(
           commands,
-          appendEnrichFields(fieldsMap, policyMetadata)
+          appendEnrichFields(fieldsMap, policyMetadata),
+          innerText
         );
 
         if (isNewExpression) {
@@ -1320,7 +1378,10 @@ async function getOptionArgsSuggestions(
           // ... | ENRICH ... WITH a
           // effectively only assign will apper
           suggestions.push(
-            ...getBuiltinCompatibleFunctionDefinition(command.name, undefined, 'any')
+            ...pushItUpInTheList(
+              getBuiltinCompatibleFunctionDefinition(command.name, undefined, 'any'),
+              true
+            )
           );
         }
 

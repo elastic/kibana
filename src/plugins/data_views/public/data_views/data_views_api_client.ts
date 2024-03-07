@@ -95,6 +95,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       fields,
       forceRefresh,
       allowHidden,
+      includeEmptyFields,
     } = options;
     const path = indexFilter ? FIELDS_FOR_WILDCARD_PATH : FIELDS_PATH;
     const versionQueryParam = indexFilter ? {} : { apiVersion: version };
@@ -111,6 +112,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         fields,
         // default to undefined to keep value out of URL params and improve caching
         allow_hidden: allowHidden || undefined,
+        include_empty_fields: includeEmptyFields,
         ...versionQueryParam,
       },
       indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined,

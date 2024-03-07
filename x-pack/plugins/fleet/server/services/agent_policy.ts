@@ -112,9 +112,10 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     action: 'created' | 'updated' | 'deleted',
-    agentPolicyId: string
+    agentPolicyId: string,
+    options?: { skipDeploy?: boolean }
   ) => {
-    return agentPolicyUpdateEventHandler(soClient, esClient, action, agentPolicyId);
+    return agentPolicyUpdateEventHandler(soClient, esClient, action, agentPolicyId, options);
   };
 
   private async _update(
@@ -286,6 +287,7 @@ class AgentPolicyService {
       id?: string;
       user?: AuthenticatedUser;
       authorizationHeader?: HTTPAuthorizationHeader | null;
+      skipDeploy?: boolean;
     } = {}
   ): Promise<AgentPolicy> {
     // Ensure an ID is provided, so we can include it in the audit logs below
@@ -330,7 +332,9 @@ class AgentPolicyService {
     );
 
     await appContextService.getUninstallTokenService()?.generateTokenForPolicyId(newSo.id);
-    await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id);
+    await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id, {
+      skipDeploy: options.skipDeploy,
+    });
     logger.debug(`Created new agent policy with id ${newSo.id}`);
     return { id: newSo.id, ...newSo.attributes };
   }
@@ -603,6 +607,7 @@ class AgentPolicyService {
         packagesToInstall,
         spaceId: options?.spaceId || DEFAULT_SPACE_ID,
         authorizationHeader: options?.authorizationHeader,
+        force: options?.force,
       });
     }
 
@@ -1033,7 +1038,7 @@ class AgentPolicyService {
 
     const bulkResponse = await esClient.bulk({
       index: AGENT_POLICY_INDEX,
-      body: fleetServerPoliciesBulkBody,
+      operations: fleetServerPoliciesBulkBody,
       refresh: 'wait_for',
     });
 

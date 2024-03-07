@@ -15,7 +15,7 @@ import type {
   CspSettings,
 } from '../../../../common/types/rules/v4';
 import {
-  convertRuleTagsToKQL,
+  convertRuleTagsToMatchAllKQL,
   generateBenchmarkRuleTags,
 } from '../../../../common/utils/detection_rules';
 
@@ -42,8 +42,9 @@ const disableDetectionRules = async (
 ): Promise<string[]> => {
   const detectionRulesIdsToDisable = await getDetectionRuleIdsToDisable(detectionRules);
   if (!detectionRulesIdsToDisable.length) return [];
-  await detectionRulesClient.bulkDisableRules({ ids: detectionRulesIdsToDisable });
-  return detectionRulesIdsToDisable;
+  const uniqueDetectionRulesIdsToDisable = [...new Set(detectionRulesIdsToDisable)]; // Prevent muting the same rule twice.
+  await detectionRulesClient.bulkDisableRules({ ids: uniqueDetectionRulesIdsToDisable });
+  return uniqueDetectionRulesIdsToDisable;
 };
 
 export const getDetectionRules = async (
@@ -55,7 +56,7 @@ export const getDetectionRules = async (
       return detectionRulesClient.find({
         excludeFromPublicApi: false,
         options: {
-          filter: convertRuleTagsToKQL(ruleTags),
+          filter: convertRuleTagsToMatchAllKQL(ruleTags),
           searchFields: ['tags'],
           page: 1,
           per_page: 1,

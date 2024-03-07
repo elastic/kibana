@@ -19,6 +19,26 @@ export const BETA = i18n.translate('xpack.securitySolution.pages.common.beta', {
   defaultMessage: 'Beta',
 });
 
+export const BETA_TOOLTIP = i18n.translate('xpack.securitySolution.pages.common.beta.tooltip', {
+  defaultMessage:
+    'This functionality is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+});
+
+export const TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.pages.common.technicalPreviewLabel',
+  {
+    defaultMessage: 'Technical Preview',
+  }
+);
+
+export const TECHNICAL_PREVIEW_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.pages.common.technicalPreviewTooltip',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);
+
 export const UPDATE_ALERT_STATUS_FAILED = (conflicts: number) =>
   i18n.translate('xpack.securitySolution.pages.common.updateAlertStatusFailed', {
     values: { conflicts },

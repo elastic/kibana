@@ -151,7 +151,7 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
     public async clickSaveButton() {
       log.debug('clickSaveButton');
       await retry.try(async () => {
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
         await testSubjects.click('saveCustomizePanelButton');
         await testSubjects.waitForDeleted('saveCustomizePanelButton');
       });

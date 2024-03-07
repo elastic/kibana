@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo, useEffect, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
 import { firstValueFrom } from 'rxjs';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   EuiAccordion,
   EuiCode,

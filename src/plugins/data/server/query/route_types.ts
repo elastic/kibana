@@ -120,7 +120,7 @@ type SavedQueryTimeFilterRestResponse = TimeRangeRestResponse & {
 export interface SavedQueryRestResponse {
   id: string;
   attributes: {
-    filters: FilterRestResponse[];
+    filters?: FilterRestResponse[];
     title: string;
     description: string;
     query: QueryRestResponse;
