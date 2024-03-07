@@ -104,11 +104,9 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
   events: ({ actions }) => ({
     beforeMount: () => {
       actions.fetchConnectorApiReset();
-      actions.fetchIndexApiReset();
     },
     beforeUnmount: () => {
       actions.fetchConnectorApiReset();
-      actions.fetchIndexApiReset();
       actions.stopConnectorPoll();
     },
   }),
