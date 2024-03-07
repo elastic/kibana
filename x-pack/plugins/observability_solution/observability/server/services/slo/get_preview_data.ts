@@ -494,7 +494,7 @@ export class GetPreviewData {
         bool: {
           filter: [
             { range: { '@timestamp': { gte: options.range.start, lte: options.range.end } } },
-            { exists: { field: 'summary.final_attempt' } },
+            { term: { 'summary.final_attempt': true } },
             { term: { 'meta.space_id': this.spaceId } },
             ...filter,
           ],
