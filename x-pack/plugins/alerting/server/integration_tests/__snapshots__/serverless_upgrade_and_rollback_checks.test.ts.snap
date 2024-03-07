@@ -754,12 +754,6 @@ Object {
           },
           "name": "custom",
         },
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
       ],
       "type": "string",
     },
@@ -898,12 +892,6 @@ Object {
           },
           "name": "custom",
         },
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
       ],
       "type": "string",
     },
@@ -912,12 +900,6 @@ Object {
         "error": [Function],
       },
       "rules": Array [
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
         Object {
           "args": Object {
             "method": [Function],
@@ -950,12 +932,6 @@ Object {
           },
           "name": "custom",
         },
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
       ],
       "type": "string",
     },
@@ -964,12 +940,6 @@ Object {
         "error": [Function],
       },
       "rules": Array [
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
         Object {
           "args": Object {
             "method": [Function],
@@ -1002,12 +972,6 @@ Object {
           },
           "name": "custom",
         },
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
       ],
       "type": "string",
     },
@@ -1016,12 +980,6 @@ Object {
         "error": [Function],
       },
       "rules": Array [
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
         Object {
           "args": Object {
             "method": [Function],
@@ -1084,12 +1042,6 @@ Object {
           },
           "name": "custom",
         },
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
       ],
       "type": "string",
     },
@@ -1100,12 +1052,6 @@ Object {
         "presence": "optional",
       },
       "rules": Array [
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
         Object {
           "args": Object {
             "method": [Function],
@@ -1140,12 +1086,6 @@ Object {
           },
           "name": "custom",
         },
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
       ],
       "type": "string",
     },
@@ -1156,12 +1096,6 @@ Object {
         "presence": "optional",
       },
       "rules": Array [
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
         Object {
           "args": Object {
             "method": [Function],
@@ -1188,12 +1122,6 @@ Object {
               "error": [Function],
             },
             "rules": Array [
-              Object {
-                "args": Object {
-                  "method": [Function],
-                },
-                "name": "custom",
-              },
               Object {
                 "args": Object {
                   "method": [Function],
@@ -1234,12 +1162,6 @@ Object {
                     },
                     "name": "custom",
                   },
-                  Object {
-                    "args": Object {
-                      "method": [Function],
-                    },
-                    "name": "custom",
-                  },
                 ],
                 "type": "string",
               },
@@ -1265,12 +1187,6 @@ Object {
         "presence": "optional",
       },
       "rules": Array [
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
         Object {
           "args": Object {
             "method": [Function],
@@ -1436,12 +1352,6 @@ Object {
           },
           "name": "custom",
         },
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
       ],
       "type": "string",
     },
@@ -1464,12 +1374,6 @@ Object {
         "error": [Function],
       },
       "rules": Array [
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
         Object {
           "args": Object {
             "method": [Function],
@@ -3527,6 +3431,12 @@ Object {
                                     },
                                     "name": "custom",
                                   },
+                                  Object {
+                                    "args": Object {
+                                      "method": [Function],
+                                    },
+                                    "name": "custom",
+                                  },
                                 ],
                                 "type": "string",
                               },
@@ -3662,6 +3572,12 @@ Object {
                                             "presence": "optional",
                                           },
                                           "rules": Array [
+                                            Object {
+                                              "args": Object {
+                                                "method": [Function],
+                                              },
+                                              "name": "custom",
+                                            },
                                             Object {
                                               "args": Object {
                                                 "method": [Function],
@@ -3921,6 +3837,12 @@ Object {
                                                         "presence": "optional",
                                                       },
                                                       "rules": Array [
+                                                        Object {
+                                                          "args": Object {
+                                                            "method": [Function],
+                                                          },
+                                                          "name": "custom",
+                                                        },
                                                         Object {
                                                           "args": Object {
                                                             "method": [Function],
@@ -4421,6 +4343,12 @@ Object {
                                           },
                                           "name": "custom",
                                         },
+                                        Object {
+                                          "args": Object {
+                                            "method": [Function],
+                                          },
+                                          "name": "custom",
+                                        },
                                       ],
                                       "type": "string",
                                     },
@@ -4674,6 +4602,12 @@ Object {
                                                     "presence": "optional",
                                                   },
                                                   "rules": Array [
+                                                    Object {
+                                                      "args": Object {
+                                                        "method": [Function],
+                                                      },
+                                                      "name": "custom",
+                                                    },
                                                     Object {
                                                       "args": Object {
                                                         "method": [Function],
