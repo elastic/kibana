@@ -67,16 +67,23 @@ export function LayerConfiguration({
   return (
     <div
       css={css`
-        padding: ${hasPadding ? euiTheme.size.s : 0};
+        padding-left: ${euiTheme.size.base};
+        padding-right: ${euiTheme.size.base};
       `}
     >
-      <EuiSpacer size="xs" />
-      <VisualizationToolbar
-        activeVisualization={activeVisualization}
-        framePublicAPI={framePublicAPI}
-      />
-      <EuiSpacer size="m" />
-      <ConfigPanelWrapper {...layerPanelsProps} />
+      <div
+        css={css`
+          padding: ${hasPadding ? euiTheme.size.s : 0};
+        `}
+      >
+        <EuiSpacer size="xs" />
+        <VisualizationToolbar
+          activeVisualization={activeVisualization}
+          framePublicAPI={framePublicAPI}
+        />
+        <EuiSpacer size="m" />
+        <ConfigPanelWrapper {...layerPanelsProps} />
+      </div>
     </div>
   );
 }
