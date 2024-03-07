@@ -22,6 +22,8 @@ import { i18n } from '@kbn/i18n';
 
 import { Connector, ConnectorStatus } from '@kbn/search-connectors';
 
+import { ElasticsearchIndex } from '../../../../../common/types/indices';
+
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { EuiButtonEmptyTo, EuiButtonTo } from '../../../shared/react_router_helpers';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
@@ -33,7 +35,6 @@ import {
 import { CONNECTORS } from '../search_index/connector/constants';
 
 import { ConnectorDetailTabId } from './connector_detail';
-import { ElasticsearchIndex } from '@kbn/enterprise-search-plugin/common/types/indices';
 
 export interface ConnectorStatsProps {
   connector: Connector;

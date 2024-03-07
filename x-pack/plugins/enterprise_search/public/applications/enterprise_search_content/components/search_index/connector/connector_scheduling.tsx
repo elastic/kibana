@@ -31,12 +31,11 @@ import { LicensingLogic } from '../../../../shared/licensing';
 import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { UnsavedChangesPrompt } from '../../../../shared/unsaved_changes_prompt';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
-import { IngestionStatus } from '../../../types';
-import { IndexViewLogic } from '../index_view_logic';
-import { ConnectorContentScheduling } from './connector_scheduling/full_content';
-import { ConnectorSchedulingLogic } from './connector_scheduling_logic';
 import { ConnectorDetailTabId } from '../../connector_detail/connector_detail';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
+
+import { ConnectorContentScheduling } from './connector_scheduling/full_content';
+import { ConnectorSchedulingLogic } from './connector_scheduling_logic';
 
 interface SchedulePanelProps {
   description: string;
@@ -65,9 +64,8 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({ title, description
 
 export const ConnectorSchedulingComponent: React.FC = () => {
   const { productFeatures } = useValues(KibanaLogic);
-  const { ingestionStatus, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
-    useValues(IndexViewLogic);
-  const { connector } = useValues(ConnectorViewLogic);
+  const { connector, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
+    useValues(ConnectorViewLogic);
   const { hasChanges } = useValues(ConnectorSchedulingLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
@@ -139,7 +137,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
       />
 
       <EuiSpacer size="l" />
-      {ingestionStatus === IngestionStatus.ERROR ? (
+      {connector.status === ConnectorStatus.ERROR ? (
         <>
           <EuiCallOut
             color="warning"
