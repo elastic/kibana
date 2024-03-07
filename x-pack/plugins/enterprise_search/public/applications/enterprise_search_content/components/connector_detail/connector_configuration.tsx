@@ -61,12 +61,10 @@ export const ConnectorConfiguration: React.FC = () => {
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
   const { http } = useValues(HttpLogic);
-  const { fetchConnector } = useActions(ConnectorViewLogic);
 
   if (!connector) {
     return <></>;
   }
-  const indexName = connector.index_name ?? '';
 
   // TODO make it work without index if possible
   if (connector.is_native && connector.service_type) {

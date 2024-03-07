@@ -20,8 +20,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorStatus } from '@kbn/search-connectors';
-
 import { Meta } from '../../../../../common/types/pagination';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -130,16 +128,19 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
         ]
       : []),
     {
-      field: 'status',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorTable.columns.status',
         {
           defaultMessage: 'Ingestion status',
         }
       ),
-      render: (connectorStatus: ConnectorStatus) => {
-        const label = connectorStatusToText(connectorStatus);
-        return <EuiBadge color={connectorStatusToColor(connectorStatus)}>{label}</EuiBadge>;
+      render: (connector: ConnectorViewItem) => {
+        const label = connectorStatusToText(connector.status, !!connector.index_name);
+        return (
+          <EuiBadge color={connectorStatusToColor(connector.status, !!connector.index_name)}>
+            {label}
+          </EuiBadge>
+        );
       },
       truncateText: true,
       width: '15%',
