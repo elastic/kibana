@@ -11,7 +11,7 @@ import * as api from './api';
 import { waitFor } from '@testing-library/react';
 import { useToasts } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import { mockedTestProvidersOwner, createAppMockRenderer } from '../../common/mock';
 
 jest.mock('./api');
 jest.mock('../../common/lib/kibana');
@@ -33,7 +33,6 @@ describe('Use get case configuration hook', () => {
     await waitForNextUpdate();
 
     expect(spy).toHaveBeenCalledWith({
-      owner: ['securitySolution'],
       signal: expect.any(AbortSignal),
     });
   });
@@ -51,7 +50,6 @@ describe('Use get case configuration hook', () => {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({
-        owner: ['securitySolution'],
         signal: expect.any(AbortSignal),
       });
 
@@ -76,13 +74,14 @@ describe('Use get case configuration hook', () => {
       id: '',
       mappings: [],
       version: '',
+      owner: '',
     });
   });
 
   it('sets the initial data correctly', async () => {
     const spy = jest.spyOn(api, 'getCaseConfigure');
     // @ts-expect-error: no need to define all properties
-    spy.mockResolvedValue({ id: 'my-new-configuration' });
+    spy.mockResolvedValue([{ id: 'my-new-configuration' }]);
 
     const { result, waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
       wrapper: appMockRender.AppWrapper,
@@ -102,6 +101,7 @@ describe('Use get case configuration hook', () => {
       id: '',
       mappings: [],
       version: '',
+      owner: '',
     });
 
     /**
@@ -109,5 +109,33 @@ describe('Use get case configuration hook', () => {
      */
     // @ts-expect-error: data are defined
     expect(result.all[1].data).toEqual({ id: 'my-new-configuration' });
+  });
+
+  it('returns the configurations matching the owner', async () => {
+    const spy = jest.spyOn(api, 'getCaseConfigure');
+    const targetConfiguration = {
+      id: 'my-new-configuration-3',
+      owner: mockedTestProvidersOwner[0], // used in the AppMockRenderer
+    };
+    spy.mockResolvedValue([
+      // @ts-expect-error: no need to define all properties
+      { id: 'my-new-configuration-1', owner: 'foo' },
+      // @ts-expect-error: no need to define all properties
+      { id: 'my-new-configuration-2', owner: 'bar' },
+      // @ts-expect-error: no need to define all properties
+      targetConfiguration,
+    ]);
+
+    const { result, waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    await waitForNextUpdate();
+
+    /**
+     * The response after fetching
+     */
+    // @ts-expect-error: data is defined
+    expect(result.all[1].data).toEqual(targetConfiguration);
   });
 });

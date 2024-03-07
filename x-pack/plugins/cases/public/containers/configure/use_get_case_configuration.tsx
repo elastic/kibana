@@ -4,54 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useQuery } from '@tanstack/react-query';
-import { ConnectorTypes } from '../../../common';
-import * as i18n from './translations';
-import { getCaseConfigure } from './api';
-import type { ServerError } from '../../types';
-import { casesQueriesKeys } from '../constants';
-import type { CasesConfigurationUI } from '../types';
-import { useCasesToast } from '../../common/use_cases_toast';
+import { useMemo } from 'react';
 import { useCasesContext } from '../../components/cases_context/use_cases_context';
-
-const initialConfiguration: CasesConfigurationUI = {
-  closureType: 'close-by-user',
-  connector: {
-    fields: null,
-    id: 'none',
-    name: 'none',
-    type: ConnectorTypes.none,
-  },
-  customFields: [],
-  mappings: [],
-  version: '',
-  id: '',
-};
-
-const transformConfiguration = (data: CasesConfigurationUI | null): CasesConfigurationUI => {
-  if (data) {
-    return data;
-  }
-
-  return initialConfiguration;
-};
+import { useGetAllCaseConfigurations } from './use_get_all_case_configurations';
+import { getConfigurationByOwner } from './utils';
 
 export const useGetCaseConfiguration = () => {
   const { owner } = useCasesContext();
-  const { showErrorToast } = useCasesToast();
 
-  return useQuery<CasesConfigurationUI | null, ServerError, CasesConfigurationUI>(
-    casesQueriesKeys.configuration({ owner }),
-    ({ signal }) => getCaseConfigure({ owner, signal }),
-    {
-      select: transformConfiguration,
-      onError: (error: ServerError) => {
-        showErrorToast(error, { title: i18n.ERROR_TITLE });
-      },
-      initialData: initialConfiguration,
-    }
+  const { data, ...other } = useGetAllCaseConfigurations(owner[0]);
+
+  const ownerSpecificConfiguration = useMemo(
+    () => getConfigurationByOwner({ configurations: data, owner: owner[0] }),
+    [data, owner]
   );
+
+  return {
+    ...other,
+    data: ownerSpecificConfiguration,
+  };
 };
 
 export type UseGetCaseConfiguration = ReturnType<typeof useGetCaseConfiguration>;

@@ -17,20 +17,29 @@ export const actionTypes: ActionTypeConnector[] = actionTypesMock;
 export const searchURL =
   '?timerange=(global:(linkTo:!(),timerange:(from:1585487656371,fromStr:now-24h,kind:relative,to:1585574056371,toStr:now)),timeline:(linkTo:!(),timerange:(from:1585227005527,kind:absolute,to:1585313405527)))';
 
-export const useCaseConfigureResponse = {
-  data: {
-    closureType: 'close-by-user',
-    connector: {
-      fields: null,
-      id: 'none',
-      name: 'none',
-      type: ConnectorTypes.none,
-    },
-    customFields: [],
-    mappings: [],
-    version: '',
-    id: '',
+const mockConfigurationData = {
+  closureType: 'close-by-user',
+  connector: {
+    fields: null,
+    id: 'none',
+    name: 'none',
+    type: ConnectorTypes.none,
   },
+  customFields: [],
+  mappings: [],
+  version: '',
+  id: '',
+};
+
+export const useCaseConfigureResponse = {
+  data: mockConfigurationData,
+  isLoading: false,
+  isFetching: false,
+  refetch: jest.fn(),
+};
+
+export const useGetAllCaseConfigurationsResponse = {
+  data: [mockConfigurationData],
   isLoading: false,
   isFetching: false,
   refetch: jest.fn(),

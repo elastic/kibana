@@ -15,11 +15,10 @@ import {
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
-import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import type { ActionConnector } from '../../../common/types/domain';
 import type { CasePostRequest } from '../../../common/types/api';
-import type { CasesConfigurationUI } from '../../../common/ui';
 import { Title } from './title';
 import { Description, fieldName as descriptionFieldName } from './description';
 import { Tags } from './tags';
@@ -46,6 +45,8 @@ import { useCancelCreationAction } from './use_cancel_creation_action';
 import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_modal';
 import { Category } from './category';
 import { CustomFields } from './custom_fields';
+import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
+import { getConfigurationByOwner } from '../../containers/configure/utils';
 
 interface ContainerProps {
   big?: boolean;
@@ -66,8 +67,6 @@ const MySpinner = styled(EuiLoadingSpinner)`
 
 export interface CreateCaseFormFieldsProps {
   connectors: ActionConnector[];
-  customFieldsConfiguration: CasesConfigurationUI['customFields'];
-  isLoadingCaseConfiguration: boolean;
   isLoadingConnectors: boolean;
   withSteps: boolean;
   owner: string[];
@@ -87,15 +86,20 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
 
 const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
-  ({
-    connectors,
-    isLoadingConnectors,
-    withSteps,
-    owner,
-    draftStorageKey,
-    customFieldsConfiguration,
-    isLoadingCaseConfiguration,
-  }) => {
+  ({ connectors, isLoadingConnectors, withSteps, owner, draftStorageKey }) => {
+    const [{ selectedOwner }] = useFormData({ watch: ['selectedOwner'] });
+    const { data: configurations, isLoading: isLoadingCaseConfiguration } =
+      useGetAllCaseConfigurations();
+
+    const customFieldsConfiguration = useMemo(
+      () =>
+        getConfigurationByOwner({
+          configurations,
+          owner: selectedOwner,
+        }).customFields ?? [],
+      [configurations, selectedOwner]
+    );
+
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
     const availableOwners = useAvailableCasesOwners();
@@ -148,8 +152,8 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         canShowCaseSolutionSelection,
         availableOwners,
         draftStorageKey,
-        customFieldsConfiguration,
         isLoadingCaseConfiguration,
+        customFieldsConfiguration,
       ]
     );
 
@@ -247,9 +251,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
         >
           <CreateCaseFormFields
             connectors={empty}
-            customFieldsConfiguration={[]}
             isLoadingConnectors={false}
-            isLoadingCaseConfiguration={false}
             withSteps={withSteps}
             owner={owner}
             draftStorageKey={draftStorageKey}
