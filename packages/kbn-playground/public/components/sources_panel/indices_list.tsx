@@ -20,7 +20,7 @@ export const IndicesList: React.FC<IndicesListProps> = ({ indices, onRemoveClick
   indices?.length ? (
     <EuiFormRow
       fullWidth
-      label={i18n.translate('aiPlayground.sources.indices.label', {
+      label={i18n.translate('playground.sources.indices.label', {
         defaultMessage: 'Selected indices',
       })}
       labelType="legend"
@@ -35,7 +35,7 @@ export const IndicesList: React.FC<IndicesListProps> = ({ indices, onRemoveClick
             size="s"
             extraAction={{
               alwaysShow: true,
-              'aria-label': i18n.translate('aiPlayground.sources.indices.removeIndex', {
+              'aria-label': i18n.translate('playground.sources.indices.removeIndex', {
                 defaultMessage: 'Remove index from sources',
               }),
               color: 'text',

@@ -25,7 +25,7 @@ export const OpenAIKeyField: React.FC = () => {
 
   return (
     <EuiFormRow
-      label={i18n.translate('aiPlayground.summarization.openAI.labelTitle', {
+      label={i18n.translate('playground.summarization.openAI.labelTitle', {
         defaultMessage: 'OpenAI API Key',
       })}
       fullWidth
@@ -33,7 +33,7 @@ export const OpenAIKeyField: React.FC = () => {
       <EuiFlexGroup>
         <EuiFieldText
           fullWidth
-          placeholder={i18n.translate('aiPlayground.sidebar.openAIFlyOut.placeholder', {
+          placeholder={i18n.translate('playground.sidebar.openAIFlyOut.placeholder', {
             defaultMessage: 'Enter API Key here',
           })}
           value={openAITempValue}
@@ -48,14 +48,14 @@ export const OpenAIKeyField: React.FC = () => {
         {openAIKey && openAIKey === openAITempValue ? (
           <EuiButton color="success" iconType="check">
             <FormattedMessage
-              id="aiPlayground.summarization.openAI.saveButton"
+              id="playground.summarization.openAI.saveButton"
               defaultMessage="Saved"
             />
           </EuiButton>
         ) : (
           <EuiButton type="submit" disabled={!openAITempValue} onClick={handleSaveValue}>
             <FormattedMessage
-              id="aiPlayground.summarization.openAI.saveButton"
+              id="playground.summarization.openAI.saveButton"
               defaultMessage="Save"
             />
           </EuiButton>

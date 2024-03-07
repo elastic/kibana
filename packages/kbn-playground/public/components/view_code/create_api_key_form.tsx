@@ -54,7 +54,7 @@ export const CreateApiKeyForm = () => {
     <EuiForm>
       <EuiFormRow
         fullWidth
-        label={i18n.translate('aiPlayground.viewCode.apiForm.name.label', {
+        label={i18n.translate('playground.viewCode.apiForm.name.label', {
           defaultMessage: 'Name',
         })}
       >
@@ -66,7 +66,7 @@ export const CreateApiKeyForm = () => {
           render={({ field }) => (
             <EuiFieldText
               fullWidth
-              placeholder={i18n.translate('aiPlayground.viewCode.apiForm.name.placeholder', {
+              placeholder={i18n.translate('playground.viewCode.apiForm.name.placeholder', {
                 defaultMessage: 'Enter a name for your API key',
               })}
               value={field.value}
@@ -88,7 +88,7 @@ export const CreateApiKeyForm = () => {
                 <EuiText size="xs">
                   <strong>
                     <FormattedMessage
-                      id="aiPlayground.viewCode.apiForm.expire.days"
+                      id="playground.viewCode.apiForm.expire.days"
                       defaultMessage="Days"
                     />
                   </strong>
@@ -98,7 +98,7 @@ export const CreateApiKeyForm = () => {
               <EuiFieldText
                 fullWidth
                 type="number"
-                placeholder={i18n.translate('aiPlayground.viewCode.apiForm.expire.placeholder', {
+                placeholder={i18n.translate('playground.viewCode.apiForm.expire.placeholder', {
                   defaultMessage: 'Set expiry in days',
                 })}
                 value={field.value || ''}
@@ -114,7 +114,7 @@ export const CreateApiKeyForm = () => {
           {isSuccess && !isDirty ? (
             <EuiButton color="success" iconType="check">
               <FormattedMessage
-                id="aiPlayground.viewCode.apiForm.createdButton"
+                id="playground.viewCode.apiForm.createdButton"
                 defaultMessage="Created"
               />
             </EuiButton>
@@ -126,7 +126,7 @@ export const CreateApiKeyForm = () => {
               color={isError ? 'danger' : 'primary'}
             >
               <FormattedMessage
-                id="aiPlayground.viewCode.apiForm.createButton"
+                id="playground.viewCode.apiForm.createButton"
                 defaultMessage="Create API key"
               />
             </EuiButton>
@@ -139,7 +139,7 @@ export const CreateApiKeyForm = () => {
             target="_blank"
           >
             <FormattedMessage
-              id="aiPlayground.viewCode.apiForm.viewKeysButton"
+              id="playground.viewCode.apiForm.viewKeysButton"
               defaultMessage="View all API keys"
             />
           </EuiButtonEmpty>

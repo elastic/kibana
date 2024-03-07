@@ -22,18 +22,18 @@ export const SummarizationPanelForStartChat: React.FC = () => {
 
   return (
     <StartChatPanel
-      title={i18n.translate('aiPlayground.emptyPrompts.summarization.title', {
+      title={i18n.translate('playground.emptyPrompts.summarization.title', {
         defaultMessage: 'Enable summarization models',
       })}
       description={
         <FormattedMessage
-          id="aiPlayground.emptyPrompts.summarization.description"
+          id="playground.emptyPrompts.summarization.description"
           defaultMessage="The AI Playground uses OpenAl models for summarization. Find or create your api key in OpenAI’s {link}"
           values={{
             link: (
               <EuiLink href={openAIApiKeyLink} target="_blank" external>
                 <FormattedMessage
-                  id="aiPlayground.emptyPrompts.summarization.description.linkText"
+                  id="playground.emptyPrompts.summarization.description.linkText"
                   defaultMessage="API keys dashboard"
                 />
               </EuiLink>

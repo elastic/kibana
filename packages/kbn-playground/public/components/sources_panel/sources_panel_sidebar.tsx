@@ -39,7 +39,7 @@ export const SourcesPanelSidebar: React.FC = () => {
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <EuiCallOut
-          title={i18n.translate('aiPlayground.sources.callout', {
+          title={i18n.translate('playground.sources.callout', {
             defaultMessage: 'Changes here will reset your custom query',
           })}
           iconType="warning"

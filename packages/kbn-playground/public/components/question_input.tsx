@@ -36,7 +36,7 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
           padding: '20px 76px 20px 20px',
           height: '56px',
         }}
-        placeholder={i18n.translate('aiPlayground.chat.questionInput.askQuestionPlaceholder', {
+        placeholder={i18n.translate('playground.chat.questionInput.askQuestionPlaceholder', {
           defaultMessage: 'Ask a question',
         })}
         value={value}

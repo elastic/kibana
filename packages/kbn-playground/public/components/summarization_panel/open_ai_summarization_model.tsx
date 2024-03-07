@@ -75,13 +75,13 @@ export const OpenAISummarizationModel: React.FC<OpenAISummarizationModelProps> =
     <EuiFormRow
       label={
         <EuiToolTip
-          content={i18n.translate('aiPlayground.sidebar.summarizationModel.help', {
+          content={i18n.translate('playground.sidebar.summarizationModel.help', {
             defaultMessage: 'The large language model used to summarize your documents.',
           })}
         >
           <>
             <span>
-              {i18n.translate('aiPlayground.sidebar.summarizationModel.label', {
+              {i18n.translate('playground.sidebar.summarizationModel.label', {
                 defaultMessage: 'Summarization Model',
               })}
             </span>
@@ -91,7 +91,7 @@ export const OpenAISummarizationModel: React.FC<OpenAISummarizationModelProps> =
       }
       labelAppend={
         <EuiButtonEmpty flush="both" size="xs" onClick={() => openAIFlyOutOpen()}>
-          {i18n.translate('aiPlayground.sidebar.summarizationModel.editLabel', {
+          {i18n.translate('playground.sidebar.summarizationModel.editLabel', {
             defaultMessage: 'Edit OpenAI API key',
           })}
         </EuiButtonEmpty>

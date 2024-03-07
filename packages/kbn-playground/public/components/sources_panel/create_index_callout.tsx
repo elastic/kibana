@@ -17,7 +17,7 @@ export const CreateIndexCallout: React.FC = () => {
 
   return (
     <EuiCallOut
-      title={i18n.translate('aiPlayground.sources.createIndexCallout.headerText', {
+      title={i18n.translate('playground.sources.createIndexCallout.headerText', {
         defaultMessage: 'Create an index',
       })}
       color="primary"
@@ -26,7 +26,7 @@ export const CreateIndexCallout: React.FC = () => {
       <EuiText size="s">
         <p>
           <FormattedMessage
-            id="aiPlayground.sources.createIndexCallout.description"
+            id="playground.sources.createIndexCallout.description"
             defaultMessage="You can not continue without having at least one index with data to search."
           />
         </p>
@@ -40,7 +40,7 @@ export const CreateIndexCallout: React.FC = () => {
         onClick={navigateToIndexPage}
       >
         <FormattedMessage
-          id="aiPlayground.sources.createIndexCallout."
+          id="playground.sources.createIndexCallout."
           defaultMessage="Create an index"
         />
       </EuiButton>

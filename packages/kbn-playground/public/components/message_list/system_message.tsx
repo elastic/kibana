@@ -18,10 +18,10 @@ interface SystemMessageProps {
 export const SystemMessage: React.FC<SystemMessageProps> = ({ content }) => {
   return (
     <EuiComment
-      username={i18n.translate('aiPlayground.chat.message.system.username', {
+      username={i18n.translate('playground.chat.message.system.username', {
         defaultMessage: 'system',
       })}
-      timelineAvatarAriaLabel={i18n.translate('aiPlayground.chat.message.system.avatarAriaLabel', {
+      timelineAvatarAriaLabel={i18n.translate('playground.chat.message.system.avatarAriaLabel', {
         defaultMessage: 'System',
       })}
       event={content}

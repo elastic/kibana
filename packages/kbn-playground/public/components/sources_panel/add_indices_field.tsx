@@ -36,14 +36,14 @@ export const AddIndicesField: React.FC<AddIndicesFieldProps> = ({
   return (
     <EuiFormRow
       fullWidth
-      label={i18n.translate('aiPlayground.sources.addIndex.label', {
+      label={i18n.translate('playground.sources.addIndex.label', {
         defaultMessage: 'Add index',
       })}
       labelType="legend"
     >
       <EuiComboBox
         singleSelection={{ asPlainText: true }}
-        placeholder={i18n.translate('aiPlayground.sources.addIndex.placeholder', {
+        placeholder={i18n.translate('playground.sources.addIndex.placeholder', {
           defaultMessage: 'Select new data source',
         })}
         async

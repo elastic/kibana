@@ -30,18 +30,18 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ selectedIndicesCount }
   const accordions = [
     {
       id: useGeneratedHtmlId({ prefix: 'summarizationAccordion' }),
-      title: i18n.translate('aiPlayground.sidebar.summarizationTitle', {
+      title: i18n.translate('playground.sidebar.summarizationTitle', {
         defaultMessage: 'Summarization',
       }),
       children: <SummarizationPanel />,
     },
     {
       id: useGeneratedHtmlId({ prefix: 'sourcesAccordion' }),
-      title: i18n.translate('aiPlayground.sidebar.sourceTitle', { defaultMessage: 'Sources' }),
+      title: i18n.translate('playground.sidebar.sourceTitle', { defaultMessage: 'Sources' }),
       extraAction: !!selectedIndicesCount && (
         <EuiText size="xs">
           <p>
-            {i18n.translate('aiPlayground.sidebar.sourceIndicesCount', {
+            {i18n.translate('playground.sidebar.sourceIndicesCount', {
               defaultMessage: '{count, number} {count, plural, one {Index} other {Indices}}',
               values: { count: Number(selectedIndicesCount) },
             })}

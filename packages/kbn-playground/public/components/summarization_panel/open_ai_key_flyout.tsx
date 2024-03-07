@@ -48,7 +48,7 @@ export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h3>
-            {i18n.translate('aiPlayground.sidebar.openAIFlyOut.headerTitle', {
+            {i18n.translate('playground.sidebar.openAIFlyOut.headerTitle', {
               defaultMessage: 'OpenAI API Key',
             })}
           </h3>
@@ -59,7 +59,7 @@ export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({
         <EuiFlexGroup direction="column" gutterSize="l">
           <EuiFormRow
             fullWidth
-            label={i18n.translate('aiPlayground.sidebar.openAIFlyOut.labelTitle', {
+            label={i18n.translate('playground.sidebar.openAIFlyOut.labelTitle', {
               defaultMessage: 'OpenAI API Key',
             })}
             labelAppend={
@@ -73,7 +73,7 @@ export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({
             <EuiFlexItem grow>
               <EuiFieldText
                 fullWidth
-                placeholder={i18n.translate('aiPlayground.sidebar.openAIFlyOut.placeholder', {
+                placeholder={i18n.translate('playground.sidebar.openAIFlyOut.placeholder', {
                   defaultMessage: 'Enter API Key here',
                 })}
                 value={apiKey}
@@ -90,7 +90,7 @@ export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({
               data-telemetry-id="entSearchAIPlayground-addingOpenAIKey-cancel"
               onClick={onClose}
             >
-              {i18n.translate('aiPlayground.sidebar.openAIFlyOut.cancelButtonLabel', {
+              {i18n.translate('playground.sidebar.openAIFlyOut.cancelButtonLabel', {
                 defaultMessage: 'Cancel',
               })}
             </EuiButtonEmpty>
@@ -103,7 +103,7 @@ export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({
               fill
               onClick={handleSave}
             >
-              {i18n.translate('aiPlayground.sidebar.openAIFlyOut.saveButtonLabel', {
+              {i18n.translate('playground.sidebar.openAIFlyOut.saveButtonLabel', {
                 defaultMessage: 'Save',
               })}
             </EuiButton>

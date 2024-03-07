@@ -41,10 +41,10 @@ export const SourcesPanelForStartChat: React.FC = () => {
 
   return (
     <StartChatPanel
-      title={i18n.translate('aiPlayground.emptyPrompts.sources.title', {
+      title={i18n.translate('playground.emptyPrompts.sources.title', {
         defaultMessage: 'Select sources',
       })}
-      description={i18n.translate('aiPlayground.emptyPrompts.sources.description', {
+      description={i18n.translate('playground.emptyPrompts.sources.description', {
         defaultMessage: 'Where should the data for this chat experience be retrieved from?',
       })}
       isValid={!!selectedIndices.length}

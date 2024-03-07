@@ -132,7 +132,7 @@ export function registerPlaygroundRoutes(
         name,
         expiration: `${expiresInDays}d`,
         role_descriptors: {
-          [`aiPlayground-${name}-role`]: {
+          [`playground-${name}-role`]: {
             cluster: [],
             indices: [
               {

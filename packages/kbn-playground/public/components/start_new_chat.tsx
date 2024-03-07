@@ -40,7 +40,7 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
             <EuiTitle>
               <h2>
                 <FormattedMessage
-                  id="aiPlayground.startNewChat.title"
+                  id="playground.startNewChat.title"
                   defaultMessage="Start a new chat"
                 />
               </h2>
@@ -66,7 +66,7 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
             disabled={!watch(ChatFormFields.openAIKey) || !watch(ChatFormFields.indices, []).length}
             onClick={onStartClick}
           >
-            <FormattedMessage id="aiPlayground.startNewChat.startBtn" defaultMessage="Start" />
+            <FormattedMessage id="playground.startNewChat.startBtn" defaultMessage="Start" />
           </EuiButton>
         </EuiFlexGroup>
       </EuiFlexGroup>

@@ -44,7 +44,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
   const columns: Array<EuiBasicTableColumn<{ field: string; value: unknown }>> = [
     {
       field: 'field',
-      name: i18n.translate('aiPlayground.chat.message.assistant.retrievalDoc.result.nameColumn', {
+      name: i18n.translate('playground.chat.message.assistant.retrievalDoc.result.nameColumn', {
         defaultMessage: 'Field',
       }),
       render: (field: string) => {
@@ -61,7 +61,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
     },
     {
       field: 'value',
-      name: i18n.translate('aiPlayground.chat.message.assistant.retrievalDoc.result.valueColumn', {
+      name: i18n.translate('playground.chat.message.assistant.retrievalDoc.result.valueColumn', {
         defaultMessage: 'Value',
       }),
       render: (value: unknown) => (
@@ -77,7 +77,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h3>
-            {i18n.translate('aiPlayground.chat.message.assistant.retrievalDoc.title', {
+            {i18n.translate('playground.chat.message.assistant.retrievalDoc.title', {
               defaultMessage: 'Documents retrieved',
             })}
           </h3>
@@ -85,7 +85,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
         <EuiSpacer size="s" />
         <EuiText color="subdued">
           <p>
-            {i18n.translate('aiPlayground.chat.message.assistant.retrievalDoc.subtitle', {
+            {i18n.translate('playground.chat.message.assistant.retrievalDoc.subtitle', {
               defaultMessage:
                 'The documents that were referenced in order to create an answer to your query',
             })}
@@ -99,7 +99,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexGroup justifyContent="spaceBetween">
                   <code>
-                    {i18n.translate('aiPlayground.chat.message.assistant.retrievalDoc.result.id', {
+                    {i18n.translate('playground.chat.message.assistant.retrievalDoc.result.id', {
                       defaultMessage: 'ID: {id}',
                       values: { id: doc.id },
                     })}
@@ -108,7 +108,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
                     <EuiFlexGroup gutterSize="xs" alignItems="center">
                       <code>
                         {i18n.translate(
-                          'aiPlayground.chat.message.assistant.retrievalDoc.result.fromIndex',
+                          'playground.chat.message.assistant.retrievalDoc.result.fromIndex',
                           {
                             defaultMessage: 'from',
                           }

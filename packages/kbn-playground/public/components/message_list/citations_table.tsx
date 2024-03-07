@@ -34,7 +34,7 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
       columns={[
         {
           field: 'id',
-          name: i18n.translate('aiPlayground.chat.message.assistant.citations.idField', {
+          name: i18n.translate('playground.chat.message.assistant.citations.idField', {
             defaultMessage: 'Index Id',
           }),
           truncateText: true,
@@ -53,7 +53,7 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
                 onClick={() => toggleDetails(citation)}
                 iconType={itemIdToExpandedRowMapValues[citation.id] ? 'arrowDown' : 'arrowRight'}
               >
-                {i18n.translate('aiPlayground.chat.message.assistant.citations.snippet', {
+                {i18n.translate('playground.chat.message.assistant.citations.snippet', {
                   defaultMessage: 'Snippet',
                 })}
               </EuiButtonEmpty>

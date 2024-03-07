@@ -28,7 +28,7 @@ export const ViewCodeAction: React.FC = () => {
         onClick={() => setShowFlyout(true)}
         disabled={!selectedIndices || selectedIndices?.length === 0}
       >
-        <FormattedMessage id="aiPlayground.viewCode.actionButtonLabel" defaultMessage="View code" />
+        <FormattedMessage id="playground.viewCode.actionButtonLabel" defaultMessage="View code" />
       </EuiButton>
     </>
   );

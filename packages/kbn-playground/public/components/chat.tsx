@@ -130,7 +130,7 @@ export const Chat = () => {
                     button={
                       isSubmitting ? (
                         <EuiButtonIcon
-                          aria-label={i18n.translate('aiPlayground.chat.stopButtonAriaLabel', {
+                          aria-label={i18n.translate('playground.chat.stopButtonAriaLabel', {
                             defaultMessage: 'Stop request',
                           })}
                           display="base"
@@ -140,7 +140,7 @@ export const Chat = () => {
                         />
                       ) : (
                         <EuiButtonIcon
-                          aria-label={i18n.translate('aiPlayground.chat.sendButtonAriaLabel', {
+                          aria-label={i18n.translate('playground.chat.sendButtonAriaLabel', {
                             defaultMessage: 'Send a question',
                           })}
                           display={isValid ? 'base' : 'empty'}
