@@ -37,6 +37,7 @@ import type {
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import moment from 'moment';
+import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import { AlertHistoryChart } from './alert_history';
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
@@ -51,6 +52,8 @@ import { LogRateAnalysis } from './log_rate_analysis';
 import { Groups } from './groups';
 import { Tags } from './tags';
 import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
+import { getViewInAppUrl } from '../../../../../common/custom_threshold_rule/get_view_in_app_url';
+import { SearchConfigurationWithExtractedReferenceType } from '../../../../../common/custom_threshold_rule/types';
 
 interface AppSectionProps {
   alert: CustomThresholdAlert;
@@ -105,7 +108,13 @@ export default function AlertDetailsAppSection({
   setAlertSummaryFields,
 }: AppSectionProps) {
   const services = useKibana().services;
-  const { charts, data } = services;
+  const {
+    charts,
+    data,
+    share: {
+      url: { locators },
+    },
+  } = services;
   const { hasAtLeast } = useLicense();
   const { euiTheme } = useEuiTheme();
   const hasLogRateAnalysisLicense = hasAtLeast('platinum');
@@ -155,6 +164,16 @@ export default function AlertDetailsAppSection({
   annotations.push(alertStartAnnotation, alertRangeAnnotation);
 
   useEffect(() => {
+    const viewInAppUrl = getViewInAppUrl({
+      dataViewId: dataView?.id,
+      groups,
+      logsExplorerLocator: locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID),
+      metrics: ruleParams.criteria[0]?.metrics,
+      searchConfiguration: rule.params
+        .searchConfiguration as unknown as SearchConfigurationWithExtractedReferenceType,
+      startedAt: alertStart,
+    });
+
     const alertSummaryFields = [];
     if (groups) {
       alertSummaryFields.push({
@@ -164,7 +183,18 @@ export default function AlertDetailsAppSection({
             defaultMessage: 'Source',
           }
         ),
-        value: <Groups groups={groups} />,
+        value: (
+          <>
+            <Groups groups={groups} />
+            <span>
+              <a href={viewInAppUrl} target="_blank">
+                {i18n.translate('xpack.observability.alertDetailsAppSection.a.viewLogsLabel', {
+                  defaultMessage: 'View logs',
+                })}
+              </a>
+            </span>
+          </>
+        ),
       });
     }
     if (tags && tags.length > 0) {
@@ -193,7 +223,17 @@ export default function AlertDetailsAppSection({
     });
 
     setAlertSummaryFields(alertSummaryFields);
-  }, [groups, tags, rule, ruleLink, setAlertSummaryFields]);
+  }, [
+    dataView,
+    alertStart,
+    ruleParams,
+    groups,
+    tags,
+    rule,
+    ruleLink,
+    setAlertSummaryFields,
+    locators,
+  ]);
 
   useEffect(() => {
     const initDataView = async () => {
