@@ -33,6 +33,12 @@ export class FieldEditorService extends FtrService {
   public async setCustomDescription(description: string) {
     await this.testSubjects.setValue('customDescriptionRow > input', description);
   }
+  public async getFormError() {
+    const alert = await this.find.byCssSelector(
+      '[data-test-subj=indexPatternFieldEditorForm] > [role="alert"]'
+    );
+    return await alert.getVisibleText();
+  }
   public async enableValue() {
     await this.testSubjects.setEuiSwitch('valueRow > toggle', 'check');
   }
@@ -130,7 +136,21 @@ export class FieldEditorService extends FtrService {
     });
   }
 
+  public async confirmDiscardChanges() {
+    await this.retry.try(async () => {
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmModalConfirmButton', {
+        timeout: 1000,
+      });
+    });
+  }
+
   public async waitUntilClosed() {
     await this.testSubjects.waitForDeleted('fieldEditor');
+  }
+
+  public async closeFlyoutAndDiscardChanges() {
+    await this.testSubjects.click('fieldEditor > closeFlyoutButton');
+    await this.confirmDiscardChanges();
+    await this.waitUntilClosed();
   }
 }

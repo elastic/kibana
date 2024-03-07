@@ -89,6 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await fieldEditor.enableCustomDescription();
       await fieldEditor.setCustomDescription(customDescription2);
       await fieldEditor.save();
+      await fieldEditor.waitUntilClosed();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
       await retry.waitFor('field popover text', async () => {
@@ -104,6 +105,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await dataGrid.closeFlyout();
+    });
+
+    it('should show a validation error when adding a too long custom description to existing fields', async function () {
+      const customDescription = 'custom bytes long description here'.repeat(10);
+      // set a custom description
+      await PageObjects.discover.editField('bytes');
+      await fieldEditor.enableCustomDescription();
+      await fieldEditor.setCustomDescription(customDescription);
+      await fieldEditor.save();
+      expect(await fieldEditor.getFormError()).to.contain(
+        'The length of the description is too long. The maximum length is 300 characters.'
+      );
+      await fieldEditor.closeFlyoutAndDiscardChanges();
     });
 
     it('allows creation of a new field', async function () {
