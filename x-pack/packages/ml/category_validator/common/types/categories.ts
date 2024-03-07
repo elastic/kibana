@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import {
+import type {
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
   VALIDATION_RESULT,
 } from '../constants/categorization';
