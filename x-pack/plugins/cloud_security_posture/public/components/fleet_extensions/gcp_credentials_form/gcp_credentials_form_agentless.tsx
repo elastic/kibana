@@ -19,7 +19,6 @@ import { getPosturePolicy } from '../utils';
 import { ReadDocumentation } from '../aws_credentials_form/aws_credentials_form';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 
-// TODO: when adding project id and then switching to organization account, the project id is not removed
 export const GcpCredentialsFormAgentless = ({
   input,
   newPolicy,
