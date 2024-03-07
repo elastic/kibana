@@ -714,7 +714,7 @@ export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   });
 }
 
-export const OUTPUT_EXLCUDE_AAD_FIELDS = new Set([
+export const OUTPUT_INCLUDE_AAD_FIELDS = new Set([
   'service_token',
   'shipper',
   'allow_edit',
@@ -734,7 +734,7 @@ export function registerEncryptedSavedObjects(
   encryptedSavedObjects.registerType({
     type: OUTPUT_SAVED_OBJECT_TYPE,
     attributesToEncrypt: OUTPUT_ENCRYPTED_FIELDS,
-    attributesToIncludeInAAD: OUTPUT_EXLCUDE_AAD_FIELDS,
+    attributesToIncludeInAAD: OUTPUT_INCLUDE_AAD_FIELDS,
   });
   // Encrypted saved objects
   encryptedSavedObjects.registerType({
