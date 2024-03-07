@@ -23,7 +23,7 @@ import { AnonymousAccessServiceContract } from '../common';
 import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
 import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
 import { registrations } from './lib/registrations';
-import type { BrowserUrlService } from './types';
+import type { BrowserUrlService, ClientConfigType } from './types';
 
 /** @public */
 export type SharePublicSetup = ShareMenuRegistrySetup & {
@@ -73,14 +73,16 @@ export class SharePlugin
       SharePublicStartDependencies
     >
 {
+  private config: ClientConfigType;
   private readonly shareMenuRegistry = new ShareMenuRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
-
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<ClientConfigType>();
+  }
 
   public setup(core: CoreSetup): SharePublicSetup {
     const { analytics, http } = core;
@@ -143,6 +145,7 @@ export class SharePlugin
       this.url!,
       this.shareMenuRegistry.start(),
       disableEmbed,
+      this.config.new_version.enabled ?? false,
       this.anonymousAccessServiceProvider
     );
 
