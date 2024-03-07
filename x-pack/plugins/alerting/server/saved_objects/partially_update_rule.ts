@@ -11,14 +11,22 @@ import {
   SavedObjectsErrorHelpers,
   SavedObjectsUpdateOptions,
 } from '@kbn/core/server';
+import { RawRule } from '../types';
 
 import {
   RuleAttributesToEncrypt,
   RuleAttributesIncludedInAAD,
-  PartiallyUpdateableRuleAttributes,
+  RuleAttributesNotPartiallyUpdatable,
   RULE_SAVED_OBJECT_TYPE,
 } from '.';
 import { RuleAttributes } from '../data/rule/types';
+
+// We have calling code that references both RawRule and RuleAttributes,
+// so we need to support both of these types (they are effectively the same)
+export type PartiallyUpdateableRuleAttributes = Partial<
+  | Omit<RawRule, RuleAttributesNotPartiallyUpdatable>
+  | Omit<RuleAttributes, RuleAttributesNotPartiallyUpdatable>
+>;
 
 interface PartiallyUpdateRuleSavedObjectOptions {
   refresh?: SavedObjectsUpdateOptions['refresh'];

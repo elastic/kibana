@@ -30,7 +30,6 @@ import {
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../../common';
 import { ruleModelVersions } from './rule_model_versions';
-import { RuleAttributes } from '../data/rule/types';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 
@@ -39,6 +38,8 @@ export const RuleAttributesToEncrypt = ['apiKey'];
 // Use caution when removing items from this array! These fields
 // are used to construct decryption AAD and must be remain in
 // this array to prevent decryption failures during migration.
+// NOTE: Always update the RuleAttributesNotPartiallyUpdatable
+// type if this const changes!
 export const RuleAttributesIncludedInAAD = [
   'enabled',
   'name',
@@ -63,30 +64,26 @@ export const RuleAttributesIncludedInAAD = [
 // useful type for Omit<RuleAttributes, [...RuleAttributesToEncrypt, ...RuleAttributesIncludedInAAD]>
 // which will produce a subset of RuleAttributes with just attributes that are safe to partually
 // update from AAD
-export type PartiallyUpdateableRuleAttributes = Partial<
-  Omit<
-    RuleAttributes,
-    | 'apiKey'
-    | 'enabled'
-    | 'name'
-    | 'tags'
-    | 'alertTypeId'
-    | 'consumer'
-    | 'legacyId'
-    | 'schedule'
-    | 'actions'
-    | 'params'
-    | 'mapped_params'
-    | 'createdBy'
-    | 'createdAt'
-    | 'apiKeyOwner'
-    | 'apiKeyCreatedByUser'
-    | 'throttle'
-    | 'notifyWhen'
-    | 'meta'
-    | 'alertDelay'
-  >
->;
+export type RuleAttributesNotPartiallyUpdatable =
+  | 'apiKey'
+  | 'enabled'
+  | 'name'
+  | 'tags'
+  | 'alertTypeId'
+  | 'consumer'
+  | 'legacyId'
+  | 'schedule'
+  | 'actions'
+  | 'params'
+  | 'mapped_params'
+  | 'createdBy'
+  | 'createdAt'
+  | 'apiKeyOwner'
+  | 'apiKeyCreatedByUser'
+  | 'throttle'
+  | 'notifyWhen'
+  | 'meta'
+  | 'alertDelay';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
