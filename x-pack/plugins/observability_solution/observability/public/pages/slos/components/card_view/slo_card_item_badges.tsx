@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useCallback } from 'react';
@@ -58,6 +59,15 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
             <SLOCardItemInstanceBadge slo={slo} />
             <SloTimeWindowBadge slo={slo} color="default" />
             <SloRulesBadge rules={rules} onClick={handleCreateRule} />
+            {slo.isRemote && (
+              <EuiFlexItem>
+                <EuiBadge color="default">
+                  {i18n.translate('xpack.observability.sloCardItemBadges.remoteBadgeLabel', {
+                    defaultMessage: 'Remote',
+                  })}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
             <SloTagsList
               tags={slo.tags}
               numberOfTagsToDisplay={1}

@@ -159,7 +159,7 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="edit"
             icon="pencil"
-            disabled={!hasWriteCapabilities}
+            disabled={!hasWriteCapabilities || slo.isRemote}
             onClick={handleEdit}
             data-test-subj="sloActionsEdit"
           >
@@ -170,7 +170,7 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="createRule"
             icon="bell"
-            disabled={!hasWriteCapabilities}
+            disabled={!hasWriteCapabilities || slo.isRemote}
             onClick={handleCreateRule}
             data-test-subj="sloActionsCreateRule"
           >
@@ -181,7 +181,7 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="manageRules"
             icon="gear"
-            disabled={!hasWriteCapabilities}
+            disabled={!hasWriteCapabilities || slo.isRemote}
             onClick={handleNavigateToRules}
             data-test-subj="sloActionsManageRules"
           >
@@ -191,7 +191,7 @@ export function SloItemActions({
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="clone"
-            disabled={!hasWriteCapabilities}
+            disabled={!hasWriteCapabilities || slo.isRemote}
             icon="copy"
             onClick={handleClone}
             data-test-subj="sloActionsClone"
@@ -203,7 +203,7 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="delete"
             icon="trash"
-            disabled={!hasWriteCapabilities}
+            disabled={!hasWriteCapabilities || slo.isRemote}
             onClick={handleDelete}
             data-test-subj="sloActionsDelete"
           >

@@ -146,6 +146,7 @@ const sloResponseSchema = t.intersection([
   }),
   t.partial({
     instanceId: allOrAnyString,
+    isRemote: t.boolean,
   }),
 ]);
 
