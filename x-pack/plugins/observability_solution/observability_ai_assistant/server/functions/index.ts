@@ -37,6 +37,8 @@ export const registerFunctions: ChatRegistrationFunction = async ({
     signal,
   };
 
+  const isServerless = !!resources.plugins.serverless;
+
   return client.getKnowledgeBaseStatus().then((response) => {
     const isReady = response.ready;
 
@@ -85,7 +87,9 @@ export const registerFunctions: ChatRegistrationFunction = async ({
             : ''
         }
 
-        The user is able to change the language in which it wants you to reply in the settings page for the Observability AI Assistant, which can be found in the Stack Management app under the option AI Assistants.
+        The user is able to change the language in which it wants you to reply in the settings page of the AI Assistant for Observability, which can be found in the ${
+          isServerless ? `Project settings.` : `Stack Management app under the option AI Assistants`
+        }.
         If the user asks how to change the language, reply in the same language the user asked in.
         `
     );
