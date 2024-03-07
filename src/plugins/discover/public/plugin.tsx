@@ -307,11 +307,12 @@ export class DiscoverPlugin
       visibleIn: ['globalSearch', 'sideNav', 'kibanaOverview'],
       mount: async (params: AppMountParameters) => {
         const [coreStart, discoverStartPlugins] = await core.getStartServices();
-        this.historyService.syncHistoryLocations();
-        appMounted();
 
         // Store the current scoped history so initializeKbnUrlTracking can access it
         this.scopedHistory = params.history;
+
+        this.historyService.syncHistoryLocations();
+        appMounted();
 
         // dispatch synthetic hash change event to update hash history objects
         // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
