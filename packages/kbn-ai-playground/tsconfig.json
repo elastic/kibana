@@ -18,6 +18,14 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/core",
-    "@kbn/kibana-react-plugin/public",
+    "@kbn/kibana-react-plugin",
+    "@kbn/user-profile-components",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
+    "@kbn/ml-response-stream",
+    "@kbn/logging",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/security-plugin",
+    "@kbn/core-http-browser",
   ]
 }
