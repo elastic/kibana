@@ -41,6 +41,7 @@ import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-browser-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
+import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -98,12 +99,14 @@ describe('PluginsService', () => {
       notifications: notificationServiceMock.createSetupContract(),
       uiSettings: uiSettingsServiceMock.createSetupContract(),
       theme: themeServiceMock.createSetupContract(),
+      security: securityServiceMock.createInternalSetup(),
     };
     mockSetupContext = {
       ...omit(mockSetupDeps, 'injectedMetadata'),
       application: expect.any(Object),
       plugins: expect.any(Object),
       getStartServices: expect.any(Function),
+      security: expect.any(Object),
       http: {
         ...mockSetupDeps.http,
         staticAssets: expect.any(Object),
@@ -126,12 +129,14 @@ describe('PluginsService', () => {
       fatalErrors: fatalErrorsServiceMock.createStartContract(),
       deprecations: deprecationsServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
+      security: securityServiceMock.createInternalStart(),
     };
     mockStartContext = {
       ...omit(mockStartDeps, 'injectedMetadata'),
       application: expect.any(Object),
       plugins: expect.any(Object),
       chrome: omit(mockStartDeps.chrome, 'getComponent'),
+      security: expect.any(Object),
       http: {
         ...mockStartDeps.http,
         staticAssets: expect.any(Object),
