@@ -15,6 +15,16 @@ import { LocatorPublic, AnonymousAccessServiceContract } from '../../common';
 import { ShareMenuItem, UrlParamExtension, BrowserUrlService } from '../types';
 import { LinkModal } from './link_modal';
 import { EmbedModal } from './embed_modal';
+import { EuiModal } from '@elastic/eui';
+import { LocatorPublic, AnonymousAccessServiceContract } from '../../common';
+import { ShareMenuItem, UrlParamExtension, BrowserUrlService } from '../types';
+
+export interface ModalTabActionHandler {
+  id: string;
+  dataTestSubj: string;
+  formattedMessageId: string;
+  defaultMessage: string;
+}
 
 export interface ShareContextTabProps {
   allowEmbed: boolean;
@@ -37,29 +47,7 @@ export interface ShareContextTabProps {
   snapshotShareWarning?: string;
   objectTypeTitle?: string;
   disabledShareUrl?: boolean;
-}
-
-// this file is intended to replace share_context_menu
-export const ShareMenuTabs = ({
-  allowEmbed,
-  shareMenuItems,
-  urlService,
-  onClose,
-  objectType,
-  embedUrlParamExtensions,
-}: ShareContextTabProps) => {
-  const getTabs = () => {
-    const tabs = [];
-
-    tabs.push({
-      id: 'link',
-      name: i18n.translate('share.contextMenu.permalinksLabel', {
-        defaultMessage: 'Links',
-      }),
-      sortOrder: 0,
-      // do not break functional tests
-      'data-test-subj': 'Permalinks',
-      content: <LinkModal objectType={objectType} />,
+ <LinkModal objectType={objectType} />,
     });
     if (allowEmbed) {
       tabs.push({

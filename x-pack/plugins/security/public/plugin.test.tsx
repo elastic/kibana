@@ -39,6 +39,7 @@ describe('Security Plugin', () => {
         license: {
           isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
+          getUnavailableReason: expect.any(Function),
           getFeatures: expect.any(Function),
           hasAtLeast: expect.any(Function),
           features$: expect.any(Observable),
@@ -66,6 +67,7 @@ describe('Security Plugin', () => {
         license: {
           isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
+          getUnavailableReason: expect.any(Function),
           getFeatures: expect.any(Function),
           hasAtLeast: expect.any(Function),
           features$: expect.any(Observable),
