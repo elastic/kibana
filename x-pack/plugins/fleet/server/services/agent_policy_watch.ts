@@ -136,7 +136,7 @@ export class PolicyWatcher {
       log.error(
         `Done - ${
           failedPolicies.length
-        } out of ${totalPolicies} were successful. Errors encountered:\n${failedPolicies
+        } out of ${totalPolicies} were unsuccessful. Errors encountered:\n${failedPolicies
           .map((e) => `Policy [${e.id}] failed to update due to error: ${e.error.message}`)
           .join('\n')}`
       );
