@@ -6,4 +6,4 @@ metadata:
 spec:
   type: file
   targets:
-    - kibana-migration-staging.yml
+    - ./kibana-migration-staging.yml

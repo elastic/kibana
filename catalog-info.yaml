@@ -37,7 +37,7 @@ metadata:
   description: A location re-routing file, pointing to individual buildkite pipeline definition files
 spec:
   type: file
-  target: .buildkite/pipeline-resource-definitions/locations.yml
+  target: ./.buildkite/pipeline-resource-definitions/locations.yml
 
 ---
 
