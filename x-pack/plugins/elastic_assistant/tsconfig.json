@@ -42,7 +42,6 @@
     "@kbn/es-query",
     "@kbn/es-types",
     "@kbn/config-schema",
-    "@kbn/zod-helpers",
     "@kbn/spaces-plugin",
     "@kbn/zod-helpers",
     "@kbn/security-plugin-types-common",
