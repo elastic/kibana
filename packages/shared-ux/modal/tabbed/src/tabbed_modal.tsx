@@ -12,6 +12,7 @@ import React, {
   type ComponentProps,
   type PropsWithChildren,
   type FC,
+  useCallback,
 } from 'react';
 import {
   EuiButton,
@@ -33,7 +34,10 @@ const TabbedModalInner: FC<ITabbedModal> = ({ onClose, modalTitle }) => {
   const { tabs, state, dispatch } = useModalContext();
 
   const selectedTabId = state.meta.selectedTabId;
-  const selectedTabState = selectedTabId ? state[selectedTabId] : {};
+  const selectedTabState = useMemo(
+    () => (selectedTabId ? state[selectedTabId] : {}),
+    [selectedTabId, state]
+  );
 
   const {
     content: SelectedTabContent,
@@ -62,6 +66,10 @@ const TabbedModalInner: FC<ITabbedModal> = ({ onClose, modalTitle }) => {
     ));
   };
 
+  const btnClickHandler = useCallback(() => {
+    handler({ state: selectedTabState });
+  }, [handler, selectedTabState]);
+
   return (
     <EuiModal onClose={onClose}>
       {Boolean(modalTitle) ? (
@@ -79,7 +87,7 @@ const TabbedModalInner: FC<ITabbedModal> = ({ onClose, modalTitle }) => {
         </Fragment>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButton onClick={handler.bind(null, { state: selectedTabState })} fill>
+        <EuiButton onClick={btnClickHandler} fill>
           {label}
         </EuiButton>
       </EuiModalFooter>

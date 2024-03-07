@@ -106,7 +106,6 @@ export function ModalContextProvider<
   const reducersMap = useMemo(
     () =>
       tabs.reduce((result, { id, reducer, initialState, ...rest }) => {
-        // TODO: verify that re-renders don't make this value stale
         initialModalState.current[id] = initialState ?? {};
         modalTabDefinitions.current.push({ id, ...rest });
         result[id] = reducer;
