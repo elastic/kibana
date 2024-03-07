@@ -6,6 +6,8 @@
  */
 import React, { useEffect, useState } from 'react';
 
+import { useLocation } from 'react-router-dom';
+
 import { useActions, useValues } from 'kea';
 
 import {
@@ -15,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -50,6 +51,8 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
   useEffect(() => {
     if (!canCreateSameNameIndex) {
       setShowError(true);
+    } else {
+      setShowError(false);
     }
   }, [canCreateSameNameIndex]);
 
@@ -80,8 +83,21 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
     }
   }, [connector.id]);
 
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (hash) {
+      const id = hash.replace('#', '');
+      if (id === 'attachIndexBox') {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    }
+  }, [hash]);
+
   return (
-    <EuiPanel hasShadow={false} hasBorder>
+    <EuiPanel hasShadow={false} hasBorder id="attachIndexBox">
       <EuiTitle size="s">
         <h4>
           {i18n.translate('xpack.enterpriseSearch.attachIndexBox.h4.attachAnIndexLabel', {
@@ -99,12 +115,6 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
         />
       </EuiText>
       <EuiSpacer />
-      <EuiLink>
-        {i18n.translate('xpack.enterpriseSearch.attachIndexBox.learnMoreAboutIndicesLinkLabel', {
-          defaultMessage: 'Learn more about indices',
-        })}
-      </EuiLink>
-      <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
@@ -117,14 +127,17 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                 ? ''
                 : i18n.translate(
                     'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexHelpTextLabel',
-                    { defaultMessage: 'You can use an existing index or create a new one' }
+                    { defaultMessage: 'You can use an existing index or create a new one.' }
                   )
             }
             error={
               showError
                 ? i18n.translate(
                     'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexErrorTextLabel',
-                    { defaultMessage: 'You can use another existing index or create a new one' }
+                    {
+                      defaultMessage:
+                        "You can't create a new index using an existing index name. Choose an existing index or create a new index with a new name.",
+                    }
                   )
                 : undefined
             }
@@ -152,6 +165,9 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
               }}
               selectedOptions={selectedIndex ? [selectedIndex] : undefined}
               onCreateOption={(value) => {
+                if (showError) {
+                  setShowError(false);
+                }
                 setSelectedIndex({ label: value.trim(), shouldCreate: true });
               }}
               singleSelection={{ asPlainText: true }}
