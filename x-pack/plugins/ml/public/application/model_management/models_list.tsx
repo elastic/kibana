@@ -843,6 +843,7 @@ export const ModelsList: FC<Props> = ({
       ) : null}
       {isAddModelFlyoutVisible ? (
         <AddModelFlyout
+          data-test-subj={'mlAddTrainedModelFlyout'}
           modelDownloads={items.filter((i) => i.state === MODEL_STATE.NOT_DOWNLOADED)}
           onClose={setIsAddModelFlyoutVisible.bind(null, false)}
           onSubmit={(modelId) => {
