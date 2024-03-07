@@ -44,7 +44,6 @@ export function defineHasApiKeysRoutes({
 
       const { api_keys: apiKeys } = await esClient.asCurrentUser.security.getApiKey({
         owner: true,
-        // @ts-expect-error @elastic/elasticsearch SecurityGetApiKeyRequest.active_only: boolean | undefined
         active_only: true,
       });
 
