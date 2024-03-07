@@ -161,6 +161,8 @@
     "@kbn/core-security-server",
     "@kbn/core-security-common",
     "@kbn/core-security-server-mocks",
+    "@kbn/core-security-browser",
+    "@kbn/core-security-browser-mocks",
   ],
   "exclude": [
     "target/**/*",
