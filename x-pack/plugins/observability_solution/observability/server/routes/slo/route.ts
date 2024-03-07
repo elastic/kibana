@@ -26,6 +26,7 @@ import {
 } from '@kbn/slo-schema';
 import * as t from 'io-ts';
 
+import { getSloSettings } from '../../services/slo/slo_settings';
 import { sloSettingsObjectId, SO_SLO_SETTINGS_TYPE } from '../../saved_objects/slo_settings';
 import type { IndicatorTypes } from '../../domain/models';
 import { SloSettings } from '../../domain/models';
@@ -252,9 +253,7 @@ const getSLORoute = createObservabilityServerRoute({
     const summaryClient = new DefaultSummaryClient(esClient);
     const getSLO = new GetSLO(repository, summaryClient, esClient);
 
-    const response = await getSLO.execute(params.path.id, params.query);
-
-    return response;
+    return await getSLO.execute(params.path.id, params.query);
   },
 });
 
@@ -369,12 +368,11 @@ const findSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const summarySearchClient = new DefaultSummarySearchClient(esClient, logger, spaceId);
+    const summarySearchClient = new DefaultSummarySearchClient(esClient, soClient, logger, spaceId);
+
     const findSLO = new FindSLO(repository, summarySearchClient);
 
-    const response = await findSLO.execute(params?.query ?? {});
-
-    return response;
+    return await findSLO.execute(params?.query ?? {});
   },
 });
 
@@ -545,7 +543,7 @@ const getPreviewData = createObservabilityServerRoute({
   },
 });
 
-const getSloSettings = createObservabilityServerRoute({
+const getSloSettingsRoute = createObservabilityServerRoute({
   endpoint: 'GET /internal/observability/slo/settings',
   options: {
     tags: ['access:slo_read'],
@@ -555,15 +553,7 @@ const getSloSettings = createObservabilityServerRoute({
     await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
-    try {
-      const object = await soClient.get<SloSettings>(SO_SLO_SETTINGS_TYPE, sloSettingsObjectId);
-      return object.attributes;
-    } catch (e) {
-      return {
-        useAllRemoteClusters: true,
-        selectedRemoteClusters: [],
-      };
-    }
+    return await getSloSettings(soClient);
   },
 });
 
@@ -596,7 +586,7 @@ const putSloSettings = createObservabilityServerRoute({
 });
 
 export const sloRouteRepository = {
-  ...getSloSettings,
+  ...getSloSettingsRoute,
   ...putSloSettings,
   ...createSLORoute,
   ...inspectSLORoute,

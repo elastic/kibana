@@ -6,10 +6,11 @@
  */
 
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
+import { getSloSettings } from './slo_settings';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { SLO, SLOId, Status, Summary, Groupings } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
@@ -62,9 +63,32 @@ export interface SummarySearchClient {
 export class DefaultSummarySearchClient implements SummarySearchClient {
   constructor(
     private esClient: ElasticsearchClient,
+    private soClient: SavedObjectsClientContract,
     private logger: Logger,
     private spaceId: string
   ) {}
+
+  getListOfIndices = async () => {
+    const indices: string[] = [SLO_SUMMARY_DESTINATION_INDEX_PATTERN];
+
+    const { useAllRemoteClusters, selectedRemoteClusters } = await getSloSettings(this.soClient);
+    if (!useAllRemoteClusters && selectedRemoteClusters.length === 0) {
+      return indices;
+    }
+    const clustersByName = await this.esClient.cluster.remoteInfo();
+    const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
+    clusterNames.forEach((clusterName) => {
+      const cluster = clustersByName[clusterName];
+      if (
+        cluster.connected &&
+        (useAllRemoteClusters || selectedRemoteClusters.includes(clusterName))
+      ) {
+        indices.push(`${clusterName}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`);
+      }
+    });
+
+    return indices.join(',');
+  };
 
   async search(
     kqlQuery: string,
@@ -80,9 +104,11 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
       this.logger.error(`Failed to parse filters: ${e.message}`);
     }
 
+    const indices = await this.getListOfIndices();
+
     try {
       const summarySearch = await this.esClient.search<EsSummaryDocument>({
-        index: `remote_cluster:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN},${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`,
+        index: indices,
         track_total_hits: true,
         query: {
           bool: {
