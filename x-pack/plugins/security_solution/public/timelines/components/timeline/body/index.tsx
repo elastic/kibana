@@ -6,7 +6,7 @@
  */
 
 import { noop } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
@@ -15,6 +15,8 @@ import {
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
 } from '@kbn/timelines-plugin/public';
+import { ThemeContext } from 'styled-components';
+import { EuiText } from '@elastic/eui';
 import { getActionsColumnWidth } from '../../../../common/components/header_actions';
 import type { ControlColumnProps } from '../../../../../common/types';
 import type { CellValueElementProps } from '../cell_rendering';
@@ -36,6 +38,8 @@ import { ColumnHeaders } from './column_headers';
 import { Events } from './events';
 import { timelineBodySelector } from './selectors';
 import { useLicense } from '../../../../common/hooks/use_license';
+import { convertToCytoscapeElements, Cytoscape } from './cdr/cytoscape';
+import { getCytoscapeDivStyle } from './cdr/cytoscape_options';
 
 export interface Props {
   activePage: number;
@@ -264,6 +268,15 @@ export const StatefulBody = React.memo<Props>(
               tabType={tabType}
             />
           </EventsTable>
+          <Cytoscape
+            elements={convertToCytoscapeElements(data)}
+            height={400}
+            serviceName={'serviceName'}
+            style={getCytoscapeDivStyle(useContext(ThemeContext))}
+          />
+          <EuiText size="s" color="subdued" textAlign="center">
+            {data.map((d) => JSON.stringify(d))}
+          </EuiText>
         </TimelineBody>
         <TimelineBodyGlobalStyle />
       </>
