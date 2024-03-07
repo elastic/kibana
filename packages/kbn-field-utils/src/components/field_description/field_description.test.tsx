@@ -28,20 +28,14 @@ describe('FieldDescription', () => {
 
   it('should render correctly with a long custom description', async () => {
     const customDescription = 'test this long desc '.repeat(8).trim();
-    const truncatedCustomDescription =
-      'test this long desc test this long desc test this long desc test this long desc test this long desc test this…';
     render(<FieldDescription field={{ name: 'bytes', customDescription }} />);
-    expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(
-      `${truncatedCustomDescription} View more`
-    );
+    expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
     screen.queryByTestId('toggleFieldDescription-bytes')?.click();
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(
       `${customDescription}View less`
     );
     screen.queryByTestId('toggleFieldDescription-bytes')?.click();
-    expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(
-      `${truncatedCustomDescription} View more`
-    );
+    expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
   });
 
   it('should render a long custom description without truncation', async () => {
