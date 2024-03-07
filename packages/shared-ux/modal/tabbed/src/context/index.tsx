@@ -15,46 +15,46 @@ import React, {
   useCallback,
   type PropsWithChildren,
   type ReactElement,
-  type ComponentProps,
   type Dispatch,
 } from 'react';
-import { EuiTab } from '@elastic/eui';
+import { type EuiTabProps, type CommonProps } from '@elastic/eui';
 
 interface IDispatchAction {
   type: string;
-  payload: unknown;
+  payload: any;
 }
 
-type IReducer<S> = (state: S, action: IDispatchAction) => S;
+export type IModalTabState = Record<string, unknown>;
 
-interface IModalTabActionBtn<S> {
-  label: string;
-  handler: (args: { state: S }) => void;
-}
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+type IModalMetaState = {
+  selectedTabId: string | null;
+};
 
-export type IModalTabContent<S extends Record<string, unknown>> = (props: {
+type IReducer<S extends IModalTabState> = (state: S, action: IDispatchAction) => S;
+
+export type IModalTabContent<S extends IModalTabState> = (props: {
   state: S;
   dispatch: Dispatch<IDispatchAction>;
 }) => ReactElement;
 
-export type IModalTabDeclaration<S extends Record<string, unknown>> = ComponentProps<
-  typeof EuiTab
-> & {
+interface IModalTabActionBtn<S> extends CommonProps {
+  label: string;
+  handler: (args: { state: S }) => void;
+}
+
+export interface IModalTabDeclaration<S extends IModalTabState> extends EuiTabProps {
   id: string;
   title: string;
   initialState?: Partial<S>;
   reducer?: IReducer<S>;
   content: IModalTabContent<S>;
   modalActionBtn: IModalTabActionBtn<S>;
-};
-
-interface IModalMetaState {
-  selectedTabId: string | null;
 }
 
-interface IModalContext {
-  tabs: Array<Exclude<IModalTabDeclaration<Record<string, unknown>>, 'reducer' | 'initialState'>>;
-  state: { meta: IModalMetaState } & Record<string, Record<string, unknown>>;
+interface IModalContext<S extends IModalTabState = IModalTabState> {
+  tabs: Array<Exclude<IModalTabDeclaration<S>, 'reducer' | 'initialState'>>;
+  state: { meta: IModalMetaState } & Record<string, S>;
   dispatch: Dispatch<IDispatchAction>;
 }
 
@@ -69,7 +69,7 @@ const ModalContext = createContext<IModalContext>({
 });
 
 /**
- * @description defines state transition for meta information to manage the modal, new meta action types
+ * @description defines state transition for meta information to manage the modal, meta action types
  * must be prefixed with the string 'META_'
  */
 const modalMetaReducer: IReducer<IModalMetaState> = (state, action) => {
@@ -84,16 +84,17 @@ const modalMetaReducer: IReducer<IModalMetaState> = (state, action) => {
   }
 };
 
-export function ModalContextProvider<
-  T extends Array<IModalTabDeclaration<Record<string, unknown>>>
->({
+export type IModalContextProviderProps<Tabs extends Array<IModalTabDeclaration<IModalTabState>>> =
+  PropsWithChildren<{
+    tabs: Tabs;
+    selectedTabId: Tabs[number]['id'];
+  }>;
+
+export function ModalContextProvider<T extends Array<IModalTabDeclaration<IModalTabState>>>({
   tabs,
   selectedTabId,
   children,
-}: PropsWithChildren<{
-  tabs: T;
-  selectedTabId: T[number]['id'];
-}>) {
+}: IModalContextProviderProps<T>) {
   const modalTabDefinitions = useRef<IModalContext['tabs']>([]);
 
   const initialModalState = useRef<IModalContext['state']>({
@@ -115,7 +116,7 @@ export function ModalContextProvider<
   );
 
   const combineReducers = useCallback(
-    function (reducers: Record<string, IReducer<Record<string, unknown>>>) {
+    function (reducers: Record<string, IReducer<IModalTabState>>) {
       return (state: IModalContext['state'], action: IDispatchAction) => {
         const newState = { ...state };
 

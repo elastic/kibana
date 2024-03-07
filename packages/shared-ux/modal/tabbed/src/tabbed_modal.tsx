@@ -6,14 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, {
-  useMemo,
-  Fragment,
-  type ComponentProps,
-  type PropsWithChildren,
-  type FC,
-  useCallback,
-} from 'react';
+import React, { useMemo, Fragment, type ComponentProps, type FC, useCallback } from 'react';
 import {
   EuiButton,
   EuiModal,
@@ -24,13 +17,19 @@ import {
   EuiTabs,
   EuiTab,
 } from '@elastic/eui';
-import { ModalContextProvider, useModalContext } from './context';
+import {
+  ModalContextProvider,
+  useModalContext,
+  type IModalTabState,
+  type IModalTabDeclaration,
+  type IModalContextProviderProps,
+} from './context';
 
-interface ITabbedModal extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
+interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
   modalTitle?: string;
 }
 
-const TabbedModalInner: FC<ITabbedModal> = ({ onClose, modalTitle }) => {
+const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle }) => {
   const { tabs, state, dispatch } = useModalContext();
 
   const selectedTabId = state.meta.selectedTabId;
@@ -54,7 +53,6 @@ const TabbedModalInner: FC<ITabbedModal> = ({ onClose, modalTitle }) => {
     return tabs.map((tab, index) => (
       <EuiTab
         key={index}
-        href={tab.href}
         onClick={() => onSelectedTabChanged(tab.id)}
         isSelected={tab.id === selectedTabId}
         disabled={tab.disabled}
@@ -95,16 +93,14 @@ const TabbedModalInner: FC<ITabbedModal> = ({ onClose, modalTitle }) => {
   );
 };
 
-export const TabbedModal = ({
+export function TabbedModal<T extends Array<IModalTabDeclaration<IModalTabState>>>({
   tabs,
   selectedTabId,
   ...rest
-}: PropsWithChildren<
-  Omit<ComponentProps<typeof ModalContextProvider>, 'children'> & ITabbedModal
->) => {
+}: Omit<IModalContextProviderProps<T>, 'children'> & ITabbedModalInner) {
   return (
     <ModalContextProvider tabs={tabs} selectedTabId={selectedTabId}>
       <TabbedModalInner {...rest} />
     </ModalContextProvider>
   );
-};
+}

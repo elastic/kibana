@@ -15,6 +15,7 @@ import {
 } from './storybook/setup';
 
 import { TabbedModal } from './tabbed_modal';
+import { IModalTabDeclaration } from './context';
 
 export default {
   title: 'Modal/Tabbed Modal',
@@ -35,9 +36,12 @@ export const TrivialExample = (params: TabbedModalStorybookParams) => {
           title: 'Hello',
           content: () => {
             return (
-              <EuiText>
-                <p>Click the button to shout a message into the void</p>
-              </EuiText>
+              <Fragment>
+                <EuiSpacer size="m" />
+                <EuiText>
+                  <p>Click the button to send a message into the void</p>
+                </EuiText>
+              </Fragment>
             );
           },
           initialState: {
@@ -60,10 +64,6 @@ export const TrivialExample = (params: TabbedModalStorybookParams) => {
 TrivialExample.argTypes = argTypes;
 
 export const NonTrivialExample = (params: TabbedModalStorybookParams) => {
-  enum ACTION_TYPES {
-    SelectOption,
-  }
-
   const checkboxGroupItemId1 = useGeneratedHtmlId({
     prefix: 'checkboxGroupItem',
     suffix: 'first',
@@ -95,7 +95,13 @@ export const NonTrivialExample = (params: TabbedModalStorybookParams) => {
     },
   ];
 
-  const pizzaSelector = {
+  enum ACTION_TYPES {
+    SelectOption,
+  }
+
+  const pizzaSelector: IModalTabDeclaration<{
+    checkboxIdToSelectedMap: Record<string, boolean>;
+  }> = {
     id: 'order',
     title: 'Pizza of choice',
     initialState: {
@@ -104,7 +110,7 @@ export const NonTrivialExample = (params: TabbedModalStorybookParams) => {
       },
     },
     reducer(state, action) {
-      switch (String(action.type)) {
+      switch (action.type) {
         case String(ACTION_TYPES.SelectOption):
           return {
             ...state,
@@ -125,7 +131,10 @@ export const NonTrivialExample = (params: TabbedModalStorybookParams) => {
           },
         };
 
-        dispatch({ type: ACTION_TYPES.SelectOption, payload: newCheckboxIdToSelectedMap });
+        dispatch({
+          type: String(ACTION_TYPES.SelectOption),
+          payload: newCheckboxIdToSelectedMap,
+        });
       };
 
       return (
@@ -151,6 +160,7 @@ export const NonTrivialExample = (params: TabbedModalStorybookParams) => {
     },
   };
 
+  // TODO: fix type mismatch
   return (
     <TabbedModal
       {...params}
