@@ -18,45 +18,41 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
   return (
     <>
       <EuiFlexItem grow={false}>
-        {/* Prevent badges from growing when inside an EuiFlexGroup by wrapping content with div */}
-        <div>
-          {slo.summary.status === 'NO_DATA' && (
-            <EuiToolTip
-              position="top"
-              content={i18n.translate('xpack.observability.slo.sloStatusBadge.noDataTooltip', {
-                defaultMessage:
-                  'It may take some time before the data is aggregated and available.',
-              })}
-            >
-              <EuiBadge color="default">
-                {i18n.translate('xpack.observability.slo.sloStatusBadge.noData', {
-                  defaultMessage: 'No data',
-                })}
-              </EuiBadge>
-            </EuiToolTip>
-          )}
-          {slo.summary.status === 'HEALTHY' && (
-            <EuiBadge color="success">
-              {i18n.translate('xpack.observability.slo.sloStatusBadge.healthy', {
-                defaultMessage: 'Healthy',
+        {slo.summary.status === 'NO_DATA' && (
+          <EuiToolTip
+            position="top"
+            content={i18n.translate('xpack.observability.slo.sloStatusBadge.noDataTooltip', {
+              defaultMessage: 'It may take some time before the data is aggregated and available.',
+            })}
+          >
+            <EuiBadge color="default">
+              {i18n.translate('xpack.observability.slo.sloStatusBadge.noData', {
+                defaultMessage: 'No data',
               })}
             </EuiBadge>
-          )}
-          {slo.summary.status === 'DEGRADING' && (
-            <EuiBadge color="warning">
-              {i18n.translate('xpack.observability.slo.sloStatusBadge.degrading', {
-                defaultMessage: 'Degrading',
-              })}
-            </EuiBadge>
-          )}
-          {slo.summary.status === 'VIOLATED' && (
-            <EuiBadge color="danger">
-              {i18n.translate('xpack.observability.slo.sloStatusBadge.violated', {
-                defaultMessage: 'Violated',
-              })}
-            </EuiBadge>
-          )}
-        </div>
+          </EuiToolTip>
+        )}
+        {slo.summary.status === 'HEALTHY' && (
+          <EuiBadge color="success">
+            {i18n.translate('xpack.observability.slo.sloStatusBadge.healthy', {
+              defaultMessage: 'Healthy',
+            })}
+          </EuiBadge>
+        )}
+        {slo.summary.status === 'DEGRADING' && (
+          <EuiBadge color="warning">
+            {i18n.translate('xpack.observability.slo.sloStatusBadge.degrading', {
+              defaultMessage: 'Degrading',
+            })}
+          </EuiBadge>
+        )}
+        {slo.summary.status === 'VIOLATED' && (
+          <EuiBadge color="danger">
+            {i18n.translate('xpack.observability.slo.sloStatusBadge.violated', {
+              defaultMessage: 'Violated',
+            })}
+          </EuiBadge>
+        )}
       </EuiFlexItem>
 
       {slo.summary.errorBudget.isEstimated && (

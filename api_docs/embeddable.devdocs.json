@@ -145,7 +145,15 @@
                     "section": "def-public.EmbeddableOutput",
                     "text": "EmbeddableOutput"
                   },
-                  ", any>, unknown>) | undefined"
+                  ", any>, ",
+                  {
+                    "pluginId": "savedObjectsFinder",
+                    "scope": "common",
+                    "docId": "kibSavedObjectsFinderPluginApi",
+                    "section": "def-common.FinderAttributes",
+                    "text": "FinderAttributes"
+                  },
+                  ">) | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
                 "deprecated": false,
@@ -618,7 +626,15 @@
                     "section": "def-public.EmbeddableFactory",
                     "text": "EmbeddableFactory"
                   },
-                  "<I, O, E, unknown> | undefined"
+                  "<I, O, E, ",
+                  {
+                    "pluginId": "savedObjectsFinder",
+                    "scope": "common",
+                    "docId": "kibSavedObjectsFinderPluginApi",
+                    "section": "def-common.FinderAttributes",
+                    "text": "FinderAttributes"
+                  },
+                  "> | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
@@ -1592,7 +1608,15 @@
                 "section": "def-public.EmbeddableFactory",
                 "text": "EmbeddableFactory"
               },
-              "<TEmbeddableInput, any, TEmbeddable, unknown>, partial?: Partial<TEmbeddableInput>, attributes?: unknown) => { newPanel: ",
+              "<TEmbeddableInput, any, TEmbeddable, ",
+              {
+                "pluginId": "savedObjectsFinder",
+                "scope": "common",
+                "docId": "kibSavedObjectsFinderPluginApi",
+                "section": "def-common.FinderAttributes",
+                "text": "FinderAttributes"
+              },
+              ">, partial?: Partial<TEmbeddableInput>, attributes?: unknown) => { newPanel: ",
               {
                 "pluginId": "embeddable",
                 "scope": "common",
@@ -1621,7 +1645,15 @@
                     "section": "def-public.EmbeddableFactory",
                     "text": "EmbeddableFactory"
                   },
-                  "<TEmbeddableInput, any, TEmbeddable, unknown>"
+                  "<TEmbeddableInput, any, TEmbeddable, ",
+                  {
+                    "pluginId": "savedObjectsFinder",
+                    "scope": "common",
+                    "docId": "kibSavedObjectsFinderPluginApi",
+                    "section": "def-common.FinderAttributes",
+                    "text": "FinderAttributes"
+                  },
+                  ">"
                 ],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
@@ -7609,7 +7641,15 @@
             "section": "def-public.IEmbeddable",
             "text": "IEmbeddable"
           },
-          "<I, O, any>, T = ",
+          "<I, O, any>, T extends ",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "common",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-common.FinderAttributes",
+            "text": "FinderAttributes"
+          },
+          " = ",
           {
             "pluginId": "@kbn/core-saved-objects-common",
             "scope": "common",
@@ -9924,14 +9964,6 @@
           {
             "plugin": "embeddableEnhanced",
             "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
           }
         ],
         "children": [
@@ -14310,7 +14342,15 @@
               "section": "def-public.EmbeddableFactoryDefinition",
               "text": "EmbeddableFactoryDefinition"
             },
-            "<I, O, E, unknown>) => () => ",
+            "<I, O, E, ",
+            {
+              "pluginId": "savedObjectsFinder",
+              "scope": "common",
+              "docId": "kibSavedObjectsFinderPluginApi",
+              "section": "def-common.FinderAttributes",
+              "text": "FinderAttributes"
+            },
+            ">) => () => ",
             {
               "pluginId": "embeddable",
               "scope": "public",
@@ -14318,7 +14358,15 @@
               "section": "def-public.EmbeddableFactory",
               "text": "EmbeddableFactory"
             },
-            "<I, O, E, unknown>"
+            "<I, O, E, ",
+            {
+              "pluginId": "savedObjectsFinder",
+              "scope": "common",
+              "docId": "kibSavedObjectsFinderPluginApi",
+              "section": "def-common.FinderAttributes",
+              "text": "FinderAttributes"
+            },
+            ">"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": false,
@@ -14354,7 +14402,15 @@
                   "section": "def-public.EmbeddableFactoryDefinition",
                   "text": "EmbeddableFactoryDefinition"
                 },
-                "<I, O, E, unknown>"
+                "<I, O, E, ",
+                {
+                  "pluginId": "savedObjectsFinder",
+                  "scope": "common",
+                  "docId": "kibSavedObjectsFinderPluginApi",
+                  "section": "def-common.FinderAttributes",
+                  "text": "FinderAttributes"
+                },
+                ">"
               ],
               "path": "src/plugins/embeddable/public/plugin.tsx",
               "deprecated": false,
@@ -14566,7 +14622,15 @@
               "section": "def-public.EmbeddableFactory",
               "text": "EmbeddableFactory"
             },
-            "<I, O, E, unknown> | undefined"
+            "<I, O, E, ",
+            {
+              "pluginId": "savedObjectsFinder",
+              "scope": "common",
+              "docId": "kibSavedObjectsFinderPluginApi",
+              "section": "def-common.FinderAttributes",
+              "text": "FinderAttributes"
+            },
+            "> | undefined"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": false,
@@ -14646,7 +14710,15 @@
               "section": "def-public.EmbeddableOutput",
               "text": "EmbeddableOutput"
             },
-            ", any>, unknown>>"
+            ", any>, ",
+            {
+              "pluginId": "savedObjectsFinder",
+              "scope": "common",
+              "docId": "kibSavedObjectsFinderPluginApi",
+              "section": "def-common.FinderAttributes",
+              "text": "FinderAttributes"
+            },
+            ">>"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": false,
