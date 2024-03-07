@@ -21,7 +21,7 @@ jest.mock('./api', () => ({
   getDslPolicies: jest.fn(),
 }));
 
-describe('useGetDslStatus', () => {
+describe('useGetDataStreamStatuses', () => {
   it('filters and formats the data returned by the data streams API', () => {
     (useFetcher as jest.Mock).mockImplementation((callback) => {
       callback();
