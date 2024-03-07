@@ -40,6 +40,7 @@ Array [
           <button
             aria-label="View field description"
             class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+            data-test-subj="fieldDescriptionPopoverButton"
             title="View field description"
             type="button"
           >

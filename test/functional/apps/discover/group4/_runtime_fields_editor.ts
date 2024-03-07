@@ -102,6 +102,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('doc viewer popover text', async () => {
         return (await testSubjects.getVisibleText('fieldDescription-bytes')) === customDescription2;
       });
+
+      await dataGrid.closeFlyout();
     });
 
     it('allows creation of a new field', async function () {
