@@ -133,6 +133,30 @@ Array [
           "value": "some-space",
         },
       },
+      Object {
+        "set": Object {
+          "field": "slo.indicator.params",
+          "value": Object {
+            "environment": "irrelevant",
+            "index": "metrics-apm*",
+            "service": "irrelevant",
+            "transactionName": "irrelevant",
+            "transactionType": "irrelevant",
+          },
+        },
+      },
+      Object {
+        "set": Object {
+          "field": "slo.createdAt",
+          "value": 2024-03-07T21:07:45.535Z,
+        },
+      },
+      Object {
+        "set": Object {
+          "field": "slo.updatedAt",
+          "value": 2024-03-07T21:07:45.535Z,
+        },
+      },
     ],
   },
 ]

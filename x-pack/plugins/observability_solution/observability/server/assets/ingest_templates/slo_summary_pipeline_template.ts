@@ -166,6 +166,18 @@ export const getSLOSummaryPipelineTemplate = (slo: SLO, spaceId: string) => {
           value: slo.indicator.params,
         },
       },
+      {
+        set: {
+          field: 'slo.createdAt',
+          value: slo.createdAt,
+        },
+      },
+      {
+        set: {
+          field: 'slo.updatedAt',
+          value: slo.updatedAt,
+        },
+      },
     ],
     _meta: {
       description: `Ingest pipeline for SLO summary data [id: ${slo.id}, revision: ${slo.revision}]`,
