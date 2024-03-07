@@ -7,7 +7,6 @@
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import type { FilterBasedSimpleQuery } from './types';
 import { isDefaultQuery } from './default_query';
 
 const boolRequiredAttributes = ['filter', 'must', 'must_not'];
@@ -15,19 +14,14 @@ const boolRequiredAttributes = ['filter', 'must', 'must_not'];
 // should identify variants of
 // `{ bool: { filter: [{ match_all: {} }], must: [], must_not: [], should: [] } }`
 // `{ bool: { filter: [], must: [{ match_all: {} }], must_not: [] } }`
-export function isFilterBasedDefaultQuery(arg: unknown): arg is FilterBasedSimpleQuery {
+export function isFilterBasedDefaultQuery(arg: unknown): boolean {
   return (
     isPopulatedObject(arg, ['bool']) &&
     isPopulatedObject(arg.bool, boolRequiredAttributes) &&
-    Object.keys(arg.bool).every(
+    Object.values(arg.bool).every(
       // should be either an empty array or an array with just 1 default query
       (d) => {
-        if (!isPopulatedObject(arg.bool, [d])) return false;
-        const attr = arg.bool[d];
-        return (
-          Array.isArray(attr) &&
-          (attr.length === 0 || (attr.length === 1 && isDefaultQuery(attr[0])))
-        );
+        return Array.isArray(d) && (d.length === 0 || (d.length === 1 && isDefaultQuery(d[0])));
       }
     )
   );
