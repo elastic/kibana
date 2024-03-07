@@ -177,7 +177,11 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                 </EuiFlexGroup>
                 <EuiSpacer size="s" />
                 <p>
-                  <EuiText color={'subdued'} size={'s'}>
+                  <EuiText
+                    color={'subdued'}
+                    size={'s'}
+                    data-test-subj="mlAddTrainedModelFlyoutElserModelHeaderCopy"
+                  >
                     <FormattedMessage
                       id="xpack.ml.trainedModels.addModelFlyout.elserDescription"
                       defaultMessage="ELSER is Elastic's NLP model for English semantic search, utilizing sparse vectors. It prioritizes intent and contextual meaning over literal term matching, optimized specifically for English documents and queries on the Elastic platform."
