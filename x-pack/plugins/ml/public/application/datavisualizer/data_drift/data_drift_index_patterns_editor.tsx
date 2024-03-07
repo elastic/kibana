@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -13,14 +15,14 @@ import {
   EuiFieldText,
   EuiFormRow,
   EuiFlexGroup,
-  EuiComboBoxOptionOption,
   EuiComboBox,
   EuiSteps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
-import { combineLatest, map, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 import { debounce, intersectionBy } from 'lodash';
 import { type DataViewEditorService } from '@kbn/data-view-editor-plugin/public';
 import { useToastNotificationService } from '../../services/toast_notification_service';

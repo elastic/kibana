@@ -8,30 +8,41 @@ import {
   Axis,
   BarSeries,
   Chart,
+  ElementClickListener,
   Position,
   ScaleType,
   Settings,
   Tooltip,
   TooltipType,
+  XYChartElementEvent,
 } from '@elastic/charts';
 import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { GetPreviewDataResponse } from '@kbn/slo-schema';
+import { GetPreviewDataResponse, SLO } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useRef } from 'react';
 import { useKibana } from '../../../../utils/kibana_react';
+import { openInDiscover } from '../../../../utils/slo/get_discover_link';
 
 export interface Props {
   data: GetPreviewDataResponse;
+  slo?: SLO;
   annotation?: React.ReactNode;
   isLoading?: boolean;
   bottomTitle?: string;
 }
 
-export function GoodBadEventsChart({ annotation, data, isLoading = false, bottomTitle }: Props) {
-  const { charts, uiSettings } = useKibana().services;
+export function GoodBadEventsChart({
+  annotation,
+  bottomTitle,
+  data,
+  slo,
+  isLoading = false,
+  indicatorType,
+}: Props) {
+  const { charts, uiSettings, discover } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
   const chartRef = useRef(null);
@@ -47,6 +58,34 @@ export function GoodBadEventsChart({ annotation, data, isLoading = false, bottom
     fit: true,
     min: NaN,
     max: NaN,
+  };
+
+  const intervalInMilliseconds =
+    data && data.length > 2
+      ? moment(data[1].date).valueOf() - moment(data[0].date).valueOf()
+      : 10 * 60000;
+
+  const goodEventId = i18n.translate(
+    'xpack.observability.slo.sloDetails.eventsChartPanel.goodEventsLabel',
+    { defaultMessage: 'Good events' }
+  );
+
+  const badEventId = i18n.translate(
+    'xpack.observability.slo.sloDetails.eventsChartPanel.badEventsLabel',
+    { defaultMessage: 'Bad events' }
+  );
+
+  const barClickHandler = (params: XYChartElementEvent[]) => {
+    if (slo?.indicator?.type === 'sli.kql.custom') {
+      const [datanum, eventDetail] = params[0];
+      const isBad = eventDetail.specId === badEventId;
+      const timeRange = {
+        from: moment(datanum.x).toISOString(),
+        to: moment(datanum.x).add(intervalInMilliseconds, 'ms').toISOString(),
+        mode: 'absolute' as const,
+      };
+      openInDiscover(discover, slo, isBad, !isBad, timeRange);
+    }
   };
 
   return (
@@ -69,6 +108,7 @@ export function GoodBadEventsChart({ annotation, data, isLoading = false, bottom
             pointerUpdateDebounce={0}
             pointerUpdateTrigger={'x'}
             locale={i18n.getLocale()}
+            onElementClick={barClickHandler as ElementClickListener}
           />
           {annotation}
           <Axis
@@ -86,10 +126,7 @@ export function GoodBadEventsChart({ annotation, data, isLoading = false, bottom
           />
           <>
             <BarSeries
-              id={i18n.translate(
-                'xpack.observability.slo.sloDetails.eventsChartPanel.goodEventsLabel',
-                { defaultMessage: 'Good events' }
-              )}
+              id={goodEventId}
               color={euiTheme.colors.success}
               barSeriesStyle={{
                 rect: { fill: euiTheme.colors.success },
@@ -109,10 +146,7 @@ export function GoodBadEventsChart({ annotation, data, isLoading = false, bottom
             />
 
             <BarSeries
-              id={i18n.translate(
-                'xpack.observability.slo.sloDetails.eventsChartPanel.badEventsLabel',
-                { defaultMessage: 'Bad events' }
-              )}
+              id={badEventId}
               color={euiTheme.colors.danger}
               barSeriesStyle={{
                 rect: { fill: euiTheme.colors.danger },

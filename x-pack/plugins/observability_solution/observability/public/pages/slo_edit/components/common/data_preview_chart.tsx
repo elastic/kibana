@@ -257,6 +257,7 @@ export function DataPreviewChart({
               bottomTitle={label || DEFAULT_LABEL}
               isLoading={isPreviewLoading}
               annotation={annotation}
+              indicatorType="sli.synthetics.availablility"
             />
           )}
           {isSuccess && !useGoodBadEventsChart && (

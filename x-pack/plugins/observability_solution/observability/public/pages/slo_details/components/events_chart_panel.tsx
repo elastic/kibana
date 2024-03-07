@@ -21,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiLoadingChart,
   EuiPanel,
   EuiText,
@@ -34,10 +35,12 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useRef } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useGetPreviewData } from '../../../hooks/slo/use_get_preview_data';
 import { useKibana } from '../../../utils/kibana_react';
 import { COMPARATOR_MAPPING } from '../../slo_edit/constants';
 import { GoodBadEventsChart } from '../../slos/components/common/good_bad_events_chart';
+import { getDiscoverLink } from '../../../utils/slo/get_discover_link';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -48,7 +51,7 @@ export interface Props {
 }
 
 export function EventsChartPanel({ slo, range }: Props) {
-  const { charts, uiSettings } = useKibana().services;
+  const { charts, uiSettings, discover } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
   const chartRef = useRef(null);
@@ -142,23 +145,54 @@ export function EventsChartPanel({ slo, range }: Props) {
       </>
     ) : null;
 
+  const showViewEventsLink = ![
+    'sli.apm.transactionErrorRate',
+    'sli.apm.transactionDuration',
+  ].includes(slo.indicator.type);
+
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="eventsChartPanel">
       <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>{title}</EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText color="subdued" size="s">
-              {i18n.translate('xpack.observability.slo.sloDetails.eventsChartPanel.duration', {
-                defaultMessage: 'Last 24h',
-              })}
-            </EuiText>
-          </EuiFlexItem>
+        <EuiFlexGroup>
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem grow={1}> {title}</EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText color="subdued" size="s">
+                {i18n.translate('xpack.observability.slo.sloDetails.eventsChartPanel.duration', {
+                  defaultMessage: 'Last 24h',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {showViewEventsLink && (
+            <EuiFlexItem grow={0}>
+              <EuiLink
+                color="text"
+                href={getDiscoverLink(discover, slo, {
+                  from: 'now-24h',
+                  to: 'now',
+                  mode: 'relative',
+                })}
+                data-test-subj="sloDetailDiscoverLink"
+              >
+                <EuiIcon type="sortRight" style={{ marginRight: '4px' }} />
+                <FormattedMessage
+                  id="xpack.observability.slo.sloDetails.viewEventsLink"
+                  defaultMessage="View events"
+                />
+              </EuiLink>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
 
         <EuiFlexItem>
           {slo.indicator.type !== 'sli.metric.timeslice' ? (
-            <GoodBadEventsChart isLoading={isLoading} data={data || []} annotation={annotation} />
+            <GoodBadEventsChart
+              isLoading={isLoading}
+              data={data || []}
+              annotation={annotation}
+              slo={slo}
+            />
           ) : (
             <>
               {isLoading && (
