@@ -70,8 +70,8 @@ describe('Connector type config checks', () => {
         }).getSubActions();
 
         subActions.forEach((subAction) => {
-          if (subAction.schema) {
-            expect(subAction.schema.getSchema!().describe()).toMatchSnapshot();
+          if (subAction.schema?.getSchema) {
+            expect(subAction.schema.getSchema().describe()).toMatchSnapshot();
           }
         });
       }

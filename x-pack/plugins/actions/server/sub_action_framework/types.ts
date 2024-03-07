@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import type { Method, AxiosRequestConfig } from 'axios';
+import { AnySchema } from 'joi';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
   ActionTypeParams,
@@ -96,7 +97,12 @@ export type ExtractFunctionKeys<T> = {
 export interface SubAction {
   name: string;
   method: string;
-  schema: Type<unknown> | null;
+  schema:
+    | Type<unknown>
+    | {
+        getSchema?: () => AnySchema;
+      }
+    | null;
 }
 
 export interface PushToServiceParams {
