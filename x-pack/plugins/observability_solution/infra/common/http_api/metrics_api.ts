@@ -8,13 +8,7 @@
 import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 import { MetricsUIAggregationRT } from '@kbn/metrics-data-access-plugin/common';
-import { afterKeyObjectRT } from './metrics_explorer';
-
-export const MetricsAPITimerangeRT = rt.type({
-  from: rt.number,
-  to: rt.number,
-  interval: rt.string,
-});
+import { afterKeyObjectRT, timeRangeRT } from './metrics_explorer';
 
 const groupByRT = rt.union([rt.string, rt.null, rt.undefined]);
 
@@ -25,7 +19,7 @@ export const MetricsAPIMetricRT = rt.type({
 
 export const MetricsAPIRequestRT = rt.intersection([
   rt.type({
-    timerange: MetricsAPITimerangeRT,
+    timerange: timeRangeRT,
     indexPattern: rt.string,
     metrics: rt.array(MetricsAPIMetricRT),
     includeTimeseries: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(true)]),
@@ -90,7 +84,7 @@ export const MetricsAPIResponseRT = rt.type({
   info: MetricsAPIPageInfoRT,
 });
 
-export type MetricsAPITimerange = rt.TypeOf<typeof MetricsAPITimerangeRT>;
+export type MetricsAPITimerange = rt.TypeOf<typeof timeRangeRT>;
 
 export type MetricsAPIColumnType = rt.TypeOf<typeof MetricsAPIColumnTypeRT>;
 
