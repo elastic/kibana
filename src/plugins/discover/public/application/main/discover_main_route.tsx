@@ -52,7 +52,6 @@ interface DiscoverLandingParams {
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
-  isDev: boolean;
   customizationContext: DiscoverCustomizationContext;
 }
 

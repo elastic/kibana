@@ -112,7 +112,6 @@ describe('DiscoverMainRoute', () => {
 
 const mountComponent = (hasESData = true, hasUserDataView = true) => {
   const props: MainRouteProps = {
-    isDev: false,
     customizationCallbacks: [],
     customizationContext: mockCustomizationContext,
   };

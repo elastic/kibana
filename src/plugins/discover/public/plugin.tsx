@@ -230,7 +230,6 @@ export class DiscoverPlugin
     plugins: DiscoverSetupPlugins
   ): DiscoverSetup {
     const baseUrl = core.http.basePath.prepend('/app/discover');
-    const isDev = this.initializerContext.env.mode.dev;
 
     if (plugins.share) {
       const useHash = core.uiSettings.get('state:storeInSessionStorage');
@@ -347,7 +346,6 @@ export class DiscoverPlugin
             displayMode: 'standalone',
             inlineTopNav: this.inlineTopNav,
           },
-          isDev,
         });
 
         return () => {
@@ -408,7 +406,6 @@ export class DiscoverPlugin
     setUiActions(plugins.uiActions);
     injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
-    const isDev = this.initializerContext.env.mode.dev;
     const getDiscoverServicesInternal = () => {
       return this.getDiscoverServices(core, plugins);
     };
@@ -428,11 +425,7 @@ export class DiscoverPlugin
       locator: this.locator,
       DiscoverContainer: (props: DiscoverContainerProps) => {
         return (
-          <DiscoverContainerInternal
-            getDiscoverServices={getDiscoverServicesInternal}
-            isDev={isDev}
-            {...props}
-          />
+          <DiscoverContainerInternal getDiscoverServices={getDiscoverServicesInternal} {...props} />
         );
       },
       registerCustomizationProfile: createRegisterCustomizationProfile(this.profileRegistry),

@@ -30,7 +30,6 @@ export interface DiscoverContainerInternalProps {
   scopedHistory: ScopedHistory;
   customizationCallbacks: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
-  isDev: boolean;
   isLoading?: boolean;
 }
 
@@ -57,7 +56,6 @@ export const DiscoverContainerInternal = ({
   overrideServices,
   scopedHistory,
   customizationCallbacks,
-  isDev,
   getDiscoverServices,
   stateStorageContainer,
   isLoading = false,
@@ -103,7 +101,6 @@ export const DiscoverContainerInternal = ({
             customizationCallbacks={customizationCallbacks}
             customizationContext={customizationContext}
             stateStorageContainer={stateStorageContainer}
-            isDev={isDev}
           />
         </KibanaContextProvider>
       </EuiFlexItem>

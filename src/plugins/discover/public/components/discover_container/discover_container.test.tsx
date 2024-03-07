@@ -40,7 +40,6 @@ const TestComponent = (props: Partial<DiscoverContainerInternalProps>) => {
     <DiscoverContainerInternal
       overrideServices={props.overrideServices ?? mockOverrideService}
       customizationCallbacks={props.customizationCallbacks ?? [customizeMock]}
-      isDev={props.isDev ?? false}
       scopedHistory={props.scopedHistory ?? (history() as ScopedHistory<unknown>)}
       getDiscoverServices={getDiscoverServicesMock}
     />
