@@ -49,6 +49,31 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [selectedAgents, setSelectedAgents] = useState<Agent[]>([]);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('manual');
 
+  // Agent enrollment flyout state
+  const [enrollmentFlyout, setEnrollmentFlyoutState] = useState<{
+    isOpen: boolean;
+    selectedPolicyId?: string;
+  }>({
+    isOpen: false,
+  });
+  const [isAgentActivityFlyoutOpen, setAgentActivityFlyoutOpen] = useState(false);
+  const flyoutContext = useFlyoutContext();
+
+  // Agent actions states
+  const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
+  const [agentToUnenroll, setAgentToUnenroll] = useState<Agent | undefined>(undefined);
+  const [agentToGetUninstallCommand, setAgentToGetUninstallCommand] = useState<Agent | undefined>(
+    undefined
+  );
+  const [agentToUpgrade, setAgentToUpgrade] = useState<Agent | undefined>(undefined);
+  const [agentToAddRemoveTags, setAgentToAddRemoveTags] = useState<Agent | undefined>(undefined);
+  const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
+  const [showTagsAddRemove, setShowTagsAddRemove] = useState(false);
+  const [agentToRequestDiagnostics, setAgentToRequestDiagnostics] = useState<Agent | undefined>(
+    undefined
+  );
+  const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
+
   const {
     allTags,
     agentsOnCurrentPage,
@@ -119,31 +144,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSelectedTags,
     setShowUpgradeable,
   ]);
-
-  // Agent enrollment flyout state
-  const [enrollmentFlyout, setEnrollmentFlyoutState] = useState<{
-    isOpen: boolean;
-    selectedPolicyId?: string;
-  }>({
-    isOpen: false,
-  });
-  const [isAgentActivityFlyoutOpen, setAgentActivityFlyoutOpen] = useState(false);
-  const flyoutContext = useFlyoutContext();
-
-  // Agent actions states
-  const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
-  const [agentToUnenroll, setAgentToUnenroll] = useState<Agent | undefined>(undefined);
-  const [agentToGetUninstallCommand, setAgentToGetUninstallCommand] = useState<Agent | undefined>(
-    undefined
-  );
-  const [agentToUpgrade, setAgentToUpgrade] = useState<Agent | undefined>(undefined);
-  const [agentToAddRemoveTags, setAgentToAddRemoveTags] = useState<Agent | undefined>(undefined);
-  const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
-  const [showTagsAddRemove, setShowTagsAddRemove] = useState(false);
-  const [agentToRequestDiagnostics, setAgentToRequestDiagnostics] = useState<Agent | undefined>(
-    undefined
-  );
-  const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
 
   const onTableChange = ({
     page,
@@ -217,6 +217,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       }
     }
     setSelectedAgents(newAgents);
+  };
+
+  const onSelectedStatusChange = (status: string[]) => {
+    if (selectionMode === 'query') {
+      setSelectionMode('manual');
+    }
+    setSelectedStatus(status);
   };
 
   const agentToUnenrollHasFleetServer = useMemo(() => {
@@ -390,7 +397,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selectedAgentPolicies={selectedAgentPolicies}
         onSelectedAgentPoliciesChange={setSelectedAgentPolicies}
         selectedStatus={selectedStatus}
-        onSelectedStatusChange={setSelectedStatus}
+        onSelectedStatusChange={onSelectedStatusChange}
         showUpgradeable={showUpgradeable}
         onShowUpgradeableChange={setShowUpgradeable}
         tags={allTags ?? []}
