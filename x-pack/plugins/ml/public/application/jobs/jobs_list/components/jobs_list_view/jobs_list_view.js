@@ -360,6 +360,7 @@ export class JobsListView extends Component {
         // deleting tasks are over
         this.checkBlockingJobTasks(true);
         if (this.state.blockingJobsFirstFoundMs === null) {
+          // keep a record of when the first blocked job was found
           this.setState({ blockingJobsFirstFoundMs: Date.now() });
         }
       } else {
