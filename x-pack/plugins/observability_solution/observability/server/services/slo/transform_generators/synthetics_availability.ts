@@ -179,7 +179,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       'slo.denominator': {
         filter: {
           term: {
-           'summary.final_attempt': true,
+            'summary.final_attempt': true,
           },
         },
       },
