@@ -1,31 +1,24 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
- 
 lexer grammar esql_lexer;
-options {  }
+options { caseInsensitive = true; }
 
-DISSECT : D I S S E C T                 -> pushMode(EXPRESSION_MODE);
-DROP : D R O P                          -> pushMode(PROJECT_MODE);
-ENRICH : E N R I C H                    -> pushMode(ENRICH_MODE);
-EVAL : E V A L                          -> pushMode(EXPRESSION_MODE);
-EXPLAIN : E X P L A I N                 -> pushMode(EXPLAIN_MODE);
-FROM : F R O M                          -> pushMode(FROM_MODE);
-GROK : G R O K                          -> pushMode(EXPRESSION_MODE);
-INLINESTATS : I N L I N E S T A T S     -> pushMode(EXPRESSION_MODE);
-KEEP : K E E P                          -> pushMode(PROJECT_MODE);
-LIMIT : L I M I T                       -> pushMode(EXPRESSION_MODE);
-MV_EXPAND : M V UNDERSCORE E X P A N D  -> pushMode(MVEXPAND_MODE);
-RENAME : R E N A M E                    -> pushMode(RENAME_MODE);
-ROW : R O W                             -> pushMode(EXPRESSION_MODE);
-SHOW : S H O W                          -> pushMode(SHOW_MODE);
-SORT : S O R T                          -> pushMode(EXPRESSION_MODE);
-STATS : S T A T S                       -> pushMode(EXPRESSION_MODE);
-WHERE : W H E R E                       -> pushMode(EXPRESSION_MODE);
-UNKNOWN_CMD : ~[ \r\n\t[\]/]+           -> pushMode(EXPRESSION_MODE);
+DISSECT : 'dissect'           -> pushMode(EXPRESSION_MODE);
+DROP : 'drop'                 -> pushMode(PROJECT_MODE);
+ENRICH : 'enrich'             -> pushMode(ENRICH_MODE);
+EVAL : 'eval'                 -> pushMode(EXPRESSION_MODE);
+EXPLAIN : 'explain'           -> pushMode(EXPLAIN_MODE);
+FROM : 'from'                 -> pushMode(FROM_MODE);
+GROK : 'grok'                 -> pushMode(EXPRESSION_MODE);
+INLINESTATS : 'inlinestats'   -> pushMode(EXPRESSION_MODE);
+KEEP : 'keep'                 -> pushMode(PROJECT_MODE);
+LIMIT : 'limit'               -> pushMode(EXPRESSION_MODE);
+MV_EXPAND : 'mv_expand'       -> pushMode(MVEXPAND_MODE);
+RENAME : 'rename'             -> pushMode(RENAME_MODE);
+ROW : 'row'                   -> pushMode(EXPRESSION_MODE);
+SHOW : 'show'                 -> pushMode(SHOW_MODE);
+SORT : 'sort'                 -> pushMode(EXPRESSION_MODE);
+STATS : 'stats'               -> pushMode(EXPRESSION_MODE);
+WHERE : 'where'               -> pushMode(EXPRESSION_MODE);
+UNKNOWN_CMD : ~[ \r\n\t[\]/]+ -> pushMode(EXPRESSION_MODE);
 
 LINE_COMMENT
     : '//' ~[\r\n]* '\r'? '\n'? -> channel(HIDDEN)
@@ -112,32 +105,32 @@ DECIMAL_LITERAL
     | DOT DIGIT+ EXPONENT
     ;
 
-BY : B Y;
+BY : 'by';
 
-AND : A N D;
-ASC : A S C;
+AND : 'and';
+ASC : 'asc';
 ASSIGN : '=';
 COMMA : ',';
-DESC : D E S C;
+DESC : 'desc';
 DOT : '.';
-FALSE : F A L S E;
-FIRST : F I R S T;
-LAST : L A S T;
+FALSE : 'false';
+FIRST : 'first';
+LAST : 'last';
 LP : '(';
-IN: I N;
-IS: I S;
-LIKE: L I K E;
-NOT : N O T;
-NULL : N U L L;
-NULLS : N U L L S;
-OR : O R;
+IN: 'in';
+IS: 'is';
+LIKE: 'like';
+NOT : 'not';
+NULL : 'null';
+NULLS : 'nulls';
+OR : 'or';
 PARAM: '?';
-RLIKE: R L I K E;
+RLIKE: 'rlike';
 RP : ')';
-TRUE : T R U E;
+TRUE : 'true';
 
 EQ  : '==';
-CIEQ : '=~';
+CIEQ  : '=~';
 NEQ : '!=';
 LT  : '<';
 LTE : '<=';
@@ -194,7 +187,7 @@ FROM_CLOSING_BRACKET : CLOSING_BRACKET -> type(CLOSING_BRACKET);
 FROM_COMMA : COMMA -> type(COMMA);
 FROM_ASSIGN : ASSIGN -> type(ASSIGN);
 
-METADATA: M E T A D A T A;
+METADATA: 'metadata';
 
 fragment FROM_UNQUOTED_IDENTIFIER_PART
     : ~[=`|,[\]/ \t\r\n]
@@ -261,7 +254,7 @@ RENAME_ASSIGN : ASSIGN -> type(ASSIGN);
 RENAME_COMMA : COMMA -> type(COMMA);
 RENAME_DOT: DOT -> type(DOT);
 
-AS : A S;
+AS : 'as';
 
 RENAME_ID_PATTERN
     : ID_PATTERN -> type(ID_PATTERN)
@@ -284,14 +277,15 @@ mode ENRICH_MODE;
 ENRICH_PIPE : PIPE -> type(PIPE), popMode;
 ENRICH_OPENING_BRACKET : OPENING_BRACKET -> type(OPENING_BRACKET), pushMode(SETTING_MODE);
 
-ON : O N        -> pushMode(ENRICH_FIELD_MODE);
-WITH : W I T H  -> pushMode(ENRICH_FIELD_MODE);
+ON : 'on'     -> pushMode(ENRICH_FIELD_MODE);
+WITH : 'with' -> pushMode(ENRICH_FIELD_MODE);
 
 // similar to that of an index
 // see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html#indices-create-api-path-params
 fragment ENRICH_POLICY_NAME_BODY
     : ~[\\/?"<>| ,#\t\r\n:]
     ;
+
 ENRICH_POLICY_NAME
     // allow prefix for the policy to specify its resolution
     : (ENRICH_POLICY_NAME_BODY+ COLON)? ENRICH_POLICY_NAME_BODY+
@@ -358,7 +352,6 @@ MVEXPAND_UNQUOTED_IDENTIFIER
     : UNQUOTED_IDENTIFIER -> type(UNQUOTED_IDENTIFIER)
     ;
 
-
 MVEXPAND_LINE_COMMENT
     : LINE_COMMENT -> channel(HIDDEN)
     ;
@@ -377,8 +370,8 @@ MVEXPAND_WS
 mode SHOW_MODE;
 SHOW_PIPE : PIPE -> type(PIPE), popMode;
 
-INFO : I N F O;
-FUNCTIONS : F U N C T I O N S;
+INFO : 'info';
+FUNCTIONS : 'functions';
 
 SHOW_LINE_COMMENT
     : LINE_COMMENT -> channel(HIDDEN)
@@ -394,43 +387,22 @@ SHOW_WS
 
 mode SETTING_MODE;
 SETTING_CLOSING_BRACKET : CLOSING_BRACKET -> type(CLOSING_BRACKET), popMode;
+
 COLON : ':';
+
 SETTING
     : (ASPERAND | DIGIT| DOT | LETTER | UNDERSCORE)+
     ;
+
 SETTING_LINE_COMMENT
     : LINE_COMMENT -> channel(HIDDEN)
     ;
+
 SETTTING_MULTILINE_COMMENT
     : MULTILINE_COMMENT -> channel(HIDDEN)
     ;
+
 SETTING_WS
     : WS -> channel(HIDDEN)
     ;
 
-fragment A : [aA]; // match either an 'a' or 'A'
-fragment B : [bB];
-fragment C : [cC];
-fragment D : [dD];
-fragment E : [eE];
-fragment F : [fF];
-fragment G : [gG];
-fragment H : [hH];
-fragment I : [iI];
-fragment J : [jJ];
-fragment K : [kK];
-fragment L : [lL];
-fragment M : [mM];
-fragment N : [nN];
-fragment O : [oO];
-fragment P : [pP];
-fragment Q : [qQ];
-fragment R : [rR];
-fragment S : [sS];
-fragment T : [tT];
-fragment U : [uU];
-fragment V : [vV];
-fragment W : [wW];
-fragment X : [xX];
-fragment Y : [yY];
-fragment Z : [zZ];
