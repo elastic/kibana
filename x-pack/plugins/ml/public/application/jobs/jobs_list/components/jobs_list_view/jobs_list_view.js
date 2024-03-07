@@ -377,7 +377,6 @@ export class JobsListView extends Component {
       return;
     }
 
-    console.log('checking blocking job tasks');
     const { jobs } = await ml.jobs.blockingJobTasks();
     const blockingJobIds = jobs.map((j) => Object.keys(j)[0]).sort();
     const taskListHasChanged = blockingJobIds.join() !== this.state.blockingJobIds.join();
