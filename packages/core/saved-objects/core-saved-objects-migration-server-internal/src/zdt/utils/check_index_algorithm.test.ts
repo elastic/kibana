@@ -73,7 +73,6 @@ describe('checkIndexCurrentAlgorithm', () => {
     expect(checkIndexCurrentAlgorithm(mapping)).toEqual('v2-partially-migrated');
   });
 
-
   it('returns `v2-incompatible` if v2 hashes are present but not indexTypesMap', () => {
     const mapping: IndexMapping = {
       properties: {},
