@@ -34,26 +34,21 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  CONNECTOR_CLIENTS_TYPE,
-  CONNECTOR_NATIVE_TYPE,
-  INGESTION_METHOD_IDS,
-} from '../../../../../../common/constants';
+import { CONNECTOR_CLIENTS_TYPE, CONNECTOR_NATIVE_TYPE } from '../../../../../../common/constants';
 
 import connectorLogo from '../../../../../assets/source_icons/network_drive.svg';
 import { BACK_BUTTON_LABEL } from '../../../../shared/constants';
-import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
 import { parseQueryParams } from '../../../../shared/query_params';
 
-import { NEW_INDEX_METHOD_PATH, NEW_INDEX_PATH } from '../../../routes';
+import { NEW_CONNECTOR_PATH, NEW_INDEX_PATH } from '../../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
 
 import { CONNECTORS } from '../../search_index/connector/constants';
 
-import { baseBreadcrumbs } from '../../search_indices';
+import { connectorsBreadcrumbs } from '../connectors';
 
 import { ConnectorCheckable } from './connector_checkable';
 import { ConnectorDescriptionBadge } from './connector_description_badge_popout';
@@ -115,7 +110,7 @@ export const SelectConnector: React.FC = () => {
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
-        ...baseBreadcrumbs,
+        ...connectorsBreadcrumbs,
         i18n.translate('xpack.enterpriseSearch.content.indices.selectConnector.breadcrumb', {
           defaultMessage: 'Select connector',
         }),
@@ -345,9 +340,7 @@ export const SelectConnector: React.FC = () => {
                       );
                     }
                     KibanaLogic.values.navigateToUrl(
-                      `${generateEncodedPath(NEW_INDEX_METHOD_PATH, {
-                        type: INGESTION_METHOD_IDS.CONNECTOR,
-                      })}?${queryParam.toString()}`
+                      `${NEW_CONNECTOR_PATH}?${queryParam.toString()}`
                     );
                   }}
                   documentationUrl={connector.docsUrl}
