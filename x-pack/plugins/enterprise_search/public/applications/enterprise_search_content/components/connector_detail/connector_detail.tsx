@@ -123,7 +123,7 @@ export const ConnectorDetail: React.FC = () => {
       ? [
           {
             content: <ConnectorSyncRules />,
-            disabled: !index,
+            disabled: !connector?.index_name,
             id: ConnectorDetailTabId.SYNC_RULES,
             isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
             label: i18n.translate(
@@ -144,7 +144,7 @@ export const ConnectorDetail: React.FC = () => {
       : []),
     {
       content: <ConnectorScheduling />,
-      disabled: !index,
+      disabled: !connector?.index_name,
       id: ConnectorDetailTabId.SCHEDULING,
       isSelected: tabId === ConnectorDetailTabId.SCHEDULING,
       label: i18n.translate(
@@ -186,7 +186,7 @@ export const ConnectorDetail: React.FC = () => {
 
   const PIPELINES_TAB = {
     content: <SearchIndexPipelines />,
-    disabled: !index,
+    disabled: !connector?.index_name,
     id: ConnectorDetailTabId.PIPELINES,
     isSelected: tabId === ConnectorDetailTabId.PIPELINES,
     label: i18n.translate(

@@ -8,7 +8,7 @@
 import { GetHostsArgs } from '../types';
 import { BUCKET_KEY, MAX_SIZE } from '../constants';
 import { assertQueryStructure } from '../utils';
-import { createFilters, systemMetricsFilter } from '../helpers/query';
+import { createFilters } from '../helpers/query';
 
 export const getFilteredHosts = async ({ infraMetricsClient, params }: GetHostsArgs) => {
   assertQueryStructure(params.query);
@@ -22,7 +22,6 @@ export const getFilteredHosts = async ({ infraMetricsClient, params }: GetHostsA
       query: {
         bool: {
           ...params.query.bool,
-          ...systemMetricsFilter,
           filter: createFilters({ params, extraFilter: params.query }),
         },
       },

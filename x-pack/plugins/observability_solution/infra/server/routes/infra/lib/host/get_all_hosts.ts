@@ -64,7 +64,6 @@ const createQuery = (params: GetInfraMetricsRequestBodyPayload, hostNamesShortLi
       track_total_hits: false,
       query: {
         bool: {
-          ...systemMetricsFilter,
           filter: createFilters({
             params,
             hostNamesShortList,

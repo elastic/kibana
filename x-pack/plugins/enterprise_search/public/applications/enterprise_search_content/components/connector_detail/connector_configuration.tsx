@@ -54,18 +54,17 @@ import { NativeConnectorConfiguration } from './native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
+  const { fetchConnector } = useActions(ConnectorViewLogic);
   const { index, isLoading, connector } = useValues(ConnectorViewLogic);
   const cloudContext = useCloudDetails();
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
   const { http } = useValues(HttpLogic);
-  const { fetchConnector } = useActions(ConnectorViewLogic);
 
   if (!connector) {
     return <></>;
   }
-  const indexName = connector.index_name ?? '';
 
   // TODO make it work without index if possible
   if (connector.is_native && connector.service_type) {
@@ -90,12 +89,19 @@ export const ConnectorConfiguration: React.FC = () => {
             <EuiSteps
               steps={[
                 {
-                  children: (
+                  children: connector.index_name ? (
                     <ApiKeyConfig
-                      indexName={indexName}
+                      indexName={connector.index_name}
                       hasApiKey={!!connector.api_key_id}
                       isNative={false}
                     />
+                  ) : (
+                    i18n.translate(
+                      'xpack.enterpriseSearch.content.connectorDetail.configuration.apiKey.noApiKeyLabel',
+                      {
+                        defaultMessage: 'Please set an index name before generating an API key',
+                      }
+                    )
                   ),
                   status: hasApiKey ? 'complete' : 'incomplete',
                   title: i18n.translate(
@@ -191,14 +197,10 @@ export const ConnectorConfiguration: React.FC = () => {
                       connector={connector}
                       hasPlatinumLicense={hasPlatinumLicense}
                       isLoading={status === Status.LOADING}
-                      saveConfig={(
-                        configuration // TODO update endpoints
-                      ) =>
-                        index &&
+                      saveConfig={(configuration) =>
                         makeRequest({
                           configuration,
                           connectorId: connector.id,
-                          indexName: index.name,
                         })
                       }
                       subscriptionLink={docLinks.licenseManagement}
