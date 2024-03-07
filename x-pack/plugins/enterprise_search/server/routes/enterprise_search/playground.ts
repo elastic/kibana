@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { registerAIPlaygroundRoutes as registerRoutes } from '@kbn/ai-playground/server/routes';
+import { registerPlaygroundRoutes as registerRoutes } from '@kbn/playground/server/routes';
 
 import { RouteDependencies } from '../../plugin';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
-export function registerAIPlaygroundRoutes({ log, router, config }: RouteDependencies) {
+export function registerPlaygroundRoutes({ log, router, config }: RouteDependencies) {
   if (!config.showPlayground) {
     return;
   }

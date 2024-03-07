@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './ai_playground';
+export * from './playground';

@@ -10,19 +10,14 @@ import React, { useCallback } from 'react';
 import { useValues } from 'kea';
 
 import { EuiPageTemplate } from '@elastic/eui';
-import {
-  Chat,
-  AIPlaygroundProvider,
-  ViewQueryAction,
-  ViewCodeAction,
-} from '@kbn/ai-playground';
+import { Chat, AIPlaygroundProvider, ViewQueryAction, ViewCodeAction } from '@kbn/ai-playground';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { NEW_INDEX_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
-export const AIPlayground: React.FC = () => {
+export const Playground: React.FC = () => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const handleNavigateToIndex = useCallback(() => navigateToUrl(NEW_INDEX_PATH), [navigateToUrl]);
 
@@ -30,20 +25,20 @@ export const AIPlayground: React.FC = () => {
     <AIPlaygroundProvider navigateToIndexPage={handleNavigateToIndex}>
       <EnterpriseSearchContentPageTemplate
         pageChrome={[
-          i18n.translate('xpack.enterpriseSearch.content.aiPlayground.breadcrumb', {
-            defaultMessage: 'AI Playground',
+          i18n.translate('xpack.enterpriseSearch.content.playground.breadcrumb', {
+            defaultMessage: 'Playground',
           }),
         ]}
         pageHeader={{
-          pageTitle: i18n.translate('xpack.enterpriseSearch.content.aiPlayground.headerTitle', {
-            defaultMessage: 'AI Playground',
+          pageTitle: i18n.translate('xpack.enterpriseSearch.content.playground.headerTitle', {
+            defaultMessage: 'Playground',
           }),
           rightSideItems: [
             <ViewCodeAction key="viewCodeAction" />,
             <ViewQueryAction key="viewQueryAction" />,
           ],
         }}
-        pageViewTelemetry="AI Playground"
+        pageViewTelemetry="Playground"
         restrictWidth={false}
         customPageSections
         bottomBorder="extended"

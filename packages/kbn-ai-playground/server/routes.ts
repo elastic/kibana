@@ -16,7 +16,7 @@ import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/a
 import { ConversationalChain } from './utils/conversationalChain';
 import { Prompt } from './utils/prompt';
 
-export function registerAIPlaygroundRoutes(
+export function registerPlaygroundRoutes(
   { log, router }: { log: Logger; router: IRouter },
   basePath: string,
   errorHandler: <ContextType, RequestType, ResponseType>(
