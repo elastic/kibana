@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { datasetQualityAppTitle } from '../../../common/translations';
@@ -25,14 +32,18 @@ export default function Header() {
   return (
     <EuiPageHeader bottomBorder>
       <EuiPageHeaderSection>
-        <EuiTitle size="m">
-          <h2>{datasetQualityAppTitle}</h2>
-        </EuiTitle>
-        <EuiBetaBadge
-          label={betaBadgeLabel}
-          title={betaBadgeLabel}
-          tooltipContent={betaBadgeDescription}
-        />
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiText>
+            <h2>{datasetQualityAppTitle}</h2>
+          </EuiText>
+          <EuiFlexItem>
+            <EuiBetaBadge
+              label={betaBadgeLabel}
+              title={betaBadgeLabel}
+              tooltipContent={betaBadgeDescription}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPageHeaderSection>
     </EuiPageHeader>
   );
