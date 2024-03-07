@@ -84,7 +84,7 @@ export class SelectableService extends FtrService {
   }
 
   public async clearSelection(buttonTestSubjectId: string, selectableBodyTestSubjectId: string) {
-    return selectOnlyOptionsWithText(buttonTestSubjectId, selectableBodyTestSubjectId, []);
+    return this.selectOnlyOptionsWithText(buttonTestSubjectId, selectableBodyTestSubjectId, []);
   }
 }
 
