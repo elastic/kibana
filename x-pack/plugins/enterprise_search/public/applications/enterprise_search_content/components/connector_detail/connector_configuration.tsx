@@ -63,7 +63,6 @@ export const ConnectorConfiguration: React.FC = () => {
   if (!connector) {
     return <></>;
   }
-  const indexName = connector.index_name ?? '';
 
   // TODO make it work without index if possible
   if (connector.is_native && connector.service_type) {
@@ -88,12 +87,19 @@ export const ConnectorConfiguration: React.FC = () => {
             <EuiSteps
               steps={[
                 {
-                  children: (
+                  children: connector.index_name ? (
                     <ApiKeyConfig
-                      indexName={indexName}
+                      indexName={connector.index_name}
                       hasApiKey={!!connector.api_key_id}
                       isNative={false}
                     />
+                  ) : (
+                    i18n.translate(
+                      'xpack.enterpriseSearch.content.connectorDetail.configuration.apiKey.noApiKeyLabel',
+                      {
+                        defaultMessage: 'Please set an index name before generating an API key',
+                      }
+                    )
                   ),
                   status: hasApiKey ? 'complete' : 'incomplete',
                   title: i18n.translate(
@@ -189,14 +195,11 @@ export const ConnectorConfiguration: React.FC = () => {
                       connector={connector}
                       hasPlatinumLicense={hasPlatinumLicense}
                       isLoading={updateConnectorConfigurationStatus === Status.LOADING}
-                      saveConfig={(
-                        configuration // TODO update endpoints
-                      ) =>
+                      saveConfig={(configuration) =>
                         index &&
                         updateConnectorConfiguration({
                           configuration,
                           connectorId: connector.id,
-                          indexName: index.name,
                         })
                       }
                       subscriptionLink={docLinks.licenseManagement}

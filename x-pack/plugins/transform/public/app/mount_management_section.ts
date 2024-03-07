@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { CoreSetup } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { type TransformEnabledFeatures } from './serverless_context';
-import { PluginsDependencies } from '../plugin';
+import type { PluginsDependencies } from '../plugin';
 import { getMlSharedImports } from '../shared_imports';
 
-import { AppDependencies } from './app_dependencies';
+import type { AppDependencies } from './app_dependencies';
 import { breadcrumbService } from './services/navigation';
 import { docTitleService } from './services/navigation';
 import { textService } from './services/text';

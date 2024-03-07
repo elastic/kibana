@@ -8,7 +8,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 
 import { addInternalBasePath, TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
