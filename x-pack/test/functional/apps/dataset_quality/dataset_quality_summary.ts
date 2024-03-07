@@ -116,14 +116,16 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         })
       );
 
-      await browser.refresh();
-
-      await retry.try(async () => {
+      await retry.tryForTime(15000, async () => {
         const { activeDatasets: updatedActiveDatasets, estimatedData: updatedEstimatedData } =
           await PageObjects.datasetQuality.parseSummaryPanel();
 
         expect(updatedActiveDatasets).to.eql('3 of 3');
         expect(updatedEstimatedData).to.not.eql(existingEstimatedData);
+
+        if (updatedEstimatedData === existingEstimatedData) {
+          await browser.refresh();
+        }
       });
     });
   });
