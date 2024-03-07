@@ -60,6 +60,11 @@ const policies = [
   },
 ];
 
+const NESTING_LEVELS = 4;
+const NESTED_DEPTHS = Array(NESTING_LEVELS)
+  .fill(0)
+  .map((_, i) => i + 1);
+
 function getCallbackMocks() {
   return {
     getFieldsFor: jest.fn(async ({ query }) => {
@@ -962,7 +967,7 @@ describe('validation logic', () => {
       ]);
     }
 
-    for (const nesting of [1, 2, 3, 4]) {
+    for (const nesting of NESTED_DEPTHS) {
       for (const evenOp of ['-', '+']) {
         for (const oddOp of ['-', '+']) {
           // This builds a combination of +/- operators
@@ -1053,6 +1058,48 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from a_index | where ${camelCase(field)}Field IS NOT null`, []);
       testErrorsAndWarnings(`from a_index | where ${camelCase(field)}Field IS not NULL`, []);
       testErrorsAndWarnings(`from a_index | where ${camelCase(field)}Field Is nOt NuLL`, []);
+    }
+
+    for (const {
+      name,
+      alias,
+      signatures,
+      ...defRest
+    } of statsAggregationFunctionDefinitions.filter(
+      ({ name: fnName, signatures: statsSignatures }) =>
+        statsSignatures.some(({ returnType, params }) => ['number'].includes(returnType))
+    )) {
+      for (const { params, infiniteParams, ...signRest } of signatures) {
+        const fieldMapping = getFieldMapping(params);
+
+        testErrorsAndWarnings(
+          `from a_index | where ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          }`,
+          [`WHERE does not support function ${name}`]
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | where ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          } > 0`,
+          [`WHERE does not support function ${name}`]
+        );
+      }
     }
 
     // Test that all functions work in where
@@ -1168,7 +1215,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from a_index | eval ${camelCase(field)}Field IS not NULL`, []);
     }
 
-    for (const nesting of [1, 2, 3, 4]) {
+    for (const nesting of NESTED_DEPTHS) {
       for (const evenOp of ['-', '+']) {
         for (const oddOp of ['-', '+']) {
           // This builds a combination of +/- operators
@@ -1196,6 +1243,67 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from a_index | eval ${wrongOp}+ numberField`, [
         `SyntaxError: extraneous input '${wrongOp}' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}`,
       ]);
+    }
+
+    for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
+      for (const { params, infiniteParams, ...signRest } of signatures) {
+        const fieldMapping = getFieldMapping(params);
+        testErrorsAndWarnings(
+          `from a_index | eval var = ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          }`,
+          [`EVAL does not support function ${name}`]
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | eval var = ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          } > 0`,
+          [`EVAL does not support function ${name}`]
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | eval ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          }`,
+          [`EVAL does not support function ${name}`]
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | eval ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          } > 0`,
+          [`EVAL does not support function ${name}`]
+        );
+      }
     }
 
     for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
@@ -1629,7 +1737,7 @@ describe('validation logic', () => {
       'At least one aggregation function required in [STATS], found [numberField+1]',
     ]);
 
-    for (const nesting of [1, 2, 3, 4]) {
+    for (const nesting of NESTED_DEPTHS) {
       const moreBuiltinWrapping = Array(nesting).fill('+1').join('');
       testErrorsAndWarnings(`from a_index | stats 5 + avg(numberField) ${moreBuiltinWrapping}`, []);
       testErrorsAndWarnings(`from a_index | stats 5 ${moreBuiltinWrapping} + avg(numberField)`, []);
@@ -1957,6 +2065,11 @@ describe('validation logic', () => {
     | STATS avg_numberField = AVG(\`numberField * 3.281\`)`,
       []
     );
+
+    testErrorsAndWarnings(
+      `FROM index | STATS AVG(numberField) by round(numberField) + 1 | EVAL \`round(numberField) + 1\` / 2`,
+      []
+    );
   });
 
   describe('sort', () => {
@@ -2130,6 +2243,52 @@ describe('validation logic', () => {
       [],
       ['Column [numberField] of type number has been overwritten as new type: string']
     );
+  });
+
+  describe('quoting and escaping expressions', () => {
+    function getTicks(amount: number) {
+      return Array(amount).fill('`').join('');
+    }
+    /**
+     * Given an initial quoted expression, build a new quoted expression
+     * that appends as many +1 to the previous one based on the nesting level
+     * i.e. given the expression `round(...) + 1` returns
+     * ```round(...) + 1`` + 1` (for nesting 1)
+     * ```````round(...) + 1```` + 1`` + 1` (for nesting 2)
+     *  etc...
+     * Note how backticks double for each level + wrapping quotes
+     * The general rule follows an exponential curve given a nesting N:
+     * (`){ (2^N)-1 } ticks expression (`){ 2^N-1 } +1 (`){ 2^N-2 } +1 ... +1
+     *
+     * Mind that nesting arg here is equivalent to N-1
+     */
+    function buildNestedExpression(expr: string, nesting: number) {
+      const openingTicks = getTicks(Math.pow(2, nesting + 1) - 1);
+      const firstClosingBatch = getTicks(Math.pow(2, nesting));
+      const additionalPlusOneswithTicks = Array(nesting)
+        .fill(' + 1')
+        .reduce((acc, plusOneAppended, i) => {
+          // workout how many ticks to add: 2^N-i
+          const ticks = getTicks(Math.pow(2, nesting - 1 - i));
+          return `${acc}${plusOneAppended}${ticks}`;
+        }, '');
+      const ret = `${openingTicks}${expr}${firstClosingBatch}${additionalPlusOneswithTicks}`;
+      return ret;
+    }
+
+    for (const nesting of NESTED_DEPTHS) {
+      // start with a quotable expression
+      const expr = 'round(numberField) + 1';
+      const startingQuery = `from a_index | eval ${expr}`;
+      // now pipe for each nesting level a new eval command that appends a +1 to the previous quoted expression
+      const finalQuery = `${startingQuery} | ${Array(nesting)
+        .fill('')
+        .map((_, i) => {
+          return `eval ${buildNestedExpression(expr, i)} + 1`;
+        })
+        .join(' | ')} | keep ${buildNestedExpression(expr, nesting)}`;
+      testErrorsAndWarnings(finalQuery, []);
+    }
   });
 
   describe('callbacks', () => {

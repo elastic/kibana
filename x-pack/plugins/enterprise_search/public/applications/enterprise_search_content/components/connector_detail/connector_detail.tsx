@@ -45,9 +45,9 @@ export enum ConnectorDetailTabId {
 export const ConnectorDetail: React.FC = () => {
   const connectorId = decodeURIComponent(useParams<{ connectorId: string }>().connectorId);
   const { hasFilteringFeature, isLoading, index, connector } = useValues(ConnectorViewLogic);
-  const { fetchConnector } = useActions(ConnectorViewLogic);
+  const { startConnectorPoll } = useActions(ConnectorViewLogic);
   useEffect(() => {
-    fetchConnector({ connectorId });
+    startConnectorPoll(connectorId);
   }, []);
 
   const { tabId = ConnectorDetailTabId.OVERVIEW } = useParams<{
@@ -119,29 +119,11 @@ export const ConnectorDetail: React.FC = () => {
   ];
 
   const CONNECTOR_TABS = [
-    {
-      content: <ConnectorConfiguration />,
-      id: ConnectorDetailTabId.CONFIGURATION,
-      isSelected: tabId === ConnectorDetailTabId.CONFIGURATION,
-      label: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorDetail.configurationTabLabel',
-        {
-          defaultMessage: 'Configuration',
-        }
-      ),
-      onClick: () =>
-        KibanaLogic.values.navigateToUrl(
-          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.CONFIGURATION,
-          })
-        ),
-    },
     ...(hasFilteringFeature
       ? [
           {
             content: <ConnectorSyncRules />,
-            disabled: !index,
+            disabled: !connector?.index_name,
             id: ConnectorDetailTabId.SYNC_RULES,
             isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
             label: i18n.translate(
@@ -162,7 +144,7 @@ export const ConnectorDetail: React.FC = () => {
       : []),
     {
       content: <ConnectorScheduling />,
-      disabled: !index,
+      disabled: !connector?.index_name,
       id: ConnectorDetailTabId.SCHEDULING,
       isSelected: tabId === ConnectorDetailTabId.SCHEDULING,
       label: i18n.translate(
@@ -181,9 +163,30 @@ export const ConnectorDetail: React.FC = () => {
     },
   ];
 
+  const CONFIG_TAB = [
+    {
+      content: <ConnectorConfiguration />,
+      id: ConnectorDetailTabId.CONFIGURATION,
+      isSelected: tabId === ConnectorDetailTabId.CONFIGURATION,
+      label: i18n.translate(
+        'xpack.enterpriseSearch.content.connectors.connectorDetail.configurationTabLabel',
+        {
+          defaultMessage: 'Configuration',
+        }
+      ),
+      onClick: () =>
+        KibanaLogic.values.navigateToUrl(
+          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId,
+            tabId: ConnectorDetailTabId.CONFIGURATION,
+          })
+        ),
+    },
+  ];
+
   const PIPELINES_TAB = {
     content: <SearchIndexPipelines />,
-    disabled: !index,
+    disabled: !connector?.index_name,
     id: ConnectorDetailTabId.PIPELINES,
     isSelected: tabId === ConnectorDetailTabId.PIPELINES,
     label: i18n.translate(
@@ -216,6 +219,7 @@ export const ConnectorDetail: React.FC = () => {
     ...ALL_INDICES_TABS,
     ...CONNECTOR_TABS,
     ...(hasDefaultIngestPipeline ? [PIPELINES_TAB] : []),
+    ...CONFIG_TAB,
   ];
 
   const selectedTab = tabs.find((tab) => tab.id === tabId);
