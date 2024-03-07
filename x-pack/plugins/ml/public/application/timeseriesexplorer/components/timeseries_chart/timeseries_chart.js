@@ -22,6 +22,7 @@ import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getFormattedSeverityScore, getSeverityWithLow } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
+import { context } from '@kbn/kibana-react-plugin/public';
 
 import { formatValue } from '../../../formatters/format_value';
 import {
@@ -41,7 +42,6 @@ import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
 import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
 import { mlEscape } from '../../../util/string_utils';
-import { mlFieldFormatService } from '../../../services/field_format_service';
 import {
   ANNOTATION_MASK_ID,
   getAnnotationBrush,
@@ -53,7 +53,6 @@ import {
   ANNOTATION_MIN_WIDTH,
 } from './timeseries_chart_annotations';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
-import { context } from '@kbn/kibana-react-plugin/public';
 
 import { LinksMenuUI } from '../../../components/anomalies_table/links_menu';
 import { RuleEditorFlyout } from '../../../components/rule_editor';
@@ -304,12 +303,10 @@ class TimeseriesChartIntl extends Component {
     chartElement.selectAll('*').remove();
 
     if (typeof selectedJob !== 'undefined') {
-      this.fieldFormat = this.context?.services?.mlServices?.mlFieldFormatService
-        ? this.context.services.mlServices.mlFieldFormatService.getFieldFormat(
-            selectedJob.job_id,
-            detectorIndex
-          )
-        : mlFieldFormatService.getFieldFormat(selectedJob.job_id, detectorIndex);
+      this.fieldFormat = this.context.services.mlServices.mlFieldFormatService.getFieldFormat(
+        selectedJob.job_id,
+        detectorIndex
+      );
     } else {
       return;
     }

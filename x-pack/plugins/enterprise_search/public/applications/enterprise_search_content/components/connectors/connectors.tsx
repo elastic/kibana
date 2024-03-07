@@ -11,8 +11,12 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
   EuiSearchBar,
   EuiSpacer,
   EuiTitle,
@@ -38,6 +42,8 @@ import { SelectConnector } from '../new_index/select_connector/select_connector'
 
 import { CannotConnect } from '../search_index/components/cannot_connect';
 
+import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
+
 import { ConnectorStats } from './connector_stats';
 import { ConnectorsLogic } from './connectors_logic';
 import { ConnectorsTable } from './connectors_table';
@@ -59,20 +65,23 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
   const { data, isLoading, searchParams, isEmpty, connectors } = useValues(ConnectorsLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
   const [searchQuery, setSearchValue] = useState('');
+  const [showMoreOptionsPopover, setShowMoreOptionsPopover] = useState<boolean>(false);
+  const [showDefaultSettingsFlyout, setShowDefaultSettingsFlyout] = useState<boolean>(false);
+  const { productFeatures } = useValues(KibanaLogic);
 
   useEffect(() => {
     setIsFirstRequest();
   }, [isCrawler]);
 
   useEffect(() => {
-    fetchConnectors({ ...searchParams, searchQuery, fetchCrawlersOnly: isCrawler });
+    fetchConnectors({ ...searchParams, fetchCrawlersOnly: isCrawler, searchQuery });
   }, [searchParams.from, searchParams.size, searchQuery, isCrawler]);
 
   return !isLoading && isEmpty && !isCrawler ? (
     <SelectConnector />
   ) : (
     <>
-      <DeleteConnectorModal />
+      <DeleteConnectorModal isCrawler={isCrawler} />
       <EnterpriseSearchContentPageTemplate
         pageChrome={baseBreadcrumbs}
         pageViewTelemetry={!isCrawler ? 'Connectors' : 'Web Crawlers'}
@@ -87,49 +96,103 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
               }),
           rightSideGroupProps: {
             gutterSize: 's',
+            responsive: false,
           },
           rightSideItems: isLoading
             ? []
             : !isCrawler
             ? [
-                <EuiButton
-                  key="newConnector"
-                  color="primary"
-                  iconType="plusInCircle"
-                  fill
-                  onClick={() => {
-                    KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.enterpriseSearch.connectors.newConnectorButtonLabel"
-                    defaultMessage="New Connector"
-                  />
-                </EuiButton>,
-                <EuiButton
-                  key="newConnectorNative"
-                  onClick={() => {
-                    KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH);
-                  }}
-                >
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.connectors.newNativeConnectorButtonLabel',
-                    {
-                      defaultMessage: 'New Native Connector',
-                    }
-                  )}
-                </EuiButton>,
-                <EuiButton
-                  key="newConnectorClient"
-                  onClick={() => {
-                    KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH);
-                  }}
-                >
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
-                    { defaultMessage: 'New Connector Client' }
-                  )}
-                </EuiButton>,
+                <EuiFlexGroup gutterSize="xs">
+                  <EuiFlexItem>
+                    <EuiButton
+                      key="newConnector"
+                      color="primary"
+                      iconType="plusInCircle"
+                      fill
+                      onClick={() => {
+                        KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
+                      }}
+                    >
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.connectors.newConnectorButtonLabel"
+                        defaultMessage="New Connector"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiPopover
+                      isOpen={showMoreOptionsPopover}
+                      closePopover={() => setShowMoreOptionsPopover(false)}
+                      button={
+                        <EuiButtonIcon
+                          color="primary"
+                          display="fill"
+                          size="m"
+                          iconType="boxesVertical"
+                          aria-label={i18n.translate(
+                            'xpack.enterpriseSearch.connectors.more.ariaLabel',
+                            { defaultMessage: 'More options' }
+                          )}
+                          onClick={() => setShowMoreOptionsPopover(!showMoreOptionsPopover)}
+                        />
+                      }
+                    >
+                      <EuiContextMenuPanel
+                        size="s"
+                        items={[
+                          <EuiContextMenuItem
+                            size="s"
+                            key="newConnectorNative"
+                            onClick={() => {
+                              KibanaLogic.values.navigateToUrl(
+                                NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH
+                              );
+                            }}
+                            icon="plusInCircle"
+                          >
+                            {i18n.translate(
+                              'xpack.enterpriseSearch.connectors.newNativeConnectorButtonLabel',
+                              {
+                                defaultMessage: 'New Native Connector',
+                              }
+                            )}
+                          </EuiContextMenuItem>,
+                          <EuiContextMenuItem
+                            size="s"
+                            key="newConnectorClient"
+                            icon="plusInCircle"
+                            onClick={() => {
+                              KibanaLogic.values.navigateToUrl(
+                                NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH
+                              );
+                            }}
+                          >
+                            {i18n.translate(
+                              'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
+                              { defaultMessage: 'New Connector Client' }
+                            )}
+                          </EuiContextMenuItem>,
+                        ]}
+                      />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                </EuiFlexGroup>,
+                ...(productFeatures.hasDefaultIngestPipeline
+                  ? [
+                      <EuiButton
+                        color="primary"
+                        data-test-subj="entSearchContent-searchIndices-defaultSettings"
+                        onClick={() => setShowDefaultSettingsFlyout(true)}
+                      >
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.content.searchIndices.defaultSettings',
+                          {
+                            defaultMessage: 'Default settings',
+                          }
+                        )}
+                      </EuiButton>,
+                    ]
+                  : []),
               ]
             : [
                 <EuiButton
@@ -150,9 +213,28 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                     defaultMessage: 'New web crawler',
                   })}
                 </EuiButton>,
+                ...(productFeatures.hasDefaultIngestPipeline
+                  ? [
+                      <EuiButton
+                        color="primary"
+                        data-test-subj="entSearchContent-searchIndices-defaultSettings"
+                        onClick={() => setShowDefaultSettingsFlyout(true)}
+                      >
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.content.searchIndices.defaultSettings',
+                          {
+                            defaultMessage: 'Default settings',
+                          }
+                        )}
+                      </EuiButton>,
+                    ]
+                  : []),
               ],
         }}
       >
+        {productFeatures.hasDefaultIngestPipeline && showDefaultSettingsFlyout && (
+          <DefaultSettingsFlyout closeFlyout={() => setShowDefaultSettingsFlyout(false)} />
+        )}
         {Boolean(errorConnectingMessage) && (
           <>
             <CannotConnect />

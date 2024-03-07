@@ -26,7 +26,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorsLogic } from './connectors_logic';
 
-export const DeleteConnectorModal: React.FC = () => {
+export interface DeleteConnectorModalProps {
+  isCrawler: boolean;
+}
+export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCrawler }) => {
   const { closeDeleteModal, deleteConnector } = useActions(ConnectorsLogic);
   const {
     deleteModalConnectorId: connectorId,
@@ -42,14 +45,21 @@ export const DeleteConnectorModal: React.FC = () => {
   useEffect(() => {
     setShouldDeleteIndex(false);
     setInputConnectorName('');
-  }, [isDeleteModalVisible]);
+  }, [isDeleteModalVisible, isCrawler]);
 
   return isDeleteModalVisible ? (
     <EuiConfirmModal
-      title={i18n.translate('xpack.enterpriseSearch.content.connectors.deleteModal.title', {
-        defaultMessage: 'Delete {connectorCount} connector?',
-        values: { connectorCount: 1 },
-      })}
+      title={
+        !isCrawler
+          ? i18n.translate('xpack.enterpriseSearch.content.connectors.deleteModal.title', {
+              defaultMessage: 'Delete {connectorCount} connector?',
+              values: { connectorCount: 1 },
+            })
+          : i18n.translate('xpack.enterpriseSearch.content.crawlers.deleteModal.title', {
+              defaultMessage: 'Delete {connectorCount} crawler?',
+              values: { connectorCount: 1 },
+            })
+      }
       onCancel={() => {
         closeDeleteModal();
       }}

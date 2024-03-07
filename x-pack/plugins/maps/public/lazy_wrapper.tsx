@@ -16,7 +16,7 @@ const Fallback = () => (
 
 interface Props<T> {
   getLazyComponent: () => FC<T>;
-  lazyComponentProps: T;
+  lazyComponentProps: JSX.IntrinsicAttributes & T;
 }
 
 export function LazyWrapper<T>({ getLazyComponent, lazyComponentProps }: Props<T>) {
@@ -24,7 +24,6 @@ export function LazyWrapper<T>({ getLazyComponent, lazyComponentProps }: Props<T
   return (
     <EuiErrorBoundary>
       <Suspense fallback={<Fallback />}>
-        {/* @ts-expect-error upgrade typescript v4.9.5*/}
         <LazyComponent {...lazyComponentProps} />
       </Suspense>
     </EuiErrorBoundary>
