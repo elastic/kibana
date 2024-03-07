@@ -48,7 +48,8 @@ export function QueryDocumentsFlyout({
         <EuiTitle size="m">
           <h2>
             {i18n.translate('xpack.observability.queryBuilder.h2.documentsLabel', {
-              defaultMessage: 'Documents',
+              defaultMessage: 'Documents for {indexPattern}',
+              values: { indexPattern: dataView.getIndexPattern() },
             })}
           </h2>
         </EuiTitle>
