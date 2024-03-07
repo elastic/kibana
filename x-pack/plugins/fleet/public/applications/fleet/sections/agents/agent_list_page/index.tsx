@@ -226,6 +226,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSelectedStatus(status);
   };
 
+  const onSelectedAgentPoliciesChange = (policies: string[]) => {
+    if (selectionMode === 'query') {
+      setSelectionMode('manual');
+    }
+    setSelectedAgentPolicies(policies);
+  };
+
   const agentToUnenrollHasFleetServer = useMemo(() => {
     if (!agentToUnenroll || !agentToUnenroll.policy_id) {
       return false;
@@ -395,7 +402,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onDraftKueryChange={setDraftKuery}
         onSubmitSearch={onSubmitSearch}
         selectedAgentPolicies={selectedAgentPolicies}
-        onSelectedAgentPoliciesChange={setSelectedAgentPolicies}
+        onSelectedAgentPoliciesChange={onSelectedAgentPoliciesChange}
         selectedStatus={selectedStatus}
         onSelectedStatusChange={onSelectedStatusChange}
         showUpgradeable={showUpgradeable}
