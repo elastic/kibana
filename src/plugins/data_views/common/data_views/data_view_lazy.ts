@@ -392,7 +392,7 @@ export class DataViewLazy extends AbstractDataView {
       type: this.type,
       rollupIndex: this.typeMeta?.params?.rollup_index,
       fields: fieldName || ['*'],
-      allowNoIndex: true, // note this in pr
+      allowNoIndex: true,
       indexFilter,
       includeUnmapped,
       forceRefresh,
