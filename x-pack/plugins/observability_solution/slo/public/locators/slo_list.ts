@@ -9,7 +9,7 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import deepmerge from 'deepmerge';
-import { sloListLocatorID } from '../../common';
+import { sloListLocatorID } from '@kbn/observability-plugin/common';
 import { SLOS_PATH } from '../../common/locators/paths';
 import {
   DEFAULT_STATE,

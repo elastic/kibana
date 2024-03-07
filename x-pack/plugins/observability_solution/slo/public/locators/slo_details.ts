@@ -7,7 +7,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import { sloDetailsLocatorID } from '../../common';
+import { sloDetailsLocatorID } from '@kbn/observability-plugin/common';
 import { SLOS_PATH } from '../../common/locators/paths';
 
 export interface SloDetailsLocatorParams extends SerializableRecord {

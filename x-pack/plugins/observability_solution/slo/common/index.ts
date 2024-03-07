@@ -8,11 +8,5 @@
 export const PLUGIN_ID = 'slo';
 export const PLUGIN_NAME = 'SLOs';
 
-export const sloFeatureId = 'slo';
-
-export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
-export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
-export const sloListLocatorID = 'SLO_LIST_LOCATOR';
-
 import { paths } from './locators/paths';
 export const sloPaths = paths;

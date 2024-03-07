@@ -10,10 +10,10 @@ import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { useMemo } from 'react';
 import { FindSLOGroupsResponse } from '@kbn/slo-schema';
 import { useKibana } from '../utils/kibana_react';
-import { useCreateDataView } from './use_create_data_view'; // TODO SLO: extract from observability
+import { useCreateDataView } from './use_create_data_view';
 import { sloKeys } from './query_key_factory';
 import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
-import { SearchState } from '../pages/slos/hooks/use_url_search_state'; // TODO SLO: move under hooks folder
+import { SearchState } from '../pages/slos/hooks/use_url_search_state';
 import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../common/constants';
 
 interface SLOGroupsParams {

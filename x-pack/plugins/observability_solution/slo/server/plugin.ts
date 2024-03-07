@@ -27,10 +27,10 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { AlertsLocatorDefinition } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { registerSloUsageCollector } from './lib/collectors/register';
 
 import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
-import { sloFeatureId } from '../common';
 import { slo, SO_SLO_TYPE } from './saved_objects';
 import { DefaultResourceInstaller, DefaultSLOInstaller } from './services';
 import { registerRuleTypes } from './lib/rules/register_rule_types';

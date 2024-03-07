@@ -19,7 +19,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 
-import { PluginContext } from './context/plugin_context'; // TODO SLO: rethink about this one, now it is a copy paste
+import { PluginContext } from './context/plugin_context';
 
 import { SloPublicPluginsStart } from './types';
 import { routes } from './routes/routes';
@@ -82,7 +82,7 @@ export const renderApp = ({
                 ...core,
                 ...plugins,
                 storage: new Storage(localStorage),
-                // isDev,
+                isDev,
                 kibanaVersion,
                 isServerless,
               }}

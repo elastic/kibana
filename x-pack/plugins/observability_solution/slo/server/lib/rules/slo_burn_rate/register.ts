@@ -15,8 +15,9 @@ import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { AlertsLocatorParams, observabilityPaths } from '@kbn/observability-plugin/common';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_AAD_FIELDS } from '../../../../common/field_names/slo';
-import { sloFeatureId } from '../../../../common';
 import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
@@ -24,7 +25,6 @@ import {
   HIGH_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
-  SLO_BURN_RATE_RULE_TYPE_ID,
 } from '../../../../common/constants';
 
 import { getRuleExecutor } from './executor';

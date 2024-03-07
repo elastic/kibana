@@ -36,7 +36,7 @@ export function SlosOutdatedDefinitions() {
       text: i18n.translate('xpack.slo.breadcrumbs.slosLinkText', {
         defaultMessage: 'SLOs',
       }),
-      deepLinkId: 'observability-overview:slos', // TODO SLO: check this deeplinkid
+      deepLinkId: 'observability-overview:slos',
     },
     {
       text: i18n.translate('xpack.slo.breadcrumbs.slosOutdatedDefinitions', {

@@ -61,23 +61,22 @@ export class SloPlugin
       return renderApp({
         appMountParameters: params,
         core: coreStart,
-        // isDev: this.initContext.env.mode.dev,
+        isDev: this.initContext.env.mode.dev,
         observabilityRuleTypeRegistry,
         kibanaVersion,
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
-        isServerless: !!pluginsStart.serverless, // TODO SLO: do I need isServerless for SLO?
+        isServerless: !!pluginsStart.serverless,
       });
     };
 
     const app: App = {
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
-      order: 8001, // 8100 adds it after Cases, 8000 adds it before alerts, 8001 adds it after Alerts TODO SLO: remove this comment
+      order: 8000,
       euiIconType: 'logoObservability',
       appRoute: SLOS_BASE_PATH,
       category: DEFAULT_APP_CATEGORIES.observability,
-      // Do I need deep links
       mount,
     };
     // Register an application into the side navigation menu

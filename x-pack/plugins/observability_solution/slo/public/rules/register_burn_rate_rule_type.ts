@@ -9,8 +9,8 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public/rules/create_observability_rule_type_registry';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { SLO_ID_FIELD, SLO_INSTANCE_ID_FIELD } from '../../common/field_names/slo';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../common/constants';
 import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
 
 const sloBurnRateDefaultActionMessage = i18n.translate(

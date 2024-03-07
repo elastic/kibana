@@ -12,9 +12,9 @@ import React, { useCallback, useState } from 'react';
 
 import type { RulesParams } from '@kbn/observability-plugin/public';
 import { rulesLocatorID } from '@kbn/observability-plugin/common';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { useKibana } from '../../../utils/kibana_react';
-import { sloFeatureId } from '../../../../common';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { paths } from '../../../../common/locators/paths';
 import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { useCapabilities } from '../../../hooks/use_capabilities';

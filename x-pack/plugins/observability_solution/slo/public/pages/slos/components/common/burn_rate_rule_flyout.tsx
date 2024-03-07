@@ -8,12 +8,12 @@
 import React from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule_types';
 import { useKibana } from '../../../../utils/kibana_react';
 import { paths } from '../../../../../common/locators/paths';
 import { sloKeys } from '../../../../hooks/query_key_factory';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../../common/constants';
-import { sloFeatureId } from '../../../../../common';
 
 export function BurnRateRuleFlyout({
   slo,

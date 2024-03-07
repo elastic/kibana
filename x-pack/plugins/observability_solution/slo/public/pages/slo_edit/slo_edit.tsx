@@ -17,7 +17,6 @@ import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnos
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-// TODO SLO: uncomment
 import { SloEditForm } from './components/slo_edit_form';
 
 export function SloEditPage() {
@@ -40,7 +39,7 @@ export function SloEditPage() {
       text: i18n.translate('xpack.slo.breadcrumbs.sloLabel', {
         defaultMessage: 'SLOs',
       }),
-      deepLinkId: 'observability-overview:slos', // TODO SLO: do I need deepLinkId
+      deepLinkId: 'observability-overview:slos',
     },
     ...(!!slo
       ? [

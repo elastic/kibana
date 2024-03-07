@@ -9,10 +9,8 @@ import React, { Fragment } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { useKibana } from '../../../utils/kibana_react';
-
-// TODO SLO: delete from here
-export const SLO_ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alertTable';
 
 export interface Props {
   slo: SLOWithSummaryResponse;

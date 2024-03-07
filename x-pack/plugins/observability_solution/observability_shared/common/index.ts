@@ -11,7 +11,6 @@ export const casesFeatureId = 'observabilityCases';
 export const sloFeatureId = 'slo';
 
 export const SLO_ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alertTable';
-// export const SLO_DETAIL_PATH =
 
 export {
   CLOUD,
