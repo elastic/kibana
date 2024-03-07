@@ -4,6 +4,6 @@ metadata:
   name: kibana-buildkite-pipelines-list
   description: This file points to individual buildkite pipeline definition files
 spec:
-  type: file
+  type: url
   targets:
-    - ./kibana-migration-staging.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-migration-staging.yml
