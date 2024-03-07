@@ -413,7 +413,6 @@ export function LensEditConfigurationFlyout({
               ${euiScrollBarStyles(euiTheme)}
               padding-left: ${euiThemeVars.euiFormMaxWidth};
               margin-left: -${euiThemeVars.euiFormMaxWidth};
-              padding-right: ${euiThemeVars.euiSizeXS};
 
               .euiAccordion-isOpen & {
                 block-size: auto !important;
@@ -462,8 +461,8 @@ export function LensEditConfigurationFlyout({
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
                 position: relative;
-                padding-left: ${euiThemeVars.euiSizeS};
-                padding-right: ${euiThemeVars.euiSizeS};
+                padding-left: ${euiThemeVars.euiSize};
+                padding-right: ${euiThemeVars.euiSize};
                 .euiAccordion__childWrapper {
                   flex: ${isLayerAccordionOpen ? 1 : 'none'}
                 }
@@ -524,8 +523,8 @@ export function LensEditConfigurationFlyout({
             css={css`
                 border-top: ${euiThemeVars.euiBorderThin};
                 border-bottom: ${euiThemeVars.euiBorderThin};
-                padding-left: ${euiThemeVars.euiSizeS};
-                padding-right: ${euiThemeVars.euiSizeS};
+                padding-left: ${euiThemeVars.euiSize};
+                padding-right: ${euiThemeVars.euiSize};
                 .euiAccordion__childWrapper {
                   flex: ${isSuggestionsAccordionOpen ? 1 : 'none'}
                 }
