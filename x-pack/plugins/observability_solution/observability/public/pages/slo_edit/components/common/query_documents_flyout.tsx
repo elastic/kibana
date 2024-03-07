@@ -14,26 +14,26 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactElement } from 'react';
-import { QuerySchema } from '@kbn/slo-schema';
+import React from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { FieldPath } from 'react-hook-form';
+import { SearchBarProps } from './query_builder';
 import { CreateSLOForm } from '../../types';
 import { DocumentsTable } from './documents_table';
 
 export function QueryDocumentsFlyout({
+  setRange,
   name,
   range,
   dataView,
-  searchBar,
-  filter,
+  searchBarProps,
   setIsFlyoutOpen,
 }: {
   range: TimeRange;
-  filter: QuerySchema;
+  setRange: (range: TimeRange) => void;
   dataView: DataView;
-  searchBar: ReactElement;
+  searchBarProps: SearchBarProps;
   setIsFlyoutOpen: (value: boolean) => void;
   name: FieldPath<CreateSLOForm>;
 }) {
@@ -57,9 +57,9 @@ export function QueryDocumentsFlyout({
         {dataView && (
           <DocumentsTable
             dataView={dataView}
-            searchBar={searchBar}
-            filter={filter}
+            searchBarProps={searchBarProps}
             range={range}
+            setRange={setRange}
             name={name}
           />
         )}

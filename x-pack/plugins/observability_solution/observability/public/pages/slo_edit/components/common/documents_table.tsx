@@ -6,41 +6,43 @@
  */
 
 import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
-import React, { ReactElement, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
-import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { kqlQuerySchema, QuerySchema } from '@kbn/slo-schema';
-import { EuiResizableContainer, EuiProgress } from '@elastic/eui';
-import { UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
+import { EuiResizableContainer, EuiProgress, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { buildFilter, FILTERS, TimeRange } from '@kbn/es-query';
 import { FieldPath, useFormContext } from 'react-hook-form';
 import { Serializable } from '@kbn/utility-types';
+import { useFieldSidebar } from './use_field_sidebar';
+import { useTableDocs } from './use_table_docs';
+import { SearchBarProps } from './query_builder';
+import { QuerySearchBar } from './query_search_bar';
 import { CreateSLOForm } from '../../types';
-import { getElasticsearchQueryOrThrow } from '../../../../../common/utils/parse_kuery';
 import { useKibana } from '../../../../utils/kibana_react';
 
 export function DocumentsTable({
   dataView,
-  searchBar,
-  filter,
   range,
   name,
+  searchBarProps,
+  setRange,
 }: {
-  filter: QuerySchema;
+  searchBarProps: SearchBarProps;
   dataView: DataView;
-  searchBar: ReactElement;
   range: TimeRange;
+  setRange: (range: TimeRange) => void;
   name: FieldPath<CreateSLOForm>;
 }) {
-  const { setValue } = useFormContext<CreateSLOForm>();
+  const { setValue, watch } = useFormContext<CreateSLOForm>();
+
+  const filter = watch(name) as QuerySchema;
 
   const [sampleSize, setSampleSize] = useState(100);
   const [columns, setColumns] = useState<string[]>([]);
   const services = useKibana().services;
-  const esFilter = getElasticsearchQueryOrThrow(filter);
   const [sizes, setSizes] = useState({
     fieldsPanel: 180,
     documentsPanel: 500,
@@ -52,35 +54,17 @@ export function DocumentsTable({
     }));
   }, []);
 
-  const { data, loading } = useEsSearch(
-    {
-      index: dataView.getIndexPattern(),
-      size: sampleSize,
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: range.from,
-                  lte: range.to,
-                },
-              },
-            },
-            esFilter,
-          ],
-        },
-      },
-    },
-    [range.from, range.to, dataView, JSON.stringify(filter), sampleSize],
-    {
-      name: 'slo-edit-documents-table',
-    }
-  );
-
+  const { data, loading, error } = useTableDocs({ dataView, range, sampleSize, name });
+  const fieldSideBar = useFieldSidebar({ dataView, columns, setColumns });
   return (
     <>
-      {searchBar}
+      <QuerySearchBar {...searchBarProps} range={range} setRange={setRange} isFlyoutOpen={true} />
+      {error && !loading && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiCallOut color="danger">{error?.message}</EuiCallOut>
+        </>
+      )}
       <EuiResizableContainer
         style={{ height: 'calc(100vh - 300px)' }}
         onPanelWidthChange={onPanelWidthChange}
@@ -97,27 +81,7 @@ export function DocumentsTable({
                 paddingRight: 0,
               }}
             >
-              <UnifiedFieldListSidebarContainer
-                services={{
-                  core: services,
-                  ...services,
-                }}
-                dataView={dataView}
-                workspaceSelectedFieldNames={columns}
-                allFields={dataView.fields}
-                onAddFieldToWorkspace={(field) => {
-                  setColumns((prevColumns) => [
-                    ...(prevColumns.length === 0 ? ['@timestamp'] : prevColumns),
-                    field.name,
-                  ]);
-                }}
-                onRemoveFieldFromWorkspace={(field) => {
-                  setColumns((prevColumns) => prevColumns.filter((c) => c !== field.name));
-                }}
-                getCreationOptions={() => ({
-                  originatingApp: 'observability',
-                })}
-              />
+              {fieldSideBar}
             </EuiResizablePanel>
 
             <EuiResizableButton indicator="border" />
