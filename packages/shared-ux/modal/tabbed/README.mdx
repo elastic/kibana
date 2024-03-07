@@ -1,0 +1,79 @@
+---
+id: sharedUX/Components/KibanaTabbedModal
+slug: /shared-ux/components/tabbed-modal
+title: Tabbed Modal
+description: A wrapper around `EuiAvatar` tailored for use in Kibana solutions.
+tags: ['shared-ux', 'component']
+date: 2024-03-07
+---
+
+## Description
+
+A wrapper around `EuiModal` for displaying and managing tabs tailored for use in Kibana solutions.
+
+## Usage
+
+A fairly trival use case might look like this
+
+```tsx
+const hello: IModalTabDeclaration<{ message: string }> = {
+  id: 'hello',
+  title: 'Say Hello',
+  initialState: {
+    message: 'Hello World!',
+  },
+  content: ({ state }) => {
+    // we can access state here to impact renders
+    return <h1>Click the button to trigger a message</h1>;
+  },
+  modalActionBtn: {
+    label: 'Click me!',
+    handler: ({ state }) => {
+      // state can also be accessed here if neccessary
+      alert(state.message);
+    },
+  },
+};
+
+<TabbedModal tabs={[hello]} />
+```
+
+a slightly more complex use case, where we'd like changes from interactions within the rendered tab 
+content to propagate to the state might look similar to this.
+
+```tsx
+const hello: IModalTabDeclaration<{ message: string }> = {
+  id: 'hello',
+  title: 'Say Hello',
+  initialState: {
+    message: 'Hello World!',
+  },
+  reducer(state, action) {
+    switch(action.type) {
+        case 'CHANGE_MESSAGE':
+            return {
+                ...state,
+                message: action.payload
+            };
+        default:
+            return State;
+    }
+  },
+  content: ({ dispatch }) => {
+    useEffect(() => {
+        dispatch({ type: 'CHANGE_MESSAGE', payload: 'Hello from the other side!' });
+    }, []);
+    // we can access state here to impact renders
+    return <h1>Click the button to trigger a message</h1>;
+  },
+  modalActionBtn: {
+    label: 'Click me!',
+    handler: ({ state }) => {
+      // message displayed in alert here would be different from the value set in our initial state
+      alert(state.message);
+    },
+  },
+};
+
+<TabbedModal tabs={[hello]} />
+```
