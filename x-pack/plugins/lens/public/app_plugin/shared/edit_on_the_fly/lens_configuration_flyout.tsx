@@ -500,7 +500,8 @@ export function LensEditConfigurationFlyout({
             >
               <>
                 <LayerConfiguration
-                  shouldDisplayChartSwitch
+                  // TODO: remove this prop once we add support for multiple layers (form-based mode)
+                  shouldDisplayChartSwitch={!!textBasedMode}
                   attributes={attributes}
                   getUserMessages={getUserMessages}
                   coreStart={coreStart}
