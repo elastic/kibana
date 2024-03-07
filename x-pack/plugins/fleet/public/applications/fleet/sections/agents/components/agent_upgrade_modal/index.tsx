@@ -111,6 +111,20 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   const [isInvalid, setIsInvalid] = useState(false);
 
   useEffect(() => {
+    const fetchFleetServerVersions = async () => {
+      try {
+        const { allFleetServerAgents } = await sendAllFleetServerAgents();
+
+        setfleetServerAgents(allFleetServerAgents);
+      } catch (error) {
+        return;
+      }
+    };
+
+    fetchFleetServerVersions();
+  }, []);
+
+  useEffect(() => {
     const getStuckUpdatingAgentCount = async (agentsOrQuery: Agent[] | string) => {
       let newQuery;
       // find updating agents from array
@@ -172,7 +186,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     };
 
     fetchFleetServerVersions();
-  }, [kibanaVersion]);
+  }, []);
 
   const minVersion = useMemo(() => {
     if (!Array.isArray(agents)) {
@@ -245,6 +259,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   useEffect(() => {
     try {
       if (!!selectedVersion[0]?.value) {
+        console.log('## checkFleetServerVersion', fleetServerAgents);
         checkFleetServerVersion(selectedVersion[0].value, fleetServerAgents);
         // clean up the error
         setErrors('');
@@ -377,7 +392,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         isSubmitting ||
         (isUpdating && updatingAgents === 0) ||
         !selectedVersion[0].value ||
-        (isSingleAgent && !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value))
+        (isSingleAgent && !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)) ||
+        (isSingleAgent && !!errors)
       }
       confirmButtonText={
         isSingleAgent ? (

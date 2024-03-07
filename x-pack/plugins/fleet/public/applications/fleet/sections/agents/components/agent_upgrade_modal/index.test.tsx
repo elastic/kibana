@@ -13,6 +13,8 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { sendGetAgentsAvailableVersions, sendPostBulkAgentUpgrade } from '../../../../hooks';
 
+import { sendAllFleetServerAgents } from './hooks';
+
 import { AgentUpgradeAgentModal } from '.';
 import type { AgentUpgradeAgentModalProps } from '.';
 
@@ -33,9 +35,17 @@ jest.mock('../../../../hooks', () => {
   };
 });
 
+jest.mock('./hooks', () => {
+  return {
+    ...jest.requireActual('./hooks'),
+    sendAllFleetServerAgents: jest.fn(),
+  };
+});
+
 const mockSendPostBulkAgentUpgrade = sendPostBulkAgentUpgrade as jest.Mock;
 
 const mockSendGetAgentsAvailableVersions = sendGetAgentsAvailableVersions as jest.Mock;
+const mockSendAllFleetServerAgentsAvailableVersions = sendAllFleetServerAgents as jest.Mock;
 
 function renderAgentUpgradeAgentModal(props: Partial<AgentUpgradeAgentModalProps>) {
   const renderer = createFleetTestRendererMock();
@@ -43,7 +53,6 @@ function renderAgentUpgradeAgentModal(props: Partial<AgentUpgradeAgentModalProps
   const utils = renderer.render(
     <AgentUpgradeAgentModal agents="" agentCount={12} onClose={() => {}} {...props} />
   );
-
   return { utils };
 }
 
@@ -180,10 +189,56 @@ describe('AgentUpgradeAgentModal', () => {
       );
       expect(optionList.textContent).toEqual(['8.10.4', '8.10.2+build123456789'].join(''));
     });
+
+    it('should disable submit button and display a warning for a single agent when version is greater than maxFleetServerVersion', async () => {
+      mockSendGetAgentsAvailableVersions.mockClear();
+      mockSendGetAgentsAvailableVersions.mockResolvedValue({
+        data: {
+          items: ['8.10.4', '8.10.2', '8.9.0', '8.8.0'],
+        },
+      });
+      mockSendAllFleetServerAgentsAvailableVersions.mockResolvedValue([
+        { id: 'fleet-server', local_metadata: { elastic: { agent: { version: '8.9.0' } } } },
+      ] as any);
+
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          {
+            id: 'agent1',
+            local_metadata: {
+              elastic: {
+                agent: { version: '8.8.0', upgradeable: true },
+              },
+              host: { hostname: 'host00001' },
+            },
+          },
+        ] as any,
+        agentCount: 1,
+      });
+
+      await waitFor(() => {
+        const container = utils.getByTestId('agentUpgradeModal.VersionCombobox');
+        const input = within(container).getByRole<HTMLInputElement>('combobox');
+        expect(input?.value).toEqual('8.10.2');
+        expect(
+          utils.queryAllByText(
+            /This action will upgrade the agent running on 'host00001' to version 8.10.2. This action can not be undone. Are you sure you wish to continue?/
+          )
+        );
+        expect(utils.queryByText(/Error upgrading the selected agent/)).toBeInTheDocument();
+        expect(
+          utils.queryByText(
+            /cannot upgrade agent to 8.10.2 because it is higher than the latest fleet server version 8.9.0./
+          )
+        ).toBeInTheDocument();
+        const el = utils.getByTestId('confirmModalConfirmButton');
+        expect(el).toBeDisabled();
+      });
+    });
   });
 
   describe('restart upgrade', () => {
-    it('should restart uprade on updating agents if some agents in updating', async () => {
+    it('should restart upgrade on updating agents if some agents in updating', async () => {
       const { utils } = renderAgentUpgradeAgentModal({
         agents: [
           { status: 'updating', upgrade_started_at: '2022-11-21T12:27:24Z', id: 'agent1' },

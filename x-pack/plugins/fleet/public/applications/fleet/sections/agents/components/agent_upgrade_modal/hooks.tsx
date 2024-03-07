@@ -55,7 +55,7 @@ export function useScheduleDateTime(now?: string) {
   };
 }
 
-export const sendAllFleetServerAgents = async () => {
+export async function sendAllFleetServerAgents() {
   const packagePoliciesRes = await sendGetPackagePolicies({
     page: 1,
     perPage: SO_SEARCH_LIMIT,
@@ -77,4 +77,4 @@ export const sendAllFleetServerAgents = async () => {
   });
 
   return { allFleetServerAgents: response.data?.items || [] };
-};
+}
