@@ -170,24 +170,34 @@ export class AuthorizationService {
     initAppAuthorization(http, authz, loggers.get('app-authorization'), features);
 
     http.registerOnPreResponse(async (request, preResponse, toolkit) => {
-      if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
-        const customBrandingValue = await customBranding.getBrandingFor(request, {
-          unauthenticated: false,
-        });
-        const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
-        const body = renderToString(
-          <ResetSessionPage
-            staticAssets={http.staticAssets}
-            basePath={http.basePath}
-            logoutUrl={http.basePath.prepend(
-              `/api/security/logout?${querystring.stringify({ next })}`
-            )}
-            customBranding={customBrandingValue}
-          />
-        );
+      if (preResponse.statusCode === 403) {
+        const user = getCurrentUser(request);
+        if (user?.roles.length === 0) {
+          this.logger.warn(
+            `A user authenticated with the "${user.authentication_realm.name}" (${user.authentication_realm.type}) realm doesn't have any roles and isn't authorized to perform request.`
+          );
+        }
 
-        return toolkit.render({ body, headers: { 'Content-Security-Policy': http.csp.header } });
+        if (canRedirectRequest(request)) {
+          const customBrandingValue = await customBranding.getBrandingFor(request, {
+            unauthenticated: false,
+          });
+          const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
+          const body = renderToString(
+            <ResetSessionPage
+              staticAssets={http.staticAssets}
+              basePath={http.basePath}
+              logoutUrl={http.basePath.prepend(
+                `/api/security/logout?${querystring.stringify({ next })}`
+              )}
+              customBranding={customBrandingValue}
+            />
+          );
+
+          return toolkit.render({ body, headers: { 'Content-Security-Policy': http.csp.header } });
+        }
       }
+
       return toolkit.next();
     });
 

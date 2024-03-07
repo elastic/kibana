@@ -652,6 +652,7 @@ export const status: CanvasTemplate = {
             },
             expression:
               'demodata\n| dropdownControl valueColumn="project" filterColumn="project"\n| render',
+            // @ts-expect-error upgrade typescript v4.9.5
             filter: '',
           },
         ],
