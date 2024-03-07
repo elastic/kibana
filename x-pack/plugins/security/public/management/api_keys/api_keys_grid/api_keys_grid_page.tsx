@@ -65,7 +65,9 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
   const [state, queryApiKeysAndAggregations] = useAsyncFn(() => {
     const queryContainer =
-      Object.keys(query).length === 0 ? undefined : EuiSearchBar.Query.toESQuery(query);
+      Object.keys(query).length === 0
+        ? undefined
+        : EuiSearchBar.Query.toESQuery(query.addSimpleFieldValue('invalidated', false));
 
     const requestBody = {
       query: queryContainer,
@@ -82,6 +84,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
   const [createdApiKey, setCreatedApiKey] = useState<CreateAPIKeyResult>();
   const [openedApiKey, setOpenedApiKey] = useState<CategorizedApiKey>();
   const readOnly = !useCapabilities('api_keys').save;
+
   useEffect(() => {
     queryApiKeysAndAggregations();
   }, [query, from, pageSize]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -135,6 +138,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
     totalItemCount: totalKeys,
     pageSizeOptions: [25, 50, 100],
   };
+
   return (
     <>
       <Route path="/create">

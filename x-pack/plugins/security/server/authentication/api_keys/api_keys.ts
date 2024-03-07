@@ -157,6 +157,7 @@ export class APIKeys implements APIKeysType {
     }
 
     const { type, expiration, name, metadata } = createParams;
+
     const scopedClusterClient = this.clusterClient.asScoped(request);
 
     this.logger.debug('Trying to create an API key');

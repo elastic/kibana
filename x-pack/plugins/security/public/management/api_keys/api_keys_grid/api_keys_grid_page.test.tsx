@@ -189,7 +189,7 @@ describe('APIKeysGridPage', () => {
   it('displays error when user does not have required permissions', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
-    coreStart.http.get.mockRejectedValueOnce({
+    coreStart.http.post.mockRejectedValueOnce({
       body: { statusCode: 403, message: 'forbidden' },
     });
 
@@ -239,7 +239,7 @@ describe('APIKeysGridPage', () => {
 
   describe('Read Only View', () => {
     beforeEach(() => {
-      coreStart.http.get.mockResolvedValue({
+      coreStart.http.post.mockResolvedValue({
         apiKeys: [],
         canManageCrossClusterApiKeys: false,
         canManageApiKeys: false,
@@ -248,7 +248,7 @@ describe('APIKeysGridPage', () => {
       });
     });
 
-    it.only('should not display prompt `Create Button` when no API keys are shown', async () => {
+    it('should not display prompt `Create Button` when no API keys are shown', async () => {
       const history = createMemoryHistory({ initialEntries: ['/'] });
 
       coreStart.application.capabilities = {

@@ -71,6 +71,15 @@ export function defineQueryApiKeysAggregationsRoute({
             path: '/_security/_query/api_key',
             body: {
               size: 0,
+              query: {
+                bool: {
+                  must: {
+                    term: {
+                      invalidated: false,
+                    },
+                  },
+                },
+              },
               aggs: {
                 usernames: {
                   terms: {
