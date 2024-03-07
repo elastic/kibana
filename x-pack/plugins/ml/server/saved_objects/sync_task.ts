@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger, CoreStart, IScopedClusterClient } from '@kbn/core/server';
-import {
+import type { Logger, CoreStart, IScopedClusterClient } from '@kbn/core/server';
+import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
