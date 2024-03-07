@@ -196,7 +196,6 @@ export const ConnectorConfiguration: React.FC = () => {
                       hasPlatinumLicense={hasPlatinumLicense}
                       isLoading={updateConnectorConfigurationStatus === Status.LOADING}
                       saveConfig={(configuration) =>
-                        index &&
                         updateConnectorConfiguration({
                           configuration,
                           connectorId: connector.id,
