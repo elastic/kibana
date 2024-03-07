@@ -68,7 +68,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
       onConfirm={() => {
         deleteConnector({
           connectorId,
-          shouldDeleteIndex,
+          shouldDeleteIndex: isCrawler ? true : shouldDeleteIndex,
         });
       }}
       cancelButtonText={
@@ -127,21 +127,40 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
         </ul>
       </p>
       <p>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.content.connectors.deleteModal.syncsWarning.indexNameDescription"
-            defaultMessage="This action cannot be undone. Please type {connectorName} to confirm."
-            values={{
-              connectorName: (
-                <strong>
-                  <EuiTextColor color="danger">{connectorName}</EuiTextColor>
-                </strong>
-              ),
-            }}
-          />
-        </EuiText>
+        {isCrawler && (
+          <>
+            <EuiText>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.deleteConnectorModal.crawler.warning"
+                defaultMessage="Deleting this crawler will also delete its related index with all of its data and its Crawler configuration. Any associated search applications will no longer be able to access any data stored in this index. This action cannot be undone. Please type {connectorName} to confirm."
+                values={{
+                  connectorName: (
+                    <strong>
+                      <EuiTextColor color="danger">{connectorName}</EuiTextColor>
+                    </strong>
+                  ),
+                }}
+              />
+            </EuiText>
+          </>
+        )}
+        {!isCrawler && (
+          <EuiText>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.connectors.deleteModal.syncsWarning.indexNameDescription"
+              defaultMessage="This action cannot be undone. Please type {connectorName} to confirm."
+              values={{
+                connectorName: (
+                  <strong>
+                    <EuiTextColor color="danger">{connectorName}</EuiTextColor>
+                  </strong>
+                ),
+              }}
+            />
+          </EuiText>
+        )}
       </p>
-      {deleteModalIndexName && (
+      {deleteModalIndexName && !isCrawler && (
         <>
           <EuiCheckbox
             id="delete-related-index"
