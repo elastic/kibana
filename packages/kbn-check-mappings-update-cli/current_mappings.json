@@ -1559,7 +1559,15 @@
         "type": "keyword"
       },
       "dashboardIdList": {
-        "type": "keyword"
+        "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "hostNameFilterEnabled": {
+              "type": "keyword"
+            }
+          },
+        "type": "nested"
       },
       "kuery": {
         "type": "text"

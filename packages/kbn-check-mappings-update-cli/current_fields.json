@@ -462,6 +462,8 @@
   "infra-custom-dashboards": [
     "assetType",
     "dashboardIdList",
+    "dashboardIdList.id",
+    "dashboardIdList.hostNameFilterEnabled",
     "kuery"
   ],
   "infrastructure-monitoring-log-view": [

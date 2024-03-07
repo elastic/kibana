@@ -10,7 +10,10 @@ import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 export type InfraCustomDashboardAssetType = InventoryItemType;
 
 export interface InfraCustomDashboard {
-  dashboardIdList: string[];
+  dashboardIdList: Array<{
+    id: string;
+    hostNameFilterEnabled: boolean;
+  }>;
   assetType: InfraCustomDashboardAssetType;
   kuery?: string;
 }

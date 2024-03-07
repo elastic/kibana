@@ -15,7 +15,12 @@ const AssetTypeRT = rt.type({
 const CustomDashboardRT = rt.intersection([
   AssetTypeRT,
   rt.type({
-    dashboardIdList: rt.array(rt.string),
+    dashboardIdList: rt.array(
+      rt.type({
+        id: rt.string,
+        hostNameFilterEnabled: rt.boolean,
+      })
+    ),
   }),
   rt.partial({
     kuery: rt.string,
