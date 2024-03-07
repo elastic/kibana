@@ -26,7 +26,7 @@ const SubFieldComponent = ({
   <EuiFlexGroup justifyContent="spaceBetween">
     <EuiFlexGroup direction="column">
       {shouldShowSubtitles ? (
-        <EuiTitle size="xxxs">
+        <EuiTitle data-test-subj="ruleUpgradePerFieldDiffSubtitle" size="xxxs">
           <h4>{fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName))}</h4>
         </EuiTitle>
       ) : null}
