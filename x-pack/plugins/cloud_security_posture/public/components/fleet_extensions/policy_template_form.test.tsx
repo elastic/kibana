@@ -51,6 +51,7 @@ import {
   AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
   CIS_GCP_OPTION_TEST_SUBJ,
+  GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ,
   SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
 } from '../test_subjects';
@@ -1490,12 +1491,11 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    // TODO: test switching to agent-based
     it('should render setup technology selector for GCP for organisation account type', async () => {
       const agentlessPolicy = getMockAgentlessAgentPolicy();
       const newPackagePolicy = getMockPolicyGCP();
 
-      const { getByTestId, queryByTestId } = render(
+      const { getByTestId, queryByTestId, getByRole } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
           agentlessPolicy={agentlessPolicy}
@@ -1532,6 +1532,16 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(projectIdField).not.toBeInTheDocument();
       expect(credentialsTypSelector).not.toBeInTheDocument();
       expect(credentialsFileField).not.toBeInTheDocument();
+
+      // select agent-based and check for cloudformation option
+      userEvent.click(setupTechnologySelector);
+      const agentBasedOption = getByRole('option', { name: /agent-based/i });
+      await waitForEuiPopoverOpen();
+      userEvent.click(agentBasedOption);
+      await waitFor(() => {
+        expect(getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUD_SHELL)).toBeInTheDocument();
+        expect(getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL)).toBeInTheDocument();
+      });
     });
 
     it('should render setup technology selector for GCP for single-account', async () => {

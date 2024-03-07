@@ -42,6 +42,7 @@ import { MIN_VERSION_GCP_CIS } from '../../../common/constants';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 import { ReadDocumentation } from '../aws_credentials_form/aws_credentials_form';
 import { GCP_ORGANIZATION_ACCOUNT } from '../policy_template_form';
+import { GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ } from '../../test_subjects';
 
 export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
   GOOGLE_CLOUD_SHELL_SETUP: 'google_cloud_shell_setup_test_id',
@@ -239,7 +240,7 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
       defaultMessage: 'Google Cloud Shell',
     }),
     disabled: false,
-    testId: 'gcpGoogleCloudShellOptionTestId',
+    testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUD_SHELL,
   },
   {
     id: SETUP_ACCESS_MANUAL,
@@ -247,7 +248,7 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
       defaultMessage: 'Manual',
     }),
     disabled: false,
-    testId: 'gcpManualOptionTestId',
+    testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL,
   },
 ];
 
