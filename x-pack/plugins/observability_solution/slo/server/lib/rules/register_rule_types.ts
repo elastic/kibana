@@ -25,7 +25,7 @@ export function registerRuleTypes(
   basePath: IBasePath,
   logger: Logger,
   ruleDataService: IRuleDataService,
-  locators: CustomThresholdLocators // TODO move this somewhere else
+  locators: CustomThresholdLocators // TODO move this somewhere else, or use only alertsLocator
 ) {
   // SLO RULE
   const ruleDataClientSLO = ruleDataService.initializeIndex({

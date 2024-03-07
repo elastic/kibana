@@ -8,7 +8,7 @@ import { AlertTableConfigRegistry } from '@kbn/triggers-actions-ui-plugin/public
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import { getSloAlertsTableConfiguration } from './slo/get_slo_alerts_table_configuration';
 
-export const registerAlertsTableConfiguration = (
+export const registerEmbeddableAlertsTableConfiguration = (
   alertTableConfigRegistry: AlertTableConfigRegistry,
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
 ) => {

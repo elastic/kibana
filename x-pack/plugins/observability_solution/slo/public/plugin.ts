@@ -23,11 +23,22 @@ import { SloEditLocatorDefinition } from './locators/slo_edit';
 import { SloListLocatorDefinition } from './locators/slo_list';
 import { SLOS_BASE_PATH } from '../common/locators/paths';
 import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
+import { registerBurnRateRuleType } from './rules/register_burn_rate_rule_type';
 
 export class SloPlugin
   implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
 {
-  constructor(private readonly initContext: PluginInitializerContext) {} // TODO SLO: Do I need ConfigSchema here?
+  private lazyRegisterEmbeddableAlertsTableConfiguration() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "lazy_register_observability_alerts_table_configuration" */
+      './components/alerts_table/register_embeddable_alerts_table_configuration'
+    );
+  }
+  constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(
     coreSetup: CoreSetup<SloPublicPluginsStart, SloPublicStart>,
@@ -72,7 +83,7 @@ export class SloPlugin
     // Register an application into the side navigation menu
     coreSetup.application.register(app);
 
-    // TODO SLO: register slo burn rate rule
+    registerBurnRateRuleType(pluginsSetup.observability.observabilityRuleTypeRegistry);
 
     const assertPlatinumLicense = async () => {
       const licensing = await pluginsSetup.licensing;
@@ -127,8 +138,16 @@ export class SloPlugin
     };
   }
 
-  // TODO SLO: register alert table configuration
   public start(coreStart: CoreStart, pluginsStart: SloPublicPluginsStart) {
+    const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
+    this.lazyRegisterEmbeddableAlertsTableConfiguration().then(
+      ({ registerEmbeddableAlertsTableConfiguration }) => {
+        return registerEmbeddableAlertsTableConfiguration(
+          alertsTableConfigurationRegistry,
+          pluginsStart.observability.observabilityRuleTypeRegistry
+        );
+      }
+    );
     const kibanaVersion = this.initContext.env.packageInfo.version;
     const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 
