@@ -7,7 +7,7 @@
 
 import { isFilterBasedSimpleQuery } from './filter_based_simple_query';
 import { isMatchAllQuery } from './match_all_query';
-import { isSimpleQuery } from './simple_query';
+import { isSimpleDefaultQuery } from './simple_query';
 import type { SearchQueryVariant } from './types';
 
 /**
@@ -21,7 +21,7 @@ import type { SearchQueryVariant } from './types';
 export function isDefaultQuery(query: SearchQueryVariant): boolean {
   return (
     isMatchAllQuery(query) ||
-    (isSimpleQuery(query) && query.query_string.query === '*') ||
+    isSimpleDefaultQuery(query) ||
     (isFilterBasedSimpleQuery(query) &&
       (query.bool.filter[0].query_string.query === '*' || isMatchAllQuery(query.bool.filter[0])))
   );

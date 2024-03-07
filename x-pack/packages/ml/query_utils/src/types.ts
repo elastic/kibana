@@ -28,7 +28,7 @@ export type SavedSearchQuery = object;
 /**
  * Represents a simple query structure for searching documents.
  */
-export interface SimpleQuery {
+export interface SimpleQuery<Q = string> {
   /**
    * Defines the query string parameters for the search.
    */
@@ -36,7 +36,7 @@ export interface SimpleQuery {
     /**
      * The query text to search for within documents.
      */
-    query: string;
+    query: Q;
 
     /**
      * The default logical operator.
