@@ -255,6 +255,7 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                           gutterSize={'s'}
                           alignItems={'center'}
                           justifyContent={'spaceBetween'}
+                          data-test-subj="mlAddTrainedModelFlyoutChooseModelPanels"
                         >
                           <EuiFlexItem grow={false}>
                             <header>
@@ -337,6 +338,7 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
         onClick={onModelDownload.bind(null, selectedModelId!)}
         fill
         disabled={!selectedModelId}
+        data-test-subj="mlAddTrainedModelFlyoutDownloadButton"
       >
         <FormattedMessage
           id="xpack.ml.trainedModels.addModelFlyout.downloadButtonLabel"

@@ -29,25 +29,29 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
     }
 
     public async assertElserPanelsExist(): Promise<void> {
-      const first = 'input.euiRadio__input[type="radio"][name=".elser_model_2"]';
-      expect(await find.existsByCssSelector(first)).to.be.ok();
+      const [first, second, ,] = await testSubjects.findAll(
+        'mlAddTrainedModelFlyoutChooseModelPanels'
+      );
 
-      const second = 'input.euiRadio__input[type="radio"][name=".elser_model_2_linux-x86_64"]';
-      expect(await find.existsByCssSelector(second)).to.be.ok();
+      expect(first).to.be.ok();
+      expect(second).to.be.ok();
     }
 
     public async assertE5PanelsExist(): Promise<void> {
-      const first = 'input.euiRadio__input[type="radio"][name=".multilingual-e5-small"]';
-      expect(await find.existsByCssSelector(first)).to.be.ok();
+      const [, , third, fourth] = await testSubjects.findAll(
+        'mlAddTrainedModelFlyoutChooseModelPanels'
+      );
 
-      const second =
-        'input.euiRadio__input[type="radio"][name=".multilingual-e5-small_linux-x86_64"]';
-      expect(await find.existsByCssSelector(second)).to.be.ok();
+      expect(third).to.be.ok();
+      expect(fourth).to.be.ok();
     }
 
     public async assertDownloadButtonExists(): Promise<void> {
-      const selector = 'div[class^="euiFlyoutBody"] button.euiButton span';
-      expect(await find.existsByCssSelector(selector)).to.be.ok();
+      expect(
+        await testSubjects.exists('mlAddTrainedModelFlyoutDownloadButton', {
+          timeout: tenSeconds / 2,
+        })
+      ).to.be.ok();
     }
 
     public async open(): Promise<void> {
