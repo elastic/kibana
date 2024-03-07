@@ -83,7 +83,6 @@ const NotesTab = tabWithSuspense(lazy(() => import('../notes_tab_content')));
 const PinnedTab = tabWithSuspense(lazy(() => import('../pinned_tab_content')));
 const SessionTab = tabWithSuspense(lazy(() => import('../session_tab_content')));
 const EsqlTab = tabWithSuspense(lazy(() => import('../esql_tab_content')));
-// const AssistantTab = tabWithSuspense(lazy(() => import('../assistant_tab_content')));
 interface BasicTimelineTab {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];

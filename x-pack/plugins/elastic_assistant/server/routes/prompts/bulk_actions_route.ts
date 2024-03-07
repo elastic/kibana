@@ -32,11 +32,11 @@ import {
   transformToCreateScheme,
   transformToUpdateScheme,
   transformESToPrompts,
-} from '../../ai_assistant_data_clients/promts/helpers';
+} from '../../ai_assistant_data_clients/prompts/helpers';
 import {
   SearchEsPromptsSchema,
   UpdatePromptSchema,
-} from '../../ai_assistant_data_clients/promts/types';
+} from '../../ai_assistant_data_clients/prompts/types';
 
 export interface BulkOperationError {
   message: string;

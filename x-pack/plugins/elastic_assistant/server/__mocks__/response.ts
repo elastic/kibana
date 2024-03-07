@@ -11,7 +11,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { SearchEsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
 import { FindResponse } from '../ai_assistant_data_clients/find';
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
-import { SearchEsPromptsSchema } from '../ai_assistant_data_clients/promts/types';
+import { SearchEsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
 import { getPromptsSearchEsMock } from './prompts_schema.mock';
 import { SearchEsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
 import { getAnonymizationFieldsSearchEsMock } from './anonymization_fields_schema.mock';
