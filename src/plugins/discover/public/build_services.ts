@@ -53,7 +53,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
-import { memoize } from 'lodash';
+import { memoize, noop } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { DiscoverStartPlugins } from './plugin';
 import { DiscoverContextAppLocator } from './application/context/services/locator';
@@ -85,7 +85,7 @@ export interface DiscoverServices {
   embeddable: EmbeddableStart;
   history: History<HistoryLocationState>;
   getScopedHistory: <T>() => ScopedHistory<T | undefined> | undefined;
-  setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme: CoreStart['theme'];
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
@@ -134,7 +134,7 @@ export const buildServices = memoize(
     history,
     scopedHistory,
     urlTracker,
-    setHeaderActionMenu,
+    setHeaderActionMenu = noop,
   }: {
     core: CoreStart;
     plugins: DiscoverStartPlugins;
