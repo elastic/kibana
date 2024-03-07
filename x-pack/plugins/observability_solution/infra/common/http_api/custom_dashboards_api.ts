@@ -12,7 +12,7 @@ const AssetTypeRT = rt.type({
   assetType: ItemTypeRT,
 });
 
-const CustomDashboardRT = rt.intersection([
+export const InfraCustomDashboardRT = rt.intersection([
   AssetTypeRT,
   rt.type({
     dashboardIdList: rt.array(
@@ -31,7 +31,7 @@ const CustomDashboardRT = rt.intersection([
  GET endpoint
 */
 export const InfraGetCustomDashboardsRequestParamsRT = AssetTypeRT;
-export const InfraGetCustomDashboardsResponseBodyRT = CustomDashboardRT;
+export const InfraGetCustomDashboardsResponseBodyRT = InfraCustomDashboardRT;
 export type InfraGetCustomDashboardsRequestParams = rt.TypeOf<
   typeof InfraGetCustomDashboardsRequestParamsRT
 >;
@@ -42,8 +42,8 @@ export type InfraGetCustomDashboardsResponseBody = rt.TypeOf<
 /**
  * POST endpoint
  */
-export const InfraSaveCustomDashboardsRequestPayloadRT = CustomDashboardRT;
-export const InfraSaveCustomDashboardsResponseBodyRT = CustomDashboardRT;
+export const InfraSaveCustomDashboardsRequestPayloadRT = InfraCustomDashboardRT;
+export const InfraSaveCustomDashboardsResponseBodyRT = InfraCustomDashboardRT;
 export type InfraSaveCustomDashboardsRequestPayload = rt.TypeOf<
   typeof InfraSaveCustomDashboardsRequestPayloadRT
 >;
