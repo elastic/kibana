@@ -70,7 +70,7 @@ export const DiscoverContainerInternal = ({
       ? {
           ...discoverServices,
           ...overrideServices,
-          scopedHistory: <T,>() => scopedHistory as ScopedHistory<T | undefined>,
+          getScopedHistory: <T,>() => scopedHistory as ScopedHistory<T | undefined>,
         }
       : undefined;
   }, [discoverServices, overrideServices, scopedHistory]);

@@ -21,7 +21,7 @@ export interface ContextUrlParams {
 }
 
 export function ContextAppRoute() {
-  const scopedHistory = useDiscoverServices().scopedHistory<ContextHistoryLocationState>();
+  const scopedHistory = useDiscoverServices().getScopedHistory<ContextHistoryLocationState>();
   const locationState = useMemo(
     () => scopedHistory?.location.state as ContextHistoryLocationState | undefined,
     [scopedHistory?.location.state]

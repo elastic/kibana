@@ -24,7 +24,7 @@ export interface DocUrlParams {
 }
 
 export const SingleDocRoute = () => {
-  const { timefilter, core, scopedHistory } = useDiscoverServices();
+  const { timefilter, core, getScopedHistory } = useDiscoverServices();
   const { search } = useLocation();
   const { dataViewId, index } = useParams<DocUrlParams>();
 
@@ -32,8 +32,8 @@ export const SingleDocRoute = () => {
   const id = query.get('id');
 
   const locationState = useMemo(
-    () => scopedHistory<DocHistoryLocationState>()?.location.state,
-    [scopedHistory]
+    () => getScopedHistory<DocHistoryLocationState>()?.location.state,
+    [getScopedHistory]
   );
 
   useExecutionContext(core.executionContext, {

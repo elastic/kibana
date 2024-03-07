@@ -69,7 +69,7 @@ export function DiscoverMainRoute({
     http: { basePath },
     dataViewEditor,
     share,
-    scopedHistory,
+    getScopedHistory,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
   const [stateContainer, { reset: resetStateContainer }] = useDiscoverStateContainer({
@@ -95,8 +95,8 @@ export function DiscoverMainRoute({
    * Get location state of scoped history only on initial load
    */
   const historyLocationState = useMemo(
-    () => scopedHistory<MainHistoryLocationState>()?.location.state,
-    [scopedHistory]
+    () => getScopedHistory<MainHistoryLocationState>()?.location.state,
+    [getScopedHistory]
   );
 
   useAlertResultsToast({

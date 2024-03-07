@@ -30,7 +30,7 @@ jest.mock('../../application/main', () => {
 
 jest.mock('@kbn/kibana-react-plugin/public');
 
-const { scopedHistory } = discoverServiceMock;
+const { getScopedHistory } = discoverServiceMock;
 
 const customizeMock = jest.fn();
 
@@ -39,7 +39,7 @@ const TestComponent = (props: Partial<DiscoverContainerInternalProps>) => {
     <DiscoverContainerInternal
       overrideServices={props.overrideServices ?? mockOverrideService}
       customizationCallbacks={props.customizationCallbacks ?? [customizeMock]}
-      scopedHistory={props.scopedHistory ?? scopedHistory()!}
+      scopedHistory={props.scopedHistory ?? getScopedHistory()!}
       getDiscoverServices={getDiscoverServicesMock}
     />
   );

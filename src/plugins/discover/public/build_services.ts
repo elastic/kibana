@@ -84,7 +84,7 @@ export interface DiscoverServices {
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
   history: History<HistoryLocationState>;
-  scopedHistory: <T>() => ScopedHistory<T | undefined> | undefined;
+  getScopedHistory: <T>() => ScopedHistory<T | undefined> | undefined;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   theme: CoreStart['theme'];
   filterManager: FilterManager;
@@ -164,7 +164,7 @@ export const buildServices = memoize(
       fieldFormats: plugins.fieldFormats,
       filterManager: plugins.data.query.filterManager,
       history,
-      scopedHistory: <T>() => scopedHistory as ScopedHistory<T | undefined>,
+      getScopedHistory: <T>() => scopedHistory as ScopedHistory<T | undefined>,
       setHeaderActionMenu,
       dataViews: plugins.data.dataViews,
       inspector: plugins.inspector,

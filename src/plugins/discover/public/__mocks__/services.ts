@@ -154,7 +154,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       },
       listen: jest.fn(),
     },
-    scopedHistory: () => scopedHistoryMock.create(),
+    getScopedHistory: () => scopedHistoryMock.create(),
     data: dataPlugin,
     docLinks: docLinksServiceMock.createStartContract(),
     capabilities: {
