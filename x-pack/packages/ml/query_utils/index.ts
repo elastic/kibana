@@ -14,7 +14,7 @@ export { matchAllQuery, isMatchAllQuery } from './src/match_all_query';
 export { isSimpleQuery } from './src/simple_query';
 export { SEARCH_QUERY_LANGUAGE } from './src/types';
 export type {
-  FilterBasedSimpleQuery,
+  BoolFilterBasedSimpleQuery,
   SavedSearchQuery,
   SearchQueryLanguage,
   SearchQueryVariant,
