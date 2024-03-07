@@ -512,6 +512,11 @@ export async function getAgentVersionsForAgentPolicyIds(
                   policy_id: agentPolicyIds,
                 },
               },
+              {
+                term: {
+                  active: true,
+                },
+              },
             ],
           },
         },
