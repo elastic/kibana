@@ -162,7 +162,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   }, [kibanaVersion]);
 
   useEffect(() => {
-    const fetchFleetServerVersions = async () => {
+    const fetchFleetServerAgents = async () => {
       try {
         const { allFleetServerAgents } = await sendAllFleetServerAgents();
         setfleetServerAgents(allFleetServerAgents);
@@ -171,7 +171,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       }
     };
 
-    fetchFleetServerVersions();
+    fetchFleetServerAgents();
   }, []);
 
   const minVersion = useMemo(() => {
