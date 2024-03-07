@@ -11,6 +11,8 @@ import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Meta, Story } from '@storybook/react';
 import { IndexPattern } from '@kbn/io-ts-utils';
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { DataViewDescriptor } from '../../../common/data_views/models/data_view_descriptor';
 import {
   AllDatasetSelection,
@@ -20,6 +22,7 @@ import {
 import { Dataset, Integration } from '../../../common/datasets';
 import { DataSourceSelector } from './data_source_selector';
 import { DataSourceSelectorProps, DataSourceSelectorSearchParams } from './types';
+import { IsDataViewAvailable } from '../../hooks/use_data_views';
 
 const meta: Meta<typeof DataSourceSelector> = {
   component: DataSourceSelector,
@@ -42,6 +45,23 @@ const meta: Meta<typeof DataSourceSelector> = {
 };
 export default meta;
 
+const coreMock = {
+  share: {
+    url: {
+      locators: {
+        get: () => {
+          return {
+            useUrl: () => 'http://localhost:5601/app/logs-explorer',
+            navigate: () => {},
+          };
+        },
+      },
+    },
+  },
+} as unknown as CoreStart;
+
+const KibanaReactContext = createKibanaReactContext(coreMock);
+
 const DataSourceSelectorTemplate: Story<DataSourceSelectorProps> = (args) => {
   const [dataSourceSelection, setDataSourceSelection] = useState<DataSourceSelection>(() =>
     AllDatasetSelection.create()
@@ -61,6 +81,10 @@ const DataSourceSelectorTemplate: Story<DataSourceSelectorProps> = (args) => {
 
   const onSelectionChange: DataSourceSelectionChangeHandler = (newSelection) => {
     setDataSourceSelection(newSelection);
+  };
+
+  const isDataViewAvailable: IsDataViewAvailable = (dataView) => {
+    return true;
   };
 
   const filteredIntegrations = integrations.filter((integration) =>
@@ -93,23 +117,26 @@ const DataSourceSelectorTemplate: Story<DataSourceSelectorProps> = (args) => {
   } = args;
 
   return (
-    <DataSourceSelector
-      {...args}
-      datasets={Boolean(datasetsError || isLoadingUncategorized) ? [] : sortedDatasets}
-      dataViews={Boolean(dataViewsError || isLoadingDataViews) ? [] : sortedDataViews}
-      dataSourceSelection={dataSourceSelection}
-      integrations={Boolean(integrationsError || isLoadingIntegrations) ? [] : sortedIntegrations}
-      onDataViewsSearch={setSearch}
-      onDataViewsSort={setSearch}
-      onIntegrationsLoadMore={onIntegrationsLoadMore}
-      onIntegrationsSearch={setSearch}
-      onIntegrationsSort={setSearch}
-      onIntegrationsStreamsSearch={setSearch}
-      onIntegrationsStreamsSort={setSearch}
-      onSelectionChange={onSelectionChange}
-      onUncategorizedSearch={setSearch}
-      onUncategorizedSort={setSearch}
-    />
+    <KibanaReactContext.Provider>
+      <DataSourceSelector
+        {...args}
+        datasets={Boolean(datasetsError || isLoadingUncategorized) ? [] : sortedDatasets}
+        dataViews={Boolean(dataViewsError || isLoadingDataViews) ? [] : sortedDataViews}
+        dataSourceSelection={dataSourceSelection}
+        integrations={Boolean(integrationsError || isLoadingIntegrations) ? [] : sortedIntegrations}
+        isDataViewAvailable={isDataViewAvailable}
+        onDataViewsSearch={setSearch}
+        onDataViewsSort={setSearch}
+        onIntegrationsLoadMore={onIntegrationsLoadMore}
+        onIntegrationsSearch={setSearch}
+        onIntegrationsSort={setSearch}
+        onIntegrationsStreamsSearch={setSearch}
+        onIntegrationsStreamsSort={setSearch}
+        onSelectionChange={onSelectionChange}
+        onUncategorizedSearch={setSearch}
+        onUncategorizedSort={setSearch}
+      />
+    </KibanaReactContext.Provider>
   );
 };
 
