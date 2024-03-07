@@ -1510,7 +1510,7 @@ describe('<CspPolicyTemplateForm />', () => {
       const setupTechnologySelectorAccordion = queryByTestId(
         SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
       );
-      const setupTechnologySelector = queryByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
       const orgIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
       const projectIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
       const credentialsJsonField = queryByTestId(

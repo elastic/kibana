@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import type { PackageInfo } from '@kbn/fleet-plugin/common';
+import type { PackageInfo, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { createNewPackagePolicyMock, createAgentPolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import {
   CLOUDBEAT_GCP,
@@ -17,11 +17,15 @@ import {
 } from '../../../common/constants';
 import type { PostureInput } from '../../../common/types_old';
 
-export const getMockPolicyAWS = (vars) => getPolicyMock(CLOUDBEAT_AWS, 'cspm', 'aws', vars);
-export const getMockPolicyGCP = (vars) => getPolicyMock(CLOUDBEAT_GCP, 'cspm', 'gcp', vars);
-export const getMockPolicyAzure = (vars) => getPolicyMock(CLOUDBEAT_AZURE, 'cspm', 'azure', vars);
+export const getMockPolicyAWS = (vars?: PackagePolicyConfigRecord) =>
+  getPolicyMock(CLOUDBEAT_AWS, 'cspm', 'aws', vars);
+export const getMockPolicyGCP = (vars?: PackagePolicyConfigRecord) =>
+  getPolicyMock(CLOUDBEAT_GCP, 'cspm', 'gcp', vars);
+export const getMockPolicyAzure = (vars?: PackagePolicyConfigRecord) =>
+  getPolicyMock(CLOUDBEAT_AZURE, 'cspm', 'azure', vars);
 export const getMockPolicyK8s = () => getPolicyMock(CLOUDBEAT_VANILLA, 'kspm', 'self_managed');
-export const getMockPolicyEKS = (vars) => getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks', vars);
+export const getMockPolicyEKS = (vars?: PackagePolicyConfigRecord) =>
+  getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks', vars);
 export const getMockPolicyVulnMgmtAWS = () =>
   getPolicyMock(CLOUDBEAT_VULN_MGMT_AWS, 'vuln_mgmt', 'aws');
 export const getMockAgentlessAgentPolicy = () => {
