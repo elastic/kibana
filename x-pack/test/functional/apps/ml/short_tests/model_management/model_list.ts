@@ -19,15 +19,6 @@ export default function ({ getService }: FtrProviderContext) {
     id: model.name,
   }));
 
-  async function maybeClearSearchInput() {
-    await ml.testExecution.logTestStep('"Maybe" clear search input box');
-    try {
-      const searchBarInput = await ml.trainedModelsTable.getModelsSearchInput();
-      await searchBarInput.clearValue();
-    } catch (e) {
-      // This is where the "maybe" comes into play.
-    }
-  }
   describe('trained models', function () {
     // 'Created at' will be different on each run,
     // so we will just assert that the value is in the expected timestamp format.
@@ -160,8 +151,9 @@ export default function ({ getService }: FtrProviderContext) {
       describe('Add trained model flyout', () => {
         it('should display elements on Manual Download tab correctly', async () => {
           await ml.testExecution.logTestStep('Open the Add Trained Model Flyout');
-          await maybeClearSearchInput();
-          await ml.trainedModelsFlyout.assertFlyoutOpen();
+          await ml.trainedModelsFlyout.open();
+          await ml.testExecution.logTestStep('Assert the Add Trained Model Flyout is closed');
+          await ml.trainedModelsFlyout.assertOpen();
 
           await ml.testExecution.logTestStep('Assert the Click to Download tab exists');
           await ml.trainedModelsFlyout.assertTabsDifferPerUser('viewer');
@@ -171,9 +163,10 @@ export default function ({ getService }: FtrProviderContext) {
           );
           await ml.trainedModelsFlyout.assertElandPythonClientCodeBlocks();
 
-          await maybeClearSearchInput();
           await ml.testExecution.logTestStep('Close the Add Trained Model flyout');
           await ml.trainedModelsFlyout.close();
+          await ml.testExecution.logTestStep('Assert the Add Trained Model flyout is closed');
+          await ml.trainedModelsFlyout.assertClosed();
         });
       });
     });
@@ -191,14 +184,16 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('Add trained model flyout', () => {
         before(async () => {
-          await maybeClearSearchInput();
           await ml.testExecution.logTestStep('Open the Add Trained Model Flyout');
-          await ml.trainedModelsFlyout.assertFlyoutOpen();
+          await ml.trainedModelsFlyout.open();
+          await ml.testExecution.logTestStep('Assert the Add Trained Model Flyout is open');
+          await ml.trainedModelsFlyout.assertOpen();
         });
 
         after(async () => {
-          await maybeClearSearchInput();
           await ml.testExecution.logTestStep('Close the Add Trained Model flyout');
+          await ml.trainedModelsFlyout.close();
+          await ml.testExecution.logTestStep('Assert the Add Trained Model flyout is closed');
           await ml.trainedModelsFlyout.assertClosed();
         });
 

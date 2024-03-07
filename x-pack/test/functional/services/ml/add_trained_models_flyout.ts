@@ -14,6 +14,7 @@ export type AddTrainedModelUser = 'power' | 'viewer';
 export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) {
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   const twentySeconds = 10000 * 2;
 
@@ -49,21 +50,31 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
       expect(await find.existsByCssSelector(selector)).to.be.ok();
     }
 
-    public async assertFlyoutOpen(): Promise<void> {
-      await find.clickByCssSelector(
-        'div[data-test-subj="euiSkeletonLoadingAriaWrapper"] div.euiFlexItem button [data-icon-type="plusInCircle"]',
-        twentySeconds
+    public async open(): Promise<void> {
+      await retry.waitFor('Add Trained Model Button', () =>
+        testSubjects.exists('mlModelsAddTrainedModelButton')
       );
-      await find.existsByCssSelector('div h2#addTrainedModelFlyout', twentySeconds);
+      await testSubjects.clickWhenNotDisabled('mlModelsAddTrainedModelButton', {
+        timeout: twentySeconds,
+      });
+    }
+
+    public async assertOpen(): Promise<void> {
+      await retry.try(async () => {
+        await testSubjects.exists('mlAddTrainedModelFlyout', {
+          timeout: twentySeconds,
+        });
+      });
+    }
+
+    public async close(): Promise<void> {
+      await testSubjects.click('euiFlyoutCloseButton');
     }
 
     public async assertClosed(): Promise<void> {
-      try {
-        await testSubjects.click('euiFlyoutCloseButton');
-        await testSubjects.missingOrFail('addTrainedModelFlyout');
-      } catch (e) {
-        // Perhaps it's been closed already?
-      }
+      await testSubjects.missingOrFail('mlAddTrainedModelFlyout', {
+        timeout: twentySeconds,
+      });
     }
 
     public async assertTabsDifferPerUser(user: AddTrainedModelUser): Promise<void> {
