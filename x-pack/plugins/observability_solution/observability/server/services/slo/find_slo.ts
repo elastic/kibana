@@ -30,7 +30,7 @@ export class FindSLO {
     );
 
     const sloList = await this.repository.findAllByIds(
-      sloSummaryList.results.filter((slo) => !slo.unsafeIsRemote).map((slo) => slo.id)
+      sloSummaryList.results.filter((slo) => !slo.remoteName).map((slo) => slo.id)
     );
 
     const sloListWithSummary = mergeSloWithSummary(sloList, sloSummaryList.results);
@@ -55,13 +55,14 @@ function mergeSloWithSummary(sloList: SLO[], sloSummaryList: SLOSummary[]): SLOW
         groupings: sloSummary.groupings,
       })),
     ...sloSummaryList
-      .filter((sloSummary) => sloSummary.unsafeIsRemote)
+      .filter((sloSummary) => sloSummary.remoteName)
       .map((remoteSloSummary) => ({
         ...remoteSloSummary.unsafeSlo!,
         instanceId: remoteSloSummary.instanceId,
         summary: remoteSloSummary.summary,
         groupings: remoteSloSummary.groupings,
         isRemote: true,
+        remoteName: remoteSloSummary.remoteName,
       })),
   ];
 }

@@ -15,7 +15,7 @@ import {
 import * as t from 'io-ts';
 import { SLO, Status } from '../../../../domain/models';
 
-export type EsSummaryDocument = {
+export interface EsSummaryDocument {
   service: {
     environment: string | null;
     name: string | null;
@@ -29,7 +29,8 @@ export type EsSummaryDocument = {
       type: IndicatorType;
     };
     timeWindow: t.OutputOf<typeof timeWindowSchema>;
-    groupBy: string;
+    groupBy: string | string[];
+    groupings: Record<string, unknown>;
     instanceId: string;
     name: string;
     description: string;
@@ -50,7 +51,7 @@ export type EsSummaryDocument = {
   status: Status;
   isTempDoc: boolean;
   spaceId: string;
-};
+}
 
 export function createTempSummaryDocument(slo: SLO, spaceId: string): EsSummaryDocument {
   const apmParams = 'environment' in slo.indicator.params ? slo.indicator.params : null;
@@ -73,6 +74,7 @@ export function createTempSummaryDocument(slo: SLO, spaceId: string): EsSummaryD
         type: slo.timeWindow.type,
       },
       groupBy: !!slo.groupBy ? slo.groupBy : ALL_VALUE,
+      groupings: {},
       instanceId: ALL_VALUE,
       name: slo.name,
       description: slo.description,

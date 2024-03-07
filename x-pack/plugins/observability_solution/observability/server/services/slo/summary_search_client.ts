@@ -10,35 +10,20 @@ import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/co
 import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
+import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
+import { createEsParams, typedSearch } from '../../utils/queries';
 import { getSloSettings } from './slo_settings';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
-import { SLO, SLOId, Status, Summary, Groupings } from '../../domain/models';
+import { SLO, SLOId, Summary, Groupings } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
 import { getFlattenedGroupings } from './utils';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
 
-interface EsSummaryDocument {
-  slo: {
-    id: string;
-    revision: number;
-    instanceId: string;
-    groupings: Groupings;
-    groupBy: string[];
-  };
-  sliValue: number;
-  errorBudgetConsumed: number;
-  errorBudgetRemaining: number;
-  errorBudgetInitial: number;
-  errorBudgetEstimated: boolean;
-  statusCode: number;
-  status: Status;
-  isTempDoc: boolean;
-}
 import { fromSummaryDocumentToSlo } from './unsafe_federated/helper';
 
 export interface SLOSummary {
   id: SLOId;
-  unsafeIsRemote: boolean;
+  remoteName: string;
   unsafeSlo: SLO | undefined;
   instanceId: string;
   summary: Summary;
@@ -105,33 +90,37 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     }
 
     const indices = await this.getListOfIndices();
+    const esParams = createEsParams({
+      index: indices,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: [
+            { term: { spaceId: this.spaceId } },
+            getElasticsearchQueryOrThrow(kqlQuery),
+            ...(parsedFilters.filter ?? []),
+          ],
+          must_not: [...(parsedFilters.must_not ?? [])],
+        },
+      },
+      sort: {
+        // non-temp first, then temp documents
+        isTempDoc: {
+          order: 'asc',
+        },
+        [toDocumentSortField(sort.field)]: {
+          order: sort.direction,
+        },
+      },
+      from: (pagination.page - 1) * pagination.perPage,
+      size: pagination.perPage * 2, // twice as much as we return, in case they are all duplicate temp/non-temp summary
+    });
 
     try {
-      const summarySearch = await this.esClient.search<EsSummaryDocument>({
-        index: indices,
-        track_total_hits: true,
-        query: {
-          bool: {
-            filter: [
-              { term: { spaceId: this.spaceId } },
-              getElasticsearchQueryOrThrow(kqlQuery),
-              ...(parsedFilters.filter ?? []),
-            ],
-            must_not: [...(parsedFilters.must_not ?? [])],
-          },
-        },
-        sort: {
-          // non-temp first, then temp documents
-          isTempDoc: {
-            order: 'asc',
-          },
-          [toDocumentSortField(sort.field)]: {
-            order: sort.direction,
-          },
-        },
-        from: (pagination.page - 1) * pagination.perPage,
-        size: pagination.perPage * 2, // twice as much as we return, in case they are all duplicate temp/non-temp summary
-      });
+      const summarySearch = await typedSearch<EsSummaryDocument, typeof esParams>(
+        this.esClient,
+        esParams
+      );
 
       const total = (summarySearch.hits.total as SearchTotalHits).value ?? 0;
       if (total === 0) {
@@ -143,21 +132,11 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         (doc) => !!doc._source?.isTempDoc
       );
 
-      // Always attempt to delete temporary summary documents with an existing non-temp summary document
-      // The temp summary documents are _eventually_ removed as we get through the real summary documents
-      const summarySloIds = summaryDocuments.map((doc) => doc._source?.slo.id);
-      await this.esClient.deleteByQuery({
-        index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-        wait_for_completion: false,
-        query: {
-          bool: {
-            filter: [{ terms: { 'slo.id': summarySloIds } }, { term: { isTempDoc: true } }],
-          },
-        },
-      });
+      const summarySloIds = summaryDocuments.map((doc) => doc._source.slo.id);
+      await this.deleteOutdatedSummaries(summarySloIds);
 
       const tempSummaryDocumentsDeduped = tempSummaryDocuments.filter(
-        (doc) => !summarySloIds.includes(doc._source?.slo.id)
+        (doc) => !summarySloIds.includes(doc._source.slo.id)
       );
 
       const finalResults = summaryDocuments
@@ -166,37 +145,37 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
 
       const finalTotal = total - (tempSummaryDocuments.length - tempSummaryDocumentsDeduped.length);
       return {
+        ...pagination,
         total: finalTotal,
-        perPage: pagination.perPage,
-        page: pagination.page,
         results: finalResults.map((doc) => {
-          const unsafeIsRemote = doc._index.includes('remote_cluster:');
+          const summaryDoc = doc._source;
+          const remoteName = this.getNameOfRemoteCluster(doc._index);
           let unsafeSlo;
-          if (unsafeIsRemote) {
-            unsafeSlo = fromSummaryDocumentToSlo(doc._source!);
+          if (remoteName) {
+            unsafeSlo = fromSummaryDocumentToSlo(summaryDoc);
             if (unsafeSlo === undefined) {
               this.logger.error(`Invalid remote stored SLO with id [${doc._source!.slo.id}]`);
             }
           }
 
           return {
-            unsafeIsRemote,
+            remoteName,
             unsafeSlo,
-            id: doc._source!.slo.id,
-            instanceId: doc._source!.slo.instanceId ?? ALL_VALUE,
+            id: summaryDoc.slo.id,
+            instanceId: summaryDoc.slo.instanceId ?? ALL_VALUE,
             summary: {
               errorBudget: {
-                initial: toHighPrecision(doc._source!.errorBudgetInitial),
-                consumed: toHighPrecision(doc._source!.errorBudgetConsumed),
-                remaining: toHighPrecision(doc._source!.errorBudgetRemaining),
-                isEstimated: doc._source!.errorBudgetEstimated,
+                initial: toHighPrecision(summaryDoc.errorBudgetInitial),
+                consumed: toHighPrecision(summaryDoc.errorBudgetConsumed),
+                remaining: toHighPrecision(summaryDoc.errorBudgetRemaining),
+                isEstimated: summaryDoc.errorBudgetEstimated,
               },
-              sliValue: toHighPrecision(doc._source!.sliValue),
-              status: doc._source!.status,
+              sliValue: toHighPrecision(doc._source.sliValue),
+              status: summaryDoc.status,
             },
             groupings: getFlattenedGroupings({
-              groupings: doc._source!.slo.groupings,
-              groupBy: doc._source!.slo.groupBy,
+              groupings: summaryDoc.slo.groupings,
+              groupBy: summaryDoc.slo.groupBy,
             }),
           };
         }),
@@ -205,6 +184,25 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
       this.logger.error(new Error(`Summary search query error, ${err.message}`, { cause: err }));
       return { total: 0, perPage: pagination.perPage, page: pagination.page, results: [] };
     }
+  }
+
+  getNameOfRemoteCluster = (index: string) => {
+    return index.split(':')?.[0];
+  };
+
+  async deleteOutdatedSummaries(summarySloIds: string[]) {
+    // Always attempt to delete temporary summary documents with an existing non-temp summary document
+    // The temp summary documents are _eventually_ removed as we get through the real summary documents
+
+    await this.esClient.deleteByQuery({
+      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      wait_for_completion: false,
+      query: {
+        bool: {
+          filter: [{ terms: { 'slo.id': summarySloIds } }, { term: { isTempDoc: true } }],
+        },
+      },
+    });
   }
 }
 

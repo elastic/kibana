@@ -14,7 +14,7 @@ export function fromSummaryDocumentToSlo(summaryDoc: EsSummaryDocument): SLO | u
   const res = sloSchema.decode({
     ...summaryDoc.slo,
     indicator: {
-      type: 'sli.kql.custom',
+      type: summaryDoc.slo.indicator.type,
       params: {
         index: 'irrelevant',
         good: 'irrelevant',
