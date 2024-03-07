@@ -197,9 +197,11 @@ describe('AgentUpgradeAgentModal', () => {
           items: ['8.10.4', '8.10.2', '8.9.0', '8.8.0'],
         },
       });
-      mockSendAllFleetServerAgents.mockResolvedValue([
-        { id: 'fleet-server', local_metadata: { elastic: { agent: { version: '8.9.0' } } } },
-      ] as any);
+      mockSendAllFleetServerAgents.mockResolvedValue({
+        allFleetServerAgents: [
+          { id: 'fleet-server', local_metadata: { elastic: { agent: { version: '8.9.0' } } } },
+        ] as any,
+      });
 
       const { utils } = renderAgentUpgradeAgentModal({
         agents: [
