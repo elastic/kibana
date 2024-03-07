@@ -528,6 +528,55 @@ describe('query tab with unified timeline', () => {
       expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
     });
 
+    it.only('should be able to add column by dragging', async () => {
+      const field = {
+        name: 'agent.id',
+      };
+
+      renderTestComponents();
+      expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent('11');
+      });
+
+      expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(0);
+
+      // column exists in the table
+      const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
+
+      const fieldToBeAdded = within(availableFields).getByTestId(`field-${field.name}-showDetails`);
+
+      const dataTransfer = {
+        text: field.name,
+        getData: () => field.name,
+      };
+
+      fireEvent.drag(fieldToBeAdded);
+      fireEvent.dragStart(fieldToBeAdded, {
+        dataTransfer,
+      });
+
+      const destination = screen.getByTestId('discoverDocTable');
+
+      fireEvent.dragEnter(destination);
+      fireEvent.dragOver(destination);
+
+      expect(screen.getByTestId('domDragDropContainer')).toHaveClass(
+        'domDragDrop__container domDragDrop__container-active'
+      );
+
+      fireEvent.drop(destination, {
+        dataTransfer,
+      });
+      expect(screen.getByTestId('domDragDropContainer')).toHaveClass('domDragDrop__container');
+
+      await waitFor(() => {
+        expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
+      });
+      expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent('12');
+    }, 10000);
+
     it('should should show callout when field search does not matches any field', async () => {
       renderTestComponents();
       expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
