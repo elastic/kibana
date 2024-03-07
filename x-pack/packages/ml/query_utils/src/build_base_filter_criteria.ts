@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 
 import { isDefaultQuery } from './default_query';
 import { isFilterBasedDefaultQuery } from './filter_based_default_query';
