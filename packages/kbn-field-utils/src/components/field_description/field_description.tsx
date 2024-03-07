@@ -8,13 +8,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiText,
-  EuiTextProps,
-  EuiButtonEmpty,
-  EuiTextBlockTruncate,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiText, EuiButtonEmpty, EuiTextBlockTruncate, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 const MAX_VISIBLE_LENGTH = 110;
@@ -24,13 +18,13 @@ export interface FieldDescriptionProps {
     name: string;
     customDescription?: string;
   };
-  color?: EuiTextProps['color'];
+  color?: 'subdued';
   truncate?: boolean;
 }
 
 export const FieldDescription: React.FC<FieldDescriptionProps> = ({
   field,
-  color = 'text',
+  color,
   truncate = true,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -56,6 +50,7 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
             css={css`
               padding: 0;
               margin: 0;
+              color: ${color === 'subdued' ? euiTheme.colors.subduedText : euiTheme.colors.text};
               line-height: inherit;
               font-size: inherit;
 
