@@ -49,18 +49,6 @@ export const createDashboardSavedObjectType = ({
       },
     },
     2: {
-      changes: [
-        {
-          type: 'mappings_addition',
-          addedMappings: {
-            controlGroupInput: {
-              properties: {
-                showApplySelections: { type: 'boolean', index: false },
-              },
-            },
-          },
-        },
-      ],
       schemas: {
         forwardCompatibility: dashboardAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
         create: dashboardAttributesSchemaV2,
@@ -89,7 +77,6 @@ export const createDashboardSavedObjectType = ({
           controlStyle: { type: 'keyword', index: false, doc_values: false },
           chainingSystem: { type: 'keyword', index: false, doc_values: false },
           panelsJSON: { type: 'text', index: false },
-          showApplySelections: { type: 'boolean', index: false },
           ignoreParentSettingsJSON: { type: 'text', index: false },
         },
       },
