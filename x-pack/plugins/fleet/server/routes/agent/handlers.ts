@@ -273,7 +273,7 @@ export const postAgentsReassignHandler: RequestHandler<
   }
 };
 
-export const postBulkAgentsReassignHandler: RequestHandler<
+export const postBulkAgentReassignHandler: RequestHandler<
   undefined,
   undefined,
   TypeOf<typeof PostBulkAgentReassignRequestSchema.body>
