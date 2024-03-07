@@ -17,6 +17,9 @@ import type {
 
 export * from './constants';
 
+/**
+ * @deprecated
+ */
 export interface JobParamsDownloadCSV {
   browserTimezone: string;
   title: string;
