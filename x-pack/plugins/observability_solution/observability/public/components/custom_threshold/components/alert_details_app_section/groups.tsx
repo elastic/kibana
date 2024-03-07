@@ -75,6 +75,8 @@ export function Groups({ groups }: { groups: Array<{ field: string; value: strin
         ? `${apmSourceLinks[field]}/${serviceName}/transactions/view?transactionName=${value}`
         : field === TRANSACTION_TYPE
         ? `${apmSourceLinks[field]}/${serviceName}?transactionType=${value}`
+        : field === SERVICE_ENVIRONMENT
+        ? `${apmSourceLinks[field]}/${serviceName}?environment=${value}`
         : `${apmSourceLinks[field]}/${value}`;
 
     return (
