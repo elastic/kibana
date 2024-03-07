@@ -48,7 +48,7 @@ export const FieldDescriptionIconButton: React.FC<FieldDescriptionIconButtonProp
             title={buttonTitle}
             aria-label={buttonTitle}
             size="xs"
-            data-test-subj="fieldDescriptionPopoverButton"
+            data-test-subj={`fieldDescriptionPopoverButton-${field.name}`}
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           />
         }
