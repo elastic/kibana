@@ -54,7 +54,7 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
     const { allLocations = [] } = await getAllLocations(route);
     const data = await savedObjectsClient.find<EncryptedSyntheticsMonitorAttributes>({
       type: syntheticsMonitorType,
-      perPage: 1000,
+      perPage: 0,
       fields: ['name', 'id'],
       filter: filtersStr ? `${filtersStr}` : undefined,
       aggs,
