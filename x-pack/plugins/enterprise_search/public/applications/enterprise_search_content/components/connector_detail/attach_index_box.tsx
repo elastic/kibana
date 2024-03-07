@@ -6,6 +6,8 @@
  */
 import React, { useEffect, useState } from 'react';
 
+import { useLocation } from 'react-router-dom';
+
 import { useActions, useValues } from 'kea';
 
 import {
@@ -81,8 +83,21 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
     }
   }, [connector.id]);
 
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (hash) {
+      const id = hash.replace('#', '');
+      if (id === 'attachIndexBox') {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    }
+  }, [hash]);
+
   return (
-    <EuiPanel hasShadow={false} hasBorder>
+    <EuiPanel hasShadow={false} hasBorder id="attachIndexBox">
       <EuiTitle size="s">
         <h4>
           {i18n.translate('xpack.enterpriseSearch.attachIndexBox.h4.attachAnIndexLabel', {

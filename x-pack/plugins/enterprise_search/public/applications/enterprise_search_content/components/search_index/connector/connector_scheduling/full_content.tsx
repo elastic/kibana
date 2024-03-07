@@ -23,9 +23,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { SyncJobType } from '@kbn/search-connectors';
-
-import { ConnectorViewIndex, CrawlerViewIndex } from '../../../../types';
+import { Connector, SyncJobType } from '@kbn/search-connectors';
 
 import { PlatinumLicensePopover } from '../../../shared/platinum_license_popover/platinum_license_popover';
 import { ConnectorSchedulingLogic } from '../connector_scheduling_logic';
@@ -34,7 +32,7 @@ import { ConnectorCronEditor } from './connector_cron_editor';
 
 export interface ConnectorContentSchedulingProps {
   hasPlatinumLicense?: boolean;
-  index: CrawlerViewIndex | ConnectorViewIndex;
+  connector: Connector;
   type: SyncJobType;
 }
 const getAccordionTitle = (type: ConnectorContentSchedulingProps['type']) => {
@@ -103,11 +101,11 @@ const EnableSwitch: React.FC<{
 
 export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProps> = ({
   type,
-  index,
+  connector,
   hasPlatinumLicense = false,
 }) => {
   const { setHasChanges, updateScheduling } = useActions(ConnectorSchedulingLogic);
-  const schedulingInput = index.connector.scheduling;
+  const schedulingInput = connector.scheduling;
   const [scheduling, setScheduling] = useState(schedulingInput);
   const [isAccordionOpen, setIsAccordionOpen] = useState<'open' | 'closed'>(
     scheduling[type].enabled ? 'open' : 'closed'
@@ -116,7 +114,7 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
 
   const isGated = !hasPlatinumLicense && type === SyncJobType.ACCESS_CONTROL;
   const isDocumentLevelSecurityDisabled =
-    !index.connector.configuration.use_document_level_security?.value;
+    !connector.configuration.use_document_level_security?.value;
 
   const isEnableSwitchDisabled =
     type === SyncJobType.ACCESS_CONTROL && (!hasPlatinumLicense || isDocumentLevelSecurityDisabled);
@@ -231,9 +229,9 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
                 }}
                 onSave={(interval) => {
                   updateScheduling(type, {
-                    connectorId: index.connector.id,
+                    connectorId: connector.id,
                     scheduling: {
-                      ...index.connector.scheduling,
+                      ...connector.scheduling,
                       [type]: {
                         ...scheduling[type],
                         interval,
