@@ -43,7 +43,6 @@
     "@kbn/es-types",
     "@kbn/config-schema",
     "@kbn/spaces-plugin",
-    "@kbn/zod-helpers",
     "@kbn/security-plugin-types-common",
   ],
   "exclude": [
