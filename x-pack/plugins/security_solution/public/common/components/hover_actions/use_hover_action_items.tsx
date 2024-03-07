@@ -14,7 +14,6 @@ import { isEmpty } from 'lodash';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { useDispatch } from 'react-redux';
 import { getSourcererScopeId, isActiveTimeline } from '../../../helpers';
-import { timelineSelectors } from '../../../timelines/store';
 import { useKibana } from '../../lib/kibana';
 import { allowTopN } from '../drag_and_drop/helpers';
 import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
@@ -101,10 +100,8 @@ export const useHoverActionItems = ({
     () => kibana.services.data.query.filterManager,
     [kibana.services.data.query.filterManager]
   );
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-
   const activeFilterManager = useDeepEqualSelector((state) =>
-    isActiveTimeline(scopeId ?? '') ? getTimeline(state, scopeId ?? '')?.filterManager : undefined
+    isActiveTimeline(scopeId ?? '') ? kibana.services.timelineFilterManager : undefined
   );
   const filterManager = useMemo(
     () =>
