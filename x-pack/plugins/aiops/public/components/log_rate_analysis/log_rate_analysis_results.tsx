@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { isEqual, uniq } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
