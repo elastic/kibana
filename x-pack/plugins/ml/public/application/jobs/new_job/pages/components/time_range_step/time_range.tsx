@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -15,13 +16,15 @@ import { useTimefilter, type GetTimeFieldRangeResponse } from '@kbn/ml-date-pick
 import { useStorage } from '@kbn/ml-local-storage';
 import { ML_INTERNAL_BASE_PATH } from '../../../../../../../common/constants/app';
 import { WizardNav } from '../wizard_nav';
-import { StepProps, WIZARD_STEPS } from '../step_types';
+import type { StepProps } from '../step_types';
+import { WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { useDataSource } from '../../../../../contexts/ml';
 import { EventRateChart } from '../charts/event_rate_chart';
-import { LineChartPoint } from '../../../common/chart_loader';
+import type { LineChartPoint } from '../../../common/chart_loader';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
-import { TimeRangePicker, TimeRange } from '../../../common/components';
+import type { TimeRange } from '../../../common/components';
+import { TimeRangePicker } from '../../../common/components';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import {
   ML_FROZEN_TIER_PREFERENCE,
