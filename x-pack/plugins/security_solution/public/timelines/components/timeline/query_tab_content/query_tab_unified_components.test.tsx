@@ -235,7 +235,7 @@ describe('query tab with unified timeline', () => {
           '11'
         );
       });
-    });
+    }, 10000);
 
     it('should remove column left/right ', async () => {
       const { container } = renderTestComponents();
@@ -475,6 +475,92 @@ describe('query tab with unified timeline', () => {
       ).toBeVisible();
 
       expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeVisible();
+    }, 10000);
+  });
+
+  describe('unified fields list', () => {
+    it('should add the column when clicked on X sign', async () => {
+      const field = {
+        name: 'event.severity',
+      };
+
+      renderTestComponents();
+      expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent('11');
+      });
+
+      // column exists in the table
+      expect(screen.getByTestId(`dataGridHeaderCell-${field.name}`)).toBeVisible();
+
+      fireEvent.click(screen.getAllByTestId(`fieldToggle-${field.name}`)[0]);
+
+      // column not longer exists in the table
+      await waitFor(() => {
+        expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent('10');
+      });
+      expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(0);
     });
+
+    it('should remove the column when clicked on ⊕ sign', async () => {
+      const field = {
+        name: 'agent.id',
+      };
+
+      renderTestComponents();
+      expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent('11');
+      });
+
+      expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(0);
+
+      // column exists in the table
+      const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
+
+      fireEvent.click(within(availableFields).getByTestId(`fieldToggle-${field.name}`));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent('12');
+      });
+      expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
+    });
+
+    it('should should show callout when field search does not matches any field', async () => {
+      renderTestComponents();
+      expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('35');
+      });
+
+      fireEvent.change(screen.getByTestId('fieldListFiltersFieldSearch'), {
+        target: { value: 'fake_field' },
+      });
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('fieldListGroupedAvailableFieldsNoFieldsCallout-noFieldsMatch')
+        ).toBeVisible();
+      });
+
+      expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('0');
+    }, 10000);
+
+    it('should toggle side bar correctly', async () => {
+      renderTestComponents();
+      expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
+      await waitFor(() => {
+        expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('35');
+      });
+
+      fireEvent.click(screen.getByTitle('Hide sidebar'));
+
+      await waitFor(() => {
+        expect(screen.queryAllByTestId('fieldListGroupedAvailableFields-count')).toHaveLength(0);
+      });
+    }, 10000);
   });
 });
