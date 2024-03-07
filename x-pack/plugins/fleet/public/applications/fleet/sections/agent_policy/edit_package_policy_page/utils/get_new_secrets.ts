@@ -52,3 +52,25 @@ export const getNewSecrets = ({
 
   return result;
 };
+
+export const packageHasAtLeastOneSecret = ({ packageInfo }: { packageInfo: PackageInfo }) => {
+  if (packageInfo.vars?.some((v) => v.secret)) {
+    return true;
+  }
+
+  for (const policyTemplate of packageInfo.policy_templates ?? []) {
+    if (isInputOnlyPolicyTemplate(policyTemplate)) {
+      if (policyTemplate.vars?.some((v) => v.secret)) {
+        return true;
+      }
+    } else {
+      for (const input of policyTemplate.inputs ?? []) {
+        if (input.vars?.some((v) => v.secret)) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+};

@@ -55,6 +55,8 @@ export async function allFleetServerVersionsAreAtLeast(
   const versionCounts = await getAgentVersionsForAgentPolicyIds(esClient, [...policyIds]);
   const versions = Object.keys(versionCounts);
 
+  console.log({ versionCounts, versions });
+
   // there must be at least one fleet server agent for this check to pass
   if (versions.length === 0) {
     return false;

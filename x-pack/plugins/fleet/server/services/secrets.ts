@@ -629,10 +629,14 @@ export async function isSecretStorageEnabled(
     return true;
   }
 
+  const areAllFleetServersOnProperVersion = await allFleetServerVersionsAreAtLeast(
+    esClient,
+    soClient,
+    SECRETS_MINIMUM_FLEET_SERVER_VERSION
+  );
+
   // otherwise check if we have the minimum fleet server version and enable secrets if so
-  if (
-    await allFleetServerVersionsAreAtLeast(esClient, soClient, SECRETS_MINIMUM_FLEET_SERVER_VERSION)
-  ) {
+  if (areAllFleetServersOnProperVersion) {
     logger.debug('Enabling secrets storage as minimum fleet server version has been met');
     try {
       await settingsService.saveSettings(soClient, {
