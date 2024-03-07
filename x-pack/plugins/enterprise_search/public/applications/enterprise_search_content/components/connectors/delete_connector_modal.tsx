@@ -33,11 +33,13 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
   const { closeDeleteModal, deleteConnector } = useActions(ConnectorsLogic);
   const {
     deleteModalConnectorId: connectorId,
-    deleteModalConnectorName: connectorName,
+    deleteModalConnectorName,
     deleteModalIndexName,
     isDeleteLoading,
     isDeleteModalVisible,
   } = useValues(ConnectorsLogic);
+
+  const connectorName = isCrawler ? deleteModalIndexName : deleteModalConnectorName;
 
   const [inputConnectorName, setInputConnectorName] = useState('');
   const [shouldDeleteIndex, setShouldDeleteIndex] = useState(false);
@@ -96,12 +98,19 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
       isLoading={isDeleteLoading}
     >
       <p>
-        {i18n.translate(
-          'xpack.enterpriseSearch.content.connectors.deleteModal.delete.description',
-          {
-            defaultMessage: 'You are about to delete this connector:',
-          }
-        )}
+        {!isCrawler
+          ? i18n.translate(
+              'xpack.enterpriseSearch.content.connectors.deleteModal.delete.connector.description',
+              {
+                defaultMessage: 'You are about to delete this connector:',
+              }
+            )
+          : i18n.translate(
+              'xpack.enterpriseSearch.content.connectors.deleteModal.delete.crawler.description',
+              {
+                defaultMessage: 'You are about to delete this crawler:',
+              }
+            )}
       </p>
       <p>
         <ul>
@@ -148,12 +157,21 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
       )}
       <EuiForm>
         <EuiFormRow
-          label={i18n.translate(
-            'xpack.enterpriseSearch.content.connectors.deleteModal.indexNameInput.label',
-            {
-              defaultMessage: 'Connector name',
-            }
-          )}
+          label={
+            !isCrawler
+              ? i18n.translate(
+                  'xpack.enterpriseSearch.content.connectors.deleteModal.connector.indexNameInput.label',
+                  {
+                    defaultMessage: 'Connector name',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.enterpriseSearch.content.connectors.deleteModal.crawler.indexNameInput.label',
+                  {
+                    defaultMessage: 'Crawler name',
+                  }
+                )
+          }
         >
           <EuiFieldText
             onChange={(e) => setInputConnectorName(e.target.value)}

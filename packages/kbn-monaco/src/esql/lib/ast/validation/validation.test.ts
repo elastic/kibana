@@ -514,7 +514,7 @@ describe('validation logic', () => {
     }
 
     for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
-      for (const { params, infiniteParams, ...signRest } of signatures) {
+      for (const { params, ...signRest } of signatures) {
         const fieldMapping = getFieldMapping(params);
         const signatureStringCorrect = tweakSignatureForRowCommand(
           getFunctionSignatures(
@@ -1307,7 +1307,7 @@ describe('validation logic', () => {
     }
 
     for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
-      for (const { params, infiniteParams, ...signRest } of signatures) {
+      for (const { params, ...signRest } of signatures) {
         const fieldMapping = getFieldMapping(params);
         testErrorsAndWarnings(
           `from a_index | eval var = ${
@@ -1414,7 +1414,7 @@ describe('validation logic', () => {
             expectedErrors
           );
 
-          if (!infiniteParams && !signRest.minParams) {
+          if (!signRest.minParams) {
             // test that additional args are spotted
             const fieldMappingWithOneExtraArg = getFieldMapping(params).concat({
               name: 'extraArg',
@@ -1835,7 +1835,7 @@ describe('validation logic', () => {
     ]);
 
     for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
-      for (const { params, infiniteParams, ...signRest } of signatures) {
+      for (const { params, ...signRest } of signatures) {
         const fieldMapping = getFieldMapping(params);
 
         const correctSignature = getFunctionSignatures(
