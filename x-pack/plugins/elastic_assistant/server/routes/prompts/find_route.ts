@@ -16,8 +16,8 @@ import {
   FindPromptsRequestQuery,
   FindPromptsResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
-import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
 import { SearchEsPromptsSchema } from '../../ai_assistant_data_clients/prompts/types';
 import { transformESToPrompts } from '../../ai_assistant_data_clients/prompts/helpers';

@@ -13,9 +13,9 @@ import {
   ConversationCreateProps,
   ConversationResponse,
 } from '@kbn/elastic-assistant-common';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
-import { buildRouteValidationWithZod } from '../route_validation';
 
 export const createConversationRoute = (router: ElasticAssistantPluginRouter): void => {
   router.versioned

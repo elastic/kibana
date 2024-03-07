@@ -12,6 +12,7 @@ import {
   CreateKnowledgeBaseRequestParams,
   CreateKnowledgeBaseResponse,
 } from '@kbn/elastic-assistant-common';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
@@ -20,7 +21,6 @@ import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elas
 import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
 import { getKbResource } from './get_kb_resource';
 import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
-import { buildRouteValidationWithZod } from '../route_validation';
 
 /**
  * Load Knowledge Base index, pipeline, and resources (collection of documents)

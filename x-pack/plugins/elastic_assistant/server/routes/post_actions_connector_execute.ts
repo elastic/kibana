@@ -15,6 +15,7 @@ import {
   Message,
   getMessageContentWithoutReplacements,
 } from '@kbn/elastic-assistant-common';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
   INVOKE_ASSISTANT_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
@@ -31,7 +32,6 @@ import {
   getMessageFromRawResponse,
   getPluginNameFromRequest,
 } from './helpers';
-import { buildRouteValidationWithZod } from './route_validation';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,

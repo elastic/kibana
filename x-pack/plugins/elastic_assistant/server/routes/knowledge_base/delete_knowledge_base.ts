@@ -13,12 +13,12 @@ import {
   DeleteKnowledgeBaseRequestParams,
   DeleteKnowledgeBaseResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { KNOWLEDGE_BASE } from '../../../common/constants';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
-import { buildRouteValidationWithZod } from '../route_validation';
 
 /**
  * Delete Knowledge Base index, pipeline, and resources (collection of documents)
