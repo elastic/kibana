@@ -18,7 +18,11 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
   params: TParams,
   fnDeps: any[],
   options: { inspector?: IInspectorInfo; name: string }
-) => {
+): {
+  data: ESSearchResponse<DocumentSource, TParams, { restTotalHitsAsInt: false }>;
+  loading: boolean;
+  error?: Error;
+} => {
   const {
     services: { data },
   } = useKibana<{ data: DataPublicPluginStart }>();
