@@ -12,14 +12,6 @@ import { defaultSimpleQuery } from './simple_query';
 
 describe('isFilterBasedDefaultQuery', () => {
   it('should identify filter based default queries', () => {
-    expect(isFilterBasedDefaultQuery(defaultSimpleQuery)).toBe(false);
-    expect(isFilterBasedDefaultQuery(matchAllQuery)).toBe(false);
-    expect(isFilterBasedDefaultQuery(simpleQueryMock)).toBe(false);
-    expect(
-      isFilterBasedDefaultQuery({
-        bool: { filter: [simpleQueryMock], must: [], must_not: [], should: [] },
-      })
-    ).toBe(false);
     expect(
       isFilterBasedDefaultQuery({
         bool: { filter: [], must: [], must_not: [], should: [] },
@@ -32,6 +24,22 @@ describe('isFilterBasedDefaultQuery', () => {
     ).toBe(true);
     expect(
       isFilterBasedDefaultQuery({
+        bool: { filter: [], must: [matchAllQuery], must_not: [] },
+      })
+    ).toBe(true);
+  });
+
+  it('should identify non-default queries', () => {
+    expect(isFilterBasedDefaultQuery(defaultSimpleQuery)).toBe(false);
+    expect(isFilterBasedDefaultQuery(matchAllQuery)).toBe(false);
+    expect(isFilterBasedDefaultQuery(simpleQueryMock)).toBe(false);
+    expect(
+      isFilterBasedDefaultQuery({
+        bool: { filter: [simpleQueryMock], must: [], must_not: [], should: [] },
+      })
+    ).toBe(false);
+    expect(
+      isFilterBasedDefaultQuery({
         bool: { filter: [], must: [matchAllQuery], must_not: [], should: [simpleQueryMock] },
       })
     ).toBe(false);
@@ -40,10 +48,5 @@ describe('isFilterBasedDefaultQuery', () => {
         bool: { filter: [], must: [matchAllQuery], must_not: [simpleQueryMock] },
       })
     ).toBe(false);
-    expect(
-      isFilterBasedDefaultQuery({
-        bool: { filter: [], must: [matchAllQuery], must_not: [] },
-      })
-    ).toBe(true);
   });
 });

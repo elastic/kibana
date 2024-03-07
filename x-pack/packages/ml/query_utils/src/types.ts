@@ -48,7 +48,7 @@ export interface SimpleQuery<Q = string> {
 /**
  * Represents simple queries that are based on a boolean filter.
  */
-export interface FilterBasedSimpleQuery {
+export interface BoolFilterBasedSimpleQuery {
   /**
    * The container for the boolean filter logic.
    */
@@ -57,10 +57,13 @@ export interface FilterBasedSimpleQuery {
      * An array of `SimpleQuery` objects.
      */
     filter: [SimpleQuery];
+    must: [];
+    must_not: [];
+    should?: [];
   };
 }
 
 /**
  * Represents a union of search queries that can be used to fetch documents.
  */
-export type SearchQueryVariant = FilterBasedSimpleQuery | SimpleQuery | SavedSearchQuery;
+export type SearchQueryVariant = BoolFilterBasedSimpleQuery | SimpleQuery | SavedSearchQuery;

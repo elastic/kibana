@@ -8,9 +8,9 @@
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { isSimpleQuery } from './simple_query';
-import type { FilterBasedSimpleQuery } from './types';
+import type { BoolFilterBasedSimpleQuery } from './types';
 
-export function isFilterBasedSimpleQuery(arg: unknown): arg is FilterBasedSimpleQuery {
+export function isBoolFilterBasedSimpleQuery(arg: unknown): arg is BoolFilterBasedSimpleQuery {
   return (
     isPopulatedObject(arg, ['bool']) &&
     isPopulatedObject(arg.bool, ['filter']) &&
