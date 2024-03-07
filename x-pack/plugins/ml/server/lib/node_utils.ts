@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { MlNodeCount } from '../../common/types/ml_server_info';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { MlNodeCount } from '../../common/types/ml_server_info';
 
 export async function getMlNodeCount(client: IScopedClusterClient): Promise<MlNodeCount> {
   const body = await client.asInternalUser.nodes.info(

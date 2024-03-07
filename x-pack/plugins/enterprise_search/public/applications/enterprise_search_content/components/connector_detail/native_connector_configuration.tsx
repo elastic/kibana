@@ -25,6 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FeatureName } from '@kbn/search-connectors';
 
 import { BetaConnectorCallout } from '../../../shared/beta/beta_connector_callout';
 import { docLinks } from '../../../shared/doc_links';
@@ -82,6 +83,8 @@ export const NativeConnectorConfiguration: React.FC = () => {
     connector.scheduling.incremental.enabled;
   const hasResearched = hasDescription || hasConfigured || hasConfiguredAdvanced;
   const icon = nativeConnector.icon;
+  const hasDocumentLevelSecurity =
+    connector.features?.[FeatureName.DOCUMENT_LEVEL_SECURITY]?.enabled || false;
 
   const hasApiKey = !!(connector.api_key_id ?? apiKeyData);
 
@@ -195,7 +198,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
                         </EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiFlexGroup>
+                        <EuiFlexGroup responsive={false}>
                           <EuiFlexItem grow={false}>
                             <EuiButtonTo
                               to={`${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
@@ -290,24 +293,26 @@ export const NativeConnectorConfiguration: React.FC = () => {
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="s" />
-                <EuiText size="s">
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.description',
-                    {
-                      defaultMessage:
-                        'Restrict and personalize the read access users have to the index documents at query time.',
-                    }
-                  )}
-                  <EuiSpacer size="s" />
-                  <EuiLink href={docLinks.documentLevelSecurity} target="_blank">
+                {hasDocumentLevelSecurity && (
+                  <EuiText size="s">
                     {i18n.translate(
-                      'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.securityLinkLabel',
+                      'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.description',
                       {
-                        defaultMessage: 'Document level security',
+                        defaultMessage:
+                          'Restrict and personalize the read access users have to the index documents at query time.',
                       }
                     )}
-                  </EuiLink>
-                </EuiText>
+                    <EuiSpacer size="s" />
+                    <EuiLink href={docLinks.documentLevelSecurity} target="_blank">
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.securityLinkLabel',
+                        {
+                          defaultMessage: 'Document level security',
+                        }
+                      )}
+                    </EuiLink>
+                  </EuiText>
+                )}
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
