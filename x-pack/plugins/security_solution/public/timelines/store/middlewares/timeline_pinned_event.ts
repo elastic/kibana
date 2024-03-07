@@ -13,6 +13,7 @@ import type { State } from '../../../common/store/types';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
 import type { PinnedEventResponse } from '../../../../common/api/timeline';
+import { TimelineStatus } from '../../../../common/api/timeline';
 import {
   pinEvent,
   endTimelineSaving,
@@ -20,9 +21,11 @@ import {
   updateTimeline,
   startTimelineSaving,
   showCallOutUnauthorizedMsg,
+  saveTimeline,
 } from '../actions';
 import { persistPinnedEvent } from '../../containers/pinned_event/api';
 import { refreshTimelines } from './helpers';
+import { UNTITLED_TIMELINE } from '../../components/open_timeline/translations';
 
 type PinnedEventAction = ReturnType<typeof pinEvent | typeof unPinEvent>;
 
@@ -74,22 +77,43 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
             })
           );
         } else {
-          store.dispatch(
+          const updatedTimeline = {
+            ...timeline,
+            pinnedEventIds: {
+              ...timeline.pinnedEventIds,
+              [eventId]: true,
+            },
+            pinnedEventsSaveObject: {
+              ...timeline.pinnedEventsSaveObject,
+              [eventId]: response,
+            },
+          };
+          await store.dispatch(
             updateTimeline({
               id: action.payload.id,
-              timeline: {
-                ...timeline,
-                pinnedEventIds: {
-                  ...timeline.pinnedEventIds,
-                  [eventId]: true,
-                },
-                pinnedEventsSaveObject: {
-                  ...timeline.pinnedEventsSaveObject,
-                  [eventId]: response,
-                },
-              },
+              timeline: updatedTimeline,
             })
           );
+
+          // In case a note was added to an unsaved timeline, we need to make sure to update the timeline
+          // locally and then remotely again in order not to lose the SO associations.
+          // This also involves setting the status and the default title.
+          if (!timeline.savedObjectId && response.timelineId && response.timelineVersion) {
+            const currentTimeline = selectTimelineById(store.getState(), action.payload.id);
+            await store.dispatch(
+              updateTimeline({
+                id: action.payload.id,
+                timeline: {
+                  ...currentTimeline,
+                  savedObjectId: response.timelineId,
+                  version: response.timelineVersion || null,
+                  status: TimelineStatus.active,
+                  title: currentTimeline.title || UNTITLED_TIMELINE,
+                },
+              })
+            );
+            await store.dispatch(saveTimeline({ id: action.payload.id, saveAsNew: false }));
+          }
         }
       } catch (error) {
         kibana.notifications.toasts.addDanger({

@@ -19,12 +19,16 @@ import {
   endTimelineSaving,
   startTimelineSaving,
   showCallOutUnauthorizedMsg,
+  updateTimeline,
+  saveTimeline,
 } from '../actions';
 import { persistNote } from '../../containers/notes/api';
 import type { ResponseNote } from '../../../../common/api/timeline';
+import { TimelineStatus } from '../../../../common/api/timeline';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
 import { refreshTimelines } from './helpers';
+import { UNTITLED_TIMELINE } from '../../components/open_timeline/translations';
 
 type NoteAction = ReturnType<typeof addNote | typeof addNoteToEvent>;
 
@@ -53,7 +57,7 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
           note: {
             eventId: 'eventId' in action.payload ? action.payload.eventId : undefined,
             note: getNoteText(localNoteId, notes),
-            timelineId: timeline.id,
+            timelineId: timeline.savedObjectId,
           },
         });
 
@@ -79,6 +83,26 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
             },
           })
         );
+
+        // In case a note was added to an unsaved timeline, we need to make sure to update the timeline
+        // locally and then remotely again in order not to lose the SO associations.
+        // This also involves setting the status and the default title.
+        if (!timeline.savedObjectId && response.note.timelineId && response.note.timelineVersion) {
+          const currentTimeline = selectTimelineById(store.getState(), id);
+          await store.dispatch(
+            updateTimeline({
+              id,
+              timeline: {
+                ...currentTimeline,
+                savedObjectId: currentTimeline.savedObjectId || response.note.timelineId,
+                version: currentTimeline.version || response.note.timelineVersion || null,
+                status: TimelineStatus.active,
+                title: currentTimeline.title || UNTITLED_TIMELINE,
+              },
+            })
+          );
+          await store.dispatch(saveTimeline({ id, saveAsNew: false }));
+        }
       } catch (error) {
         kibana.notifications.toasts.addDanger({
           title: i18n.UPDATE_TIMELINE_ERROR_TITLE,

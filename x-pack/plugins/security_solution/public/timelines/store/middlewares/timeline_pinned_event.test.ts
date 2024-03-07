@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { createMockStore, kibanaMock } from '../../../common/mock';
+import { createMockStore, kibanaMock, mockGlobalState } from '../../../common/mock';
 import { selectTimelineById } from '../selectors';
 import { TimelineId } from '../../../../common/types/timeline';
 import { persistPinnedEvent } from '../../containers/pinned_event/api';
 import { refreshTimelines } from './helpers';
-
+import { TimelineStatus } from '../../../../common/api/timeline';
+import { UNTITLED_TIMELINE } from '../../components/open_timeline/translations';
 import {
   startTimelineSaving,
   endTimelineSaving,
@@ -18,6 +19,7 @@ import {
   unPinEvent,
   showCallOutUnauthorizedMsg,
   updateTimeline,
+  saveTimeline,
 } from '../actions';
 
 jest.mock('../actions', () => {
@@ -26,6 +28,8 @@ jest.mock('../actions', () => {
   (endTLSaving as unknown as { match: Function }).match = () => false;
   return {
     ...actual,
+    updateTimeline: jest.fn().mockImplementation((...args) => actual.updateTimeline(...args)),
+    saveTimeline: jest.fn().mockImplementation((...args) => actual.saveTimeline(...args)),
     showCallOutUnauthorizedMsg: jest
       .fn()
       .mockImplementation((...args) => actual.showCallOutUnauthorizedMsg(...args)),
@@ -41,6 +45,8 @@ jest.mock('./helpers');
 const startTimelineSavingMock = startTimelineSaving as unknown as jest.Mock;
 const endTimelineSavingMock = endTimelineSaving as unknown as jest.Mock;
 const showCallOutUnauthorizedMsgMock = showCallOutUnauthorizedMsg as unknown as jest.Mock;
+const updateTimelineMock = updateTimeline as unknown as jest.Mock;
+const saveTimelineMock = saveTimeline as unknown as jest.Mock;
 
 describe('Timeline pinned event middleware', () => {
   let store = createMockStore(undefined, undefined, kibanaMock);
@@ -71,17 +77,26 @@ describe('Timeline pinned event middleware', () => {
   });
 
   it('should persist a timeline un-pin event', async () => {
-    store.dispatch(
-      updateTimeline({
-        id: TimelineId.test,
+    store = createMockStore(
+      {
+        ...mockGlobalState,
         timeline: {
-          ...selectTimelineById(store.getState(), TimelineId.test),
-          pinnedEventIds: {
-            [testEventId]: true,
+          ...mockGlobalState.timeline,
+          timelineById: {
+            ...mockGlobalState.timeline.timelineById,
+            [TimelineId.test]: {
+              ...mockGlobalState.timeline.timelineById[TimelineId.test],
+              pinnedEventIds: {
+                [testEventId]: true,
+              },
+            },
           },
         },
-      })
+      },
+      undefined,
+      kibanaMock
     );
+
     (persistPinnedEvent as jest.Mock).mockResolvedValue({
       data: {},
     });
@@ -94,6 +109,35 @@ describe('Timeline pinned event middleware', () => {
     expect(refreshTimelines as unknown as jest.Mock).toHaveBeenCalled();
     expect(endTimelineSavingMock).toHaveBeenCalled();
     expect(selectTimelineById(store.getState(), TimelineId.test).pinnedEventIds).toEqual({});
+  });
+
+  it('should persist the timeline when a pinned event was created on an unsaved timeline', async () => {
+    const testTimelineId = 'testTimelineId';
+    const testTimelineVersion = 'testVersion';
+    (persistPinnedEvent as jest.Mock).mockResolvedValue({
+      data: {
+        persistPinnedEventOnTimeline: {
+          code: 200,
+          timelineId: testTimelineId,
+          timelineVersion: testTimelineVersion,
+        },
+      },
+    });
+    expect(selectTimelineById(store.getState(), TimelineId.test).pinnedEventIds).toEqual({});
+    await store.dispatch(pinEvent({ id: TimelineId.test, eventId: testEventId }));
+
+    expect(updateTimelineMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        timeline: expect.objectContaining({
+          savedObjectId: testTimelineId,
+          version: testTimelineVersion,
+          status: TimelineStatus.active,
+          title: UNTITLED_TIMELINE,
+        }),
+      })
+    );
+    expect(saveTimelineMock).toHaveBeenCalled();
   });
 
   it('should show an error message when the call is unauthorized', async () => {

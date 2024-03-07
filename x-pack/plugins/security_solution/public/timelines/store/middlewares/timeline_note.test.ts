@@ -17,9 +17,13 @@ import {
   showCallOutUnauthorizedMsg,
   addNote,
   addNoteToEvent,
+  updateTimeline,
+  saveTimeline,
 } from '../actions';
 import { updateNote } from '../../../common/store/app/actions';
 import { createNote } from '../../components/notes/helpers';
+import { TimelineStatus } from '../../../../common/api/timeline';
+import { UNTITLED_TIMELINE } from '../../components/open_timeline/translations';
 
 jest.mock('../actions', () => {
   const actual = jest.requireActual('../actions');
@@ -27,6 +31,8 @@ jest.mock('../actions', () => {
   (endTLSaving as unknown as { match: Function }).match = () => false;
   return {
     ...actual,
+    updateTimeline: jest.fn().mockImplementation((...args) => actual.updateTimeline(...args)),
+    saveTimeline: jest.fn().mockImplementation((...args) => actual.saveTimeline(...args)),
     showCallOutUnauthorizedMsg: jest
       .fn()
       .mockImplementation((...args) => actual.showCallOutUnauthorizedMsg(...args)),
@@ -42,6 +48,8 @@ jest.mock('./helpers');
 const startTimelineSavingMock = startTimelineSaving as unknown as jest.Mock;
 const endTimelineSavingMock = endTimelineSaving as unknown as jest.Mock;
 const showCallOutUnauthorizedMsgMock = showCallOutUnauthorizedMsg as unknown as jest.Mock;
+const updateTimelineMock = updateTimeline as unknown as jest.Mock;
+const saveTimelineMock = saveTimeline as unknown as jest.Mock;
 
 describe('Timeline note middleware', () => {
   let store = createMockStore(undefined, undefined, kibanaMock);
@@ -101,6 +109,47 @@ describe('Timeline note middleware', () => {
         [testEventId]: [testNote.id],
       })
     );
+  });
+
+  it('should persist the timeline when a note was created on an unsaved timeline', async () => {
+    const testTimelineId = 'testTimelineId';
+    const testTimelineVersion = 'testVersion';
+    (persistNote as jest.Mock).mockResolvedValue({
+      data: {
+        persistNote: {
+          code: 200,
+          message: 'success',
+          note: {
+            noteId: testNote.id,
+            timelineId: testTimelineId,
+            timelineVersion: testTimelineVersion,
+          },
+        },
+      },
+    });
+
+    expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
+      expect.objectContaining({
+        savedObjectId: null,
+        version: null,
+      })
+    );
+    await store.dispatch(updateNote({ note: testNote }));
+    await store.dispatch(
+      addNoteToEvent({ eventId: testEventId, id: TimelineId.test, noteId: testNote.id })
+    );
+
+    expect(updateTimelineMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        timeline: expect.objectContaining({
+          savedObjectId: testTimelineId,
+          version: testTimelineVersion,
+          status: TimelineStatus.active,
+          title: UNTITLED_TIMELINE,
+        }),
+      })
+    );
+    expect(saveTimelineMock).toHaveBeenCalled();
   });
 
   it('should show an error message when the call is unauthorized', async () => {
