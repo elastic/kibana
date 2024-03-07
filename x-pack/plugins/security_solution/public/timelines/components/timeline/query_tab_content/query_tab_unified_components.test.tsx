@@ -16,7 +16,7 @@ import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { mockTimelineData, TestProviders } from '../../../../common/mock';
 import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
-import { render, screen, waitFor, cleanup, fireEvent, within } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -25,6 +25,7 @@ import { timelineActions } from '../../../store';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { cloneDeep } from 'lodash';
 
 jest.mock('../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -53,11 +54,12 @@ const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof Experimental
   if (feature === 'unifiedComponentsInTimelineEnabled') {
     return true;
   }
-  return allowedExperimentalValues[feature] ?? false;
+  return allowedExperimentalValues[feature];
 });
 
-// unified-field-list is is reporiting multiple analytics events
 jest.mock('../../../../common/lib/kibana');
+
+// unified-field-list is is reporiting multiple analytics events
 jest.mock(`@kbn/analytics-client`);
 
 const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) => {
@@ -99,7 +101,7 @@ const loadPageMock = jest.fn();
 const useTimelineEventsMock = jest.fn(() => [
   false,
   {
-    events: mockTimelineData,
+    events: cloneDeep(mockTimelineData),
     pageInfo: {
       activePage: 0,
       totalPages: 10,
@@ -114,13 +116,12 @@ describe('query tab with unified timeline', () => {
   const kibanaServiceMock: StartServices = createStartServicesMock();
 
   afterEach(() => {
-    cleanup();
     jest.clearAllMocks();
   });
 
   beforeEach(() => {
-    const SECOND = 1000;
-    jest.setTimeout(10 * SECOND);
+    const ONE_SECOND = 1000;
+    jest.setTimeout(10 * ONE_SECOND);
     HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
       return {
         width: 1000,
