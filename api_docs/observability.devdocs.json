@@ -22893,7 +22893,7 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.profilingAWSCostDiscountRate.value",
-                "type": "string",
+                "type": "number",
                 "tags": [],
                 "label": "value",
                 "description": [],
@@ -22988,7 +22988,7 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.profilingAzureCostDiscountRate.value",
-                "type": "string",
+                "type": "number",
                 "tags": [],
                 "label": "value",
                 "description": [],
