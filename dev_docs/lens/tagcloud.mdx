@@ -1,0 +1,55 @@
+---
+id: kibDevLensConfigAPITagCloud
+slug: /kibana-dev-docs/lens/config-builder/tagcloud
+title: Lens Config Builder API - Tag Cloud
+description: Lens Config Builder API - Tag Cloud
+date: 2024-03-04
+tags: ['kibana', 'dev', 'lens', 'tagcloud']
+---
+
+import Dataset from './dataset.mdx';
+import Breakdown from './breakdown.mdx';
+
+Understanding `LensTagCloudConfig` in detail
+
+## Required Properties
+
+### `chartType`
+
+- **Type:** Fixed value `'tagcloud'`
+- **Description:** Sets the chart type to tag cloud. Tag clouds are visual representations where tags are depicted in varying sizes, indicating the frequency or importance of each tag. This visualization type is beneficial for quickly identifying the most prominent or common terms in a dataset.
+
+### `title`
+
+- **Type:** `string`
+- **Description:** The title of the visualization.
+
+<Dataset />
+
+<Breakdown />
+
+## Optional Properties
+
+## Example
+
+```
+const tagCloudConfig: LensConfig = {
+  chartType: 'tagcloud',
+  title: 'Most Common Error Codes',
+  dataset: {
+    esql: 'from logs_data | group by errorCode | stats count() as occurrences',
+  },
+  breakdown: {
+    type: 'topValues',
+    field: 'errorCode',
+    size: 20, // Display the top 20 error codes
+  },
+};
+const configBuilder = new LensConfigBuilder(lensFormulaAPI, dataViewsAPI);
+const lensConfig = configBuilder.build(tagCloudConfig, {
+  timeRange: { from: 'now-1M', to: 'now', type: 'relative' },
+  embeddable: true,
+});
+```
+
+This example outlines how to set up a tag cloud visualization for displaying the most common error codes found within log data. The `breakdown` configuration uses the `topValues` type to select the top 20 error codes based on their occurrence frequency. An ESQL query aggregates the count of each error code, which then determines the relative size of each tag in the cloud. The visualization's title, "Most Common Error Codes," along with the breakdown configuration, facilitates an intuitive and informative display, highlighting error codes that occur most frequently in the data. This visualization aids in quickly identifying and prioritizing issues for further investigation or remediation.

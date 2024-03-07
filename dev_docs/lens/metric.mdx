@@ -42,12 +42,12 @@ Understanding `LensMetricConfig` in detail
 ### `querySecondaryMetric`
 
 - **Type:** `LensLayerQuery`
-- **Description:** Allows specifying a secondary metric to be calculated and possibly displayed alongside the primary metric, enabling comparative analyses or contextual insights.
+- **Description:** Allows specifying a secondary metric, same as value it should be the name of field or lens formula.
 
 ### `queryMaxValue`
 
 - **Type:** `LensLayerQuery`
-- **Description:** Used to define a query for calculating a maximum value, which can be useful in contexts where the metric is evaluated against a maximum threshold or goal.
+- **Description:** Used to define a query for calculating a maximum value, same as value it should be the name of field or lens formula.
 
 <Breakdown />
 
@@ -60,3 +60,23 @@ Understanding `LensMetricConfig` in detail
 
 - **Type:** `string`
 - **Description:** An optional subtitle for the chart, which can be used to provide additional context, explanatory notes, or any supplementary information that aids in understanding the metric.
+
+
+## Example
+
+```
+const config: LensConfig = {
+  chartType: 'metric',
+  title: 'Total Sales',
+  dataset: {
+    esql: 'from myindex | stats totalSales = sum(sales_field)',
+  },
+  value: 'totalSales',
+  label: 'Total Sales Value',
+};
+const configBuilder = new LensConfigBuilder(lensFormulaAPI, dataViewsAPI);
+const lensConfig = configBuilder(config, { 
+  timeRange: { from: 'now-30d', to: 'now', type: 'relative' },
+  embeddable: true,
+}
+```

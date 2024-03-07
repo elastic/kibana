@@ -1,0 +1,77 @@
+---
+id: kibDevLensConfigAPITable
+slug: /kibana-dev-docs/lens/config-builder/table
+title: Lens Config Builder API - Table
+description: Lens Config Builder API - Table
+date: 2024-03-04
+tags: ['kibana', 'dev', 'lens', 'table']
+---
+
+import Dataset from './dataset.mdx';
+import Breakdown from './breakdown.mdx';
+
+Understanding `LensTableConfig` in detail
+
+## Required Properties
+
+### `chartType`
+
+- **Type:** Fixed value `'table'`
+- **Description:** Sets the chart type to table, allowing for the display of data in a tabular format. Tables are versatile for detailed data analysis, enabling the display of multiple dimensions and metrics side by side.
+
+### `title`
+
+- **Type:** `string`
+- **Description:** The title of the visualization.
+
+<Dataset />
+
+## Optional Properties
+
+### `splitBy`
+
+- **Type:** `LensBreakdownConfig[]`
+- **Optional**
+- **Description:** An array of breakdown configurations to segment the data into different sections within the table. Each breakdown can create a new column or row based on the field specified, allowing for complex data organization and grouping. Check breakdown configuration details below.
+
+### `breakdown`
+
+- **Type:** `LensBreakdownConfig[]`
+- **Optional**
+- **Description:** Similar to `splitBy`, but specifically used for creating additional columns based on the breakdown of a particular field. It's useful for comparing metrics across different categories directly within the table. Check breakdown configuration details below.
+
+
+<Breakdown />
+
+## Example
+
+```
+const tableConfig: LensConfig = {
+  chartType: 'table',
+  title: 'Quarterly Sales by Product Category',
+  dataset: {
+    esql: 'from sales_data | group by quarter, category | stats sum(sales) as totalSales',
+  },
+  splitBy: [
+    {
+      type: 'topValues',
+      field: 'quarter',
+      size: 4, // Representing four quarters
+    },
+  ],
+  breakdown: [
+    {
+      type: 'topValues',
+      field: 'category',
+      size: 10, // Top 10 categories
+    },
+  ],
+};
+const configBuilder = new LensConfigBuilder(lensFormulaAPI, dataViewsAPI);
+const lensConfig = configBuilder.build(tableConfig, {
+  timeRange: { from: 'now-1y', to: 'now', type: 'relative' },
+  embeddable: true,
+});
+```
+
+This example demonstrates how to configure a table visualization to display quarterly sales data segmented by product category. The `splitBy` property is used to create separate sections for each quarter, while the `breakdown` property segments the sales data within each quarter by the top 10 product categories. An ESQL query aggregates sales by quarter and category, allowing for a detailed analysis of sales performance across different product lines over the year. This setup provides a comprehensive overview of sales trends and performance metrics, all within a single table visualization.

@@ -1,0 +1,72 @@
+---
+id: kibDevLensConfigAPIPie
+slug: /kibana-dev-docs/lens/config-builder/pie
+title: Lens Config Builder API - Pie
+description: Lens Config Builder API - Pie
+date: 2024-03-04
+tags: ['kibana', 'dev', 'lens', 'pie']
+---
+
+import Dataset from './dataset.mdx';
+import Breakdown from './breakdown.mdx';
+
+Understanding `LensPieConfig` in detail
+
+## Required Properties
+
+### `chartType`
+
+- **Type:** Fixed values `'pie' | 'donut'`
+- **Description:** Sets the chart type to either pie or donut.
+
+### `title`
+
+- **Type:** `string`
+- **Description:** The title of the visualization.
+
+<Dataset />
+
+### `breakdown`
+
+- **Type:** `LensBreakdownConfig[]`
+- **Description:** An array of breakdown configurations to segment the data into slices. Each breakdown configures how data should be grouped and displayed in the pie or donut chart, enabling detailed and meaningful data representations. Check breakdown configuration details below.
+
+## Optional Properties
+
+### `legend`
+
+- **Type:** `Identity<LensLegendConfig>`
+- **Description:** Configures the chart's legend. It includes properties to show or hide the legend and to position it relative to the chart ('top', 'left', 'bottom', 'right'). This helps in identifying what each slice of the pie or donut chart represents.
+
+
+<Breakdown />
+
+## Example
+
+```
+const pieConfig: LensConfig = {
+  chartType: 'pie',
+  title: 'Sales by Region',
+  dataset: {
+    esql: 'from sales_data | group by region | stats count() as salesCount',
+  },
+  breakdown: [
+    {
+      type: 'topValues',
+      field: 'region',
+      size: 5,
+    },
+  ],
+  legend: {
+    show: true,
+    position: 'right',
+  },
+};
+const configBuilder = new LensConfigBuilder(lensFormulaAPI, dataViewsAPI);
+const lensConfig = configBuilder.build(pieConfig, {
+  timeRange: { from: 'now-1y', to: 'now', type: 'relative' },
+  embeddable: true,
+});
+```
+
+This example showcases how to configure a pie chart visualization to display sales by region. The `breakdown` property uses a `topValues` type to segment sales data into slices based on the top 5 regions. Additionally, the legend is configured to be shown on the right side of the chart, facilitating the understanding of which slice corresponds to each region. The use of ESQL in the `dataset` property allows for direct aggregation and segmentation of the data at the source, enabling efficient data visualization construction.
