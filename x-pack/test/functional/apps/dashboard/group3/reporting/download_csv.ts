@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
@@ -63,16 +62,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.existOrFail('csvReportStarted'); // validate toast panel
   };
 
-  describe('Generate CSV', () => {
-    beforeEach('initialize tests', async () => {
-      log.debug('ReportingPage:initTests');
-      await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
-      await browser.setWindowSize(1600, 850);
-    });
-
+  describe('Dashboard Generate CSV', () => {
     describe('Default Saved Search Data', () => {
       before(async () => {
+        await esArchiver.emptyKibanaIndex();
         await reporting.initEcommerce();
+        await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
+      });
+
+      beforeEach(async () => {
         await navigateToDashboardApp();
       });
 
@@ -136,9 +134,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const to = 'Jun 25, 2019 @ 16:18:51.821';
 
       before(async () => {
+        await esArchiver.emptyKibanaIndex();
         await reporting.initEcommerce();
-        await PageObjects.common.setTime({ from, to });
+        await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
+      });
+
+      beforeEach(async () => {
         await navigateToDashboardApp();
+        await PageObjects.common.setTime({ from, to });
         log.info(`Creating empty dashboard`);
         await PageObjects.dashboard.clickNewDashboard();
         log.info(`Adding "${TEST_SEARCH_TITLE}" to dashboard`);
@@ -148,7 +151,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await reporting.teardownEcommerce();
-        await esArchiver.emptyKibanaIndex();
         await PageObjects.common.unsetTime();
       });
 
@@ -165,9 +167,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const dashboardWithScriptedFieldsSearch = 'names dashboard';
 
       before(async () => {
+        await esArchiver.emptyKibanaIndex();
         await reporting.initLogs();
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
+        await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
+      });
 
+      beforeEach(async () => {
         await navigateToDashboardApp();
         await PageObjects.dashboard.loadSavedDashboard(dashboardWithScriptedFieldsSearch);
         await PageObjects.timePicker.setAbsoluteRange(

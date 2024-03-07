@@ -317,5 +317,27 @@ describe('GetCsvReportPanelAction', () => {
       });
       expect(core.notifications.toasts.addDanger).not.toHaveBeenCalled();
     });
+
+    it('shows a bad old toastie when it unsuccessfully fails', async () => {
+      apiClient.createImmediateReport = jest.fn().mockRejectedValue('No more ram!');
+      const panel = new ReportingCsvPanelAction({
+        core,
+        apiClient,
+        startServices$: mockStartServices$,
+        usesUiCapabilities: true,
+        csvConfig,
+      });
+
+      await Rx.firstValueFrom(mockStartServices$);
+
+      await panel.execute(context);
+
+      expect(core.notifications.toasts.addSuccess).toHaveBeenCalled();
+      expect(core.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        'data-test-subj': 'downloadCsvFail',
+        text: "We couldn't download your CSV at this time.",
+        title: 'CSV download failed',
+      });
+    });
   });
 });

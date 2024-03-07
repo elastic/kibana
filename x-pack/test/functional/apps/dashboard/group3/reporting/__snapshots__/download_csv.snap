@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`dashboard Reporting Generate CSV Default Saved Search Data Downloads a filtered CSV export of a saved search panel 1`] = `
+exports[`dashboard Reporting Dashboard Generate CSV Default Saved Search Data Downloads a filtered CSV export of a saved search panel 1`] = `
 "\\"order_date\\",category,currency,\\"customer_id\\",\\"order_id\\",\\"day_of_week_i\\",\\"products.created_on\\",sku
 \\"Jun 22, 2019 @ 00:00:00.000\\",\\"Men's Clothing, Men's Shoes\\",EUR,13,715752,6,\\"Dec 11, 2016 @ 00:00:00.000, Dec 11, 2016 @ 00:00:00.000, Dec 11, 2016 @ 00:00:00.000, Dec 11, 2016 @ 00:00:00.000\\",\\"ZO0130801308, ZO0402604026, ZO0630506305, ZO0297402974\\"
 \\"Jun 22, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing\\",EUR,50,565284,6,\\"Dec 11, 2016 @ 00:00:00.000, Dec 11, 2016 @ 00:00:00.000\\",\\"ZO0687206872, ZO0422304223\\"
@@ -102,7 +102,7 @@ exports[`dashboard Reporting Generate CSV Default Saved Search Data Downloads a 
 "
 `;
 
-exports[`dashboard Reporting Generate CSV Default Saved Search Data Downloads a saved search panel with a custom time range that does not intersect with dashboard time range 1`] = `
+exports[`dashboard Reporting Dashboard Generate CSV Default Saved Search Data Downloads a saved search panel with a custom time range that does not intersect with dashboard time range 1`] = `
 "\\"order_date\\",category,currency,\\"customer_id\\",\\"order_id\\",\\"day_of_week_i\\",\\"products.created_on\\",sku
 \\"Jun 15, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",EUR,27,732985,6,\\"Dec 4, 2016 @ 00:00:00.000, Dec 4, 2016 @ 00:00:00.000, Dec 4, 2016 @ 00:00:00.000, Dec 4, 2016 @ 00:00:00.000\\",\\"ZO0048100481, ZO0133401334, ZO0153201532, ZO0381603816\\"
 \\"Jun 15, 2019 @ 00:00:00.000\\",\\"Women's Accessories, Women's Clothing, Women's Shoes\\",EUR,5,731613,6,\\"Dec 4, 2016 @ 00:00:00.000, Dec 4, 2016 @ 00:00:00.000, Dec 4, 2016 @ 00:00:00.000, Dec 4, 2016 @ 00:00:00.000\\",\\"ZO0203502035, ZO0706807068, ZO0072000720, ZO0011200112\\"
@@ -247,7 +247,7 @@ exports[`dashboard Reporting Generate CSV Default Saved Search Data Downloads a 
 "
 `;
 
-exports[`dashboard Reporting Generate CSV Default Saved Search Data Generate CSV export of a saved search panel 1`] = `
+exports[`dashboard Reporting Dashboard Generate CSV Default Saved Search Data Generate CSV export of a saved search panel 1`] = `
 "\\"order_date\\",category,currency,\\"customer_id\\",\\"order_id\\",\\"day_of_week_i\\",\\"products.created_on\\",sku
 \\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",EUR,27,731788,6,\\"Dec 11, 2016 @ 00:00:00.000, Dec 11, 2016 @ 00:00:00.000, Dec 11, 2016 @ 00:00:00.000, Dec 11, 2016 @ 00:00:00.000\\",\\"ZO0486004860, ZO0177901779, ZO0680506805, ZO0340503405\\"
 \\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Accessories, Women's Shoes\\",EUR,17,730663,6,\\"Dec 11, 2016 @ 00:00:00.000, Dec 11, 2016 @ 00:00:00.000, Dec 11, 2016 @ 00:00:00.000, Dec 11, 2016 @ 00:00:00.000\\",\\"ZO0697406974, ZO0370303703, ZO0368103681, ZO0013800138\\"
@@ -707,39 +707,13 @@ exports[`dashboard Reporting Generate CSV Default Saved Search Data Generate CSV
 "
 `;
 
-exports[`dashboard Reporting Generate CSV Field Formatters and Scripted Fields Generate CSV export of a saved search panel 1`] = `
+exports[`dashboard Reporting Dashboard Generate CSV Field Formatters and Scripted Fields Generate CSV export of a saved search panel 1`] = `
 "date,\\"_id\\",name,gender,value,year,\\"years_ago\\",\\"date_informal\\"
-\\"Dec 31, 1981 @ 17:00:00.000\\",\\"1982-Fethany-F\\",Fethany,F,780,1982,\\"37.00000000000000000000\\",\\"Dec 31st 81\\"
+\\"Jan 1, 1982 @ 00:00:00.000\\",\\"1982-Fethany-F\\",Fethany,F,780,1982,\\"37.00000000000000000000\\",\\"Jan 1st 82\\"
 "
 `;
 
-exports[`dashboard Reporting Generate CSV Filtered Saved Search Downloads filtered Discover saved search report 1`] = `
+exports[`dashboard Reporting Dashboard Generate CSV Filtered Saved Search Downloads filtered Discover saved search report 1`] = `
 "\\"order_date\\",category,\\"order_id\\",\\"customer_full_name\\",\\"taxful_total_price\\",currency
-\\"Jun 25, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",569144,\\"Betty Perkins\\",\\"61.969\\",EUR
-\\"Jun 25, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",568503,\\"Betty Bryant\\",68,EUR
-\\"Jun 25, 2019 @ 00:00:00.000\\",\\"Women's Accessories\\",568229,\\"Betty Reese\\",\\"22.984\\",EUR
-\\"Jun 25, 2019 @ 00:00:00.000\\",\\"Women's Accessories, Women's Clothing\\",568023,\\"Betty Brewer\\",\\"28.984\\",EUR
-\\"Jun 24, 2019 @ 00:00:00.000\\",\\"Women's Accessories, Women's Shoes\\",567524,\\"Betty Stokes\\",86,EUR
-\\"Jun 24, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",567403,\\"Betty Rivera\\",102,EUR
-\\"Jun 24, 2019 @ 00:00:00.000\\",\\"Women's Accessories, Women's Clothing\\",566942,\\"Betty Farmer\\",\\"34.969\\",EUR
-\\"Jun 24, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",566831,\\"Betty Jackson\\",\\"60.969\\",EUR
-\\"Jun 23, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",566622,\\"Betty Gilbert\\",\\"49.969\\",EUR
-\\"Jun 23, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",565945,\\"Betty King\\",84,EUR
-\\"Jun 23, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Accessories\\",565381,\\"Betty Graham\\",\\"24.984\\",EUR
-\\"Jun 23, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",565334,\\"Betty Allison\\",87,EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",565002,\\"Betty Morrison\\",175,EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",564710,\\"Betty Jimenez\\",\\"53.969\\",EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Accessories, Women's Shoes\\",564446,\\"Betty Cross\\",94,EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",564398,\\"Betty Mccarthy\\",112,EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",564315,\\"Betty Maldonado\\",\\"29.984\\",EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",564221,\\"Betty Swanson\\",100,EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",564215,\\"Betty Fletcher\\",\\"57.969\\",EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",564207,\\"Betty Ruiz\\",\\"61.969\\",EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",564009,\\"Betty Bryant\\",\\"49.969\\",EUR
-\\"Jun 21, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",563860,\\"Betty Massey\\",66,EUR
-\\"Jun 21, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",563554,\\"Betty Ramsey\\",103,EUR
-\\"Jun 21, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Accessories\\",563060,\\"Betty Webb\\",84,EUR
-\\"Jun 21, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",562762,\\"Betty Bryan\\",77,EUR
-\\"Jun 21, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",562668,\\"Betty Thompson\\",\\"58.969\\",EUR
 "
 `;

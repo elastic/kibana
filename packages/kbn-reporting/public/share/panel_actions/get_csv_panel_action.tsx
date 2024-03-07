@@ -209,16 +209,18 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
 
     await this.apiClient
       .createReportingJob('csv_searchsource', csvJobParams)
-      .then(() => {
-        this.notifications.toasts.addSuccess({
-          title: this.i18nStrings.generate.toasts.success.title,
-          text: toMountPoint(this.i18nStrings.generate.toasts.success.body, {
-            analytics,
-            i18n: i18nStart,
-            theme: this.theme,
-          }),
-          'data-test-subj': 'csvReportStarted',
-        });
+      .then((job) => {
+        if (job) {
+          this.notifications.toasts.addSuccess({
+            title: this.i18nStrings.generate.toasts.success.title,
+            text: toMountPoint(this.i18nStrings.generate.toasts.success.body, {
+              analytics,
+              i18n: i18nStart,
+              theme: this.theme,
+            }),
+            'data-test-subj': 'csvReportStarted',
+          });
+        }
       })
       .catch((error: unknown) => {
         // eslint-disable-next-line no-console
