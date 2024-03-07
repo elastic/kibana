@@ -29,7 +29,7 @@ const mockedUseLicence = useLicense as jest.MockedFunction<typeof useLicense>;
 jest.mock('../../components/agent_reassign_policy_modal');
 
 const defaultProps = {
-  shownAgents: 10, // how many agents are listed in the table in total
+  nAgentsInTable: 10,
   totalManagedAgentIds: [],
   selectionMode: 'manual',
   currentQuery: '',
@@ -193,7 +193,7 @@ describe('AgentBulkActions', () => {
 
       expect(jest.mocked(AgentReassignAgentPolicyModal)).toHaveBeenCalledWith(
         expect.objectContaining({
-          agents: '(Base query) AND NOT (fleet-agents.agent.id : ("agentId1" or "agentId2"))',
+          agents: '((Base query)) AND NOT (fleet-agents.agent.id : ("agentId1" or "agentId2"))',
         }),
         expect.anything()
       );
