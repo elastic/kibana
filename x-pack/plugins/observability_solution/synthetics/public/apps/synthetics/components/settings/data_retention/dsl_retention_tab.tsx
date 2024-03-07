@@ -6,16 +6,21 @@
  */
 
 import { EuiBasicTable, EuiBasicTableColumn, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { DataStreamStatus, useGetDataStreamStatuses } from '../hooks/use_get_data_stream_statuses';
+import { Unprivileged } from './unprivileged';
 import { useManagementLocator } from './use_management_locator';
 
 export const DslRetentionTab = () => {
   const { dataStreamStatuses, loading, error } = useGetDataStreamStatuses();
   if (loading === false && dataStreamStatuses === undefined)
     return <ErrorEmptyPrompt error={error?.message} />;
+
+  if (error && (error as unknown as IHttpFetchError<ResponseErrorBody>).body?.statusCode === 403)
+    return <Unprivileged showIlmMessage={false} />;
 
   return (
     <EuiBasicTable
