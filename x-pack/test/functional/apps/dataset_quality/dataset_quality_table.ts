@@ -177,7 +177,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       // Confirm dataset selector text in observability logs explorer
       const datasetSelectorText =
-        await PageObjects.observabilityLogsExplorer.getDatasetSelectorButtonText();
+        await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
       expect(datasetSelectorText).to.eql(datasetName);
     });
 

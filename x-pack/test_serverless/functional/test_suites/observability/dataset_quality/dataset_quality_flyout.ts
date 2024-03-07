@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Confirm dataset selector text in observability logs explorer
       const datasetSelectorText =
-        await PageObjects.observabilityLogsExplorer.getDatasetSelectorButtonText();
+        await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
       expect(datasetSelectorText).to.eql(testDatasetName);
     });
   });

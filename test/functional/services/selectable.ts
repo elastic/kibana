@@ -52,7 +52,7 @@ export class SelectableService extends FtrService {
 
     // Open the selectable
     await this.testSubjects.click(buttonTestSubjectId);
-    await this.common.sleep(300);
+    await this.common.sleep(500);
 
     const selectableBodyContainer = await this.testSubjects.find(selectableBodyTestSubjectId);
     const listContainer = await selectableBodyContainer.findByClassName('euiSelectableList');

@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Search for a dataset
       await testSubjects.setValue(
-        PageObjects.datasetQuality.testSubjectSelectors.datasetQualitySearchDatasetInput,
+        PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFilterBarFieldSearch,
         datasetNames[2]
       );
 
@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const datasetNameColCellTextsAfterSearch = await datasetNameColAfterSearch.getCellTexts();
       expect(datasetNameColCellTextsAfterSearch).to.eql([datasetNames[2]]);
       await testSubjects.setValue(
-        PageObjects.datasetQuality.testSubjectSelectors.datasetQualitySearchDatasetInput,
+        PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFilterBarFieldSearch,
         ''
       );
     });
