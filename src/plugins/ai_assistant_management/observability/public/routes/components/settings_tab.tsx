@@ -54,7 +54,7 @@ export function SettingsTab() {
     });
   };
 
-  const { selectedLanguage, selectLanguage, LANGUAGE_OPTIONS } =
+  const { selectedLanguage, setSelectedLanguage, LANGUAGE_OPTIONS } =
     observabilityAIAssistant.useUserPreferredLanguage();
 
   return (
@@ -230,7 +230,7 @@ export function SettingsTab() {
                 options={LANGUAGE_OPTIONS}
                 selectedOptions={selectedLanguage ? [{ label: selectedLanguage }] : []}
                 onChange={(selected) => {
-                  selectLanguage(selected[0]?.label ?? '');
+                  setSelectedLanguage(selected[0]?.label ?? '');
                 }}
                 aria-label={i18n.translate(
                   'aiAssistantManagementObservability.settingsPage.userPreferences.responseLanguageLabel',

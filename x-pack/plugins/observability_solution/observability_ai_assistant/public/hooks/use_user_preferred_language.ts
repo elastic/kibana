@@ -175,7 +175,7 @@ export const SELECTED_LANGUAGE_LOCAL_STORAGE_KEY =
   'xpack.observabilityAiAssistant.responseLanguage';
 
 export function useUserPreferredLanguage() {
-  const [selectedLanguage, selectLanguage] = useLocalStorage(
+  const [selectedLanguage, setSelectedLanguage] = useLocalStorage(
     SELECTED_LANGUAGE_LOCAL_STORAGE_KEY,
     USE_KIBANA_LOCALE_SETTING
   );
@@ -192,7 +192,7 @@ export function useUserPreferredLanguage() {
 
   return {
     selectedLanguage,
-    selectLanguage,
+    setSelectedLanguage,
     LANGUAGE_OPTIONS,
     getPreferredLanguage,
   };

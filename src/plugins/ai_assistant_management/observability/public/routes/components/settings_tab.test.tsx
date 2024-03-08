@@ -35,7 +35,7 @@ describe('SettingsTab', () => {
         useUserPreferredLanguage: () => ({
           LANGUAGE_OPTIONS: [{ label: 'English' }],
           selectedLanguage: 'English',
-          selectLanguage: () => {},
+          setSelectedLanguage: () => {},
           getPreferredLanguage: () => 'English',
         }),
       },
