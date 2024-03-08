@@ -150,6 +150,10 @@ export function TrainedModelsProvider({ getService }: FtrProviderContext, mlComm
     async closeCheckingSpacePermissionsModal(): Promise<void> {
       await testSubjects.click('mlDeleteSpaceAwareItemCheckModalOverlayCloseButton');
     },
+
+    async selectModel(name: string): Promise<void> {
+      await testSubjects.click(`checkboxSelectRow-${name}`);
+    },
   };
 }
 

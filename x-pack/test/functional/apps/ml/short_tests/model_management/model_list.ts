@@ -11,7 +11,6 @@ import { SUPPORTED_TRAINED_MODELS } from '../../../../services/ml/api';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
-  const testSubjects = getService('testSubjects');
   const find = getService('find');
 
   const trainedModels = Object.values(SUPPORTED_TRAINED_MODELS).map((model) => ({
@@ -221,7 +220,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should not be able to delete a model assigned to all spaces, and show a warning copy explaining the situation', async () => {
         await ml.testExecution.logTestStep('should select the model named elser_model_2');
-        await testSubjects.click('checkboxSelectRow-.elser_model_2');
+        await ml.trainedModels.selectModel('.elser_model_2');
 
         await ml.testExecution.logTestStep('should attempt to delete the model');
         await find.clickByButtonText('Delete');
