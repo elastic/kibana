@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, FC } from 'react';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { BucketSpan } from '../bucket_span';

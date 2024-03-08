@@ -6,20 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
-import { MlCoreSetup } from '../plugin';
+import type { MlCoreSetup } from '../plugin';
 import { ML_APP_LOCATOR } from '../../common/constants/locator';
+import type { AnomalyChartsFieldSelectionContext, SwimLaneDrilldownContext } from '../embeddables';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  AnomalyChartsFieldSelectionContext,
   isAnomalyExplorerEmbeddable,
   isSwimLaneEmbeddable,
-  SwimLaneDrilldownContext,
 } from '../embeddables';
-import { ExplorerAppState } from '../../common/types/locator';
+import type { ExplorerAppState } from '../../common/types/locator';
 
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
 

@@ -7,12 +7,13 @@
 
 import { getTermsAggConfig } from './terms_agg';
 import { getPercentilesAggConfig } from './percentiles_agg';
-import {
-  PivotSupportedAggs,
-  PIVOT_SUPPORTED_AGGS,
-} from '../../../../../../../common/types/pivot_aggs';
+import type { PivotSupportedAggs } from '../../../../../../../common/types/pivot_aggs';
+import { PIVOT_SUPPORTED_AGGS } from '../../../../../../../common/types/pivot_aggs';
 
-import { PivotAggsConfigBase, PivotAggsConfigWithUiBase } from '../../../../../common/pivot_aggs';
+import type {
+  PivotAggsConfigBase,
+  PivotAggsConfigWithUiBase,
+} from '../../../../../common/pivot_aggs';
 import { getFilterAggConfig } from './filter_agg/config';
 import { getTopMetricsAggConfig } from './top_metrics_agg';
 

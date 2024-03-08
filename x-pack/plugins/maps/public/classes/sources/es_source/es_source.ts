@@ -16,7 +16,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { lastValueFrom } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
 import { extractWarnings, type SearchResponseWarning } from '@kbn/search-response-warnings';
-import type { IESAggSource } from '../es_agg_source';
+import { hasESAggSourceMethod } from '../es_agg_source/types';
 import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,
@@ -183,15 +183,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       // buffer can be empty
       const geoField = await this._getGeoField();
       const buffer: MapExtent =
-        'isGeoGridPrecisionAware' in this &&
-        'getGeoGridPrecision' in this &&
-        // @ts-expect-error upgrade typescript v4.9.5
-        (this as IESAggSource).isGeoGridPrecisionAware()
-          ? expandToTileBoundaries(
-              requestMeta.buffer,
-              // @ts-expect-error upgrade typescript v4.9.5
-              (this as IESAggSource).getGeoGridPrecision(requestMeta.zoom)
-            )
+        hasESAggSourceMethod(this, 'isGeoGridPrecisionAware') &&
+        hasESAggSourceMethod(this, 'getGeoGridPrecision') &&
+        this.isGeoGridPrecisionAware()
+          ? expandToTileBoundaries(requestMeta.buffer, this.getGeoGridPrecision(requestMeta.zoom))
           : requestMeta.buffer;
       const extentFilter = createExtentFilter(buffer, [geoField.name]);
 
