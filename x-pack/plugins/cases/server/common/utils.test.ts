@@ -27,6 +27,7 @@ import {
   isSOError,
   countUserAttachments,
   isPersistableStateOrExternalReference,
+  isSODecoratedError,
 } from './utils';
 import { newCase } from '../routes/api/__mocks__/request_responses';
 import { CASE_VIEW_PAGE_TABS } from '../../common/types';
@@ -1572,6 +1573,18 @@ describe('common utils', () => {
 
     it('returns false if the SO is not an error', () => {
       expect(isSOError({})).toBe(false);
+    });
+  });
+
+  describe('isSODecoratedError', () => {
+    it('returns true if the SO error is a decorated error', () => {
+      // @ts-expect-error: only the isBoom property is required
+      expect(isSODecoratedError({ isBoom: true })).toBe(true);
+    });
+
+    it('returns false if the SO is not a decorated error', () => {
+      // @ts-expect-error: only the isBoom property is required
+      expect(isSODecoratedError({})).toBe(false);
     });
   });
 

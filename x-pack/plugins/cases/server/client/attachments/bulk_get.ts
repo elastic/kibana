@@ -12,7 +12,7 @@ import {
   BulkGetAttachmentsResponseRt,
 } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../../common/api';
-import { flattenCommentSavedObjects } from '../../common/utils';
+import { flattenCommentSavedObjects, isSODecoratedError } from '../../common/utils';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
@@ -122,12 +122,21 @@ const constructErrors = ({
   const errors: BulkGetAttachmentsResponse['errors'] = [];
 
   for (const soError of soBulkGetErrors) {
-    errors.push({
-      error: soError.error.error,
-      message: soError.error.message,
-      status: soError.error.statusCode,
-      attachmentId: soError.id,
-    });
+    if (isSODecoratedError(soError.error)) {
+      errors.push({
+        error: soError.error.output.payload.error,
+        message: soError.error.output.payload.message,
+        status: soError.error.output.statusCode,
+        attachmentId: soError.id,
+      });
+    } else {
+      errors.push({
+        error: soError.error.error,
+        message: soError.error.message,
+        status: soError.error.statusCode,
+        attachmentId: soError.id,
+      });
+    }
   }
 
   for (const attachment of associationErrors) {
