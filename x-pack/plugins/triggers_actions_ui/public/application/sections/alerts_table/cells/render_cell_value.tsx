@@ -147,7 +147,7 @@ export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
         );
       case ALERT_RULE_CONSUMER:
         const producer = rowData?.find(({ field }) => field === ALERT_RULE_PRODUCER)?.value?.[0];
-        const consumer: AlertConsumers = observabilityFeatureIds.includes(value)
+        const consumer: AlertConsumers = observabilityFeatureIds.includes(producer)
           ? 'observability'
           : producer && (value === 'alerts' || value === 'stackAlerts')
           ? producer

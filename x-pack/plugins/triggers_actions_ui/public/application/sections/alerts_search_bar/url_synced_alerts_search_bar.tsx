@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BoolQuery } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
+import { AlertsFilters } from '../alerts_filters';
 import { AlertsFeatureIdsFilter } from '../../lib/search_filters';
 import { useKibana } from '../../..';
 import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_container';
@@ -44,23 +45,35 @@ export const UrlSyncedAlertsSearchBar = ({
   const {
     data: { query: queryService },
     notifications: { toasts },
+    dataViews: dataViewsService,
+    spaces,
   } = useKibana().services;
   const {
     timefilter: { timefilter: timeFilterService },
   } = queryService;
+  const [spaceId, setSpaceId] = useState<string>();
+
   const {
     kuery,
-    rangeFrom,
-    rangeTo,
-    filters,
     onKueryChange,
-    onRangeFromChange,
-    onRangeToChange,
+    filters,
     onFiltersChange,
+    rangeFrom,
+    onRangeFromChange,
+    rangeTo,
+    onRangeToChange,
+    filterControls,
+    onFilterControlsChange,
     savedQuery,
     setSavedQuery,
     clearSavedQuery,
   } = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY);
+
+  useEffect(() => {
+    if (spaces) {
+      spaces.getActiveSpace().then((space) => setSpaceId(space.id));
+    }
+  }, [spaces]);
 
   useEffect(() => {
     try {
@@ -110,17 +123,27 @@ export const UrlSyncedAlertsSearchBar = ({
   );
 
   return (
-    <AlertsSearchBar
-      rangeFrom={rangeFrom}
-      rangeTo={rangeTo}
-      query={kuery}
-      onQuerySubmit={onQueryChange}
-      filters={filters}
-      onFiltersUpdated={onFiltersChange}
-      savedQuery={savedQuery}
-      onSavedQueryUpdated={setSavedQuery}
-      onClearSavedQuery={clearSavedQuery}
-      {...rest}
-    />
+    <>
+      <AlertsSearchBar
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+        query={kuery}
+        onQuerySubmit={onQueryChange}
+        // filters={filters}
+        // onFiltersUpdated={onFiltersChange}
+        savedQuery={savedQuery}
+        onSavedQueryUpdated={setSavedQuery}
+        onClearSavedQuery={clearSavedQuery}
+        {...rest}
+      />
+      <AlertsFilters
+        dataViewsService={dataViewsService}
+        spaceId={spaceId}
+        chainingSystem="HIERARCHICAL"
+        controlsFromUrl={filterControls}
+        filters={filters}
+        onFilterChange={onFiltersChange}
+      />
+    </>
   );
 };

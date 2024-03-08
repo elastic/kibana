@@ -16,7 +16,11 @@ import {
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
+import {
+  ALERT_CASE_IDS,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_RULE_UUID,
+} from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
   BrowserFields,
@@ -255,8 +259,10 @@ const AlertsTableStateWithQueryProvider = ({
     skip: false,
   });
 
+  console.log('Alerts', alerts);
+
   const { data: mutedAlerts } = useGetMutedAlerts([
-    ...new Set(alerts.map((a) => a['kibana.alert.rule.uuid']![0])),
+    ...new Set(alerts.map((a) => a[ALERT_RULE_UUID]![0])),
   ]);
 
   useEffect(() => {

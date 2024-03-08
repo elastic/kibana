@@ -8,8 +8,9 @@
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiBadge,
+  EuiBetaBadge,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   EuiPageTemplate,
   EuiSpacer,
@@ -155,24 +156,30 @@ const PageContent = () => {
     <>
       <EuiPageTemplate.Header
         paddingSize="none"
-        bottomBorder
         pageTitle={
-          <span data-test-subj="appTitle">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.managementSection.alerts.displayName"
-              defaultMessage="Alerts"
-            />
-          </span>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <span data-test-subj="appTitle">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.managementSection.alerts.displayName"
+                  defaultMessage="Alerts"
+                />
+              </span>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.managementSection.alerts.technicalPreview"
+                    defaultMessage="Technical preview"
+                  />
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
+        bottomBorder
         rightSideItems={ruleStats}
-        description={
-          <EuiBadge color="hollow">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.managementSection.alerts.technicalPreview"
-              defaultMessage="Technical preview"
-            />
-          </EuiBadge>
-        }
       />
       <EuiSpacer size="l" />
       {!isInitialLoadingRuleTypes && !authorizedToReadAnyRules ? (
