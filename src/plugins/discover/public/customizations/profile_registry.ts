@@ -10,6 +10,7 @@ import type { AppDeepLink, AppUpdater } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
 import { map, Observable, BehaviorSubject } from 'rxjs';
+import { DISCOVER_DEFAULT_PROFILE_ID } from '../../common/customizations';
 import type { CustomizationCallback } from './types';
 
 export type DiscoverProfileId = string;
@@ -32,8 +33,6 @@ export interface DiscoverProfileRegistry {
   set: RegisterDiscoverProfile;
   getContributedAppState$: () => Observable<AppUpdater>;
 }
-
-export const DISCOVER_DEFAULT_PROFILE_ID = 'default';
 
 export const createProfileRegistry = (): DiscoverProfileRegistry => {
   const profiles = new Map<string, DiscoverProfile>([[defaultProfile.id, defaultProfile]]);

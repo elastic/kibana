@@ -23,22 +23,15 @@ import {
   DiscoverProfilesProvider,
   DiscoverRootContext,
   DiscoverRootContextProvider,
-  DISCOVER_DEFAULT_PROFILE_ID,
   useDiscoverProfiles,
 } from '../customizations';
 import { addProfile } from '../../common/customizations';
 
 export const DiscoverRoutes = () => {
   const { currentProfile } = useDiscoverProfiles();
-
-  const profileId =
-    currentProfile && currentProfile.id !== DISCOVER_DEFAULT_PROFILE_ID
-      ? currentProfile.id
-      : undefined;
-
   const prefixPath = useCallback(
-    (path: string) => (profileId ? `${addProfile('', profileId)}/${path}` : `/${path}`),
-    [profileId]
+    (path: string) => `${addProfile('', currentProfile.id)}/${path}`,
+    [currentProfile.id]
   );
 
   return (

@@ -41,11 +41,7 @@ export class ProfileAwareLocator<T extends { profile?: string }> implements Loca
 
     const { profile } = getProfile(this.history.location.pathname);
 
-    if (profile) {
-      params = { ...params, profile };
-    }
-
-    return params;
+    return { ...params, profile };
   }
 
   getLocation(params: T) {

@@ -20,9 +20,9 @@ import {
   CustomizationCallback,
   DiscoverProfilesProvider,
   DiscoverRootContextProvider,
-  DISCOVER_DEFAULT_PROFILE_ID,
 } from '../../customizations';
 import { LoadingIndicator } from '../common/loading_indicator';
+import { DISCOVER_DEFAULT_PROFILE_ID } from '../../../common/customizations';
 
 export interface DiscoverContainerInternalProps {
   /*

@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './consts';
-export * from './utils';
+export const DISCOVER_DEFAULT_PROFILE_ID = 'default';

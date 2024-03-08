@@ -9,7 +9,7 @@
 import { createContext, useContext, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { getProfile } from '../../common/customizations';
-import { createProfileRegistry, DISCOVER_DEFAULT_PROFILE_ID } from './profile_registry';
+import { createProfileRegistry } from './profile_registry';
 
 const profilesContext = createContext(createProfileRegistry());
 
@@ -24,7 +24,7 @@ export const useDiscoverProfiles = () => {
 
     return {
       allProfiles: registry.getAll(),
-      currentProfile: registry.get(profile ?? DISCOVER_DEFAULT_PROFILE_ID)!,
+      currentProfile: registry.get(profile)!,
     };
   }, [location.pathname, registry]);
 };
