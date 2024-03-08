@@ -32,6 +32,7 @@ const pages = {
     setupGenAiConnectorsButtonSelector: `observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton`,
     chatInput: 'observabilityAiAssistantChatPromptEditorTextArea',
     retryButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
+    conversationLink: 'observabilityAiAssistantConversationsLink',
   },
   createConnectorFlyout: {
     flyout: 'create-connector-flyout',
