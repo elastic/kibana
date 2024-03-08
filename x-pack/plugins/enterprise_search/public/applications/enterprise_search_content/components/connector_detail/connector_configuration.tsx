@@ -60,7 +60,7 @@ export const ConnectorConfiguration: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
-  const { http } = useValues(HttpLogic);
+  const { errorConnectingMessage, http } = useValues(HttpLogic);
 
   if (!connector) {
     return <></>;
@@ -271,6 +271,30 @@ export const ConnectorConfiguration: React.FC = () => {
                   children: (
                     <EuiFlexGroup direction="column">
                       <EuiFlexItem>
+                        <EuiCallOut
+                          iconType="iInCircle"
+                          color="danger"
+                          title={i18n.translate(
+                            'xpack.enterpriseSearch.content.connectors.configuration.connectorNoIndexCallOut.title',
+                            {
+                              defaultMessage: 'Connector has no attached index',
+                            }
+                          )}
+                        >
+                          <EuiSpacer size="s" />
+                          <EuiText size="s">
+                            {i18n.translate(
+                              'xpack.enterpriseSearch.content.connectors.configuration.connectorNoIndexCallOut.description',
+                              {
+                                defaultMessage:
+                                  "You won't be able to start syncing content until your connector is attached to an index.",
+                              }
+                            )}
+                          </EuiText>
+                          <EuiSpacer />
+                        </EuiCallOut>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
                         <EuiText size="s">
                           {i18n.translate(
                             'xpack.enterpriseSearch.content.connector_detail.configurationConnector.scheduleSync.description',
@@ -287,6 +311,14 @@ export const ConnectorConfiguration: React.FC = () => {
                             <EuiButtonTo
                               data-test-subj="entSearchContent-connector-configuration-setScheduleAndSync"
                               data-telemetry-id="entSearchContent-connector-configuration-setScheduleAndSync"
+                              isDisabled={
+                                (connector?.is_native && !!errorConnectingMessage) ||
+                                [
+                                  ConnectorStatus.NEEDS_CONFIGURATION,
+                                  ConnectorStatus.CREATED,
+                                ].includes(connector?.status) ||
+                                !connector?.index_name
+                              }
                               to={`${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
                                 connectorId: connector.id,
                                 tabId: ConnectorDetailTabId.SCHEDULING,
