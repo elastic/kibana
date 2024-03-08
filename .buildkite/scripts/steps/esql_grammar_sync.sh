@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 cd kibana || exit
 
