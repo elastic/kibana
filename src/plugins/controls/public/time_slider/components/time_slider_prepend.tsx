@@ -7,6 +7,7 @@
  */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { ViewMode } from '@kbn/embeddable-plugin/common';
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -27,6 +28,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
   const showApplySelectionsButton = controlGroup.select(
     (state) => state.explicitInput.showApplySelections
   );
+  const viewMode = controlGroup.select((state) => state.explicitInput.viewMode);
 
   const [isPaused, setIsPaused] = useState(true);
   const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
@@ -69,8 +71,8 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
     }
   }, [timeSlider.dispatch, subscription, timeoutId]);
 
-  const PlayButton = useMemo(
-    () => (
+  const PlayButton = useMemo(() => {
+    const Button = (
       <EuiButtonIcon
         className="timeSlider-playToggle"
         onClick={isPaused ? onPlay : onPause}
@@ -80,9 +82,19 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
         display="fill"
         aria-label={TimeSliderStrings.control.getPlayButtonAriaLabel(isPaused)}
       />
-    ),
-    [isPaused, onPlay, onPause, showApplySelectionsButton]
-  );
+    );
+    return (
+      <>
+        {showApplySelectionsButton ? (
+          <EuiToolTip content={TimeSliderStrings.control.getPlayButtonDisabledTooltip()}>
+            {Button}
+          </EuiToolTip>
+        ) : (
+          Button
+        )}
+      </>
+    );
+  }, [isPaused, onPlay, onPause, showApplySelectionsButton]);
 
   return (
     <div>
@@ -96,14 +108,10 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
         aria-label={TimeSliderStrings.control.getPreviousButtonAriaLabel()}
         data-test-subj="timeSlider-previousTimeWindow"
       />
-      {props.waitForControlOutputConsumersToLoad$ ===
-      undefined ? null : showApplySelectionsButton ? (
-        <EuiToolTip content={TimeSliderStrings.control.getPlayButtonDisabledTooltip()}>
-          {PlayButton}
-        </EuiToolTip>
-      ) : (
-        PlayButton
-      )}
+      {props.waitForControlOutputConsumersToLoad$ === undefined ||
+      (showApplySelectionsButton && viewMode === ViewMode.VIEW)
+        ? null
+        : PlayButton}
       <EuiButtonIcon
         onClick={() => {
           onPause();
