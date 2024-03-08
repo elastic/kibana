@@ -11,7 +11,7 @@ import React from 'react';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { pluginServices as presentationUtilPluginServices } from '@kbn/presentation-util-plugin/public/services';
 import { registry as presentationUtilServicesRegistry } from '@kbn/presentation-util-plugin/public/services/plugin_services.story';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, prettyDOM, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { Provider } from 'react-redux';
@@ -151,7 +151,7 @@ describe('Control group component', () => {
     const { controlGroupComponent, controlGroupContainer } = await mountComponent({
       explicitInput: { showApplySelections: true },
     });
-    const applyButton = controlGroupComponent.getByTestId('controlGroup--applyFiltersButton');
+    let applyButton = controlGroupComponent.getByTestId('controlGroup--applyFiltersButton');
     expect(applyButton).toBeDisabled();
     controlGroupContainer.publishFilters = jest.fn();
 
@@ -165,7 +165,9 @@ describe('Control group component', () => {
       timeslice: [0, 1],
     };
     act(() => controlGroupContainer.dispatch.setUnpublishedFilters(unpublishedFilters));
+    applyButton = controlGroupComponent.getByTestId('controlGroup--applyFiltersButton');
     expect(applyButton).toBeEnabled();
+
     userEvent.click(applyButton);
     expect(controlGroupContainer.publishFilters).toBeCalledWith(unpublishedFilters);
   });
