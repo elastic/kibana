@@ -236,8 +236,8 @@ Run all tests from the `x-pack` root directory
   - Run `node scripts/functional_tests_server`
   - Run `node ../scripts/functional_test_runner.js --config ./test/api_integration/config.ts --grep=Lens`
 - Performance journeys:
-  - Run `node scripts/functional_tests_server.js --config x-pack/test/performance/journeys/data_stress_test_lens/config.ts`
-  - Run `node scripts/functional_test_runner --config x-pack/test/performance/journeys/data_stress_test_lens/config.ts`
+  - Run `node scripts/functional_tests_server.js --config x-pack/test/performance/journeys_e2e/data_stress_test_lens/config.ts`
+  - Run `node scripts/functional_test_runner --config x-pack/test/performance/journeys_e2e/data_stress_test_lens/config.ts`
 
 ## Developing tips
 

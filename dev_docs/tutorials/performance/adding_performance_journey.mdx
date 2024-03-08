@@ -23,7 +23,7 @@ Let's assume we instrumented dashboard with load time metrics and want to track 
 Journey supports loading test data with esArchiver or kbnArchiver. Similar to functional tests, it might require to implement custom wait
 for UI rendering to be completed.
 
-Simply create a new file in `x-pack/performance/journeys` with the following code:
+Simply create a new file in `x-pack/performance/journeys_e2e` with the following code:
 
 ```
 export const journey = new Journey({
@@ -51,7 +51,7 @@ In oder to get correct and consistent metrics, it is important to design journey
 
 ### Running performance journey locally for troubleshooting purposes
 Use the Node script:
-  `node scripts/run_performance.js --journey-path x-pack/performance/journeys/$YOUR_JOURNEY_NAME.ts`
+  `node scripts/run_performance.js --journey-path x-pack/performance/journeys_e2e/$YOUR_JOURNEY_NAME.ts`
 
 Scripts steps include:
 - start Elasticsearch
