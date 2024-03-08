@@ -117,7 +117,6 @@ describe('Timeline', () => {
     };
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/156797
   describe('rendering', () => {
     let spyCombineQueries: jest.SpyInstance;
 
