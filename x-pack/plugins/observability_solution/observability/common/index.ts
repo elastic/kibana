@@ -79,7 +79,6 @@ export const syntheticsSettingsLocatorID = 'SYNTHETICS_SETTINGS';
 export const alertsLocatorID = 'ALERTS_LOCATOR';
 export const ruleDetailsLocatorID = 'RULE_DETAILS_LOCATOR';
 export const rulesLocatorID = 'RULES_LOCATOR';
-// TODO SLO: maybe move to obs-shared?
 export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
 export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
 export const sloListLocatorID = 'SLO_LIST_LOCATOR';

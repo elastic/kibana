@@ -8,7 +8,7 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { sloDetailsLocatorID } from '@kbn/observability-plugin/common';
-import { SLOS_PATH } from '../../common/locators/paths';
+import { SLO_PREFIX } from '../../common/locators/paths';
 
 export interface SloDetailsLocatorParams extends SerializableRecord {
   sloId?: string;
@@ -21,7 +21,7 @@ export class SloDetailsLocatorDefinition implements LocatorDefinition<SloDetails
   public readonly getLocation = async ({ sloId, instanceId }: SloDetailsLocatorParams) => {
     const queryParams =
       !!instanceId && instanceId !== '*' ? `?instanceId=${encodeURI(instanceId)}` : '';
-    const path = !!sloId ? `${SLOS_PATH}/${encodeURI(sloId)}${queryParams}` : SLOS_PATH;
+    const path = !!sloId ? `${SLO_PREFIX}/${encodeURI(sloId)}${queryParams}` : SLO_PREFIX;
 
     return {
       app: 'slo',

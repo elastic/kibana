@@ -12,7 +12,7 @@ describe('SloDetailsLocator', () => {
 
   it('returns correct url when empty params are provided', async () => {
     const location = await locator.getLocation({});
-    expect(location.app).toEqual('observability');
+    expect(location.app).toEqual('slo');
     expect(location.path).toEqual('/slos');
   });
 

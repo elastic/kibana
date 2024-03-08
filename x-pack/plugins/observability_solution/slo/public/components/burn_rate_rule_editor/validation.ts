@@ -85,4 +85,7 @@ const BURN_RATE_THRESHOLD_REQUIRED = i18n.translate(
 );
 
 const getInvalidThresholdValueError = (maxBurnRate: number) =>
-  i18n.translate('xpack.slo.getInvalidThresholdValueError.', { defaultMessage: '' });
+  i18n.translate('xpack.slo.rules.burnRate.errors.invalidThresholdValue', {
+    defaultMessage: 'Burn rate threshold must be between 0.01 and {maxBurnRate}.',
+    values: { maxBurnRate },
+  });
