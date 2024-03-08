@@ -12,7 +12,10 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
 import { MonitorLocations } from '../../common/runtime_types';
 
 export const useCanEditSynthetics = () => {
-  return !!useKibana().services?.application?.capabilities.uptime.save;
+  const capabilities = useKibana().services?.application?.capabilities;
+  const canEdit = capabilities.uptime.save;
+  console.log('can edit', capabilities, canEdit);
+  return !!canEdit;
 };
 
 export const useCanUsePublicLocations = (monLocations?: MonitorLocations) => {

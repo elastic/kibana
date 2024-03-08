@@ -146,6 +146,8 @@ export class UptimePlugin
       'web perf',
     ];
 
+    console.log('serverless setup', plugins.serverless, plugins);
+
     // Register the Synthetics UI plugin
     core.application.register({
       id: 'synthetics',
@@ -191,6 +193,7 @@ export class UptimePlugin
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
 
+    console.log('serverless start', pluginsStart.serverless, pluginsStart);
     setStartServices(coreStart);
 
     syntheticsAlertTypeInitializers.forEach((init) => {
