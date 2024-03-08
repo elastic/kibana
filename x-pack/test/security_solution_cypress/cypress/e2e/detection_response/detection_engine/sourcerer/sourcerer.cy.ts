@@ -33,7 +33,7 @@ const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 
 // FLAKY: https://github.com/elastic/kibana/issues/177080
-describe.skip('Sourcerer', { tags: ['@ess', '@serverless'] }, () => {
+describe('Sourcerer', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
@@ -53,7 +53,7 @@ describe.skip('Sourcerer', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/177586
-  describe.skip('Modified badge', () => {
+  describe('Modified badge', () => {
     it('Selecting new data view does not add a modified badge', () => {
       cy.get(SOURCERER.badgeModified).should(`not.exist`);
       openSourcerer();
