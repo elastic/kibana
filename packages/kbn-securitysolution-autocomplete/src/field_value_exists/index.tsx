@@ -14,11 +14,13 @@ const NO_OPTIONS_FOR_EXIST: EuiComboBoxOptionOption[] = [];
 interface AutocompleteFieldExistsProps {
   placeholder: string;
   rowLabel?: string;
+  'aria-label'?: string;
 }
 
 export const AutocompleteFieldExistsComponent: React.FC<AutocompleteFieldExistsProps> = ({
   placeholder,
   rowLabel,
+  'aria-label': ariaLabel,
 }): JSX.Element => (
   <EuiFormRow label={rowLabel} fullWidth>
     <EuiComboBox
@@ -28,6 +30,7 @@ export const AutocompleteFieldExistsComponent: React.FC<AutocompleteFieldExistsP
       onChange={undefined}
       isDisabled
       data-test-subj="valuesAutocompleteComboBox existsComboxBox"
+      aria-label={ariaLabel}
       fullWidth
     />
   </EuiFormRow>

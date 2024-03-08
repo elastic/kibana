@@ -26,7 +26,7 @@ import { merge } from 'rxjs';
 import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { loadSavedSearch as loadSavedSearchFn } from './load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
-import { DiscoverCustomizationContext, FetchStatus } from '../../types';
+import { FetchStatus } from '../../types';
 import { changeDataView } from '../hooks/utils/change_data_view';
 import { buildStateSubscribe } from '../hooks/utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
@@ -54,6 +54,7 @@ import {
   getDiscoverGlobalStateContainer,
   DiscoverGlobalStateContainer,
 } from './discover_global_state_container';
+import type { DiscoverCustomizationContext } from '../../../customizations';
 
 export interface DiscoverStateContainerParams {
   /**

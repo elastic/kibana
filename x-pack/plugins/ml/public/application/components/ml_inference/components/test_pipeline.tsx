@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, memo, useEffect, useCallback, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { memo, useEffect, useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   EuiAccordion,
@@ -29,7 +30,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-import { IngestSimulateDocument } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestSimulateDocument } from '@elastic/elasticsearch/lib/api/types';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 
 import { i18n } from '@kbn/i18n';
@@ -91,6 +92,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
   const simulatePipeline = async () => {
     try {
       const result = await trainedModelPipelineSimulate(
+        // @ts-expect-error pipeline._meta is defined as mandatory
         pipelineConfig,
         JSON.parse(sampleDocsString) as IngestSimulateDocument[]
       );

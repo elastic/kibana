@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -14,8 +14,8 @@ import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import type { AggName } from '../../../common/types/aggregations';
 import type { Dictionary } from '../../../common/types/common';
 import type { EsFieldName } from '../../../common/types/fields';
-import type { PivotSupportedAggs } from '../../../common/types/pivot_aggs';
-import { PIVOT_SUPPORTED_AGGS, PivotAgg } from '../../../common/types/pivot_aggs';
+import type { PivotSupportedAggs, PivotAgg } from '../../../common/types/pivot_aggs';
+import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 
 import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
 import type { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
