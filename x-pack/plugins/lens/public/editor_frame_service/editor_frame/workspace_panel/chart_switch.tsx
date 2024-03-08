@@ -16,11 +16,13 @@ import {
   EuiSelectable,
   EuiIconTip,
   EuiSelectableOption,
-  EuiBadge,
+  EuiBetaBadge,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartSwitchTrigger } from '@kbn/visualization-ui-components';
+import { css } from '@emotion/react';
 import {
   Visualization,
   FramePublicAPI,
@@ -329,48 +331,7 @@ export const ChartSwitch = memo(function ChartSwitch({
                     prepend: (
                       <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />
                     ),
-                    append:
-                      v.selection.dataLoss !== 'nothing' || v.showExperimentalBadge ? (
-                        <EuiFlexGroup
-                          gutterSize="xs"
-                          responsive={false}
-                          alignItems="center"
-                          className="lnsChartSwitch__append"
-                        >
-                          {v.selection.dataLoss !== 'nothing' ? (
-                            <EuiFlexItem grow={false}>
-                              <EuiIconTip
-                                aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
-                                  defaultMessage: 'Warning',
-                                })}
-                                type="warning"
-                                color="warning"
-                                content={i18n.translate(
-                                  'xpack.lens.chartSwitch.dataLossDescription',
-                                  {
-                                    defaultMessage:
-                                      'Selecting this visualization type will remove incompatible configuration options and multiple layers, if present',
-                                  }
-                                )}
-                                iconProps={{
-                                  className: 'lnsChartSwitch__chartIcon',
-                                  'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
-                                }}
-                              />
-                            </EuiFlexItem>
-                          ) : null}
-                          {v.showExperimentalBadge ? (
-                            <EuiFlexItem grow={false}>
-                              <EuiBadge color="hollow">
-                                <FormattedMessage
-                                  id="xpack.lens.chartSwitch.experimentalLabel"
-                                  defaultMessage="Technical preview"
-                                />
-                              </EuiBadge>
-                            </EuiFlexItem>
-                          ) : null}
-                        </EuiFlexGroup>
-                      ) : null,
+                    append: getAppend(v, framePublicAPI, datasourceMap),
                     // Apparently checked: null is not valid for TS
                     ...(subVisualizationId === v.id && { checked: 'on' }),
                   })
@@ -471,6 +432,123 @@ export const ChartSwitch = memo(function ChartSwitch({
     </div>
   );
 });
+
+const getDataLossWarning = (
+  v: VisualizationType & {
+    visualizationId: string;
+    selection: VisualizationSelection;
+  },
+  frame: FramePublicAPI,
+  datasourceMap: DatasourceMap
+) => {
+  if (v.selection.dataLoss === 'nothing') {
+    return null;
+  }
+  let content: React.ReactNode = i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
+    defaultMessage:
+      'Selecting this visualization type will remove incompatible configuration options and multiple layers, if present',
+  });
+  if (v.selection.dataLoss === 'everything') {
+    content = i18n.translate('xpack.lens.chartSwitch.dataLossEverything', {
+      defaultMessage: 'Selecting this visualization type will clear your current configuration',
+    });
+  }
+  const datasource = v.selection.datasourceId ? datasourceMap[v.selection.datasourceId] : undefined;
+  const columnLabelMap = datasource?.uniqueLabels?.(
+    v.selection.datasourceState,
+    frame.dataViews.indexPatterns
+  );
+
+  const preservedColumnsLabels = (columnLabelMap ? Object.values(columnLabelMap) : []).map(
+    (name) => <li>{name}</li>
+  );
+  if (v.selection.dataLoss === 'layers') {
+    content = (
+      <>
+        <EuiText size="s">
+          {i18n.translate('xpack.lens.chartSwitch.dataLossLayersDescription', {
+            defaultMessage:
+              'Selecting this visualization type will only preserve data from the first layer.',
+          })}
+        </EuiText>
+        <EuiText size="s">
+          {i18n.translate('xpack.lens.chartSwitch.dataLossLayers', {
+            defaultMessage: `The following columns will be preserved:`,
+          })}
+          <ul>{preservedColumnsLabels}</ul>
+        </EuiText>
+      </>
+    );
+  } else if (v.selection.dataLoss === 'columns') {
+    content = (
+      <>
+        <EuiText size="s">
+          {i18n.translate('xpack.lens.chartSwitch.dataLossColumns', {
+            defaultMessage: `Selecting this visualization type will preserve the following columns:`,
+          })}
+          <ul>{preservedColumnsLabels}</ul>
+        </EuiText>
+      </>
+    );
+  }
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiIconTip
+        size="s"
+        aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
+          defaultMessage: 'Warning',
+        })}
+        type="dot"
+        color="warning"
+        content={content}
+        iconProps={{
+          className: 'lnsChartSwitch__chartIcon',
+          'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
+        }}
+      />
+    </EuiFlexItem>
+  );
+};
+
+const getAppend = (
+  v: VisualizationType & {
+    visualizationId: string;
+    selection: VisualizationSelection;
+  },
+  frame: FramePublicAPI,
+  datasourceMap: DatasourceMap
+) => {
+  if (!v.showExperimentalBadge && v.selection.dataLoss === 'nothing') {
+    return null;
+  }
+  const betaBadge = v.showExperimentalBadge ? (
+    <EuiFlexItem grow={false}>
+      <EuiBetaBadge
+        css={css`
+          vertical-align: middle;
+        `}
+        iconType="beaker"
+        label={i18n.translate('xpack.lens.chartSwitch.experimentalLabel', {
+          defaultMessage: 'Technical preview',
+        })}
+        size="s"
+      />
+    </EuiFlexItem>
+  ) : null;
+
+  const dataLossWarning = getDataLossWarning(v, frame, datasourceMap);
+  return (
+    <EuiFlexGroup
+      gutterSize="xs"
+      responsive={false}
+      alignItems="center"
+      className="lnsChartSwitch__append"
+    >
+      {betaBadge}
+      {dataLossWarning}
+    </EuiFlexGroup>
+  );
+};
 
 function getTopSuggestion(
   visualizationMap: VisualizationMap,

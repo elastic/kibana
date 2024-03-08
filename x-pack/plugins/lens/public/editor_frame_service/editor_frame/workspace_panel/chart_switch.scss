@@ -24,6 +24,15 @@
   display: inline-flex;
 }
 
+.lnsChartSwitch__option {
+  .euiSelectableListItem__text {
+    flex-grow: 0;
+  }
+  .euiSelectableListItem__append {
+    margin-left: $euiSizeXS;
+  }
+}
+
 // Targeting img as this won't target normal EuiIcon's only the custom svgs's
 img.lnsChartSwitch__chartIcon { // stylelint-disable-line selector-no-qualifying-type
   // The large icons aren't square so max out the width to fill the height
