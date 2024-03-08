@@ -1,5 +1,8 @@
 #!/bin/bash
 
+git clone https://github.com/elastic/kibana --depth 1 || exit
+git clone https://github.com/elastic/elasticsearch --depth 1 || exit
+
 cd kibana || exit
 
 # Source and destination paths
