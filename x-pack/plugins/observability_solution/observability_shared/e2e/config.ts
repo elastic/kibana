@@ -7,17 +7,19 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { readKibanaConfig } from './tasks/read_kibana_config';
+import { REPO_ROOT } from '@kbn/repo-info';
+
+import { readKibanaConfig } from './helpers/read_kibana_config';
 const MANIFEST_KEY = 'xpack.uptime.service.manifestUrl';
 const SERVICE_PASSWORD = 'xpack.uptime.service.password';
 const SERVICE_USERNAME = 'xpack.uptime.service.username';
 
 async function config({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
-    require.resolve('../../../../../test/common/config.js')
+    require.resolve(`${REPO_ROOT}/test/common/config.js`)
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../../../../test/functional/config.base.js')
+    require.resolve(`${REPO_ROOT}/test/functional/config.base.js`)
   );
 
   const kibanaConfig = readKibanaConfig();
@@ -36,6 +38,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         // define custom es server here
         // API Keys is enabled at the top level
         'xpack.security.enabled=true',
+        'xpack.ml.enabled=false',
       ],
     },
 

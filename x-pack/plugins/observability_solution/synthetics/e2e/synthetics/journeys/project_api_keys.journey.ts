@@ -6,8 +6,8 @@
  */
 
 import { journey, step, expect, before } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-shared-plugin/e2e';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { recordVideo } from '../../helpers/record_video';
 
 journey('ProjectAPIKeys', async ({ page }) => {
   recordVideo(page);

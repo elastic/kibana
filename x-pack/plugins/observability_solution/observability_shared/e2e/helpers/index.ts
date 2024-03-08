@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-const {
-  executeSyntheticsRunner,
-} = require('@kbn/observability-shared-plugin/scripts/base_e2e');
-const path = require('path');
-
-const e2eDir = path.join(__dirname, '../e2e');
-
-executeSyntheticsRunner(e2eDir);
+export { SyntheticsRunner } from './synthetics_runner';
+export { recordVideo } from './record_video';
+export { argv as runnerArgs } from './parse_args_params';

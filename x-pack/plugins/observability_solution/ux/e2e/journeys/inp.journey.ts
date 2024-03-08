@@ -7,7 +7,7 @@
 
 import { journey, step, expect, before } from '@elastic/synthetics';
 import { Client } from '@elastic/elasticsearch';
-import { recordVideo } from '../helpers/record_video';
+import { recordVideo } from '@kbn/observability-shared-plugin/e2e';
 import { loginToKibana, waitForLoadingToFinish } from './utils';
 
 const addTestTransaction = async (params: any) => {

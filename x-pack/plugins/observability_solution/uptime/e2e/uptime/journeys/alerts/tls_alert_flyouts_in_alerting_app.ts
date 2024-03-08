@@ -6,8 +6,8 @@
  */
 
 import { journey, step, before, expect } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-shared-plugin/e2e';
 import { byTestId, assertText, waitForLoadingToFinish } from '../../../helpers/utils';
-import { recordVideo } from '../../../helpers/record_video';
 import { loginPageProvider } from '../../../page_objects/login';
 
 journey('TlsFlyoutInAlertingApp', async ({ page, params }) => {

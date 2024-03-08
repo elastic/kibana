@@ -14,6 +14,7 @@ async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaConfig = await readConfigFile(
     require.resolve('@kbn/observability-shared-plugin/e2e/config')
   );
+
   return {
     ...kibanaConfig.getAll(),
     testRunner: async ({ getService }: any) => {
@@ -24,18 +25,13 @@ async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
       });
 
       await syntheticsRunner.setup();
-      const fixturesDir = path.join(__dirname, '../fixtures/es_archiver/');
 
-      await syntheticsRunner.loadTestData(fixturesDir, [
-        'synthetics_data',
-        'full_heartbeat',
-        'browser',
-      ]);
+      const fixturesDir = path.join(__dirname, '../e2e/fixtures/');
 
+      await syntheticsRunner.loadTestData(fixturesDir, ['rum_8.0.0', 'rum_test_data']);
       await syntheticsRunner.loadTestFiles(async () => {
         require('./journeys');
       });
-
       await syntheticsRunner.run();
     },
   };

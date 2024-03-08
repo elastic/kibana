@@ -7,8 +7,8 @@
 
 import { journey, step, expect, before } from '@elastic/synthetics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
+import { recordVideo } from '@kbn/observability-shared-plugin/e2e';
 import { byTestId, assertText, waitForLoadingToFinish } from '../../../helpers/utils';
-import { recordVideo } from '../../../helpers/record_video';
 import { loginPageProvider } from '../../../page_objects/login';
 
 journey('StatusFlyoutInAlertingApp', async ({ page, params }) => {

@@ -6,8 +6,8 @@
  */
 
 import { journey, step, expect, before, after } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-shared-plugin/e2e';
 import { byTestId } from '../../helpers/utils';
-import { recordVideo } from '../../helpers/record_video';
 import {
   addTestMonitor,
   cleanTestMonitors,

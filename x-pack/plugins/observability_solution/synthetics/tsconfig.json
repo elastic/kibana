@@ -83,7 +83,6 @@
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
     "@kbn/serverless",
-    "@kbn/repo-info"
   ],
   "exclude": ["target/**/*"]
 }

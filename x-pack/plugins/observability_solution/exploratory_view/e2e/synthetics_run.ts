@@ -6,13 +6,14 @@
  */
 import { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
-import { SyntheticsRunner } from './synthetics_runner';
-import { argv } from './parse_args_params';
+import { SyntheticsRunner, runnerArgs } from '@kbn/observability-shared-plugin/e2e';
 
-const { headless, grep, bail: pauseOnError } = argv;
+const { headless, grep, bail: pauseOnError } = runnerArgs;
 
 async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
-  const kibanaConfig = await readConfigFile(require.resolve('@kbn/synthetics-plugin/e2e/config'));
+  const kibanaConfig = await readConfigFile(
+    require.resolve('@kbn/observability-shared-plugin/e2e/config')
+  );
 
   return {
     ...kibanaConfig.getAll(),

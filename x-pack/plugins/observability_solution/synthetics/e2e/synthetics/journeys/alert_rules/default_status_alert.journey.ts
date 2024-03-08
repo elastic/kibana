@@ -9,8 +9,8 @@ import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { v4 as uuidv4 } from 'uuid';
+import { recordVideo } from '@kbn/observability-shared-plugin/e2e';
 import { getReasonMessage } from '../../../../server/alert_rules/status_rule/message_utils';
-import { recordVideo } from '../../../helpers/record_video';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
 

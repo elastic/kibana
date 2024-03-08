@@ -7,8 +7,8 @@
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
+import { recordVideo } from '@kbn/observability-shared-plugin/e2e';
 import { byTestId } from '../../helpers/utils';
-import { recordVideo } from '../../helpers/record_video';
 import {
   addTestMonitor,
   cleanPrivateLocations,

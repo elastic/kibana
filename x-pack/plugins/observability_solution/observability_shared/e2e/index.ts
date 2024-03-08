@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-const {
-  executeSyntheticsRunner,
-} = require('@kbn/observability-shared-plugin/scripts/base_e2e');
-const path = require('path');
-
-const e2eDir = path.join(__dirname, '../e2e');
-
-executeSyntheticsRunner(e2eDir);
+export * from './helpers';

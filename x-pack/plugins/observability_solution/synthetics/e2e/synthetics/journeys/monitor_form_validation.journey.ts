@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { expect, journey, Page, step } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-shared-plugin/e2e';
 import { FormMonitorType } from '../../../common/runtime_types';
-import { recordVideo } from '../../helpers/record_video';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import {
   isEuiFormFieldInValid,

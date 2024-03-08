@@ -7,7 +7,7 @@
 
 import { journey, step, expect, Page } from '@elastic/synthetics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
-import { recordVideo } from '../../helpers/record_video';
+import { recordVideo } from '@kbn/observability-shared-plugin/e2e';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import { byTestId, assertText } from '../../helpers/utils';
 

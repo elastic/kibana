@@ -7,7 +7,7 @@
 
 import { journey, step } from '@elastic/synthetics';
 import moment from 'moment';
-import { recordVideo } from '../record_video';
+import { recordVideo } from '@kbn/observability-shared-plugin/e2e';
 import { createExploratoryViewUrl } from '../../public/components/shared/exploratory_view/configurations/exploratory_view_url';
 import { byTestId, loginToKibana, TIMEOUT_60_SEC, waitForLoadingToFinish } from '../utils';
 
