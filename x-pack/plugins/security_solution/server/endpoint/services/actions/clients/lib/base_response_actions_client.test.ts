@@ -18,6 +18,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   EndpointActionResponseDataOutput,
+  EndpointActionDataParameterTypes,
 } from '../../../../../../common/endpoint/types';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -28,13 +29,17 @@ import type { Logger } from '@kbn/logging';
 import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
-import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
+import {
+  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+  ENDPOINT_ACTIONS_INDEX,
+} from '../../../../../../common/endpoint/constants';
 import type { DeepMutable } from '../../../../../../common/endpoint/types/utility_types';
 import { set } from 'lodash';
 import { responseActionsClientMock } from '../mocks';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getResponseActionFeatureKey } from '../../../feature_usage/feature_keys';
 import { isActionSupportedByAgentType as _isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');
@@ -552,6 +557,56 @@ describe('ResponseActionsClientImpl base class', () => {
   });
 
   describe('#fetchAllPendingActions()', () => {
+    beforeEach(() => {
+      const generator = new EndpointActionGenerator('seed');
+      const actionRequestEsHitPages = [
+        // Page 1
+        [
+          generator.generateActionEsHit({
+            agent: { id: 'agent-a' },
+            EndpointActions: { action_id: 'action-id-1' },
+          }),
+        ],
+        // Page 2
+        [
+          generator.generateActionEsHit({
+            agent: { id: 'agent-b' },
+            EndpointActions: { action_id: 'action-id-2' },
+          }),
+        ],
+      ];
+      let nextActionRequestPageNumber = 0;
+
+      constructorOptions.esClient.search.mockImplementation(async (searchReq) => {
+        // FYI: The iterable uses a Point In Time
+        if (searchReq!.pit) {
+          return generator.toEsSearchResponse(
+            actionRequestEsHitPages[nextActionRequestPageNumber++] ?? []
+          );
+        }
+
+        switch (searchReq!.index) {
+          case ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN:
+            // `action-1` will have a response - thus its complete
+            if (JSON.stringify(searchReq).includes('action-id-1')) {
+              return generator.toEsSearchResponse([
+                generator.toEsSearchHit(
+                  generator.generateResponse({
+                    agent: { id: 'agent-a' },
+                    EndpointActions: { action_id: 'action-id-1' },
+                  })
+                ),
+              ]);
+            }
+
+            // `action-2 will not have a response - it will be pending
+            return generator.toEsSearchResponse([]);
+        }
+
+        return generator.toEsSearchResponse([]);
+      });
+    });
+
     it('should return an async iterable', () => {
       const iterable = baseClassMock.fetchAllPendingActions();
 
@@ -561,9 +616,19 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     it('should provide an array of pending actions', async () => {
+      const iterationData: Array<
+        Array<
+          LogsEndpointAction<EndpointActionDataParameterTypes, EndpointActionResponseDataOutput, {}>
+        >
+      > = [];
+
       for await (const pendingActions of baseClassMock.fetchAllPendingActions()) {
-        expect(true).toBeFalsy();
+        iterationData.push(pendingActions);
       }
+
+      expect(iterationData.length).toBe(2);
+      expect(iterationData[0]).toEqual([]); // First page of results should be empty due to how the mock was setup
+      expect(iterationData[1]).toEqual([]);
     });
   });
 });

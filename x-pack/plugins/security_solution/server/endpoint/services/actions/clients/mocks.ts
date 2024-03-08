@@ -60,6 +60,7 @@ const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> =>
     isolate: jest.fn().mockReturnValue(Promise.resolve()),
     release: jest.fn().mockReturnValue(Promise.resolve()),
     runningProcesses: jest.fn().mockReturnValue(Promise.resolve()),
+    processPendingActions: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 
