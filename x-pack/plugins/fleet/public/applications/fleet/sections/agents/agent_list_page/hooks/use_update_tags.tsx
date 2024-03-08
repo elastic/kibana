@@ -79,7 +79,13 @@ export const useUpdateTags = () => {
       errorMessage?: string
     ) => {
       await wrapRequest(
-        async () => await sendPostBulkAgentTagsUpdate({ agents, tagsToAdd, tagsToRemove }),
+        async () =>
+          await sendPostBulkAgentTagsUpdate({
+            agents,
+            tagsToAdd,
+            tagsToRemove,
+            showInactive: true,
+          }),
         onSuccess,
         successMessage,
         errorMessage

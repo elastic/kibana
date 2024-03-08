@@ -173,7 +173,9 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   }
 
   try {
-    const agentOptions = Array.isArray(agents) ? { agentIds: agents } : { kuery: agents };
+    const agentOptions = Array.isArray(agents)
+      ? { agentIds: agents }
+      : { kuery: agents, showInactive: request.body.showInactive };
     const upgradeOptions = {
       ...agentOptions,
       sourceUri,

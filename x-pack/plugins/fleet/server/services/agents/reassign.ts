@@ -117,7 +117,7 @@ export async function reassignAgents(
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery: options.kuery,
-      showInactive: true,
+      showInactive: options.showInactive ?? false,
       page: 1,
       perPage: batchSize,
     });
