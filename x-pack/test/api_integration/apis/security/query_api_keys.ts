@@ -11,8 +11,10 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const config = getService('config');
+  const isBasicLicense = config.get('esTestCluster.license') === 'basic';
 
-  const createKey = async (name: string, type: string, managed: boolean, expired?: boolean) => {
+  const createKey = async (name: string, type: string, managed: boolean) => {
     const access =
       type === 'cross_cluster'
         ? {
@@ -38,19 +40,20 @@ export default function ({ getService }: FtrProviderContext) {
         type,
         metadata,
         ...(access ? { access } : {}),
-        expiration: expired ? '1s' : undefined,
       })
       .expect(200);
     expect(apiKey.name).to.eql(name);
     return apiKey;
   };
 
-  const createMultipleKeys = async () => {
+  const createCrossClusterKeys = async () => {
     // Create 10 'cross_cluster' keys
-    const crossClusterKeys = Array.from({ length: 10 }, (_, i) => i).map(
+    return Array.from({ length: 10 }, (_, i) => i).map(
       async (i) => await createKey(`cross_cluster_key_${i}`, 'cross_cluster', false)
     );
+  };
 
+  const createMultipleKeys = async () => {
     const restKeys = Array.from({ length: 5 }, (_, i) => i).map(
       async (i) => await createKey(`rest_key_${i}`, 'rest', false)
     );
@@ -64,6 +67,8 @@ export default function ({ getService }: FtrProviderContext) {
       const randomString = Math.random().toString(36).substring(7); // Generate a random string
       await createKey(`Managed_metadata_${randomString}`, 'rest', true);
     });
+
+    const crossClusterKeys = isBasicLicense ? [] : await createCrossClusterKeys();
 
     await Promise.all([...crossClusterKeys, ...restKeys, ...alertingKeys, ...metdataManagedKeys]);
   };
@@ -91,7 +96,11 @@ export default function ({ getService }: FtrProviderContext) {
           size: 100,
         })
         .expect(200);
-      expect(keys.apiKeys.length).to.be(25);
+      if (!isBasicLicense) {
+        expect(keys.apiKeys.length).to.be(25);
+      } else {
+        expect(keys.apiKeys.length).to.be(15);
+      }
     });
 
     it('should paginate keys', async () => {
@@ -131,15 +140,19 @@ export default function ({ getService }: FtrProviderContext) {
         .send()
         .expect(200);
 
-      expect(aggregationResponse.total).to.be(25);
-      expect(aggregationResponse.aggregations).to.have.property('types');
-      expect(aggregationResponse.aggregations.types.buckets.length).to.be(2);
+      if (!isBasicLicense) {
+        expect(aggregationResponse.total).to.be(25);
+        expect(aggregationResponse.aggregations).to.have.property('types');
+        expect(aggregationResponse.aggregations.types.buckets.length).to.be(2);
 
-      expect(aggregationResponse.aggregations).to.have.property('usernames');
-      expect(aggregationResponse.aggregations.usernames.buckets.length).to.be(1);
+        expect(aggregationResponse.aggregations).to.have.property('usernames');
+        expect(aggregationResponse.aggregations.usernames.buckets.length).to.be(1);
 
-      expect(aggregationResponse.aggregations).to.have.property('managedMetadata');
-      expect(aggregationResponse.aggregations.managedMetadata.doc_count).to.eql(5);
+        expect(aggregationResponse.aggregations).to.have.property('managedMetadata');
+        expect(aggregationResponse.aggregations.managedMetadata.doc_count).to.eql(5);
+      } else {
+        expect(aggregationResponse.total).to.be(15);
+      }
     });
 
     it('should query API keys with filters', async () => {
