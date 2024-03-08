@@ -49,6 +49,7 @@ enum ChartType {
   Treemap = 'Treemap',
   Tagcloud = 'Tag cloud',
   Waffle = 'Waffle',
+  Table = 'Table',
 }
 
 interface VisualizeQueryResponsev0 {
@@ -349,6 +350,10 @@ export function registerVisualizeQueryRenderFunction({
 
         case VisualizeESQLUserIntention.visualizeArea:
           preferredChartType = ChartType.Area;
+          break;
+
+        case VisualizeESQLUserIntention.visualizeTable:
+          preferredChartType = ChartType.Table;
           break;
 
         case VisualizeESQLUserIntention.visualizeTagcloud:
