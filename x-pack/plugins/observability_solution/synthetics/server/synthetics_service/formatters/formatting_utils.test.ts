@@ -20,6 +20,26 @@ describe('replaceStringWithParams', () => {
     expect(result).toEqual('https://elastic.co');
   });
 
+  it('works with dashes in the key', () => {
+    const result = replaceStringWithParams(
+      '${home-page-url}',
+      { 'home-page-url': 'https://elastic.co' },
+      logger
+    );
+
+    expect(result).toEqual('https://elastic.co');
+  });
+
+  it('works with . in the key', () => {
+    const result = replaceStringWithParams(
+      '${home.pageUrl}',
+      { 'home.pageUrl': 'https://elastic.co' },
+      logger
+    );
+
+    expect(result).toEqual('https://elastic.co');
+  });
+
   it('returns empty value in case no param', () => {
     const result = replaceStringWithParams('${homePageUrl}', {}, logger);
 

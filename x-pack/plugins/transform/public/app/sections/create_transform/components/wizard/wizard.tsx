@@ -8,10 +8,11 @@
 import React, { type FC, useRef, useState, createContext, useMemo } from 'react';
 import { pick } from 'lodash';
 
-import { EuiSteps, EuiStepStatus } from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
+import { EuiSteps } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
@@ -24,13 +25,13 @@ import { useEnabledFeatures } from '../../../../serverless_context';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';
-import { SearchItems } from '../../../../hooks/use_search_items';
+import type { SearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies } from '../../../../app_dependencies';
 
+import type { StepDefineExposedState } from '../step_define';
 import {
   applyTransformConfigToDefineState,
   getDefaultStepDefineState,
-  StepDefineExposedState,
   StepDefineForm,
   StepDefineSummary,
 } from '../step_define';
