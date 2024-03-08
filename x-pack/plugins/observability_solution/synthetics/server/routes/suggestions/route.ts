@@ -30,6 +30,23 @@ interface AggsResponse {
   projectsAggs: {
     buckets: Buckets;
   };
+  monitorIdsAggs: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+      name: {
+        hits: {
+          hits: Array<{
+            _source: {
+              [syntheticsMonitorType]: {
+                [ConfigKey.NAME]: string;
+              };
+            };
+          }>;
+        };
+      };
+    }>;
+  };
 }
 
 export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
