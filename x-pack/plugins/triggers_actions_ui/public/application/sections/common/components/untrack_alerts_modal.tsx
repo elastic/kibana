@@ -33,7 +33,7 @@ const UNTRACK_ORPHANED_ALERTS_CANCEL_BUTTON_TEXT = i18n.translate(
 const UNTRACK_ORPHANED_ALERTS_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.untrackAlertsModal.toggleLabel',
   {
-    defaultMessage: 'Change the alert statuses from active to untracked',
+    defaultMessage: 'Change alert statuses from active to untracked',
   }
 );
 
