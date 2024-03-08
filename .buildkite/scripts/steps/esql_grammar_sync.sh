@@ -32,9 +32,14 @@ echo "File copied and modified successfully. Checking for differences."
 # Check for differences
 git diff --exit-code --quiet "$destination_file"
 if [ $? -ne 0 ]; then
+  echo "Differences found. Committing changes."
+
   # Make a commit
-  # git add "$destination_file"
-  # git commit -m "updating ES|QL lexer grammar"
+  git config --global user.name kibanamachine
+  git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
+
+  git add "$destination_file"
+  git commit -m "updating ES|QL lexer grammar"
   echo "Changes committed."
 else
   echo "No differences found. Our work is done here."
