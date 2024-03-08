@@ -6,16 +6,11 @@
  */
 
 import { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
-import {
-  dispatchUpdateTimeline,
-  queryTimelineById,
-} from '../../../timelines/components/open_timeline/helpers';
+import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import type { TimelineErrorCallback } from '../../../timelines/components/open_timeline/types';
-import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/actions';
 
 export const useTimelineClick = () => {
-  const dispatch = useDispatch();
+  const queryTimelineById = useQueryTimelineById();
 
   const handleTimelineClick = useCallback(
     (timelineId: string, onError: TimelineErrorCallback, graphEventId?: string) => {
@@ -23,17 +18,9 @@ export const useTimelineClick = () => {
         graphEventId,
         timelineId,
         onError,
-        updateIsLoading: ({
-          id: currentTimelineId,
-          isLoading,
-        }: {
-          id: string;
-          isLoading: boolean;
-        }) => dispatch(dispatchUpdateIsLoading({ id: currentTimelineId, isLoading })),
-        updateTimeline: dispatchUpdateTimeline(dispatch),
       });
     },
-    [dispatch]
+    [queryTimelineById]
   );
 
   return handleTimelineClick;

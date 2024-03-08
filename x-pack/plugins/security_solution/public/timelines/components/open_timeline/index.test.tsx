@@ -23,7 +23,7 @@ import { useGetAllTimeline, getAllTimeline } from '../../containers/all';
 
 import { useTimelineStatus } from './use_timeline_status';
 import { NotePreviews } from './note_previews';
-import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById } from './helpers';
+import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { StatefulOpenTimeline } from '.';
 import { TimelineTabsStyle } from './types';
 import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
@@ -45,11 +45,13 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+const mockQueryTimelineById = jest.fn();
+
 jest.mock('./helpers', () => {
   const originalModule = jest.requireActual('./helpers');
   return {
     ...originalModule,
-    queryTimelineById: jest.fn(),
+    useQueryTimelineById: () => mockQueryTimelineById,
   };
 });
 
@@ -651,10 +653,10 @@ describe('StatefulOpenTimeline', () => {
         .last()
         .simulate('click');
 
-      expect((queryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
+      expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
         mockOpenTimelineQueryResults.timeline[0].savedObjectId
       );
-      expect((queryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(false);
+      expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(false);
     });
   });
 
@@ -675,10 +677,10 @@ describe('StatefulOpenTimeline', () => {
       .simulate('click');
     wrapper.find('button[data-test-subj="open-duplicate"]').first().simulate('click');
 
-    expect((queryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
+    expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
       mockOpenTimelineQueryResults.timeline[0].savedObjectId
     );
-    expect((queryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(true);
+    expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(true);
   });
 
   describe('Create rule from timeline', () => {
