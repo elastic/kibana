@@ -21,20 +21,17 @@ export const DiscoverTopNavInline = ({
   stateContainer: DiscoverStateContainer;
   hideNavMenuItems?: boolean;
 }) => {
-  const { customizationContext } = stateContainer;
+  const { rootContext } = stateContainer;
   const services = useDiscoverServices();
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
 
-  if (
-    !customizationContext.inlineTopNav.enabled ||
-    customizationContext.displayMode !== 'standalone'
-  ) {
+  if (!rootContext.inlineTopNav.enabled || rootContext.displayMode !== 'standalone') {
     return null;
   }
 
   return (
     <EuiHeader css={{ boxShadow: 'none' }} data-test-subj="discoverTopNavInline">
-      {customizationContext.inlineTopNav.showLogsExplorerTabs && (
+      {rootContext.inlineTopNav.showLogsExplorerTabs && (
         <EuiHeaderSection>
           <EuiHeaderSectionItem>
             <LogsExplorerTabs services={services} selectedTab="discover" />

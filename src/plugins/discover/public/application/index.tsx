@@ -12,21 +12,16 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { DiscoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
 import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
-import type { DiscoverCustomizationContext } from '../customizations';
+import type { DiscoverRootContext } from '../customizations';
 
 export interface RenderAppProps {
   element: HTMLElement;
   services: DiscoverServices;
   profileRegistry: DiscoverProfileRegistry;
-  customizationContext: DiscoverCustomizationContext;
+  rootContext: DiscoverRootContext;
 }
 
-export const renderApp = ({
-  element,
-  services,
-  profileRegistry,
-  customizationContext,
-}: RenderAppProps) => {
+export const renderApp = ({ element, services, profileRegistry, rootContext }: RenderAppProps) => {
   const { history, capabilities, chrome, data, core } = services;
 
   if (!capabilities.discover.save) {
@@ -44,7 +39,7 @@ export const renderApp = ({
     <DiscoverRouter
       services={services}
       profileRegistry={profileRegistry}
-      customizationContext={customizationContext}
+      rootContext={rootContext}
       history={history}
     />,
     {

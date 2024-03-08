@@ -29,7 +29,7 @@ import {
   getDiscoverStateContainer,
 } from '../../../services/discover_state';
 import { services } from '../../../../../__mocks__/__storybook_mocks__/with_discover_services';
-import { mockCustomizationContext } from '../../../../../customizations/__mocks__/customization_context';
+import { mockRootContext } from '../../../../../customizations/__mocks__/root_context';
 
 const documentObservables = {
   main$: new BehaviorSubject({
@@ -130,7 +130,7 @@ export function getDocumentsLayoutProps(dataView: DataView) {
     history: createHashHistory(),
     savedSearch: getSavedSearch(dataView),
     services,
-    customizationContext: mockCustomizationContext,
+    rootContext: mockRootContext,
   });
   stateContainer.appState.set({
     columns: ['name', 'message', 'bytes'],
@@ -155,7 +155,7 @@ export const getPlainRecordLayoutProps = (dataView: DataView) => {
     history: createHashHistory(),
     savedSearch: getSavedSearch(dataView),
     services,
-    customizationContext: mockCustomizationContext,
+    rootContext: mockRootContext,
   });
   stateContainer.appState.set({
     columns: ['name', 'message', 'bytes'],

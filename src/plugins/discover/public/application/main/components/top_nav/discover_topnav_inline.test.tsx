@@ -23,9 +23,9 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 function getProps({ hideNavMenuItems }: { hideNavMenuItems?: boolean } = {}) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.internalState.transitions.setDataView(dataViewMock);
-  stateContainer.customizationContext.displayMode = 'standalone';
-  stateContainer.customizationContext.inlineTopNav.enabled = true;
-  stateContainer.customizationContext.inlineTopNav.showLogsExplorerTabs = false;
+  stateContainer.rootContext.displayMode = 'standalone';
+  stateContainer.rootContext.inlineTopNav.enabled = true;
+  stateContainer.rootContext.inlineTopNav.showLogsExplorerTabs = false;
 
   return {
     stateContainer,
@@ -45,7 +45,7 @@ describe('DiscoverTopNavInline', () => {
 
   it('should not render when top nav inline is not enabled', async () => {
     const props = getProps();
-    props.stateContainer.customizationContext.inlineTopNav.enabled = false;
+    props.stateContainer.rootContext.inlineTopNav.enabled = false;
     render(
       <DiscoverMainProvider value={props.stateContainer}>
         <DiscoverTopNavInline {...props} />
@@ -68,7 +68,7 @@ describe('DiscoverTopNavInline', () => {
 
   it('should not render when top nav inline is enabled and displayMode is not "standalone"', async () => {
     const props = getProps();
-    props.stateContainer.customizationContext.displayMode = 'embedded';
+    props.stateContainer.rootContext.displayMode = 'embedded';
     render(
       <DiscoverMainProvider value={props.stateContainer}>
         <DiscoverTopNavInline {...props} />
@@ -113,7 +113,7 @@ describe('DiscoverTopNavInline', () => {
   describe('LogsExplorerTabs', () => {
     it('should render when showLogsExplorerTabs is true', async () => {
       const props = getProps();
-      props.stateContainer.customizationContext.inlineTopNav.showLogsExplorerTabs = true;
+      props.stateContainer.rootContext.inlineTopNav.showLogsExplorerTabs = true;
       render(
         <DiscoverMainProvider value={props.stateContainer}>
           <DiscoverTopNavInline {...props} />

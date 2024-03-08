@@ -295,7 +295,7 @@ describe('Discover topnav component', () => {
 
     it('should not render top nav when inline top nav is enabled', () => {
       const props = getProps();
-      props.stateContainer.customizationContext.inlineTopNav.enabled = true;
+      props.stateContainer.rootContext.inlineTopNav.enabled = true;
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
           <DiscoverTopNav {...props} />

@@ -39,7 +39,7 @@ export type CustomizationCallback = (
 
 export type DiscoverDisplayMode = 'embedded' | 'standalone';
 
-export interface DiscoverCustomizationContext {
+export interface DiscoverRootContext {
   /*
    * Display mode in which discover is running
    */

@@ -34,7 +34,7 @@ import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
 import {
   CustomizationCallback,
-  DiscoverCustomizationContext,
+  DiscoverRootContext,
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
@@ -51,12 +51,12 @@ interface DiscoverLandingParams {
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
-  customizationContext: DiscoverCustomizationContext;
+  rootContext: DiscoverRootContext;
 }
 
 export function DiscoverMainRoute({
   customizationCallbacks,
-  customizationContext,
+  rootContext,
   stateStorageContainer,
 }: MainRouteProps) {
   const history = useHistory();
@@ -75,7 +75,7 @@ export function DiscoverMainRoute({
   const [stateContainer, { reset: resetStateContainer }] = useDiscoverStateContainer({
     history,
     services,
-    customizationContext,
+    rootContext,
     stateStorageContainer,
   });
 
@@ -170,7 +170,7 @@ export function DiscoverMainRoute({
           dataViewSpec: historyLocationState?.dataViewSpec,
           initialAppState,
         });
-        if (customizationContext.displayMode === 'standalone') {
+        if (rootContext.displayMode === 'standalone') {
           if (currentSavedSearch?.id) {
             chrome.recentlyAccessed.add(
               getSavedSearchFullPathUrl(currentSavedSearch.id),
@@ -218,7 +218,7 @@ export function DiscoverMainRoute({
       stateContainer.actions,
       savedSearchId,
       historyLocationState?.dataViewSpec,
-      customizationContext.displayMode,
+      rootContext.displayMode,
       services,
       chrome.recentlyAccessed,
       history,

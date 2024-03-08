@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { DiscoverCustomizationContext } from '../types';
+import type { DiscoverRootContext } from '../types';
 
-export const mockCustomizationContext: DiscoverCustomizationContext = {
+export const mockRootContext: DiscoverRootContext = {
   displayMode: 'standalone',
   inlineTopNav: {
     enabled: false,

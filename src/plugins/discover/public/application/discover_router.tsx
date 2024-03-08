@@ -18,14 +18,14 @@ import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
-import type { CustomizationCallback, DiscoverCustomizationContext } from '../customizations';
+import type { CustomizationCallback, DiscoverRootContext } from '../customizations';
 import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
 import { addProfile } from '../../common/customizations';
 
 export interface DiscoverRoutesProps {
   prefix?: string;
   customizationCallbacks: CustomizationCallback[];
-  customizationContext: DiscoverCustomizationContext;
+  rootContext: DiscoverRootContext;
 }
 
 export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProps) => {
@@ -66,7 +66,7 @@ export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProp
 
 interface CustomDiscoverRoutesProps {
   profileRegistry: DiscoverProfileRegistry;
-  customizationContext: DiscoverCustomizationContext;
+  rootContext: DiscoverRootContext;
 }
 
 export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscoverRoutesProps) => {
@@ -92,7 +92,7 @@ export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscov
 export interface DiscoverRouterProps {
   services: DiscoverServices;
   profileRegistry: DiscoverProfileRegistry;
-  customizationContext: DiscoverCustomizationContext;
+  rootContext: DiscoverRootContext;
   history: History;
 }
 

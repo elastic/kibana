@@ -63,7 +63,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    * SavedSearch dependent initializing
    */
   useEffect(() => {
-    if (stateContainer.customizationContext.displayMode === 'standalone') {
+    if (stateContainer.rootContext.displayMode === 'standalone') {
       const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
       chrome.docTitle.change(`Discover${pageTitleSuffix}`);
       setBreadcrumbs({ titleBreadcrumbText: savedSearch.title, services });
@@ -73,7 +73,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     savedSearch.id,
     savedSearch.title,
     services,
-    stateContainer.customizationContext.displayMode,
+    stateContainer.rootContext.displayMode,
   ]);
 
   useEffect(() => {

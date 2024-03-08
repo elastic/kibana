@@ -66,7 +66,7 @@ import {
   DiscoverAppLocatorDefinition,
   DiscoverESQLLocatorDefinition,
 } from '../common';
-import type { DiscoverCustomizationContext, RegisterCustomizationProfile } from './customizations';
+import type { DiscoverRootContext, RegisterCustomizationProfile } from './customizations';
 import {
   createRegisterCustomizationProfile,
   createProfileRegistry,
@@ -115,7 +115,7 @@ export interface DiscoverSetup {
    */
   readonly locator: undefined | DiscoverAppLocator;
   readonly showInlineTopNav: (
-    options?: Partial<Omit<DiscoverCustomizationContext['inlineTopNav'], 'enabled'>>
+    options?: Partial<Omit<DiscoverRootContext['inlineTopNav'], 'enabled'>>
   ) => void;
 }
 
@@ -218,7 +218,7 @@ export class DiscoverPlugin
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
-  private inlineTopNav: DiscoverCustomizationContext['inlineTopNav'] = {
+  private inlineTopNav: DiscoverRootContext['inlineTopNav'] = {
     enabled: false,
     showLogsExplorerTabs: false,
   };
@@ -351,7 +351,7 @@ export class DiscoverPlugin
           element: params.element,
           services,
           profileRegistry: this.profileRegistry,
-          customizationContext: {
+          rootContext: {
             displayMode: 'standalone',
             inlineTopNav: this.inlineTopNav,
           },

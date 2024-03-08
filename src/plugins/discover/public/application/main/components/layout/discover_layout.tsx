@@ -263,7 +263,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   return (
     <EuiPage
       className={classNames('dscPage', {
-        'dscPage--topNavInline': stateContainer.customizationContext.inlineTopNav.enabled,
+        'dscPage--topNavInline': stateContainer.rootContext.inlineTopNav.enabled,
       })}
       data-fetch-counter={fetchCounter.current}
       css={css`

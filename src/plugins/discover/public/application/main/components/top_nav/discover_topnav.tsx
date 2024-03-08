@@ -172,7 +172,7 @@ export const DiscoverTopNav = ({
 
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
   const topNavProps = useMemo(() => {
-    if (stateContainer.customizationContext.inlineTopNav.enabled) {
+    if (stateContainer.rootContext.inlineTopNav.enabled) {
       return undefined;
     }
 
@@ -183,7 +183,7 @@ export const DiscoverTopNav = ({
     };
   }, [
     setHeaderActionMenu,
-    stateContainer.customizationContext.inlineTopNav.enabled,
+    stateContainer.rootContext.inlineTopNav.enabled,
     topNavBadges,
     topNavMenu,
   ]);
