@@ -21,9 +21,12 @@ interface DocWithArray {
 }
 
 export const journey = new Journey({
-  beforeSteps: async ({ kbnUrl, log, auth, es, kibanaServer }) => {
-    // Create index with mapping
-    try {
+  beforeSteps: async ({ es, kibanaServer }) => {
+    // Check if the index exists
+    const indexExists = await es.indices.exists({ index: indexName });
+
+    if (!indexExists) {
+      // Create index with mapping
       await es.indices.create({
         index: indexName,
         mappings: {
@@ -33,12 +36,8 @@ export const journey = new Journey({
           },
         },
       });
-    } catch (e) {
-      log.error(`Error creating index '${indexName}' in beforeSteps() callback`);
-    }
 
-    // Ingest sample data
-    try {
+      // Ingest sample data
       await es.bulk({
         refresh: 'wait_for',
         body: frequentItemSetsLargeArraysSource.reduce((docs, items) => {
@@ -51,44 +50,30 @@ export const journey = new Journey({
           return docs;
         }, [] as estypes.BulkRequest<DocWithArray, DocWithArray>['body']),
       });
-    } catch (e) {
-      log.error(`Error ingesting sample data into '${indexName}' in beforeSteps() callback`);
     }
 
     // Create data view
-    try {
-      const dataViewResp = await kibanaServer.request<DataView>({
-        method: 'POST',
-        path: '/api/saved_objects/index-pattern',
-        body: {
-          attributes: { title: indexName, timeFieldName: '@timestamp' },
-        },
-      });
+    const dataViewResp = await kibanaServer.request<DataView>({
+      method: 'POST',
+      path: '/api/saved_objects/index-pattern',
+      body: {
+        attributes: { title: indexName, timeFieldName: '@timestamp' },
+      },
+    });
 
-      dataViewId = dataViewResp.data.id;
-    } catch (e) {
-      log.error(`Error creating data view for index '${indexName}' in beforeSteps() callback`);
-    }
+    dataViewId = dataViewResp.data.id;
   },
-  afterSteps: async ({ log, es, kibanaServer }) => {
+  afterSteps: async ({ es, kibanaServer }) => {
     // Delete index
-    try {
-      await es.indices.delete({
-        index: indexName,
-      });
-    } catch (e) {
-      log.error(`Error deleting index '${indexName}' in afterSteps() callback`);
-    }
+    await es.indices.delete({
+      index: indexName,
+    });
 
     // Delete data view
-    try {
-      await kibanaServer.request({
-        method: 'DELETE',
-        path: `/api/saved_objects/index-pattern/${dataViewId}?force=true`,
-      });
-    } catch (e) {
-      log.error(`Error deleting data view '${dataViewId}' in afterSteps() callback`);
-    }
+    await kibanaServer.request({
+      method: 'DELETE',
+      path: `/api/saved_objects/index-pattern/${dataViewId}?force=true`,
+    });
   },
 })
   .step('Go to AIOps Log Rate Analysis', async ({ page, kbnUrl }) => {
