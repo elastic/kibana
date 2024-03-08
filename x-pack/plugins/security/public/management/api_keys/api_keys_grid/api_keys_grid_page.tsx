@@ -84,10 +84,6 @@ export const APIKeysGridPage: FunctionComponent = () => {
   const [openedApiKey, setOpenedApiKey] = useState<CategorizedApiKey>();
   const readOnly = !useCapabilities('api_keys').save;
 
-  useEffect(() => {
-    queryApiKeysAndAggregations();
-  }, [query, from, pageSize]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const onTableChange = ({ page }: Criteria<ApiKey>) => {
     setFrom(page?.index! * pageSize);
     setPageSize(page?.size!);
@@ -101,6 +97,10 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const debouncedOnSearchChange = useCallback(debounce(onSearchChange, 500), []);
+
+  useEffect(() => {
+    queryApiKeysAndAggregations();
+  }, [query, from, pageSize]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!state.value) {
     if (state.loading) {
