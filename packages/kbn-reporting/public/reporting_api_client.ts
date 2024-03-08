@@ -196,6 +196,10 @@ export class ReportingAPIClient implements IReportingAPI {
     }
   }
 
+  /**
+   * @deprecated
+   * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
+   */
   public async createImmediateReport(baseParams: BaseParams) {
     const { objectType: _objectType, ...params } = baseParams; // objectType is not needed for immediate download api
     return this.http.post(INTERNAL_ROUTES.DOWNLOAD_CSV, {
