@@ -53,9 +53,9 @@ export interface IQuery {
   rollup_index?: string;
   allow_no_index?: boolean;
   include_unmapped?: boolean;
-  fields?: string[];
+  fields?: string | string[];
   allow_hidden?: boolean;
-  field_types?: string[];
+  field_types?: string | string[];
   include_empty_fields?: boolean;
 }
 
