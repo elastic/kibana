@@ -80,3 +80,10 @@ export {
   isAgentPolicyValidForLicense,
   unsetAgentPolicyAccordingToLicenseLevel,
 } from './agent_policy_config';
+
+export { createSoFindIterable } from './create_so_find_iterable';
+
+export type {
+  CreateSoFindIterableOptions,
+  InferSoFindIteratorResultValue,
+} from './create_so_find_iterable';

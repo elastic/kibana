@@ -34,3 +34,31 @@ export const manifestType: SavedObjectsType = {
   mappings: manifestSavedObjectMappings,
   migrations,
 };
+
+export const unifiedManifestSavedObjectType = ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE;
+
+export const unifiedManifestSavedObjectMappings: SavedObjectsType['mappings'] = {
+  dynamic: false,
+  properties: {
+    artifactIds: {
+      type: 'text',
+    },
+    policyId: {
+      type: 'keyword',
+    },
+    semanticVersion: {
+      type: 'text',
+    },
+    created: {
+      type: 'date',
+    },
+  },
+};
+
+export const unifiedManifestType: SavedObjectsType = {
+  name: unifiedManifestSavedObjectType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
+  hidden: false,
+  namespaceType: 'agnostic',
+  mappings: unifiedManifestSavedObjectMappings,
+};

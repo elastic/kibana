@@ -14,7 +14,7 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { ManifestSchemaVersion } from '../../../../common/endpoint/schema/common';
 import { manifestSchemaVersion } from '../../../../common/endpoint/schema/common';
 import { ManifestConstants } from '../../lib/artifacts';
-import type { InternalManifestSchema, InternalManifestCreateSchema } from '../../schemas/artifacts';
+import type { InternalManifestCreateSchema, InternalManifestSchema } from '../../schemas/artifacts';
 
 interface UpdateManifestOpts {
   version: string;
