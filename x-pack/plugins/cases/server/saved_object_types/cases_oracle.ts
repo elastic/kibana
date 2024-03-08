@@ -64,7 +64,7 @@ export const casesOracleSavedObjectType: SavedObjectsType = {
           createdAt: schema.string(),
           grouping: schema.recordOf(schema.string(), schema.any()),
           rules: schema.arrayOf(schema.object({ id: schema.string() })),
-          updatedAt: schema.string(),
+          updatedAt: schema.nullable(schema.string()),
         }),
       },
     },
