@@ -12,8 +12,8 @@ import {
   BulkGetAttachmentsResponseRt,
 } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../../common/api';
-import { flattenCommentSavedObjects, isSODecoratedError } from '../../common/utils';
-import { createCaseError } from '../../common/error';
+import { flattenCommentSavedObjects } from '../../common/utils';
+import { createCaseError, isSODecoratedError } from '../../common/error';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import type { BulkGetArgs } from './types';

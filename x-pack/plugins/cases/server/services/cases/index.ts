@@ -34,7 +34,7 @@ import type {
   SavedObjectsBulkResponseWithErrors,
   SOWithErrors,
 } from '../../common/types';
-import { defaultSortField, flattenCaseSavedObject, isSOError } from '../../common/utils';
+import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
@@ -46,7 +46,7 @@ import {
 } from './transform';
 import type { AttachmentService } from '../attachments';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
-import { createCaseError } from '../../common/error';
+import { createCaseError, isSOError } from '../../common/error';
 import type {
   CasePersistedAttributes,
   CaseSavedObjectTransformed,

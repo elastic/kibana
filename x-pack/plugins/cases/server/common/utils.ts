@@ -15,8 +15,6 @@ import type {
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
-import type { DecoratedError } from '@kbn/core-saved-objects-server';
 import type {
   ActionsAttachmentPayload,
   AlertAttachmentPayload,
@@ -43,7 +41,7 @@ import {
   OWNER_INFO,
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
-import type { AlertInfo, FileAttachmentRequest, SOWithErrors } from './types';
+import type { AlertInfo, FileAttachmentRequest } from './types';
 
 import type { UpdateAlertStatusRequest } from '../client/alerts/types';
 import {
@@ -474,12 +472,6 @@ export const getCaseViewPath = (params: {
 
   return `${basePath}${normalizePath(CASE_VIEW_PATH.replace(':detailName', caseId))}`;
 };
-
-export const isSOError = <T>(so: { error?: unknown }): so is SOWithErrors<T> => so.error != null;
-
-export const isSODecoratedError = (
-  error: SavedObjectError | DecoratedError
-): error is DecoratedError => Boolean((error as DecoratedError).isBoom);
 
 export const countUserAttachments = (
   attachments: Array<SavedObject<AttachmentAttributes>>

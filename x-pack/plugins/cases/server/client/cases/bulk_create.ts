@@ -16,13 +16,8 @@ import { CaseSeverity, UserActionTypes } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../../common/api';
 
 import { Operations } from '../../authorization';
-import { createCaseError } from '../../common/error';
-import {
-  flattenCaseSavedObject,
-  isSODecoratedError,
-  isSOError,
-  transformNewCase,
-} from '../../common/utils';
+import { createCaseError, isSODecoratedError, isSOError } from '../../common/error';
+import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
