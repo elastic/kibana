@@ -110,6 +110,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
               key={tab.id}
               isSelected={selectedTabId === tab.id}
               onClick={setSelectedTabId.bind(null, tab.id)}
+              data-test-subj={`mlAddTrainedModelFlyoutTab-${normalize(tab.id)}`}
             >
               {tab.name}
             </EuiTab>
@@ -132,6 +133,10 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
     </EuiFlyout>
   );
 };
+
+function normalize(tabName: string) {
+  return tabName.toLowerCase().split(' ').join('');
+}
 
 interface ClickToDownloadTabContentProps {
   modelDownloads: ModelItem[];

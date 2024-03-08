@@ -155,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.trainedModelsFlyout.assertOpen();
 
           await ml.testExecution.logTestStep('Assert the Click to Download tab exists');
-          await ml.trainedModelsFlyout.assertTabsDifferPerUser('viewer');
+          await ml.trainedModelsFlyout.assertFlyoutTabs(['Manual Download']);
 
           await ml.testExecution.logTestStep(
             'Assert all eland code blocks exist within the flyout'
@@ -200,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'Assert the "Click to Download" and "Manual Download" tabs exists'
           );
-          await ml.trainedModelsFlyout.assertTabsDifferPerUser('power');
+          await ml.trainedModelsFlyout.assertFlyoutTabs(['Click to Download', 'Manual Download']);
         });
 
         it('should list Elser panels contents correctly', async () => {

@@ -9,7 +9,11 @@ import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-export type AddTrainedModelUser = 'power' | 'viewer';
+type FlyoutTabManualDownload = 'Manual Download';
+type FlyoutTabClickToDownload = 'Click to Download';
+export type FlyoutTabs =
+  | [FlyoutTabManualDownload]
+  | [FlyoutTabClickToDownload, FlyoutTabManualDownload];
 
 export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) {
   const find = getService('find');
@@ -81,25 +85,16 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
       });
     }
 
-    public async assertTabsDifferPerUser(user: AddTrainedModelUser): Promise<void> {
-      const selector =
-        'div.euiFlyoutHeader div.euiTabs[role~="tablist"] button[role="tab"].euiTab span.euiTab__content';
+    public async assertFlyoutTabs(tabs: FlyoutTabs): Promise<void> {
+      const normalized = tabs.map((tab) => `mlAddTrainedModelFlyoutTab-${normalize(tab)}`);
 
-      if (user === 'viewer') {
-        const el = await find.byCssSelector(selector);
-        const visibleText = await el.getVisibleText();
-        expect(visibleText).to.match(/Manual Download/);
-
-        return;
+      for await (const tab of normalized) {
+        const visibleText = await testSubjects.getVisibleText(tab);
+        expect(tabs.some((x) => x === visibleText)).to.be.ok();
       }
 
-      if (user === 'power') {
-        const [clickToDownload, manualDownload] = await find.allByCssSelector(selector);
-
-        expect(await clickToDownload.getVisibleText()).to.match(/Click to Download/);
-        expect(await manualDownload.getVisibleText()).to.match(/Manual Download/);
-
-        return;
+      function normalize(tabName: string) {
+        return tabName.toLowerCase().split(' ').join('');
       }
     }
 
