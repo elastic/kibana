@@ -1069,7 +1069,7 @@ describe('validation logic', () => {
       ({ name: fnName, signatures: statsSignatures }) =>
         statsSignatures.some(({ returnType, params }) => ['number'].includes(returnType))
     )) {
-      for (const { params, infiniteParams, ...signRest } of signatures) {
+      for (const { params, ...signRest } of signatures) {
         const fieldMapping = getFieldMapping(params);
 
         testErrorsAndWarnings(
@@ -1246,7 +1246,7 @@ describe('validation logic', () => {
     }
 
     for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
-      for (const { params, infiniteParams, ...signRest } of signatures) {
+      for (const { params, ...signRest } of signatures) {
         const fieldMapping = getFieldMapping(params);
         testErrorsAndWarnings(
           `from a_index | eval var = ${
