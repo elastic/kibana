@@ -198,6 +198,7 @@ describe('rule_converters', () => {
       const patchParams = {
         alert_suppression: {
           group_by: ['agent.name'],
+          duration: { value: 4, unit: 'h' as const },
           missing_fields_strategy: 'suppress' as const,
         },
       };
