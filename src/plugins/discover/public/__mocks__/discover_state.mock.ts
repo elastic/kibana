@@ -10,7 +10,7 @@ import { getDiscoverStateContainer } from '../application/main/services/discover
 import { savedSearchMockWithTimeField, savedSearchMock } from './saved_search';
 import { discoverServiceMock } from './services';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { mockRootContext } from '../customizations/__mocks__/root_context';
+import { createDiscoverRootContext } from '../customizations';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
@@ -24,7 +24,7 @@ export function getDiscoverStateMock({
   const container = getDiscoverStateContainer({
     services: discoverServiceMock,
     history,
-    rootContext: mockRootContext,
+    rootContext: createDiscoverRootContext(),
   });
   container.savedSearchState.set(
     savedSearch ? savedSearch : isTimeBased ? savedSearchMockWithTimeField : savedSearchMock

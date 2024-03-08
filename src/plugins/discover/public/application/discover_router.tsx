@@ -18,14 +18,17 @@ import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
-import type { CustomizationCallback, DiscoverRootContext } from '../customizations';
+import {
+  CustomizationCallback,
+  DiscoverRootContext,
+  DiscoverRootContextProvider,
+} from '../customizations';
 import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
 import { addProfile } from '../../common/customizations';
 
 export interface DiscoverRoutesProps {
   prefix?: string;
   customizationCallbacks: CustomizationCallback[];
-  rootContext: DiscoverRootContext;
 }
 
 export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProps) => {
@@ -66,7 +69,6 @@ export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProp
 
 interface CustomDiscoverRoutesProps {
   profileRegistry: DiscoverProfileRegistry;
-  rootContext: DiscoverRootContext;
 }
 
 export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscoverRoutesProps) => {
@@ -100,6 +102,7 @@ export const DiscoverRouter = ({
   services,
   history,
   profileRegistry,
+  rootContext,
   ...routeProps
 }: DiscoverRouterProps) => {
   const customizationCallbacks = useMemo(
@@ -109,18 +112,20 @@ export const DiscoverRouter = ({
 
   return (
     <KibanaContextProvider services={services}>
-      <EuiErrorBoundary>
-        <Router history={history} data-test-subj="discover-react-router">
-          <Routes>
-            <Route path={addProfile('', ':profile')}>
-              <CustomDiscoverRoutes profileRegistry={profileRegistry} {...routeProps} />
-            </Route>
-            <Route path="/">
-              <DiscoverRoutes customizationCallbacks={customizationCallbacks} {...routeProps} />
-            </Route>
-          </Routes>
-        </Router>
-      </EuiErrorBoundary>
+      <DiscoverRootContextProvider value={rootContext}>
+        <EuiErrorBoundary>
+          <Router history={history} data-test-subj="discover-react-router">
+            <Routes>
+              <Route path={addProfile('', ':profile')}>
+                <CustomDiscoverRoutes profileRegistry={profileRegistry} {...routeProps} />
+              </Route>
+              <Route path="/">
+                <DiscoverRoutes customizationCallbacks={customizationCallbacks} {...routeProps} />
+              </Route>
+            </Routes>
+          </Router>
+        </EuiErrorBoundary>
+      </DiscoverRootContextProvider>
     </KibanaContextProvider>
   );
 };

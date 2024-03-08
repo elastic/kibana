@@ -29,7 +29,7 @@ import { FetchStatus } from '../../types';
 import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view_complex';
 import { copySavedSearch } from './discover_saved_search_container';
 import { createKbnUrlStateStorage, IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { mockRootContext } from '../../../customizations/__mocks__/root_context';
+import { createDiscoverRootContext } from '../../../customizations';
 
 const startSync = (appState: DiscoverAppStateContainer) => {
   const { start, stop } = appState.syncState();
@@ -54,7 +54,7 @@ async function getState(
   const nextState = getDiscoverStateContainer({
     services: discoverServiceMock,
     history: nextHistory,
-    rootContext: mockRootContext,
+    rootContext: createDiscoverRootContext(),
   });
   nextState.appState.isEmptyURL = jest.fn(() => isEmptyUrl ?? true);
   jest.spyOn(nextState.dataState, 'fetch');
@@ -91,7 +91,7 @@ describe('Test discover state', () => {
     state = getDiscoverStateContainer({
       services: discoverServiceMock,
       history,
-      rootContext: mockRootContext,
+      rootContext: createDiscoverRootContext(),
     });
     state.savedSearchState.set(savedSearchMock);
     state.appState.update({}, true);
@@ -174,7 +174,7 @@ describe('Test discover state with overridden state storage', () => {
     state = getDiscoverStateContainer({
       services: discoverServiceMock,
       history,
-      rootContext: mockRootContext,
+      rootContext: createDiscoverRootContext(),
       stateStorageContainer: stateStorage,
     });
     state.savedSearchState.set(savedSearchMock);
@@ -260,7 +260,7 @@ describe('Test createSearchSessionRestorationDataProvider', () => {
   const discoverStateContainer = getDiscoverStateContainer({
     services: discoverServiceMock,
     history,
-    rootContext: mockRootContext,
+    rootContext: createDiscoverRootContext(),
   });
   discoverStateContainer.appState.update({
     index: savedSearchMock.searchSource.getField('index')!.id,
@@ -842,10 +842,9 @@ describe('Test discover state with embedded mode', () => {
     state = getDiscoverStateContainer({
       services: discoverServiceMock,
       history,
-      rootContext: {
-        ...mockRootContext,
+      rootContext: createDiscoverRootContext({
         displayMode: 'embedded',
-      },
+      }),
     });
     state.savedSearchState.set(savedSearchMock);
     state.appState.update({}, true);

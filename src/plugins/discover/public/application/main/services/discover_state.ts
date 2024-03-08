@@ -127,10 +127,6 @@ export interface DiscoverStateContainer {
    */
   searchSessionManager: DiscoverSearchSessionManager;
   /**
-   * Context object for customization related properties
-   */
-  rootContext: DiscoverRootContext;
-  /**
    * Complex functions to update multiple containers from UI
    */
   actions: {
@@ -504,7 +500,6 @@ export function getDiscoverStateContainer({
     savedSearchState: savedSearchContainer,
     stateStorage,
     searchSessionManager,
-    rootContext,
     actions: {
       initializeAndSync,
       fetchData,

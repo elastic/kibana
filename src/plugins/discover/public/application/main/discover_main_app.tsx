@@ -19,6 +19,7 @@ import { useSavedSearchInitial } from './services/discover_state_provider';
 import { useAdHocDataViews } from './hooks/use_adhoc_data_views';
 import { useTextBasedQueryLanguage } from './hooks/use_text_based_query_language';
 import { addLog } from '../../utils/add_log';
+import { useDiscoverRootContext } from '../../customizations';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -33,6 +34,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const { stateContainer } = props;
   const savedSearch = useSavedSearchInitial();
   const services = useDiscoverServices();
+  const rootContext = useDiscoverRootContext();
   const { chrome, docLinks, data, spaces, history } = services;
 
   useUrlTracking(stateContainer.savedSearchState);
@@ -63,18 +65,12 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    * SavedSearch dependent initializing
    */
   useEffect(() => {
-    if (stateContainer.rootContext.displayMode === 'standalone') {
+    if (rootContext.displayMode === 'standalone') {
       const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
       chrome.docTitle.change(`Discover${pageTitleSuffix}`);
       setBreadcrumbs({ titleBreadcrumbText: savedSearch.title, services });
     }
-  }, [
-    chrome.docTitle,
-    savedSearch.id,
-    savedSearch.title,
-    services,
-    stateContainer.rootContext.displayMode,
-  ]);
+  }, [chrome.docTitle, rootContext.displayMode, savedSearch.id, savedSearch.title, services]);
 
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);

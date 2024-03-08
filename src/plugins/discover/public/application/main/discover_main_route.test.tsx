@@ -19,7 +19,6 @@ import {
   DiscoverCustomizationService,
 } from '../../customizations/customization_service';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
-import { mockRootContext } from '../../customizations/__mocks__/root_context';
 
 let mockCustomizationService: DiscoverCustomizationService | undefined;
 
@@ -109,7 +108,6 @@ describe('DiscoverMainRoute', () => {
 const mountComponent = (hasESData = true, hasUserDataView = true) => {
   const props: MainRouteProps = {
     customizationCallbacks: [],
-    rootContext: mockRootContext,
   };
 
   return mountWithIntl(

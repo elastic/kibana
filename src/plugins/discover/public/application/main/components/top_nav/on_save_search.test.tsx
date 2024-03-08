@@ -18,7 +18,7 @@ import { ReactElement } from 'react';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createBrowserHistory } from 'history';
-import { mockRootContext } from '../../../../customizations/__mocks__/root_context';
+import { createDiscoverRootContext } from '../../../../customizations';
 
 function getStateContainer({ dataView }: { dataView?: DataView } = {}) {
   const savedSearch = savedSearchMock;
@@ -26,7 +26,7 @@ function getStateContainer({ dataView }: { dataView?: DataView } = {}) {
   const stateContainer = getDiscoverStateContainer({
     services: discoverServiceMock,
     history,
-    rootContext: mockRootContext,
+    rootContext: createDiscoverRootContext(),
   });
   stateContainer.savedSearchState.set(savedSearch);
   stateContainer.appState.getState = jest.fn(() => ({

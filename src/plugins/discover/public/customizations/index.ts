@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export * from './root_context';
 export * from './customization_types';
 export * from './customization_provider';
 export * from './types';

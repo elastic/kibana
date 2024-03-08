@@ -14,7 +14,12 @@ import { TopNavMenu, TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
-import type { SearchBarCustomization, TopNavCustomization } from '../../../../customizations';
+import {
+  createDiscoverRootContext,
+  DiscoverRootContextProvider,
+  SearchBarCustomization,
+  TopNavCustomization,
+} from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -295,11 +300,14 @@ describe('Discover topnav component', () => {
 
     it('should not render top nav when inline top nav is enabled', () => {
       const props = getProps();
-      props.stateContainer.rootContext.inlineTopNav.enabled = true;
       const component = mountWithIntl(
-        <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNav {...props} />
-        </DiscoverMainProvider>
+        <DiscoverRootContextProvider
+          value={createDiscoverRootContext({ inlineTopNav: { enabled: true } })}
+        >
+          <DiscoverMainProvider value={props.stateContainer}>
+            <DiscoverTopNav {...props} />
+          </DiscoverMainProvider>
+        </DiscoverRootContextProvider>
       );
       const searchBar = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
       expect(searchBar.prop('badges')).toBeUndefined();

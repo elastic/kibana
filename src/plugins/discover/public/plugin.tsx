@@ -66,7 +66,11 @@ import {
   DiscoverAppLocatorDefinition,
   DiscoverESQLLocatorDefinition,
 } from '../common';
-import type { DiscoverRootContext, RegisterCustomizationProfile } from './customizations';
+import {
+  createDiscoverRootContext,
+  DiscoverRootContext,
+  RegisterCustomizationProfile,
+} from './customizations';
 import {
   createRegisterCustomizationProfile,
   createProfileRegistry,
@@ -351,10 +355,9 @@ export class DiscoverPlugin
           element: params.element,
           services,
           profileRegistry: this.profileRegistry,
-          rootContext: {
-            displayMode: 'standalone',
+          rootContext: createDiscoverRootContext({
             inlineTopNav: this.inlineTopNav,
-          },
+          }),
         });
 
         return () => {

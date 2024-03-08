@@ -34,9 +34,9 @@ import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
 import {
   CustomizationCallback,
-  DiscoverRootContext,
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
+  useDiscoverRootContext,
 } from '../../customizations';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { isTextBasedQuery } from './utils/is_text_based_query';
@@ -51,12 +51,10 @@ interface DiscoverLandingParams {
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
-  rootContext: DiscoverRootContext;
 }
 
 export function DiscoverMainRoute({
   customizationCallbacks,
-  rootContext,
   stateStorageContainer,
 }: MainRouteProps) {
   const history = useHistory();
@@ -72,13 +70,13 @@ export function DiscoverMainRoute({
     getScopedHistory,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
+  const rootContext = useDiscoverRootContext();
   const [stateContainer, { reset: resetStateContainer }] = useDiscoverStateContainer({
     history,
     services,
     rootContext,
     stateStorageContainer,
   });
-
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
     useDiscoverCustomizationService({
       customizationCallbacks,

@@ -13,6 +13,7 @@ import { LogsExplorerTabs } from '../../../../components/logs_explorer_tabs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import type { DiscoverStateContainer } from '../../services/discover_state';
+import { useDiscoverRootContext } from '../../../../customizations';
 
 export const DiscoverTopNavInline = ({
   stateContainer,
@@ -21,7 +22,7 @@ export const DiscoverTopNavInline = ({
   stateContainer: DiscoverStateContainer;
   hideNavMenuItems?: boolean;
 }) => {
-  const { rootContext } = stateContainer;
+  const rootContext = useDiscoverRootContext();
   const services = useDiscoverServices();
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
 
