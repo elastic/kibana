@@ -230,11 +230,68 @@ describe('AgentUpgradeAgentModal', () => {
         expect(utils.queryByText(/Error upgrading the selected agent/)).toBeInTheDocument();
         expect(
           utils.queryByText(
-            /cannot upgrade agent to 8.10.2 because it is higher than the latest fleet server version 8.9.0./
+            /Cannot upgrade to version 8.10.2 because it is higher than the latest fleet server version 8.9.0./
           )
         ).toBeInTheDocument();
         const el = utils.getByTestId('confirmModalConfirmButton');
         expect(el).toBeDisabled();
+      });
+    });
+
+    it('should display a warning for multiple agents when version is greater than maxFleetServerVersion nd not disable submit button', async () => {
+      mockSendGetAgentsAvailableVersions.mockClear();
+      mockSendGetAgentsAvailableVersions.mockResolvedValue({
+        data: {
+          items: ['8.10.4', '8.10.2', '8.9.0', '8.8.0'],
+        },
+      });
+      mockSendAllFleetServerAgents.mockResolvedValue({
+        allFleetServerAgents: [
+          { id: 'fleet-server', local_metadata: { elastic: { agent: { version: '8.9.0' } } } },
+        ] as any,
+      });
+
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          {
+            id: 'agent1',
+            local_metadata: {
+              elastic: {
+                agent: { version: '8.8.0', upgradeable: true },
+              },
+              host: { hostname: 'host00001' },
+            },
+          },
+          {
+            id: 'agent2',
+            local_metadata: {
+              elastic: {
+                agent: { version: '8.8.1', upgradeable: true },
+              },
+              host: { hostname: 'host00002' },
+            },
+          },
+        ] as any,
+        agentCount: 1,
+      });
+
+      await waitFor(() => {
+        const container = utils.getByTestId('agentUpgradeModal.VersionCombobox');
+        const input = within(container).getByRole<HTMLInputElement>('combobox');
+        expect(input?.value).toEqual('8.10.2');
+        expect(
+          utils.queryAllByText(
+            /This action will upgrade multiple agents to version 8.10.2. This action can not be undone. Are you sure you wish to continue?/
+          )
+        );
+        expect(utils.queryByText(/Error upgrading the selected agent/)).toBeInTheDocument();
+        expect(
+          utils.queryByText(
+            /Cannot upgrade to version 8.10.2 because it is higher than the latest fleet server version 8.9.0./
+          )
+        ).toBeInTheDocument();
+        const el = utils.getByTestId('confirmModalConfirmButton');
+        expect(el).not.toBeDisabled();
       });
     });
   });

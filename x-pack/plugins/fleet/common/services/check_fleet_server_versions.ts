@@ -38,7 +38,7 @@ export const checkFleetServerVersion = (
     !differsOnlyInPatch(versionToUpgradeNumber, maxFleetServerVersion)
   ) {
     throw new Error(
-      `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the latest fleet server version ${maxFleetServerVersion}`
+      `Cannot upgrade to version ${versionToUpgradeNumber} because it is higher than the latest fleet server version ${maxFleetServerVersion}`
     );
   }
 
@@ -51,7 +51,7 @@ export const checkFleetServerVersion = (
   // When force is enabled, only the major and minor versions are checked
   if (force && !(fleetServerMajorGt || fleetServerMajorEqMinorGte)) {
     throw new AgentRequestInvalidError(
-      `Cannot force upgrade agent to ${versionToUpgradeNumber} because it does not satisfy the major and minor of the latest fleet server version ${maxFleetServerVersion}`
+      `Cannot force upgrade to version ${versionToUpgradeNumber} because it does not satisfy the major and minor of the latest fleet server version ${maxFleetServerVersion}`
     );
   }
 };
