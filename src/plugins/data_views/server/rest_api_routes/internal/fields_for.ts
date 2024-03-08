@@ -171,7 +171,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           allow_no_indices: allowNoIndex || false,
           includeUnmapped,
         },
-        fieldTypes,
+        fieldTypes: parsedFieldTypes,
         indexFilter: getIndexFilterDsl({ indexFilter, excludedTiers }),
         allowHidden,
         includeEmptyFields,

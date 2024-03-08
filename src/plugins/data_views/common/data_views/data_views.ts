@@ -286,7 +286,7 @@ export interface DataViewsServicePublicMethods {
     saveAttempts?: number,
     ignoreErrors?: boolean,
     displayErrors?: boolean
-  ) => Promise<void>;
+  ) => Promise<DataView | void | Error>;
 
   /**
    * Returns whether a default data view exists.
