@@ -14,7 +14,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 
-export const DiscoverTopNavServerless = ({
+export const DiscoverTopNavInline = ({
   stateContainer,
   hideNavMenuItems,
 }: {
@@ -25,13 +25,16 @@ export const DiscoverTopNavServerless = ({
   const services = useDiscoverServices();
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
 
-  if (!services.serverless || customizationContext.displayMode !== 'standalone') {
+  if (
+    !customizationContext.inlineTopNav.enabled ||
+    customizationContext.displayMode !== 'standalone'
+  ) {
     return null;
   }
 
   return (
-    <EuiHeader css={{ boxShadow: 'none' }} data-test-subj="discoverTopNavServerless">
-      {customizationContext.showLogsExplorerTabs && (
+    <EuiHeader css={{ boxShadow: 'none' }} data-test-subj="discoverTopNavInline">
+      {customizationContext.inlineTopNav.showLogsExplorerTabs && (
         <EuiHeaderSection>
           <EuiHeaderSectionItem>
             <LogsExplorerTabs services={services} selectedTab="discover" />
