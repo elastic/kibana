@@ -21,6 +21,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
 import { i18n } from '@kbn/i18n';
 
@@ -77,6 +78,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
   const hasResearched = hasDescription || hasConfigured || hasConfiguredAdvanced;
   const icon = nativeConnector.icon;
 
+  const apiKeysEnabled = index.connector.features?.native_connector_api_keys?.enabled || false;
   const hasApiKey = !!(index.connector.api_key_id ?? apiKeyData);
 
   // TODO service_type === "" is considered unknown/custom connector multipleplaces replace all of them with a better solution
@@ -146,19 +148,6 @@ export const NativeConnectorConfiguration: React.FC = () => {
                   titleSize: 'xs',
                 },
                 {
-                  children: (
-                    <ApiKeyConfig indexName={index.connector.name} hasApiKey={hasApiKey} isNative />
-                  ),
-                  status: hasApiKey ? 'complete' : 'incomplete',
-                  title: i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.manageApiKeyTitle',
-                    {
-                      defaultMessage: 'Manage API key',
-                    }
-                  ),
-                  titleSize: 'xs',
-                },
-                {
                   children: <ConnectorNameAndDescription />,
                   status: hasDescription ? 'complete' : 'incomplete',
                   title: i18n.translate(
@@ -186,6 +175,27 @@ export const NativeConnectorConfiguration: React.FC = () => {
                   ),
                   titleSize: 'xs',
                 },
+                ...(apiKeysEnabled
+                  ? [
+                      {
+                        children: (
+                          <ApiKeyConfig
+                            indexName={index.connector.name}
+                            hasApiKey={hasApiKey}
+                            isNative
+                          />
+                        ),
+                        status: hasApiKey ? 'complete' : 'incomplete',
+                        title: i18n.translate(
+                          'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.manageApiKeyTitle',
+                          {
+                            defaultMessage: 'Manage API key',
+                          }
+                        ),
+                        titleSize: 'xs',
+                      } as EuiContainedStepProps,
+                    ]
+                  : []),
                 {
                   children: <NativeConnectorAdvancedConfiguration />,
                   status: hasConfiguredAdvanced ? 'complete' : 'incomplete',
