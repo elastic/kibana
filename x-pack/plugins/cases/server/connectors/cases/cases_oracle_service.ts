@@ -8,7 +8,6 @@
 import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
 import type { SavedObjectsBulkResponseWithErrors } from '../../common/types';
-import { isSOError } from '../../common/utils';
 import { INITIAL_ORACLE_RECORD_COUNTER } from './constants';
 import { CryptoService } from './crypto_service';
 import type {
@@ -19,7 +18,10 @@ import type {
   OracleRecord,
   OracleRecordAttributes,
   OracleRecordCreateRequest,
+  OracleRecordError,
+  SOError,
 } from './types';
+import { isSOError } from './utils';
 
 export class CasesOracleService {
   private readonly logger: Logger;
@@ -124,6 +126,7 @@ export class CasesOracleService {
       req
     )) as SavedObjectsBulkResponseWithErrors<OracleRecordAttributes>;
 
+    console.log(JSON.stringify(oracleRecords), this.getBulkRecordsResponse(oracleRecords));
     return this.getBulkRecordsResponse(oracleRecords);
   }
 
@@ -197,12 +200,14 @@ export class CasesOracleService {
   ): BulkGetOracleRecordsResponse {
     return oracleRecords.saved_objects.map((oracleRecord) => {
       if (isSOError(oracleRecord)) {
-        return { ...oracleRecord.error, id: oracleRecord.id };
+        return this.getErrorResponse(oracleRecord.id, oracleRecord.error);
       }
 
       return this.getRecordResponse(oracleRecord);
     });
   }
+
+  private getErrorResponse(id: string, error: SOError): OracleRecordError {}
 
   private getCreateRecordAttributes({ cases, rules, grouping }: OracleRecordCreateRequest) {
     return {

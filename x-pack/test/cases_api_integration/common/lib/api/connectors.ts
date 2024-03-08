@@ -11,7 +11,11 @@ import http from 'http';
 import type SuperTest from 'supertest';
 import { CASE_CONFIGURE_CONNECTORS_URL } from '@kbn/cases-plugin/common/constants';
 import { getCaseConnectorsUrl } from '@kbn/cases-plugin/common/api';
-import { ActionResult, FindActionResult } from '@kbn/actions-plugin/server/types';
+import {
+  ActionResult,
+  ActionTypeExecutorResult,
+  FindActionResult,
+} from '@kbn/actions-plugin/server/types';
 import { getServiceNowServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
 import {
@@ -315,4 +319,27 @@ export const getConnectors = async ({
     .expect(expectedHttpCode);
 
   return connectors;
+};
+
+export const executeConnector = async ({
+  supertest,
+  connectorId,
+  req,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  connectorId: string;
+  req: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<ActionTypeExecutorResult<unknown>> => {
+  const { body: res } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}/api/actions/connector/${connectorId}/_execute`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send(req)
+    .expect(expectedHttpCode);
+
+  return res;
 };
