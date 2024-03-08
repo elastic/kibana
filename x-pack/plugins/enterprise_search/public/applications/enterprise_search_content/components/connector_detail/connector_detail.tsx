@@ -48,7 +48,7 @@ export const ConnectorDetail: React.FC = () => {
   const { startConnectorPoll } = useActions(ConnectorViewLogic);
   useEffect(() => {
     startConnectorPoll(connectorId);
-  }, []);
+  }, [connectorId]);
 
   const { tabId = ConnectorDetailTabId.OVERVIEW } = useParams<{
     tabId?: string;
