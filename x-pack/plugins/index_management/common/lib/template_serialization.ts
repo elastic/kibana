@@ -13,6 +13,7 @@ import {
   TemplateType,
 } from '../types';
 import { deserializeESLifecycle } from './data_stream_serialization';
+import { allowAutoCreateRadioValues } from '../constants';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
@@ -37,7 +38,7 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
     data_stream: dataStream,
     composed_of: composedOf,
     ignore_missing_component_templates: ignoreMissingComponentTemplates,
-    allow_auto_create: allowAutoCreate,
+    allow_auto_create: allowAutoCreateRadioValues?.[allowAutoCreate],
     _meta,
   };
 }
@@ -81,7 +82,8 @@ export function deserializeTemplate(
     composedOf: composedOf ?? [],
     ignoreMissingComponentTemplates: ignoreMissingComponentTemplates ?? [],
     dataStream,
-    allowAutoCreate,
+    allowAutoCreate:
+      allowAutoCreate === false ? 'FALSE' : allowAutoCreate ? 'TRUE' : 'NO_OVERWRITE',
     _meta,
     deprecated,
     _kbnMeta: {
