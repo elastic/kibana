@@ -203,10 +203,10 @@ export const OPEN_ALL_ALERTS_BUTTON = i18n.translate(
   }
 );
 
-export const VIEW_RECENT_CASES = i18n.translate(
-  'xpack.securitySolution.detectionResponse.viewRecentCases',
+export const VIEW_ALL_CASES = i18n.translate(
+  'xpack.securitySolution.detectionResponse.viewAllCases',
   {
-    defaultMessage: 'View recent cases',
+    defaultMessage: 'View all cases',
   }
 );
 

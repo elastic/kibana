@@ -42,6 +42,11 @@ export const INDICATOR_APM_AVAILABILITY = i18n.translate(
   { defaultMessage: 'APM availability' }
 );
 
+export const INDICATOR_SYNTHETICS_AVAILABILITY = i18n.translate(
+  'xpack.observability.slo.indicators.syntheticsAvailability',
+  { defaultMessage: 'Synthetics availability' }
+);
+
 export function toIndicatorTypeLabel(
   indicatorType: SLOWithSummaryResponse['indicator']['type']
 ): string {
@@ -54,6 +59,9 @@ export function toIndicatorTypeLabel(
 
     case 'sli.apm.transactionErrorRate':
       return INDICATOR_APM_AVAILABILITY;
+
+    case 'sli.synthetics.availability':
+      return INDICATOR_SYNTHETICS_AVAILABILITY;
 
     case 'sli.metric.custom':
       return INDICATOR_CUSTOM_METRIC;

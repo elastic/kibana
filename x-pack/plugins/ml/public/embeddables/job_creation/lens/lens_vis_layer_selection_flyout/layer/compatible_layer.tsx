@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react'; // useCallback
+import type { FC } from 'react';
+import React, { useMemo } from 'react'; // useCallback
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Embeddable } from '@kbn/lens-plugin/public';
 
@@ -18,7 +19,8 @@ import {
 import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_lens';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { useMlFromLensKibanaContext } from '../../../common/context';
-import { JobDetails, CreateADJobParams } from '../../../common/job_details';
+import type { CreateADJobParams } from '../../../common/job_details';
+import { JobDetails } from '../../../common/job_details';
 
 interface Props {
   layer: LayerResult;
