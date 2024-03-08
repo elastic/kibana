@@ -26,6 +26,7 @@ const defaultProps = {
 // FLAKY: https://github.com/elastic/kibana/issues/174525
 // FLAKY: https://github.com/elastic/kibana/issues/174526
 // FLAKY: https://github.com/elastic/kibana/issues/174527
+// FLAKY: https://github.com/elastic/kibana/issues/174528
 describe.skip('CreateCaseFlyout', () => {
   let mockedContext: AppMockRenderer;
   beforeEach(() => {
