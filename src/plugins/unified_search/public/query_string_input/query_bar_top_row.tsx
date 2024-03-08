@@ -726,6 +726,7 @@ export const QueryBarTopRow = React.memo(
             isDisabled={props.isDisabled}
             hideRunQueryText={props.hideTextBasedRunQueryLabel}
             data-test-subj="unifiedTextLangEditor"
+            isLoading={props.isLoading}
           />
         )
       );

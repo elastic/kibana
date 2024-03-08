@@ -13,3 +13,5 @@ import { TextBasedLanguagesEditor } from './src/text_based_languages_editor';
 // React.lazy support
 // eslint-disable-next-line import/no-default-export
 export default TextBasedLanguagesEditor;
+
+export * from './src/history_localStorage';

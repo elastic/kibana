@@ -63,6 +63,7 @@ import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
+import { addQueriesToCache, updateCachedQueries } from './history_localStorage';
 
 import './overwrite.scss';
 
@@ -175,7 +176,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService, application, docLinks } =
+  const { dataViews, expressions, indexManagementApiService, application, docLinks, uiSettings } =
     kibana.services;
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
@@ -220,6 +221,21 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   useEffect(() => {
     if (!isLoading) setIsQueryLoading(false);
   }, [isLoading]);
+
+  useEffect(() => {
+    if (isLoading) {
+      addQueriesToCache({
+        queryString,
+      });
+    } else {
+      const timeZone = uiSettings!.get('dateFormat:tz');
+      updateCachedQueries({
+        queryString,
+        status: serverErrors?.length ? 'error' : 'success',
+        timeZone,
+      });
+    }
+  }, [isLoading, queryString, serverErrors?.length, uiSettings]);
 
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();

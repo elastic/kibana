@@ -17,19 +17,12 @@ import {
   EuiBasicTableColumn,
   EuiTableSortingType,
   EuiButtonEmpty,
-  formatDate,
   Criteria,
   EuiButtonIcon,
   CustomItemAction,
 } from '@elastic/eui';
 import { css, Interpolation, Theme } from '@emotion/react';
-
-interface QueryHistoryItem {
-  status: 'success' | 'error' | 'warning';
-  queryString: string;
-  duration: string;
-  timeRun: string;
-}
+import { type QueryHistoryItem, getHistoryItems } from './history_localStorage';
 
 export function QueryHistoryAction({
   toggleHistory,
@@ -40,6 +33,9 @@ export function QueryHistoryAction({
   isHistoryOpen: boolean;
   isSpaceReduced?: boolean;
 }) {
+  // get history items from local storage
+  const items: QueryHistoryItem[] = getHistoryItems();
+  if (!items.length) return null;
   return (
     <>
       {isSpaceReduced && (
@@ -71,29 +67,6 @@ export function QueryHistoryAction({
     </>
   );
 }
-
-// temporary, retrieve from localStorate
-const items: QueryHistoryItem[] = [
-  {
-    status: 'success',
-    queryString:
-      'from logstash-* | limit 10 | EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp | rename timestamp as `@timestamp every 30 minute`',
-    duration: '128ms',
-    timeRun: '12 September 2023',
-  },
-  {
-    status: 'error',
-    queryString: 'from logstash-* | limit 10',
-    duration: '13ms',
-    timeRun: '12 November 2023',
-  },
-  {
-    status: 'success',
-    queryString: 'from logstash-* | limit 10 | keep bytes',
-    duration: '12ms',
-    timeRun: '13 November 2023',
-  },
-];
 
 export const getTableColumns = (
   width: number,
@@ -141,7 +114,7 @@ export const getTableColumns = (
               }
             ),
             sortable: true,
-            render: (timeRun: QueryHistoryItem['timeRun']) => formatDate(timeRun, 'dobLong'),
+            render: (timeRun: QueryHistoryItem['timeRun']) => timeRun,
             width: '240px',
           },
         ]
@@ -219,6 +192,8 @@ export function QueryHistory({
   };
 
   const { euiTheme } = useEuiTheme();
+  // get history items from local storage
+  const items: QueryHistoryItem[] = getHistoryItems();
   return (
     <EuiFlexGroup
       gutterSize="none"
