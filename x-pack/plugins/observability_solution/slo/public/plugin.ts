@@ -16,7 +16,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 
 import { SloPublicPluginsSetup, SloPublicPluginsStart } from './types'; // TODO move later to type
-import { PLUGIN_NAME, PLUGIN_ID } from '../common';
+import { PLUGIN_NAME, sloAppId } from '../common';
 import type { SloPublicSetup, SloPublicStart } from './types';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloEditLocatorDefinition } from './locators/slo_edit';
@@ -64,6 +64,7 @@ export class SloPlugin
         isDev: this.initContext.env.mode.dev,
         observabilityRuleTypeRegistry,
         kibanaVersion,
+        usageCollection: pluginsSetup.usageCollection,
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         isServerless: !!pluginsStart.serverless,
@@ -71,7 +72,7 @@ export class SloPlugin
     };
 
     const app: App = {
-      id: PLUGIN_ID,
+      id: sloAppId,
       title: PLUGIN_NAME,
       order: 8000,
       euiIconType: 'logoObservability',

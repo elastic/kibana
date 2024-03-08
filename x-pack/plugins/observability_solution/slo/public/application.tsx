@@ -16,6 +16,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 
@@ -46,6 +47,7 @@ export const renderApp = ({
   plugins,
   appMountParameters,
   ObservabilityPageTemplate,
+  usageCollection,
   isDev,
   kibanaVersion,
   isServerless,
@@ -56,6 +58,7 @@ export const renderApp = ({
   appMountParameters: AppMountParameters;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
+  usageCollection: UsageCollectionSetup;
   isDev?: boolean;
   kibanaVersion: string;
   isServerless?: boolean;
@@ -68,6 +71,9 @@ export const renderApp = ({
   element.classList.add(APP_WRAPPER_CLASS);
 
   const queryClient = new QueryClient();
+
+  const ApplicationUsageTrackingProvider =
+    usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
 
   const PresentationContextProvider = plugins.presentationUtil?.ContextProvider ?? React.Fragment;
@@ -75,44 +81,46 @@ export const renderApp = ({
   ReactDOM.render(
     <PresentationContextProvider>
       <EuiErrorBoundary>
-        <KibanaThemeProvider {...{ theme: { theme$ } }}>
-          <CloudProvider>
-            <KibanaContextProvider
-              services={{
-                ...core,
-                ...plugins,
-                storage: new Storage(localStorage),
-                isDev,
-                kibanaVersion,
-                isServerless,
-              }}
-            >
-              <PluginContext.Provider
-                value={{
-                  // isDev,
-                  appMountParameters,
-                  ObservabilityPageTemplate,
-                  observabilityRuleTypeRegistry,
+        <ApplicationUsageTrackingProvider>
+          <KibanaThemeProvider {...{ theme: { theme$ } }}>
+            <CloudProvider>
+              <KibanaContextProvider
+                services={{
+                  ...core,
+                  ...plugins,
+                  storage: new Storage(localStorage),
+                  isDev,
+                  kibanaVersion,
+                  isServerless,
                 }}
               >
-                <Router history={history}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
-                    <i18nCore.Context>
-                      <RedirectAppLinks
-                        coreStart={core}
-                        data-test-subj="observabilityMainContainer"
-                      >
-                        <QueryClientProvider client={queryClient}>
-                          <App />
-                        </QueryClientProvider>
-                      </RedirectAppLinks>
-                    </i18nCore.Context>
-                  </EuiThemeProvider>
-                </Router>
-              </PluginContext.Provider>
-            </KibanaContextProvider>
-          </CloudProvider>
-        </KibanaThemeProvider>
+                <PluginContext.Provider
+                  value={{
+                    // isDev,
+                    appMountParameters,
+                    ObservabilityPageTemplate,
+                    observabilityRuleTypeRegistry,
+                  }}
+                >
+                  <Router history={history}>
+                    <EuiThemeProvider darkMode={isDarkMode}>
+                      <i18nCore.Context>
+                        <RedirectAppLinks
+                          coreStart={core}
+                          data-test-subj="observabilityMainContainer"
+                        >
+                          <QueryClientProvider client={queryClient}>
+                            <App />
+                          </QueryClientProvider>
+                        </RedirectAppLinks>
+                      </i18nCore.Context>
+                    </EuiThemeProvider>
+                  </Router>
+                </PluginContext.Provider>
+              </KibanaContextProvider>
+            </CloudProvider>
+          </KibanaThemeProvider>
+        </ApplicationUsageTrackingProvider>
       </EuiErrorBoundary>
     </PresentationContextProvider>,
     element

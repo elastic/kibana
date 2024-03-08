@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'slo';
+export const sloAppId = 'slo';
 export const PLUGIN_NAME = 'SLOs';
 
 import { paths } from './locators/paths';
