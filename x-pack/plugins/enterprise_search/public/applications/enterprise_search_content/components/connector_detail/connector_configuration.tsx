@@ -270,30 +270,32 @@ export const ConnectorConfiguration: React.FC = () => {
                 {
                   children: (
                     <EuiFlexGroup direction="column">
-                      <EuiFlexItem>
-                        <EuiCallOut
-                          iconType="iInCircle"
-                          color="danger"
-                          title={i18n.translate(
-                            'xpack.enterpriseSearch.content.connectors.configuration.connectorNoIndexCallOut.title',
-                            {
-                              defaultMessage: 'Connector has no attached index',
-                            }
-                          )}
-                        >
-                          <EuiSpacer size="s" />
-                          <EuiText size="s">
-                            {i18n.translate(
-                              'xpack.enterpriseSearch.content.connectors.configuration.connectorNoIndexCallOut.description',
+                      {!connector.index_name && (
+                        <EuiFlexItem>
+                          <EuiCallOut
+                            iconType="iInCircle"
+                            color="danger"
+                            title={i18n.translate(
+                              'xpack.enterpriseSearch.content.connectors.configuration.connectorNoIndexCallOut.title',
                               {
-                                defaultMessage:
-                                  "You won't be able to start syncing content until your connector is attached to an index.",
+                                defaultMessage: 'Connector has no attached index',
                               }
                             )}
-                          </EuiText>
-                          <EuiSpacer />
-                        </EuiCallOut>
-                      </EuiFlexItem>
+                          >
+                            <EuiSpacer size="s" />
+                            <EuiText size="s">
+                              {i18n.translate(
+                                'xpack.enterpriseSearch.content.connectors.configuration.connectorNoIndexCallOut.description',
+                                {
+                                  defaultMessage:
+                                    "You won't be able to start syncing content until your connector is attached to an index.",
+                                }
+                              )}
+                            </EuiText>
+                            <EuiSpacer />
+                          </EuiCallOut>
+                        </EuiFlexItem>
+                      )}
                       <EuiFlexItem>
                         <EuiText size="s">
                           {i18n.translate(
