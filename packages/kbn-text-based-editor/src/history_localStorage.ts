@@ -16,12 +16,6 @@ export interface QueryHistoryItem {
   duration?: string;
 }
 
-export interface QueryHistoryLSItem {
-  queryString: string;
-  duration?: string;
-  timeZone?: string;
-  status?: 'success' | 'error';
-}
 export const getHistoryItems = (): QueryHistoryItem[] => {
   const localStorageString = localStorage.getItem(QUERY_HISTORY_ITEM_KEY) ?? '[]';
   const historyItems: QueryHistoryItem[] = JSON.parse(localStorageString);
