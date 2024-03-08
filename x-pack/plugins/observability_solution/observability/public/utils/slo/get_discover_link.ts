@@ -9,6 +9,7 @@ import { ALL_VALUE, kqlWithFiltersSchema, SLOWithSummaryResponse } from '@kbn/sl
 import { Filter, FilterStateStore, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { v4 } from 'uuid';
+import { isEmpty } from 'lodash';
 import { buildEsQuery } from '../build_es_query';
 
 function createDiscoverLocator(
@@ -69,7 +70,11 @@ function createDiscoverLocator(
 
   const groupBy = [slo.groupBy].flat();
 
-  if (groupBy.length > 0 && groupBy.every((field) => field === ALL_VALUE) === false) {
+  if (
+    !isEmpty(slo.groupings) &&
+    groupBy.length > 0 &&
+    groupBy.every((field) => field === ALL_VALUE) === false
+  ) {
     groupBy.forEach((field) => {
       filters.push({
         meta: {
