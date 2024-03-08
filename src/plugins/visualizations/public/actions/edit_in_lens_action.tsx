@@ -14,9 +14,6 @@ import { i18n } from '@kbn/i18n';
 import {
   apiCanAccessViewMode,
   apiHasUniqueId,
-  apiPublishesPanelDescription,
-  apiPublishesPanelTitle,
-  apiPublishesPartialLocalUnifiedSearch,
   CanAccessViewMode,
   EmbeddableApiContext,
   getInheritedViewMode,
