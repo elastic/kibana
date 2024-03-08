@@ -46,7 +46,9 @@ export function BudgetConsumed({
           })}{' '}
           <EuiIconTip
             position="top"
-            content={i18n.translate('xpack.slo.budgetConsumed.', { defaultMessage: '' })}
+            content={i18n.translate('xpack.slo.rules.budgetConsumed.tooltip', {
+              defaultMessage: 'How much budget is consumed before the first alert is fired.',
+            })}
           />
         </>
       }

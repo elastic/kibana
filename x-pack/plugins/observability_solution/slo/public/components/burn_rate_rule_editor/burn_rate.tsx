@@ -36,7 +36,10 @@ export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors }:
           })}{' '}
           <EuiIconTip
             position="top"
-            content={i18n.translate('xpack.slo.burnRate.', { defaultMessage: '' })}
+            content={i18n.translate('xpack.slo.rules.burnRate.tooltip', {
+              defaultMessage:
+                'The burn rate is how fast the service consumes the error budget over the lookback period.',
+            })}
           />
         </>
       }

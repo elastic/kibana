@@ -73,7 +73,11 @@ export function BurnRateRuleEditor(props: Props) {
           <EuiCallOut
             color="warning"
             size="s"
-            title={i18n.translate('xpack.slo.burnRateRuleEditor.', { defaultMessage: '' })}
+            title={i18n.translate('xpack.slo.rules.groupByMessage', {
+              defaultMessage:
+                'The SLO you selected has been created with a group-by on "{groupByField}". This rule will monitor and generate an alert for every instance found in the group-by field.',
+              values: { groupByField: selectedSlo.groupBy },
+            })}
           />
         </>
       )}

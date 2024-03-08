@@ -166,13 +166,19 @@ function Window({
           </EuiFlexItem>
         )}
         <EuiFlexItem>
-          <EuiFormRow label={i18n.translate('xpack.slo.window.', { defaultMessage: '' })}>
+          <EuiFormRow
+            label={i18n.translate('xpack.slo.rules.actionGroupSelectorLabel', {
+              defaultMessage: 'Action Group',
+            })}
+          >
             <EuiSelect
               data-test-subj="sloBurnRateActionGroupSelctor"
               options={ACTION_GROUP_OPTIONS}
               value={actionGroup}
               onChange={onActionGroupChange}
-              aria-label={i18n.translate('xpack.slo.window.', { defaultMessage: '' })}
+              aria-label={i18n.translate('xpack.slo.rules.actionGroupSelectorLabel', {
+                defaultMessage: 'Action Group',
+              })}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -184,8 +190,12 @@ function Window({
             style={{ marginBottom: '-1em' }}
             onClick={() => onDelete(id)}
             disabled={disableDelete}
-            title={i18n.translate('xpack.slo.window.', { defaultMessage: '' })}
-            aria-label={i18n.translate('xpack.slo.window.', { defaultMessage: '' })}
+            title={i18n.translate('xpack.slo.rules.deleteWindowLabel', {
+              defaultMessage: 'Delete window',
+            })}
+            aria-label={i18n.translate('xpack.slo.rules.deleteWindowLabel', {
+              defaultMessage: 'Delete window',
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -219,9 +229,22 @@ const getErrorBudgetExhaustionText = (
   budgetMode = false
 ) =>
   budgetMode
-    ? i18n.translate('xpack.slo.getErrorBudgetExhaustionText.', { defaultMessage: '' })
-    : i18n.translate('xpack.slo.getErrorBudgetExhaustionText.', { defaultMessage: '' });
-
+    ? i18n.translate('xpack.slo.rules.errorBudgetExhaustion.budgetMode.text', {
+        defaultMessage:
+          '{formatedHours} hours until error budget exhaustion. The burn rate threshold is {burnRateThreshold}x.',
+        values: {
+          formatedHours: formattedHours,
+          burnRateThreshold: numeral(burnRateThreshold).format('0[.0]'),
+        },
+      })
+    : i18n.translate('xpack.slo.rules.errorBudgetExhaustion.burnRateMode.text', {
+        defaultMessage:
+          '{formatedHours} hours until error budget exhaustion. {budgetConsumed} budget consumed before first alert.',
+        values: {
+          formatedHours: formattedHours,
+          budgetConsumed: numeral(budgetConsumed).format('0.00%'),
+        },
+      });
 export const createNewWindow = (
   slo?: SLOResponse | CreateSLOInput,
   partialWindow: Partial<WindowSchema> = {}

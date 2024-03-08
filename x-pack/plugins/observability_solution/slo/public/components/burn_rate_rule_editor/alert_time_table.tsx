@@ -29,7 +29,10 @@ function formatTime(minutes: number) {
       values: { hours, mins },
     });
   }
-  return i18n.translate('xpack.slo.formatTime.', { defaultMessage: '' });
+  return i18n.translate('xpack.slo.rules.timeTable.minuteLabel', {
+    defaultMessage: '{minutes}m',
+    values: { minutes },
+  });
 }
 
 export function AlertTimeTable({ windows, slo }: AlertTimeTableProps) {
@@ -52,7 +55,9 @@ export function AlertTimeTable({ windows, slo }: AlertTimeTableProps) {
   const columns = [
     {
       field: 'rate',
-      name: i18n.translate('xpack.slo.alertTimeTable.', { defaultMessage: '' }),
+      name: i18n.translate('xpack.slo.rules.timeTable.rateColumnLabel', {
+        defaultMessage: 'Error rate',
+      }),
       render: (rate: number) => numeral(rate).format('0%'),
     },
     ...windows.map((windowDef, index) => ({
@@ -67,15 +72,26 @@ export function AlertTimeTable({ windows, slo }: AlertTimeTableProps) {
   return (
     <>
       <EuiTitle size="xs">
-        <h5>{i18n.translate('xpack.slo.alertTimeTable.', { defaultMessage: '' })}</h5>
+        <h5>
+          {i18n.translate('xpack.slo.rules.timeTable.title', {
+            defaultMessage: 'How long will it take for the alert to fire?',
+          })}
+        </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiText size="s">
-        <p>{i18n.translate('xpack.slo.alertTimeTable.', { defaultMessage: '' })}</p>
+        <p>
+          {i18n.translate('xpack.slo.rules.timeTable.description', {
+            defaultMessage:
+              'The table below lists the error rates and approximately how long it would take to receive your first alert with the current configuration.',
+          })}
+        </p>
       </EuiText>
       <EuiSpacer size="m" />
       <EuiBasicTable<{ rate: number } & WindowSchema>
-        tableCaption={i18n.translate('xpack.slo.alertTimeTable.', { defaultMessage: '' })}
+        tableCaption={i18n.translate('xpack.slo.rules.tableCaption', {
+          defaultMessage: 'Alerting time table',
+        })}
         items={rows}
         columns={columns}
       />
