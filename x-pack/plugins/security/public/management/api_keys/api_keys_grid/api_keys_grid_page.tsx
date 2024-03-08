@@ -27,9 +27,10 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { debounce } from 'lodash';
 import moment from 'moment-timezone';
 import type { FunctionComponent } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
@@ -97,6 +98,8 @@ export const APIKeysGridPage: FunctionComponent = () => {
       setQuery(args.query);
     }
   };
+
+  const debouncedOnSearchChange = useCallback(debounce(onSearchChange, 300), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!state.value) {
     if (state.loading) {
@@ -274,7 +277,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
                   totalItemCount={totalKeys}
                   pagination={pagination}
                   onTableChange={onTableChange}
-                  onSearchChange={onSearchChange}
+                  onSearchChange={debouncedOnSearchChange}
                   aggregations={aggregations}
                 />
               )}
@@ -556,6 +559,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
       <EuiSearchBar
         defaultQuery={initialQuery}
         box={{
+          incremental: true,
           placeholder: 'Search...',
         }}
         filters={filters}
