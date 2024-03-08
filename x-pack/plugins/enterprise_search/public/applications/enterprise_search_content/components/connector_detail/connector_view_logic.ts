@@ -12,19 +12,22 @@ import { Connector, FeatureName, IngestPipelineParams } from '@kbn/search-connec
 import { Status } from '../../../../../common/types/api';
 
 import {
-  FetchConnectorByIdApiLogic,
-  FetchConnectorByIdApiLogicActions,
-} from '../../api/connector/fetch_connector_by_id_logic';
+  CachedFetchConnectorByIdApiLogic,
+  CachedFetchConnectorByIdApiLogicActions,
+  CachedFetchConnectorByIdApiLogicValues,
+} from '../../api/connector/cached_fetch_connector_by_id_api_logic';
 
 import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
 import { IndexNameActions, IndexNameLogic } from '../search_index/index_name_logic';
 
 export interface ConnectorViewActions {
-  fetchConnector: FetchConnectorByIdApiLogicActions['makeRequest'];
-  fetchConnectorApiError: FetchConnectorByIdApiLogicActions['apiError'];
-  fetchConnectorApiReset: FetchConnectorByIdApiLogicActions['apiReset'];
-  fetchConnectorApiSuccess: FetchConnectorByIdApiLogicActions['apiSuccess'];
+  fetchConnector: CachedFetchConnectorByIdApiLogicActions['makeRequest'];
+  fetchConnectorApiError: CachedFetchConnectorByIdApiLogicActions['apiError'];
+  fetchConnectorApiReset: CachedFetchConnectorByIdApiLogicActions['apiReset'];
+  fetchConnectorApiSuccess: CachedFetchConnectorByIdApiLogicActions['apiSuccess'];
+  startConnectorPoll: CachedFetchConnectorByIdApiLogicActions['startPolling'];
+  stopConnectorPoll: CachedFetchConnectorByIdApiLogicActions['stopPolling'];
   fetchIndex: FetchIndexActions['makeRequest'];
   fetchIndexApiError: FetchIndexActions['apiError'];
   fetchIndexApiReset: FetchIndexActions['apiReset'];
@@ -34,7 +37,7 @@ export interface ConnectorViewActions {
 
 export interface ConnectorViewValues {
   connector: Connector | undefined;
-  connectorData: typeof FetchConnectorByIdApiLogic.values.data;
+  connectorData: CachedFetchConnectorByIdApiLogicValues['connectorData'];
   connectorError: string | undefined;
   connectorId: string | null;
   connectorName: string | null;
@@ -68,12 +71,14 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     actions: [
       IndexNameLogic,
       ['setIndexName'],
-      FetchConnectorByIdApiLogic,
+      CachedFetchConnectorByIdApiLogic,
       [
         'makeRequest as fetchConnector',
         'apiSuccess as fetchConnectorApiSuccess',
         'apiError as fetchConnectorApiError',
         'apiReset as fetchConnectorApiReset',
+        'startPolling as startConnectorPoll',
+        'stopPolling as stopConnectorPoll',
       ],
       FetchIndexApiLogic,
       [
@@ -84,8 +89,8 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       ],
     ],
     values: [
-      FetchConnectorByIdApiLogic,
-      ['status as fetchConnectorApiStatus', 'data as connectorData'],
+      CachedFetchConnectorByIdApiLogic,
+      ['status as fetchConnectorApiStatus', 'connectorData', 'isInitialLoading'],
       FetchIndexApiLogic,
       ['data as index', 'status as fetchIndexApiStatus'],
     ],
@@ -98,13 +103,13 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     beforeUnmount: () => {
       actions.fetchConnectorApiReset();
       actions.fetchIndexApiReset();
+      actions.stopConnectorPoll();
     },
   }),
   listeners: ({ actions, values }) => ({
     fetchConnectorApiSuccess: () => {
       if (values.indexName) {
         actions.fetchIndex({ indexName: values.indexName });
-        actions.setIndexName(values.indexName);
       }
     },
   }),
@@ -113,7 +118,7 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     connector: [
       () => [selectors.connectorData],
       (connectorData) => {
-        return connectorData?.connector;
+        return connectorData;
       },
     ],
     connectorError: [
