@@ -1524,9 +1524,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       const { body, status } = await esSupertest.delete(
         `/_ingest/pipeline/${usePrefix ? 'pipeline_' : ''}${modelId}`
       );
-      if (assertStatusCode) this.assertResponseStatusCode(200, status, body);
 
-      log.debug('> Ingest pipeline deleted');
+      if (assertStatusCode) {
+        this.assertResponseStatusCode(200, status, body);
+        log.debug('> Ingest pipeline deleted');
+      }
     },
 
     async assureMlStatsIndexExists(timeout: number = 60 * 1000) {
