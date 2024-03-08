@@ -890,7 +890,7 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    options?: { force?: boolean; removeFleetServerDocuments?: boolean; user?: AuthenticatedUser }
+    options?: { force?: boolean; user?: AuthenticatedUser }
   ): Promise<DeleteAgentPolicyResponse> {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting agent policy ${id}`);
