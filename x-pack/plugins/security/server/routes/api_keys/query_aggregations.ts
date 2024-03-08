@@ -6,36 +6,9 @@
  */
 
 import type { RouteDefinitionParams } from '..';
+import type { ApiKeyAggregationsResponse } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-
-export interface EsBucket {
-  key: string;
-  doc_count: number;
-}
-export interface ApiKeyAggregationResult {
-  total: number;
-  aggregations: {
-    usernames: {
-      doc_count_error_upper_bound: number;
-      sum_other_doc_count: number;
-      buckets: EsBucket[];
-    };
-    types: {
-      doc_count_error_upper_bound: number;
-      sum_other_doc_count: number;
-      buckets: EsBucket[];
-    };
-    invalidated: {
-      doc_count_error_upper_bound: number;
-      sum_other_doc_count: number;
-      buckets: EsBucket[];
-    };
-    expired: { doc_count: number };
-    alertingKeys: { doc_count: number };
-    managedMetadata: { doc_count: number };
-  };
-}
 
 export function defineQueryApiKeysAggregationsRoute({
   router,
@@ -66,7 +39,7 @@ export function defineQueryApiKeysAggregationsRoute({
         }
 
         const transportResponse =
-          await esClient.asCurrentUser.transport.request<ApiKeyAggregationResult>({
+          await esClient.asCurrentUser.transport.request<ApiKeyAggregationsResponse>({
             method: 'POST',
             path: '/_security/_query/api_key',
             body: {
@@ -121,7 +94,7 @@ export function defineQueryApiKeysAggregationsRoute({
             },
           });
 
-        return response.ok<ApiKeyAggregationResult>({
+        return response.ok<ApiKeyAggregationsResponse>({
           body: {
             total: transportResponse.total,
             aggregations: transportResponse.aggregations,
