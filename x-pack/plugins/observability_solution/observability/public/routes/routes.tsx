@@ -27,6 +27,9 @@ import {
   RULES_LOGS_PATH,
   RULES_PATH,
   RULE_DETAIL_PATH,
+  OLD_SLOS_PATH,
+  OLD_SLOS_WELCOME_PATH,
+  OLD_SLOS_OUTDATED_DEFINITIONS_PATH,
 } from '../../common/locators/paths';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
 
@@ -124,6 +127,27 @@ export const routes = {
   [ALERT_DETAIL_PATH]: {
     handler: () => {
       return <AlertDetails />;
+    },
+    params: {},
+    exact: true,
+  },
+  [OLD_SLOS_PATH]: {
+    handler: () => {
+      return <SimpleRedirect to="/" redirectToApp="slo" />;
+    },
+    params: {},
+    exact: true,
+  },
+  [OLD_SLOS_WELCOME_PATH]: {
+    handler: () => {
+      return <SimpleRedirect to="/welcome" redirectToApp="slo" />;
+    },
+    params: {},
+    exact: true,
+  },
+  [OLD_SLOS_OUTDATED_DEFINITIONS_PATH]: {
+    handler: () => {
+      return <SimpleRedirect to="/outdated-definition" redirectToApp="slo" />;
     },
     params: {},
     exact: true,
