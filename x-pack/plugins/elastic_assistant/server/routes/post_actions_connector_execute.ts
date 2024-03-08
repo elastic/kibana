@@ -139,9 +139,12 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
 
-            onMessageSent = (content: string, traceData: Message['traceData'] = {}) => {
+            onMessageSent = async (
+              content: string,
+              traceData: Message['traceData'] = {}
+            ): Promise<void> => {
               if (updatedConversation) {
-                dataClient?.appendConversationMessages({
+                await dataClient?.appendConversationMessages({
                   existingConversation: updatedConversation,
                   messages: [
                     getMessageFromRawResponse({
@@ -245,7 +248,8 @@ export const postActionsConnectorExecuteRoute = (
           });
 
           if (conversationId) {
-            onMessageSent?.(
+            // if conversationId is defined, onMessageSent will be too. the ? is to satisfy TS
+            await onMessageSent?.(
               langChainResponseBody.data,
               langChainResponseBody.trace_data
                 ? {
@@ -256,7 +260,6 @@ export const postActionsConnectorExecuteRoute = (
             );
 
             if (Object.keys(latestReplacements).length > 0) {
-              // TODO, @yul I think if this request happens before append message is done, it could interrupt append message
               await dataClient?.updateConversation({
                 conversationUpdateProps: {
                   id: conversationId,
