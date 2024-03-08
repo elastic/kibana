@@ -131,7 +131,7 @@ export function Overview({ slo }: Props) {
         {IndicatorOverview}
         {'index' in slo.indicator.params && (
           <OverviewItem
-            title={i18n.translate('xpack.observability.slo.sloDetails.overview.indexTitle', {
+            title={i18n.translate('xpack.slo.sloDetails.overview.indexTitle', {
               defaultMessage: 'Index pattern',
             })}
             subtitle={slo.indicator.params.index}
@@ -139,7 +139,7 @@ export function Overview({ slo }: Props) {
         )}
         {'filter' in slo.indicator.params && (
           <OverviewItem
-            title={i18n.translate('xpack.observability.slo.sloDetails.overview.overallQueryTitle', {
+            title={i18n.translate('xpack.slo.sloDetails.overview.overallQueryTitle', {
               defaultMessage: 'Overall query',
             })}
             subtitle={
@@ -152,7 +152,7 @@ export function Overview({ slo }: Props) {
         )}
         {'good' in slo.indicator.params && querySchema.is(slo.indicator.params.good) && (
           <OverviewItem
-            title={i18n.translate('xpack.observability.slo.sloDetails.overview.goodQueryTitle', {
+            title={i18n.translate('xpack.slo.sloDetails.overview.goodQueryTitle', {
               defaultMessage: 'Good query',
             })}
             subtitle={
@@ -162,7 +162,7 @@ export function Overview({ slo }: Props) {
         )}
         {'total' in slo.indicator.params && querySchema.is(slo.indicator.params.total) && (
           <OverviewItem
-            title={i18n.translate('xpack.observability.slo.sloDetails.overview.totalQueryTitle', {
+            title={i18n.translate('xpack.slo.sloDetails.overview.totalQueryTitle', {
               defaultMessage: 'Total query',
             })}
             subtitle={
