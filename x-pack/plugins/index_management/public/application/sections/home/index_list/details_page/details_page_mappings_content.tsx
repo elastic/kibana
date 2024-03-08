@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import {
+  EuiButton,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,104 +16,180 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
 
 import { Index } from '../../../../../../common';
-import { documentationService } from '../../../../services';
+import { FieldsList } from '../../../../../application/components/mappings_editor/components/document_fields/fields';
+import { extractMappingsDefinition } from '../../../../../application/components/mappings_editor/lib';
+import { MappingsEditorParsedMetadata } from '../../../../../application/components/mappings_editor/mappings_editor';
+import { useMappingsState } from '../../../../../application/components/mappings_editor/mappings_state_context';
+import { useMappingsStateListener } from '../../../../../application/components/mappings_editor/use_state_listener';
 import { useAppContext } from '../../../../app_context';
+import { documentationService } from '../../../../services';
 
-export const DetailsPageMappingsContent: FunctionComponent<{ index: Index; data: string }> = ({
-  index,
-  data,
-}) => {
+export const DetailsPageMappingsContent: FunctionComponent<{
+  index: Index;
+  data: string;
+  jsonData: any;
+}> = ({ index, data, jsonData }) => {
   const {
     services: { extensionsService },
     core: { getUrlForApp },
   } = useAppContext();
-  return (
-    // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
-    <EuiFlexGroup
-      wrap
-      direction="rowReverse"
+  const { euiTheme } = useEuiTheme();
+
+  const [toggleOn, setToggleOn] = useState(true);
+  const onToggleChange = () => {
+    setToggleOn((prevValue) => !prevValue);
+  };
+  const { parsedDefaultValue } = useMemo<MappingsEditorParsedMetadata>(() => {
+    const mappingsDefinition = extractMappingsDefinition(jsonData);
+
+    if (mappingsDefinition === null) {
+      return { multipleMappingsDeclared: true };
+    }
+
+    const {
+      _source,
+      _meta,
+      _routing,
+      _size,
+      dynamic,
+      properties,
+      runtime,
+      /* eslint-disable @typescript-eslint/naming-convention */
+      numeric_detection,
+      date_detection,
+      dynamic_date_formats,
+      dynamic_templates,
+      /* eslint-enable @typescript-eslint/naming-convention */
+    } = mappingsDefinition;
+
+    const parsed = {
+      configuration: {
+        _source,
+        _meta,
+        _routing,
+        _size,
+        dynamic,
+        numeric_detection,
+        date_detection,
+        dynamic_date_formats,
+      },
+      fields: properties,
+      templates: {
+        dynamic_templates,
+      },
+      runtime,
+    };
+
+    return { parsedDefaultValue: parsed, multipleMappingsDeclared: false };
+  }, [jsonData]);
+
+  useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
+
+  const {
+    fields: { byId, rootLevelFields },
+  } = useMappingsState();
+
+  const getField = useCallback((fieldId: string) => byId[fieldId], [byId]);
+  const fields = useMemo(() => rootLevelFields.map(getField), [rootLevelFields, getField]);
+
+  const jsonBlock = (
+    <EuiCodeBlock
+      language="json"
+      isCopyable
+      data-test-subj="indexDetailsMappingsCodeBlock"
       css={css`
         height: 100%;
       `}
     >
-      <EuiFlexItem
-        grow={1}
+      {data}
+    </EuiCodeBlock>
+  );
+
+  const treeViewBlock = <FieldsList fields={fields} />;
+
+  return (
+    // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
+    <>
+      <EuiFlexGroup style={{ marginBottom: euiTheme.size.l }}>
+        <EuiButton onClick={onToggleChange}>{!toggleOn ? 'JSON' : 'Table View'}</EuiButton>
+      </EuiFlexGroup>
+      <EuiFlexGroup
+        wrap
+        direction="rowReverse"
         css={css`
-          min-width: 400px;
+          height: 100%;
         `}
       >
-        <EuiPanel grow={false} paddingSize="l">
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="iInCircle" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h2>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.indexDetails.mappings.docsCardTitle"
-                    defaultMessage="About index mappings"
-                  />
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.idxMgmt.indexDetails.mappings.docsCardDescription"
-                defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type
+        <EuiFlexItem
+          grow={1}
+          css={css`
+            min-width: 400px;
+          `}
+        >
+          <EuiPanel grow={false} paddingSize="l">
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="iInCircle" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.idxMgmt.indexDetails.mappings.docsCardTitle"
+                      defaultMessage="About index mappings"
+                    />
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexDetails.mappings.docsCardDescription"
+                  defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type
               (such as keyword, number, or date) and additional subfields. These index mappings determine the functions
               available in your relevance tuning and search experience."
+                />
+              </p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiLink
+              data-test-subj="indexDetailsMappingsDocsLink"
+              href={documentationService.getMappingDocumentationLink()}
+              target="_blank"
+              external
+            >
+              <FormattedMessage
+                id="xpack.idxMgmt.indexDetails.mappings.docsCardLink"
+                defaultMessage="Learn more about mappings"
               />
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiLink
-            data-test-subj="indexDetailsMappingsDocsLink"
-            href={documentationService.getMappingDocumentationLink()}
-            target="_blank"
-            external
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.indexDetails.mappings.docsCardLink"
-              defaultMessage="Learn more about mappings"
-            />
-          </EuiLink>
-        </EuiPanel>
-        {extensionsService.indexMappingsContent && (
-          <>
-            <EuiSpacer />
-            {extensionsService.indexMappingsContent.renderContent({ index, getUrlForApp })}
-          </>
-        )}
-      </EuiFlexItem>
+            </EuiLink>
+          </EuiPanel>
+          {extensionsService.indexMappingsContent && (
+            <>
+              <EuiSpacer />
+              {extensionsService.indexMappingsContent.renderContent({ index, getUrlForApp })}
+            </>
+          )}
+        </EuiFlexItem>
 
-      <EuiFlexItem
-        grow={3}
-        css={css`
-          min-width: 600px;
-        `}
-      >
-        <EuiPanel>
-          <EuiCodeBlock
-            language="json"
-            isCopyable
-            data-test-subj="indexDetailsMappingsCodeBlock"
-            css={css`
-              height: 100%;
-            `}
-          >
-            {data}
-          </EuiCodeBlock>
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        <EuiFlexItem
+          grow={3}
+          css={css`
+            min-width: 600px;
+          `}
+        >
+          <EuiPanel>{toggleOn ? jsonBlock : treeViewBlock}</EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };
