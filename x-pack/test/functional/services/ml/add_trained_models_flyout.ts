@@ -59,8 +59,9 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
     }
 
     public async open(): Promise<void> {
-      await retry.waitFor('Add Trained Model Button', () =>
-        testSubjects.exists('mlModelsAddTrainedModelButton')
+      await retry.waitFor(
+        'Add Trained Model Button',
+        async () => await testSubjects.exists('mlModelsAddTrainedModelButton')
       );
       await testSubjects.clickWhenNotDisabled('mlModelsAddTrainedModelButton', {
         timeout: tenSeconds,
@@ -99,12 +100,15 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
     }
 
     public async assertElandPythonClientCodeBlocks() {
-      const [pipInstall, condaInstall, exampleImport] = await find.allByCssSelector(
-        'div.euiFlyoutBody div.euiCodeBlock'
+      expect(await testSubjects.getVisibleText('mlElandPipInstallCodeBlock')).to.match(
+        /python -m pip install eland/
       );
-      expect(await pipInstall.getVisibleText()).to.match(/python -m pip install eland/);
-      expect(await condaInstall.getVisibleText()).to.match(/conda install -c conda-forge eland/);
-      expect(await exampleImport.getVisibleText()).to.match(/eland_import_hub_model/);
+      expect(await testSubjects.getVisibleText('mlElandCondaInstallCodeBlock')).to.match(
+        /conda install -c conda-forge eland/
+      );
+      expect(await testSubjects.getVisibleText('mlElandExampleImportCodeBlock')).to.match(
+        /eland_import_hub_model/
+      );
     }
   })();
 }
