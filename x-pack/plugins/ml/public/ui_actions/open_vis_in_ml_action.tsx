@@ -11,7 +11,7 @@ import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { isLensApi } from '@kbn/lens-plugin/public';
 import { isMapApi } from '@kbn/maps-plugin/public';
 import type { ActionApi } from './types';
-import { MlCoreSetup } from '../plugin';
+import type { MlCoreSetup } from '../plugin';
 
 export const CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION = 'createMLADJobAction';
 
