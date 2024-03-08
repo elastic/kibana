@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCheckableCard,
   EuiTitle,
   EuiSpacer,
   EuiSwitch,
   EuiHorizontalRule,
-  EuiComboBoxOptionOption,
   EuiComboBox,
   EuiFormRow,
   EuiCallOut,

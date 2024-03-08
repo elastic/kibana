@@ -196,18 +196,26 @@ export const navigationTree: NavigationTreeDefinition = {
             defaultMessage: 'Synthetics',
           }),
           renderAs: 'accordion',
+          breadcrumbStatus: 'hidden',
           children: [
             {
+              title: i18n.translate('xpack.serverlessObservability.nav.synthetics.overviewItem', {
+                defaultMessage: 'Overview',
+              }),
+              id: 'synthetics-overview',
               link: 'synthetics:overview',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/synthetics'));
-              },
+              breadcrumbStatus: 'hidden',
             },
             {
-              link: 'synthetics:management',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/synthetics/monitors'));
-              },
+              link: 'synthetics:certificates',
+              title: i18n.translate(
+                'xpack.serverlessObservability.nav.synthetics.certificatesItem',
+                {
+                  defaultMessage: 'TLS Certificates',
+                }
+              ),
+              id: 'synthetics-certificates',
+              breadcrumbStatus: 'hidden',
             },
           ],
         },

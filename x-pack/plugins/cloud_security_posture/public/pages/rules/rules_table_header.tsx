@@ -108,98 +108,100 @@ export const RulesTableHeader = ({
   };
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1}>
-        <SearchField
-          isSearching={isSearching}
-          searchValue={searchValue}
-          search={search}
-          totalRulesCount={totalRulesCount}
+    <EuiFlexGroup direction="column">
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={0}>
+          <EuiFlexGroup gutterSize="s" direction="row">
+            <EuiFlexItem
+              css={css`
+                min-width: 160px;
+              `}
+            >
+              <MultiSelectFilter
+                buttonLabel={i18n.translate(
+                  'xpack.csp.rules.rulesTableHeader.sectionSelectPlaceholder',
+                  {
+                    defaultMessage: 'CIS Section',
+                  }
+                )}
+                id={'cis-section-multi-select-filter'}
+                onChange={(section) => {
+                  setSelectedSection([...section?.selectedOptionKeys]);
+                  onSectionChange(
+                    section?.selectedOptionKeys ? section?.selectedOptionKeys : undefined
+                  );
+                }}
+                options={sectionOptions}
+                selectedOptionKeys={selectedSection}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              css={css`
+                min-width: 160px;
+              `}
+            >
+              <MultiSelectFilter
+                buttonLabel={i18n.translate(
+                  'xpack.csp.rules.rulesTableHeader.ruleNumberSelectPlaceholder',
+                  {
+                    defaultMessage: 'Rule Number',
+                  }
+                )}
+                id={'rule-number-multi-select-filter'}
+                onChange={(ruleNumber) => {
+                  setSelectedRuleNumber([...ruleNumber?.selectedOptionKeys]);
+                  onRuleNumberChange(
+                    ruleNumber?.selectedOptionKeys ? ruleNumber?.selectedOptionKeys : undefined
+                  );
+                }}
+                options={ruleNumberOptions}
+                selectedOptionKeys={selectedRuleNumber}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              css={css`
+                min-width: 220px;
+              `}
+            >
+              <EuiFilterGroup>
+                <EuiFilterButton
+                  withNext
+                  hasActiveFilters={enabledDisabledItemsFilterState === 'enabled'}
+                  onClick={toggleEnabledRulesFilter}
+                  data-test-subj={RULES_ENABLED_FILTER}
+                >
+                  <FormattedMessage
+                    id="xpack.csp.rules.rulesTable.enabledRuleFilterButton"
+                    defaultMessage="Enabled rules"
+                  />
+                </EuiFilterButton>
+                <EuiFilterButton
+                  hasActiveFilters={enabledDisabledItemsFilterState === 'disabled'}
+                  onClick={toggleDisabledRulesFilter}
+                  data-test-subj={RULES_DISABLED_FILTER}
+                >
+                  <FormattedMessage
+                    id="xpack.csp.rules.rulesTable.disabledRuleFilterButton"
+                    defaultMessage="Disabled rules"
+                  />
+                </EuiFilterButton>
+              </EuiFilterGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexItem>
+        <CurrentPageOfTotal
           pageSize={pageSize}
+          total={totalRulesCount}
           selectedRules={selectedRules}
           refetchRulesStates={refetchRulesStates}
           setSelectAllRules={setSelectAllRules}
           setSelectedRules={setSelectedRules}
         />
-      </EuiFlexItem>
-      <EuiFlexItem grow={0}>
-        <EuiFlexGroup gutterSize="s" direction="row">
-          <EuiFlexItem
-            css={css`
-              min-width: 160px;
-            `}
-          >
-            <MultiSelectFilter
-              buttonLabel={i18n.translate(
-                'xpack.csp.rules.rulesTableHeader.sectionSelectPlaceholder',
-                {
-                  defaultMessage: 'CIS Section',
-                }
-              )}
-              id={'cis-section-multi-select-filter'}
-              onChange={(section) => {
-                setSelectedSection([...section?.selectedOptionKeys]);
-                onSectionChange(
-                  section?.selectedOptionKeys ? section?.selectedOptionKeys : undefined
-                );
-              }}
-              options={sectionOptions}
-              selectedOptionKeys={selectedSection}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem
-            css={css`
-              min-width: 160px;
-            `}
-          >
-            <MultiSelectFilter
-              buttonLabel={i18n.translate(
-                'xpack.csp.rules.rulesTableHeader.ruleNumberSelectPlaceholder',
-                {
-                  defaultMessage: 'Rule Number',
-                }
-              )}
-              id={'rule-number-multi-select-filter'}
-              onChange={(ruleNumber) => {
-                setSelectedRuleNumber([...ruleNumber?.selectedOptionKeys]);
-                onRuleNumberChange(
-                  ruleNumber?.selectedOptionKeys ? ruleNumber?.selectedOptionKeys : undefined
-                );
-              }}
-              options={ruleNumberOptions}
-              selectedOptionKeys={selectedRuleNumber}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem
-            css={css`
-              min-width: 220px;
-            `}
-          >
-            <EuiFilterGroup>
-              <EuiFilterButton
-                withNext
-                hasActiveFilters={enabledDisabledItemsFilterState === 'enabled'}
-                onClick={toggleEnabledRulesFilter}
-                data-test-subj={RULES_ENABLED_FILTER}
-              >
-                <FormattedMessage
-                  id="xpack.csp.rules.rulesTable.enabledRuleFilterButton"
-                  defaultMessage="Enabled rules"
-                />
-              </EuiFilterButton>
-              <EuiFilterButton
-                hasActiveFilters={enabledDisabledItemsFilterState === 'disabled'}
-                onClick={toggleDisabledRulesFilter}
-                data-test-subj={RULES_DISABLED_FILTER}
-              >
-                <FormattedMessage
-                  id="xpack.csp.rules.rulesTable.disabledRuleFilterButton"
-                  defaultMessage="Disabled rules"
-                />
-              </EuiFilterButton>
-            </EuiFilterGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -211,24 +213,7 @@ const SearchField = ({
   search,
   isSearching,
   searchValue,
-  totalRulesCount,
-  pageSize,
-  selectedRules,
-  refetchRulesStates,
-  setSelectAllRules,
-  setSelectedRules,
-}: Pick<
-  RulesTableToolbarProps,
-  | 'isSearching'
-  | 'searchValue'
-  | 'search'
-  | 'totalRulesCount'
-  | 'pageSize'
-  | 'selectedRules'
-  | 'refetchRulesStates'
-  | 'setSelectAllRules'
-  | 'setSelectedRules'
->) => {
+}: Pick<RulesTableToolbarProps, 'isSearching' | 'searchValue' | 'search'>) => {
   const [localValue, setLocalValue] = useState(searchValue);
 
   useDebounce(() => search(localValue), SEARCH_DEBOUNCE_MS, [localValue]);
@@ -247,14 +232,6 @@ const SearchField = ({
           fullWidth
         />
       </EuiFlexItem>
-      <CurrentPageOfTotal
-        pageSize={pageSize}
-        total={totalRulesCount}
-        selectedRules={selectedRules}
-        refetchRulesStates={refetchRulesStates}
-        setSelectAllRules={setSelectAllRules}
-        setSelectedRules={setSelectedRules}
-      />
     </div>
   );
 };
@@ -349,7 +326,7 @@ const CurrentPageOfTotal = ({
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiSpacer size="xl" />
+      <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>

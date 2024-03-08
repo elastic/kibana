@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useState, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -30,7 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { TimeRange } from '@kbn/es-query';
-import { QuickLensJobCreator } from '../../../application/jobs/new_job/job_from_lens';
+import type { QuickLensJobCreator } from '../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
 import type { CreateState } from '../../../application/jobs/new_job/job_from_dashboard';
 import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '../../../../common/constants/new_job';
