@@ -28,7 +28,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const retry = getService('retry');
   const objectRemover = new ObjectRemover(supertest);
-  const toasts = getService('toasts');
 
   async function refreshAlertsList() {
     await testSubjects.click('logsTab');
@@ -241,7 +240,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('bulkDisable');
 
       await retry.try(async () => {
-        const toastTitle = await toasts.getTitleAndDismiss();
+        const toastTitle = await pageObjects.common.closeToast();
         expect(toastTitle).to.eql('Disabled 2 rules');
       });
 
@@ -270,7 +269,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await toasts.getTitleAndDismiss();
+        const toastTitle = await pageObjects.common.closeToast();
         expect(toastTitle).to.eql('Deleted 1 rule');
       });
 
