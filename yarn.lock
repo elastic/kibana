@@ -5782,6 +5782,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search_playground@link:x-pack/plugins/search_playground":
+  version "0.0.0"
+  uid ""
+
 "@kbn/searchprofiler-plugin@link:x-pack/plugins/searchprofiler":
   version "0.0.0"
   uid ""

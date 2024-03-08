@@ -4,11 +4,9 @@
   "owner": "@elastic/enterprise-search-frontend",
   "plugin": {
     "id": "searchPlayground",
-    "server": true,
+    "server": false,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "search_playground"
-    ]
+    "configPath": ["xpack", "search_playground"],
+    "requiredPlugins": ["navigation", "security"]
   }
 }

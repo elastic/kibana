@@ -679,6 +679,7 @@
     "@kbn/search-examples-plugin": "link:examples/search_examples",
     "@kbn/search-index-documents": "link:packages/kbn-search-index-documents",
     "@kbn/search-response-warnings": "link:packages/kbn-search-response-warnings",
+    "@kbn/search_playground": "link:x-pack/plugins/search_playground",
     "@kbn/searchprofiler-plugin": "link:x-pack/plugins/searchprofiler",
     "@kbn/security-hardening": "link:packages/kbn-security-hardening",
     "@kbn/security-plugin": "link:x-pack/plugins/security",

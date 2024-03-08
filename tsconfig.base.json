@@ -1332,6 +1332,8 @@
       "@kbn/screenshotting-example-plugin/*": ["x-pack/examples/screenshotting_example/*"],
       "@kbn/screenshotting-plugin": ["x-pack/plugins/screenshotting"],
       "@kbn/screenshotting-plugin/*": ["x-pack/plugins/screenshotting/*"],
+      "@kbn/search_playground": ["x-pack/plugins/search_playground"],
+      "@kbn/search_playground/*": ["x-pack/plugins/search_playground/*"],
       "@kbn/search-api-panels": ["packages/kbn-search-api-panels"],
       "@kbn/search-api-panels/*": ["packages/kbn-search-api-panels/*"],
       "@kbn/search-connectors": ["packages/kbn-search-connectors"],
