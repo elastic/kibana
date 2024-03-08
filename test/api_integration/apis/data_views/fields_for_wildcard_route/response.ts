@@ -249,7 +249,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       await supertest
         .get(FIELDS_FOR_WILDCARD_PATH)
-        .query({ pattern: 'fields-for-wildcard-000001', apiVersion: INITIAL_REST_VERSION_INTERNAL })
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .query({
+          pattern: 'fields-for-wildcard-000001',
+          meta_fields: ['_id', '_index'],
+        })
         .expect(200, {
           fields: [],
           indices: ['fields-for-wildcard-000001'],
