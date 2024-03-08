@@ -141,7 +141,8 @@ describe('extract search response warnings', () => {
         },
         _clusters: {
           total: 2,
-          successful: 2,
+          partial: 1,
+          successful: 1,
           skipped: 0,
           details: {
             '(local)': {
@@ -218,7 +219,8 @@ describe('extract search response warnings', () => {
         },
         _clusters: {
           total: 2,
-          successful: 2,
+          partial: 1,
+          successful: 1,
           skipped: 0,
           details: {
             '(local)': {
