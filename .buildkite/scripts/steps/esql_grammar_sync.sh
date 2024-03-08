@@ -26,13 +26,18 @@ echo "File copied and modified successfully. Checking for differences."
 # Check for differences
 git diff --exit-code --quiet "$destination_file"
 if [ $? -ne 0 ]; then
-  echo "Differences found. Committing changes."
+  echo "Differences found. Building ANTLR stuff."
+
+  # Built ANTLR stuff
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  cd ./packages/kbn-monaco/src 
+  yarn build:antlr4
 
   # Make a commit
+  BRANCH_NAME="esql_grammar_sync_$(date +%s)"
+
   git config --global user.name kibanamachine
   git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
-
-  BRANCH_NAME="esql_grammar_sync_$(date +%s)"
 
   git checkout -b "$BRANCH_NAME"
 
@@ -44,7 +49,8 @@ if [ $? -ne 0 ]; then
   echo "Changes committed. Creating pull request."
 
   # Create a PR
-  gh pr create --title "Update ES|QL lexer grammar" --body "This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch." --base main --head "$BRANCH_NAME" || exit
+  gh pr create --title "[ES|QL] Update lexer grammar" --body "This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch." \ 
+  --base main --head "$BRANCH_NAME" --label "release_note:skip" || exit
 
 else
   echo "No differences found. Our work is done here."
