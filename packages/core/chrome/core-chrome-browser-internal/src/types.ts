@@ -49,6 +49,12 @@ export interface InternalChromeStart extends ChromeStart {
     setHome(homeHref: string): void;
 
     /**
+     * Sets the cloud's URLs.
+     * @param cloudUrls
+     */
+    setCloudUrls(cloudUrls: CloudURLs): void;
+
+    /**
      * Sets the project name.
      * @param projectName
      */
@@ -59,8 +65,7 @@ export interface InternalChromeStart extends ChromeStart {
       Id extends string = string,
       ChildrenId extends string = Id
     >(
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
-      deps: { cloudUrls: CloudURLs }
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
     ): void;
 
     getNavigationTreeUi$: () => Observable<NavigationTreeDefinitionUI>;

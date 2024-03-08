@@ -125,6 +125,14 @@ export class ProjectNavigationService {
       getProjectHome$: () => {
         return this.projectHome$.asObservable();
       },
+      setCloudUrls: (cloudUrls: CloudURLs) => {
+        let cloudLinks = this.cloudLinks$.getValue();
+        if (Object.keys(cloudLinks).length === 0) {
+          // Cloud links never change, so we only need to parse them once
+          cloudLinks = getCloudLinks(cloudUrls);
+          this.cloudLinks$.next(cloudLinks);
+        }
+      },
       setProjectName: (projectName: string) => {
         this.projectName$.next(projectName);
       },

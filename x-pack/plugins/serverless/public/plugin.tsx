@@ -69,6 +69,7 @@ export class ServerlessPlugin
     if (cloud.serverless.projectName) {
       project.setProjectName(cloud.serverless.projectName);
     }
+    project.setCloudUrls(cloud);
 
     const activeNavigationNodes$ = project.getActiveNavigationNodes$();
     const navigationTreeUi$ = project.getNavigationTreeUi$();
@@ -77,8 +78,7 @@ export class ServerlessPlugin
       setSideNavComponentDeprecated: (sideNavigationComponent) =>
         project.setSideNavComponent(sideNavigationComponent),
       initNavigation: (navigationTree$, { panelContentProvider, dataTestSubj } = {}) => {
-        project.initNavigation(navigationTree$, { cloudUrls: cloud });
-
+        project.initNavigation(navigationTree$);
         project.setSideNavComponent(() => (
           <SideNavComponent
             navProps={{
