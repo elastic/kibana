@@ -10,6 +10,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { CompleteExternalActionsTaskRunner } from './complete_external_actions_task_runner';
 import type { EndpointAppContext } from '../../types';
@@ -26,12 +27,14 @@ export interface CompleteExternalResponseActionsTaskSetupOptions {
 
 export interface CompleteExternalResponseActionsTaskStartOptions {
   taskManager: TaskManagerStartContract;
+  esClient: ElasticsearchClient;
 }
 
 export class CompleteExternalResponseActionsTask {
   private wasSetup = false;
   private wasStarted = false;
   private log: Logger;
+  private esClient: ElasticsearchClient | undefined = undefined;
   private cleanup: (() => void | Promise<void>) | undefined;
   private taskTimeout = '20m'; // Default. Real value comes from server config
   private taskInterval = '30s'; // Default. Real value comes from server config
@@ -70,8 +73,15 @@ export class CompleteExternalResponseActionsTask {
         title: 'Security Solution Complete External Response Actions',
         timeout: this.taskTimeout,
         createTaskRunner: () => {
+          if (!this.esClient) {
+            throw new EndpointError(
+              `esClient not defined. Was [${this.constructor.name}.start()] called?`
+            );
+          }
+
           return new CompleteExternalActionsTaskRunner(
             this.options.endpointAppContext.service,
+            this.esClient,
             this.taskInterval
           );
         },
@@ -79,12 +89,13 @@ export class CompleteExternalResponseActionsTask {
     });
   }
 
-  public async start({ taskManager }: CompleteExternalResponseActionsTaskStartOptions) {
+  public async start({ taskManager, esClient }: CompleteExternalResponseActionsTaskStartOptions) {
     if (this.wasStarted) {
       throw new Error('Task has already been started!');
     }
 
     this.wasStarted = true;
+    this.esClient = esClient;
 
     if (!this.options.endpointAppContext.experimentalFeatures.responseActionsSentinelOneV2Enabled) {
       return;

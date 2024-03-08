@@ -6,13 +6,16 @@
  */
 
 import type { CancellableTask, RunContext } from '@kbn/task-manager-plugin/server/task';
-import type { Logger } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
+import { catchAndWrapError } from '../../utils';
 import { stringify } from '../../utils/stringify';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
 import type { BatchHandlerCallbackOptions } from '../../utils/queue_processor';
 import { QueueProcessor } from '../../utils/queue_processor';
 import type { LogsEndpointActionResponse } from '../../../../common/endpoint/types';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
+import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../../common/endpoint/constants';
 
 /**
  * A task manager runner responsible for checking the status of and completing pending actions
@@ -24,9 +27,11 @@ export class CompleteExternalActionsTaskRunner
   private readonly log: Logger;
   private updatesQueue: QueueProcessor<LogsEndpointActionResponse>;
   private abortController = new AbortController();
+  private errors: string[] = [];
 
   constructor(
     private readonly endpointContextServices: EndpointAppContextService,
+    private readonly esClient: ElasticsearchClient,
     private readonly nextRunInterval: string = '5m'
   ) {
     this.log = this.endpointContextServices.createLogger(
@@ -41,11 +46,30 @@ export class CompleteExternalActionsTaskRunner
     });
   }
 
-  private async queueBatchProcessor(
-    options: BatchHandlerCallbackOptions<LogsEndpointActionResponse>
-  ): Promise<void> {
-    // FIXME:PT implement
-    this.log.error(`TODO: Batch processing:\n${stringify(options.data)}`);
+  private async queueBatchProcessor({
+    batch,
+    data,
+  }: BatchHandlerCallbackOptions<LogsEndpointActionResponse>): Promise<void> {
+    const operations: BulkRequest<LogsEndpointActionResponse>['operations'] = [];
+
+    for (const actionResponseDoc of data) {
+      operations.push({ create: { _index: ENDPOINT_ACTION_RESPONSES_INDEX } }, actionResponseDoc);
+    }
+
+    const bulkResponse = await this.esClient
+      .bulk({
+        index: ENDPOINT_ACTION_RESPONSES_INDEX,
+        operations,
+      })
+      .catch(catchAndWrapError);
+
+    if (bulkResponse.errors) {
+      this.errors.push(
+        `Batch [${batch}] processing of [${
+          data.length
+        }] items generated the following errors:\n${stringify(bulkResponse)}`
+      );
+    }
   }
 
   private getNextRunDate(): Date | undefined {
@@ -92,15 +116,24 @@ export class CompleteExternalActionsTaskRunner
 
           return agentTypeActionsClient.processPendingActions({
             abortSignal: this.abortController.signal,
-            addToQueue: this.updatesQueue.addToQueue,
+            addToQueue: this.updatesQueue.addToQueue.bind(this.updatesQueue),
           });
         }
       )
     );
 
     await this.updatesQueue.complete();
-    this.log.debug(`Completed: Checking status of external response actions`);
     this.abortController.abort(`Run complete.`);
+
+    if (this.errors.length) {
+      this.log.error(
+        `${this.errors.length} errors were encountered while running task:\n${this.errors.join(
+          '\n'
+        )}`
+      );
+    }
+
+    this.log.debug(`Completed: Checking status of external response actions`);
 
     return {
       state: {},

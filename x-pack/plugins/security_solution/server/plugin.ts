@@ -647,7 +647,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     if (plugins.taskManager) {
-      this.completeExternalResponseActionsTask.start({ taskManager: plugins.taskManager });
+      this.completeExternalResponseActionsTask.start({
+        taskManager: plugins.taskManager,
+        esClient: core.elasticsearch.client.asInternalUser,
+      });
     }
 
     this.telemetryReceiver.start(
