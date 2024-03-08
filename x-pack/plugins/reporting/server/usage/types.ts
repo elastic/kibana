@@ -244,12 +244,6 @@ export interface MetricsStats {
   png_memory: MetricsPercentiles;
 }
 
-export type ReportingUsageType = RangeStats & {
-  available: boolean;
-  enabled: boolean;
-  last7Days: RangeStats;
-};
-
 export type FeatureAvailabilityMap = Record<string, boolean>;
 
 export enum EventType {
