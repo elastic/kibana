@@ -536,14 +536,12 @@ export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 
-export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps) => {
+export const fillDefineNewTermsRule = (rule: NewTermsRuleCreateProps) => {
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
     .type(rule.query || '');
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).click();
-  cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).type(rule.new_terms_fields[0], { delay: 35 });
-
-  cy.get(EUI_FILTER_SELECT_ITEM).click();
+  cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).type(`${rule.new_terms_fields[0]}{enter}`);
 
   cy.focused().type('{esc}'); // Close combobox dropdown so next inputs can be interacted with
   const historySize = convertHistoryStartToSize(rule.history_window_start);
@@ -552,6 +550,10 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_SIZE).type('{selectAll}');
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_SIZE).type(historySizeNumber);
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_TIME_TYPE).select(historySizeType);
+};
+
+export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps) => {
+  fillDefineNewTermsRule(rule);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 

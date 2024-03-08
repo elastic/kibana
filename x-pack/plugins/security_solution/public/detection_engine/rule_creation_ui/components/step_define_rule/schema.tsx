@@ -574,6 +574,77 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
+  newTermsFields: {
+    type: FIELD_TYPES.COMBO_BOX,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.newTermsFieldsLabel',
+      {
+        defaultMessage: 'Fields',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldNewTermsFieldHelpText',
+      {
+        defaultMessage: 'Select a field to check for new terms.',
+      }
+    ),
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData }] = args;
+          const needsValidation = isNewTermsRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+
+          return fieldValidators.emptyField(
+            i18n.translate(
+              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.newTermsFieldsMin',
+              {
+                defaultMessage: 'A minimum of one field is required.',
+              }
+            )
+          )(...args);
+        },
+      },
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData }] = args;
+          const needsValidation = isNewTermsRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+          return fieldValidators.maxLengthField({
+            length: MAX_NUMBER_OF_NEW_TERMS_FIELDS,
+            message: i18n.translate(
+              'xpack.securitySolution.detectionEngine.validations.stepDefineRule.newTermsFieldsMax',
+              {
+                defaultMessage: 'Number of fields must be 3 or less.',
+              }
+            ),
+          })(...args);
+        },
+      },
+    ],
+  },
+  historyWindowSize: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.historyWindowSizeLabel',
+      {
+        defaultMessage: 'History Window Size',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.historyWindowSizeHelpText',
+      {
+        defaultMessage: "New terms rules only alert if terms don't appear in historical data.",
+      }
+    ),
+  },
   groupByFields: {
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
@@ -644,77 +715,6 @@ export const schema: FormSchema<DefineStepRule> = {
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.suppressionMissingFieldsLabel',
       {
         defaultMessage: 'If a suppression field is missing',
-      }
-    ),
-  },
-  newTermsFields: {
-    type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.newTermsFieldsLabel',
-      {
-        defaultMessage: 'Fields',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldNewTermsFieldHelpText',
-      {
-        defaultMessage: 'Select a field to check for new terms.',
-      }
-    ),
-    validations: [
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData }] = args;
-          const needsValidation = isNewTermsRule(formData.ruleType);
-          if (!needsValidation) {
-            return;
-          }
-
-          return fieldValidators.emptyField(
-            i18n.translate(
-              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.newTermsFieldsMin',
-              {
-                defaultMessage: 'A minimum of one field is required.',
-              }
-            )
-          )(...args);
-        },
-      },
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData }] = args;
-          const needsValidation = isNewTermsRule(formData.ruleType);
-          if (!needsValidation) {
-            return;
-          }
-          return fieldValidators.maxLengthField({
-            length: MAX_NUMBER_OF_NEW_TERMS_FIELDS,
-            message: i18n.translate(
-              'xpack.securitySolution.detectionEngine.validations.stepDefineRule.newTermsFieldsMax',
-              {
-                defaultMessage: 'Number of fields must be 3 or less.',
-              }
-            ),
-          })(...args);
-        },
-      },
-    ],
-  },
-  historyWindowSize: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.historyWindowSizeLabel',
-      {
-        defaultMessage: 'History Window Size',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.historyWindowSizeHelpText',
-      {
-        defaultMessage: "New terms rules only alert if terms don't appear in historical data.",
       }
     ),
   },
