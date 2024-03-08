@@ -405,12 +405,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     }
   }
 
-  /**
-   * Writes a Response Action response document to the Endpoint index
-   * @param options
-   * @protected
-   */
-  protected async writeActionResponseToEndpointIndex<
+  protected buildActionResponseEsDoc<
     // Default type purposely set to empty object in order to ensure proper types are used when calling the method
     TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
   >({
@@ -418,9 +413,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     error,
     agentId,
     data,
-  }: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>): Promise<
-    LogsEndpointActionResponse<TOutputContent>
-  > {
+  }: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>): LogsEndpointActionResponse<TOutputContent> {
     const timestamp = new Date().toISOString();
     const doc: LogsEndpointActionResponse<TOutputContent> = {
       '@timestamp': timestamp,
@@ -436,6 +429,22 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       },
       error,
     };
+
+    return doc;
+  }
+
+  /**
+   * Writes a Response Action response document to the Endpoint index
+   * @param options
+   * @protected
+   */
+  protected async writeActionResponseToEndpointIndex<
+    // Default type purposely set to empty object in order to ensure proper types are used when calling the method
+    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+  >(
+    options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>
+  ): Promise<LogsEndpointActionResponse<TOutputContent>> {
+    const doc = this.buildActionResponseEsDoc(options);
 
     this.log.debug(`Writing response action response:\n${stringify(doc)}`);
 
@@ -622,6 +631,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {
-    this.log.warn(`#processPendingActions() method is not implemented!`);
+    this.log.debug(`#processPendingActions() method is not implemented for ${this.agentType}!`);
   }
 }
