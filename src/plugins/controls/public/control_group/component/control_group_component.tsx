@@ -114,6 +114,24 @@ export const ControlGroup = () => {
     [showAddButton, showApplySelections]
   );
 
+  const ApplyButtonComponent = useMemo(() => {
+    return (
+      <EuiButtonIcon
+        size="m"
+        disabled={!applyButtonEnabled}
+        iconSize="m"
+        display="fill"
+        color={'success'}
+        iconType={'check'}
+        data-test-subj="controlGroup--applyFiltersButton"
+        aria-label={ControlGroupStrings.management.getApplyButtonTitle(applyButtonEnabled)}
+        onClick={() => {
+          if (unpublishedFilters) controlGroup.publishFilters(unpublishedFilters);
+        }}
+      />
+    );
+  }, [applyButtonEnabled, unpublishedFilters, controlGroup]);
+
   const tourStep = useMemo(() => {
     if (
       !renderTourStep ||
@@ -307,21 +325,15 @@ export const ControlGroup = () => {
                   )}
                   {showApplySelections && (
                     <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        size="m"
-                        disabled={!applyButtonEnabled}
-                        iconSize="m"
-                        display="fill"
-                        color={'success'}
-                        iconType={'check'}
-                        data-test-subj="controlGroup--applyFiltersButton"
-                        aria-label={ControlGroupStrings.management.getApplyButtonTitle(
-                          applyButtonEnabled
-                        )}
-                        onClick={() => {
-                          if (unpublishedFilters) controlGroup.publishFilters(unpublishedFilters);
-                        }}
-                      />
+                      {applyButtonEnabled ? (
+                        ApplyButtonComponent
+                      ) : (
+                        <EuiToolTip
+                          content={ControlGroupStrings.management.getApplyButtonTitle(false)}
+                        >
+                          {ApplyButtonComponent}
+                        </EuiToolTip>
+                      )}
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
