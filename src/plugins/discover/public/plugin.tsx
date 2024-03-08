@@ -69,13 +69,10 @@ import {
 } from '../common';
 import {
   createDiscoverRootContext,
-  DiscoverRootContext,
-  RegisterCustomizationProfile,
-} from './customizations';
-import {
-  createRegisterCustomizationProfile,
   createProfileRegistry,
-} from './customizations/profile_registry';
+  DiscoverRootContext,
+  RegisterDiscoverProfile,
+} from './customizations';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 import {
   DiscoverContainerInternal,
@@ -155,7 +152,7 @@ export interface DiscoverStart {
    */
   readonly locator: undefined | DiscoverAppLocator;
   readonly DiscoverContainer: ComponentType<DiscoverContainerProps>;
-  readonly registerCustomizationProfile: RegisterCustomizationProfile;
+  readonly registerProfile: RegisterDiscoverProfile;
 }
 
 /**
@@ -430,7 +427,7 @@ export class DiscoverPlugin
       DiscoverContainer: (props: DiscoverContainerProps) => (
         <DiscoverContainerInternal getDiscoverServices={getDiscoverServicesInternal} {...props} />
       ),
-      registerCustomizationProfile: createRegisterCustomizationProfile(this.profileRegistry),
+      registerProfile: this.profileRegistry.set,
     };
   }
 

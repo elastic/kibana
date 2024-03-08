@@ -7,62 +7,78 @@
  */
 
 import type { AppDeepLink, AppUpdater } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { map, Observable, BehaviorSubject } from 'rxjs';
-import type { RegisterCustomizationProfile, DiscoverProfile, DiscoverProfileId } from './types';
+import type { CustomizationCallback } from './types';
+
+export type DiscoverProfileId = string;
+
+export interface DiscoverProfile {
+  id: DiscoverProfileId;
+  displayName: string;
+  customizationCallbacks: CustomizationCallback[];
+  deepLinks: AppDeepLink[];
+}
+
+export type DiscoverProfileOptions = Pick<DiscoverProfile, 'id' | 'displayName'> &
+  Partial<DiscoverProfile>;
+
+export type RegisterDiscoverProfile = (options: DiscoverProfileOptions) => void;
 
 export interface DiscoverProfileRegistry {
   get(id: DiscoverProfileId): DiscoverProfile | undefined;
-  set(profile: DiscoverProfile): void;
+  set: RegisterDiscoverProfile;
   getContributedAppState$: () => Observable<AppUpdater>;
 }
 
+export const DISCOVER_DEFAULT_PROFILE_ID = 'default';
+
 export const createProfileRegistry = (): DiscoverProfileRegistry => {
-  const profiles = new Map<string, DiscoverProfile>([['default', createProfile('default')]]);
-  const profiles$ = new BehaviorSubject<DiscoverProfile[]>([...profiles.values()]);
+  const profiles = createProfilesMap();
+  const profiles$ = new BehaviorSubject([...profiles.values()]);
 
   return {
     get: (id) => profiles.get(id.toLowerCase()),
-    set: (profile) => {
-      profiles.set(profile.id.toLowerCase(), profile);
+    set: (options) => {
+      profiles.set(options.id.toLowerCase(), createProfile(options));
       profiles$.next([...profiles.values()]);
     },
     getContributedAppState$() {
       return profiles$.pipe(
-        map((profilesList) => profilesList.flatMap((profile) => profile.deepLinks ?? [])),
-        map((profilesDeepLinks) => (app) => ({
-          deepLinks: getUniqueDeepLinks([...(app.deepLinks ?? []), ...profilesDeepLinks]),
-        }))
+        map((profilesList) => profilesList.flatMap((profile) => profile.deepLinks)),
+        map(
+          (profilesDeepLinks): AppUpdater =>
+            (app) => ({
+              deepLinks: getUniqueDeepLinks([...(app.deepLinks ?? []), ...profilesDeepLinks]),
+            })
+        )
       );
     },
   };
 };
 
-export const createRegisterCustomizationProfile =
-  (profileRegistry: DiscoverProfileRegistry): RegisterCustomizationProfile =>
-  (id, options) => {
-    const profile = profileRegistry.get(id) ?? createProfile(id);
-
-    const { customize, deepLinks } = options;
-
-    profile.customizationCallbacks.push(customize);
-
-    if (Array.isArray(deepLinks) && profile.deepLinks) {
-      profile.deepLinks = getUniqueDeepLinks([...profile.deepLinks, ...deepLinks]);
-    } else if (Array.isArray(deepLinks)) {
-      profile.deepLinks = getUniqueDeepLinks(deepLinks);
-    }
-
-    profileRegistry.set(profile);
-  };
-
 /**
  * Utils
  */
-const createProfile = (id: DiscoverProfileId): DiscoverProfile => ({
-  id,
+
+export const createProfile = (options: DiscoverProfileOptions): DiscoverProfile => ({
   customizationCallbacks: [],
   deepLinks: [],
+  ...options,
 });
+
+const defaultProfileName = i18n.translate('discover.profiles.defaultProfileName', {
+  defaultMessage: 'Discover',
+});
+
+const createProfilesMap = () => {
+  return new Map<string, DiscoverProfile>([
+    [
+      DISCOVER_DEFAULT_PROFILE_ID,
+      createProfile({ id: DISCOVER_DEFAULT_PROFILE_ID, displayName: defaultProfileName }),
+    ],
+  ]);
+};
 
 const getUniqueDeepLinks = (deepLinks: AppDeepLink[]): AppDeepLink[] => {
   const mapValues = deepLinks

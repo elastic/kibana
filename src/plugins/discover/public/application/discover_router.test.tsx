@@ -20,10 +20,14 @@ import {
 import { DiscoverMainRoute } from './main';
 import { SingleDocRoute } from './doc';
 import { ContextAppRoute } from './context';
-import { createProfileRegistry } from '../customizations/profile_registry';
 import { addProfile } from '../../common/customizations';
 import { NotFoundRoute } from './not_found';
-import { createDiscoverRootContext } from '../customizations';
+import {
+  createDiscoverRootContext,
+  createProfile,
+  createProfileRegistry,
+  DISCOVER_DEFAULT_PROFILE_ID,
+} from '../customizations';
 
 let mockProfile: string | undefined;
 
@@ -134,15 +138,17 @@ describe('DiscoverRoutes', () => {
 const profileRegistry = createProfileRegistry();
 const callbacks = [jest.fn()];
 
-profileRegistry.set({
-  id: 'default',
-  customizationCallbacks: callbacks,
-});
+profileRegistry.set(
+  createProfile({
+    id: DISCOVER_DEFAULT_PROFILE_ID,
+    displayName: DISCOVER_DEFAULT_PROFILE_ID,
+    customizationCallbacks: callbacks,
+  })
+);
 
-profileRegistry.set({
-  id: 'test',
-  customizationCallbacks: callbacks,
-});
+profileRegistry.set(
+  createProfile({ id: 'test', displayName: 'test', customizationCallbacks: callbacks })
+);
 
 describe('CustomDiscoverRoutes', () => {
   afterEach(() => {

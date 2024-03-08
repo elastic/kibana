@@ -20,10 +20,11 @@ import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 import {
   CustomizationCallback,
+  DiscoverProfileRegistry,
   DiscoverRootContext,
   DiscoverRootContextProvider,
+  DISCOVER_DEFAULT_PROFILE_ID,
 } from '../customizations';
-import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
 import { addProfile } from '../../common/customizations';
 
 export interface DiscoverRoutesProps {
@@ -106,7 +107,7 @@ export const DiscoverRouter = ({
   ...routeProps
 }: DiscoverRouterProps) => {
   const customizationCallbacks = useMemo(
-    () => profileRegistry.get('default')?.customizationCallbacks ?? [],
+    () => profileRegistry.get(DISCOVER_DEFAULT_PROFILE_ID)?.customizationCallbacks ?? [],
     [profileRegistry]
   );
 

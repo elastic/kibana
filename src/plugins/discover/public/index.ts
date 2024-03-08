@@ -23,7 +23,7 @@ export type {
   CustomizationCallback,
   DiscoverProfileId,
   DiscoverProfileOptions,
-  RegisterCustomizationProfile,
+  RegisterDiscoverProfile,
   DiscoverCustomization,
   DiscoverCustomizationService,
   FlyoutCustomization,
