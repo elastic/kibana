@@ -6,19 +6,22 @@
  */
 
 // TODO Consolidate with duplicate component `CorrelationsProgressControls` in
-// `x-pack/plugins/apm/public/components/app/correlations/progress_controls.tsx`
+// `x-pack/plugins/observability_solution/apm/public/components/app/correlations/progress_controls.tsx`
 import { cloneDeep } from 'lodash';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { buildEsQuery, Query, Filter } from '@kbn/es-query';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { Query, Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getEsQueryConfig, SearchSource } from '@kbn/data-plugin/common';
-import { FilterManager, mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
-import { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { isDefined } from '@kbn/ml-is-defined';
-import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
+import type { SavedSearchSavedObject } from '../../../../common/types';
+import { isSavedSearchSavedObject } from '../../../../common/types';
 
 /**
  * Parse the stringified searchSourceJSON

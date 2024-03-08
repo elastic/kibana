@@ -14,6 +14,7 @@ import {
   budgetingMethodSchema,
   dateType,
   durationType,
+  groupingsSchema,
   histogramIndicatorSchema,
   historicalSummarySchema,
   indicatorSchema,
@@ -34,6 +35,9 @@ import {
   timesliceMetricBasicMetricWithField,
   timesliceMetricDocCountMetric,
   timesliceMetricPercentileMetric,
+  allOrAnyStringOrArray,
+  kqlWithFiltersSchema,
+  querySchema,
 } from '../schema';
 
 const createSLOParamsSchema = t.type({
@@ -50,7 +54,7 @@ const createSLOParamsSchema = t.type({
       id: sloIdSchema,
       settings: optionalSettingsSchema,
       tags: tagsSchema,
-      groupBy: allOrAnyString,
+      groupBy: allOrAnyStringOrArray,
       revision: t.number,
     }),
   ]),
@@ -71,6 +75,9 @@ const getPreviewDataParamsSchema = t.type({
     }),
     t.partial({
       objective: objectiveSchema,
+      instanceId: t.string,
+      groupBy: t.string,
+      groupings: t.record(t.string, t.unknown),
     }),
   ]),
 });
@@ -132,7 +139,7 @@ const sloResponseSchema = t.intersection([
     settings: settingsSchema,
     enabled: t.boolean,
     tags: tagsSchema,
-    groupBy: allOrAnyString,
+    groupBy: allOrAnyStringOrArray,
     createdAt: dateType,
     updatedAt: dateType,
     version: t.number,
@@ -144,7 +151,7 @@ const sloResponseSchema = t.intersection([
 
 const sloWithSummaryResponseSchema = t.intersection([
   sloResponseSchema,
-  t.type({ summary: summarySchema }),
+  t.type({ summary: summarySchema, groupings: groupingsSchema }),
 ]);
 
 const sloGroupWithSummaryResponseSchema = t.type({
@@ -182,7 +189,7 @@ const updateSLOParamsSchema = t.type({
     objective: objectiveSchema,
     settings: optionalSettingsSchema,
     tags: tagsSchema,
-    groupBy: allOrAnyString,
+    groupBy: allOrAnyStringOrArray,
   }),
 });
 
@@ -217,7 +224,9 @@ const deleteSLOInstancesParamsSchema = t.type({
 });
 
 const fetchHistoricalSummaryParamsSchema = t.type({
-  body: t.type({ list: t.array(t.type({ sloId: sloIdSchema, instanceId: allOrAnyString })) }),
+  body: t.type({
+    list: t.array(t.type({ sloId: sloIdSchema, instanceId: t.string })),
+  }),
 });
 
 const fetchHistoricalSummaryResponseSchema = t.array(
@@ -272,7 +281,7 @@ const getSLOInstancesParamsSchema = t.type({
 });
 
 const getSLOInstancesResponseSchema = t.type({
-  groupBy: t.string,
+  groupBy: t.union([t.string, t.array(t.string)]),
   instances: t.array(t.string),
 });
 
@@ -334,6 +343,8 @@ type TimesclieMetricPercentileMetric = t.OutputOf<typeof timesliceMetricPercenti
 type HistogramIndicator = t.OutputOf<typeof histogramIndicatorSchema>;
 type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 type GroupSummary = t.TypeOf<typeof groupSummarySchema>;
+type KqlWithFiltersSchema = t.TypeOf<typeof kqlWithFiltersSchema>;
+type QuerySchema = t.TypeOf<typeof querySchema>;
 
 export {
   createSLOParamsSchema,
@@ -409,4 +420,6 @@ export type {
   KQLCustomIndicator,
   TimeWindow,
   GroupSummary,
+  KqlWithFiltersSchema,
+  QuerySchema,
 };
