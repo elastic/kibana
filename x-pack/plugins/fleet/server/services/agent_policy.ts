@@ -6,7 +6,7 @@
  */
 
 import { chunk, groupBy, isEqual, keyBy, omit, pick } from 'lodash';
-import { v5 as uuidv5 } from 'uuid';
+import { v5 as uuidv5, v4 } from 'uuid';
 import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt } from 'semver';
@@ -1119,6 +1119,7 @@ class AgentPolicyService {
   }
 
   public async deployPolicies(soClient: SavedObjectsClientContract, agentPolicyIds: string[]) {
+    const uid = v4();
     // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
     const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
@@ -1135,6 +1136,7 @@ class AgentPolicyService {
 
     const policies = await agentPolicyService.getByIDs(soClient, agentPolicyIds);
     const policiesMap = keyBy(policies, 'id');
+    console.time(`🐕 getFullPolicies ${uid}`);
     const fullPolicies = await pMap(
       agentPolicyIds,
       // There are some potential performance concerns around using `getFullAgentPolicy` in this context, e.g.
@@ -1145,6 +1147,7 @@ class AgentPolicyService {
         concurrency: 50,
       }
     );
+    console.timeEnd(`🐕 getFullPolicies ${uid}`);
 
     const fleetServerPolicies = fullPolicies.reduce((acc, fullPolicy) => {
       if (!fullPolicy || !fullPolicy.revision) {
@@ -1184,12 +1187,13 @@ class AgentPolicyService {
       },
       fleetServerPolicy,
     ]);
-
+    console.time(`🐕 esClient.bulk ${uid}`);
     const bulkResponse = await esClient.bulk({
       index: AGENT_POLICY_INDEX,
       operations: fleetServerPoliciesBulkBody,
       refresh: 'wait_for',
     });
+    console.timeEnd(`🐕 esClient.bulk ${uid}`);
 
     if (bulkResponse.errors) {
       const logger = appContextService.getLogger();
@@ -1208,6 +1212,7 @@ class AgentPolicyService {
       );
     }
 
+    console.time(`🐕 promiseAll ${uid}`);
     await Promise.all(
       fleetServerPolicies
         .filter((fleetServerPolicy) => {
@@ -1230,6 +1235,7 @@ class AgentPolicyService {
           )
         )
     );
+    console.timeEnd(`🐕 promiseAll ${uid}`);
   }
 
   public async deleteFleetServerPoliciesForPolicyId(

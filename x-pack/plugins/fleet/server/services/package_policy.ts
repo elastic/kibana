@@ -1086,7 +1086,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     console.timeEnd('🥭 B');
     console.log('🧀 package_policy.ts:1087 🥭 ', policiesToUpdate.length);
 
-    console.time('🥭 C'); // todo SECOND SLOWEST, ~0.7 sec
+    console.time('🥭 C'); // todo SECOND SLOWEST, ~0.5 sec
 
     const { saved_objects: updatedPolicies } = await soClient.bulkUpdate<PackagePolicySOAttributes>(
       policiesToUpdate
