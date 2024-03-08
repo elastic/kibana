@@ -168,6 +168,7 @@ export const getSLOSummaryPipelineTemplate = (
         set: {
           field: 'slo.indicator.params',
           value: slo.indicator.params,
+          ignore_failure: true,
         },
       },
       {
