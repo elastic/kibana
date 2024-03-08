@@ -49,10 +49,7 @@ export interface OracleRecord {
   version: string;
 }
 
-export interface SOError {
-  id?: string;
-  error: SavedObjectError | DecoratedError;
-}
+export type OracleSOError = SavedObjectError | DecoratedError;
 
 export interface OracleRecordError {
   id?: string;
@@ -67,7 +64,7 @@ export interface OracleRecordCreateRequest {
   grouping: Record<string, unknown>;
 }
 
-export type BulkGetOracleRecordsResponse = Array<OracleRecord | SavedObjectError>;
+export type BulkGetOracleRecordsResponse = Array<OracleRecord | OracleRecordError>;
 
 export type OracleRecordAttributes = Omit<OracleRecord, 'id' | 'version'>;
 

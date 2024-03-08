@@ -9,17 +9,10 @@ import { isPlainObject, partition, toString } from 'lodash';
 import type { CaseRequestCustomField, CaseRequestCustomFields } from '../../../common/types/api';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import { VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS } from './constants';
-import type {
-  BulkGetOracleRecordsResponse,
-  OracleRecord,
-  OracleRecordError,
-  SOError,
-} from './types';
+import type { BulkGetOracleRecordsResponse, OracleRecord, OracleRecordError } from './types';
 
 export const isRecordError = (so: OracleRecord | OracleRecordError): so is OracleRecordError =>
   (so as OracleRecordError).error != null;
-
-export const isSOError = (so: { error?: unknown }): so is SOError => so.error != null;
 
 export const partitionRecordsByError = (
   res: BulkGetOracleRecordsResponse
