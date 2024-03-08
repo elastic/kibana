@@ -26,6 +26,7 @@ import {
   DISCOVER_DEFAULT_PROFILE_ID,
 } from '../customizations';
 import { addProfile } from '../../common/customizations';
+import { DiscoverProfilesProvider } from '../customizations/profiles_provider';
 
 export interface DiscoverRoutesProps {
   prefix?: string;
@@ -114,18 +115,20 @@ export const DiscoverRouter = ({
   return (
     <KibanaContextProvider services={services}>
       <DiscoverRootContextProvider value={rootContext}>
-        <EuiErrorBoundary>
-          <Router history={history} data-test-subj="discover-react-router">
-            <Routes>
-              <Route path={addProfile('', ':profile')}>
-                <CustomDiscoverRoutes profileRegistry={profileRegistry} {...routeProps} />
-              </Route>
-              <Route path="/">
-                <DiscoverRoutes customizationCallbacks={customizationCallbacks} {...routeProps} />
-              </Route>
-            </Routes>
-          </Router>
-        </EuiErrorBoundary>
+        <DiscoverProfilesProvider value={profileRegistry}>
+          <EuiErrorBoundary>
+            <Router history={history} data-test-subj="discover-react-router">
+              <Routes>
+                <Route path={addProfile('', ':profile')}>
+                  <CustomDiscoverRoutes profileRegistry={profileRegistry} {...routeProps} />
+                </Route>
+                <Route path="/">
+                  <DiscoverRoutes customizationCallbacks={customizationCallbacks} {...routeProps} />
+                </Route>
+              </Routes>
+            </Router>
+          </EuiErrorBoundary>
+        </DiscoverProfilesProvider>
       </DiscoverRootContextProvider>
     </KibanaContextProvider>
   );

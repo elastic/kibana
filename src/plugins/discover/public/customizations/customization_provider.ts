@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isFunction } from 'lodash';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
 import type { DiscoverStateContainer } from '../application/main/services/discover_state';
 import type { CustomizationCallback } from './types';
 import {
@@ -31,7 +30,7 @@ export const useDiscoverCustomizationService = ({
 }) => {
   const [customizationService, setCustomizationService] = useState<DiscoverCustomizationService>();
 
-  useEffectOnce(() => {
+  useEffect(() => {
     const customizations = createCustomizationService();
     const callbacks = customizationCallbacks.map((callback) =>
       Promise.resolve(callback({ customizations, stateContainer }))
@@ -47,7 +46,7 @@ export const useDiscoverCustomizationService = ({
         cleanups.forEach((cleanup) => cleanup());
       });
     };
-  });
+  }, [customizationCallbacks, stateContainer]);
 
   const isInitialized = Boolean(customizationService);
 

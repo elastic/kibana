@@ -8,6 +8,7 @@
 
 import type { AppDeepLink, AppUpdater } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { sortBy } from 'lodash';
 import { map, Observable, BehaviorSubject } from 'rxjs';
 import type { CustomizationCallback } from './types';
 
@@ -27,6 +28,7 @@ export type RegisterDiscoverProfile = (options: DiscoverProfileOptions) => void;
 
 export interface DiscoverProfileRegistry {
   get(id: DiscoverProfileId): DiscoverProfile | undefined;
+  getAll(): DiscoverProfile[];
   set: RegisterDiscoverProfile;
   getContributedAppState$: () => Observable<AppUpdater>;
 }
@@ -34,11 +36,12 @@ export interface DiscoverProfileRegistry {
 export const DISCOVER_DEFAULT_PROFILE_ID = 'default';
 
 export const createProfileRegistry = (): DiscoverProfileRegistry => {
-  const profiles = createProfilesMap();
+  const profiles = new Map<string, DiscoverProfile>([[defaultProfile.id, defaultProfile]]);
   const profiles$ = new BehaviorSubject([...profiles.values()]);
 
   return {
     get: (id) => profiles.get(id.toLowerCase()),
+    getAll: () => sortBy(profiles$.getValue(), 'displayName'),
     set: (options) => {
       profiles.set(options.id.toLowerCase(), createProfile(options));
       profiles$.next([...profiles.values()]);
@@ -71,14 +74,10 @@ const defaultProfileName = i18n.translate('discover.profiles.defaultProfileName'
   defaultMessage: 'Discover',
 });
 
-const createProfilesMap = () => {
-  return new Map<string, DiscoverProfile>([
-    [
-      DISCOVER_DEFAULT_PROFILE_ID,
-      createProfile({ id: DISCOVER_DEFAULT_PROFILE_ID, displayName: defaultProfileName }),
-    ],
-  ]);
-};
+const defaultProfile = createProfile({
+  id: DISCOVER_DEFAULT_PROFILE_ID,
+  displayName: defaultProfileName,
+});
 
 const getUniqueDeepLinks = (deepLinks: AppDeepLink[]): AppDeepLink[] => {
   const mapValues = deepLinks
