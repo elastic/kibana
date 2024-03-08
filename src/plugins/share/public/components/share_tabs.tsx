@@ -8,7 +8,7 @@
 
 import { Capabilities } from '@kbn/core-capabilities-common';
 import React, { useCallback } from 'react';
-import { ShareModal } from '@kbn/share-modal';
+import { TabbedModal } from '@kbn/shared-ux-tabbed-modal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { LocatorPublic, AnonymousAccessServiceContract } from '../../common';
@@ -85,7 +85,6 @@ export const ShareMenuTabs = ({
 
   const getTabs = () => {
     const tabs = [];
-
     tabs.push({
       id: 'link',
       name: i18n.translate('share.contextMenu.permalinksTab', {
@@ -93,8 +92,9 @@ export const ShareMenuTabs = ({
       }),
       // do not break functional tests
       'data-test-subj': 'Permalinks',
-      action: buttonHandler().filter(({ id }) => id === 'link')[0],
-      content: (
+      modalActionBtn: buttonHandler().filter(({ id }) => id === 'link')[0],
+      title: `Share this ${objectType}`,
+      content: () => (
         <LinkModal
           objectType={objectType}
           objectId={objectId}
@@ -121,8 +121,8 @@ export const ShareMenuTabs = ({
         name: i18n.translate('share.contextMenu.embedCodeTab', {
           defaultMessage: 'Embed',
         }),
-        action: buttonHandler().filter(({ id }) => id === 'embed')[0],
-        content: (
+        ModalActionBtn: buttonHandler().filter(({ id }) => id === 'embed')[0],
+        content: () => (
           <EmbedModal
             urlParamExtensions={embedUrlParamExtensions}
             urlService={urlService}
@@ -156,7 +156,7 @@ export const ShareMenuTabs = ({
   ];
 
   return (
-    <ShareModal
+    <TabbedModal
       objectType={objectType}
       modalBodyDescriptions={getModalBodyDescriptions()}
       onClose={onClose}
