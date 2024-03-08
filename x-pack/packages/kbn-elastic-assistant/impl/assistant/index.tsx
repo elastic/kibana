@@ -250,7 +250,7 @@ const AssistantComponent: React.FC<Props> = ({
     setTimeout(() => {
       setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation, showAnonymizedValues));
     }, 0);
-  }, [augmentMessageCodeBlocks, currentConversation]);
+  }, [augmentMessageCodeBlocks, currentConversation, showAnonymizedValues]);
 
   const isSendingDisabled = useMemo(() => {
     return isDisabled || showMissingConnectorCallout;
