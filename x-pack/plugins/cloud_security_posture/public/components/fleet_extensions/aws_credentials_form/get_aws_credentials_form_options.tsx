@@ -70,7 +70,10 @@ const AWS_FIELD_LABEL = {
   }),
 };
 
-export type AwsCredentialsFields = Record<string, { label: string; type?: 'password' | 'text' }>;
+export type AwsCredentialsFields = Record<
+  string,
+  { label: string; type?: 'password' | 'text'; dataTestId: string }
+>;
 
 export interface AwsOptionValue {
   label: string;
@@ -88,6 +91,7 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AwsCred
         label: field.label,
         type: field.type || 'text',
         value: inputVar.value,
+        dataTestId: field.dataTestId,
       } as const;
     });
 
@@ -131,6 +135,7 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
         label: i18n.translate('xpack.csp.awsIntegration.roleArnLabel', {
           defaultMessage: 'Role ARN',
         }),
+        dataTestId: 'roleArnInput',
       },
     },
   },
@@ -140,8 +145,12 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
     }),
     info: DirectAccessKeysDescription,
     fields: {
-      access_key_id: { label: AWS_FIELD_LABEL.access_key_id },
-      secret_access_key: { label: AWS_FIELD_LABEL.secret_access_key, type: 'password' },
+      access_key_id: { label: AWS_FIELD_LABEL.access_key_id, dataTestId: 'assumeRoleIdInput' },
+      secret_access_key: {
+        label: AWS_FIELD_LABEL.secret_access_key,
+        type: 'password',
+        dataTestId: 'assumeRoleIdSecretKey',
+      },
     },
   },
   temporary_keys: {
@@ -150,12 +159,20 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
       defaultMessage: 'Temporary keys',
     }),
     fields: {
-      access_key_id: { label: AWS_FIELD_LABEL.access_key_id },
-      secret_access_key: { label: AWS_FIELD_LABEL.secret_access_key, type: 'password' },
+      access_key_id: {
+        label: AWS_FIELD_LABEL.access_key_id,
+        dataTestId: 'temporaryKeysAccessKeyId',
+      },
+      secret_access_key: {
+        label: AWS_FIELD_LABEL.secret_access_key,
+        type: 'password',
+        dataTestId: 'temporaryKeysSecretAccessKey',
+      },
       session_token: {
         label: i18n.translate('xpack.csp.awsIntegration.sessionTokenLabel', {
           defaultMessage: 'Session Token',
         }),
+        dataTestId: 'temporaryKeysSessionToken',
       },
     },
   },
@@ -169,11 +186,13 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
         label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialFileLabel', {
           defaultMessage: 'Shared Credential File',
         }),
+        dataTestId: 'sharedCredentialFile',
       },
       credential_profile_name: {
         label: i18n.translate('xpack.csp.awsIntegration.credentialProfileNameLabel', {
           defaultMessage: 'Credential Profile Name',
         }),
+        dataTestId: 'credentialProfileName',
       },
     },
   },

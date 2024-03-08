@@ -21,6 +21,10 @@ export function AddCisIntegrationFormPageProvider({
       const fieldValue = await (await testSubjects.find('externalLink')).getAttribute('href');
       return fieldValue;
     },
+
+    getPostInstallCloudFormationModal: async () => {
+      return await testSubjects.find('postInstallCloudFormationModal');
+    },
   };
 
   const cisGcp = {
@@ -110,6 +114,10 @@ export function AddCisIntegrationFormPageProvider({
       const fieldValue = await (await testSubjects.find(field)).getAttribute(value);
       return fieldValue;
     },
+
+    selectValue: async (selector: string, value: string) => {
+      return testSubjects.selectValue(selector, value);
+    },
   };
 
   const isRadioButtonChecked = async (selector: string) => {
@@ -181,6 +189,10 @@ export function AddCisIntegrationFormPageProvider({
     return currentUrl;
   };
 
+  const waitForElementToAppear = async () => {
+    await PageObjects.common.sleep(10000);
+  };
+
   return {
     cisAws,
     cisGcp,
@@ -193,5 +205,6 @@ export function AddCisIntegrationFormPageProvider({
     clickFirstElementOnIntegrationTable,
     clickFirstElementOnIntegrationTableAddAgent,
     clickLaunchAndGetCurrentUrl,
+    waitForElementToAppear,
   };
 }

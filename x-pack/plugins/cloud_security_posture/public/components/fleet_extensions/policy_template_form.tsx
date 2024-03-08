@@ -110,12 +110,14 @@ const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps
           defaultMessage: 'Supported from integration version 1.5.0 and above',
         })
       : undefined,
+    testId: 'awsOrganizationTestId',
   },
   {
     id: AWS_SINGLE_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
       defaultMessage: 'Single Account',
     }),
+    testId: 'awsSingleTestId',
   },
 ];
 

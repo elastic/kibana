@@ -13,7 +13,13 @@ export const AwsInputVarFields = ({
   fields,
   onChange,
 }: {
-  fields: Array<AwsOptions[keyof AwsOptions]['fields'][number] & { value: string; id: string }>;
+  fields: Array<
+    AwsOptions[keyof AwsOptions]['fields'][number] & {
+      value: string;
+      id: string;
+      dataTestId: string;
+    }
+  >;
   onChange: (key: string, value: string) => void;
 }) => (
   <div>
@@ -27,6 +33,7 @@ export const AwsInputVarFields = ({
               fullWidth
               value={field.value || ''}
               onChange={(event) => onChange(field.id, event.target.value)}
+              data-test-subj={field.dataTestId}
             />
           )}
           {field.type === 'text' && (
@@ -35,6 +42,7 @@ export const AwsInputVarFields = ({
               fullWidth
               value={field.value || ''}
               onChange={(event) => onChange(field.id, event.target.value)}
+              data-test-subj={field.dataTestId}
             />
           )}
         </>
