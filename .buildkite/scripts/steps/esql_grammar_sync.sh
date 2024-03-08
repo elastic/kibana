@@ -1,5 +1,6 @@
 #!/bin/bash
 
+sed || exit
 
 cd "$PARENT_DIR" || exit
 
