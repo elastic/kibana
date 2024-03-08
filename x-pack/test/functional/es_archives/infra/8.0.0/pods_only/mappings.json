@@ -2,8 +2,7 @@
   "type": "index",
   "value": {
     "aliases": {
-      "metrics-fake_k8s": {
-      }
+      "metrics-fake_k8s": {}
     },
     "index": "high-cardinality-data-fake_k8s-2022-01-20",
     "mappings": {
@@ -268,7 +267,7 @@
         "auto_expand_replicas": "0-1",
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",

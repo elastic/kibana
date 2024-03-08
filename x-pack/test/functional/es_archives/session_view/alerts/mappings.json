@@ -5239,7 +5239,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "1700"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "1",

@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "filebeat-2019.07.25",
     "mappings": {
       "properties": {
@@ -1489,7 +1488,7 @@
         "auto_expand_replicas": "0-1",
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",
@@ -1511,8 +1510,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "metricbeat-2019.07.25",
     "mappings": {
       "_meta": {
@@ -17006,7 +17004,7 @@
         "auto_expand_replicas": "0-1",
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",

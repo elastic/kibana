@@ -2089,7 +2089,7 @@
         "auto_expand_replicas": "0-1",
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",
@@ -17599,7 +17599,7 @@
         "auto_expand_replicas": "0-1",
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",

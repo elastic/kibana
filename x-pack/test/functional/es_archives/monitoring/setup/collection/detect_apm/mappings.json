@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "apm-8.0.0-metric-2019.04.16",
     "mappings": {
       "_meta": {
@@ -1947,7 +1946,7 @@
         "codec": "best_compression",
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",

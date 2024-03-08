@@ -58,7 +58,7 @@ describe('cloneIndex', () => {
             "blocks.write": false,
             "mapping": Object {
               "total_fields": Object {
-                "limit": 1500,
+                "limit": 1000,
               },
             },
             "number_of_shards": 1,

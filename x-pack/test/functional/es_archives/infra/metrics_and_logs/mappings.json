@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "metricbeat-7.0.0-alpha1-2018.10.17",
     "mappings": {
       "_meta": {
@@ -8480,7 +8479,7 @@
         "codec": "best_compression",
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",
@@ -8755,8 +8754,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "filebeat-7.0.0-alpha1-2018.10.17",
     "mappings": {
       "_meta": {
@@ -10477,7 +10475,7 @@
         "codec": "best_compression",
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",

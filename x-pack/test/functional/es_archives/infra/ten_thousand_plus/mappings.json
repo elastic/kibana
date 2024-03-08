@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "filebeat-2021-10-18",
     "mappings": {
       "_meta": {
@@ -21713,7 +21712,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "auto_expand_replicas": "0-1",

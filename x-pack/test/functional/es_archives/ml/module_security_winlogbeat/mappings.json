@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "ft_module_security_winlogbeat",
     "mappings": {
       "_meta": {
@@ -4211,7 +4210,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "5000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "1",

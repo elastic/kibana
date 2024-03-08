@@ -224,7 +224,7 @@ export default function (providerContext: FtrProviderContext) {
                 lifecycle: { name: 'logs' },
                 default_pipeline: 'logs-dataset1-1.0.0',
                 mapping: {
-                  total_fields: { limit: '10000' },
+                  total_fields: { limit: '1000' },
                 },
               },
             },

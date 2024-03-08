@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "filebeat-7.0.0-iot-2019.06",
     "mappings": {
       "_meta": {
@@ -5425,7 +5424,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",

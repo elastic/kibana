@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "ft_module_metricbeat",
     "mappings": {
       "properties": {
@@ -429,7 +428,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "5000"
+            "limit": "1000"
           }
         },
         "auto_expand_replicas": "0-1",

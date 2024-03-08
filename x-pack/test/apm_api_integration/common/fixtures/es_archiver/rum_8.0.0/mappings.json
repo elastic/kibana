@@ -3869,7 +3869,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "max_docvalue_fields_search": "200",
@@ -7853,7 +7853,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "max_docvalue_fields_search": "200",

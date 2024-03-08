@@ -61,7 +61,7 @@ describe('createIndex', () => {
             "auto_expand_replicas": "0-1",
             "mapping": Object {
               "total_fields": Object {
-                "limit": 1500,
+                "limit": 1000,
               },
             },
             "number_of_shards": 1,
@@ -99,7 +99,7 @@ describe('createIndex', () => {
           "index": Object {
             "mapping": Object {
               "total_fields": Object {
-                "limit": 1500,
+                "limit": 1000,
               },
             },
           },

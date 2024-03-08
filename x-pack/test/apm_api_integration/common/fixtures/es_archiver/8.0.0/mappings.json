@@ -3792,7 +3792,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",
@@ -8189,7 +8189,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",
@@ -8650,8 +8650,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "apm-8.0.0-onboarding-2020.06.29",
     "mappings": {
       "_meta": {
@@ -12421,7 +12420,7 @@
         "codec": "best_compression",
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",
@@ -16659,7 +16658,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",
@@ -20905,7 +20904,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",
@@ -25245,7 +25244,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",

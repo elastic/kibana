@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "ft_logs-endpoint.events.file-default-000001",
     "mappings": {
       "_meta": {
@@ -679,7 +678,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "auto_expand_replicas": "0-1",
@@ -694,8 +693,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "ft_logs-endpoint.events.file-default-000002",
     "mappings": {
       "_meta": {
@@ -1372,7 +1370,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "auto_expand_replicas": "0-1",
@@ -1387,8 +1385,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "ft_logs-endpoint.events.library-default-000001",
     "mappings": {
       "_meta": {
@@ -2006,7 +2003,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "auto_expand_replicas": "0-1",
@@ -2021,8 +2018,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "ft_logs-endpoint.events.library-default-000002",
     "mappings": {
       "_meta": {
@@ -2640,7 +2636,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "auto_expand_replicas": "0-1",
@@ -2655,8 +2651,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "ft_logs-endpoint.events.network-default-000001",
     "mappings": {
       "_meta": {
@@ -3322,7 +3317,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "auto_expand_replicas": "0-1",
@@ -3337,8 +3332,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "ft_logs-endpoint.events.network-default-000002",
     "mappings": {
       "_meta": {
@@ -4004,7 +3998,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "auto_expand_replicas": "0-1",
@@ -4019,8 +4013,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "ft_logs-endpoint.events.process-default-000001",
     "mappings": {
       "_meta": {
@@ -4869,7 +4862,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "auto_expand_replicas": "0-1",
@@ -4884,8 +4877,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "ft_logs-endpoint.events.process-default-000002",
     "mappings": {
       "_meta": {
@@ -5734,7 +5726,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "auto_expand_replicas": "0-1",
@@ -5749,8 +5741,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "ft_logs-endpoint.events.registry-default-000001",
     "mappings": {
       "_meta": {
@@ -6255,7 +6246,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "auto_expand_replicas": "0-1",
@@ -6270,8 +6261,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "ft_logs-endpoint.events.registry-default-000002",
     "mappings": {
       "_meta": {
@@ -6776,7 +6766,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "auto_expand_replicas": "0-1",
@@ -6791,8 +6781,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "ft_logs-endpoint.events.security-default-000001",
     "mappings": {
       "_meta": {
@@ -7265,7 +7254,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "auto_expand_replicas": "0-1",
@@ -7280,8 +7269,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "ft_logs-endpoint.events.security-default-000002",
     "mappings": {
       "_meta": {
@@ -7754,7 +7742,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "auto_expand_replicas": "0-1",

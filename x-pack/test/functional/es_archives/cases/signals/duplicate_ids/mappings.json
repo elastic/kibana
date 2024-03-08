@@ -4986,7 +4986,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "1",
@@ -4999,8 +4999,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": ".siem-signals-default-000002",
     "mappings": {
       "_meta": {
@@ -9978,7 +9977,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "1",

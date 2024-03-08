@@ -787,8 +787,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": ".ml-config",
     "mappings": {
       "_meta": {
@@ -5002,7 +5001,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",
@@ -8791,7 +8790,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",
@@ -12606,7 +12605,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "1",
@@ -16408,7 +16407,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "1",
@@ -20426,7 +20425,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",
@@ -24458,7 +24457,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",
@@ -28589,7 +28588,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "1",
@@ -32719,7 +32718,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "1",
@@ -36493,7 +36492,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",
@@ -40267,7 +40266,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",
@@ -44067,7 +44066,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "1",
@@ -47866,7 +47865,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "1",
@@ -51746,7 +51745,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",
@@ -55632,7 +55631,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "0",
@@ -59536,7 +59535,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "1",
@@ -63439,7 +63438,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "2000"
+            "limit": "1000"
           }
         },
         "number_of_replicas": "1",

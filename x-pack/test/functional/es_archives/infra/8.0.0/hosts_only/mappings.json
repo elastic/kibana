@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "metricbeat-2022-01-18",
     "mappings": {
       "date_detection": false,
@@ -314,7 +313,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "10000"
+            "limit": "1000"
           }
         },
         "auto_expand_replicas": "0-1",
