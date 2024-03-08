@@ -460,9 +460,9 @@ export function LensEditConfigurationFlyout({
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
-                position: relative;
                 .euiAccordion__childWrapper {
                   flex: ${isLayerAccordionOpen ? 1 : 'none'}
+                  position: relative;
                 }
               }
             `}
