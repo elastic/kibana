@@ -1,7 +1,5 @@
 #!/bin/bash
 
-sed || exit
-
 cd "$PARENT_DIR" || exit
 
 rm -rf elasticsearch
@@ -23,10 +21,10 @@ ls -l "$destination_file"
 echo "--------"
 
 # Replace the line containing "lexer grammar" with "lexer grammar esql_lexer;"
-sed -i '' -e 's/lexer grammar.*$/lexer grammar esql_lexer;/' "$destination_file" || exit
+sed -i -e 's/lexer grammar.*$/lexer grammar esql_lexer;/' "$destination_file" || exit
 
 # Insert "options { caseInsensitive = true; }" one line below
-sed -i '' -e '/lexer grammar esql_lexer;/a\
+sed -i -e '/lexer grammar esql_lexer;/a\
 options { caseInsensitive = true; }' "$destination_file" || exit
 
 echo "File copied and modified successfully. Checking for differences."
