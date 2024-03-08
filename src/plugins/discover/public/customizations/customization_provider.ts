@@ -10,29 +10,28 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isFunction } from 'lodash';
 import type { DiscoverStateContainer } from '../application/main/services/discover_state';
-import type { CustomizationCallback } from './types';
 import {
   createCustomizationService,
   DiscoverCustomizationId,
   DiscoverCustomizationService,
 } from './customization_service';
+import { useDiscoverProfiles } from './profiles_provider';
 
 const customizationContext = createContext(createCustomizationService());
 
 export const DiscoverCustomizationProvider = customizationContext.Provider;
 
 export const useDiscoverCustomizationService = ({
-  customizationCallbacks,
   stateContainer,
 }: {
-  customizationCallbacks: CustomizationCallback[];
   stateContainer: DiscoverStateContainer;
 }) => {
+  const { currentProfile } = useDiscoverProfiles();
   const [customizationService, setCustomizationService] = useState<DiscoverCustomizationService>();
 
   useEffect(() => {
     const customizations = createCustomizationService();
-    const callbacks = customizationCallbacks.map((callback) =>
+    const callbacks = currentProfile.customizationCallbacks.map((callback) =>
       Promise.resolve(callback({ customizations, stateContainer }))
     );
     const initialize = () => Promise.all(callbacks).then((result) => result.filter(isFunction));
@@ -46,7 +45,7 @@ export const useDiscoverCustomizationService = ({
         cleanups.forEach((cleanup) => cleanup());
       });
     };
-  }, [customizationCallbacks, stateContainer]);
+  }, [currentProfile.customizationCallbacks, stateContainer]);
 
   const isInitialized = Boolean(customizationService);
 

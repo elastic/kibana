@@ -33,7 +33,6 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
 import {
-  CustomizationCallback,
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
   useDiscoverRootContext,
@@ -49,14 +48,10 @@ interface DiscoverLandingParams {
 }
 
 export interface MainRouteProps {
-  customizationCallbacks: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
 }
 
-export function DiscoverMainRoute({
-  customizationCallbacks,
-  stateStorageContainer,
-}: MainRouteProps) {
+export function DiscoverMainRoute({ stateStorageContainer }: MainRouteProps) {
   const history = useHistory();
   const services = useDiscoverServices();
   const {
@@ -79,7 +74,6 @@ export function DiscoverMainRoute({
   });
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
     useDiscoverCustomizationService({
-      customizationCallbacks,
       stateContainer,
     });
   const [error, setError] = useState<Error>();

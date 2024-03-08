@@ -16,8 +16,11 @@ import { DiscoverMainRoute } from '../../application/main';
 import type { DiscoverServices } from '../../build_services';
 import {
   createDiscoverRootContext,
+  createProfileRegistry,
   CustomizationCallback,
+  DiscoverProfilesProvider,
   DiscoverRootContextProvider,
+  DISCOVER_DEFAULT_PROFILE_ID,
 } from '../../customizations';
 import { LoadingIndicator } from '../common/loading_indicator';
 
@@ -55,6 +58,18 @@ const rootContext = createDiscoverRootContext({
   },
 });
 
+const createScopedProfileRegistry = (customizationCallbacks: CustomizationCallback[]) => {
+  const registry = createProfileRegistry();
+  const defaultProfile = registry.get(DISCOVER_DEFAULT_PROFILE_ID)!;
+
+  registry.set({
+    ...defaultProfile,
+    customizationCallbacks,
+  });
+
+  return registry;
+};
+
 export const DiscoverContainerInternal = ({
   overrideServices,
   scopedHistory,
@@ -79,6 +94,11 @@ export const DiscoverContainerInternal = ({
       : undefined;
   }, [discoverServices, overrideServices, scopedHistory]);
 
+  const profileRegistry = useMemo(
+    () => createScopedProfileRegistry(customizationCallbacks),
+    [customizationCallbacks]
+  );
+
   if (!services || isLoading) {
     return (
       <EuiFlexGroup css={discoverContainerWrapperCss}>
@@ -99,10 +119,9 @@ export const DiscoverContainerInternal = ({
       >
         <KibanaContextProvider services={services}>
           <DiscoverRootContextProvider value={rootContext}>
-            <DiscoverMainRoute
-              customizationCallbacks={customizationCallbacks}
-              stateStorageContainer={stateStorageContainer}
-            />
+            <DiscoverProfilesProvider value={profileRegistry}>
+              <DiscoverMainRoute stateStorageContainer={stateStorageContainer} />
+            </DiscoverProfilesProvider>
           </DiscoverRootContextProvider>
         </KibanaContextProvider>
       </EuiFlexItem>

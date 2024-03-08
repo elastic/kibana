@@ -8,6 +8,7 @@
 
 export * from './root_context';
 export * from './profile_registry';
+export * from './profiles_provider';
 export * from './customization_types';
 export * from './customization_provider';
 export * from './types';
