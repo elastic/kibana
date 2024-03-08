@@ -268,6 +268,7 @@ export class ServiceAPIClient {
       convertToDataStreamFormat(rest)
     );
 
+    console.log('license', license.type, license.issued_to);
     return {
       monitors: monitorsStreams,
       output,
