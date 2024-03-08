@@ -27,6 +27,7 @@ paths:
               required:
                 - params
                 - llmType
+                - replacements
               properties:
                 conversationId:
                   $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/UUID'
@@ -48,7 +49,8 @@ paths:
                   type: boolean
                 replacements:
                   type: object
-                  additionalProperties: true
+                  additionalProperties:
+                    type: string
                 size:
                   type: number
                 llmType:

@@ -62,7 +62,7 @@ export const ExecuteConnectorRequestBody = z.object({
   allowReplacement: z.array(z.string()).optional(),
   isEnabledKnowledgeBase: z.boolean().optional(),
   isEnabledRAGAlerts: z.boolean().optional(),
-  replacements: z.object({}).catchall(z.unknown()).optional(),
+  replacements: z.object({}).catchall(z.string()),
   size: z.number().optional(),
   llmType: z.enum(['bedrock', 'openai']),
 });

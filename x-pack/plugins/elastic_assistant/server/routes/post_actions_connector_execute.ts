@@ -229,7 +229,7 @@ export const postActionsConnectorExecuteRoute = (
             logger,
             onNewReplacements,
             request,
-            replacements: (request.body.replacements as Record<string, string>) ?? {},
+            replacements: request.body.replacements,
             size: request.body.size,
             telemetry,
           });
