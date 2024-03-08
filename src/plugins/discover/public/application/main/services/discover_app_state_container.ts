@@ -22,7 +22,7 @@ import {
 } from '@kbn/es-query';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../../build_services';
@@ -361,18 +361,8 @@ export function isEqualState(
     return false;
   }
 
-  const { filters: stateAFilters = [], ...stateAPartial } = stateA;
-  const { filters: stateBFilters = [], ...stateBPartial } = stateB;
+  const { filters: stateAFilters = [], ...stateAPartial } = omit(stateA, exclude);
+  const { filters: stateBFilters = [], ...stateBPartial } = omit(stateB, exclude);
 
-  const filteredStateAPartial = excludeKeys(stateAPartial, exclude);
-  const filteredStateBPartial = excludeKeys(stateBPartial, exclude);
-
-  return (
-    isEqual(filteredStateAPartial, filteredStateBPartial) &&
-    isEqualFilters(stateAFilters, stateBFilters)
-  );
-}
-
-function excludeKeys(obj: DiscoverAppState, keys: string[]) {
-  return Object.fromEntries(Object.entries(obj).filter(([key]) => !keys.includes(key)));
+  return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
 }

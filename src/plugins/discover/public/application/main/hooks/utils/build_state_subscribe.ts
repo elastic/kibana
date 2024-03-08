@@ -49,18 +49,15 @@ export const buildStateSubscribe =
     const prevQuery = savedSearch.searchSource.getField('query');
     const isTextBasedQueryLang = isTextBasedQuery(nextQuery);
     const queryChanged = !isEqual(nextQuery, prevQuery) || !isEqual(nextQuery, prevState.query);
-    // check if prevState and nextState are equal except for index
 
     if (
       isTextBasedQueryLang &&
       isEqualState(prevState, nextState, ['index', 'viewMode']) &&
       !queryChanged
     ) {
-      // this is just used to unset the index/viewmode when switching to a text based query, nothing to do here
-      addLog('[appstate] subscribe update ignored for es|ql', {
-        prevState,
-        nextState,
-      });
+      // When there's a switch from data view to es|ql, this just leads to a cleanup of index and viewMode
+      // And there's no subsequent action in this function required
+      addLog('[appstate] subscribe update ignored for es|ql', { prevState, nextState });
       return;
     }
     if (isEqualState(prevState, nextState) && !queryChanged) {
