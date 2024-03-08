@@ -20,11 +20,13 @@ export const paths = {
   sloCreate: `${SLOS_BASE_PATH}${SLO_CREATE_PATH}`,
   sloCreateWithEncodedForm: (encodedParams: string) =>
     `${SLOS_BASE_PATH}${SLO_CREATE_PATH}?_a=${encodedParams}`,
-  sloEdit: (sloId: string) => `${SLOS_BASE_PATH}${SLOS_PATH}/edit/${encodeURI(sloId)}`,
+  sloEdit: (sloId: string) => `${SLOS_BASE_PATH}${SLOS_PATH}/edit/${encodeURIComponent(sloId)}`,
   sloEditWithEncodedForm: (sloId: string, encodedParams: string) =>
-    `${SLOS_BASE_PATH}${SLOS_PATH}/edit/${encodeURI(sloId)}?_a=${encodedParams}`,
+    `${SLOS_BASE_PATH}${SLOS_PATH}/edit/${encodeURIComponent(sloId)}?_a=${encodedParams}`,
   sloDetails: (sloId: string, instanceId?: string) =>
     !!instanceId
-      ? `${SLOS_BASE_PATH}${SLOS_PATH}/${encodeURI(sloId)}?instanceId=${encodeURI(instanceId)}`
-      : `${SLOS_BASE_PATH}${SLOS_PATH}/${encodeURI(sloId)}`,
+      ? `${SLOS_BASE_PATH}${SLOS_PATH}/${encodeURIComponent(sloId)}?instanceId=${encodeURIComponent(
+          instanceId
+        )}`
+      : `${SLOS_BASE_PATH}${SLOS_PATH}/${encodeURIComponent(sloId)}`,
 };

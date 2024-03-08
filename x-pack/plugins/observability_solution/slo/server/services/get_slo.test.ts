@@ -29,13 +29,16 @@ describe('GetSLO', () => {
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
       mockRepository.findById.mockResolvedValueOnce(slo);
       mockSummaryClient.computeSummary.mockResolvedValueOnce({
-        status: 'HEALTHY',
-        sliValue: 0.9999,
-        errorBudget: {
-          initial: 0.001,
-          consumed: 0.1,
-          remaining: 0.9,
-          isEstimated: false,
+        groupings: {},
+        summary: {
+          status: 'HEALTHY',
+          sliValue: 0.9999,
+          errorBudget: {
+            initial: 0.001,
+            consumed: 0.1,
+            remaining: 0.9,
+            isEstimated: false,
+          },
         },
       });
 
@@ -84,6 +87,7 @@ describe('GetSLO', () => {
         enabled: slo.enabled,
         revision: slo.revision,
         groupBy: slo.groupBy,
+        groupings: {},
         instanceId: ALL_VALUE,
         version: SLO_MODEL_VERSION,
       });

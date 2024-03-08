@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   DefaultItemAction,
   EuiBasicTable,
@@ -43,6 +42,7 @@ import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
 import { SloSparkline } from '../slo_sparkline';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { SLOGroupings } from '../common/slo_groupings';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
@@ -115,7 +115,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         const sloDetailsUrl = basePath.prepend(
           paths.sloDetails(
             slo.id,
-            slo.groupBy !== ALL_VALUE && slo.instanceId ? slo.instanceId : undefined
+            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
           )
         );
         navigateToUrl(sloDetailsUrl);
@@ -242,7 +242,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         const sloDetailsUrl = basePath.prepend(
           paths.sloDetails(
             slo.id,
-            slo.groupBy !== ALL_VALUE && slo.instanceId ? slo.instanceId : undefined
+            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
           )
         );
         return (
@@ -268,23 +268,14 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       field: 'instance',
       name: 'Instance',
-      render: (_, slo: SLOWithSummaryResponse) =>
-        slo.groupBy !== ALL_VALUE ? (
-          <EuiToolTip
-            position="top"
-            content={i18n.translate('xpack.slo.groupByBadge', {
-              defaultMessage: 'Group by {groupKey}',
-              values: {
-                groupKey: slo.groupBy,
-              },
-            })}
-            display="block"
-          >
-            <span>{slo.instanceId}</span>
-          </EuiToolTip>
+      render: (_, slo: SLOWithSummaryResponse) => {
+        const groups = [slo.groupBy].flat();
+        return !groups.includes(ALL_VALUE) ? (
+          <SLOGroupings slo={slo} direction="column" />
         ) : (
           <span>{NOT_AVAILABLE_LABEL}</span>
-        ),
+        );
+      },
     },
     {
       field: 'objective',

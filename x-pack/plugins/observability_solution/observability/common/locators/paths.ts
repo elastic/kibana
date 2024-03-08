@@ -28,14 +28,15 @@ export const paths = {
   observability: {
     alerts: `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}`,
     alertDetails: (alertId: string) =>
-      `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}/${encodeURI(alertId)}`,
+      `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}/${encodeURIComponent(alertId)}`,
     rules: `${OBSERVABILITY_BASE_PATH}${RULES_PATH}`,
-    ruleDetails: (ruleId: string) => `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/${encodeURI(ruleId)}`,
+    ruleDetails: (ruleId: string) =>
+      `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/${encodeURIComponent(ruleId)}`,
   },
 };
 
 export const relativePaths = {
   observability: {
-    ruleDetails: (ruleId: string) => `${RULES_PATH}/${encodeURI(ruleId)}`,
+    ruleDetails: (ruleId: string) => `${RULES_PATH}/${encodeURIComponent(ruleId)}`,
   },
 };

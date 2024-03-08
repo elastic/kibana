@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { ToastsStart } from '@kbn/core/public';
 import {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -48,7 +48,9 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 
 import { SloPlugin } from './plugin';
 
@@ -69,7 +71,7 @@ export interface SloPublicPluginsSetup {
 
 export interface SloPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
   cloud?: CloudStart;
   dataViewEditor: DataViewEditorStart;
   observability: ObservabilityPublicStart;
@@ -93,6 +95,9 @@ export interface SloPublicPluginsStart {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   uiSettings: IUiSettingsClient;
   usageCollection: UsageCollectionStart;
+  discover: DiscoverStart;
+  dataViewFieldEditor: DataViewFieldEditorStart;
+  toastNotifications: ToastsStart;
 }
 
 export type SloPublicSetup = ReturnType<SloPlugin['setup']>;

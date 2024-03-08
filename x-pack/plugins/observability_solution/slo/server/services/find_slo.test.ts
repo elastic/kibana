@@ -96,6 +96,7 @@ describe('FindSLO', () => {
             enabled: slo.enabled,
             revision: slo.revision,
             groupBy: slo.groupBy,
+            groupings: {},
             instanceId: ALL_VALUE,
             version: SLO_MODEL_VERSION,
           },
@@ -166,6 +167,7 @@ function summarySearchResult(slo: SLO): Paginated<SLOSummary> {
       {
         id: slo.id,
         instanceId: slo.groupBy === ALL_VALUE ? ALL_VALUE : 'host-abcde',
+        groupings: {},
         summary: {
           status: 'HEALTHY',
           sliValue: 0.9999,

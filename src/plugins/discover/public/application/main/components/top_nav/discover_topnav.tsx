@@ -166,7 +166,7 @@ export const DiscoverTopNav = ({
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
   const setMenuMountPoint = getHeaderActionMenuMounter();
   const topNavProps = useMemo(() => {
-    if (services.serverless) {
+    if (stateContainer.customizationContext.inlineTopNav.enabled) {
       return undefined;
     }
 
@@ -175,7 +175,12 @@ export const DiscoverTopNav = ({
       config: topNavMenu,
       setMenuMountPoint,
     };
-  }, [services.serverless, setMenuMountPoint, topNavBadges, topNavMenu]);
+  }, [
+    setMenuMountPoint,
+    stateContainer.customizationContext.inlineTopNav.enabled,
+    topNavBadges,
+    topNavMenu,
+  ]);
 
   const savedSearchId = useSavedSearch().id;
   const savedSearchHasChanged = useSavedSearchHasChanged();

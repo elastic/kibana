@@ -15,7 +15,7 @@ import {
 } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
 
-import { SloPublicPluginsSetup, SloPublicPluginsStart } from './types'; // TODO move later to type
+import { SloPublicPluginsSetup, SloPublicPluginsStart } from './types';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { SloPublicSetup, SloPublicStart } from './types';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';

@@ -30,6 +30,7 @@ import { useLicense } from '../../hooks/use_license';
 import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -53,6 +54,8 @@ const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
+const TagsListMock = TagsList as jest.Mock;
+TagsListMock.mockReturnValue(<div>Tags list</div>);
 
 const mockNavigate = jest.fn();
 const mockLocator = jest.fn();
@@ -74,6 +77,11 @@ const mockKibana = () => {
         basePath: {
           prepend: (url: string) => url,
         },
+      },
+      dataViews: {
+        create: jest.fn().mockResolvedValue({
+          getIndexPattern: jest.fn().mockReturnValue('some-index'),
+        }),
       },
       notifications: {
         toasts: {

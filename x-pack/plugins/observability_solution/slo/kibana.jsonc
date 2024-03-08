@@ -40,6 +40,7 @@
       "cloud",
       "spaces",
       "serverless",
+      "discover"
     ],
     "requiredBundles": [
       "kibanaReact",

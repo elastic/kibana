@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import { CasesDeepLinkId, CasesPublicStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -20,6 +20,7 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin as PluginClass,
   PluginInitializerContext,
+  ToastsStart,
 } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -67,6 +68,7 @@ import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/pu
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -124,7 +126,7 @@ export interface ObservabilityPublicPluginsSetup {
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
   data: DataPublicPluginStart;
@@ -154,6 +156,8 @@ export interface ObservabilityPublicPluginsStart {
   uiActions: UiActionsStart;
   presentationUtil?: PresentationUtilPluginStart;
   theme: CoreStart['theme'];
+  dataViewFieldEditor: DataViewFieldEditorStart;
+  toastNotifications: ToastsStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 

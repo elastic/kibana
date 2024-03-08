@@ -77,7 +77,7 @@ export { useGetFilteredRuleTypes } from './hooks/use_get_filtered_rule_types';
 export { useCreateRule } from './hooks/use_create_rule';
 
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
-
+export { buildEsQuery } from './utils/build_es_query';
 export { KibanaReactStorybookDecorator } from './utils/kibana_react.storybook_decorator';
 
 export type {
@@ -95,6 +95,7 @@ export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate
 export type { render } from './utils/test_helper';
 
 export { convertTo } from '../common/utils/formatters/duration';
+export { getElasticsearchQueryOrThrow } from '../common/utils/parse_kuery';
 export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_value';
 export { WithKueryAutocompletion } from './components/rule_kql_filter/with_kuery_autocompletion';
 export { AutocompleteField } from './components/rule_kql_filter/autocomplete_field';

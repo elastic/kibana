@@ -30,7 +30,7 @@ export class SloEditLocatorDefinition implements LocatorDefinition<SloEditLocato
         },
         { useHash: false, storeInHashQuery: false },
         slo.id
-          ? `${SLO_PREFIX}/edit/${encodeURI(String(slo.id))}`
+          ? `${SLO_PREFIX}/edit/${encodeURIComponent(String(slo.id))}`
           : `${SLO_PREFIX}${SLO_CREATE_PATH}`
       ),
       state: {},

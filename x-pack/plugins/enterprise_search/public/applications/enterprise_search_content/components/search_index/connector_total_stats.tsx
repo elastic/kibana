@@ -38,6 +38,7 @@ export const ConnectorTotalStats: React.FC = () => {
 
   const stats: EuiStatProps[] & { 'data-test-subj'?: string } = [
     {
+      // @ts-expect-error upgrade typescript v4.9.5
       'data-test-subj': 'entSearchContent-indexOverview-totalStats-ingestionType',
       description: i18n.translate(
         'xpack.enterpriseSearch.content.searchIndex.totalStats.ingestionTypeCardLabel',
@@ -54,6 +55,7 @@ export const ConnectorTotalStats: React.FC = () => {
       ),
     },
     {
+      // @ts-expect-error upgrade typescript v4.9.5
       'data-test-subj': 'entSearchContent-indexOverview-totalStats-connectorType',
       description: i18n.translate('xpack.enterpriseSearch.connector.connectorTypePanel.title', {
         defaultMessage: 'Connector type',

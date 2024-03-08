@@ -22,5 +22,5 @@ export interface CreateSLOForm {
     timesliceTarget?: number;
     timesliceWindow?: string;
   };
-  groupBy: string;
+  groupBy: string[] | string;
 }

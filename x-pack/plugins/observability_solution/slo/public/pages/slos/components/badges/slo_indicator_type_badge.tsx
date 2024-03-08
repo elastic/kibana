@@ -14,9 +14,11 @@ import {
   SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
-import React from 'react';
-import { useKibana } from '../../../../utils/kibana_react';
+import React, { MouseEvent } from 'react';
+import { useRouteMatch } from 'react-router-dom';
+import { SLOS_PATH } from '../../../../../common/locators/paths';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
+import { useKibana } from '../../../../utils/kibana_react';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
 
@@ -30,6 +32,8 @@ export function SloIndicatorTypeBadge({ slo, color }: Props) {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
+
+  const isSloPage = useRouteMatch(SLOS_PATH)?.isExact ?? false;
 
   const { onStateChange } = useUrlSearchState();
 
@@ -45,10 +49,15 @@ export function SloIndicatorTypeBadge({ slo, color }: Props) {
       <EuiFlexItem grow={false}>
         <EuiBadge
           color={color ?? euiLightVars.euiColorDisabled}
-          onClick={() => {
-            onStateChange({
-              kqlQuery: `slo.indicator.type: ${slo.indicator.type}`,
-            });
+          onClick={(evt) => {
+            if (isSloPage) {
+              onStateChange({
+                kqlQuery: `slo.indicator.type: ${slo.indicator.type}`,
+              });
+            }
+          }}
+          onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
+            if (isSloPage) e.stopPropagation(); // stops propagation of metric onElementClick
           }}
           onClickAriaLabel={i18n.translate('xpack.slo.sloIndicatorTypeBadge.clickToFilter', {
             defaultMessage: 'Click to filter by {indicatorType} SLOs',
@@ -71,7 +80,10 @@ export function SloIndicatorTypeBadge({ slo, color }: Props) {
             <EuiBadge
               color={color ?? euiLightVars.euiColorDisabled}
               onClick={handleNavigateToApm}
-              onClickAriaLabel={i18n.translate('xpack.slo.sloIndicatorTypeBadge.exploreInApm', {
+              onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
+                e.stopPropagation(); // stops propagation of metric onElementClick
+              }}
+              onClickAriaLabel={i18n.translate('xpack.slo.indicatorTypeBadge.exploreInApm', {
                 defaultMessage: 'View {service} details',
                 values: { service: slo.indicator.params.service },
               })}
