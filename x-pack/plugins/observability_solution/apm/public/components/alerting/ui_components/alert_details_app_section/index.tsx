@@ -106,10 +106,7 @@ export function AlertDetailsAppSection({
   ]);
 
   const { services } = useKibana();
-
-  useEffect(() => {
-    createCallApmApi(services as CoreStart);
-  }, [services]);
+  createCallApmApi(services as CoreStart);
 
   const params = rule.params;
   const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
