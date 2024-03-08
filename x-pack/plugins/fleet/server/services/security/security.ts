@@ -138,6 +138,22 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
       kibanaPrivileges: privileges.kibana,
       prefix: `${PLUGIN_ID}-agents-read`,
     });
+    const fleetAgentPoliciesAllAuth = getAuthorizationFromPrivileges({
+      kibanaPrivileges: privileges.kibana,
+      prefix: `${PLUGIN_ID}-agent-policies-all`,
+    });
+    const fleetAgentPoliciesReadAuth = getAuthorizationFromPrivileges({
+      kibanaPrivileges: privileges.kibana,
+      prefix: `${PLUGIN_ID}-agent-policies-read`,
+    });
+    const fleetSettingsAllAuth = getAuthorizationFromPrivileges({
+      kibanaPrivileges: privileges.kibana,
+      prefix: `${PLUGIN_ID}-settings-all`,
+    });
+    const fleetSettingsReadAuth = getAuthorizationFromPrivileges({
+      kibanaPrivileges: privileges.kibana,
+      prefix: `${PLUGIN_ID}-settings-read`,
+    });
 
     return {
       ...calculateAuthz({
@@ -148,6 +164,14 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
           agents: {
             read: fleetAgentsReadAuth,
             all: fleetAgentsAllAuth,
+          },
+          agentPolicies: {
+            read: fleetAgentPoliciesAllAuth,
+            all: fleetAgentPoliciesReadAuth,
+          },
+          settings: {
+            read: fleetSettingsReadAuth,
+            all: fleetSettingsAllAuth,
           },
         },
         integrations: {
