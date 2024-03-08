@@ -282,6 +282,35 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
       });
+
+      it('should allow a deprecated component template to be updated', async () => {
+        const deprecatedTemplateName = 'deprecated_component_template';
+        const deprecatedTemplate = {
+          template: {},
+          deprecated: true,
+        };
+        try {
+          await addComponentTemplate(
+            { body: deprecatedTemplate, name: deprecatedTemplateName },
+            CACHE_TEMPLATES
+          );
+        } catch (err) {
+          log.debug('[Setup error] Error creating component template');
+          throw err;
+        }
+        const { body } = await updateComponentTemplate(deprecatedTemplateName, {
+          ...deprecatedTemplate,
+          version: 1,
+          _kbnMeta: {
+            usedBy: [],
+            isManaged: false,
+          },
+        }).expect(200);
+
+        expect(body).to.eql({
+          acknowledged: true,
+        });
+      });
     });
 
     describe('Delete', () => {
