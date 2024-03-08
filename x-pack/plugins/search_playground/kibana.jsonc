@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search_playground",
+  "owner": "@elastic/enterprise-search-frontend",
+  "plugin": {
+    "id": "searchPlayground",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "search_playground"
+    ]
+  }
+}
