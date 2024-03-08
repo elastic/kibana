@@ -182,7 +182,7 @@ export function useUserPreferredLanguage() {
 
   const getPreferredLanguage = useCallback(() => {
     if (selectedLanguage === USE_KIBANA_LOCALE_SETTING) {
-      return getLanguageFromLocale();
+      return getLanguageFromKibanaSettings();
     } else if (selectedLanguage === USE_BROWSER_LANGUAGE_SETTING) {
       return getLanguageFromBrowserSetting();
     } else {
@@ -198,7 +198,7 @@ export function useUserPreferredLanguage() {
   };
 }
 
-function getLanguageFromLocale() {
+function getLanguageFromKibanaSettings() {
   switch (i18n.getLocale()) {
     case 'en':
       return 'English';
