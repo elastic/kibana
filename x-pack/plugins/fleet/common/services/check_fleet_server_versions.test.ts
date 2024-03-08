@@ -23,7 +23,7 @@ describe('checkFleetServerVersion', () => {
       { local_metadata: { elastic: { agent: { version: '8.4.0' } } } },
     ] as any;
     expect(() => checkFleetServerVersion('8.5.1', fleetServers, false)).toThrowError(
-      'Cannot upgrade to version 8.5.1 because it is higher than the latest fleet server version 8.4.0'
+      'Cannot upgrade to version 8.5.1 because it is higher than the latest fleet server version 8.4.0.'
     );
   });
 
@@ -33,7 +33,7 @@ describe('checkFleetServerVersion', () => {
       { local_metadata: { elastic: { agent: { version: '8.4.0' } } } },
     ] as any;
     expect(() => checkFleetServerVersion('8.5.1', fleetServers, true)).toThrowError(
-      'Cannot force upgrade to version 8.5.1 because it does not satisfy the major and minor of the latest fleet server version 8.4.0'
+      'Cannot force upgrade to version 8.5.1 because it does not satisfy the major and minor of the latest fleet server version 8.4.0.'
     );
   });
 });
