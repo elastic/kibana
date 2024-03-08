@@ -120,7 +120,7 @@ export interface AddAuditEventParams {
    * Relevant saved object information
    * object containing type & id strings
    */
-  savedObject?: { type: string; id: string };
+  savedObject?: { type: string; id: string; name?: string };
   /**
    * Array of spaces being added. For
    * UPDATE_OBJECTS_SPACES action only
