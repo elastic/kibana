@@ -121,7 +121,7 @@ const createInstallButtonColumn = (
         disabled={isInstallButtonDisabled}
         onClick={() => installOneRule(ruleId)}
         data-test-subj={`installSinglePrebuiltRuleButton-${ruleId}`}
-        aria-label={i18n.INSTALL_RULE_BUTTON_ARIA_LABEL(record.name ?? ruleId)}
+        aria-label={i18n.INSTALL_RULE_BUTTON_ARIA_LABEL(record.name)}
       >
         {isRuleInstalling ? (
           <EuiLoadingSpinner
