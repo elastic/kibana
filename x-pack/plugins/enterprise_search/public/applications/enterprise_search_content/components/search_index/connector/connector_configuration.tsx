@@ -40,14 +40,11 @@ import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers'
 
 import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
-import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
-import { isConnectorIndex } from '../../../utils/indices';
+import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
 
+import { ConnectorDetailTabId } from '../../connector_detail/connector_detail';
+import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import { SyncsContextMenu } from '../components/header_actions/syncs_context_menu';
-import { IndexNameLogic } from '../index_name_logic';
-
-import { IndexViewLogic } from '../index_view_logic';
-import { SearchIndexTabId } from '../search_index';
 
 import { ApiKeyConfig } from './api_key_configuration';
 import { ConnectorNameAndDescription } from './connector_name_and_description/connector_name_and_description';
@@ -56,34 +53,31 @@ import { NativeConnectorConfiguration } from './native_connector_configuration/n
 
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
-  const { index, recheckIndexLoading } = useValues(IndexViewLogic);
-  const { indexName } = useValues(IndexNameLogic);
-  const { recheckIndex } = useActions(IndexViewLogic);
+  const { connector, fetchConnectorApiStatus } = useValues(ConnectorViewLogic);
+  const { fetchConnector } = useActions(ConnectorViewLogic);
   const cloudContext = useCloudDetails();
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
   const { http } = useValues(HttpLogic);
 
-  if (!isConnectorIndex(index)) {
-    return <></>;
+  if (!connector) {
+    return <></>; // TODO: show nicer error message
   }
 
-  if (index.connector.is_native && index.connector.service_type) {
+  if (connector.is_native && connector.service_type) {
     return <NativeConnectorConfiguration />;
   }
 
-  const hasApiKey = !!(index.connector.api_key_id ?? apiKeyData);
+  const hasApiKey = !!(connector.api_key_id ?? apiKeyData);
   const docsUrl = CONNECTORS.find(
-    ({ serviceType }) => serviceType === index.connector.service_type
+    ({ serviceType }) => serviceType === connector.service_type
   )?.docsUrl;
 
   // TODO service_type === "" is considered unknown/custom connector multipleplaces replace all of them with a better solution
   const isBeta =
-    !index.connector.service_type ||
-    Boolean(
-      BETA_CONNECTORS.find(({ serviceType }) => serviceType === index.connector.service_type)
-    );
+    !connector.service_type ||
+    Boolean(BETA_CONNECTORS.find(({ serviceType }) => serviceType === connector.service_type));
 
   return (
     <>
@@ -94,12 +88,19 @@ export const ConnectorConfiguration: React.FC = () => {
             <EuiSteps
               steps={[
                 {
-                  children: (
+                  children: connector.index_name ? (
                     <ApiKeyConfig
-                      indexName={indexName}
-                      hasApiKey={!!index.connector.api_key_id}
+                      indexName={connector.index_name}
+                      hasApiKey={!!connector.api_key_id}
                       isNative={false}
                     />
+                  ) : (
+                    i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.configurationConnector.steps.apiKey.noApiKeyLabel',
+                      {
+                        defaultMessage: 'Please set an index name before generating an API key',
+                      }
+                    )
                   ),
                   status: hasApiKey ? 'complete' : 'incomplete',
                   title: i18n.translate(
@@ -112,7 +113,7 @@ export const ConnectorConfiguration: React.FC = () => {
                 },
                 {
                   children: <ConnectorNameAndDescription />,
-                  status: index.connector.description ? 'complete' : 'incomplete',
+                  status: connector.description ? 'complete' : 'incomplete',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.nameAndDescriptionTitle',
                     {
@@ -149,8 +150,8 @@ export const ConnectorConfiguration: React.FC = () => {
                         {getConnectorTemplate({
                           apiKeyData,
                           connectorData: {
-                            id: index.connector.id,
-                            service_type: index.connector.service_type,
+                            id: connector.id,
+                            service_type: connector.service_type,
                           },
                           host: cloudContext.elasticsearchUrl,
                         })}
@@ -168,7 +169,7 @@ export const ConnectorConfiguration: React.FC = () => {
                     </>
                   ),
                   status:
-                    !index.connector.status || index.connector.status === ConnectorStatus.CREATED
+                    !connector.status || connector.status === ConnectorStatus.CREATED
                       ? 'incomplete'
                       : 'complete',
                   title: i18n.translate(
@@ -182,14 +183,13 @@ export const ConnectorConfiguration: React.FC = () => {
                 {
                   children: (
                     <ConnectorConfigurationComponent
-                      connector={index.connector}
+                      connector={connector}
                       hasPlatinumLicense={hasPlatinumLicense}
                       isLoading={status === Status.LOADING}
                       saveConfig={(configuration) =>
                         makeRequest({
                           configuration,
-                          connectorId: index.connector.id,
-                          indexName: index.name,
+                          connectorId: connector.id, // TODO
                         })
                       }
                       subscriptionLink={docLinks.licenseManagement}
@@ -197,8 +197,7 @@ export const ConnectorConfiguration: React.FC = () => {
                         '/app/management/stack/license_management'
                       )}
                     >
-                      {!index.connector.status ||
-                      index.connector.status === ConnectorStatus.CREATED ? (
+                      {!connector.status || connector.status === ConnectorStatus.CREATED ? (
                         <EuiCallOut
                           title={i18n.translate(
                             'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.waitingForConnectorTitle',
@@ -219,8 +218,8 @@ export const ConnectorConfiguration: React.FC = () => {
                           <EuiButton
                             data-telemetry-id="entSearchContent-connector-configuration-recheckNow"
                             iconType="refresh"
-                            onClick={() => recheckIndex()}
-                            isLoading={recheckIndexLoading}
+                            onClick={() => fetchConnector({ connectorId: connector.id })}
+                            isLoading={fetchConnectorApiStatus === Status.LOADING}
                           >
                             {i18n.translate(
                               'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.waitingForConnector.button.label',
@@ -239,7 +238,7 @@ export const ConnectorConfiguration: React.FC = () => {
                             {
                               defaultMessage:
                                 'Your connector {name} has connected to Search successfully.',
-                              values: { name: index.connector.name },
+                              values: { name: connector.name },
                             }
                           )}
                         />
@@ -247,9 +246,7 @@ export const ConnectorConfiguration: React.FC = () => {
                     </ConnectorConfigurationComponent>
                   ),
                   status:
-                    index.connector.status === ConnectorStatus.CONNECTED
-                      ? 'complete'
-                      : 'incomplete',
+                    connector.status === ConnectorStatus.CONNECTED ? 'complete' : 'incomplete',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.enhance.title',
                     {
@@ -278,9 +275,9 @@ export const ConnectorConfiguration: React.FC = () => {
                             <EuiButtonTo
                               data-test-subj="entSearchContent-connector-configuration-setScheduleAndSync"
                               data-telemetry-id="entSearchContent-connector-configuration-setScheduleAndSync"
-                              to={`${generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-                                indexName,
-                                tabId: SearchIndexTabId.SCHEDULING,
+                              to={`${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                                connectorId: connector.id,
+                                tabId: ConnectorDetailTabId.SCHEDULING,
                               })}`}
                             >
                               {i18n.translate(
@@ -298,7 +295,7 @@ export const ConnectorConfiguration: React.FC = () => {
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   ),
-                  status: index.connector.scheduling.full.enabled ? 'complete' : 'incomplete',
+                  status: connector.scheduling.full.enabled ? 'complete' : 'incomplete',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.schedule.title',
                     {

@@ -27,7 +27,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
   const toasts = getService('toasts');
 
-  const { header, common } = getPageObjects(['header', 'common']);
+  const { header } = getPageObjects(['header', 'common']);
 
   const flyoutService = getService('flyout');
 
@@ -221,10 +221,14 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   role: 'assistant',
                   content: 'My response',
                 });
+              });
 
-                await common.waitUntilUrlIncludes(
-                  `/conversations/${response.body.conversations[0].conversation.id}`
-                );
+              it('updates the list of conversations', async () => {
+                const links = await testSubjects.findAll(ui.pages.conversations.conversationLink);
+                expect(links.length).to.eql(1);
+
+                const title = await links[0].getVisibleText();
+                expect(title).to.eql('My title');
               });
 
               describe('and adding another prompt', () => {
