@@ -21,6 +21,7 @@
       "observability",
       "observabilityShared",
       "management",
+      "discover",
     ],
     "optionalPlugins": [],
     "requiredBundles": []
