@@ -50,7 +50,7 @@ const deriveType = (setting: UiSetting<SettingType>): SettingType => {
 };
 
 const isNumericValue = (value: unknown): boolean => {
-  return value != null && value !== '' && !isNaN(Number(value.toString()));
+  return value != null && value !== '' && !isNaN(Number(String(value)));
 };
 
 /**
