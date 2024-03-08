@@ -1,7 +1,5 @@
 #!/bin/bash
 
-gh || exit
-
 cd "$PARENT_DIR" || exit
 
 rm -rf elasticsearch
@@ -36,9 +34,10 @@ if [ $? -ne 0 ]; then
 
   git add "$destination_file"
   git commit -m "updating ES|QL lexer grammar"
-  echo "Changes committed."
+  echo "Changes committed. Creating pull request."
 
-  # TODO - create PR
+  # Create a PR
+  gh pr create --title "Update ES|QL lexer grammar" --body "This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch." --base master --head kibanamachine:main
 else
   echo "No differences found. Our work is done here."
 fi
