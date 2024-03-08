@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -26,7 +27,8 @@ import {
   redirectToGeoJobWizard,
 } from '../../../../../application/jobs/new_job/job_from_map';
 import { useMlFromLensKibanaContext } from '../../../common/context';
-import { JobDetails, CreateADJobParams } from '../../../common/job_details';
+import type { CreateADJobParams } from '../../../common/job_details';
+import { JobDetails } from '../../../common/job_details';
 
 interface DropDownLabel {
   label: string;

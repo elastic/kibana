@@ -23,6 +23,7 @@ import {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
 } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import { EnhancedEmbeddable } from './types';
 import {
   EmbeddableActionStorage,
@@ -76,7 +77,7 @@ export class EmbeddableEnhancedPlugin
         I extends EmbeddableInput = EmbeddableInput,
         O extends EmbeddableOutput = EmbeddableOutput,
         E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-        T = unknown
+        T extends FinderAttributes = {}
       >(
         def: EmbeddableFactoryDefinition<I, O, E, T>
       ): EmbeddableFactory<I, O, E, T> => {

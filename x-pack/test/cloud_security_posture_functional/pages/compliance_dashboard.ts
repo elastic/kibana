@@ -12,7 +12,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'cloudPostureDashboard']);
+  const pageObjects = getPageObjects(['common', 'cloudPostureDashboard', 'header']);
   const chance = new Chance();
 
   const data = [
@@ -56,6 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Kubernetes Dashboard', () => {
       it('displays accurate summary compliance score', async () => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
         const scoreElement = await dashboard.getKubernetesComplianceScore();
 
         expect((await scoreElement.getVisibleText()) === '0%').to.be(true);
