@@ -8,7 +8,6 @@ import {
   AnnotationDomainType,
   AreaSeries,
   Axis,
-  BarSeries,
   Chart,
   LineAnnotation,
   Position,
@@ -22,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiLoadingChart,
   EuiPanel,
   EuiText,
@@ -35,9 +35,12 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useRef } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useGetPreviewData } from '../../../hooks/slo/use_get_preview_data';
 import { useKibana } from '../../../utils/kibana_react';
 import { COMPARATOR_MAPPING } from '../../slo_edit/constants';
+import { GoodBadEventsChart } from '../../slos/components/common/good_bad_events_chart';
+import { getDiscoverLink } from '../../../utils/slo/get_discover_link';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -48,7 +51,7 @@ export interface Props {
 }
 
 export function EventsChartPanel({ slo, range }: Props) {
-  const { charts, uiSettings } = useKibana().services;
+  const { charts, uiSettings, discover } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
   const chartRef = useRef(null);
@@ -142,119 +145,107 @@ export function EventsChartPanel({ slo, range }: Props) {
       </>
     ) : null;
 
+  const showViewEventsLink = ![
+    'sli.apm.transactionErrorRate',
+    'sli.apm.transactionDuration',
+  ].includes(slo.indicator.type);
+
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="eventsChartPanel">
       <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>{title}</EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText color="subdued" size="s">
-              {i18n.translate('xpack.observability.slo.sloDetails.eventsChartPanel.duration', {
-                defaultMessage: 'Last 24h',
-              })}
-            </EuiText>
-          </EuiFlexItem>
+        <EuiFlexGroup>
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem grow={1}> {title}</EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText color="subdued" size="s">
+                {i18n.translate('xpack.observability.slo.sloDetails.eventsChartPanel.duration', {
+                  defaultMessage: 'Last 24h',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {showViewEventsLink && (
+            <EuiFlexItem grow={0}>
+              <EuiLink
+                color="text"
+                href={getDiscoverLink(discover, slo, {
+                  from: 'now-24h',
+                  to: 'now',
+                  mode: 'relative',
+                })}
+                data-test-subj="sloDetailDiscoverLink"
+              >
+                <EuiIcon type="sortRight" style={{ marginRight: '4px' }} />
+                <FormattedMessage
+                  id="xpack.observability.slo.sloDetails.viewEventsLink"
+                  defaultMessage="View events"
+                />
+              </EuiLink>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
 
         <EuiFlexItem>
-          {isLoading && <EuiLoadingChart size="m" mono data-test-subj="sliEventsChartLoading" />}
-
-          {!isLoading && (
-            <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
-              <Tooltip type={TooltipType.VerticalCursor} />
-              <Settings
-                baseTheme={baseTheme}
-                showLegend={slo.indicator.type !== 'sli.metric.timeslice'}
-                showLegendExtra={false}
-                legendPosition={Position.Left}
-                noResults={
-                  <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
-                }
-                onPointerUpdate={handleCursorUpdate}
-                externalPointerEvents={{
-                  tooltip: { visible: true },
-                }}
-                pointerUpdateDebounce={0}
-                pointerUpdateTrigger={'x'}
-                locale={i18n.getLocale()}
-              />
-              {annotation}
-
-              <Axis
-                id="bottom"
-                position={Position.Bottom}
-                showOverlappingTicks
-                tickFormat={(d) => moment(d).format(dateFormat)}
-              />
-              <Axis
-                id="left"
-                position={Position.Left}
-                tickFormat={(d) => numeral(d).format(yAxisNumberFormat)}
-                domain={domain}
-              />
-
-              {slo.indicator.type !== 'sli.metric.timeslice' ? (
-                <>
-                  <BarSeries
-                    id={i18n.translate(
-                      'xpack.observability.slo.sloDetails.eventsChartPanel.goodEventsLabel',
-                      { defaultMessage: 'Good events' }
-                    )}
-                    color={euiTheme.colors.success}
-                    barSeriesStyle={{
-                      rect: { fill: euiTheme.colors.success },
-                      displayValue: { fill: euiTheme.colors.success },
-                    }}
-                    xScaleType={ScaleType.Time}
-                    yScaleType={ScaleType.Linear}
-                    xAccessor="key"
-                    yAccessors={['value']}
-                    stackAccessors={[0]}
-                    data={
-                      data?.map((datum) => ({
-                        key: new Date(datum.date).getTime(),
-                        value: datum.events?.good,
-                      })) ?? []
-                    }
-                  />
-
-                  <BarSeries
-                    id={i18n.translate(
-                      'xpack.observability.slo.sloDetails.eventsChartPanel.badEventsLabel',
-                      { defaultMessage: 'Bad events' }
-                    )}
-                    color={euiTheme.colors.danger}
-                    barSeriesStyle={{
-                      rect: { fill: euiTheme.colors.danger },
-                      displayValue: { fill: euiTheme.colors.danger },
-                    }}
-                    xScaleType={ScaleType.Time}
-                    yScaleType={ScaleType.Linear}
-                    xAccessor="key"
-                    yAccessors={['value']}
-                    stackAccessors={[0]}
-                    data={
-                      data?.map((datum) => ({
-                        key: new Date(datum.date).getTime(),
-                        value: datum.events?.bad,
-                      })) ?? []
-                    }
-                  />
-                </>
-              ) : (
-                <AreaSeries
-                  id="Metric"
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  xAccessor="date"
-                  yAccessors={['value']}
-                  data={(data ?? []).map((datum) => ({
-                    date: new Date(datum.date).getTime(),
-                    value: datum.sliValue >= 0 ? datum.sliValue : null,
-                  }))}
-                />
+          {slo.indicator.type !== 'sli.metric.timeslice' ? (
+            <GoodBadEventsChart
+              isLoading={isLoading}
+              data={data || []}
+              annotation={annotation}
+              slo={slo}
+            />
+          ) : (
+            <>
+              {isLoading && (
+                <EuiLoadingChart size="m" mono data-test-subj="sliEventsChartLoading" />
               )}
-            </Chart>
+
+              {!isLoading && (
+                <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
+                  <Tooltip type={TooltipType.VerticalCursor} />
+                  <Settings
+                    baseTheme={baseTheme}
+                    showLegend={slo.indicator.type !== 'sli.metric.timeslice'}
+                    showLegendExtra={false}
+                    legendPosition={Position.Left}
+                    noResults={
+                      <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
+                    }
+                    onPointerUpdate={handleCursorUpdate}
+                    externalPointerEvents={{
+                      tooltip: { visible: true },
+                    }}
+                    pointerUpdateDebounce={0}
+                    pointerUpdateTrigger={'x'}
+                    locale={i18n.getLocale()}
+                  />
+                  {annotation}
+
+                  <Axis
+                    id="bottom"
+                    position={Position.Bottom}
+                    showOverlappingTicks
+                    tickFormat={(d) => moment(d).format(dateFormat)}
+                  />
+                  <Axis
+                    id="left"
+                    position={Position.Left}
+                    tickFormat={(d) => numeral(d).format(yAxisNumberFormat)}
+                    domain={domain}
+                  />
+                  <AreaSeries
+                    id="Metric"
+                    xScaleType={ScaleType.Time}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor="date"
+                    yAccessors={['value']}
+                    data={(data ?? []).map((datum) => ({
+                      date: new Date(datum.date).getTime(),
+                      value: datum.sliValue >= 0 ? datum.sliValue : null,
+                    }))}
+                  />
+                </Chart>
+              )}
+            </>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
