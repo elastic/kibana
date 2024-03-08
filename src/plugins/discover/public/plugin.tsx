@@ -45,7 +45,6 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TRUNCATE_MAX_HEIGHT, ENABLE_ESQL } from '@kbn/discover-utils';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { PLUGIN_ID } from '../common';
 import {
   setHeaderActionMenuMounter,
@@ -73,7 +72,7 @@ import {
   DiscoverAppLocatorDefinition,
   DiscoverESQLLocatorDefinition,
 } from '../common';
-import type { RegisterCustomizationProfile } from './customizations';
+import type { DiscoverCustomizationContext, RegisterCustomizationProfile } from './customizations';
 import {
   createRegisterCustomizationProfile,
   createProfileRegistry,
@@ -120,7 +119,9 @@ export interface DiscoverSetup {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  readonly showLogsExplorerTabs: () => void;
+  readonly showInlineTopNav: (
+    options?: Partial<Omit<DiscoverCustomizationContext['inlineTopNav'], 'enabled'>>
+  ) => void;
 }
 
 export interface DiscoverStart {
@@ -202,7 +203,6 @@ export interface DiscoverStartPlugins {
   lens: LensPublicStart;
   contentManagement: ContentManagementPublicStart;
   noDataPage?: NoDataPagePluginStart;
-  serverless?: ServerlessPluginStart;
 }
 
 /**
@@ -220,9 +220,15 @@ export class DiscoverPlugin
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
-  private showLogsExplorerTabs = false;
+  private inlineTopNav: DiscoverCustomizationContext['inlineTopNav'] = {
+    enabled: false,
+    showLogsExplorerTabs: false,
+  };
 
-  setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
+  setup(
+    core: CoreSetup<DiscoverStartPlugins, DiscoverStart>,
+    plugins: DiscoverSetupPlugins
+  ): DiscoverSetup {
     const baseUrl = core.http.basePath.prepend('/app/discover');
     const isDev = this.initializerContext.env.mode.dev;
 
@@ -339,7 +345,7 @@ export class DiscoverPlugin
           profileRegistry: this.profileRegistry,
           customizationContext: {
             displayMode: 'standalone',
-            showLogsExplorerTabs: this.showLogsExplorerTabs,
+            inlineTopNav: this.inlineTopNav,
           },
           isDev,
         });
@@ -382,13 +388,14 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      showLogsExplorerTabs: () => {
-        this.showLogsExplorerTabs = true;
+      showInlineTopNav: ({ showLogsExplorerTabs } = {}) => {
+        this.inlineTopNav.enabled = true;
+        this.inlineTopNav.showLogsExplorerTabs = showLogsExplorerTabs ?? false;
       },
     };
   }
 
-  start(core: CoreStart, plugins: DiscoverStartPlugins) {
+  start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
     // we need to register the application service at setup, but to render it
     // there are some start dependencies necessary, for this reason
     // initializeServices are assigned at start and used
