@@ -65,8 +65,8 @@ export const EditFieldHeaderForm = React.memo(
               const [fieldType] = type;
               return (
                 <SubTypeParameter
-                  key={fieldType.value}
-                  type={fieldType.value}
+                  key={fieldType?.value}
+                  type={fieldType?.value}
                   defaultValueType={defaultValue.type}
                   isMultiField={isMultiField}
                   isRootLevelField={isRootLevelField}
@@ -80,8 +80,8 @@ export const EditFieldHeaderForm = React.memo(
         <FormDataProvider pathsToWatch={['type', 'subType']}>
           {({ type, subType }) => {
             const typeDefinition = getTypeDefinition(
-              type[0].value as MainType,
-              subType && (subType[0].value as SubType)
+              type[0]?.value as MainType,
+              subType && (subType[0]?.value as SubType)
             );
             const description = (typeDefinition?.description?.() as JSX.Element) ?? null;
 

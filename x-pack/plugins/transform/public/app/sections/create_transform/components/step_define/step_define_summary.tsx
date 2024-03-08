@@ -24,12 +24,12 @@ import {
   isMatchAllQuery,
 } from '../../../../common';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
-import { SearchItems } from '../../../../hooks/use_search_items';
+import type { SearchItems } from '../../../../hooks/use_search_items';
 
 import { AggListSummary } from '../aggregation_list';
 import { GroupByListSummary } from '../group_by_list';
 
-import { StepDefineExposedState } from './common';
+import type { StepDefineExposedState } from './common';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import { isLatestPartialRequest } from './common/types';
 
