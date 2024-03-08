@@ -1,5 +1,7 @@
 #!/bin/bash
 
+gh || exit
+
 cd "$PARENT_DIR" || exit
 
 rm -rf elasticsearch
@@ -13,12 +15,6 @@ destination_file="./packages/kbn-monaco/src/esql/antlr/esql_lexer.g4"
 
 # Copy the file
 cp "$source_file" "$destination_file"
-
-echo "--------"
-echo "$destination_file copied successfully."
-echo "currently in $pwd"
-ls -l "$destination_file"
-echo "--------"
 
 # Replace the line containing "lexer grammar" with "lexer grammar esql_lexer;"
 sed -i -e 's/lexer grammar.*$/lexer grammar esql_lexer;/' "$destination_file" || exit
@@ -41,6 +37,8 @@ if [ $? -ne 0 ]; then
   git add "$destination_file"
   git commit -m "updating ES|QL lexer grammar"
   echo "Changes committed."
+
+  # TODO - create PR
 else
   echo "No differences found. Our work is done here."
 fi
