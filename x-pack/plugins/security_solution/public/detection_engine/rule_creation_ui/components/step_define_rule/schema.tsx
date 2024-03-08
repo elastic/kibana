@@ -22,6 +22,7 @@ import {
   isQueryRule,
   isThreatMatchRule,
   isThresholdRule,
+  isSuppressionRuleConfiguredWithGroupBy,
 } from '../../../../../common/detection_engine/utils';
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -603,8 +604,8 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
-          const needsValidation =
-            isQueryRule(formData.ruleType) || isThreatMatchRule(formData.ruleType);
+          const needsValidation = isSuppressionRuleConfiguredWithGroupBy(formData.ruleType);
+
           if (!needsValidation) {
             return;
           }

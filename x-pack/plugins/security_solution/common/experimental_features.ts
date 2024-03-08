@@ -160,6 +160,11 @@ export const allowedExperimentalValues = Object.freeze({
   riskEnginePrivilegesRouteEnabled: true,
 
   /**
+   * Enables alerts suppression for new terms rules
+   */
+  alertSuppressionForNewTermsRuleEnabled: false,
+
+  /**
    * Enables alerts suppression for indicator match rules
    */
   alertSuppressionForIndicatorMatchRuleEnabled: false,

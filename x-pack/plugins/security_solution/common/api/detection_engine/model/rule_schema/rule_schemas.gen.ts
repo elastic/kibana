@@ -504,6 +504,7 @@ export const NewTermsRuleOptionalFields = z.object({
   index: IndexPatternArray.optional(),
   data_view_id: DataViewId.optional(),
   filters: RuleFilterArray.optional(),
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type NewTermsRuleDefaultableFields = z.infer<typeof NewTermsRuleDefaultableFields>;

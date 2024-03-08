@@ -16,6 +16,9 @@ export const useAlertSuppression = (ruleType: Type | undefined): UseAlertSuppres
   const isThreatMatchRuleFFEnabled = useIsExperimentalFeatureEnabled(
     'alertSuppressionForIndicatorMatchRuleEnabled'
   );
+  const isAlertSuppressionForNewTermsRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForNewTermsRuleEnabled'
+  );
 
   const isSuppressionEnabledForRuleType = useCallback(() => {
     if (!ruleType) return false;
@@ -24,8 +27,13 @@ export const useAlertSuppression = (ruleType: Type | undefined): UseAlertSuppres
     if (ruleType === 'threat_match')
       return isSuppressibleAlertRule(ruleType) && isThreatMatchRuleFFEnabled;
 
+    // Remove this condition when the Feature Flag for enabling Suppression in the New terms rule is removed.
+    if (ruleType === 'new_terms') {
+      return isSuppressibleAlertRule(ruleType) && isAlertSuppressionForNewTermsRuleEnabled;
+    }
+
     return isSuppressibleAlertRule(ruleType);
-  }, [ruleType, isThreatMatchRuleFFEnabled]);
+  }, [ruleType, isThreatMatchRuleFFEnabled, isAlertSuppressionForNewTermsRuleEnabled]);
 
   return {
     isSuppressionEnabled: isSuppressionEnabledForRuleType(),

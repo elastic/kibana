@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import { isThreatMatchRule, isNewTermsRule } from '../../../../../common/detection_engine/utils';
 
 /**
  * transforms  DefineStepRule fields according to experimental feature flags
@@ -20,13 +20,20 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
     'alertSuppressionForIndicatorMatchRuleEnabled'
   );
 
+  const isAlertSuppressionForNewTermsRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForNewTermsRuleEnabled'
+  );
+
   const transformer = useCallback(
     (fields: T) => {
+      const isNewTermsSuppressionDisabled = isNewTermsRule(fields.ruleType)
+        ? !isAlertSuppressionForNewTermsRuleEnabled
+        : false;
       const isIndicatorMatchSuppressionDisabled = isThreatMatchRule(fields.ruleType)
         ? !isAlertSuppressionForIndicatorMatchRuleEnabled
         : false;
       // reset any alert suppression values hidden behind feature flag
-      if (isIndicatorMatchSuppressionDisabled) {
+      if (isIndicatorMatchSuppressionDisabled || isNewTermsSuppressionDisabled) {
         return {
           ...fields,
           groupByFields: [],
@@ -38,7 +45,7 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
 
       return fields;
     },
-    [isAlertSuppressionForIndicatorMatchRuleEnabled]
+    [isAlertSuppressionForIndicatorMatchRuleEnabled, isAlertSuppressionForNewTermsRuleEnabled]
   );
 
   return transformer;
