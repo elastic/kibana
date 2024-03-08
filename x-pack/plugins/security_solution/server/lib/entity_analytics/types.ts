@@ -124,6 +124,24 @@ export interface RiskScoreBucket {
   inputs: SearchResponse;
 }
 
+export interface RiskScoreSamplingBucket {
+  key: { [identifierField: string]: string };
+  doc_count: number;
+  top_n_per_shard: {
+    doc_count: number;
+    risk_details: {
+      value: {
+        score: number;
+        normalized_score: number;
+        notes: string[];
+        category_1_score: number;
+        category_1_count: number;
+      };
+    };
+    inputs: SearchResponse;
+  };
+}
+
 export interface RiskEngineConfiguration {
   dataViewId: string;
   enabled: boolean;
