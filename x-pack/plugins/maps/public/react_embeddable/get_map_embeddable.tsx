@@ -50,7 +50,7 @@ export async function getMapEmbeddable(
     cleanupReduxStateSync,
     reduxStateComparators,
     serializeReduxState,
-  } = initReduxStateSync(savedMap.getStore());
+  } = initReduxStateSync(savedMap.getStore(), state);
 
   return RegisterReactEmbeddable((apiRef) => {
     
@@ -66,6 +66,7 @@ export async function getMapEmbeddable(
     const thisApi = useReactEmbeddableApiHandle(
       {
         ...titlesApi,
+        type: MAP_SAVED_OBJECT_TYPE,
         localTimeRange: timeRange,
         setLocalTimeRange: (timeRange: TimeRange | undefined) => {
           timeRange.next(timeRange);

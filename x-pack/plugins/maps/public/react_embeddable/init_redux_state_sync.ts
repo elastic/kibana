@@ -14,10 +14,12 @@ import {
   getLayerListRaw,
   getMapBuffer,
   getMapCenter,
+  getMapReady,
   getMapZoom,
 } from '../selectors/map_selectors';
 import { setGotoWithCenter, setHiddenLayers, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions';
 import { MapCenterAndZoom } from '@kbn/maps-plugin/common/descriptor_types';
+import { MapEmbeddableInput } from '../embeddable/types';
 
 function getMapCenterAndZoom(state: MapStoreState) {
   return {
@@ -30,15 +32,20 @@ function getHiddenLayerIds(state: MapStoreState) {
   return getLayerListRaw(state).filter((layer) => !layer.visible).map((layer) => layer.id)
 }
 
-export function initReduxStateSync(store: MapStore) {
-  const hiddenLayers$ = new BehaviorSubject<string[]>(getHiddenLayerIds(store.getState()));
-  const isLayerTOCOpen$ = new BehaviorSubject<boolean>(getIsLayerTOCOpen(store.getState()));
-  const mapCenterAndZoom$ = new BehaviorSubject<MapCenterAndZoom>(getMapCenterAndZoom(store.getState()));
-  const openTOCDetails$ = new BehaviorSubject<string[]>(getOpenTOCDetails(store.getState()));
+export function initReduxStateSync(store: MapStore, state: MapEmbeddableInput) {
+  // initializing comparitor publishing subjects to state instead of store state values
+  // because store is not settled until map is rendered and mapReady is true
+  const hiddenLayers$ = new BehaviorSubject<string[]>(state.hiddenLayers ?? getHiddenLayerIds(store.getState()));
+  const isLayerTOCOpen$ = new BehaviorSubject<boolean>(state.isLayerTOCOpen ?? getIsLayerTOCOpen(store.getState()));
+  const mapCenterAndZoom$ = new BehaviorSubject<MapCenterAndZoom>(state.mapCenter ?? getMapCenterAndZoom(store.getState()));
+  const openTOCDetails$ = new BehaviorSubject<string[]>(state.openTOCDetails ?? getOpenTOCDetails(store.getState()));
 
   const unsubscribeFromStore = store.subscribe(() => {
+    if (!getMapReady(store.getState())) {
+      return;
+    }
     const nextHiddenLayers = getHiddenLayerIds(store.getState());
-    if (fastIsEqual(hiddenLayers$.value, nextHiddenLayers)) {
+    if (!fastIsEqual(hiddenLayers$.value, nextHiddenLayers)) {
       hiddenLayers$.next(nextHiddenLayers);
     }
 
@@ -48,12 +55,12 @@ export function initReduxStateSync(store: MapStore) {
     }
 
     const nextMapCenterAndZoom = getMapCenterAndZoom(store.getState());
-    if (fastIsEqual(mapCenterAndZoom$.value, nextMapCenterAndZoom)) {
+    if (!fastIsEqual(mapCenterAndZoom$.value, nextMapCenterAndZoom)) {
       mapCenterAndZoom$.next(nextMapCenterAndZoom);
     }
 
     const nextOpenTOCDetails = getOpenTOCDetails(store.getState());
-    if (openTOCDetails$.value !== nextOpenTOCDetails) {
+    if (!fastIsEqual(openTOCDetails$.value, nextOpenTOCDetails)) {
       openTOCDetails$.next(nextOpenTOCDetails);
     }
   });
@@ -86,7 +93,8 @@ export function initReduxStateSync(store: MapStore) {
         openTOCDetails$,
         (nextValue: string[]) => {
           store.dispatch(setOpenTOCDetails(nextValue));
-        }
+        },
+        fastIsEqual
       ]
     },
     serializeReduxState: () => {
