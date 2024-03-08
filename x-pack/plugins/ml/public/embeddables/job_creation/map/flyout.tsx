@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -21,10 +22,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { Layer } from './map_vis_layer_selection_flyout/layer';
-import {
-  LayerResult,
-  VisualizationExtractor,
-} from '../../../application/jobs/new_job/job_from_map';
+import type { LayerResult } from '../../../application/jobs/new_job/job_from_map';
+import { VisualizationExtractor } from '../../../application/jobs/new_job/job_from_map';
 
 interface Props {
   embeddable: MapEmbeddable;
