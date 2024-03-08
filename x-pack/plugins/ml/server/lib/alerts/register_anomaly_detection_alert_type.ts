@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { takeRight } from 'lodash';
-import { DEFAULT_APP_CATEGORIES, KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
   ActionGroup,
   AlertInstanceContext,
@@ -16,13 +17,10 @@ import type {
   RuleTypeParams,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import {
-  AlertsClientError,
-  IRuleTypeAlerts,
-  RuleExecutorOptions,
-} from '@kbn/alerting-plugin/server';
+import type { IRuleTypeAlerts, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
-import { MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils';
+import type { MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
@@ -40,10 +38,8 @@ import {
   mlAnomalyDetectionAlertParams,
 } from '../../routes/schemas/alerting_schema';
 import type { RegisterAlertParams } from './register_ml_alerts';
-import {
-  InfluencerAnomalyAlertDoc,
-  type RecordAnomalyAlertDoc,
-} from '../../../common/types/alerts';
+import type { InfluencerAnomalyAlertDoc } from '../../../common/types/alerts';
+import { type RecordAnomalyAlertDoc } from '../../../common/types/alerts';
 
 /**
  * Base Anomaly detection alerting rule context.

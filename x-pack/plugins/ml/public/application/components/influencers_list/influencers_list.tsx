@@ -9,14 +9,16 @@
  * React component for rendering a list of Machine Learning influencers.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getSeverity, getFormattedSeverityScore } from '@kbn/ml-anomaly-utils';
 import { abbreviateWholeNumber } from '../../formatters/abbreviate_whole_number';
-import { EntityCell, EntityCellFilter } from '../entity_cell';
+import type { EntityCellFilter } from '../entity_cell';
+import { EntityCell } from '../entity_cell';
 
 export interface InfluencerValueData {
   influencerFieldValue: string;

@@ -7,7 +7,10 @@
 
 import React, { useCallback, useMemo } from 'react';
 
-import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
+import type {
+  DataFrameAnalyticsListAction,
+  DataFrameAnalyticsListRow,
+} from '../analytics_list/common';
 
 import {
   cloneActionNameText,
