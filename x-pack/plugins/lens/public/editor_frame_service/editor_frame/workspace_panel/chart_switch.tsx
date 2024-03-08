@@ -446,11 +446,11 @@ const getDataLossWarning = (
   }
   let content: React.ReactNode = i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
     defaultMessage:
-      'Selecting this visualization type will remove incompatible configuration options and multiple layers, if present',
+      'Selecting this visualization will remove incompatible configuration options and multiple layers, if present',
   });
   if (v.selection.dataLoss === 'everything') {
     content = i18n.translate('xpack.lens.chartSwitch.dataLossEverything', {
-      defaultMessage: 'Selecting this visualization type will clear your current configuration',
+      defaultMessage: 'Selecting this visualization clears the current configuration.',
     });
   }
   const datasource = v.selection.datasourceId ? datasourceMap[v.selection.datasourceId] : undefined;
@@ -467,13 +467,12 @@ const getDataLossWarning = (
       <>
         <EuiText size="s">
           {i18n.translate('xpack.lens.chartSwitch.dataLossLayersDescription', {
-            defaultMessage:
-              'Selecting this visualization type will only preserve data from the first layer.',
+            defaultMessage: 'Selecting this visualization keeps first layer data only.',
           })}
         </EuiText>
         <EuiText size="s">
           {i18n.translate('xpack.lens.chartSwitch.dataLossLayers', {
-            defaultMessage: `The following columns will be preserved:`,
+            defaultMessage: `Columns kept:`,
           })}
           <ul>{preservedColumnsLabels}</ul>
         </EuiText>
@@ -484,7 +483,7 @@ const getDataLossWarning = (
       <>
         <EuiText size="s">
           {i18n.translate('xpack.lens.chartSwitch.dataLossColumns', {
-            defaultMessage: `Selecting this visualization type will preserve the following columns:`,
+            defaultMessage: `Selecting this visualization keeps columns:`,
           })}
           <ul>{preservedColumnsLabels}</ul>
         </EuiText>
