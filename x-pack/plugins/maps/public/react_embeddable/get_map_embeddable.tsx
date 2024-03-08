@@ -67,6 +67,7 @@ export async function getMapEmbeddable(
       {
         ...titlesApi,
         type: MAP_SAVED_OBJECT_TYPE,
+        defaultPanelTitle: new BehaviorSubject<string | undefined>(savedMap.getAttributes().title),
         localTimeRange: timeRange,
         setLocalTimeRange: (timeRange: TimeRange | undefined) => {
           timeRange.next(timeRange);
