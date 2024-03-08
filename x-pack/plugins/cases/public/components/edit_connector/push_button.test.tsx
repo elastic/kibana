@@ -26,6 +26,7 @@ const defaultProps = {
 };
 
 // FLAKY: https://github.com/elastic/kibana/issues/176671
+// FLAKY: https://github.com/elastic/kibana/issues/176672
 describe.skip('PushButton ', () => {
   let appMockRender: AppMockRenderer;
 
