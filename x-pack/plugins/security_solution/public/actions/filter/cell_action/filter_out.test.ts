@@ -11,9 +11,10 @@ import type { SecurityCellActionExecutionContext } from '../../types';
 import { TimelineId } from '../../../../common/types';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { createServicesMock } from './test/utils';
 
-const mockServices = createServicesMock();
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+
+const mockServices = createStartServicesMock();
 
 const mockGlobalFilterManager = mockServices.data.query.filterManager;
 const mockWarningToast = mockServices.notifications.toasts.addWarning;

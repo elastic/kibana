@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { TableId } from '@kbn/securitysolution-data-table';
+
 import { createMockStore, mockGlobalState } from '../../../common/mock';
 import { createFilterInCellActionFactory } from './filter_in';
 import type { SecurityCellActionExecutionContext } from '../../types';
-import { TableId } from '@kbn/securitysolution-data-table';
 import { TimelineId } from '../../../../common/types';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { createServicesMock } from './test/utils';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
-const services = createServicesMock();
+const services = createStartServicesMock();
 const mockGlobalFilterManager = services.data.query.filterManager;
 const mockWarningToast = services.notifications.toasts.addWarning;
 
