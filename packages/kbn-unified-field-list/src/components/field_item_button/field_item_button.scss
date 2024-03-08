@@ -42,7 +42,8 @@
 
 .unifiedFieldListItemButton {
   width: 100%;
-
+  background: $euiColorEmptyShade;
+  @include euiSlightShadow;
   &.kbnFieldButton {
     &:focus-within,
     &-isActive {
@@ -96,7 +97,7 @@
 
   &:hover,
   &[class*='-isActive'],
-  .domDragDrop__keyboardHandler:focus + & {
+  .domDraggable__keyboardHandler:focus + & {
     .unifiedFieldListItemButton__fieldIcon {
       opacity: 0;
     }
