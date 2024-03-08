@@ -57,7 +57,7 @@ const savedObject = {
   references: [],
 };
 
-describe('IndexPatterns', () => {
+describe('DataViews', () => {
   let indexPatterns: DataViewsService;
   let indexPatternsNoAccess: DataViewsService;
   let savedObjectsClient: PersistenceAPI;
@@ -446,6 +446,7 @@ describe('IndexPatterns', () => {
     const title = 'kibana-*';
     const version = '8.4.0';
     const dataView = await indexPatterns.create({ title }, true);
+    const id = dataView.id;
 
     savedObjectsClient.find = jest.fn().mockResolvedValue([]);
     savedObjectsClient.create = jest.fn().mockResolvedValue({
@@ -458,11 +459,10 @@ describe('IndexPatterns', () => {
       },
     });
 
-    const indexPattern = await indexPatterns.createSavedObject(dataView);
-    expect(indexPattern).toBeInstanceOf(DataView);
-    expect(indexPattern.id).toBe(dataView.id);
-    expect(indexPattern.getIndexPattern()).toBe(title);
-    expect(indexPattern.isPersisted()).toBe(true);
+    await indexPatterns.createSavedObject(dataView);
+    expect(dataView.id).toBe(id);
+    expect(dataView.getIndexPattern()).toBe(title);
+    expect(dataView.isPersisted()).toBe(true);
   });
 
   test('find', async () => {
@@ -480,12 +480,9 @@ describe('IndexPatterns', () => {
 
   test('createAndSave', async () => {
     const title = 'kibana-*';
-
-    indexPatterns.createSavedObject = jest.fn(() =>
-      Promise.resolve({
-        id: 'id',
-      } as unknown as DataView)
-    );
+    indexPatterns.createSavedObject = jest.fn(() => Promise.resolve());
+    savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({});
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSave({ title });
     expect(indexPatterns.createSavedObject).toBeCalled();
@@ -494,12 +491,9 @@ describe('IndexPatterns', () => {
 
   test('createAndSave DataViewLazy', async () => {
     const title = 'kibana-*';
-
-    indexPatterns.createSavedObject = jest.fn(() =>
-      Promise.resolve({
-        id: 'id',
-      } as unknown as DataView)
-    );
+    indexPatterns.createSavedObject = jest.fn(() => Promise.resolve());
+    savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({});
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSaveDataViewLazy({ title });
     expect(indexPatterns.createSavedObject).toBeCalled();

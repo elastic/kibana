@@ -165,15 +165,10 @@ export interface DataViewsServicePublicMethods {
   ) => Promise<DataView>;
   /**
    * Save data view
-   * @param dataView - Data view instance to save.
+   * @param dataView - Data view  or data view lazy instance to save.
    * @param override - If true, save over existing data view
-   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
-  createSavedObject: (
-    indexPattern: DataView,
-    overwrite?: boolean,
-    displayErrors?: boolean
-  ) => Promise<DataView>;
+  createSavedObject: (indexPattern: AbstractDataView, overwrite?: boolean) => Promise<void>;
   /**
    * Delete data view
    * @param indexPatternId - Id of the data view to delete.
@@ -291,7 +286,7 @@ export interface DataViewsServicePublicMethods {
     saveAttempts?: number,
     ignoreErrors?: boolean,
     displayErrors?: boolean
-  ) => Promise<DataView | void | Error>;
+  ) => Promise<void>;
 
   /**
    * Returns whether a default data view exists.
@@ -301,11 +296,19 @@ export interface DataViewsServicePublicMethods {
   getMetaFields: () => Promise<string[] | undefined>;
   getShortDotsEnable: () => Promise<boolean | undefined>;
 
-  getLegacy: (id: string, displayErrors?: boolean) => Promise<DataView>;
-
   toDataView: (toDataView: DataViewLazy) => Promise<DataView>;
 
   toDataViewLazy: (dataView: DataView) => Promise<DataViewLazy>;
+
+  getAllDataViewLazy: () => Promise<DataViewLazy[]>;
+
+  getDataViewLazy: (id: string) => Promise<DataViewLazy>;
+
+  createDataViewLazy: (spec: DataViewSpec) => Promise<DataViewLazy>;
+
+  createAndSaveDataViewLazy: (spec: DataViewSpec, override?: boolean) => Promise<DataViewLazy>;
+
+  getDefaultDataViewLazy: () => Promise<DataViewLazy | null>;
 }
 
 /**
@@ -1145,10 +1148,10 @@ export class DataViewsService {
    */
 
   async createAndSaveDataViewLazy(spec: DataViewSpec, overwrite = false) {
-    const indexPattern = await this.createFromSpecLazy(spec);
-    const createdIndexPattern = await this.createSavedObject(indexPattern, overwrite, false);
-    await this.setDefault(createdIndexPattern.id!);
-    return createdIndexPattern!;
+    const dataViewLazy = await this.createFromSpecLazy(spec);
+    await this.createSavedObject(dataViewLazy, overwrite);
+    await this.setDefault(dataViewLazy.id!);
+    return dataViewLazy;
   }
 
   /**
@@ -1165,24 +1168,19 @@ export class DataViewsService {
     skipFetchFields = false,
     displayErrors = true
   ) {
-    const indexPattern = await this.createFromSpec(spec, skipFetchFields, displayErrors);
-    const createdIndexPattern = await this.createSavedObject(
-      indexPattern,
-      overwrite,
-      displayErrors
-    );
-    await this.setDefault(createdIndexPattern.id!);
-    return createdIndexPattern!;
+    const dataView = await this.createFromSpec(spec, skipFetchFields, displayErrors);
+    await this.createSavedObject(dataView, overwrite);
+    await this.setDefault(dataView.id!);
+    return dataView;
   }
 
   /**
    * Save a new data view.
    * @param dataView data view instance
    * @param override Overwrite if existing index pattern exists
-   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
 
-  async createSavedObject(dataView: AbstractDataView, overwrite = false, displayErrors = true) {
+  async createSavedObject(dataView: AbstractDataView, overwrite = false) {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError();
     }
@@ -1204,11 +1202,11 @@ export class DataViewsService {
       overwrite,
     })) as SavedObject<DataViewAttributes>;
 
-    const createdIndexPattern = await this.initFromSavedObject(response, displayErrors);
     if (this.savedObjectsCache) {
       this.savedObjectsCache.push(response as SavedObject<IndexPatternListSavedObjectAttrs>);
     }
-    return createdIndexPattern;
+    dataView.id = response.id; // todo is the id assigned here or when created?
+    dataView.version = response.version;
   }
 
   /**
