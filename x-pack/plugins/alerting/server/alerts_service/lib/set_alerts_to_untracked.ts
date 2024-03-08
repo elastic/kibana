@@ -33,7 +33,6 @@ export interface SetAlertsToUntrackedParams {
   query?: QueryDslQueryContainer[];
   spaceId?: RulesClientContext['spaceId'];
   featureIds?: string[];
-  isUsingQuery?: boolean;
   getAuthorizedRuleTypes?: RulesClientContext['authorization']['getAuthorizedRuleTypes'];
   getAlertIndicesAlias?: RulesClientContext['getAlertIndicesAlias'];
   ensureAuthorized?: EnsureAuthorized;
@@ -69,8 +68,8 @@ const getUntrackQuery = (
     },
   ];
 
-  if (params.isUsingQuery) {
-    const { query } = params;
+  const { query } = params;
+  if (query) {
     return {
       bool: {
         must: statusTerms,
@@ -186,12 +185,15 @@ export async function setAlertsToUntracked(
     ruleIds = [],
     alertUuids = [], // OPTIONAL - If no alertUuids are passed, untrack ALL ids by default,
     ensureAuthorized,
-    isUsingQuery,
+    query,
   } = params;
 
   let indices: string[];
 
-  if (isUsingQuery) {
+  if (query) {
+    if (query.length === 0) {
+      throw new Error('Query must not be empty if defined');
+    }
     indices = (await getAuthorizedAlertsIndices(params)) || [];
   } else {
     if (isEmpty(ruleIds) && isEmpty(alertUuids)) {

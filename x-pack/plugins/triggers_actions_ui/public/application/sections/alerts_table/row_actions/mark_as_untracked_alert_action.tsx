@@ -16,13 +16,13 @@ import { useBulkUntrackAlerts } from '../../../..';
  * Alerts table row action to mark the selected alert as untracked
  */
 export const MarkAsUntrackedAlertAction = memo(
-  ({ alert, refresh, onActionExecuted }: AlertActionsProps) => {
+  ({ alert, refresh, onActionExecuted, featureIds = [] }: AlertActionsProps) => {
     const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
     const isAlertActive = useMemo(() => alert[ALERT_STATUS]?.[0] === ALERT_STATUS_ACTIVE, [alert]);
 
     const handleUntrackAlert = useCallback(async () => {
       await untrackAlerts({
-        indices: [alert._index ?? ''],
+        featureIds: featureIds,
         alertUuids: [alert._id],
       });
       onActionExecuted?.();

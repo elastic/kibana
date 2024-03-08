@@ -112,9 +112,7 @@ export default function bulkUntrackByQueryTests({ getService }: FtrProviderConte
           });
 
           const response = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(scenario.space.id)}/internal/alerting/alerts/_bulk_untrack_by_query`
-            )
+            .post(`${getUrlPrefix(scenario.space.id)}/internal/alerting/alerts/_bulk_untrack`)
             .set('kbn-xsrf', 'foo')
             .auth(scenario.user.username, scenario.user.password)
             .send({

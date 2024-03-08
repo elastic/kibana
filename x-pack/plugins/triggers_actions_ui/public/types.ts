@@ -686,6 +686,7 @@ export interface RenderCustomActionsRowArgs {
   setIsActionLoading?: (isLoading: boolean) => void;
   refresh: () => void;
   clearSelection: () => void;
+  featureIds?: ValidFeatureId[];
 }
 
 export interface AlertActionsProps extends RenderCustomActionsRowArgs {

@@ -34,8 +34,18 @@ describe('bulkUntrackAlertsRoute', () => {
     rulesClient.bulkUntrackAlerts.mockResolvedValueOnce();
 
     const requestBody = {
-      indices: ['test-index'],
-      alert_uuids: ['id1', 'id2'],
+      query: [
+        {
+          bool: {
+            must: {
+              term: {
+                'kibana.alert.rule.name': 'test',
+              },
+            },
+          },
+        },
+      ],
+      feature_ids: ['o11y'],
     };
 
     const [context, req, res] = mockHandlerArguments(
@@ -51,9 +61,8 @@ describe('bulkUntrackAlertsRoute', () => {
     expect(rulesClient.bulkUntrackAlerts).toHaveBeenCalledTimes(1);
     expect(rulesClient.bulkUntrackAlerts.mock.calls[0]).toEqual([
       {
-        indices: requestBody.indices,
-        alertUuids: requestBody.alert_uuids,
-        isUsingQuery: false,
+        query: requestBody.query,
+        featureIds: requestBody.feature_ids,
       },
     ]);
 

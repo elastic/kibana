@@ -313,6 +313,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                   setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
                   refresh,
                   clearSelection,
+                  featureIds: props.featureIds,
                 })}
               </EuiFlexGroup>
             );

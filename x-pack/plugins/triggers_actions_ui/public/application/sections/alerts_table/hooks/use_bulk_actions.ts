@@ -32,7 +32,6 @@ import {
 } from './translations';
 import { TimelineItem } from '../bulk_actions/components/toolbar';
 import { useBulkUntrackAlerts } from './use_bulk_untrack_alerts';
-import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query';
 
 interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
@@ -195,7 +194,6 @@ export const useBulkUntrackActions = ({
 
   const { application } = useKibana().services;
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
-  const { mutateAsync: untrackAlertsByQuery } = useBulkUntrackAlertsByQuery();
 
   // Check if at least one Observability feature is enabled
   if (!application?.capabilities) return [];
@@ -226,14 +224,13 @@ export const useBulkUntrackActions = ({
       onClick: async (alerts?: TimelineItem[]) => {
         if (!alerts) return;
         const alertUuids = alerts.map((alert) => alert._id);
-        const indices = alerts.map((alert) => alert._index ?? '');
         try {
           setIsBulkActionsLoading(true);
-          if (isAllSelected) {
-            await untrackAlertsByQuery({ query, featureIds });
-          } else {
-            await untrackAlerts({ indices, alertUuids });
-          }
+          await untrackAlerts({
+            featureIds,
+            query,
+            ...(isAllSelected ? {} : { alertUuids }),
+          });
           onSuccess();
         } finally {
           setIsBulkActionsLoading(false);

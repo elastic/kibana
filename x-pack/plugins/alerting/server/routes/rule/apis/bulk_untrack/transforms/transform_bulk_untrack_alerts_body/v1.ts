@@ -8,9 +8,9 @@
 import type { BulkUntrackRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/bulk_untrack';
 
 export const transformBulkUntrackAlertsBody = ({
-  indices,
-  alert_uuids: alertUuids,
+  query,
+  feature_ids: featureIds,
 }: BulkUntrackRequestBodyV1) => ({
-  indices,
-  alertUuids,
+  query,
+  featureIds,
 });

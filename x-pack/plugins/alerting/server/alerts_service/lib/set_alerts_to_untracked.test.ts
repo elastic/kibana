@@ -427,7 +427,6 @@ describe('setAlertsToUntracked()', () => {
     });
 
     const result = await setAlertsToUntracked({
-      isUsingQuery: true,
       query: [
         {
           bool: {
@@ -522,5 +521,84 @@ describe('setAlertsToUntracked()', () => {
         'kibana.alert.uuid': 'test-alert-id-2',
       },
     ]);
+  });
+
+  test('should throw if query is defined but empty', async () => {
+    getAuthorizedRuleTypesMock.mockResolvedValue([
+      {
+        id: 'test-rule-type',
+      },
+    ]);
+    getAlertIndicesAliasMock.mockResolvedValue(['test-alert-index']);
+
+    clusterClient.search.mockResponseOnce({
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        hits: [],
+      },
+      aggregations: {
+        ruleTypeIds: {
+          buckets: [
+            {
+              key: 'some rule type',
+              consumers: {
+                buckets: [{ key: 'o11y' }],
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    clusterClient.search.mockResponseOnce({
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        hits: [
+          {
+            _index: 'test-alert-index',
+            _id: 'test-alert-id-1',
+            _source: {
+              [ALERT_RULE_UUID]: 'test-alert-rule-id-1',
+              [ALERT_UUID]: 'test-alert-id-1',
+            },
+          },
+          {
+            _index: 'test-alert-index',
+            _id: 'test-alert-id-2',
+            _source: {
+              [ALERT_RULE_UUID]: 'test-alert-rule-id-2',
+              [ALERT_UUID]: 'test-alert-id-2',
+            },
+          },
+        ],
+      },
+    });
+
+    expect(
+      setAlertsToUntracked({
+        query: [],
+        featureIds: ['o11y'],
+        spaceId: 'default',
+        getAuthorizedRuleTypes: getAuthorizedRuleTypesMock,
+        getAlertIndicesAlias: getAlertIndicesAliasMock,
+        ensureAuthorized: ensureAuthorizedMock,
+        logger,
+        esClient: clusterClient,
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Query must not be empty if defined"`);
   });
 });
