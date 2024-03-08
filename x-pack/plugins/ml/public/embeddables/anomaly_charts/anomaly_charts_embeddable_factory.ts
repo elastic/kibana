@@ -14,11 +14,8 @@ import { PLUGIN_ICON, PLUGIN_ID, ML_APP_NAME } from '../../../common/constants/a
 import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
-import {
-  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-  AnomalyChartsEmbeddableInput,
-  AnomalyChartsEmbeddableServices,
-} from '..';
+import type { AnomalyChartsEmbeddableInput, AnomalyChartsEmbeddableServices } from '..';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
 import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 
 export class AnomalyChartsEmbeddableFactory

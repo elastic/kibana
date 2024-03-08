@@ -6,7 +6,7 @@
  */
 
 import { mlJobService } from '../services/job_service';
-import { Entity } from './components/entity_control/entity_control';
+import type { Entity } from './components/entity_control/entity_control';
 import type { JobId, CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
 /**

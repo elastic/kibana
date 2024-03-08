@@ -260,7 +260,7 @@ describe('calculateHealthStatus', () => {
     });
   });
 
-  test('should return OK status when stats are not yet populated', () => {
+  test('should return Uninitialized status when stats are not yet populated and shouldRunTasks = true', () => {
     expect(
       calculateHealthStatus(
         {
@@ -272,6 +272,20 @@ describe('calculateHealthStatus', () => {
         logger
       )
     ).toEqual({ status: HealthStatus.Uninitialized, reason: `no health stats available` });
+  });
+
+  test('should return OK status when stats are not yet populated and shouldRunTasks = false', () => {
+    expect(
+      calculateHealthStatus(
+        {
+          last_update: '2023-05-09T12:59:57.000Z',
+          stats: {},
+        },
+        config,
+        false,
+        logger
+      )
+    ).toEqual({ status: HealthStatus.OK });
   });
 
   test('should return error status if any stat has status error', () => {
