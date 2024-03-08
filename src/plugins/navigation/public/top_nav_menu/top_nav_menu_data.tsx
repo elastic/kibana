@@ -27,6 +27,7 @@ export interface TopNavMenuData {
   target?: string;
   href?: string;
   appendElement?: React.ReactElement;
+  hideLabel?: boolean;
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {

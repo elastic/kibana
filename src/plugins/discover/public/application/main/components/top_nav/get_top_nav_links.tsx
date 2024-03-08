@@ -10,8 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import React from 'react';
-import { copyToClipboard, EuiButtonIcon } from '@elastic/eui';
+import { copyToClipboard } from '@elastic/eui';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
@@ -176,18 +175,6 @@ export const getTopNavLinks = ({
     description: i18n.translate('discover.localMenu.shareSearchDescription', {
       defaultMessage: 'Share Search',
     }),
-    appendElement: (
-      <EuiButtonIcon
-        iconType={'copyClipboard'}
-        onClick={() => {
-          getShareLink().then((res) => {
-            copyToClipboard(res.shareableUrl);
-          });
-        }}
-      >
-        Click to copy
-      </EuiButtonIcon>
-    ),
     testId: 'shareTopNavButton',
     run: async (anchorElement: HTMLElement) => {
       if (!services.share) return;
@@ -225,6 +212,29 @@ export const getTopNavLinks = ({
         onClose: () => {
           anchorElement?.focus();
         },
+      });
+    },
+  };
+
+  const shareSearchBtn = {
+    id: 'shareBtn',
+    label: i18n.translate('discover.localMenu.shareTitle', {
+      defaultMessage: 'Copy link',
+    }),
+    description: i18n.translate('discover.localMenu.shareSearchDescription', {
+      defaultMessage: 'Copy link to clipboard',
+    }),
+    tooltip: i18n.translate('discover.localMenu.shareSearchDescription', {
+      defaultMessage: 'Copy link to clipboard',
+    }),
+    iconType: 'link',
+    emphasize: true,
+    hideLabel: true,
+    testId: 'shareTopNavButtonSm',
+    run: async () => {
+      if (!services.share) return;
+      getShareLink().then((res) => {
+        copyToClipboard(res.shareableUrl);
       });
     },
   };
@@ -268,6 +278,10 @@ export const getTopNavLinks = ({
 
   if (!defaultMenu?.inspectItem?.disabled) {
     entries.push({ data: inspectSearch, order: defaultMenu?.inspectItem?.order ?? 500 });
+  }
+
+  if (!defaultMenu?.shareItem?.disabled) {
+    entries.push({ data: shareSearchBtn, order: defaultMenu?.shareItem?.order ?? 550 });
   }
 
   if (services.capabilities.discover.save && !defaultMenu?.saveItem?.disabled) {
