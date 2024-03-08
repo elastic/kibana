@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   };
 
-  const getCsv = async () => {
+  const getCsvReportData = async () => {
     await toasts.dismissAll();
     const url = await PageObjects.reporting.getReportURL(60000);
     const res = await PageObjects.reporting.getResponse(url);
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
 
-        const csvFile = await getCsv();
+        const csvFile = await getCsvReportData();
         expectSnapshot(csvFile).toMatch();
       });
 
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
 
-        const csvFile = await getCsv();
+        const csvFile = await getCsvReportData();
         expectSnapshot(csvFile).toMatch();
       });
 
@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
 
-        const csvFile = await getCsv();
+        const csvFile = await getCsvReportData();
         expectSnapshot(csvFile).toMatch();
       });
 
@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickDownloadCsv();
         await testSubjects.existOrFail('csvReportStarted');
 
-        const csvFile = await getCsv(); // file exists with proper name
+        const csvFile = await getCsvReportData(); // file exists with proper name
         expect(csvFile).to.not.be(null);
       });
     });
@@ -158,7 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickActionsMenu(TEST_SEARCH_TITLE.replace(/ /g, ''));
         await clickDownloadCsv();
 
-        const csvFile = await getCsv();
+        const csvFile = await getCsvReportData();
         expectSnapshot(csvFile).toMatch();
       });
     });
@@ -195,7 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickActionsMenu('namessearch');
         await clickDownloadCsv();
 
-        const csvFile = await getCsv();
+        const csvFile = await getCsvReportData();
         expectSnapshot(csvFile).toMatch();
       });
     });
