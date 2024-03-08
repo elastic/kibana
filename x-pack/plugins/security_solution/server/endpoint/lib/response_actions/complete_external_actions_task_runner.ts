@@ -73,7 +73,8 @@ export class CompleteExternalActionsTaskRunner
     // If license is not `enterprise`, then exit. Support for external response actions is a
     // Enterprise level feature.
     if (!this.endpointContextServices.getLicenseService().isEnterprise()) {
-      this.log.debug(`Exiting - License is not Enterprise`);
+      this.abortController.abort(`License not Enterprise!`);
+      this.log.debug(`Exiting: Run aborted due to license not being Enterprise`);
       return;
     }
 
@@ -111,10 +112,10 @@ export class CompleteExternalActionsTaskRunner
     if (!this.abortController.signal.aborted) {
       this.abortController.abort('Task canceled by Task Manager');
 
-      // Sleep 5 seconds to give an opportunity for the abort signal to be processed
-      await new Promise((r) => setTimeout(r, 5000));
+      // Sleep 2 seconds to give an opportunity for the abort signal to be processed
+      await new Promise((r) => setTimeout(r, 2000));
 
-      // Wait for remainder of updates to be written
+      // Wait for remainder of updates to be written to ES
       await this.updatesQueue.complete();
     }
   }

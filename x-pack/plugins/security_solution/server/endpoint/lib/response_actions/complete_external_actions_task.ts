@@ -122,6 +122,6 @@ export class CompleteExternalResponseActionsTask {
       this.cleanup = undefined;
     }
 
-    this.log.info(`Task [${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}] as been stopped`);
+    this.log.debug(`Task [${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}] as been stopped`);
   }
 }
