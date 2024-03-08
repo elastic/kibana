@@ -24,7 +24,7 @@ export function validateCustomThreshold({
   uiSettings,
 }: {
   criteria: CustomMetricExpressionParams[];
-  searchConfiguration: SerializedSearchSourceFields;
+  searchConfiguration: SerializedSearchSourceFields<Query>;
   uiSettings: IUiSettingsClient;
 }): ValidationResult {
   const validationResult = { errors: {} };
@@ -58,7 +58,7 @@ export function validateCustomThreshold({
     try {
       buildEsQuery(
         undefined,
-        [{ query: (searchConfiguration.query as Query).query, language: 'kuery' }],
+        [{ query: searchConfiguration.query.query, language: 'kuery' }],
         [],
         getEsQueryConfig(uiSettings)
       );

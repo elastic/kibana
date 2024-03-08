@@ -46,7 +46,7 @@ interface ChartOptions {
 
 interface RuleConditionChartProps {
   metricExpression: MetricExpression;
-  searchConfiguration: SerializedSearchSourceFields;
+  searchConfiguration: SerializedSearchSourceFields<Query>;
   dataView?: DataView;
   groupBy?: string | string[];
   error?: IErrorObject;
@@ -355,7 +355,7 @@ export function RuleConditionChart({
         timeRange={timeRange}
         attributes={attributes}
         disableTriggers={true}
-        query={(searchConfiguration.query as Query) || defaultQuery}
+        query={searchConfiguration.query || defaultQuery}
         filters={filters}
       />
     </div>

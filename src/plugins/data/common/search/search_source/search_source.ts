@@ -73,11 +73,13 @@ import {
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
+  AggregateQuery,
   buildEsQuery,
   Filter,
   isOfQueryType,
   isPhraseFilter,
   isPhrasesFilter,
+  Query,
 } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
@@ -233,8 +235,8 @@ export class SearchSource {
   /**
    * returns all search source fields
    */
-  getFields(): SearchSourceFields {
-    return { ...this.fields };
+  getFields<Q extends Query | AggregateQuery = Query | AggregateQuery>() {
+    return { ...this.fields } as SearchSourceFields<Q>;
   }
 
   /**
@@ -947,7 +949,9 @@ export class SearchSource {
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields(recurse = false): SerializedSearchSourceFields {
+  public getSerializedFields<Q extends Query | AggregateQuery = Query | AggregateQuery>(
+    recurse = false
+  ): SerializedSearchSourceFields<Q> {
     const {
       filter: originalFilters,
       aggs: searchSourceAggs,
@@ -956,9 +960,9 @@ export class SearchSource {
       sort,
       index,
       ...searchSourceFields
-    } = this.getFields();
+    } = this.getFields<Q>();
 
-    let serializedSearchSourceFields: SerializedSearchSourceFields = {
+    let serializedSearchSourceFields: SerializedSearchSourceFields<Q> = {
       ...searchSourceFields,
     };
     if (index) {

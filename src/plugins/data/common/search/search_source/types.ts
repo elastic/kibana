@@ -71,12 +71,12 @@ export type SearchFieldValue = string | SearchField;
 /**
  * search source fields
  */
-export interface SearchSourceFields {
+export interface SearchSourceFields<Q extends Query | AggregateQuery = Query | AggregateQuery> {
   type?: string;
   /**
    * {@link Query}
    */
-  query?: Query | AggregateQuery;
+  query?: Q;
   /**
    * {@link Filter}
    */
@@ -122,12 +122,14 @@ export interface SearchSourceFields {
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type SerializedSearchSourceFields = {
+export type SerializedSearchSourceFields<
+  Q extends Query | AggregateQuery = Query | AggregateQuery
+> = {
   type?: string;
   /**
    * {@link Query}
    */
-  query?: Query | AggregateQuery;
+  query?: Q;
   /**
    * {@link Filter}
    */

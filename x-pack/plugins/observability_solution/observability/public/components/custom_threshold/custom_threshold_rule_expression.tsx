@@ -412,7 +412,7 @@ export default function Expressions(props: Props) {
         onQueryChange={debouncedOnFilterChange}
         onQuerySubmit={onFilterChange}
         dataTestSubj="thresholdRuleUnifiedSearchBar"
-        query={ruleParams.searchConfiguration?.query as Query}
+        query={ruleParams.searchConfiguration?.query}
         filters={ruleParams.searchConfiguration?.filter}
         onFiltersUpdated={(filter) => {
           // Since rule params will be sent to the API as is, and we only need meta and query parameters to be

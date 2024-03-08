@@ -12,6 +12,7 @@ import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-p
 import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { Query } from '@kbn/es-query';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
@@ -61,7 +62,7 @@ export interface AlertParams {
   filterQuery?: string;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
-  searchConfiguration: SerializedSearchSourceFields;
+  searchConfiguration: SerializedSearchSourceFields<Query>;
   shouldDropPartialBuckets?: boolean;
 }
 
