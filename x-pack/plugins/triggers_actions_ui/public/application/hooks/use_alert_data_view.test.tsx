@@ -46,7 +46,8 @@ const wrapper = ({ children }: { children: Node }) => (
   <QueryClientProvider client={queryClient}> {children} </QueryClientProvider>
 );
 
-describe('useAlertDataView', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/177250
+describe.skip('useAlertDataView', () => {
   const observabilityAlertFeatureIds: ValidFeatureId[] = [
     AlertConsumers.APM,
     AlertConsumers.INFRASTRUCTURE,

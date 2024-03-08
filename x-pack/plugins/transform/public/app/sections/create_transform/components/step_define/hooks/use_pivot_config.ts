@@ -10,30 +10,26 @@ import { i18n } from '@kbn/i18n';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isDefined } from '@kbn/ml-is-defined';
-import { AggName } from '../../../../../../../common/types/aggregations';
+import type { AggName } from '../../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../../common/types/common';
 
 import { useToastNotifications } from '../../../../../app_dependencies';
-import {
+import type {
   DropDownLabel,
-  getRequestPayload,
-  isPivotGroupByConfigWithUiSupport,
   PivotAggsConfig,
   PivotAggsConfigDict,
   PivotGroupByConfig,
 } from '../../../../../common';
+import { getRequestPayload, isPivotGroupByConfigWithUiSupport } from '../../../../../common';
 
-import {
-  getAggNameConflictToastMessages,
-  getPivotDropdownOptions,
-  StepDefineExposedState,
-} from '../common';
-import { StepDefineFormProps } from '../step_define_form';
+import type { StepDefineExposedState } from '../common';
+import { getAggNameConflictToastMessages, getPivotDropdownOptions } from '../common';
+import type { StepDefineFormProps } from '../step_define_form';
 import {
   isPivotAggConfigTopMetric,
   isPivotAggsWithExtendedForm,
 } from '../../../../../common/pivot_aggs';
-import { TransformPivotConfig } from '../../../../../../../common/types/transform';
+import type { TransformPivotConfig } from '../../../../../../../common/types/transform';
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../../common/types/pivot_aggs';
 import { isPivotAggConfigWithUiSupport } from '../../../../../common/pivot_group_by';
 

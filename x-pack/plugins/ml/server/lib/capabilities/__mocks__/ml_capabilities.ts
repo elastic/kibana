@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { MlCapabilities } from '../../../../common/types/capabilities';
 import {
   adminMlCapabilities,
   userMlCapabilities,
-  MlCapabilities,
   getDefaultCapabilities,
 } from '../../../../common/types/capabilities';
 

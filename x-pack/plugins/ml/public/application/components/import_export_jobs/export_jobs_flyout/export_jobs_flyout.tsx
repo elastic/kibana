@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {

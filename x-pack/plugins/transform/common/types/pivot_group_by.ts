@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Dictionary } from './common';
-import { EsFieldName } from './fields';
+import type { Dictionary } from './common';
+import type { EsFieldName } from './fields';
 
 export type GenericAgg = object;
 
