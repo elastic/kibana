@@ -8,6 +8,8 @@
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { SAVED_OBJECT_TYPES } from '../../../common';
 import { CASES_CONNECTOR_SUB_ACTION } from './constants';
 import type { CasesConnectorConfig, CasesConnectorRunParams, CasesConnectorSecrets } from './types';
 import { CasesConnectorRunParamsSchema } from './schema';
@@ -22,12 +24,17 @@ import {
 import { CasesConnectorExecutor } from './cases_connector_executor';
 import { CaseConnectorRetryService } from './retry_service';
 import { fullJitterBackoffFactory } from './full_jitter_backoff';
+import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
 
 interface CasesConnectorParams {
   connectorParams: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>;
   casesParams: {
     getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
     getSpaceId: (request?: KibanaRequest) => string;
+    getScopedSavedObjectClient: (
+      request: KibanaRequest,
+      savedObjectTypes: string[]
+    ) => Promise<SavedObjectsClientContract>;
   };
 }
 
@@ -35,18 +42,12 @@ export class CasesConnector extends SubActionConnector<
   CasesConnectorConfig,
   CasesConnectorSecrets
 > {
-  private readonly casesOracleService: CasesOracleService;
   private readonly casesService: CasesService;
   private readonly retryService: CaseConnectorRetryService;
   private readonly casesParams: CasesConnectorParams['casesParams'];
 
   constructor({ connectorParams, casesParams }: CasesConnectorParams) {
     super(connectorParams);
-
-    this.casesOracleService = new CasesOracleService({
-      logger: this.logger,
-      savedObjectsClient: this.savedObjectsClient,
-    });
 
     this.casesService = new CasesService();
 
@@ -95,11 +96,21 @@ export class CasesConnector extends SubActionConnector<
        */
       const kibanaRequest = this.kibanaRequest as KibanaRequest;
       const casesClient = await this.casesParams.getCasesClient(kibanaRequest);
+      const savedObjectsClient = await this.casesParams.getScopedSavedObjectClient(kibanaRequest, [
+        ...SAVED_OBJECT_TYPES,
+        CASE_ORACLE_SAVED_OBJECT,
+      ]);
+
       const spaceId = this.casesParams.getSpaceId(kibanaRequest);
+
+      const casesOracleService = new CasesOracleService({
+        logger: this.logger,
+        savedObjectsClient,
+      });
 
       const connectorExecutor = new CasesConnectorExecutor({
         logger: this.logger,
-        casesOracleService: this.casesOracleService,
+        casesOracleService,
         casesService: this.casesService,
         casesClient,
         spaceId,

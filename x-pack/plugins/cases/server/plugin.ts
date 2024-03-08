@@ -145,7 +145,7 @@ export class CasePlugin
       return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
 
-    registerConnectorTypes({ actions: plugins.actions, getCasesClient, getSpaceId });
+    registerConnectorTypes({ actions: plugins.actions, core, getCasesClient, getSpaceId });
 
     return {
       attachmentFramework: {

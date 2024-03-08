@@ -8,6 +8,7 @@
 import { SecurityConnectorFeatureId, UptimeConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { CasesConnector } from './cases_connector';
 import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE } from './constants';
 import type { CasesConnectorConfig, CasesConnectorSecrets } from './types';
@@ -16,12 +17,17 @@ import type { CasesClient } from '../../client';
 
 interface GetCasesConnectorTypeArgs {
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
+  getScopedSavedObjectClient: (
+    request: KibanaRequest,
+    savedObjectTypes: string[]
+  ) => Promise<SavedObjectsClientContract>;
   getSpaceId: (request?: KibanaRequest) => string;
 }
 
 export const getCasesConnectorType = ({
   getCasesClient,
   getSpaceId,
+  getScopedSavedObjectClient,
 }: GetCasesConnectorTypeArgs): SubActionConnectorType<
   CasesConnectorConfig,
   CasesConnectorSecrets
@@ -29,7 +35,10 @@ export const getCasesConnectorType = ({
   id: CASES_CONNECTOR_ID,
   name: CASES_CONNECTOR_TITLE,
   getService: (params) =>
-    new CasesConnector({ casesParams: { getCasesClient, getSpaceId }, connectorParams: params }),
+    new CasesConnector({
+      casesParams: { getCasesClient, getSpaceId, getScopedSavedObjectClient },
+      connectorParams: params,
+    }),
   schema: {
     config: CasesConnectorConfigSchema,
     secrets: CasesConnectorSecretsSchema,
