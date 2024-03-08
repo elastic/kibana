@@ -30,6 +30,8 @@ describe('CreateSLO', () => {
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let createSLO: CreateSLO;
 
+  jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
+
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     loggerMock = loggingSystemMock.createLogger();
