@@ -19,7 +19,6 @@ import {
 import {
   isEsqlRule,
   isNewTermsRule,
-  isQueryRule,
   isThreatMatchRule,
   isThresholdRule,
   isSuppressionRuleConfiguredWithGroupBy,
