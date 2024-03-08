@@ -65,20 +65,16 @@ const MenuItem: React.FC = () => {
 
 type EditInLensActionApi = HasUniqueId &
   HasVisualizeConfig &
-  PublishesPanelTitle &
-  PublishesPanelDescription &
-  Partial<PublishesLocalUnifiedSearch> &
   CanAccessViewMode &
-  Partial<HasExpressionVariables>;
+  Partial<
+    PublishesLocalUnifiedSearch &
+      HasExpressionVariables &
+      PublishesPanelTitle &
+      PublishesPanelDescription
+  >;
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is EditInLensActionApi =>
-  apiHasUniqueId(api) &&
-  apiHasVisualizeConfig(api) &&
-  apiPublishesPanelTitle(api) &&
-  apiPublishesPanelDescription(api) &&
-  apiPublishesPartialLocalUnifiedSearch(api) &&
-  apiCanAccessViewMode(api) &&
-  getInheritedViewMode(api) === ViewMode.EDIT;
+  apiHasUniqueId(api) && apiCanAccessViewMode(api) && apiHasVisualizeConfig(api);
 
 export class EditInLensAction implements Action<EmbeddableApiContext> {
   public id = ACTION_EDIT_IN_LENS;
@@ -111,7 +107,7 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
     const parentSearchSource = vis.data.searchSource?.getParent();
     const searchFilters = parentSearchSource?.getField('filter') ?? visFilters;
     const searchQuery = parentSearchSource?.getField('query') ?? visQuery;
-    const title = vis.title || embeddable.panelTitle.getValue();
+    const title = vis.title || embeddable.panelTitle?.getValue();
     const panelTimeRange = embeddable.localTimeRange?.getValue();
     const updatedWithMeta = {
       ...navigateToLensConfig,
@@ -122,7 +118,7 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
       searchFilters,
       searchQuery,
       isEmbeddable: true,
-      description: vis.description || embeddable.panelDescription.getValue(),
+      description: vis.description || embeddable.panelDescription?.getValue(),
       panelTimeRange,
     };
     if (navigateToLensConfig) {
@@ -150,7 +146,8 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
 
   async isCompatible(context: EmbeddableApiContext) {
     const { embeddable } = context;
-    if (!compatibilityCheck(embeddable)) return false;
+    if (!compatibilityCheck(embeddable) || getInheritedViewMode(embeddable) !== ViewMode.EDIT)
+      return false;
 
     const vis = embeddable.getVis();
     const { visualize } = getCapabilities();
