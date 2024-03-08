@@ -330,7 +330,7 @@ export class FleetPlugin
                     privileges: [
                       {
                         id: `${PLUGIN_ID}-agents-all`,
-                        api: [`${PLUGIN_ID}-agent-read`, `${PLUGIN_ID}-agent-all`],
+                        api: [`${PLUGIN_ID}-agents-read`, `${PLUGIN_ID}-agents-all`],
                         name: 'All',
                         ui: ['read', 'all'],
                         savedObject: {
@@ -341,7 +341,7 @@ export class FleetPlugin
                       },
                       {
                         id: `${PLUGIN_ID}-agents-read`,
-                        api: [`${PLUGIN_ID}-agent-read`],
+                        api: [`${PLUGIN_ID}-agents-read`],
                         name: 'Read',
                         ui: ['read'],
                         savedObject: {
