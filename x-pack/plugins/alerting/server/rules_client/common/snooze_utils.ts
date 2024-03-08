@@ -29,15 +29,6 @@ export function getSnoozeAttributes(
     };
   }
 
-  console.log(
-    'snoozeId',
-    snoozeId,
-    attributes.snoozeSchedule,
-    (snoozeId
-      ? clearScheduledSnoozesAttributesById(attributes, [snoozeId])
-      : clearUnscheduledSnoozeAttributes(attributes)
-    ).concat(snoozeSchedule)
-  );
   return {
     snoozeSchedule: (snoozeId
       ? clearScheduledSnoozesAttributesById(attributes, [snoozeId])
