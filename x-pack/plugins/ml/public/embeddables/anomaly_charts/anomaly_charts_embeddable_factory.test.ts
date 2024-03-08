@@ -9,7 +9,7 @@ import { AnomalyChartsEmbeddableFactory } from './anomaly_charts_embeddable_fact
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { AnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
-import { AnomalyChartsEmbeddableInput } from '..';
+import type { AnomalyChartsEmbeddableInput } from '..';
 
 jest.mock('./anomaly_charts_embeddable', () => ({
   AnomalyChartsEmbeddable: jest.fn(),

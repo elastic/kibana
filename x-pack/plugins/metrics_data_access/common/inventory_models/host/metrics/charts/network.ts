@@ -53,7 +53,7 @@ const rx: LensConfigWithId = {
   title: formulas.rx.label ?? '',
   layers: [
     {
-      seriesType: 'area',
+      seriesType: 'line',
       type: 'series',
       xAxis: '@timestamp',
       yAxis: [formulas.rx],
@@ -70,7 +70,7 @@ const tx: LensConfigWithId = {
   title: formulas.tx.label ?? '',
   layers: [
     {
-      seriesType: 'area',
+      seriesType: 'line',
       type: 'series',
       xAxis: '@timestamp',
       yAxis: [formulas.tx],
