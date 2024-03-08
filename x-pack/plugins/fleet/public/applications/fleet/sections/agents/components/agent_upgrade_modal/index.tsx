@@ -32,7 +32,8 @@ import semverLt from 'semver/functions/lt';
 import {
   AGENT_UPGRADE_COOLDOWN_IN_MIN,
   getMinVersion,
-  checkFleetServerVersion,
+  getFleetServerVersionMessage,
+  isAgentVersionLessThanFleetServer,
 } from '../../../../../../../common/services';
 
 import {
@@ -242,17 +243,28 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     }
   }, [latestAgentVersion]);
 
-  useEffect(() => {
-    try {
-      if (!!selectedVersion[0]?.value) {
-        checkFleetServerVersion(selectedVersion[0].value, fleetServerAgents);
-        // clean up the error
-        setErrors('');
-      }
-    } catch (error) {
-      setErrors(error?.message);
+  const warningMessage = useMemo(() => {
+    if (
+      isSingleAgent &&
+      selectedVersion[0]?.value &&
+      !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)
+    ) {
+      return `The selected agent is not upgradeable: ${getNotUpgradeableMessage(
+        agents[0],
+        latestAgentVersion,
+        selectedVersion[0].value
+      )}`;
     }
-  }, [selectedVersion, fleetServerAgents]);
+    if (
+      selectedVersion[0]?.value &&
+      !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents)
+    ) {
+      return `Please choose another version. ${getFleetServerVersionMessage(
+        selectedVersion[0].value,
+        fleetServerAgents
+      )}`;
+    }
+  }, [agents, fleetServerAgents, isSingleAgent, latestAgentVersion, selectedVersion]);
 
   const [selectedMaintenanceWindow, setSelectedMaintenanceWindow] = useState([
     isSmallBatch ? maintenanceOptions[0] : maintenanceOptions[1],
@@ -378,7 +390,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         (isUpdating && updatingAgents === 0) ||
         !selectedVersion[0].value ||
         (isSingleAgent && !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)) ||
-        (isSingleAgent && !!errors)
+        (isSingleAgent &&
+          !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents))
       }
       confirmButtonText={
         isSingleAgent ? (
@@ -413,8 +426,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
             defaultMessage="No newer versions found to upgrade to. You may type in a custom version."
           />
         ) : isSingleAgent ? (
-          selectedVersion[0].value &&
-          !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value) ? (
+          warningMessage ? (
             <EuiCallOut
               data-test-subj="agentUpgradeModal.notUpgradeableCallout"
               color="warning"
@@ -422,18 +434,24 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               title={
                 <FormattedMessage
                   id="xpack.fleet.upgradeAgents.notUpgradeable"
-                  defaultMessage="The selected agent is not upgradeable."
+                  defaultMessage="Warning"
                 />
               }
             >
               <FormattedMessage
                 id="xpack.fleet.upgradeAgents.notUpgradeableMsg"
-                defaultMessage="Reason: {reason}"
+                defaultMessage="{reason} {learnMore}"
                 values={{
-                  reason: getNotUpgradeableMessage(
-                    agents[0],
-                    latestAgentVersion,
-                    selectedVersion[0].value
+                  reason: warningMessage,
+                  learnMore: (
+                    <div>
+                      <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
+                        <FormattedMessage
+                          id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
+                          defaultMessage="Learn more"
+                        />
+                      </EuiLink>
+                    </div>
                   ),
                 }}
               />
@@ -480,6 +498,36 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               )}
             </>
           )
+        ) : warningMessage ? (
+          <EuiCallOut
+            data-test-subj="agentUpgradeModal.notUpgradeableCallout"
+            color="warning"
+            iconType="warning"
+            title={
+              <FormattedMessage
+                id="xpack.fleet.upgradeAgents.notUpgradeable"
+                defaultMessage="Warning"
+              />
+            }
+          >
+            <FormattedMessage
+              id="xpack.fleet.upgradeAgents.notUpgradeableMsg"
+              defaultMessage="{reason} {learnMore}"
+              values={{
+                reason: warningMessage,
+                learnMore: (
+                  <div>
+                    <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
+                      <FormattedMessage
+                        id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
+                        defaultMessage="Learn more"
+                      />
+                    </EuiLink>
+                  </div>
+                ),
+              }}
+            />
+          </EuiCallOut>
         ) : (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.upgradeMultipleDescription"

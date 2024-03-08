@@ -227,7 +227,6 @@ describe('AgentUpgradeAgentModal', () => {
             /This action will upgrade the agent running on 'host00001' to version 8.10.2. This action can not be undone. Are you sure you wish to continue?/
           )
         );
-        expect(utils.queryByText(/Error upgrading the selected agent/)).toBeInTheDocument();
         expect(
           utils.queryByText(
             /Cannot upgrade to version 8.10.2 because it is higher than the latest fleet server version 8.9.0./
@@ -238,7 +237,7 @@ describe('AgentUpgradeAgentModal', () => {
       });
     });
 
-    it('should display a warning for multiple agents when version is greater than maxFleetServerVersion nd not disable submit button', async () => {
+    it('should display a warning for multiple agents when version is greater than maxFleetServerVersion and not disable submit button', async () => {
       mockSendGetAgentsAvailableVersions.mockClear();
       mockSendGetAgentsAvailableVersions.mockResolvedValue({
         data: {
@@ -284,10 +283,9 @@ describe('AgentUpgradeAgentModal', () => {
             /This action will upgrade multiple agents to version 8.10.2. This action can not be undone. Are you sure you wish to continue?/
           )
         );
-        expect(utils.queryByText(/Error upgrading the selected agent/)).toBeInTheDocument();
         expect(
           utils.queryByText(
-            /Cannot upgrade to version 8.10.2 because it is higher than the latest fleet server version 8.9.0./
+            /Please choose another version. Cannot upgrade to version 8.10.2 because it is higher than the latest fleet server version 8.9.0./
           )
         ).toBeInTheDocument();
         const el = utils.getByTestId('confirmModalConfirmButton');
@@ -380,10 +378,9 @@ describe('AgentUpgradeAgentModal', () => {
       agentCount: 2,
     });
     await waitFor(() => {
-      expect(utils.queryByText(/The selected agent is not upgradeable/)).toBeInTheDocument();
       expect(
         utils.queryByText(
-          /Reason: agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service./
+          /The selected agent is not upgradeable: agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service./
         )
       ).toBeInTheDocument();
       const el = utils.getByTestId('confirmModalConfirmButton');

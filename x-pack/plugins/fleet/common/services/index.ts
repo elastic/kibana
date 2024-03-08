@@ -81,4 +81,7 @@ export {
   unsetAgentPolicyAccordingToLicenseLevel,
 } from './agent_policy_config';
 
-export { checkFleetServerVersion } from './check_fleet_server_versions';
+export {
+  getFleetServerVersionMessage,
+  isAgentVersionLessThanFleetServer,
+} from './check_fleet_server_versions';

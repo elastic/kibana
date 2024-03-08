@@ -22,13 +22,23 @@ export const checkFleetServerVersion = (
   fleetServerAgents: Agent[],
   force = false
 ) => {
+  const message = getFleetServerVersionMessage(versionToUpgradeNumber, fleetServerAgents, force);
+  if (force && message) throw new AgentRequestInvalidError(message);
+  if (message) throw new Error(message);
+};
+
+export const getFleetServerVersionMessage = (
+  versionToUpgradeNumber: string | undefined,
+  fleetServerAgents: Agent[],
+  force = false
+) => {
   const fleetServerVersions = fleetServerAgents.map(
     (agent) => agent.local_metadata.elastic.agent.version
   ) as string[];
 
   const maxFleetServerVersion = getMaxVersion(fleetServerVersions);
 
-  if (!maxFleetServerVersion) {
+  if (!maxFleetServerVersion || !versionToUpgradeNumber) {
     return;
   }
 
@@ -37,9 +47,7 @@ export const checkFleetServerVersion = (
     semverGt(versionToUpgradeNumber, maxFleetServerVersion) &&
     !differsOnlyInPatch(versionToUpgradeNumber, maxFleetServerVersion)
   ) {
-    throw new Error(
-      `Cannot upgrade to version ${versionToUpgradeNumber} because it is higher than the latest fleet server version ${maxFleetServerVersion}`
-    );
+    return `Cannot upgrade to version ${versionToUpgradeNumber} because it is higher than the latest fleet server version ${maxFleetServerVersion}.`;
   }
 
   const fleetServerMajorGt =
@@ -50,8 +58,41 @@ export const checkFleetServerVersion = (
 
   // When force is enabled, only the major and minor versions are checked
   if (force && !(fleetServerMajorGt || fleetServerMajorEqMinorGte)) {
-    throw new AgentRequestInvalidError(
-      `Cannot force upgrade to version ${versionToUpgradeNumber} because it does not satisfy the major and minor of the latest fleet server version ${maxFleetServerVersion}`
-    );
+    return `Cannot force upgrade to version ${versionToUpgradeNumber} because it does not satisfy the major and minor of the latest fleet server version ${maxFleetServerVersion}.`;
   }
+};
+
+export const isAgentVersionLessThanFleetServer = (
+  versionToUpgradeNumber: string | undefined,
+  fleetServerAgents: Agent[],
+  force = false
+) => {
+  const fleetServerVersions = fleetServerAgents.map(
+    (agent) => agent.local_metadata.elastic.agent.version
+  ) as string[];
+
+  const maxFleetServerVersion = getMaxVersion(fleetServerVersions);
+
+  if (!maxFleetServerVersion || !versionToUpgradeNumber) {
+    return false;
+  }
+  if (
+    !force &&
+    semverGt(versionToUpgradeNumber, maxFleetServerVersion) &&
+    !differsOnlyInPatch(versionToUpgradeNumber, maxFleetServerVersion)
+  )
+    return false;
+
+  const fleetServerMajorGt =
+    semverMajor(maxFleetServerVersion) > semverMajor(versionToUpgradeNumber);
+  const fleetServerMajorEqMinorGte =
+    semverMajor(maxFleetServerVersion) === semverMajor(versionToUpgradeNumber) &&
+    semverMinor(maxFleetServerVersion) >= semverMinor(versionToUpgradeNumber);
+
+  // When force is enabled, only the major and minor versions are checked
+  if (force && !(fleetServerMajorGt || fleetServerMajorEqMinorGte)) {
+    return false;
+  }
+
+  return true;
 };
