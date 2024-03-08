@@ -191,52 +191,6 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
       .expect(500);
   });
 
-  it(`returns 200 if job handler doesn't error`, async () => {
-    registerGenerationRoutesPublic(reportingCore, mockLogger);
-
-    await server.start();
-
-    await supertest(httpSetup.server.listener)
-      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
-      .send({
-        jobParams: rison.encode({
-          title: `abc`,
-          relativeUrls: ['test'],
-          layout: { id: 'test' },
-          objectType: 'canvas workpad',
-        }),
-      })
-      .expect(200)
-      .then(({ body }) => {
-        expect(body).toMatchObject({
-          job: {
-            attempts: 0,
-            created_by: 'Tom Riddle',
-            id: 'foo',
-            index: 'foo-index',
-            jobtype: 'printable_pdf',
-            payload: {
-              forceNow: expect.any(String),
-              isDeprecated: true,
-              layout: {
-                id: 'test',
-              },
-              objectType: 'canvas workpad',
-              objects: [
-                {
-                  relativeUrl: 'test',
-                },
-              ],
-              title: 'abc',
-              version: '7.14.0',
-            },
-            status: 'pending',
-          },
-          path: '/mock-server-basepath/api/reporting/jobs/download/foo',
-        });
-      });
-  });
-
   describe('telemetry', () => {
     it('increments generation api counter', async () => {
       registerGenerationRoutesPublic(reportingCore, mockLogger);

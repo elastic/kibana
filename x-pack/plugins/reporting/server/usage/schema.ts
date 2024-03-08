@@ -52,7 +52,6 @@ const byAppCountsSchema: MakeSchemaFrom<ByAppCounts> = {
   csv_v2: appCountsSchema,
   PNG: appCountsSchema,
   PNGV2: appCountsSchema,
-  printable_pdf: appCountsSchema,
   printable_pdf_v2: appCountsSchema,
 };
 
@@ -146,12 +145,6 @@ const jobTypesSchema: MakeSchemaFrom<JobTypes> = {
   },
   PNG: { ...availableTotalSchema, metrics: metricsSchemaPng, error_codes: errorCodesSchemaPng },
   PNGV2: { ...availableTotalSchema, metrics: metricsSchemaPng, error_codes: errorCodesSchemaPng },
-  printable_pdf: {
-    ...availableTotalSchema,
-    layout: layoutCountsSchema,
-    metrics: metricsSchemaPdf,
-    error_codes: errorCodesSchemaPdf,
-  },
   printable_pdf_v2: {
     ...availableTotalSchema,
     layout: layoutCountsSchema,

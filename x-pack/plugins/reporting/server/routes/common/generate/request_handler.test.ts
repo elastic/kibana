@@ -154,15 +154,6 @@ describe('Handle request to generate', () => {
         }
       `);
     });
-
-    test('provides a default kibana version field for older POST URLs', async () => {
-      // how do we handle the printable_pdf endpoint that isn't migrating to the class instance of export types?
-      (mockJobParams as unknown as { version?: string }).version = undefined;
-      const report = await requestHandler.enqueueJob('printablePdf', mockJobParams);
-
-      const { _id, created_at: _created_at, ...snapObj } = report;
-      expect(snapObj.payload.version).toBe('7.14.0');
-    });
   });
 
   describe('getJobParams', () => {

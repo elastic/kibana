@@ -33,7 +33,7 @@ import {
   CsvSearchSourceImmediateExportType,
   CsvV2ExportType,
 } from '@kbn/reporting-export-types-csv';
-import { PdfExportType, PdfV1ExportType } from '@kbn/reporting-export-types-pdf';
+import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import { ExportType } from '@kbn/reporting-server';
@@ -225,8 +225,6 @@ export class ReportingCore {
     }
 
     if (pdf.enabled) {
-      // NOTE: PdfV1ExportType is deprecated and tagged for removal: https://github.com/elastic/kibana/issues/154601
-      exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
       exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
     }
 

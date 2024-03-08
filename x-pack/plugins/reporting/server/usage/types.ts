@@ -53,7 +53,6 @@ type BaseJobTypes =
   | 'csv_v2'
   | 'PNG'
   | 'PNGV2'
-  | 'printable_pdf'
   | 'printable_pdf_v2';
 
 export interface KeyCountBucket
@@ -158,11 +157,6 @@ export interface JobTypes {
   PNGV2: AvailableTotal & {
     metrics: MetricsStatsPng;
     error_codes: ErrorCodesStatsPng;
-  };
-  printable_pdf: AvailableTotal & {
-    layout: LayoutCounts;
-    metrics: MetricsStatsPdf;
-    error_codes: ErrorCodesStatsPdf;
   };
   printable_pdf_v2: AvailableTotal & {
     layout: LayoutCounts;

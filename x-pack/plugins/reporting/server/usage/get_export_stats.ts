@@ -33,7 +33,7 @@ const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> & { layout: Lay
 };
 
 const jobTypeIsPdf = (jobType: keyof JobTypes) => {
-  return jobType === 'printable_pdf' || jobType === 'printable_pdf_v2';
+  return jobType === 'printable_pdf_v2';
 };
 
 const metricsPercentiles = ['50.0', '75.0', '95.0', '99.0'].reduce(
@@ -57,7 +57,6 @@ const metricsForFeature: { [K in keyof JobTypes]: JobTypes[K]['metrics'] } = {
   csv_v2: metricsSets.csv,
   PNG: metricsSets.png,
   PNGV2: metricsSets.png,
-  printable_pdf: metricsSets.pdf,
   printable_pdf_v2: metricsSets.pdf,
 };
 
