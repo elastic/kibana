@@ -104,7 +104,8 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
     }
   );
 
-  describe('Load prebuilt packs', { tags: ['@ess', '@serverless'] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/176543
+  describe.skip('Load prebuilt packs', { tags: ['@ess', '@serverless'] }, () => {
     afterEach(() => {
       cleanupAllPrebuiltPacks();
     });
