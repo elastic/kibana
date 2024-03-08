@@ -76,7 +76,6 @@ export {
   INVALID_NAMESPACE_CHARACTERS,
   getFileMetadataIndexName,
   getFileDataIndexName,
-  createSoFindIterable,
 } from './services';
 
 export type { FleetAuthz } from './authz';

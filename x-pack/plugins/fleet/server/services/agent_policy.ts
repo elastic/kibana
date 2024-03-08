@@ -28,7 +28,6 @@ import { asyncForEach } from '@kbn/std';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import {
-  createSoFindIterable,
   getAllowedOutputTypeForPolicy,
   packageToPackagePolicy,
   policyHasAPMIntegration,
@@ -107,6 +106,7 @@ import { appContextService } from './app_context';
 import { getFullAgentPolicy, validateOutputForPolicy } from './agent_policies';
 import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
+import { createSoFindIterable } from './utils/create_so_find_iterable';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 

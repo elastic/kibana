@@ -95,7 +95,7 @@ import type {
 } from '../types';
 import type { ExternalCallback } from '..';
 
-import { createSoFindIterable } from '../../common/services/create_so_find_iterable';
+import { createSoFindIterable } from './utils/create_so_find_iterable';
 
 import type { FleetAuthzRouteConfig } from './security';
 

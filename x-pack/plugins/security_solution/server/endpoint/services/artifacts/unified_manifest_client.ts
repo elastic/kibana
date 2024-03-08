@@ -12,7 +12,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { createSoFindIterable, type ListWithKuery } from '@kbn/fleet-plugin/common';
+import { createSoFindIterable } from '../../utils/create_so_find_iterable';
 import { mapUnifiedManifestSavedObjectToUnifiedManifest } from './utils';
 import type {
   InternalUnifiedManifestCreateSchema,
@@ -20,10 +20,13 @@ import type {
 } from '../../schemas';
 import { ManifestConstants } from '../../lib/artifacts';
 
-type FetchAllAgentPoliciesOptions = Pick<
-  ListWithKuery,
-  'perPage' | 'kuery' | 'sortField' | 'sortOrder'
-> & { fields?: string[] };
+interface FetchAllUnifiedManifestsOptions {
+  perPage?: number;
+  kuery?: string;
+  sortField?: string;
+  sortOrder?: 'desc' | 'asc';
+  fields?: string[];
+}
 
 export class UnifiedManifestClient {
   private savedObjectsClient: SavedObjectsClientContract;
@@ -83,7 +86,7 @@ export class UnifiedManifestClient {
 
   public async getAllUnifiedManifests(
     cb: (unifiedManifests: InternalUnifiedManifestSchema[]) => void | Promise<void>,
-    options?: FetchAllAgentPoliciesOptions
+    options?: FetchAllUnifiedManifestsOptions
   ): Promise<void> {
     const unifiedManifestsFetcher = this.fetchAllUnifiedManifests(options);
 
@@ -150,7 +153,7 @@ export class UnifiedManifestClient {
     kuery,
     sortOrder = 'asc',
     sortField = 'created',
-  }: FetchAllAgentPoliciesOptions = {}): AsyncIterable<InternalUnifiedManifestSchema[]> {
+  }: FetchAllUnifiedManifestsOptions = {}): AsyncIterable<InternalUnifiedManifestSchema[]> {
     const normalizeKuery = (savedObjectType: string, kueryInput: string): string => {
       return kueryInput.replace(
         new RegExp(`${savedObjectType}\\.(?!attributes\\.)`, 'g'),
