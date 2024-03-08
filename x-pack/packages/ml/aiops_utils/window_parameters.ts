@@ -55,7 +55,8 @@ export const isWindowParameters = (arg: unknown): arg is WindowParameters =>
 export const getWindowParameters = (
   clickTime: number,
   minTime: number,
-  maxTime: number
+  maxTime: number,
+  clickTimeUpper?: number
 ): WindowParameters => {
   const totalWindow = maxTime - minTime;
 
@@ -72,8 +73,8 @@ export const getWindowParameters = (
   const baselineWindow = Math.max(totalWindow / 3.5, minBaselineWindow);
   const windowGap = Math.max(totalWindow / 10, minWindowGap);
 
-  const deviationMin = clickTime - deviationWindow / 2;
-  const deviationMax = clickTime + deviationWindow / 2;
+  const deviationMin = clickTimeUpper ? clickTime : clickTime - deviationWindow / 2;
+  const deviationMax = clickTimeUpper ? clickTimeUpper : clickTime + deviationWindow / 2;
 
   const baselineMax = deviationMin - windowGap;
   const baselineMin = baselineMax - baselineWindow;

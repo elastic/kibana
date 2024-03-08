@@ -11,6 +11,7 @@ import { EuiEmptyPrompt, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import type { Moment } from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -181,6 +182,23 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     setInitialAnalysisStart(undefined);
   }
 
+  const barStyle = {
+    rect: {
+      opacity: 1,
+      fill: 'orange',
+    },
+  };
+  const barStyleAccessor: BarStyleAccessor | undefined = documentCountStats?.changePoint
+    ? (d, g) => {
+        return g.specId === 'document_count' &&
+          documentCountStats?.changePoint &&
+          d.x > documentCountStats.changePoint.lower &&
+          d.x < documentCountStats.changePoint.upper
+          ? barStyle
+          : null;
+      }
+    : undefined;
+
   return (
     <EuiPanel hasBorder={false} hasShadow={false}>
       {documentCountStats !== undefined && (
@@ -198,6 +216,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           initialAnalysisStart={initialAnalysisStart}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
+          barStyleAccessor={barStyleAccessor}
         />
       )}
       <EuiHorizontalRule />

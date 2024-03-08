@@ -6,6 +6,7 @@
  */
 
 import { get } from 'lodash';
+import { mean } from 'd3-array';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import dateMath from '@kbn/datemath';
@@ -21,6 +22,7 @@ import type { GroupTableItem } from './components/log_rate_analysis_results_tabl
 export interface DocumentCountStats {
   interval?: number;
   buckets?: { [key: string]: number };
+  changePoint?: { key: number; lower: number; upper: number; type: string };
   timeRangeEarliest?: number;
   timeRangeLatest?: number;
   totalCount: number;
@@ -45,7 +47,8 @@ export interface DocumentStatsSearchStrategyParams {
 export const getDocumentCountStatsRequest = (
   params: DocumentStatsSearchStrategyParams,
   randomSamplerWrapper?: RandomSamplerWrapper,
-  skipAggs = false
+  skipAggs = false,
+  changePoints = false
 ) => {
   const {
     index,
@@ -88,6 +91,16 @@ export const getDocumentCountStatsRequest = (
           : {}),
       },
     },
+    ...(changePoints
+      ? {
+          change_point_request: {
+            // @ts-expect-error missing from ES spec
+            change_point: {
+              buckets_path: 'eventRate>_count',
+            },
+          },
+        }
+      : {}),
   };
 
   const aggs = randomSamplerWrapper ? randomSamplerWrapper.wrap(rawAggs) : rawAggs;
@@ -152,10 +165,45 @@ export const processDocumentCountStats = (
     []
   );
 
+  const changePointRaw = get(
+    randomSamplerWrapper && body.aggregations !== undefined
+      ? randomSamplerWrapper.unwrap(body.aggregations)
+      : body.aggregations,
+    ['change_point_request']
+  );
+
+  const changePointBase =
+    changePointRaw && changePointRaw.bucket && Object.keys(changePointRaw.type).length > 0
+      ? { key: Date.parse(changePointRaw.bucket.key), type: Object.keys(changePointRaw.type)[0] }
+      : undefined;
+
   const buckets = dataByTimeBucket.reduce<Record<string, number>>((acc, cur) => {
     acc[cur.key] = cur.doc_count;
     return acc;
   }, {});
+
+  const bucketKeys = Object.keys(buckets);
+  const bucketValues = Object.values(buckets);
+  const meanValue = Math.round(mean(bucketValues) ?? 0);
+  const cpIndex = bucketKeys.findIndex((d) => +d === changePointBase?.key);
+  const cpValue = changePointBase ? buckets[changePointBase.key] : 0;
+
+  let lIndex = cpIndex - 1;
+  let uIndex = cpIndex + 1;
+
+  while (
+    lIndex >= 0 &&
+    Math.abs(bucketValues[lIndex] - meanValue) > Math.abs(bucketValues[lIndex] - cpValue)
+  ) {
+    lIndex--;
+  }
+
+  while (
+    uIndex < bucketValues.length &&
+    Math.abs(bucketValues[uIndex] - meanValue) > Math.abs(bucketValues[uIndex] - cpValue)
+  ) {
+    uIndex++;
+  }
 
   const lastDocTimeStamp: string = Object.values(body.hits.hits[0]?.fields ?? [[]])[0][0];
   const lastDocTimeStampMs =
@@ -168,5 +216,14 @@ export const processDocumentCountStats = (
     timeRangeLatest: params.latest,
     totalCount,
     lastDocTimeStampMs,
+    ...(changePointBase
+      ? {
+          changePoint: {
+            ...changePointBase,
+            lower: +bucketKeys[lIndex],
+            upper: +bucketKeys[uIndex],
+          },
+        }
+      : {}),
   };
 };
