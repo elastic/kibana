@@ -74,6 +74,8 @@ const computeUiApiPrivileges = (
   );
 };
 
+const FLEET_SUBFEATURES = ['agents', 'agent-policies', 'settings'];
+
 export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuthz> {
   const security = appContextService.getSecurity();
 
@@ -88,6 +90,7 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
     const { privileges } = await checkPrivileges({
       kibana: [
         security.authz.actions.api.get(`${PLUGIN_ID}-all`),
+        security.authz.actions.api.get(`${PLUGIN_ID}-read`),
         security.authz.actions.api.get(`${PLUGIN_ID}-setup`),
         security.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-all`),
         security.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-read`),
@@ -95,13 +98,24 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
         security.authz.actions.api.get(`${TRANSFORM_PLUGIN_ID}-admin`),
         security.authz.actions.api.get(`${TRANSFORM_PLUGIN_ID}-read`),
 
+        // Fleet subprivileges
+        ...FLEET_SUBFEATURES.flatMap((subfeature) => [
+          security.authz.actions.api.get(`${PLUGIN_ID}-${subfeature}-all`),
+          security.authz.actions.api.get(`${PLUGIN_ID}-${subfeature}-read`),
+        ]),
+
         ...endpointPrivileges,
         ...endpointExceptionsPrivileges,
       ],
     });
+
     const fleetAllAuth = getAuthorizationFromPrivileges({
       kibanaPrivileges: privileges.kibana,
       prefix: `${PLUGIN_ID}-all`,
+    });
+    const fleetReadAuth = getAuthorizationFromPrivileges({
+      kibanaPrivileges: privileges.kibana,
+      prefix: `${PLUGIN_ID}-read`,
     });
     const intAllAuth = getAuthorizationFromPrivileges({
       kibanaPrivileges: privileges.kibana,
@@ -115,10 +129,27 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
       kibanaPrivileges: privileges.kibana,
       searchPrivilege: 'fleet-setup',
     });
+    // Fleet sub features
+    const fleetAgentsAllAuth = getAuthorizationFromPrivileges({
+      kibanaPrivileges: privileges.kibana,
+      prefix: `${PLUGIN_ID}-agents-all`,
+    });
+    const fleetAgentsReadAuth = getAuthorizationFromPrivileges({
+      kibanaPrivileges: privileges.kibana,
+      prefix: `${PLUGIN_ID}-agents-read`,
+    });
 
     return {
       ...calculateAuthz({
-        fleet: { all: fleetAllAuth, setup: fleetSetupAuth },
+        fleet: {
+          all: fleetAllAuth,
+          read: fleetReadAuth,
+          setup: fleetSetupAuth,
+          agents: {
+            read: fleetAgentsReadAuth,
+            all: fleetAgentsAllAuth,
+          },
+        },
         integrations: {
           all: intAllAuth,
           read: intReadAuth,
@@ -133,7 +164,7 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
   }
 
   return calculateAuthz({
-    fleet: { all: false, setup: false },
+    fleet: { all: false, read: false, setup: false },
     integrations: {
       all: false,
       read: false,

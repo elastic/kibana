@@ -53,6 +53,7 @@ describe('AgentService', () => {
             fleet: {
               all: false,
               setup: false,
+              readAgents: false,
               readEnrollmentTokens: false,
               readAgentPolicies: false,
             },
@@ -128,6 +129,7 @@ describe('AgentService', () => {
               setup: true,
               readEnrollmentTokens: true,
               readAgentPolicies: true,
+              readAgents: true,
             },
             integrations: {
               readPackageInfo: true,

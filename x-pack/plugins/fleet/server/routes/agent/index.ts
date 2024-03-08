@@ -77,7 +77,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .get({
       path: AGENT_API_ROUTES.INFO_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -142,7 +142,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       path: AGENT_API_ROUTES.LIST_PATTERN,
 
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -158,7 +158,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .get({
       path: AGENT_API_ROUTES.LIST_TAGS_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -306,7 +306,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .get({
       path: AGENT_API_ROUTES.LIST_UPLOADS_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -321,7 +321,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .get({
       path: AGENT_API_ROUTES.GET_UPLOAD_FILE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -368,7 +368,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .get({
       path: AGENT_API_ROUTES.DATA_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -416,7 +416,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       path: AGENT_API_ROUTES.ACTION_STATUS_PATTERN,
 
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
@@ -464,7 +464,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .get({
       path: AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgents: true },
       },
     })
     .addVersion(
