@@ -10631,7 +10631,7 @@
               },
               {
                 "plugin": "logsShared",
-                "path": "x-pack/plugins/logs_shared/server/saved_objects/log_view/log_view_saved_object.ts"
+                "path": "x-pack/plugins/observability_solution/logs_shared/server/saved_objects/log_view/log_view_saved_object.ts"
               },
               {
                 "plugin": "graph",
