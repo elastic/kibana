@@ -397,9 +397,12 @@ export interface SolutionNavigationDefinition {
   id: string;
   /** Title for the solution navigation. */
   title: string;
-  /** Optional icon for the solution navigation. */
+  /** The navigation tree definition */
+  navigationTree$: Observable<NavigationTreeDefinition>;
+  /** Optional icon for the solution navigation to render in the select dropdown. */
   icon?: IconType;
-  sideNavComponentGetter?: () => SideNavComponent;
+  /** React component to render in the side nav for the navigation */
+  sideNavComponent?: SideNavComponent;
   /** The page to navigate to when switching to this solution navigation. */
   homePage?: AppDeepLinkId;
 }

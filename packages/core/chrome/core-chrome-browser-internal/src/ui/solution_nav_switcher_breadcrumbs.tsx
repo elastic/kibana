@@ -22,7 +22,7 @@ export const getSolutionNavSwitcherBreadCrumb = ({
 }: {
   definitions: SolutionNavigationDefinitions;
   activeId: string;
-  onChange: (id: string) => void;
+  onChange: (id: string, options?: { redirect?: boolean }) => void;
   cloudLinks: CloudLinks;
 }): ChromeProjectBreadcrumb => {
   return {
@@ -47,7 +47,7 @@ export const getSolutionNavSwitcherBreadCrumb = ({
               isActive={id === activeId}
               iconType={icon as string}
               onClick={() => {
-                onChange(id);
+                onChange(id, { redirect: true });
               }}
             />,
           ])}

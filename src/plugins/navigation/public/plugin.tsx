@@ -10,8 +10,6 @@ import { combineLatest, debounceTime, of, ReplaySubject, takeUntil } from 'rxjs'
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
-  CloudURLs,
-  NavigationTreeDefinition,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
 } from '@kbn/core-chrome-browser';
@@ -45,6 +43,8 @@ export class NavigationPublicPlugin
   private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry =
     new TopNavMenuExtensionsRegistry();
   private readonly stop$ = new ReplaySubject<void>(1);
+  private coreStart?: CoreStart;
+  private depsStart?: NavigationPublicStartDependencies;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -58,8 +58,12 @@ export class NavigationPublicPlugin
 
   public start(
     core: CoreStart,
-    { unifiedSearch, cloud }: NavigationPublicStartDependencies
+    depsStart: NavigationPublicStartDependencies
   ): NavigationPublicStart {
+    this.coreStart = core;
+    this.depsStart = depsStart;
+
+    const { unifiedSearch, cloud } = depsStart;
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
 
@@ -92,26 +96,38 @@ export class NavigationPublicPlugin
     const isSolutionNavEnabled = isSolutionNavigationFeatureOn && onCloud;
 
     if (isSolutionNavEnabled) {
-      this.addDefaultSolutionNavigation({ core, chrome, cloud });
+      chrome.project.setCloudUrls(cloud);
+      this.addDefaultSolutionNavigation({ chrome });
+      this.susbcribeToSolutionNavUiSettings(core);
 
-      combineLatest([
-        core.settings.globalClient.get$(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
-        core.settings.globalClient.get$(OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID),
-        core.settings.globalClient.get$(DEFAULT_SOLUTION_NAV_UI_SETTING_ID),
-      ])
-        .pipe(takeUntil(this.stop$), debounceTime(10))
-        .subscribe(([enabled, status, defaultSolution]) => {
-          if (!enabled) {
-            chrome.project.changeActiveSolutionNavigation(null);
-          } else {
-            // TODO: Here we will need to check if the user has opt-in or not.... (value set in their user profile)
-            const changeImmediately = status === 'visible';
-            chrome.project.changeActiveSolutionNavigation(
-              changeImmediately ? defaultSolution : null,
-              { onlyIfNotSet: true }
-            );
-          }
+      // Temp. This is temporary to simulate adding a solution nav after bootstrapping
+      setTimeout(() => {
+        this.addSolutionNavigation({
+          id: 'security',
+          title: 'Security',
+          icon: 'logoSecurity',
+          homePage: 'dashboards', // Temp. Wil be updated when all links are registered
+          navigationTree$: of({
+            body: [
+              // Temp. In future work this will be loaded from a package
+              {
+                type: 'navGroup',
+                id: 'security_project_nav',
+                title: 'Security',
+                icon: 'logoSecurity',
+                breadcrumbStatus: 'hidden',
+                defaultIsCollapsed: false,
+                children: [
+                  {
+                    link: 'dashboards',
+                    spaceBefore: 'm',
+                  },
+                ],
+              },
+            ],
+          }),
         });
+      }, 5000);
     }
 
     return {
@@ -131,128 +147,115 @@ export class NavigationPublicPlugin
     this.stop$.next();
   }
 
-  private addSolutionNavigation(solutionNavigation: SolutionNavigation) {
-    // TODO: Implement. This handler will allow any plugin (e.g. security) to register a solution navigation.
+  private susbcribeToSolutionNavUiSettings(core: CoreStart) {
+    const chrome = core.chrome as InternalChromeStart;
+
+    combineLatest([
+      core.settings.globalClient.get$(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
+      core.settings.globalClient.get$(OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID),
+      core.settings.globalClient.get$(DEFAULT_SOLUTION_NAV_UI_SETTING_ID),
+    ])
+      .pipe(takeUntil(this.stop$), debounceTime(10))
+      .subscribe(([enabled, status, defaultSolution]) => {
+        if (!enabled) {
+          chrome.project.changeActiveSolutionNavigation(null);
+        } else {
+          // TODO: Here we will need to check if the user has opt-in or not.... (value set in their user profile)
+          const changeImmediately = status === 'visible';
+          chrome.project.changeActiveSolutionNavigation(
+            changeImmediately ? defaultSolution : null,
+            { onlyIfNotSet: true }
+          );
+        }
+      });
   }
 
-  private addDefaultSolutionNavigation({
-    core,
-    chrome,
-    cloud = {},
-  }: {
-    core: CoreStart;
-    chrome: InternalChromeStart;
-    cloud?: CloudURLs;
-  }) {
-    const { project } = chrome;
+  private getSideNavComponent(): SolutionNavigationDefinition['sideNavComponent'] {
+    if (!this.coreStart) throw new Error('coreStart is not available');
+    if (!this.depsStart) throw new Error('depsStart is not available');
+
+    const core = this.coreStart;
+    const { project } = core.chrome as InternalChromeStart;
     const activeNavigationNodes$ = project.getActiveNavigationNodes$();
     const navigationTreeUi$ = project.getNavigationTreeUi$();
 
-    const getSideNavComponentGetter: (
-      navTree: NavigationTreeDefinition,
-      id: string
-    ) => SolutionNavigationDefinition['sideNavComponentGetter'] = (navTree, id) => () => {
-      project.initNavigation(of(navTree), { cloudUrls: cloud });
+    return () => (
+      <SideNavComponent
+        navProps={{ navigationTree$: navigationTreeUi$ }}
+        deps={{ core, activeNodes$: activeNavigationNodes$ }}
+      />
+    );
+  }
 
-      return () => (
-        <SideNavComponent
-          navProps={{ navigationTree$: navigationTreeUi$ }}
-          deps={{ core, activeNodes$: activeNavigationNodes$ }}
-        />
-      );
-    };
+  private addSolutionNavigation(solutionNavigation: SolutionNavigation) {
+    if (!this.coreStart) throw new Error('coreStart is not available');
+    const sideNavComponent = solutionNavigation.sideNavComponent ?? this.getSideNavComponent();
+    const { project } = this.coreStart.chrome as InternalChromeStart;
+    project.updateSolutionNavigations({
+      [solutionNavigation.id]: { ...solutionNavigation, sideNavComponent },
+    });
+  }
 
+  private addDefaultSolutionNavigation({ chrome }: { chrome: InternalChromeStart }) {
     const solutionNavs: SolutionNavigationDefinitions = {
       es: {
         id: 'es',
         title: 'Search',
         icon: 'logoElasticsearch',
         homePage: 'dev_tools', // Temp. Wil be updated when all links are registered
-        sideNavComponentGetter: getSideNavComponentGetter(
-          {
-            body: [
-              // Temp. In future work this will be loaded from a package
-              {
-                type: 'navGroup',
-                id: 'search_project_nav',
-                title: 'Search',
-                icon: 'logoElasticsearch',
-                defaultIsCollapsed: false,
-                isCollapsible: false,
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    id: 'dev_tools',
-                    title: 'Dev Tools',
-                    link: 'dev_tools:console',
-                    getIsActive: ({ pathNameSerialized, prepend }) => {
-                      return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
-                    },
-                    spaceBefore: 'm',
+        navigationTree$: of({
+          body: [
+            // Temp. In future work this will be loaded from a package
+            {
+              type: 'navGroup',
+              id: 'search_project_nav',
+              title: 'Search',
+              icon: 'logoElasticsearch',
+              defaultIsCollapsed: false,
+              isCollapsible: false,
+              breadcrumbStatus: 'hidden',
+              children: [
+                {
+                  id: 'dev_tools',
+                  title: 'Dev Tools',
+                  link: 'dev_tools:console',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
                   },
-                ],
-              },
-            ],
-          },
-          'search'
-        ),
+                  spaceBefore: 'm',
+                },
+              ],
+            },
+          ],
+        }),
+        sideNavComponent: this.getSideNavComponent(),
       },
       oblt: {
         id: 'oblt',
         title: 'Observability',
         icon: 'logoObservability',
         homePage: 'discover', // Temp. Wil be updated when all links are registered
-        sideNavComponentGetter: getSideNavComponentGetter(
-          {
-            body: [
-              // Temp. In future work this will be loaded from a package
-              {
-                type: 'navGroup',
-                id: 'observability_project_nav',
-                title: 'Observability',
-                icon: 'logoObservability',
-                defaultIsCollapsed: false,
-                isCollapsible: false,
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'discover',
-                    spaceBefore: 'm',
-                  },
-                ],
-              },
-            ],
-          },
-          'oblt'
-        ),
-      },
-      security: {
-        id: 'security',
-        title: 'Security',
-        icon: 'logoSecurity',
-        homePage: 'integrations', // Temp. Wil be updated when all links are registered
-        sideNavComponentGetter: getSideNavComponentGetter(
-          {
-            body: [
-              // Temp. In future work this will be loaded from a package
-              {
-                type: 'navGroup',
-                id: 'security_project_nav',
-                title: 'Security',
-                icon: 'logoSecurity',
-                breadcrumbStatus: 'hidden',
-                defaultIsCollapsed: false,
-                children: [
-                  {
-                    link: 'integrations',
-                    spaceBefore: 'm',
-                  },
-                ],
-              },
-            ],
-          },
-          'security'
-        ),
+        navigationTree$: of({
+          body: [
+            // Temp. In future work this will be loaded from a package
+            {
+              type: 'navGroup',
+              id: 'observability_project_nav',
+              title: 'Observability',
+              icon: 'logoObservability',
+              defaultIsCollapsed: false,
+              isCollapsible: false,
+              breadcrumbStatus: 'hidden',
+              children: [
+                {
+                  link: 'discover',
+                  spaceBefore: 'm',
+                },
+              ],
+            },
+          ],
+        }),
+        sideNavComponent: this.getSideNavComponent(),
       },
     };
 
