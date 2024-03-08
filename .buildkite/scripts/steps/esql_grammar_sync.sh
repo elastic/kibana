@@ -32,12 +32,20 @@ if [ $? -ne 0 ]; then
   git config --global user.name kibanamachine
   git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
+  BRANCH_NAME="esql_grammar_sync_$(date +%s)"
+
+  git checkout -b "$BRANCH_NAME"
+
   git add "$destination_file"
   git commit -m "updating ES|QL lexer grammar"
+
+  git push --set-upstream origin "$BRANCH_NAME"
+
   echo "Changes committed. Creating pull request."
 
   # Create a PR
-  gh pr create --title "Update ES|QL lexer grammar" --body "This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch." --base master --head kibanamachine:main
+  gh pr create --title "Update ES|QL lexer grammar" --body "This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch." --base main --head "$BRANCH_NAME" || exit
+
 else
   echo "No differences found. Our work is done here."
 fi
