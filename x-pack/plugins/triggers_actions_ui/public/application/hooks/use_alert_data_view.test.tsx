@@ -46,8 +46,7 @@ const wrapper = ({ children }: { children: Node }) => (
   <QueryClientProvider client={queryClient}> {children} </QueryClientProvider>
 );
 
-// FLAKY: https://github.com/elastic/kibana/issues/177250
-describe.skip('useAlertDataView', () => {
+describe('useAlertDataView', () => {
   const observabilityAlertFeatureIds: ValidFeatureId[] = [
     AlertConsumers.APM,
     AlertConsumers.INFRASTRUCTURE,
@@ -80,9 +79,7 @@ describe.skip('useAlertDataView', () => {
       wrapper,
     });
 
-    await waitFor(() => {
-      expect(result.current).toEqual(mockedAsyncDataView);
-    });
+    await waitFor(() => expect(result.current).toEqual(mockedAsyncDataView));
   });
 
   it('fetch index names + fields for the provided o11y featureIds', async () => {
@@ -90,10 +87,8 @@ describe.skip('useAlertDataView', () => {
       wrapper,
     });
 
-    await waitFor(() => {
-      expect(fetchAlertIndexNames).toHaveBeenCalledTimes(1);
-      expect(fetchAlertFields).toHaveBeenCalledTimes(1);
-    });
+    await waitFor(() => expect(fetchAlertIndexNames).toHaveBeenCalledTimes(1));
+    expect(fetchAlertFields).toHaveBeenCalledTimes(1);
   });
 
   it('only fetch index names for security featureId', async () => {
@@ -101,10 +96,8 @@ describe.skip('useAlertDataView', () => {
       wrapper,
     });
 
-    await waitFor(() => {
-      expect(fetchAlertIndexNames).toHaveBeenCalledTimes(1);
-      expect(fetchAlertFields).toHaveBeenCalledTimes(0);
-    });
+    await waitFor(() => expect(fetchAlertIndexNames).toHaveBeenCalledTimes(1));
+    expect(fetchAlertFields).toHaveBeenCalledTimes(0);
   });
 
   it('Do not fetch anything if security and o11y featureIds are mixed together', async () => {
@@ -115,12 +108,12 @@ describe.skip('useAlertDataView', () => {
       }
     );
 
-    await waitFor(() => {
+    await waitFor(() =>
       expect(result.current).toEqual({
         loading: false,
         dataview: undefined,
-      });
-    });
+      })
+    );
     expect(fetchAlertIndexNames).toHaveBeenCalledTimes(0);
     expect(fetchAlertFields).toHaveBeenCalledTimes(0);
   });
@@ -132,11 +125,11 @@ describe.skip('useAlertDataView', () => {
       wrapper,
     });
 
-    await waitFor(() => {
+    await waitFor(() =>
       expect(result.current).toEqual({
         loading: false,
         dataview: undefined,
-      });
-    });
+      })
+    );
   });
 });
