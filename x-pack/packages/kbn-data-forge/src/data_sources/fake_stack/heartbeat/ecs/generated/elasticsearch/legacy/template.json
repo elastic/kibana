@@ -1,6 +1,6 @@
 {
   "index_patterns": [
-    "kbn-data-forge-fake_stack.nginx_proxy-*"
+    "kbn-data-forge-fake_stack.heartbeat-*"
   ],
   "mappings": {
     "_meta": {
@@ -28,25 +28,26 @@
       "@timestamp": {
         "type": "date"
       },
-      "host": {
+      "event": {
         "properties": {
-          "name": {
+          "action": {
             "ignore_above": 1024,
             "type": "keyword"
-          }
-        }
-      },
-      "http": {
-        "properties": {
-          "response": {
-            "properties": {
-              "bytes": {
-                "type": "long"
-              },
-              "status_code": {
-                "type": "long"
-              }
-            }
+          },
+          "duration": {
+            "type": "long"
+          },
+          "outcome": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "type": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "url": {
+            "ignore_above": 1024,
+            "type": "keyword"
           }
         }
       },
@@ -71,14 +72,6 @@
       "tags": {
         "ignore_above": 1024,
         "type": "keyword"
-      },
-      "url": {
-        "properties": {
-          "domain": {
-            "ignore_above": 1024,
-            "type": "keyword"
-          }
-        }
       }
     }
   },
