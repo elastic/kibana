@@ -1071,6 +1071,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * the active subtype of the visualization.
    */
   getVisualizationTypeId: (state: T) => string;
+
+  hideFromChartSwitch?: (frame: FramePublicAPI) => boolean;
   /**
    * If the visualization has subtypes, update the subtype in state.
    */

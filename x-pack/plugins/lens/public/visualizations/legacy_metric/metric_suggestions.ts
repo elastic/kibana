@@ -52,7 +52,8 @@ function getSuggestion(
 
   return {
     title,
-    score: datasourceId === 'textBased' ? 0 : 0.1,
+    hide: datasourceId === 'textBased',
+    score: 0.1,
     previewIcon: IconChartMetric,
     state: {
       layerId: table.layerId,
