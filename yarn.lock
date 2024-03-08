@@ -6210,6 +6210,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-tabbed-modal@link:packages/shared-ux/modal/tabbed":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-utility@link:packages/kbn-shared-ux-utility":
   version "0.0.0"
   uid ""
