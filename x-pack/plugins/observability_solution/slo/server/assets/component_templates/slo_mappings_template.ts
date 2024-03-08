@@ -45,6 +45,7 @@ export const getSLOMappingsTemplate = (name: string): ClusterPutComponentTemplat
             },
           },
         },
+        // SLO field mappings
         slo: {
           properties: {
             id: {
