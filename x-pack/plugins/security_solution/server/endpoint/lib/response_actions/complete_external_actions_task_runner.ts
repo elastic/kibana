@@ -67,13 +67,25 @@ export class CompleteExternalActionsTaskRunner
   }
 
   public async run() {
-    this.log.info(`Started: Checking status of external response actions`);
+    this.log.debug(`Started: Checking status of external response actions`);
     this.abortController = new AbortController();
+
+    // If license is not `enterprise`, then exit. Support for external response actions is a
+    // Enterprise level feature.
+    if (!this.endpointContextServices.getLicenseService().isEnterprise()) {
+      this.log.debug(`Exiting - License is not Enterprise`);
+      return;
+    }
 
     // Collect update needed to complete response actions
     await Promise.all(
       RESPONSE_ACTION_AGENT_TYPE.filter((agentType) => agentType !== 'endpoint').map(
         (agentType) => {
+          // If run was aborted, then stop looping through
+          if (this.abortController.signal.aborted) {
+            return null;
+          }
+
           const agentTypeActionsClient =
             this.endpointContextServices.getInternalResponseActionsClient({ agentType });
 
@@ -86,7 +98,7 @@ export class CompleteExternalActionsTaskRunner
     );
 
     await this.updatesQueue.complete();
-    this.log.info(`Completed: Checking status of external response actions`);
+    this.log.debug(`Completed: Checking status of external response actions`);
     this.abortController.abort(`Run complete.`);
 
     return {
