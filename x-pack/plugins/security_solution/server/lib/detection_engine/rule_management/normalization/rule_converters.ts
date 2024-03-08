@@ -23,7 +23,6 @@ import type { PatchRuleRequestBody } from '../../../../../common/api/detection_e
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-  SetupGuide,
   RuleCreateProps,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
@@ -426,7 +425,6 @@ export const convertPatchAPIToInternalSchema = (
   nextParams: PatchRuleRequestBody & {
     related_integrations?: RelatedIntegrationArray;
     required_fields?: RequiredFieldArray;
-    setup?: SetupGuide;
   },
   existingRule: SanitizedRule<RuleParams>
 ): InternalRuleUpdate => {
@@ -487,7 +485,6 @@ export const convertCreateAPIToInternalSchema = (
   input: RuleCreateProps & {
     related_integrations?: RelatedIntegrationArray;
     required_fields?: RequiredFieldArray;
-    setup?: SetupGuide;
   },
   immutable = false,
   defaultEnabled = true

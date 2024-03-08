@@ -864,6 +864,49 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.investigation_fields).to.eql(undefined);
         });
       });
+
+      describe('setup guide', () => {
+        it('should overwrite setup value on update', async () => {
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            setup: 'A setup guide',
+          });
+
+          const ruleUpdate = {
+            ...getSimpleRuleUpdate('rule-1'),
+            setup: 'A different setup guide',
+          };
+
+          const { body } = await supertest
+            .put(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .send(ruleUpdate)
+            .expect(200);
+
+          expect(body.setup).to.eql('A different setup guide');
+        });
+
+        it('should reset setup field to empty string on unset', async () => {
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            setup: 'A setup guide',
+          });
+
+          const ruleUpdate = {
+            ...getSimpleRuleUpdate('rule-1'),
+            setup: undefined,
+          };
+
+          const { body } = await supertest
+            .put(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(ruleUpdate)
+            .expect(200);
+
+          expect(body.setup).to.eql('');
+        });
+      });
     });
   });
 };

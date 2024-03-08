@@ -57,6 +57,11 @@ const NoteDescriptionContainer = styled(EuiFlexItem)`
   overflow-y: hidden;
 `;
 
+const SetupDescriptionContainer = styled(EuiFlexItem)`
+  height: 105px;
+  overflow-y: hidden;
+`;
+
 export const isNotEmptyArray = (values: string[]) => !isEmpty(values.join(''));
 
 const EuiBadgeWrap = styled(EuiBadge)`
@@ -642,11 +647,11 @@ export const buildSetupDescription = (label: string, setup: string): ListItems[]
       {
         title: label,
         description: (
-          <NoteDescriptionContainer>
+          <SetupDescriptionContainer>
             <div data-test-subj="setupDescriptionItem" className="eui-yScrollWithShadows">
               {setup}
             </div>
-          </NoteDescriptionContainer>
+          </SetupDescriptionContainer>
         ),
       },
     ];
