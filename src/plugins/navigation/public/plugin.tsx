@@ -14,6 +14,8 @@ import type {
   SolutionNavigationDefinitions,
 } from '@kbn/core-chrome-browser';
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import { definition as esDefinition } from '@kbn/solution-nav-es';
+import { definition as obltDefinition } from '@kbn/solution-nav-oblt';
 import {
   ENABLE_SOLUTION_NAV_UI_SETTING_ID,
   OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID,
@@ -199,62 +201,11 @@ export class NavigationPublicPlugin
   private addDefaultSolutionNavigation({ chrome }: { chrome: InternalChromeStart }) {
     const solutionNavs: SolutionNavigationDefinitions = {
       es: {
-        id: 'es',
-        title: 'Search',
-        icon: 'logoElasticsearch',
-        homePage: 'dev_tools', // Temp. Wil be updated when all links are registered
-        navigationTree$: of({
-          body: [
-            // Temp. In future work this will be loaded from a package
-            {
-              type: 'navGroup',
-              id: 'search_project_nav',
-              title: 'Search',
-              icon: 'logoElasticsearch',
-              defaultIsCollapsed: false,
-              isCollapsible: false,
-              breadcrumbStatus: 'hidden',
-              children: [
-                {
-                  id: 'dev_tools',
-                  title: 'Dev Tools',
-                  link: 'dev_tools:console',
-                  getIsActive: ({ pathNameSerialized, prepend }) => {
-                    return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
-                  },
-                  spaceBefore: 'm',
-                },
-              ],
-            },
-          ],
-        }),
+        ...esDefinition,
         sideNavComponent: this.getSideNavComponent(),
       },
       oblt: {
-        id: 'oblt',
-        title: 'Observability',
-        icon: 'logoObservability',
-        homePage: 'discover', // Temp. Wil be updated when all links are registered
-        navigationTree$: of({
-          body: [
-            // Temp. In future work this will be loaded from a package
-            {
-              type: 'navGroup',
-              id: 'observability_project_nav',
-              title: 'Observability',
-              icon: 'logoObservability',
-              defaultIsCollapsed: false,
-              isCollapsible: false,
-              breadcrumbStatus: 'hidden',
-              children: [
-                {
-                  link: 'discover',
-                  spaceBefore: 'm',
-                },
-              ],
-            },
-          ],
-        }),
+        ...obltDefinition,
         sideNavComponent: this.getSideNavComponent(),
       },
     };

@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/solution-nav-oblt",
+  "owner": "@elastic/appex-sharedux"
+}
