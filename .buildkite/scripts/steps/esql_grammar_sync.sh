@@ -14,12 +14,18 @@ destination_file="./packages/kbn-monaco/src/esql/antlr/esql_lexer.g4"
 # Copy the file
 cp "$source_file" "$destination_file"
 
+echo "--------"
+echo "$destination_file copied successfully."
+echo "currently in $pwd"
+ls -l "$destination_file"
+echo "--------"
+
 # Replace the line containing "lexer grammar" with "lexer grammar esql_lexer;"
-sed -i '' -e 's/lexer grammar.*$/lexer grammar esql_lexer;/' "$destination_file"
+sed -i '' -e 's/lexer grammar.*$/lexer grammar esql_lexer;/' "$destination_file" || exit
 
 # Insert "options { caseInsensitive = true; }" one line below
 sed -i '' -e '/lexer grammar esql_lexer;/a\
-options { caseInsensitive = true; }' "$destination_file"
+options { caseInsensitive = true; }' "$destination_file" || exit
 
 echo "File copied and modified successfully. Checking for differences."
 
