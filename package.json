@@ -606,7 +606,6 @@
     "@kbn/paertial-results-example-plugin": "link:examples/partial_results_example",
     "@kbn/painless-lab-plugin": "link:x-pack/plugins/painless_lab",
     "@kbn/panel-loader": "link:packages/kbn-panel-loader",
-    "@kbn/playground": "link:packages/kbn-playground",
     "@kbn/plugin-check": "link:packages/kbn-plugin-check",
     "@kbn/portable-dashboards-example": "link:examples/portable_dashboards_example",
     "@kbn/preboot-example-plugin": "link:examples/preboot_example",

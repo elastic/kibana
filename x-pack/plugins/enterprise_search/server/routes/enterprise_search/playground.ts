@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import { registerPlaygroundRoutes as registerRoutes } from '@kbn/playground/server/routes';
-
 import { RouteDependencies } from '../../plugin';
-import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
-export function registerPlaygroundRoutes({ log, router, config }: RouteDependencies) {
+export function registerPlaygroundRoutes({ config }: RouteDependencies) {
   if (!config.showPlayground) {
     return;
   }
-
-  registerRoutes({ log, router }, '/internal/enterprise_search', elasticsearchErrorHandler);
 }

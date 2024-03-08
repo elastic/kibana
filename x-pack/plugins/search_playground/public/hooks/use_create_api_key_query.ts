@@ -8,7 +8,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useFormContext } from 'react-hook-form';
 import { useKibana } from './use_kibana';
-import { ChatFormFields } from '../types';
+import { APIRoutes, ChatFormFields } from '../types';
 
 interface UseApiKeyQueryParams {
   name: string;
@@ -23,7 +23,7 @@ export const useCreateApiKeyQuery = () => {
     mutationFn: async ({ name, expiresInDays }: UseApiKeyQueryParams) => {
       const response = await services.http.post<{
         apiKey: { encoded: string; name: string; expiration: number };
-      }>('/internal/enterprise_search/ai_playground/api_key', {
+      }>(APIRoutes.POST_API_KEY, {
         body: JSON.stringify({
           name,
           expiresInDays,

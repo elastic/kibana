@@ -1,39 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { ChatOpenAI } from '@langchain/openai';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { Logger } from '@kbn/logging';
-import { IRouter, RequestHandler } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import { fetchFields } from './utils/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './utils/conversational_chain';
 import { Prompt } from './utils/prompt';
+import { errorHandler } from './utils/error_handler';
+import { APIRoutes } from './types';
 
-export function registerPlaygroundRoutes(
-  { log, router }: { log: Logger; router: IRouter },
-  basePath: string,
-  errorHandler: <ContextType, RequestType, ResponseType>(
-    log: Logger,
-    requestHandler: RequestHandler<ContextType, RequestType, ResponseType>
-  ) => RequestHandler<ContextType, RequestType, ResponseType>
-) {
+export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) {
   router.post(
     {
-      path: `${basePath}/ai_playground/query_source_fields`,
+      path: APIRoutes.POST_QUERY_SOURCE_FIELDS,
       validate: {
         body: schema.object({
           indices: schema.arrayOf(schema.string()),
         }),
       },
     },
-    errorHandler(log, async (context, request, response) => {
+    errorHandler(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
 
       const { indices } = request.body;
@@ -48,7 +42,7 @@ export function registerPlaygroundRoutes(
 
   router.post(
     {
-      path: `${basePath}/ai_playground/chat`,
+      path: APIRoutes.POST_CHAT_MESSAGE,
       validate: {
         body: schema.object({
           data: schema.any(),
@@ -56,7 +50,7 @@ export function registerPlaygroundRoutes(
         }),
       },
     },
-    errorHandler(log, async (context, request, response) => {
+    errorHandler(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
 
       const aiClient = Assist({
@@ -115,7 +109,7 @@ export function registerPlaygroundRoutes(
 
   router.post(
     {
-      path: `${basePath}/ai_playground/api_key`,
+      path: APIRoutes.POST_API_KEY,
       validate: {
         body: schema.object({
           name: schema.string(),
@@ -124,7 +118,7 @@ export function registerPlaygroundRoutes(
         }),
       },
     },
-    errorHandler(log, async (context, request, response) => {
+    errorHandler(async (context, request, response) => {
       const { name, expiresInDays, indices } = request.body;
       const { client } = (await context.core).elasticsearch;
 

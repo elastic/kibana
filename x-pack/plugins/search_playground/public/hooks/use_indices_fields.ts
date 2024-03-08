@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
-import { IndicesQuerySourceFields } from '../types';
+import { APIRoutes, IndicesQuerySourceFields } from '../types';
 
 export const useIndicesFields = (indices: string[]) => {
   const { services } = useKibana();
@@ -18,7 +18,7 @@ export const useIndicesFields = (indices: string[]) => {
     initialData: {},
     queryFn: async () => {
       const response = await services.http.post<IndicesQuerySourceFields>(
-        '/internal/enterprise_search/ai_playground/query_source_fields',
+        APIRoutes.POST_QUERY_SOURCE_FIELDS,
         {
           body: JSON.stringify({
             indices,

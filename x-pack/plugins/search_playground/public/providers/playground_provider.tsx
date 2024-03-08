@@ -10,7 +10,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ChatForm } from '../types';
 
-interface AIPlaygroundProviderProps {
+interface PlaygroundProviderProps {
   navigateToIndexPage: () => void;
   children: ReactNode;
 }
@@ -19,7 +19,7 @@ export const ChatContext = createContext<{ navigateToIndexPage?: () => void }>({
 
 const queryClient = new QueryClient({});
 
-export const AIPlaygroundProvider: React.FC<AIPlaygroundProviderProps> = ({
+export const PlaygroundProvider: React.FC<PlaygroundProviderProps> = ({
   navigateToIndexPage,
   children,
 }) => {

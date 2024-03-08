@@ -5,54 +5,39 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-
-import { useValues } from 'kea';
+import React from 'react';
 
 import { EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Chat, AIPlaygroundProvider, ViewQueryAction, ViewCodeAction } from '@kbn/playground';
 
-import { KibanaLogic } from '../../../shared/kibana';
-import { NEW_INDEX_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 export const Playground: React.FC = () => {
-  const { navigateToUrl } = useValues(KibanaLogic);
-  const handleNavigateToIndex = useCallback(() => navigateToUrl(NEW_INDEX_PATH), [navigateToUrl]);
-
   return (
-    <AIPlaygroundProvider navigateToIndexPage={handleNavigateToIndex}>
-      <EnterpriseSearchContentPageTemplate
-        pageChrome={[
-          i18n.translate('xpack.enterpriseSearch.content.playground.breadcrumb', {
-            defaultMessage: 'Playground',
-          }),
-        ]}
-        pageHeader={{
-          pageTitle: i18n.translate('xpack.enterpriseSearch.content.playground.headerTitle', {
-            defaultMessage: 'Playground',
-          }),
-          rightSideItems: [
-            <ViewCodeAction key="viewCodeAction" />,
-            <ViewQueryAction key="viewQueryAction" />,
-          ],
-        }}
-        pageViewTelemetry="Playground"
+    <EnterpriseSearchContentPageTemplate
+      pageChrome={[
+        i18n.translate('xpack.enterpriseSearch.content.playground.breadcrumb', {
+          defaultMessage: 'Playground',
+        }),
+      ]}
+      pageHeader={{
+        pageTitle: i18n.translate('xpack.enterpriseSearch.content.playground.headerTitle', {
+          defaultMessage: 'Playground',
+        }),
+        rightSideItems: [],
+      }}
+      pageViewTelemetry="Playground"
+      restrictWidth={false}
+      customPageSections
+      bottomBorder="extended"
+    >
+      <EuiPageTemplate.Section
+        alignment="top"
         restrictWidth={false}
-        customPageSections
-        bottomBorder="extended"
-      >
-        <EuiPageTemplate.Section
-          alignment="top"
-          restrictWidth={false}
-          grow
-          contentProps={{ css: { display: 'flex', flexGrow: 1 } }}
-          paddingSize="none"
-        >
-          <Chat />
-        </EuiPageTemplate.Section>
-      </EnterpriseSearchContentPageTemplate>
-    </AIPlaygroundProvider>
+        grow
+        contentProps={{ css: { display: 'flex', flexGrow: 1 } }}
+        paddingSize="none"
+      />
+    </EnterpriseSearchContentPageTemplate>
   );
 };

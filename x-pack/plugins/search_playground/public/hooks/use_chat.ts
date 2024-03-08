@@ -7,14 +7,14 @@
 
 import { useAIAssistChat } from './use_ai_assist_chat';
 import { useKibana } from './use_kibana';
-import { UseChatHelpers } from '../types';
+import { APIRoutes, UseChatHelpers } from '../types';
 
 export const useChat = (): UseChatHelpers => {
   const { services } = useKibana();
 
   const chatHelpers = useAIAssistChat({
     api: async (request: RequestInit) => {
-      const response = await services.http.post('/internal/enterprise_search/ai_playground/chat', {
+      const response = await services.http.post(APIRoutes.POST_CHAT_MESSAGE, {
         ...request,
         rawResponse: true,
         asResponse: true,

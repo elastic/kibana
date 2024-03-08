@@ -13,7 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import { Chat } from './chat';
-import { AIPlaygroundProvider } from '../providers/ai_playground_provider';
+import { PlaygroundProvider } from '../providers/playground_provider';
 import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
 
 interface SearchPlaygroundAppDeps {
@@ -31,7 +31,7 @@ export const SearchPlaygroundApp = ({
 }: SearchPlaygroundAppDeps) => {
   return (
     <Router basename={basename}>
-      <AIPlaygroundProvider navigateToIndexPage={() => {}}>
+      <PlaygroundProvider navigateToIndexPage={() => {}}>
         <I18nProvider>
           <>
             <navigation.ui.TopNavMenu appName={PLUGIN_ID} />
@@ -59,7 +59,7 @@ export const SearchPlaygroundApp = ({
             </EuiPageTemplate>
           </>
         </I18nProvider>
-      </AIPlaygroundProvider>
+      </PlaygroundProvider>
     </Router>
   );
 };
