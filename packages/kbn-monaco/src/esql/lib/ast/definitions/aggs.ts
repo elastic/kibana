@@ -125,7 +125,10 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       supportedCommands: ['stats'],
       signatures: [
         {
-          params: [{ name: 'column', type: 'any', noNestingFunctions: true }],
+          params: [
+            { name: 'column', type: 'any', noNestingFunctions: true },
+            { name: 'precision', type: 'number', noNestingFunctions: true, optional: true },
+          ],
           returnType: 'number',
           examples: [
             `from index | stats result = count_distinct(field)`,
