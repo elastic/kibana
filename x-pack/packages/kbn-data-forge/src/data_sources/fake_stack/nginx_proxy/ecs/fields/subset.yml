@@ -7,9 +7,6 @@ fields:
     fields:
       level: {}
       logger: {}
-  url:
-    fields:
-      domain: {}
   http:
     fields:
       response:

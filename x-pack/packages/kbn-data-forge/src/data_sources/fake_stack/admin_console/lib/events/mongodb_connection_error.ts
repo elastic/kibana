@@ -77,7 +77,7 @@ export const mongodbConnectionError: EventFunction = (_schedule, timestamp) => {
       path,
       `https://${ADMIN_CONSOLE}.${domain}`,
       userAgent,
-      domain,
+      `${ADMIN_CONSOLE}.${domain}`,
       `${host}:${port}`,
       user.id
     ),

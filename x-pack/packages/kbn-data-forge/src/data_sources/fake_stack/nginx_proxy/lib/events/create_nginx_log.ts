@@ -38,7 +38,6 @@ export const createNginxLog = (
       log: { level: 'INFO', logger: NGINX_PROXY },
       host: { name: host },
       http: { response: { status_code: statusCode, bytes } },
-      url: { domain },
     },
   ];
 };
