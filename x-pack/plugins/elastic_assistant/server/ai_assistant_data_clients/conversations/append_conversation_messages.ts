@@ -56,6 +56,9 @@ export const appendConversationMessages = async ({
               newMessage.is_error = message.is_error;
               newMessage.reader = message.reader;
               newMessage.role = message.role; 
+              if (message.trace_data != null) {
+                newMessage.trace_data = message.trace_data;
+              }
               messages.add(newMessage);
             }
             ctx._source.messages = messages;

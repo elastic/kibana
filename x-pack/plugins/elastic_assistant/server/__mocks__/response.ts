@@ -62,7 +62,9 @@ export const getBasicEmptySearchResponse =
     },
   });
 
-export const getConversationResponseMock = (): ConversationResponse => ({
+export const getConversationResponseMock = (
+  timestamp: string = new Date().toISOString()
+): ConversationResponse => ({
   id: 'test',
   title: 'test',
   apiConfig: {
@@ -76,11 +78,11 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   messages: [],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   replacements: {} as any,
-  createdAt: Date.now().toLocaleString(),
+  createdAt: timestamp,
   namespace: 'default',
   isDefault: false,
-  updatedAt: Date.now().toLocaleString(),
-  timestamp: Date.now().toLocaleString(),
+  updatedAt: timestamp,
+  timestamp,
   category: 'assistant',
   users: [
     {

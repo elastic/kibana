@@ -41,7 +41,7 @@ export const transformESToConversations = (
         messages:
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           conversationSchema.messages?.map((message: Record<string, any>) => ({
-            timestamp: message['@timestamp'],
+            timestamp: new Date(message['@timestamp']).toLocaleString(),
             content: message.content,
             ...(message.is_error ? { isError: message.is_error } : {}),
             ...(message.reader ? { reader: message.reader } : {}),

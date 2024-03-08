@@ -100,7 +100,7 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
 
-            const dateTimeString = new Date().toLocaleString();
+            const dateTimeString = new Date().toISOString();
 
             const appendMessageFuncs = request.body.params.subActionParams.messages.map(
               (userMessage) => async () => {

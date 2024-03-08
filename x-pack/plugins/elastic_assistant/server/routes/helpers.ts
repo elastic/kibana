@@ -61,7 +61,7 @@ export const getMessageFromRawResponse = ({
   traceData?: TraceData;
   isError?: boolean;
 }): Message => {
-  const dateTimeString = new Date().toLocaleString();
+  const dateTimeString = new Date().toISOString();
   if (rawContent) {
     return {
       role: 'assistant',

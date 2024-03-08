@@ -31,7 +31,7 @@ const apiConfig: Conversation['apiConfig'] = {
 };
 
 const messages: Message[] = [
-  { content: 'This is a test', role: 'user', timestamp: new Date().toLocaleString() },
+  { content: 'This is a test', role: 'user', timestamp: new Date().toISOString() },
 ];
 const fetchConnectorArgs: FetchConnectorExecuteAction = {
   isEnabledRAGAlerts: false,
