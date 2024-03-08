@@ -122,7 +122,6 @@ export function getTemplate({
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
       : []),
-    ...(type === 'logs' ? [STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS] : []),
   ];
 
   template.ignore_missing_component_templates = template.composed_of.filter(isUserSettingsTemplate);
@@ -138,7 +137,7 @@ const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): stri
 
     return [STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS];
   } else if (type === 'logs') {
-    return [STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS];
+    return [STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS, STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS];
   }
 
   return [];
