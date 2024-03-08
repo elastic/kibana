@@ -14,12 +14,14 @@ import {
   createResultSchema,
 } from '@kbn/content-management-utils';
 
-export const controlGroupInputSchema = schema.object({
-  panelsJSON: schema.maybe(schema.string()),
-  controlStyle: schema.maybe(schema.string()),
-  chainingSystem: schema.maybe(schema.string()),
-  ignoreParentSettingsJSON: schema.maybe(schema.string()),
-});
+export const controlGroupInputSchema = schema
+  .object({
+    panelsJSON: schema.maybe(schema.string()),
+    controlStyle: schema.maybe(schema.string()),
+    chainingSystem: schema.maybe(schema.string()),
+    ignoreParentSettingsJSON: schema.maybe(schema.string()),
+  })
+  .extends({}, { unknowns: 'ignore' });
 
 export const dashboardAttributesSchema = schema.object(
   {
