@@ -179,11 +179,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
                   ? [
                       {
                         children: (
-                          <ApiKeyConfig
-                            indexName={index.connector.name}
-                            hasApiKey={hasApiKey}
-                            isNative
-                          />
+                          <ApiKeyConfig indexName={index.name} hasApiKey={hasApiKey} isNative />
                         ),
                         status: hasApiKey ? 'complete' : 'incomplete',
                         title: i18n.translate(
