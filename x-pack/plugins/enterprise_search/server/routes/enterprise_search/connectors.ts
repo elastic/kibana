@@ -44,6 +44,7 @@ import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
+  ElasticsearchResponseError,
   isAccessControlDisabledException,
   isExpensiveQueriesNotAllowedException,
   isIndexNotFoundException,
@@ -668,7 +669,6 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { connectorId, indexName } = request.params;
-
       try {
         await client.asCurrentUser.transport.request({
           body: {
@@ -677,21 +677,19 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           method: 'PUT',
           path: `/_connector/${connectorId}/_index_name`,
         });
-
-        const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
-        if (connector?.is_native) {
-          // generateApiKey will search for the connector doc based on index_name, so we need to refresh the index before that.
-          await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
-          await generateApiKey(client, indexName, true);
-        }
-
-        return response.ok();
       } catch (error) {
-        if (isIndexNotFoundException(error)) {
-          return response.ok();
-        }
-        throw error;
+        // TODO
+        return error;
       }
+
+      const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
+      if (connector?.is_native) {
+        // generateApiKey will search for the connector doc based on index_name, so we need to refresh the index before that.
+        await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
+        await generateApiKey(client, indexName, true);
+      }
+
+      return response.ok();
     })
   );
 }
