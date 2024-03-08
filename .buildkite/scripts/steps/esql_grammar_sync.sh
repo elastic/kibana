@@ -3,6 +3,7 @@
 
 cd "$PARENT_DIR" || exit
 
+rm -rf elasticsearch
 git clone https://github.com/elastic/elasticsearch --depth 1 || exit
 
 cd "$KIBANA_DIR" || exit
