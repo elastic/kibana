@@ -6,7 +6,13 @@
  */
 
 import { getSuggestions } from './suggestions';
-import { IconChartVerticalBullet, IconChartHorizontalBullet } from '@kbn/chart-icons';
+import {
+  IconChartVerticalBullet,
+  IconChartHorizontalBullet,
+  IconChartGaugeHalfCircle,
+  IconChartGaugeTwoThirdsCircle,
+  IconChartGaugeCircle,
+} from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import { GaugeVisualizationState } from './constants';
@@ -208,10 +214,55 @@ describe('shows suggestions', () => {
           layerId: 'first',
         },
         previewIcon: IconChartVerticalBullet,
-        title: 'Gauge',
+        title: 'Bullet vertical',
         hide: false, // shows suggestion when current is gauge
         incomplete: false,
         score: 0.5,
+      },
+      {
+        hide: false,
+        incomplete: false,
+        previewIcon: IconChartGaugeHalfCircle,
+        score: 0.5,
+        state: {
+          labelMajorMode: 'auto',
+          layerId: 'first',
+          layerType: 'data',
+          metricAccessor: 'metric-column',
+          shape: 'arc',
+          ticksPosition: 'auto',
+        },
+        title: 'Gauge arc',
+      },
+      {
+        hide: false,
+        incomplete: false,
+        previewIcon: IconChartGaugeTwoThirdsCircle,
+        score: 0.5,
+        state: {
+          labelMajorMode: 'auto',
+          layerId: 'first',
+          layerType: 'data',
+          metricAccessor: 'metric-column',
+          shape: 'twoThirdsCircle',
+          ticksPosition: 'auto',
+        },
+        title: 'Gauge 2/3 Circle',
+      },
+      {
+        hide: false,
+        incomplete: false,
+        previewIcon: IconChartGaugeCircle,
+        score: 0.5,
+        state: {
+          labelMajorMode: 'auto',
+          layerId: 'first',
+          layerType: 'data',
+          metricAccessor: 'metric-column',
+          shape: 'circle',
+          ticksPosition: 'auto',
+        },
+        title: 'Gauge circle',
       },
     ]);
   });

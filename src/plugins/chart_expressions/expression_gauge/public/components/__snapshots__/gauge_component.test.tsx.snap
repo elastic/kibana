@@ -546,28 +546,34 @@ exports[`GaugeComponent renders the chart 1`] = `
       ]
     }
   />
-  <Goal
-    actual={3}
-    bandFillColor={[Function]}
-    bands={
+  <Bullet
+    colorBands={
       Array [
-        0,
-        4,
+        "#D3DAE6",
+        "#D3DAE6",
       ]
     }
-    base={0}
-    domain={
-      Object {
-        "max": 4,
-        "min": 0,
-      }
+    data={
+      Array [
+        Array [
+          Object {
+            "domain": Array [
+              0,
+              4,
+            ],
+            "subtitle": undefined,
+            "target": undefined,
+            "tickFormatter": [Function],
+            "ticks": undefined,
+            "title": "Count of records",
+            "value": 3,
+            "valueFormatter": [Function],
+          },
+        ],
+      ]
     }
     id="goal"
-    labelMajor="Count of records   "
-    labelMinor=""
-    subtype="verticalBullet"
-    tickValueFormatter={[Function]}
-    tooltipValueFormatter={[Function]}
+    subtype="vertical"
   />
 </Chart>
 `;

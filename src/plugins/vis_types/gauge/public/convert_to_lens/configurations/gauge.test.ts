@@ -9,7 +9,7 @@
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { getConfiguration } from './gauge';
-import { GaugeVisParams } from '../../types';
+import { GaugeType, GaugeVisParams } from '../../types';
 
 const params: GaugeVisParams = {
   addTooltip: false,
@@ -49,35 +49,70 @@ const params: GaugeVisParams = {
 };
 
 describe('getConfiguration', () => {
-  const palette = {
-    name: 'custom',
-    params: { name: 'custom' },
-    type: 'palette',
-  } as PaletteOutput<CustomPaletteParams>;
+  const getPalette = (gaugeType: GaugeType) =>
+    ({
+      name: 'custom',
+      params: { name: 'custom', gaugeType },
+      type: 'palette',
+    } as PaletteOutput<CustomPaletteParams>);
 
-  test('shourd return correct configuration', () => {
+  test('shourd return correct configuration - Arc', () => {
     const layerId = 'layer-id';
     const metricAccessor = 'metric-id';
     const minAccessor = 'min-accessor';
     const maxAccessor = 'max-accessor';
     expect(
-      getConfiguration(layerId, params, palette, {
+      getConfiguration(layerId, params, getPalette('Arc'), {
         metricAccessor,
         minAccessor,
         maxAccessor,
       })
     ).toEqual({
       colorMode: 'palette',
-      labelMajorMode: 'auto',
-      labelMinor: undefined,
+      labelMajorMode: 'none',
       layerId: 'layer-id',
       layerType: 'data',
       maxAccessor: 'max-accessor',
       metricAccessor: 'metric-id',
       minAccessor: 'min-accessor',
-      palette: { name: 'custom', params: { name: 'custom' }, type: 'palette' },
-      shape: 'horizontalBullet',
-      ticksPosition: 'bands',
+      palette: {
+        name: 'custom',
+        params: { name: 'custom', gaugeType: 'Arc' },
+        type: 'palette',
+      },
+      percentageMode: false,
+      shape: 'arc',
+      ticksPosition: 'hidden',
+    });
+  });
+
+  test('shourd return correct configuration - Circle', () => {
+    const layerId = 'layer-id';
+    const metricAccessor = 'metric-id';
+    const minAccessor = 'min-accessor';
+    const maxAccessor = 'max-accessor';
+    expect(
+      getConfiguration(layerId, params, getPalette('Circle'), {
+        metricAccessor,
+        minAccessor,
+        maxAccessor,
+      })
+    ).toEqual({
+      colorMode: 'palette',
+      labelMajorMode: 'none',
+      layerId: 'layer-id',
+      layerType: 'data',
+      maxAccessor: 'max-accessor',
+      metricAccessor: 'metric-id',
+      minAccessor: 'min-accessor',
+      palette: {
+        name: 'custom',
+        params: { name: 'custom', gaugeType: 'Circle' },
+        type: 'palette',
+      },
+      percentageMode: false,
+      shape: 'arc',
+      ticksPosition: 'hidden',
     });
   });
 });

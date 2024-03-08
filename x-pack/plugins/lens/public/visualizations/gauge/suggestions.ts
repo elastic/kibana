@@ -55,7 +55,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
   const baseSuggestion = {
     state: {
       ...state,
-      shape: GaugeShapes.VERTICAL_BULLET,
+      shape: state?.shape ?? GaugeShapes.HORIZONTAL_BULLET,
       layerId: table.layerId,
       layerType: LayerTypes.DATA,
       ticksPosition: GaugeTicksPositions.AUTO,
@@ -64,7 +64,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
     title: i18n.translate('xpack.lens.gauge.gaugeLabel', {
       defaultMessage: 'Gauge',
     }),
-    previewIcon: IconChartVerticalBullet,
+    previewIcon: IconChartHorizontalBullet,
     score: 0.5,
     hide: !isGauge || state?.metricAccessor === undefined, // only display for gauges for beta
     incomplete: state?.metricAccessor === undefined,

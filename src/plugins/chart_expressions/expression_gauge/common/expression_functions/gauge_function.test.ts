@@ -72,27 +72,6 @@ describe('interpreter/functions#gauge', () => {
     expect(actual).toMatchSnapshot();
   });
 
-  it(`throws error if centralMajor or centralMajorMode are provided for the horizontalBullet shape`, () => {
-    const actual = () =>
-      fn(context, {
-        ...args,
-        centralMajor: 'Some label',
-        centralMajorMode: GaugeCentralMajorModes.CUSTOM,
-      });
-    expect(actual).toThrowErrorMatchingSnapshot();
-  });
-
-  it(`throws error if centralMajor or centralMajorMode are provided for the vertical shape`, () => {
-    const actual = () =>
-      fn(context, {
-        ...args,
-        shape: GaugeShapes.VERTICAL_BULLET,
-        centralMajor: 'Some label',
-        centralMajorMode: GaugeCentralMajorModes.CUSTOM,
-      });
-    expect(actual).toThrowErrorMatchingSnapshot();
-  });
-
   it('logs correct datatable to inspector', async () => {
     let loggedTable: Datatable;
     const handlers = {

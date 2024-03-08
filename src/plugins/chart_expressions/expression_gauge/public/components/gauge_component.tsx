@@ -32,7 +32,7 @@ import {
   getSubtypeByGaugeType,
   computeMinMax,
 } from './utils';
-import { getIcons } from './utils/icons';
+import { getGaugeIconByType } from './utils/icons';
 import './index.scss';
 import { GaugeCentralMajorMode, GaugeTicksPosition } from '../../common/types';
 
@@ -265,7 +265,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
 
   const metricValue = args.metric ? getValueFromAccessor(accessors.metric, row) : undefined;
 
-  const icon = getIcons(gaugeType);
+  const icon = getGaugeIconByType(gaugeType);
 
   if (typeof metricValue !== 'number') {
     return <EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />;
