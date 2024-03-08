@@ -7,7 +7,7 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import {
   ALERT_GROUP_FIELD,
   ALERT_GROUP_VALUE,
@@ -129,7 +129,7 @@ export const registerObservabilityRuleTypes = async (
     searchConfiguration,
   }: {
     criteria: CustomMetricExpressionParams[];
-    searchConfiguration: SerializedSearchSourceFields;
+    searchConfiguration: SerializedSearchSourceFields<Query>;
   }) => validateCustomThreshold({ criteria, searchConfiguration, uiSettings });
   observabilityRuleTypeRegistry.register({
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
