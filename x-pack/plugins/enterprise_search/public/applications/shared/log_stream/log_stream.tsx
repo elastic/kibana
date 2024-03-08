@@ -16,7 +16,7 @@ import { LogStream, LogStreamProps } from '@kbn/logs-shared-plugin/public';
  * default for timestamps. All other props get passed as-is to the underlying LogStream.
  *
  * Documentation links for reference:
- * - https://github.com/elastic/kibana/blob/main/x-pack/plugins/logs_shared/public/components/log_stream/log_stream.stories.mdx
+ * - https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability_solution/logs_shared/public/components/log_stream/log_stream.stories.mdx
  * - Run `yarn storybook logsShared` for live docs
  */
 
