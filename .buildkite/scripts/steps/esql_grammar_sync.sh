@@ -29,7 +29,7 @@ if [ $? -ne 0 ]; then
   echo "Differences found. Building ANTLR stuff."
 
   # Built ANTLR stuff
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   cd ./packages/kbn-monaco/src 
   yarn build:antlr4
 
