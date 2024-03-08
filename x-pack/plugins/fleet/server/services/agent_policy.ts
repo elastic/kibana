@@ -1002,6 +1002,15 @@ class AgentPolicyService {
       }
     );
 
+    // clean up any fleet server policies that are out of sync: newer or same revision
+    for (let i = 0; i < fullPolicies.length; i++) {
+      const fullPolicy = fullPolicies[i];
+      if (!fullPolicy || !fullPolicy.revision) {
+        continue;
+      }
+      await this.deleteFleetServerPoliciesForPolicyId(esClient, fullPolicy.id, fullPolicy.revision);
+    }
+
     const fleetServerPolicies = fullPolicies.reduce((acc, fullPolicy) => {
       if (!fullPolicy || !fullPolicy.revision) {
         return acc;
@@ -1090,11 +1099,26 @@ class AgentPolicyService {
 
   public async deleteFleetServerPoliciesForPolicyId(
     esClient: ElasticsearchClient,
-    agentPolicyId: string
+    agentPolicyId: string,
+    gteRevision?: number
   ) {
     auditLoggingService.writeCustomAuditLog({
-      message: `User deleting policy [id=${agentPolicyId}]`,
+      message: `User deleting policy [id=${agentPolicyId}]${
+        gteRevision ? ` with revision >= ${gteRevision}` : ''
+      }`,
     });
+
+    const revisionFilter = gteRevision
+      ? [
+          {
+            range: {
+              revision_idx: {
+                gte: gteRevision,
+              },
+            },
+          },
+        ]
+      : [];
 
     let hasMore = true;
     while (hasMore) {
@@ -1104,8 +1128,15 @@ class AgentPolicyService {
         scroll_size: SO_SEARCH_LIMIT,
         refresh: true,
         query: {
-          term: {
-            policy_id: agentPolicyId,
+          bool: {
+            filter: [
+              {
+                term: {
+                  policy_id: agentPolicyId,
+                },
+              },
+              ...revisionFilter,
+            ],
           },
         },
       });

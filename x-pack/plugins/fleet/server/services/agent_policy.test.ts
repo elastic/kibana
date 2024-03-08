@@ -413,8 +413,14 @@ describe('agent policy', () => {
         expect.objectContaining({
           index: AGENT_POLICY_INDEX,
           query: {
-            term: {
-              policy_id: 'mocked',
+            bool: {
+              filter: [
+                {
+                  term: {
+                    policy_id: 'mocked',
+                  },
+                },
+              ],
             },
           },
         })
@@ -899,6 +905,24 @@ describe('agent policy', () => {
             }),
           ],
           refresh: 'wait_for',
+        })
+      );
+
+      expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: AGENT_POLICY_INDEX,
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    policy_id: 'policy123',
+                  },
+                },
+                { range: { revision_idx: { gte: 1 } } },
+              ],
+            },
+          },
         })
       );
     });
