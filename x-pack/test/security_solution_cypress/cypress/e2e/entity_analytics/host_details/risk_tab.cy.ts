@@ -20,7 +20,7 @@ import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   // FLAKY: https://github.com/elastic/kibana/issues/169033
   // FLAKY: https://github.com/elastic/kibana/issues/169034
-  describe.skip('with legacy risk score', () => {
+  describe('with legacy risk score', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
     });
@@ -72,7 +72,6 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     after(() => {
       cy.task('esArchiverUnload', 'risk_scores_new_complete_data');
       deleteAlertsAndRules(); // esArchiverUnload doesn't work properly when using with `useCreate` and `docsOnly` flags
-      deleteRiskEngineConfiguration();
     });
 
     it('renders risk tab', () => {
