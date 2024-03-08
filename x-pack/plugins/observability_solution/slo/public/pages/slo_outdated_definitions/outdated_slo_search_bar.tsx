@@ -58,7 +58,9 @@ export function OutdatedSloSearchBar({
             iconType="refresh"
             onClick={refreshOrUpdateSearch}
           >
-            {i18n.translate('xpack.slo.outdatedSloSearchBar.', { defaultMessage: '' })}
+            {i18n.translate('xpack.slo.slosOutdatedDefinitions.refreshButtonLabel', {
+              defaultMessage: 'Refresh',
+            })}
           </EuiButton>
         )}
         {search !== tempSearch && (
