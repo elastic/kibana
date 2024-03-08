@@ -85,6 +85,16 @@ export class CasesConnector extends SubActionConnector<
       this.handleError(error);
     }
 
+    if (params.alerts.length === 0) {
+      this.logDebugCurrentState(
+        'start',
+        '[CasesConnector][_run] No alerts. Skipping execution.',
+        params
+      );
+
+      return;
+    }
+
     await this.retryService.retryWithBackoff(() => this._run(params));
   }
 

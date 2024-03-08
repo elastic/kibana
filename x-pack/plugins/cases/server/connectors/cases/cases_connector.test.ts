@@ -86,7 +86,7 @@ describe('CasesConnector', () => {
 
   it('creates the CasesConnectorExecutor correctly', async () => {
     await connector.run({
-      alerts: [],
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
       groupingBy,
       owner,
       rule,
@@ -106,7 +106,7 @@ describe('CasesConnector', () => {
 
   it('executes the CasesConnectorExecutor correctly', async () => {
     await connector.run({
-      alerts: [],
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
       groupingBy,
       owner,
       rule,
@@ -116,7 +116,7 @@ describe('CasesConnector', () => {
     });
 
     expect(mockExecute).toBeCalledWith({
-      alerts: [],
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
       groupingBy,
       owner,
       rule,
@@ -128,7 +128,7 @@ describe('CasesConnector', () => {
 
   it('creates the cases client correctly', async () => {
     await connector.run({
-      alerts: [],
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
       groupingBy,
       owner,
       rule,
@@ -145,7 +145,7 @@ describe('CasesConnector', () => {
 
     await expect(() =>
       connector.run({
-        alerts: [],
+        alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
         groupingBy,
         owner,
         rule,
@@ -165,7 +165,7 @@ describe('CasesConnector', () => {
 
     await expect(() =>
       connector.run({
-        alerts: [],
+        alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
         groupingBy,
         owner,
         rule,
@@ -185,7 +185,7 @@ describe('CasesConnector', () => {
 
     await expect(() =>
       connector.run({
-        alerts: [],
+        alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
         groupingBy,
         owner,
         rule,
@@ -207,7 +207,7 @@ describe('CasesConnector', () => {
       .mockResolvedValue({});
 
     await connector.run({
-      alerts: [],
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
       groupingBy,
       owner,
       rule,
@@ -228,7 +228,7 @@ describe('CasesConnector', () => {
 
     await expect(() =>
       connector.run({
-        alerts: [],
+        alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
         groupingBy,
         owner,
         rule,
@@ -244,5 +244,22 @@ describe('CasesConnector', () => {
 
     expect(nextBackOff).toBeCalledTimes(0);
     expect(mockExecute).toBeCalledTimes(0);
+  });
+
+  it('does not execute with no alerts', async () => {
+    await connector.run({
+      alerts: [],
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      reopenClosedCases,
+      maximumCasesToOpen,
+    });
+
+    expect(getCasesClient).not.toBeCalled();
+    expect(CasesConnectorExecutorMock).not.toBeCalled();
+    expect(mockExecute).not.toBeCalled();
+    expect(nextBackOff).not.toBeCalled();
   });
 });
