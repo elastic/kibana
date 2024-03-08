@@ -11,7 +11,10 @@ import { EuiSearchBar, type Query } from '@elastic/eui';
 import { Request } from '../../../../../../common/adapters/request/types';
 import { getLocalClusterDetails, LOCAL_CLUSTER_KEY } from './local_cluster';
 
-export function findClusters(request: Request, query?: Query): Record<string, estypes.ClusterDetails> {
+export function findClusters(
+  request: Request,
+  query?: Query
+): Record<string, estypes.ClusterDetails> {
   const rawResponse = (request.response?.json as { rawResponse?: estypes.SearchResponse })
     ?.rawResponse;
   if (!rawResponse) {
