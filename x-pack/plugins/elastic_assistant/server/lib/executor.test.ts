@@ -21,7 +21,7 @@ const request = {
     params: {},
   },
 } as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
-const onMessageSent = jest.fn();
+const onLlmResponse = jest.fn();
 const connectorId = 'testConnectorId';
 const testProps: Omit<Props, 'actions'> = {
   params: {
@@ -30,7 +30,7 @@ const testProps: Omit<Props, 'actions'> = {
   },
   request,
   connectorId,
-  onMessageSent,
+  onLlmResponse,
 };
 
 describe('executeAction', () => {
@@ -55,7 +55,7 @@ describe('executeAction', () => {
       data: 'Test message',
       status: 'ok',
     });
-    expect(onMessageSent).toHaveBeenCalledWith('Test message');
+    expect(onLlmResponse).toHaveBeenCalledWith('Test message');
   });
 
   it('should execute an action and return a Readable object when the response from the actions framework is a stream', async () => {

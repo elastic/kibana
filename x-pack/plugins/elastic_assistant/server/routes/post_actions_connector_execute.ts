@@ -13,7 +13,6 @@ import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   ExecuteConnectorRequestBody,
   Message,
-  getMessageContentWithoutReplacements,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
@@ -72,7 +71,12 @@ export const postActionsConnectorExecuteRoute = (
           }
           const dataClient = await assistantContext.getAIAssistantConversationsDataClient();
 
-          let onMessageSent;
+          let latestReplacements = { ...request.body.replacements };
+          const onNewReplacements = (newReplacements: Record<string, string>) => {
+            latestReplacements = { ...latestReplacements, ...newReplacements };
+          };
+
+          let onLlmResponse;
           let prevMessages;
           const conversationId = request.body.conversationId;
           if (conversationId) {
@@ -91,15 +95,6 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
 
-            if (request.body.replacements) {
-              await dataClient?.updateConversation({
-                conversationUpdateProps: {
-                  id: conversationId,
-                  replacements: request.body.replacements,
-                },
-              });
-            }
-
             const dateTimeString = new Date().toISOString();
 
             const appendMessageFuncs = request.body.params.subActionParams.messages.map(
@@ -108,10 +103,7 @@ export const postActionsConnectorExecuteRoute = (
                   const res = await dataClient?.appendConversationMessages({
                     existingConversation: conversation,
                     messages: request.body.params.subActionParams.messages.map((m) => ({
-                      content: getMessageContentWithoutReplacements({
-                        messageContent: userMessage.content,
-                        replacements: (request.body.replacements ?? {}) as Record<string, string>,
-                      }),
+                      content: userMessage.content,
                       role: m.role,
                       timestamp: dateTimeString,
                     })),
@@ -139,7 +131,7 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
 
-            onMessageSent = async (
+            onLlmResponse = async (
               content: string,
               traceData: Message['traceData'] = {}
             ): Promise<void> => {
@@ -148,13 +140,18 @@ export const postActionsConnectorExecuteRoute = (
                   existingConversation: updatedConversation,
                   messages: [
                     getMessageFromRawResponse({
-                      rawContent: getMessageContentWithoutReplacements({
-                        messageContent: content,
-                        replacements: (request.body.replacements ?? {}) as Record<string, string>,
-                      }),
+                      rawContent: content,
                       traceData,
                     }),
                   ],
+                });
+              }
+              if (Object.keys(latestReplacements).length > 0) {
+                await dataClient?.updateConversation({
+                  conversationUpdateProps: {
+                    id: conversationId,
+                    replacements: latestReplacements,
+                  },
                 });
               }
             };
@@ -169,7 +166,7 @@ export const postActionsConnectorExecuteRoute = (
           if (!request.body.isEnabledKnowledgeBase && !request.body.isEnabledRAGAlerts) {
             logger.debug('Executing via actions framework directly');
             const result = await executeAction({
-              onMessageSent,
+              onLlmResponse,
               actions,
               request,
               connectorId,
@@ -217,11 +214,6 @@ export const postActionsConnectorExecuteRoute = (
 
           const elserId = await getElser(request, (await context.core).savedObjects.getClient());
 
-          let latestReplacements = { ...request.body.replacements };
-          const onNewReplacements = (newReplacements: Record<string, string>) => {
-            latestReplacements = { ...latestReplacements, ...newReplacements };
-          };
-
           const langChainResponseBody = await callAgentExecutor({
             alertsIndexPattern: request.body.alertsIndexPattern,
             allow: request.body.allow,
@@ -248,8 +240,8 @@ export const postActionsConnectorExecuteRoute = (
           });
 
           if (conversationId) {
-            // if conversationId is defined, onMessageSent will be too. the ? is to satisfy TS
-            await onMessageSent?.(
+            // if conversationId is defined, onLlmResponse will be too. the ? is to satisfy TS
+            await onLlmResponse?.(
               langChainResponseBody.data,
               langChainResponseBody.trace_data
                 ? {
@@ -258,15 +250,6 @@ export const postActionsConnectorExecuteRoute = (
                   }
                 : {}
             );
-
-            if (Object.keys(latestReplacements).length > 0) {
-              await dataClient?.updateConversation({
-                conversationUpdateProps: {
-                  id: conversationId,
-                  replacements: latestReplacements,
-                },
-              });
-            }
           }
           return response.ok({
             body: {

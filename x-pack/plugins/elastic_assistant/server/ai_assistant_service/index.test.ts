@@ -59,9 +59,18 @@ const GetDataStreamResponse: IndicesGetDataStreamResponse = {
       generation: 1,
       timestamp_field: { name: 'ignored' },
       hidden: true,
-      indices: [{ index_name: 'ignored', index_uuid: 'ignored' }],
+      indices: [
+        {
+          index_name: 'ignored',
+          index_uuid: 'ignored',
+          managed_by: 'Data stream lifecycle',
+          prefer_ilm: false,
+        },
+      ],
       status: 'green',
       template: 'ignored',
+      next_generation_managed_by: 'Data stream lifecycle',
+      prefer_ilm: false,
     },
   ],
 };

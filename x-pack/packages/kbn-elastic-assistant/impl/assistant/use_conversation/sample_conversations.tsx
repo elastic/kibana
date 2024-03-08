@@ -43,6 +43,7 @@ export const WELCOME_CONVERSATION: Conversation = {
     },
   ],
   apiConfig: {},
+  replacements: {},
 };
 
 export const enterpriseMessaging: Message[] = [

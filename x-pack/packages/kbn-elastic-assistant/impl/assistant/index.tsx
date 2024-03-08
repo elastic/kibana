@@ -248,7 +248,7 @@ const AssistantComponent: React.FC<Props> = ({
   useLayoutEffect(() => {
     // need in order for code block controls to be added to the DOM
     setTimeout(() => {
-      setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation));
+      setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation, showAnonymizedValues));
     }, 0);
   }, [augmentMessageCodeBlocks, currentConversation]);
 

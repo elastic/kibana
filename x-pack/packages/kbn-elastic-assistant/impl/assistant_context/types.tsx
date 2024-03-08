@@ -69,7 +69,7 @@ export interface Conversation {
   messages: Message[];
   updatedAt?: Date;
   createdAt?: Date;
-  replacements?: Record<string, string>;
+  replacements: Record<string, string>;
   isDefault?: boolean;
   excludeFromLastConversationStorage?: boolean;
 }

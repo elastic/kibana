@@ -56,7 +56,10 @@ export interface AssistantProviderProps {
   alertsIndexPattern?: string;
   assistantAvailability: AssistantAvailability;
   assistantTelemetry?: AssistantTelemetry;
-  augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
+  augmentMessageCodeBlocks: (
+    currentConversation: Conversation,
+    showAnonymizedValues: boolean
+  ) => CodeBlockDetails[][];
   baseAllow: string[];
   baseAllowReplacement: string[];
   defaultAllow: string[];
@@ -95,7 +98,10 @@ export interface UseAssistantContext {
   assistantAvailability: AssistantAvailability;
   assistantStreamingEnabled: boolean;
   assistantTelemetry?: AssistantTelemetry;
-  augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
+  augmentMessageCodeBlocks: (
+    currentConversation: Conversation,
+    showAnonymizedValues: boolean
+  ) => CodeBlockDetails[][];
   allQuickPrompts: QuickPrompt[];
   allSystemPrompts: Prompt[];
   baseAllow: string[];

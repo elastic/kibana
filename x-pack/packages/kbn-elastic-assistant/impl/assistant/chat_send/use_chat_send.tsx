@@ -7,7 +7,6 @@
 
 import React, { useCallback } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
-import { getMessageContentWithoutReplacements } from '@kbn/elastic-assistant-common';
 import { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessages } from '../use_send_messages';
 import { useConversation } from '../use_conversation';
@@ -97,10 +96,7 @@ export const useChatSend = ({
 
       const updatedMessages = [...currentConversation.messages, userMessage].map((m) => ({
         ...m,
-        content: getMessageContentWithoutReplacements({
-          messageContent: m.content ?? '',
-          replacements,
-        }),
+        content: m.content ?? '',
       }));
       setCurrentConversation({
         ...currentConversation,

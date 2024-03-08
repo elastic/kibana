@@ -17,6 +17,7 @@ const conversation1 = {
   id: 'conversation1',
   title: 'Conversation 1',
   apiConfig: {},
+  replacements: {},
   category: 'default',
   messages: [
     {

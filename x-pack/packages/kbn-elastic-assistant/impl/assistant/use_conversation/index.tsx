@@ -23,6 +23,7 @@ export const DEFAULT_CONVERSATION_STATE: Conversation = {
   id: i18n.DEFAULT_CONVERSATION_TITLE,
   messages: [],
   apiConfig: {},
+  replacements: {},
   category: 'assistant',
   title: i18n.DEFAULT_CONVERSATION_TITLE,
 };

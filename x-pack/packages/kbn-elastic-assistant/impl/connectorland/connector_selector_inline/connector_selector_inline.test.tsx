@@ -78,6 +78,7 @@ describe('ConnectorSelectorInline', () => {
       category: 'assistant',
       messages: [],
       apiConfig: {},
+      replacements: {},
       title: 'conversation_id',
     };
     const { getByText } = render(
@@ -98,6 +99,7 @@ describe('ConnectorSelectorInline', () => {
       category: 'assistant',
       messages: [],
       apiConfig: {},
+      replacements: {},
       title: 'conversation_id',
     };
     const { getByTestId, queryByTestId } = render(
@@ -121,6 +123,7 @@ describe('ConnectorSelectorInline', () => {
       category: 'assistant',
       messages: [],
       apiConfig: {},
+      replacements: {},
       title: 'conversation_id',
     };
     const { getByTestId, queryByTestId } = render(
@@ -146,6 +149,7 @@ describe('ConnectorSelectorInline', () => {
       },
       conversation: {
         apiConfig: {},
+        replacements: {},
         category: 'assistant',
         id: 'conversation_id',
         messages: [],
@@ -159,6 +163,7 @@ describe('ConnectorSelectorInline', () => {
       category: 'assistant',
       messages: [],
       apiConfig: {},
+      replacements: {},
       title: 'conversation_id',
     };
     const { getByTestId } = render(

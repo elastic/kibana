@@ -11,6 +11,7 @@ import type { ConversationRole } from '@kbn/elastic-assistant/impl/assistant_con
 const user: ConversationRole = 'user';
 const currentConversation = {
   apiConfig: {},
+  replacements: {},
   category: 'assistant',
   id: '1',
   title: '1',
@@ -42,6 +43,7 @@ describe('getComments', () => {
       currentConversation: {
         category: 'assistant',
         apiConfig: {},
+        replacements: {},
         id: '1',
         title: '1',
         messages: [

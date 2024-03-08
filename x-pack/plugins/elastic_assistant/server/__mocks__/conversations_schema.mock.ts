@@ -130,6 +130,7 @@ export const getConversationMock = (
 ): ConversationResponse => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   apiConfig: {},
+  replacements: {},
   title: 'test',
   ...params,
   createdAt: '2019-12-13T16:40:33.400Z',

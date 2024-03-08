@@ -11,7 +11,7 @@ import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import { AssistantAvatar } from '@kbn/elastic-assistant';
-import { getMessageContentWithReplacements } from '../helpers';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
@@ -28,17 +28,16 @@ const transformMessageWithReplacements = ({
   message: Message;
   content: string;
   showAnonymizedValues: boolean;
-  replacements?: Record<string, string>;
+  replacements: Record<string, string>;
 }): ContentMessage => {
   return {
     ...message,
-    content:
-      showAnonymizedValues || !replacements
-        ? getMessageContentWithReplacements({
-            messageContent: content,
-            replacements,
-          })
-        : content,
+    content: showAnonymizedValues
+      ? content
+      : replaceAnonymizedValuesWithOriginalValues({
+          messageContent: content,
+          replacements,
+        }),
   };
 };
 

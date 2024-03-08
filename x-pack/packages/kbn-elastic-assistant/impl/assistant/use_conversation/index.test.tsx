@@ -62,6 +62,7 @@ describe('useConversation', () => {
       const createResult = await result.current.createConversation({
         id: mockConvo.id,
         messages: mockConvo.messages,
+        replacements: {},
         apiConfig: { defaultSystemPromptId: 'default-system-prompt' },
         title: mockConvo.title,
         category: 'assistant',

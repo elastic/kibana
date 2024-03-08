@@ -24,6 +24,7 @@ describe('helpers', () => {
         theme: {},
         messages: [],
         apiConfig: {},
+        replacements: {},
         title: 'conversation_id',
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
@@ -46,6 +47,7 @@ describe('helpers', () => {
           },
         ],
         apiConfig: {},
+        replacements: {},
         category: 'assistant',
         title: 'conversation_id',
       };
@@ -59,6 +61,7 @@ describe('helpers', () => {
         title: 'conversation_id',
         messages: enterpriseMessaging,
         apiConfig: {},
+        replacements: {},
         category: 'assistant',
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
@@ -84,6 +87,7 @@ describe('helpers', () => {
           },
         ],
         apiConfig: {},
+        replacements: {},
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(3);
@@ -99,6 +103,7 @@ describe('helpers', () => {
         category: 'assistant',
         messages: [],
         apiConfig: {},
+        replacements: {},
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(3);
@@ -120,6 +125,7 @@ describe('helpers', () => {
           },
         ],
         apiConfig: {},
+        replacements: {},
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(4);
@@ -261,6 +267,7 @@ describe('helpers', () => {
       category: 'assistant',
       theme: {},
       apiConfig: {},
+      replacements: {},
     };
     const baseConversations = {
       conversation1: {

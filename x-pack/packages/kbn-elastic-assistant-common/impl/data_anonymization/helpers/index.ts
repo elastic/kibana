@@ -22,7 +22,7 @@ export const isAnonymized = ({
   field: string;
 }): boolean => allowReplacementSet.has(field);
 
-export const getMessageContentWithoutReplacements = ({
+export const replaceAnonymizedValuesWithOriginalValues = ({
   messageContent,
   replacements,
 }: {
@@ -30,8 +30,8 @@ export const getMessageContentWithoutReplacements = ({
   replacements: Record<string, string>;
 }): string =>
   replacements != null
-    ? Object.keys(replacements).reduce(
-        (acc, replacement) => acc.replaceAll(replacement, replacements[replacement]),
-        messageContent
-      )
+    ? Object.keys(replacements).reduce((acc, uuid) => {
+        const value = replacements[uuid];
+        return acc.replaceAll(uuid, value);
+      }, messageContent)
     : messageContent;

@@ -12,7 +12,6 @@ import {
   ConversationCategoryEnum,
   ConversationCreateProps,
   ConversationResponse,
-  getMessageContentWithoutReplacements,
 } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { getConversation } from './get_conversation';
@@ -95,10 +94,7 @@ export const transformToCreateScheme = (
     is_default: isDefault,
     messages: messages?.map((message) => ({
       '@timestamp': message.timestamp,
-      content: getMessageContentWithoutReplacements({
-        messageContent: message.content,
-        replacements: (replacements ?? {}) as Record<string, string>,
-      }),
+      content: message.content,
       is_error: message.isError,
       reader: message.reader,
       role: message.role,

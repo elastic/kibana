@@ -16,7 +16,7 @@ import {
 import { handleStreamStorage } from './parse_stream';
 
 export interface Props {
-  onMessageSent?: (content: string) => Promise<void>;
+  onLlmResponse?: (content: string) => Promise<void>;
   actions: ActionsPluginStart;
   connectorId: string;
   params: ConnectorExecutionParams;
@@ -29,7 +29,7 @@ interface StaticResponse {
 }
 
 export const executeAction = async ({
-  onMessageSent,
+  onLlmResponse,
   actions,
   params,
   connectorId,
@@ -49,8 +49,8 @@ export const executeAction = async ({
   }
   const content = get('data.message', actionResult);
   if (typeof content === 'string') {
-    if (onMessageSent) {
-      await onMessageSent(content);
+    if (onLlmResponse) {
+      await onLlmResponse(content);
     }
     return {
       connector_id: connectorId,
@@ -65,7 +65,7 @@ export const executeAction = async ({
   }
 
   // do not await, blocks stream for UI
-  handleStreamStorage(readable, request.body.llmType, onMessageSent);
+  handleStreamStorage(readable, request.body.llmType, onLlmResponse);
 
   return readable.pipe(new PassThrough());
 };

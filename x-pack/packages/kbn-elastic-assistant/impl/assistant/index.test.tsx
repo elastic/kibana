@@ -51,6 +51,7 @@ const mockData = {
     category: 'assistant',
     messages: [],
     apiConfig: {},
+    replacements: {},
   },
   'electric sheep': {
     id: 'electric sheep id',
@@ -58,6 +59,7 @@ const mockData = {
     title: 'electric sheep',
     messages: [],
     apiConfig: {},
+    replacements: {},
   },
 };
 const mockDeleteConvo = jest.fn();
@@ -167,6 +169,7 @@ describe('Assistant', () => {
         expect.objectContaining({
           currentConversation: {
             apiConfig: {},
+            replacements: {},
             category: 'assistant',
             id: 'Welcome Id',
             messages: [],

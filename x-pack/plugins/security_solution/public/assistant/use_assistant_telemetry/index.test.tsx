@@ -16,6 +16,7 @@ const mockedConversations = {
   [customId]: {
     id: customId,
     apiConfig: {},
+    replacements: {},
     messages: [],
   },
 };
@@ -48,6 +49,7 @@ jest.mock('@kbn/elastic-assistant', () => ({
     id: customId,
     title: 'Custom',
     apiConfig: {},
+    replacements: {},
     messages: [],
   }),
 }));
