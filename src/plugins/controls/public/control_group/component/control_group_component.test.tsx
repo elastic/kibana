@@ -11,7 +11,7 @@ import React from 'react';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { pluginServices as presentationUtilPluginServices } from '@kbn/presentation-util-plugin/public/services';
 import { registry as presentationUtilServicesRegistry } from '@kbn/presentation-util-plugin/public/services/plugin_services.story';
-import { act, prettyDOM, render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { Provider } from 'react-redux';
