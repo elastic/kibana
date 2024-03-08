@@ -184,7 +184,7 @@ describe('Agent Policy-Changing license watcher', () => {
     await pw.watch(Basic);
 
     expect(logger.error).toHaveBeenLastCalledWith(
-      'Done - 1 out of 2 were successful. Errors encountered:\n' +
+      'Done - 1 out of 2 were unsuccessful. Errors encountered:\n' +
         'Policy [agent-policy-2] failed to update due to error: error-test'
     );
   });
