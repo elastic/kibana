@@ -348,7 +348,7 @@ export abstract class AbstractDataView {
       title: this.getIndexPattern(),
       timeFieldName: this.timeFieldName,
       sourceFilters: stringifyOrUndefined(this.sourceFilters),
-      fields: stringifyOrUndefined(this.scriptedFields),
+      fields: stringifyOrUndefined(Object.values(this.scriptedFields)),
       fieldFormatMap: stringifyOrUndefined(this.fieldFormatMap),
       type: this.type!,
       typeMeta: stringifyOrUndefined(this.typeMeta),
