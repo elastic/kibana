@@ -64,10 +64,8 @@ export const APIKeysGridPage: FunctionComponent = () => {
   const [pageSize, setPageSize] = useState(25);
 
   const [state, queryApiKeysAndAggregations] = useAsyncFn(() => {
-    const queryContainer =
-      Object.keys(query).length === 0
-        ? undefined
-        : EuiSearchBar.Query.toESQuery(query.addSimpleFieldValue('invalidated', false));
+    const parsedQuery = query.addSimpleFieldValue('invalidated', false);
+    const queryContainer = EuiSearchBar.Query.toESQuery(parsedQuery);
 
     const requestBody = {
       query: queryContainer,

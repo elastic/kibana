@@ -32,11 +32,12 @@ describe('apiKeysManagementApp', () => {
       },
     };
 
-    coreStartMock.http.get.mockResolvedValue({
+    coreStartMock.http.post.mockResolvedValue({
       apiKeys: [],
       canManageCrossClusterApiKeys: true,
       canManageApiKeys: true,
       canManageOwnApiKeys: true,
+      aggregations: {},
     });
 
     authc.getCurrentUser.mockResolvedValue(
