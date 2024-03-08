@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { i18n } from '@kbn/i18n';
 import {
   CONNECTORS_INDEX,
@@ -501,6 +502,8 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
 
       let connectorResult;
       let connectorCountResult;
+      let connectorResultSlice;
+      const indicesExist: Record<string, boolean> = {};
       try {
         connectorResult = await fetchConnectors(
           client.asCurrentUser,
@@ -509,14 +512,21 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           searchQuery
         );
 
-        const indicesSlice = connectorResult
-          .reduce((acc: string[], connector) => {
-            if (connector.index_name) {
-              acc.push(connector.index_name);
-            }
-            return acc;
-          }, [])
-          .slice(from, from + size);
+        connectorResultSlice = connectorResult.slice(from, from + size);
+        for (const connector of connectorResultSlice) {
+          if (connector.index_name) {
+            const indexExists = await client.asCurrentUser.indices.exists({
+              index: connector.index_name,
+            });
+            indicesExist[connector.index_name] = indexExists;
+          }
+        }
+        const indicesSlice = connectorResultSlice.reduce((acc: string[], connector) => {
+          if (connector.index_name) {
+            acc.push(connector.index_name);
+          }
+          return acc;
+        }, []);
         connectorCountResult = await fetchIndexCounts(client, indicesSlice);
       } catch (error) {
         if (isExpensiveQueriesNotAllowedException(error)) {
@@ -537,8 +547,9 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       }
       return response.ok({
         body: {
-          connectors: connectorResult.slice(from, from + size),
+          connectors: connectorResultSlice,
           counts: connectorCountResult,
+          indexExists: indicesExist,
           meta: {
             page: {
               from,
@@ -562,13 +573,8 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { connectorId } = request.params;
+      const connectorResult = await fetchConnectorById(client.asCurrentUser, connectorId);
 
-      let connectorResult;
-      try {
-        connectorResult = await fetchConnectorById(client.asCurrentUser, connectorId);
-      } catch (error) {
-        throw error;
-      }
       return response.ok({
         body: {
           connector: connectorResult,
@@ -605,7 +611,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         if (indexNameToDelete) {
           await deleteIndexPipelines(client, indexNameToDelete);
           await deleteAccessControlIndex(client, indexNameToDelete);
-          await client.asCurrentUser.indices.delete({ index: indexNameToDelete });
+          const indexExists = await client.asCurrentUser.indices.exists({
+            index: indexNameToDelete,
+          });
+          if (indexExists) {
+            await client.asCurrentUser.indices.delete({ index: indexNameToDelete });
+          }
         }
         if (apiKeyId) {
           await client.asCurrentUser.security.invalidateApiKey({ ids: [apiKeyId] });
@@ -677,12 +688,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         return response.ok();
       } catch (error) {
         if (isIndexNotFoundException(error)) {
-          return createError({
-            errorCode: ErrorCode.INDEX_NOT_FOUND,
-            message: `Could not find index ${indexName}`,
-            response,
-            statusCode: 404,
-          });
+          return response.ok();
         }
         throw error;
       }
