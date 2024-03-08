@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Conversation } from '../../common';
+import type { SearchQueryVariant } from '../types';
 
-export function useConversations(): Conversation[] {
-  return [];
-}
+export const simpleQueryMock: SearchQueryVariant = { query_string: { query: 'airline:AAL' } };
