@@ -52,4 +52,5 @@ export const getCasesConnectorType = ({
    * TODO: Verify license
    */
   minimumLicenseRequired: 'platinum' as const,
+  isSystemActionType: true,
 });
