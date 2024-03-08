@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import {
   anomalyDetectionJobSchema,
   anomalyDetectionUpdateJobSchema,
