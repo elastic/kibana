@@ -99,7 +99,8 @@ export const APIKeysGridPage: FunctionComponent = () => {
     }
   };
 
-  const debouncedOnSearchChange = useCallback(debounce(onSearchChange, 300), []); // eslint-disable-line react-hooks/exhaustive-deps
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  const debouncedOnSearchChange = useCallback(debounce(onSearchChange, 500), []);
 
   if (!state.value) {
     if (state.loading) {
