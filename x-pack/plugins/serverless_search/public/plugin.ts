@@ -112,7 +112,11 @@ export class ServerlessSearchPlugin
       },
     });
 
-    setupDeps.discover.showInlineTopNav();
+    setupDeps.discover.setRootContext({
+      inlineTopNav: {
+        enabled: true,
+      },
+    });
 
     return {};
   }

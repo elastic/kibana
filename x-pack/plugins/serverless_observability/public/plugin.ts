@@ -43,7 +43,12 @@ export class ServerlessObservabilityPlugin
       })
     );
 
-    setupDeps.discover.showInlineTopNav({ showLogsExplorerTabs: true });
+    setupDeps.discover.setRootContext({
+      inlineTopNav: {
+        enabled: true,
+        showLogsExplorerTabs: true,
+      },
+    });
 
     return {};
   }
