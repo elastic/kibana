@@ -11,11 +11,8 @@ import type { StartServicesAccessor } from '@kbn/core/public';
 import type { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 
 import { PLUGIN_ICON, PLUGIN_ID, ML_APP_NAME } from '../../../common/constants/app';
-import {
-  ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
-  SingleMetricViewerEmbeddableInput,
-  SingleMetricViewerEmbeddableServices,
-} from '..';
+import type { SingleMetricViewerEmbeddableInput, SingleMetricViewerEmbeddableServices } from '..';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
 import { HttpService } from '../../application/services/http_service';
@@ -78,36 +75,56 @@ export class SingleMetricViewerEmbeddableFactory
       { fieldFormatServiceFactory },
       { indexServiceFactory },
       { mlApiServicesProvider },
+      { mlJobServiceFactory },
       { mlResultsServiceProvider },
+      { MlCapabilitiesService },
       { timeSeriesSearchServiceFactory },
+      { toastNotificationServiceProvider },
     ] = await Promise.all([
       await this.getStartServices(),
       await import('../../application/services/anomaly_detector_service'),
       await import('../../application/services/field_format_service_factory'),
       await import('../../application/util/index_service'),
       await import('../../application/services/ml_api_service'),
+      await import('../../application/services/job_service'),
       await import('../../application/services/results_service'),
+      await import('../../application/capabilities/check_capabilities'),
       await import(
         '../../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service'
       ),
+      await import('../../application/services/toast_notification_service'),
     ]);
 
     const httpService = new HttpService(coreStart.http);
     const anomalyDetectorService = new AnomalyDetectorService(httpService);
     const mlApiServices = mlApiServicesProvider(httpService);
+    const mlJobService = mlJobServiceFactory(
+      toastNotificationServiceProvider(coreStart.notifications.toasts),
+      mlApiServices
+    );
     const mlResultsService = mlResultsServiceProvider(mlApiServices);
-    const mlIndexUtils = indexServiceFactory(pluginsStart.data.dataViews);
     const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(
       mlResultsService,
       mlApiServices
     );
-    const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
-
+    const mlCapabilities = new MlCapabilitiesService(mlApiServices);
     const anomalyExplorerService = new AnomalyExplorerChartsService(
       pluginsStart.data.query.timefilter.timefilter,
       mlApiServices,
       mlResultsService
     );
+
+    // Note on the following services:
+    // - `mlIndexUtils` is just instantiated here to be passed on to `mlFieldFormatService`,
+    //   but it's not being made available as part of global services. Since it's just
+    //   some stateless utils `useMlIndexUtils()` should be used from within components.
+    // - `mlFieldFormatService` is a stateful legacy service that relied on "dependency cache",
+    //   so because of its own state it needs to be made available as a global service.
+    //   In the long run we should again try to get rid of it here and make it available via
+    //   its own context or possibly without having a singleton like state at all, since the
+    //   way this manages its own state right now doesn't consider React component lifecycles.
+    const mlIndexUtils = indexServiceFactory(pluginsStart.data.dataViews);
+    const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
 
     return [
       coreStart,
@@ -115,10 +132,12 @@ export class SingleMetricViewerEmbeddableFactory
       {
         anomalyDetectorService,
         anomalyExplorerService,
-        mlResultsService,
         mlApiServices,
-        mlTimeSeriesSearchService,
+        mlCapabilities,
         mlFieldFormatService,
+        mlJobService,
+        mlResultsService,
+        mlTimeSeriesSearchService,
       },
     ];
   }
