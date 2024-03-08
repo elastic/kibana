@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import moment, { type Moment } from 'moment';
 import { EuiDatePicker, EuiDatePickerRange, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';

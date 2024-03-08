@@ -94,7 +94,7 @@ export const calculateAuthz = ({
     installPackages: fleet.all && integrations.all,
     upgradePackages: fleet.all && integrations.all,
     removePackages: fleet.all && integrations.all,
-    uploadPackages: isSuperuser,
+    uploadPackages: fleet.all && integrations.all,
 
     readPackageSettings: fleet.all && integrations.all,
     writePackageSettings: fleet.all && integrations.all,

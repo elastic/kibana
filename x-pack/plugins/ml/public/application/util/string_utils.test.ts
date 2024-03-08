@@ -6,7 +6,7 @@
  */
 
 import type { MlCustomUrlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
-import { Detector } from '../../../common/types/anomaly_detection_jobs';
+import type { Detector } from '../../../common/types/anomaly_detection_jobs';
 
 import {
   replaceStringTokens,
