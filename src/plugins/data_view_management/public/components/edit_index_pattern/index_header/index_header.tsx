@@ -17,7 +17,9 @@ interface IndexHeaderProps {
   setDefault?: () => void;
   editIndexPatternClick?: () => void;
   deleteIndexPatternClick?: () => void;
+  refreshIndexPatternClick?: () => void;
   canSave: boolean;
+  isRefreshing?: boolean;
 }
 
 const setDefaultAriaLabel = i18n.translate('indexPatternManagement.editDataView.setDefaultAria', {
@@ -63,6 +65,7 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
             iconType="pencil"
             aria-label={editAriaLabel}
             data-test-subj="editIndexPatternButton"
+            color="primary"
           >
             {editTooltip}
           </EuiButton>

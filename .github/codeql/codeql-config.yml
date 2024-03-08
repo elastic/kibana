@@ -61,6 +61,7 @@ paths-ignore:
   - packages/kbn-telemetry-tools
   - packages/kbn-test
   - packages/kbn-test-jest-helpers
+  - packages/kbn-test-eui-helpers
   - packages/kbn-test-subj-selector
   - packages/kbn-tooling-log
   - packages/kbn-ts-project-linter

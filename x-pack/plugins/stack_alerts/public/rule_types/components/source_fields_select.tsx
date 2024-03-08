@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { uniqBy } from 'lodash';
-import { EuiComboBox, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -77,44 +77,39 @@ export const SourceFields: React.FC<SourceFieldsProps> = ({
       fullWidth
       isInvalid={errors.length > 0 && sourceFields !== undefined}
       error={errors}
-    >
-      <>
-        <EuiTitle size="xs">
-          <h5>
-            <FormattedMessage
-              id="xpack.stackAlerts.components.ui.sourceFieldsSelect.title"
-              defaultMessage="Add more fields to alert details"
-            />
-          </h5>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiComboBox
-          fullWidth
-          placeholder={i18n.translate(
-            'xpack.stackAlerts.components.ui.sourceFieldsSelect.placeholder',
-            {
-              defaultMessage: 'Select fields',
-            }
-          )}
-          data-test-subj="sourceFields"
-          isInvalid={errors.length > 0 && sourceFields !== undefined}
-          selectedOptions={(sourceFields || []).map((f) => ({
-            label: f.label,
-            value: f.searchPath,
-            'data-test-subj': `option-${f.label}`,
-          }))}
-          onChange={(options) => {
-            const fields: SourceField[] = [];
-            options.forEach((f) => {
-              if (f.value) {
-                fields.push({ label: f.label, searchPath: f.value });
-              }
-            });
-            onChangeSourceFields(fields);
-          }}
-          options={sourceFieldsOptions}
+      label={
+        <FormattedMessage
+          id="xpack.stackAlerts.components.ui.sourceFieldsSelect.title"
+          defaultMessage="Add more fields to alert details"
         />
-      </>
+      }
+    >
+      <EuiComboBox
+        fullWidth
+        placeholder={i18n.translate(
+          'xpack.stackAlerts.components.ui.sourceFieldsSelect.placeholder',
+          {
+            defaultMessage: 'Select fields',
+          }
+        )}
+        data-test-subj="sourceFields"
+        isInvalid={errors.length > 0 && sourceFields !== undefined}
+        selectedOptions={(sourceFields || []).map((f) => ({
+          label: f.label,
+          value: f.searchPath,
+          'data-test-subj': `option-${f.label}`,
+        }))}
+        onChange={(options) => {
+          const fields: SourceField[] = [];
+          options.forEach((f) => {
+            if (f.value) {
+              fields.push({ label: f.label, searchPath: f.value });
+            }
+          });
+          onChangeSourceFields(fields);
+        }}
+        options={sourceFieldsOptions}
+      />
     </EuiFormRow>
   ) : null;
 };

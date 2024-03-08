@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, memo, useState } from 'react';
+import type { FC } from 'react';
+import React, { memo, useState } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -18,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
 import { type InferecePipelineCreationState } from './state';
 import { EDIT_MESSAGE, CANCEL_EDIT_MESSAGE } from '../../components/ml_inference/constants';

@@ -35,9 +35,9 @@ export const journey = new Journey({
     maxDuration: '10m',
   },
 })
-  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
+  .step('Go to Dashboards Page', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(kbnUrl.get(`/app/dashboards`));
-    await page.waitForSelector('#dashboardListingHeading');
+    await kibanaPage.waitForListViewTable();
   })
 
   .step('Go to Promotion Tracking Dashboard', async ({ page }) => {

@@ -175,6 +175,25 @@ describe('rule_converters', () => {
       );
     });
 
+    test('should accept threat_match alerts suppression params', () => {
+      const patchParams = {
+        alert_suppression: {
+          group_by: ['agent.name'],
+          missing_fields_strategy: 'suppress' as const,
+        },
+      };
+      const rule = getThreatRuleParams();
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      expect(patchedParams).toEqual(
+        expect.objectContaining({
+          alertSuppression: {
+            groupBy: ['agent.name'],
+            missingFieldsStrategy: 'suppress',
+          },
+        })
+      );
+    });
+
     test('should accept machine learning params when existing rule type is machine learning', () => {
       const patchParams = {
         anomaly_threshold: 5,

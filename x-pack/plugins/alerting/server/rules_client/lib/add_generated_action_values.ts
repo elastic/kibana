@@ -8,16 +8,34 @@
 import { v4 } from 'uuid';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import Boom from '@hapi/boom';
-import { NormalizedAlertAction, NormalizedAlertActionWithGeneratedValues } from '..';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import {
+  NormalizedAlertAction,
+  NormalizedAlertActionWithGeneratedValues,
+  RulesClientContext,
+} from '..';
 
-export function addGeneratedActionValues(
-  actions: NormalizedAlertAction[] = []
-): NormalizedAlertActionWithGeneratedValues[] {
+export async function addGeneratedActionValues(
+  actions: NormalizedAlertAction[] = [],
+  context: RulesClientContext
+): Promise<NormalizedAlertActionWithGeneratedValues[]> {
+  const uiSettingClient = context.uiSettings.asScopedToClient(context.unsecuredSavedObjectsClient);
+  const [allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex] =
+    await Promise.all([
+      uiSettingClient.get(UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS),
+      uiSettingClient.get(UI_SETTINGS.QUERY_STRING_OPTIONS),
+      uiSettingClient.get(UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX),
+    ]);
+  const esQueryConfig = {
+    allowLeadingWildcards,
+    queryStringOptions,
+    ignoreFilterIfFieldNotInIndex,
+  };
   return actions.map(({ uuid, alertsFilter, ...action }) => {
     const generateDSL = (kql: string, filters: Filter[]) => {
       try {
         return JSON.stringify(
-          buildEsQuery(undefined, [{ query: kql, language: 'kuery' }], filters)
+          buildEsQuery(undefined, [{ query: kql, language: 'kuery' }], filters, esQueryConfig)
         );
       } catch (e) {
         throw Boom.badRequest(`Error creating DSL query: invalid KQL`);

@@ -8,6 +8,7 @@
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
+import { createDocumentMigratorMock } from './migrator.mock';
 
 // mock duplicated from `@kbn/core/saved-objects-migration-server-mocks` to avoid cyclic dependencies
 
@@ -39,6 +40,7 @@ const createMigratorMock = (
     migrateDocument: jest.fn(),
     prepareMigrations: jest.fn(),
     getStatus$: jest.fn(),
+    getDocumentMigrator: jest.fn().mockReturnValue(createDocumentMigratorMock()),
   };
 
   // mockMigrator.getActiveMappings.mockReturnValue(buildActiveMappings(mergeTypes(types)));

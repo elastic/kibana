@@ -42,6 +42,7 @@ interface Props {
   indexPatterns: string[];
   remoteClusters?: Cluster[];
   canUseRemoteIndices?: boolean;
+  isDarkMode?: boolean;
 }
 
 export class ElasticsearchPrivileges extends Component<Props, {}> {
@@ -173,6 +174,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
           onChange={onChange}
           availableIndexPrivileges={builtinESPrivileges.index}
           editable={editable}
+          isDarkMode={this.props.isDarkMode}
         />
 
         {canUseRemoteIndices && (
@@ -208,6 +210,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
               onChange={onChange}
               availableIndexPrivileges={builtinESPrivileges.index}
               editable={editable}
+              isDarkMode={this.props.isDarkMode}
             />
           </>
         )}

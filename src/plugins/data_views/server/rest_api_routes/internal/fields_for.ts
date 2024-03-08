@@ -17,7 +17,11 @@ import type {
   DataViewsServerPluginStartDependencies,
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
-import { FIELDS_FOR_WILDCARD_PATH as path } from '../../../common/constants';
+import {
+  FIELDS_FOR_WILDCARD_PATH as path,
+  DATA_VIEWS_FIELDS_EXCLUDED_TIERS,
+} from '../../../common/constants';
+import { getIndexFilterDsl } from './utils';
 
 /**
  * Accepts one of the following:
@@ -41,8 +45,8 @@ export const parseFields = (fields: string | string[]): string[] => {
 
 const access = 'internal';
 
-type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
-interface IQuery {
+export type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
+export interface IQuery {
   pattern: string;
   meta_fields: string | string[];
   type?: string;
@@ -51,9 +55,10 @@ interface IQuery {
   include_unmapped?: boolean;
   fields?: string[];
   allow_hidden?: boolean;
+  include_empty_fields?: boolean;
 }
 
-const querySchema = schema.object({
+export const querySchema = schema.object({
   pattern: schema.string(),
   meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
     defaultValue: [],
@@ -64,6 +69,7 @@ const querySchema = schema.object({
   include_unmapped: schema.maybe(schema.boolean()),
   fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   allow_hidden: schema.maybe(schema.boolean()),
+  include_empty_fields: schema.maybe(schema.boolean()),
 });
 
 const fieldSubTypeSchema = schema.object({
@@ -95,9 +101,10 @@ const FieldDescriptorSchema = schema.object({
   conflictDescriptions: schema.maybe(
     schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
   ),
+  defaultFormatter: schema.maybe(schema.string()),
 });
 
-const validate: FullValidationConfig<any, any, any> = {
+export const validate: FullValidationConfig<any, any, any> = {
   request: {
     query: querySchema,
     // not available to get request
@@ -115,8 +122,13 @@ const validate: FullValidationConfig<any, any, any> = {
 
 const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
   (isRollupsEnabled) => async (context, request, response) => {
-    const { asCurrentUser } = (await context.core).elasticsearch.client;
+    const core = await context.core;
+    const { asCurrentUser } = core.elasticsearch.client;
+    const excludedTiers = await core.uiSettings.client.get<string>(
+      DATA_VIEWS_FIELDS_EXCLUDED_TIERS
+    );
     const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
+
     const {
       pattern,
       meta_fields: metaFields,
@@ -125,6 +137,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
       allow_no_index: allowNoIndex,
       include_unmapped: includeUnmapped,
       allow_hidden: allowHidden,
+      include_empty_fields: includeEmptyFields,
     } = request.query;
 
     // not available to get request
@@ -149,8 +162,9 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           allow_no_indices: allowNoIndex || false,
           includeUnmapped,
         },
-        indexFilter,
+        indexFilter: getIndexFilterDsl({ indexFilter, excludedTiers }),
         allowHidden,
+        includeEmptyFields,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
       });
 

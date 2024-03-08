@@ -27,7 +27,6 @@ import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plug
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -45,8 +44,7 @@ import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/publi
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TRUNCATE_MAX_HEIGHT, ENABLE_ESQL } from '@kbn/discover-utils';
-import { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { PLUGIN_ID } from '../common';
 import {
   setHeaderActionMenuMounter,
@@ -69,8 +67,12 @@ import {
   DiscoverSingleDocLocator,
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
-import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
-import type { RegisterCustomizationProfile } from './customizations';
+import {
+  DiscoverAppLocator,
+  DiscoverAppLocatorDefinition,
+  DiscoverESQLLocatorDefinition,
+} from '../common';
+import type { DiscoverCustomizationContext, RegisterCustomizationProfile } from './customizations';
 import {
   createRegisterCustomizationProfile,
   createProfileRegistry,
@@ -117,7 +119,9 @@ export interface DiscoverSetup {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  readonly showLogExplorerTabs: () => void;
+  readonly showInlineTopNav: (
+    options?: Partial<Omit<DiscoverCustomizationContext['inlineTopNav'], 'enabled'>>
+  ) => void;
 }
 
 export interface DiscoverStart {
@@ -160,6 +164,7 @@ export interface DiscoverStart {
  * @internal
  */
 export interface DiscoverSetupPlugins {
+  dataViews: DataViewsServicePublic;
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   embeddable: EmbeddableSetup;
@@ -185,7 +190,6 @@ export interface DiscoverStartPlugins {
   share?: SharePluginStart;
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
-  savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionSetup;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   spaces?: SpacesPluginStart;
@@ -199,7 +203,6 @@ export interface DiscoverStartPlugins {
   lens: LensPublicStart;
   contentManagement: ContentManagementPublicStart;
   noDataPage?: NoDataPagePluginStart;
-  serverless?: ServerlessPluginStart;
 }
 
 /**
@@ -217,9 +220,15 @@ export class DiscoverPlugin
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
-  private showLogExplorerTabs = false;
+  private inlineTopNav: DiscoverCustomizationContext['inlineTopNav'] = {
+    enabled: false,
+    showLogsExplorerTabs: false,
+  };
 
-  setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
+  setup(
+    core: CoreSetup<DiscoverStartPlugins, DiscoverStart>,
+    plugins: DiscoverSetupPlugins
+  ): DiscoverSetup {
     const baseUrl = core.http.basePath.prepend('/app/discover');
     const isDev = this.initializerContext.env.mode.dev;
 
@@ -293,6 +302,7 @@ export class DiscoverPlugin
       euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
+      visibleIn: ['globalSearch', 'sideNav', 'kibanaOverview'],
       mount: async (params: AppMountParameters) => {
         const [coreStart, discoverStartPlugins] = await core.getStartServices();
         setScopedHistory(params.history);
@@ -335,7 +345,7 @@ export class DiscoverPlugin
           profileRegistry: this.profileRegistry,
           customizationContext: {
             displayMode: 'standalone',
-            showLogExplorerTabs: this.showLogExplorerTabs,
+            inlineTopNav: this.inlineTopNav,
           },
           isDev,
         });
@@ -378,13 +388,14 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      showLogExplorerTabs: () => {
-        this.showLogExplorerTabs = true;
+      showInlineTopNav: ({ showLogsExplorerTabs } = {}) => {
+        this.inlineTopNav.enabled = true;
+        this.inlineTopNav.showLogsExplorerTabs = showLogsExplorerTabs ?? false;
       },
     };
   }
 
-  start(core: CoreStart, plugins: DiscoverStartPlugins) {
+  start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
     // we need to register the application service at setup, but to render it
     // there are some start dependencies necessary, for this reason
     // initializeServices are assigned at start and used
@@ -401,6 +412,17 @@ export class DiscoverPlugin
     const getDiscoverServicesInternal = () => {
       return this.getDiscoverServices(core, plugins);
     };
+
+    const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
+
+    if (plugins.share && this.locator && isEsqlEnabled) {
+      plugins.share?.url.locators.create(
+        new DiscoverESQLLocatorDefinition({
+          discoverAppLocator: this.locator,
+          getIndices: plugins.dataViews.getIndices,
+        })
+      );
+    }
 
     return {
       locator: this.locator,

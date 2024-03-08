@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -19,28 +18,27 @@ import type {
 import { ENTRA_TAB_TEST_ID, OKTA_TAB_TEST_ID } from './test_ids';
 import { AssetDocumentTab } from './tabs/asset_document';
 import { RightPanelProvider } from '../../document_details/right/context';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
+import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
+import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
-export type LeftPanelTabsType = Array<{
-  id: UserDetailsLeftPanelTab;
-  'data-test-subj': string;
-  name: ReactElement;
-  content: React.ReactElement;
-}>;
-
-export enum UserDetailsLeftPanelTab {
-  RISK_INPUTS = 'risk_inputs',
-  OKTA = 'okta_document',
-  ENTRA = 'entra_document',
-}
-
-export const useTabs = (managedUser: ManagedUserHits, alertIds: string[]): LeftPanelTabsType =>
+export const useTabs = (
+  managedUser: ManagedUserHits,
+  name: string,
+  isRiskScoreExist: boolean
+): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];
     const entraManagedUser = managedUser[ManagedUserDatasetKey.ENTRA];
     const oktaManagedUser = managedUser[ManagedUserDatasetKey.OKTA];
 
-    if (alertIds.length > 0) {
-      tabs.push(getRiskInputTab(alertIds));
+    if (isRiskScoreExist) {
+      tabs.push(
+        getRiskInputTab({
+          entityName: name,
+          entityType: RiskScoreEntity.user,
+        })
+      );
     }
 
     if (oktaManagedUser) {
@@ -52,10 +50,10 @@ export const useTabs = (managedUser: ManagedUserHits, alertIds: string[]): LeftP
     }
 
     return tabs;
-  }, [alertIds, managedUser]);
+  }, [isRiskScoreExist, managedUser, name]);
 
 const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({
-  id: UserDetailsLeftPanelTab.OKTA,
+  id: EntityDetailsLeftPanelTab.OKTA,
   'data-test-subj': OKTA_TAB_TEST_ID,
   name: (
     <FormattedMessage
@@ -76,7 +74,7 @@ const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({
 
 const getEntraTab = (entraManagedUser: ManagedUserHit) => {
   return {
-    id: UserDetailsLeftPanelTab.ENTRA,
+    id: EntityDetailsLeftPanelTab.ENTRA,
     'data-test-subj': ENTRA_TAB_TEST_ID,
     name: (
       <FormattedMessage

@@ -6,154 +6,71 @@
  * Side Public License, v 1.
  */
 
-import {
-  ViewMode,
-  IContainer,
-  ErrorEmbeddable,
-  isErrorEmbeddable,
-  ReferenceOrValueEmbeddable,
-  SavedObjectEmbeddableInput,
-} from '@kbn/embeddable-plugin/public';
-import {
-  ContactCardEmbeddable,
-  ContactCardEmbeddableFactory,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
-} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-
-import { buildMockDashboard } from '../mocks';
-import { DashboardPanelState } from '../../common';
+import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 import { pluginServices } from '../services/plugin_services';
-import { UnlinkFromLibraryAction } from './unlink_from_library_action';
-import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
+import {
+  UnlinkFromLibraryAction,
+  UnlinkPanelFromLibraryActionApi,
+} from './unlink_from_library_action';
 
-let container: DashboardContainer;
-let embeddable: ContactCardEmbeddable & ReferenceOrValueEmbeddable;
+describe('Unlink from library action', () => {
+  let action: UnlinkFromLibraryAction;
+  let context: { embeddable: UnlinkPanelFromLibraryActionApi };
 
-const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-  .fn()
-  .mockReturnValue(mockEmbeddableFactory);
+  beforeEach(() => {
+    action = new UnlinkFromLibraryAction();
+    context = {
+      embeddable: {
+        unlinkFromLibrary: jest.fn(),
+        canUnlinkFromLibrary: jest.fn().mockResolvedValue(true),
 
-beforeEach(async () => {
-  container = buildMockDashboard();
-
-  const contactCardEmbeddable = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Kibanana',
+        viewMode: new BehaviorSubject<ViewMode>('edit'),
+        panelTitle: new BehaviorSubject<string | undefined>('A very compatible API'),
+      },
+    };
   });
 
-  if (isErrorEmbeddable(contactCardEmbeddable)) {
-    throw new Error('Failed to create embeddable');
-  }
-  embeddable = embeddablePluginMock.mockRefOrValEmbeddable<
-    ContactCardEmbeddable,
-    ContactCardEmbeddableInput
-  >(contactCardEmbeddable, {
-    mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: contactCardEmbeddable.id },
-    mockedByValueInput: { firstName: 'Kibanana', id: contactCardEmbeddable.id },
+  it('is compatible when api meets all conditions', async () => {
+    expect(await action.isCompatible(context)).toBe(true);
   });
-  embeddable.updateInput({ viewMode: ViewMode.EDIT });
-});
 
-test('Unlink is incompatible with Error Embeddables', async () => {
-  const action = new UnlinkFromLibraryAction();
-  const errorEmbeddable = new ErrorEmbeddable(
-    'Wow what an awful error',
-    { id: ' 404' },
-    embeddable.getRoot() as IContainer
-  );
-  expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
-});
-
-test('Unlink is compatible when embeddable on dashboard has reference type input', async () => {
-  const action = new UnlinkFromLibraryAction();
-  embeddable.updateInput(await embeddable.getInputAsRefType());
-  expect(await action.isCompatible({ embeddable })).toBe(true);
-});
-
-test('Unlink is not compatible when embeddable input is by value', async () => {
-  const action = new UnlinkFromLibraryAction();
-  embeddable.updateInput(await embeddable.getInputAsValueType());
-  expect(await action.isCompatible({ embeddable })).toBe(false);
-});
-
-test('Unlink is not compatible when view mode is set to view', async () => {
-  const action = new UnlinkFromLibraryAction();
-  embeddable.updateInput(await embeddable.getInputAsRefType());
-  embeddable.updateInput({ viewMode: ViewMode.VIEW });
-  expect(await action.isCompatible({ embeddable })).toBe(false);
-});
-
-test('Unlink is not compatible when embeddable is not in a dashboard container', async () => {
-  let orphanContactCard = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Orphan',
+  it('is incompatible when context lacks necessary functions', async () => {
+    const emptyContext = {
+      embeddable: {},
+    };
+    expect(await action.isCompatible(emptyContext)).toBe(false);
   });
-  orphanContactCard = embeddablePluginMock.mockRefOrValEmbeddable<
-    ContactCardEmbeddable,
-    ContactCardEmbeddableInput
-  >(orphanContactCard, {
-    mockedByReferenceInput: { savedObjectId: 'test', id: orphanContactCard.id },
-    mockedByValueInput: { firstName: 'Kibanana', id: orphanContactCard.id },
+
+  it('is incompatible when view mode is view', async () => {
+    (context.embeddable as PublishesViewMode).viewMode = new BehaviorSubject<ViewMode>('view');
+    expect(await action.isCompatible(context)).toBe(false);
   });
-  const action = new UnlinkFromLibraryAction();
-  expect(await action.isCompatible({ embeddable: orphanContactCard })).toBe(false);
-});
 
-test('Unlink replaces embeddableId and retains panel count', async () => {
-  const dashboard = embeddable.getRoot() as IContainer;
-  const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
-  const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
-  const action = new UnlinkFromLibraryAction();
-  await action.execute({ embeddable });
-  expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount);
-
-  const newPanelId = Object.keys(container.getInput().panels).find(
-    (key) => !originalPanelKeySet.has(key)
-  );
-  expect(newPanelId).toBeDefined();
-  const newPanel = container.getInput().panels[newPanelId!];
-  expect(newPanel.type).toEqual(embeddable.type);
-});
-
-test('Unlink unwraps all attributes from savedObject', async () => {
-  const complicatedAttributes = {
-    attribute1: 'The best attribute',
-    attribute2: 22,
-    attribute3: ['array', 'of', 'strings'],
-    attribute4: { nestedattribute: 'hello from the nest' },
-  };
-
-  embeddable = embeddablePluginMock.mockRefOrValEmbeddable<
-    ContactCardEmbeddable,
-    { attributes: unknown; id: string },
-    SavedObjectEmbeddableInput
-  >(embeddable, {
-    mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: embeddable.id },
-    mockedByValueInput: { attributes: complicatedAttributes, id: embeddable.id },
+  it('is incompatible when canUnlinkFromLibrary returns false', async () => {
+    context.embeddable.canUnlinkFromLibrary = jest.fn().mockResolvedValue(false);
+    expect(await action.isCompatible(context)).toBe(false);
   });
-  const dashboard = embeddable.getRoot() as IContainer;
-  const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
-  const action = new UnlinkFromLibraryAction();
-  await action.execute({ embeddable });
-  const newPanelId = Object.keys(container.getInput().panels).find(
-    (key) => !originalPanelKeySet.has(key)
-  );
-  expect(newPanelId).toBeDefined();
-  const newPanel = container.getInput().panels[newPanelId!] as DashboardPanelState & {
-    explicitInput: { attributes: unknown };
-  };
-  expect(newPanel.type).toEqual(embeddable.type);
-  expect((newPanel.explicitInput as { attributes: unknown }).attributes).toEqual(
-    complicatedAttributes
-  );
+
+  it('calls the unlinkFromLibrary method on execute', async () => {
+    action.execute(context);
+    expect(context.embeddable.unlinkFromLibrary).toHaveBeenCalled();
+  });
+
+  it('shows a toast with a title from the API when successful', async () => {
+    await action.execute(context);
+    expect(pluginServices.getServices().notifications.toasts.addSuccess).toHaveBeenCalledWith({
+      'data-test-subj': 'unlinkPanelSuccess',
+      title: "Panel 'A very compatible API' is no longer connected to the library.",
+    });
+  });
+
+  it('shows a danger toast when the link operation is unsuccessful', async () => {
+    context.embeddable.unlinkFromLibrary = jest.fn().mockRejectedValue(new Error('Oh dang'));
+    await action.execute(context);
+    expect(pluginServices.getServices().notifications.toasts.addDanger).toHaveBeenCalledWith({
+      'data-test-subj': 'unlinkPanelFailure',
+      title: "An error occured while unlinking 'A very compatible API' from the library.",
+    });
+  });
 });

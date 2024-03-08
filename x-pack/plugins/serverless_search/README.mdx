@@ -1,3 +1,10 @@
 # Serverless Search project plugin
 
-This plugin contains configuration and code used to create a Serverless Search project.  It leverages universal configuration and other APIs in the [`serverless`](../serverless/README.mdx) plugin to configure Kibana.
+This plugin contains configuration and code used to create a Serverless Search project. It leverages universal configuration and other APIs in the [`serverless`](../serverless/README.mdx) plugin to configure Kibana.
+
+## Code guidance
+
+We use Tanstack React Query to handle all API calls in the browser. To create consistent error behavior, all APIs will flash an error toast if they encounter an error, except for 404 errors on GET calls.
+To skip the error message, add a boolean property `skipToast` to your error and set it to `true`.
+To change the toast message, change the `name` property on your error to change the title and the `body.message` property to change the message contents.
+You can do this by catching the error in your fetch function and modifying the error in your catch before rethrowing.

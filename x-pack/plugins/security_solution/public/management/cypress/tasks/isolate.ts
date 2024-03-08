@@ -124,7 +124,7 @@ const checkEndpointListForIsolationStatus = (expectIsolated: boolean): void => {
     cy.get('tbody tr')
       .eq(0)
       .within(() => {
-        cy.get('td').eq(1).should(chainer, 'Isolated');
+        cy.get('td', { timeout: 120000 }).eq(1).should(chainer, 'Isolated');
       });
   });
 };

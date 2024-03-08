@@ -8,19 +8,6 @@
 import React from 'react';
 import { screen, render, within, fireEvent, waitFor } from '@testing-library/react';
 import JsonEditor from './json_editor';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
-
-const kibanaReactPath = '../../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 
 describe('JsonEditor', () => {
   const editAction = jest.fn();

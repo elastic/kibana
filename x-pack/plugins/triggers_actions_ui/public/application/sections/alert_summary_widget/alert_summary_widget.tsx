@@ -37,9 +37,9 @@ export const AlertSummaryWidget = ({
 
   useEffect(() => {
     if (!isLoading && onLoaded) {
-      onLoaded();
+      onLoaded({ activeAlertCount, recoveredAlertCount });
     }
-  }, [isLoading, onLoaded]);
+  }, [activeAlertCount, isLoading, onLoaded, recoveredAlertCount]);
 
   if (isLoading)
     return <AlertSummaryWidgetLoader fullSize={fullSize} isLoadingWithoutChart={hideChart} />;

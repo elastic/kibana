@@ -18,7 +18,8 @@ import type { FormProps } from './schema';
 import { schema } from './schema';
 import { waitForComponentToPaint } from '../../common/test_utils';
 
-describe('Case Owner Selection', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/175570
+describe.skip('Case Owner Selection', () => {
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {

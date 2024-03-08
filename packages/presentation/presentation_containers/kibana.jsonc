@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/presentation-containers",
+  "owner": "@elastic/kibana-presentation"
+}

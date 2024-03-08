@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tinymathFunctions } from '@kbn/lens-formula-docs';
 import { createMockedIndexPattern } from '../../../mocks';
 import {
   formulaOperation,
@@ -15,7 +16,6 @@ import type { FormulaIndexPatternColumn } from './formula';
 import { insertOrReplaceFormulaColumn } from './parse';
 import type { FormBasedLayer } from '../../../types';
 import { IndexPattern } from '../../../../../types';
-import { tinymathFunctions } from './util';
 import { TermsIndexPatternColumn } from '../terms';
 import { MovingAverageIndexPatternColumn } from '../calculations';
 import { StaticValueIndexPatternColumn } from '../static_value';
@@ -56,10 +56,12 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
   }),
   derivative: createOperationDefinitionMock('derivative', { input: 'fullReference' }),
   moving_average: createOperationDefinitionMock('moving_average', {
+    // @ts-expect-error upgrade typescript v4.9.5
     input: 'fullReference',
     operationParams: [{ name: 'window', type: 'number', required: true }],
     filterable: true,
     getErrorMessage: jest.fn(() => ['mock error']),
+    // @ts-expect-error upgrade typescript v4.9.5
     buildColumn: ({ referenceIds }, columnsParams) => ({
       label: 'moving_average',
       dataType: 'number',
@@ -82,7 +84,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
   }),
 };
 
-describe('formula', () => {
+describe('[Lens] formula', () => {
   let layer: FormBasedLayer;
 
   beforeEach(() => {
@@ -899,6 +901,115 @@ describe('formula', () => {
         })
       );
     });
+  });
+
+  describe('toExpression', () => {
+    let indexPattern: IndexPattern;
+
+    beforeEach(() => {
+      indexPattern = createMockedIndexPattern();
+    });
+
+    it.each([true, false])(
+      '[isFormulaBroken: %s] should return the custom label when defined',
+      (isFormulaBroken) => {
+        const formula = 'average(bytes)';
+        expect(
+          formulaOperation.toExpression(
+            {
+              ...layer,
+              columns: {
+                ...layer.columns,
+                col2: {
+                  label: 'My custom formula',
+                  dataType: 'number',
+                  operationType: 'formula',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: { formula, isFormulaBroken },
+                  references: [],
+                } as FormulaIndexPatternColumn,
+              },
+            },
+            'col2',
+            indexPattern
+          )
+        ).toEqual([
+          expect.objectContaining({
+            arguments: expect.objectContaining({
+              name: ['My custom formula'],
+            }),
+          }),
+        ]);
+      }
+    );
+
+    it.each([true, false])(
+      '[isFormulaBroken: %s] should return the formula as label if defaultLabel is used',
+      (isFormulaBroken) => {
+        const formula = 'average(bytes)';
+        expect(
+          formulaOperation.toExpression(
+            {
+              ...layer,
+              columns: {
+                ...layer.columns,
+                col2: {
+                  label: 'Formula',
+                  dataType: 'number',
+                  operationType: 'formula',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: { formula, isFormulaBroken: false },
+                  references: [],
+                } as FormulaIndexPatternColumn,
+              },
+            },
+            'col2',
+            indexPattern
+          )
+        ).toEqual([
+          expect.objectContaining({
+            arguments: expect.objectContaining({
+              name: [formula],
+            }),
+          }),
+        ]);
+      }
+    );
+
+    it.each([true, false])(
+      '[isFormulaBroken: %s] should return the formula default label only on empty formula',
+      (isFormulaBroken) => {
+        expect(
+          formulaOperation.toExpression(
+            {
+              ...layer,
+              columns: {
+                ...layer.columns,
+                col2: {
+                  label: 'Formula',
+                  dataType: 'number',
+                  operationType: 'formula',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: { formula: '', isFormulaBroken },
+                  references: [],
+                } as FormulaIndexPatternColumn,
+              },
+            },
+            'col2',
+            indexPattern
+          )
+        ).toEqual([
+          expect.objectContaining({
+            arguments: expect.objectContaining({
+              name: ['Formula'],
+            }),
+          }),
+        ]);
+      }
+    );
   });
 
   describe('getErrorMessage', () => {

@@ -51,11 +51,10 @@ import { kqlSearch } from '../../../tasks/security_header';
 import { setEndDate, setStartDate, updateDates } from '../../../tasks/date_picker';
 import {
   enableJob,
+  mockRiskEngineEnabled,
   navigateToNextPage,
   waitForAnomaliesToBeLoaded,
 } from '../../../tasks/entity_analytics';
-import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
-import { enableRiskEngine } from '../../../tasks/entity_analytics';
 
 const TEST_USER_ALERTS = 1;
 const TEST_USER_NAME = 'test';
@@ -68,8 +67,6 @@ const OLDEST_DATE = moment('2019-01-19T16:22:56.217Z').format(DATE_FORMAT);
 describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
-    login();
-    deleteRiskEngineConfiguration();
   });
 
   after(() => {
@@ -328,225 +325,212 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
       });
     });
 
-    describe('Risk Score enabled but still no data', () => {
-      before(() => {
-        cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_no_data' });
-      });
-
+    describe('When risk engine is enabled', () => {
       beforeEach(() => {
         login();
-        enableRiskEngine();
+        mockRiskEngineEnabled();
         visitWithTimeRange(ENTITY_ANALYTICS_URL);
       });
 
-      afterEach(() => {
-        deleteRiskEngineConfiguration();
-      });
-
-      after(() => {
-        cy.task('esArchiverUnload', 'risk_scores_new_no_data');
-      });
-
-      it('shows no data detected prompt for host and user risk scores', () => {
-        cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
-        cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
-      });
-    });
-
-    describe('With host risk data', () => {
-      before(() => {
-        cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
-        login();
-        enableRiskEngine();
-      });
-
-      beforeEach(() => {
-        login();
-        visitWithTimeRange(ENTITY_ANALYTICS_URL);
-      });
-
-      after(() => {
-        cy.task('esArchiverUnload', 'risk_scores_new');
-        deleteRiskEngineConfiguration();
-      });
-
-      it('renders donut chart', () => {
-        cy.get(HOSTS_DONUT_CHART).should('include.text', '6Total');
-      });
-
-      it('renders table', () => {
-        cy.get(HOSTS_TABLE).should('be.visible');
-        cy.get(HOSTS_TABLE_ROWS).should('have.length', 5);
-      });
-
-      it('renders alerts column', () => {
-        cy.get(HOSTS_TABLE_ALERT_CELL).should('have.length', 5);
-      });
-
-      it('filters by risk level', () => {
-        cy.get(HOSTS_DONUT_CHART).should('include.text', '6Total');
-        openRiskTableFilterAndSelectTheCriticalOption();
-
-        cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
-        cy.get(HOSTS_TABLE_ROWS).should('have.length', 1);
-
-        removeCriticalFilterAndCloseRiskTableFilter();
-      });
-
-      it('filters the host risk table with KQL search bar query', () => {
-        kqlSearch(`host.name : ${SIEM_KIBANA_HOST_NAME}{enter}`);
-
-        cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
-        cy.get(HOSTS_TABLE_ROWS).should('have.length', 1);
-      });
-
-      describe('With alerts data', () => {
+      describe('Without data (before the risk engine runs for the first time)', () => {
         before(() => {
-          createRule(getNewRule());
-        });
-
-        beforeEach(() => {
-          login();
-          visitWithTimeRange(ALERTS_URL);
-          waitForAlertsToPopulate();
-          visitWithTimeRange(ENTITY_ANALYTICS_URL);
+          cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_no_data' });
         });
 
         after(() => {
-          deleteAlertsAndRules();
+          cy.task('esArchiverUnload', 'risk_scores_new_no_data');
         });
 
-        it('populates alerts column', () => {
-          cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', SIEM_KIBANA_HOST_ALERTS);
-        });
-
-        it('filters the alerts count with time range', () => {
-          setEndDate(DATE_BEFORE_ALERT_CREATION);
-          updateDates();
-
-          cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', 0);
-        });
-
-        it('filters risk scores with time range', () => {
-          const now = moment().format(DATE_FORMAT);
-          setStartDate(now);
-          updateDates();
-
+        it('shows no data detected prompt for host and user risk scores', () => {
           cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
-
-          // CLEAR DATES
-          setStartDate(OLDEST_DATE);
-          updateDates();
-        });
-
-        it('opens alerts page when alerts count is clicked', () => {
-          clickOnFirstHostsAlerts();
-          cy.url().should('include', ALERTS_URL);
-
-          cy.get(OPTION_LIST_LABELS).eq(0).should('include.text', 'Status');
-          cy.get(OPTION_LIST_VALUES(0)).should('include.text', 'open');
-          cy.get(OPTION_LIST_LABELS).eq(1).should('include.text', 'Host');
-          cy.get(OPTION_LIST_VALUES(1)).should('include.text', SIEM_KIBANA_HOST_NAME);
+          cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
         });
       });
-    });
 
-    describe('With user risk data', () => {
-      before(() => {
-        cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
-        login();
-        enableRiskEngine();
-      });
-
-      beforeEach(() => {
-        login();
-        visitWithTimeRange(ENTITY_ANALYTICS_URL);
-      });
-
-      after(() => {
-        cy.task('esArchiverUnload', 'risk_scores_new');
-        deleteRiskEngineConfiguration();
-      });
-
-      it('renders donut chart', () => {
-        cy.get(USERS_DONUT_CHART).should('include.text', '7Total');
-      });
-
-      it('renders table', () => {
-        cy.get(USERS_TABLE).should('be.visible');
-        cy.get(USERS_TABLE_ROWS).should('have.length', 5);
-      });
-
-      it('renders alerts column', () => {
-        cy.get(USERS_TABLE_ALERT_CELL).should('have.length', 5);
-      });
-
-      it('filters by risk level', () => {
-        cy.get(USERS_DONUT_CHART).should('include.text', '7Total');
-
-        openUserRiskTableFilterAndSelectTheLowOption(1);
-
-        cy.get(USERS_DONUT_CHART).should('include.text', '1Total');
-        cy.get(USERS_TABLE_ROWS).should('have.length', 1);
-
-        removeLowFilterAndCloseUserRiskTableFilter();
-      });
-
-      it('filters the host risk table with KQL search bar query', () => {
-        kqlSearch(`user.name : ${TEST_USER_NAME}{enter}`);
-
-        cy.get(USERS_DONUT_CHART).should('include.text', '1Total');
-        cy.get(USERS_TABLE_ROWS).should('have.length', 1);
-      });
-
-      describe('With alerts data', () => {
+      describe('With host risk data', () => {
         before(() => {
-          createRule(getNewRule());
-        });
-
-        beforeEach(() => {
-          login();
-          visitWithTimeRange(ALERTS_URL);
-          waitForAlertsToPopulate();
-          visitWithTimeRange(ENTITY_ANALYTICS_URL);
+          cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
         });
 
         after(() => {
-          deleteAlertsAndRules();
+          cy.task('esArchiverUnload', 'risk_scores_new');
         });
 
-        it('populates alerts column', () => {
-          cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', TEST_USER_ALERTS);
+        it('renders donut chart', () => {
+          cy.get(HOSTS_DONUT_CHART).should('include.text', '6Total');
         });
 
-        it('filters the alerts count with time range', () => {
-          setEndDate(DATE_BEFORE_ALERT_CREATION);
-          updateDates();
-
-          cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', 0);
+        it('renders table', () => {
+          cy.get(HOSTS_TABLE).should('be.visible');
+          cy.get(HOSTS_TABLE_ROWS).should('have.length', 5);
         });
 
-        it('filters risk scores with time range', () => {
-          const now = moment().format(DATE_FORMAT);
-          setStartDate(now);
-          updateDates();
-
-          cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
-
-          // CLEAR DATES
-          setStartDate(OLDEST_DATE);
-          updateDates();
+        it('renders alerts column', () => {
+          cy.get(HOSTS_TABLE_ALERT_CELL).should('have.length', 5);
         });
 
-        it('opens alerts page when alerts count is clicked', () => {
-          clickOnFirstUsersAlerts();
+        it('filters by risk level', () => {
+          cy.get(HOSTS_TABLE).should('be.visible');
+          cy.get(HOSTS_TABLE_ROWS).should('have.length', 5);
+          cy.get(HOSTS_DONUT_CHART).should('include.text', '6Total');
 
-          cy.url().should('include', ALERTS_URL);
+          openRiskTableFilterAndSelectTheCriticalOption();
 
-          cy.get(OPTION_LIST_LABELS).eq(0).should('include.text', 'Status');
-          cy.get(OPTION_LIST_VALUES(0)).should('include.text', 'open');
-          cy.get(OPTION_LIST_LABELS).eq(1).should('include.text', 'User');
-          cy.get(OPTION_LIST_VALUES(1)).should('include.text', TEST_USER_NAME);
+          cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
+          cy.get(HOSTS_TABLE_ROWS).should('have.length', 1);
+
+          removeCriticalFilterAndCloseRiskTableFilter();
+        });
+
+        it('filters the host risk table with KQL search bar query', () => {
+          kqlSearch(`host.name : ${SIEM_KIBANA_HOST_NAME}{enter}`);
+
+          cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
+          cy.get(HOSTS_TABLE_ROWS).should('have.length', 1);
+        });
+
+        describe('With alerts data', () => {
+          before(() => {
+            createRule(getNewRule());
+          });
+
+          beforeEach(() => {
+            login();
+            visitWithTimeRange(ALERTS_URL);
+            waitForAlertsToPopulate();
+            visitWithTimeRange(ENTITY_ANALYTICS_URL);
+          });
+
+          after(() => {
+            deleteAlertsAndRules();
+          });
+
+          it('populates alerts column', () => {
+            cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', SIEM_KIBANA_HOST_ALERTS);
+          });
+
+          it('filters the alerts count with time range', () => {
+            setEndDate(DATE_BEFORE_ALERT_CREATION);
+            updateDates();
+
+            cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', 0);
+          });
+
+          it('filters risk scores with time range', () => {
+            const now = moment().format(DATE_FORMAT);
+            setStartDate(now);
+            updateDates();
+
+            cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
+
+            // CLEAR DATES
+            setStartDate(OLDEST_DATE);
+            updateDates();
+          });
+
+          it('opens alerts page when alerts count is clicked', () => {
+            clickOnFirstHostsAlerts();
+            cy.url().should('include', ALERTS_URL);
+
+            cy.get(OPTION_LIST_LABELS).eq(0).should('include.text', 'Status');
+            cy.get(OPTION_LIST_VALUES(0)).should('include.text', 'open');
+            cy.get(OPTION_LIST_LABELS).eq(1).should('include.text', 'Host');
+            cy.get(OPTION_LIST_VALUES(1)).should('include.text', SIEM_KIBANA_HOST_NAME);
+          });
+        });
+      });
+
+      describe('With user risk data', () => {
+        before(() => {
+          cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
+        });
+
+        after(() => {
+          cy.task('esArchiverUnload', 'risk_scores_new');
+        });
+
+        it('renders donut chart', () => {
+          cy.get(USERS_DONUT_CHART).should('include.text', '7Total');
+        });
+
+        it('renders table', () => {
+          cy.get(USERS_TABLE).should('be.visible');
+          cy.get(USERS_TABLE_ROWS).should('have.length', 5);
+        });
+
+        it('renders alerts column', () => {
+          cy.get(USERS_TABLE_ALERT_CELL).should('have.length', 5);
+        });
+
+        it('filters by risk level', () => {
+          cy.get(USERS_DONUT_CHART).should('include.text', '7Total');
+          cy.get(USERS_TABLE).should('be.visible');
+          cy.get(USERS_TABLE_ROWS).should('have.length', 5);
+
+          openUserRiskTableFilterAndSelectTheLowOption(1);
+
+          cy.get(USERS_DONUT_CHART).should('include.text', '1Total');
+          cy.get(USERS_TABLE_ROWS).should('have.length', 1);
+
+          removeLowFilterAndCloseUserRiskTableFilter();
+        });
+
+        it('filters the host risk table with KQL search bar query', () => {
+          kqlSearch(`user.name : ${TEST_USER_NAME}{enter}`);
+
+          cy.get(USERS_DONUT_CHART).should('include.text', '1Total');
+          cy.get(USERS_TABLE_ROWS).should('have.length', 1);
+        });
+
+        describe('With alerts data', () => {
+          before(() => {
+            createRule(getNewRule());
+          });
+
+          beforeEach(() => {
+            login();
+            visitWithTimeRange(ALERTS_URL);
+            waitForAlertsToPopulate();
+            visitWithTimeRange(ENTITY_ANALYTICS_URL);
+          });
+
+          after(() => {
+            deleteAlertsAndRules();
+          });
+
+          it('populates alerts column', () => {
+            cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', TEST_USER_ALERTS);
+          });
+
+          it('filters the alerts count with time range', () => {
+            setEndDate(DATE_BEFORE_ALERT_CREATION);
+            updateDates();
+
+            cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', 0);
+          });
+
+          it('filters risk scores with time range', () => {
+            const now = moment().format(DATE_FORMAT);
+            setStartDate(now);
+            updateDates();
+
+            cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
+
+            // CLEAR DATES
+            setStartDate(OLDEST_DATE);
+            updateDates();
+          });
+
+          it('opens alerts page when alerts count is clicked', () => {
+            clickOnFirstUsersAlerts();
+
+            cy.url().should('include', ALERTS_URL);
+
+            cy.get(OPTION_LIST_LABELS).eq(0).should('include.text', 'Status');
+            cy.get(OPTION_LIST_VALUES(0)).should('include.text', 'open');
+            cy.get(OPTION_LIST_LABELS).eq(1).should('include.text', 'User');
+            cy.get(OPTION_LIST_VALUES(1)).should('include.text', TEST_USER_NAME);
+          });
         });
       });
     });

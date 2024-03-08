@@ -17,9 +17,6 @@ import type {
   SavedObjectsIncrementCounterOptions,
 } from '@kbn/core-saved-objects-api-server';
 import {
-  type ISavedObjectsEncryptionExtension,
-  type ISavedObjectsSecurityExtension,
-  type ISavedObjectTypeRegistry,
   type SavedObjectsRawDocSource,
   type SavedObject,
   type BulkResolveError,
@@ -27,7 +24,6 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import {
-  type IKibanaMigrator,
   LEGACY_URL_ALIAS_TYPE,
   type LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
@@ -49,6 +45,7 @@ import {
   left,
   right,
 } from '../utils';
+import type { ApiExecutionContext } from '../types';
 import type { RepositoryEsClient } from '../../repository_es_client';
 
 const MAX_CONCURRENT_RESOLVE = 10;
@@ -59,22 +56,14 @@ const MAX_CONCURRENT_RESOLVE = 10;
  * @internal
  */
 export interface InternalBulkResolveParams {
-  registry: ISavedObjectTypeRegistry;
-  migrator: IKibanaMigrator;
-  allowedTypes: string[];
-  client: RepositoryEsClient;
-  serializer: ISavedObjectsSerializer;
-  getIndexForType: (type: string) => string;
+  objects: SavedObjectsBulkResolveObject[];
+  options?: SavedObjectsResolveOptions;
   incrementCounterInternal: <T = unknown>(
     type: string,
     id: string,
     counterFields: Array<string | SavedObjectsIncrementCounterField>,
     options?: SavedObjectsIncrementCounterOptions<T>
   ) => Promise<SavedObject<T>>;
-  encryptionExtension: ISavedObjectsEncryptionExtension | undefined;
-  securityExtension: ISavedObjectsSecurityExtension | undefined;
-  objects: SavedObjectsBulkResolveObject[];
-  options?: SavedObjectsResolveOptions;
 }
 
 /**
@@ -96,21 +85,14 @@ export function isBulkResolveError<T>(
 type AliasInfo = Pick<LegacyUrlAlias, 'targetId' | 'purpose'>;
 
 export async function internalBulkResolve<T>(
-  params: InternalBulkResolveParams
+  params: InternalBulkResolveParams,
+  apiExecutionContext: ApiExecutionContext
 ): Promise<InternalSavedObjectsBulkResolveResponse<T>> {
-  const {
-    registry,
-    migrator,
-    allowedTypes,
-    client,
-    serializer,
-    getIndexForType,
-    incrementCounterInternal,
-    encryptionExtension,
-    securityExtension,
-    objects,
-    options = {},
-  } = params;
+  const { incrementCounterInternal, objects, options = {} } = params;
+
+  const { registry, allowedTypes, client, serializer } = apiExecutionContext;
+  const { common: commonHelper, migration: migrationHelper } = apiExecutionContext.helpers;
+  const { securityExtension } = apiExecutionContext.extensions;
 
   if (objects.length === 0) {
     return { resolved_objects: [] };
@@ -126,14 +108,14 @@ export async function internalBulkResolve<T>(
     validObjects,
     client,
     serializer,
-    getIndexForType,
+    commonHelper.getIndexForType.bind(commonHelper),
     namespace
   );
 
   const docsToBulkGet: Array<{ _id: string; _index: string }> = [];
   const aliasInfoArray: Array<AliasInfo | undefined> = [];
   validObjects.forEach(({ value: { type, id } }, i) => {
-    const objectIndex = getIndexForType(type);
+    const objectIndex = commonHelper.getIndexForType(type);
     docsToBulkGet.push({
       // attempt to find an exact match for the given ID
       _id: serializer.generateRawId(namespace, type, id),
@@ -182,17 +164,15 @@ export async function internalBulkResolve<T>(
     objectId: string,
     doc: MgetResponseItem<SavedObjectsRawDocSource>
   ) {
-    // Encryption
     // @ts-expect-error MultiGetHit._source is optional
     const object = getSavedObjectFromSource<T>(registry, objectType, objectId, doc, {
       migrationVersionCompatibility,
     });
-    const migrated = migrator.migrateDocument(object, { allowDowngrade: true }) as SavedObject<T>;
-
-    if (!encryptionExtension?.isEncryptableType(migrated.type)) {
-      return migrated;
-    }
-    return encryptionExtension.decryptOrStripResponseAttributes(migrated);
+    // migrate and decrypt document
+    return await migrationHelper.migrateAndDecryptStorageDocument({
+      document: object,
+      typeMap: undefined,
+    });
   }
 
   // map function for pMap below
@@ -275,9 +255,11 @@ export async function internalBulkResolve<T>(
     { refresh: false }
   ).catch(() => {}); // if the call fails for some reason, intentionally swallow the error
 
-  if (!securityExtension) return { resolved_objects: resolvedObjects };
+  if (!securityExtension) {
+    return { resolved_objects: resolvedObjects };
+  }
 
-  const redactedObjects = await securityExtension?.authorizeAndRedactInternalBulkResolve({
+  const redactedObjects = await securityExtension.authorizeAndRedactInternalBulkResolve({
     namespace,
     objects: resolvedObjects,
   });

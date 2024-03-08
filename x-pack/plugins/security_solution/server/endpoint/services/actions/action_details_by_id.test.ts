@@ -66,7 +66,9 @@ describe('When using `getActionDetailsById()', () => {
     await expect(
       getActionDetailsById(esClient, endpointAppContextService.getEndpointMetadataService(), '123')
     ).resolves.toEqual({
+      action: '123',
       agents: ['agent-a'],
+      agentType: 'endpoint',
       hosts: { 'agent-a': { name: 'Host-agent-a' } },
       command: 'kill-process',
       completedAt: '2022-04-30T16:08:47.449Z',

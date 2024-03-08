@@ -40,6 +40,7 @@ import {
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { isFallbackDataView } from '../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
 import VisualizationError from '../components/visualization_error';
@@ -210,12 +211,8 @@ export class VisualizeEmbeddable
    * Gets the Visualize embeddable's local filters
    * @returns Local/panel-level array of filters for Visualize embeddable
    */
-  public async getFilters() {
-    let input = this.getInput();
-    if (this.inputIsRefType(input)) {
-      input = await this.getInputAsValueType();
-    }
-    const filters = input.savedVis?.data.searchSource?.filter ?? [];
+  public getFilters() {
+    const filters = this.vis.serialize().data.searchSource?.filter ?? [];
     // must clone the filters so that it's not read only, because mapAndFlattenFilters modifies the array
     return mapAndFlattenFilters(_.cloneDeep(filters));
   }
@@ -224,12 +221,8 @@ export class VisualizeEmbeddable
    * Gets the Visualize embeddable's local query
    * @returns Local/panel-level query for Visualize embeddable
    */
-  public async getQuery() {
-    let input = this.getInput();
-    if (this.inputIsRefType(input)) {
-      input = await this.getInputAsValueType();
-    }
-    return input.savedVis?.data.searchSource?.query;
+  public getQuery() {
+    return this.vis.serialize().data.searchSource.query;
   }
 
   public getInspectorAdapters = () => {
@@ -477,6 +470,10 @@ export class VisualizeEmbeddable
       this.handler.events$
         .pipe(
           mergeMap(async (event) => {
+            // Visualize doesn't respond to sizing events, so ignore.
+            if (isChartSizeEvent(event)) {
+              return;
+            }
             if (!this.input.disableTriggers) {
               const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
               let context;

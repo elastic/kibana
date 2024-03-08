@@ -6,7 +6,7 @@
  */
 
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import type { AlertRawData } from '../tabs/risk_inputs';
+import type { AlertRawData } from '../tabs/risk_inputs/risk_inputs_tab';
 
 export const alertDataMock: AlertRawData = {
   _id: 'test-id',

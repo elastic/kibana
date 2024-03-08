@@ -8,9 +8,15 @@
 import { readFile } from 'fs/promises';
 
 import fetch from 'node-fetch';
+import type { DeepPartial } from 'utility-types';
+
+import type { FleetConfigType } from '../../../public/plugin';
+
+import { getAvailableVersions } from './versions';
 
 let mockKibanaVersion = '300.0.0';
-let mockConfig = {};
+let mockConfig: DeepPartial<FleetConfigType> = {};
+
 jest.mock('../app_context', () => {
   const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
   return {
@@ -32,8 +38,6 @@ const emptyResponse = {
   status: 200,
   text: jest.fn().mockResolvedValue(JSON.stringify({})),
 } as any;
-
-import { getAvailableVersions } from './versions';
 
 describe('getAvailableVersions', () => {
   beforeEach(() => {
@@ -133,7 +137,7 @@ describe('getAvailableVersions', () => {
   });
 
   it('should cache results', async () => {
-    mockKibanaVersion = '300.0.0';
+    mockKibanaVersion = '9.0.0';
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
     mockedFetch.mockResolvedValueOnce({
       status: 200,
@@ -191,7 +195,7 @@ describe('getAvailableVersions', () => {
     const res = await getAvailableVersions({ ignoreCache: true });
 
     // Should sort, uniquify and filter out versions < 7.17
-    expect(res).toEqual(['8.1.0', '8.0.0', '7.17.0']);
+    expect(res).toEqual(['300.0.0', '8.1.0', '8.0.0', '7.17.0']);
   });
 
   it('should gracefully handle network errors when fetching from product versions API', async () => {
@@ -202,6 +206,17 @@ describe('getAvailableVersions', () => {
     const res = await getAvailableVersions({ ignoreCache: true });
 
     // Should sort, uniquify and filter out versions < 7.17
-    expect(res).toEqual(['8.1.0', '8.0.0', '7.17.0']);
+    expect(res).toEqual(['300.0.0', '8.1.0', '8.0.0', '7.17.0']);
+  });
+
+  it('should not fetch from product versions API when air-gapped config is set', async () => {
+    mockKibanaVersion = '300.0.0';
+    mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
+
+    mockConfig = { isAirGapped: true };
+    const res = await getAvailableVersions({ ignoreCache: true });
+
+    expect(res).toEqual(['300.0.0', '8.1.0', '8.0.0', '7.17.0']);
+    expect(mockedFetch).not.toBeCalled();
   });
 });

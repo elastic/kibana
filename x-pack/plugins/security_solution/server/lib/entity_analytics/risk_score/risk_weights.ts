@@ -54,7 +54,7 @@ const getWeightForIdentifierType = (weight: RiskWeight, identifierType: Identifi
 };
 
 export const buildCategoryScoreDeclarations = (): string => {
-  return RISK_CATEGORIES.map((riskCategory) => `results['${riskCategory}_score'] = 0;`).join('');
+  return RISK_CATEGORIES.map((riskCategory) => `results['${riskCategory}_score'] = 0.0;`).join('');
 };
 
 export const buildCategoryCountDeclarations = (): string => {

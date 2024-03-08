@@ -29,7 +29,11 @@ import { getTopNavConfig } from './get_top_nav';
 import type { SenseEditor } from '../../models/sense_editor';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
-export function Main() {
+export interface MainProps {
+  hideWelcome?: boolean;
+}
+
+export function Main({ hideWelcome = false }: MainProps) {
   const {
     services: { storage },
   } = useServicesContext();
@@ -42,7 +46,7 @@ export function Main() {
   } = useRequestReadContext();
 
   const [showWelcome, setShowWelcomePanel] = useState(
-    () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION'
+    () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION' && !hideWelcome
   );
 
   const [showingHistory, setShowHistory] = useState(false);

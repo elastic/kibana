@@ -14,7 +14,6 @@ import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/co
 import type { GetFileRequestSchema, FleetRequestHandler } from '../../types';
 import { getFile, getInstallation } from '../../services/epm/packages';
 import { defaultFleetErrorHandler } from '../../errors';
-import { getArchiveEntry } from '../../services/epm/archive';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getBundledPackageByPkgKey } from '../../services/epm/packages/bundled_packages';
 import { pkgToPkgKey } from '../../services/epm/registry';
@@ -31,35 +30,23 @@ export const getFileHandler: FleetRequestHandler<
     const savedObjectsClient = (await context.fleet).internalSoClient;
 
     const installation = await getInstallation({ savedObjectsClient, pkgName });
-    const useLocalFile = pkgVersion === installation?.version;
+    const isPackageInstalled = pkgVersion === installation?.version;
     const assetPath = `${pkgName}-${pkgVersion}/${filePath}`;
 
-    if (useLocalFile) {
-      const fileBuffer = getArchiveEntry(assetPath);
-      // only pull local installation if we don't have it cached
-      const storedAsset = !fileBuffer && (await getAsset({ savedObjectsClient, path: assetPath }));
+    if (isPackageInstalled) {
+      const storedAsset = await getAsset({ savedObjectsClient, path: assetPath });
 
-      // error, if neither is available
-      if (!fileBuffer && !storedAsset) {
+      if (!storedAsset) {
         return response.custom({
           body: `installed package file not found: ${filePath}`,
           statusCode: 404,
         });
       }
 
-      // if storedAsset is not available, fileBuffer *must* be
-      // b/c we error if we don't have at least one, and storedAsset is the least likely
-      const { buffer, contentType } = storedAsset
-        ? {
-            contentType: storedAsset.media_type,
-            buffer: storedAsset.data_utf8
-              ? Buffer.from(storedAsset.data_utf8, 'utf8')
-              : Buffer.from(storedAsset.data_base64, 'base64'),
-          }
-        : {
-            contentType: mime.contentType(path.extname(assetPath)),
-            buffer: fileBuffer,
-          };
+      const contentType = storedAsset.media_type;
+      const buffer = storedAsset.data_utf8
+        ? Buffer.from(storedAsset.data_utf8, 'utf8')
+        : Buffer.from(storedAsset.data_base64, 'base64');
 
       if (!contentType) {
         return response.custom({

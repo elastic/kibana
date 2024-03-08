@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import type { WebElementWrapper } from '../../../../../../../test/functional/services/lib/web_element_wrapper';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
@@ -16,12 +16,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const es = getService('es');
   const retry = getService('retry');
+  const log = getService('log');
 
   const TEST_TEMPLATE = 'a_test_template';
+  const INDEX_PATTERN = `index_pattern_${Math.random()}`;
 
   describe('Index Templates', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
     });
 
     beforeEach(async () => {
@@ -32,7 +34,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
+      log.debug('Cleaning up created template');
+
+      try {
+        await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE }, { ignore: [404] });
+      } catch (e) {
+        log.debug('[Setup error] Error creating test policy');
+        throw e;
+      }
     });
 
     it('renders the index templates tab', async () => {
@@ -45,7 +54,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await es.indices.putIndexTemplate({
           name: TEST_TEMPLATE,
           body: {
-            index_patterns: ['test*'],
+            index_patterns: [INDEX_PATTERN],
           },
         });
       });
@@ -75,7 +84,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Create index template', () => {
-      const TEST_TEMPLATE_NAME = `test_template_${Math.random()}`;
+      const TEST_TEMPLATE_NAME = `test_template_${Date.now()}`;
 
       after(async () => {
         await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE_NAME }, { ignore: [404] });
@@ -85,7 +94,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('createTemplateButton');
 
         await testSubjects.setValue('nameField', TEST_TEMPLATE_NAME);
-        await testSubjects.setValue('indexPatternsField', 'test*');
+        await testSubjects.setValue('indexPatternsField', INDEX_PATTERN);
 
         // Click form summary step and then the submit button
         await testSubjects.click('formWizardStep-5');

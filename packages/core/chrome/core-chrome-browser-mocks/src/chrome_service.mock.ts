@@ -73,10 +73,13 @@ const createStartContractMock = () => {
       setProjectsUrl: jest.fn(),
       setProjectUrl: jest.fn(),
       setProjectName: jest.fn(),
-      setNavigation: jest.fn(),
+      initNavigation: jest.fn(),
       setSideNavComponent: jest.fn(),
       setBreadcrumbs: jest.fn(),
       getActiveNavigationNodes$: jest.fn(),
+      getNavigationTreeUi$: jest.fn(),
+      changeActiveSolutionNavigation: jest.fn(),
+      updateSolutionNavigations: jest.fn(),
     },
   };
   startContract.navLinks.getAll.mockReturnValue([]);

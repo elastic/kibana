@@ -18,7 +18,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
-import { useKibana, useHttp } from '../../../common/lib/kibana';
+import { useHttp, useKibana } from '../../../common/lib/kibana';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -30,8 +30,8 @@ import {
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import {
-  isAlertFromEndpointEvent,
   isAlertFromEndpointAlert,
+  isAlertFromEndpointEvent,
 } from '../../../common/utils/endpoint_alert_check';
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 import { allCasesPermissions } from '../../../cases_test_utils';
@@ -62,7 +62,7 @@ jest.mock('../../../common/hooks/use_app_toasts', () => ({
 }));
 
 jest.mock('../../../common/hooks/use_license', () => ({
-  useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true }),
+  useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true, isEnterprise: () => false }),
 }));
 
 jest.mock('../../../common/hooks/use_experimental_features', () => ({

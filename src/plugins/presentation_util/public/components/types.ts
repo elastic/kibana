@@ -27,6 +27,8 @@ export interface SaveModalDashboardProps {
   onClose: () => void;
   onSave: (props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }) => void;
   tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
+  // include a message if the user has to copy on save
+  mustCopyOnSaveMessage?: string;
 }
 
 /**

@@ -7,13 +7,17 @@
  */
 
 import type {
-  ChromeProjectNavigation,
   ChromeStart,
   SideNavComponent,
   ChromeProjectBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
+  ChromeProjectNavigationNode,
+  AppDeepLinkId,
+  NavigationTreeDefinition,
+  NavigationTreeDefinitionUI,
+  CloudURLs,
+  SolutionNavigationDefinitions,
 } from '@kbn/core-chrome-browser';
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser/src';
 import type { Observable } from 'rxjs';
 
 /** @internal */
@@ -62,14 +66,16 @@ export interface InternalChromeStart extends ChromeStart {
      */
     setProjectUrl(projectUrl: string): void;
 
-    /**
-     * Sets the project navigation config to be used for rendering project navigation.
-     * It is used for default project sidenav, project breadcrumbs, tracking active deep link.
-     * @param projectNavigation The project navigation config
-     *
-     * Use {@link ServerlessPluginStart.setNavigation} to set project navigation config.
-     */
-    setNavigation(projectNavigation: ChromeProjectNavigation): void;
+    initNavigation<
+      LinkId extends AppDeepLinkId = AppDeepLinkId,
+      Id extends string = string,
+      ChildrenId extends string = Id
+    >(
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
+      deps: { cloudUrls: CloudURLs }
+    ): void;
+
+    getNavigationTreeUi$: () => Observable<NavigationTreeDefinitionUI>;
 
     /**
      * Returns an observable of the active nodes in the project navigation.
@@ -97,5 +103,22 @@ export interface InternalChromeStart extends ChromeStart {
       breadcrumbs: ChromeProjectBreadcrumb[] | ChromeProjectBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
+
+    /**
+     * Update the solution navigation definitions.
+     *
+     * @param solutionNavs The solution navigation definitions to update.
+     * @param replace Flag to indicate if the previous solution navigation definitions should be replaced.
+     * If `false`, the new solution navigation definitions will be merged with the existing ones.
+     */
+    updateSolutionNavigations(solutionNavs: SolutionNavigationDefinitions, replace?: boolean): void;
+
+    /**
+     * Change the active solution navigation.
+     *
+     * @param id The id of the active solution navigation. If `null` is provided, the solution navigation
+     * will be replaced with the legacy Kibana navigation.
+     */
+    changeActiveSolutionNavigation(id: string | null, options?: { onlyIfNotSet?: boolean }): void;
   };
 }

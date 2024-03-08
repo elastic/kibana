@@ -5,13 +5,14 @@
  * 2.0.
  */
 import '../_index.scss';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
 // @ts-ignore
 import { FileDataVisualizerView } from './components/file_data_visualizer_view';
-import { GetAdditionalLinks } from '../common/components/results_links';
+import type { GetAdditionalLinks } from '../common/components/results_links';
 
 interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
@@ -20,7 +21,7 @@ interface Props {
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
 export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks }) => {
   const coreStart = getCoreStart();
-  const { data, maps, embeddable, discover, share, security, fileUpload, cloud } =
+  const { data, maps, embeddable, discover, share, security, fileUpload, cloud, fieldFormats } =
     getPluginsStart();
   const services = {
     data,
@@ -30,6 +31,7 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks }) => {
     share,
     security,
     fileUpload,
+    fieldFormats,
     ...coreStart,
   };
 
@@ -42,6 +44,7 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks }) => {
         <CloudContext>
           <FileDataVisualizerView
             dataViewsContract={data.dataViews}
+            dataStart={data}
             http={coreStart.http}
             fileUpload={fileUpload}
             getAdditionalLinks={getAdditionalLinks}

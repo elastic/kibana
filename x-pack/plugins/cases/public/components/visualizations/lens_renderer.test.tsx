@@ -62,4 +62,13 @@ describe('LensRenderer', () => {
 
     expect(screen.queryByTestId('embeddableComponent')).not.toBeInTheDocument();
   });
+
+  it('renders the lens visualization with description', () => {
+    appMockRender.render(
+      // @ts-expect-error: props are correct
+      <LensRenderer {...lensVisualization} metadata={{ description: 'description' }} />
+    );
+
+    expect(screen.getByText('description')).toBeInTheDocument();
+  });
 });

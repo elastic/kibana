@@ -7,7 +7,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuntimeField } from '@kbn/data-views-plugin/common';
+import type { DataViewField, RuntimeField } from '@kbn/data-views-plugin/common';
 import type { DataViewsContract, DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 
@@ -49,15 +49,26 @@ export async function fetchFieldExistence({
   metaFields: string[];
   dataViewsService: DataViewsContract;
 }) {
-  const allFields = buildFieldList(dataView, metaFields);
   const existingFieldList = await dataViewsService.getFieldsForIndexPattern(dataView, {
     // filled in by data views service
     pattern: '',
     indexFilter: toQuery(timeFieldName, fromDate, toDate, dslQuery),
+    includeEmptyFields: false,
   });
+
+  // take care of fields of existingFieldList, that are not yet available
+  // in the given data view. Those fields we consider as new fields,
+  // that were ingested after the data view was loaded
+  const newFields = existingFieldList.filter((field) => !dataView.getFieldByName(field.name));
+  // refresh the data view in case there are new fields
+  if (newFields.length) {
+    await dataViewsService.refreshFields(dataView, false, true);
+  }
+  const allFields = buildFieldList(dataView, metaFields);
   return {
-    indexPatternTitle: dataView.title,
+    indexPatternTitle: dataView.getIndexPattern(),
     existingFieldNames: existingFields(existingFieldList, allFields),
+    newFields,
   };
 }
 
@@ -66,17 +77,21 @@ export async function fetchFieldExistence({
  */
 export function buildFieldList(indexPattern: DataView, metaFields: string[]): Field[] {
   return indexPattern.fields.map((field) => {
-    return {
-      name: field.name,
-      isScript: !!field.scripted,
-      lang: field.lang,
-      script: field.script,
-      // id is a special case - it doesn't show up in the meta field list,
-      // but as it's not part of source, it has to be handled separately.
-      isMeta: metaFields?.includes(field.name) || field.name === '_id',
-      runtimeField: !field.isMapped ? field.runtimeField : undefined,
-    };
+    return buildField(field, metaFields);
   });
+}
+
+export function buildField(field: DataViewField, metaFields: string[]): Field {
+  return {
+    name: field.name,
+    isScript: !!field.scripted,
+    lang: field.lang,
+    script: field.script,
+    // id is a special case - it doesn't show up in the meta field list,
+    // but as it's not part of source, it has to be handled separately.
+    isMeta: metaFields?.includes(field.name) || field.name === '_id',
+    runtimeField: !field.isMapped ? field.runtimeField : undefined,
+  };
 }
 
 function toQuery(

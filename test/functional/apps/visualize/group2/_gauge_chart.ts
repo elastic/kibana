@@ -96,6 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should add machine.os.raw:win 8 filter by click on the first Gauge', async () => {
         await PageObjects.visChart.clickOnGaugeByLabel('win 8');
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const hasFilter = await filterBar.hasFilter('machine.os.raw', 'win 8');
 
         expect(hasFilter).to.eql(true);

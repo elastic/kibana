@@ -71,6 +71,47 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(4);
     });
 
+    describe('dimension flyout keeping open/closing when palette is open ', () => {
+      it('should keep the dimension editor open when switching to a chart that moves the column to the new group', async () => {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVisType('lens');
+        await PageObjects.lens.goToTimeRange();
+
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'average',
+          field: 'bytes',
+        });
+
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+          operation: 'terms',
+          field: '@message.raw',
+          keepOpen: true,
+        });
+
+        await PageObjects.lens.openPalettePanel();
+
+        await PageObjects.lens.switchToVisualization('bar');
+
+        expect(await PageObjects.lens.isDimensionEditorOpen()).to.eql(true);
+      });
+      it('should close the dimension editor when switching to a chart that removes the column', async () => {
+        await PageObjects.lens.closeDimensionEditor();
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+          operation: 'terms',
+          field: '@message.raw',
+          keepOpen: true,
+        });
+
+        await PageObjects.lens.openPalettePanel();
+        await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
+
+        expect(await PageObjects.lens.isDimensionEditorOpen()).to.eql(false);
+      });
+    });
+
     it('should create an xy visualization with filters aggregation', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
@@ -281,7 +322,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
     });
 
-    it('should transition from a multi-layer stacked bar to donut chart using suggestions', async () => {
+    it('should transition from a multi-layer stacked bar to treemap chart using suggestions', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -313,10 +354,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.save('twolayerchart');
-      await testSubjects.click('lnsSuggestion-donut > lnsSuggestion');
+      await testSubjects.click('lnsSuggestion-treemap > lnsSuggestion');
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(1);
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel')).to.eql(
         'Top 5 values of geo.dest'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(

@@ -11,9 +11,33 @@ export function getErrorMessage(error: unknown): string {
   if (typeof error === 'string') {
     return error;
   }
-  if (typeof error === 'object') {
-    return (error as { body: KibanaServerError })?.body?.message || '';
+  if (isKibanaServerError(error)) {
+    return error.body.message;
+  }
+
+  if (typeof error === 'object' && (error as { name: string }).name) {
+    return (error as { name: string }).name;
   }
 
   return '';
+}
+
+export function getErrorCode(error: unknown): number | undefined {
+  if (isKibanaServerError(error)) {
+    return error.body.statusCode;
+  }
+  return undefined;
+}
+
+export function isKibanaServerError(
+  input: unknown
+): input is Error & { body: KibanaServerError; name: string; skipToast?: boolean } {
+  if (
+    typeof input === 'object' &&
+    (input as { body: KibanaServerError }).body &&
+    typeof (input as { body: KibanaServerError }).body.message === 'string'
+  ) {
+    return true;
+  }
+  return false;
 }

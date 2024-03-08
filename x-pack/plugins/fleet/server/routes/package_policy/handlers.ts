@@ -371,7 +371,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         ...body,
         name: body.name ?? packagePolicy.name,
         description: body.description ?? packagePolicy.description,
-        namespace: body.namespace ?? packagePolicy.namespace,
+        namespace: body.namespace ?? packagePolicy?.namespace,
         policy_id: body.policy_id ?? packagePolicy.policy_id,
         enabled: 'enabled' in body ? body.enabled ?? packagePolicy.enabled : packagePolicy.enabled,
         package: pkg ?? packagePolicy.package,

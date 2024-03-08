@@ -9,6 +9,7 @@ import type { TextBasedLayerColumn, TextBasedPrivateState } from '../types';
 import { reorderElements } from '../../../utils';
 import { DatasourceDimensionDropHandlerProps, isOperation } from '../../../types';
 import { removeColumn } from '../remove_column';
+import { retrieveLayerColumnsFromCache } from '../fieldlist_cache';
 
 export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPrivateState>) => {
   const { dropType, state, source, target } = props;
@@ -28,31 +29,28 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
   }
 
   const layer = state.layers[target.layerId];
-  const sourceField = layer.allColumns.find((f) => f.columnId === source.id);
-  const targetField = layer.allColumns.find((f) => f.columnId === target.columnId);
+  const allColumns = retrieveLayerColumnsFromCache(layer.columns, layer.query);
+  const sourceField = allColumns.find((f) => f.columnId === source.id);
+  const targetField = allColumns.find((f) => f.columnId === target.columnId);
   const newColumn = {
     columnId: target.columnId,
     fieldName: sourceField?.fieldName ?? '',
     meta: sourceField?.meta,
   };
   let columns: TextBasedLayerColumn[] | undefined;
-  let allColumns: TextBasedLayerColumn[] | undefined;
 
   switch (dropType) {
     case 'field_add':
     case 'duplicate_compatible':
     case 'replace_duplicate_compatible':
       columns = [...layer.columns.filter((c) => c.columnId !== target.columnId), newColumn];
-      allColumns = [...layer.allColumns.filter((c) => c.columnId !== target.columnId), newColumn];
       break;
     case 'field_replace':
     case 'replace_compatible':
       columns = layer.columns.map((c) => (c.columnId === target.columnId ? newColumn : c));
-      allColumns = layer.allColumns.map((c) => (c.columnId === target.columnId ? newColumn : c));
       break;
     case 'move_compatible':
       columns = [...layer.columns, newColumn];
-      allColumns = [...layer.allColumns, newColumn];
       break;
     case 'swap_compatible':
       const swapTwoColumns = (c: TextBasedLayerColumn) =>
@@ -66,18 +64,16 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
             }
           : c;
       columns = layer.columns.map(swapTwoColumns);
-      allColumns = layer.allColumns.map(swapTwoColumns);
       break;
     case 'reorder':
       const targetColumn = layer.columns.find((f) => f.columnId === target.columnId);
       const sourceColumn = layer.columns.find((f) => f.columnId === source.id);
       if (!targetColumn || !sourceColumn) return;
       columns = reorderElements(layer.columns, targetColumn, sourceColumn);
-      allColumns = reorderElements(layer.allColumns, targetColumn, sourceColumn);
       break;
   }
 
-  if (!columns || !allColumns) return;
+  if (!columns) return;
 
   const newState = {
     ...props.state,

@@ -45,8 +45,7 @@ describe('useBulkEditSelectTest', () => {
       useBulkEditSelect({
         items,
         totalItemCount: 4,
-        tagsFilter: ['test: 123'],
-        searchText: 'rules*',
+        filters: { tags: ['test: 123'], searchText: 'rules*' },
       })
     );
 
@@ -58,8 +57,7 @@ describe('useBulkEditSelectTest', () => {
       useBulkEditSelect({
         items,
         totalItemCount: 4,
-        tagsFilter: ['test: 123'],
-        searchText: 'rules*',
+        filters: { tags: ['test: 123'], searchText: 'rules*' },
       })
     );
 
@@ -107,8 +105,7 @@ describe('useBulkEditSelectTest', () => {
       useBulkEditSelect({
         items,
         totalItemCount: 4,
-        tagsFilter: ['test: 123'],
-        searchText: 'rules*',
+        filters: { tags: ['test: 123'], searchText: 'rules*' },
       })
     );
 
@@ -124,8 +121,10 @@ describe('useBulkEditSelectTest', () => {
       useBulkEditSelect({
         items,
         totalItemCount: 4,
-        tagsFilter: ['test: 123'],
-        searchText: 'rules*',
+        filters: {
+          tags: ['test: 123'],
+          searchText: 'rules*',
+        },
       })
     );
 

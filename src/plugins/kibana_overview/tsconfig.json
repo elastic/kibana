@@ -26,6 +26,7 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-avatar-solution",
+    "@kbn/shared-ux-utility",
   ],
   "exclude": [
     "target/**/*",

@@ -17,8 +17,19 @@ import { InspectorPublicPlugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new InspectorPublicPlugin(initializerContext);
 }
-
-export type { Setup, Start } from './plugin';
+export {
+  type Adapters,
+  type Request,
+  type RequestStatistic,
+  type RequestStatistics,
+  RequestAdapter,
+  RequestStatus,
+  RequestResponder,
+} from '../common';
+export {
+  apiHasInspectorAdapters,
+  type HasInspectorAdapters,
+} from './adapters/has_inspector_adapters';
 export { InspectorPublicPlugin as Plugin } from './plugin';
+export type { Setup, Start } from './plugin';
 export * from './types';
-export * from '../common/adapters';

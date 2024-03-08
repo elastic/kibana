@@ -38,13 +38,13 @@ exports[`StartTrial component when trial is allowed display for basic license 1`
               >
                 subscription features
                 <span
-                  class="emotion-euiLink__externalIcon"
+                  class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
                 >
                   External link
                 </span>
                 <span
-                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                  class="emotion-euiScreenReaderOnly"
                 >
                   (opens in a new tab or window)
                 </span>
@@ -112,13 +112,13 @@ exports[`StartTrial component when trial is allowed should display for expired e
               >
                 subscription features
                 <span
-                  class="emotion-euiLink__externalIcon"
+                  class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
                 >
                   External link
                 </span>
                 <span
-                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                  class="emotion-euiScreenReaderOnly"
                 >
                   (opens in a new tab or window)
                 </span>
@@ -186,13 +186,13 @@ exports[`StartTrial component when trial is allowed should display for expired p
               >
                 subscription features
                 <span
-                  class="emotion-euiLink__externalIcon"
+                  class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
                 >
                   External link
                 </span>
                 <span
-                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                  class="emotion-euiScreenReaderOnly"
                 >
                   (opens in a new tab or window)
                 </span>
@@ -260,13 +260,13 @@ exports[`StartTrial component when trial is allowed should display for gold lice
               >
                 subscription features
                 <span
-                  class="emotion-euiLink__externalIcon"
+                  class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
                 >
                   External link
                 </span>
                 <span
-                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                  class="emotion-euiScreenReaderOnly"
                 >
                   (opens in a new tab or window)
                 </span>

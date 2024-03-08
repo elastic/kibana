@@ -1,7 +1,7 @@
 [[esql]]
 === {esql}
 
-preview::[]
+preview::["Do not use {esql} on production environments. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."]
 
 The Elasticsearch Query Language, {esql}, has been created to make exploring your data faster and easier using the **Discover** application. From version 8.11 you can try this new feature, which is enabled by default. 
 

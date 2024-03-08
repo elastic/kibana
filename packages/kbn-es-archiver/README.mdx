@@ -3,7 +3,8 @@ id: kibDevDocsOpsEsArchiver
 slug: /kibana-dev-docs/ops/es-archiver
 title: "ES Archiver"
 description: A tool which helps developers capture and restore ES indexes
-tags: ['kibana', 'dev', 'contributor', 'operations', 'ci']
+date: 2024-01-11
+tags: ['kibana', 'dev', 'contributor', 'operations', 'ci', 'es-archiver', 'load', 'es-archiver-load-action', 'performance']
 ---
 
 The ES Archiver is a service primarily used by the Functional Tests to load up ES indexes using the bulk API which makes the archives more resilient to ES upgrades and easier to inspect/edit locally because they are just plain text files containing newline-delimited JSON (though they are sometimes compressed).
@@ -15,3 +16,32 @@ This tool also has a CLI which can be used to save indexes to new archives or lo
 To teach the ES Archiver how to talk to ES and Kibana it is ideal to start ES and Kibana using `node scripts/functional_test_servers --config some/config/file.ts` and then use the same `--config` flag when running `node scripts/es_archiver` so that it can access the location and authorization information about the ES instace from the FTR config file.
 
 Additional information about what functionality the CLI provides can be found by running `node scripts/es_archiver --help`
+
+## Performance Option Parameter
+
+We now have a performance parameter for the es-archiver#load(), entry-point 
+function.
+This parameter is optional, with defaults:
+
+ - Batch size: 5000
+ - Concurrency (maximum number of bulk requests that can be active in parallel): 4 
+
+According to our benchmarks, these default settings are giving the best results in terms of loading time for 
+the majority of the archives. 
+However, there might be cases where different settings are needed, so they can be overridden when loading an archive.
+
+
+### How to override the default performance settings in test files
+
+To control the batch size and concurrency
+
+#### Example 
+
+```typescript
+await esArchiver.load('x-pack/test/functional/es_archives/getting_started/shakespeare', {
+  performance: {
+    batchSize: 300,
+    concurrency: 1,
+  },
+});
+```

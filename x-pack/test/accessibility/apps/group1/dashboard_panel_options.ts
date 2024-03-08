@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import type { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('dashboardEditMode');
       await dashboardPanelActions.toggleContextMenu(header);
       await testSubjects.click('embeddablePanelAction-clonePanel');
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
       await a11y.testAppSnapshot();
     });
 

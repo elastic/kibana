@@ -181,7 +181,7 @@ export const histogramHandlerFactory =
       const significantCategoriesHistogramQueries = significantCategories.map((d) => {
         const histogramQuery = getHistogramQuery(requestBody);
         const categoryQuery = getCategoryQuery(d.fieldName, [
-          { key: `${d.key}`, count: d.doc_count, examples: [] },
+          { key: `${d.key}`, count: d.doc_count, examples: [], regex: '' },
         ]);
         if (Array.isArray(histogramQuery.bool?.filter)) {
           histogramQuery.bool?.filter?.push(categoryQuery);

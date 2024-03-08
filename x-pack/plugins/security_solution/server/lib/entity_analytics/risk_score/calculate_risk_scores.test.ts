@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { assetCriticalityServiceMock } from '../asset_criticality/asset_criticality_service.mock';
 
 import { calculateRiskScores } from './calculate_risk_scores';
 import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
@@ -21,6 +22,7 @@ describe('calculateRiskScores()', () => {
     logger = loggingSystemMock.createLogger();
     params = {
       afterKeys: {},
+      assetCriticalityService: assetCriticalityServiceMock.create(),
       esClient,
       logger,
       index: 'index',
@@ -184,7 +186,7 @@ describe('calculateRiskScores()', () => {
           '@timestamp': expect.any(String),
           id_field: expect.any(String),
           id_value: expect.any(String),
-          calculated_level: 'Unknown',
+          calculated_level: 'Low',
           calculated_score: expect.any(Number),
           calculated_score_norm: expect.any(Number),
           category_1_score: expect.any(Number),
@@ -217,17 +219,43 @@ describe('calculateRiskScores()', () => {
   });
 
   describe('error conditions', () => {
-    beforeEach(() => {
-      // stub out a rejected response
+    it('raises an error if elasticsearch client rejects', async () => {
       (esClient.search as jest.Mock).mockRejectedValueOnce({
+        aggregations: calculateRiskScoresMock.buildAggregationResponse(),
+      });
+
+      await expect(() => calculateRiskScores(params)).rejects.toEqual({
         aggregations: calculateRiskScoresMock.buildAggregationResponse(),
       });
     });
 
-    it('raises an error if elasticsearch client rejects', () => {
-      expect.assertions(1);
-      expect(() => calculateRiskScores(params)).rejects.toEqual({
-        aggregations: calculateRiskScoresMock.buildAggregationResponse(),
+    describe('when the asset criticality service throws an error', () => {
+      beforeEach(() => {
+        (esClient.search as jest.Mock).mockResolvedValueOnce({
+          aggregations: calculateRiskScoresMock.buildAggregationResponse(),
+        });
+        (
+          params.assetCriticalityService.getCriticalitiesByIdentifiers as jest.Mock
+        ).mockRejectedValueOnce(new Error('foo'));
+      });
+
+      it('logs the error but proceeds if asset criticality service throws', async () => {
+        await expect(calculateRiskScores(params)).resolves.toEqual(
+          expect.objectContaining({
+            scores: expect.objectContaining({
+              host: expect.arrayContaining([
+                expect.objectContaining({
+                  calculated_level: expect.any(String),
+                  id_field: expect.any(String),
+                  id_value: expect.any(String),
+                }),
+              ]),
+            }),
+          })
+        );
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Error retrieving criticality: Error: foo. Scoring will proceed without criticality information.'
+        );
       });
     });
   });

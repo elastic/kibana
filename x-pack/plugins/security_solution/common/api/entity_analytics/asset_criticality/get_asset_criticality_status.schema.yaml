@@ -12,6 +12,7 @@ servers:
 paths:
   /internal/asset_criticality/status:
     get:
+      operationId: AssetCriticalityGetStatus
       summary: Get Asset Criticality Status
       responses:
         '200':

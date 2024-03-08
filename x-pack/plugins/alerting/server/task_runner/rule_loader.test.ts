@@ -6,7 +6,7 @@
  */
 
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { CoreKibanaRequest } from '@kbn/core/server';
+import { CoreKibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
 import { getRuleAttributes, getFakeKibanaRequest, validateRule } from './rule_loader';
@@ -238,6 +238,19 @@ describe('rule_loader', () => {
       } catch (e) {
         expect(e.message).toMatch('wops');
         expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
+      }
+    });
+
+    test('returns USER error for a "not found SO"', async () => {
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError()
+      );
+
+      try {
+        await getRuleAttributes(context, ruleId, spaceId);
+      } catch (e) {
+        expect(e.message).toMatch('Not Found');
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
       }
     });
   });

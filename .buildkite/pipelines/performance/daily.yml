@@ -21,13 +21,7 @@ steps:
       queue: kb-static-ubuntu
     depends_on: build
     key: tests
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-        - exit_status: '*'
-          limit: 1
+    timeout_in_minutes: 90
 
   - label: '📈 Report performance metrics to ci-stats'
     command: .buildkite/scripts/steps/functional/report_performance_metrics.sh

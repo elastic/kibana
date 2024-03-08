@@ -777,7 +777,12 @@ describe('helpers', () => {
       expect(dispatchAddTimeline).toHaveBeenCalledWith({
         id: TimelineId.active,
         savedTimeline: true,
-        timeline: mockTimelineModel,
+        timeline: {
+          ...mockTimelineModel,
+          version: null,
+          updated: undefined,
+          changed: undefined,
+        },
       });
     });
 

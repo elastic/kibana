@@ -15,6 +15,7 @@ interface ContainerDocument extends Fields {
   'container.id': string;
   'kubernetes.pod.uid': string;
   'kubernetes.node.name': string;
+  'metricset.name'?: string;
 }
 
 export class Container extends Entity<ContainerDocument> {

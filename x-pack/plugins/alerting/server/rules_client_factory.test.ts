@@ -13,6 +13,7 @@ import {
   savedObjectsServiceMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -58,6 +59,7 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   kibanaVersion: '7.10.0',
   authorization:
     alertingAuthorizationClientFactory as unknown as AlertingAuthorizationClientFactory,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 const actionsAuthorization = actionsAuthorizationMock.create();
@@ -70,6 +72,8 @@ beforeEach(() => {
   ).getActionsAuthorizationWithRequest.mockReturnValue(actionsAuthorization);
   rulesClientFactoryParams.getSpaceId.mockReturnValue('default');
   rulesClientFactoryParams.spaceIdToNamespace.mockReturnValue('default');
+  rulesClientFactoryParams.uiSettings.asScopedToClient =
+    uiSettingsServiceMock.createStartContract().asScopedToClient;
 });
 
 test('creates a rules client with proper constructor arguments when security is enabled', async () => {
@@ -117,6 +121,7 @@ test('creates a rules client with proper constructor arguments when security is 
     getAuthenticationAPIKey: expect.any(Function),
     getAlertIndicesAlias: expect.any(Function),
     alertsService: null,
+    uiSettings: rulesClientFactoryParams.uiSettings,
   });
 });
 
@@ -161,6 +166,7 @@ test('creates a rules client with proper constructor arguments', async () => {
     getAuthenticationAPIKey: expect.any(Function),
     getAlertIndicesAlias: expect.any(Function),
     alertsService: null,
+    uiSettings: rulesClientFactoryParams.uiSettings,
   });
 });
 

@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
-
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Query } from '@kbn/es-query';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import { QueryErrorMessage } from '@kbn/ml-error-utils';
+import type { QueryErrorMessage } from '@kbn/ml-error-utils';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { PLUGIN_ID } from '../../../../../../../common/constants/app';
-import { Dictionary } from '../../../../../../../common/types/common';
+import type { Dictionary } from '../../../../../../../common/types/common';
 import { removeFilterFromQueryString } from '../../../../../explorer/explorer_utils';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
@@ -54,8 +53,11 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   );
 
   const { services } = useMlKibana();
-  const { unifiedSearch, data, storage, notifications, http, docLinks, uiSettings, dataViews } =
-    services;
+  const {
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
+  } = services;
 
   const searchChangeHandler = (q: Query) => setSearchInput(q);
 
@@ -199,16 +201,6 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
               dataTestSubj="mlDFAnalyticsQueryInput"
               languageSwitcherPopoverAnchorPosition="rightDown"
               appName={PLUGIN_ID}
-              deps={{
-                unifiedSearch,
-                notifications,
-                http,
-                docLinks,
-                uiSettings,
-                data,
-                storage,
-                dataViews,
-              }}
             />
           </EuiFlexItem>
           {filters && filters.options && (

@@ -288,3 +288,17 @@ export const NEED_TO_HAVE = i18n.translate(
     defaultMessage: 'You need to have:',
   }
 );
+
+export const RISK_SCORE_MODULE_TURNED_ON = i18n.translate(
+  'xpack.securitySolution.riskScore.moduleTurnedOn',
+  {
+    defaultMessage: 'Entity risk score has been turned on',
+  }
+);
+
+export const RISK_SCORE_MODULE_TURNED_OFF = i18n.translate(
+  'xpack.securitySolution.riskScore.moduleTurnedOff',
+  {
+    defaultMessage: 'Entity risk score has been turned off',
+  }
+);

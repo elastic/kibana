@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { compressToEncodedURIComponent } from 'lz-string';
 import {
   getDevToolsCapabilities,

@@ -7,12 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { Index } from '@kbn/index-management-plugin/common';
-import { get } from 'lodash';
 
-const propertyPath = 'isRollupIndex';
 export const rollupToggleExtension = {
-  matchIndex: (index: { isRollupIndex: boolean }) => {
-    return get(index, propertyPath);
+  matchIndex: (index: Index) => {
+    return Boolean(index.isRollupIndex);
   },
   label: i18n.translate('xpack.rollupJobs.indexMgmtToggle.toggleLabel', {
     defaultMessage: 'Include rollup indices',
@@ -22,7 +20,7 @@ export const rollupToggleExtension = {
 
 export const rollupBadgeExtension = {
   matchIndex: (index: Index) => {
-    return !!get(index, propertyPath);
+    return Boolean(index.isRollupIndex);
   },
   label: i18n.translate('xpack.rollupJobs.indexMgmtBadge.rollupLabel', {
     defaultMessage: 'Rollup',

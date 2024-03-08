@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,9 +30,9 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
 import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 
-import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/constants/validation_messages';
+import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/validators/messages';
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
-import { TransformId } from '../../../../../../common/types/transform';
+import type { TransformId } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
@@ -46,24 +47,25 @@ import {
   useGetTransforms,
   useGetTransformsPreview,
 } from '../../../../hooks';
-import { SearchItems } from '../../../../hooks/use_search_items';
+import type { SearchItems } from '../../../../hooks/use_search_items';
 import {
   getTransformConfigQuery,
   getPreviewTransformRequestBody,
   isTransformIdValid,
 } from '../../../../common';
-import { EsIndexName } from './common';
+import type { EsIndexName } from './common';
 import {
-  continuousModeDelayValidator,
+  isContinuousModeDelay,
+  isRetentionPolicyMaxAge,
+  isTransformWizardFrequency,
   integerRangeMinus1To100Validator,
-  retentionPolicyMaxAgeValidator,
-  transformFrequencyValidator,
   transformSettingsPageSearchSizeValidator,
 } from '../../../../common/validators';
-import { StepDefineExposedState } from '../step_define/common';
+import type { StepDefineExposedState } from '../step_define/common';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
-import { getDefaultStepDetailsState, StepDetailsExposedState } from './common';
+import type { StepDetailsExposedState } from './common';
+import { getDefaultStepDetailsState } from './common';
 
 interface StepDetailsFormProps {
   overrides?: StepDetailsExposedState;
@@ -260,7 +262,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       isContinuousModeAvailable ? sourceIndexDateFieldNames[0] : ''
     );
     const [continuousModeDelay, setContinuousModeDelay] = useState(defaults.continuousModeDelay);
-    const isContinuousModeDelayValid = continuousModeDelayValidator(continuousModeDelay);
+    const isContinuousModeDelayValid = isContinuousModeDelay(continuousModeDelay);
 
     // Retention Policy
     const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
@@ -274,7 +276,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       defaults.retentionPolicyMaxAge
     );
     const retentionPolicyMaxAgeEmpty = retentionPolicyMaxAge === '';
-    const isRetentionPolicyMaxAgeValid = retentionPolicyMaxAgeValidator(retentionPolicyMaxAge);
+    const isRetentionPolicyMaxAgeValid = isRetentionPolicyMaxAge(retentionPolicyMaxAge);
 
     useEffect(() => {
       // Reset retention policy settings when the user disables the whole option
@@ -308,7 +310,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const dataViewTitleExists = dataViewTitles?.some((name) => destinationIndex === name) ?? false;
 
     const [transformFrequency, setTransformFrequency] = useState(defaults.transformFrequency);
-    const isTransformFrequencyValid = transformFrequencyValidator(transformFrequency);
+    const isTransformFrequencyValid = isTransformWizardFrequency(transformFrequency);
 
     const [transformSettingsMaxPageSearchSize, setTransformSettingsMaxPageSearchSize] = useState<
       number | undefined

@@ -12,6 +12,7 @@ const createAssetCriticalityDataClientMock = () =>
     doesIndexExist: jest.fn(),
     getStatus: jest.fn(),
     init: jest.fn(),
+    search: jest.fn(),
   } as unknown as jest.Mocked<AssetCriticalityDataClient>);
 
 export const assetCriticalityDataClientMock = { create: createAssetCriticalityDataClientMock };

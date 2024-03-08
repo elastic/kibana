@@ -14,6 +14,7 @@ import type {
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
 import type {
+  FormBasedPersistedState,
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
@@ -21,16 +22,24 @@ import type {
   TextBasedLayerColumn,
   TextBasedPersistedState,
 } from '@kbn/lens-plugin/public/datasources/text_based/types';
-import { AggregateQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import {
+  FormulaValueConfig,
   LensAnnotationLayer,
   LensAttributes,
   LensBaseConfig,
   LensBaseLayer,
+  LensBaseXYLayer,
   LensDataset,
   LensDatatableDataset,
   LensESQLDataset,
 } from './types';
+
+type DataSourceStateLayer =
+  | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
+  | PersistedIndexPatternLayer
+  | TextBasedPersistedState['layers'][0];
 
 export const getDefaultReferences = (
   index: string,
@@ -44,6 +53,27 @@ export const getDefaultReferences = (
     },
   ];
 };
+
+export function mapToFormula(layer: LensBaseLayer): FormulaValueConfig {
+  const { label, decimals, format, compactValues: compact, normalizeByUnit, value } = layer;
+
+  const formulaFormat: FormulaValueConfig['format'] | undefined = format
+    ? {
+        id: format,
+        params: {
+          decimals: decimals ?? 2,
+          ...(!!compact ? { compact } : undefined),
+        },
+      }
+    : undefined;
+
+  return {
+    formula: value,
+    label,
+    timeScale: normalizeByUnit,
+    format: formulaFormat,
+  };
+}
 
 export function buildReferences(dataviews: Record<string, DataView>) {
   const references = [];
@@ -74,6 +104,12 @@ export const getAdhocDataviews = (dataviews: Record<string, DataView>) => {
 
   return adHocDataViews;
 };
+
+export function isSingleLayer(
+  layer: DataSourceStateLayer
+): layer is PersistedIndexPatternLayer | TextBasedPersistedState['layers'][0] {
+  return layer && typeof layer === 'object' && ('columnOrder' in layer || 'columns' in layer);
+}
 
 export function isFormulaDataset(dataset?: LensDataset) {
   if (dataset && 'index' in dataset) {
@@ -126,7 +162,7 @@ export function getDatasetIndex(dataset?: LensDataset) {
 }
 
 function buildDatasourceStatesLayer(
-  layer: LensBaseLayer,
+  layer: LensBaseLayer | LensBaseXYLayer,
   i: number,
   dataset: LensDataset,
   dataView: DataView | undefined,
@@ -134,13 +170,12 @@ function buildDatasourceStatesLayer(
     config: unknown,
     i: number,
     dataView: DataView
-  ) => PersistedIndexPatternLayer | undefined,
+  ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
   getValueColumns: (config: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
-): [
-  'textBased' | 'formBased',
-  PersistedIndexPatternLayer | TextBasedPersistedState['layers'][0] | undefined
-] {
-  function buildValueLayer(config: LensBaseLayer): TextBasedPersistedState['layers'][0] {
+): ['textBased' | 'formBased', DataSourceStateLayer | undefined] {
+  function buildValueLayer(
+    config: LensBaseLayer | LensBaseXYLayer
+  ): TextBasedPersistedState['layers'][0] {
     const table = dataset as LensDatatableDataset;
     const newLayer = {
       table,
@@ -160,7 +195,9 @@ function buildDatasourceStatesLayer(
     return newLayer;
   }
 
-  function buildESQLLayer(config: LensBaseLayer): TextBasedPersistedState['layers'][0] {
+  function buildESQLLayer(
+    config: LensBaseLayer | LensBaseXYLayer
+  ): TextBasedPersistedState['layers'][0] {
     const columns = getValueColumns(layer, i);
 
     const newLayer = {
@@ -181,20 +218,17 @@ function buildDatasourceStatesLayer(
   return ['formBased', buildFormulaLayers(layer, i, dataView!)];
 }
 export const buildDatasourceStates = async (
-  config: (LensBaseConfig & { layers: LensBaseLayer[] }) | (LensBaseLayer & LensBaseConfig),
+  config: (LensBaseConfig & { layers: LensBaseXYLayer[] }) | (LensBaseLayer & LensBaseConfig),
   dataviews: Record<string, DataView>,
   buildFormulaLayers: (
     config: unknown,
     i: number,
     dataView: DataView
-  ) => PersistedIndexPatternLayer | undefined,
+  ) => PersistedIndexPatternLayer | FormBasedPersistedState['layers'] | undefined,
   getValueColumns: (config: any, i: number) => TextBasedLayerColumn[],
   dataViewsAPI: DataViewsPublicPluginStart
 ) => {
-  const layers: LensAttributes['state']['datasourceStates'] = {
-    textBased: { layers: {} },
-    formBased: { layers: {} },
-  };
+  let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 
   const mainDataset = config.dataset;
   const configLayers = 'layers' in config ? config.layers : [config];
@@ -212,10 +246,6 @@ export const buildDatasourceStates = async (
       ? await getDataView(index.index, dataViewsAPI, index.timeFieldName)
       : undefined;
 
-    if (dataView) {
-      dataviews[layerId] = dataView;
-    }
-
     if (dataset) {
       const [type, layerConfig] = buildDatasourceStatesLayer(
         layer,
@@ -226,13 +256,28 @@ export const buildDatasourceStates = async (
         getValueColumns
       );
       if (layerConfig) {
-        layers[type]!.layers[layerId] = layerConfig;
+        layers = {
+          ...layers,
+          [type]: {
+            layers: isSingleLayer(layerConfig)
+              ? { ...layers[type]?.layers, [layerId]: layerConfig }
+              : // metric chart can return 2 layers (one for the metric and one for the trendline)
+                { ...layerConfig },
+          },
+        };
+      }
+
+      if (dataView) {
+        Object.keys(layers[type]?.layers ?? []).forEach((id) => {
+          dataviews[id] = dataView;
+        });
       }
     }
   }
 
   return layers;
 };
+
 export const addLayerColumn = (
   layer: PersistedIndexPatternLayer,
   columnName: string,

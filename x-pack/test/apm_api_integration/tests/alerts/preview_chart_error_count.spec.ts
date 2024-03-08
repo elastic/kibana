@@ -68,15 +68,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/172769
-  registry.when.skip(`with data loaded`, { config: 'basic', archives: [] }, () => {
+  registry.when(`with data loaded`, { config: 'basic', archives: [] }, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/172769
     describe('error_count', () => {
-      before(async () => {
+      beforeEach(async () => {
         await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
         await generateErrorData({ serviceName: 'synth-java', start, end, synthtraceEsClient });
       });
 
-      after(() => synthtraceEsClient.clean());
+      afterEach(() => synthtraceEsClient.clean());
 
       it('with data', async () => {
         const options = getOptions();
@@ -305,6 +305,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when(`with data loaded and using KQL filter`, { config: 'basic', archives: [] }, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176975
     describe('error_count', () => {
       before(async () => {
         await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });

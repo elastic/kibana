@@ -27,7 +27,6 @@
       "dashboard",
       "embeddable",
       "mapsEms",
-      "savedObjects",
       "share",
       "presentationUtil",
       "contentManagement"
@@ -49,7 +48,9 @@
       "kibanaUtils",
       "usageCollection",
       "unifiedSearch",
-      "fieldFormats"
+      "fieldFormats",
+      "textBasedLanguages",
+      "savedObjects",
     ],
     "extraPublicDirs": [
       "common"

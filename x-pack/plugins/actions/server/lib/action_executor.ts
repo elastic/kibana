@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import { KibanaRequest, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { withSpan } from '@kbn/apm-utils';
@@ -487,6 +487,9 @@ export class ActionExecutor {
         rawAction: rawAction.attributes,
       };
     } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw createTaskRunError(e, TaskErrorSource.USER);
+      }
       throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
     }
   }

@@ -64,7 +64,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.expectLinkActive({
         deepLinkId: 'serverlessElasticsearch',
       });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Get started` });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Home` });
       await testSubjects.existOrFail(`svlSearchOverviewPage`);
 
       await expectNoPageReload();

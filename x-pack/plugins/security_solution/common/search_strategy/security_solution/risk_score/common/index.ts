@@ -23,9 +23,11 @@ export const getHostRiskIndex = (
   onlyLatest: boolean = true,
   isNewRiskScoreModuleInstalled: boolean
 ): string => {
-  return isNewRiskScoreModuleInstalled
-    ? getRiskScoreLatestIndex(spaceId)
-    : `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
+  if (isNewRiskScoreModuleInstalled) {
+    return onlyLatest ? getRiskScoreLatestIndex(spaceId) : getRiskScoreTimeSeriesIndex(spaceId);
+  } else {
+    return `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
+  }
 };
 
 export const getUserRiskIndex = (
@@ -33,11 +35,11 @@ export const getUserRiskIndex = (
   onlyLatest: boolean = true,
   isNewRiskScoreModuleInstalled: boolean
 ): string => {
-  return isNewRiskScoreModuleInstalled
-    ? onlyLatest
-      ? getRiskScoreLatestIndex(spaceId)
-      : getRiskScoreTimeSeriesIndex(spaceId)
-    : `${RISKY_USERS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
+  if (isNewRiskScoreModuleInstalled) {
+    return onlyLatest ? getRiskScoreLatestIndex(spaceId) : getRiskScoreTimeSeriesIndex(spaceId);
+  } else {
+    return `${RISKY_USERS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
+  }
 };
 
 export const buildHostNamesFilter = (hostNames: string[]) => {

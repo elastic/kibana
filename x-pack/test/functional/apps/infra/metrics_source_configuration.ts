@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
@@ -49,10 +50,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await metricIndicesInput.clearValueWithKeyboard({ charByChar: true });
         await metricIndicesInput.type('does-not-exist-*');
 
-        await infraSourceConfigurationForm.saveConfiguration();
+        await infraSourceConfigurationForm.saveInfraSettings();
 
         await pageObjects.infraHome.waitForLoading();
         await pageObjects.infraHome.getInfraMissingMetricsIndicesCallout();
+      });
+
+      it('can clear the input and reset to previous values without saving', async () => {
+        await pageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/settings');
+
+        const nameInput = await infraSourceConfigurationForm.getNameInput();
+        const previousNameInputText = await nameInput.getAttribute('value');
+        await nameInput.clearValueWithKeyboard({ charByChar: true });
+        await nameInput.type('New Source');
+
+        const metricIndicesInput = await infraSourceConfigurationForm.getMetricIndicesInput();
+        await metricIndicesInput.clearValueWithKeyboard({ charByChar: true });
+        await metricIndicesInput.type('this-is-new-change-*');
+
+        await infraSourceConfigurationForm.discardInfraSettingsChanges();
+
+        // Check for previous value
+        const nameInputText = await nameInput.getAttribute('value');
+        expect(nameInputText).to.equal(previousNameInputText);
       });
 
       it('renders the no indices screen when no indices match the pattern', async () => {
@@ -71,7 +91,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await metricIndicesInput.clearValueWithKeyboard({ charByChar: true });
         await metricIndicesInput.type('remote_cluster:metricbeat-*');
 
-        await infraSourceConfigurationForm.saveConfiguration();
+        await infraSourceConfigurationForm.saveInfraSettings();
 
         await pageObjects.infraHome.waitForLoading();
         await pageObjects.infraHome.getInfraMissingRemoteClusterIndicesCallout();
@@ -89,7 +109,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await metricIndicesInput.clearValueWithKeyboard({ charByChar: true });
         await metricIndicesInput.type('metricbeat-*');
 
-        await infraSourceConfigurationForm.saveConfiguration();
+        await infraSourceConfigurationForm.saveInfraSettings();
       });
 
       it('renders the waffle map again', async () => {

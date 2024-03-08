@@ -16,7 +16,7 @@ import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
-import { isAgentUpgradeable } from '../../../common/services';
+import { isAgentUpgradeAvailable } from '../../../common/services';
 import { AGENTS_INDEX } from '../../constants';
 import {
   FleetError,
@@ -340,19 +340,29 @@ export async function getAgentsByKuery(
       const response = await queryAgents(0, SO_SEARCH_LIMIT);
       agents = response.hits.hits
         .map(searchHitToAgent)
-        .filter((agent) => isAgentUpgradeable(agent, latestAgentVersion));
+        .filter((agent) => isAgentUpgradeAvailable(agent, latestAgentVersion));
       total = agents.length;
       const start = (page - 1) * perPage;
       agents = agents.slice(start, start + perPage);
     } else {
-      agents = agents.filter((agent) => isAgentUpgradeable(agent, latestAgentVersion));
+      agents = agents.filter((agent) => isAgentUpgradeAvailable(agent, latestAgentVersion));
     }
   }
 
   if (getStatusSummary) {
-    res.aggregations?.status.buckets.forEach((bucket) => {
-      statusSummary[bucket.key] = bucket.doc_count;
-    });
+    if (showUpgradeable) {
+      // when showUpgradeable is selected, calculate the summary status manually from the upgradeable agents above
+      // the bucket count doesn't take in account the upgradeable agents
+      agents.forEach((agent) => {
+        if (!agent?.status) return;
+        if (!statusSummary[agent.status]) statusSummary[agent.status] = 0;
+        statusSummary[agent.status]++;
+      });
+    } else {
+      res.aggregations?.status.buckets.forEach((bucket) => {
+        statusSummary[bucket.key] = bucket.doc_count;
+      });
+    }
   }
 
   return {

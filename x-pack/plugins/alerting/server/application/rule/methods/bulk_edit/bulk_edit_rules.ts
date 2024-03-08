@@ -638,7 +638,7 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
       case 'actions': {
         const updatedOperation = {
           ...operation,
-          value: addGeneratedActionValues(operation.value),
+          value: await addGeneratedActionValues(operation.value, context),
         };
 
         try {

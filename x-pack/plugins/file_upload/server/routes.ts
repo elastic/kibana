@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { CoreSetup, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   IndicesIndexSettings,
   MappingTypeMapping,
@@ -26,8 +26,9 @@ import {
   analyzeFileQuerySchema,
   runtimeMappingsSchema,
 } from './schemas';
-import { StartDeps } from './types';
+import type { StartDeps } from './types';
 import { checkFileUploadPrivileges } from './check_privileges';
+import { previewIndexTimeRange } from './preview_index_time_range';
 
 function importData(
   client: IScopedClusterClient,
@@ -269,6 +270,49 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
             query,
             runtimeMappings
           );
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /internal/file_upload/preview_index_time_range Predict the time range for an index using example documents
+   * @apiName PreviewIndexTimeRange
+   * @apiDescription Predict the time range for an index using example documents
+   */
+  router.versioned
+    .post({
+      path: '/internal/file_upload/preview_index_time_range',
+      access: 'internal',
+      options: {
+        tags: ['access:fileUpload:analyzeFile'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              docs: schema.arrayOf(schema.any()),
+              pipeline: schema.any(),
+              timeField: schema.string(),
+            }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { docs, pipeline, timeField } = request.body;
+          const esClient = (await context.core).elasticsearch.client;
+          const resp = await previewIndexTimeRange(esClient, timeField, pipeline, docs);
 
           return response.ok({
             body: resp,

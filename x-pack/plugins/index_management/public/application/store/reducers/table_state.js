@@ -20,6 +20,7 @@ export const defaultTableState = {
   currentPage: 0,
   sortField: 'index.name',
   isSortAscending: true,
+  toggleNameToVisibleMap: {},
 };
 
 export const tableState = handleActions(

@@ -10,6 +10,7 @@ import type { FieldDefinition } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { UnsavedFieldChange } from '@kbn/management-settings-types';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { useServices } from './services';
 
 export interface UseSaveParameters {
@@ -17,6 +18,8 @@ export interface UseSaveParameters {
   fields: FieldDefinition[];
   /** The function to invoke for clearing all unsaved changes. */
   clearChanges: () => void;
+  /** The {@link UiSettingsScope} of the unsaved changes. */
+  scope: UiSettingsScope;
 }
 
 /**
@@ -33,7 +36,7 @@ export const useSave = (params: UseSaveParameters) => {
       return;
     }
     try {
-      await saveChanges(changes);
+      await saveChanges(changes, params.scope);
       params.clearChanges();
       const requiresReload = params.fields.some(
         (setting) => changes.hasOwnProperty(setting.id) && setting.requiresPageReload

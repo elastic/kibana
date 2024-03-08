@@ -6,7 +6,7 @@
  */
 import React, { useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSkeletonText } from '@elastic/eui';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
@@ -23,7 +23,7 @@ import {
  * or a no-data message if investigation guide hasn't been set up on the rule
  */
 export const InvestigationGuide: React.FC = () => {
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, isPreview } =
     useRightPanelContext();
 

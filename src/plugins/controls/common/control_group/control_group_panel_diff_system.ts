@@ -34,11 +34,11 @@ export const ControlPanelDiffSystems: {
         return false;
       }
 
-      const { value: valueA = ['', ''] }: Partial<RangeSliderEmbeddableInput> =
+      const { value: valueA = ['', ''], ...inputA }: Partial<RangeSliderEmbeddableInput> =
         initialInput.explicitInput;
-      const { value: valueB = ['', ''] }: Partial<RangeSliderEmbeddableInput> =
+      const { value: valueB = ['', ''], ...inputB }: Partial<RangeSliderEmbeddableInput> =
         newInput.explicitInput;
-      return isEqual(valueA, valueB);
+      return isEqual(valueA, valueB) && deepEqual(inputA, inputB);
     },
   },
   [OPTIONS_LIST_CONTROL]: {

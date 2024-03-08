@@ -23,6 +23,12 @@ export const navTabsNetworkDetails = (
   flowTarget: FlowTargetSourceDest
 ): NetworkDetailsNavTabs => {
   const networkDetailsNavTabs: NetworkDetailsNavTabs = {
+    [NetworkDetailsRouteType.events]: {
+      id: NetworkDetailsRouteType.events,
+      name: i18n.NAVIGATION_EVENTS_TITLE,
+      href: getTabsOnNetworkDetailsUrl(ipAddress, NetworkDetailsRouteType.events, flowTarget),
+      disabled: false,
+    },
     [NetworkDetailsRouteType.flows]: {
       id: NetworkDetailsRouteType.flows,
       name: i18n.NAVIGATION_FLOWS_TITLE,
@@ -51,12 +57,6 @@ export const navTabsNetworkDetails = (
       id: NetworkDetailsRouteType.anomalies,
       name: i18n.NAVIGATION_ANOMALIES_TITLE,
       href: getTabsOnNetworkDetailsUrl(ipAddress, NetworkDetailsRouteType.anomalies, flowTarget),
-      disabled: false,
-    },
-    [NetworkDetailsRouteType.events]: {
-      id: NetworkDetailsRouteType.events,
-      name: i18n.NAVIGATION_EVENTS_TITLE,
-      href: getTabsOnNetworkDetailsUrl(ipAddress, NetworkDetailsRouteType.events, flowTarget),
       disabled: false,
     },
   };

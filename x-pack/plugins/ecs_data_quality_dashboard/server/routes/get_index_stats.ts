@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 
-import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { fetchStats, fetchAvailableIndices } from '../lib';
 import { buildResponse } from '../lib/build_response';
 import { GET_INDEX_STATS, INTERNAL_API_VERSION } from '../../common/constants';
@@ -20,6 +20,7 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
     .get({
       path: GET_INDEX_STATS,
       access: 'internal',
+      options: { tags: ['access:securitySolution'] },
     })
     .addVersion(
       {

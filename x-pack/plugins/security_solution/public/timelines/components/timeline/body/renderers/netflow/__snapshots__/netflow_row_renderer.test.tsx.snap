@@ -2,7 +2,12 @@
 
 exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c0 {
+  .c14 svg {
+  position: relative;
+  top: -1px;
+}
+
+.c0 {
   display: inline-block;
   font-size: 12px;
   line-height: 1.5;
@@ -14,11 +19,6 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
   padding: 0 8px;
   border: 1px solid #343741;
   border-radius: 4px;
-}
-
-.c14 svg {
-  position: relative;
-  top: -1px;
 }
 
 .c12,
@@ -1211,7 +1211,7 @@ tr:hover .c4:focus::before {
                                                           <a
                                                             class="euiLink emotion-euiLink-primary"
                                                             data-test-subj="network-details"
-                                                            href="/ip/192.168.1.2/source/flows"
+                                                            href="/ip/192.168.1.2/source/events"
                                                             rel="noreferrer"
                                                           >
                                                             192.168.1.2
@@ -1309,13 +1309,13 @@ tr:hover .c4:focus::before {
                                                                 >
                                                                   9987
                                                                   <span
-                                                                    class="emotion-euiLink__externalIcon"
+                                                                    class="emotion-EuiExternalLinkIcon"
                                                                     data-euiicon-type="popout"
                                                                   >
                                                                     External link
                                                                   </span>
                                                                   <span
-                                                                    class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                                                                    class="emotion-euiScreenReaderOnly"
                                                                   >
                                                                     (opens in a new tab or window)
                                                                   </span>
@@ -2211,7 +2211,7 @@ tr:hover .c4:focus::before {
                                                           <a
                                                             class="euiLink emotion-euiLink-primary"
                                                             data-test-subj="network-details"
-                                                            href="/ip/10.1.2.3/source/flows"
+                                                            href="/ip/10.1.2.3/source/events"
                                                             rel="noreferrer"
                                                           >
                                                             10.1.2.3
@@ -2309,13 +2309,13 @@ tr:hover .c4:focus::before {
                                                                 >
                                                                   80
                                                                   <span
-                                                                    class="emotion-euiLink__externalIcon"
+                                                                    class="emotion-EuiExternalLinkIcon"
                                                                     data-euiicon-type="popout"
                                                                   >
                                                                     External link
                                                                   </span>
                                                                   <span
-                                                                    class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                                                                    class="emotion-euiScreenReaderOnly"
                                                                   >
                                                                     (opens in a new tab or window)
                                                                   </span>
@@ -2827,13 +2827,13 @@ tr:hover .c4:focus::before {
                                       >
                                         tls.fingerprints.ja3.hash-value
                                         <span
-                                          class="emotion-euiLink__externalIcon"
+                                          class="emotion-EuiExternalLinkIcon"
                                           data-euiicon-type="popout"
                                         >
                                           External link
                                         </span>
                                         <span
-                                          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                                          class="emotion-euiScreenReaderOnly"
                                         >
                                           (opens in a new tab or window)
                                         </span>
@@ -2935,13 +2935,13 @@ tr:hover .c4:focus::before {
                                       >
                                         tls.client_certificate.fingerprint.sha1-value
                                         <span
-                                          class="emotion-euiLink__externalIcon"
+                                          class="emotion-EuiExternalLinkIcon"
                                           data-euiicon-type="popout"
                                         >
                                           External link
                                         </span>
                                         <span
-                                          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                                          class="emotion-euiScreenReaderOnly"
                                         >
                                           (opens in a new tab or window)
                                         </span>
@@ -3043,13 +3043,13 @@ tr:hover .c4:focus::before {
                                       >
                                         tls.server_certificate.fingerprint.sha1-value
                                         <span
-                                          class="emotion-euiLink__externalIcon"
+                                          class="emotion-EuiExternalLinkIcon"
                                           data-euiicon-type="popout"
                                         >
                                           External link
                                         </span>
                                         <span
-                                          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                                          class="emotion-euiScreenReaderOnly"
                                         >
                                           (opens in a new tab or window)
                                         </span>

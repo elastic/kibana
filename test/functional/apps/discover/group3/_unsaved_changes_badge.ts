@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 const SAVED_SEARCH_NAME = 'test saved search';
 const SAVED_SEARCH_WITH_FILTERS_NAME = 'test saved search with filters';
+const SAVED_SEARCH_ESQL = 'test saved search ES|QL';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -18,6 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
   const filterBar = getService('filterBar');
+  const monacoEditor = getService('monacoEditor');
+  const browser = getService('browser');
   const PageObjects = getPageObjects([
     'settings',
     'common',
@@ -193,6 +196,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await filterBar.isFilterPinned('extension')).to.be(false);
       expect(await filterBar.isFilterNegated('bytes')).to.be(false);
       expect(await PageObjects.discover.getHitCount()).to.be('1,373');
+    });
+
+    it('should not show a badge after loading an ES|QL saved search, only after changes', async () => {
+      await PageObjects.discover.selectTextBaseLang();
+
+      await monacoEditor.setCodeEditorValue('from logstash-* | limit 10');
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await PageObjects.discover.saveSearch(SAVED_SEARCH_ESQL);
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+
+      await browser.refresh();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+
+      await monacoEditor.setCodeEditorValue('from logstash-* | limit 100');
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.existOrFail('unsavedChangesBadge');
     });
   });
 }

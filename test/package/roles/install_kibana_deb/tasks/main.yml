@@ -6,6 +6,7 @@
       - fonts-liberation
       - libfontconfig
     state: latest
+    cache_valid_time: 3600
 
 - name: find deb package
   find:

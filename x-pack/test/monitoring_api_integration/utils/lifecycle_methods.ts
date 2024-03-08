@@ -25,7 +25,16 @@ export const getLifecycleMethods = (getService: FtrProviderContext['getService']
   return {
     async setup(archives: string[] | string) {
       const archivesArray = Array.isArray(archives) ? archives : [archives];
-      await Promise.all(archivesArray.map((archive) => esArchiver.load(archive)));
+      await Promise.all(
+        archivesArray.map((archive) =>
+          esArchiver.load(archive, {
+            performance: {
+              batchSize: 300,
+              concurrency: 1,
+            },
+          })
+        )
+      );
     },
 
     async tearDown() {

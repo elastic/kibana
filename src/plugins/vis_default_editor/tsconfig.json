@@ -27,6 +27,7 @@
     "@kbn/es-ui-shared-plugin",
     "@kbn/utility-types",
     "@kbn/saved-search-plugin",
+    "@kbn/code-editor",
   ],
   "exclude": [
     "target/**/*",

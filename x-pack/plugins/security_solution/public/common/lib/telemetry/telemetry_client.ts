@@ -24,8 +24,11 @@ import type {
   ReportAssistantMessageSentParams,
   ReportAssistantQuickPromptParams,
   ReportAssistantSettingToggledParams,
+  ReportRiskInputsExpandedFlyoutOpenedParams,
+  ReportToggleRiskSummaryClickedParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
+import type { ReportAddRiskInputToTimelineClickedParams } from './events/entity_analytics/types';
 
 /**
  * Client which aggregate all the available telemetry tracking functions
@@ -106,6 +109,16 @@ export class TelemetryClient implements TelemetryClientStart {
   public reportMLJobUpdate = (params: ReportMLJobUpdateParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.MLJobUpdate, params);
   };
+
+  reportToggleRiskSummaryClicked(params: ReportToggleRiskSummaryClickedParams): void {
+    this.analytics.reportEvent(TelemetryEventTypes.ToggleRiskSummaryClicked, params);
+  }
+  reportRiskInputsExpandedFlyoutOpened(params: ReportRiskInputsExpandedFlyoutOpenedParams): void {
+    this.analytics.reportEvent(TelemetryEventTypes.RiskInputsExpandedFlyoutOpened, params);
+  }
+  reportAddRiskInputToTimelineClicked(params: ReportAddRiskInputToTimelineClickedParams): void {
+    this.analytics.reportEvent(TelemetryEventTypes.AddRiskInputToTimelineClicked, params);
+  }
 
   public reportCellActionClicked = (params: ReportCellActionClickedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.CellActionClicked, params);

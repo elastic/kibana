@@ -112,7 +112,8 @@ export async function getFullAgentPolicy(
   const inputs = await storedPackagePoliciesToAgentInputs(
     agentPolicy.package_policies as PackagePolicy[],
     packageInfoCache,
-    getOutputIdForAgentPolicy(dataOutput)
+    getOutputIdForAgentPolicy(dataOutput),
+    agentPolicy.namespace
   );
   const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
     acc[name] = featureConfig;
@@ -189,6 +190,7 @@ export async function getFullAgentPolicy(
   const dataPermissions =
     (await storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
+      agentPolicy.namespace,
       agentPolicy.package_policies
     )) || {};
 
@@ -352,12 +354,15 @@ export function transformOutputToFullPolicyOutput(
       random,
       round_robin,
       hash,
+      topic,
       topics,
       headers,
       timeout,
       broker_timeout,
       required_acks,
     } = output;
+
+    const kafkaTopic = topic ? topic : topics?.filter((t) => !t.when)?.[0]?.topic;
 
     const transformPartition = () => {
       if (!partition) return {};
@@ -395,26 +400,7 @@ export function transformOutputToFullPolicyOutput(
       ...(password ? { password } : {}),
       ...(sasl ? { sasl } : {}),
       partition: transformPartition(),
-      topics: (topics ?? []).map((topic) => {
-        const { topic: topicName, ...rest } = topic;
-        const whenKeys = Object.keys(rest);
-
-        if (whenKeys.length === 0) {
-          return { topic: topicName };
-        }
-        if (rest.when && rest.when.condition) {
-          const [keyName, value] = rest.when.condition.split(':');
-
-          return {
-            topic: topicName,
-            when: {
-              [rest.when.type as string]: {
-                [keyName.replace(/\s/g, '')]: value,
-              },
-            },
-          };
-        }
-      }),
+      topic: kafkaTopic,
       headers: (headers ?? []).filter((item) => item.key !== '' || item.value !== ''),
       timeout,
       broker_timeout,

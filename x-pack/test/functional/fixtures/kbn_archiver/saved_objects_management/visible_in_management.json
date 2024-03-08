@@ -1,0 +1,12 @@
+{
+  "attributes": {
+    "enabled": true,
+    "title": "vim-1"
+  },
+  "coreMigrationVersion": "7.14.0",
+  "id": "test-not-visible-in-management:vim-1",
+  "references": [],
+  "type": "test-not-visible-in-management",
+  "updated_at": "2018-12-21T00:43:07.096Z",
+  "version": "WzIsMV0="
+}

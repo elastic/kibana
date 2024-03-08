@@ -6,105 +6,62 @@
  * Side Public License, v 1.
  */
 
-import {
-  ContactCardEmbeddable,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-  ContactCardExportableEmbeddableFactory,
-  CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
-} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { CoreStart } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
 import { LINE_FEED_CHARACTER } from '@kbn/data-plugin/common/exports/export_csv';
-import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-
-import { ExportCSVAction } from './export_csv_action';
-import { pluginServices } from '../services/plugin_services';
-import { buildMockDashboard, getSampleDashboardPanel } from '../mocks';
-import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
+import { ExportCSVAction, ExportCsvActionApi } from './export_csv_action';
 
 describe('Export CSV action', () => {
-  let container: DashboardContainer;
-  let embeddable: ContactCardEmbeddable;
-  let coreStart: CoreStart;
-
-  const mockEmbeddableFactory = new ContactCardExportableEmbeddableFactory(
-    (() => null) as any,
-    {} as any
-  );
-  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-    .fn()
-    .mockReturnValue(mockEmbeddableFactory);
+  let action: ExportCSVAction;
+  let context: { embeddable: ExportCsvActionApi };
 
   beforeEach(async () => {
-    coreStart = coreMock.createStart();
-    coreStart.savedObjects.client = {
-      ...coreStart.savedObjects.client,
-      get: jest.fn().mockImplementation(() => ({ attributes: { title: 'Holy moly' } })),
-      find: jest.fn().mockImplementation(() => ({ total: 15 })),
-      create: jest.fn().mockImplementation(() => ({ id: 'brandNewSavedObject' })),
-    };
-
-    container = buildMockDashboard({
-      overrides: {
-        panels: {
-          '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-            explicitInput: { firstName: 'Kibanana', id: '123' },
-            type: CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
-          }),
-        },
+    action = new ExportCSVAction();
+    context = {
+      embeddable: {
+        getInspectorAdapters: () => ({
+          tables: {
+            allowCsvExport: true,
+            tables: {
+              layer1: {
+                type: 'datatable',
+                columns: [
+                  { id: 'firstName', name: 'First Name' },
+                  { id: 'originalLastName', name: 'Last Name' },
+                ],
+                rows: [
+                  {
+                    firstName: 'Kibanana',
+                    orignialLastName: 'Kiwi',
+                  },
+                ],
+              },
+            },
+          },
+        }),
       },
-    });
-
-    const contactCardEmbeddable = await container.addNewEmbeddable<
-      ContactCardEmbeddableInput,
-      ContactCardEmbeddableOutput,
-      ContactCardEmbeddable
-    >(CONTACT_CARD_EXPORTABLE_EMBEDDABLE, {
-      firstName: 'Kibana',
-    });
-
-    if (isErrorEmbeddable(contactCardEmbeddable)) {
-      throw new Error('Failed to create embeddable');
-    } else {
-      embeddable = contactCardEmbeddable;
-    }
+    };
   });
 
-  test('Download is incompatible with embeddables without getInspectorAdapters implementation', async () => {
-    const action = new ExportCSVAction();
-    const errorEmbeddable = new ErrorEmbeddable(
-      'Wow what an awful error',
-      { id: ' 404' },
-      embeddable.getRoot() as IContainer
-    );
-    expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
+  it('is compatible when api meets all conditions', async () => {
+    expect(await action.isCompatible(context)).toBe(true);
   });
 
-  test('Should download a compatible Embeddable', async () => {
-    const action = new ExportCSVAction();
-    const result = (await action.execute({ embeddable, asString: true })) as unknown as
-      | undefined
-      | Record<string, { content: string; type: string }>;
+  it('is incompatible with APIs without a getInspectorAdapters implementation', async () => {
+    const emptyContext = {
+      embeddable: {},
+    };
+    expect(await action.isCompatible(emptyContext)).toBe(false);
+  });
+
+  it('Should download if the API is compatible', async () => {
+    const result = (await action.execute({
+      embeddable: context.embeddable,
+      asString: true,
+    })) as unknown as undefined | Record<string, { content: string; type: string }>;
     expect(result).toEqual({
-      'Hello Kibana.csv': {
-        content: `First Name,Last Name${LINE_FEED_CHARACTER}Kibana,${LINE_FEED_CHARACTER}`,
+      'untitled.csv': {
+        content: `First Name,Last Name${LINE_FEED_CHARACTER}Kibanana,${LINE_FEED_CHARACTER}`,
         type: 'text/plain;charset=utf-8',
       },
     });
-  });
-
-  test('Should not download incompatible Embeddable', async () => {
-    const action = new ExportCSVAction();
-    const errorEmbeddable = new ErrorEmbeddable(
-      'Wow what an awful error',
-      { id: ' 404' },
-      embeddable.getRoot() as IContainer
-    );
-    const result = (await action.execute({
-      embeddable: errorEmbeddable,
-      asString: true,
-    })) as unknown as undefined | Record<string, string>;
-    expect(result).toBeUndefined();
   });
 });

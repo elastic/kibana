@@ -1,0 +1,474 @@
+{
+  "id": "@kbn/data-forge",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/data-forge",
+        "id": "def-common.cleanup",
+        "type": "Function",
+        "tags": [],
+        "label": "cleanup",
+        "description": [],
+        "signature": [
+          "({\n  client,\n  config: partialConfig,\n  logger,\n}: { client: ",
+          "default",
+          "; config: { elasticsearch?: { host?: string | undefined; username?: string | undefined; password?: string | undefined; apiKey?: string | undefined; installKibanaUser?: boolean | undefined; } | undefined; kibana?: { host?: string | undefined; username?: string | undefined; password?: string | undefined; installAssets?: boolean | undefined; } | undefined; indexing?: { dataset?: \"fake_hosts\" | \"fake_logs\" | \"fake_stack\" | undefined; scenario?: string | undefined; interval?: number | undefined; eventsPerCycle?: number | undefined; payloadSize?: number | undefined; concurrency?: number | undefined; reduceWeekendTrafficBy?: number | undefined; ephemeralProjectIds?: number | undefined; alignEventsToInterval?: boolean | undefined; } | undefined; schedule?: ({ template: string; start: string; end: string | boolean; } & { eventsPerCycle?: number | ({ start: number; end: number; method: \"linear\" | \"exp\" | \"sine\"; } & { options?: { period?: number | undefined; } | undefined; }) | undefined; interval?: number | undefined; delayInMinutes?: number | undefined; delayEveryMinutes?: number | undefined; randomness?: number | undefined; metrics?: ({ name: string; method: \"linear\" | \"exp\" | \"sine\"; start: number; end: number; } & { period?: number | undefined; randomness?: number | undefined; })[] | undefined; })[] | undefined; }; logger: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; }) => Promise<void>"
+        ],
+        "path": "x-pack/packages/kbn-data-forge/src/cleanup.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.cleanup.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  client,\n  config: partialConfig,\n  logger,\n}",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/cleanup.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/data-forge",
+                "id": "def-common.cleanup.$1.client",
+                "type": "Object",
+                "tags": [],
+                "label": "client",
+                "description": [],
+                "signature": [
+                  "default"
+                ],
+                "path": "x-pack/packages/kbn-data-forge/src/cleanup.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/data-forge",
+                "id": "def-common.cleanup.$1.config",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "{ elasticsearch?: { host?: string | undefined; username?: string | undefined; password?: string | undefined; apiKey?: string | undefined; installKibanaUser?: boolean | undefined; } | undefined; kibana?: { host?: string | undefined; username?: string | undefined; password?: string | undefined; installAssets?: boolean | undefined; } | undefined; indexing?: { dataset?: \"fake_hosts\" | \"fake_logs\" | \"fake_stack\" | undefined; scenario?: string | undefined; interval?: number | undefined; eventsPerCycle?: number | undefined; payloadSize?: number | undefined; concurrency?: number | undefined; reduceWeekendTrafficBy?: number | undefined; ephemeralProjectIds?: number | undefined; alignEventsToInterval?: boolean | undefined; } | undefined; schedule?: ({ template: string; start: string; end: string | boolean; } & { eventsPerCycle?: number | ({ start: number; end: number; method: \"linear\" | \"exp\" | \"sine\"; } & { options?: { period?: number | undefined; } | undefined; }) | undefined; interval?: number | undefined; delayInMinutes?: number | undefined; delayEveryMinutes?: number | undefined; randomness?: number | undefined; metrics?: ({ name: string; method: \"linear\" | \"exp\" | \"sine\"; start: number; end: number; } & { period?: number | undefined; randomness?: number | undefined; })[] | undefined; })[] | undefined; }"
+                ],
+                "path": "x-pack/packages/kbn-data-forge/src/cleanup.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/data-forge",
+                "id": "def-common.cleanup.$1.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "x-pack/packages/kbn-data-forge/src/cleanup.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-forge",
+        "id": "def-common.cli",
+        "type": "Function",
+        "tags": [],
+        "label": "cli",
+        "description": [],
+        "signature": [
+          "() => Promise<string[]>"
+        ],
+        "path": "x-pack/packages/kbn-data-forge/src/cli.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-forge",
+        "id": "def-common.createConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "createConfig",
+        "description": [],
+        "signature": [
+          "(partialConfig: { elasticsearch?: { host?: string | undefined; username?: string | undefined; password?: string | undefined; apiKey?: string | undefined; installKibanaUser?: boolean | undefined; } | undefined; kibana?: { host?: string | undefined; username?: string | undefined; password?: string | undefined; installAssets?: boolean | undefined; } | undefined; indexing?: { dataset?: \"fake_hosts\" | \"fake_logs\" | \"fake_stack\" | undefined; scenario?: string | undefined; interval?: number | undefined; eventsPerCycle?: number | undefined; payloadSize?: number | undefined; concurrency?: number | undefined; reduceWeekendTrafficBy?: number | undefined; ephemeralProjectIds?: number | undefined; alignEventsToInterval?: boolean | undefined; } | undefined; schedule?: ({ template: string; start: string; end: string | boolean; } & { eventsPerCycle?: number | ({ start: number; end: number; method: \"linear\" | \"exp\" | \"sine\"; } & { options?: { period?: number | undefined; } | undefined; }) | undefined; interval?: number | undefined; delayInMinutes?: number | undefined; delayEveryMinutes?: number | undefined; randomness?: number | undefined; metrics?: ({ name: string; method: \"linear\" | \"exp\" | \"sine\"; start: number; end: number; } & { period?: number | undefined; randomness?: number | undefined; })[] | undefined; })[] | undefined; }) => { elasticsearch: { host: string; username: string; password: string; apiKey: string; installKibanaUser: boolean; }; kibana: { host: string; username: string; password: string; installAssets: boolean; }; indexing: { dataset: \"fake_hosts\" | \"fake_logs\" | \"fake_stack\"; scenario: string; interval: number; eventsPerCycle: number; payloadSize: number; concurrency: number; reduceWeekendTrafficBy: number; ephemeralProjectIds: number; alignEventsToInterval: boolean; }; schedule: ({ template: string; start: string; end: string | boolean; } & { eventsPerCycle?: number | ({ start: number; end: number; method: \"linear\" | \"exp\" | \"sine\"; } & { options?: { period?: number | undefined; } | undefined; }) | undefined; interval?: number | undefined; delayInMinutes?: number | undefined; delayEveryMinutes?: number | undefined; randomness?: number | undefined; metrics?: ({ name: string; method: \"linear\" | \"exp\" | \"sine\"; start: number; end: number; } & { period?: number | undefined; randomness?: number | undefined; })[] | undefined; })[]; }"
+        ],
+        "path": "x-pack/packages/kbn-data-forge/src/lib/create_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.createConfig.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "partialConfig",
+            "description": [],
+            "signature": [
+              "{ elasticsearch?: { host?: string | undefined; username?: string | undefined; password?: string | undefined; apiKey?: string | undefined; installKibanaUser?: boolean | undefined; } | undefined; kibana?: { host?: string | undefined; username?: string | undefined; password?: string | undefined; installAssets?: boolean | undefined; } | undefined; indexing?: { dataset?: \"fake_hosts\" | \"fake_logs\" | \"fake_stack\" | undefined; scenario?: string | undefined; interval?: number | undefined; eventsPerCycle?: number | undefined; payloadSize?: number | undefined; concurrency?: number | undefined; reduceWeekendTrafficBy?: number | undefined; ephemeralProjectIds?: number | undefined; alignEventsToInterval?: boolean | undefined; } | undefined; schedule?: ({ template: string; start: string; end: string | boolean; } & { eventsPerCycle?: number | ({ start: number; end: number; method: \"linear\" | \"exp\" | \"sine\"; } & { options?: { period?: number | undefined; } | undefined; }) | undefined; interval?: number | undefined; delayInMinutes?: number | undefined; delayEveryMinutes?: number | undefined; randomness?: number | undefined; metrics?: ({ name: string; method: \"linear\" | \"exp\" | \"sine\"; start: number; end: number; } & { period?: number | undefined; randomness?: number | undefined; })[] | undefined; })[] | undefined; }"
+            ],
+            "path": "x-pack/packages/kbn-data-forge/src/lib/create_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-forge",
+        "id": "def-common.generate",
+        "type": "Function",
+        "tags": [],
+        "label": "generate",
+        "description": [],
+        "signature": [
+          "({ client, config: partialConfig, logger, }: { client: ",
+          "default",
+          "; config: { elasticsearch?: { host?: string | undefined; username?: string | undefined; password?: string | undefined; apiKey?: string | undefined; installKibanaUser?: boolean | undefined; } | undefined; kibana?: { host?: string | undefined; username?: string | undefined; password?: string | undefined; installAssets?: boolean | undefined; } | undefined; indexing?: { dataset?: \"fake_hosts\" | \"fake_logs\" | \"fake_stack\" | undefined; scenario?: string | undefined; interval?: number | undefined; eventsPerCycle?: number | undefined; payloadSize?: number | undefined; concurrency?: number | undefined; reduceWeekendTrafficBy?: number | undefined; ephemeralProjectIds?: number | undefined; alignEventsToInterval?: boolean | undefined; } | undefined; schedule?: ({ template: string; start: string; end: string | boolean; } & { eventsPerCycle?: number | ({ start: number; end: number; method: \"linear\" | \"exp\" | \"sine\"; } & { options?: { period?: number | undefined; } | undefined; }) | undefined; interval?: number | undefined; delayInMinutes?: number | undefined; delayEveryMinutes?: number | undefined; randomness?: number | undefined; metrics?: ({ name: string; method: \"linear\" | \"exp\" | \"sine\"; start: number; end: number; } & { period?: number | undefined; randomness?: number | undefined; })[] | undefined; })[] | undefined; }; logger: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; }) => Promise<string[]>"
+        ],
+        "path": "x-pack/packages/kbn-data-forge/src/generate.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.generate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  client,\n  config: partialConfig,\n  logger,\n}",
+            "description": [],
+            "path": "x-pack/packages/kbn-data-forge/src/generate.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/data-forge",
+                "id": "def-common.generate.$1.client",
+                "type": "Object",
+                "tags": [],
+                "label": "client",
+                "description": [],
+                "signature": [
+                  "default"
+                ],
+                "path": "x-pack/packages/kbn-data-forge/src/generate.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/data-forge",
+                "id": "def-common.generate.$1.config",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "{ elasticsearch?: { host?: string | undefined; username?: string | undefined; password?: string | undefined; apiKey?: string | undefined; installKibanaUser?: boolean | undefined; } | undefined; kibana?: { host?: string | undefined; username?: string | undefined; password?: string | undefined; installAssets?: boolean | undefined; } | undefined; indexing?: { dataset?: \"fake_hosts\" | \"fake_logs\" | \"fake_stack\" | undefined; scenario?: string | undefined; interval?: number | undefined; eventsPerCycle?: number | undefined; payloadSize?: number | undefined; concurrency?: number | undefined; reduceWeekendTrafficBy?: number | undefined; ephemeralProjectIds?: number | undefined; alignEventsToInterval?: boolean | undefined; } | undefined; schedule?: ({ template: string; start: string; end: string | boolean; } & { eventsPerCycle?: number | ({ start: number; end: number; method: \"linear\" | \"exp\" | \"sine\"; } & { options?: { period?: number | undefined; } | undefined; }) | undefined; interval?: number | undefined; delayInMinutes?: number | undefined; delayEveryMinutes?: number | undefined; randomness?: number | undefined; metrics?: ({ name: string; method: \"linear\" | \"exp\" | \"sine\"; start: number; end: number; } & { period?: number | undefined; randomness?: number | undefined; })[] | undefined; })[] | undefined; }"
+                ],
+                "path": "x-pack/packages/kbn-data-forge/src/generate.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/data-forge",
+                "id": "def-common.generate.$1.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "x-pack/packages/kbn-data-forge/src/generate.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-forge",
+        "id": "def-common.readConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "readConfig",
+        "description": [],
+        "signature": [
+          "(filePath: string) => Promise<{ elasticsearch?: { host?: string | undefined; username?: string | undefined; password?: string | undefined; apiKey?: string | undefined; installKibanaUser?: boolean | undefined; } | undefined; kibana?: { host?: string | undefined; username?: string | undefined; password?: string | undefined; installAssets?: boolean | undefined; } | undefined; indexing?: { dataset?: \"fake_hosts\" | \"fake_logs\" | \"fake_stack\" | undefined; scenario?: string | undefined; interval?: number | undefined; eventsPerCycle?: number | undefined; payloadSize?: number | undefined; concurrency?: number | undefined; reduceWeekendTrafficBy?: number | undefined; ephemeralProjectIds?: number | undefined; alignEventsToInterval?: boolean | undefined; } | undefined; schedule?: ({ template: string; start: string; end: string | boolean; } & { eventsPerCycle?: number | ({ start: number; end: number; method: \"linear\" | \"exp\" | \"sine\"; } & { options?: { period?: number | undefined; } | undefined; }) | undefined; interval?: number | undefined; delayInMinutes?: number | undefined; delayEveryMinutes?: number | undefined; randomness?: number | undefined; metrics?: ({ name: string; method: \"linear\" | \"exp\" | \"sine\"; start: number; end: number; } & { period?: number | undefined; randomness?: number | undefined; })[] | undefined; })[] | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-data-forge/src/lib/create_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.readConfig.$1",
+            "type": "string",
+            "tags": [],
+            "label": "filePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/kbn-data-forge/src/lib/create_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-forge",
+        "id": "def-common.run",
+        "type": "Function",
+        "tags": [],
+        "label": "run",
+        "description": [],
+        "signature": [
+          "(config: { elasticsearch: { host: string; username: string; password: string; apiKey: string; installKibanaUser: boolean; }; kibana: { host: string; username: string; password: string; installAssets: boolean; }; indexing: { dataset: \"fake_hosts\" | \"fake_logs\" | \"fake_stack\"; scenario: string; interval: number; eventsPerCycle: number; payloadSize: number; concurrency: number; reduceWeekendTrafficBy: number; ephemeralProjectIds: number; alignEventsToInterval: boolean; }; schedule: ({ template: string; start: string; end: string | boolean; } & { eventsPerCycle?: number | ({ start: number; end: number; method: \"linear\" | \"exp\" | \"sine\"; } & { options?: { period?: number | undefined; } | undefined; }) | undefined; interval?: number | undefined; delayInMinutes?: number | undefined; delayEveryMinutes?: number | undefined; randomness?: number | undefined; metrics?: ({ name: string; method: \"linear\" | \"exp\" | \"sine\"; start: number; end: number; } & { period?: number | undefined; randomness?: number | undefined; })[] | undefined; })[]; }, client: ",
+          "default",
+          ", logger: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => Promise<string[]>"
+        ],
+        "path": "x-pack/packages/kbn-data-forge/src/run.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.run.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "{ elasticsearch: { host: string; username: string; password: string; apiKey: string; installKibanaUser: boolean; }; kibana: { host: string; username: string; password: string; installAssets: boolean; }; indexing: { dataset: \"fake_hosts\" | \"fake_logs\" | \"fake_stack\"; scenario: string; interval: number; eventsPerCycle: number; payloadSize: number; concurrency: number; reduceWeekendTrafficBy: number; ephemeralProjectIds: number; alignEventsToInterval: boolean; }; schedule: ({ template: string; start: string; end: string | boolean; } & { eventsPerCycle?: number | ({ start: number; end: number; method: \"linear\" | \"exp\" | \"sine\"; } & { options?: { period?: number | undefined; } | undefined; }) | undefined; interval?: number | undefined; delayInMinutes?: number | undefined; delayEveryMinutes?: number | undefined; randomness?: number | undefined; metrics?: ({ name: string; method: \"linear\" | \"exp\" | \"sine\"; start: number; end: number; } & { period?: number | undefined; randomness?: number | undefined; })[] | undefined; })[]; }"
+            ],
+            "path": "x-pack/packages/kbn-data-forge/src/run.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.run.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              "default"
+            ],
+            "path": "x-pack/packages/kbn-data-forge/src/run.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/data-forge",
+            "id": "def-common.run.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "x-pack/packages/kbn-data-forge/src/run.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/data-forge",
+        "id": "def-common.Config",
+        "type": "Type",
+        "tags": [],
+        "label": "Config",
+        "description": [],
+        "signature": [
+          "{ elasticsearch: { host: string; username: string; password: string; apiKey: string; installKibanaUser: boolean; }; kibana: { host: string; username: string; password: string; installAssets: boolean; }; indexing: { dataset: \"fake_hosts\" | \"fake_logs\" | \"fake_stack\"; scenario: string; interval: number; eventsPerCycle: number; payloadSize: number; concurrency: number; reduceWeekendTrafficBy: number; ephemeralProjectIds: number; alignEventsToInterval: boolean; }; schedule: ({ template: string; start: string; end: string | boolean; } & { eventsPerCycle?: number | ({ start: number; end: number; method: \"linear\" | \"exp\" | \"sine\"; } & { options?: { period?: number | undefined; } | undefined; }) | undefined; interval?: number | undefined; delayInMinutes?: number | undefined; delayEveryMinutes?: number | undefined; randomness?: number | undefined; metrics?: ({ name: string; method: \"linear\" | \"exp\" | \"sine\"; start: number; end: number; } & { period?: number | undefined; randomness?: number | undefined; })[] | undefined; })[]; }"
+        ],
+        "path": "x-pack/packages/kbn-data-forge/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-forge",
+        "id": "def-common.Dataset",
+        "type": "Type",
+        "tags": [],
+        "label": "Dataset",
+        "description": [],
+        "signature": [
+          "\"fake_hosts\" | \"fake_logs\" | \"fake_stack\""
+        ],
+        "path": "x-pack/packages/kbn-data-forge/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-forge",
+        "id": "def-common.EventsPerCycle",
+        "type": "Type",
+        "tags": [],
+        "label": "EventsPerCycle",
+        "description": [],
+        "signature": [
+          "number | ({ start: number; end: number; method: \"linear\" | \"exp\" | \"sine\"; } & { options?: { period?: number | undefined; } | undefined; })"
+        ],
+        "path": "x-pack/packages/kbn-data-forge/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-forge",
+        "id": "def-common.MetricEventDef",
+        "type": "Type",
+        "tags": [],
+        "label": "MetricEventDef",
+        "description": [],
+        "signature": [
+          "{ name: string; method: \"linear\" | \"exp\" | \"sine\"; start: number; end: number; } & { period?: number | undefined; randomness?: number | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-data-forge/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-forge",
+        "id": "def-common.PartialConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "PartialConfig",
+        "description": [],
+        "signature": [
+          "{ elasticsearch?: { host?: string | undefined; username?: string | undefined; password?: string | undefined; apiKey?: string | undefined; installKibanaUser?: boolean | undefined; } | undefined; kibana?: { host?: string | undefined; username?: string | undefined; password?: string | undefined; installAssets?: boolean | undefined; } | undefined; indexing?: { dataset?: \"fake_hosts\" | \"fake_logs\" | \"fake_stack\" | undefined; scenario?: string | undefined; interval?: number | undefined; eventsPerCycle?: number | undefined; payloadSize?: number | undefined; concurrency?: number | undefined; reduceWeekendTrafficBy?: number | undefined; ephemeralProjectIds?: number | undefined; alignEventsToInterval?: boolean | undefined; } | undefined; schedule?: ({ template: string; start: string; end: string | boolean; } & { eventsPerCycle?: number | ({ start: number; end: number; method: \"linear\" | \"exp\" | \"sine\"; } & { options?: { period?: number | undefined; } | undefined; }) | undefined; interval?: number | undefined; delayInMinutes?: number | undefined; delayEveryMinutes?: number | undefined; randomness?: number | undefined; metrics?: ({ name: string; method: \"linear\" | \"exp\" | \"sine\"; start: number; end: number; } & { period?: number | undefined; randomness?: number | undefined; })[] | undefined; })[] | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-data-forge/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-forge",
+        "id": "def-common.Schedule",
+        "type": "Type",
+        "tags": [],
+        "label": "Schedule",
+        "description": [],
+        "signature": [
+          "{ template: string; start: string; end: string | boolean; } & { eventsPerCycle?: number | ({ start: number; end: number; method: \"linear\" | \"exp\" | \"sine\"; } & { options?: { period?: number | undefined; } | undefined; }) | undefined; interval?: number | undefined; delayInMinutes?: number | undefined; delayEveryMinutes?: number | undefined; randomness?: number | undefined; metrics?: ({ name: string; method: \"linear\" | \"exp\" | \"sine\"; start: number; end: number; } & { period?: number | undefined; randomness?: number | undefined; })[] | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-data-forge/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-forge",
+        "id": "def-common.TransitionMethod",
+        "type": "Type",
+        "tags": [],
+        "label": "TransitionMethod",
+        "description": [],
+        "signature": [
+          "\"linear\" | \"exp\" | \"sine\""
+        ],
+        "path": "x-pack/packages/kbn-data-forge/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

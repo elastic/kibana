@@ -25,19 +25,19 @@ describe('CustomFields', () => {
     appMockRender = createAppMockRenderer();
   });
 
-  it('renders correctly', () => {
+  it('renders correctly', async () => {
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
         <CustomFields isLoading={false} customFieldsConfiguration={customFieldsConfigurationMock} />
       </FormTestComponent>
     );
 
-    expect(screen.getByText(i18n.ADDITIONAL_FIELDS)).toBeInTheDocument();
-    expect(screen.getByTestId('create-case-custom-fields')).toBeInTheDocument();
+    expect(await screen.findByText(i18n.ADDITIONAL_FIELDS)).toBeInTheDocument();
+    expect(await screen.findByTestId('create-case-custom-fields')).toBeInTheDocument();
 
     for (const item of customFieldsConfigurationMock) {
       expect(
-        screen.getByTestId(`${item.key}-${item.type}-create-custom-field`)
+        await screen.findByTestId(`${item.key}-${item.type}-create-custom-field`)
       ).toBeInTheDocument();
     }
   });
@@ -66,10 +66,12 @@ describe('CustomFields', () => {
 
     const customFields = customFieldsWrapper.querySelectorAll('.euiFormRow');
 
-    expect(customFields).toHaveLength(2);
+    expect(customFields).toHaveLength(4);
 
     expect(customFields[0]).toHaveTextContent('My test label 1');
     expect(customFields[1]).toHaveTextContent('My test label 2');
+    expect(customFields[2]).toHaveTextContent('My test label 3');
+    expect(customFields[3]).toHaveTextContent('My test label 4');
   });
 
   it('should update the custom fields', async () => {
@@ -81,24 +83,26 @@ describe('CustomFields', () => {
       </FormTestComponent>
     );
 
-    const textField = customFieldsConfigurationMock[0];
-    const toggleField = customFieldsConfigurationMock[1];
+    const textField = customFieldsConfigurationMock[2];
+    const toggleField = customFieldsConfigurationMock[3];
 
     userEvent.type(
-      screen.getByTestId(`${textField.key}-${textField.type}-create-custom-field`),
+      await screen.findByTestId(`${textField.key}-${textField.type}-create-custom-field`),
       'hello'
     );
     userEvent.click(
-      screen.getByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
+      await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
       expect(onSubmit).toHaveBeenCalledWith(
         {
           customFields: {
+            [customFieldsConfigurationMock[0].key]: customFieldsConfigurationMock[0].defaultValue,
+            [customFieldsConfigurationMock[1].key]: customFieldsConfigurationMock[1].defaultValue,
             [textField.key]: 'hello',
             [toggleField.key]: true,
           },

@@ -10,6 +10,7 @@ import type {
   AGENT_TYPE_PERMANENT,
   AGENT_TYPE_TEMPORARY,
   FleetServerAgentComponentStatuses,
+  AgentStatuses,
 } from '../../constants';
 
 export type AgentType =
@@ -17,16 +18,8 @@ export type AgentType =
   | typeof AGENT_TYPE_PERMANENT
   | typeof AGENT_TYPE_TEMPORARY;
 
-export type AgentStatus =
-  | 'offline'
-  | 'error'
-  | 'online'
-  | 'inactive'
-  | 'enrolling'
-  | 'unenrolling'
-  | 'unenrolled'
-  | 'updating'
-  | 'degraded';
+type AgentStatusTuple = typeof AgentStatuses;
+export type AgentStatus = AgentStatusTuple[number];
 
 export type SimplifiedAgentStatus =
   | 'healthy'
@@ -449,5 +442,7 @@ export interface AgentUpgradeDetails {
     download_rate?: number; // bytes per second
     failed_state?: AgentUpgradeStateType;
     error_msg?: string;
+    retry_error_msg?: string;
+    retry_until?: string;
   };
 }

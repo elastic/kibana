@@ -8,7 +8,8 @@
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { MLCATEGORY, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
@@ -22,6 +23,7 @@ import type { JobCreatorType } from '../common/job_creator';
 
 export const CATEGORIZATION_TYPE = {
   COUNT: ML_JOB_AGGREGATION.COUNT,
+  HIGH_COUNT: ML_JOB_AGGREGATION.HIGH_COUNT,
   RARE: ML_JOB_AGGREGATION.RARE,
 } as const;
 
@@ -29,13 +31,14 @@ export type CategorizationType = typeof CATEGORIZATION_TYPE[keyof typeof CATEGOR
 
 export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
   constructor(
+    dataViews: DataViewsContract,
     kibanaConfig: IUiSettingsClient,
     timeFilter: TimefilterContract,
     dashboardService: DashboardStart,
     private data: DataPublicPluginStart,
     mlApiServices: MlApiServices
   ) {
-    super(kibanaConfig, timeFilter, dashboardService, mlApiServices);
+    super(dataViews, kibanaConfig, timeFilter, dashboardService, mlApiServices);
   }
 
   public async createAndSaveJob(

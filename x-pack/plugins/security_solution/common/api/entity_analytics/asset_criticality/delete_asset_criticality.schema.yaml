@@ -12,6 +12,7 @@ servers:
 paths:
   /internal/asset_criticality:
     delete:
+      operationId: AssetCriticalityDeleteRecord
       summary: Delete Criticality Record
       parameters:
         - $ref: './common.schema.yaml#/components/parameters/id_value'

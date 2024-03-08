@@ -617,3 +617,32 @@ Pagination in a data table is unsupported. To use pagination in data tables, cre
 ====
 Specifying the color for a single data point, such as a single bar or line, is unsupported.
 ====
+
+[discrete]
+[[dynamic-metric-coloring]]
+.*How does dynamic coloring work for the metric visualization?*
+[%collapsible]
+====
+In the color palette editor, if you select *Value type: Number* the colors are applied based on the *Primary metric* value.
+
+The *Primary metric* refers to the large number displayed in each tile.
+
+[role="screenshot"]
+image:images/lens_primaryMetric.png[Illustration of where to find the primary metric in a metric visualization.]
+
+
+If you select *Value type: Percent*, the primary metric values are mapped to a range between 0 and 100 percent. The bounds of the range depend on your configuration.
+
+The logic is as follows. If there is a Breakdown dimension for multiple visualization tiles:
+
+* When there is a *Maximum dimension*, the range is from zero to the value of your *Maximum dimension*.
+
+* When there is no *Maximum dimension*, the range is from the smallest primary metric values to the greatest primary metric values.
+
+If there is no Breakdown dimension for a single visualization tile:
+
+* When there is a *Maximum dimension*, the range is from zero to the value of your *Maximum dimension*.
+
+* When there is no *Maximum dimension*, *Value type: Percent* cannot be selected because there's no way to determine a range.
+
+====

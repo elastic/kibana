@@ -12,7 +12,8 @@ import { assertLogContains, isExecutionContextLog, readLogFile } from '../test_u
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'timePicker']);
 
-  describe('Browser apps', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/112103
+  describe.skip('Browser apps', () => {
     let logs: Ecs[];
     const retry = getService('retry');
 

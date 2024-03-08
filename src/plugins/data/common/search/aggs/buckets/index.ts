@@ -21,6 +21,8 @@ export * from './geo_tile_fn';
 export * from './geo_tile';
 export * from './histogram_fn';
 export * from './histogram';
+export * from './ip_prefix_fn';
+export * from './ip_prefix';
 export * from './ip_range_fn';
 export * from './ip_range';
 export * from './lib/cidr_mask';

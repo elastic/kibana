@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC, memo, useCallback } from 'react';
+import React, { FC, memo, useCallback, useEffect } from 'react';
 import { Chart, Goal, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PaletteOutput } from '@kbn/coloring';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { type ChartSizeSpec, getOverridesFor } from '@kbn/chart-expressions-common';
 import { isVisDimension } from '@kbn/visualizations-plugin/common/utils';
 import { i18n } from '@kbn/i18n';
 import {
@@ -178,6 +178,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     chartsThemeService,
     renderComplete,
     overrides,
+    setChartSize,
   }) => {
     const {
       shape: gaugeType,
@@ -252,6 +253,24 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       },
       [renderComplete]
     );
+
+    useEffect(() => {
+      const chartSizeSpec: ChartSizeSpec = {
+        maxDimensions: {
+          ...(gaugeType === GaugeShapes.HORIZONTAL_BULLET
+            ? {
+                x: { value: 600, unit: 'pixels' },
+                y: { value: 300, unit: 'pixels' },
+              }
+            : {
+                y: { value: 600, unit: 'pixels' },
+                x: { value: 300, unit: 'pixels' },
+              }),
+        },
+      };
+
+      setChartSize(chartSizeSpec);
+    }, [gaugeType, setChartSize]);
 
     const table = data;
     const accessors = getAccessorsFromArgs(args, table.columns);

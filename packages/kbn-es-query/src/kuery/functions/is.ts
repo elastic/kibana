@@ -159,7 +159,7 @@ export function toElasticsearchQuery(
         ? {
             wildcard: {
               [field.name]: {
-                value,
+                value: wildcard.toQueryStringQuery(valueArg),
                 ...(typeof config.caseInsensitive === 'boolean' && {
                   case_insensitive: config.caseInsensitive,
                 }),

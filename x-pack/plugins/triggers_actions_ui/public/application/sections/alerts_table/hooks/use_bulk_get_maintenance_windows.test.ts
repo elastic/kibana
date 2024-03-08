@@ -15,8 +15,15 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useBulkGetMaintenanceWindows } from './use_bulk_get_maintenance_windows';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { useLicense } from '../../../hooks/use_license';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 
-jest.mock('../../../../common/lib/kibana');
+const mockUseKibanaReturnValue = createStartServicesMock();
+jest.mock('../../../../common/lib/kibana', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => ({
+    services: mockUseKibanaReturnValue,
+  })),
+}));
 jest.mock('../../../hooks/use_license');
 jest.mock('./apis/bulk_get_maintenance_windows');
 

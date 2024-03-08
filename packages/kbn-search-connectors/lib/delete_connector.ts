@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { CONNECTORS_INDEX } from '..';
 import { cancelSyncs } from './cancel_syncs';
 
 export const deleteConnectorById = async (client: ElasticsearchClient, id: string) => {
@@ -17,5 +17,8 @@ export const deleteConnectorById = async (client: ElasticsearchClient, id: strin
     return promise;
   };
   await Promise.all([cancelSyncs(client, id), timeout]);
-  return await client.delete({ id, index: CONNECTORS_INDEX, refresh: 'wait_for' });
+  return await client.transport.request<AcknowledgedResponseBase>({
+    method: 'DELETE',
+    path: `/_connector/${id}`,
+  });
 };

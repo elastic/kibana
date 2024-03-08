@@ -6,13 +6,7 @@
  */
 
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-} from '../../../common/mock';
-import { createStore } from '../../../common/store';
+import { createMockStore, mockGlobalState } from '../../../common/mock';
 import { createFilterOutCellActionFactory } from './filter_out';
 import type { SecurityCellActionExecutionContext } from '../../types';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
@@ -39,8 +33,7 @@ const mockState = {
   },
 };
 
-const { storage } = createSecuritySolutionStorageMock();
-const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const mockStore = createMockStore(mockState);
 
 describe('createFilterOutCellActionFactory', () => {
   const filterOutActionFactory = createFilterOutCellActionFactory({ store: mockStore, services });

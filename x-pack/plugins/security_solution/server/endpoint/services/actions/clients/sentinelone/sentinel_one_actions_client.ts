@@ -13,14 +13,22 @@ import {
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { once } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { dump } from '../../../../utils/dump';
-import { ResponseActionsClientError } from '../errors';
-import type { ActionDetails } from '../../../../../../common/endpoint/types';
 import type {
-  IsolationRouteRequestBody,
-  BaseActionRequestBody,
-} from '../../../../../../common/api/endpoint';
-import type { ResponseActionsClientOptions } from '../lib/base_response_actions_client';
+  SentinelOneGetAgentsResponse,
+  SentinelOneGetAgentsParams,
+} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { CommonResponseActionMethodOptions } from '../../..';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { SentinelOneConnectorExecuteOptions } from './types';
+import { stringify } from '../../../../utils/stringify';
+import { ResponseActionsClientError } from '../errors';
+import type { ActionDetails, LogsEndpointAction } from '../../../../../../common/endpoint/types';
+import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
+import type {
+  ResponseActionsClientOptions,
+  ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
+  ResponseActionsClientValidateRequestResponse,
+} from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 
 export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
@@ -28,6 +36,7 @@ export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
 };
 
 export class SentinelOneActionsClient extends ResponseActionsClientImpl {
+  protected readonly agentType: ResponseActionAgentType = 'sentinel_one';
   private readonly connectorActionsClient: ActionsClient;
   private readonly getConnector: () => Promise<ConnectorWithExtraFindData>;
 
@@ -67,14 +76,27 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     });
   }
 
+  protected async writeActionRequestToEndpointIndex(
+    actionRequest: Omit<ResponseActionsClientWriteActionRequestToEndpointIndexOptions, 'hosts'>
+  ): Promise<LogsEndpointAction> {
+    const agentId = actionRequest.endpoint_ids[0];
+    const agentDetails = await this.getAgentDetails(agentId);
+
+    return super.writeActionRequestToEndpointIndex({
+      ...actionRequest,
+      hosts: {
+        [agentId]: { name: agentDetails.computerName },
+      },
+    });
+  }
+
   /**
-   * Sends actions to SentinelOne directly
+   * Sends actions to SentinelOne directly (via Connector)
    * @private
    */
   private async sendAction(
     actionType: SUB_ACTION,
     actionParams: object
-    // FIXME:PT type properly the options above once PR 168441 for 8.12 merges
   ): Promise<ActionTypeExecutorResult<unknown>> {
     const { id: connectorId } = await this.getConnector();
     const executeOptions: Parameters<typeof this.connectorActionsClient.execute>[0] = {
@@ -86,13 +108,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     };
 
     this.log.debug(
-      `calling connector actions 'execute()' for SentinelOne with:\n${dump(executeOptions)}`
+      `calling connector actions 'execute()' for SentinelOne with:\n${stringify(executeOptions)}`
     );
 
     const actionSendResponse = await this.connectorActionsClient.execute(executeOptions);
 
     if (actionSendResponse.status === 'error') {
-      this.log.error(dump(actionSendResponse));
+      this.log.error(stringify(actionSendResponse));
 
       throw new ResponseActionsClientError(
         `Attempt to send [${actionType}] to SentinelOne failed: ${
@@ -103,45 +125,175 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       );
     }
 
-    this.log.debug(`Response:\n${dump(actionSendResponse)}`);
+    this.log.debug(`Response:\n${stringify(actionSendResponse)}`);
 
     return actionSendResponse;
   }
 
-  private async validateRequest(payload: BaseActionRequestBody): Promise<void> {
-    if (payload.endpoint_ids.length > 1) {
+  private async getAgentDetails(id: string): Promise<SentinelOneGetAgentsResponse['data'][number]> {
+    const { id: connectorId } = await this.getConnector();
+    const executeOptions: SentinelOneConnectorExecuteOptions<SentinelOneGetAgentsParams> = {
+      actionId: connectorId,
+      params: {
+        subAction: SUB_ACTION.GET_AGENTS,
+        subActionParams: {
+          uuid: id,
+        },
+      },
+    };
+
+    let s1ApiResponse: SentinelOneGetAgentsResponse | undefined;
+
+    try {
+      const response = (await this.connectorActionsClient.execute(
+        executeOptions
+      )) as ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
+
+      this.log.debug(`Response for SentinelOne agent id [${id}] returned:\n${stringify(response)}`);
+
+      s1ApiResponse = response.data;
+    } catch (err) {
       throw new ResponseActionsClientError(
-        `[body.endpoint_ids]: Multiple agents IDs not currently supported for SentinelOne`,
-        400
+        `Error while attempting to retrieve SentinelOne host with agent id [${id}]`,
+        500,
+        err
       );
     }
+
+    if (!s1ApiResponse || !s1ApiResponse.data[0]) {
+      throw new ResponseActionsClientError(`SentinelOne agent id [${id}] not found`, 404);
+    }
+
+    return s1ApiResponse.data[0];
   }
 
-  async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+  protected async validateRequest(
+    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+  ): Promise<ResponseActionsClientValidateRequestResponse> {
     // TODO:PT support multiple agents
-    await this.validateRequest(options);
+    if (payload.endpoint_ids.length > 1) {
+      return {
+        isValid: false,
+        error: new ResponseActionsClientError(
+          `[body.endpoint_ids]: Multiple agents IDs not currently supported for SentinelOne`,
+          400
+        ),
+      };
+    }
 
-    const agentUUID = options.endpoint_ids[0];
+    return super.validateRequest(payload);
+  }
 
-    await this.sendAction(SUB_ACTION.ISOLATE_HOST, {
-      uuid: agentUUID,
-    });
-
-    // FIXME:PT need to grab data from the response above and store it with the Request or Response documents on our side
-
-    const actionRequestDoc = await this.writeActionRequestToEndpointIndex({
-      ...options,
+  async isolate(
+    actionRequest: IsolationRouteRequestBody,
+    options: CommonResponseActionMethodOptions = {}
+  ): Promise<ActionDetails> {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
       command: 'isolate',
+    };
+
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      if (!error) {
+        try {
+          await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: actionRequest.endpoint_ids[0] });
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+
+    await this.updateCases({
+      command: reqIndexOptions.command,
+      caseIds: reqIndexOptions.case_ids,
+      alertIds: reqIndexOptions.alert_ids,
+      actionId: actionRequestDoc.EndpointActions.action_id,
+      hosts: actionRequest.endpoint_ids.map((agentId) => {
+        return {
+          hostId: agentId,
+          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
+        };
+      }),
+      comment: reqIndexOptions.comment,
     });
 
-    // TODO: un-comment code below once we have proper authz given to `kibana_system` account (security issue #8190)
-    // await this.writeActionResponseToEndpointIndex({
-    //   actionId: actionRequestDoc.EndpointActions.action_id,
-    //   agentId: actionRequestDoc.agent.id,
-    //   data: {
-    //     command: actionRequestDoc.EndpointActions.data.command,
-    //   },
-    // });
+    if (!actionRequestDoc.error) {
+      await this.writeActionResponseToEndpointIndex({
+        actionId: actionRequestDoc.EndpointActions.action_id,
+        agentId: actionRequestDoc.agent.id,
+        data: {
+          command: actionRequestDoc.EndpointActions.data.command,
+        },
+      });
+    }
+
+    return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+  }
+
+  async release(
+    actionRequest: IsolationRouteRequestBody,
+    options: CommonResponseActionMethodOptions = {}
+  ): Promise<ActionDetails> {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'unisolate',
+    };
+
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      if (!error) {
+        try {
+          await this.sendAction(SUB_ACTION.RELEASE_HOST, { uuid: actionRequest.endpoint_ids[0] });
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+
+    await this.updateCases({
+      command: reqIndexOptions.command,
+      caseIds: reqIndexOptions.case_ids,
+      alertIds: reqIndexOptions.alert_ids,
+      actionId: actionRequestDoc.EndpointActions.action_id,
+      hosts: actionRequest.endpoint_ids.map((agentId) => {
+        return {
+          hostId: agentId,
+          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
+        };
+      }),
+      comment: reqIndexOptions.comment,
+    });
+
+    if (!actionRequestDoc.error) {
+      await this.writeActionResponseToEndpointIndex({
+        actionId: actionRequestDoc.EndpointActions.action_id,
+        agentId: actionRequestDoc.agent.id,
+        data: {
+          command: actionRequestDoc.EndpointActions.data.command,
+        },
+      });
+    }
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }

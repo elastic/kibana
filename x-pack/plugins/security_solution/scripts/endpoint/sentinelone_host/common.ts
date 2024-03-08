@@ -209,7 +209,10 @@ export const installSentinelOneAgent = async ({
 
     try {
       // Generate an alert in SentinelOne
-      await hostVm.exec('nslookup amazon.com');
+      const command = 'nslookup elastic.co';
+
+      log?.info(`Triggering alert using command: ${command}`);
+      await hostVm.exec(command);
     } catch (e) {
       log?.warning(`Attempted to generate an alert on SentinelOne host failed: ${e.message}`);
     }
@@ -265,7 +268,7 @@ export const createDetectionEngineSentinelOneRuleIfNeeded = async (
   log: ToolingLog
 ): Promise<RuleResponse> => {
   const ruleName = 'Promote SentinelOne alerts';
-  const sentinelOneAlertsIndexPattern = 'logs-sentinel_one.alert';
+  const sentinelOneAlertsIndexPattern = 'logs-sentinel_one.alert*';
   const ruleQueryValue = 'observer.serial_number:*';
 
   const { data } = await findRules(kbnClient, {

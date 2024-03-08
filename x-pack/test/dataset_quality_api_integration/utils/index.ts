@@ -8,3 +8,4 @@
 export { joinByKey } from './join_by_key';
 export { maybe } from './maybe';
 export { expectToReject } from './expect_to_reject';
+export * from './data_stream';

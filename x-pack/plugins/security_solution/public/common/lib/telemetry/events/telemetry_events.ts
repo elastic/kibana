@@ -15,6 +15,9 @@ import {
   entityAlertsClickedEvent,
   entityClickedEvent,
   entityRiskFilteredEvent,
+  addRiskInputToTimelineClickedEvent,
+  RiskInputsExpandedFlyoutOpenedEvent,
+  toggleRiskSummaryClickedEvent,
 } from './entity_analytics';
 import {
   assistantInvokedEvent,
@@ -143,6 +146,9 @@ export const telemetryEvents = [
   entityClickedEvent,
   entityAlertsClickedEvent,
   entityRiskFilteredEvent,
+  toggleRiskSummaryClickedEvent,
+  RiskInputsExpandedFlyoutOpenedEvent,
+  addRiskInputToTimelineClickedEvent,
   mlJobUpdateEvent,
   cellActionClickedEvent,
   anomaliesCountClickedEvent,

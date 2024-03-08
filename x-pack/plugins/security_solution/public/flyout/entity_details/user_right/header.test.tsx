@@ -12,9 +12,9 @@ import { TestProviders } from '../../../common/mock';
 import {
   managedUserDetails,
   mockManagedUserData,
-  mockObservedUser,
 } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
 import { UserPanelHeader } from './header';
+import { mockObservedUser } from './mocks';
 
 const mockProps = {
   userName: 'test',

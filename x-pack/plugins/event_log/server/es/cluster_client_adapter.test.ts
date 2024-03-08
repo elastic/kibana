@@ -447,7 +447,7 @@ describe('setIndexAliasToHidden', () => {
   });
 });
 
-export const GetDataStreamsResponse = {
+export const GetDataStreamsResponse: estypes.IndicesGetDataStreamResponse = {
   data_streams: [
     {
       name: 'foo',
@@ -457,6 +457,8 @@ export const GetDataStreamsResponse = {
       indices: [],
       template: '',
       hidden: true,
+      prefer_ilm: false,
+      next_generation_managed_by: 'Index Lifecycle Management',
     },
   ],
 };
@@ -673,6 +675,13 @@ describe('aggregateEventsBySavedObject', () => {
           ],
         },
       },
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 0,
+        },
+      },
     });
   });
 });
@@ -769,6 +778,13 @@ describe('aggregateEventsWithAuthFilter', () => {
               doc_count: 2,
             },
           ],
+        },
+      },
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 0,
         },
       },
     });
@@ -917,6 +933,13 @@ describe('aggregateEventsWithAuthFilter', () => {
               doc_count: 2,
             },
           ],
+        },
+      },
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 0,
         },
       },
     });

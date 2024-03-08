@@ -8,20 +8,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import WebhookParamsFields from './webhook_params';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import { CasesWebhookActionConnector } from './types';
-
-const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 
 const actionParams = {
   subAction: 'pushToService',
@@ -53,7 +40,7 @@ describe('WebhookParamsFields renders', () => {
         actionConnector={actionConnector}
         actionParams={actionParams}
         errors={{ body: [] }}
-        editAction={() => {}}
+        editAction={jest.fn()}
         index={0}
         messageVariables={[
           {
@@ -85,7 +72,7 @@ describe('WebhookParamsFields renders', () => {
         actionConnector={actionConnectorNoComments}
         actionParams={actionParams}
         errors={{ body: [] }}
-        editAction={() => {}}
+        editAction={jest.fn()}
         index={0}
         messageVariables={[
           {

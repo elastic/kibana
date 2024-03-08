@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, useState, memo } from 'react';
+import type { FC } from 'react';
+import React, { useState, memo } from 'react';
 
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCode,
@@ -17,11 +19,10 @@ import {
   EuiLink,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 

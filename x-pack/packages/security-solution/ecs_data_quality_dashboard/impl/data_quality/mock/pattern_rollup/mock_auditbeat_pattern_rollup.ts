@@ -155,6 +155,7 @@ export const auditbeatWithAllResults: PatternRollup = {
       markdownComments: ['foo', 'bar', 'baz'],
       pattern: 'auditbeat-*',
       sameFamily: 0,
+      checkedAt: 1706526408000,
     },
     'auditbeat-custom-index-1': {
       docsCount: 4,
@@ -165,6 +166,7 @@ export const auditbeatWithAllResults: PatternRollup = {
       markdownComments: ['foo', 'bar', 'baz'],
       pattern: 'auditbeat-*',
       sameFamily: 0,
+      checkedAt: 1706526408000,
     },
     'auditbeat-custom-empty-index-1': {
       docsCount: 0,
@@ -175,6 +177,7 @@ export const auditbeatWithAllResults: PatternRollup = {
       markdownComments: ['foo', 'bar', 'baz'],
       pattern: 'auditbeat-*',
       sameFamily: 0,
+      checkedAt: 1706526408000,
     },
   },
   sizeInBytes: 18820446,

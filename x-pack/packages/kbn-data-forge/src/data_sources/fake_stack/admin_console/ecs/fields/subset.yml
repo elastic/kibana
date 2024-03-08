@@ -1,0 +1,30 @@
+---
+name: admin_console
+fields:
+  base:
+    fields: "*"
+  event:
+    fields:
+      category: {}
+      action: {}
+      duration: {}
+  http:
+    fields: "*"
+  url:
+    fields: "*"
+  user:
+    fields:
+      name: {}
+      id: {}
+      roles: {}
+  user_agent:
+    fields:
+      original: {}
+  log:
+    fields:
+      level: {}
+      logger: {}
+  host:
+    fields:
+      name: {}
+

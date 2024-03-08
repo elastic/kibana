@@ -8,7 +8,11 @@
 
 import React from 'react';
 
-import { CategorizedFields, UnsavedFieldChanges } from '@kbn/management-settings-types';
+import {
+  CategorizedFields,
+  UnsavedFieldChanges,
+  CategoryCounts,
+} from '@kbn/management-settings-types';
 
 import { FieldRow, FieldRowProps } from '@kbn/management-settings-components-field-row';
 import { FieldCategory, type FieldCategoryProps } from './category';
@@ -21,7 +25,7 @@ export interface FieldCategoriesProps
     Pick<FieldRowProps, 'onFieldChange' | 'isSavingEnabled'> {
   /** Categorized fields for display. */
   categorizedFields: CategorizedFields;
-  categoryCounts: { [category: string]: number };
+  categoryCounts: CategoryCounts;
   /** And unsaved changes currently managed by the parent component. */
   unsavedChanges?: UnsavedFieldChanges;
 }

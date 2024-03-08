@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
-import { isEqual } from 'lodash';
+import { isEqual, pick } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
@@ -18,7 +19,13 @@ import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
+import {
+  PersistableControlGroupInput,
+  persistableControlGroupInputIsEqual,
+  persistableControlGroupInputKeys,
+} from '../../../common';
 import { pluginServices } from '../../services';
+import { ControlsStorageService } from '../../services/storage/types';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { ControlGroup } from '../component/control_group_component';
 import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
@@ -32,12 +39,13 @@ import {
   type AddOptionsListControlProps,
   type AddRangeSliderControlProps,
 } from '../external_api/control_group_input_builder';
+import { startDiffingControlGroupState } from '../state/control_group_diffing_integration';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import {
+  ControlGroupComponentState,
   ControlGroupInput,
   ControlGroupOutput,
   ControlGroupReduxState,
-  ControlGroupSettings,
   ControlPanelState,
   ControlsPanels,
   CONTROL_GROUP_TYPE,
@@ -80,11 +88,16 @@ export class ControlGroupContainer extends Container<
 
   private initialized$ = new BehaviorSubject(false);
 
+  private storageService: ControlsStorageService;
+
   private subscriptions: Subscription = new Subscription();
   private domNode?: HTMLElement;
   private recalculateFilters$: Subject<null>;
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
+  private invalidSelectionsState: { [childId: string]: boolean };
+
+  public diffingSubscription: Subscription = new Subscription();
 
   // state management
   public select: ControlGroupReduxEmbeddableTools['select'];
@@ -99,13 +112,16 @@ export class ControlGroupContainer extends Container<
   public onFiltersPublished$: Subject<Filter[]>;
   public onControlRemoved$: Subject<string>;
 
+  /** This currently reports the **entire** persistable control group input on unsaved changes */
+  public unsavedChanges: BehaviorSubject<PersistableControlGroupInput | undefined>;
+
   public fieldFilterPredicate: FieldFilterPredicate | undefined;
 
   constructor(
     reduxToolsPackage: ReduxToolsPackage,
     initialInput: ControlGroupInput,
     parent?: Container,
-    settings?: ControlGroupSettings,
+    initialComponentState?: ControlGroupComponentState,
     fieldFilterPredicate?: FieldFilterPredicate
   ) {
     super(
@@ -116,9 +132,15 @@ export class ControlGroupContainer extends Container<
       ControlGroupChainingSystems[initialInput.chainingSystem]?.getContainerSettings(initialInput)
     );
 
+    ({ storage: this.storageService } = pluginServices.getServices());
+
     this.recalculateFilters$ = new Subject();
     this.onFiltersPublished$ = new Subject<Filter[]>();
     this.onControlRemoved$ = new Subject<string>();
+
+    // start diffing control group state
+    this.unsavedChanges = new BehaviorSubject<PersistableControlGroupInput | undefined>(undefined);
+    const diffingMiddleware = startDiffingControlGroupState.bind(this)();
 
     // build redux embeddable tools
     const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
@@ -127,7 +149,8 @@ export class ControlGroupContainer extends Container<
     >({
       embeddable: this,
       reducers: controlGroupReducers,
-      initialComponentState: settings,
+      additionalMiddleware: [diffingMiddleware],
+      initialComponentState,
     });
 
     this.select = reduxEmbeddableTools.select;
@@ -137,6 +160,10 @@ export class ControlGroupContainer extends Container<
     this.onStateChange = reduxEmbeddableTools.onStateChange;
 
     this.store = reduxEmbeddableTools.store;
+
+    this.invalidSelectionsState = this.getChildIds().reduce((prev, id) => {
+      return { ...prev, [id]: false };
+    }, {});
 
     // when all children are ready setup subscriptions
     this.untilAllChildrenReady().then(() => {
@@ -148,6 +175,32 @@ export class ControlGroupContainer extends Container<
 
     this.fieldFilterPredicate = fieldFilterPredicate;
   }
+
+  public canShowInvalidSelectionsWarning = () =>
+    this.storageService.getShowInvalidSelectionWarning() ?? true;
+
+  public suppressInvalidSelectionsWarning = () => {
+    this.storageService.setShowInvalidSelectionWarning(false);
+  };
+
+  public reportInvalidSelections = ({
+    id,
+    hasInvalidSelections,
+  }: {
+    id: string;
+    hasInvalidSelections: boolean;
+  }) => {
+    this.invalidSelectionsState = { ...this.invalidSelectionsState, [id]: hasInvalidSelections };
+
+    const childrenWithInvalidSelections = cachedChildEmbeddableOrder(
+      this.getInput().panels
+    ).idsInOrder.filter((childId) => {
+      return this.invalidSelectionsState[childId];
+    });
+    this.dispatch.setControlWithInvalidSelectionsId(
+      childrenWithInvalidSelections.length > 0 ? childrenWithInvalidSelections[0] : undefined
+    );
+  };
 
   private setupSubscriptions = () => {
     /**
@@ -186,8 +239,29 @@ export class ControlGroupContainer extends Container<
      * debounce output recalculation
      */
     this.subscriptions.add(
-      this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => this.recalculateFilters())
+      this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => {
+        this.recalculateFilters();
+      })
     );
+  };
+
+  public resetToLastSavedState() {
+    const {
+      componentState: { lastSavedInput },
+    } = this.getState();
+    if (!persistableControlGroupInputIsEqual(this.getPersistableInput(), lastSavedInput)) {
+      this.updateInput(lastSavedInput);
+      this.reload(); // this forces the children to update their inputs + perform validation as necessary
+    }
+  }
+
+  public reload() {
+    super.reload();
+  }
+
+  public getPersistableInput: () => PersistableControlGroupInput & { id: string } = () => {
+    const input = this.getInput();
+    return pick(input, [...persistableControlGroupInputKeys, 'id']);
   };
 
   public updateInputAndReinitialize = (newInput: Partial<ControlGroupInput>) => {
@@ -255,13 +329,14 @@ export class ControlGroupContainer extends Container<
   private recalculateFilters = () => {
     const allFilters: Filter[] = [];
     let timeslice;
-    Object.values(this.children).map((child) => {
+    Object.values(this.children).map((child: ControlEmbeddable) => {
       const childOutput = child.getOutput() as ControlOutput;
       allFilters.push(...(childOutput?.filters ?? []));
       if (childOutput.timeslice) {
         timeslice = childOutput.timeslice;
       }
     });
+
     // if filters are different, publish them
     if (
       !compareFilters(this.output.filters ?? [], allFilters ?? [], COMPARE_ALL_OPTIONS) ||

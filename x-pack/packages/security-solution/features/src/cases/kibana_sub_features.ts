@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
-import { CasesSubFeatureId } from '../app_features_keys';
+import { CasesSubFeatureId } from '../product_features_keys';
 import { APP_ID } from '../constants';
 import type { CasesFeatureParams } from './types';
 
@@ -65,7 +65,7 @@ export const getCasesSubFeaturesMap = ({
     name: i18n.translate(
       'securitySolutionPackages.features.featureRegistry.casesSettingsSubFeatureName',
       {
-        defaultMessage: 'Case Settings',
+        defaultMessage: 'Case settings',
       }
     ),
     privilegeGroups: [
@@ -77,7 +77,7 @@ export const getCasesSubFeaturesMap = ({
             name: i18n.translate(
               'securitySolutionPackages.features.featureRegistry.casesSettingsSubFeatureDetails',
               {
-                defaultMessage: 'Edit Case Settings',
+                defaultMessage: 'Edit case settings',
               }
             ),
             includeIn: 'all',

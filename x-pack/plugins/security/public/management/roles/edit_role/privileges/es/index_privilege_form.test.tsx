@@ -8,8 +8,10 @@
 import { EuiButtonIcon, EuiComboBox, EuiTextArea } from '@elastic/eui';
 import React from 'react';
 
+import '@kbn/code-editor-mock/jest_helper';
+import { CodeEditorField } from '@kbn/code-editor';
 import { coreMock } from '@kbn/core/public/mocks';
-import { CodeEditorField, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { IndexPrivilegeForm } from './index_privilege_form';

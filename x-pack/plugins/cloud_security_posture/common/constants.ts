@@ -51,6 +51,7 @@ export const LATEST_FINDINGS_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.
 export const LATEST_FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings_latest-*';
 export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.findings_latest-default';
+
 export const LATEST_FINDINGS_RETENTION_POLICY = '26h';
 
 export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.scores';

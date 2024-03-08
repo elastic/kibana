@@ -74,3 +74,4 @@ export const History = require('history');
 export const Classnames = require('classnames');
 export const ReactQuery = require('@tanstack/react-query');
 export const ReactQueryDevtools = require('@tanstack/react-query-devtools');
+export const KbnCodeEditor = require('@kbn/code-editor');

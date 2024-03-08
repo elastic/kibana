@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 
 import { monaco } from '@kbn/monaco';
 

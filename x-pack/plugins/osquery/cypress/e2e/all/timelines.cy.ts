@@ -19,8 +19,8 @@ describe.skip('ALL - Timelines', { tags: ['@ess'] }, () => {
 
   it('should substitute osquery parameter on non-alert event take action', () => {
     cy.visit('/app/security/timelines');
-    cy.getBySel('flyoutBottomBar').within(() => {
-      cy.getBySel('flyoutOverlay').click();
+    cy.getBySel('timeline-bottom-bar').within(() => {
+      cy.getBySel('timeline-bottom-bar-title-button').click();
     });
     cy.getBySel('timelineQueryInput').type('NOT host.name: "dev-fleet-server.8220"{enter}');
     // Filter out alerts

@@ -30,13 +30,11 @@ import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
 import type { MiddlewareActionSpyHelper } from '../../store/test_utils';
 import { createSpyMiddleware } from '../../store/test_utils';
-import { kibanaObservable } from '../test_providers';
 import type { State } from '../../store';
-import { createStore } from '../../store';
 import { AppRootProvider } from './app_root_provider';
 import { managementMiddlewareFactory } from '../../../management/store/middleware';
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
-import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock } from '..';
+import { SUB_PLUGINS_REDUCER, mockGlobalState, createMockStore } from '..';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaServices } from '../../lib/kibana';
@@ -201,7 +199,6 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const coreStart = createCoreStartMock(history);
   const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
-  const { storage } = createSecuritySolutionStorageMock();
   const startServices: StartServices = createStartServicesMock(coreStart);
 
   const storeReducer = {
@@ -211,11 +208,11 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     app: experimentalFeaturesReducer,
   };
 
-  const store = createStore(
-    mockGlobalState,
+  const store = createMockStore(
+    undefined,
     storeReducer,
-    kibanaObservable,
-    storage,
+    undefined,
+    undefined,
     // @ts-expect-error ts upgrade v4.7.4
     [...managementMiddlewareFactory(coreStart, depsStart), middlewareSpy.actionSpyMiddleware]
   );

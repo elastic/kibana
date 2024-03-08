@@ -271,3 +271,11 @@ Lens has a lot of UI elements – to make it easier to refer to them in issues o
 * **Suggestion panel** Panel to the bottom showing previews for suggestions on how to change the current chart
 
 ![Layout](./layout.png "Layout")
+
+
+# Inline Editing of a Lens Embeddable
+
+If you have a Lens embeddable in your application and you want to allow inline editing you can do it with 3 ways:
+- If you use a portable dashboard, the functionality is built in and you don't need to do anything
+- If you don't have a portable dashboard then you can use UI actions to retrieve the inline editing component. For more information check out the example in `x-pack/examples/lens_embeddable_inline_editing_example`.
+- The component is also exported from Lens start contract. Check the `EditLensConfigPanelApi`. This is advised to be used only when the 2 above cases can't be used.

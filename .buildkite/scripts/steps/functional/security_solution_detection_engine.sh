@@ -13,4 +13,6 @@ echo "--- Detection Engine - Security Solution Cypress Tests"
 cd x-pack/test/security_solution_cypress
 
 set +e
-yarn cypress:detection_engine:run:ess; status=$?; yarn junit:merge || :; exit $status
+BK_ANALYTICS_API_KEY=$(vault_get security-solution-ci sec-sol-cypress-bk-api-key)
+
+BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY yarn cypress:detection_engine:run:ess; status=$?; yarn junit:merge || :; exit $status

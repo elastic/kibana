@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback } from 'react';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { HeaderActions } from './components/header_actions';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { DocumentDetailsLeftPanelKey } from '../left';
@@ -21,7 +21,7 @@ interface PanelNavigationProps {
 }
 
 export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpandable }) => {
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId } = useRightPanelContext();
 
   const expandDetails = useCallback(() => {

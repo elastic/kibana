@@ -39,6 +39,8 @@ export const configSchema = schema.object({
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  // Temp Feature Flag for AI Playground page
+  showAIPlayground: schema.boolean({ defaultValue: false }),
 });
 
 export type ConfigType = TypeOf<typeof configSchema>;

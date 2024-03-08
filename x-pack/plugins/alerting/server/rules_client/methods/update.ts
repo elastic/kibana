@@ -17,7 +17,7 @@ import {
 } from '../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../common';
+import { parseDuration, getRuleCircuitBreakerErrorMessage, AlertDelay } from '../../../common';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
@@ -51,6 +51,7 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     params: Params;
     throttle?: string | null;
     notifyWhen?: RuleNotifyWhenType | null;
+    alertDelay?: AlertDelay;
   };
   allowMissingConnectorSecrets?: boolean;
   shouldIncrementRevision?: ShouldIncrementRevision;
@@ -218,7 +219,10 @@ async function updateAlert<Params extends RuleTypeParams>(
   currentRule: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
   const { attributes, version } = currentRule;
-  const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
+  const data = {
+    ...initialData,
+    actions: await addGeneratedActionValues(initialData.actions, context),
+  };
 
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 

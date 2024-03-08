@@ -11,23 +11,13 @@ import { generatePath } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import {
-  EuiButton,
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
-  IconType,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import {
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_ELASTICSEARCH_URL,
-  INGESTION_METHOD_IDS,
 } from '../../../../../common/constants';
 
 import apiLogo from '../../../../assets/images/api_image.png';
@@ -37,17 +27,17 @@ import connectorLogo from '../../../../assets/images/search_connector.svg';
 import crawlerLogo from '../../../../assets/images/search_crawler.svg';
 import languageClientsLogo from '../../../../assets/images/search_language_clients.svg';
 
+import { IngestionCard } from '../../../enterprise_search_content/components/shared/ingestion_card/ingestion_card';
 import {
   NEW_API_PATH,
-  NEW_INDEX_METHOD_PATH,
+  NEW_CRAWLER_PATH,
   NEW_INDEX_SELECT_CONNECTOR_PATH,
 } from '../../../enterprise_search_content/routes';
 import { HttpLogic } from '../../../shared/http/http_logic';
-import { KibanaLogic } from '../../../shared/kibana';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
-import { ConnectorIcon } from './icons/connector';
-import { CrawlerIcon } from './icons/crawler';
+import { ConnectorIcon } from '../../../shared/icons/connector';
+import { CrawlerIcon } from '../../../shared/icons/crawler';
+import { KibanaLogic } from '../../../shared/kibana';
 
 export const IngestionSelector: React.FC = () => {
   const {
@@ -100,9 +90,7 @@ export const IngestionSelector: React.FC = () => {
                     'Discover, extract, and index searchable content from websites and knowledge bases.',
                 }
               )}
-              href={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_METHOD_PATH, {
-                type: INGESTION_METHOD_IDS.CRAWLER,
-              })}
+              href={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_CRAWLER_PATH)}
               isDisabled={crawlerDisabled}
               logo={crawlerLogo}
               title={i18n.translate('xpack.enterpriseSearch.ingestSelector.method.crawler', {
@@ -212,64 +200,5 @@ export const IngestionSelector: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
-  );
-};
-
-interface IngestionCardProps {
-  buttonIcon: IconType;
-  buttonLabel: string;
-  description: string;
-  href?: string;
-  isDisabled?: boolean;
-  logo: IconType;
-  onClick?: () => void;
-  title: string;
-}
-
-const IngestionCard: React.FC<IngestionCardProps> = ({
-  buttonIcon,
-  buttonLabel,
-  description,
-  href,
-  isDisabled,
-  logo,
-  onClick,
-  title,
-}) => {
-  return (
-    <EuiCard
-      hasBorder
-      isDisabled={isDisabled}
-      textAlign="left"
-      title={
-        <>
-          <EuiFlexGroup direction="row" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={logo} size="xxl" />
-            </EuiFlexItem>
-            <EuiFlexItem>{title}</EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer />
-        </>
-      }
-      description={
-        <EuiText color="subdued" size="s">
-          {description}
-        </EuiText>
-      }
-      footer={
-        onClick ? (
-          <EuiButton isDisabled={isDisabled} iconType={buttonIcon} onClick={onClick} fullWidth>
-            {buttonLabel}
-          </EuiButton>
-        ) : (
-          <EuiLinkTo to={href ?? ''} shouldNotCreateHref>
-            <EuiButton isDisabled={isDisabled} iconType={buttonIcon} fullWidth>
-              {buttonLabel}
-            </EuiButton>
-          </EuiLinkTo>
-        )
-      }
-    />
   );
 };

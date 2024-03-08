@@ -28,6 +28,7 @@ describe('savedSearchComparator', () => {
       index: dataViewMock,
       query: customQuery,
     }),
+    managed: false,
   };
 
   it('should result true when saved search is same', () => {
