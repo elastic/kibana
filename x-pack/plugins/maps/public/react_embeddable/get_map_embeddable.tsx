@@ -21,6 +21,7 @@ import {
   ReactEmbeddable
 } from '@kbn/embeddable-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { extract, type MapEmbeddablePersistableState } from '../../common/embeddable';
 import type { MapApi } from './types';
 import { useActionHandlers } from './use_action_handlers';
 import type { MapEmbeddableInput } from '../embeddable/types';
@@ -72,12 +73,14 @@ export async function getMapEmbeddable(
         unsavedChanges,
         resetUnsavedChanges,
         serializeState: async () => {
+          const { state: rawState, references } = extract({
+            ...state,
+            ...serializeTitles(),
+            ...serializeReduxState(),
+          } as unknown as MapEmbeddablePersistableState);
           return {
-            rawState: {
-              ...state,
-              ...serializeTitles(),
-              ...serializeReduxState(),
-            },
+            rawState,
+            references
           };
         },
       },
