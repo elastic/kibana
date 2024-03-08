@@ -401,6 +401,25 @@ describe('agent policy', () => {
         'Cannot delete an agent policy that is assigned to any active or inactive agents'
       );
     });
+
+    it('should delete .fleet-policies entries on agent policy delete', async () => {
+      esClient.deleteByQuery.mockResolvedValueOnce({
+        deleted: 2,
+      });
+
+      await agentPolicyService.delete(soClient, esClient, 'mocked');
+
+      expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: AGENT_POLICY_INDEX,
+          query: {
+            term: {
+              policy_id: 'mocked',
+            },
+          },
+        })
+      );
+    });
   });
 
   describe('bumpRevision', () => {

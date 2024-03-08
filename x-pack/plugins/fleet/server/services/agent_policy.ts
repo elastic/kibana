@@ -955,9 +955,9 @@ class AgentPolicyService {
     await soClient.delete(SAVED_OBJECT_TYPE, id);
     await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'deleted', id);
 
-    if (options?.removeFleetServerDocuments) {
-      await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
-    }
+    // cleanup .fleet-policies docs on delete
+    await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
+
     logger.debug(`Deleted agent policy ${id}`);
     return {
       id,
