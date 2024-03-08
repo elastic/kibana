@@ -6,7 +6,10 @@
  */
 
 import { Boom, isBoom } from '@hapi/boom';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type { DecoratedError } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/core/server';
+import type { SOWithErrors } from './types';
 
 export interface HTTPError extends Error {
   statusCode: number;
@@ -82,3 +85,32 @@ export function createCaseError({
 
   return new CaseError(message, error);
 }
+
+export const isSOError = <T>(so: { error?: unknown }): so is SOWithErrors<T> => so.error != null;
+
+export const isSODecoratedError = (
+  error: SavedObjectError | DecoratedError
+): error is DecoratedError => Boolean((error as DecoratedError).isBoom);
+
+export const createCaseErrorFromSOError = (
+  error: SavedObjectError | DecoratedError,
+  message: string
+) => {
+  if (isSODecoratedError(error)) {
+    return createCaseError({
+      message: `${message}: ${error.output.payload.error}`,
+      error: new Boom(error.message, {
+        statusCode: error.output.statusCode,
+        message: error.output.payload.message,
+      }),
+    });
+  }
+
+  return createCaseError({
+    message: `${message}: ${error.error}`,
+    error: new Boom(error.message, {
+      statusCode: error.statusCode,
+      message: error.message,
+    }),
+  });
+};

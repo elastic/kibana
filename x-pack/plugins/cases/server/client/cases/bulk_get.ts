@@ -11,7 +11,7 @@ import type { CaseAttributes } from '../../../common/types/domain';
 import type { CasesBulkGetRequest, CasesBulkGetResponse } from '../../../common/types/api';
 import { CasesBulkGetResponseRt, CasesBulkGetRequestRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../../common/api';
-import { createCaseError } from '../../common/error';
+import { createCaseError, isSODecoratedError } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
@@ -88,12 +88,21 @@ const constructErrors = (
   const errors: CasesBulkGetResponse['errors'] = [];
 
   for (const soError of soBulkGetErrors) {
-    errors.push({
-      error: soError.error.error,
-      message: soError.error.message,
-      status: soError.error.statusCode,
-      caseId: soError.id,
-    });
+    if (isSODecoratedError(soError.error)) {
+      errors.push({
+        error: soError.error.output.payload.error,
+        message: soError.error.output.payload.message,
+        status: soError.error.output.statusCode,
+        caseId: soError.id,
+      });
+    } else {
+      errors.push({
+        error: soError.error.error,
+        message: soError.error.message,
+        status: soError.error.statusCode,
+        caseId: soError.id,
+      });
+    }
   }
 
   for (const theCase of unauthorizedCases) {
