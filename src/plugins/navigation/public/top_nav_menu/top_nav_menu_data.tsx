@@ -26,6 +26,7 @@ export interface TopNavMenuData {
   iconSide?: EuiButtonProps['iconSide'];
   target?: string;
   href?: string;
+  appendElement?: React.ReactElement;
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {

@@ -71,6 +71,14 @@ export function TopNavMenuItem(props: TopNavMenuData) {
   if (tooltip) {
     return <EuiToolTip content={tooltip}>{btn}</EuiToolTip>;
   }
+  if (props.appendElement) {
+    return (
+      <>
+        {btn}
+        {props.appendElement}
+      </>
+    );
+  }
   return btn;
 }
 
