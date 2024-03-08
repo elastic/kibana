@@ -12,7 +12,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { DiscoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
 import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
-import type { DiscoverCustomizationContext } from './types';
+import type { DiscoverCustomizationContext } from '../customizations';
 
 export interface RenderAppProps {
   element: HTMLElement;
