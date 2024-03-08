@@ -7,37 +7,28 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import type { InstalledIntegrationArray } from '../../../../../common/api/detection_engine/fleet_integrations';
+import type { Integration } from '../../../../../common/api/detection_engine/fleet_integrations';
 import { fleetIntegrationsApi } from '../../../../detection_engine/fleet_integrations';
 // import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 // import * as i18n from './translations';
 
 const ONE_MINUTE = 60000;
 
-export interface UseInstalledIntegrationsArgs {
-  packages?: string[];
+export interface UseIntegrationsArgs {
   skip?: boolean;
 }
 
-export const useInstalledIntegrations = ({
-  packages,
-  skip = false,
-}: UseInstalledIntegrationsArgs) => {
+export const useIntegrations = ({ skip = false }: UseIntegrationsArgs = {}) => {
   // const { addError } = useAppToasts();
 
-  return useQuery<InstalledIntegrationArray>(
-    [
-      'installedIntegrations',
-      {
-        packages,
-      },
-    ],
+  return useQuery<Integration[]>(
+    ['integrations'],
     async ({ signal }) => {
-      const integrations = await fleetIntegrationsApi.fetchInstalledIntegrations({
-        packages,
+      const integrations = await fleetIntegrationsApi.fetchAllIntegrations({
         signal,
       });
-      return integrations.installed_integrations ?? [];
+
+      return integrations.integrations ?? [];
     },
     {
       keepPreviousData: true,

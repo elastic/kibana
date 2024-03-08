@@ -10,7 +10,7 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, cleanup } from '@testing-library/react-hooks';
 
-import { useInstalledIntegrations } from './use_installed_integrations';
+import { useIntegrations } from './use_integrations';
 
 import { fleetIntegrationsApi } from '../../../../detection_engine/fleet_integrations/api';
 import { useToasts } from '../../../../common/lib/kibana';
@@ -45,8 +45,7 @@ describe('useInstalledIntegrations', () => {
   const render = ({ skip } = { skip: false }) =>
     renderHook(
       () =>
-        useInstalledIntegrations({
-          packages: [],
+        useIntegrations({
           skip,
         }),
       {
@@ -54,31 +53,22 @@ describe('useInstalledIntegrations', () => {
       }
     );
 
-  it('calls the API via fetchInstalledIntegrations', async () => {
-    const fetchInstalledIntegrations = jest.spyOn(
-      fleetIntegrationsApi,
-      'fetchInstalledIntegrations'
-    );
+  it('calls the API via fetchAllIntegrations', async () => {
+    const fetchAllIntegrations = jest.spyOn(fleetIntegrationsApi, 'fetchAllIntegrations');
 
     const { waitForNextUpdate } = render();
 
     await waitForNextUpdate();
 
-    expect(fetchInstalledIntegrations).toHaveBeenCalledTimes(1);
-    expect(fetchInstalledIntegrations).toHaveBeenLastCalledWith(
-      expect.objectContaining({ packages: [] })
-    );
+    expect(fetchAllIntegrations).toHaveBeenCalledTimes(1);
   });
 
   it('does not call the API when skip is true', async () => {
-    const fetchInstalledIntegrations = jest.spyOn(
-      fleetIntegrationsApi,
-      'fetchInstalledIntegrations'
-    );
+    const fetchAllIntegrations = jest.spyOn(fleetIntegrationsApi, 'fetchAllIntegrations');
 
     render({ skip: true });
 
-    expect(fetchInstalledIntegrations).toHaveBeenCalledTimes(0);
+    expect(fetchAllIntegrations).toHaveBeenCalledTimes(0);
   });
 
   it('fetches data from the API', async () => {
@@ -98,18 +88,27 @@ describe('useInstalledIntegrations', () => {
     expect(result.current.isError).toEqual(false);
     expect(result.current.data).toEqual([
       {
+        package_name: 'o365',
+        package_title: 'Microsoft 365',
+        installed_package_version: '1.0.0',
+        is_installed: false,
+        is_enabled: false,
+      },
+      {
         integration_name: 'audit',
         integration_title: 'Audit Logs',
+        is_installed: true,
         is_enabled: true,
         package_name: 'atlassian_bitbucket',
         package_title: 'Atlassian Bitbucket',
-        package_version: '1.0.1',
+        installed_package_version: '1.0.1',
       },
       {
+        is_installed: true,
         is_enabled: true,
         package_name: 'system',
         package_title: 'System',
-        package_version: '1.6.4',
+        installed_package_version: '1.6.4',
       },
     ]);
   });
@@ -117,7 +116,7 @@ describe('useInstalledIntegrations', () => {
   // Skipping until we re-enable errors
   it.skip('handles exceptions from the API', async () => {
     const exception = new Error('Boom!');
-    jest.spyOn(fleetIntegrationsApi, 'fetchInstalledIntegrations').mockRejectedValue(exception);
+    jest.spyOn(fleetIntegrationsApi, 'fetchAllIntegrations').mockRejectedValue(exception);
 
     const { result, waitForNextUpdate } = render();
 
@@ -138,7 +137,7 @@ describe('useInstalledIntegrations', () => {
     // And shows a toast with the caught exception
     expect(useToasts().addError).toHaveBeenCalledTimes(1);
     expect(useToasts().addError).toHaveBeenCalledWith(exception, {
-      title: 'Failed to fetch installed integrations',
+      title: 'Failed to fetch integrations',
     });
   });
 });
