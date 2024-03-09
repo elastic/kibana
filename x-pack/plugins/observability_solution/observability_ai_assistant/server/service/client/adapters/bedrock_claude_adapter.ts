@@ -90,7 +90,9 @@ export const createBedrockClaudeAdapter: LlmApiAdapterFactory = ({
             (fn) => `<tool_description>
           <tool_name>${fn.name}</tool_name>
           <description>${fn.description}</description>
-          <parameters>
+          ${
+            fn.parameters
+              ? `<parameters>
             ${jsonSchemaToFlatParameters(fn.parameters).map((param) => {
               return `<parameter>
                 <name>${param.name}</name>
@@ -107,7 +109,9 @@ export const createBedrockClaudeAdapter: LlmApiAdapterFactory = ({
                 </description>
               </parameter>`;
             })}
-          </parameters>
+          </parameters>`
+              : ''
+          }
         </tool_description>`
           )
           .join('\n')}

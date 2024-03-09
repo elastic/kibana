@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ObservabilityAIAssistantChatService } from '../public';
-import type { CompatibleJSONSchema, FunctionDefinition, FunctionResponse } from './functions/types';
+import type { CompatibleJSONSchema, FunctionResponse } from './functions/types';
 
 export enum MessageRole {
   System = 'system',
@@ -86,7 +86,7 @@ export interface ObservabilityAIAssistantScreenContextRequest {
     description: string;
     value: any;
   }>;
-  actions?: Array<Omit<FunctionDefinition, 'contexts'>>;
+  actions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
 }
 
 export type ScreenContextActionRespondFunction<TArguments extends unknown> = ({}: {
@@ -97,10 +97,10 @@ export type ScreenContextActionRespondFunction<TArguments extends unknown> = ({}
   messages: Message[];
 }) => Promise<FunctionResponse>;
 
-export interface ScreenContextActionDefinition<TArguments = unknown> {
+export interface ScreenContextActionDefinition<TArguments = undefined> {
   name: string;
   description: string;
-  parameters: CompatibleJSONSchema;
+  parameters?: CompatibleJSONSchema;
   respond: ScreenContextActionRespondFunction<TArguments>;
 }
 

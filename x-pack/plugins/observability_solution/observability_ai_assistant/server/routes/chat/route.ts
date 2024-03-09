@@ -25,11 +25,15 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
         messages: t.array(messageRt),
         connectorId: t.string,
         functions: t.array(
-          t.type({
-            name: t.string,
-            description: t.string,
-            parameters: t.any,
-          })
+          t.intersection([
+            t.partial({
+              parameters: t.any,
+            }),
+            t.type({
+              name: t.string,
+              description: t.string,
+            }),
+          ])
         ),
       }),
       t.partial({

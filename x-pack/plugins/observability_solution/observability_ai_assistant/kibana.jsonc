@@ -15,7 +15,7 @@
       "taskManager",
     ],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
-    "optionalPlugins": ["cloud", "ml"],
+    "optionalPlugins": ["cloud"],
     "extraPublicDirs": [],
     "runtimePluginDependencies": [ "ml" ]
   }

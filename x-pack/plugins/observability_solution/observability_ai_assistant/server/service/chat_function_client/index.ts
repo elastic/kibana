@@ -80,12 +80,16 @@ export class ChatFunctionClient {
     }
 
     this.actions.forEach((action) => {
-      this.validators.set(action.name, ajv.compile(action.parameters));
+      if (action.parameters) {
+        this.validators.set(action.name, ajv.compile(action.parameters));
+      }
     });
   }
 
   registerFunction: RegisterFunction = (definition, respond) => {
-    this.validators.set(definition.name, ajv.compile(definition.parameters));
+    if (definition.parameters) {
+      this.validators.set(definition.name, ajv.compile(definition.parameters));
+    }
     this.functionRegistry.set(definition.name, { definition, respond });
   };
 
@@ -95,6 +99,10 @@ export class ChatFunctionClient {
 
   validate(name: string, parameters: unknown) {
     const validator = this.validators.get(name)!;
+    if (!validator) {
+      return;
+    }
+
     const result = validator(parameters);
     if (!result) {
       throw new FunctionArgsValidationError(validator.errors!);

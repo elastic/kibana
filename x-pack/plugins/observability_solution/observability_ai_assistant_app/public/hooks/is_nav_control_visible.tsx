@@ -26,7 +26,7 @@ export function useIsNavControlVisible() {
           appId &&
           applications.get(appId)?.category?.id === DEFAULT_APP_CATEGORIES.observability.id;
 
-        setIsVisible(true); // !!isObservabilityApp);
+        setIsVisible(!!isObservabilityApp);
       },
     });
 

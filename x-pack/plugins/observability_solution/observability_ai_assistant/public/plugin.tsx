@@ -26,6 +26,7 @@ import type {
   ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantService,
 } from './types';
+import { createScreenContextAction } from './utils/create_screen_context_action';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -101,6 +102,7 @@ export class ObservabilityAIAssistantPlugin
             )
           )
         : null,
+      createScreenContextAction,
     };
   }
 }
