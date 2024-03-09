@@ -40,7 +40,7 @@ export const createDataView = async ({
   usageCollection,
   spec,
   override,
-  refreshFields,
+  refreshFields = true,
   counterName,
 }: CreateDataViewArgs) => {
   usageCollection?.incrementCounter({ counterName });

@@ -301,7 +301,7 @@ describe('LogViewsClient class', () => {
               "type": "keyword",
             },
           },
-          "scriptedFields": Array [],
+          "scriptedFields": Object {},
           "setAllowHidden": [Function],
           "setEtag": [Function],
           "setFieldFormat": [Function],
