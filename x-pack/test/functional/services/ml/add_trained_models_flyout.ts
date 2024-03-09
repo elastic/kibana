@@ -16,7 +16,6 @@ export type FlyoutTabs =
   | [FlyoutTabClickToDownload, FlyoutTabManualDownload];
 
 export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) {
-  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
