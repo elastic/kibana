@@ -15,7 +15,7 @@ import { CompatibleJSONSchema } from '../../../../common/functions/types';
 export type LlmApiAdapterFactory = (options: {
   logger: Logger;
   messages: Message[];
-  functions?: Array<{ name: string; description: string; parameters: CompatibleJSONSchema }>;
+  functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
   functionCall?: string;
 }) => LlmApiAdapter;
 

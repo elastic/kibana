@@ -54,7 +54,7 @@ const mockService: MockedService = {
     openNewConversation: jest.fn(),
     predefinedConversation$: new Observable(),
   },
-  navigate: jest.fn().mockImplementation(async () => of()),
+  navigate: jest.fn().mockReturnValue(of()),
 };
 
 const mockChatService = createMockChatService();

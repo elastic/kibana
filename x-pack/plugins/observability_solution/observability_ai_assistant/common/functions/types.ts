@@ -30,7 +30,7 @@ export interface FunctionDefinition<TParameters extends CompatibleJSONSchema = a
   description: string;
   visibility?: FunctionVisibility;
   descriptionForUser?: string;
-  parameters: TParameters;
+  parameters?: TParameters;
   contexts: string[];
 }
 

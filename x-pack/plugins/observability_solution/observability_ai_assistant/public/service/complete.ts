@@ -142,6 +142,17 @@ export function complete(
           return;
         }
 
+        const executedMessage = createFunctionResponseMessage({
+          name: functionCall.name,
+          content: {
+            executed: true,
+          },
+        });
+
+        allMessages.push(executedMessage.message);
+
+        subscriber.next(executedMessage);
+
         requestedAction
           .respond({
             signal,

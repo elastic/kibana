@@ -9,6 +9,7 @@ import { noop } from 'lodash';
 import React from 'react';
 import { Observable, of } from 'rxjs';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
+import { ScreenContextActionDefinition } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type {
   ObservabilityAIAssistantChatService,
@@ -76,6 +77,7 @@ function createStartContract(): ObservabilityAIAssistantPublicStart {
       getPreferredLanguage: () => 'English',
     }),
     getContextualInsightMessages: () => [],
+    createScreenContextAction: () => ({} as ScreenContextActionDefinition<any>),
   };
 }
 

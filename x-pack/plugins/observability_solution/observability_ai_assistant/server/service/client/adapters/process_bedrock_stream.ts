@@ -24,7 +24,7 @@ async function parseFunctionCallXml({
   functions,
 }: {
   xml: string;
-  functions?: Array<{ name: string; description: string; parameters: JSONSchema }>;
+  functions?: Array<{ name: string; description: string; parameters?: JSONSchema }>;
 }) {
   const parser = new Parser();
 
@@ -45,7 +45,9 @@ async function parseFunctionCallXml({
     );
   }
 
-  const args = convertDeserializedXmlWithJsonSchema(parameters, functionDef.parameters);
+  const args = functionDef.parameters
+    ? convertDeserializedXmlWithJsonSchema(parameters, functionDef.parameters)
+    : {};
 
   return {
     name: fnName,
@@ -58,7 +60,7 @@ export function processBedrockStream({
   functions,
 }: {
   logger: Logger;
-  functions?: Array<{ name: string; description: string; parameters: JSONSchema }>;
+  functions?: Array<{ name: string; description: string; parameters?: JSONSchema }>;
 }) {
   return (source: Observable<BedrockChunkMember>) =>
     new Observable<ChatCompletionChunkEvent>((subscriber) => {

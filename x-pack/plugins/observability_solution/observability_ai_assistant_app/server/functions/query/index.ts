@@ -352,11 +352,16 @@ export function registerQueryFunction({
           ],
           connectorId,
           signal,
+          functions: functions.getActions(),
         }
       );
 
       return esqlResponse$.pipe(
         emitWithConcatenatedMessage((msg) => {
+          if (msg.message.function_call.name) {
+            return msg;
+          }
+
           const esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger).match(
             /```esql([\s\S]*?)```/
           )?.[1];

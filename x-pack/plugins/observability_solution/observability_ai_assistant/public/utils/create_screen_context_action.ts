@@ -5,13 +5,16 @@
  * 2.0.
  */
 import type { FromSchema } from 'json-schema-to-ts';
+import { CompatibleJSONSchema } from '../../common/functions/types';
 import type {
   ScreenContextActionDefinition,
   ScreenContextActionRespondFunction,
 } from '../../common/types';
 
 type ReturnOf<TActionDefinition extends Omit<ScreenContextActionDefinition, 'respond'>> =
-  FromSchema<TActionDefinition['parameters']>;
+  TActionDefinition['parameters'] extends CompatibleJSONSchema
+    ? FromSchema<TActionDefinition['parameters']>
+    : undefined;
 
 export function createScreenContextAction<
   TActionDefinition extends Omit<ScreenContextActionDefinition, 'respond'>,

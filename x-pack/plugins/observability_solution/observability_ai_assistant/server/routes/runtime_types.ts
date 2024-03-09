@@ -104,10 +104,14 @@ export const screenContextRt: t.Type<ObservabilityAIAssistantScreenContextReques
     })
   ),
   actions: t.array(
-    t.type({
-      name: t.string,
-      description: t.string,
-      parameters: t.record(t.string, t.any),
-    })
+    t.intersection([
+      t.type({
+        name: t.string,
+        description: t.string,
+      }),
+      t.partial({
+        parameters: t.record(t.string, t.any),
+      }),
+    ])
   ),
 });

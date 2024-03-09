@@ -60,7 +60,7 @@ export function createService({
       await lastValueFrom(
         coreStart.http.getLoadingCount$().pipe(
           filter((count) => count === 0),
-          debounceTime(250),
+          debounceTime(1000),
           take(1)
         )
       );
