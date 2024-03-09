@@ -59,14 +59,11 @@ function FunctionName({ name: functionName }: { name: string }) {
   return <span style={{ fontFamily: euiTheme.font.familyCode, fontSize: 13 }}>{functionName}</span>;
 }
 
-export type StartedFrom = 'contextualInsight' | 'appTopNavbar' | 'conversationView';
-
 export function getTimelineItemsfromConversation({
   chatService,
   currentUser,
   hasConnector,
   messages,
-  startedFrom,
   chatState,
   onActionClick,
 }: {
@@ -74,7 +71,6 @@ export function getTimelineItemsfromConversation({
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   hasConnector: boolean;
   messages: Message[];
-  startedFrom?: StartedFrom;
   chatState: ChatState;
   onActionClick: ({
     message,
@@ -212,14 +208,6 @@ export function getTimelineItemsfromConversation({
 
             actions.canEdit = hasConnector;
             display.collapsed = false;
-
-            if (startedFrom === 'contextualInsight') {
-              const firstUserMessageIndex = messagesWithoutSystem.findIndex(
-                (el) => el.message.role === MessageRole.User
-              );
-
-              display.collapsed = index === firstUserMessageIndex;
-            }
           }
 
           break;

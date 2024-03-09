@@ -420,7 +420,6 @@ describe('getTimelineItemsFromConversation', () => {
           full_name: 'John Doe',
         },
         chatState: ChatState.Ready,
-        startedFrom: 'contextualInsight',
         messages: [
           {
             '@timestamp': new Date().toISOString(),

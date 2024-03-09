@@ -63,7 +63,10 @@ function ChatContent({
     persist: false,
   });
 
-  const lastAssistantResponse = getLastMessageOfType(messages, MessageRole.Assistant);
+  const lastAssistantResponse = getLastMessageOfType(
+    messages.slice(initialMessagesRef.current.length + 1),
+    MessageRole.Assistant
+  );
 
   useEffect(() => {
     next(initialMessagesRef.current);
@@ -113,7 +116,7 @@ function ChatContent({
                 <StartChatButton
                   onClick={() => {
                     service.conversations.openNewConversation({
-                      messages: initialMessages,
+                      messages,
                       title: defaultTitle,
                     });
                   }}

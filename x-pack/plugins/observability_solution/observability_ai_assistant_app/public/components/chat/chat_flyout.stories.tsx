@@ -31,7 +31,6 @@ const defaultProps: ChatFlyoutProps = {
   isOpen: true,
   initialTitle: 'How is this working',
   initialMessages: [getAssistantSystemMessage({ contexts: [] })],
-  startedFrom: 'appTopNavbar',
   onClose: () => {},
 };
 

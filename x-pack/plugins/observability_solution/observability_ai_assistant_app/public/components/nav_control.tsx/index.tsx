@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { AssistantAvatar, useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
@@ -14,16 +14,7 @@ import { useObservabilityAIAssistantAppService } from '../../hooks/use_observabi
 import { ChatFlyout } from '../chat/chat_flyout';
 import { useKibana } from '../../hooks/use_kibana';
 import { useIsNavControlVisible } from '../../hooks/is_nav_control_visible';
-
-const buttonCss = css`
-  padding: 4px 2px 0 2px;
-  & svg circle {
-    opacity: 0.85;
-  }
-  &:hover svg circle {
-    opacity: 1;
-  }
-`;
+import { useTheme } from '../../hooks/use_theme';
 
 export function NavControl({}: {}) {
   const service = useObservabilityAIAssistantAppService();
@@ -69,22 +60,36 @@ export function NavControl({}: {}) {
     title: undefined,
   };
 
+  const theme = useTheme();
+
+  const buttonCss = css`
+    padding: 0px 8px;
+
+    svg path {
+      fill: ${theme.colors.darkestShade};
+    }
+  `;
+
   if (!isVisible) {
     return null;
   }
 
   return (
     <>
-      <EuiButtonEmpty
+      <EuiButton
         css={buttonCss}
         onClick={() => {
           service.conversations.openNewConversation({
             messages: [],
           });
         }}
+        color="primary"
+        size="s"
+        fullWidth={false}
+        minWidth={0}
       >
-        <AssistantAvatar size="s" background />
-      </EuiButtonEmpty>
+        <AssistantAvatar size="xs" />
+      </EuiButton>
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceContext.Provider value={chatService.value}>
           <ChatFlyout
@@ -95,7 +100,6 @@ export function NavControl({}: {}) {
             onClose={() => {
               setIsOpen(false);
             }}
-            startedFrom="appTopNavbar"
           />
         </ObservabilityAIAssistantChatServiceContext.Provider>
       ) : undefined}

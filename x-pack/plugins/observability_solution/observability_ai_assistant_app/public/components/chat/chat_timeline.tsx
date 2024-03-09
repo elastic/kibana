@@ -21,10 +21,7 @@ import {
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
-import {
-  getTimelineItemsfromConversation,
-  StartedFrom,
-} from '../../utils/get_timeline_items_from_conversation';
+import { getTimelineItemsfromConversation } from '../../utils/get_timeline_items_from_conversation';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
@@ -55,7 +52,6 @@ export interface ChatTimelineProps {
   hasConnector: boolean;
   chatState: ChatState;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
-  startedFrom?: StartedFrom;
   onEdit: (message: Message, messageAfterEdit: Message) => void;
   onFeedback: (message: Message, feedback: Feedback) => void;
   onRegenerate: (message: Message) => void;
@@ -75,7 +71,6 @@ export function ChatTimeline({
   chatService,
   hasConnector,
   currentUser,
-  startedFrom,
   onEdit,
   onFeedback,
   onRegenerate,
@@ -90,7 +85,6 @@ export function ChatTimeline({
       hasConnector,
       messages,
       currentUser,
-      startedFrom,
       chatState,
       onActionClick,
     });
@@ -115,7 +109,7 @@ export function ChatTimeline({
     }
 
     return consolidatedChatItems;
-  }, [chatService, hasConnector, messages, currentUser, startedFrom, chatState, onActionClick]);
+  }, [chatService, hasConnector, messages, currentUser, chatState, onActionClick]);
 
   return (
     <EuiCommentList

@@ -25,7 +25,6 @@ import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
-import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { NewChatButton } from '../buttons/new_chat_button';
 import { ChatBody } from './chat_body';
 import { ChatInlineEditingContent } from './chat_inline_edit';
@@ -43,12 +42,10 @@ export function ChatFlyout({
   initialMessages,
   onClose,
   isOpen,
-  startedFrom,
 }: {
   initialTitle: string;
   initialMessages: Message[];
   isOpen: boolean;
-  startedFrom: StartedFrom;
   onClose: () => void;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -256,7 +253,6 @@ export function ChatFlyout({
               initialConversationId={conversationId}
               knowledgeBase={knowledgeBase}
               showLinkToConversationsApp
-              startedFrom={startedFrom}
               onConversationUpdate={(conversation) => {
                 if (!conversationId) {
                   updateConversationIdInPlace(conversation.conversation.id);

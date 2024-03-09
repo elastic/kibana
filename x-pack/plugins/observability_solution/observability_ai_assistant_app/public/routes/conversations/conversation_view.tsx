@@ -170,7 +170,6 @@ export function ConversationView() {
             initialConversationId={conversationId}
             knowledgeBase={knowledgeBase}
             showLinkToConversationsApp={false}
-            startedFrom="conversationView"
             onConversationUpdate={handleConversationUpdate}
           />
 

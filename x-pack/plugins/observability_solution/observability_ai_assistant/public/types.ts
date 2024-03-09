@@ -122,4 +122,5 @@ export interface ObservabilityAIAssistantPublicStart {
   useGenAIConnectors: () => UseGenAIConnectorsResult;
   useChat: typeof useChat;
   useUserPreferredLanguage: () => UseUserPreferredLanguageResult;
+  getContextualInsightMessages: ({}: { message: string; instructions: string }) => Message[];
 }

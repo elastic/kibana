@@ -27,6 +27,7 @@ import type {
   ObservabilityAIAssistantService,
 } from './types';
 import { useUserPreferredLanguage } from './hooks/use_user_preferred_language';
+import { getContextualInsightMessages } from './utils/get_contextual_insight_messages';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -105,6 +106,7 @@ export class ObservabilityAIAssistantPlugin
             )
           )
         : null,
+      getContextualInsightMessages,
     };
   }
 }

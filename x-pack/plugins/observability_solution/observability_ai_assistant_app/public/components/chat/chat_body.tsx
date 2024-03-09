@@ -39,7 +39,6 @@ import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { useLicense } from '../../hooks/use_license';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
-import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { FlyoutWidthMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
@@ -104,7 +103,6 @@ export function ChatBody({
   initialTitle,
   knowledgeBase,
   showLinkToConversationsApp,
-  startedFrom,
   onConversationUpdate,
   onToggleFlyoutWidthMode,
 }: {
@@ -116,7 +114,6 @@ export function ChatBody({
   initialConversationId?: string;
   knowledgeBase: UseKnowledgeBaseResult;
   showLinkToConversationsApp: boolean;
-  startedFrom?: StartedFrom;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
   onToggleFlyoutWidthMode?: (flyoutWidthMode: FlyoutWidthMode) => void;
 }) {
@@ -163,9 +160,6 @@ export function ChatBody({
     background: white;
     min-width: 0;
     max-height: 100%;
-    max-width: ${startedFrom === 'conversationView'
-      ? 1200 - 250 + 'px' // page template max width - conversation list width.
-      : '100%'};
   `;
 
   const headerContainerClassName = css`
@@ -350,7 +344,6 @@ export function ChatBody({
                 <WelcomeMessage connectors={connectors} knowledgeBase={knowledgeBase} />
               ) : (
                 <ChatTimeline
-                  startedFrom={startedFrom}
                   messages={messages}
                   knowledgeBase={knowledgeBase}
                   chatService={chatService}
