@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenu, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiContextMenu, EuiFlexGroup, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
 import styled from '@emotion/styled';
 import React, { useMemo } from 'react';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
@@ -34,6 +34,7 @@ import {
   createIntegrationStatusItem,
   createUncategorizedStatusItem,
 } from './utils';
+import { AddDataButton } from './sub_components/add_data_button';
 
 export function DataSourceSelector({
   datasets,
@@ -221,7 +222,10 @@ export function DataSourceSelector({
       closePopover={closePopover}
       onClick={togglePopover}
     >
-      <Tabs>{tabEntries}</Tabs>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <Tabs bottomBorder={false}>{tabEntries}</Tabs>
+        {(tabId === INTEGRATIONS_TAB_ID || tabId === UNCATEGORIZED_TAB_ID) && <AddDataButton />}
+      </EuiFlexGroup>
       <EuiHorizontalRule margin="none" />
       <SearchControls
         key={panelId}
