@@ -6,14 +6,12 @@
  */
 
 export const useDiscoverInTimelineContext = () => ({
-  useDiscoverInTimelineContext: () => ({
-    resetDiscoverAppState: jest.fn(),
-    restoreDiscoverAppStateFromSavedSearch: jest.fn(),
-    updateSavedSearch: jest.fn(),
-    initializeLocalSavedSearch: jest.fn(),
-    getAppStateFromSavedSearch: jest.fn(),
-    defaultDiscoverAppState: {},
-    discoverStateContainer: { current: undefined },
-    setDiscoverStateContainer: jest.fn(),
-  }),
+  resetDiscoverAppState: jest.fn(),
+  restoreDiscoverAppStateFromSavedSearch: jest.fn(),
+  updateSavedSearch: jest.fn(),
+  initializeLocalSavedSearch: jest.fn(),
+  getAppStateFromSavedSearch: jest.fn(),
+  defaultDiscoverAppState: {},
+  discoverStateContainer: { current: undefined },
+  setDiscoverStateContainer: jest.fn(),
 });

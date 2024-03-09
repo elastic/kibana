@@ -135,16 +135,44 @@ export const useDiscoverInTimelineActions = (
    * resets discover state to a default value
    *
    * */
-  const resetDiscoverAppState = useCallback(async () => {
-    setDiscoverAppState(defaultDiscoverAppState);
-    discoverStateContainer.current?.appState.resetToState(defaultDiscoverAppState);
-    discoverStateContainer.current?.appState.update(defaultDiscoverAppState, true);
-    await discoverStateContainer.current?.appState.replaceUrlState(defaultDiscoverAppState);
-    discoverStateContainer.current?.globalState.set({
-      ...discoverStateContainer.current?.globalState.get(),
-      time: defaultDiscoverTimeRange,
-    });
-  }, [defaultDiscoverAppState, discoverStateContainer, setDiscoverAppState]);
+  const resetDiscoverAppState = useCallback(
+    async (newSavedSearchId?: string | null) => {
+      if (newSavedSearchId && discoverStateContainer.current) {
+        let savedSearch;
+        try {
+          savedSearch = await discoverStateContainer.current?.savedSearchState.load(
+            newSavedSearchId
+          );
+          const savedSearchState = savedSearch ? getAppStateFromSavedSearch(savedSearch) : null;
+          discoverStateContainer.current?.appState.initAndSync(savedSearch);
+          await discoverStateContainer.current?.appState.replaceUrlState(
+            savedSearchState?.appState ?? {}
+          );
+          setDiscoverAppState(savedSearchState?.appState ?? defaultDiscoverAppState);
+          discoverStateContainer.current?.globalState.set({
+            ...discoverStateContainer.current?.globalState.get(),
+            time: savedSearch.timeRange ?? defaultDiscoverTimeRange,
+          });
+        } catch (e) {
+          /* empty */
+        }
+      } else {
+        discoverStateContainer.current?.appState.resetToState(defaultDiscoverAppState);
+        await discoverStateContainer.current?.appState.replaceUrlState({});
+        setDiscoverAppState(defaultDiscoverAppState);
+        discoverStateContainer.current?.globalState.set({
+          ...discoverStateContainer.current?.globalState.get(),
+          time: defaultDiscoverTimeRange,
+        });
+      }
+    },
+    [
+      defaultDiscoverAppState,
+      discoverStateContainer,
+      getAppStateFromSavedSearch,
+      setDiscoverAppState,
+    ]
+  );
 
   const persistSavedSearch = useCallback(
     async (savedSearch: SavedSearch, savedSearchOption: SaveSavedSearchOptions) => {

@@ -389,7 +389,7 @@ export const useQueryTimelineById = () => {
               // No need to do that again.
               preventSettingQuery: true,
             });
-            resetDiscoverAppState();
+            resetDiscoverAppState(timeline.savedSearchId);
           }
         })
         .catch((error) => {

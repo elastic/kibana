@@ -228,17 +228,26 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const initialDiscoverCustomizationCallback: CustomizationCallback = useCallback(
     async ({ stateContainer }) => {
-      if (stateContainer.appState.isEmptyURL()) {
-        stateContainer.appState.set(discoverAppState ?? defaultDiscoverAppState);
-        await stateContainer.appState.replaceUrlState(discoverAppState ?? defaultDiscoverAppState);
-      }
-
       setDiscoverStateContainer(stateContainer);
       let savedSearchAppState;
       if (savedSearchId) {
         const localSavedSearch = await savedSearchService.get(savedSearchId);
         initializeLocalSavedSearch(localSavedSearch, timelineId);
         savedSearchAppState = getAppStateFromSavedSearch(localSavedSearch);
+      }
+
+      const finalAppState =
+        savedSearchAppState?.appState ?? discoverAppState ?? defaultDiscoverAppState;
+
+      if (stateContainer.appState.isEmptyURL()) {
+        if (savedSearchAppState?.savedSearch.timeRange) {
+          stateContainer.globalState.set({
+            ...stateContainer.globalState.get(),
+            time: savedSearchAppState?.savedSearch.timeRange,
+          });
+        }
+        stateContainer.appState.set(finalAppState);
+        await stateContainer.appState.replaceUrlState(finalAppState);
       }
 
       const unsubscribeState = stateContainer.appState.state$.subscribe({

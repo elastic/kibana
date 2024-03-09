@@ -11,7 +11,7 @@ export const useDiscoverInTimelineActions = () => {
     restoreDiscoverAppStateFromSavedSearch: jest.fn(),
     updateSavedSearch: jest.fn(),
     getAppStateFromSavedSearch: jest.fn(),
-    getDefaultDiscoverAppState: () => ({
+    defaultDiscoverAppState: {
       query: {
         query: '',
         language: 'esql',
@@ -23,6 +23,6 @@ export const useDiscoverInTimelineActions = () => {
       filters: [],
       hideChart: false,
       grid: {},
-    }),
+    },
   };
 };
