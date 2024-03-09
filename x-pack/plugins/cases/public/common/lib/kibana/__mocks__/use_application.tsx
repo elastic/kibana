@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import { STACK_APP_ID } from '../../common/constants';
-import { useApplication } from './lib/kibana/use_application';
-
-export const useIsMainApplication = () => {
-  const { appId } = useApplication();
-
-  return appId === STACK_APP_ID;
-};
+export const useApplication = jest
+  .fn()
+  .mockReturnValue({ appId: 'testAppId', appTitle: 'test-title' });
