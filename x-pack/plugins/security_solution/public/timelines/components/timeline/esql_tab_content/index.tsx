@@ -241,32 +241,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         savedSearchAppState = getAppStateFromSavedSearch(localSavedSearch);
       }
 
-      const finalAppState =
-        savedSearchAppState?.appState ??
-        stateContainer.appState.get() ??
-        discoverAppState ??
-        defaultDiscoverAppState;
-
-      const urlAppState = stateContainer.appState.isEmptyURL()
-        ? undefined
-        : stateContainer.appState.getState();
-
-      const hasESQLURlState = urlAppState?.query && 'esql' in urlAppState.query;
-
-      /*
-       * Url state should NOT apply if there is already a saved search being loaded
-       * */
-      const shouldApplyESQLUrlState = !savedSearchAppState?.appState && hasESQLURlState;
-
-      if (!shouldApplyESQLUrlState) {
-        /*
-         * If url state applies, it should be a no-op and there is no need to update the state container.
-         * Discover should automatically pick up url state
-         * */
-        stateContainer.appState.set(finalAppState);
-        await stateContainer.appState.replaceUrlState(finalAppState);
-      }
-
       const unsubscribeState = stateContainer.appState.state$.subscribe({
         next: setDiscoverAppState,
       });

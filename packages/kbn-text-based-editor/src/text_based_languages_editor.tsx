@@ -177,7 +177,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const kibana = useKibana<TextBasedEditorDeps>();
   const { dataViews, expressions, indexManagementApiService, application, docLinks } =
     kibana.services;
-  const [code, setCode] = useState(queryString ?? '');
+  const [code, setCode] = useState<string>(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
@@ -526,6 +526,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [calculateVisibleCode, code, isCompactFocused, queryString]);
 
+  useEffect(() => {
+    // make sure to always update the code in expanded editor when query prop changes
+    if (isCodeEditorExpanded) {
+      setCode(queryString);
+    }
+  }, [isCodeEditorExpanded, queryString]);
+
   const linesBreaksButtonsStatus = useMemo(() => {
     const pipes = code?.split('|');
     const pipesWithNewLine = code?.split('\n|');
@@ -750,11 +757,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       >
         <EuiResizeObserver onResize={onResize}>
           {(resizeRef) => (
-            <EuiOutsideClickDetector
-              onOutsideClick={() => {
-                restoreInitialMode();
-              }}
-            >
+            <EuiOutsideClickDetector onOutsideClick={restoreInitialMode}>
               <div ref={resizeRef} css={styles.resizableContainer}>
                 <EuiFlexItem
                   data-test-subj={dataTestSubj ?? 'TextBasedLangEditor'}
@@ -973,9 +976,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           lines={lines}
           containerCSS={styles.bottomContainer}
           onErrorClick={onErrorClick}
-          runQuery={() => {
-            onQuerySubmit();
-          }}
+          runQuery={onQuerySubmit}
           detectTimestamp={detectTimestamp}
           hideRunQueryText={hideRunQueryText}
           editorIsInline={editorIsInline}
