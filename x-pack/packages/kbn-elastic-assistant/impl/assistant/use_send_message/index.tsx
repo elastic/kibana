@@ -9,29 +9,29 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useState } from 'react';
 
 import { useAssistantContext } from '../../assistant_context';
-import { Conversation, Message } from '../../assistant_context/types';
+import { Conversation } from '../../assistant_context/types';
 import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
 
-interface SendMessagesProps {
+interface SendMessageProps {
   allow?: string[];
   allowReplacement?: string[];
   apiConfig: Conversation['apiConfig'];
   http: HttpSetup;
-  messages: Message[];
+  message?: string;
   conversationId: string;
   replacements: Record<string, string>;
 }
 
-interface UseSendMessages {
+interface UseSendMessage {
   isLoading: boolean;
-  sendMessages: ({
+  sendMessage: ({
     apiConfig,
     http,
-    messages,
-  }: SendMessagesProps) => Promise<FetchConnectorExecuteResponse>;
+    message,
+  }: SendMessageProps) => Promise<FetchConnectorExecuteResponse>;
 }
 
-export const useSendMessages = (): UseSendMessages => {
+export const useSendMessage = (): UseSendMessage => {
   const {
     alertsIndexPattern,
     assistantStreamingEnabled,
@@ -41,8 +41,8 @@ export const useSendMessages = (): UseSendMessages => {
   } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
 
-  const sendMessages = useCallback(
-    async ({ apiConfig, http, messages, conversationId, replacements }: SendMessagesProps) => {
+  const sendMessage = useCallback(
+    async ({ apiConfig, http, message, conversationId, replacements }: SendMessageProps) => {
       setIsLoading(true);
 
       try {
@@ -56,7 +56,7 @@ export const useSendMessages = (): UseSendMessages => {
           isEnabledKnowledgeBase: knowledgeBase.isEnabledKnowledgeBase,
           assistantStreamingEnabled,
           http,
-          messages,
+          message,
           replacements,
           size: knowledgeBase.latestAlerts,
         });
@@ -75,5 +75,5 @@ export const useSendMessages = (): UseSendMessages => {
     ]
   );
 
-  return { isLoading, sendMessages };
+  return { isLoading, sendMessage };
 };

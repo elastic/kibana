@@ -9,17 +9,14 @@ import { get } from 'lodash/fp';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { PassThrough, Readable } from 'stream';
-import {
-  ConnectorExecutionParams,
-  ExecuteConnectorRequestBody,
-} from '@kbn/elastic-assistant-common';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { handleStreamStorage } from './parse_stream';
 
 export interface Props {
   onLlmResponse?: (content: string) => Promise<void>;
   actions: ActionsPluginStart;
   connectorId: string;
-  params: ConnectorExecutionParams;
+  params: InvokeAIActionsParams;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 }
 interface StaticResponse {
@@ -27,6 +24,20 @@ interface StaticResponse {
   data: string;
   status: string;
 }
+
+interface InvokeAIActionsParams {
+  subActionParams: {
+    messages: Array<{ role: string; content: string }>;
+    model?: string;
+    n?: number;
+    stop?: string | string[] | null;
+    temperature?: number;
+  };
+  subAction: 'invokeAI' | 'invokeStream';
+}
+
+const convertToGenericType = (params: InvokeAIActionsParams): Record<string, unknown> =>
+  params as unknown as Record<string, unknown>;
 
 export const executeAction = async ({
   onLlmResponse,
@@ -39,7 +50,7 @@ export const executeAction = async ({
 
   const actionResult = await actionsClient.execute({
     actionId: connectorId,
-    params,
+    params: convertToGenericType(params),
   });
 
   if (actionResult.status === 'error') {

@@ -77,10 +77,13 @@ export class ActionsClientLlm extends LLM {
     const requestBody = {
       actionId: this.#connectorId,
       params: {
-        ...this.#request.body.params, // the original request body params
+        subAction: this.#request.body.subAction,
         subActionParams: {
-          ...this.#request.body.params.subActionParams, // the original request body params.subActionParams
+          model: this.#request.body.model,
           messages: [assistantMessage], // the assistant message
+          ...(this.#request.body.llmType === 'openai'
+            ? { n: 1, stop: null, temperature: 0.2 }
+            : {}),
         },
       },
     };

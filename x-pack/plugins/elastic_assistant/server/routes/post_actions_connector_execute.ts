@@ -78,48 +78,45 @@ export const postActionsConnectorExecuteRoute = (
 
           let onLlmResponse;
           let prevMessages;
+          let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
+
+          // if message is undefined, it means the user is regenerating a message from the stored conversation
+          if (request.body.message) {
+            newMessage = {
+              content: request.body.message,
+              role: 'user',
+            };
+          }
+
           if (conversationId) {
             const conversation = await dataClient?.getConversation({
               id: conversationId,
               authenticatedUser,
             });
-            prevMessages = conversation?.messages?.map((c) => ({
-              role: c.role,
-              content: c.content,
-            }));
-
             if (conversation == null) {
               return response.notFound({
                 body: `conversation id: "${conversationId}" not found`,
               });
             }
 
-            const dateTimeString = new Date().toISOString();
+            prevMessages = conversation?.messages?.map((c) => ({
+              role: c.role,
+              content: c.content,
+            }));
 
-            const appendMessageFuncs = request.body.params.subActionParams.messages.map(
-              (userMessage) => async () => {
-                if (conversation != null) {
-                  const res = await dataClient?.appendConversationMessages({
-                    existingConversation: conversation,
-                    messages: request.body.params.subActionParams.messages.map((m) => ({
-                      content: userMessage.content,
-                      role: m.role,
-                      timestamp: dateTimeString,
-                    })),
-                  });
+            if (newMessage) {
+              const res = await dataClient?.appendConversationMessages({
+                existingConversation: conversation,
+                messages: [{ ...newMessage, timestamp: new Date().toISOString() }],
+              });
 
-                  if (res == null) {
-                    return response.badRequest({
-                      body: `conversation id: "${conversationId}" not updated`,
-                    });
-                  }
-                }
+              if (res == null) {
+                return response.badRequest({
+                  body: `conversation id: "${conversationId}" not updated`,
+                });
               }
-            );
-
-            await Promise.all(appendMessageFuncs.map((appendMessageFunc) => appendMessageFunc()));
-
+            }
             const updatedConversation = await dataClient?.getConversation({
               id: conversationId,
               authenticatedUser,
@@ -165,22 +162,24 @@ export const postActionsConnectorExecuteRoute = (
           // if not langchain, call execute action directly and return the response:
           if (!request.body.isEnabledKnowledgeBase && !request.body.isEnabledRAGAlerts) {
             logger.debug('Executing via actions framework directly');
+
             const result = await executeAction({
               onLlmResponse,
               actions,
               request,
               connectorId,
               params: {
-                subAction: request.body.params.subAction,
+                subAction: request.body.subAction,
                 subActionParams: {
-                  ...request.body.params.subActionParams,
-                  messages: [
-                    ...(prevMessages ?? []),
-                    ...request.body.params.subActionParams.messages,
-                  ],
+                  model: request.body.model,
+                  messages: [...(prevMessages ?? []), ...(newMessage ? [newMessage] : [])],
+                  ...(request.body.llmType === 'openai'
+                    ? { n: 1, stop: null, temperature: 0.2 }
+                    : {}),
                 },
               },
             });
+
             telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
               isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
               isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
@@ -208,7 +207,7 @@ export const postActionsConnectorExecuteRoute = (
 
           // convert the assistant messages to LangChain messages:
           const langChainMessages = getLangChainMessages(
-            ([...(prevMessages ?? []), ...request.body.params.subActionParams.messages] ??
+            ([...(prevMessages ?? []), ...(newMessage ? [newMessage] : [])] ??
               []) as unknown as Array<Pick<Message, 'content' | 'role'>>
           );
 

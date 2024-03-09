@@ -431,20 +431,12 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
                 .on('error', reject)
                 .send({
-                  params: {
-                    subAction: 'invokeStream',
-                    subActionParams: {
-                      messages: [
-                        {
-                          role: 'user',
-                          content: 'Hello world',
-                        },
-                      ],
-                    },
-                  },
+                  subAction: 'invokeStream',
+                  message: 'Hello world',
                   isEnabledKnowledgeBase: false,
                   isEnabledRAGAlerts: false,
                   llmType: 'bedrock',
+                  replacements: {},
                 })
                 .pipe(passThrough);
               const responseBuffer: Uint8Array[] = [];

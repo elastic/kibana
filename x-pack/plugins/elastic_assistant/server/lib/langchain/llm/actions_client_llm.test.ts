@@ -28,34 +28,16 @@ const mockActions = {
   })),
 } as unknown as ActionsPluginStart;
 
+const prompt = 'Do you know my name?';
+
 const mockRequest: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody> = {
   params: { connectorId },
   body: {
-    params: {
-      subActionParams: {
-        messages: [
-          { role: 'user', content: '\\n\\n\\n\\nWhat is my name?' },
-          {
-            role: 'assistant',
-            content:
-              "I'm sorry, but I don't have the information about your name. You can tell me your name if you'd like, and we can continue our conversation from there.",
-          },
-          { role: 'user', content: '\\n\\nMy name is Andrew' },
-          {
-            role: 'assistant',
-            content:
-              "Hello, Andrew! It's nice to meet you. What would you like to talk about today?",
-          },
-          { role: 'user', content: '\\n\\nDo you know my name?' },
-        ],
-      },
-      subAction: 'invokeAI',
-    },
+    message: prompt,
+    subAction: 'invokeAI',
     isEnabledKnowledgeBase: true,
   },
 } as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
-
-const prompt = 'Do you know my name?';
 
 describe('ActionsClientLlm', () => {
   beforeEach(() => {

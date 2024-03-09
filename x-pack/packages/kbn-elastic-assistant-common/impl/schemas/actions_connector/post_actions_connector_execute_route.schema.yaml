@@ -28,11 +28,19 @@ paths:
                 - params
                 - llmType
                 - replacements
+                - subAction
               properties:
                 conversationId:
                   $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/UUID'
-                params:
-                  $ref: '#/components/schemas/ConnectorExecutionParams'
+                message:
+                  type: string
+                model:
+                  type: string
+                subAction:
+                  type: string
+                  enum:
+                    - invokeAI
+                    - invokeStream
                 alertsIndexPattern:
                   type: string
                 allow:
@@ -99,50 +107,3 @@ paths:
                   message:
                     type: string
 
-components:
-  schemas:
-    RawMessageData:
-      type: object
-      additionalProperties: true
-
-    ConnectorExecutionParams:
-      type: object
-      description: AI assistant connector execution params.
-      required:
-        - subActionParams
-        - subAction
-      properties:
-        subActionParams:
-          type: object
-          required:
-            - messages
-          properties:
-            messages:
-              type: array
-              items:
-                type: object
-                required:
-                  - role
-                  - content
-                properties:
-                  role:
-                    type: string
-                    description: Message role.
-                    enum:
-                      - system
-                      - user
-                      - assistant
-                  content:
-                    type: string
-            model:
-              type: string
-            n:
-              type: number
-            stop:
-              type: array
-              items:
-                type: string
-            temperature:
-              type: number
-        subAction:
-          type: string

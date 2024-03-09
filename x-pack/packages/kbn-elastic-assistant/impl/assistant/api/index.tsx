@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { HttpSetup } from '@kbn/core/public';
 import { IHttpFetchError } from '@kbn/core-http-browser';
-import type { Conversation, Message } from '../../assistant_context/types';
+import type { Conversation } from '../../assistant_context/types';
 import { API_ERROR } from '../translations';
-import { MODEL_GPT_3_5_TURBO } from '../../connectorland/models/model_selector/model_selector';
 import { getOptionalRequestParams, llmTypeDictionary } from '../helpers';
 export * from './conversations';
 
@@ -24,7 +22,7 @@ export interface FetchConnectorExecuteAction {
   assistantStreamingEnabled: boolean;
   apiConfig: Conversation['apiConfig'];
   http: HttpSetup;
-  messages: Message[];
+  message?: string;
   replacements: Record<string, string>;
   signal?: AbortSignal | undefined;
   size?: number;
@@ -49,31 +47,12 @@ export const fetchConnectorExecuteAction = async ({
   isEnabledKnowledgeBase,
   assistantStreamingEnabled,
   http,
-  messages,
+  message,
   replacements,
   apiConfig,
   signal,
   size,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
-  const outboundMessages = messages.map((msg) => ({
-    role: msg.role,
-    content: msg.content,
-  }));
-
-  const body =
-    apiConfig?.provider === OpenAiProviderType.OpenAi
-      ? {
-          model: apiConfig.model ?? MODEL_GPT_3_5_TURBO,
-          messages: outboundMessages,
-          n: 1,
-          stop: null,
-          temperature: 0.2,
-        }
-      : {
-          // Azure OpenAI and Bedrock invokeAI both expect this body format
-          messages: outboundMessages,
-        };
-
   const llmType = llmTypeDictionary[apiConfig.connectorTypeTitle ?? 'OpenAI'];
   // TODO: Remove in part 3 of streaming work for security solution
   // tracked here: https://github.com/elastic/security-team/issues/7363
@@ -89,10 +68,10 @@ export const fetchConnectorExecuteAction = async ({
   });
 
   const requestBody = {
-    params: {
-      subActionParams: body,
-      subAction: isStream ? 'invokeStream' : 'invokeAI',
-    },
+    // only used for openai, azure and bedrock ignore field
+    model: apiConfig.model,
+    message,
+    subAction: isStream ? 'invokeStream' : 'invokeAI',
     conversationId,
     replacements,
     isEnabledKnowledgeBase,

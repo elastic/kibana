@@ -15,7 +15,7 @@ import {
   getKnowledgeBaseStatus,
   postKnowledgeBase,
 } from '.';
-import type { Conversation, Message } from '../../assistant_context/types';
+import type { Conversation } from '../../assistant_context/types';
 import { API_ERROR } from '../translations';
 
 jest.mock('@kbn/core-http-browser');
@@ -30,16 +30,13 @@ const apiConfig: Conversation['apiConfig'] = {
   provider: OpenAiProviderType.OpenAi,
 };
 
-const messages: Message[] = [
-  { content: 'This is a test', role: 'user', timestamp: new Date().toISOString() },
-];
 const fetchConnectorArgs: FetchConnectorExecuteAction = {
   isEnabledRAGAlerts: false,
   apiConfig,
   isEnabledKnowledgeBase: true,
   assistantStreamingEnabled: true,
   http: mockHttp,
-  messages,
+  message: 'This is a test',
   conversationId: 'test',
   replacements: {},
 };
@@ -55,7 +52,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"conversationId":"test","replacements":{},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false,"llmType":"openai"}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":{},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false,"llmType":"openai"}',
           headers: { 'Content-Type': 'application/json' },
           method: 'POST',
           signal: undefined,
@@ -75,7 +72,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeStream"},"conversationId":"test","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false,"llmType":"openai"}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeStream","conversationId":"test","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false,"llmType":"openai"}',
           method: 'POST',
           asResponse: true,
           rawResponse: true,
@@ -101,7 +98,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"conversationId":"test","replacements":{"auuid":"real.hostname"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"llmType":"openai","alertsIndexPattern":".alerts-security.alerts-default","allow":["a","b","c"],"allowReplacement":["b","c"],"size":30}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":{"auuid":"real.hostname"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"llmType":"openai","alertsIndexPattern":".alerts-security.alerts-default","allow":["a","b","c"],"allowReplacement":["b","c"],"size":30}',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -124,7 +121,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"conversationId":"test","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false,"llmType":"openai"}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false,"llmType":"openai"}',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -147,7 +144,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"conversationId":"test","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true,"llmType":"openai"}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true,"llmType":"openai"}',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

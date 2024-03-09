@@ -140,6 +140,7 @@ describe('Assistant', () => {
             id: 'Welcome Id',
             messages: [],
             title: 'Welcome',
+            replacements: {},
           },
         })
       );

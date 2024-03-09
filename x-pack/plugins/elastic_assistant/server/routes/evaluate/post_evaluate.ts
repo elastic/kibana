@@ -148,12 +148,7 @@ export const postEvaluateRoute = (
               alertsIndexPattern: '',
               allow: [],
               allowReplacement: [],
-              params: {
-                subAction: 'invokeAI',
-                subActionParams: {
-                  messages: [],
-                },
-              },
+              subAction: 'invokeAI',
               replacements: {},
               size: DEFAULT_SIZE,
               isEnabledKnowledgeBase: true,

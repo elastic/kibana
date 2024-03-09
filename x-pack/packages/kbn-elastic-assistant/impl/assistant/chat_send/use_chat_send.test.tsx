@@ -6,7 +6,7 @@
  */
 
 import { HttpSetup } from '@kbn/core-http-browser';
-import { useSendMessages } from '../use_send_messages';
+import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
 import { defaultSystemPrompt, mockSystemPrompt } from '../../mock/system_prompt';
@@ -16,7 +16,7 @@ import { waitFor } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { useAssistantContext } from '../../..';
 
-jest.mock('../use_send_messages');
+jest.mock('../use_send_message');
 jest.mock('../use_conversation');
 jest.mock('../../..');
 
@@ -24,7 +24,7 @@ const setEditingSystemPromptId = jest.fn();
 const setPromptTextPreview = jest.fn();
 const setSelectedPromptContexts = jest.fn();
 const setUserPrompt = jest.fn();
-const sendMessages = jest.fn();
+const sendMessage = jest.fn();
 const removeLastMessage = jest.fn();
 const clearConversation = jest.fn();
 const refresh = jest.fn();
@@ -55,9 +55,9 @@ const reportAssistantMessageSent = jest.fn();
 describe('use chat send', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useSendMessages as jest.Mock).mockReturnValue({
+    (useSendMessage as jest.Mock).mockReturnValue({
       isLoading: false,
-      sendMessages: sendMessages.mockReturnValue(robotMessage),
+      sendMessage: sendMessage.mockReturnValue(robotMessage),
     });
     (useConversation as jest.Mock).mockReturnValue({
       removeLastMessage,
@@ -102,12 +102,11 @@ describe('use chat send', () => {
     expect(setUserPrompt).toHaveBeenCalledWith('');
 
     await waitFor(() => {
-      expect(sendMessages).toHaveBeenCalled();
-      const appendMessageSend = sendMessages.mock.calls[0][0].messages[0];
-      expect(appendMessageSend.content).toEqual(
+      expect(sendMessage).toHaveBeenCalled();
+      const appendMessageSend = sendMessage.mock.calls[0][0].message;
+      expect(appendMessageSend).toEqual(
         `You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n\n\n${promptText}`
       );
-      expect(appendMessageSend.role).toEqual('user');
     });
   });
   it('handleButtonSendMessage sends message with only provided prompt text and context already exists in convo history', async () => {
@@ -124,7 +123,7 @@ describe('use chat send', () => {
     expect(setUserPrompt).toHaveBeenCalledWith('');
 
     await waitFor(() => {
-      expect(sendMessages).toHaveBeenCalled();
+      expect(sendMessage).toHaveBeenCalled();
       const messages = setCurrentConversation.mock.calls[0][0].messages;
       expect(messages[messages.length - 1].content).toEqual(`\n\n${promptText}`);
     });
@@ -142,7 +141,7 @@ describe('use chat send', () => {
     expect(removeLastMessage).toHaveBeenCalledWith('welcome-id');
 
     await waitFor(() => {
-      expect(sendMessages).toHaveBeenCalled();
+      expect(sendMessage).toHaveBeenCalled();
       const messages = setCurrentConversation.mock.calls[1][0].messages;
       expect(messages[messages.length - 1].content).toEqual(robotMessage.response);
     });

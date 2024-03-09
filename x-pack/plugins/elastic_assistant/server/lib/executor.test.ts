@@ -18,7 +18,8 @@ import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/s
 import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 const request = {
   body: {
-    params: {},
+    subAction: 'invokeAI',
+    message: 'hello',
   },
 } as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 const onLlmResponse = jest.fn();

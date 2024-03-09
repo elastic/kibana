@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { SelectedPromptContext } from '../prompt_context/types';
-import { useSendMessages } from '../use_send_messages';
+import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
 import { Conversation, Message, Prompt, useAssistantContext } from '../../..';
@@ -63,7 +63,7 @@ export const useChatSend = ({
     knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
   } = useAssistantContext();
 
-  const { isLoading, sendMessages } = useSendMessages();
+  const { isLoading, sendMessage } = useSendMessage();
   const { clearConversation, removeLastMessage } = useConversation();
 
   const handlePromptChange = (prompt: string) => {
@@ -107,10 +107,10 @@ export const useChatSend = ({
       setSelectedPromptContexts({});
       setPromptTextPreview('');
 
-      const rawResponse = await sendMessages({
+      const rawResponse = await sendMessage({
         apiConfig: currentConversation.apiConfig,
         http,
-        messages: [userMessage],
+        message: userMessage.content ?? '',
         conversationId: currentConversation.id,
         replacements,
       });
@@ -143,7 +143,7 @@ export const useChatSend = ({
       isEnabledKnowledgeBase,
       isEnabledRAGAlerts,
       selectedPromptContexts,
-      sendMessages,
+      sendMessage,
       setCurrentConversation,
       setPromptTextPreview,
       setSelectedPromptContexts,
@@ -158,11 +158,10 @@ export const useChatSend = ({
     });
     const updatedMessages = (await removeLastMessage(currentConversation.id)) ?? [];
 
-    const rawResponse = await sendMessages({
+    const rawResponse = await sendMessage({
       apiConfig: currentConversation.apiConfig,
       http,
       // do not send any new messages, the previous conversation is already stored
-      messages: [],
       conversationId: currentConversation.id,
       replacements: {},
     });
@@ -172,7 +171,7 @@ export const useChatSend = ({
       ...currentConversation,
       messages: [...updatedMessages, responseMessage],
     });
-  }, [currentConversation, http, removeLastMessage, sendMessages, setCurrentConversation]);
+  }, [currentConversation, http, removeLastMessage, sendMessage, setCurrentConversation]);
 
   const handleButtonSendMessage = useCallback(
     (message: string) => {
