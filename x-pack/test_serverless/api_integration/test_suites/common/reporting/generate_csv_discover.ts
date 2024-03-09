@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializedSearchSourceFields, SortDirection } from '@kbn/data-plugin/common';
+import type { SortDirection } from '@kbn/data-plugin/common';
 import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { Filter } from '@kbn/es-query';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -31,56 +31,93 @@ export default ({ getService }: FtrProviderContext) => {
     };
   };
 
+  const archives: Record<string, { data: string; savedObjects: string }> = {
+    ecommerce: {
+      data: 'x-pack/test/functional/es_archives/reporting/ecommerce',
+      savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce',
+    },
+    unmappedFields: {
+      data: 'x-pack/test/functional/es_archives/reporting/unmapped_fields',
+      savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/unmapped_fields.json',
+    },
+    logs: {
+      data: 'x-pack/test/functional/es_archives/logstash_functional',
+      savedObjects: 'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs',
+    },
+    nanos: {
+      data: 'x-pack/test/functional/es_archives/reporting/nanos',
+      savedObjects: 'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs',
+    },
+    sales: {
+      data: 'x-pack/test/functional/es_archives/reporting/sales',
+      savedObjects: 'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs',
+    },
+    bigIntIdField: {
+      data: 'x-pack/test/functional/es_archives/reporting/big_int_id_field',
+      savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/big_int_id_field',
+    },
+  };
+
   /*
    * Tests
    */
   describe('Generate CSV from SearchSource', () => {
-    const archives = {
-      ecommerce: {
-        data: 'x-pack/test/functional/es_archives/reporting/ecommerce',
-        savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce',
-      },
-    };
-
     beforeEach(async () => {
-      await esArchiver.load(archives.ecommerce.data);
-      await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
-    });
-
-    after(async () => {
-      await esArchiver.unload(archives.ecommerce.data);
-      await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
-    });
-
-    before(async () => {
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': true,
         'dateFormat:tz': 'UTC',
       });
     });
 
-    it(`exported CSV file matches snapshot`, async () => {
-      const fromTime = '2019-06-20T00:00:00.000Z';
-      const toTime = '2019-06-24T00:00:00.000Z';
+    describe('exported CSV', () => {
+      before(async () => {
+        await esArchiver.load(archives.ecommerce.data);
+        await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
+      });
 
-      const res = await reportingAPI.createReportJobInternal(
-        'csv_searchsource',
-        createTestCsvJobParams({
-          title: 'Generic CSV Report',
-          searchSource: {
-            version: true,
-            query: { query: '', language: 'kuery' },
-            index: '5193f870-d861-11e9-a311-0fa548c5f953',
-            sort: [{ order_date: 'desc' as SortDirection }],
-            fields: ['*'],
-            filter: [],
-            parent: {
-              query: { language: 'kuery', query: '' },
-              filter: [],
-              parent: {
-                filter: [
-                  {
-                    meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
+      after(async () => {
+        await esArchiver.unload(archives.ecommerce.data);
+        await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
+      });
+
+      it('file matches snapshot', async () => {
+        const fromTime = '2019-06-20T00:00:00.000Z';
+        const toTime = '2019-06-24T00:00:00.000Z';
+
+        const res = await reportingAPI.createReportJobInternal(
+          'csv_searchsource',
+          createTestCsvJobParams({
+            browserTimezone: 'UTC',
+            columns: [
+              'order_date',
+              'category',
+              'currency',
+              'customer_id',
+              'order_id',
+              'day_of_week_i',
+              'products.created_on',
+              'sku',
+            ],
+            objectType: 'search',
+            searchSource: {
+              fields: [
+                { field: 'order_date', include_unmapped: 'true' },
+                { field: 'category', include_unmapped: 'true' },
+                { field: 'currency', include_unmapped: 'true' },
+                { field: 'customer_id', include_unmapped: 'true' },
+                { field: 'order_id', include_unmapped: 'true' },
+                { field: 'day_of_week_i', include_unmapped: 'true' },
+                { field: 'products.created_on', include_unmapped: 'true' },
+                { field: 'sku', include_unmapped: 'true' },
+              ],
+              filter: [
+                {
+                  meta: {
+                    field: 'order_date',
+                    index: '5193f870-d861-11e9-a311-0fa548c5f953',
+                    params: {},
+                  },
+                  query: {
                     range: {
                       order_date: {
                         gte: fromTime,
@@ -89,33 +126,40 @@ export default ({ getService }: FtrProviderContext) => {
                       },
                     },
                   },
-                ],
-              },
+                },
+              ] as unknown as Filter[],
+              index: '5193f870-d861-11e9-a311-0fa548c5f953',
+              query: { language: 'kuery', query: '' },
+              sort: [
+                {
+                  order_date: {
+                    format: 'strict_date_optional_time',
+                    order: 'desc' as SortDirection,
+                  },
+                },
+                { order_id: 'desc' as SortDirection },
+              ],
+              version: true,
             },
-          } as unknown as SerializedSearchSourceFields,
-        })
-      );
-
-      await reportingAPI.waitForJobToFinish(res.path);
-      const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-      expectSnapshot(csvFile).toMatch();
+            title: 'Ecommerce Data',
+            version: '8.14.0',
+          })
+        );
+        await reportingAPI.waitForJobToFinish(res.path);
+        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        expectSnapshot(csvFile).toMatch();
+      });
     });
 
     describe('with unmapped fields', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded(
-          'x-pack/test/functional/es_archives/reporting/unmapped_fields'
-        );
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/reporting/unmapped_fields.json'
-        );
+        await esArchiver.load(archives.unmappedFields.data);
+        await kibanaServer.importExport.load(archives.unmappedFields.savedObjects);
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/unmapped_fields');
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/reporting/unmapped_fields.json'
-        );
+        await esArchiver.unload(archives.unmappedFields.data);
+        await kibanaServer.importExport.unload(archives.unmappedFields.savedObjects);
       });
 
       // Helper function
@@ -128,13 +172,20 @@ export default ({ getService }: FtrProviderContext) => {
               version: true,
               query: { query: '', language: 'kuery' },
               index: '5c620ea0-dc4f-11ec-972a-bf98ce1eebd7',
-              sort: [{ order_date: 'desc' as SortDirection }],
+              sort: [
+                {
+                  order_date: {
+                    format: 'strict_date_optional_time',
+                    order: 'desc' as SortDirection,
+                  },
+                },
+                { order_id: 'desc' as SortDirection },
+              ],
               fields: fields.map((field) => ({ field, include_unmapped: 'true' })),
               filter: [],
-            } as unknown as SerializedSearchSourceFields,
+            },
           })
         );
-
         await reportingAPI.waitForJobToFinish(res.path);
         return reportingAPI.getCompletedJobOutput(res.path);
       }
@@ -161,12 +212,20 @@ export default ({ getService }: FtrProviderContext) => {
 
       before(async () => {
         await esArchiver.load(archives.ecommerce.data);
-        await kibanaServer.uiSettings.update({ 'csv:quoteValues': false });
+        await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
+        await kibanaServer.uiSettings.update({
+          'csv:quoteValues': false,
+          'dateFormat:tz': 'UTC',
+        });
       });
 
       after(async () => {
-        await kibanaServer.uiSettings.update({ 'csv:quoteValues': true });
         await esArchiver.unload(archives.ecommerce.data);
+        await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
+        await kibanaServer.uiSettings.update({
+          'csv:quoteValues': true,
+          'dateFormat:tz': 'UTC',
+        });
       });
 
       it('Exports CSV with almost all fields when using fieldsFromSource', async () => {
@@ -177,7 +236,15 @@ export default ({ getService }: FtrProviderContext) => {
             searchSource: {
               query: { query: '', language: 'kuery' },
               index: '5193f870-d861-11e9-a311-0fa548c5f953',
-              sort: [{ order_date: 'desc' as SortDirection }],
+              sort: [
+                {
+                  order_date: {
+                    format: 'strict_date_optional_time',
+                    order: 'desc' as SortDirection,
+                  },
+                },
+                { order_id: 'desc' as SortDirection },
+              ],
               fieldsFromSource: [
                 '_id',
                 '_index',
@@ -261,7 +328,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
           })
         );
-
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
         expectSnapshot(csvFile).toMatch();
@@ -275,7 +341,15 @@ export default ({ getService }: FtrProviderContext) => {
             searchSource: {
               query: { query: '', language: 'kuery' },
               index: '5193f870-d861-11e9-a311-0fa548c5f953',
-              sort: [{ order_date: 'desc' as SortDirection }],
+              sort: [
+                {
+                  order_date: {
+                    format: 'strict_date_optional_time',
+                    order: 'desc' as SortDirection,
+                  },
+                },
+                { order_id: 'desc' as SortDirection },
+              ],
               fields: ['*'],
               filter: [],
               parent: {
@@ -299,7 +373,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
           })
         );
-
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
         expectSnapshot(csvFile).toMatch();
@@ -308,17 +381,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('date formatting', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
-        await kibanaServer.importExport.load(
-          'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs'
-        );
+        await esArchiver.load(archives.logs.data);
+        await kibanaServer.importExport.load(archives.logs.savedObjects);
       });
 
       after(async () => {
-        await kibanaServer.importExport.unload(
-          'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs'
-        );
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await kibanaServer.importExport.unload(archives.logs.savedObjects);
+        await esArchiver.unload(archives.logs.data);
       });
 
       it('With filters and timebased data, default to UTC', async () => {
@@ -355,7 +424,6 @@ export default ({ getService }: FtrProviderContext) => {
             columns: ['@timestamp', 'clientip', 'extension'],
           })
         );
-
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
         expectSnapshot(csvFile).toMatch();
@@ -395,7 +463,6 @@ export default ({ getService }: FtrProviderContext) => {
             columns: ['@timestamp', 'clientip', 'extension'],
           })
         );
-
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
         expectSnapshot(csvFile).toMatch();
@@ -404,19 +471,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('nanosecond formatting', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/nanos');
-        await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
-        await kibanaServer.importExport.load(
-          'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs'
-        );
+        await esArchiver.load(archives.nanos.data);
+        await kibanaServer.importExport.load(archives.nanos.savedObjects);
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/nanos');
-        await kibanaServer.importExport.unload(
-          'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs'
-        );
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.unload(archives.nanos.data);
+        await kibanaServer.importExport.unload(archives.nanos.savedObjects);
       });
 
       it('Formatted date_nanos data, UTC timezone', async () => {
@@ -435,7 +496,6 @@ export default ({ getService }: FtrProviderContext) => {
             columns: ['date', 'message'],
           })
         );
-
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
         expectSnapshot(csvFile).toMatch();
@@ -458,7 +518,6 @@ export default ({ getService }: FtrProviderContext) => {
             columns: ['date', 'message'],
           })
         );
-
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
         expectSnapshot(csvFile).toMatch();
@@ -467,22 +526,20 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('non-timebased', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
-        await kibanaServer.importExport.load(
-          'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs'
-        );
+        await esArchiver.load(archives.nanos.data);
+        await kibanaServer.importExport.load(archives.nanos.savedObjects);
+        await esArchiver.load(archives.sales.data);
+        await kibanaServer.importExport.load(archives.sales.savedObjects);
       });
 
       after(async () => {
-        await kibanaServer.importExport.unload(
-          'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs'
-        );
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.unload(archives.nanos.data);
+        await kibanaServer.importExport.unload(archives.nanos.savedObjects);
+        await esArchiver.unload(archives.sales.data);
+        await kibanaServer.importExport.unload(archives.sales.savedObjects);
       });
 
       it('Handle _id and _index columns', async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/nanos');
-
         const res = await reportingAPI.createReportJobInternal(
           'csv_searchsource',
           createTestCsvJobParams({
@@ -497,17 +554,12 @@ export default ({ getService }: FtrProviderContext) => {
             columns: ['date', 'message', '_id', '_index'],
           })
         );
-
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
         expectSnapshot(csvFile).toMatch();
-
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/nanos');
       });
 
       it('With filters and non-timebased data', async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/sales');
-
         const res = await reportingAPI.createReportJobInternal(
           'csv_searchsource',
           createTestCsvJobParams({
@@ -527,31 +579,24 @@ export default ({ getService }: FtrProviderContext) => {
             columns: ['name', 'power'],
           })
         );
-
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
         expectSnapshot(csvFile).toMatch();
-
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/sales');
       });
     });
 
     describe('_id field is a big integer', () => {
       before(async () => {
         await Promise.all([
-          esArchiver.load('x-pack/test/functional/es_archives/reporting/big_int_id_field'),
-          kibanaServer.importExport.load(
-            'x-pack/test/functional/fixtures/kbn_archiver/reporting/big_int_id_field'
-          ),
+          esArchiver.load(archives.bigIntIdField.data),
+          kibanaServer.importExport.load(archives.bigIntIdField.savedObjects),
         ]);
       });
 
       after(async () => {
         await Promise.all([
-          esArchiver.unload('x-pack/test/functional/es_archives/reporting/big_int_id_field'),
-          kibanaServer.importExport.unload(
-            'x-pack/test/functional/fixtures/kbn_archiver/reporting/big_int_id_field'
-          ),
+          esArchiver.unload(archives.bigIntIdField.data),
+          kibanaServer.importExport.unload(archives.bigIntIdField.savedObjects),
         ]);
       });
 
@@ -611,7 +656,6 @@ export default ({ getService }: FtrProviderContext) => {
             columns: [],
           })
         );
-
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
         expectSnapshot(csvFile).toMatch();
@@ -621,14 +665,16 @@ export default ({ getService }: FtrProviderContext) => {
     describe('validation', () => {
       before(async () => {
         await esArchiver.load(archives.ecommerce.data);
+        await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
       });
 
       after(async () => {
         await esArchiver.unload(archives.ecommerce.data);
+        await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
       });
 
       // NOTE: this test requires having the test server run with `xpack.reporting.csv.maxSizeBytes=6000`
-      it(`Searches large amount of data, stops at Max Size Reached`, async () => {
+      it('Searches large amount of data, stops at Max Size Reached', async () => {
         const res = await reportingAPI.createReportJobInternal(
           'csv_searchsource',
           createTestCsvJobParams({
@@ -637,7 +683,15 @@ export default ({ getService }: FtrProviderContext) => {
               version: true,
               query: { query: '', language: 'kuery' },
               index: '5193f870-d861-11e9-a311-0fa548c5f953',
-              sort: [{ order_date: 'desc' as SortDirection }],
+              sort: [
+                {
+                  order_date: {
+                    format: 'strict_date_optional_time',
+                    order: 'desc' as SortDirection,
+                  },
+                },
+                { order_id: 'desc' as SortDirection },
+              ],
               fields: ['*'],
               filter: [],
               parent: {
@@ -661,7 +715,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
           })
         );
-
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
         expectSnapshot(csvFile).toMatch();
