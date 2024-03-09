@@ -91,6 +91,9 @@ describe(
       cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).first().click({});
 
       setStartDate(NEW_START_DATE, DISCOVER_CONTAINER);
+
+      cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).first().click({});
+
       updateDates(DISCOVER_CONTAINER);
 
       cy.go('back');

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const useDiscoverInTimelineContext = () => ({
+export const useDiscoverInTimelineContext = jest.fn().mockReturnValue({
   resetDiscoverAppState: jest.fn(),
   restoreDiscoverAppStateFromSavedSearch: jest.fn(),
   updateSavedSearch: jest.fn(),
