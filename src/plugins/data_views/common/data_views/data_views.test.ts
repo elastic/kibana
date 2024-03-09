@@ -57,7 +57,7 @@ const savedObject = {
   references: [],
 };
 
-describe('DataViews', () => {
+describe('IndexPatterns', () => {
   let indexPatterns: DataViewsService;
   let indexPatternsNoAccess: DataViewsService;
   let savedObjectsClient: PersistenceAPI;
