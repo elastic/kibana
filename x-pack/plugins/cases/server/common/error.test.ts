@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isSOError, isSODecoratedError } from './error';
+import Boom from '@hapi/boom';
+import { isSOError, isSODecoratedError, generateCaseErrorResponse } from './error';
 
 describe('common utils', () => {
   describe('isSOError', () => {
@@ -27,6 +28,37 @@ describe('common utils', () => {
     it('returns false if the SO is not a decorated error', () => {
       // @ts-expect-error: only the isBoom property is required
       expect(isSODecoratedError({})).toBe(false);
+    });
+  });
+
+  describe('generateCaseErrorResponse', () => {
+    it('generates a case error response from a decorated error', () => {
+      expect(
+        generateCaseErrorResponse(
+          Boom.boomify(new Error('My error'), {
+            statusCode: 404,
+            message: 'SO not found',
+          })
+        )
+      ).toEqual({
+        error: 'Not Found',
+        message: 'SO not found: My error',
+        status: 404,
+      });
+    });
+
+    it('generates a case error response from an SO error', () => {
+      expect(
+        generateCaseErrorResponse({
+          error: 'My error',
+          message: 'not found',
+          statusCode: 404,
+        })
+      ).toEqual({
+        error: 'My error',
+        message: 'not found',
+        status: 404,
+      });
     });
   });
 });
