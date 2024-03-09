@@ -59,8 +59,10 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
   return useCallback(
     (props: ResponderInfoProps) => {
       const { agentId, agentType, capabilities, hostName } = props;
+      const isSentinelOneAgent = agentType === 'sentinel_one';
+      const isEndpointAgent = agentType === 'endpoint';
       // If no authz, just exit and log something to the console
-      if (agentType === 'endpoint' && !endpointPrivileges.canAccessResponseConsole) {
+      if (isEndpointAgent && !endpointPrivileges.canAccessResponseConsole) {
         window.console.error(new Error(`Access denied to ${agentType} response actions console`));
         return;
       }
@@ -109,7 +111,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
             if (agentType === 'endpoint') {
               return <HeaderEndpointInfo endpointId={agentId} />;
             }
-            if (agentType === 'sentinel_one') {
+            if (isSentinelOneAgent) {
               return (
                 <HeaderSentinelOneInfo
                   agentId={agentId}
@@ -131,7 +133,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
             },
             consoleProps,
             PageTitleComponent: () => {
-              if (isSentinelOneV1Enabled && agentType === 'sentinel_one') {
+              if (isSentinelOneV1Enabled && isSentinelOneAgent) {
                 return (
                   <EuiFlexGroup>
                     <EuiFlexItem>{RESPONDER_PAGE_TITLE}</EuiFlexItem>

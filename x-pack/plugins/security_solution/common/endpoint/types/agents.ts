@@ -5,24 +5,8 @@
  * 2.0.
  */
 
-import type { HostStatus } from '.';
-import type {
-  ResponseActionsApiCommandNames,
-  ResponseActionAgentType,
-} from '../service/response_actions/constants';
-
-export interface AgentStatusInfo {
-  id: string;
-  agentType: ResponseActionAgentType;
-  found: boolean;
-  isolated: boolean;
-  isPendingUninstall: boolean;
-  isUninstalled: boolean;
-  lastSeen: string; // ISO date
-  pendingActions: Record<ResponseActionsApiCommandNames, number>;
-  status: HostStatus;
-}
+import type { AgentStatuses } from '../../../server/endpoint/services';
 
 export interface AgentStatusApiResponse {
-  data: Record<string, AgentStatusInfo>;
+  data: AgentStatuses;
 }
