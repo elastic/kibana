@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep, last } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common/types';
-import { TELEMETRY } from '../../analytics';
 import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { ChatState, useChat } from '../../hooks/use_chat';
@@ -36,6 +35,7 @@ import { MessageText } from '../message_panel/message_text';
 import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { InsightBase } from './insight_base';
 import { ActionsMenu } from './actions_menu';
+import { ObservabilityAIAssistantTelemetryEventType } from '../../analytics/telemetry_event_type';
 
 function getLastMessageOfType(messages: Message[], role: MessageRole) {
   return last(messages.filter((msg) => msg.message.role === role));
@@ -96,7 +96,7 @@ function ChatContent({
                 onClickFeedback={(feedback) => {
                   if (lastAssistantResponse) {
                     chatService.sendAnalyticsEvent({
-                      type: TELEMETRY.observability_ai_assistant_insight_feedback,
+                      type: ObservabilityAIAssistantTelemetryEventType.InsightFeedback,
                       payload: {
                         feedback,
                         message: lastAssistantResponse,

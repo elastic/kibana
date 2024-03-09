@@ -8,6 +8,7 @@
 import type { EventTypeOpts } from '@kbn/analytics-client';
 import type { Message } from '../../../common';
 import type { Feedback } from '../../components/buttons/feedback_buttons';
+import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_type';
 import { messageSchema } from './common';
 
 export interface InsightFeedback {
@@ -15,10 +16,8 @@ export interface InsightFeedback {
   message: Message;
 }
 
-export const eventType = 'observability_ai_assistant_insight_feedback';
-
 export const insightFeedbackEventSchema: EventTypeOpts<InsightFeedback> = {
-  eventType,
+  eventType: ObservabilityAIAssistantTelemetryEventType.InsightFeedback,
   schema: {
     feedback: {
       type: 'text',

@@ -58,7 +58,8 @@ export { getAssistantSystemMessage } from './service/get_assistant_system_messag
 export { isSupportedConnectorType } from '../common';
 export { FunctionVisibility } from '../common';
 
-export { TELEMETRY, type TelemetryEventTypeWithPayload } from './analytics';
+export type { TelemetryEventTypeWithPayload } from './analytics';
+export { ObservabilityAIAssistantTelemetryEventType } from './analytics/telemetry_event_type';
 
 export type { Conversation, Message, KnowledgeBaseEntry } from '../common';
 export { MessageRole, KnowledgeBaseEntryRole } from '../common';

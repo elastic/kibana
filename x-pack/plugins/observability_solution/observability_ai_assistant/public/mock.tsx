@@ -74,6 +74,7 @@ function createStartContract(): ObservabilityAIAssistantPublicStart {
       setSelectedLanguage: () => {},
       getPreferredLanguage: () => 'English',
     }),
+    getContextualInsightMessages: () => [],
   };
 }
 

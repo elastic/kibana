@@ -8,6 +8,8 @@
 import type { JSONSchema } from 'json-schema-to-ts';
 import type { Observable } from 'rxjs';
 import { ChatCompletionChunkEvent, MessageAddEvent } from '../conversation_complete';
+import { FunctionVisibility } from './function_visibility';
+export { FunctionVisibility };
 
 export type CompatibleJSONSchema = Exclude<JSONSchema, boolean>;
 
@@ -22,13 +24,6 @@ export type FunctionResponse =
       data?: any;
     }
   | Observable<ChatCompletionChunkEvent | MessageAddEvent>;
-
-export enum FunctionVisibility {
-  AssistantOnly = 'assistantOnly',
-  UserOnly = 'userOnly',
-  Internal = 'internal',
-  All = 'all',
-}
 
 export interface FunctionDefinition<
   TParameters extends CompatibleJSONSchema = CompatibleJSONSchema

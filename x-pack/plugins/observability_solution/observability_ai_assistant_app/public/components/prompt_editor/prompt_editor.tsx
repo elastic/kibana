@@ -11,8 +11,8 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
 import {
   type Message,
   MessageRole,
-  TELEMETRY,
   type TelemetryEventTypeWithPayload,
+  ObservabilityAIAssistantTelemetryEventType,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { FunctionListPopover } from '../chat/function_list_popover';
 import { PromptEditorFunction } from './prompt_editor_function';
@@ -116,7 +116,7 @@ export function PromptEditor({
       setMode('prompt');
 
       onSendTelemetry({
-        type: TELEMETRY.observability_ai_assistant_user_sent_prompt_in_chat,
+        type: ObservabilityAIAssistantTelemetryEventType.UserSentPromptInChat,
         payload: message,
       });
     } catch (_) {

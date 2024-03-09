@@ -6,8 +6,10 @@
  */
 
 export type { Message, Conversation, KnowledgeBaseEntry } from './types';
-export { KnowledgeBaseEntryRole, MessageRole, type ConversationCreateRequest } from './types';
-export { FunctionVisibility, type FunctionDefinition } from './functions/types';
+export type { ConversationCreateRequest } from './types';
+export { KnowledgeBaseEntryRole, MessageRole } from './types';
+export type { FunctionDefinition } from './functions/types';
+export { FunctionVisibility } from './functions/function_visibility';
 export {
   VISUALIZE_ESQL_USER_INTENTIONS,
   VisualizeESQLUserIntention,

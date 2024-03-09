@@ -22,11 +22,11 @@ import {
   MessageRole,
   type Feedback,
   VisualizeESQLUserIntention,
+  ObservabilityAIAssistantTelemetryEventType,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import {
   ChatActionClickType,
   ChatState,
-  TELEMETRY,
   type ChatActionClickPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -176,7 +176,7 @@ export function ChatBody({
   const handleFeedback = (message: Message, feedback: Feedback) => {
     if (conversation.value?.conversation && 'user' in conversation.value) {
       chatService.sendAnalyticsEvent({
-        type: TELEMETRY.observability_ai_assistant_chat_feedback,
+        type: ObservabilityAIAssistantTelemetryEventType.ChatFeedback,
         payload: {
           messageWithFeedback: { message, feedback },
           conversation: conversation.value,
