@@ -9,6 +9,9 @@ import type { PublishesWritableLocalUnifiedSearch } from '@kbn/presentation-publ
 import type {
   DefaultEmbeddableApi,
 } from '@kbn/embeddable-plugin/public';
+import { CanLinkToLibrary, CanUnlinkFromLibrary } from '@kbn/presentation-library';
 
 export type MapApi = DefaultEmbeddableApi & 
+  CanLinkToLibrary &
+  CanUnlinkFromLibrary &
   Pick<PublishesWritableLocalUnifiedSearch, 'localTimeRange' | 'setLocalTimeRange'>;
