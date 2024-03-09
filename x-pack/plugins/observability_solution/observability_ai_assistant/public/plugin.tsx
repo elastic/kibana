@@ -26,6 +26,7 @@ import type {
   ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantService,
 } from './types';
+import { useUserPreferredLanguage } from './hooks/use_user_preferred_language';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -87,7 +88,10 @@ export class ObservabilityAIAssistantPlugin
     return {
       service,
       useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
-      useChat: createUseChat(),
+      useChat: createUseChat({
+        notifications: coreStart.notifications,
+      }),
+      useUserPreferredLanguage,
       ObservabilityAIAssistantMultipaneFlyoutContext,
       ObservabilityAIAssistantChatServiceContext,
       useObservabilityAIAssistantChatService,

@@ -4,11 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
-import { i18n } from '@kbn/i18n';
-import { v4 } from 'uuid';
-import { css } from '@emotion/css';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -19,17 +14,22 @@ import {
   useCurrentEuiBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
 import { Message } from '@kbn/observability-ai-assistant-plugin/common';
-import { useForceUpdate } from '../../hooks/use_force_update';
+import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
+import { useConversationKey } from '../../hooks/use_conversation_key';
+import { useConversationList } from '../../hooks/use_conversation_list';
 import { useCurrentUser } from '../../hooks/use_current_user';
-import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
-import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
-import { ChatBody } from './chat_body';
-import { ConversationList } from './conversation_list';
-import { ChatInlineEditingContent } from './chat_inline_edit';
-import { NewChatButton } from '../buttons/new_chat_button';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
+import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
+import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
+import { NewChatButton } from '../buttons/new_chat_button';
+import { ChatBody } from './chat_body';
+import { ChatInlineEditingContent } from './chat_inline_edit';
+import { ConversationList } from './conversation_list';
 
 const CONVERSATIONS_SIDEBAR_WIDTH = 260;
 const CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED = 34;
@@ -78,6 +78,9 @@ export function ChatFlyout({
       },
     },
   } = useKibana();
+  const conversationList = useConversationList();
+
+  const { key: bodyKey, updateConversationIdInPlace } = useConversationKey(conversationId);
 
   const flyoutClassName = css`
     max-inline-size: 100% !important;
@@ -127,30 +130,6 @@ export function ChatFlyout({
       : 5}px;
     z-index: 1;
   `;
-
-  const chatBodyKeyRef = useRef(v4());
-  const forceUpdate = useForceUpdate();
-  const reloadConversation = useCallback(() => {
-    chatBodyKeyRef.current = v4();
-    forceUpdate();
-  }, [forceUpdate]);
-
-  const handleClickChat = (id: string) => {
-    setConversationId(id);
-    reloadConversation();
-  };
-
-  const handleClickDeleteConversation = () => {
-    setConversationId(undefined);
-    reloadConversation();
-  };
-
-  const handleClickNewChat = () => {
-    if (conversationId) {
-      setConversationId(undefined);
-      reloadConversation();
-    }
-  };
 
   const handleToggleFlyoutWidthMode = (newFlyoutWidthMode: FlyoutWidthMode) => {
     setFlyoutWidthMode(newFlyoutWidthMode);
@@ -223,10 +202,19 @@ export function ChatFlyout({
 
             {conversationsExpanded ? (
               <ConversationList
-                selected={conversationId ?? ''}
-                onClickDeleteConversation={handleClickDeleteConversation}
-                onClickChat={handleClickChat}
-                onClickNewChat={handleClickNewChat}
+                conversations={conversationList.conversations}
+                isLoading={conversationList.isLoading}
+                selectedConversationId={conversationId}
+                onConversationDeleteClick={(deletedConversationId) => {
+                  conversationList.deleteConversation(deletedConversationId).then(() => {
+                    if (deletedConversationId === conversationId) {
+                      setConversationId(undefined);
+                    }
+                  });
+                }}
+                onConversationSelect={(nextConversationId) => {
+                  setConversationId(nextConversationId);
+                }}
               />
             ) : (
               <EuiPopover
@@ -246,7 +234,9 @@ export function ChatFlyout({
                       )}
                       collapsed
                       data-test-subj="observabilityAiAssistantNewChatFlyoutButton"
-                      onClick={handleClickNewChat}
+                      onClick={() => {
+                        setConversationId(undefined);
+                      }}
                     />
                   </EuiToolTip>
                 }
@@ -257,7 +247,7 @@ export function ChatFlyout({
 
           <EuiFlexItem className={chatBodyContainerClassName}>
             <ChatBody
-              key={chatBodyKeyRef.current}
+              key={bodyKey}
               connectors={connectors}
               currentUser={currentUser}
               flyoutWidthMode={flyoutWidthMode}
@@ -268,7 +258,11 @@ export function ChatFlyout({
               showLinkToConversationsApp
               startedFrom={startedFrom}
               onConversationUpdate={(conversation) => {
+                if (!conversationId) {
+                  updateConversationIdInPlace(conversation.conversation.id);
+                }
                 setConversationId(conversation.conversation.id);
+                conversationList.conversations.refresh();
               }}
               onToggleFlyoutWidthMode={handleToggleFlyoutWidthMode}
             />

@@ -30,6 +30,8 @@ import {
 import * as useKibanaModule from './use_kibana';
 import { ChatState } from '@kbn/observability-ai-assistant-plugin/public';
 import { createMockChatService } from '../utils/create_mock_chat_service';
+import { createUseChat } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_chat';
+import type { NotificationsStart } from '@kbn/core/public';
 
 let hookResult: RenderHookResult<UseConversationProps, UseConversationResult>;
 
@@ -60,9 +62,17 @@ const addErrorMock = jest.fn();
 
 jest.spyOn(useKibanaModule, 'useKibana').mockReturnValue({
   services: {
-    notifications: {
-      toasts: {
-        addError: addErrorMock,
+    plugins: {
+      start: {
+        observabilityAIAssistant: {
+          useChat: createUseChat({
+            notifications: {
+              toasts: {
+                addError: addErrorMock,
+              },
+            } as unknown as NotificationsStart,
+          }),
+        },
       },
     },
   },

@@ -29,6 +29,7 @@ import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observ
 import { useChat } from './hooks/use_chat';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 import { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
+import type { UseUserPreferredLanguageResult } from './hooks/use_user_preferred_language';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -52,6 +53,7 @@ export interface ObservabilityAIAssistantChatService {
     messages: Message[];
     persist: boolean;
     signal: AbortSignal;
+    responseLanguage: string;
   }) => Observable<StreamingChatResponseEventWithoutError>;
   getContexts: () => ContextDefinition[];
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
@@ -119,4 +121,5 @@ export interface ObservabilityAIAssistantPublicStart {
   useObservabilityAIAssistantChatService: typeof useObservabilityAIAssistantChatService;
   useGenAIConnectors: () => UseGenAIConnectorsResult;
   useChat: typeof useChat;
+  useUserPreferredLanguage: () => UseUserPreferredLanguageResult;
 }

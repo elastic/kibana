@@ -68,6 +68,12 @@ function createStartContract(): ObservabilityAIAssistantPublicStart {
       selectConnector: () => {},
       reloadConnectors: () => {},
     }),
+    useUserPreferredLanguage: () => ({
+      LANGUAGE_OPTIONS: [{ label: 'English' }],
+      selectedLanguage: 'English',
+      setSelectedLanguage: () => {},
+      getPreferredLanguage: () => 'English',
+    }),
   };
 }
 

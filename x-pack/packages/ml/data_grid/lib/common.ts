@@ -9,10 +9,10 @@ import moment from 'moment-timezone';
 import { useMemo } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';

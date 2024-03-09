@@ -23,6 +23,7 @@ import type {
 } from '@kbn/data-views-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import type { ObservabilityAIAssistantService } from './service';
 
 export interface ObservabilityAIAssistantServerSetup {
@@ -47,6 +48,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   dataViews: DataViewsServerPluginSetup;
   licensing: LicensingPluginSetup;
   cloud?: CloudSetup;
+  serverless?: ServerlessPluginSetup;
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
@@ -57,4 +59,5 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   dataViews: DataViewsServerPluginStart;
   licensing: LicensingPluginStart;
   cloud?: CloudStart;
+  serverless?: ServerlessPluginStart;
 }

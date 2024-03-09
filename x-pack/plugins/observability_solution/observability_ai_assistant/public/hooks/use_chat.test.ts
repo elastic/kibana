@@ -17,7 +17,7 @@ import {
   StreamingChatResponseEventType,
   type StreamingChatResponseEventWithoutError,
 } from '../../common';
-import { ChatState, createUseChat, type UseChatProps, type UseChatResult } from './use_chat';
+import { ChatState, useChat, type UseChatProps, type UseChatResult } from './use_chat';
 import * as useKibanaModule from './use_kibana';
 
 type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;
@@ -54,7 +54,7 @@ describe('useChat', () => {
 
   describe('initially', () => {
     beforeEach(() => {
-      hookResult = renderHook(createUseChat(), {
+      hookResult = renderHook(useChat, {
         initialProps: {
           connectorId: 'my-connector',
           chatService: mockChatService,
@@ -91,7 +91,7 @@ describe('useChat', () => {
     let subject: Subject<StreamingChatResponseEventWithoutError>;
 
     beforeEach(() => {
-      hookResult = renderHook(createUseChat(), {
+      hookResult = renderHook(useChat, {
         initialProps: {
           connectorId: 'my-connector',
           chatService: mockChatService,

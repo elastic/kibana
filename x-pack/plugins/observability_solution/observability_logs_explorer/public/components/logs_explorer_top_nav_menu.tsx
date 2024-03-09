@@ -84,11 +84,10 @@ const StatefulTopNav = () => {
     services: {
       appParams: { setHeaderActionMenu },
       chrome,
-      i18n,
+      i18n: i18nStart,
       theme,
     },
   } = useKibanaContextForPlugin();
-
   /**
    * Since the breadcrumbsAppendExtension might be set only during a plugin start (e.g. search session)
    * we retrieve the latest valid extension in order to restore it once we unmount the beta badge.
@@ -122,7 +121,7 @@ const StatefulTopNav = () => {
               <FeedbackLink />
             </EuiHeaderSectionItem>
           </EuiHeaderSection>,
-          { theme, i18n }
+          { theme, i18n: i18nStart }
         ),
       });
     }
@@ -132,7 +131,7 @@ const StatefulTopNav = () => {
         chrome.setBreadcrumbsAppendExtension(previousAppendExtension);
       }
     };
-  }, [chrome, i18n, previousAppendExtension, theme]);
+  }, [chrome, i18nStart, previousAppendExtension, theme]);
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>

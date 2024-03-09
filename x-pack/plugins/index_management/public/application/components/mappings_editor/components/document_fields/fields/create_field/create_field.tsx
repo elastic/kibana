@@ -123,8 +123,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
           const [fieldType] = type;
           return (
             <SubTypeParameter
-              key={fieldType.value}
-              type={fieldType.value}
+              key={fieldType?.value}
+              type={fieldType?.value}
               isMultiField={isMultiField ?? false}
               isRootLevelField={isRootLevelField}
             />
@@ -198,8 +198,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
             <FormDataProvider pathsToWatch={['type', 'subType']}>
               {({ type, subType }) => {
                 const RequiredParametersForm = getRequiredParametersFormForType(
-                  type?.[0].value,
-                  subType?.[0].value
+                  type?.[0]?.value,
+                  subType?.[0]?.value
                 );
 
                 if (!RequiredParametersForm) {

@@ -11,12 +11,31 @@ import { getTimelineItemsfromConversation } from './get_timeline_items_from_conv
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ChatState, Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { createMockChatService } from './create_mock_chat_service';
+import { KibanaContextProvider } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
 
 const mockChatService = createMockChatService();
 
-const ObservabilityAIAssistantChatServiceContext = React.createContext(mockChatService);
-
 let items: ReturnType<typeof getTimelineItemsfromConversation>;
+
+function Providers({ children }: { children: React.ReactElement }) {
+  return (
+    <IntlProvider locale="en" messages={{}}>
+      <KibanaContextProvider
+        services={{
+          plugins: {
+            start: {
+              observabilityAIAssistant: {
+                useObservabilityAIAssistantChatService: () => mockChatService,
+              },
+            },
+          },
+        }}
+      >
+        {children}
+      </KibanaContextProvider>
+    </IntlProvider>
+  );
+}
 
 describe('getTimelineItemsFromConversation', () => {
   describe('returns an opening message only', () => {
@@ -151,11 +170,7 @@ describe('getTimelineItemsFromConversation', () => {
       });
 
       const { container } = render(items[2].title as React.ReactElement, {
-        wrapper: ({ children }) => (
-          <IntlProvider locale="en" messages={{}}>
-            {children}
-          </IntlProvider>
-        ),
+        wrapper: ({ children }) => <Providers>{children}</Providers>,
       });
 
       expect(container.textContent).toBe('requested the function context');
@@ -177,11 +192,7 @@ describe('getTimelineItemsFromConversation', () => {
       });
 
       const { container } = render(items[3].title as React.ReactElement, {
-        wrapper: ({ children }) => (
-          <IntlProvider locale="en" messages={{}}>
-            {children}
-          </IntlProvider>
-        ),
+        wrapper: ({ children }) => <Providers>{children}</Providers>,
       });
 
       expect(container.textContent).toBe('executed the function context');
@@ -253,13 +264,7 @@ describe('getTimelineItemsFromConversation', () => {
       expect(items[3].element).toBeTruthy();
 
       const { container } = render(items[3].element as React.ReactElement, {
-        wrapper: ({ children }) => (
-          <IntlProvider locale="en" messages={{}}>
-            <ObservabilityAIAssistantChatServiceContext.Provider value={mockChatService}>
-              {children}
-            </ObservabilityAIAssistantChatServiceContext.Provider>
-          </IntlProvider>
-        ),
+        wrapper: ({ children }) => <Providers>{children}</Providers>,
       });
 
       expect(mockChatService.renderFunction).toHaveBeenCalledWith(
