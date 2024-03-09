@@ -50,6 +50,7 @@ export type Integration = rt.TypeOf<typeof integrationRt>;
 export const degradedDocsRt = rt.type({
   dataset: rt.string,
   percentage: rt.number,
+  count: rt.number,
 });
 
 export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
