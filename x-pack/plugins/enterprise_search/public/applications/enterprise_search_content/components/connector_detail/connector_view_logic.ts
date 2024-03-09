@@ -102,20 +102,15 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     ],
   },
   events: ({ actions }) => ({
-    beforeMount: () => {
-      actions.fetchConnectorApiReset();
-      actions.fetchIndexApiReset();
-    },
     beforeUnmount: () => {
-      actions.fetchConnectorApiReset();
-      actions.fetchIndexApiReset();
       actions.stopConnectorPoll();
+      actions.fetchConnectorApiReset();
     },
   }),
-  listeners: ({ actions, values }) => ({
-    fetchConnectorApiSuccess: () => {
-      if (values.indexName) {
-        actions.fetchIndex({ indexName: values.indexName });
+  listeners: ({ actions }) => ({
+    fetchConnectorApiSuccess: (response) => {
+      if (response.connector?.index_name) {
+        actions.setIndexName(response.connector.index_name);
       }
     },
   }),

@@ -43,6 +43,8 @@ export class ServerlessObservabilityPlugin
       })
     );
 
+    setupDeps.discover.showInlineTopNav({ showLogsExplorerTabs: true });
+
     return {};
   }
 
