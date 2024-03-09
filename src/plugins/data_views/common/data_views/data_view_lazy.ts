@@ -479,6 +479,7 @@ export class DataViewLazy extends AbstractDataView {
     return this.runtimeFieldMap;
   }
 
+  // todo
   private toSpecShared(includeFields = true): DataViewSpec {
     // if fields aren't included, don't include count
     const fieldAttrs = cloneDeep(this.fieldAttrs);
@@ -517,7 +518,9 @@ export class DataViewLazy extends AbstractDataView {
    * @param includeFields Whether or not to include the `fields` list as part of this spec. If not included, the list
    * will be fetched from Elasticsearch when instantiating a new Data View with this spec.
    */
-  public async toSpec(params: { fieldParams?: GetFieldsParams } = {}): Promise<DataViewSpec> {
+  public async toSpec(
+    params: { fieldParams?: GetFieldsParams } = { fieldParams: { fieldName: ['*'] } }
+  ): Promise<DataViewSpec> {
     const spec = this.toSpecShared(!!params.fieldParams);
 
     if (params.fieldParams) {

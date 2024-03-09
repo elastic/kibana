@@ -1207,6 +1207,7 @@ export class DataViewsService {
     }
     dataView.id = response.id; // todo is the id assigned here or when created?
     dataView.version = response.version;
+    dataView.namespaces = response.namespaces || [];
   }
 
   /**
