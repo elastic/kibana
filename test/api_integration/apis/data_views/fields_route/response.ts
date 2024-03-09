@@ -15,6 +15,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const esClient = getService('es');
 
   const ensureFieldsAreSorted = (resp: { body: { fields: { name: string } } }) => {
     expect(resp.body.fields).to.eql(sortBy(resp.body.fields, 'name'));
@@ -107,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
     });
 
-    it('returns a single field as requested with jhson encoding', async () => {
+    it('returns a single field as requested with json encoding', async () => {
       await supertest
         .get(FIELDS_PATH)
         .query({
@@ -267,6 +268,24 @@ export default function ({ getService }: FtrProviderContext) {
           apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
         .expect(404);
+    });
+
+    it('returns empty set when no fields even if meta fields are supplied', async () => {
+      await esClient.indices.create({ index: 'fields-route-000001' });
+
+      await supertest
+        .get(FIELDS_PATH)
+        .query({
+          pattern: 'fields-route-000001',
+          meta_fields: ['_id', '_index'],
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        })
+        .expect(200, {
+          fields: [],
+          indices: ['fields-route-000001'],
+        });
+
+      await esClient.indices.delete({ index: 'fields-route-000001' });
     });
   });
 }

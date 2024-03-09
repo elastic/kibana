@@ -38,7 +38,7 @@ export const parseFields = (fields: string | string[], fldName: string): string[
   } catch (e) {
     if (!fields.includes(',')) return [fields];
     throw new Error(
-      `${fldName} should be an array of field names, a JSON-stringified array of field names, or a single field name`
+      `${fldName} should be an array of strings, a JSON-stringified array of strings, or a single string`
     );
   }
 };
@@ -53,9 +53,9 @@ export interface IQuery {
   rollup_index?: string;
   allow_no_index?: boolean;
   include_unmapped?: boolean;
-  fields?: string[];
+  fields?: string | string[];
   allow_hidden?: boolean;
-  field_types?: string[];
+  field_types?: string | string[];
   include_empty_fields?: boolean;
 }
 
