@@ -15,6 +15,12 @@ export function AddCisIntegrationFormPageProvider({
   const PageObjects = getPageObjects(['common', 'header']);
   const browser = getService('browser');
 
+  const cisAzure = {
+    getPostInstallArmTemplateModal: async () => {
+      return await testSubjects.find('postInstallAzureArmTemplateModal');
+    },
+  };
+
   const cisAws = {
     getUrlValueInEditPage: async () => {
       /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
@@ -28,37 +34,6 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const cisGcp = {
-    getIntegrationFormEntirePage: () => testSubjects.find('dataCollectionSetupStep'),
-
-    getIntegrationPolicyTable: () => testSubjects.find('integrationPolicyTable'),
-
-    getIntegrationFormEditPage: () => testSubjects.find('editPackagePolicy_page'),
-
-    findOptionInPage: async (text: string) => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const optionToBeClicked = await testSubjects.find(text);
-      return await optionToBeClicked;
-    },
-
-    clickOptionButton: async (text: string) => {
-      const optionToBeClicked = await cisGcp.findOptionInPage(text);
-      await optionToBeClicked.click();
-    },
-
-    clickSaveButton: async () => {
-      const optionToBeClicked = await cisGcp.findOptionInPage('createPackagePolicySaveButton');
-      await optionToBeClicked.click();
-    },
-
-    clickSaveIntegrationButton: async () => {
-      const optionToBeClicked = await cisGcp.findOptionInPage('saveIntegration');
-      await optionToBeClicked.click();
-    },
-
-    getPostInstallModal: async () => {
-      return await testSubjects.find('confirmModalTitleText');
-    },
-
     isPostInstallGoogleCloudShellModal: async (isOrg: boolean, orgID?: string, prjID?: string) => {
       const googleCloudShellModal = await testSubjects.find('postInstallGoogleCloudShellModal');
       const googleCloudShellModalVisibleText = await googleCloudShellModal.getVisibleText();
@@ -77,46 +52,6 @@ export function AddCisIntegrationFormPageProvider({
     checkGcpFieldExist: async (text: string) => {
       const field = await testSubjects.findAll(text);
       return field.length;
-    },
-
-    fillInTextField: async (selector: string, text: string) => {
-      const textField = await testSubjects.find(selector);
-      await textField.type(text);
-    },
-
-    chooseDropDown: async (selector: string, text: string) => {
-      const credentialTypeBox = await testSubjects.find(selector);
-      const chosenOption = await testSubjects.find(text);
-      await credentialTypeBox.click();
-      await chosenOption.click();
-    },
-
-    getFieldValueInEditPage: async (field: string) => {
-      /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
-      const integrationList = await testSubjects.findAll('integrationNameLink');
-      await integrationList[0].click();
-      const fieldValue = await (await testSubjects.find(field)).getAttribute('value');
-      return fieldValue;
-    },
-
-    doesStringExistInCodeBlock: async (str: string) => {
-      const flyout = await testSubjects.find('agentEnrollmentFlyout');
-      const codeBlock = await flyout.findByXpath('//code');
-      const commandsToBeCopied = await codeBlock.getVisibleText();
-      return commandsToBeCopied.includes(str);
-    },
-
-    getFieldValueInAddAgentFlyout: async (field: string, value: string) => {
-      /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
-      const integrationList = await testSubjects.findAll('agentEnrollmentFlyout');
-      await integrationList[0].click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const fieldValue = await (await testSubjects.find(field)).getAttribute(value);
-      return fieldValue;
-    },
-
-    selectValue: async (selector: string, value: string) => {
-      return testSubjects.selectValue(selector, value);
     },
   };
 
@@ -193,7 +128,85 @@ export function AddCisIntegrationFormPageProvider({
     await PageObjects.common.sleep(10000);
   };
 
+  const getIntegrationFormEntirePage = () => testSubjects.find('dataCollectionSetupStep');
+
+  const getIntegrationPolicyTable = () => testSubjects.find('integrationPolicyTable');
+
+  const getIntegrationFormEditPage = () => testSubjects.find('editPackagePolicy_page');
+
+  const findOptionInPage = async (text: string) => {
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    const optionToBeClicked = await testSubjects.find(text);
+    return await optionToBeClicked;
+  };
+
+  const clickOptionButton = async (text: string) => {
+    const optionToBeClicked = await findOptionInPage(text);
+    await optionToBeClicked.click();
+  };
+
+  const clickSaveButton = async () => {
+    const optionToBeClicked = await findOptionInPage('createPackagePolicySaveButton');
+    await optionToBeClicked.click();
+  };
+
+  const clickSaveIntegrationButton = async () => {
+    const optionToBeClicked = await findOptionInPage('saveIntegration');
+    await optionToBeClicked.click();
+  };
+
+  const getPostInstallModal = async () => {
+    return await testSubjects.find('confirmModalTitleText');
+  };
+
+  const fillInTextField = async (selector: string, text: string) => {
+    const textField = await testSubjects.find(selector);
+    await textField.type(text);
+  };
+
+  const chooseDropDown = async (selector: string, text: string) => {
+    const credentialTypeBox = await testSubjects.find(selector);
+    const chosenOption = await testSubjects.find(text);
+    await credentialTypeBox.click();
+    await chosenOption.click();
+  };
+
+  const getFieldValueInEditPage = async (field: string) => {
+    /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
+    const integrationList = await testSubjects.findAll('integrationNameLink');
+    await integrationList[0].click();
+    const fieldValue = await (await testSubjects.find(field)).getAttribute('value');
+    return fieldValue;
+  };
+
+  const doesStringExistInCodeBlock = async (str: string) => {
+    const flyout = await testSubjects.find('agentEnrollmentFlyout');
+    const codeBlock = await flyout.findByXpath('//code');
+    const commandsToBeCopied = await codeBlock.getVisibleText();
+    return commandsToBeCopied.includes(str);
+  };
+
+  const getFieldValueInAddAgentFlyout = async (field: string, value: string) => {
+    /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
+    const integrationList = await testSubjects.findAll('agentEnrollmentFlyout');
+    await integrationList[0].click();
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    const fieldValue = await (await testSubjects.find(field)).getAttribute(value);
+    return fieldValue;
+  };
+
+  const selectValue = async (selector: string, value: string) => {
+    return testSubjects.selectValue(selector, value);
+  };
+
+  const getValueInEditPage = async (field: string) => {
+    /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
+    const fieldValue = await (await testSubjects.find(field)).getAttribute('value');
+    return fieldValue;
+  };
+
   return {
+    cisAzure,
     cisAws,
     cisGcp,
     navigateToAddIntegrationCspmPage,
@@ -206,5 +219,20 @@ export function AddCisIntegrationFormPageProvider({
     clickFirstElementOnIntegrationTableAddAgent,
     clickLaunchAndGetCurrentUrl,
     waitForElementToAppear,
+    getIntegrationFormEntirePage,
+    getIntegrationPolicyTable,
+    getIntegrationFormEditPage,
+    findOptionInPage,
+    clickOptionButton,
+    clickSaveButton,
+    clickSaveIntegrationButton,
+    getPostInstallModal,
+    fillInTextField,
+    chooseDropDown,
+    getFieldValueInEditPage,
+    doesStringExistInCodeBlock,
+    getFieldValueInAddAgentFlyout,
+    selectValue,
+    getValueInEditPage,
   };
 }

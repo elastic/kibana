@@ -12,7 +12,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import { AzureCredentialsType } from '../../../../common/types_old';
 
-export type AzureCredentialsFields = Record<string, { label: string; type?: 'password' | 'text' }>;
+export type AzureCredentialsFields = Record<
+  string,
+  { label: string; type?: 'password' | 'text'; dataTestId?: string }
+>;
 
 export interface AzureOptionValue {
   label: string;
@@ -49,6 +52,7 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AzureCr
         label: field.label,
         type: field.type || 'text',
         value: inputVar.value,
+        dataTestId: field.dataTestId,
       } as const;
     });
 
@@ -91,13 +95,20 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       defaultMessage: 'Service principal with Client Secret',
     }),
     fields: {
-      'azure.credentials.tenant_id': { label: I18N_TENANT_ID },
-      'azure.credentials.client_id': { label: I18N_CLIENT_ID },
+      'azure.credentials.tenant_id': {
+        label: I18N_TENANT_ID,
+        dataTestId: 'azureCredentialsTenantIdTestId',
+      },
+      'azure.credentials.client_id': {
+        label: I18N_CLIENT_ID,
+        dataTestId: 'azureCredentialsClientIdTestId',
+      },
       'azure.credentials.client_secret': {
         type: 'password',
         label: i18n.translate('xpack.csp.azureIntegration.clientSecretLabel', {
           defaultMessage: 'Client Secret',
         }),
+        dataTestId: 'azureCredentialsClientSecretTestId',
       },
     },
   },
@@ -106,18 +117,26 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       defaultMessage: 'Service principal with Client Certificate',
     }),
     fields: {
-      'azure.credentials.tenant_id': { label: I18N_TENANT_ID },
-      'azure.credentials.client_id': { label: I18N_CLIENT_ID },
+      'azure.credentials.tenant_id': {
+        label: I18N_TENANT_ID,
+        dataTestId: 'azureCredentialsTenantIdClientCertificateOptionTestId',
+      },
+      'azure.credentials.client_id': {
+        label: I18N_CLIENT_ID,
+        dataTestId: 'azureCredentialsClientIdClientCertificateTestOptionId',
+      },
       'azure.credentials.client_certificate_path': {
         label: i18n.translate('xpack.csp.azureIntegration.clientCertificatePathLabel', {
           defaultMessage: 'Client Certificate Path',
         }),
+        dataTestId: 'azureCredentialsClientCertificatePathTestId',
       },
       'azure.credentials.client_certificate_password': {
         type: 'password',
         label: i18n.translate('xpack.csp.azureIntegration.clientCertificatePasswordLabel', {
           defaultMessage: 'Client Certificate Password',
         }),
+        dataTestId: 'azureCredentialsClientCertificatePasswordTestId',
       },
     },
   },
@@ -127,18 +146,26 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       { defaultMessage: 'Service principal with Client Username and Password' }
     ),
     fields: {
-      'azure.credentials.tenant_id': { label: I18N_TENANT_ID },
-      'azure.credentials.client_id': { label: I18N_CLIENT_ID },
+      'azure.credentials.tenant_id': {
+        label: I18N_TENANT_ID,
+        dataTestId: 'azureCredentialsTenantIdUsernameAndPasswordOptionTestId',
+      },
+      'azure.credentials.client_id': {
+        label: I18N_CLIENT_ID,
+        dataTestId: 'azureCredentialsTenantIdUsernameAndPasswordOptionTestId',
+      },
       'azure.credentials.client_username': {
         label: i18n.translate('xpack.csp.azureIntegration.clientUsernameLabel', {
           defaultMessage: 'Client Username',
         }),
+        dataTestId: 'azureCredentialsClientUserNameTestId',
       },
       'azure.credentials.client_password': {
         type: 'password',
         label: i18n.translate('xpack.csp.azureIntegration.clientPasswordLabel', {
           defaultMessage: 'Client Password',
         }),
+        dataTestId: 'azureCredentialsClientPasswordTestId',
       },
     },
   },

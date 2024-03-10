@@ -15,13 +15,11 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Test adding Cloud Security Posture Integrations', function () {
-    this.tags(['cloud_security_posture_cis_integration']);
-    let cisIntegrationGcp: typeof pageObjects.cisAddIntegration.cisGcp;
+    this.tags(['cloud_security_posture_cis_integration_cnvm']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
-      cisIntegrationGcp = pageObjects.cisAddIntegration.cisGcp;
 
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
@@ -33,7 +31,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('CNVM AWS', () => {
       it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
         await cisIntegration.navigateToAddIntegrationCnvmPage();
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (await cisIntegration.getUrlOnPostInstallModal()) ===
@@ -46,7 +44,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickFirstElementOnIntegrationTableAddAgent();
         expect(
           (
-            await cisIntegrationGcp.getFieldValueInAddAgentFlyout(
+            await cisIntegration.getFieldValueInAddAgentFlyout(
               'launchCloudFormationButtonAgentFlyoutTestId',
               'href'
             )
@@ -56,7 +54,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {
         await cisIntegration.navigateToAddIntegrationCnvmPage();
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (

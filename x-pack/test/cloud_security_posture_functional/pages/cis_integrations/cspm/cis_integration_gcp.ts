@@ -26,7 +26,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Test adding Cloud Security Posture Integrations', function () {
-    this.tags(['cloud_security_posture_cis_integration']);
+    this.tags(['cloud_security_posture_cis_integration_cspm_gcp']);
     let cisIntegrationGcp: typeof pageObjects.cisAddIntegration.cisGcp;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
@@ -43,9 +43,9 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('CIS_GCP Organization', () => {
       it('Switch between Manual and Google cloud shell', async () => {
-        await cisIntegrationGcp.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_ORGANIZATION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_MANUAL_TEST_ID);
+        await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_ORGANIZATION_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_MANUAL_TEST_ID);
         /* Check for existing fields. In Manual, Credential field should be visible */
         expect((await cisIntegrationGcp.checkGcpFieldExist(PRJ_ID_TEST_ID)) === 1).to.be(true);
         expect((await cisIntegrationGcp.checkGcpFieldExist(ORG_ID_TEST_ID)) === 1).to.be(true);
@@ -53,7 +53,7 @@ export default function (providerContext: FtrProviderContext) {
           true
         );
 
-        await cisIntegrationGcp.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
         /* Check for existing fields. In Google Cloud Shell, Credential field should NOT be visible */
         expect((await cisIntegrationGcp.checkGcpFieldExist(PRJ_ID_TEST_ID)) === 1).to.be(true);
         expect((await cisIntegrationGcp.checkGcpFieldExist(ORG_ID_TEST_ID)) === 1).to.be(true);
@@ -63,10 +63,10 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID or Organization ID provided, it should use default value', async () => {
-        await cisIntegrationGcp.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_ORGANIZATION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_ORGANIZATION_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(true)) === true).to.be(
           true
@@ -76,13 +76,13 @@ export default function (providerContext: FtrProviderContext) {
       it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID or Organization ID provided, it should use that value', async () => {
         const projectName = 'PRJ_NAME_TEST';
         const organizationName = 'ORG_NAME_TEST';
-        await cisIntegrationGcp.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_ORGANIZATION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
-        await cisIntegrationGcp.fillInTextField('project_id_test_id', projectName);
-        await cisIntegrationGcp.fillInTextField('organization_id_test_id', organizationName);
+        await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_ORGANIZATION_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
+        await cisIntegration.fillInTextField('project_id_test_id', projectName);
+        await cisIntegration.fillInTextField('organization_id_test_id', organizationName);
 
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(
@@ -96,18 +96,16 @@ export default function (providerContext: FtrProviderContext) {
       it('Add Agent FLyout - Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID or Organization ID provided, it should use that value', async () => {
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTableAddAgent();
-        expect(await cisIntegrationGcp.doesStringExistInCodeBlock('PRJ_NAME_TEST')).to.be(true);
-        expect(await cisIntegrationGcp.doesStringExistInCodeBlock('ORG_ID=ORG_NAME_TEST')).to.be(
-          true
-        );
+        expect(await cisIntegration.doesStringExistInCodeBlock('PRJ_NAME_TEST')).to.be(true);
+        expect(await cisIntegration.doesStringExistInCodeBlock('ORG_ID=ORG_NAME_TEST')).to.be(true);
       });
 
       it('Organization ID field on cloud shell command should only be shown if user chose Google Cloud Shell, if user chose Single Account it shouldn not show up', async () => {
-        await cisIntegrationGcp.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
+        await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
 
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(false)) === true).to.be(
           true
@@ -115,8 +113,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
-        await cisIntegrationGcp.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (await cisIntegration.getUrlOnPostInstallModal()) ===
@@ -125,8 +123,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('Clicking on Launch CloudShell on post intall modal should lead user to CloudShell page', async () => {
-        await cisIntegrationGcp.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (
@@ -143,17 +141,17 @@ export default function (providerContext: FtrProviderContext) {
       it('CIS_GCP Organization Credentials File workflow', async () => {
         const projectName = 'PRJ_NAME_TEST';
         const credentialFileName = 'CRED_FILE_TEST_NAME';
-        await cisIntegrationGcp.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_MANUAL_TEST_ID);
-        await cisIntegrationGcp.fillInTextField(PRJ_ID_TEST_ID, projectName);
-        await cisIntegrationGcp.fillInTextField(CREDENTIALS_FILE_TEST_ID, credentialFileName);
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_MANUAL_TEST_ID);
+        await cisIntegration.fillInTextField(PRJ_ID_TEST_ID, projectName);
+        await cisIntegration.fillInTextField(CREDENTIALS_FILE_TEST_ID, credentialFileName);
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationGcp.getPostInstallModal()) !== undefined).to.be(true);
+        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(CREDENTIALS_FILE_TEST_ID)) ===
+          (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_FILE_TEST_ID)) ===
             credentialFileName
         ).to.be(true);
       });
@@ -163,21 +161,21 @@ export default function (providerContext: FtrProviderContext) {
       it('CIS_GCP Organization Credentials JSON workflow', async () => {
         const projectName = 'PRJ_NAME_TEST';
         const credentialJsonName = 'CRED_JSON_TEST_NAME';
-        await cisIntegrationGcp.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_MANUAL_TEST_ID);
-        await cisIntegrationGcp.fillInTextField(PRJ_ID_TEST_ID, projectName);
-        await cisIntegrationGcp.chooseDropDown(
+        await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_MANUAL_TEST_ID);
+        await cisIntegration.fillInTextField(PRJ_ID_TEST_ID, projectName);
+        await cisIntegration.chooseDropDown(
           CREDENTIALS_TYPE_TEST_ID,
           'credentials_json_option_test_id'
         );
-        await cisIntegrationGcp.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationGcp.getPostInstallModal()) !== undefined).to.be(true);
+        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(CREDENTIALS_JSON_TEST_ID)) ===
+          (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_JSON_TEST_ID)) ===
             credentialJsonName
         ).to.be(true);
       });
@@ -185,10 +183,10 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('CIS_GCP Single', () => {
       it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID, it should use default value', async () => {
-        await cisIntegrationGcp.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(false)) === true).to.be(
           true
@@ -196,11 +194,11 @@ export default function (providerContext: FtrProviderContext) {
       });
       it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID, it should use that value', async () => {
         const projectName = 'PRJ_NAME_TEST';
-        await cisIntegrationGcp.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
-        await cisIntegrationGcp.fillInTextField('project_id_test_id', projectName);
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
+        await cisIntegration.fillInTextField('project_id_test_id', projectName);
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(false, '', projectName)) ===
@@ -210,8 +208,8 @@ export default function (providerContext: FtrProviderContext) {
       it('Add Agent FLyout - Organization ID field on cloud shell command should only be shown if user chose Google Cloud Shell, if user chose Single Account it shouldn not show up', async () => {
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTableAddAgent();
-        expect(await cisIntegrationGcp.doesStringExistInCodeBlock('PRJ_NAME_TEST')).to.be(true);
-        expect(await cisIntegrationGcp.doesStringExistInCodeBlock('ORG_ID=ORG_NAME_TEST')).to.be(
+        expect(await cisIntegration.doesStringExistInCodeBlock('PRJ_NAME_TEST')).to.be(true);
+        expect(await cisIntegration.doesStringExistInCodeBlock('ORG_ID=ORG_NAME_TEST')).to.be(
           false
         );
       });
@@ -220,7 +218,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickFirstElementOnIntegrationTableAddAgent();
         expect(
           (
-            await cisIntegrationGcp.getFieldValueInAddAgentFlyout(
+            await cisIntegration.getFieldValueInAddAgentFlyout(
               'launchGoogleCloudShellButtonAgentFlyoutTestId',
               'href'
             )
@@ -230,17 +228,17 @@ export default function (providerContext: FtrProviderContext) {
       it('Users are able to add CIS_GCP Integration with Manual settings using Credentials File', async () => {
         const projectName = 'PRJ_NAME_TEST';
         const credentialFileName = 'CRED_FILE_TEST_NAME';
-        await cisIntegrationGcp.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_MANUAL_TEST_ID);
-        await cisIntegrationGcp.fillInTextField(PRJ_ID_TEST_ID, projectName);
-        await cisIntegrationGcp.fillInTextField(CREDENTIALS_FILE_TEST_ID, credentialFileName);
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_MANUAL_TEST_ID);
+        await cisIntegration.fillInTextField(PRJ_ID_TEST_ID, projectName);
+        await cisIntegration.fillInTextField(CREDENTIALS_FILE_TEST_ID, credentialFileName);
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationGcp.getPostInstallModal()) !== undefined).to.be(true);
+        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(CREDENTIALS_FILE_TEST_ID)) ===
+          (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_FILE_TEST_ID)) ===
             credentialFileName
         ).to.be(true);
       });
@@ -248,37 +246,37 @@ export default function (providerContext: FtrProviderContext) {
         const credentialJsonName = 'CRED_JSON_TEST_NAME';
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTable();
-        await cisIntegrationGcp.chooseDropDown(
+        await cisIntegration.chooseDropDown(
           CREDENTIALS_TYPE_TEST_ID,
           'credentials_json_option_test_id'
         );
-        await cisIntegrationGcp.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
-        await cisIntegrationGcp.clickSaveIntegrationButton();
+        await cisIntegration.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
+        await cisIntegration.clickSaveIntegrationButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.navigateToIntegrationCspList();
         expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(CREDENTIALS_JSON_TEST_ID)) ===
+          (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_JSON_TEST_ID)) ===
             credentialJsonName
         ).to.be(true);
       });
       it('Users are able to add CIS_GCP Integration with Manual settings using Credentials JSON', async () => {
         const projectName = 'PRJ_NAME_TEST';
         const credentialJsonName = 'CRED_JSON_TEST_NAME';
-        await cisIntegrationGcp.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(GCP_MANUAL_TEST_ID);
-        await cisIntegrationGcp.fillInTextField(PRJ_ID_TEST_ID, projectName);
-        await cisIntegrationGcp.chooseDropDown(
+        await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_MANUAL_TEST_ID);
+        await cisIntegration.fillInTextField(PRJ_ID_TEST_ID, projectName);
+        await cisIntegration.chooseDropDown(
           CREDENTIALS_TYPE_TEST_ID,
           'credentials_json_option_test_id'
         );
-        await cisIntegrationGcp.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationGcp.getPostInstallModal()) !== undefined).to.be(true);
+        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(CREDENTIALS_JSON_TEST_ID)) ===
+          (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_JSON_TEST_ID)) ===
             credentialJsonName
         ).to.be(true);
       });
@@ -286,16 +284,16 @@ export default function (providerContext: FtrProviderContext) {
         const credentialFileName = 'CRED_FILE_TEST_NAME';
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTable();
-        await cisIntegrationGcp.chooseDropDown(
+        await cisIntegration.chooseDropDown(
           CREDENTIALS_TYPE_TEST_ID,
           'credentials_file_option_test_id'
         );
-        await cisIntegrationGcp.fillInTextField(CREDENTIALS_FILE_TEST_ID, credentialFileName);
-        await cisIntegrationGcp.clickSaveIntegrationButton();
+        await cisIntegration.fillInTextField(CREDENTIALS_FILE_TEST_ID, credentialFileName);
+        await cisIntegration.clickSaveIntegrationButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.navigateToIntegrationCspList();
         expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(CREDENTIALS_FILE_TEST_ID)) ===
+          (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_FILE_TEST_ID)) ===
             credentialFileName
         ).to.be(true);
       });

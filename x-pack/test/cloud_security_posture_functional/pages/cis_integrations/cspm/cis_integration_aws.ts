@@ -28,14 +28,12 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Test adding Cloud Security Posture Integrations', function () {
-    this.tags(['cloud_security_posture_cis_integration']);
-    let cisIntegrationGcp: typeof pageObjects.cisAddIntegration.cisGcp;
+    this.tags(['cloud_security_posture_cis_integration_cspm_aws']);
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
-      cisIntegrationGcp = pageObjects.cisAddIntegration.cisGcp;
       cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
 
       await cisIntegration.navigateToAddIntegrationCspmPage();
@@ -52,8 +50,8 @@ export default function (providerContext: FtrProviderContext) {
         expect((await cisIntegration.isRadioButtonChecked('cloud_formation')) === true);
       });
       it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
-        await cisIntegrationGcp.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.clickSaveButton();
         expect((await cisIntegrationAws.getPostInstallCloudFormationModal()) !== undefined).to.be(
           true
         );
@@ -68,7 +66,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickFirstElementOnIntegrationTableAddAgent();
         expect(
           (
-            await cisIntegrationGcp.getFieldValueInAddAgentFlyout(
+            await cisIntegration.getFieldValueInAddAgentFlyout(
               'launchCloudFormationButtonAgentFlyoutTestId',
               'href'
             )
@@ -76,8 +74,8 @@ export default function (providerContext: FtrProviderContext) {
         ).to.be(true);
       });
       it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {
-        await cisIntegrationGcp.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (
@@ -93,16 +91,16 @@ export default function (providerContext: FtrProviderContext) {
     describe('CIS_AWS Organization Manual Assume Role', () => {
       it('CIS_AWS Organization Manual Assume Role Workflow', async () => {
         const roleArn = 'RoleArnTestValue';
-        await cisIntegrationGcp.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_MANUAL_TEST_ID);
-        await cisIntegrationGcp.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
+        await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationGcp.getPostInstallModal()) !== undefined).to.be(true);
+        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
-        expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(ROLE_ARN_TEST_ID)) === roleArn
-        ).to.be(true);
+        expect((await cisIntegration.getFieldValueInEditPage(ROLE_ARN_TEST_ID)) === roleArn).to.be(
+          true
+        );
       });
     });
 
@@ -110,21 +108,21 @@ export default function (providerContext: FtrProviderContext) {
       it('CIS_AWS Organization Manual Direct Access Workflow', async () => {
         const directAccessKeyId = 'directAccessKeyIdTest';
         const directAccessSecretKey = 'directAccessSecretKeyTest';
-        await cisIntegrationGcp.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_MANUAL_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-        await cisIntegrationGcp.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
-        await cisIntegrationGcp.fillInTextField(ASSUME_ROLE_ID_TEST_ID, directAccessKeyId);
-        await cisIntegrationGcp.fillInTextField(
+        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
+        await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
+        await cisIntegration.fillInTextField(ASSUME_ROLE_ID_TEST_ID, directAccessKeyId);
+        await cisIntegration.fillInTextField(
           ASSUME_ROLE_ID_SECRET_KEY_TEST_ID,
           directAccessSecretKey
         );
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationGcp.getPostInstallModal()) !== undefined).to.be(true);
+        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(ASSUME_ROLE_ID_TEST_ID)) ===
+          (await cisIntegration.getFieldValueInEditPage(ASSUME_ROLE_ID_TEST_ID)) ===
             directAccessKeyId
         ).to.be(true);
       });
@@ -135,30 +133,29 @@ export default function (providerContext: FtrProviderContext) {
         const accessKeyId = 'accessKeyIdTest';
         const accessKeySecretKey = 'accessKeySecretKeyTest';
         const tempAccessSessionToken = 'tempAccessSessionTokenTest';
-        await cisIntegrationGcp.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_MANUAL_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-        await cisIntegrationGcp.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
-        await cisIntegrationGcp.fillInTextField(TEMP_ACCESS_KEY_ID_TEST_ID, accessKeyId);
-        await cisIntegrationGcp.fillInTextField(
+        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
+        await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
+        await cisIntegration.fillInTextField(TEMP_ACCESS_KEY_ID_TEST_ID, accessKeyId);
+        await cisIntegration.fillInTextField(
           TEMP_ACCESS_KEY_SECRET_KEY_TEST_ID,
           accessKeySecretKey
         );
-        await cisIntegrationGcp.fillInTextField(
+        await cisIntegration.fillInTextField(
           TEMP_ACCESS_SESSION_TOKEN_TEST_ID,
           tempAccessSessionToken
         );
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationGcp.getPostInstallModal()) !== undefined).to.be(true);
+        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
         expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(TEMP_ACCESS_KEY_ID_TEST_ID)) ===
-            accessKeyId
+          (await cisIntegration.getValueInEditPage(TEMP_ACCESS_KEY_ID_TEST_ID)) === accessKeyId
         ).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
         expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(TEMP_ACCESS_SESSION_TOKEN_TEST_ID)) ===
+          (await cisIntegration.getValueInEditPage(TEMP_ACCESS_SESSION_TOKEN_TEST_ID)) ===
             tempAccessSessionToken
         ).to.be(true);
       });
@@ -168,40 +165,36 @@ export default function (providerContext: FtrProviderContext) {
       it('CIS_AWS Organization Manual Shared Access Workflow', async () => {
         const sharedCredentialFile = 'sharedCredentialFileTest';
         const sharedCredentialProfileName = 'sharedCredentialProfileNameTest';
-        await cisIntegrationGcp.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_MANUAL_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-        await cisIntegrationGcp.selectValue(AWS_CREDENTIAL_SELECTOR, 'shared_credentials');
-        await cisIntegrationGcp.fillInTextField(
-          SHARED_CREDENTIALS_FILE_TEST_ID,
-          sharedCredentialFile
-        );
-        await cisIntegrationGcp.fillInTextField(
+        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
+        await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'shared_credentials');
+        await cisIntegration.fillInTextField(SHARED_CREDENTIALS_FILE_TEST_ID, sharedCredentialFile);
+        await cisIntegration.fillInTextField(
           SHARED_CREDETIALS_PROFILE_NAME_TEST_ID,
           sharedCredentialProfileName
         );
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationGcp.getPostInstallModal()) !== undefined).to.be(true);
+        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
         expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(SHARED_CREDENTIALS_FILE_TEST_ID)) ===
+          (await cisIntegration.getValueInEditPage(SHARED_CREDENTIALS_FILE_TEST_ID)) ===
             sharedCredentialFile
         ).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
         expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(
-            SHARED_CREDETIALS_PROFILE_NAME_TEST_ID
-          )) === sharedCredentialProfileName
+          (await cisIntegration.getValueInEditPage(SHARED_CREDETIALS_PROFILE_NAME_TEST_ID)) ===
+            sharedCredentialProfileName
         ).to.be(true);
       });
     });
 
     describe('CIS_AWS Single Cloud Formation', () => {
       it('CIS_AWS Single Cloud Formation workflow', async () => {
-        await cisIntegrationGcp.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (await cisIntegration.getUrlOnPostInstallModal()) ===
@@ -213,17 +206,17 @@ export default function (providerContext: FtrProviderContext) {
     describe('CIS_AWS Single Manual Assume Role', () => {
       it('CIS_AWS Single Manual Assume Role Workflow', async () => {
         const roleArn = 'RoleArnTestValue';
-        await cisIntegrationGcp.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_MANUAL_TEST_ID);
-        await cisIntegrationGcp.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
+        await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationGcp.getPostInstallModal()) !== undefined).to.be(true);
+        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
-        expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(ROLE_ARN_TEST_ID)) === roleArn
-        ).to.be(true);
+        expect((await cisIntegration.getFieldValueInEditPage(ROLE_ARN_TEST_ID)) === roleArn).to.be(
+          true
+        );
       });
     });
 
@@ -231,22 +224,22 @@ export default function (providerContext: FtrProviderContext) {
       it('CIS_AWS Single Manual Direct Access Workflow', async () => {
         const directAccessKeyId = 'directAccessKeyIdTest';
         const directAccessSecretKey = 'directAccessSecretKeyTest';
-        await cisIntegrationGcp.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_MANUAL_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-        await cisIntegrationGcp.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
-        await cisIntegrationGcp.fillInTextField(ASSUME_ROLE_ID_TEST_ID, directAccessKeyId);
-        await cisIntegrationGcp.fillInTextField(
+        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
+        await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
+        await cisIntegration.fillInTextField(ASSUME_ROLE_ID_TEST_ID, directAccessKeyId);
+        await cisIntegration.fillInTextField(
           ASSUME_ROLE_ID_SECRET_KEY_TEST_ID,
           directAccessSecretKey
         );
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationGcp.getPostInstallModal()) !== undefined).to.be(true);
+        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(ASSUME_ROLE_ID_TEST_ID)) ===
+          (await cisIntegration.getFieldValueInEditPage(ASSUME_ROLE_ID_TEST_ID)) ===
             directAccessKeyId
         ).to.be(true);
       });
@@ -257,31 +250,30 @@ export default function (providerContext: FtrProviderContext) {
         const accessKeyId = 'accessKeyIdTest';
         const accessKeySecretKey = 'accessKeySecretKeyTest';
         const tempAccessSessionToken = 'tempAccessSessionTokenTest';
-        await cisIntegrationGcp.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_MANUAL_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-        await cisIntegrationGcp.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
-        await cisIntegrationGcp.fillInTextField(TEMP_ACCESS_KEY_ID_TEST_ID, accessKeyId);
-        await cisIntegrationGcp.fillInTextField(
+        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
+        await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
+        await cisIntegration.fillInTextField(TEMP_ACCESS_KEY_ID_TEST_ID, accessKeyId);
+        await cisIntegration.fillInTextField(
           TEMP_ACCESS_KEY_SECRET_KEY_TEST_ID,
           accessKeySecretKey
         );
-        await cisIntegrationGcp.fillInTextField(
+        await cisIntegration.fillInTextField(
           TEMP_ACCESS_SESSION_TOKEN_TEST_ID,
           tempAccessSessionToken
         );
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationGcp.getPostInstallModal()) !== undefined).to.be(true);
+        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
         expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(TEMP_ACCESS_KEY_ID_TEST_ID)) ===
-            accessKeyId
+          (await cisIntegration.getValueInEditPage(TEMP_ACCESS_KEY_ID_TEST_ID)) === accessKeyId
         ).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
         expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(TEMP_ACCESS_SESSION_TOKEN_TEST_ID)) ===
+          (await cisIntegration.getValueInEditPage(TEMP_ACCESS_SESSION_TOKEN_TEST_ID)) ===
             tempAccessSessionToken
         ).to.be(true);
       });
@@ -291,32 +283,28 @@ export default function (providerContext: FtrProviderContext) {
       it('CIS_AWS Single Manual Shared Access Workflow', async () => {
         const sharedCredentialFile = 'sharedCredentialFileTest';
         const sharedCredentialProfileName = 'sharedCredentialProfileNameTest';
-        await cisIntegrationGcp.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_MANUAL_TEST_ID);
-        await cisIntegrationGcp.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-        await cisIntegrationGcp.selectValue(AWS_CREDENTIAL_SELECTOR, 'shared_credentials');
-        await cisIntegrationGcp.fillInTextField(
-          SHARED_CREDENTIALS_FILE_TEST_ID,
-          sharedCredentialFile
-        );
-        await cisIntegrationGcp.fillInTextField(
+        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
+        await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'shared_credentials');
+        await cisIntegration.fillInTextField(SHARED_CREDENTIALS_FILE_TEST_ID, sharedCredentialFile);
+        await cisIntegration.fillInTextField(
           SHARED_CREDETIALS_PROFILE_NAME_TEST_ID,
           sharedCredentialProfileName
         );
-        await cisIntegrationGcp.clickSaveButton();
+        await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationGcp.getPostInstallModal()) !== undefined).to.be(true);
+        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
         expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(SHARED_CREDENTIALS_FILE_TEST_ID)) ===
+          (await cisIntegration.getValueInEditPage(SHARED_CREDENTIALS_FILE_TEST_ID)) ===
             sharedCredentialFile
         ).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
         expect(
-          (await cisIntegrationGcp.getFieldValueInEditPage(
-            SHARED_CREDETIALS_PROFILE_NAME_TEST_ID
-          )) === sharedCredentialProfileName
+          (await cisIntegration.getValueInEditPage(SHARED_CREDETIALS_PROFILE_NAME_TEST_ID)) ===
+            sharedCredentialProfileName
         ).to.be(true);
       });
     });

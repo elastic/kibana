@@ -21,6 +21,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./cis_integrations/cnvm/cis_integration_cnvm'));
     loadTestFile(require.resolve('./cis_integrations/cspm/cis_integration_aws'));
     loadTestFile(require.resolve('./cis_integrations/cspm/cis_integration_gcp'));
+    loadTestFile(require.resolve('./cis_integrations/cspm/cis_integration_azure'));
     loadTestFile(require.resolve('./findings_old_data'));
     loadTestFile(require.resolve('./vulnerabilities'));
     loadTestFile(require.resolve('./vulnerabilities_grouping'));

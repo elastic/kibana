@@ -33,6 +33,7 @@ import { AzureCredentialsType } from '../../../../common/types_old';
 import { SetupFormat, useAzureCredentialsForm } from './hooks';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import { AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ } from '../../test_subjects';
 
 interface AzureSetupInfoContentProps {
   integrationLink: string;
@@ -78,12 +79,14 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
   {
     id: AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE,
     label: 'ARM Template',
+    testId: 'azureOrganizationOptionTestId',
   },
   {
     id: AZURE_MANUAL_CREDENTIAL_TYPE,
     label: i18n.translate('xpack.csp.azureIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
+    testId: 'azureManualOptionTestId',
   },
 ];
 
@@ -197,6 +200,7 @@ const AzureCredentialTypeSelector = ({
       onChange={(optionElem) => {
         onChange(optionElem.target.value as AzureCredentialsType);
       }}
+      data-test-subj={AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ}
     />
   </EuiFormRow>
 );
@@ -252,7 +256,12 @@ const AzureInputVarFields = ({
   fields,
   onChange,
 }: {
-  fields: Array<AzureOptions[keyof AzureOptions]['fields'][number] & { value: string; id: string }>;
+  fields: Array<
+    AzureOptions[keyof AzureOptions]['fields'][number] & {
+      value: string;
+      id: string;
+    }
+  >;
   onChange: (key: string, value: string) => void;
 }) => (
   <div>
@@ -266,6 +275,7 @@ const AzureInputVarFields = ({
               fullWidth
               value={field.value || ''}
               onChange={(event) => onChange(field.id, event.target.value)}
+              data-test-subj={field.dataTestId}
             />
           )}
           {field.type === 'text' && (
@@ -274,6 +284,7 @@ const AzureInputVarFields = ({
               fullWidth
               value={field.value || ''}
               onChange={(event) => onChange(field.id, event.target.value)}
+              data-test-subj={field.dataTestId}
             />
           )}
         </>
