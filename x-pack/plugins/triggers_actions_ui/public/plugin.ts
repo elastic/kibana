@@ -24,6 +24,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -170,6 +171,7 @@ interface PluginsStart {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
+  dashboard: DashboardStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
@@ -298,6 +300,7 @@ export class Plugin
         return renderApp({
           ...coreStart,
           actions: plugins.actions,
+          dashboard: pluginsStart.dashboard,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
           dataViewEditor: pluginsStart.dataViewEditor,
@@ -350,6 +353,7 @@ export class Plugin
         return renderApp({
           ...coreStart,
           actions: plugins.actions,
+          dashboard: pluginsStart.dashboard,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
           dataViewEditor: pluginsStart.dataViewEditor,
@@ -394,6 +398,7 @@ export class Plugin
           return renderApp({
             ...coreStart,
             actions: plugins.actions,
+            dashboard: pluginsStart.dashboard,
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
             dataViewEditor: pluginsStart.dataViewEditor,
