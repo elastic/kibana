@@ -71,6 +71,7 @@ import { firstValueFrom } from 'rxjs';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -164,6 +165,7 @@ export interface ObservabilityPublicPluginsStart {
   theme: CoreStart['theme'];
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
+  dashboard: DashboardStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -195,11 +197,20 @@ export class Plugin
   // in the global navigation will happen in `updateGlobalNavigation`.
   private readonly deepLinks: AppDeepLink[] = [
     {
+      id: 'dashboards',
+      title: i18n.translate('xpack.observability.dashboardsLinkTitle', {
+        defaultMessage: 'Dashboards',
+      }),
+      visibleIn: [],
+      order: 8001,
+      path: '/dashboards',
+    },
+    {
       id: 'alerts',
       title: i18n.translate('xpack.observability.alertsLinkTitle', {
         defaultMessage: 'Alerts',
       }),
-      order: 8001,
+      order: 8002,
       path: ALERTS_PATH,
       visibleIn: [],
       deepLinks: [
@@ -219,14 +230,14 @@ export class Plugin
         defaultMessage: 'SLOs',
       }),
       visibleIn: [],
-      order: 8002,
+      order: 8003,
       path: SLOS_PATH,
     },
     getCasesDeepLinks({
       basePath: CASES_PATH,
       extend: {
         [CasesDeepLinkId.cases]: {
-          order: 8003,
+          order: 8004,
           visibleIn: [],
         },
         [CasesDeepLinkId.casesCreate]: {

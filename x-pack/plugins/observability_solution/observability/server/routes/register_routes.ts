@@ -17,6 +17,7 @@ import {
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import axios from 'axios';
 import * as t from 'io-ts';
+import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { ObservabilityConfig } from '..';
 import { getHTTPResponseCode, ObservabilityError } from '../errors';
 import { ObservabilityRequestHandlerContext } from '../types';
@@ -37,6 +38,7 @@ export interface RegisterRoutesDependencies {
   spaces?: SpacesPluginStart;
   ruleDataService: RuleDataPluginService;
   getRulesClientWithRequest: (request: KibanaRequest) => RulesClientApi;
+  fleet: FleetStartContract;
 }
 
 export function registerRoutes({ config, repository, core, logger, dependencies }: RegisterRoutes) {

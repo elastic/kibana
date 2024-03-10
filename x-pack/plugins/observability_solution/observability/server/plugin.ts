@@ -21,6 +21,7 @@ import {
   SavedObjectsClient,
 } from '@kbn/core/server';
 import { LogsExplorerLocatorParams, LOGS_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
@@ -56,12 +57,12 @@ import {
 } from './lib/annotations/bootstrap_annotations';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
+import { obsDashboardSections } from './lib/dashboards';
 import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { registerRoutes } from './routes/register_routes';
 import { slo, SO_SLO_TYPE } from './saved_objects';
 import { threshold } from './saved_objects/threshold';
 import { DefaultResourceInstaller, DefaultSLOInstaller } from './services/slo';
-
 import { uiSettings } from './ui_settings';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
@@ -82,6 +83,7 @@ interface PluginStart {
   alerting: PluginStartContract;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
+  fleet: FleetStartContract;
 }
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
@@ -343,6 +345,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     core.savedObjects.registerType(slo);
     core.savedObjects.registerType(threshold);
+    core.savedObjects.registerType(obsDashboardSections);
 
     registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, ruleDataService, {
       alertsLocator,
@@ -362,6 +365,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           spaces: pluginStart.spaces,
           ruleDataService,
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
+          fleet: pluginStart.fleet,
         },
         logger: this.logger,
         repository: getObservabilityServerRouteRepository(config),

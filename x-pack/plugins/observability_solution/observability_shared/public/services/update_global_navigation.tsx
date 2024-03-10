@@ -62,6 +62,11 @@ export function updateGlobalNavigation({
             };
           }
           return null;
+        case 'dashboards':
+            return {
+              ...link,
+              visibleIn: ['sideNav', 'globalSearch'],
+            };
         default:
           return link;
       }
