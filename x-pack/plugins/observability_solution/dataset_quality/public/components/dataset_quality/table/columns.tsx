@@ -207,7 +207,7 @@ export const getDatasetQualityTableColumns = ({
           </span>
         </EuiToolTip>
       ),
-      field: 'degradedDocs',
+      field: 'degradedDocs.percentage',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
         <DegradedDocsPercentageLink
