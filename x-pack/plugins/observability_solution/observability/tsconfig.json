@@ -11,7 +11,7 @@
     "typings/**/*",
     "../../../../typings/**/*",
     "../../observability/public/embeddable/slo/common"
-, "../slo/public/pages/slo_edit/components/synthetics_common", "../slo/public/pages/slo_edit/components/synthetics_availability"  ],
+    , "../slo/public/pages/slo_edit/components/synthetics_common", "../slo/public/pages/slo_edit/components/synthetics_availability"  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -98,8 +98,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/aiops-utils",
     "@kbn/event-annotation-common",
-    "@kbn/controls-plugin",
-    "@kbn/core-lifecycle-browser"
+    "@kbn/data-view-field-editor-plugin"
   ],
   "exclude": ["target/**/*"]
 }
