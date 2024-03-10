@@ -7,14 +7,14 @@
 import {
   App,
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { firstValueFrom } from 'rxjs';
-
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { SloPublicPluginsSetup, SloPublicPluginsStart } from './types';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { SloPublicSetup, SloPublicStart } from './types';
@@ -38,6 +38,8 @@ export class SloPlugin
       './components/alerts_table/register_embeddable_alerts_table_configuration'
     );
   }
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+
   constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(
@@ -70,15 +72,17 @@ export class SloPlugin
         isServerless: !!pluginsStart.serverless,
       });
     };
-
+    const appUpdater$ = this.appUpdater$;
     const app: App = {
       id: sloAppId,
       title: PLUGIN_NAME,
       order: 8000,
+      updater$: appUpdater$,
       euiIconType: 'logoObservability',
       appRoute: SLOS_BASE_PATH,
       category: DEFAULT_APP_CATEGORIES.observability,
       mount,
+      keywords: ['observability', 'monitor', 'slos'],
     };
     // Register an application into the side navigation menu
     coreSetup.application.register(app);

@@ -22,6 +22,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -29,11 +30,10 @@ import { AlertsLocatorDefinition } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { registerSloUsageCollector } from './lib/collectors/register';
-
 import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
 import { slo, SO_SLO_TYPE } from './saved_objects';
 import { DefaultResourceInstaller, DefaultSLOInstaller } from './services';
-import { registerRuleTypes } from './lib/rules/register_rule_types';
+import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
 import { SloConfig } from '.';
 import { registerRoutes } from './routes/register_routes';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
@@ -47,6 +47,7 @@ export interface PluginSetup {
   features: FeaturesSetup;
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
+  cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -127,7 +128,7 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
 
     core.savedObjects.registerType(slo);
 
-    registerRuleTypes(plugins.alerting, core.http.basePath, this.logger, ruleDataService, {
+    registerBurnRateRule(plugins.alerting, core.http.basePath, this.logger, ruleDataService, {
       alertsLocator,
     });
 
@@ -169,8 +170,6 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
     const internalEsClient = core.elasticsearch.client.asInternalUser;
 
     this.sloOrphanCleanupTask?.start(plugins.taskManager, internalSoClient, internalEsClient);
-
-    return {};
   }
 
   public stop() {}

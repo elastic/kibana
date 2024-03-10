@@ -20,7 +20,7 @@ import { SLO_RULE_REGISTRATION_CONTEXT } from '../../common/constants';
 import { sloBurnRateRuleType } from './slo_burn_rate';
 import { sloRuleFieldMap } from './slo_burn_rate/field_map';
 
-export function registerRuleTypes(
+export function registerBurnRateRule(
   alertingPlugin: PluginSetupContract,
   basePath: IBasePath,
   logger: Logger,

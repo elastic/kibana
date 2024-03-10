@@ -40,7 +40,9 @@ function createDiscoverLocator(
       $state: { store: FilterStateStore.APP_STATE },
       meta: {
         type: 'custom',
-        alias: i18n.translate('xpack.slo.createDiscoverLocator.', { defaultMessage: '' }),
+        alias: i18n.translate('xpack.slo.sloDetails.goodFilterLabel', {
+          defaultMessage: 'Good events',
+        }),
         disabled: !showGood,
         index: `${slo.indicator.params.index}-id`,
         value: JSON.stringify(customGoodFilter),
@@ -52,7 +54,9 @@ function createDiscoverLocator(
       $state: { store: FilterStateStore.APP_STATE },
       meta: {
         type: 'custom',
-        alias: i18n.translate('xpack.slo.createDiscoverLocator.', { defaultMessage: '' }),
+        alias: i18n.translate('xpack.slo.sloDetails.badFilterLabel', {
+          defaultMessage: 'Bad events',
+        }),
         disabled: !showBad,
         index: `${slo.indicator.params.index}-id`,
         value: JSON.stringify(customBadFilter),
