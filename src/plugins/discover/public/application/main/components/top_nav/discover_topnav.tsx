@@ -21,7 +21,7 @@ import { useInternalStateSelector } from '../../services/discover_internal_state
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
-import { useDiscoverCustomization, useDiscoverRootContext } from '../../../../customizations';
+import { useDiscoverContext, useDiscoverCustomization } from '../../../../customizations';
 import { addLog } from '../../../../utils/add_log';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { isTextBasedQuery } from '../../utils/is_text_based_query';
@@ -171,7 +171,7 @@ export const DiscoverTopNav = ({
   );
 
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
-  const rootContext = useDiscoverRootContext();
+  const { rootContext } = useDiscoverContext();
   const topNavProps = useMemo(() => {
     if (rootContext.inlineTopNav.enabled) {
       return undefined;

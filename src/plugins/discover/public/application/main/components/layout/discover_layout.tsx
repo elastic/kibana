@@ -54,7 +54,7 @@ import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { ESQLTechPreviewCallout } from './esql_tech_preview_callout';
 import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
-import { useDiscoverRootContext } from '../../../../customizations';
+import { useDiscoverContext } from '../../../../customizations';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -94,7 +94,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   ]);
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
-  const rootContext = useDiscoverRootContext();
+  const { rootContext } = useDiscoverContext();
   const fetchCounter = useRef<number>(0);
 
   useEffect(() => {

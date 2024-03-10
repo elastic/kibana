@@ -19,7 +19,7 @@ import { useSavedSearchInitial } from './services/discover_state_provider';
 import { useAdHocDataViews } from './hooks/use_adhoc_data_views';
 import { useTextBasedQueryLanguage } from './hooks/use_text_based_query_language';
 import { addLog } from '../../utils/add_log';
-import { useDiscoverRootContext } from '../../customizations';
+import { useDiscoverContext } from '../../customizations';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -34,7 +34,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const { stateContainer } = props;
   const savedSearch = useSavedSearchInitial();
   const services = useDiscoverServices();
-  const rootContext = useDiscoverRootContext();
+  const { rootContext } = useDiscoverContext();
   const { chrome, docLinks, data, spaces, history } = services;
 
   useUrlTracking(stateContainer.savedSearchState);

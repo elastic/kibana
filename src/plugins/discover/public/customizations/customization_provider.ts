@@ -15,7 +15,7 @@ import {
   DiscoverCustomizationId,
   DiscoverCustomizationService,
 } from './customization_service';
-import { useDiscoverProfiles } from './profiles_provider';
+import { useDiscoverContext } from './context_provider';
 
 const customizationContext = createContext(createCustomizationService());
 
@@ -26,7 +26,7 @@ export const useDiscoverCustomizationService = ({
 }: {
   stateContainer: DiscoverStateContainer;
 }) => {
-  const { currentProfile } = useDiscoverProfiles();
+  const { currentProfile } = useDiscoverContext();
   const [customizationService, setCustomizationService] = useState<DiscoverCustomizationService>();
 
   useEffect(() => {

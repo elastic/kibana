@@ -19,16 +19,15 @@ import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 import {
+  DiscoverContextProvider,
   DiscoverProfileRegistry,
-  DiscoverProfilesProvider,
   DiscoverRootContext,
-  DiscoverRootContextProvider,
-  useDiscoverProfiles,
+  useDiscoverContext,
 } from '../customizations';
 import { addProfile } from '../../common/customizations';
 
 export const DiscoverRoutes = () => {
-  const { currentProfile } = useDiscoverProfiles();
+  const { currentProfile } = useDiscoverContext();
   const prefixPath = useCallback(
     (path: string) => `${addProfile('', currentProfile.id)}/${path}`,
     [currentProfile.id]
@@ -79,22 +78,20 @@ export const DiscoverRouter = ({
 }: DiscoverRouterProps) => {
   return (
     <KibanaContextProvider services={services}>
-      <DiscoverRootContextProvider value={rootContext}>
-        <DiscoverProfilesProvider value={profileRegistry}>
-          <EuiErrorBoundary>
-            <Router history={history} data-test-subj="discover-react-router">
-              <Routes>
-                <Route path={addProfile('', ':profile')}>
-                  <DiscoverRoutes />
-                </Route>
-                <Route path="/">
-                  <DiscoverRoutes />
-                </Route>
-              </Routes>
-            </Router>
-          </EuiErrorBoundary>
-        </DiscoverProfilesProvider>
-      </DiscoverRootContextProvider>
+      <DiscoverContextProvider rootContext={rootContext} profileRegistry={profileRegistry}>
+        <EuiErrorBoundary>
+          <Router history={history} data-test-subj="discover-react-router">
+            <Routes>
+              <Route path={addProfile('', ':profile')}>
+                <DiscoverRoutes />
+              </Route>
+              <Route path="/">
+                <DiscoverRoutes />
+              </Route>
+            </Routes>
+          </Router>
+        </EuiErrorBoundary>
+      </DiscoverContextProvider>
     </KibanaContextProvider>
   );
 };

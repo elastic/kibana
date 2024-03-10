@@ -6,10 +6,15 @@
  * Side Public License, v 1.
  */
 
-export * from './root_context';
+export type { DiscoverRootContext, DiscoverDisplayMode } from './root_context';
+export type { DiscoverRuntimeContext, DiscoverRuntimeContextEvents } from './runtime_context';
+export type { DiscoverCustomization, DiscoverCustomizationService } from './customization_service';
+
+export { createDiscoverRootContext } from './root_context';
+export { DataSourceType, useDiscoverRuntimeContextEvents } from './runtime_context';
+
 export * from './profile_registry';
-export * from './profiles_provider';
+export * from './context_provider';
 export * from './customization_types';
 export * from './customization_provider';
 export * from './types';
-export type { DiscoverCustomization, DiscoverCustomizationService } from './customization_service';

@@ -18,8 +18,7 @@ import {
   createDiscoverRootContext,
   createProfileRegistry,
   CustomizationCallback,
-  DiscoverProfilesProvider,
-  DiscoverRootContextProvider,
+  DiscoverContextProvider,
 } from '../../customizations';
 import { LoadingIndicator } from '../common/loading_indicator';
 import { DISCOVER_DEFAULT_PROFILE_ID } from '../../../common/customizations';
@@ -118,11 +117,9 @@ export const DiscoverContainerInternal = ({
         `}
       >
         <KibanaContextProvider services={services}>
-          <DiscoverRootContextProvider value={rootContext}>
-            <DiscoverProfilesProvider value={profileRegistry}>
-              <DiscoverMainRoute stateStorageContainer={stateStorageContainer} />
-            </DiscoverProfilesProvider>
-          </DiscoverRootContextProvider>
+          <DiscoverContextProvider rootContext={rootContext} profileRegistry={profileRegistry}>
+            <DiscoverMainRoute stateStorageContainer={stateStorageContainer} />
+          </DiscoverContextProvider>
         </KibanaContextProvider>
       </EuiFlexItem>
     </EuiFlexGroup>

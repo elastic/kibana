@@ -34,8 +34,8 @@ import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
 import {
   DiscoverCustomizationProvider,
+  useDiscoverContext,
   useDiscoverCustomizationService,
-  useDiscoverRootContext,
 } from '../../customizations';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { isTextBasedQuery } from './utils/is_text_based_query';
@@ -65,7 +65,7 @@ export function DiscoverMainRoute({ stateStorageContainer }: MainRouteProps) {
     getScopedHistory,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
-  const rootContext = useDiscoverRootContext();
+  const { rootContext } = useDiscoverContext();
   const { stateContainer, resetStateContainer } = useDiscoverStateContainer({
     history,
     services,
