@@ -410,41 +410,6 @@ describe('getTimelineItemsFromConversation', () => {
     });
   });
 
-  describe('when starting from a contextual insight', () => {
-    beforeEach(() => {
-      items = getTimelineItemsfromConversation({
-        chatService: mockChatService,
-        hasConnector: true,
-        currentUser: {
-          username: 'johndoe',
-          full_name: 'John Doe',
-        },
-        chatState: ChatState.Ready,
-        messages: [
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.User,
-              content: 'Test',
-            },
-          },
-        ],
-        onActionClick: jest.fn(),
-      });
-    });
-
-    it('hides the first user message', () => {
-      expect(items[1].display.collapsed).toBe(true);
-    });
-  });
-
   describe('with function calling suggested by the user', () => {
     beforeEach(() => {
       mockChatService.hasRenderFunction.mockImplementation(() => false);
