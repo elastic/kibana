@@ -198,6 +198,19 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async assertModelDeployActionButtonExists(modelId: string, expectedValue: boolean) {
+      const actionsExists = await testSubjects.exists(
+        this.rowSelector(modelId, 'mlModelsTableRowDeployAction')
+      );
+
+      expect(actionsExists).to.eql(
+        expectedValue,
+        `Expected row deploy action button for trained model '${modelId}' to be ${
+          expectedValue ? 'visible' : 'hidden'
+        } (got ${actionsExists ? 'visible' : 'hidden'})`
+      );
+    }
+
     public async assertModelTestButtonExists(modelId: string, expectedValue: boolean) {
       const actionExists = await testSubjects.exists(
         this.rowSelector(modelId, 'mlModelsTableRowTestAction')
@@ -224,6 +237,15 @@ export function TrainedModelsTableProvider(
       await this.assertTestFlyoutExists();
 
       await trainedModelsActions.testModelOutput(modelType, inputParams, expectedResult);
+    }
+
+    public async openTrainedModelsInferenceFlyout(modelId: string) {
+      await mlCommonUI.invokeTableRowAction(
+        this.rowSelector(modelId),
+        'mlModelsTableRowDeployAction',
+        false
+      );
+      await this.assertDeployModelFlyoutExists();
     }
 
     public async deleteModel(modelId: string) {
@@ -264,12 +286,31 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async deployModelsContinue(expectedStep?: string) {
+      await testSubjects.existOrFail('mlTrainedModelsInferencePipelineContinueButton');
+      await testSubjects.click('mlTrainedModelsInferencePipelineContinueButton');
+      if (expectedStep) {
+        await testSubjects.existOrFail(expectedStep);
+      }
+    }
+
+    public async assertDeployModelsCreateButton(expectedStep?: string) {
+      await testSubjects.existOrFail('mlTrainedModelsInferencePipelineCreateButton');
+      await testSubjects.click('mlTrainedModelsInferencePipelineCreateButton');
+    }
+
     public async assertDeleteModalExists() {
       await testSubjects.existOrFail('mlModelsDeleteModal', { timeout: 60 * 1000 });
     }
 
     public async assertTestFlyoutExists() {
       await testSubjects.existOrFail('mlTestModelsFlyout', { timeout: 60 * 1000 });
+    }
+
+    public async assertDeployModelFlyoutExists() {
+      await testSubjects.existOrFail('mlTrainedModelsInferencePipelineFlyout', {
+        timeout: 60 * 1000,
+      });
     }
 
     public async assertStartDeploymentModalExists(expectExist = true) {
