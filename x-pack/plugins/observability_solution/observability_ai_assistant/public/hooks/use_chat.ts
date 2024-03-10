@@ -23,6 +23,7 @@ import type {
 } from '../types';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
+import { useUserPreferredLanguage } from './use_user_preferred_language';
 
 export enum ChatState {
   Ready = 'ready',
@@ -88,6 +89,8 @@ export function useChat({
   const {
     services: { notifications },
   } = useKibana();
+
+  const { getPreferredLanguage } = useUserPreferredLanguage();
 
   const onChatCompleteRef = useRef(onChatComplete);
   onChatCompleteRef.current = onChatComplete;
@@ -162,6 +165,7 @@ export function useChat({
         persist,
         signal: abortControllerRef.current.signal,
         conversationId,
+        responseLanguage: getPreferredLanguage(),
       });
 
       function getPendingMessages() {
@@ -259,6 +263,7 @@ export function useChat({
       persist,
       service,
       systemMessage,
+      getPreferredLanguage,
     ]
   );
 

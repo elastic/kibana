@@ -19,8 +19,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import { CombinedField } from './types';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';
 import { CombinedFieldLabel } from './combined_field_label';
 import {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 
