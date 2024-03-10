@@ -18,7 +18,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   ]);
   const synthtrace = getService('logSynthtraceEsClient');
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
   const to = '2024-01-01T12:00:00.000Z';
 
   describe('Dataset quality table filters', () => {

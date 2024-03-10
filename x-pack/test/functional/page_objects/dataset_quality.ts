@@ -25,6 +25,15 @@ const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
   flyout: {},
 };
 
+type SummaryPanelKpi = Record<
+  | 'datasetHealthPoor'
+  | 'datasetHealthDegraded'
+  | 'datasetHealthGood'
+  | 'activeDatasets'
+  | 'estimatedData',
+  string
+>;
+
 export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
@@ -93,16 +102,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       );
     },
 
-    async parseSummaryPanel(): Promise<
-      Record<
-        | 'datasetHealthPoor'
-        | 'datasetHealthDegraded'
-        | 'datasetHealthGood'
-        | 'activeDatasets'
-        | 'estimatedData',
-        string
-      >
-    > {
+    async parseSummaryPanel(): Promise<SummaryPanelKpi> {
       const kpiTitleAndKeys = [
         { title: texts.datasetHealthPoor, key: 'datasetHealthPoor' },
         { title: texts.datasetHealthDegraded, key: 'datasetHealthDegraded' },
@@ -125,7 +125,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
           ...acc,
           [key]: value,
         }),
-        {}
+        {} as SummaryPanelKpi
       );
     },
 

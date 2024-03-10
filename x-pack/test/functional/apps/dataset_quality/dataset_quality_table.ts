@@ -226,7 +226,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const lastActivityCol = cols['Last Activity'];
       const lastActivityColCellTexts = await lastActivityCol.getCellTexts();
       const activeDatasets = lastActivityColCellTexts.filter(
-        (activity) => activity !== PageObjects.datasetQuality.texts.noActivityText
+        (activity: string) => activity !== PageObjects.datasetQuality.texts.noActivityText
       );
 
       await PageObjects.datasetQuality.toggleShowInactiveDatasets();

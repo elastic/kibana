@@ -118,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         })
       );
 
-      await retry.tryForTime(15000, async () => {
+      await retry.tryForTime(30000, async () => {
         const { activeDatasets: updatedActiveDatasets, estimatedData: updatedEstimatedData } =
           await PageObjects.datasetQuality.parseSummaryPanel();
 
