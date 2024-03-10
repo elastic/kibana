@@ -192,7 +192,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFiltersContainer
       );
 
-      await PageObjects.datasetQuality.setDatePickerLastXUnits(filtersContainer, '1', 's');
+      await PageObjects.datasetQuality.setDatePickerLastXUnits(filtersContainer, 1, 's');
       const lastActivityColCellTexts = await lastActivityCol.getCellTexts();
       expect(lastActivityColCellTexts).to.eql([
         PageObjects.datasetQuality.texts.noActivityText,

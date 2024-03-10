@@ -29,7 +29,7 @@ export function getLogsForDataset({
   isMalformed = false,
 }: {
   dataset: string;
-  to: string;
+  to: moment.MomentInput;
   count?: number;
   isMalformed?: boolean;
 }) {

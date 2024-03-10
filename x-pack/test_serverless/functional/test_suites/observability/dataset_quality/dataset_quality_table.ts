@@ -19,6 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'svlCommonPage',
   ]);
   const synthtrace = getService('svlLogsSynthtraceClient');
+  const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const to = '2024-01-01T12:00:00.000Z';
 
   describe('Dataset quality table', () => {
@@ -194,7 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFiltersContainer
       );
 
-      await PageObjects.datasetQuality.setDatePickerLastXUnits(filtersContainer, '1', 's');
+      await PageObjects.datasetQuality.setDatePickerLastXUnits(filtersContainer, 1, 's');
       const lastActivityColCellTexts = await lastActivityCol.getCellTexts();
       expect(lastActivityColCellTexts).to.eql([
         PageObjects.datasetQuality.texts.noActivityText,
