@@ -7,7 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {
-  AppMountParameters,
+  type AppMountParameters,
   DEFAULT_APP_CATEGORIES,
   type CoreSetup,
   type CoreStart,
@@ -22,9 +22,9 @@ import type {
   ObservabilityAIAssistantAppPublicSetup,
   ObservabilityAIAssistantAppPublicStart,
 } from './types';
-import { NavControl } from './components/nav_control.tsx';
 import { createAppService, ObservabilityAIAssistantAppService } from './service/create_app_service';
 import { SharedProviders } from './utils/shared_providers';
+import { LazyNavControl } from './components/nav_control/lazy_nav_control';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ConfigSchema {}
@@ -111,7 +111,7 @@ export class ObservabilityAIAssistantAppPlugin
             service={appService}
             theme$={coreStart.theme.theme$}
           >
-            <NavControl />
+            <LazyNavControl />
           </SharedProviders>,
           element,
           () => {}
