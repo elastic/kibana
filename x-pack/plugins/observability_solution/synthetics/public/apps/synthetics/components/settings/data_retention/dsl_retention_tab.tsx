@@ -102,21 +102,21 @@ const ErrorEmptyPrompt = ({ error }: { error?: string }) => (
   <EuiEmptyPrompt
     iconType="error"
     body={
-      <p>
-        {error ??
-          i18n.translate('xpack.synthetics.dslRetention.emptyErrorPrompt', {
-            defaultMessage: 'No further error information available',
-          })}
-      </p>
+      error ?? (
+        <FormattedMessage
+          tagName="p"
+          id="pack.synthetics.dslRetention.emptyErrorPrompt"
+          defaultMessage="No further error information available"
+        />
+      )
     }
     color="danger"
     title={
-      <h2>
-        <FormattedMessage
-          id="xpack.synthetics.dslRetention.noData.heading"
-          defaultMessage="No data retention information found"
-        />
-      </h2>
+      <FormattedMessage
+        tagName="h2"
+        id="xpack.synthetics.dslRetention.noData.heading"
+        defaultMessage="No data retention information found"
+      />
     }
   />
 );
