@@ -97,7 +97,7 @@ export const useConversation = (): UseConversation => {
           conversationId,
           apiConfig: { ...conversation.apiConfig, defaultSystemPromptId },
           messages: [],
-          replacements: undefined,
+          replacements: {},
         });
       }
     },
