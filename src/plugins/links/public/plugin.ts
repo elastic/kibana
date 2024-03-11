@@ -25,6 +25,7 @@ import { getLinksClient } from './content_management/links_content_management_cl
 import { LinksFactoryDefinition } from './embeddable';
 import { LinksByReferenceInput } from './embeddable/types';
 import { setKibanaServices } from './services/kibana_services';
+import { registerLinksEmbeddable } from './react_embeddable/links_react_embeddable';
 
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -48,8 +49,6 @@ export class LinksPlugin
   public setup(core: CoreSetup<LinksStartDependencies>, plugins: LinksSetupDependencies) {
     core.getStartServices().then(([_, deps]) => {
       const linksFactory = new LinksFactoryDefinition();
-
-      plugins.embeddable.registerEmbeddableFactory(CONTENT_ID, linksFactory);
 
       plugins.contentManagement.registry.register({
         id: CONTENT_ID,
@@ -110,6 +109,7 @@ export class LinksPlugin
 
   public start(core: CoreStart, plugins: LinksStartDependencies) {
     setKibanaServices(core, plugins);
+    registerLinksEmbeddable();
     return {};
   }
 
