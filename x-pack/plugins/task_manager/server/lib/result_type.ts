@@ -52,7 +52,8 @@ export async function promiseResult<T, E>(future: Promise<T>): Promise<Result<T,
   try {
     return asOk(await future);
   } catch (e) {
-    return asErr(e);
+    const error = e.error ? e.error : e;
+    return asErr(error);
   }
 }
 
