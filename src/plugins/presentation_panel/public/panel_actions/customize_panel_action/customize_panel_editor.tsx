@@ -221,6 +221,7 @@ export const CustomizePanelEditor = ({
             )}
           />
         </EuiFormRow>
+        <EuiSpacer size="m" />
       </div>
     );
   };

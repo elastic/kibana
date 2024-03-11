@@ -123,7 +123,7 @@ export const Default = HelloWorldEmbeddablePanel as Meta<HelloWorldEmbeddablePan
 Default.args = {
   hideHeader: false,
   loading: false,
-  showShadow: true,
+  showShadow: false,
   title: 'Hello World',
   viewMode: true,
 };
