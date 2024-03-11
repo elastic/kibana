@@ -23,10 +23,10 @@ export function GotoDashboard({ currentDashboard }: { currentDashboard: Dashboar
   });
   return (
     <EuiButtonEmpty
-      data-test-subj="apmGotoDashboardGoToDashboardButton"
+      data-test-subj="infraGotoDashboardGoToDashboardButton"
       color="text"
       size="s"
-      iconType={'visGauge'}
+      iconType="visGauge"
       href={url}
     >
       {i18n.translate('xpack.infra.customDashboards.contextMenu.goToDashboard', {

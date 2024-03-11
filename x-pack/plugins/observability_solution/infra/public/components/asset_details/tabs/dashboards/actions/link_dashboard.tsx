@@ -32,7 +32,7 @@ export function LinkDashboard({
         <EuiButtonEmpty
           color="text"
           size="s"
-          iconType={'plusInCircle'}
+          iconType="plusInCircle"
           data-test-subj="infraLinkDashboardMenu"
           onClick={() => setIsModalVisible(true)}
         >

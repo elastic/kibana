@@ -155,7 +155,7 @@ export function Dashboards() {
   // }, [share, getLocatorParams]);
 
   return (
-    <EuiPanel hasBorder={true}>
+    <EuiPanel hasBorder>
       {loading ? (
         <EuiEmptyPrompt
           icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
@@ -170,7 +170,7 @@ export function Dashboards() {
       ) : (dashboards?.dashboardIdList ?? []).length > 0 ? (
         <>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={true}>
+            <EuiFlexItem grow>
               <EuiTitle size="s">
                 <h3>{currentDashboard?.title}</h3>
               </EuiTitle>
@@ -189,7 +189,7 @@ export function Dashboards() {
                 <ContextMenu
                   items={[
                     <LinkDashboard
-                      emptyButton={true}
+                      emptyButton
                       onRefresh={reload}
                       customDashboards={customDashboards}
                       assetType={asset.type}
@@ -212,7 +212,7 @@ export function Dashboards() {
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-          <EuiFlexItem grow={true}>
+          <EuiFlexItem grow>
             <EuiSpacer size="l" />
             {urlState?.dashboardId && (
               <DashboardRenderer

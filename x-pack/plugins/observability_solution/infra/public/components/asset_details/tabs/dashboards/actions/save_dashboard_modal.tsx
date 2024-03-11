@@ -145,7 +145,7 @@ export function SaveDashboardModal({
   );
 
   return (
-    <EuiModal onClose={onClose} data-test-subj="apmSelectServiceDashboard">
+    <EuiModal onClose={onClose} data-test-subj="infraSelectCustomDashboard">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {isEditMode
@@ -182,7 +182,7 @@ export function SaveDashboardModal({
             label={
               <p>
                 {i18n.translate('xpack.infra.customDashboard.addDashboard.useContextFilterLabel', {
-                  defaultMessage: 'Filter by service and environment',
+                  defaultMessage: 'Filter by host name',
                 })}{' '}
                 <EuiToolTip
                   position="bottom"
@@ -190,7 +190,7 @@ export function SaveDashboardModal({
                     'xpack.infra.customDashboard.addDashboard.useContextFilterLabel.tooltip',
                     {
                       defaultMessage:
-                        'Enabling this option will apply filters to the dashboard based on your chosen service and environment.',
+                        'Enabling this option will apply filters to the dashboard based on your chosen host.',
                     }
                   )}
                 >
@@ -205,12 +205,12 @@ export function SaveDashboardModal({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="apmSelectDashboardCancelButton" onClick={onClose}>
+        <EuiButtonEmpty data-test-subj="infraSelectDashboardCancelButton" onClick={onClose}>
           {i18n.translate('xpack.infra.customDashboards.selectDashboard.cancel', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
-        <EuiButton data-test-subj="apmSelectDashboardButton" onClick={onClickSave} fill>
+        <EuiButton data-test-subj="infraSelectDashboardButton" onClick={onClickSave} fill>
           {isEditMode
             ? i18n.translate('xpack.infra.customDashboards.selectDashboard.edit', {
                 defaultMessage: 'Save',
