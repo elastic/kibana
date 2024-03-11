@@ -56,7 +56,8 @@ export type LegacyEmbeddableAPI = HasType &
   Partial<CanLinkToLibrary & CanUnlinkFromLibrary> &
   HasParentApi<DefaultPresentationPanelApi['parentApi']> &
   EmbeddableHasTimeRange &
-  PublishesSavedObjectId;
+  PublishesSavedObjectId &
+  { serializeState: () => object };
 
 export interface EmbeddableAppContext {
   /**

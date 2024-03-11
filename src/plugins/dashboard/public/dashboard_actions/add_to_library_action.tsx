@@ -6,15 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { apiCanLinkToLibrary, CanLinkToLibrary } from '@kbn/presentation-library';
+import React from 'react';
 import {
+  HasSerializableState,
+  apiHasSerializableState,
+} from '@kbn/presentation-containers';
+import {
+  HasLibraryTransforms,
+  apiHasLibraryTransforms,
   apiCanAccessViewMode,
   EmbeddableApiContext,
   getPanelTitle,
   PublishesPanelTitle,
   CanAccessViewMode,
   getInheritedViewMode,
+  HasTypeDisplayName,
+  HasType,
 } from '@kbn/presentation-publishing';
+import {
+  SavedObjectSaveModal,
+  OnSaveProps,
+  SaveResult,
+  showSaveModal,
+} from '@kbn/saved-objects-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';
@@ -22,11 +36,13 @@ import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings
 export const ACTION_ADD_TO_LIBRARY = 'saveToLibrary';
 
 export type AddPanelToLibraryActionApi = CanAccessViewMode &
-  CanLinkToLibrary &
-  Partial<PublishesPanelTitle>;
+  HasType &
+  HasSerializableState &
+  HasLibraryTransforms &
+  Partial<PublishesPanelTitle & HasTypeDisplayName>;
 
 const isApiCompatible = (api: unknown | null): api is AddPanelToLibraryActionApi =>
-  Boolean(apiCanAccessViewMode(api) && apiCanLinkToLibrary(api));
+  Boolean(apiCanAccessViewMode(api) && apiHasLibraryTransforms(api) && apiHasSerializableState(api));
 
 export class AddToLibraryAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_ADD_TO_LIBRARY;
@@ -60,7 +76,56 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     const panelTitle = getPanelTitle(embeddable);
     try {
-      await embeddable.linkToLibrary();
+      
+      // Link to library
+      const newInput = new Promise<RefType>((resolve, reject) => {
+        const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
+          await embeddable.checkForDuplicateTitle(props);
+          try {
+            const newAttributes = embeddable.serializeState();
+            newAttributes.title = props.newTitle;
+            const wrappedInput = (await this.wrapAttributes(
+              newAttributes,
+              true
+            )) as unknown as RefType;
+            // Remove unneeded attributes from the original input. Note that the original panel title
+            // is removed in favour of the new attributes title
+            const newInput = omit(input, [ATTRIBUTE_SERVICE_KEY, 'title']);
+  
+            // Combine input and wrapped input to preserve any passed in explicit Input
+            resolve({ ...newInput, ...wrappedInput });
+            return { id: wrappedInput.savedObjectId };
+          } catch (error) {
+            reject(error);
+            return { error };
+          }
+        };
+        showSaveModal(
+          <SavedObjectSaveModal
+            onSave={onSave}
+            onClose={() => {}}
+            title={panelTitle ?? embeddable.type}
+            showCopyOnSave={false}
+            objectType={
+              embeddable.getTypeDisplayName?.() ?? embeddable.type
+            }
+            showDescription={false}
+          />
+        );
+      });
+      embeddable.updateInput(newInput);
+
+      // Replace panel in parent.
+      const panelToReplace = root.getInput().panels[embeddable.id];
+      if (!panelToReplace) {
+        throw new PanelNotFoundError();
+      }
+      await root.replacePanel(panelToReplace.explicitInput.id, {
+        panelType: embeddable.type,
+        initialState: { ...newInput },
+      });
+      
+     throw new Error('not implemented');
       this.toastsService.addSuccess({
         title: dashboardAddToLibraryActionStrings.getSuccessMessage(
           panelTitle ? `'${panelTitle}'` : ''
@@ -69,7 +134,9 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
       });
     } catch (e) {
       this.toastsService.addDanger({
-        title: dashboardAddToLibraryActionStrings.getErrorMessage(panelTitle),
+        title: dashboardAddToLibraryActionStrings.getErrorMessage(
+          panelTitle ? `'${panelTitle}'` : ''
+        ),
         'data-test-subj': 'addPanelToLibraryError',
       });
     }

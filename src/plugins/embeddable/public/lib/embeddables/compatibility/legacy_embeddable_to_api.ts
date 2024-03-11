@@ -35,8 +35,6 @@ import {
   embeddableOutputToSubject,
   viewModeToSubject,
 } from './embeddable_compatibility_utils';
-import { canLinkLegacyEmbeddable, linkLegacyEmbeddable } from './link_legacy_embeddable';
-import { canUnlinkLegacyEmbeddable, unlinkLegacyEmbeddable } from './unlink_legacy_embeddable';
 
 export type CommonLegacyInput = EmbeddableInput & { savedObjectId?: string; timeRange: TimeRange };
 export type CommonLegacyOutput = EmbeddableOutput & { indexPatterns: DataView[] };
@@ -259,11 +257,15 @@ export const legacyEmbeddableToApi = (
       setPanelDescription,
       panelDescription,
 
-      canLinkToLibrary: () => canLinkLegacyEmbeddable(embeddable),
-      linkToLibrary: () => linkLegacyEmbeddable(embeddable),
+      serializeState: () => {
+        return embeddable.getExplicitInput();
+      },
 
-      canUnlinkFromLibrary: () => canUnlinkLegacyEmbeddable(embeddable),
-      unlinkFromLibrary: () => unlinkLegacyEmbeddable(embeddable),
+      //canLinkToLibrary: () => canLinkLegacyEmbeddable(embeddable),
+      //linkToLibrary: () => linkLegacyEmbeddable(embeddable),
+
+      //canUnlinkFromLibrary: () => canUnlinkLegacyEmbeddable(embeddable),
+      //unlinkFromLibrary: () => unlinkLegacyEmbeddable(embeddable),
 
       savedObjectId,
     },

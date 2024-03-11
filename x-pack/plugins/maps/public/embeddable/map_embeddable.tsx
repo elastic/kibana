@@ -84,6 +84,7 @@ import {
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import {
   getCharts,
+  getCore,
   getCoreI18n,
   getExecutionContextService,
   getHttp,
@@ -323,6 +324,25 @@ export class MapEmbeddable
       saveModalTitle: this.getTitle(),
     });
   }
+
+  public libraryTransforms = {
+    canLinkToLibrary: async () => {
+      const { maps } = getCore().application.capabilities;
+      return maps.save && this._savedMap.getSavedObjectId() === undefined;
+    },
+    canUnlinkFromLibrary: async () => {
+      return this._savedMap.getSavedObjectId() !== undefined;
+    },
+    saveStateToSavedObject: () => {
+      throw new Error('saveStateToSavedObject not implemented');
+    },
+    savedObjectAttributesToState: () => {
+      throw new Error('savedObjectAttributesToState not implemented');
+    },
+    checkForDuplicateTitle: () => () => {
+      throw new Error('checkForDuplicateTitle not implemented');
+    },
+  };
 
   public async getExplicitInputIsEqual(
     lastExplicitInput: Partial<MapByValueInput | MapByReferenceInput>

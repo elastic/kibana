@@ -17,3 +17,12 @@ export interface SerializedPanelState<RawStateType extends object = object> {
   rawState: RawStateType;
   version?: string;
 }
+
+export type HasSerializableState<StateT extends SerializedPanelState = SerializedPanelState> = {
+  serializeState: () => StateT;
+};
+
+export const apiHasSerializableState = <StateT extends SerializedPanelState = SerializedPanelState>(unknownApi: null | unknown): unknownApi is HasSerializableState<StateT> => {
+  return Boolean(unknownApi &&
+    typeof (unknownApi as HasSerializableState<StateT>).serializeState === 'function');
+};
