@@ -31,7 +31,6 @@ import { HOST_FIELD } from '../../../../../common/constants';
 import type {
   DashboardIdItem,
   DashboardItemWithTitle,
-  InfraCustomDashboard,
   InfraCustomDashboardAssetType,
 } from '../../../../../common/custom_dashboards';
 
@@ -44,6 +43,7 @@ import { useDashboardFetcher } from '../../hooks/use_dashboards_fetcher';
 import { useDataViewsContext } from '../../hooks/use_data_views';
 import { DashboardSelector } from './dashboard_selector';
 import { ContextMenu } from './context_menu';
+import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 
 const fieldByAssetType = {
   host: HOST_FIELD,
@@ -82,6 +82,7 @@ export function Dashboards() {
   // const { dataView } = useAdHocApmDataView();
   const { metrics } = useDataViewsContext();
   // const { share } = useApmPluginContext();
+  const [urlState] = useAssetDetailsUrlState();
 
   const { dashboards, loading, error, reload } = useCustomDashboard({ assetType: asset.type });
 
@@ -179,7 +180,7 @@ export function Dashboards() {
 
             <EuiFlexItem grow={false}>
               <DashboardSelector
-                currentDashboardId={currentDashboard?.id}
+                currentDashboardId={urlState?.dashboardId}
                 customDashboards={customDashboards}
                 setCurrentDashboard={setCurrentDashboard}
               />
@@ -214,10 +215,10 @@ export function Dashboards() {
           </EuiFlexGroup>
           <EuiFlexItem grow={true}>
             <EuiSpacer size="l" />
-            {currentDashboard?.id && (
+            {urlState?.dashboardId && (
               <DashboardRenderer
                 // locator={locator}
-                savedObjectId={currentDashboard?.id}
+                savedObjectId={urlState?.dashboardId}
                 getCreationOptions={getCreationOptions}
                 ref={setDashboard}
               />

@@ -6,12 +6,11 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 import { DashboardItemWithTitle } from '../../../../../common/custom_dashboards';
+import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 
 interface Props {
   customDashboards: DashboardItemWithTitle[];
@@ -24,30 +23,18 @@ export function DashboardSelector({
   currentDashboardId,
   setCurrentDashboard,
 }: Props) {
-  const history = useHistory();
+  const [, setUrlState] = useAssetDetailsUrlState();
 
   const [selectedDashboard, setSelectedDashboard] = useState<DashboardItemWithTitle>();
 
-  // TODO dashboardId URL param
-  // useMount(() => {
-  //   if (!currentDashboardId) {
-  //     history.push({
-  //       ...history.location,
-  //       search: fromQuery({
-  //         ...toQuery(location.search),
-  //         dashboardId: customDashboards[0].id,
-  //       }),
-  //     });
-  //   }
-  // });
+  useMount(() => {
+    if (!currentDashboardId) {
+      setUrlState({ dashboardId: customDashboards[0].id });
+    }
+  });
 
   useEffect(() => {
-    const preselectedDashboard = customDashboards.find(
-      ({ id }) => id === currentDashboardId || 'system-Metrics-system-overview'
-    );
-    console.log('preselectedDashboard', preselectedDashboard);
-    console.log('customDashboards', customDashboards);
-    console.log('currentDashboardId', currentDashboardId);
+    const preselectedDashboard = customDashboards.find(({ id }) => id === currentDashboardId);
     // preselect dashboard
     if (preselectedDashboard) {
       setSelectedDashboard(preselectedDashboard);
@@ -56,15 +43,7 @@ export function DashboardSelector({
   }, [customDashboards, currentDashboardId, setCurrentDashboard]);
 
   function onChange(newDashboardId?: string) {
-    // TODO FIX
-    // history.push({
-    //   ...history.location,
-    //   search: fromQuery({
-    //     ...toQuery(location.search),
-    //     dashboardId: newDashboardId,
-    //   }),
-    // });
-    // }
+    setUrlState({ dashboardId: newDashboardId });
   }
 
   return (

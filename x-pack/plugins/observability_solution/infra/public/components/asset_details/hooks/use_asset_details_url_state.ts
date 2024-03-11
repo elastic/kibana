@@ -85,6 +85,7 @@ const AssetDetailsUrlStateRT = rt.partial({
   logsSearch: rt.string,
   profilingSearch: rt.string,
   alertStatus: AlertStatusRT,
+  dashboardId: rt.string,
 });
 
 const AssetDetailsUrlRT = rt.union([AssetDetailsUrlStateRT, rt.null]);

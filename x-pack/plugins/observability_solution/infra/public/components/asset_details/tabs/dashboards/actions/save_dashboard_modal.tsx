@@ -33,6 +33,7 @@ import {
 import { useDashboardFetcher, FETCH_STATUS } from '../../../hooks/use_dashboards_fetcher';
 import { useUpdateCustomDashboard } from '../../../hooks/use_update_custom_dashboards';
 import { useCustomDashboard } from '../../../hooks/use_custom_dashboards';
+import { useAssetDetailsUrlState } from '../../../hooks/use_asset_details_url_state';
 // import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
 // import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 
@@ -53,8 +54,7 @@ export function SaveDashboardModal({
 }: Props) {
   const { notifications } = useKibana();
   const { data: allAvailableDashboards, status } = useDashboardFetcher();
-  const history = useHistory();
-  console.log('allAvailableDashboards', allAvailableDashboards);
+  const [, setUrlState] = useAssetDetailsUrlState();
 
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
@@ -69,7 +69,6 @@ export function SaveDashboardModal({
 
   const [selectedDashboard, setSelectedDashboard] = useState(defaultOption ? [defaultOption] : []);
 
-  // const { result } = useUpdateCustomDashboard({ assetType, dashboardIdList: customDashboards });
   const { loading, updateCustomDashboard } = useUpdateCustomDashboard();
   const {
     dashboards,
@@ -94,10 +93,13 @@ export function SaveDashboardModal({
       const [newDashboard] = selectedDashboard;
       try {
         if (newDashboard.value && !savedObjectDashboardsLoading) {
+          const dashboardList = (dashboards?.dashboardIdList ?? []).filter(
+            ({ id }) => id !== newDashboard.value
+          );
           const result = await updateCustomDashboard({
             assetType,
             dashboardIdList: [
-              ...(dashboards?.dashboardIdList ?? []),
+              ...dashboardList,
               {
                 id: newDashboard.value,
                 hostNameFilterEnabled: assetNameEnabled,
@@ -111,13 +113,7 @@ export function SaveDashboardModal({
                 ? getEditSuccessToastLabels(newDashboard.label)
                 : getLinkSuccessToastLabels(newDashboard.label)
             );
-            // history.push({
-            //   ...history.location,
-            //   search: fromQuery({
-            //     ...toQuery(location.search),
-            //     dashboardId: newDashboard.value,
-            //   }),
-            // });
+            setUrlState({ dashboardId: newDashboard.value });
             reloadCustomDashboards();
           }
         }
@@ -137,14 +133,15 @@ export function SaveDashboardModal({
       selectedDashboard,
       onClose,
       savedObjectDashboardsLoading,
+      dashboards?.dashboardIdList,
       updateCustomDashboard,
       assetType,
-      dashboards?.dashboardIdList,
       assetNameEnabled,
       loading,
       savedObjectDashboardsError,
       notifications.toasts,
       isEditMode,
+      setUrlState,
       reloadCustomDashboards,
     ]
   );
