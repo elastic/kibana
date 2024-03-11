@@ -32,6 +32,7 @@ import { DataViewsService } from '@kbn/data-views-plugin/common';
 describe('TransformManager', () => {
   let esClientMock: ElasticsearchClientMock;
   let loggerMock: jest.Mocked<MockedLogger>;
+  const spaceId = 'default';
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
@@ -49,6 +50,7 @@ describe('TransformManager', () => {
           generators,
           esClientMock,
           loggerMock,
+          spaceId,
           dataViewsService
         );
 
@@ -66,6 +68,7 @@ describe('TransformManager', () => {
           generators,
           esClientMock,
           loggerMock,
+          spaceId,
           dataViewsService
         );
 
@@ -86,6 +89,7 @@ describe('TransformManager', () => {
         generators,
         esClientMock,
         loggerMock,
+        spaceId,
         dataViewsService
       );
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
@@ -107,6 +111,7 @@ describe('TransformManager', () => {
         generators,
         esClientMock,
         loggerMock,
+        spaceId,
         dataViewsService
       );
 
@@ -126,6 +131,7 @@ describe('TransformManager', () => {
         generators,
         esClientMock,
         loggerMock,
+        spaceId,
         dataViewsService
       );
 
@@ -145,6 +151,7 @@ describe('TransformManager', () => {
         generators,
         esClientMock,
         loggerMock,
+        spaceId,
         dataViewsService
       );
 
@@ -164,6 +171,7 @@ describe('TransformManager', () => {
         generators,
         esClientMock,
         loggerMock,
+        spaceId,
         dataViewsService
       );
 
@@ -184,6 +192,7 @@ describe('TransformManager', () => {
         generators,
         esClientMock,
         loggerMock,
+        spaceId,
         dataViewsService
       );
 

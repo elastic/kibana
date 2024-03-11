@@ -17,6 +17,7 @@ import { SLO } from '../../../domain/models';
 export abstract class TransformGenerator {
   public abstract getTransformParams(
     slo: SLO,
+    spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest>;
 

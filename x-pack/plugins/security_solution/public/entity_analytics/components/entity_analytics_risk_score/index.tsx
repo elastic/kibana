@@ -7,6 +7,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { HostPanelKey } from '../../../flyout/entity_details/host_right';
 import { EnableRiskScore } from '../enable_risk_score';
 import { getRiskScoreColumns } from './columns';
 import { LastUpdatedAt } from '../../../common/components/last_updated_at';
@@ -33,6 +35,9 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
 import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
+import { UserPanelKey } from '../../../flyout/entity_details/user_right';
+
+export const ENTITY_RISK_SCORE_TABLE_ID = 'entity-risk-score-table';
 
 const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
@@ -40,6 +45,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
   const entity = useEntityInfo(riskEntity);
   const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
   const { telemetry } = useKibana().services;
+  const { openRightPanel } = useExpandableFlyoutApi();
 
   const openEntityOnAlertsPage = useCallback(
     (entityName: string) => {
@@ -55,10 +61,24 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     [telemetry, riskEntity, openAlertsPageWithFilters]
   );
 
+  const openEntityOnExpandableFlyout = useCallback(
+    (entityName: string) => {
+      openRightPanel({
+        id: riskEntity === RiskScoreEntity.host ? HostPanelKey : UserPanelKey,
+        params: {
+          [riskEntity === RiskScoreEntity.host ? 'hostName' : 'userName']: entityName,
+          contextID: ENTITY_RISK_SCORE_TABLE_ID,
+          scopeId: ENTITY_RISK_SCORE_TABLE_ID,
+        },
+      });
+    },
+    [openRightPanel, riskEntity]
+  );
+
   const { toggleStatus, setToggleStatus } = useQueryToggle(entity.tableQueryId);
   const columns = useMemo(
-    () => getRiskScoreColumns(riskEntity, openEntityOnAlertsPage),
-    [riskEntity, openEntityOnAlertsPage]
+    () => getRiskScoreColumns(riskEntity, openEntityOnAlertsPage, openEntityOnExpandableFlyout),
+    [riskEntity, openEntityOnAlertsPage, openEntityOnExpandableFlyout]
   );
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
 
