@@ -15,8 +15,8 @@ import { Unprivileged } from './unprivileged';
 import { useManagementLocator } from './use_management_locator';
 
 export const DslRetentionTab = () => {
-  const { dataStreamStatuses, loading, error } = useGetDataStreamStatuses();
-  if (loading === false && dataStreamStatuses === undefined)
+  const { dataStreamStatuses = [], loading, error } = useGetDataStreamStatuses();
+  if (loading === false && dataStreamStatuses.length === 0)
     return <ErrorEmptyPrompt error={error?.message} />;
 
   if (error && (error as unknown as IHttpFetchError<ResponseErrorBody>).body?.statusCode === 403)
@@ -24,16 +24,8 @@ export const DslRetentionTab = () => {
 
   return (
     <EuiBasicTable
-      items={dataStreamStatuses ?? []}
-      loading={loading === true && dataStreamStatuses === undefined}
-      noItemsMessage={
-        loading === false && (dataStreamStatuses?.length ?? 0) === 0 ? (
-          <FormattedMessage
-            id="xpack.synthetics.dslRetention.noData"
-            defaultMessage="No retention data found"
-          />
-        ) : undefined
-      }
+      items={dataStreamStatuses}
+      loading={loading === true}
       columns={DSL_RETENTION_COLUMNS}
       tableLayout="auto"
     />
