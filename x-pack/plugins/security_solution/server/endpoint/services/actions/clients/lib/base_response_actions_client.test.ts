@@ -620,6 +620,25 @@ describe('ResponseActionsClientImpl base class', () => {
       });
     });
 
+    it('should query ES with expected criteria', async () => {
+      for await (const pendingActions of baseClassMock.fetchAllPendingActions()) {
+        expect(pendingActions);
+      }
+
+      expect(constructorOptions.esClient.search).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: { term: { 'EndpointActions.input_type': expect.any(String) } },
+              must_not: { exists: { field: 'error' } },
+              filter: [{ range: { 'EndpointActions.expiration': { gte: 'now' } } }],
+            },
+          },
+        })
+      );
+    });
+
     it('should provide an array of pending actions', async () => {
       const iterationData: Array<
         Array<
