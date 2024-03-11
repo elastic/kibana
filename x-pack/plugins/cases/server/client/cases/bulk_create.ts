@@ -86,17 +86,17 @@ export const bulkCreate = async (
     const [errors, casesSOs] = partition(bulkCreateResponse.saved_objects, isSOError);
 
     if (errors.length > 0) {
-      const firstError = errors[0];
-      if (isSODecoratedError(firstError.error)) {
-        throw new Boom.Boom(firstError.error.output.payload.error, {
-          statusCode: firstError.error.output.statusCode,
-          message: firstError.error.output.payload.message,
+      const firstError = errors[0].error;
+      if (isSODecoratedError(firstError)) {
+        throw new Boom.Boom(firstError.output.payload.error, {
+          statusCode: firstError.output.statusCode,
+          message: firstError.output.payload.message,
         });
       }
 
-      throw new Boom.Boom(firstError.error.error, {
-        statusCode: firstError.error.statusCode,
-        message: firstError.error.message,
+      throw new Boom.Boom(firstError.error, {
+        statusCode: firstError.statusCode,
+        message: firstError.message,
       });
     }
 

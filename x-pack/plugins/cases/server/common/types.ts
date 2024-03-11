@@ -58,3 +58,9 @@ export type SOWithErrors<T> = Omit<SavedObject<T>, 'attributes' | 'error'> & {
 export interface SavedObjectsBulkResponseWithErrors<T> {
   saved_objects: Array<SavedObject<T> | SOWithErrors<T>>;
 }
+
+export interface CaseErrorResponse {
+  error: string;
+  message: string;
+  status: number;
+}
