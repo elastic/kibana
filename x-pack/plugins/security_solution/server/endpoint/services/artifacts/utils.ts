@@ -7,14 +7,14 @@
 
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
-  InternalUnifiedManifestCreatedSchema,
+  InternalUnifiedManifestCreateSchema,
   InternalUnifiedManifestSchema,
 } from '../../schemas';
 
 export const mapUnifiedManifestSavedObjectToUnifiedManifest = ({
   id,
   attributes: { artifactIds, policyId, semanticVersion, created },
-}: SavedObject<InternalUnifiedManifestCreatedSchema>): InternalUnifiedManifestSchema => {
+}: SavedObject<InternalUnifiedManifestCreateSchema>): InternalUnifiedManifestSchema => {
   return {
     id,
     policyId,

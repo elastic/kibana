@@ -15,8 +15,8 @@ import type {
 import { createSoFindIterable } from '../../utils/create_so_find_iterable';
 import { mapUnifiedManifestSavedObjectToUnifiedManifest } from './utils';
 import type {
-  InternalUnifiedManifestCreatedSchema,
   InternalUnifiedManifestCreateSchema,
+  InternalUnifiedManifestBaseSchema,
   InternalUnifiedManifestSchema,
   InternalUnifiedManifestUpdateSchema,
 } from '../../schemas';
@@ -42,15 +42,15 @@ export class UnifiedManifestClient {
    */
 
   public createUnifiedManifest(
-    manifest: InternalUnifiedManifestCreateSchema
-  ): Promise<SavedObjectsBulkResponse<InternalUnifiedManifestCreatedSchema>> {
+    manifest: InternalUnifiedManifestBaseSchema
+  ): Promise<SavedObjectsBulkResponse<InternalUnifiedManifestCreateSchema>> {
     return this.createUnifiedManifests([manifest]);
   }
 
   public createUnifiedManifests(
-    manifest: InternalUnifiedManifestCreateSchema[]
-  ): Promise<SavedObjectsBulkResponse<InternalUnifiedManifestCreatedSchema>> {
-    return this.savedObjectsClient.bulkCreate<InternalUnifiedManifestCreatedSchema>(
+    manifest: InternalUnifiedManifestBaseSchema[]
+  ): Promise<SavedObjectsBulkResponse<InternalUnifiedManifestCreateSchema>> {
+    return this.savedObjectsClient.bulkCreate<InternalUnifiedManifestCreateSchema>(
       manifest.map((attributes) => ({
         type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
         attributes: {
@@ -120,7 +120,7 @@ export class UnifiedManifestClient {
   public updateUnifiedManifests(
     manifests: Array<InternalUnifiedManifestUpdateSchema & { version?: string }>
   ): Promise<SavedObjectsBulkUpdateResponse<InternalUnifiedManifestSchema>> {
-    return this.savedObjectsClient.bulkUpdate<InternalUnifiedManifestCreateSchema>(
+    return this.savedObjectsClient.bulkUpdate<InternalUnifiedManifestBaseSchema>(
       manifests.map((manifest) => {
         const { id, version, ...attributes } = manifest;
         return {
@@ -169,7 +169,7 @@ export class UnifiedManifestClient {
         `${savedObjectType}.attributes.`
       );
     };
-    return createSoFindIterable<InternalUnifiedManifestCreatedSchema>({
+    return createSoFindIterable<InternalUnifiedManifestCreateSchema>({
       soClient,
       findRequest: {
         type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
