@@ -22,6 +22,15 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
       },
     };
 
+    after(async () => {
+      await supertest
+        .put('/internal/core/_settings')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set('elastic-api-version', '1')
+        .send({ 'telemetry.labels': baseConfig.labels })
+        .expect(200, { ok: true });
+    });
+
     it('GET should get the default config', async () => {
       await supertest
         .get('/api/telemetry/v2/config')
