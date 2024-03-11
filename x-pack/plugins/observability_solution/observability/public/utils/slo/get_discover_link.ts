@@ -36,8 +36,15 @@ function createDiscoverLocator(
     const goodFilters = kqlWithFiltersSchema.is(slo.indicator.params.good)
       ? slo.indicator.params.good.filters
       : [];
+    const totalKuery = kqlWithFiltersSchema.is(slo.indicator.params.total)
+      ? slo.indicator.params.total.kqlQuery
+      : slo.indicator.params.total;
+    const totalFilters = kqlWithFiltersSchema.is(slo.indicator.params.total)
+      ? slo.indicator.params.total.filters
+      : [];
     const customGoodFilter = buildEsQuery({ kuery: goodKuery, filters: goodFilters });
-    const customBadFilter = { bool: { must_not: customGoodFilter } };
+    const customTotalFilter = buildEsQuery({ kuery: totalKuery, filters: totalFilters });
+    const customBadFilter = { bool: { filter: customTotalFilter, must_not: customGoodFilter } };
 
     filters.push({
       $state: { store: FilterStateStore.APP_STATE },
