@@ -406,10 +406,10 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                 path="allowAutoCreate"
                 component={RadioGroupField}
                 componentProps={{
+                  'data-test-subj': allowAutoCreate.testSubject,
                   euiFieldProps: {
                     options: allowAutoCreateRadios,
                     name: 'allowAutoCreate radio group',
-                    ['data-test-subj']: allowAutoCreate.testSubject,
                   },
                 }}
               />
