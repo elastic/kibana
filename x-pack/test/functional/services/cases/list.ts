@@ -465,10 +465,10 @@ export function CasesTableServiceProvider(
     },
 
     async setAllCasesStateInLocalStorage(state: Record<string, unknown>) {
-      await browser.setLocalStorageItem('management.cases.list.state', JSON.stringify(state));
+      await browser.setLocalStorageItem('cases.cases.list.state', JSON.stringify(state));
 
       const currentState = JSON.parse(
-        (await browser.getLocalStorageItem('management.cases.list.state')) ?? '{}'
+        (await browser.getLocalStorageItem('cases.cases.list.state')) ?? '{}'
       );
 
       expect(deepEqual(currentState, state)).to.be(true);
@@ -476,7 +476,7 @@ export function CasesTableServiceProvider(
 
     async getAllCasesStateInLocalStorage() {
       const currentState = JSON.parse(
-        (await browser.getLocalStorageItem('management.cases.list.state')) ?? '{}'
+        (await browser.getLocalStorageItem('cases.cases.list.state')) ?? '{}'
       );
 
       return currentState;
@@ -484,12 +484,12 @@ export function CasesTableServiceProvider(
 
     async setFiltersConfigurationInLocalStorage(state: Array<{ key: string; isActive: boolean }>) {
       await browser.setLocalStorageItem(
-        'management.cases.list.tableFiltersConfig',
+        'cases.cases.list.tableFiltersConfig',
         JSON.stringify(state)
       );
 
       const currentState = JSON.parse(
-        (await browser.getLocalStorageItem('management.cases.list.tableFiltersConfig')) ?? '{}'
+        (await browser.getLocalStorageItem('cases.cases.list.tableFiltersConfig')) ?? '{}'
       );
 
       expect(deepEqual(currentState, state)).to.be(true);
