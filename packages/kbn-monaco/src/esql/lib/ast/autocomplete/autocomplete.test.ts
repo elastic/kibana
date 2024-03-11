@@ -562,6 +562,18 @@ describe('autocomplete', () => {
         `from a | ${command} stringField, `,
         getFieldNamesByType('any').filter((name) => name !== 'stringField')
       );
+
+      testSuggestions(
+        `from a_index | eval round(numberField) + 1 | eval \`round(numberField) + 1\` + 1 | eval \`\`\`round(numberField) + 1\`\` + 1\` + 1 | eval \`\`\`\`\`\`\`round(numberField) + 1\`\`\`\` + 1\`\` + 1\` + 1 | eval \`\`\`\`\`\`\`\`\`\`\`\`\`\`\`round(numberField) + 1\`\`\`\`\`\`\`\` + 1\`\`\`\` + 1\`\` + 1\` + 1 | ${command} `,
+        [
+          ...getFieldNamesByType('any'),
+          '`round(numberField) + 1`',
+          '```round(numberField) + 1`` + 1`',
+          '```````round(numberField) + 1```` + 1`` + 1`',
+          '```````````````round(numberField) + 1```````` + 1```` + 1`` + 1`',
+          '```````````````````````````````round(numberField) + 1```````````````` + 1```````` + 1```` + 1`` + 1`',
+        ]
+      );
     });
   }
 
@@ -927,10 +939,7 @@ describe('autocomplete', () => {
       [
         'var0 =',
         ...getFieldNamesByType('any'),
-        // @TODO: leverage the location data to get the original text
-        // For now return back the trimmed version:
-        // the ANTLR parser trims all text so that's what it's stored in the AST
-        '`abs(numberField)+1`',
+        '`abs(numberField) + 1`',
         ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
       ],
       ' '

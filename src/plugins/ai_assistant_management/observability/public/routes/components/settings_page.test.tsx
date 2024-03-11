@@ -23,6 +23,12 @@ describe('Settings Page', () => {
     useAppContextMock.mockReturnValue({
       observabilityAIAssistant: {
         useGenAIConnectors: () => ({ connectors: [] }),
+        useUserPreferredLanguage: () => ({
+          LANGUAGE_OPTIONS: [{ label: 'English' }],
+          selectedLanguage: 'English',
+          setSelectedLanguage: () => {},
+          getPreferredLanguage: () => 'English',
+        }),
       },
       setBreadcrumbs,
       application: { navigateToApp },

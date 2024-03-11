@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { pick } from 'lodash';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
