@@ -114,7 +114,7 @@ export class ChatFunctionClient {
   }
 
   hasAction(name: string) {
-    return this.actions.find((action) => action.name === name);
+    return !!this.actions.find((action) => action.name === name)!;
   }
 
   getFunctions({

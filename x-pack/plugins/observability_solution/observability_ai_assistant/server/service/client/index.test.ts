@@ -116,6 +116,9 @@ describe('Observability AI Assistant client', () => {
     executeFunction: jest.fn(),
     getFunctions: jest.fn(),
     hasFunction: jest.fn(),
+    hasAction: jest.fn(),
+    getActions: jest.fn(),
+    validate: jest.fn(),
   } as any;
 
   let llmSimulator: LlmSimulator;
@@ -127,6 +130,9 @@ describe('Observability AI Assistant client', () => {
     functionClientMock.hasFunction.mockImplementation((name) => {
       return name !== 'context';
     });
+
+    functionClientMock.hasAction.mockReturnValue(false);
+    functionClientMock.getActions.mockReturnValue([]);
 
     actionsClientMock.get.mockResolvedValue({
       actionTypeId: ObservabilityAIAssistantConnectorType.OpenAI,
