@@ -61,7 +61,7 @@ export function defineSAMLRoutes({
             relayState: request.body.RelayState,
           },
         });
-
+        return response.customError({ statusCode: 500 });
         if (authenticationResult.redirected()) {
           return response.redirected({
             headers: { location: authenticationResult.redirectURL! },

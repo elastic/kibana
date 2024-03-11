@@ -220,6 +220,17 @@ export class AuthenticationService {
             headers: { 'Content-Security-Policy': http.csp.header },
           });
         }
+        return toolkit.render({
+          body: '<div/>',
+          headers: {
+            'Content-Security-Policy': http.csp.header,
+            Refresh: `0;url=${http.basePath.prepend(
+              `/login?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+                originalURL
+              )}`
+            )}`,
+          },
+        });
       }
 
       if (preResponse.statusCode !== 401 || !canRedirectRequest(request)) {
