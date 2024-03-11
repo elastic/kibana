@@ -11,6 +11,7 @@ import type { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from '@kbn/d
 import { EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type { EqlOptionsSelected } from '../../../../common/search_strategy';
 import {
   getValidationErrors,
   isErrorResponse,
@@ -23,6 +24,7 @@ interface Params {
   data: DataPublicPluginStart;
   signal: AbortSignal;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  options: Omit<EqlOptionsSelected, 'query' | 'size'>;
 }
 
 export const validateEql = async ({
@@ -31,6 +33,7 @@ export const validateEql = async ({
   query,
   signal,
   runtimeMappings,
+  options,
 }: Params): Promise<{ valid: boolean; errors: string[] }> => {
   const { rawResponse: response } = await firstValueFrom(
     data.search.search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
@@ -38,6 +41,10 @@ export const validateEql = async ({
         params: {
           index: dataViewTitle,
           body: { query, runtime_mappings: runtimeMappings, size: 0 },
+          // @ts-expect-error top-level keys are unexpected in {@link EqlSearchRequest}
+          timestamp_field: options?.timestampField,
+          tiebreaker_field: options?.tiebreakerField,
+          event_category_field: options?.eventCategoryField,
         },
         options: { ignore: [400] },
       },
