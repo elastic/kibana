@@ -209,13 +209,13 @@ const buildIdentifierTypeAggregation = ({
   identifierType,
   pageSize,
   weights,
-  isSamplingEnabled,
+  isAlertSamplingDisabled,
 }: {
   afterKeys: AfterKeys;
   identifierType: IdentifierType;
   pageSize: number;
   weights?: RiskWeights;
-  isSamplingEnabled: boolean;
+  isAlertSamplingDisabled: boolean;
 }): AggregationsAggregationContainer => {
   const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType({ identifierType, weights });
   const identifierField = getFieldForIdentifierAgg(identifierType);
@@ -226,8 +226,12 @@ const buildIdentifierTypeAggregation = ({
     globalIdentifierTypeWeight
   );
 
-  const aggs: Record<string, AggregationsAggregationContainer> = isSamplingEnabled
+  const aggs: Record<string, AggregationsAggregationContainer> = isAlertSamplingDisabled
     ? {
+        inputs: riskInputsAggregation,
+        risk_details: riskDetailsAggregation,
+      }
+    : {
         top_n_per_shard: {
           sampler: {
             shard_size: 10000, // How many alerts per shard we process
@@ -237,10 +241,6 @@ const buildIdentifierTypeAggregation = ({
             risk_details: riskDetailsAggregation,
           },
         },
-      }
-    : {
-        inputs: riskInputsAggregation,
-        risk_details: riskDetailsAggregation,
       };
 
   return {
@@ -321,14 +321,13 @@ export const calculateRiskScores = async ({
   range,
   runtimeMappings,
   weights,
+  isAlertSamplingDisabled = false,
 }: {
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
   logger: Logger;
 } & CalculateScoresParams): Promise<CalculateScoresResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
-    const isSamplingEnabled = true; // TODO make it a config?
-
     const now = new Date().toISOString();
 
     const filter = [
@@ -341,8 +340,13 @@ export const calculateRiskScores = async ({
     }
     const identifierTypes: IdentifierType[] = identifierType ? [identifierType] : ['host', 'user'];
 
-    const query = isSamplingEnabled
+    const query = isAlertSamplingDisabled
       ? {
+          bool: {
+            filter,
+          },
+        }
+      : {
           function_score: {
             query: {
               bool: {
@@ -358,11 +362,6 @@ export const calculateRiskScores = async ({
               field: 'kibana.alert.risk_score', // sort fields by risk score
             },
           },
-        }
-      : {
-          bool: {
-            filter,
-          },
         };
 
     const request = {
@@ -377,7 +376,7 @@ export const calculateRiskScores = async ({
           identifierType: _identifierType,
           pageSize,
           weights,
-          isSamplingEnabled,
+          isAlertSamplingDisabled,
         });
         return aggs;
       }, {} as Record<string, AggregationsAggregationContainer>),

@@ -26,6 +26,7 @@ export interface CalculateScoresParams {
   range: { start: string; end: string };
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
+  isAlertSamplingDisabled?: boolean;
 }
 
 export interface CalculateAndPersistScoresParams {
@@ -38,6 +39,7 @@ export interface CalculateAndPersistScoresParams {
   range: Range;
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
+  isAlertSamplingDisabled?: boolean;
 }
 
 export interface CalculateAndPersistScoresResponse {
@@ -150,4 +152,5 @@ export interface RiskEngineConfiguration {
   interval: string;
   pageSize: number;
   range: Range;
+  isAlertSamplingDisabled: boolean;
 }
