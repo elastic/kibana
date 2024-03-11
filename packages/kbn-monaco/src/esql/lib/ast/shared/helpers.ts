@@ -91,7 +91,7 @@ export function isIncompleteItem(arg: ESQLAstItem): boolean {
 }
 
 export function isMathFunction(query: string, offset: number) {
-  const queryTrimmed = query.substring(0, offset).trimEnd();
+  const queryTrimmed = query.trimEnd();
   // try to get the full operation token (e.g. "+", "in", "like", etc...) but it requires the token
   // to be spaced out from a field/function (e.g. "field + ") so it is subject to issues
   const [opString] = queryTrimmed.split(' ').reverse();
@@ -352,7 +352,8 @@ export function isEqualType(
   item: ESQLSingleAstItem,
   argDef: SignatureArgType,
   references: ReferenceMaps,
-  parentCommand?: string
+  parentCommand?: string,
+  nameHit?: string
 ) {
   const argType = 'innerType' in argDef && argDef.innerType ? argDef.innerType : argDef.type;
   if (argType === 'any') {
@@ -375,10 +376,8 @@ export function isEqualType(
       // anything goes, so avoid any effort here
       return true;
     }
-    // perform a double check, but give priority to the non trimmed version
-    const hit = getColumnHit(item.name, references);
-    const hitTrimmed = getColumnHit(item.name.replace(/\s/g, ''), references);
-    const validHit = hit || hitTrimmed;
+    const hit = getColumnHit(nameHit ?? item.name, references);
+    const validHit = hit;
     if (!validHit) {
       return false;
     }
@@ -445,9 +444,9 @@ export function columnExists(
     return { hit: true, nameHit: column.name };
   }
   if (column.quoted) {
-    const trimmedName = column.name.replace(/`/g, '``').replace(/\s/g, '');
-    if (variables.has(trimmedName)) {
-      return { hit: true, nameHit: trimmedName };
+    const originalName = column.text;
+    if (variables.has(originalName)) {
+      return { hit: true, nameHit: originalName };
     }
   }
   if (
