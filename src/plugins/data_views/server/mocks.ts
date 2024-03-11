@@ -21,6 +21,7 @@ export const dataViewsService = {
   ensureDefaultIndexPattern: jest.fn(),
   ensureDefaultDataView: jest.fn().mockReturnValue(Promise.resolve({})),
   get: jest.fn().mockReturnValue(Promise.resolve({})),
+  getDataViewLazy: jest.fn().mockReturnValue(Promise.resolve({})),
   clearCache: jest.fn(),
   createAndSave: jest.fn(),
   setDefault: jest.fn(),
