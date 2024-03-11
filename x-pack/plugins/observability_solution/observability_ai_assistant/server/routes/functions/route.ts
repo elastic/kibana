@@ -7,11 +7,8 @@
 import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import {
-  ContextDefinition,
-  FunctionDefinition,
-  KnowledgeBaseEntryRole,
-} from '../../../common/types';
+import { ContextDefinition, FunctionDefinition } from '../../../common/functions/types';
+import { KnowledgeBaseEntryRole } from '../../../common/types';
 import type { RecalledEntry } from '../../service/knowledge_base_service';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 
