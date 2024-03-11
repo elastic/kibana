@@ -9,19 +9,19 @@ import { schema } from '@kbn/config-schema';
 
 export const taskSchemaV1 = schema.object({
   taskType: schema.string(),
-  scheduledAt: schema.maybe(schema.string()),
-  startedAt: schema.maybe(schema.nullable(schema.string())),
-  retryAt: schema.maybe(schema.nullable(schema.string())),
-  runAt: schema.maybe(schema.string()),
+  scheduledAt: schema.string(),
+  startedAt: schema.nullable(schema.string()),
+  retryAt: schema.nullable(schema.string()),
+  runAt: schema.string(),
   schedule: schema.maybe(
     schema.object({
       interval: schema.duration(),
     })
   ),
-  params: schema.recordOf(schema.string(), schema.any()),
-  state: schema.recordOf(schema.string(), schema.any()),
+  params: schema.string(),
+  state: schema.string(),
   stateVersion: schema.maybe(schema.number()),
-  traceparent: schema.maybe(schema.string()),
+  traceparent: schema.string(),
   user: schema.maybe(schema.string()),
   scope: schema.maybe(schema.arrayOf(schema.string())),
   ownerId: schema.nullable(schema.string()),
@@ -36,4 +36,5 @@ export const taskSchemaV1 = schema.object({
     schema.literal('unrecognized'),
     schema.literal('dead_letter'),
   ]),
+  version: schema.maybe(schema.string()),
 });

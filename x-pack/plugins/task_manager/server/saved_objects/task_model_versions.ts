@@ -13,7 +13,7 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
     changes: [
       {
         type: 'mappings_deprecation',
-        deprecatedMappings: ['numSkippedRuns'],
+        deprecatedMappings: ['numSkippedRuns', 'interval'],
       },
     ],
     schemas: {
