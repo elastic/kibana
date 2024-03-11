@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -159,6 +160,17 @@ export class CasesConnector extends SubActionConnector<
       );
 
       this.logError(caseConnectorError);
+      throw caseConnectorError;
+    }
+
+    if (Boom.isBoom(error)) {
+      const caseConnectorError = new CasesConnectorError(
+        `${error.output.payload.error}: ${error.output.payload.message}`,
+        error.output.statusCode
+      );
+
+      this.logError(caseConnectorError);
+
       throw caseConnectorError;
     }
 
