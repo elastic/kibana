@@ -158,8 +158,7 @@ const waitForFormToRender = async (renderer: Screen) => {
   });
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/146394
-describe.skip('Create case', () => {
+describe('Create case', () => {
   const refetch = jest.fn();
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
@@ -478,7 +477,7 @@ describe.skip('Create case', () => {
       const textField = customFieldsConfigurationMock[0];
       const toggleField = customFieldsConfigurationMock[1];
 
-      expect(screen.getByTestId('create-case-custom-fields')).toBeInTheDocument();
+      expect(await screen.findByTestId('create-case-custom-fields')).toBeInTheDocument();
 
       const textCustomField = await screen.findByTestId(
         `${textField.key}-${textField.type}-create-custom-field`
@@ -488,10 +487,10 @@ describe.skip('Create case', () => {
       userEvent.paste(textCustomField, 'My text test value 1');
 
       userEvent.click(
-        screen.getByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
+        await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
       );
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      userEvent.click(await screen.findByTestId('create-case-submit'));
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
@@ -500,7 +499,7 @@ describe.skip('Create case', () => {
           ...sampleDataWithoutTags,
           customFields: [
             customFieldsMock[0],
-            { ...customFieldsMock[1], value: false }, // from the defaul toggled
+            { ...customFieldsMock[1], value: false }, // toggled the default
             customFieldsMock[2],
             { ...customFieldsMock[3], value: false },
             {
