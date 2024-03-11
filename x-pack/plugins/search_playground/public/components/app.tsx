@@ -6,60 +6,47 @@
  */
 
 import React from 'react';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { BrowserRouter as Router } from '@kbn/shared-ux-router';
-import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
+import { i18n } from '@kbn/i18n';
 import { Chat } from './chat';
 import { PlaygroundProvider } from '../providers/playground_provider';
-import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
+import { PLUGIN_ID } from '../../common';
 
 interface SearchPlaygroundAppDeps {
-  basename: string;
-  notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
   navigation: NavigationPublicPluginStart;
 }
 
-export const SearchPlaygroundApp = ({
-  basename,
-  notifications,
-  http,
-  navigation,
-}: SearchPlaygroundAppDeps) => {
+export const SearchPlaygroundApp = ({ navigation }: SearchPlaygroundAppDeps) => {
   return (
-    <Router basename={basename}>
-      <PlaygroundProvider navigateToIndexPage={() => {}}>
-        <I18nProvider>
-          <>
-            <navigation.ui.TopNavMenu appName={PLUGIN_ID} />
-            <EuiPageTemplate>
-              <EuiPageTemplate.Header>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="searchPlayground.helloWorldText"
-                      defaultMessage="{name}"
-                      values={{ name: PLUGIN_NAME }}
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiPageTemplate.Header>
-              <EuiPageTemplate.Section
-                alignment="top"
-                restrictWidth={false}
-                grow
-                contentProps={{ css: { display: 'flex', flexGrow: 1 } }}
-                paddingSize="none"
-              >
-                <Chat />
-              </EuiPageTemplate.Section>
-            </EuiPageTemplate>
-          </>
-        </I18nProvider>
-      </PlaygroundProvider>
-    </Router>
+    <PlaygroundProvider navigateToIndexPage={() => {}}>
+      <navigation.ui.TopNavMenu appName={PLUGIN_ID} />
+
+      <KibanaPageTemplate
+        pageChrome={[
+          i18n.translate('searchPlayground.breadcrumb', {
+            defaultMessage: 'Playground',
+          }),
+        ]}
+        pageHeader={{
+          pageTitle: i18n.translate('searchPlayground.pageTitle', {
+            defaultMessage: 'Playground',
+          }),
+        }}
+        bottomBorder="extended"
+        restrictWidth={false}
+      >
+        <KibanaPageTemplate.Section
+          alignment="top"
+          restrictWidth={false}
+          grow
+          contentProps={{ css: { display: 'flex', flexGrow: 1 } }}
+          paddingSize="none"
+        >
+          <Chat />
+        </KibanaPageTemplate.Section>
+      </KibanaPageTemplate>
+    </PlaygroundProvider>
   );
 };

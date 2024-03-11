@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin, CoreStart, AppMountParameters } from '@kbn/core/public';
+import {
+  CoreSetup,
+  Plugin,
+  CoreStart,
+  AppMountParameters,
+  DEFAULT_APP_CATEGORIES,
+} from '@kbn/core/public';
 import {
   SearchPlaygroundPluginSetup,
   SearchPlaygroundPluginStart,
@@ -18,31 +23,20 @@ export class SearchPlaygroundPlugin
   implements Plugin<SearchPlaygroundPluginSetup, SearchPlaygroundPluginStart>
 {
   public setup(core: CoreSetup): SearchPlaygroundPluginSetup {
-    // Register an application into the side navigation menu
     core.application.register({
-      id: 'searchPlayground',
+      id: 'playground',
+      appRoute: '/app/enterprise_search/playground',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       title: PLUGIN_NAME,
       async mount(params: AppMountParameters) {
-        // Load application bundle
         const { renderApp } = await import('./application');
-        // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();
-        // Render the application
+
         return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
       },
     });
 
-    // Return methods that should be available to other plugins
-    return {
-      getGreeting() {
-        return i18n.translate('searchPlayground.greetingText', {
-          defaultMessage: 'Hello from {name}!',
-          values: {
-            name: PLUGIN_NAME,
-          },
-        });
-      },
-    };
+    return {};
   }
 
   public start(core: CoreStart): SearchPlaygroundPluginStart {
