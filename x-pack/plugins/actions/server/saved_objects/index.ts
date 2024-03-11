@@ -69,7 +69,7 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: ACTION_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['secrets']),
-    attributesToExcludeFromAAD: new Set(['name']),
+    attributesToIncludeInAAD: new Set(['actionTypeId', 'isMissingSecrets', 'config']),
   });
 
   savedObjects.registerType({
@@ -98,6 +98,14 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['apiKey']),
+    attributesToIncludeInAAD: new Set([
+      'actionId',
+      'consumer',
+      'params',
+      'executionId',
+      'relatedSavedObjects',
+      'source',
+    ]),
   });
 
   savedObjects.registerType({
@@ -114,5 +122,12 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token']),
+    attributesToIncludeInAAD: new Set([
+      'connectorId',
+      'tokenType',
+      'expiresAt',
+      'createdAt',
+      'updatedAt',
+    ]),
   });
 }
