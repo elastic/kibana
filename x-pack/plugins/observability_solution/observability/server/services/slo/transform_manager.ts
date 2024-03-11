@@ -41,7 +41,11 @@ export class DefaultTransformManager implements TransformManager {
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
     }
 
-    const transformParams = await generator.getTransformParams(slo, this.spaceId, this.dataViewService);
+    const transformParams = await generator.getTransformParams(
+      slo,
+      this.spaceId,
+      this.dataViewService
+    );
     try {
       await retryTransientEsErrors(() => this.esClient.transform.putTransform(transformParams), {
         logger: this.logger,

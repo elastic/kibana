@@ -8,17 +8,10 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { ReactNode, useState } from 'react';
+import { FieldPath } from 'react-hook-form';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { QuerySearchBar } from './query_search_bar';
 import { QueryDocumentsFlyout } from './query_documents_flyout';
-import { useCreateDataView } from '../../../../hooks/use_create_data_view';
-import { EuiFormRow } from '@elastic/eui';
-import { Controller, FieldPath, useFormContext } from 'react-hook-form';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import styled from 'styled-components';
-import { kqlQuerySchema } from '@kbn/slo-schema';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { observabilityAppId } from '../../../../../common';
-import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
 
 export interface SearchBarProps {
@@ -32,10 +25,7 @@ export interface SearchBarProps {
 }
 
 export function QueryBuilder(props: SearchBarProps) {
-  const { indexPatternString, name } = props;
-  const { dataView } = useCreateDataView({
-    indexPatternString,
-  });
+  const { dataView, name } = props;
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [range, setRange] = useState({ from: 'now-15m', to: 'now' });
