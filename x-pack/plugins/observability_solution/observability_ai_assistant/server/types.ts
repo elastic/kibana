@@ -24,6 +24,7 @@ import type {
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import type { ObservabilityAIAssistantService } from './service';
 
 export interface ObservabilityAIAssistantPluginSetup {
@@ -49,6 +50,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   ml: MlPluginSetup;
   licensing: LicensingPluginSetup;
   cloud?: CloudSetup;
+  serverless?: ServerlessPluginSetup;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
@@ -59,4 +61,5 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   ml: MlPluginStart;
   licensing: LicensingPluginStart;
   cloud?: CloudStart;
+  serverless?: ServerlessPluginStart;
 }
