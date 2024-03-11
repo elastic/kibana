@@ -31,6 +31,16 @@ export const testUsers: {
     username: 'fleet_read_only',
     password: 'changeme',
   },
+  fleet_minimal_all_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['minimal_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_minimal_all_only',
+    password: 'changeme',
+  },
   fleet_agents_read_only: {
     permissions: {
       feature: {
@@ -39,6 +49,16 @@ export const testUsers: {
       spaces: ['*'],
     },
     username: 'fleet_agents_read_only',
+    password: 'changeme',
+  },
+  fleet_settings_read_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['settings_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_settings_read_only',
     password: 'changeme',
   },
   setup: {
