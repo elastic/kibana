@@ -228,7 +228,6 @@ export const getDefaultAwsCredentialsType = (
   return DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
 };
 
-// TODO: add unit tests
 export const getDefaultAzureCredentialsType = (
   packageInfo: PackageInfo,
   setupTechnology?: SetupTechnology
