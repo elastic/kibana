@@ -7,20 +7,19 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import {
-  EmbeddableSwimLaneContainer,
-  ExplorerSwimlaneContainerProps,
-} from './embeddable_swim_lane_container';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { ExplorerSwimlaneContainerProps } from './embeddable_swim_lane_container';
+import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import { AnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
-import { CoreStart } from '@kbn/core/public';
+import type { AnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
+import type { CoreStart } from '@kbn/core/public';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { SwimlaneContainer } from '../../application/explorer/swimlane_container';
-import { MlDependencies } from '../../application/app';
-import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
-import { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
+import type { MlDependencies } from '../../application/app';
+import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
+import type { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
 import { createCoreStartMock } from '../../__mocks__/core_start';
 import { createMlStartDepsMock } from '../../__mocks__/ml_start_deps';
 

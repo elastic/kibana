@@ -6,7 +6,6 @@
  */
 
 import { truncate } from 'lodash';
-import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 
@@ -58,6 +57,7 @@ import {
   validateBulkDuplicateRule,
   dryRunValidateBulkEditRule,
 } from '../../../logic/bulk_actions/validations';
+import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
@@ -242,7 +242,7 @@ export const performBulkActionRoute = (
       options: {
         tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
         timeout: {
-          idleSocket: moment.duration(15, 'minutes').asMilliseconds(),
+          idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
         },
       },
     })
