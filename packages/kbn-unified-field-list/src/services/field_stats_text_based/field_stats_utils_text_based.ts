@@ -33,7 +33,7 @@ export function buildSearchFilter({
           },
         },
       }
-    : {};
+    : null;
 }
 
 interface FetchAndCalculateFieldStatsParams {
@@ -47,6 +47,9 @@ export async function fetchAndCalculateFieldStats(params: FetchAndCalculateField
   if (!canProvideStatsForFieldTextBased(field)) {
     return {};
   }
+  if (field.type === 'boolean') {
+    return await getStringTopValues(params, 3);
+  }
   if (field.type === 'string' && field.esTypes?.[0] === 'keyword') {
     return await getStringTopValues(params);
   }
@@ -57,7 +60,7 @@ export async function fetchAndCalculateFieldStats(params: FetchAndCalculateField
 export async function getStringTopValues(
   params: FetchAndCalculateFieldStatsParams,
   size = DEFAULT_TOP_VALUES_SIZE
-): Promise<FieldStatsResponse<string | number>> {
+): Promise<FieldStatsResponse<string | boolean>> {
   const { searchHandler, field, esqlBaseQuery } = params;
   const esqlQuery =
     esqlBaseQuery +

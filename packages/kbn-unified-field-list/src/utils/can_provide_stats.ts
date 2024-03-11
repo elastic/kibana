@@ -76,7 +76,7 @@ export function canProvideExamplesForField(field: DataViewField, isTextBased: bo
 }
 
 export function canProvideStatsForFieldTextBased(field: DataViewField): boolean {
-  if (field.type === 'string' && field.esTypes?.[0] === 'keyword') {
+  if ((field.type === 'string' && field.esTypes?.[0] === 'keyword') || field.type === 'boolean') {
     return true;
   }
   return false;
