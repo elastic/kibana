@@ -39,6 +39,32 @@ export function initRoutes(
   );
 
   const router = core.http.createRouter();
+
+  for (const isAuthFlow of [true, false]) {
+    router.get(
+      {
+        path: `/authentication/app/${isAuthFlow ? 'auth_flow' : 'not_auth_flow'}`,
+        validate: {
+          query: schema.object({
+            statusCode: schema.maybe(schema.number()),
+            message: schema.maybe(schema.string()),
+          }),
+        },
+        options: { tags: isAuthFlow ? ['security:authFlow'] : [] },
+      },
+      (context, request, response) => {
+        if (request.query.statusCode) {
+          return response.customError({
+            statusCode: request.query.statusCode,
+            body: request.query.message ?? `${request.query.statusCode} response`,
+          });
+        }
+
+        return response.ok({ body: isAuthFlow ? 'Auth flow complete' : 'Not auth flow complete' });
+      }
+    );
+  }
+
   router.post(
     {
       path: '/authentication/app/setup',

@@ -220,12 +220,21 @@ export class AuthenticationService {
             headers: { 'Content-Security-Policy': http.csp.header },
           });
         }
+        const needsToLogout = (await this.session?.getSID(request)) !== undefined;
+        if (needsToLogout) {
+          this.logger.warn(
+            'Could not authenticate user with the existing session. Forcing logout.'
+          );
+        }
+
         return toolkit.render({
           body: '<div/>',
           headers: {
             'Content-Security-Policy': http.csp.header,
             Refresh: `0;url=${http.basePath.prepend(
-              `/login?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+              `${
+                needsToLogout ? '/logout' : '/login'
+              }?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
                 originalURL
               )}`
             )}`,
