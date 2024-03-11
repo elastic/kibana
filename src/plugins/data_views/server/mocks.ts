@@ -24,6 +24,7 @@ export const dataViewsService = {
   getDataViewLazy: jest.fn().mockReturnValue(Promise.resolve({})),
   clearCache: jest.fn(),
   createAndSave: jest.fn(),
+  createAndSaveDataViewLazy: jest.fn(),
   setDefault: jest.fn(),
   delete: jest.fn(),
   hasUserDataView: jest.fn(),
