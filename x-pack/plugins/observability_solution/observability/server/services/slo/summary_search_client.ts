@@ -24,7 +24,7 @@ import { fromSummaryDocumentToSlo } from './unsafe_federated/helper';
 export interface SLOSummary {
   id: SLOId;
   remoteName?: string;
-  unsafeSlo: SLO | undefined;
+  unsafeSlo?: SLO;
   instanceId: string;
   summary: Summary;
   groupings: Groupings;

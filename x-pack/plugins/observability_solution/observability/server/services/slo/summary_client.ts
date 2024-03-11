@@ -136,7 +136,7 @@ export class DefaultSummaryClient implements SummaryClient {
       summary: {
         sliValue,
         errorBudget,
-        status: computeSummaryStatus(slo, sliValue, errorBudget),
+        status: computeSummaryStatus(slo.objective, sliValue, errorBudget),
       },
       groupings: groupings ? getFlattenedGroupings({ groupBy: slo.groupBy, groupings }) : {},
     };

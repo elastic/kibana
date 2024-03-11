@@ -439,20 +439,11 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
   handler: async ({ context, params, logger }) => {
     await assertPlatinumLicense(context);
 
-    const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const historicalSummaryClient = new DefaultHistoricalSummaryClient(esClient);
+    const fetchSummaryData = new FetchHistoricalSummary(historicalSummaryClient);
 
-    const fetchSummaryData = new FetchHistoricalSummary(
-      repository,
-      historicalSummaryClient,
-      esClient
-    );
-
-    const response = await fetchSummaryData.execute(params.body);
-
-    return response;
+    return await fetchSummaryData.execute(params.body);
   },
 });
 

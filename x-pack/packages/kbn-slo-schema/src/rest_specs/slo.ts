@@ -227,7 +227,20 @@ const deleteSLOInstancesParamsSchema = t.type({
 
 const fetchHistoricalSummaryParamsSchema = t.type({
   body: t.type({
-    list: t.array(t.type({ sloId: sloIdSchema, instanceId: t.string })),
+    list: t.array(
+      t.intersection([
+        t.type({
+          sloId: sloIdSchema,
+          instanceId: t.string,
+          timeWindow: timeWindowSchema,
+          budgetingMethod: budgetingMethodSchema,
+          objective: objectiveSchema,
+          groupBy: allOrAnyStringOrArray,
+          revision: t.number,
+        }),
+        t.partial({ remoteName: t.string }),
+      ])
+    ),
   }),
 });
 
@@ -331,7 +344,8 @@ type GetSLOInstancesResponse = t.OutputOf<typeof getSLOInstancesResponseSchema>;
 
 type GetSLOBurnRatesResponse = t.OutputOf<typeof getSLOBurnRatesResponseSchema>;
 type BudgetingMethod = t.OutputOf<typeof budgetingMethodSchema>;
-type TimeWindow = t.OutputOf<typeof timeWindowTypeSchema>;
+type TimeWindowType = t.OutputOf<typeof timeWindowTypeSchema>;
+type TimeWindow = t.OutputOf<typeof timeWindowSchema>;
 type IndicatorType = t.OutputOf<typeof indicatorTypesSchema>;
 type Indicator = t.OutputOf<typeof indicatorSchema>;
 type Objective = t.OutputOf<typeof objectiveSchema>;
@@ -421,6 +435,7 @@ export type {
   HistogramIndicator,
   KQLCustomIndicator,
   TimeWindow,
+  TimeWindowType,
   GroupSummary,
   KqlWithFiltersSchema,
   QuerySchema,

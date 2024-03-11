@@ -39,6 +39,7 @@ Object {
       "groupings": Object {},
       "id": "slo-one",
       "instanceId": "*",
+      "remoteName": undefined,
       "summary": Object {
         "errorBudget": Object {
           "consumed": 0.4,
@@ -49,11 +50,13 @@ Object {
         "sliValue": 0.9,
         "status": "HEALTHY",
       },
+      "unsafeSlo": undefined,
     },
     Object {
       "groupings": Object {},
       "id": "slo_two",
       "instanceId": "*",
+      "remoteName": undefined,
       "summary": Object {
         "errorBudget": Object {
           "consumed": 0.4,
@@ -64,11 +67,13 @@ Object {
         "sliValue": 0.9,
         "status": "HEALTHY",
       },
+      "unsafeSlo": undefined,
     },
     Object {
       "groupings": Object {},
       "id": "slo-three",
       "instanceId": "*",
+      "remoteName": undefined,
       "summary": Object {
         "errorBudget": Object {
           "consumed": 0.4,
@@ -79,11 +84,13 @@ Object {
         "sliValue": 0.9,
         "status": "HEALTHY",
       },
+      "unsafeSlo": undefined,
     },
     Object {
       "groupings": Object {},
       "id": "slo-five",
       "instanceId": "*",
+      "remoteName": undefined,
       "summary": Object {
         "errorBudget": Object {
           "consumed": 0.4,
@@ -94,11 +101,13 @@ Object {
         "sliValue": 0.9,
         "status": "HEALTHY",
       },
+      "unsafeSlo": undefined,
     },
     Object {
       "groupings": Object {},
       "id": "slo-four",
       "instanceId": "*",
+      "remoteName": undefined,
       "summary": Object {
         "errorBudget": Object {
           "consumed": 0.4,
@@ -109,6 +118,7 @@ Object {
         "sliValue": 0.9,
         "status": "HEALTHY",
       },
+      "unsafeSlo": undefined,
     },
   ],
   "total": 5,

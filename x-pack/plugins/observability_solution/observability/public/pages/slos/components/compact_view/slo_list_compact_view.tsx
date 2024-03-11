@@ -95,7 +95,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
   });
   const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
     useFetchHistoricalSummary({
-      list: sloList.map((slo) => ({ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE })),
+      sloList,
     });
 
   const navigateToClone = useCloneSlo();
@@ -114,7 +114,10 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         const sloDetailsUrl = basePath.prepend(
           paths.observability.sloDetails(
             slo.id,
-            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
+            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId
+              ? slo.instanceId
+              : undefined,
+            slo.remoteName
           )
         );
         navigateToUrl(sloDetailsUrl);
@@ -241,7 +244,10 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         const sloDetailsUrl = basePath.prepend(
           paths.observability.sloDetails(
             slo.id,
-            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
+            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId
+              ? slo.instanceId
+              : undefined,
+            slo.remoteName
           )
         );
         return (

@@ -30,7 +30,13 @@ describe('Summary Search Client', () => {
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    service = new DefaultSummarySearchClient(esClientMock, loggerMock.create(), 'some-space');
+    const soClientMock = {} as any;
+    service = new DefaultSummarySearchClient(
+      esClientMock,
+      soClientMock,
+      loggerMock.create(),
+      'some-space'
+    );
   });
 
   it('returns an empty response on error', async () => {

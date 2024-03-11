@@ -124,7 +124,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
             iconType="arrowDown"
             iconSize="s"
             onClick={handleActionsClick}
-            disabled={isLoading || !slo}
+            disabled={isLoading || !slo || Boolean(slo.remoteName)}
           >
             {i18n.translate('xpack.observability.slo.sloDetails.headerControl.actions', {
               defaultMessage: 'Actions',

@@ -12,6 +12,8 @@ import { GetSLO } from './get_slo';
 import { createSummaryClientMock, createSLORepositoryMock } from './mocks';
 import { SLORepository } from './slo_repository';
 import { SummaryClient } from './summary_client';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 describe('GetSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
@@ -21,7 +23,13 @@ describe('GetSLO', () => {
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockSummaryClient = createSummaryClientMock();
-    getSLO = new GetSLO(mockRepository, mockSummaryClient);
+
+    getSLO = new GetSLO(
+      mockRepository,
+      mockSummaryClient,
+      elasticsearchServiceMock.createElasticsearchClient(),
+      loggerMock.create()
+    );
   });
 
   describe('happy path', () => {

@@ -57,7 +57,7 @@ export function SloOverview({
   });
 
   const { data: historicalSummaries = [] } = useFetchHistoricalSummary({
-    list: slo ? [{ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE }] : [],
+    sloList: slo ? [slo] : [],
   });
 
   const [selectedSlo, setSelectedSlo] = useState<SLOWithSummaryResponse | null>(null);

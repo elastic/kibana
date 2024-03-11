@@ -76,7 +76,7 @@ export function SloOverviewDetails({
         <SLOGroupings slo={slo} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <HeaderTitle slo={slo} isLoading={false} showTitle={false} />
+        <HeaderTitle slo={slo} isLoading={false} />
         <EuiTabs>
           {tabs.map((tab, index) => (
             <EuiTab

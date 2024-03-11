@@ -93,6 +93,19 @@ export function fromSummaryDocumentToSlo(
     logger.error(errors.join('|'));
     return undefined;
   } else {
-    return res.right;
+    const formattedSlo = res.right;
+    if ('params' in summaryDoc.slo.indicator) {
+      return formattedSlo;
+    } else {
+      // @ts-ignore
+      formattedSlo.indicator.params = {};
+      return formattedSlo;
+    }
   }
 }
+
+export const getNameOfRemoteCluster = (index: string) => {
+  if (index.includes(':')) {
+    return index.split(':')?.[0];
+  }
+};

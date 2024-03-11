@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, FetchHistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
@@ -22,15 +22,26 @@ export interface UseFetchHistoricalSummaryResponse {
 }
 
 export interface Params {
-  list: Array<{ sloId: string; instanceId: string }>;
+  sloList: SLOWithSummaryResponse[];
   shouldRefetch?: boolean;
 }
 
 export function useFetchHistoricalSummary({
-  list = [],
+  sloList = [],
   shouldRefetch,
 }: Params): UseFetchHistoricalSummaryResponse {
   const { http } = useKibana().services;
+
+  const list = sloList.map((slo) => ({
+    sloId: slo.id,
+    instanceId: slo.instanceId ?? ALL_VALUE,
+    remoteName: slo.remoteName,
+    timeWindow: slo.timeWindow,
+    groupBy: slo.groupBy,
+    revision: slo.revision,
+    objective: slo.objective,
+    budgetingMethod: slo.budgetingMethod,
+  }));
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: sloKeys.historicalSummary(list),

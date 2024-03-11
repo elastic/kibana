@@ -7,12 +7,16 @@
 
 import { ErrorBudget, SLO, Status } from '../models';
 
-export function computeSummaryStatus(slo: SLO, sliValue: number, errorBudget: ErrorBudget): Status {
+export function computeSummaryStatus(
+  objective: SLO['objective'],
+  sliValue: number,
+  errorBudget: ErrorBudget
+): Status {
   if (sliValue === -1) {
     return 'NO_DATA';
   }
 
-  if (sliValue >= slo.objective.target) {
+  if (sliValue >= objective.target) {
     return 'HEALTHY';
   } else {
     return errorBudget.remaining > 0 ? 'DEGRADING' : 'VIOLATED';

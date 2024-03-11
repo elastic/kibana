@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BudgetingMethod, Indicator, TimeWindow } from '@kbn/slo-schema';
+import { BudgetingMethod, Indicator, TimeWindowType } from '@kbn/slo-schema';
 
 export interface CreateSLOForm {
   name: string;
@@ -13,7 +13,7 @@ export interface CreateSLOForm {
   indicator: Indicator;
   timeWindow: {
     duration: string;
-    type: TimeWindow;
+    type: TimeWindowType;
   };
   tags: string[];
   budgetingMethod: BudgetingMethod;

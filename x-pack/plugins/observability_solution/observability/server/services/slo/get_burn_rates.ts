@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '@kbn/observability-plugin/common/slo/constants';
+import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { Duration, SLO } from '../../domain/models';
 import { computeBurnRate, computeSLI } from '../../domain/services';
 import { DefaultSLIClient } from './sli_client';
@@ -59,7 +59,7 @@ export async function getBurnRates(
       throw new Error('SLO not found');
     }
 
-    slo = fromSummaryDocumentToSlo(summarySearch.hits.hits[0]._source!);
+    slo = fromSummaryDocumentToSlo(summarySearch.hits.hits[0]._source!, services.logger);
   } else {
     slo = await repository.findById(sloId);
   }

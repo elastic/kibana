@@ -92,7 +92,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
 
   const { data: historicalSummaries = [], isLoading: historicalSummaryLoading } =
     useFetchHistoricalSummary({
-      list: [{ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE }],
+      sloList: [slo],
       shouldRefetch: isAutoRefreshing,
     });
 
@@ -148,7 +148,9 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EventsChartPanel slo={slo} range={range} />
+          {Object.keys(slo.indicator.params).length > 0 && (
+            <EventsChartPanel slo={slo} range={range} />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexGroup>
