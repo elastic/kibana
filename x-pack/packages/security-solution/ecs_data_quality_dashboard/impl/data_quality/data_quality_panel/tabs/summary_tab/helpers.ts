@@ -35,6 +35,7 @@ export const getSummaryData = (
   { categoryId: 'incompatible', mappings: partitionedFieldMetadata.incompatible.length },
   { categoryId: 'custom', mappings: partitionedFieldMetadata.custom.length },
   { categoryId: 'ecs-compliant', mappings: partitionedFieldMetadata.ecsCompliant.length },
+  { categoryId: 'same-family', mappings: partitionedFieldMetadata.sameFamily.length },
 ];
 
 export const getFillColor = (categoryId: CategoryId | string): string => {
