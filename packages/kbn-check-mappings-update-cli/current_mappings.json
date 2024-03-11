@@ -2445,6 +2445,9 @@
       "interval": {
         "type": "keyword"
       },
+      "isAlertSamplingDisabled": {
+        "type": "boolean"
+      },
       "pageSize": {
         "type": "integer"
       },
