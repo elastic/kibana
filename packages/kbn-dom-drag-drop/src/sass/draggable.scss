@@ -3,6 +3,7 @@
 // Draggable item
 .domDraggable {
   cursor: grab;
+  border-radius: $euiBorderRadius;
   @include mixinDomDragDrop;
   @include mixinDomDragDropHover;
 

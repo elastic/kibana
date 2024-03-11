@@ -51,13 +51,12 @@
   align-items: center;
 }
 
+.unifiedFieldListItemButton__dragging {
+  @include euiSlightShadow;
+}
+
 .unifiedFieldListSidebar .unifiedFieldListItemButton {
   &.kbnFieldButton {
     margin-bottom: calc($euiSizeXS / 2);
-  }
-
-  &:not(.unifiedFieldListItemButton__dragging) {
-    padding: 0;
-    background: none;
   }
 }

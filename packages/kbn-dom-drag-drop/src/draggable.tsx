@@ -249,6 +249,18 @@ const DraggableImpl = memo(function DraggableImpl({
       const currentTarget = e?.currentTarget;
       onDragStart?.(e?.currentTarget);
 
+      // Apply an optional class to the element being dragged so the ghost
+      // can be styled. We must add it to the actual element for a single
+      // frame before removing it so the ghost picks up the styling.
+      const current = e.currentTarget;
+
+      if (dragClassName && !current.classList.contains(dragClassName)) {
+        current.classList.add(dragClassName);
+        requestAnimationFrame(() => {
+          current.classList.remove(dragClassName);
+        });
+      }
+
       setTimeout(() => {
         dndDispatch({
           type: 'startDragging',
