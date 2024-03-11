@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiButton,
-  EuiCopy,
-  EuiForm,
-  EuiFormRow,
-  EuiModalFooter,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -24,6 +16,16 @@ import { UrlParamExtension } from '../types';
 
 interface EmbedProps {
   urlParamExtensions?: UrlParamExtension[];
+  shareableUrlLocatorParams?:
+    | {
+        locator: LocatorPublic<any>;
+        params: any;
+      }
+    | undefined;
+  urlService: BrowserUrlService;
+  shareableUrlForSavedObject?: string;
+  shareableUrl?: string;
+  isEmbedded?: boolean;
 }
 interface UrlParams {
   [extensionName: string]: {
@@ -36,7 +38,14 @@ export enum ExportUrlAsType {
   EXPORT_URL_AS_SNAPSHOT = 'snapshot',
 }
 
-export const EmbedModal = ({ urlParamExtensions }: EmbedProps) => {
+export const EmbedModal = ({
+  urlParamExtensions,
+  shareableUrlLocatorParams,
+  urlService,
+  shareableUrlForSavedObject,
+  shareableUrl,
+  isEmbedded,
+}: EmbedProps) => {
   const isMounted = useMountedState();
   const [urlParams, setUrlParams] = useState<UrlParams | undefined>(undefined);
   const [useShortUrl] = useState<boolean>(true);
@@ -84,7 +93,7 @@ export const EmbedModal = ({ urlParamExtensions }: EmbedProps) => {
       }
       return updateUrlParams(tempUrl);
     },
-    [updateUrlParams]
+    [updateUrlParams, shareableUrl, shareableUrlForSavedObject]
   );
 
   const getSavedObjectUrl = useCallback(() => {
@@ -166,6 +175,7 @@ export const EmbedModal = ({ urlParamExtensions }: EmbedProps) => {
     getSnapshotUrl,
     shortUrlCache,
     useShortUrl,
+    isEmbedded,
   ]);
 
   const resetUrl = useCallback(() => {
@@ -181,19 +191,6 @@ export const EmbedModal = ({ urlParamExtensions }: EmbedProps) => {
     window.addEventListener('hashchange', resetUrl, false);
     isMounted();
   }, [getUrlParamExtensions, resetUrl, setUrlHelper, url, isMounted]);
-
-  const renderButtons = () => {
-    const { dataTestSubj, formattedMessageId, defaultMessage } = action;
-    return (
-      <EuiCopy textToCopy={url}>
-        {(copy) => (
-          <EuiButton fill data-test-subj={dataTestSubj} data-share-url={url} onClick={copy}>
-            <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
-          </EuiButton>
-        )}
-      </EuiCopy>
-    );
-  };
 
   const renderUrlParamExtensions = () => {
     if (!urlParamExtensions) {
@@ -218,20 +215,17 @@ export const EmbedModal = ({ urlParamExtensions }: EmbedProps) => {
     );
   };
   return (
-    <>
-      <EuiForm>
-        <EuiSpacer size="m" />
-        <EuiText size="s">
-          <FormattedMessage
-            id="share.embed.helpText"
-            defaultMessage="Embed this dashboard into another webpage. Select which items to include in the embeddable view."
-          />
-        </EuiText>
-        <EuiSpacer />
-        {renderUrlParamExtensions()}
-        <EuiSpacer />
-      </EuiForm>
-      <EuiModalFooter>{renderButtons()}</EuiModalFooter>
-    </>
+    <EuiForm>
+      <EuiSpacer size="m" />
+      <EuiText size="s">
+        <FormattedMessage
+          id="share.embed.helpText"
+          defaultMessage="Embed this dashboard into another webpage. Select which items to include in the embeddable view."
+        />
+      </EuiText>
+      <EuiSpacer />
+      {renderUrlParamExtensions()}
+      <EuiSpacer />
+    </EuiForm>
   );
 };

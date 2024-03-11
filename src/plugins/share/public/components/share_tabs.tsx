@@ -7,8 +7,8 @@
  */
 
 import { Capabilities } from '@kbn/core-capabilities-common';
-import React, { useCallback } from 'react';
-import { TabbedModal } from '@kbn/shared-ux-tabbed-modal';
+import React, { useState } from 'react';
+import { IModalTabDeclaration, TabbedModal } from '@kbn/shared-ux-tabbed-modal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { LocatorPublic, AnonymousAccessServiceContract } from '../../common';
@@ -60,32 +60,21 @@ export const ShareMenuTabs = ({
   isDirty,
   isEmbedded,
 }: ShareContextTabProps) => {
-  const buttonHandler = useCallback(
-    () => [
-      {
-        id: 'link',
-        dataTestSubj: 'copyShareUrlButton',
-        formattedMessageId: 'share.link.copyLinkButton',
-        defaultMessage: 'Copy link',
-      },
-      {
-        id: 'embed',
-        dataTestSubj: 'copyEmbedUrlButton',
-        formattedMessageId: 'share.link.copyEmbedCodeButton',
-        defaultMessage: 'Copy Embed',
-      },
-      {
-        id: 'export',
-        dataTestSubj: 'generateExportButton',
-        formattedMessageId: 'share.link.generateExportButton',
-        defaultMessage: 'Generate export',
-      },
-    ],
-    []
-  );
+  const [linkData, setLinkData] = useState<string | undefined>(undefined);
+  const [embedData, setEmbedData] = useState<{} | undefined>(undefined);
 
   const getTabs = () => {
-    const tabs = [];
+    const tabs: Array<
+      IModalTabDeclaration<{
+        shortUrlCache: string;
+        url: string;
+        urlParams(urlParams: any): unknown;
+        id: string;
+        dataTestSubj: string;
+        defaultMessage: string;
+        handler: () => void;
+      }>
+    > = [];
     tabs.push({
       id: 'link',
       name: i18n.translate('share.contextMenu.permalinksTab', {
@@ -93,8 +82,22 @@ export const ShareMenuTabs = ({
       }),
       // do not break functional tests
       'data-test-subj': 'Permalinks',
-      modalActionBtn: buttonHandler().filter(({ id }) => id === 'link')[0],
+      modalActionBtn: {
+        id: 'link',
+        dataTestSubj: 'copyShareUrlButton',
+        formattedMessageId: 'share.link.copyLinkButton',
+        defaultMessage: 'Copy link',
+        handler: ({ state }) => {
+          setLinkData(state.shortUrlCache ?? state.url);
+        },
+      },
       title: `Share this ${objectType}`,
+      description: (
+        <FormattedMessage
+          id="share.dashboard.link.description"
+          defaultMessage="Share a direct link to this search."
+        />
+      ),
       content: () => (
         <LinkModal
           objectType={objectType}
@@ -102,17 +105,34 @@ export const ShareMenuTabs = ({
           isDirty={isDirty}
           isEmbedded={isEmbedded}
           onClose={onClose}
-          action={buttonHandler().filter(({ id }) => id === 'link')[0]}
           urlService={urlService}
         />
       ),
+      reducer(state, action) {
+        switch (action.type) {
+          default:
+            return state;
+        }
+      },
     });
 
     shareMenuItems.map(({ shareMenuItem, panel }) => {
       tabs.push({
         ...shareMenuItem,
-        id: panel.id,
-        buttonHandler: buttonHandler().filter(({ id }) => id === id)[0],
+        id: panel.id.toString(),
+        title: `Share this ${objectType}`,
+        modalActionBtn: {
+          id: 'export',
+          dataTestSubj: 'generateExportButton',
+          formattedMessageId: 'share.link.generateExportButton',
+          defaultMessage: 'Generate export',
+        },
+        reducer(state, action) {
+          switch (action.type) {
+            default:
+              return state;
+          }
+        },
       });
     });
 
@@ -122,46 +142,47 @@ export const ShareMenuTabs = ({
         name: i18n.translate('share.contextMenu.embedCodeTab', {
           defaultMessage: 'Embed',
         }),
-        ModalActionBtn: buttonHandler().filter(({ id }) => id === 'embed')[0],
-        content: () => (
-          <EmbedModal
-            urlParamExtensions={embedUrlParamExtensions}
-            urlService={urlService}
-            action={buttonHandler().filter(({ id }) => id === 'embed')[0]}
+        description: (
+          <FormattedMessage
+            id="share.dashboard.embed.description"
+            defaultMessage="Embed this dashboard into another webpage. Select which menu items to include in the embeddable view."
           />
         ),
+        title: `Share this ${objectType}`,
+        modalActionBtn: {
+          id: 'embed',
+          dataTestSubj: 'copyEmbedUrlButton',
+          formattedMessageId: 'share.link.copyEmbedCodeButton',
+          defaultMessage: 'Copy Embed',
+          handler: ({ state }) => {
+            setEmbedData(state.urlParams);
+          },
+        },
+        content: ({ state, dispatch }) => {
+          const onChange = (optionId) => {
+            const newCheckboxIdToSelectedMap = {
+              embedUrlParamExtensions,
+            };
+
+            dispatch({
+              type: '0',
+              payload: newCheckboxIdToSelectedMap,
+            });
+          };
+          return (
+            <EmbedModal urlParamExtensions={embedUrlParamExtensions} urlService={urlService} />
+          );
+        },
+        reducer(state, action) {
+          switch (action.type) {
+            default:
+              return state;
+          }
+        },
       });
     }
     return tabs;
   };
 
-  const getModalBodyDescriptions = () => [
-    {
-      id: 'dashboard-link',
-      description: (
-        <FormattedMessage
-          id="share.dashboard.link.description"
-          defaultMessage="Share a direct link to this search."
-        />
-      ),
-    },
-    {
-      id: 'dashboard-embed',
-      description: (
-        <FormattedMessage
-          id="share.dashboard.embed.description"
-          defaultMessage="Embed this dashboard into another webpage. Select which menu items to include in the embeddable view."
-        />
-      ),
-    },
-  ];
-
-  return (
-    <TabbedModal
-      objectType={objectType}
-      modalBodyDescriptions={getModalBodyDescriptions()}
-      onClose={onClose}
-      tabs={getTabs()}
-    />
-  );
+  return <TabbedModal onClose={onClose} tabs={getTabs()} selectedTabId="link" />;
 };

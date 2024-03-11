@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiButton,
-  EuiCodeBlock,
-  EuiCopy,
-  EuiForm,
-  EuiModalFooter,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiCodeBlock, EuiForm, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -30,7 +22,6 @@ interface LinkProps {
   shareableUrlForSavedObject?: string;
   shareableUrl?: string;
   onClose: () => void;
-  action: { formattedMessageId: string; defaultMessage: string; dataTestSubj: string };
   urlService: BrowserUrlService;
   shareableUrlLocatorParams?: {
     locator: LocatorPublic<any>;
@@ -51,7 +42,6 @@ export const LinkModal = ({
   isEmbedded,
   shareableUrl,
   shareableUrlForSavedObject,
-  action,
   urlService,
   shareableUrlLocatorParams,
 }: LinkProps) => {
@@ -179,37 +169,34 @@ export const LinkModal = ({
     setUrlHelper();
   }, [isMounted, setUrlHelper]);
 
-  const renderButtons = () => {
-    const { formattedMessageId, defaultMessage, dataTestSubj } = action;
-    return (
-      <EuiCopy textToCopy={shortUrlCache ?? url}>
-        {(copy) => (
-          <EuiButton fill data-test-subj={dataTestSubj} onClick={copy}>
-            <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
-          </EuiButton>
-        )}
-      </EuiCopy>
-    );
-  };
+  // const renderButtons = () => {
+  //   const { formattedMessageId, defaultMessage, dataTestSubj } = action;
+  //   return (
+  //     <EuiCopy textToCopy={shortUrlCache ?? url}>
+  //       {(copy) => (
+  //         <EuiButton fill data-test-subj={dataTestSubj} onClick={copy}>
+  //           <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
+  //         </EuiButton>
+  //       )}
+  //     </EuiCopy>
+  //   );
+  // };
 
   return (
-    <>
-      <EuiForm>
-        <EuiSpacer size="m" />
-        <EuiText size="s">
-          <FormattedMessage
-            id="share.link.helpText"
-            defaultMessage="Share a direct link to this {objectType}."
-            values={{ objectType }}
-          />
-        </EuiText>
-        <EuiSpacer size="l" />
-        <EuiCodeBlock whiteSpace="pre" css={{ paddingRight: '30px' }}>
-          {shareableUrl ?? url}
-        </EuiCodeBlock>
-        <EuiSpacer />
-      </EuiForm>
-      <EuiModalFooter>{renderButtons()}</EuiModalFooter>
-    </>
+    <EuiForm>
+      <EuiSpacer size="m" />
+      <EuiText size="s">
+        <FormattedMessage
+          id="share.link.helpText"
+          defaultMessage="Share a direct link to this {objectType}."
+          values={{ objectType }}
+        />
+      </EuiText>
+      <EuiSpacer size="l" />
+      <EuiCodeBlock whiteSpace="pre" css={{ paddingRight: '30px' }}>
+        {shareableUrl ?? url}
+      </EuiCodeBlock>
+      <EuiSpacer />
+    </EuiForm>
   );
 };
