@@ -100,6 +100,7 @@ const createSLORoute = createObservabilityServerRoute({
       (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const basePath = dependencies.pluginsSetup.core.http.basePath;
     const soClient = (await context.core).savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const transformManager = new DefaultTransformManager(
@@ -120,7 +121,8 @@ const createSLORoute = createObservabilityServerRoute({
       transformManager,
       summaryTransformManager,
       logger,
-      spaceId
+      spaceId,
+      basePath
     );
 
     const response = await createSLO.execute(params.body);
@@ -141,7 +143,7 @@ const inspectSLORoute = createObservabilityServerRoute({
 
     const spaceId =
       (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
-
+    const basePath = dependencies.pluginsSetup.core.http.basePath;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
@@ -163,7 +165,8 @@ const inspectSLORoute = createObservabilityServerRoute({
       transformManager,
       summaryTransformManager,
       logger,
-      spaceId
+      spaceId,
+      basePath
     );
 
     return createSLO.inspect(params.body);
@@ -182,6 +185,8 @@ const updateSLORoute = createObservabilityServerRoute({
 
     const spaceId =
       (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
+
+    const basePath = dependencies.pluginsSetup.core.http.basePath;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
 
@@ -204,7 +209,8 @@ const updateSLORoute = createObservabilityServerRoute({
       summaryTransformManager,
       esClient,
       logger,
-      spaceId
+      spaceId,
+      basePath
     );
 
     const response = await updateSLO.execute(params.path.id, params.body);
@@ -364,6 +370,7 @@ const resetSLORoute = createObservabilityServerRoute({
       (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const basePath = dependencies.pluginsSetup.core.http.basePath;
 
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const transformManager = new DefaultTransformManager(
@@ -384,7 +391,8 @@ const resetSLORoute = createObservabilityServerRoute({
       transformManager,
       summaryTransformManager,
       logger,
-      spaceId
+      spaceId,
+      basePath
     );
 
     const response = await resetSLO.execute(params.path.id);

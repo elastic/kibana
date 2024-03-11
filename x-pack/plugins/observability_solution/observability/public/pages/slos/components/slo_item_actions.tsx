@@ -113,7 +113,7 @@ export function SloItemActions({
     setIsAddRuleFlyoutOpen(true);
   };
 
-  const handleAttachToDashboard = () => {
+  const handleAddToDashboard = () => {
     setIsActionsPopoverOpen(false);
     if (setDashboardAttachmentReady) {
       setDashboardAttachmentReady(true);
@@ -215,13 +215,13 @@ export function SloItemActions({
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             icon="dashboardApp"
-            key="attachToDashboard"
-            onClick={handleAttachToDashboard}
+            key="addToDashboard"
+            onClick={handleAddToDashboard}
             disabled={!hasWriteCapabilities || isRemote}
-            data-test-subj="sloActinsAttachToDashboard"
+            data-test-subj="sloActionsAddToDashboard"
           >
-            {i18n.translate('xpack.observability.slo.item.actions.attachToDashboard', {
-              defaultMessage: 'Attach to Dashboard',
+            {i18n.translate('xpack.observability.slo.item.actions.addToDashboard', {
+              defaultMessage: 'Add to Dashboard',
             })}
           </EuiContextMenuItem>,
         ]}
