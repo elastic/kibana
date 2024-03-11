@@ -8,6 +8,7 @@
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { DataStream } from '@kbn/index-management-plugin/common';
 import { useContext } from 'react';
+import { keyBy } from 'lodash';
 import { getDslPolicies } from './api';
 import { SyntheticsRefreshContext } from '../../../contexts';
 import { formatBytes } from '../../step_details_page/hooks/use_object_metrics';
@@ -36,25 +37,20 @@ export function useGetDataStreamStatuses(): DataStreamStatusResponse {
 
   if (!Array.isArray(data) || !!error) return { dataStreamStatuses: undefined, error, loading };
 
-  const dataStreamSet = new Set();
-  const dataStreamMap: Record<string, DataStream> = {};
-
-  data.forEach((dataStream) => {
-    dataStreamSet.add(dataStream.indexTemplateName);
-    dataStreamMap[dataStream.indexTemplateName] = dataStream;
-  });
+  const dataStreamMap = keyBy(data, 'indexTemplateName');
 
   const dataStreamStatuses: DataStream[] = [];
   let totalBytes = 0;
   let summaryItem: DataStreamStatus | null = null;
   for (const { indexTemplate, label } of policyLabels) {
-    if (!dataStreamSet.has(indexTemplate)) {
+    const dataStream = dataStreamMap[indexTemplate];
+    if (dataStream) {
+      dataStreamStatuses.push(formatDataStreamInfo(dataStreamMap[indexTemplate]));
+      totalBytes += dataStreamMap[indexTemplate].storageSizeBytes ?? 0;
+    } else {
       const missingStream = toMissingDataStream({ indexTemplate, label });
       dataStreamStatuses.push(missingStream);
       if (indexTemplate === 'synthetics') summaryItem = missingStream;
-    } else {
-      dataStreamStatuses.push(formatDataStreamInfo(dataStreamMap[indexTemplate]));
-      totalBytes += dataStreamMap[indexTemplate].storageSizeBytes ?? 0;
     }
   }
 
