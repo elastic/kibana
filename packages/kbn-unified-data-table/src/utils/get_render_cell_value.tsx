@@ -74,7 +74,11 @@ export const getRenderCellValueFn = ({
       }
     }, [ctx, row, setCellProps]);
 
-    if (!!externalCustomRenderers && !!externalCustomRenderers[columnId] && row) {
+    if (typeof row === 'undefined') {
+      return <span className={CELL_CLASS}>-</span>;
+    }
+
+    if (!!externalCustomRenderers && !!externalCustomRenderers[columnId]) {
       return (
         <span className={CELL_CLASS}>
           {externalCustomRenderers[columnId]({
@@ -92,10 +96,6 @@ export const getRenderCellValueFn = ({
           })}
         </span>
       );
-    }
-
-    if (typeof row === 'undefined') {
-      return <span className={CELL_CLASS}>-</span>;
     }
 
     /**
