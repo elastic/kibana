@@ -231,22 +231,22 @@ nAMtOW0BH63Xcmy46HLV,ecommerce,\\"-\\",\\"Women's Clothing, Women's Shoes, Women
 `;
 
 exports[`Reporting APIs Generate CSV from SearchSource with unmapped fields includes all unmapped fields to the report 1`] = `
-"\\"*\\"
-\\"-\\"
-\\"-\\"
+"\\"_id\\",\\"_index\\",\\"_score\\",\\"nested.unmapped\\",text,unmapped
+1,recipes,1,\\"-\\",text1,unmapped1
+2,recipes,1,unmapped2,text2,\\"-\\"
 "
 `;
 
 exports[`Reporting APIs Generate CSV from SearchSource with unmapped fields includes an unmapped field to the report 1`] = `
-"text,unmapped
-text1,unmapped1
-text2,\\"-\\"
+"\\"_id\\",\\"_index\\",\\"_score\\",text,unmapped
+1,recipes,1,text1,unmapped1
+2,recipes,1,text2,\\"-\\"
 "
 `;
 
 exports[`Reporting APIs Generate CSV from SearchSource with unmapped fields includes an unmapped nested field to the report 1`] = `
-"text,\\"nested.unmapped\\"
-text1,\\"-\\"
-text2,unmapped2
+"\\"_id\\",\\"_index\\",\\"_score\\",\\"nested.unmapped\\",text
+1,recipes,1,\\"-\\",text1
+2,recipes,1,unmapped2,text2
 "
 `;

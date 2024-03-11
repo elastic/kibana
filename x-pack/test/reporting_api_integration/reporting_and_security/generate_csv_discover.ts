@@ -166,20 +166,24 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Helper function
       async function generateCsvReportWithUnmapped(fields: string[]) {
-        const res = await reportingAPI.generateCsv(
-          createTestCsvJobParams({
-            columns: fields,
-            searchSource: {
-              index: '5c620ea0-dc4f-11ec-972a-bf98ce1eebd7',
-              query: { language: 'kuery', query: '' },
-              sort: [{ _score: 'desc' as SortDirection }],
-              filter: [],
-            },
-          })
-        );
-        const { path: downloadPath } = JSON.parse(res.text) as { path: string };
-        await reportingAPI.waitForJobToFinish(downloadPath);
-        return reportingAPI.getCompletedJobOutput(downloadPath);
+        const { text } = await reportingAPI.generateCsv({
+          title: 'CSV Report',
+          browserTimezone: 'UTC',
+          objectType: 'search',
+          version: '7.15.0',
+          searchSource: {
+            version: true,
+            query: { query: '', language: 'kuery' },
+            index: '5c620ea0-dc4f-11ec-972a-bf98ce1eebd7',
+            fields: fields.map((field) => ({ field, include_unmapped: 'true' })),
+            filter: [],
+          },
+        });
+
+        const { path } = JSON.parse(text) as { path: string };
+        await reportingAPI.waitForJobToFinish(path);
+
+        return reportingAPI.getCompletedJobOutput(path);
       }
 
       it('includes an unmapped field to the report', async () => {

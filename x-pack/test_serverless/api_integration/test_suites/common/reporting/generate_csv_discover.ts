@@ -168,13 +168,13 @@ export default ({ getService }: FtrProviderContext) => {
           'csv_searchsource',
           createTestCsvJobParams({
             browserTimezone: 'UTC',
-            columns: fields,
             objectType: 'search',
             searchSource: {
-              filter: [],
+              version: true,
               index: '5c620ea0-dc4f-11ec-972a-bf98ce1eebd7',
               query: { language: 'kuery', query: '' },
-              sort: [{ _score: 'desc' as SortDirection }],
+              fields: fields.map((field) => ({ field, include_unmapped: 'true' })),
+              filter: [],
             },
             title: 'Untitled discover search',
             version: '8.14.0',
@@ -191,6 +191,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('includes an unmapped nested field to the report', async () => {
         const csvFile = await generateCsvReportWithUnmapped(['text', 'nested.unmapped']);
+        expectSnapshot(csvFile).toMatch();
+      });
+
+      it('includes all unmapped fields to the report', async () => {
+        const csvFile = await generateCsvReportWithUnmapped(['*']);
         expectSnapshot(csvFile).toMatch();
       });
     });
