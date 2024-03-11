@@ -6,19 +6,27 @@
  * Side Public License, v 1.
  */
 
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { getCore } from '../kibana_services';
 import { SavedMap } from '../routes/map_page';
 
-export function getLibraryInterface(savedMap: SavedMap) {
+export function getLibraryTransforms(savedMap: SavedMap) {
   return {
     canLinkToLibrary: async () => {
       const { maps } = getCore().application.capabilities;
       return maps.save && savedMap.getSavedObjectId() === undefined;
     },
-    linkToLibrary: async () => {},
     canUnlinkFromLibrary: async () => {
       return savedMap.getSavedObjectId() !== undefined;
     },
-    unlinkFromLibrary: async () => {},
+    saveStateToSavedObject: () => {
+      throw new Error('saveStateToSavedObject not implemented');
+    },
+    savedObjectAttributesToState: () => {
+      throw new Error('savedObjectAttributesToState not implemented');
+    },
+    checkForDuplicateTitle: async (props: OnSaveProps) => {
+      throw new Error('checkForDuplicateTitle not implemented');
+    },
   };
 }
