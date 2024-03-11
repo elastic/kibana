@@ -3,7 +3,8 @@
 == Rule types
 
 A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides rules built into the {stack} and rules registered by one of the {kib} apps.
-You can create most rules types in <<create-and-manage-rules,{stack-manage-app} > {rules-ui}>>. For information on creating security rules, refer to {security-guide}/rules-ui-create.html[Create a detection rule].
+You can create most rules types in <<create-and-manage-rules,{stack-manage-app} > {rules-ui}>>.
+Security rules must be defined in the Security app. For more information, refer to the documentation about {security-guide}/rules-ui-create.html[creating a detection rule].
 
 [NOTE]
 ==============================================
