@@ -12,8 +12,9 @@ import {
   EuiTitle,
   EuiButtonEmpty,
   EuiSpacer,
-  EuiLink, EuiCode
-} from "@elastic/eui";
+  EuiLink,
+  EuiCode,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
