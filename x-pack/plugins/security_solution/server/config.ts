@@ -120,7 +120,7 @@ export const configSchema = schema.object({
    * Complete External Response Actions task: interval duration
    */
   completeExternalResponseActionsTaskInterval: schema.string({
-    defaultValue: '30s',
+    defaultValue: '60s',
     validate: isValidTaskManagerDuration,
   }),
 

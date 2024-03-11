@@ -37,7 +37,7 @@ export class CompleteExternalResponseActionsTask {
   private esClient: ElasticsearchClient | undefined = undefined;
   private cleanup: (() => void | Promise<void>) | undefined;
   private taskTimeout = '20m'; // Default. Real value comes from server config
-  private taskInterval = '30s'; // Default. Real value comes from server config
+  private taskInterval = '60s'; // Default. Real value comes from server config
 
   constructor(protected readonly options: CompleteExternalResponseActionsTaskConstructorOptions) {
     this.log = this.options.endpointAppContext.logFactory.get(
