@@ -18,6 +18,10 @@
     "browser": true,
     "server": true,
     "requiredBundles": [
+    ],
+    "nodeRoles": [
+      "background_tasks",
+      "ui"
     ]
   }
 }

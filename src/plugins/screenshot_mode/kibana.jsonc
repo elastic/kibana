@@ -5,6 +5,9 @@
   "plugin": {
     "id": "screenshotMode",
     "server": true,
-    "browser": true
+    "browser": true,
+    "nodeRoles": [
+      "ui"
+    ]
   }
 }

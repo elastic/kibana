@@ -22,6 +22,9 @@
       "visTypeHeatmap",
       "visTypeGauge",
       "kibanaReact"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

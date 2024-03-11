@@ -40,6 +40,10 @@
       "kibanaReact",
       "kibanaUtils",
       "observability",
+    ],
+    "nodeRoles": [
+      "background_tasks",
+      "ui"
     ]
   }
 }

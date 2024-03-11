@@ -22,6 +22,9 @@
       "esUiShared",
       "visualizations",
       "savedSearch"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

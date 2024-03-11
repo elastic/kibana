@@ -18,6 +18,10 @@
     ],
     "extraPublicDirs": [
       "public/common"
+    ],
+    "nodeRoles": [
+      "background_tasks",
+      "ui"
     ]
   }
 }

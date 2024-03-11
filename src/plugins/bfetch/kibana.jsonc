@@ -9,6 +9,9 @@
     "browser": true,
     "requiredBundles": [
       "kibanaUtils"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

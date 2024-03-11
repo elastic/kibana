@@ -47,6 +47,10 @@
       "common/utils",
       "common/expression_functions",
       "common/convert_to_lens"
+    ],
+    "nodeRoles": [
+      "background_tasks",
+      "ui"
     ]
   }
 }

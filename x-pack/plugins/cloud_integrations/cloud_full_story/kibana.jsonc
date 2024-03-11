@@ -17,6 +17,9 @@
     ],
     "optionalPlugins": [
       "security"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

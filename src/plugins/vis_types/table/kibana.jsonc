@@ -20,6 +20,9 @@
       "kibanaReact",
       "share",
       "visDefaultEditor"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

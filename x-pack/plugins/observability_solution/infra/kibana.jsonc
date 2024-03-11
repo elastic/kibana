@@ -57,6 +57,10 @@
       "ml",
       "embeddable",
       "controls"
+    ],
+    "nodeRoles": [
+      "background_tasks",
+      "ui"
     ]
   }
 }

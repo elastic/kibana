@@ -9,6 +9,9 @@
     "browser": true,
     "extraPublicDirs": [
       "common"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

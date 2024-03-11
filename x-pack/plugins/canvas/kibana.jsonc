@@ -47,5 +47,8 @@
       "visualizations",
       "fieldFormats"
     ],
+    "nodeRoles": [
+      "ui"
+    ]
   }
 }

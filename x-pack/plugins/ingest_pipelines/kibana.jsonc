@@ -24,6 +24,10 @@
     "requiredBundles": [
       "esUiShared",
       "kibanaReact"
+    ],
+    "nodeRoles": [
+      "background_tasks",
+      "ui"
     ]
   }
 }

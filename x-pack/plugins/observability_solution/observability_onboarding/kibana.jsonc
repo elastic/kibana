@@ -10,6 +10,10 @@
     "requiredPlugins": ["data", "observability", "observabilityShared", "discover", "share", "fleet"],
     "optionalPlugins": ["cloud", "usageCollection"],
     "requiredBundles": ["kibanaReact"],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": ["common"],
+    "nodeRoles": [
+      "background_tasks",
+      "ui"
+    ]
   }
 }

@@ -12,6 +12,9 @@
       "kibanaReact",
       "uiActions",
       "uiActionsEnhanced"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

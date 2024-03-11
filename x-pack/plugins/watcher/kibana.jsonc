@@ -26,6 +26,10 @@
       "esUiShared",
       "kibanaReact",
       "fieldFormats"
+    ],
+    "nodeRoles": [
+      "background_tasks",
+      "ui"
     ]
   }
 }

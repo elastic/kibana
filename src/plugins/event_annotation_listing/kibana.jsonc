@@ -25,6 +25,9 @@
     "requiredBundles": [
       "kibanaReact",
     ],
-    "extraPublicDirs": []
+    "extraPublicDirs": [],
+    "nodeRoles": [
+      "ui"
+    ]
   }
 }

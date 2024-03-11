@@ -35,6 +35,10 @@
       "unifiedSearch",
       "visualizations"
     ],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": ["common"],
+    "nodeRoles": [
+      "background_tasks",
+      "ui"
+    ]
   }
 }

@@ -16,6 +16,9 @@
     "optionalPlugins": [
       "usageCollection",
       "savedObjectsTagging"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

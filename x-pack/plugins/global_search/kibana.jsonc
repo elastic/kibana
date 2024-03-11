@@ -12,6 +12,9 @@
     ],
     "requiredPlugins": [
       "licensing"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

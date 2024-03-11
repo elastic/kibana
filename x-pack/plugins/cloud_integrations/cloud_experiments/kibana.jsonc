@@ -18,6 +18,9 @@
     ],
     "optionalPlugins": [
       "usageCollection"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

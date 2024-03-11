@@ -12,6 +12,9 @@
     ],
     "optionalPlugins": [
       "usageCollection"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

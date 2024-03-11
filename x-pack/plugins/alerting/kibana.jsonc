@@ -36,6 +36,10 @@
     "extraPublicDirs": [
       "common",
       "common/parse_duration"
+    ],
+    "nodeRoles": [
+      "background_tasks",
+      "ui"
     ]
   }
 }

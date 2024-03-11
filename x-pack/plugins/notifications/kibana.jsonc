@@ -9,6 +9,9 @@
     "optionalPlugins": [
       "actions",
       "licensing"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

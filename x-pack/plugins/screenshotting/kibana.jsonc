@@ -17,6 +17,9 @@
     ],
     "optionalPlugins": [
       "cloud"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

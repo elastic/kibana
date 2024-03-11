@@ -8,6 +8,9 @@
     "browser": true,
     "requiredPlugins": [
       "usageCollection"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

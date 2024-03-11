@@ -16,6 +16,9 @@
       "kibanaReact",
       "imageEmbeddable",
       "uiActions"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

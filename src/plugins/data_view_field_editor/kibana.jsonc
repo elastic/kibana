@@ -18,6 +18,9 @@
     "requiredBundles": [
       "kibanaReact",
       "esUiShared"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

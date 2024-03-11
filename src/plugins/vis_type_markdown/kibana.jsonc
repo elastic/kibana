@@ -15,6 +15,9 @@
       "expressions",
       "visDefaultEditor",
       "visualizations"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

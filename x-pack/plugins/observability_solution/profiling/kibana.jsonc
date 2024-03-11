@@ -32,6 +32,9 @@
       "kibanaReact",
       "kibanaUtils",
       "observabilityAIAssistant"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

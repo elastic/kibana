@@ -23,6 +23,9 @@
       "imageEmbeddable",
       "presentationUtil",
       "uiActions"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

@@ -41,6 +41,10 @@
       "serverless"
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch", "savedObjects"],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": ["common"],
+    "nodeRoles": [
+      "background_tasks",
+      "ui"
+    ]
   }
 }

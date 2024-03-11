@@ -16,6 +16,10 @@
       "savedObjectsManagement",
       "savedObjectsTaggingOss"
     ],
-    "requiredBundles": ["kibanaReact", "unifiedSearch"]
+    "requiredBundles": ["kibanaReact", "unifiedSearch"],
+    "nodeRoles": [
+      "background_tasks",
+      "ui"
+    ]
   }
 }

@@ -16,6 +16,9 @@
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils"
+    ],
+    "nodeRoles": [
+      "ui"
     ]
   }
 }

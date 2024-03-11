@@ -27,6 +27,10 @@
       "kibanaReact",
       "esUiShared",
       "runtimeFields"
+    ],
+    "nodeRoles": [
+      "background_tasks",
+      "ui"
     ]
   }
 }

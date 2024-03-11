@@ -27,6 +27,10 @@
     ],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "optionalPlugins": ["cloud"],
-    "extraPublicDirs": []
+    "extraPublicDirs": [],
+    "nodeRoles": [
+      "background_tasks",
+      "ui"
+    ]
   }
 }
