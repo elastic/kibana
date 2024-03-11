@@ -111,6 +111,8 @@ export class CompleteExternalActionsTaskRunner
             return null;
           }
 
+          // FIXME:PT need to implement logic that first checks if a given agent type is currently supported - like do we have what we need to "talk" to them?
+
           const agentTypeActionsClient =
             this.endpointContextServices.getInternalResponseActionsClient({ agentType });
 
