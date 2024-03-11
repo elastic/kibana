@@ -20,7 +20,7 @@ export const DslRetentionTab = () => {
     return <ErrorEmptyPrompt error={error?.message} />;
 
   if (error && (error as unknown as IHttpFetchError<ResponseErrorBody>).body?.statusCode === 403)
-    return <Unprivileged showIlmMessage={false} />;
+    return <Unprivileged hideIlmMessage={true} />;
 
   return (
     <EuiBasicTable

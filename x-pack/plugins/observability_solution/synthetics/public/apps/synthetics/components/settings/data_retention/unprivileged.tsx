@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-export const Unprivileged = ({ showIlmMessage }: { showIlmMessage?: boolean }) => {
+export const Unprivileged = ({ hideIlmMessage = false }: { hideIlmMessage?: boolean }) => {
   const {
     services: { docLinks },
   } = useKibana();
@@ -54,9 +54,7 @@ export const Unprivileged = ({ showIlmMessage }: { showIlmMessage?: boolean }) =
           css={css`
             text-align: initial;
           `}
-          children={`\n- ${INDEX_PRIVILEGES} ${
-            showIlmMessage === false ? '' : ` \n- ${CLUSTER_PRIVILEGES}`
-          }`}
+          children={`\n- ${INDEX_PRIVILEGES} ${hideIlmMessage ? '' : ` \n- ${CLUSTER_PRIVILEGES}`}`}
         />
       }
     />
