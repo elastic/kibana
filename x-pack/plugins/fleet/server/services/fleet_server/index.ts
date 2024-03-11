@@ -9,10 +9,13 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
 
-import { FLEET_SERVER_SERVERS_INDEX } from '../../constants';
-import { getAgentVersionsForAgentPolicyIds } from '../agents';
+import { FLEET_SERVER_SERVERS_INDEX, SO_SEARCH_LIMIT } from '../../constants';
+import { getAgentsByKuery, getAgentStatusById } from '../agents';
 
 import { packagePolicyService } from '../package_policy';
+import { agentPolicyService } from '../agent_policy';
+import { appContextService } from '..';
+
 /**
  * Check if at least one fleet server is connected
  */
@@ -33,6 +36,8 @@ export async function allFleetServerVersionsAreAtLeast(
   soClient: SavedObjectsClientContract,
   version: string
 ): Promise<boolean> {
+  const logger = appContextService.getLogger();
+
   let hasMore = true;
   const policyIds = new Set<string>();
   let page = 1;
@@ -52,17 +57,56 @@ export async function allFleetServerVersionsAreAtLeast(
     }
   }
 
-  const versionCounts = await getAgentVersionsForAgentPolicyIds(esClient, [...policyIds]);
-  const versions = Object.keys(versionCounts);
+  /*
+    What do we actually need to do here?
+    - Get all agents running on Fleet Server policies
+    - Ensure all agents are running at least the specified version
+    - If a policy is managed and offline, ignore any outdated agents on it
+  */
 
-  // there must be at least one fleet server agent for this check to pass
-  if (versions.length === 0) {
+  const managedAgentPolicies = await agentPolicyService.getAllManagedAgentPolicies(soClient);
+  const fleetServerAgents = await getAgentsByKuery(esClient, soClient, {
+    showInactive: true,
+    perPage: SO_SEARCH_LIMIT,
+  });
+
+  if (fleetServerAgents.agents.length === 0) {
     return false;
   }
 
-  return _allVersionsAreAtLeast(version, versions);
-}
+  let result = true;
 
-function _allVersionsAreAtLeast(version: string, versions: string[]) {
-  return versions.every((v) => semverGte(semverCoerce(v)!, version));
+  for (const fleetServerAgent of fleetServerAgents.agents) {
+    const agentVersion = fleetServerAgent.local_metadata?.elastic?.agent?.version;
+    const isNewerVersion = semverGte(semverCoerce(agentVersion)!, version);
+
+    if (!isNewerVersion) {
+      const isManagedAgentPolicy = managedAgentPolicies.some(
+        (managedPolicy) => managedPolicy.id === fleetServerAgent.policy_id
+      );
+
+      // If this is an agent enrolled in a managed policy, and it is no longer active then we ignore it if it's
+      // running on an outdated version. This prevents users with offline Elastic Agent on Cloud policies from
+      // being stuck when it comes to enabling secrets, as agents can't be unenrolled from managed policies via Fleet UI.
+      if (isManagedAgentPolicy) {
+        const agentStatus = await getAgentStatusById(esClient, soClient, fleetServerAgent.id);
+
+        if (agentStatus === 'offline' || agentStatus === 'unenrolled') {
+          logger.debug(
+            `Found outdated managed Fleet Server agent ${fleetServerAgent.id} on version ${agentVersion} when checking for secrets storage compatibility - ignoring due to ${agentStatus} status`
+          );
+          continue;
+        }
+      }
+
+      logger.debug(
+        `Found outdated Fleet Server agent ${fleetServerAgent.id} on version ${agentVersion} - secrets won't be enabled until all Fleet Server agents are running at least ${version}`
+      );
+
+      result = false;
+      break;
+    }
+  }
+
+  return result;
 }
