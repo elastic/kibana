@@ -80,14 +80,14 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose }) => {
       <EuiModalBody>
         <Fragment>
           <EuiTabs>{renderTabs()}</EuiTabs>
-          {React.createElement(SelectedTabContent, {
+          {React.createElement(SelectedTabContent!, {
             state: selectedTabState,
             dispatch,
           })}
         </Fragment>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiCopy textToCopy={state.shortUrlCache ?? state.url ?? 'test'}>
+        <EuiCopy textToCopy={selectedTabState.shortUrlCache ?? selectedTabState.urlParams}>
           {(copy) => (
             <EuiButton fill data-test-subj={dataTestSubj} data-share-url={state.url} onClick={copy}>
               <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
