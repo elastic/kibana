@@ -32,6 +32,7 @@ import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useApplication } from '../../common/lib/kibana/use_application';
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -41,7 +42,6 @@ const initialCaseValue: FormProps = {
   connectorId: NONE_CONNECTOR_ID,
   fields: null,
   syncAlerts: true,
-  selectedOwner: null,
   assignees: [],
   customFields: {},
 };
@@ -70,7 +70,8 @@ export const FormContext: React.FC<Props> = ({
     data: { customFields: customFieldsConfiguration },
     isLoading: isLoadingCaseConfiguration,
   } = useGetCaseConfiguration();
-  const { owner, appId } = useCasesContext();
+  const { owner } = useCasesContext();
+  const { appId } = useApplication();
   const { isSyncAlertsEnabled } = useCasesFeatures();
   const { mutateAsync: postCase } = usePostCase();
   const { mutateAsync: createAttachments } = useCreateAttachments();

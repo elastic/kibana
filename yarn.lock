@@ -5332,6 +5332,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-ai-assistant-app-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant_app":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-ai-assistant-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant":
   version "0.0.0"
   uid ""
@@ -30212,9 +30216,9 @@ undici-types@~5.26.4:
   integrity sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==
 
 undici@^5.21.2, undici@^5.22.1:
-  version "5.26.3"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-5.26.3.tgz#ab3527b3d5bb25b12f898dfd22165d472dd71b79"
-  integrity sha512-H7n2zmKEWgOllKkIUkLvFmsJQj062lSm3uA4EYApG8gLuiOM0/go9bIoC3HVaSnfg4xunowDE2i9p8drkXuvDw==
+  version "5.28.3"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-5.28.3.tgz#a731e0eff2c3fcfd41c1169a869062be222d1e5b"
+  integrity sha512-3ItfzbrhDlINjaP0duwnNsKpDQk3acHI3gVJ1z4fmwMK31k5G9OVIAMLSIaP6w4FaGkaAkN6zaQO9LUvZ1t7VA==
   dependencies:
     "@fastify/busboy" "^2.0.0"
 
