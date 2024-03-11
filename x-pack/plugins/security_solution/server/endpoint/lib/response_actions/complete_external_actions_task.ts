@@ -15,7 +15,10 @@ import { EndpointError } from '../../../../common/endpoint/errors';
 import { CompleteExternalActionsTaskRunner } from './complete_external_actions_task_runner';
 import type { EndpointAppContext } from '../../types';
 
-const COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE = 'endpoint:complete-external-response-actions';
+export const COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE =
+  'endpoint:complete-external-response-actions';
+export const COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TITLE =
+  'Security Solution Complete External Response Actions';
 
 export interface CompleteExternalResponseActionsTaskConstructorOptions {
   endpointAppContext: EndpointAppContext;
@@ -60,9 +63,11 @@ export class CompleteExternalResponseActionsTask {
     }
 
     this.taskInterval =
-      this.options.endpointAppContext.serverConfig.completeExternalResponseActionsTaskInterval;
+      this.options.endpointAppContext.serverConfig.completeExternalResponseActionsTaskInterval ??
+      this.taskInterval;
     this.taskTimeout =
-      this.options.endpointAppContext.serverConfig.completeExternalResponseActionsTaskTimeout;
+      this.options.endpointAppContext.serverConfig.completeExternalResponseActionsTaskTimeout ??
+      this.taskTimeout;
 
     this.log.info(
       `Registering task [${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}] with timeout of [${this.taskTimeout}] and run interval of [${this.taskInterval}]`
@@ -70,7 +75,7 @@ export class CompleteExternalResponseActionsTask {
 
     taskManager.registerTaskDefinitions({
       [COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE]: {
-        title: 'Security Solution Complete External Response Actions',
+        title: COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TITLE,
         timeout: this.taskTimeout,
         createTaskRunner: () => {
           if (!this.esClient) {
