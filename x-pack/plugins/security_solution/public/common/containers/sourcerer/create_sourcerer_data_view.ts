@@ -11,7 +11,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
 import type { KibanaDataView } from '../../store/sourcerer/model';
 import { DEFAULT_TIME_FIELD } from '../../../../common/constants';
-// import { getSourcererDataView } from './get_sourcerer_data_view';
 
 export interface GetSourcererDataView {
   signal?: AbortSignal;
@@ -70,15 +69,11 @@ export const createSourcererDataView = async ({
       title: siemDataView.title,
     };
   } else {
-    // console.log('siemDataViewExist', siemDataViewExist);
     let patterns = ensurePatternFormat(siemDataViewExist.title.split(','));
     const siemDataViewTitle = siemDataViewExist ? patterns.join() : '';
     if (patternListAsTitle !== siemDataViewTitle) {
       patterns = patternListFormatted;
       siemDataView = await dataViewService.get(dataViewId);
-      // console.log('siemDataView', siemDataView);
-      // console.log('patternListAsTitle', patternListAsTitle);
-      // console.log('siemDataViewTitle', siemDataViewTitle);
       siemDataView.title = patternListAsTitle;
       await dataViewService.updateSavedObject(siemDataView);
     }
@@ -89,9 +84,6 @@ export const createSourcererDataView = async ({
     };
   }
 
-  // console.log('dataViewId', dataViewId);
-  // console.log('allDataViews', allDataViews);
-
   if (allDataViews.some((dv) => dv.id === dataViewId)) {
     allDataViews = allDataViews.map((v) =>
       v.id === dataViewId ? { ...v, title: patternListAsTitle } : v
@@ -100,20 +92,11 @@ export const createSourcererDataView = async ({
     allDataViews.push({ id: defaultDataView.id ?? dataViewId, title: defaultDataView?.title });
   }
 
-  // const siemSourcererDataView = await getSourcererDataView(dataViewId, dataViewService);
-  // const siemSourcererDataView = {
-  //   id: defaultDataView.id,
-  //   patternList: defaultDataView.title.split(','),
-  //   title: siemDataView.title,
-  // };
-  // console.log('defaultDataView', defaultDataView);
-  // console.log('siemSourcererDataView', siemSourcererDataView);
   const existingPatternList = await dataViewService.getExistingIndices(defaultDataView.patternList);
   defaultDataView = {
     ...defaultDataView,
     patternList: existingPatternList,
   };
-  // console.log('existingPatternList', existingPatternList);
   return {
     defaultDataView,
     kibanaDataViews: allDataViews.map((dv) =>
