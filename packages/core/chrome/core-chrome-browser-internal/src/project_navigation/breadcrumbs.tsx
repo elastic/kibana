@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import {
+import type {
   AppDeepLinkId,
   ChromeProjectBreadcrumb,
   ChromeProjectNavigationNode,

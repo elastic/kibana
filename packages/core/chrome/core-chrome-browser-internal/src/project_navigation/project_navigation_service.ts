@@ -129,12 +129,10 @@ export class ProjectNavigationService {
         return this.projectHome$.asObservable();
       },
       setCloudUrls: (cloudUrls: CloudURLs) => {
-        let cloudLinks = this.cloudLinks$.getValue();
-        if (Object.keys(cloudLinks).length === 0) {
-          // Cloud links never change, so we only need to parse them once
-          cloudLinks = getCloudLinks(cloudUrls);
-          this.cloudLinks$.next(cloudLinks);
-        }
+        // Cloud links never change, so we only need to parse them once
+        if (Object.keys(this.cloudLinks$.getValue()).length > 0) return;
+
+        this.cloudLinks$.next(getCloudLinks(cloudUrls));
       },
       setProjectName: (projectName: string) => {
         this.projectName$.next(projectName);
@@ -217,9 +215,16 @@ export class ProjectNavigationService {
     };
   }
 
+  /**
+   * Initialize a "serverless style" navigation. The serverless style navigation
+   * is going to land in "stateful" Kibana under "solution navigations".
+   *
+   * @param navTreeDefinition$ The navigation tree definition
+   * @param location Optional location to use to detect the active node in the new navigation tree
+   */
   private initNavigation(
     navTreeDefinition$: Observable<NavigationTreeDefinition>,
-    redirectLocation?: Location
+    location?: Location
   ) {
     if (this.navigationChangeSubscription) {
       this.navigationChangeSubscription.unsubscribe();
@@ -246,7 +251,7 @@ export class ProjectNavigationService {
           this.navigationTreeUi$.next(navigationTreeUI);
 
           this.projectNavigationNavTreeFlattened = flattenNav(navigationTree);
-          this.setActiveProjectNavigationNodes(redirectLocation);
+          this.updateActiveProjectNavigationNodes(location, true);
         },
         error: (err) => {
           this.logger?.error(err);
@@ -280,9 +285,8 @@ export class ProjectNavigationService {
     return findActiveNodes(currentPathname, flattendTree, location, this.http?.basePath.prepend);
   }
 
-  private setActiveProjectNavigationNodes(_location?: Location) {
-    const activeNodes = this.findActiveNodes({ location: _location });
-
+  private updateActiveProjectNavigationNodes(location?: Location, forceUpdate = false) {
+    const activeNodes = this.findActiveNodes({ location });
     // Each time we call findActiveNodes() we create a new array of activeNodes. As this array is used
     // in React in useCallback() and useMemo() dependencies arrays it triggers an infinite navigation
     // tree registration loop. To avoid that we only notify the listeners when the activeNodes array
@@ -296,7 +300,7 @@ export class ProjectNavigationService {
 
   private onHistoryLocationChange(location: Location) {
     this.location$.next(location);
-    this.setActiveProjectNavigationNodes(location);
+    this.updateActiveProjectNavigationNodes(location);
   }
 
   private handleActiveNodesChange() {
@@ -328,10 +332,10 @@ export class ProjectNavigationService {
    */
   private handleEmptyActiveNodes() {
     combineLatest([
-      this.activeNodes$.pipe(distinctUntilChanged(deepEqual)),
+      this.activeNodes$,
       this.solutionNavDefinitions$,
       this.activeSolutionNavDefinitionId$.pipe(distinctUntilChanged()),
-      this.location$.pipe(distinctUntilChanged(deepEqual)),
+      this.location$,
     ])
       .pipe(takeUntil(this.stop$), debounceTime(20))
       .subscribe(([activeNodes, definitions, activeSolution, location]) => {
@@ -391,7 +395,7 @@ export class ProjectNavigationService {
     }
 
     const definitions = this.solutionNavDefinitions$.getValue();
-
+    this.activeSolutionNavDefinitionId$.next(null);
     // We don't want to change to "classic" if `id` is `null` when we haven't received
     // any definitions yet. Serverless Kibana could be impacted by this.
     // When we **do** have definitions, then passing `null` does mean we should change to "classic".

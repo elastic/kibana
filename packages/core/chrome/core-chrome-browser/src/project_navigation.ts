@@ -392,19 +392,19 @@ export interface NavigationTreeDefinitionUI {
  * for the side navigation evolution to align with the Serverless UX.
  */
 
-export interface SolutionNavigationDefinition {
+export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = AppDeepLinkId> {
   /** Unique id for the solution navigation. */
   id: string;
   /** Title for the solution navigation. */
   title: string;
   /** The navigation tree definition */
-  navigationTree$: Observable<NavigationTreeDefinition>;
+  navigationTree$: Observable<NavigationTreeDefinition<LinkId>>;
   /** Optional icon for the solution navigation to render in the select dropdown. */
   icon?: IconType;
   /** React component to render in the side nav for the navigation */
   sideNavComponent?: SideNavComponent;
   /** The page to navigate to when switching to this solution navigation. */
-  homePage?: AppDeepLinkId;
+  homePage?: LinkId;
 }
 
 export interface SolutionNavigationDefinitions {
