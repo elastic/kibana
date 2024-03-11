@@ -496,7 +496,7 @@ You can also check out the dedicated app view, which enables easier search and f
 
 **Total Tests:** 4 | **Skipped:** 0 (0.00%) | **Todo:** 0 (0.00%)
 
-![](https://img.shields.io/badge/FTR-blue) ![](https://img.shields.io/badge/SERVERLESS-undefined)
+![](https://img.shields.io/badge/FTR-blue) ![](https://img.shields.io/badge/SERVERLESS-pink)
 
 <details>
 <summary>Test Details</summary>
