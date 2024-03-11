@@ -383,7 +383,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
           {...getOverridesFor(overrides, 'settings')}
         />
         <Bullet
-          id="goal"
+          id="bullet"
           subtype={getSubtypeByGaugeType(gaugeType)}
           colorBands={getColorConfig()}
           data={[

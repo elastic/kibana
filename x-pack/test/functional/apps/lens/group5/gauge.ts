@@ -36,15 +36,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should switch to gauge and render a gauge with default values', async () => {
-      await PageObjects.lens.switchToVisualization('horizontalBullet', 'gauge');
+      await PageObjects.lens.switchToVisualization('horizontalBullet', 'bullet horizontal');
       await PageObjects.lens.waitForVisualization('gaugeChart');
-      const elementWithInfo = await find.byCssSelector('.echScreenReaderOnly');
-      const textContent = await elementWithInfo.getAttribute('textContent');
-      expect(textContent).to.contain('Average of bytes'); // it gets default title
-      expect(textContent).to.contain('horizontalBullet chart');
-      expect(textContent).to.contain('Minimum:0'); // it gets default minimum static value
-      expect(textContent).to.contain('Maximum:10000'); // it gets default maximum static value
-      expect(textContent).to.contain('Value:5727.32');
+      const { bullet } = await elasticChart.getChartDebugData();
+      const debugData = bullet?.rows[0][0];
+      expect(debugData?.subtype).to.be('horizontal');
+      expect(debugData?.title).to.be('Average of bytes');
+      expect(debugData?.value).to.be(5727.322);
+      expect(debugData?.domain).to.eql([0, 10000]);
     });
 
     it('should reflect edits for gauge', async () => {
