@@ -30,6 +30,7 @@ import { getActionDetailsById as _getActionDetailsById } from '../../action_deta
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import {
+  ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
@@ -40,6 +41,7 @@ import type { ResponseActionAgentType } from '../../../../../../common/endpoint/
 import { getResponseActionFeatureKey } from '../../../feature_usage/feature_keys';
 import { isActionSupportedByAgentType as _isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');
@@ -577,7 +579,9 @@ describe('ResponseActionsClientImpl base class', () => {
       ];
       let nextActionRequestPageNumber = 0;
 
-      constructorOptions.esClient.search.mockImplementation(async (searchReq) => {
+      constructorOptions.esClient.search.mockImplementation(async (_searchReq) => {
+        const searchReq = _searchReq as SearchRequest;
+
         // FYI: The iterable uses a Point In Time
         if (searchReq!.pit) {
           return generator.toEsSearchResponse(
@@ -594,7 +598,8 @@ describe('ResponseActionsClientImpl base class', () => {
                   generator.generateResponse({
                     agent: { id: 'agent-a' },
                     EndpointActions: { action_id: 'action-id-1' },
-                  })
+                  }),
+                  ENDPOINT_ACTION_RESPONSES_INDEX
                 ),
               ]);
             }
@@ -628,7 +633,14 @@ describe('ResponseActionsClientImpl base class', () => {
 
       expect(iterationData.length).toBe(2);
       expect(iterationData[0]).toEqual([]); // First page of results should be empty due to how the mock was setup
-      expect(iterationData[1]).toEqual([]);
+      expect(iterationData[1]).toEqual([
+        expect.objectContaining({
+          EndpointActions: expect.objectContaining({
+            action_id: 'action-id-2',
+          }),
+          agent: { id: 'agent-b' },
+        }),
+      ]);
     });
   });
 });
