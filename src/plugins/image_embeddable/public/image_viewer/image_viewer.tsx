@@ -50,6 +50,7 @@ export function ImageViewer({
   containerCSS,
   isScreenshotMode,
 }: ImageViewerProps) {
+  console.log('HJERE', { imageConfig });
   const { euiTheme } = useEuiTheme();
   const { getImageDownloadHref, validateUrl } = useImageViewerContext();
 

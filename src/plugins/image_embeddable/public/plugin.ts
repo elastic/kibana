@@ -7,17 +7,17 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
-import { IMAGE_EMBEDDABLE_TYPE, ImageEmbeddableFactoryDefinition } from './image_embeddable';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { imageClickTrigger } from './actions';
+import { registerCreateImageAction } from './actions/create_image_action';
+import { registerImageEmbeddableFactory } from './image_embeddable/register_image_embeddable_factory';
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
@@ -28,7 +28,6 @@ export interface SetupDependencies {
 }
 
 export interface StartDependencies {
-  embeddable: EmbeddableStart;
   files: FilesStart;
   security?: SecurityPluginStart;
   uiActions: UiActionsStart;
@@ -47,31 +46,17 @@ export class ImageEmbeddablePlugin
   constructor(protected readonly context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
-    const start = createStartServicesGetter(core.getStartServices);
-    plugins.embeddable.registerEmbeddableFactory(
-      IMAGE_EMBEDDABLE_TYPE,
-      new ImageEmbeddableFactoryDefinition({
-        start: () => ({
-          application: start().core.application,
-          overlays: start().core.overlays,
-          files: start().plugins.files.filesClientFactory.asUnscoped(),
-          externalUrl: start().core.http.externalUrl,
-          theme: start().core.theme,
-          getUser: async () => {
-            const security = start().plugins.security;
-            return security ? await security.authc.getCurrentUser() : undefined;
-          },
-          uiActions: start().plugins.uiActions,
-          isScreenshotMode: () => plugins.screenshotMode?.isScreenshotMode() ?? false,
-        }),
-      })
-    );
-
     plugins.uiActions.registerTrigger(imageClickTrigger);
     return {};
   }
 
-  public start(core: CoreStart, plugins: StartDependencies): StartContract {
+  public start(
+    core: CoreStart,
+    { files, security, uiActions, screenshotMode }: StartDependencies
+  ): StartContract {
+    registerCreateImageAction({ core, files, security, uiActions });
+
+    registerImageEmbeddableFactory({ core, files, security, uiActions, screenshotMode });
     return {};
   }
 

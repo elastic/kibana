@@ -13,8 +13,7 @@ import { ImageEmbeddableInput } from './image_embeddable_factory';
 import { ImageViewer, ImageViewerContext } from '../image_viewer';
 import { createValidateUrl } from '../utils/validate_url';
 import { imageClickTrigger, ImageClickContext } from '../actions';
-
-export const IMAGE_EMBEDDABLE_TYPE = 'image';
+import { IMAGE_EMBEDDABLE_TYPE } from './constants';
 
 export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
   public readonly type = IMAGE_EMBEDDABLE_TYPE;

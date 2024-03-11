@@ -21,10 +21,11 @@ import {
   ThemeServiceStart,
   UiActionsStart,
 } from '../imports';
-import { ImageEmbeddable, IMAGE_EMBEDDABLE_TYPE } from './image_embeddable';
+import { ImageEmbeddable } from './image_embeddable';
 import { ImageConfig } from '../types';
 import { createValidateUrl } from '../utils/validate_url';
 import { ImageClickContext } from '../actions';
+import { IMAGE_EMBEDDABLE_TYPE } from './constants';
 
 export interface ImageEmbeddableFactoryDeps {
   start: () => {

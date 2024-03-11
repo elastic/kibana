@@ -7,18 +7,7 @@
     "id": "imageEmbeddable",
     "server": false,
     "browser": true,
-    "requiredPlugins": [
-      "embeddable",
-      "files",
-      "uiActions"
-    ],
-    "optionalPlugins": [
-      "security",
-      "screenshotMode",
-    ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact"
-    ]
+    "requiredPlugins": ["embeddable", "files", "uiActions", "kibanaReact"],
+    "optionalPlugins": ["security", "screenshotMode"]
   }
 }
