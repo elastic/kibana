@@ -6269,6 +6269,40 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Visualization.hideFromChartSwitch",
+            "type": "Function",
+            "tags": [],
+            "label": "hideFromChartSwitch",
+            "description": [],
+            "signature": [
+              "((frame: ",
+              "FramePublicAPI",
+              ") => boolean) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.hideFromChartSwitch.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "frame",
+                "description": [],
+                "signature": [
+                  "FramePublicAPI"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Visualization.switchVisualizationType",
             "type": "Function",
             "tags": [],
