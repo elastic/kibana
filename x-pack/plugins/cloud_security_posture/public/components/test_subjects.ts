@@ -54,6 +54,11 @@ export const AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ = {
   CLOUDFORMATION: 'aws-cloudformation-setup-option',
   MANUAL: 'aws-manual-setup-option',
 };
+export const GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ = {
+  CLOUD_SHELL: 'gcpGoogleCloudShellOptionTestId',
+  MANUAL: 'gcpManualOptionTestId',
+};
+export const CIS_GCP_OPTION_TEST_SUBJ = 'cisGcpTestId';
 
 export const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
 export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';

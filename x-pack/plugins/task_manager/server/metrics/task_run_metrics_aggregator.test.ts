@@ -93,6 +93,7 @@ describe('TaskRunMetricsAggregator', () => {
         framework_errors: 0,
         user_errors: 0,
         delay: { counts: [], values: [] },
+        total_errors: 0,
       },
     });
   });
@@ -106,6 +107,7 @@ describe('TaskRunMetricsAggregator', () => {
         framework_errors: 0,
         user_errors: 0,
         delay: { counts: [], values: [] },
+        total_errors: 0,
       },
       by_type: {},
     });
@@ -122,9 +124,17 @@ describe('TaskRunMetricsAggregator', () => {
         framework_errors: 0,
         user_errors: 0,
         delay: { counts: [], values: [] },
+        total_errors: 0,
       },
       by_type: {
-        telemetry: { success: 2, not_timed_out: 2, total: 2, framework_errors: 0, user_errors: 0 },
+        telemetry: {
+          success: 2,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
       },
     });
   });
@@ -139,6 +149,7 @@ describe('TaskRunMetricsAggregator', () => {
         framework_errors: 0,
         user_errors: 0,
         delay: { counts: [1], values: [10] },
+        total_errors: 0,
       },
     });
   });
@@ -155,6 +166,7 @@ describe('TaskRunMetricsAggregator', () => {
         framework_errors: 0,
         user_errors: 0,
         delay: { counts: [], values: [] },
+        total_errors: 0,
       },
     });
   });
@@ -170,9 +182,17 @@ describe('TaskRunMetricsAggregator', () => {
         framework_errors: 0,
         user_errors: 0,
         delay: { counts: [], values: [] },
+        total_errors: 0,
       },
       by_type: {
-        telemetry: { success: 2, not_timed_out: 0, total: 2, framework_errors: 0, user_errors: 0 },
+        telemetry: {
+          success: 2,
+          not_timed_out: 0,
+          total: 2,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
       },
     });
   });
@@ -188,9 +208,17 @@ describe('TaskRunMetricsAggregator', () => {
         framework_errors: 2,
         user_errors: 0,
         delay: { counts: [], values: [] },
+        total_errors: 2,
       },
       by_type: {
-        telemetry: { success: 0, not_timed_out: 2, total: 2, framework_errors: 2, user_errors: 0 },
+        telemetry: {
+          success: 0,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 2,
+          user_errors: 0,
+          total_errors: 2,
+        },
       },
     });
   });
@@ -206,9 +234,17 @@ describe('TaskRunMetricsAggregator', () => {
         framework_errors: 2,
         user_errors: 0,
         delay: { counts: [], values: [] },
+        total_errors: 2,
       },
       by_type: {
-        telemetry: { success: 0, not_timed_out: 0, total: 2, framework_errors: 2, user_errors: 0 },
+        telemetry: {
+          success: 0,
+          not_timed_out: 0,
+          total: 2,
+          framework_errors: 2,
+          user_errors: 0,
+          total_errors: 2,
+        },
       },
     });
   });
@@ -226,10 +262,25 @@ describe('TaskRunMetricsAggregator', () => {
         framework_errors: 1,
         user_errors: 0,
         delay: { counts: [], values: [] },
+        total_errors: 1,
       },
       by_type: {
-        report: { success: 2, not_timed_out: 1, total: 2, framework_errors: 0, user_errors: 0 },
-        telemetry: { success: 1, not_timed_out: 2, total: 2, framework_errors: 1, user_errors: 0 },
+        report: {
+          success: 2,
+          not_timed_out: 1,
+          total: 2,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        telemetry: {
+          success: 1,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 1,
+          user_errors: 0,
+          total_errors: 1,
+        },
       },
     });
   });
@@ -263,15 +314,24 @@ describe('TaskRunMetricsAggregator', () => {
         framework_errors: 3,
         user_errors: 0,
         delay: { counts: [], values: [] },
+        total_errors: 3,
       },
       by_type: {
-        actions: { success: 3, not_timed_out: 3, total: 3, framework_errors: 0, user_errors: 0 },
+        actions: {
+          success: 3,
+          not_timed_out: 3,
+          total: 3,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
         'actions:__email': {
           success: 1,
           not_timed_out: 1,
           total: 1,
           framework_errors: 0,
           user_errors: 0,
+          total_errors: 0,
         },
         'actions:webhook': {
           success: 2,
@@ -279,14 +339,23 @@ describe('TaskRunMetricsAggregator', () => {
           total: 2,
           framework_errors: 0,
           user_errors: 0,
+          total_errors: 0,
         },
-        alerting: { success: 5, not_timed_out: 5, total: 7, framework_errors: 2, user_errors: 0 },
+        alerting: {
+          success: 5,
+          not_timed_out: 5,
+          total: 7,
+          framework_errors: 2,
+          user_errors: 0,
+          total_errors: 2,
+        },
         'alerting:example': {
           success: 3,
           not_timed_out: 4,
           total: 5,
           framework_errors: 2,
           user_errors: 0,
+          total_errors: 2,
         },
         'alerting:__index-threshold': {
           success: 2,
@@ -294,9 +363,24 @@ describe('TaskRunMetricsAggregator', () => {
           total: 2,
           framework_errors: 0,
           user_errors: 0,
+          total_errors: 0,
         },
-        report: { success: 2, not_timed_out: 2, total: 2, framework_errors: 0, user_errors: 0 },
-        telemetry: { success: 1, not_timed_out: 2, total: 2, framework_errors: 1, user_errors: 0 },
+        report: {
+          success: 2,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        telemetry: {
+          success: 1,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 1,
+          user_errors: 0,
+          total_errors: 1,
+        },
       },
     });
   });
@@ -335,15 +419,24 @@ describe('TaskRunMetricsAggregator', () => {
         delay: { counts: [3, 0, 1], values: [10, 20, 30] },
         framework_errors: 3,
         user_errors: 0,
+        total_errors: 3,
       },
       by_type: {
-        actions: { success: 3, not_timed_out: 3, total: 3, framework_errors: 0, user_errors: 0 },
+        actions: {
+          success: 3,
+          not_timed_out: 3,
+          total: 3,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
         'actions:__email': {
           success: 1,
           not_timed_out: 1,
           total: 1,
           framework_errors: 0,
           user_errors: 0,
+          total_errors: 0,
         },
         'actions:webhook': {
           success: 2,
@@ -351,14 +444,23 @@ describe('TaskRunMetricsAggregator', () => {
           total: 2,
           framework_errors: 0,
           user_errors: 0,
+          total_errors: 0,
         },
-        alerting: { success: 5, not_timed_out: 5, total: 7, framework_errors: 2, user_errors: 0 },
+        alerting: {
+          success: 5,
+          not_timed_out: 5,
+          total: 7,
+          framework_errors: 2,
+          user_errors: 0,
+          total_errors: 2,
+        },
         'alerting:example': {
           success: 3,
           not_timed_out: 4,
           total: 5,
           framework_errors: 2,
           user_errors: 0,
+          total_errors: 2,
         },
         'alerting:__index-threshold': {
           success: 2,
@@ -366,9 +468,24 @@ describe('TaskRunMetricsAggregator', () => {
           total: 2,
           framework_errors: 0,
           user_errors: 0,
+          total_errors: 0,
         },
-        report: { success: 2, not_timed_out: 2, total: 2, framework_errors: 0, user_errors: 0 },
-        telemetry: { success: 1, not_timed_out: 2, total: 2, framework_errors: 1, user_errors: 0 },
+        report: {
+          success: 2,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        telemetry: {
+          success: 1,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 1,
+          user_errors: 0,
+          total_errors: 1,
+        },
       },
     });
 
@@ -381,15 +498,24 @@ describe('TaskRunMetricsAggregator', () => {
         framework_errors: 0,
         user_errors: 0,
         delay: { counts: [], values: [] },
+        total_errors: 0,
       },
       by_type: {
-        actions: { success: 0, not_timed_out: 0, total: 0, framework_errors: 0, user_errors: 0 },
+        actions: {
+          success: 0,
+          not_timed_out: 0,
+          total: 0,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
         'actions:__email': {
           success: 0,
           not_timed_out: 0,
           total: 0,
           framework_errors: 0,
           user_errors: 0,
+          total_errors: 0,
         },
         'actions:webhook': {
           success: 0,
@@ -397,14 +523,23 @@ describe('TaskRunMetricsAggregator', () => {
           total: 0,
           framework_errors: 0,
           user_errors: 0,
+          total_errors: 0,
         },
-        alerting: { success: 0, not_timed_out: 0, total: 0, framework_errors: 0, user_errors: 0 },
+        alerting: {
+          success: 0,
+          not_timed_out: 0,
+          total: 0,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
         'alerting:example': {
           success: 0,
           not_timed_out: 0,
           total: 0,
           framework_errors: 0,
           user_errors: 0,
+          total_errors: 0,
         },
         'alerting:__index-threshold': {
           success: 0,
@@ -412,9 +547,24 @@ describe('TaskRunMetricsAggregator', () => {
           total: 0,
           framework_errors: 0,
           user_errors: 0,
+          total_errors: 0,
         },
-        report: { success: 0, not_timed_out: 0, total: 0, framework_errors: 0, user_errors: 0 },
-        telemetry: { success: 0, not_timed_out: 0, total: 0, framework_errors: 0, user_errors: 0 },
+        report: {
+          success: 0,
+          not_timed_out: 0,
+          total: 0,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
+        telemetry: {
+          success: 0,
+          not_timed_out: 0,
+          total: 0,
+          framework_errors: 0,
+          user_errors: 0,
+          total_errors: 0,
+        },
       },
     });
   });

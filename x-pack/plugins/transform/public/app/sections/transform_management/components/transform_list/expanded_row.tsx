@@ -27,11 +27,12 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useEnabledFeatures } from '../../../../serverless_context';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
-import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
+import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
-import { TransformListRow } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
 
-import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_row_details_pane';
+import type { SectionConfig, SectionItem } from './expanded_row_details_pane';
+import { ExpandedRowDetailsPane } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 import { ExpandedRowPreviewPane } from './expanded_row_preview_pane';
