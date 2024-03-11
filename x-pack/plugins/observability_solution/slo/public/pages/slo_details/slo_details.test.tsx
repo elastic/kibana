@@ -30,7 +30,7 @@ import { useLicense } from '../../hooks/use_license';
 import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
-import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { TagsList, HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -56,6 +56,9 @@ const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
 const TagsListMock = TagsList as jest.Mock;
 TagsListMock.mockReturnValue(<div>Tags list</div>);
+
+const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
+HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
 const mockNavigate = jest.fn();
 const mockLocator = jest.fn();

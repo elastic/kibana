@@ -18,6 +18,7 @@ import { useLicense } from '../../hooks/use_license';
 import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
 import { SlosWelcomePage } from './slos_welcome';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -30,6 +31,9 @@ jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_slo_list');
 jest.mock('../../hooks/use_capabilities');
 jest.mock('../../hooks/use_fetch_global_diagnosis');
+
+const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
+HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;

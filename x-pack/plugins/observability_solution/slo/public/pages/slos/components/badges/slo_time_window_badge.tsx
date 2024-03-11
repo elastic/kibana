@@ -39,13 +39,10 @@ export function SloTimeWindowBadge({ slo, color }: Props) {
       <EuiFlexItem grow={false}>
         <EuiBadge
           onClick={onBadgeClick}
-          onClickAriaLabel={i18n.translate(
-            'xpack.observability.slo.timeWindowBadge.clickToFilter',
-            {
-              defaultMessage: 'Click to filter by {timeWindow} SLOs',
-              values: { timeWindow: toDurationLabel(slo.timeWindow.duration) },
-            }
-          )}
+          onClickAriaLabel={i18n.translate('xpack.slo.timeWindowBadge.clickToFilter', {
+            defaultMessage: 'Click to filter by {timeWindow} SLOs',
+            values: { timeWindow: toDurationLabel(slo.timeWindow.duration) },
+          })}
           color={color ?? euiLightVars.euiColorDisabled}
           iconType="editorItemAlignRight"
           iconSide="left"

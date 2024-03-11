@@ -41,7 +41,9 @@ export function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { isInApp: 
         {!alert.link || isInApp ? null : (
           <EuiFlexItem grow={false}>
             <EuiButton data-test-subj="alertsFlyoutViewInAppButton" fill href={viewInAppUrl}>
-              {i18n.translate('xpack.slo.alertsFlyoutFooter.', { defaultMessage: '' })}
+              {i18n.translate('xpack.slo.alertsFlyout.viewInAppButtonText', {
+                defaultMessage: 'View in app',
+              })}
             </EuiButton>
           </EuiFlexItem>
         )}
@@ -56,7 +58,9 @@ export function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { isInApp: 
                 prepend(observabilityPaths.alertDetails(alert.fields['kibana.alert.uuid']))
               }
             >
-              {i18n.translate('xpack.slo.alertsFlyoutFooter.', { defaultMessage: '' })}
+              {i18n.translate('xpack.slo.alertsFlyout.alertsDetailsButtonText', {
+                defaultMessage: 'Alert details',
+              })}
             </EuiButton>
           </EuiFlexItem>
         )}

@@ -62,7 +62,7 @@ export function FieldSelector({
 
   const ALL_VALUE_OPTION = {
     value: ALL_VALUE,
-    label: i18n.translate('xpack.slo.fieldSelector.', { defaultMessage: '' }),
+    label: i18n.translate('xpack.slo.fieldSelector.all', { defaultMessage: 'All' }),
   };
 
   const options = (allowAllOption ? [ALL_VALUE_OPTION] : []).concat(createOptions(suggestions));

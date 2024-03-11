@@ -27,6 +27,7 @@ import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from './constants';
 import { SloEditPage } from './slo_edit';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -57,6 +58,9 @@ const useUpdateSloMock = useUpdateSlo as jest.Mock;
 const useCreateRuleMock = useCreateRule as jest.Mock;
 const useFetchApmSuggestionsMock = useFetchApmSuggestions as jest.Mock;
 const useCapabilitiesMock = useCapabilities as jest.Mock;
+
+const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
+HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();

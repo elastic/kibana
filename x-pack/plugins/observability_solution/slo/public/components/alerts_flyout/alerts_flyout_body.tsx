@@ -67,7 +67,9 @@ export function AlertsFlyoutBody({ alert, rawAlert, id: pageId }: FlyoutProps) {
   const overviewTab = useMemo(() => {
     const overviewListItems = [
       {
-        title: i18n.translate('xpack.slo.overviewTab.', { defaultMessage: '' }),
+        title: i18n.translate('xpack.slo.alertsFlyout.statusLabel', {
+          defaultMessage: 'Status',
+        }),
         description: (
           <AlertLifecycleStatusBadge
             alertStatus={alert.fields[ALERT_STATUS] as AlertStatus}
@@ -76,13 +78,17 @@ export function AlertsFlyoutBody({ alert, rawAlert, id: pageId }: FlyoutProps) {
         ),
       },
       {
-        title: i18n.translate('xpack.slo.overviewTab.', { defaultMessage: '' }),
+        title: i18n.translate('xpack.slo.alertsFlyout.startedAtLabel', {
+          defaultMessage: 'Started at',
+        }),
         description: (
           <span title={alert.start.toString()}>{moment(alert.start).format(dateFormat)}</span>
         ),
       },
       {
-        title: i18n.translate('xpack.slo.overviewTab.', { defaultMessage: '' }),
+        title: i18n.translate('xpack.slo.alertsFlyout.lastUpdatedLabel', {
+          defaultMessage: 'Last updated',
+        }),
         description: (
           <span title={alert.lastUpdated.toString()}>
             {moment(alert.lastUpdated).format(dateFormat)}
@@ -90,25 +96,33 @@ export function AlertsFlyoutBody({ alert, rawAlert, id: pageId }: FlyoutProps) {
         ),
       },
       {
-        title: i18n.translate('xpack.slo.overviewTab.', { defaultMessage: '' }),
+        title: i18n.translate('xpack.slo.alertsFlyout.durationLabel', {
+          defaultMessage: 'Duration',
+        }),
         description: asDuration(alert.fields[ALERT_DURATION], { extended: true }),
       },
       {
-        title: i18n.translate('xpack.slo.overviewTab.', { defaultMessage: '' }),
+        title: i18n.translate('xpack.slo.alertsFlyout.expectedValueLabel', {
+          defaultMessage: 'Expected value',
+        }),
         description: formatAlertEvaluationValue(
           alert.fields[ALERT_RULE_TYPE_ID],
           alert.fields[ALERT_EVALUATION_THRESHOLD]
         ),
       },
       {
-        title: i18n.translate('xpack.slo.overviewTab.', { defaultMessage: '' }),
+        title: i18n.translate('xpack.slo.alertsFlyout.actualValueLabel', {
+          defaultMessage: 'Actual value',
+        }),
         description: formatAlertEvaluationValue(
           alert.fields[ALERT_RULE_TYPE_ID],
           alert.fields[ALERT_EVALUATION_VALUE]
         ),
       },
       {
-        title: i18n.translate('xpack.slo.overviewTab.', { defaultMessage: '' }),
+        title: i18n.translate('xpack.slo.alertsFlyout.ruleTypeLabel', {
+          defaultMessage: 'Rule type',
+        }),
         description: alert.fields[ALERT_RULE_CATEGORY] ?? '-',
       },
     ];
@@ -116,23 +130,35 @@ export function AlertsFlyoutBody({ alert, rawAlert, id: pageId }: FlyoutProps) {
     return {
       id: 'overview',
       'data-test-subj': 'overviewTab',
-      name: i18n.translate('xpack.slo.overviewTab.', { defaultMessage: '' }),
+      name: i18n.translate('xpack.slo.alertFlyout.overview', {
+        defaultMessage: 'Overview',
+      }),
       content: (
         <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel">
           <EuiTitle size="xs">
-            <h4>{i18n.translate('xpack.slo.overviewTab.', { defaultMessage: '' })}</h4>
+            <h4>
+              {i18n.translate('xpack.slo.alertsFlyout.reasonTitle', {
+                defaultMessage: 'Reason',
+              })}
+            </h4>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s">{alert.reason}</EuiText>
           <EuiSpacer size="s" />
           {!!linkToRule && (
             <EuiLink href={linkToRule} data-test-subj="viewRuleDetailsFlyout">
-              {i18n.translate('xpack.slo.overviewTab.', { defaultMessage: '' })}
+              {i18n.translate('xpack.slo.alertsFlyout.viewRulesDetailsLinkText', {
+                defaultMessage: 'View rule details',
+              })}
             </EuiLink>
           )}
           <EuiHorizontalRule size="full" />
           <EuiTitle size="xs">
-            <h4>{i18n.translate('xpack.slo.overviewTab.', { defaultMessage: '' })}</h4>
+            <h4>
+              {i18n.translate('xpack.slo.alertsFlyout.documentSummaryTitle', {
+                defaultMessage: 'Document Summary',
+              })}
+            </h4>
           </EuiTitle>
           <EuiSpacer size="m" />
           <EuiDescriptionList
@@ -155,7 +181,7 @@ export function AlertsFlyoutBody({ alert, rawAlert, id: pageId }: FlyoutProps) {
     () => ({
       id: 'table',
       'data-test-subj': 'tableTab',
-      name: i18n.translate('xpack.slo.tableTab.', { defaultMessage: '' }),
+      name: i18n.translate('xpack.slo.alertsFlyout.table', { defaultMessage: 'Table' }),
       content: (
         <EuiPanel hasShadow={false} data-test-subj="tableTabPanel">
           <AlertFieldsTable alert={rawAlert} />

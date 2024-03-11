@@ -45,12 +45,9 @@ export const getColumns = (
     ? [
         {
           columnHeaderType: 'not-filtered',
-          displayAsText: i18n.translate(
-            'xpack.observability.alertsTGrid.ruleNameColumnDescription',
-            {
-              defaultMessage: 'Rule name',
-            }
-          ),
+          displayAsText: i18n.translate('xpack.slo.alertsTGrid.ruleNameColumnDescription', {
+            defaultMessage: 'Rule name',
+          }),
           id: ALERT_RULE_NAME,
           initialWidth: 150,
         },
@@ -60,7 +57,7 @@ export const getColumns = (
   return [
     {
       columnHeaderType: 'not-filtered',
-      displayAsText: i18n.translate('xpack.observability.alertsTGrid.statusColumnDescription', {
+      displayAsText: i18n.translate('xpack.slo.alertsTGrid.statusColumnDescription', {
         defaultMessage: 'Alert Status',
       }),
       id: ALERT_STATUS,
@@ -68,7 +65,7 @@ export const getColumns = (
     },
     {
       columnHeaderType: 'not-filtered',
-      displayAsText: i18n.translate('xpack.observability.alertsTGrid.triggeredColumnDescription', {
+      displayAsText: i18n.translate('xpack.slo.alertsTGrid.triggeredColumnDescription', {
         defaultMessage: 'Triggered',
       }),
       id: ALERT_START,
@@ -77,7 +74,7 @@ export const getColumns = (
     },
     {
       columnHeaderType: 'not-filtered',
-      displayAsText: i18n.translate('xpack.observability.alertsTGrid.durationColumnDescription', {
+      displayAsText: i18n.translate('xpack.slo.alertsTGrid.durationColumnDescription', {
         defaultMessage: 'Duration',
       }),
       id: ALERT_DURATION,
@@ -86,7 +83,7 @@ export const getColumns = (
     ...ruleNameColumn,
     {
       columnHeaderType: 'not-filtered',
-      displayAsText: i18n.translate('xpack.observability.alertsTGrid.sourceColumnDescription', {
+      displayAsText: i18n.translate('xpack.slo.alertsTGrid.sourceColumnDescription', {
         defaultMessage: 'Group',
       }),
       id: ALERT_INSTANCE_ID,
@@ -94,18 +91,15 @@ export const getColumns = (
     },
     {
       columnHeaderType: 'not-filtered',
-      displayAsText: i18n.translate(
-        'xpack.observability.alertsTGrid.observedValueColumnDescription',
-        {
-          defaultMessage: 'Observed value',
-        }
-      ),
+      displayAsText: i18n.translate('xpack.slo.alertsTGrid.observedValueColumnDescription', {
+        defaultMessage: 'Observed value',
+      }),
       id: ALERT_EVALUATION_VALUE,
       initialWidth: 100,
     },
     {
       columnHeaderType: 'not-filtered',
-      displayAsText: i18n.translate('xpack.observability.alertsTGrid.thresholdColumnDescription', {
+      displayAsText: i18n.translate('xpack.slo.alertsTGrid.thresholdColumnDescription', {
         defaultMessage: 'Threshold',
       }),
       id: ALERT_EVALUATION_THRESHOLD,
@@ -113,7 +107,7 @@ export const getColumns = (
     },
     {
       columnHeaderType: 'not-filtered',
-      displayAsText: i18n.translate('xpack.observability.alertsTGrid.tagsColumnDescription', {
+      displayAsText: i18n.translate('xpack.slo.alertsTGrid.tagsColumnDescription', {
         defaultMessage: 'Tags',
       }),
       id: TAGS,
@@ -121,7 +115,7 @@ export const getColumns = (
     },
     {
       columnHeaderType: 'not-filtered',
-      displayAsText: i18n.translate('xpack.observability.alertsTGrid.reasonColumnDescription', {
+      displayAsText: i18n.translate('xpack.slo.alertsTGrid.reasonColumnDescription', {
         defaultMessage: 'Reason',
       }),
       id: ALERT_REASON,

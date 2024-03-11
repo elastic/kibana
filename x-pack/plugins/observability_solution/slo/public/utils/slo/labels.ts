@@ -35,7 +35,7 @@ export const INDICATOR_APM_AVAILABILITY = i18n.translate('xpack.slo.indicators.a
 });
 
 export const INDICATOR_SYNTHETICS_AVAILABILITY = i18n.translate(
-  'xpack.observability.slo.indicators.syntheticsAvailability',
+  'xpack.slo.indicators.syntheticsAvailability',
   { defaultMessage: 'Synthetics availability' }
 );
 

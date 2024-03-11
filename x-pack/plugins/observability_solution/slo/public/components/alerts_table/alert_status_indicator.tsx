@@ -20,7 +20,7 @@ export function AlertStatusIndicator({ alertStatus, textSize = 'xs' }: AlertStat
   if (alertStatus === ALERT_STATUS_ACTIVE) {
     return (
       <EuiHealth color={LEGACY_LIGHT_THEME.colors.vizColors[2]} textSize={textSize}>
-        {i18n.translate('xpack.observability.alertsTGrid.statusActiveDescription', {
+        {i18n.translate('xpack.slo.alertsTGrid.statusActiveDescription', {
           defaultMessage: 'Active',
         })}
       </EuiHealth>
@@ -30,7 +30,7 @@ export function AlertStatusIndicator({ alertStatus, textSize = 'xs' }: AlertStat
   return (
     <EuiHealth color={LEGACY_LIGHT_THEME.colors.vizColors[1]} textSize={textSize}>
       <EuiText color="subdued" size="relative">
-        {i18n.translate('xpack.observability.alertsTGrid.statusRecoveredDescription', {
+        {i18n.translate('xpack.slo.alertsTGrid.statusRecoveredDescription', {
           defaultMessage: 'Recovered',
         })}
       </EuiText>

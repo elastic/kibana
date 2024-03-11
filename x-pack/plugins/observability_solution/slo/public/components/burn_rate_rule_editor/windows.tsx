@@ -328,10 +328,7 @@ export function Windows({ slo, windows, errors, onChange, totalNumberOfWindows }
               defaultMessage: 'Add window',
             })}
           >
-            <FormattedMessage
-              id="xpack.observability.slo.rules.addWIndowLabel"
-              defaultMessage="Add window"
-            />
+            <FormattedMessage id="xpack.slo.slo.rules.addWIndowLabel" defaultMessage="Add window" />
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={0}>

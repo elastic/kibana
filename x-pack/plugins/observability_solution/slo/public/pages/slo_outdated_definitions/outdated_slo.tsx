@@ -85,7 +85,7 @@ export function OutdatedSlo({ slo, onReset, onDelete }: OutdatedSloProps) {
             onClick={handleReset}
           >
             <FormattedMessage
-              id="xpack.observability.slosOutdatedDefinitions.resetButtonLabel"
+              id="xpack.slo.slosOutdatedDefinitions.resetButtonLabel"
               defaultMessage="Reset"
             />
           </EuiButton>
@@ -99,7 +99,7 @@ export function OutdatedSlo({ slo, onReset, onDelete }: OutdatedSloProps) {
             onClick={handleDelete}
           >
             <FormattedMessage
-              id="xpack.observability.slosOutdatedDefinitions.deleteButtonLabel"
+              id="xpack.slo.slosOutdatedDefinitions.deleteButtonLabel"
               defaultMessage="Delete"
             />
           </EuiButton>

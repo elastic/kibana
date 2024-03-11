@@ -21,7 +21,7 @@ import { useDeleteSlo } from '../../hooks/use_delete_slo';
 import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
-import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
 import { SlosPage } from './slos';
@@ -49,6 +49,9 @@ const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 const useCapabilitiesMock = useCapabilities as jest.Mock;
 const TagsListMock = TagsList as jest.Mock;
 TagsListMock.mockReturnValue(<div>Tags list</div>);
+
+const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
+HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
 const mockCreateSlo = jest.fn();
 const mockDeleteSlo = jest.fn();

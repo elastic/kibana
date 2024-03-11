@@ -63,7 +63,7 @@ export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
         <EuiFlyoutBody>
           <EuiText>
             <FormattedMessage
-              id="xpack.equivalentApiRequest.p.useTheRESTAPILabel"
+              id="xpack.slo.equivalentApiRequest.p.useTheRESTAPILabel"
               defaultMessage="Use the REST API"
             />
           </EuiText>

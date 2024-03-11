@@ -34,7 +34,7 @@ function SloAddFormFlyout({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj="addSLOFlyoutTitle">
           <h3 id="flyoutTitle">
-            <FormattedMessage defaultMessage="Create SLO" id="xpack.sloAdd.flyoutTitle" />
+            <FormattedMessage defaultMessage="Create SLO" id="xpack.slo.add.flyoutTitle" />
           </h3>
         </EuiTitle>
       </EuiFlyoutHeader>

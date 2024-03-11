@@ -65,7 +65,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
           <FormattedMessage
-            id="xpack.observability.sloEmbeddable.config.cancelButtonLabel"
+            id="xpack.slo.sloEmbeddable.config.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
@@ -77,7 +77,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
           fill
         >
           <FormattedMessage
-            id="xpack.observability.embeddableSlo.config.confirmButtonLabel"
+            id="xpack.slo.embeddableSlo.config.confirmButtonLabel"
             defaultMessage="Confirm configurations"
           />
         </EuiButton>

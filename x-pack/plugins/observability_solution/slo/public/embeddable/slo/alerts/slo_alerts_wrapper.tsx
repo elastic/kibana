@@ -140,7 +140,7 @@ export function SloAlertsWrapper({
             onClick={handleGoToAlertsClick}
           >
             <FormattedMessage
-              id="xpack.observability.sloAlertsWrapper.goToAlertsFlexItemLabel"
+              id="xpack.slo.sloAlertsWrapper.goToAlertsFlexItemLabel"
               defaultMessage="Go to alerts"
             />
           </EuiLink>

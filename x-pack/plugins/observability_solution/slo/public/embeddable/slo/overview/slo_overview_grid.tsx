@@ -61,7 +61,7 @@ const getSloChartData = ({
     })),
     extra: (
       <FormattedMessage
-        id="xpack.sLOGridItem.targetFlexItemLabel"
+        id="xpack.slo.sloGridItem.targetFlexItemLabel"
         defaultMessage="Target {target}"
         values={{
           target: sloTarget,

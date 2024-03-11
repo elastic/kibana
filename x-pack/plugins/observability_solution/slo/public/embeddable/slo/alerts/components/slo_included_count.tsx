@@ -18,7 +18,7 @@ export function SloIncludedCount({ slos }: { slos: SloItem[] }) {
 
   return (
     <FormattedMessage
-      id="xpack.sloAlertsWrapper.sLOsIncludedFlexItemLabel.withInstances"
+      id="xpack.slo.sloAlertsWrapper.sLOsIncludedFlexItemLabel.withInstances"
       defaultMessage="{numOfSlos, number} {numOfSlos, plural, one {SLO} other {SLOs}}{instances} included"
       values={{
         numOfSlos: slos.length,
