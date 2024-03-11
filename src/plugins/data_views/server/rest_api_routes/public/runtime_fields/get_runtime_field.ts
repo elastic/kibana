@@ -24,7 +24,7 @@ import {
   SERVICE_KEY_TYPE,
   INITIAL_REST_VERSION,
 } from '../../../constants';
-import { responseFormatter } from './response_formatter';
+import { responseFormatterLazy } from './response_formatter';
 import { runtimeResponseSchema } from '../../schema';
 import type { RuntimeResponseType } from '../../route_types';
 
@@ -44,7 +44,7 @@ export const getRuntimeField = async ({
   name,
 }: GetRuntimeFieldArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getDataViewLazy(id);
 
   const field = dataView.getRuntimeField(name);
 
@@ -52,7 +52,14 @@ export const getRuntimeField = async ({
     throw new ErrorIndexPatternFieldNotFound(id, name);
   }
 
-  return { dataView, fields: Object.values(dataView.getFieldsByRuntimeFieldName(name) || {}) };
+  return {
+    dataView,
+    fields: Object.values(
+      (
+        await dataView.getFields({ fieldName: [name], mapped: false, scripted: false })
+      ).getFieldMap()
+    ),
+  };
 };
 
 const getRuntimeFieldRouteFactory =
@@ -109,7 +116,7 @@ const getRuntimeFieldRouteFactory =
           name,
         });
 
-        const response: RuntimeResponseType = responseFormatter({
+        const response: RuntimeResponseType = await responseFormatterLazy({
           serviceKey,
           dataView,
           fields: fields || [],

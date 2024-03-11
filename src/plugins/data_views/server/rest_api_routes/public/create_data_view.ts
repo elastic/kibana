@@ -44,8 +44,7 @@ export const createDataView = async ({
   counterName,
 }: CreateDataViewArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  // return dataViewsService.createAndSaveDataViewLazy(spec, override);
-  return dataViewsService.createAndSave(spec, override);
+  return dataViewsService.createAndSaveDataViewLazy(spec, override);
 };
 
 const registerCreateDataViewRouteFactory =
@@ -107,7 +106,7 @@ const registerCreateDataViewRouteFactory =
 
           const responseBody: Record<string, DataViewSpecRestResponse> = {
             [serviceKey]: {
-              ...(await dataView.toSpec()),
+              ...(await dataView.toSpec({ fieldParams: { fieldName: ['*'] } })),
               namespaces: dataView.namespaces,
             },
           };

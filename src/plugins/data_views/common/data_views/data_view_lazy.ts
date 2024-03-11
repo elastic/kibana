@@ -95,7 +95,7 @@ export class DataViewLazy extends AbstractDataView {
       runtimeResult = this.getRuntimeFields({ fieldName });
     }
 
-    const fieldMap = { ...scriptedResult, ...mappedResult, ...runtimeResult };
+    const fieldMap = { ...mappedResult, ...scriptedResult, ...runtimeResult };
     let fieldMapSorted = {};
     let hasBeenSorted = false;
 
@@ -369,9 +369,18 @@ export class DataViewLazy extends AbstractDataView {
         return;
       }
       let fld = this.fieldCache.get(field.name);
-      if (!fld) {
-        fld = new DataViewField({ ...field, searchable: false, aggregatable: false });
+
+      if (fld) {
+        this.fieldCache.delete(field.name);
       }
+      fld = new DataViewField({
+        ...field,
+        scripted: true,
+        searchable: false,
+        aggregatable: false,
+        count: this.fieldAttrs?.[field.name]?.count,
+        customLabel: this.fieldAttrs?.[field.name]?.customLabel,
+      });
       this.fieldCache.set(field.name, fld);
       dataViewFields[field.name] = fld;
     });
@@ -411,6 +420,8 @@ export class DataViewLazy extends AbstractDataView {
       } else {
         fld = new DataViewField({
           ...field,
+          count: this.fieldAttrs?.[field.name]?.count,
+          customLabel: this.fieldAttrs?.[field.name]?.customLabel,
           shortDotsEnable: this.shortDotsEnable,
         });
         this.fieldCache.set(field.name, fld);
@@ -518,16 +529,16 @@ export class DataViewLazy extends AbstractDataView {
    * @param includeFields Whether or not to include the `fields` list as part of this spec. If not included, the list
    * will be fetched from Elasticsearch when instantiating a new Data View with this spec.
    */
-  public async toSpec(
-    params: { fieldParams?: GetFieldsParams } = { fieldParams: { fieldName: ['*'] } }
-  ): Promise<DataViewSpec> {
-    const spec = this.toSpecShared(!!params.fieldParams);
+  public async toSpec(params?: { fieldParams?: GetFieldsParams }): Promise<DataViewSpec> {
+    const spec = this.toSpecShared(!!params?.fieldParams);
 
-    if (params.fieldParams) {
+    if (params?.fieldParams) {
       const fields: DataViewFieldSpecMap = {};
       const fieldMap = (await this.getFields(params.fieldParams)).getFieldMap();
       Object.values(fieldMap).forEach((field) => {
-        fields[field.name] = field.toSpec({ getFormatterForField: this.getFormatterForField });
+        fields[field.name] = field.toSpec({
+          getFormatterForField: this.getFormatterForField.bind(this),
+        });
       });
       spec.fields = fields;
     }
