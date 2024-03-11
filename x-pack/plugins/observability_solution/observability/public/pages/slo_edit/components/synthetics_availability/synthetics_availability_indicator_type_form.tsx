@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiCallOut } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
 import { useFormContext } from 'react-hook-form';
@@ -13,6 +13,7 @@ import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../synthetics_common/field_selector';
 import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
+import { GroupByCardinality } from '../common/group_by_cardinality';
 
 const ONE_DAY_IN_MILLISECONDS = 1 * 60 * 60 * 1000 * 24;
 
@@ -130,11 +131,14 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiCallOut
-        size="s"
-        title="Synthetics availability SLIs are automatically grouped by monitor and location"
-        iconType="iInCircle"
+      <GroupByCardinality
+        titleAppend={i18n.translate(
+          'xpack.observability.slo.sloEdit.syntheticsAvailability.warning',
+          {
+            defaultMessage:
+              'Synthetics availability SLIs are automatically grouped by monitor and location.',
+          }
+        )}
       />
       <DataPreviewChart range={range} label={LABEL} useGoodBadEventsChart />
     </EuiFlexGroup>
