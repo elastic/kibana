@@ -9,10 +9,10 @@ import { stringify } from 'query-string';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
-import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
-import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { type Dictionary, isRisonSerializationRequired } from '@kbn/ml-url-state';
-import { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 
 export const DATA_VISUALIZER_APP_LOCATOR = 'DATA_VISUALIZER_APP_LOCATOR';
 
