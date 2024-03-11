@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { format as formatUrl, parse as parseUrl } from 'url';
 import { AnonymousAccessState, LocatorPublic } from '../../common';
-import { BrowserUrlService, UrlParamExtension } from '../types';
+import { UrlParamExtension } from '../types';
 
 interface EmbedProps {
   urlParamExtensions?: UrlParamExtension[];
@@ -22,7 +22,6 @@ interface EmbedProps {
         params: any;
       }
     | undefined;
-  urlService: BrowserUrlService;
   shareableUrlForSavedObject?: string;
   shareableUrl?: string;
   isEmbedded?: boolean;
@@ -40,8 +39,6 @@ export enum ExportUrlAsType {
 
 export const EmbedModal = ({
   urlParamExtensions,
-  shareableUrlLocatorParams,
-  urlService,
   shareableUrlForSavedObject,
   shareableUrl,
   isEmbedded,
