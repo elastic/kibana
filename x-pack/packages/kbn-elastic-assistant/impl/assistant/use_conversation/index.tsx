@@ -99,7 +99,7 @@ export const useConversation = (): UseConversation => {
             defaultSystemPromptId,
           },
           messages: [],
-          replacements: undefined,
+          replacements: {},
         });
       }
     },

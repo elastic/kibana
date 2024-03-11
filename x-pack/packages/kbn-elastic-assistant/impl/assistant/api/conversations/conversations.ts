@@ -30,7 +30,7 @@ export interface GetConversationByIdParams {
  * @param {IToasts} [options.toasts] - IToasts
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {Promise<Conversation | undefined>}
+ * @returns {Promise<Conversation>}
  */
 export const getConversationById = async ({
   http,
@@ -53,6 +53,7 @@ export const getConversationById = async ({
         values: { id },
       }),
     });
+    throw error;
   }
 };
 
@@ -72,14 +73,14 @@ export interface PostConversationParams {
  * @param {AbortSignal} [options.signal] - AbortSignal
  * @param {IToasts} [options.toasts] - IToasts
  *
- * @returns {Promise<PostConversationResponse | undefined>}
+ * @returns {Promise<PostConversationResponse>}
  */
 export const createConversation = async ({
   http,
   conversation,
   signal,
   toasts,
-}: PostConversationParams): Promise<Conversation | undefined> => {
+}: PostConversationParams): Promise<Conversation> => {
   try {
     const response = await http.post(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL, {
       body: JSON.stringify(conversation),
@@ -95,6 +96,7 @@ export const createConversation = async ({
         values: { title: conversation.title },
       }),
     });
+    throw error;
   }
 };
 
@@ -114,14 +116,14 @@ export interface DeleteConversationParams {
  * @param {AbortSignal} [options.signal] - AbortSignal
  * @param {IToasts} [options.toasts] - IToasts
  *
- * @returns {Promise<boolean | undefined>}
+ * @returns {Promise<boolean>}
  */
 export const deleteConversation = async ({
   http,
   id,
   signal,
   toasts,
-}: DeleteConversationParams): Promise<boolean | undefined> => {
+}: DeleteConversationParams): Promise<boolean> => {
   try {
     const response = await http.fetch(`${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/${id}`, {
       method: 'DELETE',
@@ -137,6 +139,7 @@ export const deleteConversation = async ({
         values: { id },
       }),
     });
+    throw error;
   }
 };
 
@@ -170,7 +173,7 @@ export interface PutConversationMessageParams {
  * @param {IToasts} [options.toasts] - IToasts
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {Promise<Conversation | undefined>}
+ * @returns {Promise<Conversation>}
  */
 export const updateConversation = async ({
   http,
@@ -182,7 +185,7 @@ export const updateConversation = async ({
   replacements,
   excludeFromLastConversationStorage,
   signal,
-}: PutConversationMessageParams): Promise<Conversation | undefined> => {
+}: PutConversationMessageParams): Promise<Conversation> => {
   try {
     const response = await http.fetch(
       `${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/${conversationId}`,
@@ -212,5 +215,6 @@ export const updateConversation = async ({
         values: { conversationId },
       }),
     });
+    throw error;
   }
 };
