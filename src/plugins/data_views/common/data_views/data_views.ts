@@ -961,17 +961,13 @@ export class DataViewsService {
         const shortDotsEnable = await this.getShortDotsEnable();
         const metaFields = await this.getMetaFields();
 
-        if (!this.scriptedFieldsEnabled) {
-          // only scripted fields are in the fields array
-          delete spec.fields;
-        }
-
         return new DataViewLazy({
           spec,
           fieldFormats: this.fieldFormats,
           shortDotsEnable,
           metaFields,
           apiClient: this.apiClient,
+          scriptedFieldsEnabled: this.scriptedFieldsEnabled,
         });
       };
 
@@ -1116,6 +1112,7 @@ export class DataViewsService {
       shortDotsEnable,
       metaFields,
       apiClient: this.apiClient,
+      scriptedFieldsEnabled: this.scriptedFieldsEnabled,
     });
   }
 
@@ -1451,6 +1448,7 @@ export class DataViewsService {
       shortDotsEnable,
       metaFields,
       apiClient: this.apiClient,
+      scriptedFieldsEnabled: this.scriptedFieldsEnabled,
     });
   }
 }

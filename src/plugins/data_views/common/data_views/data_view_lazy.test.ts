@@ -71,6 +71,7 @@ function create(id: string, spec?: DataViewSpec) {
         .fn()
         .mockImplementation(() => Promise.resolve({ fields: fieldCapsResponse })),
     } as any,
+    scriptedFieldsEnabled: true,
   });
 }
 
@@ -548,6 +549,7 @@ describe('DataViewLazy', () => {
             .fn()
             .mockImplementation(() => Promise.resolve({ fields: fieldCapsResponse })),
         } as any,
+        scriptedFieldsEnabled: true,
       });
       expect(restoredPattern.id).toEqual(dataViewLazy.id);
       expect(restoredPattern.getIndexPattern()).toEqual(dataViewLazy.getIndexPattern());

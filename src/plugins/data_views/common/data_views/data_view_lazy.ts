@@ -34,6 +34,7 @@ interface DataViewDeps {
   shortDotsEnable?: boolean;
   metaFields?: string[];
   apiClient: IDataViewsApiClient;
+  scriptedFieldsEnabled: boolean;
 }
 
 interface GetFieldsParams {
@@ -54,9 +55,15 @@ export class DataViewLazy extends AbstractDataView {
   private apiClient: IDataViewsApiClient;
   private fieldCache = new Map<string, DataViewField>();
 
+  /**
+   * Returns true if scripted fields are enabled
+   */
+  protected scriptedFieldsEnabled: boolean = false;
+
   constructor(config: DataViewDeps) {
     super(config);
     this.apiClient = config.apiClient;
+    this.scriptedFieldsEnabled = config.scriptedFieldsEnabled;
   }
 
   async getFields({
@@ -87,7 +94,7 @@ export class DataViewLazy extends AbstractDataView {
       });
     }
 
-    if (scripted) {
+    if (scripted && this.scriptedFieldsEnabled) {
       scriptedResult = this.getScriptedFields({ fieldName });
     }
 
