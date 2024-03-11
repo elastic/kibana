@@ -10,7 +10,7 @@ import { omitBy, isPlainObject, isEmpty } from 'lodash';
 import { isLeft } from 'fp-ts/lib/Either';
 import Boom from '@hapi/boom';
 import { strictKeysRt } from '@kbn/io-ts-utils';
-import { isObject } from 'lodash/fp';
+import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { RouteParamsRT } from './typings';
 
 interface KibanaRequestParams {
@@ -41,28 +41,3 @@ export function decodeRequestParams<T extends RouteParamsRT>(
 
   return result.right;
 }
-
-export const formatErrors = (errors: t.Errors): string[] => {
-  const err = errors.map((error) => {
-    if (error.message != null) {
-      return error.message;
-    } else {
-      const keyContext = error.context
-        .filter(
-          (entry) => entry.key != null && !Number.isInteger(+entry.key) && entry.key.trim() !== ''
-        )
-        .map((entry) => entry.key)
-        .join(',');
-
-      const nameContext = error.context.find(
-        (entry) => entry.type != null && entry.type.name != null && entry.type.name.length > 0
-      );
-      const suppliedValue =
-        keyContext !== '' ? keyContext : nameContext != null ? nameContext.type.name : '';
-      const value = isObject(error.value) ? JSON.stringify(error.value) : error.value;
-      return `Invalid value "${value}" supplied to "${suppliedValue}"`;
-    }
-  });
-
-  return [...new Set(err)];
-};
