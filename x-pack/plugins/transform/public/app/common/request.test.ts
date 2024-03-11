@@ -18,22 +18,14 @@ import type { StepDetailsExposedState } from '../sections/create_transform/compo
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
 import type { PivotAggsConfig } from './pivot_aggs';
 import {
-  defaultQuery,
   getPreviewTransformRequestBody,
   getCreateTransformRequestBody,
   getCreateTransformSettingsRequestBody,
   getTransformConfigQuery,
   getMissingBucketConfig,
   getRequestPayload,
-  isDefaultQuery,
-  isMatchAllQuery,
-  isSimpleQuery,
-  matchAllQuery,
-  type TransformConfigQuery,
 } from './request';
 import type { LatestFunctionConfigUI } from '../../../common/types/transform';
-
-const simpleQuery: TransformConfigQuery = { query_string: { query: 'airline:AAL' } };
 
 const groupByTerms: PivotGroupByConfig = {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
@@ -50,24 +42,6 @@ const aggsAvg: PivotAggsConfig = {
 };
 
 describe('Transform: Common', () => {
-  test('isMatchAllQuery()', () => {
-    expect(isMatchAllQuery(defaultQuery)).toBe(false);
-    expect(isMatchAllQuery(matchAllQuery)).toBe(true);
-    expect(isMatchAllQuery(simpleQuery)).toBe(false);
-  });
-
-  test('isSimpleQuery()', () => {
-    expect(isSimpleQuery(defaultQuery)).toBe(true);
-    expect(isSimpleQuery(matchAllQuery)).toBe(false);
-    expect(isSimpleQuery(simpleQuery)).toBe(true);
-  });
-
-  test('isDefaultQuery()', () => {
-    expect(isDefaultQuery(defaultQuery)).toBe(true);
-    expect(isDefaultQuery(matchAllQuery)).toBe(true);
-    expect(isDefaultQuery(simpleQuery)).toBe(false);
-  });
-
   test('getTransformConfigQuery()', () => {
     const query = getTransformConfigQuery('the-query');
 

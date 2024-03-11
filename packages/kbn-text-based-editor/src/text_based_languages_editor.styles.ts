@@ -69,7 +69,6 @@ export const textBasedLanguagedEditorStyles = (
       transform: 'translate(0, -50%)',
     },
     bottomContainer: {
-      border: euiTheme.border.thin,
       borderLeft: editorIsInline ? 'none' : euiTheme.border.thin,
       borderRight: editorIsInline ? 'none' : euiTheme.border.thin,
       borderTop:

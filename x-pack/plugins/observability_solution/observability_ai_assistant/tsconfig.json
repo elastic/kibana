@@ -69,7 +69,8 @@
     "@kbn/field-types",
     "@kbn/es-types",
     "@kbn/esql-utils",
-    "@kbn/data-plugin"
+    "@kbn/data-plugin",
+    "@kbn/serverless"
   ],
   "exclude": ["target/**/*"]
 }
