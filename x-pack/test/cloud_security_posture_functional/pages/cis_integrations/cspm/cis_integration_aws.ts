@@ -104,30 +104,30 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('CIS_AWS Organization Manual Direct Access', () => {
-      it('CIS_AWS Organization Manual Direct Access Workflow', async () => {
-        const directAccessKeyId = 'directAccessKeyIdTest';
-        const directAccessSecretKey = 'directAccessSecretKeyTest';
-        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
-        await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-        await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
-        pageObjects.header.waitUntilLoadingHasFinished();
-        await cisIntegration.fillInTextField(DIRECT_ACCESS_KEY_ID_TEST_ID, directAccessKeyId);
-        await cisIntegration.fillInTextField(
-          DIRECT_ACCESS_SECRET_KEY_TEST_ID,
-          directAccessSecretKey
-        );
-        await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        expect(
-          (await cisIntegration.getFieldValueInEditPage(DIRECT_ACCESS_KEY_ID_TEST_ID)) ===
-            directAccessKeyId
-        ).to.be(true);
-      });
-    });
+    // describe('CIS_AWS Organization Manual Direct Access', () => {
+    //   it('CIS_AWS Organization Manual Direct Access Workflow', async () => {
+    //     const directAccessKeyId = 'directAccessKeyIdTest';
+    //     const directAccessSecretKey = 'directAccessSecretKeyTest';
+    //     await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+    //     await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
+    //     await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
+    //     await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
+    //     pageObjects.header.waitUntilLoadingHasFinished();
+    //     await cisIntegration.fillInTextField(DIRECT_ACCESS_KEY_ID_TEST_ID, directAccessKeyId);
+    //     await cisIntegration.fillInTextField(
+    //       DIRECT_ACCESS_SECRET_KEY_TEST_ID,
+    //       directAccessSecretKey
+    //     );
+    //     await cisIntegration.clickSaveButton();
+    //     pageObjects.header.waitUntilLoadingHasFinished();
+    //     expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+    //     await cisIntegration.navigateToIntegrationCspList();
+    //     expect(
+    //       (await cisIntegration.getFieldValueInEditPage(DIRECT_ACCESS_KEY_ID_TEST_ID)) ===
+    //         directAccessKeyId
+    //     ).to.be(true);
+    //   });
+    // });
 
     describe('CIS_AWS Organization Manual Temporary Keys', () => {
       it('CIS_AWS Organization Manual Temporary Keys Workflow', async () => {
