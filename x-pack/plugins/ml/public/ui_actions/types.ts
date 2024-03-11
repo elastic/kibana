@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export * from './embeddable';
+import type { LensApi } from '@kbn/lens-plugin/public';
+import type { MapApi } from '@kbn/maps-plugin/public';
 
-export { type LensApi, isLensApi } from './interfaces/lens_api';
+export type ActionApi = MapApi | LensApi;
