@@ -32,7 +32,7 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
     }
 
     public async assertElserPanelsExist(): Promise<void> {
-      const [first, second, ,] = await testSubjects.findAll(
+      const [first, second] = await testSubjects.findAll(
         'mlAddTrainedModelFlyoutChooseModelPanels'
       );
 
