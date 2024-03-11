@@ -18,11 +18,8 @@ import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 
 describe.skip('Analyze events view for alerts', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    createRule(getNewRule());
-  });
-
   beforeEach(() => {
+    createRule(getNewRule());
     login();
     visitWithTimeRange(ALERTS_URL);
     waitForAlertsToPopulate();

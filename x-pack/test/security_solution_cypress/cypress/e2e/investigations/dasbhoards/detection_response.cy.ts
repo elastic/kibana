@@ -51,13 +51,13 @@ const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 // FLAKY: https://github.com/elastic/kibana/issues/168772
 describe.skip('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    deleteAlertsAndRules();
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
-    createRule(getNewRule());
   });
 
   beforeEach(() => {
+    deleteAlertsAndRules();
     login();
+    createRule(getNewRule());
     visit(DETECTION_AND_RESPONSE_URL);
   });
 

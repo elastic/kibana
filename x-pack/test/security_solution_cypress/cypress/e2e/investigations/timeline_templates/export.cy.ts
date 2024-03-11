@@ -15,15 +15,13 @@ import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 import { searchByTitle } from '../../../tasks/table_pagination';
 
 describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
+  it('Exports a custom timeline template', function () {
     createTimelineTemplate().then((response) => {
       cy.wrap(response).as('templateResponse');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');
       cy.wrap(response.body.data.persistTimeline.timeline.title).as('templateTitle');
     });
-  });
-
-  it('Exports a custom timeline template', function () {
+    
     cy.intercept({
       method: 'POST',
       path: '/api/timeline/_export?file_name=timelines_export.ndjson',

@@ -35,10 +35,9 @@ const text = 'system_indices_superuser';
 const link = 'https://www.elastic.co/';
 
 describe.skip('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    login();
-    visit(TIMELINES_URL);
 
+  beforeEach(function () {
+    login();
     createTimeline(getTimelineNonValidQuery())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId: string) =>
@@ -47,15 +46,9 @@ describe.skip('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
           // request responses and indeterminism since on clicks to activates URL's.
           .then(() => cy.wrap(timelineId).as('timelineId'))
       );
-  });
-
-  beforeEach(function () {
-    login();
     visit(TIMELINES_URL);
     openTimelineById(this?.timelineId as string);
     goToNotesTab();
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(1000);
   });
 
   it('should render mockdown', () => {

@@ -25,7 +25,6 @@ import { ALERTS_URL, hostsUrl } from '../../../urls/navigation';
 describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'bulk_process' });
-    login();
   });
 
   after(() => {
@@ -33,11 +32,8 @@ describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () =
   });
 
   context('Alerts', () => {
-    before(() => {
-      createRule(getNewRule());
-    });
-
     beforeEach(() => {
+      createRule(getNewRule());
       login();
       visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();

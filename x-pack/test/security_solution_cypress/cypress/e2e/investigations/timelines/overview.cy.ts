@@ -19,7 +19,7 @@ import {
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
+import { createTimeline, favoriteTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
@@ -27,9 +27,19 @@ const mockTimeline = getTimeline();
 const mockFavoritedTimeline = getFavoritedTimeline();
 
 describe('timeline overview search', { tags: ['@ess', 'serverless'] }, () => {
-  before(() => {
+  let currentTimelineIds: string[];
+  let currentSavedSearchIds: string[];
+  beforeEach(() => {
+    if (currentTimelineIds || currentSavedSearchIds) {
+      deleteTimelines(currentTimelineIds, currentSavedSearchIds)
+    }
     createTimeline(mockFavoritedTimeline)
-      .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
+      .then((response) => {
+        const { savedObjectId, savedSearchId } = response.body.data.persistTimeline.timeline;
+        currentTimelineIds = [savedObjectId];
+        if (savedSearchId) currentSavedSearchIds = [savedSearchId];
+        return savedObjectId;
+      })
       .then((timelineId) => favoriteTimeline({ timelineId, timelineType: 'default' }));
     createTimeline();
   });
