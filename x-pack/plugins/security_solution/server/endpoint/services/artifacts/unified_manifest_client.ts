@@ -17,6 +17,7 @@ import { mapUnifiedManifestSavedObjectToUnifiedManifest } from './utils';
 import type {
   InternalUnifiedManifestCreateSchema,
   InternalUnifiedManifestSchema,
+  InternalUnifiedManifestUpdateSchema,
 } from '../../schemas';
 import { ManifestConstants } from '../../lib/artifacts';
 
@@ -51,7 +52,10 @@ export class UnifiedManifestClient {
     return this.savedObjectsClient.bulkCreate<InternalUnifiedManifestCreateSchema>(
       manifest.map((attributes) => ({
         type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
-        attributes,
+        attributes: {
+          ...attributes,
+          created: Date.now(),
+        },
       }))
     );
   }
@@ -88,7 +92,7 @@ export class UnifiedManifestClient {
     cb: (unifiedManifests: InternalUnifiedManifestSchema[]) => void | Promise<void>,
     options?: FetchAllUnifiedManifestsOptions
   ): Promise<void> {
-    const unifiedManifestsFetcher = this.fetchAllUnifiedManifests(options);
+    const unifiedManifestsFetcher = this.fetchAllUnifiedManifests(this.savedObjectsClient, options);
 
     for await (const unifiedManifests of unifiedManifestsFetcher) {
       if (cb.constructor.name === 'AsyncFunction') {
@@ -104,24 +108,25 @@ export class UnifiedManifestClient {
    */
 
   public updateUnifiedManifest(
-    manifest: InternalUnifiedManifestSchema,
+    manifest: InternalUnifiedManifestUpdateSchema,
     opts?: { version: string }
   ): Promise<SavedObjectsBulkUpdateResponse<InternalUnifiedManifestSchema>> {
-    return this.updateUnifiedManifests([manifest], opts);
+    return this.updateUnifiedManifests([
+      { ...manifest, ...(opts?.version ? { version: opts.version } : {}) },
+    ]);
   }
 
   public updateUnifiedManifests(
-    manifests: InternalUnifiedManifestSchema[],
-    opts?: { version: string }
+    manifests: Array<InternalUnifiedManifestUpdateSchema & { version?: string }>
   ): Promise<SavedObjectsBulkUpdateResponse<InternalUnifiedManifestSchema>> {
     return this.savedObjectsClient.bulkUpdate<InternalUnifiedManifestCreateSchema>(
       manifests.map((manifest) => {
-        const { id, ...attributes } = manifest;
+        const { id, version, ...attributes } = manifest;
         return {
           type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
           id,
           attributes,
-          ...(opts?.version ? { version: opts.version } : {}),
+          ...(version ? { version } : {}),
         };
       })
     );
@@ -144,16 +149,19 @@ export class UnifiedManifestClient {
   }
 
   /**
-   * Private
+   * Utils
    */
 
-  private fetchAllUnifiedManifests({
-    perPage = 1000,
-    fields = [],
-    kuery,
-    sortOrder = 'asc',
-    sortField = 'created',
-  }: FetchAllUnifiedManifestsOptions = {}): AsyncIterable<InternalUnifiedManifestSchema[]> {
+  public fetchAllUnifiedManifests(
+    soClient: SavedObjectsClientContract,
+    {
+      perPage = 1000,
+      fields = [],
+      kuery,
+      sortOrder = 'asc',
+      sortField = 'created',
+    }: FetchAllUnifiedManifestsOptions = {}
+  ): AsyncIterable<InternalUnifiedManifestSchema[]> {
     const normalizeKuery = (savedObjectType: string, kueryInput: string): string => {
       return kueryInput.replace(
         new RegExp(`${savedObjectType}\\.(?!attributes\\.)`, 'g'),
@@ -161,7 +169,7 @@ export class UnifiedManifestClient {
       );
     };
     return createSoFindIterable<InternalUnifiedManifestCreateSchema>({
-      soClient: this.savedObjectsClient,
+      soClient,
       findRequest: {
         type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
         perPage,

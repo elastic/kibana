@@ -42,7 +42,6 @@ export const DEFAULT_INDEX_TYPES_MAP: IndexTypesMap = {
     'csp-rule-template',
     'dashboard',
     'endpoint:user-artifact-manifest',
-    'endpoint:unified-user-artifact-manifest',
     'enterprise_search_telemetry',
     'epm-packages',
     'epm-packages-assets',

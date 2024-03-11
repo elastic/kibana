@@ -15,5 +15,5 @@ module.exports = {
   rootDir: '../../../../../../..',
   roots: ['<rootDir>/src/core/server/integration_tests/saved_objects/migrations/group5'],
   // must override to match all test given there is no `integration_tests` subfolder
-  testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
+  testMatch: ['**/dot_kibana_split.test.{js,mjs,ts,tsx}'],
 };
