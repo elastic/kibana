@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -668,7 +669,6 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { connectorId, indexName } = request.params;
-
       try {
         await client.asCurrentUser.transport.request({
           body: {
@@ -677,21 +677,23 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           method: 'PUT',
           path: `/_connector/${connectorId}/_index_name`,
         });
-
-        const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
-        if (connector?.is_native) {
-          // generateApiKey will search for the connector doc based on index_name, so we need to refresh the index before that.
-          await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
-          await generateApiKey(client, indexName, true);
-        }
-
-        return response.ok();
       } catch (error) {
-        if (isIndexNotFoundException(error)) {
-          return response.ok();
-        }
-        throw error;
+        // This will almost always be a conflict because another connector has the index configured
+        // ES returns this reason nicely so we can just pass it through
+        return response.customError({
+          body: (error.meta.body as ElasticsearchErrorDetails)?.error?.reason,
+          statusCode: 500,
+        });
       }
+
+      const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
+      if (connector?.is_native) {
+        // generateApiKey will search for the connector doc based on index_name, so we need to refresh the index before that.
+        await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
+        await generateApiKey(client, indexName, true);
+      }
+
+      return response.ok();
     })
   );
 }
