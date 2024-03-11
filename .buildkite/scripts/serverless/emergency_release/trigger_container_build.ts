@@ -35,7 +35,7 @@ async function main() {
 
 function isCurrentHeadInMain(commitSha: string) {
   const containmentTest = execSync(
-    `git branch -r --contains "${commitSha}" | grep -E "(upstream|origin)/main" | wc -l`
+    `git branch -r --contains '${commitSha}' | grep -E "(upstream|origin)/main" | wc -l`
   ).toString();
 
   return parseInt(containmentTest, 10) >= 1;
