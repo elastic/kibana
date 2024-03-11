@@ -103,20 +103,15 @@ const UserNameComponent: React.FC<Props> = ({
         }
       };
 
-      if (isTimelineScope(timelineID)) {
-        // for timeline scenarios
-        if (isNewUserDetailsFlyoutEnable && expandableTimelineFlyoutEnabled) {
-          openNewFlyout();
-        } else {
-          openOldFlyout();
-        }
+      if (
+        (isTimelineScope(timelineID) &&
+          isNewUserDetailsFlyoutEnable &&
+          expandableTimelineFlyoutEnabled) ||
+        isNewUserDetailsFlyoutEnable
+      ) {
+        openNewFlyout();
       } else {
-        // for non-timeline scenarios (like tables on alerts page or explore pages
-        if (isNewUserDetailsFlyoutEnable) {
-          openNewFlyout();
-        } else {
-          openOldFlyout();
-        }
+        openOldFlyout();
       }
     },
     [

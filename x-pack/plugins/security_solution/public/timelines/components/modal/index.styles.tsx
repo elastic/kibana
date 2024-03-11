@@ -28,7 +28,8 @@ export const usePaneStyles = () => {
     right: 0;
     bottom: 0;
     background: ${transparentize(euiTheme.colors.ink, 0.5)};
-    z-index: 998; // this z-index needs to be between the eventFlyout (set at 997) and the timelineFlyout (set at 999)
+    z-index: ${(euiTheme.levels.flyout as number) +
+    1}; // this z-index needs to be between the eventFlyout (set at 1000) and the timelineFlyout (set at 1002)
 
     ${euiCanAnimate} {
       animation: ${euiAnimFadeIn} ${euiTheme.animation.fast} ease-in;

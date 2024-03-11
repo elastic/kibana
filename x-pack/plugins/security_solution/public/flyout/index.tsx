@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
+import { useEuiTheme } from '@elastic/eui';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import {
   IsolateHostPanel,
@@ -92,30 +93,28 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
 
 /**
  * Flyout used for the Security Solution application
- * We set the z-index to 997 to ensure it is always rendered behind Timeline (which has a z-index of 998)
+ * We keep the default EUI 1000 z-index to ensure it is always rendered behind Timeline (which has a z-index of 1001)
  */
 export const SecuritySolutionFlyout = memo(() => (
-  <ExpandableFlyout
-    registeredPanels={expandableFlyoutDocumentsPanels}
-    paddingSize="none"
-    customStyles={{ 'z-index': 997 }}
-  />
+  <ExpandableFlyout registeredPanels={expandableFlyoutDocumentsPanels} paddingSize="none" />
 ));
 
 SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';
 
 /**
  * Flyout used in Timeline
- * We set the z-index to 999 to ensure it is always rendered above Timeline (which has a z-index of 998)
- * and also behind other flyouts like Create new Case, Add Endpoint exception, Add rule exception, etc...
- * opened from the Take action button in the footer. These latter flyouts use an overlay mask and that index is set to 1000 so we need to be below that.
+ * We set the z-index to 1002 to ensure it is always rendered above Timeline (which has a z-index of 1001)
  */
-export const TimelineFlyout = memo(() => (
-  <ExpandableFlyout
-    registeredPanels={expandableFlyoutDocumentsPanels}
-    paddingSize="none"
-    customStyles={{ 'z-index': 999 }}
-  />
-));
+export const TimelineFlyout = memo(() => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <ExpandableFlyout
+      registeredPanels={expandableFlyoutDocumentsPanels}
+      paddingSize="none"
+      customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 2 }}
+    />
+  );
+});
 
 TimelineFlyout.displayName = 'TimelineFlyout';

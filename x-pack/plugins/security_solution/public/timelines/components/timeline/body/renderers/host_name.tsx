@@ -104,20 +104,15 @@ const HostNameComponent: React.FC<Props> = ({
         }
       };
 
-      if (isTimelineScope(timelineID)) {
-        // for timeline scenarios
-        if (isNewHostDetailsFlyoutEnabled && expandableTimelineFlyoutEnabled) {
-          openNewFlyout();
-        } else {
-          openOldFlyout();
-        }
+      if (
+        (isTimelineScope(timelineID) &&
+          isNewHostDetailsFlyoutEnabled &&
+          expandableTimelineFlyoutEnabled) ||
+        isNewHostDetailsFlyoutEnabled
+      ) {
+        openNewFlyout();
       } else {
-        // for non-timeline scenarios (like tables on alerts page or explore pages
-        if (isNewHostDetailsFlyoutEnabled) {
-          openNewFlyout();
-        } else {
-          openOldFlyout();
-        }
+        openOldFlyout();
       }
     },
     [
