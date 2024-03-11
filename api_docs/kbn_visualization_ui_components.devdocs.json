@@ -5,6 +5,42 @@
     "functions": [
       {
         "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.ChartSwitchTrigger",
+        "type": "Function",
+        "tags": [],
+        "label": "ChartSwitchTrigger",
+        "description": [],
+        "signature": [
+          "({ label, icon, onClick, dataTestSubj, size, }: { label: string; icon?: ",
+          "IconType",
+          " | undefined; onClick: () => void; dataTestSubj?: string | undefined; size?: \"m\" | \"s\" | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/chart_switch_trigger.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.ChartSwitchTrigger.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "{ label: string; icon?: ",
+              "IconType",
+              " | undefined; onClick: () => void; dataTestSubj?: string | undefined; size?: \"m\" | \"s\" | undefined; }"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/chart_switch_trigger.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
         "id": "def-public.ColorPicker",
         "type": "Function",
         "tags": [],
