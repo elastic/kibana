@@ -106,8 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
     }
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/177762
-  describe.skip('manage spaces', function () {
+  describe('manage spaces', function () {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -196,8 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
           ]);
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/146722
-        it.skip('should edit job space assignment', async () => {
+        it('should edit job space assignment', async () => {
           // AD
           await ml.navigation.navigateToStackManagementJobsListPageAnomalyDetectionTab();
           await ml.stackManagementJobs.openJobSpacesFlyout('anomaly-detector', testData.adJobId);
