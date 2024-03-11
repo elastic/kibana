@@ -26,10 +26,10 @@ export const getConfigurationByOwner = ({
   configurations,
   owner,
 }: {
-  configurations: CasesConfigurationUI[];
+  configurations: CasesConfigurationUI[] | null;
   owner: string;
 }): CasesConfigurationUI => {
-  if (!configurations.length) {
+  if (!configurations || !configurations.length) {
     return initialConfiguration;
   }
 

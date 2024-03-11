@@ -143,13 +143,19 @@ export const FormContext: React.FC<Props> = ({
           ? normalizeActionConnector(caseConnector, fields)
           : getNoneConnector();
 
-        const customFieldsConfiguration =
-          allConfigurations.find((element: CasesConfigurationUI) => element.owner === selectedOwner)
-            ?.customFields ?? [];
+        const configurationOwner: string = selectedOwner ? selectedOwner : owner[0];
+        const selectedConfiguration = allConfigurations.find(
+          (element: CasesConfigurationUI) => element.owner === configurationOwner
+        );
+        const backupConfiguration = allConfigurations[0];
+
+        const customFieldsConfiguration = selectedConfiguration
+          ? selectedConfiguration.customFields
+          : backupConfiguration.customFields;
 
         const transformedCustomFields = transformCustomFieldsData(
           customFields,
-          customFieldsConfiguration
+          customFieldsConfiguration ?? []
         );
 
         const trimmedData = trimUserFormData(userFormData);

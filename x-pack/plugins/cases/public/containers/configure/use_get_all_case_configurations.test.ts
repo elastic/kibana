@@ -8,13 +8,10 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useGetAllCaseConfigurations } from './use_get_all_case_configurations';
 import * as api from './api';
-import { waitFor } from '@testing-library/react';
-import { useToasts } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 
 jest.mock('./api');
-jest.mock('../../common/lib/kibana');
 
 describe('Use get all case configurations hook', () => {
   let appMockRender: AppMockRenderer;
@@ -24,66 +21,16 @@ describe('Use get all case configurations hook', () => {
     jest.clearAllMocks();
   });
 
-  it('calls the api when invoked with the correct parameters', async () => {
+  it('returns all available configurations', async () => {
     const spy = jest.spyOn(api, 'getCaseConfigure');
-
-    const { waitForNextUpdate } = renderHook(() => useGetAllCaseConfigurations(), {
-      wrapper: appMockRender.AppWrapper,
-    });
-    await waitForNextUpdate();
-
-    expect(spy).toHaveBeenCalledWith({
-      signal: expect.any(AbortSignal),
-    });
-  });
-
-  it('shows a toast error when the api return an error', async () => {
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
-
-    const spy = jest.spyOn(api, 'getCaseConfigure').mockRejectedValue(new Error('error'));
-
-    const { waitForNextUpdate } = renderHook(() => useGetAllCaseConfigurations(), {
-      wrapper: appMockRender.AppWrapper,
-    });
-    await waitForNextUpdate();
-
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalledWith({
-        signal: expect.any(AbortSignal),
-      });
-
-      expect(addError).toHaveBeenCalled();
-    });
-  });
-
-  it('returns the default if the response is null', async () => {
-    const spy = jest.spyOn(api, 'getCaseConfigure');
-    spy.mockResolvedValue(null);
-
-    const { result, waitForNextUpdate } = renderHook(() => useGetAllCaseConfigurations(), {
-      wrapper: appMockRender.AppWrapper,
-    });
-
-    await waitForNextUpdate();
-
-    expect(result.current.data).toEqual([
-      {
-        closureType: 'close-by-user',
-        connector: { fields: null, id: 'none', name: 'none', type: '.none' },
-        customFields: [],
-        id: '',
-        mappings: [],
-        version: '',
-        owner: '',
-      },
+    spy.mockResolvedValue([
+      // @ts-expect-error: no need to define all properties
+      { id: 'my-configuration-1', owner: '1' },
+      // @ts-expect-error: no need to define all properties
+      { id: 'my-configuration-2', owner: '2' },
+      // @ts-expect-error: no need to define all properties
+      { id: 'my-configuration-3', owner: '3' },
     ]);
-  });
-
-  it('sets the initial data correctly', async () => {
-    const spy = jest.spyOn(api, 'getCaseConfigure');
-    // @ts-expect-error: no need to define all properties
-    spy.mockResolvedValue({ id: 'my-new-configuration' });
 
     const { result, waitForNextUpdate } = renderHook(() => useGetAllCaseConfigurations(), {
       wrapper: appMockRender.AppWrapper,
@@ -92,7 +39,7 @@ describe('Use get all case configurations hook', () => {
     await waitForNextUpdate();
 
     /**
-     * Ensures that the initial data is returned
+     * Ensures that the initial data is returned≠
      * before fetching
      */
     // @ts-expect-error: data is defined
@@ -112,6 +59,38 @@ describe('Use get all case configurations hook', () => {
      * The response after fetching
      */
     // @ts-expect-error: data is defined
-    expect(result.all[1].data).toEqual({ id: 'my-new-configuration' });
+    expect(result.all[1].data).toEqual([
+      { id: 'my-configuration-1', owner: '1' },
+      { id: 'my-configuration-2', owner: '2' },
+      { id: 'my-configuration-3', owner: '3' },
+    ]);
+  });
+
+  it('returns the initial configuration if none is available', async () => {
+    const spy = jest.spyOn(api, 'getCaseConfigure');
+    spy.mockResolvedValue([]);
+
+    const { result, waitForNextUpdate } = renderHook(() => useGetAllCaseConfigurations(), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    await waitForNextUpdate();
+
+    /**
+     * Ensures that the initial data is returned≠
+     * before fetching
+     */
+    // @ts-expect-error: data is defined
+    expect(result.all[0].data).toEqual([
+      {
+        closureType: 'close-by-user',
+        connector: { fields: null, id: 'none', name: 'none', type: '.none' },
+        customFields: [],
+        id: '',
+        mappings: [],
+        version: '',
+        owner: '',
+      },
+    ]);
   });
 });

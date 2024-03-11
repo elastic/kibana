@@ -8,13 +8,11 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useGetCaseConfiguration } from './use_get_case_configuration';
 import * as api from './api';
-import { waitFor } from '@testing-library/react';
-import { useToasts } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
 import { mockedTestProvidersOwner, createAppMockRenderer } from '../../common/mock';
+import { initialConfiguration } from './utils';
 
 jest.mock('./api');
-jest.mock('../../common/lib/kibana');
 
 describe('Use get case configuration hook', () => {
   let appMockRender: AppMockRenderer;
@@ -24,94 +22,7 @@ describe('Use get case configuration hook', () => {
     jest.clearAllMocks();
   });
 
-  it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'getCaseConfigure');
-
-    const { waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
-    });
-    await waitForNextUpdate();
-
-    expect(spy).toHaveBeenCalledWith({
-      signal: expect.any(AbortSignal),
-    });
-  });
-
-  it('shows a toast error when the api return an error', async () => {
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
-
-    const spy = jest.spyOn(api, 'getCaseConfigure').mockRejectedValue(new Error('error'));
-
-    const { waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
-    });
-    await waitForNextUpdate();
-
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalledWith({
-        signal: expect.any(AbortSignal),
-      });
-
-      expect(addError).toHaveBeenCalled();
-    });
-  });
-
-  it('returns the default if the response is null', async () => {
-    const spy = jest.spyOn(api, 'getCaseConfigure');
-    spy.mockResolvedValue(null);
-
-    const { result, waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
-    });
-
-    await waitForNextUpdate();
-
-    expect(result.current.data).toEqual({
-      closureType: 'close-by-user',
-      connector: { fields: null, id: 'none', name: 'none', type: '.none' },
-      customFields: [],
-      id: '',
-      mappings: [],
-      version: '',
-      owner: '',
-    });
-  });
-
-  it('sets the initial data correctly', async () => {
-    const spy = jest.spyOn(api, 'getCaseConfigure');
-    // @ts-expect-error: no need to define all properties
-    spy.mockResolvedValue([{ id: 'my-new-configuration' }]);
-
-    const { result, waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
-    });
-
-    await waitForNextUpdate();
-
-    /**
-     * Ensures that the initial data are returned
-     * before fetching
-     */
-    // @ts-expect-error: data are defined
-    expect(result.all[0].data).toEqual({
-      closureType: 'close-by-user',
-      connector: { fields: null, id: 'none', name: 'none', type: '.none' },
-      customFields: [],
-      id: '',
-      mappings: [],
-      version: '',
-      owner: '',
-    });
-
-    /**
-     * The response after fetching
-     */
-    // @ts-expect-error: data are defined
-    expect(result.all[1].data).toEqual({ id: 'my-new-configuration' });
-  });
-
-  it('returns the configurations matching the owner', async () => {
+  it('returns a configuration matching the owner', async () => {
     const spy = jest.spyOn(api, 'getCaseConfigure');
     const targetConfiguration = {
       id: 'my-new-configuration-3',
@@ -137,5 +48,46 @@ describe('Use get case configuration hook', () => {
      */
     // @ts-expect-error: data is defined
     expect(result.all[1].data).toEqual(targetConfiguration);
+  });
+
+  it('returns the configuration at position zero if none matches the owner', async () => {
+    const spy = jest.spyOn(api, 'getCaseConfigure');
+    const targetConfiguration = { id: 'my-new-configuration-1', owner: 'foo' };
+    spy.mockResolvedValue([
+      // @ts-expect-error: no need to define all properties
+      targetConfiguration,
+      // @ts-expect-error: no need to define all properties
+      { id: 'my-new-configuration-2', owner: 'bar' },
+    ]);
+
+    const { result, waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    await waitForNextUpdate();
+
+    /**
+     * The response after fetching
+     */
+    // @ts-expect-error: data is defined
+    expect(result.all[1].data).toEqual(targetConfiguration);
+  });
+
+  it('returns the initial configuration if none exists', async () => {
+    const spy = jest.spyOn(api, 'getCaseConfigure');
+
+    spy.mockResolvedValue([]);
+
+    const { result, waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    await waitForNextUpdate();
+
+    /**
+     * The response after fetching
+     */
+    // @ts-expect-error: data is defined
+    expect(result.all[0].data).toEqual(initialConfiguration);
   });
 });

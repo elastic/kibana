@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { mockedTestProvidersOwner } from '../../../common/mock';
 import type { ActionTypeConnector } from '../../../../common/types/domain';
 import { ConnectorTypes } from '../../../../common/types/domain';
 import type { ActionConnector } from '../../../containers/configure/types';
@@ -29,6 +30,7 @@ const mockConfigurationData = {
   mappings: [],
   version: '',
   id: '',
+  owner: mockedTestProvidersOwner,
 };
 
 export const useCaseConfigureResponse = {

@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
-import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import type { ActionConnector } from '../../../common/types/domain';
 import type { CasePostRequest } from '../../../common/types/api';
@@ -45,8 +45,6 @@ import { useCancelCreationAction } from './use_cancel_creation_action';
 import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_modal';
 import { Category } from './category';
 import { CustomFields } from './custom_fields';
-import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
-import { getConfigurationByOwner } from '../../containers/configure/utils';
 
 interface ContainerProps {
   big?: boolean;
@@ -69,7 +67,6 @@ export interface CreateCaseFormFieldsProps {
   connectors: ActionConnector[];
   isLoadingConnectors: boolean;
   withSteps: boolean;
-  owner: string[];
   draftStorageKey: string;
 }
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
@@ -86,20 +83,8 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
 
 const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
-  ({ connectors, isLoadingConnectors, withSteps, owner, draftStorageKey }) => {
-    const [{ selectedOwner }] = useFormData({ watch: ['selectedOwner'] });
-    const { data: configurations, isLoading: isLoadingCaseConfiguration } =
-      useGetAllCaseConfigurations();
-
-    const customFieldsConfiguration = useMemo(
-      () =>
-        getConfigurationByOwner({
-          configurations,
-          owner: selectedOwner,
-        }).customFields ?? [],
-      [configurations, selectedOwner]
-    );
-
+  ({ connectors, isLoadingConnectors, withSteps, draftStorageKey }) => {
+    const { owner } = useCasesContext();
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
     const availableOwners = useAvailableCasesOwners();
@@ -137,10 +122,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
               <Description isLoading={isSubmitting} draftStorageKey={draftStorageKey} />
             </Container>
             <Container>
-              <CustomFields
-                isLoading={isSubmitting || isLoadingCaseConfiguration}
-                customFieldsConfiguration={customFieldsConfiguration}
-              />
+              <CustomFields isLoading={isSubmitting} />
             </Container>
             <Container />
           </>
@@ -152,8 +134,6 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         canShowCaseSolutionSelection,
         availableOwners,
         draftStorageKey,
-        isLoadingCaseConfiguration,
-        customFieldsConfiguration,
       ]
     );
 
@@ -223,7 +203,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     attachments,
     initialValue,
   }) => {
-    const { owner, appId } = useCasesContext();
+    const { appId } = useCasesContext();
     const draftStorageKey = getMarkdownEditorStorageKey(appId, 'createCase', 'description');
 
     const handleOnConfirmationCallback = (): void => {
@@ -253,7 +233,6 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
             connectors={empty}
             isLoadingConnectors={false}
             withSteps={withSteps}
-            owner={owner}
             draftStorageKey={draftStorageKey}
           />
           <Container>
