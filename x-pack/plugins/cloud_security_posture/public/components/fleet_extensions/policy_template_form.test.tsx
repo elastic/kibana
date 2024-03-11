@@ -45,11 +45,13 @@ import { useParams } from 'react-router-dom';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
-import { CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS } from './gcp_credential_form';
+import { CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS } from './gcp_credentials_form/gcp_credential_form';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import {
   AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+  CIS_GCP_OPTION_TEST_SUBJ,
+  GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ,
   SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
 } from '../test_subjects';
@@ -1489,6 +1491,104 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
+    it('should render setup technology selector for GCP for organisation account type', async () => {
+      const agentlessPolicy = getMockAgentlessAgentPolicy();
+      const newPackagePolicy = getMockPolicyGCP();
+
+      const { getByTestId, queryByTestId, getByRole } = render(
+        <WrappedComponent
+          newPolicy={newPackagePolicy}
+          agentlessPolicy={agentlessPolicy}
+          packageInfo={{ version: '1.6.0' } as PackageInfo}
+        />
+      );
+
+      // navigate to GCP
+      const gcpSelectorButton = getByTestId(CIS_GCP_OPTION_TEST_SUBJ);
+      userEvent.click(gcpSelectorButton);
+
+      const setupTechnologySelectorAccordion = queryByTestId(
+        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+      const orgIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
+      const projectIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
+      const credentialsJsonField = queryByTestId(
+        CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON
+      );
+      const credentialsTypSelector = queryByTestId(
+        CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE
+      );
+      const credentialsFileField = queryByTestId(
+        CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE
+      );
+
+      // default state for GCP with the Org selected
+      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(orgIdField).toBeInTheDocument();
+      expect(credentialsJsonField).toBeInTheDocument();
+      expect(projectIdField).not.toBeInTheDocument();
+      expect(credentialsTypSelector).not.toBeInTheDocument();
+      expect(credentialsFileField).not.toBeInTheDocument();
+
+      // select agent-based and check for cloudformation option
+      userEvent.click(setupTechnologySelector);
+      const agentBasedOption = getByRole('option', { name: /agent-based/i });
+      await waitForEuiPopoverOpen();
+      userEvent.click(agentBasedOption);
+      await waitFor(() => {
+        expect(getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUD_SHELL)).toBeInTheDocument();
+        expect(getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL)).toBeInTheDocument();
+      });
+    });
+
+    it('should render setup technology selector for GCP for single-account', async () => {
+      const agentlessPolicy = getMockAgentlessAgentPolicy();
+      const newPackagePolicy = getMockPolicyGCP({
+        'gcp.account_type': { value: GCP_SINGLE_ACCOUNT, type: 'text' },
+      });
+
+      const { getByTestId, queryByTestId } = render(
+        <WrappedComponent
+          newPolicy={newPackagePolicy}
+          agentlessPolicy={agentlessPolicy}
+          packageInfo={{ version: '1.6.0' } as PackageInfo}
+        />
+      );
+
+      // navigate to GCP
+      const gcpSelectorButton = getByTestId(CIS_GCP_OPTION_TEST_SUBJ);
+      userEvent.click(gcpSelectorButton);
+
+      const setupTechnologySelectorAccordion = queryByTestId(
+        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
+      );
+      const setupTechnologySelector = queryByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+      const orgIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
+      const projectIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
+      const credentialsJsonField = queryByTestId(
+        CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON
+      );
+      const credentialsTypSelector = queryByTestId(
+        CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE
+      );
+      const credentialsFileField = queryByTestId(
+        CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE
+      );
+
+      // default state for GCP with the Org selected
+      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(orgIdField).not.toBeInTheDocument();
+      expect(credentialsJsonField).toBeInTheDocument();
+      expect(projectIdField).toBeInTheDocument();
+      expect(credentialsTypSelector).not.toBeInTheDocument();
+      expect(credentialsFileField).not.toBeInTheDocument();
+    });
+
     it('should not render setup technology selector for KSPM', () => {
       const agentlessPolicy = getMockAgentlessAgentPolicy();
       const newPackagePolicy = getMockPolicyEKS();
@@ -1510,25 +1610,6 @@ describe('<CspPolicyTemplateForm />', () => {
 
       const { queryByTestId } = render(
         <WrappedComponent newPolicy={newPackagePolicy} agentlessPolicy={agentlessPolicy} />
-      );
-
-      const setupTechnologySelectorAccordion = queryByTestId(
-        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
-      );
-
-      expect(setupTechnologySelectorAccordion).not.toBeInTheDocument();
-    });
-
-    it('should not render setup technology selector for CSPM GCP', () => {
-      const agentlessPolicy = getMockAgentlessAgentPolicy();
-      const newPackagePolicy = getMockPolicyGCP();
-
-      const { queryByTestId } = render(
-        <WrappedComponent
-          newPolicy={newPackagePolicy}
-          packageInfo={getMockPackageInfoCspmGCP()}
-          agentlessPolicy={agentlessPolicy}
-        />
       );
 
       const setupTechnologySelectorAccordion = queryByTestId(
