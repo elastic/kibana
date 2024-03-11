@@ -27,7 +27,7 @@ interface Props {
   remoteName?: string;
 }
 export interface SummaryClient {
-  computeSummary(props: Props): Promise<{ summary: Summary; groupings: Groupings }>;
+  computeSummary(props: Props): Promise<{ summary: Summary; groupings: Groupings; meta: Meta }>;
 }
 
 export class DefaultSummaryClient implements SummaryClient {
@@ -37,7 +37,7 @@ export class DefaultSummaryClient implements SummaryClient {
     instanceId,
     slo,
     remoteName,
-  }: Props): Promise<{ summary: Summary; groupings: Groupings }> {
+  }: Props): Promise<{ summary: Summary; groupings: Groupings; meta: Meta }> {
     const dateRange = toDateRange(slo.timeWindow);
     const isDefinedWithGroupBy = ![slo.groupBy].flat().includes(ALL_VALUE);
     const hasInstanceId = instanceId !== ALL_VALUE;

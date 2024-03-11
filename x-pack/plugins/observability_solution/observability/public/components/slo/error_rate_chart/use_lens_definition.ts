@@ -469,7 +469,9 @@ export function useLensDefinition(
       adHocDataViews: {
         '32ca1ad4-81c0-4daf-b9d1-07118044bdc5': {
           id: '32ca1ad4-81c0-4daf-b9d1-07118044bdc5',
-          title: `remote_cluster:${SLO_DESTINATION_INDEX_PATTERN},${SLO_DESTINATION_INDEX_PATTERN}`,
+          title: slo.remoteName
+            ? `${slo.remoteName}:${SLO_DESTINATION_INDEX_PATTERN}`
+            : SLO_DESTINATION_INDEX_PATTERN,
           timeFieldName: '@timestamp',
           sourceFilters: [],
           fieldFormats: {},

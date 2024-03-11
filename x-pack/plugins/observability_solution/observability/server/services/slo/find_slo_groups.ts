@@ -5,15 +5,13 @@
  * 2.0.
  */
 import { FindSLOGroupsParams, FindSLOGroupsResponse, Pagination } from '@kbn/slo-schema';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { findSLOGroupsResponseSchema } from '@kbn/slo-schema';
 import { Logger } from '@kbn/core/server';
+import { getListOfSummaryIndices } from './slo_settings';
 import { typedSearch } from '../../utils/queries';
 import { IllegalArgumentError } from '../../errors';
-import {
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-  DEFAULT_SLO_GROUPS_PAGE_SIZE,
-} from '../../../common/slo/constants';
+import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../../common/slo/constants';
 import { Status } from '../../domain/models';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
 
@@ -43,6 +41,7 @@ interface SliDocument {
 export class FindSLOGroups {
   constructor(
     private esClient: ElasticsearchClient,
+    private soClient: SavedObjectsClientContract,
     private logger: Logger,
     private spaceId: string
   ) {}
@@ -60,8 +59,10 @@ export class FindSLOGroups {
       this.logger.error(`Failed to parse filters: ${e.message}`);
     }
 
+    const indices = await getListOfSummaryIndices(this.soClient, this.esClient);
+
     const response = await typedSearch(this.esClient, {
-      index: `remote_cluster:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN},${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`,
+      index: indices,
       size: 0,
       query: {
         bool: {

@@ -49,7 +49,8 @@ export class DefaultSLIClient implements SLIClient {
   async fetchSLIDataFrom(
     slo: SLO,
     instanceId: string,
-    lookbackWindows: LookbackWindow[]
+    lookbackWindows: LookbackWindow[],
+    remoteName?: string
   ): Promise<Record<WindowName, IndicatorData>> {
     const sortedLookbackWindows = [...lookbackWindows].sort((a, b) =>
       a.duration.isShorterThan(b.duration) ? 1 : -1
@@ -62,10 +63,14 @@ export class DefaultSLIClient implements SLIClient {
       delayInSeconds
     );
 
+    const index = remoteName
+      ? `${remoteName}:${SLO_DESTINATION_INDEX_PATTERN}`
+      : SLO_DESTINATION_INDEX_PATTERN;
+
     if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, instanceId, longestDateRange),
-        index: `remote_cluster:${SLO_DESTINATION_INDEX_PATTERN},${SLO_DESTINATION_INDEX_PATTERN}`,
+        index,
         aggs: toLookbackWindowsAggregationsQuery(
           longestDateRange.to,
           sortedLookbackWindows,
@@ -79,7 +84,7 @@ export class DefaultSLIClient implements SLIClient {
     if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, instanceId, longestDateRange),
-        index: `remote_cluster:${SLO_DESTINATION_INDEX_PATTERN},${SLO_DESTINATION_INDEX_PATTERN}`,
+        index,
         aggs: toLookbackWindowsSlicedAggregationsQuery(
           longestDateRange.to,
           sortedLookbackWindows,

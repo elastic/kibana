@@ -544,16 +544,18 @@ const getSloBurnRates = createObservabilityServerRoute({
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
-    const burnRates = await getBurnRates(
-      params.path.id,
-      params.body.instanceId,
-      params.body.windows,
-      {
+    const { instanceId, windows, remoteName } = params.body;
+    const burnRates = await getBurnRates({
+      instanceId,
+      windows,
+      remoteName,
+      sloId: params.path.id,
+      services: {
         soClient,
         esClient,
         logger,
-      }
-    );
+      },
+    });
     return { burnRates };
   },
 });

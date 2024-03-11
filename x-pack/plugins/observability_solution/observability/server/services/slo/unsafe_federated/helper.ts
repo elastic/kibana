@@ -16,7 +16,7 @@ export function fromSummaryDocumentToSlo(
   summaryDoc: EsSummaryDocument,
   logger: Logger
 ): SLO | undefined {
-  let params: Indicator['params'];
+  let params: Indicator['params'] | undefined;
   switch (summaryDoc.slo.indicator.type) {
     case 'sli.kql.custom':
       params = {

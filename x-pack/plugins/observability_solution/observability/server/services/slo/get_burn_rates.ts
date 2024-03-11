@@ -27,12 +27,19 @@ interface LookbackWindow {
   duration: Duration;
 }
 
-export async function getBurnRates(
-  sloId: string,
-  instanceId: string,
-  windows: LookbackWindow[],
-  services: Services
-) {
+export async function getBurnRates({
+  sloId,
+  windows,
+  instanceId,
+  remoteName,
+  services,
+}: {
+  sloId: string;
+  instanceId: string;
+  remoteName: string;
+  windows: LookbackWindow[];
+  services: Services;
+}) {
   const { soClient, esClient, logger } = services;
 
   const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
@@ -43,7 +50,9 @@ export async function getBurnRates(
   let slo: SLO | undefined;
   if (unsafeIsRemote) {
     const summarySearch = await esClient.search<EsSummaryDocument>({
-      index: `remote_cluster:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`,
+      index: remoteName
+        ? `${remoteName}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`
+        : SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
       query: {
         bool: {
           filter: [
@@ -64,7 +73,7 @@ export async function getBurnRates(
     slo = await repository.findById(sloId);
   }
 
-  const sliData = await sliClient.fetchSLIDataFrom(slo!, instanceId, windows);
+  const sliData = await sliClient.fetchSLIDataFrom(slo!, instanceId, windows, remoteName);
   return Object.keys(sliData).map((key) => {
     return {
       name: key,
