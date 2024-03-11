@@ -26,12 +26,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Dataset quality table', () => {
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginWithRole('admin');
       await PageObjects.datasetQuality.navigateTo();
     });
 
     after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
       await synthtrace.clean();
     });
 

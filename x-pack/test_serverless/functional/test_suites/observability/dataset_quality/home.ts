@@ -19,11 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Dataset quality home', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.login();
-    });
-
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
+      await PageObjects.svlCommonPage.loginWithRole('admin');
     });
 
     it('dataset quality table exists', async () => {
