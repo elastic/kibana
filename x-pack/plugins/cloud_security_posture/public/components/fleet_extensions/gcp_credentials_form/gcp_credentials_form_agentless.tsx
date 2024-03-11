@@ -27,6 +27,8 @@ export const GcpCredentialsFormAgentless = ({
 }: GcpFormProps) => {
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
   const isOrganization = accountType === 'organization-account';
+  const organizationFields = ['gcp.organization_id', 'gcp.credentials.json'];
+  const singleAccountFields = ['gcp.project_id', 'gcp.credentials.json'];
 
   /*
     For Agentless only JSON credentials type is supported.
@@ -34,9 +36,9 @@ export const GcpCredentialsFormAgentless = ({
    */
   const fields = getInputVarsFields(input, gcpField.fields).filter((field) => {
     if (isOrganization) {
-      return ['gcp.organization_id', 'gcp.credentials.json'].includes(field.id);
+      return organizationFields.includes(field.id);
     } else {
-      return ['gcp.project_id', 'gcp.credentials.json'].includes(field.id);
+      return singleAccountFields.includes(field.id);
     }
   });
 
