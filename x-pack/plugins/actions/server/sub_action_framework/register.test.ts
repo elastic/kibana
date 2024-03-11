@@ -60,6 +60,7 @@ describe('Registration', () => {
       supportedFeatureIds: connector.supportedFeatureIds,
       validate: expect.anything(),
       executor: expect.any(Function),
+      getService: expect.any(Function),
       renderParameterTemplates: expect.any(Function),
     });
   });
@@ -99,6 +100,7 @@ describe('Registration', () => {
       supportedFeatureIds: connector.supportedFeatureIds,
       validate: expect.anything(),
       executor: expect.any(Function),
+      getService: expect.any(Function),
       renderParameterTemplates: expect.any(Function),
       isSystemActionType: true,
     });
