@@ -56,7 +56,7 @@ export class CompleteExternalResponseActionsTask {
     this.wasSetup = true;
 
     if (!this.options.endpointAppContext.experimentalFeatures.responseActionsSentinelOneV2Enabled) {
-      this.log.debug(
+      this.log.info(
         `responseActionsSentinelOneV2Enabled feature flag is disabled. Task [${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}] will NOT be registered!`
       );
       return;
@@ -126,6 +126,7 @@ export class CompleteExternalResponseActionsTask {
         `Un-registering task definition [${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}] (if it exists)`
       );
       taskManager.removeIfExists(COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE);
+      this.cleanup = undefined;
     };
   }
 

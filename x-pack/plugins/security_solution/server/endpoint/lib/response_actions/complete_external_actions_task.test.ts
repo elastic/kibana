@@ -12,6 +12,7 @@ import {
   CompleteExternalResponseActionsTask,
 } from './complete_external_actions_task';
 import { createMockEndpointAppContext } from '../../mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 describe('CompleteExternalActionsTask class', () => {
   let endpointAppContextMock: ReturnType<typeof createMockEndpointAppContext>;
@@ -76,12 +77,87 @@ describe('CompleteExternalActionsTask class', () => {
   });
 
   describe('#start()', () => {
-    it.todo('should schedule task with task manager');
+    let taskManagerStartContractMock: ReturnType<typeof taskManagerMock.createStart>;
+    let esClientMock: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
-    it.todo('should NOT schedule task if feature flag is disabled');
+    const doTaskInstanceSetup = () =>
+      taskInstance.setup({ taskManager: taskManagerMock.createSetup() });
+
+    beforeEach(() => {
+      taskManagerStartContractMock = taskManagerMock.createStart();
+      esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    });
+
+    it('should schedule task with task manager', async () => {
+      await doTaskInstanceSetup();
+      await taskInstance.start({
+        taskManager: taskManagerStartContractMock,
+        esClient: esClientMock,
+      });
+
+      expect(taskManagerStartContractMock.ensureScheduled).toHaveBeenCalledWith({
+        id: COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
+        taskType: COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
+        scope: ['securitySolution'],
+        schedule: {
+          interval: '60s',
+        },
+        state: {},
+        params: {},
+      });
+    });
+
+    it('should NOT schedule task if feature flag is disabled', async () => {
+      endpointAppContextMock.experimentalFeatures = {
+        ...endpointAppContextMock.experimentalFeatures,
+        responseActionsSentinelOneV2Enabled: false,
+      };
+      await doTaskInstanceSetup();
+      await taskInstance.start({
+        taskManager: taskManagerStartContractMock,
+        esClient: esClientMock,
+      });
+
+      expect(taskManagerStartContractMock.ensureScheduled).not.toHaveBeenCalled();
+    });
+
+    it(`should use interval value from server config`, async () => {
+      endpointAppContextMock.serverConfig = {
+        ...endpointAppContextMock.serverConfig,
+        completeExternalResponseActionsTaskInterval: '1000s',
+      };
+      await doTaskInstanceSetup();
+      await taskInstance.start({
+        taskManager: taskManagerStartContractMock,
+        esClient: esClientMock,
+      });
+
+      expect(taskManagerStartContractMock.ensureScheduled).toHaveBeenCalledWith({
+        id: COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
+        taskType: COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
+        scope: ['securitySolution'],
+        schedule: {
+          interval: '1000s',
+        },
+        state: {},
+        params: {},
+      });
+    });
   });
 
   describe('#stop()', () => {
-    it.todo('should remove task definition from task manager');
+    it('should remove task definition from task manager', async () => {
+      const taskManagerStartContractMock = taskManagerMock.createStart();
+      await taskInstance.setup({ taskManager: taskManagerMock.createSetup() });
+      await taskInstance.start({
+        taskManager: taskManagerStartContractMock,
+        esClient: elasticsearchServiceMock.createElasticsearchClient(),
+      });
+      await taskInstance.stop();
+
+      expect(taskManagerStartContractMock.removeIfExists).toHaveBeenCalledWith(
+        COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE
+      );
+    });
   });
 });
