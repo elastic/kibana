@@ -7,13 +7,8 @@
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiForm,
-  EuiFormRow,
-  EuiPopover,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiSpacer,
   EuiTableActionsColumnType,
   EuiText,
@@ -21,21 +16,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { isRight } from 'fp-ts/lib/Either';
-import {
-  SloRule,
-  useFetchSLOsWithBurnRateRules,
-} from '../../hooks/slo/use_fetch_slos_with_burn_rate_rules';
-import { Dependency, DependencyRT } from '../../../common/typings';
+import React from 'react';
+import { useFetchSLOsWithBurnRateRules } from '../../hooks/slo/use_fetch_slos_with_burn_rate_rules';
+import { Dependency } from '../../../common/typings';
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
 } from '../../../common/constants';
+import { DependencyEditor } from './dependency_editor';
+import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
 const ACTION_GROUP_OPTIONS = [
   { value: ALERT_ACTION.id, label: ALERT_ACTION.name },
@@ -43,136 +34,6 @@ const ACTION_GROUP_OPTIONS = [
   { value: MEDIUM_PRIORITY_ACTION.id, label: MEDIUM_PRIORITY_ACTION.name },
   { value: LOW_PRIORITY_ACTION.id, label: LOW_PRIORITY_ACTION.name },
 ];
-
-interface DependencyEditorProps {
-  isLoading: boolean;
-  onSubmit: (dependency: Dependency) => void;
-  dependency?: Dependency;
-  rules?: Array<Rule<SloRule>>;
-}
-
-function DependencyEditor({ isLoading, onSubmit, dependency, rules }: DependencyEditorProps) {
-  const isEditMode = dependency != null;
-  const [isOpen, setPopoverState] = useState(false);
-
-  const [partialDependency, setPartialDependency] = useState<Partial<Dependency>>(dependency || {});
-
-  const handleOpenPopover = () => setPopoverState(true);
-  const handleClosePopover = () => {
-    if (!isEditMode) {
-      setPartialDependency({});
-    }
-    setPopoverState(false);
-  };
-
-  const handleRuleSelection = (opts: Array<EuiComboBoxOptionOption<string>>) => {
-    if (opts.length > 0 && opts[0].value) {
-      setPartialDependency((previous) => ({ ...previous, ruleId: opts[0].value }));
-    }
-  };
-
-  const handleActionGroupSelection = (opts: Array<EuiComboBoxOptionOption<string>>) => {
-    if (opts.length > 0 && opts.every((opt) => !!opt.value)) {
-      const values = opts.map((opt) => opt.value);
-      setPartialDependency((previous) => ({
-        ...previous,
-        actionGroupsToSuppressOn: values as string[],
-      }));
-    }
-  };
-
-  const rulesOptions = rules?.map((rule) => ({ label: rule.name, value: rule.id })) ?? [];
-  const selectedRuleOption = rulesOptions?.filter((opt) => opt.value === partialDependency.ruleId);
-  const selectedRule = rules?.find((rule) => rule.id === partialDependency.ruleId);
-  const ruleActionGroups =
-    (selectedRule && selectedRule.params.windows.map((winDef) => winDef.actionGroup)) || [];
-  const actionGroupOptions = ACTION_GROUP_OPTIONS.filter((group) =>
-    ruleActionGroups.includes(group.value)
-  );
-  const selectedActionGroups = ACTION_GROUP_OPTIONS.filter((group) =>
-    partialDependency.actionGroupsToSuppressOn?.includes(group.value)
-  );
-
-  const handleSubmit = () => {
-    const dep = DependencyRT.decode(partialDependency);
-    if (isRight(dep)) {
-      onSubmit(dep.right);
-    }
-    handleClosePopover();
-  };
-
-  const button = isEditMode ? (
-    <EuiButtonIcon
-      isDisabled={isLoading}
-      data-test-subj="sloBurnRateRuleEditDependencyButton"
-      color={'primary'}
-      size="s"
-      iconType={'pencil'}
-      onClick={handleOpenPopover}
-      aria-label={i18n.translate('xpack.observability.slo.rules.editDependencyAriaLabel', {
-        defaultMessage: 'Edit dependency',
-      })}
-    />
-  ) : (
-    <EuiButtonEmpty
-      isDisabled={isLoading || rules?.length === 0}
-      data-test-subj="sloBurnRateRuleAddDependencyButton"
-      color={'primary'}
-      size="s"
-      iconType={'plusInCircleFilled'}
-      onClick={handleOpenPopover}
-      aria-label={i18n.translate('xpack.observability.slo.rules.addDependencyAriaLabel', {
-        defaultMessage: 'Add dependency',
-      })}
-    >
-      <FormattedMessage
-        id="xpack.observability.slo.rules.addDependencyLabel"
-        defaultMessage="Add dependency"
-      />
-    </EuiButtonEmpty>
-  );
-
-  return (
-    <EuiPopover button={button} isOpen={isOpen} closePopover={handleSubmit}>
-      <div style={{ width: 400 }}>
-        <EuiForm component="form">
-          <EuiFormRow
-            label={i18n.translate('xpack.observability.slo.rules.addDependencyForm.ruleLabel', {
-              defaultMessage: 'Rule (required)',
-            })}
-          >
-            <EuiComboBox
-              compressed
-              fullWidth
-              options={rulesOptions}
-              singleSelection={{ asPlainText: true }}
-              isLoading={isLoading}
-              onChange={handleRuleSelection}
-              selectedOptions={selectedRuleOption}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.observability.slo.rules.addDependencyForm.suppressOnLabel',
-              {
-                defaultMessage: 'Suppress on (required)',
-              }
-            )}
-          >
-            <EuiComboBox
-              compressed
-              fullWidth
-              isDisabled={!partialDependency.ruleId}
-              options={actionGroupOptions}
-              onChange={handleActionGroupSelection}
-              selectedOptions={selectedActionGroups}
-            />
-          </EuiFormRow>
-        </EuiForm>
-      </div>
-    </EuiPopover>
-  );
-}
 
 interface DependenciesProps {
   currentRuleId?: string;
@@ -270,13 +131,20 @@ export function Dependencies({ currentRuleId, dependencies, onChange }: Dependen
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h5>
-          {i18n.translate('xpack.observability.slo.rules.dependencies.title', {
-            defaultMessage: 'Rule dependencies',
-          })}
-        </h5>
-      </EuiTitle>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <EuiTitle size="xs">
+            <h5>
+              {i18n.translate('xpack.observability.slo.rules.dependencies.title', {
+                defaultMessage: 'Rule dependencies',
+              })}
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={0}>
+          <TechnicalPreviewBadge />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiText size="s">
         <p>
