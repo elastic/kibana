@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,5 @@
  * 2.0.
  */
 
-import { Conversation } from '../../common';
-
-export function useConversations(): Conversation[] {
-  return [];
-}
+require('../../../../../src/setup_node_env');
+require('./agent_policy_generator').cli();

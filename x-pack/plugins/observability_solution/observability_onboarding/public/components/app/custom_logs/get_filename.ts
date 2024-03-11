@@ -10,9 +10,7 @@ export const getFilename = (path?: string) => {
     return '';
   }
 
-  const filenameWithExt = path
-    .replace(/^.*[\\\/](?!\d*$)/, '')
-    .replace(/[\\\/]/, '');
+  const filenameWithExt = path.replace(/^.*[\\\/](?!\d*$)/g, '');
   const filenameParts = filenameWithExt.split('.');
 
   return replaceSpecialChars(filenameParts[0]);
