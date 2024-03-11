@@ -1,0 +1,523 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-message-signing-keys:15d50edc-e8aa-4856-a5a3-df0188c4f550",
+    "index": ".kibana_ingest",
+    "source": {
+      "fleet-message-signing-keys": {
+        "private_key": "private_key",
+        "public_key": "public_key",
+        "passphrase": "+gMsqYHYbY62vUhjQbz6zVzTwfDC8n5dTkmFHoq7a6OwOvA8XIFfMYgThcnB/vewKbJWl/OCDrckZwuZCfpWjGGkgxUbUafO0FrkYz7vfxJs4tzHKWVpDhR+xio8YGKwoVofZzlGBMe9duAu6nj3BX7B92Q=",
+        "passphrase_plain": "This is the passphrase"
+      },
+      "type": "fleet-message-signing-keys",
+      "references": [],
+      "updated_at": "2023-12-21T22:10:37.254Z",
+      "namespaces": [
+        "default"
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_alerting_cases",
+    "id": "alert:5c892f54-c428-496b-b760-075c01b5fcdd",
+    "source": {
+      "alert": {
+        "name": "test_rule",
+        "tags": [],
+        "enabled": true,
+        "alertTypeId": "apm.transaction_error_rate",
+        "consumer": "alerts",
+        "legacyId": "some-legacy-id",
+        "schedule": {
+          "interval": "1m"
+        },
+        "alertDelay": {
+          "active": 1234
+        },
+        "actions": [
+          {
+            "group": "threshold_met",
+            "params": {
+              "documents": [
+                {
+                  "it-worked": true
+                }
+              ]
+            },
+            "actionTypeId": ".index",
+            "frequency": {
+              "summary": false,
+              "throttle": null,
+              "notifyWhen": "onActionGroupChange"
+            },
+            "uuid": "974b1bed-4eac-41af-b34a-d751b916d811",
+            "actionRef": "action_0"
+          }
+        ],
+        "params": {
+          "threshold": 30,
+          "windowSize": 5,
+          "windowUnit": "m",
+          "environment": "ENVIRONMENT_ALL"
+        },
+        "mapped_params": {
+          "risk_score": 1.23,
+          "severity": "some-severity"
+        },
+        "createdBy": "elastic",
+        "updatedBy": "elastic",
+        "createdAt": "2024-01-16T22:09:07.964Z",
+        "updatedAt": "2024-01-16T22:09:07.964Z",
+        "apiKey": "RfC7Uqq/0mZ7iZou3FCKEtS697YRLrgx3RE/MH87s5RMYJf4KZXjDSsreTJfMIxq2LrStpx9DnYaNSQ4HTWholYqwwheYdnC9+lXWI42aKJat3AibhlpCIeMt1YHZrO+9pqjoAKJE9xtIPA1CPN+5oGTFsgcbe+lb3qCBjx1/jbeBhq7x6vRw0FnALBk58QUdWemYeBH1LRURk/yydk=",
+        "apiKeyOwner": "elastic",
+        "apiKeyCreatedByUser": false,
+        "throttle": "some-throttle-value",
+        "notifyWhen": "onThrottleInterval",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "executionStatus": {
+          "status": "ok",
+          "lastExecutionDate": "2024-01-16T22:09:09.482Z",
+          "lastDuration": 1651,
+          "error": null,
+          "warning": null
+        },
+        "monitoring": {
+          "run": {
+            "history": [
+              {
+                "success": true,
+                "timestamp": 1705442949482,
+                "duration": 1651
+              }
+            ],
+            "calculated_metrics": {
+              "success_ratio": 1,
+              "p50": 1651,
+              "p95": 1651,
+              "p99": 1651
+            },
+            "last_run": {
+              "timestamp": "2024-01-16T22:09:09.482Z",
+              "metrics": {
+                "duration": 1651,
+                "total_search_duration_ms": null,
+                "total_indexing_duration_ms": null,
+                "total_alerts_detected": null,
+                "total_alerts_created": null,
+                "gap_duration_s": null
+              }
+            }
+          }
+        },
+        "snoozeSchedule": [],
+        "revision": 0,
+        "running": false,
+        "meta": {
+          "versionApiKeyLastmodified": "8.13.0"
+        },
+        "scheduledTaskId": "903b890f-4e98-4ea5-bc10-71433f01de18",
+        "lastRun": {
+          "outcome": "succeeded",
+          "outcomeOrder": 0,
+          "outcomeMsg": null,
+          "warning": null,
+          "alertsCount": {
+            "active": 0,
+            "new": 0,
+            "recovered": 0,
+            "ignored": 0
+          }
+        },
+        "nextRun": "2024-01-16T22:10:09.409Z"
+      },
+      "type": "alert",
+      "references": [],
+      "managed": false,
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "10.1.0",
+      "updated_at": "2024-02-22T19:34:13.564Z",
+      "created_at": "2024-02-22T19:34:13.564Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_alerting_cases",
+    "id": "action:1e78caea-c2d9-47ec-bba5-5b69c211c274",
+    "source": {
+      "action": {
+        "actionTypeId": ".torq",
+        "name": "test-torq-connector",
+        "isMissingSecrets": false,
+        "config": {
+          "webhookIntegrationUrl": "https://hooks.torq.io/v1/hookid"
+        },
+        "secrets": "3BUB4WqB0+RM/ty2XwJLppQWl9o0rzbmdpGGzzMBhWYSM+4uzVesnULPQjHz7mP8EQDrveFip/J+1kdcbQ5OqgdbEpnZt6luK43HJfT3c0A3t9n6V3mkS6o7lLMag41Gs9AJEYLKD140zRdECHkzsXkGIwFBdY6QR0rFt8r95Q=="
+      },
+      "type": "action",
+      "references": [],
+      "managed": false,
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.3.0",
+      "updated_at": "2024-01-17T00:04:47.371Z",
+      "created_at": "2024-01-17T00:04:47.371Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "synthetics-param:a304e397-723a-495c-a934-126504d53d10",
+    "source": {
+      "synthetics-param": {
+        "key": "test_synthetics_param",
+        "value": "VxVUb6Ic61EO/VYkgTrnhK7YO2aOeJdEjPowQ0SJd0W2S43VdNL+gx1Um5sqi2YaAk1ArP/tJ2Bfdxq4I6u64O5l6p2LHio6RgCb0QwzK7fmY0pS4iRYiPyhWmrZn0Y0qkVonQXsux+nAZWJQv5JZZVm/loAc0jA0kmVTNFUE/K0sjrFnASqH9OAr5Z+kzgGCPkMK4HmP79N8H23",
+        "description": "some description here",
+        "tags": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      "type": "synthetics-param",
+      "references": [],
+      "managed": false,
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "updated_at": "2024-01-18T22:32:44.274Z",
+      "created_at": "2024-01-18T22:32:44.274Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "synthetics-monitor:305ea066-0f33-47f2-8d15-2bf82c5ea430",
+    "source": {
+      "synthetics-monitor": {
+        "type": "browser",
+        "form_monitor_type": "multistep",
+        "enabled": true,
+        "alert": {
+          "status": {
+            "enabled": true
+          },
+          "tls": {
+            "enabled": true
+          }
+        },
+        "schedule": {
+          "unit": "m",
+          "number": "10"
+        },
+        "service.name": "some-service-name",
+        "custom_heartbeat_id": "some-heartbeat-id",
+        "config_id": "85e2583e-d02e-4cff-8b23-a91ae75e8dc2",
+        "tags": [
+          "a",
+          "b",
+          "c"
+        ],
+        "timeout": 9999,
+        "wait": 200,
+        "name": "localhost",
+        "locations": [
+          {
+            "id": "b9ba5cfb-a676-4e3e-ab74-316ae2d697de",
+            "label": "test_location",
+            "geo": {
+              "lat": 0,
+              "lon": 0
+            },
+            "isServiceManaged": false
+          }
+        ],
+        "namespace": "default",
+        "original_space": "some-space",
+        "origin": "ui",
+        "journey_id": "some-journey-id",
+        "hash": "some-hash",
+        "max_redirects": 2,
+        "mode": "some-mode",
+        "id": "85e2583e-d02e-4cff-8b23-a91ae75e8dc2",
+        "max_attempts": 2,
+        "project_id": "some-project-id",
+        "playwright_options": "some-playwright-options",
+        "__ui": {
+          "script_source": {
+            "is_generated_script": false,
+            "file_name": ""
+          }
+        },
+        "url.port": 9555,
+        "proxy_url": "some-proxy-url",
+        "proxy_use_local_resolver": false,
+        "response.include_body": false,
+        "response.include_headers": false,
+        "response.include_body_max_bytes": true,
+        "check.response.status": 200,
+        "check.request.method": "get",
+        "ipv4": "10.10.10.10",
+        "ipv6": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+        "playwright_text_assertion": "some-assertion",
+        "urls": "localhost",
+        "screenshots": "on",
+        "filter_journeys.match": "some-filter-journeys-match",
+        "filter_journeys.tags": [
+          "a",
+          "b",
+          "c"
+        ],
+        "ignore_https_errors": false,
+        "throttling": {
+          "value": {
+            "download": "5",
+            "upload": "3",
+            "latency": "20"
+          },
+          "id": "default",
+          "label": "Default"
+        },
+        "ssl.certificate_authorities": "some-ca",
+        "ssl.certificate": "some-certificate",
+        "ssl.verification_mode": "full",
+        "ssl.supported_protocols": [
+          "TLSv1.1",
+          "TLSv1.2",
+          "TLSv1.3"
+        ],
+        "revision": 2,
+        "secrets": "hK+lf2dby84QJJm2W9Sml+XdqtzXUZGAcMlRNBP8ta+WjkCRqBc8e2IZaHCVwQsp4YhjPuP2DANk5fbge0fcjR/1BPpenpcRPvglSxTyfcrIYH8LtZ6Jt4Z6D1126101CdDMwtFHVVZhx5g26b4FSd2lr8mtjCda+K6tFbKTk8qhnEx0f+L6PhlFBAYruehfQd6NJFd/Ts4CKk4tHONhpCsGFHL32HUipGgxiDJi3oLMA4+QGAAd/BcsONC6Fh6niRUi7IbCkTxqJgOCHrYtOfuDW8K+0UF2ysgGuhT+fKi7ldL26KI3s2qc60GbQ6+KhUunnTwpE7PpZjqmELxHBusq4p+Q/zjK4IUBNFEvFJihA9AraCRqtSI6ckho1qpy0ny/TX7H2hyYibgiFyxW0OeHd13Y195vs0DArHik+BafZGnXfx+S2m/GYVGnTSY8X1VevhWeEuMzOE7OC703uGwzUns3/fmGwqQwk/7xnnU6slIcYIP38yqDBbnuFdTyREumNA=="
+      },
+      "type": "synthetics-monitor",
+      "references": [],
+      "managed": false,
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.9.0",
+      "updated_at": "2024-01-19T00:13:32.522Z",
+      "created_at": "2024-01-19T00:13:32.522Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_alerting_cases",
+    "id": "connector_token:601750d9-a82a-4344-ac5c-badfbe12a4ca",
+    "source": {
+      "connector_token": {
+        "connectorId": "connector-id",
+        "token": "ToodRP10TblHckqc9mIGKv4hWUN/rjhzP2OW4j41/z4V4HLSMGJGd6LknngRK7il+8nvMh2pvWJCA/6iIdM62+GAqJZlaHy4gOJnxb62J8ucolZxmmSX2AL1Fsn+6BaIVtegxDt82fdm4S94ANlpwzt9JvshB20vm32vkZrDl74/E9pwtHSsyz+b6s2iyLfELoo2feo=",
+        "expiresAt": "9999",
+        "tokenType": "access_token",
+        "createdAt": "2024-01-17T16:27:21.181Z",
+        "updatedAt": "2024-01-17T16:27:21.181Z"
+      },
+      "type": "connector_token",
+      "references": [],
+      "managed": false,
+      "coreMigrationVersion": "8.8.0",
+      "updated_at": "2024-01-17T16:27:21.181Z",
+      "created_at": "2024-01-17T16:27:21.181Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_ingest",
+    "id": "ingest-outputs:e7e5ea1b-8342-45f3-8051-1bc1448fd923",
+    "source": {
+      "ingest-outputs": {
+        "service_token": "some-service-token",
+        "shipper": {
+          "prop1": "a",
+          "prop2": "b"
+        },
+        "allow_edit": false,
+        "broker_ack_reliability": "some-value",
+        "broker_buffer_size": 100,
+        "channel_buffer_size": 100,
+        "name": "test_kafka_output",
+        "type": "kafka",
+        "hosts": [
+          "localhost:9092"
+        ],
+        "is_default": false,
+        "is_default_monitoring": false,
+        "config_yaml": "",
+        "proxy_id": null,
+        "client_id": "Elastic",
+        "version": "1.0.0",
+        "key": "some-key",
+        "compression": "none",
+        "auth_type": "user_pass",
+        "username": "some-username",
+        "sasl": {
+          "mechanism": "PLAIN"
+        },
+        "partition": "random",
+        "random": {
+          "group_events": 1
+        },
+        "topics": [
+          {
+            "topic": "some topic"
+          }
+        ],
+        "headers": [
+          {
+            "key": "",
+            "value": ""
+          }
+        ],
+        "timeout": 30,
+        "broker_timeout": 30,
+        "required_acks": 1,
+        "ssl": "QxjwNqSXWYqkJmZkgn9o4jBvzu6JIvqatP2F+CH3zPSF9fLSLBp7Q6PRWjztmuKv0Uq6Q+BrZRM4rE7OTt2wQoYrhtRETzQsxWWXXDD9B2Ph7ivUqlRiZmXLSERNYDPYlWspRDlv8e5gcncV8WUyinJAnRucNZuFQBvH1H+L7CkwpuVOG8avoiaJ00ZEn93AruSMxvPdTDfd+YIOjrcrE/ReU4fxith794adlLDDubN5vblbvBM0O4fsGjAoYxjNpWdOm9GvoxTDDw9v1QM9FLwV2i1FAYSVXLc69OWnd5s=",
+        "password": "xtsCxu6mdPQxLusMO6pkfM3yriLyt+8/9pn3BHcc5qce4wYjrdWhRsyyMcMSR/DUwfZzmWXDNT3uYUxeegbMzDwypqCcgYyGl85jB6ekUOJeGkokfW0vl130Xk7TccY6wjlyzMVC61PWavNLfaaEOEdGktKcx+6Tn+syxAc734puI0wMGxgyenMX+lkXqXEW4TYZ27hOthWwKSW35V/m"
+      },
+      "type": "ingest-outputs",
+      "references": [],
+      "managed": false,
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "10.4.0",
+      "updated_at": "2024-01-23T03:10:45.098Z",
+      "created_at": "2024-01-23T03:10:45.098Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_ingest",
+    "id": "fleet-uninstall-tokens:1db22a8f-4cbb-415d-90d1-7608a6923ba1",
+    "source": {
+      "fleet-uninstall-tokens": {
+        "policy_id": "some-policy-id",
+        "token": "eIGQf+EuprdGJlLunhXdvPoDO1NCLG3RtsbhVjWLbRuG+/YmNa8GFyD6924nwNJOND8900YQjT1sGInpQI3rLTC6KX0fthjlBk2RWElyndlnE6jga140dGNf++cbrY1d2c1k6JYPb+SjGs9VEfHQlrM9RpAFx8ZRUGHEbzgGCsaGVcNUZdB0G4A0UFrLSkcme2ICNgxp/qS0xU+0",
+        "token_plain": "This token was encrypted prior to the AAD include list change."
+      },
+      "type": "fleet-uninstall-tokens",
+      "references": [],
+      "managed": false,
+      "coreMigrationVersion": "8.8.0",
+      "updated_at": "2024-01-17T18:19:50.628Z",
+      "created_at": "2024-01-17T18:19:50.628Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "uptime-synthetics-api-key:b448dffe-6e9c-4032-aa9a-5d9446531b83",
+    "source": {
+      "uptime-synthetics-api-key": {
+        "id": "some-id",
+        "name": "some-name",
+        "apiKey": "iqDazOl7MJ5ZAMFGm5p8palEp72ZYIEdNVfmd+WPVfpak61HiOZZx3HmeNaFZa6yviAWm+ES6e2PNKAOPRKmvPWbnQfSXI2Eww2zC+st7RrzNEEGiU7j2w4h+tgCfvGco8CiQZIGZ9dhViOW32p6nsKiuo8P9dRIEdYJA7zPU3oilA4oAz87DTAO3rmdn2dCQqqyOUuEDPL+ytpCyMY="
+      },
+      "type": "uptime-synthetics-api-key",
+      "references": [],
+      "managed": false,
+      "coreMigrationVersion": "8.8.0",
+      "updated_at": "2024-01-17T22:27:14.580Z",
+      "created_at": "2024-01-17T22:27:14.580Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_alerting_cases",
+    "id": "api_key_pending_invalidation:e67824d0-b428-47c7-be46-fd4e2021519f",
+    "source": {
+      "api_key_pending_invalidation": {
+        "createdAt": "2024-02-08T19:10:37.114Z",
+        "apiKeyId": "QXdPIxu0RSFEr2g0n0F/adxDeiu5hR4+CAnX/OvW59oJwTs3knvVxnPttXfcNR8V2fE3btEN5wwXh+fgZ+ADZ3E/fbFxz1Op8tToYWlSheZX3RennPgfnfi5f99edg0FWtAf0TU2FlBnAqzmDrxzhA+q6m3mj4/hzZKuJI2ghuECWJFj0wMLQ6ZDdCLOdRrX5MU7Enxtqvue7uZGboJxEoA="
+      },
+      "type": "api_key_pending_invalidation",
+      "references": [],
+      "managed": false,
+      "coreMigrationVersion": "8.8.0",
+      "updated_at": "2024-02-08T19:10:37.114Z",
+      "created_at": "2024-02-08T19:10:37.114Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_alerting_cases",
+    "id": "action_task_params:248408b1-b3b0-46a0-80fa-e2b6fbc9085d",
+    "source": {
+      "action_task_params": {
+        "apiKey": "UI4MwCfF2yw1h+JQMEEFu18HI0ebFrGxbgKFA76YHKLOdpG9PY4oG5h+ctJjVlyUtcv8+DGnnvpjmxWErJxSe9ni8aQn9cBEZAqScOt1V7eZ5JB2fUVQxFIkrTmOG20vih1OSjaZl4tm55vziSXnvnQapksFWaQGQuIp1c2EasBESHrx9FTgpnUR7UvULYx3eNeQHIvenB030c8gDwg=",
+        "actionId": "some-action-id",
+        "consumer": "some-consumer",
+        "params": {
+          "param1": "a",
+          "param2": "b",
+          "param3": "c"
+        },
+        "executionId": "some-exe-id",
+        "relatedSavedObjects": [
+          {
+            "namespace": "default",
+            "id": "obj1-id",
+            "type": "obj1-type"
+          },
+          {
+            "namespace": "default",
+            "id": "obj2-id",
+            "type": "obj2-type",
+            "typeId": "some-type-id"
+          },
+          {
+            "namespace": "default",
+            "id": "obj3-id",
+            "type": "obj3-type"
+          }
+        ],
+        "source": "SAVED_OBJECT"
+      },
+      "type": "action_task_params",
+      "references": [],
+      "managed": false,
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0",
+      "updated_at": "2024-02-08T15:31:13.593Z",
+      "created_at": "2024-02-08T15:31:13.593Z"
+    }
+  }
+}
