@@ -28,6 +28,7 @@ import { BuildkitePipelineManifest } from './pipelineBackstageDefinitions';
 const DRY_RUN = process.argv.includes('--dry-run');
 const DEFAULT_OUTPUT_PATH = path.resolve(REPO_ROOT, '.buildkite/pipeline-resource-definitions');
 const DEFAULT_LOCATION_FILE_NAME = 'locations.yml';
+const REPO_FILES_PREFIX = 'https://github.com/elastic/kibana/blob/main';
 const TMP_DIR = fs.mkdtempSync(path.resolve(os.tmpdir(), 'buildkite-migration'));
 
 const SCHEMA_DEF = `# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json\n`;
@@ -157,7 +158,7 @@ function generateCatalogFile({
   log: ToolingLog;
 }) {
   const catalogFileName = path.basename(tfFilePath, '.tf');
-  const outputCatalogPath = path.resolve(outputFolder, `${catalogFileName}.yaml`);
+  const outputCatalogPath = path.resolve(outputFolder, `${catalogFileName}.yml`);
 
   const definitionObjectsAsJson = execSync(`hcl2json ${tfFilePath}`).toString();
 
@@ -427,12 +428,12 @@ function compileLocationFile({
       apiVersion: 'backstage.io/v1alpha1',
       kind: 'Location',
       metadata: {
-        name: 'kibana-buildkite-pipelines',
+        name: 'kibana-buildkite-pipelines-list',
         description: 'This file points to individual buildkite pipeline definition files',
       },
       spec: {
         type: 'url',
-        targets: catalogFileNames.map((e) => path.join('.', path.basename(e))),
+        targets: catalogFileNames.map((fileName) => `${REPO_FILES_PREFIX}/${fileName}`),
       },
     },
     DUMP_OPTIONS
@@ -459,6 +460,8 @@ function updateCatalogLocationInCatalogInfo({
 }) {
   const catalogInfoFilePath = path.resolve(REPO_ROOT, 'catalog-info.yaml');
   const catalogInfoFileContent = fs.readFileSync(catalogInfoFilePath, 'utf-8');
+  const catalogLocationFileRelativePath = path.relative(REPO_ROOT, catalogLocationFilePath);
+  const catalogLocationUrl = `${REPO_FILES_PREFIX}/${catalogLocationFileRelativePath}`;
 
   const editedCatalogInfoFile = catalogInfoFileContent
     .split('\n')
@@ -466,7 +469,7 @@ function updateCatalogLocationInCatalogInfo({
       if (line.includes('# Auto-updated')) {
         const indent = line.match(/^\s+/)?.[0] || '';
         const comment = line.match(/# Auto-updated.*$/)?.[0] || '';
-        return `${indent}location: ${catalogLocationFilePath} ${comment}`;
+        return `${indent}target: ${catalogLocationUrl} ${comment}`;
       } else {
         return line;
       }
@@ -507,7 +510,7 @@ function expandSchedule(
   ) as any;
 
   if (scheduleObj.for_each) {
-    const iterable = love(scheduleObj.for_each, env);
+    const iterable = evaluateExpressionInContext(scheduleObj.for_each, env);
 
     for (const item of iterable) {
       const result = expandSchedule(
@@ -520,7 +523,7 @@ function expandSchedule(
   } else {
     for (const field of fields) {
       if (typeof scheduleObj[field] === 'string' && scheduleObj[field].startsWith('${')) {
-        scheduleObj[field] = love(scheduleObj[field], env);
+        scheduleObj[field] = evaluateExpressionInContext(scheduleObj[field], env);
       }
     }
     const scheduleName = postfix ? `${scheduleObj.message} (${postfix})` : scheduleObj.message;
@@ -530,18 +533,24 @@ function expandSchedule(
   return resultingSchedules;
 }
 
-function love(expr: string, env: any) {
+function evaluateExpressionInContext(expr: string, env: any) {
+  // @ts-ignore
   const setsubtract = (arr: any[], toRemove: any[]) => arr.filter((e) => !toRemove.includes(e));
+  // @ts-ignore
   const join = (token: string, array: any[]) => array.join(token);
   const toset = (arr: any[]) => [...new Set(arr)];
+  // @ts-ignore
   const setunion = (...arrays: any[][]) => toset(arrays.flat());
 
   const local = env;
+  // @ts-ignore
   const each = local.each;
 
   try {
+    // eslint-disable-next-line no-eval
     return eval(expr.replace(/\${/g, '').replace(/}/g, ''));
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Failed to expand: ' + expr, local, e);
     throw e;
   }
@@ -580,7 +589,7 @@ function getLocal() {
 function expandAnyObjectValue(input: object) {
   return JSON.parse(JSON.stringify(input), (key, value) => {
     if (typeof value === 'string' && value.startsWith('${')) {
-      return love(value, getLocal());
+      return evaluateExpressionInContext(value, getLocal());
     } else {
       return value;
     }
