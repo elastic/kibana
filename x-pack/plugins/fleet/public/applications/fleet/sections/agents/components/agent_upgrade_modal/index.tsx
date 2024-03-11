@@ -105,7 +105,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   const [updatingAgents, setUpdatingAgents] = useState<number>(0);
   const [updatingQuery, setUpdatingQuery] = useState<Agent[] | string>('');
 
-  const [fleetServerAgents, setfleetServerAgents] = useState<Agent[]>([]);
+  const [fleetServerAgents, setFleetServerAgents] = useState<Agent[]>([]);
 
   const QUERY_STUCK_UPDATING = `status:updating AND upgrade_started_at:* AND NOT upgraded_at:* AND upgrade_started_at < now-${AGENT_UPDATING_TIMEOUT_HOURS}h`;
   const EMPTY_VALUE = useMemo(() => ({ label: '', value: '' }), []);
@@ -166,7 +166,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     const fetchFleetServerAgents = async () => {
       try {
         const { allFleetServerAgents } = await sendAllFleetServerAgents();
-        setfleetServerAgents(allFleetServerAgents);
+        setFleetServerAgents(allFleetServerAgents);
       } catch (error) {
         return;
       }
