@@ -46,8 +46,6 @@ import {
   CONNECTORS,
   getConnectorTemplate,
 } from '../search_index/connector/constants';
-import { IndexNameLogic } from '../search_index/index_name_logic';
-import { IndexViewLogic } from '../search_index/index_view_logic';
 
 import { AttachIndexBox } from './attach_index_box';
 import { ConnectorDetailTabId } from './connector_detail';
@@ -56,14 +54,13 @@ import { NativeConnectorConfiguration } from './native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
-  const { index, recheckIndexLoading, connector } = useValues(ConnectorViewLogic);
-  const { indexName } = useValues(IndexNameLogic);
-  const { recheckIndex } = useActions(IndexViewLogic);
+  const { fetchConnector } = useActions(ConnectorViewLogic);
+  const { index, isLoading, connector } = useValues(ConnectorViewLogic);
   const cloudContext = useCloudDetails();
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
-  const { http } = useValues(HttpLogic);
+  const { errorConnectingMessage, http } = useValues(HttpLogic);
 
   if (!connector) {
     return <></>;
@@ -92,12 +89,19 @@ export const ConnectorConfiguration: React.FC = () => {
             <EuiSteps
               steps={[
                 {
-                  children: (
+                  children: connector.index_name ? (
                     <ApiKeyConfig
-                      indexName={indexName}
+                      indexName={connector.index_name}
                       hasApiKey={!!connector.api_key_id}
                       isNative={false}
                     />
+                  ) : (
+                    i18n.translate(
+                      'xpack.enterpriseSearch.content.connectorDetail.configuration.apiKey.noApiKeyLabel',
+                      {
+                        defaultMessage: 'Please set an index name before generating an API key',
+                      }
+                    )
                   ),
                   status: hasApiKey ? 'complete' : 'incomplete',
                   title: i18n.translate(
@@ -193,14 +197,10 @@ export const ConnectorConfiguration: React.FC = () => {
                       connector={connector}
                       hasPlatinumLicense={hasPlatinumLicense}
                       isLoading={status === Status.LOADING}
-                      saveConfig={(
-                        configuration // TODO update endpoints
-                      ) =>
-                        index &&
+                      saveConfig={(configuration) =>
                         makeRequest({
                           configuration,
                           connectorId: connector.id,
-                          indexName: index.name,
                         })
                       }
                       subscriptionLink={docLinks.licenseManagement}
@@ -227,10 +227,11 @@ export const ConnectorConfiguration: React.FC = () => {
                           )}
                           <EuiSpacer size="s" />
                           <EuiButton
+                            disabled={!index}
                             data-telemetry-id="entSearchContent-connector-configuration-recheckNow"
                             iconType="refresh"
-                            onClick={() => recheckIndex()}
-                            isLoading={recheckIndexLoading}
+                            onClick={() => fetchConnector({ connectorId: connector.id })}
+                            isLoading={isLoading}
                           >
                             {i18n.translate(
                               'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.waitingForConnector.button.label',
@@ -269,6 +270,32 @@ export const ConnectorConfiguration: React.FC = () => {
                 {
                   children: (
                     <EuiFlexGroup direction="column">
+                      {!connector.index_name && (
+                        <EuiFlexItem>
+                          <EuiCallOut
+                            iconType="iInCircle"
+                            color="danger"
+                            title={i18n.translate(
+                              'xpack.enterpriseSearch.content.connectors.configuration.connectorNoIndexCallOut.title',
+                              {
+                                defaultMessage: 'Connector has no attached index',
+                              }
+                            )}
+                          >
+                            <EuiSpacer size="s" />
+                            <EuiText size="s">
+                              {i18n.translate(
+                                'xpack.enterpriseSearch.content.connectors.configuration.connectorNoIndexCallOut.description',
+                                {
+                                  defaultMessage:
+                                    "You won't be able to start syncing content until your connector is attached to an index.",
+                                }
+                              )}
+                            </EuiText>
+                            <EuiSpacer />
+                          </EuiCallOut>
+                        </EuiFlexItem>
+                      )}
                       <EuiFlexItem>
                         <EuiText size="s">
                           {i18n.translate(
@@ -281,11 +308,19 @@ export const ConnectorConfiguration: React.FC = () => {
                         </EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiFlexGroup>
+                        <EuiFlexGroup responsive={false}>
                           <EuiFlexItem grow={false}>
                             <EuiButtonTo
                               data-test-subj="entSearchContent-connector-configuration-setScheduleAndSync"
                               data-telemetry-id="entSearchContent-connector-configuration-setScheduleAndSync"
+                              isDisabled={
+                                (connector?.is_native && !!errorConnectingMessage) ||
+                                [
+                                  ConnectorStatus.NEEDS_CONFIGURATION,
+                                  ConnectorStatus.CREATED,
+                                ].includes(connector?.status) ||
+                                !connector?.index_name
+                              }
                               to={`${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
                                 connectorId: connector.id,
                                 tabId: ConnectorDetailTabId.SCHEDULING,

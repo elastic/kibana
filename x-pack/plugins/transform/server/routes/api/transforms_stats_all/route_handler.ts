@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { RequestHandler } from '@kbn/core/server';
 
-import { TransformRequestHandlerContext } from '../../../services/license';
+import type { TransformRequestHandlerContext } from '../../../services/license';
 
 import { wrapError, wrapEsError } from '../../utils/error_utils';
 

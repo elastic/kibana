@@ -57,6 +57,7 @@ window.matchMedia = jest.fn().mockImplementation((query) => {
     removeListener: jest.fn(),
   };
 });
+const dataViewId = 'security-solution-default';
 
 export const TestCellRenderer: React.FC<DeprecatedCellValueElementProps> = ({ columnId, data }) => (
   <>
@@ -185,6 +186,7 @@ describe('DataTable', () => {
         fields: [timestampFieldSpec],
         getCellValue: expect.any(Function),
         metadata: {
+          dataViewId,
           scopeId: 'table-test',
         },
         dataGridRef: expect.any(Object),

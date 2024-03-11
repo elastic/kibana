@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
@@ -21,7 +22,7 @@ import {
   EuiCode,
   EuiCopy,
 } from '@elastic/eui';
-import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { createFilebeatConfig } from './filebeat_config';
 import { useDataVisualizerKibana } from '../../../kibana_context'; // copy context?
 
