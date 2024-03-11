@@ -144,13 +144,15 @@ export class DataView extends AbstractDataView implements DataViewBase {
    * will be fetched from Elasticsearch when instantiating a new Data View with this spec.
    */
   public toSpec(includeFields = true): DataViewSpec {
-    const spec = this.toSpecShared();
+    const spec = this.toSpecShared(includeFields);
     const fields =
       includeFields && this.fields
         ? this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) })
         : undefined;
 
-    spec.fields = fields;
+    if (fields) {
+      spec.fields = fields;
+    }
 
     return spec;
   }
