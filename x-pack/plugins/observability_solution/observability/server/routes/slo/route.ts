@@ -616,7 +616,12 @@ const getPreviewData = createObservabilityServerRoute({
       (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const service = new GetPreviewData(esClient, spaceId);
+    const soClient = (await context.core).savedObjects.client;
+    const dataViewsService = await dependencies.dataViews.dataViewsServiceFactory(
+      soClient,
+      esClient
+    );
+    const service = new GetPreviewData(esClient, spaceId, dataViewsService);
     return await service.execute(params.body);
   },
 });

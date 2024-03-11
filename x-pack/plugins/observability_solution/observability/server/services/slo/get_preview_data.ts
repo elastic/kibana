@@ -21,6 +21,7 @@ import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { estypes } from '@elastic/elasticsearch';
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
 import { buildParamValues } from './transform_generators/synthetics_availability';
 import { typedSearch } from '../../utils/queries';
@@ -44,7 +45,23 @@ interface Options {
   groupings?: Record<string, unknown>;
 }
 export class GetPreviewData {
-  constructor(private esClient: ElasticsearchClient, private spaceId: string) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private spaceId: string,
+    private dataViewService: DataViewsService
+  ) {}
+
+  public async buildRuntimeMappings({ dataViewId }: { dataViewId?: string }) {
+    let dataView: DataView | undefined;
+    if (dataViewId) {
+      try {
+        dataView = await this.dataViewService.get(dataViewId);
+      } catch (e) {
+        // If the data view is not found, we will continue without it
+      }
+    }
+    return dataView?.getRuntimeMappings?.() ?? {};
+  }
 
   private async getAPMTransactionDurationPreviewData(
     indicator: APMTransactionDurationIndicator,
@@ -75,6 +92,9 @@ export class GetPreviewData {
 
     const result = await typedSearch(this.esClient, {
       index: indicator.params.index,
+      runtime_mappings: await this.buildRuntimeMappings({
+        dataViewId: indicator.params.dataViewId,
+      }),
       size: 0,
       query: {
         bool: {
@@ -167,6 +187,9 @@ export class GetPreviewData {
 
     const result = await this.esClient.search({
       index: indicator.params.index,
+      runtime_mappings: await this.buildRuntimeMappings({
+        dataViewId: indicator.params.dataViewId,
+      }),
       size: 0,
       query: {
         bool: {
@@ -242,6 +265,9 @@ export class GetPreviewData {
 
     const result = await this.esClient.search({
       index: indicator.params.index,
+      runtime_mappings: await this.buildRuntimeMappings({
+        dataViewId: indicator.params.dataViewId,
+      }),
       size: 0,
       query: {
         bool: {
@@ -301,6 +327,9 @@ export class GetPreviewData {
 
     const result = await this.esClient.search({
       index: indicator.params.index,
+      runtime_mappings: await this.buildRuntimeMappings({
+        dataViewId: indicator.params.dataViewId,
+      }),
       size: 0,
       query: {
         bool: {
@@ -363,6 +392,9 @@ export class GetPreviewData {
 
     const result = await this.esClient.search({
       index: indicator.params.index,
+      runtime_mappings: await this.buildRuntimeMappings({
+        dataViewId: indicator.params.dataViewId,
+      }),
       size: 0,
       query: {
         bool: {
@@ -410,6 +442,9 @@ export class GetPreviewData {
 
     const result = await this.esClient.search({
       index: indicator.params.index,
+      runtime_mappings: await this.buildRuntimeMappings({
+        dataViewId: indicator.params.dataViewId,
+      }),
       size: 0,
       query: {
         bool: {
@@ -489,6 +524,9 @@ export class GetPreviewData {
 
     const result = await this.esClient.search({
       index: SYNTHETICS_INDEX_PATTERN,
+      runtime_mappings: await this.buildRuntimeMappings({
+        dataViewId: indicator.params.dataViewId,
+      }),
       size: 0,
       query: {
         bool: {
