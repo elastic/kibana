@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -70,6 +70,7 @@ interface EditorFooterProps {
   detectTimestamp: boolean;
   onErrorClick: (error: MonacoMessage) => void;
   runQuery: () => void;
+  updateQuery: (qs: string) => void;
   isHistoryOpen: boolean;
   setIsHistoryOpen: (status: boolean) => void;
   containerWidth: number;
@@ -90,6 +91,7 @@ export const EditorFooter = memo(function EditorFooter({
   detectTimestamp,
   onErrorClick,
   runQuery,
+  updateQuery,
   hideRunQueryText,
   disableSubmitAction,
   editorIsInline,
@@ -104,6 +106,18 @@ export const EditorFooter = memo(function EditorFooter({
   const { euiTheme } = useEuiTheme();
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
+
+  const onUpdateAndSubmit = useCallback(
+    (qs: string) => {
+      // update the query first
+      updateQuery(qs);
+      // submit the query with some latency
+      setTimeout(() => {
+        runQuery();
+      }, 300);
+    },
+    [runQuery, updateQuery]
+  );
 
   return (
     <EuiFlexGroup
@@ -299,7 +313,7 @@ export const EditorFooter = memo(function EditorFooter({
         <EuiFlexItem grow={false}>
           <QueryHistory
             containerCSS={styles.historyContainer}
-            runQuery={() => {}}
+            onUpdateAndSubmit={onUpdateAndSubmit}
             containerWidth={containerWidth}
           />
         </EuiFlexItem>

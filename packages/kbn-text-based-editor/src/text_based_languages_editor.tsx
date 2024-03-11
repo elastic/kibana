@@ -201,6 +201,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
 
+  const onQueryUpdate = useCallback(
+    (value: string) => {
+      setCode(value);
+      onTextLangQueryChange({ [language]: value } as AggregateQuery);
+    },
+    [language, onTextLangQueryChange]
+  );
+
   const onQuerySubmit = useCallback(() => {
     if (isQueryLoading && allowQueryCancellation) {
       abortController?.abort();
@@ -563,14 +571,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   };
 
-  const onQueryUpdate = useCallback(
-    (value: string) => {
-      setCode(value);
-      onTextLangQueryChange({ [language]: value } as AggregateQuery);
-    },
-    [language, onTextLangQueryChange]
-  );
-
   useEffect(() => {
     async function getDocumentation() {
       const sections = await getDocumentationSections(language);
@@ -897,11 +897,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         }}
                         {...editorMessages}
                         onErrorClick={onErrorClick}
-                        runQuery={() => {
-                          if (editorMessages.errors.some((e) => e.source !== 'client')) {
-                            onQuerySubmit();
-                          }
-                        }}
+                        runQuery={onQuerySubmit}
+                        updateQuery={onQueryUpdate}
                         detectTimestamp={detectTimestamp}
                         editorIsInline={editorIsInline}
                         disableSubmitAction={disableSubmitAction}
@@ -1002,9 +999,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
             historyContainer: styles.historyContainer,
           }}
           onErrorClick={onErrorClick}
-          runQuery={() => {
-            onQuerySubmit();
-          }}
+          runQuery={onQuerySubmit}
+          updateQuery={onQueryUpdate}
           detectTimestamp={detectTimestamp}
           hideRunQueryText={hideRunQueryText}
           editorIsInline={editorIsInline}

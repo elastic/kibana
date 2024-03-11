@@ -25,11 +25,13 @@ export const getHistoryItems = (): QueryHistoryItem[] => {
 const cachedQueries = new Map<string, QueryHistoryItem>();
 const localStorageQueries = getHistoryItems();
 localStorageQueries.forEach((queryItem) => {
-  cachedQueries.set(queryItem.queryString, queryItem);
+  const trimmedQueryString = queryItem.queryString.replaceAll('\n', '').trim();
+  cachedQueries.set(trimmedQueryString, queryItem);
 });
 
 export const addQueriesToCache = (item: QueryHistoryItem) => {
-  if (!localStorageQueries.some((queryItem) => queryItem.queryString === item.queryString)) {
+  const trimmedQueryString = item.queryString.replaceAll('\n', '').trim();
+  if (!localStorageQueries.some((queryItem) => queryItem.queryString === trimmedQueryString)) {
     cachedQueries.set(item.queryString, item);
   }
 };

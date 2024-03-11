@@ -20,6 +20,7 @@ import {
   Criteria,
   EuiButtonIcon,
   CustomItemAction,
+  EuiCopy,
 } from '@elastic/eui';
 import { css, Interpolation, Theme } from '@emotion/react';
 import { type QueryHistoryItem, getHistoryItems } from './history_localStorage';
@@ -145,11 +146,11 @@ export const getTableColumns = (
 export function QueryHistory({
   containerCSS,
   containerWidth,
-  runQuery,
+  onUpdateAndSubmit,
 }: {
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
-  runQuery: () => void;
+  onUpdateAndSubmit: (qs: string) => void;
 }) {
   const actions: Array<CustomItemAction<QueryHistoryItem>> = useMemo(() => {
     return [
@@ -158,17 +159,23 @@ export function QueryHistory({
           return (
             <EuiFlexGroup gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="playFilled" size="m" />
+                <EuiIcon
+                  type="playFilled"
+                  size="m"
+                  onClick={() => onUpdateAndSubmit(item.queryString)}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="copy" size="m" />
+                <EuiCopy textToCopy={item.queryString}>
+                  {(copy) => <EuiIcon type="copy" size="m" onClick={copy} />}
+                </EuiCopy>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
         },
       },
     ];
-  }, []);
+  }, [onUpdateAndSubmit]);
   const columns = useMemo(() => {
     return getTableColumns(containerWidth, actions);
   }, [actions, containerWidth]);
