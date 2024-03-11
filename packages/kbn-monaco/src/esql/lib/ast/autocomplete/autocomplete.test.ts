@@ -7,7 +7,7 @@
  */
 
 import { monaco } from '../../../../monaco_imports';
-import { CharStreams } from 'antlr4ts';
+import { CharStreams } from 'antlr4';
 import { suggest } from './autocomplete';
 import { getParser, ROOT_STATEMENT } from '../../antlr_facade';
 import { ESQLErrorListener } from '../../monaco/esql_error_listener';
@@ -379,7 +379,8 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('string'),
       ...getFunctionSignaturesByReturnType('where', 'string', { evalMath: true }),
     ]);
-    testSuggestions('from a | where stringField =~ ', [
+    // Skip these tests until the insensitive case equality gets restored back
+    testSuggestions.skip('from a | where stringField =~ ', [
       ...getFieldNamesByType('string'),
       ...getFunctionSignaturesByReturnType('where', 'string', { evalMath: true }),
     ]);
@@ -394,7 +395,7 @@ describe('autocomplete', () => {
         ['boolean']
       ),
     ]);
-    testSuggestions('from a | where stringField =~ stringField ', [
+    testSuggestions.skip('from a | where stringField =~ stringField ', [
       '|',
       ...getFunctionSignaturesByReturnType(
         'where',
@@ -829,7 +830,8 @@ describe('autocomplete', () => {
       'a',
       ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
     ]);
-    testSuggestions('from a | eval a=stringField =~ ', [
+    // Skip this test until the insensitive case equality gets restored back
+    testSuggestions.skip('from a | eval a=stringField =~ ', [
       ...getFieldNamesByType('string'),
       ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }),
     ]);
@@ -973,6 +975,39 @@ describe('autocomplete', () => {
       ],
       '('
     );
+    // test that comma is correctly added to the suggestions if minParams is not reached yet
+    testSuggestions('from a | eval a=concat( ', [
+      ...getFieldNamesByType('string').map((v) => `${v},`),
+      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
+        'concat',
+      ]).map((v) => `${v},`),
+    ]);
+    testSuggestions('from a | eval a=concat(stringField, ', [
+      ...getFieldNamesByType('string'),
+      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
+        'concat',
+      ]),
+    ]);
+    // test that the arg type is correct after minParams
+    testSuggestions('from a | eval a=cidr_match(ipField, stringField,', [
+      ...getFieldNamesByType('string'),
+      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
+        'cidr_match',
+      ]),
+    ]);
+    // test that comma is correctly added to the suggestions if minParams is not reached yet
+    testSuggestions('from a | eval a=cidr_match( ', [
+      ...getFieldNamesByType('ip').map((v) => `${v},`),
+      ...getFunctionSignaturesByReturnType('eval', 'ip', { evalMath: true }, undefined, [
+        'cidr_match',
+      ]).map((v) => `${v},`),
+    ]);
+    testSuggestions('from a | eval a=cidr_match(ipField, ', [
+      ...getFieldNamesByType('string'),
+      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
+        'cidr_match',
+      ]),
+    ]);
     // test deep function nesting suggestions (and check that the same function is not suggested)
     // round(round(
     // round(round(round(
