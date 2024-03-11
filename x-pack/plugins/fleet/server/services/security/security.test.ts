@@ -23,6 +23,7 @@ describe('When using calculateRouteAuthz()', () => {
       readEnrollmentTokens: false,
       readAgentPolicies: false,
       readAgents: false,
+      allAgents: false,
     },
     integrations: {
       readPackageInfo: false,
@@ -676,6 +677,87 @@ describe('getAuthzFromRequest', () => {
       });
       const res = await getAuthzFromRequest({} as any);
       expect(res.fleet.readAgents).toBe(false);
+    });
+  });
+
+  describe('Fleet allAgents', () => {
+    beforeEach(() => {
+      mockSecurity.authz.mode.useRbacForRequest.mockReturnValue(true);
+    });
+    it('should authorize Fleet:All', async () => {
+      checkPrivileges.mockResolvedValue({
+        privileges: {
+          kibana: [
+            {
+              resource: 'default',
+              privilege: 'api:fleet-all',
+              authorized: true,
+            },
+          ],
+          elasticsearch: {} as any,
+        },
+        hasAllRequested: true,
+        username: 'test',
+      });
+      const res = await getAuthzFromRequest({} as any);
+      expect(res.fleet.allAgents).toBe(true);
+    });
+
+    it('should not authorize Fleet:Read', async () => {
+      checkPrivileges.mockResolvedValue({
+        privileges: {
+          kibana: [
+            {
+              resource: 'default',
+              privilege: 'api:fleet-read',
+              authorized: true,
+            },
+          ],
+          elasticsearch: {} as any,
+        },
+        hasAllRequested: false,
+        username: 'test',
+      });
+      const res = await getAuthzFromRequest({} as any);
+      expect(res.fleet.allAgents).toBe(false);
+    });
+
+    it('should not authorize Fleet:Agents:Read', async () => {
+      checkPrivileges.mockResolvedValue({
+        privileges: {
+          kibana: [
+            {
+              resource: 'default',
+              privilege: 'api:fleet-agents-read',
+              authorized: false,
+            },
+          ],
+          elasticsearch: {} as any,
+        },
+        hasAllRequested: false,
+        username: 'test',
+      });
+      const res = await getAuthzFromRequest({} as any);
+      expect(res.fleet.allAgents).toBe(false);
+    });
+
+    it('should authorize Fleet:Agents:All', async () => {
+      checkPrivileges.mockResolvedValue({
+        privileges: {
+          kibana: [
+            {
+              resource: 'default',
+              privilege: 'api:fleet-agents-all',
+              authorized: true,
+            },
+          ],
+          elasticsearch: {} as any,
+        },
+        hasAllRequested: false,
+        username: 'test',
+      });
+      const res = await getAuthzFromRequest({} as any);
+      expect(res.fleet.allAgents).toBe(true);
     });
   });
 });

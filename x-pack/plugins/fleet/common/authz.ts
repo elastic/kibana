@@ -24,6 +24,7 @@ export interface FleetAuthz {
     readEnrollmentTokens: boolean;
     readAgentPolicies: boolean;
     readAgents: boolean;
+    allAgents: boolean;
   };
 
   integrations: {
@@ -90,6 +91,7 @@ export const calculateAuthz = ({
     all: fleet.all && (integrations.all || integrations.read),
 
     readAgents: (fleet.all || fleet.read || fleet.agents?.read || fleet.agents?.all) ?? false,
+    allAgents: (fleet.all || fleet.agents?.all) ?? false,
     // These are currently used by Fleet Server setup
     setup: fleet.all || fleet.setup,
     readEnrollmentTokens: fleet.all || fleet.setup,

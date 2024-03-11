@@ -21,6 +21,17 @@ export const testUsers: {
     username: 'fleet_all_int_all',
     password: 'changeme',
   },
+  fleet_read_int_all: {
+    permissions: {
+      feature: {
+        fleetv2: ['read'],
+        fleet: ['all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_all_int_all',
+    password: 'changeme',
+  },
   setup: {
     permissions: {
       feature: {
