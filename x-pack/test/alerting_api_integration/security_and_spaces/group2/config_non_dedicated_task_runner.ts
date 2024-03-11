@@ -15,6 +15,6 @@ export default createTestConfig('security_and_spaces', {
   enableActionsProxy: true,
   publicBaseUrl: true,
   testFiles: [require.resolve('./tests')],
-  useDedicatedTaskRunner: false,
+  useDedicatedTaskRunner: true,
   experimentalFeatures: ['sentinelOneConnectorOn'],
 });
