@@ -334,6 +334,7 @@ exports[`ResetSLO resets all associated resources 8`] = `
           Object {
             "set": Object {
               "field": "slo.indicator.params",
+              "ignore_failure": true,
               "value": Object {
                 "environment": "irrelevant",
                 "index": "metrics-apm*",
@@ -354,6 +355,12 @@ exports[`ResetSLO resets all associated resources 8`] = `
             "set": Object {
               "field": "slo.updatedAt",
               "value": 2023-01-01T00:00:00.000Z,
+            },
+          },
+          Object {
+            "set": Object {
+              "field": "kibanaUrl",
+              "value": "http://myhost.com/mock-server-basepath",
             },
           },
         ],

@@ -136,6 +136,7 @@ Array [
       Object {
         "set": Object {
           "field": "slo.indicator.params",
+          "ignore_failure": true,
           "value": Object {
             "environment": "irrelevant",
             "index": "metrics-apm*",
@@ -155,6 +156,12 @@ Array [
         "set": Object {
           "field": "slo.updatedAt",
           "value": 2024-01-01T00:00:00.000Z,
+        },
+      },
+      Object {
+        "set": Object {
+          "field": "kibanaUrl",
+          "value": "http://myhost.com/mock-server-basepath",
         },
       },
     ],

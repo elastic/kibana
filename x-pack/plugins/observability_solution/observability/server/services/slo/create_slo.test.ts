@@ -8,6 +8,7 @@
 import {
   ElasticsearchClientMock,
   elasticsearchServiceMock,
+  httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
@@ -44,7 +45,8 @@ describe('CreateSLO', () => {
       mockTransformManager,
       mockSummaryTransformManager,
       loggerMock,
-      'some-space'
+      'some-space',
+      httpServiceMock.createStartContract().basePath
     );
   });
 
