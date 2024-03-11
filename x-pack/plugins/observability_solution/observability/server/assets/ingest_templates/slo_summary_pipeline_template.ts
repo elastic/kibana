@@ -7,12 +7,14 @@
 
 import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import { IBasePath } from '@kbn/core-http-server';
 import { getSLOSummaryPipelineId, SLO_RESOURCES_VERSION } from '../../../common/slo/constants';
 import { SLO } from '../../domain/models';
 
 export const getSLOSummaryPipelineTemplate = (
   slo: SLO,
-  spaceId: string
+  spaceId: string,
+  basePath: IBasePath
 ): IngestPutPipelineRequest => {
   const errorBudgetEstimated =
     slo.budgetingMethod === 'occurrences' && slo.timeWindow.type === 'calendarAligned';
@@ -181,6 +183,12 @@ export const getSLOSummaryPipelineTemplate = (
         set: {
           field: 'slo.updatedAt',
           value: slo.updatedAt,
+        },
+      },
+      {
+        set: {
+          field: 'kibanaUrl',
+          value: basePath.publicBaseUrl,
         },
       },
     ],
