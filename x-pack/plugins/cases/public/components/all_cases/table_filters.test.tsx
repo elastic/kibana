@@ -469,7 +469,7 @@ describe('CasesTableFilters ', () => {
     beforeEach(() => {
       const previousState = [{ key: uiCustomFieldKey, isActive: true }];
       localStorage.setItem(
-        'testAppId.cases.list.tableFiltersConfig',
+        'securitySolution.cases.list.tableFiltersConfig',
         JSON.stringify(previousState)
       );
 
@@ -571,7 +571,7 @@ describe('CasesTableFilters ', () => {
     it('should reset the selected options when a custom field filter is deactivated', async () => {
       const previousState = [{ key: uiCustomFieldKey, isActive: true }];
       localStorage.setItem(
-        'testAppId.cases.list.tableFiltersConfig',
+        'securitySolution.cases.list.tableFiltersConfig',
         JSON.stringify(previousState)
       );
       const customProps = {
@@ -673,7 +673,9 @@ describe('CasesTableFilters ', () => {
       await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
 
       userEvent.click(screen.getByRole('option', { name: 'Toggle' }));
-      const storedFilterState = localStorage.getItem('testAppId.cases.list.tableFiltersConfig');
+      const storedFilterState = localStorage.getItem(
+        'securitySolution.cases.list.tableFiltersConfig'
+      );
       expect(storedFilterState).toBeTruthy();
       expect(JSON.parse(storedFilterState!)).toMatchInlineSnapshot(`
         Array [
@@ -752,7 +754,9 @@ describe('CasesTableFilters ', () => {
 
       userEvent.click(screen.getByRole('option', { name: 'Status' }));
 
-      const storedFilterState = localStorage.getItem('testAppId.cases.list.tableFiltersConfig');
+      const storedFilterState = localStorage.getItem(
+        'securitySolution.cases.list.tableFiltersConfig'
+      );
       expect(storedFilterState).toBeTruthy();
       expect(JSON.parse(storedFilterState || '')).toMatchInlineSnapshot(`
         Array [
@@ -792,7 +796,7 @@ describe('CasesTableFilters ', () => {
       ];
 
       localStorage.setItem(
-        'testAppId.cases.list.tableFiltersConfig',
+        'securitySolution.cases.list.tableFiltersConfig',
         JSON.stringify(previousState)
       );
 
@@ -822,7 +826,7 @@ describe('CasesTableFilters ', () => {
         { key: `${CUSTOM_FIELD_KEY_PREFIX}toggle`, isActive: true },
       ];
       localStorage.setItem(
-        'testAppId.cases.list.tableFiltersConfig',
+        'securitySolution.cases.list.tableFiltersConfig',
         JSON.stringify(previousState)
       );
 
@@ -950,7 +954,7 @@ describe('CasesTableFilters ', () => {
         { key: `${CUSTOM_FIELD_KEY_PREFIX}toggle`, isActive: true },
       ];
       localStorage.setItem(
-        'testAppId.cases.list.tableFiltersConfig',
+        'securitySolution.cases.list.tableFiltersConfig',
         JSON.stringify(previousState)
       );
 
@@ -960,7 +964,9 @@ describe('CasesTableFilters ', () => {
       // we need any user action to trigger the filter config update
       userEvent.click(await screen.findByRole('option', { name: 'Toggle' }));
 
-      const storedFilterState = localStorage.getItem('testAppId.cases.list.tableFiltersConfig');
+      const storedFilterState = localStorage.getItem(
+        'securitySolution.cases.list.tableFiltersConfig'
+      );
       // the fakeField and owner filter should be removed and toggle should update isActive
       expect(JSON.parse(storedFilterState || '')).toMatchInlineSnapshot(`
         Array [
@@ -1003,7 +1009,7 @@ describe('CasesTableFilters ', () => {
       ];
 
       localStorage.setItem(
-        'testAppId.cases.list.tableFiltersConfig',
+        'securitySolution.cases.list.tableFiltersConfig',
         JSON.stringify(previousState)
       );
 
@@ -1052,7 +1058,7 @@ describe('CasesTableFilters ', () => {
         license: { type: 'platinum' },
       });
 
-      localStorage.setItem('testAppId.cases.list.tableFiltersConfig', JSON.stringify([]));
+      localStorage.setItem('securitySolution.cases.list.tableFiltersConfig', JSON.stringify([]));
 
       const overrideProps = {
         ...props,

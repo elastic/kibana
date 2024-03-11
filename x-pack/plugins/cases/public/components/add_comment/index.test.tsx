@@ -49,7 +49,7 @@ const sampleData: CaseAttachmentWithoutOwner = {
   comment: 'what a cool comment',
   type: AttachmentType.user as const,
 };
-const appId = 'testAppId';
+const appId = 'securitySolution';
 const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
 
 describe('AddComment ', () => {
