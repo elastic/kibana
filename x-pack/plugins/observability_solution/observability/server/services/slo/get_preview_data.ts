@@ -9,6 +9,7 @@ import { calculateAuto } from '@kbn/calculate-auto';
 import {
   ALL_VALUE,
   APMTransactionErrorRateIndicator,
+  SyntheticsAvailabilityIndicator,
   GetPreviewDataParams,
   GetPreviewDataResponse,
   HistogramIndicator,
@@ -21,6 +22,7 @@ import moment from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { estypes } from '@elastic/elasticsearch';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
+import { buildParamValues } from './transform_generators/synthetics_availability';
 import { typedSearch } from '../../utils/queries';
 import { APMTransactionDurationIndicator } from '../../domain/models';
 import { computeSLI } from '../../domain/services';
@@ -29,6 +31,7 @@ import {
   GetHistogramIndicatorAggregation,
   GetTimesliceMetricIndicatorAggregation,
 } from './aggregations';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../common/slo/constants';
 
 interface Options {
   range: {
@@ -41,7 +44,7 @@ interface Options {
   groupings?: Record<string, unknown>;
 }
 export class GetPreviewData {
-  constructor(private esClient: ElasticsearchClient) {}
+  constructor(private esClient: ElasticsearchClient, private spaceId: string) {}
 
   private async getAPMTransactionDurationPreviewData(
     indicator: APMTransactionDurationIndicator,
@@ -461,6 +464,94 @@ export class GetPreviewData {
     }
   }
 
+  private async getSyntheticsAvailabilityPreviewData(
+    indicator: SyntheticsAvailabilityIndicator,
+    options: Options
+  ): Promise<GetPreviewDataResponse> {
+    const filter = [];
+    const { monitorIds, tags, projects } = buildParamValues({
+      monitorIds: indicator.params.monitorIds || [],
+      tags: indicator.params.tags || [],
+      projects: indicator.params.projects || [],
+    });
+    if (!monitorIds.includes(ALL_VALUE) && monitorIds.length > 0)
+      filter.push({
+        terms: { 'monitor.id': monitorIds },
+      });
+    if (!tags.includes(ALL_VALUE) && tags.length > 0)
+      filter.push({
+        terms: { tags },
+      });
+    if (!projects.includes(ALL_VALUE) && projects.length > 0)
+      filter.push({
+        terms: { 'monitor.project.id': projects },
+      });
+
+    const result = await this.esClient.search({
+      index: SYNTHETICS_INDEX_PATTERN,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { range: { '@timestamp': { gte: options.range.start, lte: options.range.end } } },
+            { term: { 'summary.final_attempt': true } },
+            { term: { 'meta.space_id': this.spaceId } },
+            ...filter,
+          ],
+        },
+      },
+      aggs: {
+        perMinute: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: '10m',
+          },
+          aggs: {
+            good: {
+              filter: {
+                term: {
+                  'monitor.status': 'up',
+                },
+              },
+            },
+            bad: {
+              filter: {
+                term: {
+                  'monitor.status': 'down',
+                },
+              },
+            },
+            total: {
+              filter: {
+                match_all: {},
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const data: GetPreviewDataResponse = [];
+
+    // @ts-ignore buckets is not improperly typed
+    result.aggregations?.perMinute.buckets.forEach((bucket) => {
+      const good = bucket.good?.doc_count ?? 0;
+      const bad = bucket.bad?.doc_count ?? 0;
+      const total = bucket.total?.doc_count ?? 0;
+      data.push({
+        date: bucket.key_as_string,
+        sliValue: computeSLI(good, total),
+        events: {
+          good,
+          bad,
+          total,
+        },
+      });
+    });
+
+    return data;
+  }
+
   public async execute(params: GetPreviewDataParams): Promise<GetPreviewDataResponse> {
     try {
       // If the time range is 24h or less, then we want to use a 1m bucket for the
@@ -492,6 +583,8 @@ export class GetPreviewData {
           return this.getAPMTransactionDurationPreviewData(params.indicator, options);
         case 'sli.apm.transactionErrorRate':
           return this.getAPMTransactionErrorPreviewData(params.indicator, options);
+        case 'sli.synthetics.availability':
+          return this.getSyntheticsAvailabilityPreviewData(params.indicator, options);
         case 'sli.kql.custom':
           return this.getCustomKQLPreviewData(params.indicator, options);
         case 'sli.histogram.custom':
