@@ -5,8 +5,20 @@
  * 2.0.
  */
 
+import { KibanaSavedObjectType } from '@kbn/fleet-plugin/common';
+
+export interface DashboardReference {
+  type: KibanaSavedObjectType.dashboard;
+  id: string;
+}
+
 export interface Section {
   title: string;
+  dashboards: DashboardReference[];
+}
+
+export interface GetDashboardsSectionsResponse {
+  sections: Section[];
 }
 
 export interface ObsDashboardSections {
