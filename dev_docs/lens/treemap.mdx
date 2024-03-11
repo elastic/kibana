@@ -40,22 +40,15 @@ Understanding `LensTreeMapConfig` in detail
 ```
 const treemapConfig: LensConfig = {
   chartType: 'treemap',
-  title: 'Sales Distribution by Product Category',
+  title: 'Treemap chart',
   dataset: {
-    esql: 'from sales_data | group by category, subCategory | stats sum(sales) as totalSales',
+    esql: 'from kibana_sample_data_logs | stats bytes = sum(bytes) by geo.src, geo.dest',
   },
   breakdown: [
-    {
-      type: 'topValues',
-      field: 'category',
-      size: 5, // Top 5 categories
-    },
-    {
-      type: 'topValues',
-      field: 'subCategory',
-      size: 10, // Top 10 subcategories within each category
-    },
+    'geo.src',
+    'geo.dest',
   ],
+  value: 'bytes',
 };
 const configBuilder = new LensConfigBuilder(lensFormulaAPI, dataViewsAPI);
 const lensConfig = configBuilder.build(treemapConfig, {
@@ -64,4 +57,3 @@ const lensConfig = configBuilder.build(treemapConfig, {
 });
 ```
 
-This example demonstrates how to create a treemap visualization to display sales distribution across different product categories and their subcategories. The `breakdown` property is configured with two levels of `topValues` breakdowns to first segment the data by the top 5 categories and then further by the top 10 subcategories within each category. An ESQL query aggregates sales totals at these levels, enabling the treemap to visually represent the distribution of sales across the product hierarchy. The visualization title, "Sales Distribution by Product Category," provides a clear description of what the treemap represents, facilitating easy interpretation of the hierarchical data structure and the relative significance of each segment.

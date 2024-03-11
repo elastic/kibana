@@ -46,16 +46,12 @@ Understanding `LensPieConfig` in detail
 ```
 const pieConfig: LensConfig = {
   chartType: 'pie',
-  title: 'Sales by Region',
+  title: 'Bytes by Region',
   dataset: {
-    esql: 'from sales_data | group by region | stats count() as salesCount',
+    esql: 'from sales_data | stats avgBytes = avg(bytes) by geo.src',
   },
   breakdown: [
-    {
-      type: 'topValues',
-      field: 'region',
-      size: 5,
-    },
+    'geo.src'
   ],
   legend: {
     show: true,
@@ -69,4 +65,3 @@ const lensConfig = configBuilder.build(pieConfig, {
 });
 ```
 
-This example showcases how to configure a pie chart visualization to display sales by region. The `breakdown` property uses a `topValues` type to segment sales data into slices based on the top 5 regions. Additionally, the legend is configured to be shown on the right side of the chart, facilitating the understanding of which slice corresponds to each region. The use of ESQL in the `dataset` property allows for direct aggregation and segmentation of the data at the source, enabling efficient data visualization construction.

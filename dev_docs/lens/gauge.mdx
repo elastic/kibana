@@ -67,13 +67,11 @@ const gaugeConfig: LensConfig = {
   chartType: 'gauge',
   title: 'CPU Utilization',
   dataset: {
-    esql: 'from myindex | stats avgCpuUtilization = avg(cpu_utilization)',
+    esql: 'from myindex | stats avgCpuUtilization = avg(cpu_utilization) | eval max=100 ',
   },
   value: 'avgCpuUtilization',
   label: 'Average CPU Utilization',
-  queryMinValue: '0',
-  queryMaxValue: '100',
-  queryGoalValue: '75',
+  queryMaxValue: 'max',
   shape: 'arc',
 };
 const configBuilder = new LensConfigBuilder(lensFormulaAPI, dataViewsAPI);
@@ -83,4 +81,4 @@ const lensConfig = configBuilder.build(gaugeConfig, {
 });
 ```
 
-This example demonstrates how to create a gauge visualization using the `LensGaugeConfig`. It sets up a gauge to display the average CPU utilization, with specified minimum and maximum values to define the scale, and a goal value to highlight the target CPU utilization level. The `shape` property is set to `'arc'`, giving the gauge a semi-circular appearance.
+This example demonstrates how to create a gauge visualization using the `LensGaugeConfig`. It sets up a gauge to display the average CPU utilization.

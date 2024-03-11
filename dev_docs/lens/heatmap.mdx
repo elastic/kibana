@@ -51,20 +51,13 @@ Understanding `LensHeatmapConfig` in detail
 ```
 const heatmapConfig: LensConfig = {
   chartType: 'heatmap',
-  title: 'Website Traffic Heatmap',
+  title: 'Heatmap Chart',
   dataset: {
-    esql: 'from web_traffic | group by weekday, hour | stats count() as sessions',
+    esql: 'from kibana_sample_data_logs | stats bytes=sum(bytes) by geo.dest, geo.src',
   },
-  breakdown: {
-    type: 'topValues',
-    field: 'weekday',
-    size: 7, // Representing days of the week
-  },
-  xAxis: {
-    type: 'topValues',
-    field: 'hour',
-    size: 24, // Representing hours of the day
-  },
+  breakdown: 'geo.dest',
+  xAxis: 'geo.src',
+  value: 'bytes',
   legend: {
     show: true,
     position: 'right',

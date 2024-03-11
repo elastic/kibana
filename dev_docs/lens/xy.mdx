@@ -140,22 +140,18 @@ The Reference Line Layer is used to add horizontal lines to the chart, serving a
 ```
 const xyConfig: LensConfig = {
   chartType: 'xy',
-  title: 'Monthly Sales Trend',
+  title: 'XY Chart',
   dataset: {
-    esql: 'from sales_data | group by month | stats sum(sales) as totalSales',
+    esql: 'FROM sales_data | EVAL timestamp=DATE_TRUNC(3 hour, @timestamp) | stats sales = SUM(sales_field) by timestamp',
   },
   layers: [
     {
       type: 'series',
       seriesType: 'line',
-      xAxis: {
-        type: 'dateHistogram',
-        field: 'month',
-        minimumInterval: '1M',
-      },
+      xAxis: 'timestamp',
       yAxis: [
         {
-          value: 'totalSales',
+          value: 'sales',
           label: 'Total Sales',
         },
       ],
@@ -177,4 +173,3 @@ const lensConfig = configBuilder.build(xyConfig, {
 });
 ```
 
-This example demonstrates how to configure an XY chart to display the trend of monthly sales. It uses a line chart series layer to represent the total sales over time, with sales data aggregated by month. The `xAxis` configuration uses a `dateHistogram` to ensure that sales data is plotted over time accurately. The `legend` and `axisTitleVisibility` options are used to enhance the chart's readability, making it easy to interpret the sales trend. This configuration exemplifies how to leverage the XY chart type for time series data analysis, showcasing trends and patterns in sales over the specified period.

@@ -39,13 +39,10 @@ const regionMapConfig: LensConfig = {
   chartType: 'regionmap',
   title: 'Sales by Country',
   dataset: {
-    esql: 'from sales_data | group by country | stats sum(sales) as totalSales',
+    esql: 'from kibana_sample_data_logs | stats bytes=sum(bytes) by geo.dest',
   },
-  breakdown: {
-    type: 'topValues',
-    field: 'country',
-    size: 20, // Top 20 countries
-  },
+  breakdown: 'geo.dest',
+  value: 'bytes',
 };
 const configBuilder = new LensConfigBuilder(lensFormulaAPI, dataViewsAPI);
 const lensConfig = configBuilder.build(regionMapConfig, {
@@ -54,4 +51,3 @@ const lensConfig = configBuilder.build(regionMapConfig, {
 });
 ```
 
-This example outlines how to set up a region map visualization to display total sales by country. The `breakdown` configuration is used to segment the data by country, and an ESQL query aggregates sales within each country. The visualization title is set to "Sales by Country," which, along with the breakdown configuration, guides the mapping of aggregated sales data to the corresponding countries on the map. This setup effectively visualizes geographical distribution of sales, making it easier to identify which countries are performing best or might need more attention.

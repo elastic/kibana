@@ -45,20 +45,12 @@ Understanding `LensMosaicConfig` in detail
 ```
 const mosaicConfig: LensConfig = {
   chartType: 'mosaic',
-  title: 'Product Sales Distribution by Region and Category',
+  title: 'Mosaic Chart',
   dataset: {
-    esql: 'from sales_data | group by region, category | stats sum(sales) as totalSales',
+    esql: 'from kibana_sample_data_logs | stats bytes = sum(bytes) by geo.src, geo.dest',
   },
-  breakdown: {
-    type: 'topValues',
-    field: 'region',
-    size: 5, // Top 5 regions
-  },
-  xAxis: {
-    type: 'topValues',
-    field: 'category',
-    size: 10, // Top 10 categories
-  },
+  breakdown: 'geo.src',
+  xAxis: 'geo.dest',
 };
 const configBuilder = new LensConfigBuilder(lensFormulaAPI, dataViewsAPI);
 const lensConfig = configBuilder.build(mosaicConfig, {

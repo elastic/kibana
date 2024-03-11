@@ -48,24 +48,17 @@ Understanding `LensTableConfig` in detail
 ```
 const tableConfig: LensConfig = {
   chartType: 'table',
-  title: 'Quarterly Sales by Product Category',
+  title: 'Table chart',
   dataset: {
-    esql: 'from sales_data | group by quarter, category | stats sum(sales) as totalSales',
+    esql: 'from kibana_sample_data_logs | stats bytes=sum(bytes) by geo.dest, geo.src',
   },
   splitBy: [
-    {
-      type: 'topValues',
-      field: 'quarter',
-      size: 4, // Representing four quarters
-    },
+    'geo.src'
   ],
   breakdown: [
-    {
-      type: 'topValues',
-      field: 'category',
-      size: 10, // Top 10 categories
-    },
+    'geo.dest'
   ],
+  value: 'bytes',
 };
 const configBuilder = new LensConfigBuilder(lensFormulaAPI, dataViewsAPI);
 const lensConfig = configBuilder.build(tableConfig, {
@@ -73,5 +66,3 @@ const lensConfig = configBuilder.build(tableConfig, {
   embeddable: true,
 });
 ```
-
-This example demonstrates how to configure a table visualization to display quarterly sales data segmented by product category. The `splitBy` property is used to create separate sections for each quarter, while the `breakdown` property segments the sales data within each quarter by the top 10 product categories. An ESQL query aggregates sales by quarter and category, allowing for a detailed analysis of sales performance across different product lines over the year. This setup provides a comprehensive overview of sales trends and performance metrics, all within a single table visualization.
