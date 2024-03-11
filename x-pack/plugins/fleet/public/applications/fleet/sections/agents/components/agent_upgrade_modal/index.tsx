@@ -273,6 +273,25 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   const { startDatetime, onChangeStartDateTime, initialDatetime, minTime, maxTime } =
     useScheduleDateTime();
 
+  const isSubmitButtonDisabled = useMemo(
+    () =>
+      isSubmitting ||
+      (isUpdating && updatingAgents === 0) ||
+      !selectedVersion[0].value ||
+      (isSingleAgent && !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)) ||
+      (isSingleAgent &&
+        !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents)),
+    [
+      agents,
+      fleetServerAgents,
+      isSingleAgent,
+      isSubmitting,
+      isUpdating,
+      selectedVersion,
+      updatingAgents,
+    ]
+  );
+
   async function onSubmit() {
     const version = getVersion(selectedVersion);
     const rolloutOptions = {
@@ -385,14 +404,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           defaultMessage="Cancel"
         />
       }
-      confirmButtonDisabled={
-        isSubmitting ||
-        (isUpdating && updatingAgents === 0) ||
-        !selectedVersion[0].value ||
-        (isSingleAgent && !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)) ||
-        (isSingleAgent &&
-          !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents))
-      }
+      confirmButtonDisabled={isSubmitButtonDisabled}
       confirmButtonText={
         isSingleAgent ? (
           <FormattedMessage
@@ -427,35 +439,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           />
         ) : isSingleAgent ? (
           warningMessage ? (
-            <EuiCallOut
-              data-test-subj="agentUpgradeModal.notUpgradeableCallout"
-              color="warning"
-              iconType="warning"
-              title={
-                <FormattedMessage
-                  id="xpack.fleet.upgradeAgents.notUpgradeable"
-                  defaultMessage="Warning"
-                />
-              }
-            >
-              <FormattedMessage
-                id="xpack.fleet.upgradeAgents.notUpgradeableMsg"
-                defaultMessage="{reason} {learnMore}"
-                values={{
-                  reason: warningMessage,
-                  learnMore: (
-                    <div>
-                      <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
-                        <FormattedMessage
-                          id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
-                          defaultMessage="Learn more"
-                        />
-                      </EuiLink>
-                    </div>
-                  ),
-                }}
-              />
-            </EuiCallOut>
+            <UpgradeModalWarningCallout warningMessage={warningMessage} />
           ) : (
             <>
               <p>
@@ -499,35 +483,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
             </>
           )
         ) : warningMessage ? (
-          <EuiCallOut
-            data-test-subj="agentUpgradeModal.notUpgradeableCallout"
-            color="warning"
-            iconType="warning"
-            title={
-              <FormattedMessage
-                id="xpack.fleet.upgradeAgents.notUpgradeable"
-                defaultMessage="Warning"
-              />
-            }
-          >
-            <FormattedMessage
-              id="xpack.fleet.upgradeAgents.notUpgradeableMsg"
-              defaultMessage="{reason} {learnMore}"
-              values={{
-                reason: warningMessage,
-                learnMore: (
-                  <div>
-                    <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
-                      <FormattedMessage
-                        id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
-                        defaultMessage="Learn more"
-                      />
-                    </EuiLink>
-                  </div>
-                ),
-              }}
-            />
-          </EuiCallOut>
+          <UpgradeModalWarningCallout warningMessage={warningMessage} />
         ) : (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.upgradeMultipleDescription"
@@ -706,5 +662,39 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         </>
       ) : null}
     </EuiConfirmModal>
+  );
+};
+
+export const UpgradeModalWarningCallout: React.FunctionComponent<{ warningMessage: string }> = ({
+  warningMessage,
+}) => {
+  const { docLinks } = useStartServices();
+  return (
+    <EuiCallOut
+      data-test-subj="agentUpgradeModal.notUpgradeableCallout"
+      color="warning"
+      iconType="warning"
+      title={
+        <FormattedMessage id="xpack.fleet.upgradeAgents.notUpgradeable" defaultMessage="Warning" />
+      }
+    >
+      <FormattedMessage
+        id="xpack.fleet.upgradeAgents.notUpgradeableMsg"
+        defaultMessage="{reason} {learnMore}"
+        values={{
+          reason: warningMessage,
+          learnMore: (
+            <div>
+              <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
+                <FormattedMessage
+                  id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
+                  defaultMessage="Learn more"
+                />
+              </EuiLink>
+            </div>
+          ),
+        }}
+      />
+    </EuiCallOut>
   );
 };
