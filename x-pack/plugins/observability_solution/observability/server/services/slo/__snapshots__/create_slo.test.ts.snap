@@ -161,6 +161,7 @@ Array [
       Object {
         "set": Object {
           "field": "kibanaUrl",
+          "ignore_failure": true,
           "value": "http://myhost.com/mock-server-basepath",
         },
       },

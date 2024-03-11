@@ -360,6 +360,7 @@ exports[`ResetSLO resets all associated resources 8`] = `
           Object {
             "set": Object {
               "field": "kibanaUrl",
+              "ignore_failure": true,
               "value": "http://myhost.com/mock-server-basepath",
             },
           },
