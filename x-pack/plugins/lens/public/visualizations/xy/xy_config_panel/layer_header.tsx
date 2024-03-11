@@ -11,14 +11,11 @@ import {
   EuiIcon,
   EuiPopover,
   EuiSelectable,
-  EuiText,
   EuiPopoverTitle,
   useEuiTheme,
   EuiIconTip,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
-import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
+import { ChartSwitchTrigger } from '@kbn/visualization-ui-components';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -26,7 +23,6 @@ import { getIgnoreGlobalFilterIcon } from '../../../shared_components/ignore_glo
 import type {
   VisualizationLayerHeaderContentProps,
   VisualizationLayerWidgetProps,
-  VisualizationType,
 } from '../../../types';
 import { State, visualizationTypes, SeriesType, XYAnnotationLayerConfig } from '../types';
 import {
@@ -171,9 +167,11 @@ function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
   return (
     <EuiPopover
       button={
-        <DataLayerHeaderTrigger
+        <ChartSwitchTrigger
+          label={currentVisType.fullLabel || currentVisType.label}
+          icon={currentVisType.icon}
+          dataTestSubj="lns_layer_settings"
           onClick={() => setPopoverIsOpen(!isPopoverOpen)}
-          currentVisType={currentVisType}
         />
       }
       isOpen={isPopoverOpen}
@@ -225,33 +223,3 @@ function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
     </EuiPopover>
   );
 }
-
-const DataLayerHeaderTrigger = function ({
-  currentVisType,
-  onClick,
-}: {
-  currentVisType: VisualizationType;
-  onClick: () => void;
-}) {
-  return (
-    <ToolbarButton
-      data-test-subj="lns_layer_settings"
-      aria-label={currentVisType.fullLabel || currentVisType.label}
-      onClick={onClick}
-      fullWidth
-      size="s"
-      label={
-        <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={currentVisType.icon} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" className="lnsLayerPanelChartSwitch_title">
-              {currentVisType.fullLabel || currentVisType.label}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-    />
-  );
-};

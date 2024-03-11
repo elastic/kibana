@@ -6,7 +6,8 @@
  */
 
 import { EuiToolTip, EuiLink, EuiText } from '@elastic/eui';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,11 +20,11 @@ import {
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { DeepReadonly } from '../../../../../../../common/types/common';
+import type { DeepReadonly } from '../../../../../../../common/types/common';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES } from '../../hooks/use_create_analytics_form';
-import { State } from '../../hooks/use_create_analytics_form/state';
-import { DataFrameAnalyticsListRow } from '../analytics_list/common';
+import type { State } from '../../hooks/use_create_analytics_form/state';
+import type { DataFrameAnalyticsListRow } from '../analytics_list/common';
 
 interface PropDefinition {
   /**

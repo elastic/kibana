@@ -273,6 +273,7 @@ interface ActionsLogTableProps {
   isFlyout: boolean;
   loading: boolean;
   onChange: ({
+    // @ts-expect-error upgrade typescript v4.9.5
     page: _page,
   }: CriteriaWithPagination<ActionListApiResponse['data'][number]>) => void;
   onShowActionDetails: (actionIds: string[]) => void;

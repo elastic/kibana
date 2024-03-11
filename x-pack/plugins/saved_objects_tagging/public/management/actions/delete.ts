@@ -39,6 +39,7 @@ export const getDeleteAction = ({
     ),
     type: 'icon',
     icon: 'trash',
+    available: (tag) => !tag.managed,
     onClick: async (tag: TagWithRelations) => {
       const confirmed = await overlays.openConfirm(
         i18n.translate('xpack.savedObjectsTagging.modals.confirmDelete.text', {

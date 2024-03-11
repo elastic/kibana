@@ -7,7 +7,7 @@
  */
 
 import { monaco } from '../../../../monaco_imports';
-import { CharStreams } from 'antlr4ts';
+import { CharStreams } from 'antlr4';
 import { suggest } from './autocomplete';
 import { getParser, ROOT_STATEMENT } from '../../antlr_facade';
 import { ESQLErrorListener } from '../../monaco/esql_error_listener';
@@ -562,6 +562,18 @@ describe('autocomplete', () => {
         `from a | ${command} stringField, `,
         getFieldNamesByType('any').filter((name) => name !== 'stringField')
       );
+
+      testSuggestions(
+        `from a_index | eval round(numberField) + 1 | eval \`round(numberField) + 1\` + 1 | eval \`\`\`round(numberField) + 1\`\` + 1\` + 1 | eval \`\`\`\`\`\`\`round(numberField) + 1\`\`\`\` + 1\`\` + 1\` + 1 | eval \`\`\`\`\`\`\`\`\`\`\`\`\`\`\`round(numberField) + 1\`\`\`\`\`\`\`\` + 1\`\`\`\` + 1\`\` + 1\` + 1 | ${command} `,
+        [
+          ...getFieldNamesByType('any'),
+          '`round(numberField) + 1`',
+          '```round(numberField) + 1`` + 1`',
+          '```````round(numberField) + 1```` + 1`` + 1`',
+          '```````````````round(numberField) + 1```````` + 1```` + 1`` + 1`',
+          '```````````````````````````````round(numberField) + 1```````````````` + 1```````` + 1```` + 1`` + 1`',
+        ]
+      );
     });
   }
 
@@ -927,10 +939,7 @@ describe('autocomplete', () => {
       [
         'var0 =',
         ...getFieldNamesByType('any'),
-        // @TODO: leverage the location data to get the original text
-        // For now return back the trimmed version:
-        // the ANTLR parser trims all text so that's what it's stored in the AST
-        '`abs(numberField)+1`',
+        '`abs(numberField) + 1`',
         ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
       ],
       ' '
@@ -975,6 +984,39 @@ describe('autocomplete', () => {
       ],
       '('
     );
+    // test that comma is correctly added to the suggestions if minParams is not reached yet
+    testSuggestions('from a | eval a=concat( ', [
+      ...getFieldNamesByType('string').map((v) => `${v},`),
+      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
+        'concat',
+      ]).map((v) => `${v},`),
+    ]);
+    testSuggestions('from a | eval a=concat(stringField, ', [
+      ...getFieldNamesByType('string'),
+      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
+        'concat',
+      ]),
+    ]);
+    // test that the arg type is correct after minParams
+    testSuggestions('from a | eval a=cidr_match(ipField, stringField,', [
+      ...getFieldNamesByType('string'),
+      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
+        'cidr_match',
+      ]),
+    ]);
+    // test that comma is correctly added to the suggestions if minParams is not reached yet
+    testSuggestions('from a | eval a=cidr_match( ', [
+      ...getFieldNamesByType('ip').map((v) => `${v},`),
+      ...getFunctionSignaturesByReturnType('eval', 'ip', { evalMath: true }, undefined, [
+        'cidr_match',
+      ]).map((v) => `${v},`),
+    ]);
+    testSuggestions('from a | eval a=cidr_match(ipField, ', [
+      ...getFieldNamesByType('string'),
+      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
+        'cidr_match',
+      ]),
+    ]);
     // test deep function nesting suggestions (and check that the same function is not suggested)
     // round(round(
     // round(round(round(
