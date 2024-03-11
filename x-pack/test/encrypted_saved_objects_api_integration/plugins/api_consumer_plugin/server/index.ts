@@ -78,7 +78,7 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
           'privateProperty',
           { key: 'publicPropertyStoredEncrypted', dangerouslyExposeValue: true },
         ]),
-        attributesToExcludeFromAAD: new Set(['publicPropertyExcludedFromAAD']),
+        attributesToIncludeInAAD: new Set(['publicProperty']),
       });
     }
 
@@ -164,12 +164,14 @@ function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSet
   const typePriorTo790 = {
     type: SAVED_OBJECT_WITH_MIGRATION_TYPE,
     attributesToEncrypt: new Set(['encryptedAttribute']),
+    attributesToIncludeInAAD: new Set(['nonEncryptedAttribute']), // No attributes were excluded previously, so we have to add this
   };
 
   // current type is registered
   deps.encryptedSavedObjects.registerType({
     type: SAVED_OBJECT_WITH_MIGRATION_TYPE,
     attributesToEncrypt: new Set(['encryptedAttribute', 'additionalEncryptedAttribute']),
+    attributesToIncludeInAAD: new Set(['nonEncryptedAttribute']), // No attributes were excluded previously, so we have to add this
   });
 
   core.savedObjects.registerType({
@@ -261,11 +263,13 @@ function defineModelVersionWithMigration(core: CoreSetup<PluginsStart>, deps: Pl
   const typePriorTo810 = {
     type: SAVED_OBJECT_MV_TYPE,
     attributesToEncrypt: new Set(['encryptedAttribute']),
+    attributesToIncludeInAAD: new Set(['nonEncryptedAttribute']),
   };
 
   const latestType = {
     type: SAVED_OBJECT_MV_TYPE,
     attributesToEncrypt: new Set(['encryptedAttribute', 'additionalEncryptedAttribute']),
+    attributesToIncludeInAAD: new Set(['nonEncryptedAttribute']),
   };
   deps.encryptedSavedObjects.registerType(latestType);
 
