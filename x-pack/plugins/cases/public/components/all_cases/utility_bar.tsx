@@ -6,6 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
+import { css } from '@emotion/react';
 import React, { useCallback, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
 import {
@@ -25,6 +26,7 @@ import { useRefreshCases } from './use_on_refresh_cases';
 import { useBulkActions } from './use_bulk_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { ColumnsPopover } from './columns_popover';
+import { useCasesLocalStorage } from '../../common/use_cases_local_storage';
 
 interface Props {
   isSelectorView?: boolean;

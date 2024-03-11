@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import type { TooltipCellStyle, TooltipSpec } from '@elastic/charts';
 import {
-  TooltipCellStyle,
-  TooltipSpec,
   TooltipTable,
   TooltipTableBody,
   TooltipTableCell,
