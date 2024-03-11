@@ -24,6 +24,9 @@ import type {
   EuiDataGridToolBarVisibilityOptions,
   EuiSuperSelectOption,
   EuiDataGridOnColumnResizeHandler,
+  EuiDataGridCellProps,
+  RenderCellValueWithContext,
+  RenderCellValue,
 } from '@elastic/eui';
 import type { RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
@@ -554,10 +557,10 @@ export type AlertsTableProps = {
   leadingControlColumns: EuiDataGridControlColumn[];
   showAlertStatusWithFlapping?: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
+  renderCellContext?: EuiDataGridCellProps['renderCellContext'];
   useFetchAlertsData: () => FetchAlertData;
   visibleColumns: string[];
   'data-test-subj': string;
-  updatedAt: number;
   browserFields: any;
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
@@ -585,16 +588,7 @@ export interface TimelineNonEcsData {
   value?: string[] | null;
 }
 
-// TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
-export type GetRenderCellValue<T = unknown> = ({
-  setFlyoutAlert,
-  context,
-}: {
-  setFlyoutAlert: SetFlyoutAlert;
-  context?: T;
-}) => (
-  props: EuiDataGridCellValueElementProps & { data: TimelineNonEcsData[] }
-) => React.ReactNode | JSX.Element | null | string;
+export type GetRenderCellValue = React.FC<{ [x: string]: any }>;
 
 export type PreFetchPageContext<T = unknown> = ({
   alerts,
@@ -659,7 +653,8 @@ interface ItemsPanelConfig extends PanelConfig {
 export type BulkActionsPanelConfig = ItemsPanelConfig | ContentPanelConfig;
 
 export type UseBulkActionsRegistry = (
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>
+  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>,
+  refresh: () => void
 ) => BulkActionsPanelConfig[];
 
 export type UseCellActions = (props: {
@@ -738,11 +733,7 @@ export interface AlertsTableConfigurationRegistry {
   showInspectButton?: boolean;
   ruleTypeIds?: string[];
   useFetchPageContext?: PreFetchPageContext;
-}
-
-export interface AlertsTableConfigurationRegistryWithActions
-  extends AlertsTableConfigurationRegistry {
-  actions: {
+  actions?: {
     toggleColumn: (columnId: string) => void;
   };
 }
@@ -770,6 +761,7 @@ export interface BulkActionsState {
   isAllSelected: boolean;
   areAllVisibleRowsSelected: boolean;
   rowCount: number;
+  updatedAt: number;
 }
 
 export type RowSelection = Map<number, RowSelectionState>;

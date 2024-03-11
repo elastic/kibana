@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps, RenderCellValueWithContext } from '@elastic/eui';
 import { EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
-import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
+import React, { useCallback, useMemo, memo } from 'react';
 import { find, getOr } from 'lodash/fp';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import { useLicense } from '../../../common/hooks/use_license';
@@ -25,8 +25,7 @@ import {
 } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-
-import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
+import type { CellValueElementProps } from '../../../../common/types/timeline/cells';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
 import { SUPPRESSED_ALERT_TOOLTIP } from './translations';
@@ -40,10 +39,28 @@ import type { RenderCellValueContext } from './fetch_page_context';
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellValueElementProps> = (
-  props
-) => {
-  const { columnId, rowIndex, scopeId } = props;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const RenderCellValue: React.FC<Record<string, any>> = memo(function RenderCellValue(props) {
+  const {
+    columnId,
+    rowIndex,
+    scopeId,
+    tableId,
+    header,
+    data,
+    ecsData,
+    linkValues,
+    rowRenderers,
+    isDetails,
+    isDraggable,
+    isExpandable,
+    isExpanded,
+    colIndex,
+    eventId,
+    setCellProps,
+    truncate,
+    context,
+  } = props;
   const isTourAnchor = useMemo(
     () =>
       columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
@@ -52,6 +69,41 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
       !props.isDetails,
     [columnId, props.isDetails, rowIndex, scopeId]
   );
+  const { browserFields } = useSourcererDataView(scopeId);
+  const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
+  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
+  const license = useLicense();
+  const viewMode =
+    useShallowEqualSelector((state) => (getTable(state, tableId) ?? tableDefaults).viewMode) ??
+    tableDefaults.viewMode;
+
+  const columnHeaders = useMemo(() => {
+    return viewMode === VIEW_SELECTION.gridView ? getColumns(license) : eventRenderedViewColumns;
+  }, [license, viewMode]);
+
+  /**
+   * There is difference between how `triggers actions` fetched data v/s
+   * how security solution fetches data via timelineSearchStrategy
+   *
+   * _id and _index fields are array in timelineSearchStrategy  but not in
+   * ruleStrategy
+   *
+   *
+   */
+
+  const finalData = useMemo(() => {
+    return (data as TimelineNonEcsData[]).map((field) => {
+      if (['_id', '_index'].includes(field.field)) {
+        const newValue = field.value ?? '';
+        return {
+          field: field.field,
+          value: Array.isArray(newValue) ? newValue : [newValue],
+        };
+      } else {
+        return field;
+      }
+    });
+  }, [data]);
 
   // We check both ecsData and data for the suppression count because it could be in either one,
   // depending on where RenderCellValue is being used - when used in cases, data is populated,
@@ -63,15 +115,62 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
     ? parseInt(ecsSuppressionCount, 10)
     : dataSuppressionCount;
 
-  const component = (
-    <GuidedOnboardingTourStep
-      isTourAnchor={isTourAnchor}
-      step={AlertsCasesTourSteps.pointToAlertName}
-      tourId={SecurityStepId.alertsCases}
-    >
-      <DefaultCellRenderer {...props} />
-    </GuidedOnboardingTourStep>
-  );
+  const Renderer = useMemo(() => {
+    const myHeader = header ?? { id: columnId, ...browserFieldsByName[columnId] };
+    const colHeader = columnHeaders.find((col) => col.id === columnId);
+    const localLinkValues = getOr([], colHeader?.linkField ?? '', ecsData);
+    return (
+      <GuidedOnboardingTourStep
+        isTourAnchor={isTourAnchor}
+        step={AlertsCasesTourSteps.pointToAlertName}
+        tourId={SecurityStepId.alertsCases}
+      >
+        <DefaultCellRenderer
+          browserFields={browserFields}
+          columnId={columnId}
+          data={finalData}
+          ecsData={ecsData}
+          eventId={eventId}
+          header={myHeader}
+          isDetails={isDetails}
+          isDraggable={isDraggable}
+          isExpandable={isExpandable}
+          isExpanded={isExpanded}
+          linkValues={linkValues ?? localLinkValues}
+          rowIndex={rowIndex}
+          colIndex={colIndex}
+          rowRenderers={rowRenderers ?? defaultRowRenderers}
+          setCellProps={setCellProps}
+          scopeId={tableId}
+          truncate={truncate}
+          asPlainText={false}
+          context={context}
+        />
+      </GuidedOnboardingTourStep>
+    );
+  }, [
+    isTourAnchor,
+    finalData,
+    browserFieldsByName,
+    header,
+    columnId,
+    ecsData,
+    linkValues,
+    rowRenderers,
+    isDetails,
+    isDraggable,
+    isExpandable,
+    isExpanded,
+    colIndex,
+    eventId,
+    setCellProps,
+    truncate,
+    context,
+    tableId,
+    browserFields,
+    rowIndex,
+    columnHeaders,
+  ]);
 
   return columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
     actualSuppressionCount &&
@@ -82,12 +181,18 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
           <EuiIcon type="layers" />
         </EuiToolTip>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{component}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{Renderer}</EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    component
+    <GuidedOnboardingTourStep
+      isTourAnchor={isTourAnchor}
+      step={AlertsCasesTourSteps.pointToAlertName}
+      tourId={SecurityStepId.alertsCases}
+    >
+      {Renderer}
+    </GuidedOnboardingTourStep>
   );
-};
+});
 
 export const getRenderCellValueHook = ({
   scopeId,
@@ -96,92 +201,8 @@ export const getRenderCellValueHook = ({
   scopeId: SourcererScopeName;
   tableId: TableId;
 }) => {
-  const useRenderCellValue: GetRenderCellValue = ({ context }) => {
-    const { browserFields } = useSourcererDataView(scopeId);
-    const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
-    const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
-    const license = useLicense();
-
-    const viewMode =
-      useShallowEqualSelector((state) => (getTable(state, tableId) ?? tableDefaults).viewMode) ??
-      tableDefaults.viewMode;
-
-    const columnHeaders =
-      viewMode === VIEW_SELECTION.gridView ? getColumns(license) : eventRenderedViewColumns;
-
-    const result = useCallback(
-      ({
-        columnId,
-        colIndex,
-        data,
-        ecsData,
-        eventId,
-        header,
-        isDetails = false,
-        isDraggable = false,
-        isExpandable,
-        isExpanded,
-        rowIndex,
-        rowRenderers,
-        setCellProps,
-        linkValues,
-        truncate = true,
-      }) => {
-        const myHeader = header ?? { id: columnId, ...browserFieldsByName[columnId] };
-        /**
-         * There is difference between how `triggers actions` fetched data v/s
-         * how security solution fetches data via timelineSearchStrategy
-         *
-         * _id and _index fields are array in timelineSearchStrategy  but not in
-         * ruleStrategy
-         *
-         *
-         */
-
-        const finalData = (data as TimelineNonEcsData[]).map((field) => {
-          let localField = field;
-          if (['_id', '_index'].includes(field.field)) {
-            const newValue = field.value ?? '';
-            localField = {
-              field: field.field,
-              value: Array.isArray(newValue) ? newValue : [newValue],
-            };
-          }
-          return localField;
-        });
-
-        const colHeader = columnHeaders.find((col) => col.id === columnId);
-
-        const localLinkValues = getOr([], colHeader?.linkField ?? '', ecsData);
-
-        return (
-          <RenderCellValue
-            browserFields={browserFields}
-            columnId={columnId}
-            data={finalData}
-            ecsData={ecsData}
-            eventId={eventId}
-            header={myHeader}
-            isDetails={isDetails}
-            isDraggable={isDraggable}
-            isExpandable={isExpandable}
-            isExpanded={isExpanded}
-            linkValues={linkValues ?? localLinkValues}
-            rowIndex={rowIndex}
-            colIndex={colIndex}
-            rowRenderers={rowRenderers ?? defaultRowRenderers}
-            setCellProps={setCellProps}
-            scopeId={tableId}
-            truncate={truncate}
-            asPlainText={false}
-            context={context as RenderCellValueContext}
-          />
-        );
-      },
-      [browserFieldsByName, columnHeaders, browserFields, context]
-    );
-    return result;
+  const useRenderCellValue = (props: { [x: string]: any }) => {
+    return <RenderCellValue {...props} scopeId={scopeId} tableId={tableId} />;
   };
-
   return useRenderCellValue;
 };
