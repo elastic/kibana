@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
@@ -151,6 +150,22 @@ export const Description = ({
   const hasUnsavedChanges =
     draftDescription && draftDescription !== caseData.description && !isLoadingDescription;
 
+  const tempCss = !isCollapsed
+    ? css`
+        border-bottom: ${euiTheme.border.thin};
+        border-radius: none;
+      `
+    : css`
+        background: ${euiTheme.colors.lightestShade};
+        border-radius: 6px;
+        ${hasUnsavedChanges
+          ? css`
+              border-bottom-left-radius: 0;
+              border-bottom-right-radius: 0;
+            `
+          : css``}
+      `;
+
   return isEditable ? (
     <EditableMarkdown
       id="description"
@@ -169,8 +184,7 @@ export const Description = ({
       css={css`
         padding: 0;
       `}
-      hasShadow={false}
-      hasBorder={true}
+      hasBorder
       data-test-subj="description"
     >
       <EuiFlexGroup direction="column" gutterSize={isCollapsed ? 'none' : 'm'}>
@@ -178,24 +192,25 @@ export const Description = ({
           <EuiFlexGroup
             justifyContent="spaceBetween"
             alignItems="center"
+            gutterSize="s"
             css={css`
-              display: flex;
               padding: ${euiTheme.size.s};
               align-items: center;
               ${!isCollapsed
-                ? `
-                    border-bottom: ${euiTheme.border.thin}; 
+                ? css`
+                    border-bottom: ${euiTheme.border.thin};
                     border-radius: none;
                   `
-                : `
+                : css`
                     background: ${euiTheme.colors.lightestShade};
-                      border-radius: 6px;
-                      ${
-                        hasUnsavedChanges
-                          ? 'border-bottom-left-radius: 0; border-bottom-right-radius: 0;'
-                          : ''
-                      }
-                    `}
+                    border-radius: 6px;
+                    ${hasUnsavedChanges
+                      ? css`
+                          border-bottom-left-radius: 0;
+                          border-bottom-right-radius: 0;
+                        `
+                      : css``}
+                  `}
             `}
           >
             <EuiFlexItem>
@@ -228,7 +243,7 @@ export const Description = ({
         {!isCollapsed ? (
           <EuiFlexItem
             css={css`
-              padding: ${euiTheme.size};
+              padding: ${euiTheme.size.s};
               padding-top: 0;
 
               > div {

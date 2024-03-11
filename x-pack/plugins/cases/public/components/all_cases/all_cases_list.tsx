@@ -34,19 +34,6 @@ import { useCasesColumnsSelection } from './use_cases_columns_selection';
 import { DEFAULT_CASES_TABLE_STATE } from '../../containers/constants';
 import { CasesTableUtilityBar } from './utility_bar';
 
-// const ProgressLoader = styled(EuiProgress)`
-//   ${({ $isShow }: { $isShow: boolean }) =>
-//     $isShow
-//       ? css`
-//           top: 2px;
-//           border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-//           z-index: ${({ theme }) => theme.eui.euiZHeader};
-//         `
-//       : `
-//       display: none;
-//     `}
-// `;
-
 const getSortField = (field: string): SortFieldCase =>
   // @ts-ignore
   SortFieldCase[field] ?? SortFieldCase.title;
@@ -174,7 +161,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       [permissions, selectedCases]
     );
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
-    const showProgressBar = isLoading || isLoadingCases || isLoadingColumns;
 
     const tableRowProps = useCallback(
       (theCase: CaseUI) => ({
@@ -196,31 +182,25 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       filterOptions
     );
 
-    console.log({ showProgressBar });
-
     return (
       <>
         <EuiProgress
           size="xs"
           color="accent"
           className="essentialAnimation"
-          // css={
-          //   showProgressBar
-          //     ? css`
-          //         top: 2px;
-          //         border-radius: ${euiTheme.border.radius};
-          //         z-index: ${euiTheme.levels.header};
-          //       `
-          //     : css`
-          //         display: none;
-          //       `
-          // }
-          css={css`
-            ${showProgressBar
-              ? 'top: 2px; border-radius: ${euiTheme.border.radius}; z-index: ${euiTheme.levels.header};'
-              : 'display: none;'}
-          `}
+          css={
+            isLoading || isLoadingCases || isLoadingColumns
+              ? css`
+                  top: 2px;
+                  border-radius: ${euiTheme.border.radius};
+                  z-index: ${euiTheme.levels.header};
+                `
+              : css`
+                  display: none;
+                `
+          }
         />
+
         {!isSelectorView ? <CasesMetrics /> : null}
         <CasesTableFilters
           countClosedCases={data.countClosedCases}

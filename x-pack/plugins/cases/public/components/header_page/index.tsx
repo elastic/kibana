@@ -87,17 +87,13 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
 
   return (
     <header
-      className="casesHeaderPage"
       css={css`
         margin-bottom: ${euiTheme.size.l};
-        ${border &&
-        css`
-          border-bottom: ${euiTheme.border.thin};
-          padding-bottom: ${euiTheme.size.l};
-          .euiProgress {
-            top: ${euiTheme.size.l};
-          }
-        `}
+        border-bottom: ${euiTheme.border.thin};
+        padding-bottom: ${euiTheme.size.l};
+        .euiProgress {
+          top: ${euiTheme.size.l};
+        }
       `}
       data-test-subj={dataTestSubj}
     >

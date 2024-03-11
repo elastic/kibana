@@ -146,23 +146,21 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
           justifyContent="spaceBetween"
           alignItems="center"
           gutterSize="s"
-          css={{
-            borderBottom: euiTheme.border.thin,
-            marginTop: 0,
-            marginBottom: 0,
-            paddingTop: euiTheme.size.s,
-            paddingBottom: euiTheme.size.s,
-          }}
+          css={css`
+            border-bottom: ${euiTheme.border.thin};
+            padding-top: ${euiTheme.size.s};
+            padding-bottom: ${euiTheme.size.s};
+          `}
         >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
               <EuiFlexItem
                 data-test-subj="case-table-case-count"
                 grow={false}
-                css={{
-                  borderRight: euiTheme.border.thin,
-                  paddingRight: euiTheme.size.s,
-                }}
+                css={css`
+                  border-right: ${euiTheme.border.thin};
+                  padding-right: ${euiTheme.size.s};
+                `}
               >
                 <EuiText size="xs" color="subdued">
                   {i18n.SHOWING_CASES(totalCases, visibleCases)}

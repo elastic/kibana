@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiThemeProvider } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { lazy, Suspense } from 'react';
-import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
+// import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { useIsDarkTheme } from '../../common/use_is_dark_theme';
 import type { CasesContextProps } from '../../components/cases_context';
 
@@ -38,7 +38,7 @@ const CasesProviderLazyWrapper = ({
 
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <StyledComponentsThemeProvider darkMode={isDarkTheme}>
+      <EuiThemeProvider colorMode={isDarkTheme ? 'dark' : 'light'}>
         <CasesProviderLazy
           value={{
             externalReferenceAttachmentTypeRegistry,
@@ -52,7 +52,7 @@ const CasesProviderLazyWrapper = ({
         >
           {children}
         </CasesProviderLazy>
-      </StyledComponentsThemeProvider>
+      </EuiThemeProvider>
     </Suspense>
   );
 };

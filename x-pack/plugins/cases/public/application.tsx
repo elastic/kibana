@@ -11,8 +11,8 @@ import { Router } from '@kbn/shared-ux-router';
 
 import { EuiErrorBoundary, EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-// import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
@@ -63,12 +63,12 @@ CasesAppWithContext.displayName = 'CasesAppWithContext';
 
 export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
   const { mountParams, coreStart, pluginsStart, storage, kibanaVersion } = deps;
-  const { history, theme$ } = mountParams;
+  const { history } = mountParams;
 
   return (
     <EuiErrorBoundary>
       <I18nProvider>
-        <KibanaThemeProvider theme$={theme$}>
+        <KibanaThemeProvider theme={coreStart.theme}>
           <KibanaContextProvider
             services={{
               kibanaVersion,
