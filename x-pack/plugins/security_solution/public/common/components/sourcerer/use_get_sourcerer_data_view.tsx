@@ -11,6 +11,10 @@ import { useSourcererDataView } from '../../containers/sourcerer';
 import { useKibana } from '../../lib/kibana';
 import type { SourcererScopeName } from '../../store/sourcerer/model';
 
+export interface UseGetScopedSourcererDataViewArgs {
+  sourcererScope: SourcererScopeName;
+}
+
 /*
  *
  * returns the created dataView based on sourcererDataView spec
@@ -19,16 +23,14 @@ import type { SourcererScopeName } from '../../store/sourcerer/model';
  * */
 export const useGetScopedSourcererDataView = ({
   sourcererScope,
-}: {
-  sourcererScope: SourcererScopeName;
-}) => {
+}: UseGetScopedSourcererDataViewArgs): DataView | undefined => {
   const {
     services: { fieldFormats },
   } = useKibana();
   const { sourcererDataView } = useSourcererDataView(sourcererScope);
 
   const dataView = useMemo(() => {
-    if (sourcererDataView != null) {
+    if (sourcererDataView) {
       return new DataView({ spec: sourcererDataView, fieldFormats });
     } else {
       return undefined;

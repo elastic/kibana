@@ -32,7 +32,6 @@ import {
 import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -57,6 +56,7 @@ import { filtersToInsightProviders } from './provider';
 import { useLicense } from '../../../../hooks/use_license';
 import { isProviderValid } from './helpers';
 import * as i18n from './translations';
+import { useGetScopedSourcererDataView } from '../../../sourcerer/use_get_sourcerer_data_view';
 
 interface InsightComponentProps {
   label?: string;
@@ -285,13 +285,8 @@ const InsightEditorComponent = ({
     uiSettings,
     fieldFormats,
   } = useKibana().services;
-  const dataView = useMemo(() => {
-    if (sourcererDataView != null) {
-      return new DataView({ spec: sourcererDataView, fieldFormats });
-    } else {
-      return null;
-    }
-  }, [sourcererDataView, fieldFormats]);
+
+  const dataView = useGetScopedSourcererDataView(SourcererScopeName.default);
 
   const [providers, setProviders] = useState<Provider[][]>([[]]);
   const dateRangeChoices = useMemo(() => {

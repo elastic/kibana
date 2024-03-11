@@ -10,7 +10,6 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { generateFilters } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DataLoadingState } from '@kbn/unified-data-table';
 import { useColumns } from '@kbn/unified-data-table';
@@ -25,6 +24,7 @@ import type {
 import { UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { useGetScopedSourcererDataView } from '../../../../common/components/sourcerer/use_get_sourcerer_data_view';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { ExpandedDetailTimeline } from '../../../../../common/types';
 import type { TimelineItem } from '../../../../../common/search_strategy';
@@ -40,7 +40,6 @@ import type {
 } from '../../../../../common/types/timeline';
 import type { State, inputsModel } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { getColumnHeader } from '../body/column_headers/helpers';
 import { timelineBodySelector } from '../body/selectors';
 import { StyledPageContentWrapper, StyledMainEuiPanel, StyledSplitFlexItem } from './styles';
@@ -192,15 +191,8 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
   const defaultColumns = useMemo(() => {
     return columns.map((c) => c.id);
   }, [columns]);
-  const { sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const dataView = useMemo(() => {
-    if (sourcererDataView != null) {
-      return new DataView({ spec: sourcererDataView, fieldFormats });
-    } else {
-      return undefined;
-    }
-  }, [sourcererDataView, fieldFormats]);
+  const dataView = useGetScopedSourcererDataView(SourcererScopeName.timeline);
 
   // Sorting
   const sortingColumns = useMemo(() => {
