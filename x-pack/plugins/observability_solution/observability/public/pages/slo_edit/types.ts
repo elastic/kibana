@@ -7,10 +7,10 @@
 
 import { BudgetingMethod, Indicator, TimeWindow } from '@kbn/slo-schema';
 
-export interface CreateSLOForm {
+export interface CreateSLOForm<IndicatorType = Indicator> {
   name: string;
   description: string;
-  indicator: Indicator;
+  indicator: IndicatorType;
   timeWindow: {
     duration: string;
     type: TimeWindow;

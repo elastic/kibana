@@ -71,6 +71,7 @@
     "@kbn/content-management-plugin",
     "@kbn/index-management-plugin",
     "@kbn/rison",
+    "@kbn/core-application-browser",
   ],
   "exclude": [
     "target/**/*",
