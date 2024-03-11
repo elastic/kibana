@@ -188,7 +188,8 @@ export const getSLOSummaryPipelineTemplate = (
       {
         set: {
           field: 'kibanaUrl',
-          value: basePath.publicBaseUrl,
+          value: basePath.publicBaseUrl ?? '',
+          ignore_failure: true,
         },
       },
     ],
