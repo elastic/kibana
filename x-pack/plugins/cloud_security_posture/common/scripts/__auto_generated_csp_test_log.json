@@ -9820,6 +9820,7 @@
     "fileName": "v1.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
     "tags": [
+      "FTR",
       "SERVERLESS"
     ],
     "lines": [
@@ -9941,6 +9942,7 @@
     "fileName": "v2.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
     "tags": [
+      "FTR",
       "SERVERLESS"
     ],
     "lines": [
@@ -9999,6 +10001,7 @@
     "fileName": "find_csp_benchmark_rule.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
     "tags": [
+      "FTR",
       "SERVERLESS"
     ],
     "lines": [
@@ -10183,6 +10186,7 @@
     "fileName": "index.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
     "tags": [
+      "FTR",
       "SERVERLESS"
     ],
     "lines": [
@@ -10218,6 +10222,7 @@
     "fileName": "status_indexed.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
     "tags": [
+      "FTR",
       "SERVERLESS"
     ],
     "lines": [
@@ -10341,6 +10346,7 @@
     "fileName": "status_indexing.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
     "tags": [
+      "FTR",
       "SERVERLESS"
     ],
     "lines": [
@@ -10464,6 +10470,7 @@
     "fileName": "status_not_deployed_not_installed.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
     "tags": [
+      "FTR",
       "SERVERLESS"
     ],
     "lines": [
@@ -10587,6 +10594,7 @@
     "fileName": "telemetry.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
     "tags": [
+      "FTR",
       "SERVERLESS"
     ],
     "lines": [

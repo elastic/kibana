@@ -78,6 +78,7 @@ const getTags = (filePath, testSuits) => {
 
   if (
     filePath.startsWith(FTR_SERVERLESS) ||
+    filePath.startsWith(FTR_SERVERLESS_API_INTEGRATION) ||
     filePath.startsWith(FTR_API_INTEGRATION) ||
     filePath.startsWith(FTR_CSP_API) ||
     filePath.startsWith(FTR_CSP_FUNCTIONAL)
