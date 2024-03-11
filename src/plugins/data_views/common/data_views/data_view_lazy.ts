@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { each, cloneDeep, pickBy, mapValues, omit, assign, chain } from 'lodash';
+import { each, pickBy, mapValues, omit, assign, chain } from 'lodash';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { AbstractDataView } from './abstract_data_views';
 import { DataViewField } from '../fields';
@@ -488,40 +488,6 @@ export class DataViewLazy extends AbstractDataView {
   getRuntimeMappings(): estypes.MappingRuntimeFields {
     // @ts-expect-error composite type is not yet supported by es client but it can be forced
     return this.runtimeFieldMap;
-  }
-
-  // todo
-  private toSpecShared(includeFields = true): DataViewSpec {
-    // if fields aren't included, don't include count
-    const fieldAttrs = cloneDeep(this.fieldAttrs);
-    if (!includeFields) {
-      Object.keys(fieldAttrs).forEach((key) => {
-        delete fieldAttrs[key].count;
-        if (Object.keys(fieldAttrs[key]).length === 0) {
-          delete fieldAttrs[key];
-        }
-      });
-    }
-
-    const spec: DataViewSpec = {
-      id: this.id,
-      version: this.version,
-      title: this.getIndexPattern(),
-      timeFieldName: this.timeFieldName,
-      sourceFilters: [...(this.sourceFilters || [])],
-      // fields,
-      typeMeta: this.typeMeta,
-      type: this.type,
-      fieldFormats: { ...this.fieldFormatMap },
-      runtimeFieldMap: cloneDeep(this.runtimeFieldMap),
-      fieldAttrs,
-      allowNoIndex: this.allowNoIndex,
-      name: this.name,
-      allowHidden: this.getAllowHidden(),
-    };
-
-    // Filter undefined values from the spec
-    return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
   }
 
   /**

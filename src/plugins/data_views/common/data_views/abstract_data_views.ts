@@ -359,6 +359,39 @@ export abstract class AbstractDataView {
     };
   }
 
+  protected toSpecShared(includeFields = true): DataViewSpec {
+    // if fields aren't included, don't include count
+    const fieldAttrs = cloneDeep(this.fieldAttrs);
+    if (!includeFields) {
+      Object.keys(fieldAttrs).forEach((key) => {
+        delete fieldAttrs[key].count;
+        if (Object.keys(fieldAttrs[key]).length === 0) {
+          delete fieldAttrs[key];
+        }
+      });
+    }
+
+    const spec: DataViewSpec = {
+      id: this.id,
+      version: this.version,
+      title: this.getIndexPattern(),
+      timeFieldName: this.timeFieldName,
+      sourceFilters: [...(this.sourceFilters || [])],
+      // fields,
+      typeMeta: this.typeMeta,
+      type: this.type,
+      fieldFormats: { ...this.fieldFormatMap },
+      runtimeFieldMap: cloneDeep(this.runtimeFieldMap),
+      fieldAttrs,
+      allowNoIndex: this.allowNoIndex,
+      name: this.name,
+      allowHidden: this.getAllowHidden(),
+    };
+
+    // Filter undefined values from the spec
+    return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
+  }
+
   protected upsertScriptedFieldInternal = (field: FieldSpec) => {
     this.scriptedFields[field.name] = {
       name: field.name,

@@ -961,6 +961,11 @@ export class DataViewsService {
         const shortDotsEnable = await this.getShortDotsEnable();
         const metaFields = await this.getMetaFields();
 
+        if (!this.scriptedFieldsEnabled) {
+          // only scripted fields are in the fields array
+          delete spec.fields;
+        }
+
         return new DataViewLazy({
           spec,
           fieldFormats: this.fieldFormats,

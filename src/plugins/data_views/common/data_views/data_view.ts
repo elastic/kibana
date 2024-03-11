@@ -11,7 +11,7 @@ import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
-import { cloneDeep, each, mapValues, omit, pickBy, reject } from 'lodash';
+import { each, mapValues, omit, pickBy, reject } from 'lodash';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
 import type {
@@ -144,41 +144,15 @@ export class DataView extends AbstractDataView implements DataViewBase {
    * will be fetched from Elasticsearch when instantiating a new Data View with this spec.
    */
   public toSpec(includeFields = true): DataViewSpec {
+    const spec = this.toSpecShared();
     const fields =
       includeFields && this.fields
         ? this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) })
         : undefined;
 
-    // if fields aren't included, don't include count
-    const fieldAttrs = cloneDeep(this.fieldAttrs);
-    if (!includeFields) {
-      Object.keys(fieldAttrs).forEach((key) => {
-        delete fieldAttrs[key].count;
-        if (Object.keys(fieldAttrs[key]).length === 0) {
-          delete fieldAttrs[key];
-        }
-      });
-    }
+    spec.fields = fields;
 
-    const spec: DataViewSpec = {
-      id: this.id,
-      version: this.version,
-      title: this.getIndexPattern(),
-      timeFieldName: this.timeFieldName,
-      sourceFilters: [...(this.sourceFilters || [])],
-      fields,
-      typeMeta: this.typeMeta,
-      type: this.type,
-      fieldFormats: { ...this.fieldFormatMap },
-      runtimeFieldMap: cloneDeep(this.runtimeFieldMap),
-      fieldAttrs,
-      allowNoIndex: this.allowNoIndex,
-      name: this.name,
-      allowHidden: this.getAllowHidden(),
-    };
-
-    // Filter undefined values from the spec
-    return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
+    return spec;
   }
 
   /**
