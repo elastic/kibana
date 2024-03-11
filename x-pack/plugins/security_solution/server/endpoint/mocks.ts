@@ -46,6 +46,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { AddVersionOpts, VersionedRouteConfig } from '@kbn/core-http-server';
+import { responseActionsClientMock } from './services/actions/clients/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import type {
@@ -103,6 +104,7 @@ export const createMockEndpointAppContextService = (
   const loggerFactory = loggingSystemMock.create();
   const featureUsageMock = createFeatureUsageServiceMock();
   const messageSigningService = createMessageSigningServiceMock();
+  const licenseServiceMock = createLicenseServiceMock();
 
   return {
     start: jest.fn(),
@@ -119,12 +121,14 @@ export const createMockEndpointAppContextService = (
     getFleetFromHostFilesClient: jest.fn(async () => fleetFromHostFilesClientMock),
     getFleetToHostFilesClient: jest.fn(async () => fleetToHostFilesClientMock),
     setup: jest.fn(),
-    getLicenseService: jest.fn(),
+    getLicenseService: jest.fn().mockReturnValue(licenseServiceMock),
     getFeatureUsageService: jest.fn().mockReturnValue(featureUsageMock),
     getExceptionListsClient: jest.fn(),
     getMessageSigningService: jest.fn().mockReturnValue(messageSigningService),
     getFleetActionsClient: jest.fn(async (_) => fleetActionsClientMock),
-    getInternalResponseActionsClient: jest.fn(),
+    getInternalResponseActionsClient: jest.fn(() => {
+      return responseActionsClientMock.create();
+    }),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 

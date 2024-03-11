@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CancellableTask, RunContext } from '@kbn/task-manager-plugin/server/task';
+import type { CancellableTask, RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import { catchAndWrapError } from '../../utils';
@@ -32,7 +32,7 @@ export class CompleteExternalActionsTaskRunner
   constructor(
     private readonly endpointContextServices: EndpointAppContextService,
     private readonly esClient: ElasticsearchClient,
-    private readonly nextRunInterval: string = '5m'
+    private readonly nextRunInterval: string = '60s'
   ) {
     this.log = this.endpointContextServices.createLogger(
       // Adding a unique identifier to the end of the class name to help identify log entries related to this run
@@ -90,7 +90,7 @@ export class CompleteExternalActionsTaskRunner
     return nextRun;
   }
 
-  public async run() {
+  public async run(): Promise<RunResult | void> {
     this.log.debug(`Started: Checking status of external response actions`);
     this.abortController = new AbortController();
 
@@ -141,9 +141,9 @@ export class CompleteExternalActionsTaskRunner
     };
   }
 
-  public async cancel() {
+  public async cancel(): Promise<void> {
     if (!this.abortController.signal.aborted) {
-      this.abortController.abort('Task canceled by Task Manager');
+      this.abortController.abort('Task runner canceled!');
 
       // Sleep 2 seconds to give an opportunity for the abort signal to be processed
       await new Promise((r) => setTimeout(r, 2000));
