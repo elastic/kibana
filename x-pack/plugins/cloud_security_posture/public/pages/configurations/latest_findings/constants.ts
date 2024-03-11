@@ -17,7 +17,11 @@ export const FINDINGS_UNIT = (totalCount: number) =>
     defaultMessage: `{totalCount, plural, =1 {finding} other {findings}}`,
   });
 
-export const GROUPS_UNIT = (totalCount: number, selectedGroup: string, hasNullGroup: boolean) => {
+export const MISCONFIGURATIONS_GROUPS_UNIT = (
+  totalCount: number,
+  selectedGroup: string,
+  hasNullGroup: boolean
+) => {
   const groupCount = hasNullGroup ? totalCount - 1 : totalCount;
 
   switch (selectedGroup) {

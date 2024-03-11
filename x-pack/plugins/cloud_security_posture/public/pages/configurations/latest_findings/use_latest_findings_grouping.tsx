@@ -32,7 +32,7 @@ import {
   groupingTitle,
   defaultGroupingOptions,
   getDefaultQuery,
-  GROUPS_UNIT,
+  MISCONFIGURATIONS_GROUPS_UNIT,
 } from './constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { getFilters } from '../utils/get_filters';
@@ -167,7 +167,7 @@ export const useLatestFindingsGrouping = ({
     groupStatsRenderer,
     groupingLocalStorageKey: LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
     groupingLevel,
-    groupsUnit: GROUPS_UNIT,
+    groupsUnit: MISCONFIGURATIONS_GROUPS_UNIT,
   });
 
   const additionalFilters = buildEsQuery(dataView, [], groupFilters);
