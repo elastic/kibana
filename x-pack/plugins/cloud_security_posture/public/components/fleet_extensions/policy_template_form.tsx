@@ -152,6 +152,7 @@ const getAzureAccountTypeOptions = (
     label: i18n.translate('xpack.csp.fleetIntegration.azureAccountType.azureOrganizationLabel', {
       defaultMessage: 'Azure Organization',
     }),
+    testId: 'azureOrganizationAccountTestId',
     disabled: isAzureOrganizationDisabled,
     tooltip: isAzureOrganizationDisabled
       ? i18n.translate(
@@ -167,6 +168,7 @@ const getAzureAccountTypeOptions = (
     label: i18n.translate('xpack.csp.fleetIntegration.azureAccountType.singleAccountLabel', {
       defaultMessage: 'Single Subscription',
     }),
+    testId: 'azureSingleAccountTestId',
   },
 ];
 
