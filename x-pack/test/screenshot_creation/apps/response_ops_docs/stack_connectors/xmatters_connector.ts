@@ -26,11 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await actions.common.openNewConnectorForm('xmatters');
       await testSubjects.setValue('nameInput', 'xMatters test connector');
       await commonScreenshots.takeScreenshot('xmatters-connector-basic', screenshotDirectories);
-      const authentication = await testSubjects.find('button-group');
-      // a radio button consists of a div tag that contains an input, a div, and a label
-      // we can't click the input directly, need to click the label
-      const label = await authentication.findByCssSelector('label[title="URL Authentication"]');
-      await label.click();
+      const auth = await testSubjects.find('URL Authentication');
+      await auth.click();
       await commonScreenshots.takeScreenshot('xmatters-connector-url', screenshotDirectories);
       await testSubjects.setValue('secrets.secretsUrl', 'https://example.com');
       await testSubjects.click('create-connector-flyout-save-test-btn');
