@@ -297,7 +297,6 @@ describe('EPM index template install', () => {
     );
   });
 
-
   it('test prepareTemplate with default total_fields.limit in settings', () => {
     const dataStream = {
       type: 'logs',
