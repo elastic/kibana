@@ -80,6 +80,9 @@ describe('LayerPanel', () => {
   function getDefaultProps() {
     return {
       layerId: 'first',
+      visualizationMap: {
+        testVis: mockVisualization,
+      },
       activeVisualization: mockVisualization,
       dimensionGroups: mockVisualization.getConfiguration({} as VisualizationConfigProps).groups,
       datasourceMap: {

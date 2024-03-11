@@ -31,7 +31,6 @@ import {
   TopNFunctionsLocatorDefinition,
 } from './locators/profiling/topn_functions_locator';
 import { updateGlobalNavigation } from './services/update_global_navigation';
-
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }

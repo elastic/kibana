@@ -49,4 +49,5 @@ export const templateSchema = schema.object({
     hasDatastream: schema.maybe(schema.boolean()),
     isLegacy: schema.maybe(schema.boolean()),
   }),
+  deprecated: schema.maybe(schema.boolean()),
 });

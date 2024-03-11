@@ -33,7 +33,6 @@ export const CaseViewLoading = () => (
 
 export const CaseView = React.memo(
   ({
-    onComponentInitialized,
     actionsNavigation,
     ruleDetailsNavigation,
     showAlertDetails,
@@ -87,7 +86,6 @@ export const CaseView = React.memo(
         <CaseViewPage
           caseData={data.case}
           fetchCase={refetch}
-          onComponentInitialized={onComponentInitialized}
           actionsNavigation={actionsNavigation}
           ruleDetailsNavigation={ruleDetailsNavigation}
           showAlertDetails={showAlertDetails}
