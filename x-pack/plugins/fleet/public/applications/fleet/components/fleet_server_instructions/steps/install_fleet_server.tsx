@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PLATFORM_TYPE } from '../../../hooks';
+import { useDefaultDownloadSource } from '../../../hooks';
 import { useStartServices, useDefaultOutput, useKibanaVersion } from '../../../hooks';
 
 import { PlatformSelector } from '../..';
@@ -61,6 +62,7 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
   const { docLinks } = useStartServices();
   const kibanaVersion = useKibanaVersion();
   const { output } = useDefaultOutput();
+  const { downloadSource } = useDefaultDownloadSource();
 
   const commandOutput = output?.type === 'elasticsearch' ? output : undefined;
 
@@ -74,7 +76,8 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
         fleetServerHost,
         deploymentMode === 'production',
         commandOutput?.ca_trusted_fingerprint ?? undefined,
-        kibanaVersion
+        kibanaVersion,
+        downloadSource
       );
 
       return acc;
