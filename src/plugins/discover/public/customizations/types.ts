@@ -36,3 +36,25 @@ export type RegisterCustomizationProfile = (
 export type CustomizationCallback = (
   options: CustomizationCallbackContext
 ) => void | (() => void) | Promise<void | (() => void)>;
+
+export type DiscoverDisplayMode = 'embedded' | 'standalone';
+
+export interface DiscoverCustomizationContext {
+  /*
+   * Display mode in which discover is running
+   */
+  displayMode: DiscoverDisplayMode;
+  /**
+   * Inline top nav configuration
+   */
+  inlineTopNav: {
+    /**
+     * Whether or not to show the inline top nav
+     */
+    enabled: boolean;
+    /**
+     * Whether or not to show the Logs Explorer tabs
+     */
+    showLogsExplorerTabs: boolean;
+  };
+}
