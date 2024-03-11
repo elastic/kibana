@@ -6,11 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { uniq, flattenDepth } from 'lodash';
 import type { ESQLSearchReponse } from '@kbn/es-types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldStatsResponse } from '../../types';
-import { DEFAULT_TOP_VALUES_SIZE } from '../../constants';
-import { canProvideStatsForFieldTextBased } from '../../utils/can_provide_stats';
+import { DEFAULT_TOP_VALUES_SIZE, SIMPLE_EXAMPLES_SIZE } from '../../constants';
+import {
+  canProvideStatsForFieldTextBased,
+  canProvideTopValuesForFieldTextBased,
+} from '../../utils/can_provide_stats';
 
 export type SearchHandlerTextBased = ({ query }: { query: string }) => Promise<ESQLSearchReponse>;
 
@@ -50,8 +54,11 @@ export async function fetchAndCalculateFieldStats(params: FetchAndCalculateField
   if (field.type === 'boolean') {
     return await getStringTopValues(params, 3);
   }
-  if (field.type === 'string' && field.esTypes?.[0] === 'keyword') {
+  if (canProvideTopValuesForFieldTextBased(field)) {
     return await getStringTopValues(params);
+  }
+  if (field.type === 'string') {
+    return await getSimpleTextExamples(params, SIMPLE_EXAMPLES_SIZE);
   }
 
   return {};
@@ -72,19 +79,53 @@ export async function getStringTopValues(
 
   const result = await searchHandler({ query: esqlQuery });
   const values = result?.values as Array<[number, string]>;
-  const sampledValues = values?.reduce((acc: number, row) => acc + row[0], 0);
+  const sampledDocuments = values?.reduce((acc: number, row) => acc + row[0], 0);
 
   const topValues = {
-    buckets: values.map((value) => ({
-      count: value[0],
-      key: value[1],
+    buckets: values
+      .map((value) => ({
+        count: value[0],
+        key: value[1],
+      }))
+      .filter(({ count, key }) => !(count === 0 && key === null)),
+  };
+
+  return {
+    totalDocuments: sampledDocuments,
+    sampledDocuments,
+    sampledValues: sampledDocuments,
+    topValues,
+  };
+}
+
+export async function getSimpleTextExamples(
+  params: FetchAndCalculateFieldStatsParams,
+  size = DEFAULT_TOP_VALUES_SIZE
+): Promise<FieldStatsResponse<string | boolean>> {
+  const { searchHandler, field, esqlBaseQuery } = params;
+  const esqlQuery =
+    esqlBaseQuery +
+    `| KEEP ${getSafeESQLFieldName(field.name)}
+    | LIMIT ${size}`;
+
+  const result = await searchHandler({ query: esqlQuery });
+  const values = result?.values as Array<[string | string[]]>;
+  const flattenedValues = uniq(flattenDepth(values, 2))
+    .filter((value) => typeof value === 'string')
+    .slice(0, size);
+  const sampledDocuments = values?.length;
+
+  const topValues = {
+    buckets: flattenedValues.map((value) => ({
+      count: 1,
+      key: value as string,
     })),
   };
 
   return {
-    totalDocuments: sampledValues,
-    sampledDocuments: sampledValues,
-    sampledValues,
+    totalDocuments: sampledDocuments,
+    sampledDocuments,
+    sampledValues: sampledDocuments,
     topValues,
   };
 }

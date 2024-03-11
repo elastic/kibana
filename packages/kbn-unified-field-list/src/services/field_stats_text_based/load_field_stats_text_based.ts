@@ -36,7 +36,7 @@ interface FetchFieldStatsParamsTextBased {
 
 export type LoadFieldStatsTextBasedHandler = (
   params: FetchFieldStatsParamsTextBased
-) => Promise<FieldStatsResponse<string | number>>;
+) => Promise<FieldStatsResponse<string | boolean>>;
 
 /**
  * Loads and aggregates stats data for an ES|QL query field

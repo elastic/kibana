@@ -59,8 +59,8 @@ export interface FieldStatsState {
   totalDocuments?: number;
   sampledDocuments?: number;
   sampledValues?: number;
-  histogram?: BucketedAggregation<number | string>;
-  topValues?: BucketedAggregation<number | string>;
+  histogram?: BucketedAggregation<number | string | boolean>;
+  topValues?: BucketedAggregation<number | string | boolean>;
   numberSummary?: NumberSummary;
 }
 

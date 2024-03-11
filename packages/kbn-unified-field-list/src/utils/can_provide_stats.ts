@@ -47,7 +47,7 @@ export function canProvideNumberSummaryForField(
 
 export function showExamplesForField(field: DataViewField, isTextBased: boolean): boolean {
   if (isTextBased) {
-    return false;
+    return canProvideExamplesForField(field, isTextBased);
   }
   return (
     (!field.aggregatable && canProvideExamplesForField(field, isTextBased)) ||
@@ -58,7 +58,7 @@ export function showExamplesForField(field: DataViewField, isTextBased: boolean)
 
 export function canProvideExamplesForField(field: DataViewField, isTextBased: boolean): boolean {
   if (isTextBased) {
-    return false;
+    return field.type === 'string' && !canProvideTopValuesForFieldTextBased(field);
   }
   if (field.name === '_score') {
     return false;
@@ -75,8 +75,16 @@ export function canProvideExamplesForField(field: DataViewField, isTextBased: bo
   ].includes(field.type);
 }
 
+export function canProvideTopValuesForFieldTextBased(field: DataViewField): boolean {
+  const esTypes = field.esTypes?.[0];
+  return (
+    Boolean(field.type === 'string' && esTypes && ['keyword', 'version'].includes(esTypes)) ||
+    ['keyword', 'version', 'ip', 'number', 'boolean'].includes(field.type)
+  );
+}
+
 export function canProvideStatsForFieldTextBased(field: DataViewField): boolean {
-  if ((field.type === 'string' && field.esTypes?.[0] === 'keyword') || field.type === 'boolean') {
+  if (canProvideTopValuesForFieldTextBased(field) || canProvideExamplesForField(field, true)) {
     return true;
   }
   return false;
