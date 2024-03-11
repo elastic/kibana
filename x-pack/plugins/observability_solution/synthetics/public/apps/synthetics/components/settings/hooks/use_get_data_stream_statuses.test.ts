@@ -28,7 +28,7 @@ describe('useGetDataStreamStatuses', () => {
       return {
         error: undefined,
         loading: false,
-        status: 'success' as FETCH_STATUS.SUCCESS,
+        status: FETCH_STATUS.SUCCESS,
         refetch: () => {},
         fetch: jest.fn(),
         data: exampleData,
@@ -59,7 +59,7 @@ describe('useGetDataStreamStatuses', () => {
       return {
         error: undefined,
         loading: false,
-        status: 'success' as FETCH_STATUS.SUCCESS,
+        status: FETCH_STATUS.SUCCESS,
         refetch: () => {},
         fetch: jest.fn(),
         data: undefined,
