@@ -53,7 +53,11 @@ import {
   getDiscoverGlobalStateContainer,
   DiscoverGlobalStateContainer,
 } from './discover_global_state_container';
-import type { DiscoverRootContext } from '../../../customizations';
+import {
+  DataSourceType,
+  DiscoverRootContext,
+  DiscoverRuntimeContextEvents,
+} from '../../../customizations';
 
 export interface DiscoverStateContainerParams {
   /**
@@ -72,6 +76,10 @@ export interface DiscoverStateContainerParams {
    * Context object for customization related properties
    */
   rootContext: DiscoverRootContext;
+  /**
+   * Events for runtime context
+   */
+  runtimeContextEvents: DiscoverRuntimeContextEvents;
   /**
    * a custom url state storage
    */
@@ -209,6 +217,7 @@ export function getDiscoverStateContainer({
   history,
   services,
   rootContext,
+  runtimeContextEvents,
   stateStorageContainer,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
@@ -276,6 +285,8 @@ export function getDiscoverStateContainer({
     internalStateContainer.transitions.setDataView(dataView);
     pauseAutoRefreshInterval(dataView);
     savedSearchContainer.getState().searchSource.setField('index', dataView);
+    const dataSourceType = dataView.type === 'esql' ? DataSourceType.Esql : DataSourceType.DataView;
+    runtimeContextEvents.onDataSourceTypeChange(dataSourceType);
   };
 
   const dataStateContainer = getDataStateContainer({

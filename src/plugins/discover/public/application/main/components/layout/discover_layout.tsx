@@ -54,7 +54,9 @@ import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { ESQLTechPreviewCallout } from './esql_tech_preview_callout';
 import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
-import { useDiscoverContext } from '../../../../customizations';
+import { DataSourceType, useDiscoverContext } from '../../../../customizations';
+import { RuntimeContextNavigator } from '../../../../customizations/runtime_context_navigator';
+import { RuntimeContextManager } from '../../../../customizations/runtime_context_manager';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -74,6 +76,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     history,
     spaces,
     docLinks,
+    locator,
+    storage,
+    application,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
@@ -94,7 +99,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   ]);
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
-  const { rootContext } = useDiscoverContext();
+  const { rootContext, allProfiles, currentProfile, runtimeContext } = useDiscoverContext();
   const fetchCounter = useRef<number>(0);
 
   useEffect(() => {
@@ -211,6 +216,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     );
   }, [stateContainer, sidebarToggleState$]);
 
+  const [navigator] = useState(
+    () => new RuntimeContextNavigator(new RuntimeContextManager(storage), locator, application)
+  );
+
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
@@ -221,6 +230,48 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       <>
         {/* Temporarily display a tech preview callout for ES|QL*/}
         {isPlainRecord && <ESQLTechPreviewCallout docLinks={docLinks} />}
+        <div>
+          <a
+            href={locator.getRedirectUrl({})}
+            onClick={(e) => {
+              e.preventDefault();
+              navigator.navigateWithContext(
+                {
+                  runtimeContext: {
+                    ...runtimeContext,
+                    dataSourceType:
+                      runtimeContext.dataSourceType === DataSourceType.DataView
+                        ? DataSourceType.Esql
+                        : DataSourceType.DataView,
+                  },
+                },
+                { openInNewTab: true }
+              );
+            }}
+            css={{
+              marginRight: 10,
+            }}
+          >
+            SWAP
+          </a>
+          <span css={{ marginRight: 10, fontWeight: 'bold' }}>{runtimeContext.dataSourceType}</span>
+          {allProfiles.map((profile) => (
+            <a
+              key={profile.id}
+              href={locator.getRedirectUrl({ profile: profile.id })}
+              onClick={(e) => {
+                e.preventDefault();
+                locator.navigate({ profile: profile.id });
+              }}
+              css={{
+                marginRight: 10,
+                fontWeight: currentProfile.id === profile.id ? 'bold' : 'normal',
+              }}
+            >
+              {profile.displayName}
+            </a>
+          ))}
+        </div>
         <DiscoverHistogramLayout
           isPlainRecord={isPlainRecord}
           dataView={dataView}
@@ -237,18 +288,23 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       </>
     );
   }, [
+    allProfiles,
     currentColumns,
+    currentProfile.id,
     dataView,
     docLinks,
     isPlainRecord,
+    locator,
     mainContainer,
+    navigator,
     onAddFilter,
     onDropFieldToTable,
     onFieldEdited,
+    panelsToggle,
     resultState,
+    runtimeContext,
     stateContainer,
     viewMode,
-    panelsToggle,
   ]);
 
   const isLoading =
