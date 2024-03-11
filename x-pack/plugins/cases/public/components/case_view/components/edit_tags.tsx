@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiText,
   EuiHorizontalRule,
@@ -18,15 +18,9 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { isEqual } from 'lodash/fp';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  Form,
-  FormDataProvider,
-  useForm,
-  getUseField,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { Form, useForm, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import * as i18n from '../../tags/translations';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { Tags } from '../../tags/tags';
@@ -36,8 +30,6 @@ import { schemaTags } from '../../create/schema';
 export const schema: FormSchema = {
   tags: schemaTags,
 };
-
-const CommonUseField = getUseField({ component: Field });
 
 export interface EditTagsProps {
   isLoading: boolean;
@@ -69,11 +61,13 @@ export interface EditTagsProps {
 export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps) => {
   const { permissions } = useCasesContext();
   const initialState = { tags };
+
   const { form } = useForm({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
+
   const { submit } = form;
   const [isEditTags, setIsEditTags] = useState(false);
   const { euiTheme } = useEuiTheme();
@@ -91,21 +85,11 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
   }, [onSubmit, submit]);
 
   const { data: tagOptions = [] } = useGetTags();
-  const [options, setOptions] = useState(
-    tagOptions.map((label) => ({
-      label,
-    }))
-  );
 
-  useEffect(
-    () =>
-      setOptions(
-        tagOptions.map((label) => ({
-          label,
-        }))
-      ),
-    [tagOptions]
-  );
+  const options = tagOptions.map((label) => ({
+    label,
+  }));
+
   return (
     <EuiFlexItem grow={false}>
       <EuiText data-test-subj="case-view-tag-list">
@@ -125,7 +109,7 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
                 data-test-subj="tag-list-edit-button"
                 aria-label={i18n.EDIT_TAGS_ARIA}
                 iconType={'pencil'}
-                onClick={setIsEditTags.bind(null, true)}
+                onClick={() => setIsEditTags(true)}
               />
             </EuiFlexItem>
           )}
@@ -163,8 +147,9 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
             >
               <EuiFlexItem>
                 <Form form={form}>
-                  <CommonUseField
+                  <UseField
                     path="tags"
+                    component={ComboBoxField}
                     componentProps={{
                       idAria: 'caseTags',
                       'data-test-subj': 'caseTags',
@@ -177,25 +162,6 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
                       },
                     }}
                   />
-                  <FormDataProvider pathsToWatch="tags">
-                    {({ tags: anotherTags }) => {
-                      const current: string[] = options.map((opt) => opt.label);
-                      const newOptions = anotherTags.reduce((acc: string[], item: string) => {
-                        if (!acc.includes(item)) {
-                          return [...acc, item];
-                        }
-                        return acc;
-                      }, current);
-                      if (!isEqual(current, newOptions)) {
-                        setOptions(
-                          newOptions.map((label: string) => ({
-                            label,
-                          }))
-                        );
-                      }
-                      return null;
-                    }}
-                  </FormDataProvider>
                 </Form>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -216,7 +182,7 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
                     <EuiButtonEmpty
                       data-test-subj="edit-tags-cancel"
                       iconType="cross"
-                      onClick={setIsEditTags.bind(null, false)}
+                      onClick={() => setIsEditTags(false)}
                       size="s"
                     >
                       {i18n.CANCEL}

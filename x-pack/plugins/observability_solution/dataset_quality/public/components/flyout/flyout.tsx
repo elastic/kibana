@@ -54,7 +54,12 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+              <EuiButtonEmpty
+                data-test-subj="datasetQualityFlyoutButton"
+                iconType="cross"
+                onClick={closeFlyout}
+                flush="left"
+              >
                 {flyoutCancelText}
               </EuiButtonEmpty>
             </EuiFlexItem>

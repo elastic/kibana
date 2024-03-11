@@ -65,7 +65,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/177656
-  registry.when.skip('Error groups detailed statistics', { config: 'basic', archives: [] }, () => {
+  registry.when('Error groups detailed statistics', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       const { PROD_LIST_ERROR_RATE, PROD_ID_ERROR_RATE } = config;
       before(async () => {
