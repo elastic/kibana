@@ -39,7 +39,7 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   useEffect(() => {
     if (expanded && doc && expanded.id === doc.id) {
       setCellProps({
-        className: 'dscDocsGrid__cell--selected',
+        className: 'unifiedDataTable__cell--selected',
       });
     } else {
       setCellProps({ style: undefined });

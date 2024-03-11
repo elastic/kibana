@@ -63,11 +63,11 @@ export const getRenderCellValueFn = ({
     useEffect(() => {
       if (row?.isAnchor) {
         setCellProps({
-          className: 'dscDocsGrid__cell--highlight',
+          className: 'unifiedDataTable__cell--highlight',
         });
       } else if (ctx.expanded && row && ctx.expanded.id === row.id) {
         setCellProps({
-          className: 'dscDocsGrid__cell--expanded',
+          className: 'unifiedDataTable__cell--expanded',
         });
       } else {
         setCellProps({ style: undefined });

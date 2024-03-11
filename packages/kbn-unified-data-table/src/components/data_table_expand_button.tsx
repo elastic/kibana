@@ -26,11 +26,11 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   useEffect(() => {
     if (current.isAnchor) {
       setCellProps({
-        className: 'dscDocsGrid__cell--highlight',
+        className: 'unifiedDataTable__cell--highlight',
       });
     } else if (expanded && current && expanded.id === current.id) {
       setCellProps({
-        className: 'dscDocsGrid__cell--expanded',
+        className: 'unifiedDataTable__cell--expanded',
       });
     } else {
       setCellProps({ style: undefined });
