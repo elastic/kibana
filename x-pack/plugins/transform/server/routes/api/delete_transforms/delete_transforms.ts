@@ -87,7 +87,6 @@ export async function deleteTransforms(
         await esClient.asCurrentUser.transform.deleteTransform({
           transform_id: transformId,
           force: shouldForceDelete && needToForceDelete,
-          // @ts-expect-error ES type needs to be updated
           delete_dest_index: deleteDestIndex,
         });
         transformDeleted.success = true;

@@ -22,7 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { pick } from 'lodash';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import {
   ChangePointDetectionControlsContextProvider,
@@ -38,8 +39,8 @@ import { ViewTypeSelector } from '../components/change_point_detection/view_type
 import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { DEFAULT_SERIES } from './const';
-import { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
-import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
+import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
+import type { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
 import { type EmbeddableChangePointChartExplicitInput } from './types';
 
 export interface AnomalyChartsInitializerProps {
