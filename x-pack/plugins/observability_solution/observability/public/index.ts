@@ -52,11 +52,9 @@ export {
 } from '../common';
 
 export type { RulesParams } from './locators/rules';
-export { getRenderCellValue } from './components/alerts_table/common/render_cell_value';
 export { useGetAlertFlyoutComponents } from './components/alerts_flyout/use_get_alert_flyout_components';
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
-export { HeaderMenu } from './pages/overview/components/header_menu/header_menu';
-export { DatePicker } from './pages/overview/components/date_picker/date_picker';
+// export { DatePicker } from './pages/overview/components/date_picker/date_picker';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
 
 export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout/alerts_flyout'));

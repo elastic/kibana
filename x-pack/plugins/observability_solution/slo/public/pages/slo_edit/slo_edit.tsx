@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-// import { HeaderMenu } from '@kbn/observability-plugin/public';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { useKibana } from '../../utils/kibana_react';
 import { paths } from '../../../common/locators/paths';
 import { useCapabilities } from '../../hooks/use_capabilities';
@@ -78,7 +78,7 @@ export function SloEditPage() {
       }}
       data-test-subj="slosEditPage"
     >
-      {/* <HeaderMenu /> */}
+      <HeaderMenu />
       <SloEditForm slo={slo} />
     </ObservabilityPageTemplate>
   );

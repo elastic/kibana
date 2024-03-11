@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination, EuiText } from '@elastic/eui';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-// import { HeaderMenu } from '@kbn/observability-plugin/public';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { useKibana } from '../../utils/kibana_react';
 import { useLicense } from '../../hooks/use_license';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -94,7 +94,7 @@ export function SlosOutdatedDefinitions() {
         }),
       }}
     >
-      {/* <HeaderMenu /> */}
+      <HeaderMenu />
 
       {!hasSlosAndHasPermissions ? (
         errors

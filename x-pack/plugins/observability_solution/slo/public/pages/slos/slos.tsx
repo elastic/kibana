@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { i18n } from '@kbn/i18n';
-// import { HeaderMenu } from '@kbn/observability-plugin/public';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { useKibana } from '../../utils/kibana_react';
 import { FeedbackButton } from './components/common/feedback_button';
 import { CreateSloBtn } from './components/common/create_slo_btn';
@@ -65,7 +65,7 @@ export function SlosPage() {
       }}
       topSearchBar={<SloListSearchBar />}
     >
-      {/* <HeaderMenu /> */}
+      <HeaderMenu />
       <SloOutdatedCallout />
       <SloList />
     </ObservabilityPageTemplate>

@@ -16,7 +16,7 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import dedent from 'dedent';
-// import { HeaderMenu } from '@kbn/observability-plugin/public';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { useSloDetailsTabs } from './hooks/use_slo_details_tabs';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -137,7 +137,7 @@ export function SloDetailsPage() {
       }}
       data-test-subj="sloDetailsPage"
     >
-      {/* <HeaderMenu /> */}
+      <HeaderMenu />
       {isLoading && <EuiLoadingSpinner data-test-subj="sloDetailsLoading" />}
       {!isLoading && (
         <SloDetails slo={slo!} isAutoRefreshing={isAutoRefreshing} selectedTabId={selectedTabId} />
