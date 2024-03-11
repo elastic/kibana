@@ -89,7 +89,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
       confirmButtonText={i18n.translate(
         'xpack.enterpriseSearch.content.connectors.deleteModal.confirmButton.title',
         {
-          defaultMessage: 'Delete index',
+          defaultMessage: 'Delete',
         }
       )}
       defaultFocusedButton="confirm"

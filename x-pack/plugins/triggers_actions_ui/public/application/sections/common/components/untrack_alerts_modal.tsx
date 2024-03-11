@@ -19,22 +19,21 @@ const UNTRACK_ORPHANED_ALERTS_TITLE = i18n.translate(
 const UNTRACK_ORPHANED_ALERTS_CONFIRM_BUTTON_TEXT = i18n.translate(
   'xpack.triggersActionsUI.sections.untrackAlertsModal.confirmButtonText',
   {
-    defaultMessage: 'Disable rule',
+    defaultMessage: 'Disable',
   }
 );
 
 const UNTRACK_ORPHANED_ALERTS_CANCEL_BUTTON_TEXT = i18n.translate(
   'xpack.triggersActionsUI.sections.untrackAlertsModal.cancelButtonText',
   {
-    defaultMessage: 'cancel',
+    defaultMessage: 'Cancel',
   }
 );
 
 const UNTRACK_ORPHANED_ALERTS_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.untrackAlertsModal.toggleLabel',
   {
-    defaultMessage:
-      'When disabling, all alerts related to this rule will be updated to "Untracked"',
+    defaultMessage: 'Change alert statuses from active to untracked',
   }
 );
 

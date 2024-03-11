@@ -511,10 +511,6 @@
                 "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
-              },
-              {
                 "plugin": "apm",
                 "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
               },
@@ -1814,10 +1810,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
               },
               {
                 "plugin": "fleet",
