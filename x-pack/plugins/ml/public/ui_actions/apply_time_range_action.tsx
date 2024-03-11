@@ -10,8 +10,9 @@ import moment from 'moment';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { firstValueFrom } from 'rxjs';
-import { MlCoreSetup } from '../plugin';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
+import type { MlCoreSetup } from '../plugin';
+import type { SwimLaneDrilldownContext } from '../embeddables';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
 
 export const APPLY_TIME_RANGE_SELECTION_ACTION = 'applyTimeRangeSelectionAction';
 

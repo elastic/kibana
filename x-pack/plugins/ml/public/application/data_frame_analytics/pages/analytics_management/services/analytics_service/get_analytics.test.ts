@@ -6,7 +6,7 @@
  */
 
 import { DATA_FRAME_TASK_STATE } from '@kbn/ml-data-frame-analytics-utils';
-import { GetDataFrameAnalyticsStatsResponseOk } from '../../../../../services/ml_api_service/data_frame_analytics';
+import type { GetDataFrameAnalyticsStatsResponseOk } from '../../../../../services/ml_api_service/data_frame_analytics';
 import { getAnalyticsJobsStats } from './get_analytics';
 
 describe('get_analytics', () => {

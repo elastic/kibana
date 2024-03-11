@@ -11,6 +11,7 @@ import moment from 'moment';
 import path from 'path';
 import fs from 'fs';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getEsClient } from '../shared/get_es_client';
 import { parseIndexUrl } from '../shared/parse_index_url';
 
@@ -116,8 +117,6 @@ async function run() {
     },
   };
 
-  const root = path.join(__dirname, '../../../../..');
-
   const options = parseIndexUrl(esUrl);
 
   const client = getEsClient({
@@ -160,7 +159,7 @@ async function run() {
       query
     )}'`,
     {
-      cwd: root,
+      cwd: REPO_ROOT,
       stdio: 'inherit',
     }
   );
@@ -195,7 +194,7 @@ async function run() {
   const esArchiverDir = 'fixtures/es_archiver/';
 
   const apiIntegrationDir = path.join(
-    root,
+    REPO_ROOT,
     'x-pack/test/apm_api_integration/common',
     esArchiverDir
   );
@@ -212,7 +211,7 @@ async function run() {
 
   // run ESLint on the generated metadata files
   execSync('node scripts/eslint x-pack/**/*/archives_metadata.ts --fix', {
-    cwd: root,
+    cwd: REPO_ROOT,
     stdio: 'inherit',
   });
 }
