@@ -153,8 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // FIXME
-    describe.skip('with unmapped fields', () => {
+    describe('with unmapped fields', () => {
       before(async () => {
         await esArchiver.load(archives.unmappedFields.data);
         await kibanaServer.importExport.load(archives.unmappedFields.savedObjects);
@@ -169,21 +168,11 @@ export default function ({ getService }: FtrProviderContext) {
       async function generateCsvReportWithUnmapped(fields: string[]) {
         const res = await reportingAPI.generateCsv(
           createTestCsvJobParams({
-            title: 'Unmapped Fields CSV Report',
+            columns: fields,
             searchSource: {
-              version: true,
-              query: { query: '', language: 'kuery' },
               index: '5c620ea0-dc4f-11ec-972a-bf98ce1eebd7',
-              sort: [
-                {
-                  order_date: {
-                    format: 'strict_date_optional_time',
-                    order: 'desc' as SortDirection,
-                  },
-                },
-                { order_id: 'desc' as SortDirection },
-              ],
-              fields: fields.map((field) => ({ field, include_unmapped: 'true' })),
+              query: { language: 'kuery', query: '' },
+              sort: [{ _score: 'desc' as SortDirection }],
               filter: [],
             },
           })

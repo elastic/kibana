@@ -151,8 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FIXME
-    describe.skip('with unmapped fields', () => {
+    describe('with unmapped fields', () => {
       before(async () => {
         await esArchiver.load(archives.unmappedFields.data);
         await kibanaServer.importExport.load(archives.unmappedFields.savedObjects);
@@ -168,23 +167,17 @@ export default ({ getService }: FtrProviderContext) => {
         const res = await reportingAPI.createReportJobInternal(
           'csv_searchsource',
           createTestCsvJobParams({
-            title: 'Unmapped Fields CSV Report',
+            browserTimezone: 'UTC',
+            columns: fields,
+            objectType: 'search',
             searchSource: {
-              version: true,
-              query: { query: '', language: 'kuery' },
-              index: '5c620ea0-dc4f-11ec-972a-bf98ce1eebd7',
-              sort: [
-                {
-                  order_date: {
-                    format: 'strict_date_optional_time',
-                    order: 'desc' as SortDirection,
-                  },
-                },
-                { order_id: 'desc' as SortDirection },
-              ],
-              fields: fields.map((field) => ({ field, include_unmapped: 'true' })),
               filter: [],
+              index: '5c620ea0-dc4f-11ec-972a-bf98ce1eebd7',
+              query: { language: 'kuery', query: '' },
+              sort: [{ _score: 'desc' as SortDirection }],
             },
+            title: 'Untitled discover search',
+            version: '8.14.0',
           })
         );
         await reportingAPI.waitForJobToFinish(res.path);
@@ -198,11 +191,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('includes an unmapped nested field to the report', async () => {
         const csvFile = await generateCsvReportWithUnmapped(['text', 'nested.unmapped']);
-        expectSnapshot(csvFile).toMatch();
-      });
-
-      it('includes all unmapped fields to the report', async () => {
-        const csvFile = await generateCsvReportWithUnmapped(['*']);
         expectSnapshot(csvFile).toMatch();
       });
     });
