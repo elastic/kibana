@@ -141,9 +141,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       beforeEach(async () => {
         await navigateToDashboardApp();
-        await PageObjects.common.setTime({ from, to });
         log.info(`Creating empty dashboard`);
         await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.timePicker.setAbsoluteRange(from, to);
         log.info(`Adding "${TEST_SEARCH_TITLE}" to dashboard`);
         await dashboardAddPanel.addSavedSearch(TEST_SEARCH_TITLE);
         await PageObjects.dashboard.saveDashboard(TEST_DASHBOARD_TITLE);
