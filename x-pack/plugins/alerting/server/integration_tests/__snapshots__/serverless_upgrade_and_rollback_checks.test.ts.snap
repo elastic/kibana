@@ -3259,6 +3259,12 @@ Object {
                                     },
                                     "name": "custom",
                                   },
+                                  Object {
+                                    "args": Object {
+                                      "method": [Function],
+                                    },
+                                    "name": "custom",
+                                  },
                                 ],
                                 "type": "string",
                               },
