@@ -78,7 +78,101 @@ export default ({ getService }: FtrProviderContext): void => {
       await clearOracleRecords(es, kibanaServer);
     });
 
-    describe('validation', () => {});
+    describe('validation', () => {
+      it('returns 400 if the alerts do not contain _id and _index', async () => {
+        const res = await executeConnector({
+          supertest,
+          connectorId,
+          // @ts-expect-error: need to test schema validation
+          req: getRequest({ alerts: [{ foo: 'bar' }] }),
+        });
+
+        expect(res.status).to.be('error');
+        expect(res.serviceMessage).to.be(
+          'Request validation failed (Error: [alerts.0]: Alert ID and index must be defined)'
+        );
+      });
+
+      it('returns 400 when groupingBy has more than one value', async () => {
+        const res = await executeConnector({
+          supertest,
+          connectorId,
+          req: getRequest({ groupingBy: ['host.name', 'source.ip'] }),
+        });
+
+        expect(res.status).to.be('error');
+        expect(res.serviceMessage).to.be(
+          'Request validation failed (Error: [groupingBy]: array size is [2], but cannot be greater than [1])'
+        );
+      });
+
+      it('returns 400 when timeWindow is invalid', async () => {
+        const res = await executeConnector({
+          supertest,
+          connectorId,
+          req: getRequest({ timeWindow: 'not-valid' }),
+        });
+
+        expect(res.status).to.be('error');
+        expect(res.serviceMessage).to.be(
+          'Request validation failed (Error: [timeWindow]: Not a valid time window)'
+        );
+      });
+
+      it('returns 400 for valid date math but not valid time window', async () => {
+        const res = await executeConnector({
+          supertest,
+          connectorId,
+          req: getRequest({ timeWindow: '10d+3d' }),
+        });
+
+        expect(res.status).to.be('error');
+        expect(res.serviceMessage).to.be(
+          'Request validation failed (Error: [timeWindow]: Not a valid time window)'
+        );
+      });
+
+      it('returns 400 for unsupported time units', async () => {
+        for (const unit of ['s', 'm', 'H', 'h']) {
+          const res = await executeConnector({
+            supertest,
+            connectorId,
+            req: getRequest({ timeWindow: `5${unit}` }),
+          });
+
+          expect(res.status).to.be('error');
+          expect(res.serviceMessage).to.be(
+            'Request validation failed (Error: [timeWindow]: Not a valid time window)'
+          );
+        }
+      });
+
+      it('returns 400 when maximumCasesToOpen > 10', async () => {
+        const res = await executeConnector({
+          supertest,
+          connectorId,
+          req: getRequest({ maximumCasesToOpen: 11 }),
+        });
+
+        expect(res.status).to.be('error');
+        expect(res.serviceMessage).to.be(
+          'Request validation failed (Error: [maximumCasesToOpen]: Value must be equal to or lower than [10].)'
+        );
+      });
+
+      it('returns 400 when maximumCasesToOpen < 1', async () => {
+        const res = await executeConnector({
+          supertest,
+          connectorId,
+          req: getRequest({ maximumCasesToOpen: 0 }),
+        });
+
+        expect(res.status).to.be('error');
+        expect(res.serviceMessage).to.be(
+          'Request validation failed (Error: [maximumCasesToOpen]: Value must be equal to or greater than [1].)'
+        );
+      });
+    });
 
     describe('execution', () => {
       const req = getRequest();
