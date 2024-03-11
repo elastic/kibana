@@ -404,8 +404,11 @@ export default function ({ getService }: FtrProviderContext) {
       log.debug(`Starting SAML handshake 3 times.`);
 
       const unauthenticatedSessionOne = await startSAMLHandshake();
+      await setTimeoutAsync(500);
       const unauthenticatedSessionTwo = await startSAMLHandshake();
+      await setTimeoutAsync(500);
       const unauthenticatedSessionThree = await startSAMLHandshake();
+      await setTimeoutAsync(500);
 
       log.debug('Waiting for all sessions to be persisted...');
       await retry.tryForTime(20000, async () => {
