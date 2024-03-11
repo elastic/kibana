@@ -4,25 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
-import { v4 } from 'uuid';
-import { css } from '@emotion/css';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
-import usePrevious from 'react-use/lib/usePrevious';
+import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
 import { ChatBody } from '../../components/chat/chat_body';
+import { ChatInlineEditingContent } from '../../components/chat/chat_inline_edit';
 import { ConversationList } from '../../components/chat/conversation_list';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
+import { useConversationKey } from '../../hooks/use_conversation_key';
+import { useConversationList } from '../../hooks/use_conversation_list';
 import { useCurrentUser } from '../../hooks/use_current_user';
-import { useForceUpdate } from '../../hooks/use_force_update';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantParams } from '../../hooks/use_observability_ai_assistant_params';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
-import { ChatInlineEditingContent } from '../../components/chat/chat_inline_edit';
 
 const SECOND_SLOT_CONTAINER_WIDTH = 400;
 
@@ -50,38 +49,14 @@ export function ConversationView() {
 
   const conversationId = 'conversationId' in path ? path.conversationId : undefined;
 
-  // Regenerate the key only when the id changes, except after
-  // creating the conversation. Ideally this happens by adding
-  // state to the current route, but I'm not keen on adding
-  // the concept of state to the router, due to a mismatch
-  // between router.link() and router.push(). So, this is a
-  // pretty gross workaround for persisting a key under some
-  // conditions.
-  const chatBodyKeyRef = useRef(v4());
-  const keepPreviousKeyRef = useRef(false);
-  const prevConversationId = usePrevious(conversationId);
+  const { key: bodyKey, updateConversationIdInPlace } = useConversationKey(conversationId);
 
   const [secondSlotContainer, setSecondSlotContainer] = useState<HTMLDivElement | null>(null);
   const [isSecondSlotVisible, setIsSecondSlotVisible] = useState(false);
 
-  if (conversationId !== prevConversationId && keepPreviousKeyRef.current === false) {
-    chatBodyKeyRef.current = v4();
-  }
+  const conversationList = useConversationList();
 
-  keepPreviousKeyRef.current = false;
-
-  const forceUpdate = useForceUpdate();
-
-  const conversations = useAbortableAsync(
-    ({ signal }) => {
-      return service.callApi('POST /internal/observability_ai_assistant/conversations', {
-        signal,
-      });
-    },
-    [service]
-  );
-
-  function navigateToConversation(nextConversationId?: string, usePrevConversationKey?: boolean) {
+  function navigateToConversation(nextConversationId?: string) {
     if (nextConversationId) {
       observabilityAIAssistantRouter.push('/conversations/{conversationId}', {
         path: {
@@ -95,12 +70,12 @@ export function ConversationView() {
   }
 
   function handleRefreshConversations() {
-    conversations.refresh();
+    conversationList.conversations.refresh();
   }
 
   const handleConversationUpdate = (conversation: { conversation: { id: string } }) => {
     if (!conversationId) {
-      keepPreviousKeyRef.current = true;
+      updateConversationIdInPlace(conversation.conversation.id);
       navigateToConversation(conversation.conversation.id);
     }
     handleRefreshConversations();
@@ -153,26 +128,15 @@ export function ConversationView() {
     <EuiFlexGroup direction="row" className={containerClassName} gutterSize="none">
       <EuiFlexItem grow={false} className={conversationListContainerName}>
         <ConversationList
-          selected={conversationId ?? ''}
-          onClickNewChat={() => {
-            if (conversationId) {
-              observabilityAIAssistantRouter.push('/conversations/new', {
-                path: {},
-                query: {},
-              });
-            } else {
-              // clear the chat
-              chatBodyKeyRef.current = v4();
-              forceUpdate();
-            }
-          }}
-          onClickChat={(id) => {
-            navigateToConversation(id, false);
-          }}
-          onClickDeleteConversation={(id) => {
-            if (conversationId === id) {
-              navigateToConversation(undefined, false);
-            }
+          selectedConversationId={conversationId}
+          conversations={conversationList.conversations}
+          isLoading={conversationList.isLoading}
+          onConversationDeleteClick={(deletedConversationId) => {
+            conversationList.deleteConversation(deletedConversationId).then(() => {
+              if (deletedConversationId === conversationId) {
+                navigateToConversation(undefined);
+              }
+            });
           }}
         />
         <EuiSpacer size="s" />
@@ -190,7 +154,7 @@ export function ConversationView() {
       {chatService.value && (
         <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
           <ChatBody
-            key={chatBodyKeyRef.current}
+            key={bodyKey}
             currentUser={currentUser}
             connectors={connectors}
             initialConversationId={conversationId}
