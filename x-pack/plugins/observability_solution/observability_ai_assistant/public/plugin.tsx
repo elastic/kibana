@@ -30,6 +30,7 @@ import type {
 } from './types';
 import { registerTelemetryEventTypes } from './analytics';
 import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
+import { useUserPreferredLanguage } from './hooks/use_user_preferred_language';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -145,6 +146,7 @@ export class ObservabilityAIAssistantPlugin
     return {
       service,
       useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
+      useUserPreferredLanguage,
       ObservabilityAIAssistantContextualInsight: isEnabled
         ? withSuspense(
             withProviders(
