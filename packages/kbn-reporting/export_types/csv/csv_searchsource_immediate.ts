@@ -20,6 +20,7 @@ import {
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
+  durationToNumber,
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
 import {
@@ -108,7 +109,17 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
     };
     const cancellationToken = new CancellationToken();
     const csvConfig = this.config.csv;
-    const taskInstanceFields = { startedAt: null, retryAt: null };
+    const taskInstanceFields =
+      csvConfig.scroll.duration === 'auto'
+        ? {
+            startedAt: new Date(),
+            retryAt: new Date(Date.now() + durationToNumber(this.config.queue.timeout)),
+          }
+        : {
+            startedAt: null,
+            retryAt: null,
+          };
+
     const csv = new CsvGenerator(
       job,
       csvConfig,

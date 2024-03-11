@@ -23,8 +23,9 @@ import type {
   Field,
   FieldExamples,
   FieldStatsCommonRequestParams,
+  FieldStatsError,
 } from '../../../../../common/types/field_stats';
-import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
+import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 import { MAX_EXAMPLES_DEFAULT } from './constants';
 
 export const getFieldExamplesRequest = (params: FieldStatsCommonRequestParams, field: Field) => {

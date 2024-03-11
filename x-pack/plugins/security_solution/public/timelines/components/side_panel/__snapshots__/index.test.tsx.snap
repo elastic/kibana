@@ -287,7 +287,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
 
 exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should render the Host Details view in the Details Panel when the panelView is hostDetail and the hostName is set 1`] = `
 .c3 {
-  color: #535966;
+  color: #98a2b3;
 }
 
 .c2 {
@@ -342,6 +342,11 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
   opacity: 0;
   -webkit-transition: opacity 250ms ease;
   transition: opacity 250ms ease;
+}
+
+.c0 .inspectButtonComponent:focus-visible {
+  pointer-events: auto;
+  opacity: 1;
 }
 
 .c0:hover .inspectButtonComponent {
@@ -631,7 +636,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
 
 exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it should render the Network Details view in the Details Panel when the panelView is networkDetail and the ip is set 1`] = `
 .c3 {
-  color: #535966;
+  color: #98a2b3;
 }
 
 .c2 {
@@ -686,6 +691,11 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
   opacity: 0;
   -webkit-transition: opacity 250ms ease;
   transition: opacity 250ms ease;
+}
+
+.c0 .inspectButtonComponent:focus-visible {
+  pointer-events: auto;
+  opacity: 1;
 }
 
 .c0:hover .inspectButtonComponent {
