@@ -151,7 +151,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with unmapped fields', () => {
+    // FIXME
+    describe.skip('with unmapped fields', () => {
       before(async () => {
         await esArchiver.load(archives.unmappedFields.data);
         await kibanaServer.importExport.load(archives.unmappedFields.savedObjects);

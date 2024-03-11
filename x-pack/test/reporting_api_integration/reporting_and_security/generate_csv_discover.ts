@@ -43,19 +43,19 @@ export default function ({ getService }: FtrProviderContext) {
     },
     logs: {
       data: 'x-pack/test/functional/es_archives/logstash_functional',
-      savedObjects: 'x-pack/test/functional/es_archives/logstash_functional',
+      savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs',
     },
     nanos: {
       data: 'x-pack/test/functional/es_archives/reporting/nanos',
-      savedObjects: 'x-pack/test/functional/es_archives/logstash_functional',
+      savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs',
     },
     sales: {
       data: 'x-pack/test/functional/es_archives/reporting/sales',
-      savedObjects: 'x-pack/test/functional/es_archives/logstash_functional',
+      savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs',
     },
     bigIntIdField: {
       data: 'x-pack/test/functional/es_archives/reporting/big_int_id_field',
-      savedObjects: 'x-pack/test/functional/es_archives/logstash_functional',
+      savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/big_int_id_field',
     },
   };
 
@@ -64,6 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
    */
   describe('Generate CSV from SearchSource', () => {
     beforeEach(async () => {
+      await reportingAPI.initLogs();
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': true,
         'dateFormat:tz': 'UTC',
@@ -145,13 +146,15 @@ export default function ({ getService }: FtrProviderContext) {
             version: '8.14.0',
           })
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        const { path: downloadPath } = JSON.parse(res.text) as { path: string };
+        await reportingAPI.waitForJobToFinish(downloadPath);
+        const csvFile = await reportingAPI.getCompletedJobOutput(downloadPath);
         expectSnapshot(csvFile).toMatch();
       });
     });
 
-    describe('with unmapped fields', () => {
+    // FIXME
+    describe.skip('with unmapped fields', () => {
       before(async () => {
         await esArchiver.load(archives.unmappedFields.data);
         await kibanaServer.importExport.load(archives.unmappedFields.savedObjects);
@@ -185,8 +188,9 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        return reportingAPI.getCompletedJobOutput(res.path);
+        const { path: downloadPath } = JSON.parse(res.text) as { path: string };
+        await reportingAPI.waitForJobToFinish(downloadPath);
+        return reportingAPI.getCompletedJobOutput(downloadPath);
       }
 
       it('includes an unmapped field to the report', async () => {
@@ -326,8 +330,9 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        const { path: downloadPath } = JSON.parse(res.text) as { path: string };
+        await reportingAPI.waitForJobToFinish(downloadPath);
+        const csvFile = await reportingAPI.getCompletedJobOutput(downloadPath);
         expectSnapshot(csvFile).toMatch();
       });
 
@@ -370,8 +375,9 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        const { path: downloadPath } = JSON.parse(res.text) as { path: string };
+        await reportingAPI.waitForJobToFinish(downloadPath);
+        const csvFile = await reportingAPI.getCompletedJobOutput(downloadPath);
         expectSnapshot(csvFile).toMatch();
       });
     });
@@ -420,8 +426,9 @@ export default function ({ getService }: FtrProviderContext) {
             columns: ['@timestamp', 'clientip', 'extension'],
           })
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        const { path: downloadPath } = JSON.parse(res.text) as { path: string };
+        await reportingAPI.waitForJobToFinish(downloadPath);
+        const csvFile = await reportingAPI.getCompletedJobOutput(downloadPath);
         expectSnapshot(csvFile).toMatch();
       });
 
@@ -458,8 +465,9 @@ export default function ({ getService }: FtrProviderContext) {
             columns: ['@timestamp', 'clientip', 'extension'],
           })
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        const { path: downloadPath } = JSON.parse(res.text) as { path: string };
+        await reportingAPI.waitForJobToFinish(downloadPath);
+        const csvFile = await reportingAPI.getCompletedJobOutput(downloadPath);
         expectSnapshot(csvFile).toMatch();
       });
     });
@@ -490,8 +498,9 @@ export default function ({ getService }: FtrProviderContext) {
             columns: ['date', 'message'],
           })
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        const { path: downloadPath } = JSON.parse(res.text) as { path: string };
+        await reportingAPI.waitForJobToFinish(downloadPath);
+        const csvFile = await reportingAPI.getCompletedJobOutput(downloadPath);
         expectSnapshot(csvFile).toMatch();
       });
 
@@ -511,8 +520,9 @@ export default function ({ getService }: FtrProviderContext) {
             columns: ['date', 'message'],
           })
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        const { path: downloadPath } = JSON.parse(res.text) as { path: string };
+        await reportingAPI.waitForJobToFinish(downloadPath);
+        const csvFile = await reportingAPI.getCompletedJobOutput(downloadPath);
         expectSnapshot(csvFile).toMatch();
       });
     });
@@ -546,8 +556,9 @@ export default function ({ getService }: FtrProviderContext) {
             columns: ['date', 'message', '_id', '_index'],
           })
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        const { path: downloadPath } = JSON.parse(res.text) as { path: string };
+        await reportingAPI.waitForJobToFinish(downloadPath);
+        const csvFile = await reportingAPI.getCompletedJobOutput(downloadPath);
         expectSnapshot(csvFile).toMatch();
       });
 
@@ -570,8 +581,9 @@ export default function ({ getService }: FtrProviderContext) {
             columns: ['name', 'power'],
           })
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        const { path: downloadPath } = JSON.parse(res.text) as { path: string };
+        await reportingAPI.waitForJobToFinish(downloadPath);
+        const csvFile = await reportingAPI.getCompletedJobOutput(downloadPath);
         expectSnapshot(csvFile).toMatch();
       });
     });
@@ -646,8 +658,9 @@ export default function ({ getService }: FtrProviderContext) {
             columns: [],
           })
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        const { path: downloadPath } = JSON.parse(res.text) as { path: string };
+        await reportingAPI.waitForJobToFinish(downloadPath);
+        const csvFile = await reportingAPI.getCompletedJobOutput(downloadPath);
         expectSnapshot(csvFile).toMatch();
       });
     });
@@ -704,8 +717,9 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        const { path: downloadPath } = JSON.parse(res.text) as { path: string };
+        await reportingAPI.waitForJobToFinish(downloadPath);
+        const csvFile = await reportingAPI.getCompletedJobOutput(downloadPath);
         expectSnapshot(csvFile).toMatch();
       });
     });

@@ -7,7 +7,7 @@
 
 import type { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-pdf-common';
 import type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
-import type { JobParamsCSV, JobParamsDownloadCSV } from '@kbn/reporting-export-types-csv-common';
+import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import rison from '@kbn/rison';
 import { LoadActionPerfOptions } from '@kbn/es-archiver';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
@@ -139,13 +139,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
-  const downloadCsv = async (username: string, password: string, job: JobParamsDownloadCSV) => {
-    return await supertestWithoutAuth
-      .post(INTERNAL_ROUTES.DOWNLOAD_CSV)
-      .auth(username, password)
-      .set('kbn-xsrf', 'xxx')
-      .send(job);
-  };
   const generatePdf = async (username: string, password: string, job: JobParamsPDFDeprecated) => {
     const jobParams = rison.encode(job);
     return await supertestWithoutAuth
@@ -277,7 +270,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     createDataAnalyst,
     createTestReportingUserRole,
     createTestReportingUser,
-    downloadCsv,
     generatePdf,
     generatePng,
     generateCsv,
