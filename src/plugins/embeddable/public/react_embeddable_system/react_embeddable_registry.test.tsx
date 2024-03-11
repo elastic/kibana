@@ -15,8 +15,9 @@ import { ReactEmbeddableFactory } from './types';
 
 describe('react embeddable registry', () => {
   const testEmbeddableFactory: ReactEmbeddableFactory = {
+    type: 'test',
     deserializeState: jest.fn(),
-    getComponent: jest.fn(),
+    buildEmbeddable: jest.fn(),
   };
 
   it('throws an error if requested embeddable factory type is not registered', () => {
@@ -26,7 +27,7 @@ describe('react embeddable registry', () => {
   });
 
   it('can register and get an embeddable factory', () => {
-    registerReactEmbeddableFactory('test', testEmbeddableFactory);
+    registerReactEmbeddableFactory(testEmbeddableFactory);
     expect(getReactEmbeddableFactory('test')).toBe(testEmbeddableFactory);
   });
 
