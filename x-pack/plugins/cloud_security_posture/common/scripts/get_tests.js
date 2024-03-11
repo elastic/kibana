@@ -285,7 +285,7 @@ const groupTestsByDirectory = (testLogs) => {
 const tagShieldsColors = {
   FTR: 'blue',
   UT: 'brightgreen',
-  SERVERLESS: 'brightblue',
+  SERVERLESS: 'pink',
   'HAS SKIP': 'yellow',
   'HAS TODO': 'green',
   'API INTEGRATION': 'purple',
