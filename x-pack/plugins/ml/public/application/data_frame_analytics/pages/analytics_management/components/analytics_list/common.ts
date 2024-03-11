@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiTableActionsColumnType, Query, Ast } from '@elastic/eui';
+import type { EuiTableActionsColumnType, Ast } from '@elastic/eui';
+import { Query } from '@elastic/eui';
 
 import {
   DATA_FRAME_TASK_STATE,
