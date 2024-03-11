@@ -19,7 +19,6 @@ export interface RenderAppProps {
   services: DiscoverServices;
   profileRegistry: DiscoverProfileRegistry;
   customizationContext: DiscoverCustomizationContext;
-  isDev: boolean;
 }
 
 export const renderApp = ({
@@ -27,11 +26,9 @@ export const renderApp = ({
   services,
   profileRegistry,
   customizationContext,
-  isDev,
 }: RenderAppProps) => {
-  const { history: getHistory, capabilities, chrome, data, core } = services;
+  const { history, capabilities, chrome, data, core } = services;
 
-  const history = getHistory();
   if (!capabilities.discover.save) {
     chrome.setBadge({
       text: i18n.translate('discover.badge.readOnly.text', {
@@ -49,7 +46,6 @@ export const renderApp = ({
       profileRegistry={profileRegistry}
       customizationContext={customizationContext}
       history={history}
-      isDev={isDev}
     />,
     {
       theme: core.theme,

@@ -26,7 +26,6 @@ export interface DiscoverRoutesProps {
   prefix?: string;
   customizationCallbacks: CustomizationCallback[];
   customizationContext: DiscoverCustomizationContext;
-  isDev: boolean;
 }
 
 export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProps) => {
@@ -68,7 +67,6 @@ export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProp
 interface CustomDiscoverRoutesProps {
   profileRegistry: DiscoverProfileRegistry;
   customizationContext: DiscoverCustomizationContext;
-  isDev: boolean;
 }
 
 export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscoverRoutesProps) => {
@@ -96,7 +94,6 @@ export interface DiscoverRouterProps {
   profileRegistry: DiscoverProfileRegistry;
   customizationContext: DiscoverCustomizationContext;
   history: History;
-  isDev: boolean;
 }
 
 export const DiscoverRouter = ({
