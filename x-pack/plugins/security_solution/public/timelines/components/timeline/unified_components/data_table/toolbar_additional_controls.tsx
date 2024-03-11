@@ -14,9 +14,9 @@ import {
   useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
 import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
-import { FixedWidthLastUpdatedContainer } from './last_updated';
 import * as i18n from './translations';
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../../../common/components/exit_full_screen';
+import { FixedWidthLastUpdatedContainer } from '../../footer/last_updated';
 
 export const isFullScreen = ({
   globalFullScreen,

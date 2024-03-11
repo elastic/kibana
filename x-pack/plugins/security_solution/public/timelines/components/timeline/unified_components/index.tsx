@@ -192,7 +192,9 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
     return columns.map((c) => c.id);
   }, [columns]);
 
-  const dataView = useGetScopedSourcererDataView(SourcererScopeName.timeline);
+  const dataView = useGetScopedSourcererDataView({
+    sourcererScope: SourcererScopeName.timeline,
+  });
 
   // Sorting
   const sortingColumns = useMemo(() => {

@@ -277,16 +277,17 @@ const InsightEditorComponent = ({
   onCancel,
 }: EuiMarkdownEditorUiPluginEditorProps<InsightComponentProps & { relativeTimerange: string }>) => {
   const isEditMode = node != null;
-  const { sourcererDataView, indexPattern } = useSourcererDataView(SourcererScopeName.default);
+  const { indexPattern } = useSourcererDataView(SourcererScopeName.default);
   const {
     unifiedSearch: {
       ui: { FiltersBuilderLazy },
     },
     uiSettings,
-    fieldFormats,
   } = useKibana().services;
 
-  const dataView = useGetScopedSourcererDataView(SourcererScopeName.default);
+  const dataView = useGetScopedSourcererDataView({
+    sourcererScope: SourcererScopeName.default,
+  });
 
   const [providers, setProviders] = useState<Provider[][]>([[]]);
   const dateRangeChoices = useMemo(() => {
