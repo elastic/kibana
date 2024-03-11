@@ -11,12 +11,14 @@
  */
 
 import { isEqual } from 'lodash';
-import { from, isObservable, Observable, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { from, isObservable, Subject } from 'rxjs';
 import { distinctUntilChanged, flatMap, scan, shareReplay } from 'rxjs/operators';
-import { DeepPartial } from '../../../common/types/common';
+import type { DeepPartial } from '../../../common/types/common';
 import { jobSelectionActionCreator } from './actions';
 import { EXPLORER_ACTION } from './explorer_constants';
-import { explorerReducer, getExplorerDefaultState, ExplorerState } from './reducers';
+import type { ExplorerState } from './reducers';
+import { explorerReducer, getExplorerDefaultState } from './reducers';
 import type { MlFieldFormatService } from '../services/field_format_service';
 
 type ExplorerAction = Action | Observable<ActionPayload>;

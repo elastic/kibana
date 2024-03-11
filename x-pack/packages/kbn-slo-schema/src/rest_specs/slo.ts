@@ -11,6 +11,7 @@ import {
   allOrAnyString,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
+  syntheticsAvailabilityIndicatorSchema,
   budgetingMethodSchema,
   dateType,
   durationType,
@@ -21,6 +22,7 @@ import {
   indicatorTypesSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
+  metaSchema,
   timesliceMetricIndicatorSchema,
   objectiveSchema,
   optionalSettingsSchema,
@@ -151,7 +153,10 @@ const sloResponseSchema = t.intersection([
 
 const sloWithSummaryResponseSchema = t.intersection([
   sloResponseSchema,
-  t.type({ summary: summarySchema, groupings: groupingsSchema }),
+  t.intersection([
+    t.type({ summary: summarySchema, groupings: groupingsSchema }),
+    t.partial({ meta: metaSchema }),
+  ]),
 ]);
 
 const sloGroupWithSummaryResponseSchema = t.type({
@@ -335,6 +340,7 @@ type Indicator = t.OutputOf<typeof indicatorSchema>;
 type Objective = t.OutputOf<typeof objectiveSchema>;
 type APMTransactionErrorRateIndicator = t.OutputOf<typeof apmTransactionErrorRateIndicatorSchema>;
 type APMTransactionDurationIndicator = t.OutputOf<typeof apmTransactionDurationIndicatorSchema>;
+type SyntheticsAvailabilityIndicator = t.OutputOf<typeof syntheticsAvailabilityIndicatorSchema>;
 type MetricCustomIndicator = t.OutputOf<typeof metricCustomIndicatorSchema>;
 type TimesliceMetricIndicator = t.OutputOf<typeof timesliceMetricIndicatorSchema>;
 type TimesliceMetricBasicMetricWithField = t.OutputOf<typeof timesliceMetricBasicMetricWithField>;
@@ -406,6 +412,7 @@ export type {
   UpdateSLOResponse,
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
+  SyntheticsAvailabilityIndicator,
   GetSLOBurnRatesResponse,
   GetSLOInstancesResponse,
   IndicatorType,

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { forkJoin, Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
-import { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
+import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import { ml } from '../../services/ml_api_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
 import { mlTimeSeriesSearchService } from '../timeseries_search_service';
-import { mlResultsService, CriteriaField } from '../../services/results_service';
-import { Job } from '../../../../common/types/anomaly_detection_jobs';
+import type { CriteriaField } from '../../services/results_service';
+import { mlResultsService } from '../../services/results_service';
+import type { Job } from '../../../../common/types/anomaly_detection_jobs';
 import { MAX_SCHEDULED_EVENTS, TIME_FIELD_NAME } from '../timeseriesexplorer_constants';
 import {
   processDataForFocusAnomalies,
@@ -24,7 +26,7 @@ import {
 } from './timeseriesexplorer_utils';
 import { mlForecastService } from '../../services/forecast_service';
 import { mlFunctionToESAggregation } from '../../../../common/util/job_utils';
-import { GetAnnotationsResponse } from '../../../../common/types/annotations';
+import type { GetAnnotationsResponse } from '../../../../common/types/annotations';
 
 export interface Interval {
   asMilliseconds: () => number;

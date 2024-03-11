@@ -7,21 +7,21 @@
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { IContainer } from '@kbn/embeddable-plugin/public';
+import type { IContainer } from '@kbn/embeddable-plugin/public';
 import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
-import {
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+import type {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
 } from '..';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
 import { AnomalyDetectionEmbeddable } from '../common/anomaly_detection_embeddable';
 
