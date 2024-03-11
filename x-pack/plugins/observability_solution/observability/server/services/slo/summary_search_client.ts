@@ -122,6 +122,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         .slice(0, pagination.perPage);
 
       const finalTotal = total - (tempSummaryDocuments.length - tempSummaryDocumentsDeduped.length);
+
       return {
         ...pagination,
         total: finalTotal,

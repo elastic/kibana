@@ -236,7 +236,7 @@ export const ConnectorDetail: React.FC = () => {
           responsive: false,
           wrap: false,
         },
-        rightSideItems: getHeaderActions(index, hasAppSearchAccess),
+        rightSideItems: getHeaderActions(index, hasAppSearchAccess, connector),
         tabs,
       }}
     >

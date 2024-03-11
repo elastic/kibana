@@ -35,6 +35,7 @@ export const getSLOSummaryMappingsTemplate = (
             },
           },
         },
+        // SLO field mappings
         slo: {
           properties: {
             id: {

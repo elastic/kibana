@@ -8,7 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE, GetSLOParams, GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
-import { Groupings, SLO, Summary } from '../../domain/models';
+import { Groupings, Meta, SLO, Summary } from '../../domain/models';
 import { SLORepository } from './slo_repository';
 import { SummaryClient } from './summary_client';
 import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
@@ -50,14 +50,14 @@ export class GetSLO {
       slo = await this.repository.findById(sloId);
     }
     if (slo) {
-      const { summary, groupings } = await this.summaryClient.computeSummary({
+      const { summary, groupings, meta } = await this.summaryClient.computeSummary({
         slo,
         instanceId,
         remoteName,
       });
 
       return getSLOResponseSchema.encode(
-        mergeSloWithSummary(slo, summary, instanceId, groupings, remoteName)
+        mergeSloWithSummary(slo, summary, instanceId, groupings, meta, remoteName)
       );
     } else {
       throw new Error('SLO not found');
@@ -70,7 +70,8 @@ function mergeSloWithSummary(
   summary: Summary,
   instanceId: string,
   groupings: Groupings,
+  meta: Meta,
   remoteName?: string
 ) {
-  return { ...slo, instanceId, summary, groupings, remoteName };
+  return { ...slo, instanceId, summary, groupings, meta, remoteName };
 }
