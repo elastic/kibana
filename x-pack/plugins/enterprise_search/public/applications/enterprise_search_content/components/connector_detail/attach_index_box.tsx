@@ -202,13 +202,10 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
             </EuiButton>
             {indexExists[connector.name] ? (
               <EuiText size="xs">
-                {i18n.translate(
-                  'xpack.enterpriseSearch.attachIndexBox.createSameIndexButtonLabel',
-                  {
-                    defaultMessage: 'Index with name {indexName} already exists',
-                    values: { indexName: connector.name },
-                  }
-                )}
+                {i18n.translate('xpack.enterpriseSearch.attachIndexBox.indexNameExistsError', {
+                  defaultMessage: 'Index with name {indexName} already exists',
+                  values: { indexName: connector.name },
+                })}
               </EuiText>
             ) : (
               <></>
