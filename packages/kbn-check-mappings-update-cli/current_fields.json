@@ -263,6 +263,12 @@
     "title",
     "version"
   ],
+  "endpoint:unified-user-artifact-manifest": [
+    "artifactIds",
+    "created",
+    "policyId",
+    "semanticVersion"
+  ],
   "endpoint:user-artifact-manifest": [
     "artifacts",
     "schemaVersion"
