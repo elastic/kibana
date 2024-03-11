@@ -57,13 +57,6 @@ export async function allFleetServerVersionsAreAtLeast(
     }
   }
 
-  /*
-    What do we actually need to do here?
-    - Get all agents running on Fleet Server policies
-    - Ensure all agents are running at least the specified version
-    - If a policy is managed and offline, ignore any outdated agents on it
-  */
-
   const managedAgentPolicies = await agentPolicyService.getAllManagedAgentPolicies(soClient);
   const fleetServerAgents = await getAgentsByKuery(esClient, soClient, {
     showInactive: true,
@@ -78,6 +71,11 @@ export async function allFleetServerVersionsAreAtLeast(
 
   for (const fleetServerAgent of fleetServerAgents.agents) {
     const agentVersion = fleetServerAgent.local_metadata?.elastic?.agent?.version;
+
+    if (!agentVersion) {
+      continue;
+    }
+
     const isNewerVersion = semverGte(semverCoerce(agentVersion)!, version);
 
     if (!isNewerVersion) {
