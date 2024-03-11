@@ -83,6 +83,10 @@ export const createFleetAuthzMock = (): FleetAuthz => {
       readAgents: true,
       readEnrollmentTokens: true,
       readAgentPolicies: true,
+      allAgentPolicies: true,
+      allAgents: true,
+      allSettings: true,
+      readSettings: true,
     },
     integrations: {
       readPackageInfo: true,
