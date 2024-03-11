@@ -78,9 +78,9 @@ export const DiscoverRouter = ({
 }: DiscoverRouterProps) => {
   return (
     <KibanaContextProvider services={services}>
-      <DiscoverContextProvider rootContext={rootContext} profileRegistry={profileRegistry}>
-        <EuiErrorBoundary>
-          <Router history={history} data-test-subj="discover-react-router">
+      <EuiErrorBoundary>
+        <Router history={history} data-test-subj="discover-react-router">
+          <DiscoverContextProvider rootContext={rootContext} profileRegistry={profileRegistry}>
             <Routes>
               <Route path={addProfile('', ':profile')}>
                 <DiscoverRoutes />
@@ -89,9 +89,9 @@ export const DiscoverRouter = ({
                 <DiscoverRoutes />
               </Route>
             </Routes>
-          </Router>
-        </EuiErrorBoundary>
-      </DiscoverContextProvider>
+          </DiscoverContextProvider>
+        </Router>
+      </EuiErrorBoundary>
     </KibanaContextProvider>
   );
 };

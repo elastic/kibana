@@ -6,20 +6,27 @@
  * Side Public License, v 1.
  */
 
-import type { DeepPartial } from '@kbn/utility-types';
+import type { DeepPartial, SerializableRecord } from '@kbn/utility-types';
 import { noop } from 'lodash';
 import React, { createContext, FC, useContext, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { useDiscoverServices } from '../hooks/use_discover_services';
+import { RuntimeContextManager } from './runtime_context_manager';
 
 export enum DataSourceType {
   DataView = 'data_view',
   Esql = 'esql',
 }
 
-export interface DiscoverRuntimeContext {
+export interface DiscoverRuntimeContext extends SerializableRecord {
   /**
    * The type of data source that is currently being used.
    */
   dataSourceType: DataSourceType;
+  returnLocation?: {
+    url: string;
+    title: string;
+  };
 }
 
 export interface DiscoverRuntimeContextEvents {
@@ -46,15 +53,29 @@ export const createDiscoverRuntimeContextEvents = (): DiscoverRuntimeContextEven
 const eventsContext = createContext(createDiscoverRuntimeContextEvents());
 
 export const DiscoverRuntimeContextProvider: FC = ({ children }) => {
-  const [context, setContext] = useState(createDiscoverRuntimeContext());
+  // const [context, setContext] = useState(createDiscoverRuntimeContext());
 
   const events = useMemo<DiscoverRuntimeContextEvents>(
     () => ({
       onDataSourceTypeChange: (dataSourceType: DataSourceType) => {
-        setContext((ctx) => ({ ...ctx, dataSourceType }));
+        // setContext((ctx) => ({ ...ctx, dataSourceType }));
       },
     }),
     []
+  );
+
+  const { storage } = useDiscoverServices();
+  const [runtimeContextManager] = useState(() => new RuntimeContextManager(storage));
+  const { location } = useHistory();
+
+  const contextId = useMemo(
+    () => new URLSearchParams(location.search).get('contextId') ?? undefined,
+    [location.search]
+  );
+
+  const context = useMemo(
+    () => runtimeContextManager.restoreContext(contextId),
+    [contextId, runtimeContextManager]
   );
 
   return (
