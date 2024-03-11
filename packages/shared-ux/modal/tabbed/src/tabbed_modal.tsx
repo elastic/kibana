@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, Fragment, type ComponentProps, type FC, useCallback } from 'react';
+import React, { useMemo, Fragment, type ComponentProps, type FC } from 'react';
 import {
   EuiButton,
   EuiModal,
@@ -16,7 +16,9 @@ import {
   EuiModalHeaderTitle,
   EuiTabs,
   EuiTab,
+  EuiCopy,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ModalContextProvider,
   useModalContext,
@@ -29,7 +31,7 @@ interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClo
   modalTitle?: string;
 }
 
-const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle }) => {
+const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose }) => {
   const { tabs, state, dispatch } = useModalContext();
 
   const selectedTabId = state.meta.selectedTabId;
@@ -40,7 +42,9 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle }) => {
 
   const {
     content: SelectedTabContent,
-    modalActionBtn: { label, handler },
+    description: string,
+    modalActionBtn: { defaultMessage, handler, dataTestSubj, formattedMessageId },
+    title,
   } = useMemo(() => {
     return tabs.find((obj) => obj.id === selectedTabId)!;
   }, [selectedTabId, tabs]);
@@ -59,22 +63,20 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle }) => {
         prepend={tab.prepend}
         append={tab.append}
       >
-        {tab.title}
+        {tab.name}
       </EuiTab>
     ));
   };
 
-  const btnClickHandler = useCallback(() => {
-    handler({ state: selectedTabState });
-  }, [handler, selectedTabState]);
+  // const btnClickHandler = useCallback(() => {
+  //   handler!({ state: selectedTabState });
+  // }, [handler, selectedTabState]);
 
   return (
     <EuiModal onClose={onClose}>
-      {Boolean(modalTitle) ? (
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>{modalTitle}</EuiModalHeaderTitle>
-        </EuiModalHeader>
-      ) : null}
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+      </EuiModalHeader>
       <EuiModalBody>
         <Fragment>
           <EuiTabs>{renderTabs()}</EuiTabs>
@@ -85,9 +87,13 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle }) => {
         </Fragment>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButton onClick={btnClickHandler} fill>
-          {label}
-        </EuiButton>
+        <EuiCopy textToCopy={state.shortUrlCache ?? state.url ?? 'test'}>
+          {(copy) => (
+            <EuiButton fill data-test-subj={dataTestSubj} data-share-url={state.url} onClick={copy}>
+              <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
+            </EuiButton>
+          )}
+        </EuiCopy>
       </EuiModalFooter>
     </EuiModal>
   );
