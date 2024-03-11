@@ -31,6 +31,12 @@ import {
 } from '@kbn/cases-plugin/server/common/constants';
 import { Client } from '@elastic/elasticsearch';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { User } from '../../../../../common/lib/authentication/types';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  onlyActions,
+} from '../../../../../common/lib/authentication/users';
 import {
   deleteAllCaseItems,
   executeConnector,
@@ -43,11 +49,25 @@ import {
 } from '../../../../../common/lib/api';
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { roles as api_int_roles } from '../../../../../../api_integration/apis/cases/common/roles';
+import {
+  casesAllUser,
+  obsCasesAllUser,
+  obsCasesReadUser,
+  obsSecCasesAllUser,
+  obsSecCasesReadUser,
+  secAllCasesReadUser,
+  secAllSpace1User,
+  secAllUser,
+  users as api_int_users,
+} from '../../../../../../api_integration/apis/cases/common/users';
+import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
 
   describe('Case connector', () => {
@@ -571,7 +591,102 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('rbac', () => {});
+    describe('rbac', () => {
+      before(async () => {
+        await createUsersAndRoles(getService, api_int_users, api_int_roles);
+      });
+
+      after(async () => {
+        await deleteUsersAndRoles(getService, api_int_users, api_int_roles);
+      });
+
+      it('should not execute without permission to cases for all owners', async () => {
+        for (const owner of ['cases', 'securitySolution', 'observability']) {
+          const req = getRequest({ owner });
+          await executeConnector({
+            supertest: supertestWithoutAuth,
+            connectorId,
+            req,
+            auth: { user: onlyActions, space: null },
+            expectedHttpCode: 403,
+          });
+        }
+      });
+
+      it('should not execute in a space with no permissions', async () => {
+        const req = getRequest({ owner: 'securitySolution' });
+        await executeConnector({
+          supertest: supertestWithoutAuth,
+          connectorId,
+          req,
+          auth: { user: secAllSpace1User, space: 'space2' },
+          expectedHttpCode: 403,
+        });
+      });
+
+      it('should not execute with read permission to cases', async () => {
+        for (const user of [
+          globalRead,
+          secAllCasesReadUser,
+          obsCasesReadUser,
+          obsSecCasesReadUser,
+          noKibanaPrivileges,
+        ]) {
+          const req = getRequest({ owner: 'securitySolution' });
+          await executeConnector({
+            supertest: supertestWithoutAuth,
+            connectorId,
+            req,
+            auth: { user, space: null },
+            expectedHttpCode: 403,
+          });
+        }
+      });
+
+      it('should execute correctly for users with permissions to cases', async () => {
+        const usersToTest: Array<[User, string]> = [
+          [secAllUser, 'securitySolution'],
+          [obsCasesAllUser, 'observability'],
+          [casesAllUser, 'cases'],
+          [obsSecCasesAllUser, 'securitySolution'],
+          [obsSecCasesAllUser, 'observability'],
+        ];
+
+        for (const [user, owner] of usersToTest) {
+          const req = getRequest({ owner });
+          const res = await executeConnector({
+            supertest: supertestWithoutAuth,
+            connectorId,
+            req,
+            auth: { user, space: null },
+            expectedHttpCode: 200,
+          });
+
+          expect(res.status).to.be('ok');
+        }
+      });
+
+      it('should not execute when users have permission to cases but for different owners', async () => {
+        const usersToTest: Array<[User, string]> = [
+          [secAllUser, 'observability'],
+          [obsCasesAllUser, 'securitySolution'],
+          [casesAllUser, 'securitySolution'],
+          [obsSecCasesAllUser, 'cases'],
+          [obsSecCasesAllUser, 'cases'],
+        ];
+
+        for (const [user, owner] of usersToTest) {
+          const req = getRequest({ owner });
+          await executeConnector({
+            supertest: supertestWithoutAuth,
+            connectorId,
+            req,
+            auth: { user, space: null },
+            expectedHttpCode: 403,
+          });
+        }
+      });
+    });
   });
 };
 

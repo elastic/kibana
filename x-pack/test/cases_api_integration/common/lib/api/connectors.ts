@@ -25,6 +25,7 @@ import {
   ConnectorTypes,
 } from '@kbn/cases-plugin/common/types/domain';
 import { CasePostRequest, GetCaseConnectorsResponse } from '@kbn/cases-plugin/common/types/api';
+import { camelCase, mapKeys } from 'lodash';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getPostCaseRequest } from '../mock';
@@ -341,5 +342,5 @@ export const executeConnector = async ({
     .send(req)
     .expect(expectedHttpCode);
 
-  return res;
+  return mapKeys(res, (_v, k) => camelCase(k)) as ActionTypeExecutorResult<unknown>;
 };
