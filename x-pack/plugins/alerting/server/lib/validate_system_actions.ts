@@ -20,7 +20,7 @@ interface Params {
 export const validateSystemActions = async ({
   actionsClient,
   connectorAdapterRegistry,
-  systemActions,
+  systemActions = [],
 }: Params) => {
   if (systemActions.length === 0) {
     return;

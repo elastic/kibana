@@ -45,9 +45,14 @@ export const createRuleDataSchema = schema.object({
   schedule: schema.object({
     interval: schema.string({ validate: validateDuration }),
   }),
-  actions: schema.arrayOf(schema.oneOf([defaultActionSchema, systemActionSchema]), {
+  actions: schema.arrayOf(defaultActionSchema, {
     defaultValue: [],
   }),
+  systemActions: schema.maybe(
+    schema.arrayOf(systemActionSchema, {
+      defaultValue: [],
+    })
+  ),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
   alertDelay: schema.maybe(alertDelaySchema),
 });
