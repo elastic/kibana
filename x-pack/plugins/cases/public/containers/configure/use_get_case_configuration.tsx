@@ -8,9 +8,6 @@ import { useCasesContext } from '../../components/cases_context/use_cases_contex
 import type { CasesConfigurationUI } from '../types';
 import { useGetCaseConfigurationsQuery } from './use_get_case_configurations_query';
 import { getConfigurationByOwner } from './utils';
-// export interface UseGetCaseConfiguration {
-//   data: CasesConfigurationUI;
-// }
 
 export const useGetCaseConfiguration = () => {
   const { owner } = useCasesContext();
