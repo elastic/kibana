@@ -6,8 +6,6 @@
  */
 
 import { ruleFields } from '../../../../data/detection_engine';
-import { getTimeline } from '../../../../objects/timeline';
-
 import {
   ABOUT_CONTINUE_BTN,
   ABOUT_EDIT_BUTTON,
@@ -50,7 +48,7 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
-    createTimeline(getTimeline())
+    createTimeline()
       .then((response) => {
         return response.body.data.persistTimeline.timeline.savedObjectId;
       })

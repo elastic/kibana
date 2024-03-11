@@ -6,10 +6,17 @@
  */
 
 import type { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
-import type { CompleteTimeline } from '../../objects/timeline';
+import { CompleteTimeline, getTimeline } from '../../objects/timeline';
 import { rootRequest } from './common';
 
-export const createTimeline = (timeline: CompleteTimeline) =>
+const mockTimeline = getTimeline();
+
+/**
+ * Creates a timeline saved object
+ * @param {CompleteTimeline} [timeline] - configuration needed for creating a timeline. Defaults to getTimeline in security_solution_cypress/cypress/objects/timeline.ts
+ * @returns undefined 
+ */
+export const createTimeline = (timeline: CompleteTimeline = mockTimeline) =>
   rootRequest<TimelineResponse>({
     method: 'POST',
     url: 'api/timeline',
@@ -58,7 +65,12 @@ export const createTimeline = (timeline: CompleteTimeline) =>
     },
   });
 
-export const createTimelineTemplate = (timeline: CompleteTimeline) =>
+  /**
+ * Creates a timeline template saved object
+ * @param {CompleteTimeline} [timeline] - configuration needed for creating a timeline template. Defaults to `getTimeline` in security_solution_cypress/cypress/objects/timeline.ts
+ * @returns undefined 
+ */
+export const createTimelineTemplate = (timeline: CompleteTimeline = mockTimeline) =>
   rootRequest<TimelineResponse>({
     method: 'POST',
     url: 'api/timeline',

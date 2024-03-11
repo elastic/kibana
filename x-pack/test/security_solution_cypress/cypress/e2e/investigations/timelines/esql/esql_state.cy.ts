@@ -35,6 +35,7 @@ const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 const DEFAULT_ESQL_QUERY = '';
 
+const mockTimeline = mockTimeline;
 // FAILURE introduced by the fix for 8.11.4 related to the default empty string and fix for the infinite loop on the esql tab
 describe.skip(
   'Timeline Discover ESQL State',
@@ -62,7 +63,7 @@ describe.skip(
       const esqlQuery = 'from auditbeat-* | limit 5';
       addDiscoverEsqlQuery(esqlQuery);
       submitDiscoverSearchBar();
-      addNameAndDescriptionToTimeline(getTimeline());
+      addNameAndDescriptionToTimeline(mockTimeline);
       saveTimeline();
       closeTimeline();
       navigateFromHeaderTo(CSP_FINDINGS);
@@ -76,7 +77,7 @@ describe.skip(
       const esqlQuery = 'from auditbeat-* | limit 5';
       addDiscoverEsqlQuery(esqlQuery);
       submitDiscoverSearchBar();
-      addNameAndDescriptionToTimeline(getTimeline());
+      addNameAndDescriptionToTimeline(mockTimeline);
       addFieldToTable('host.name');
       addFieldToTable('user.name');
       saveTimeline();

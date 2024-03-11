@@ -23,6 +23,7 @@ import {
   TIMELINE_FILTER_BADGE_ENABLED,
 } from '../../../screens/timeline';
 
+const mockTimeline = getTimeline();
 describe(
   `timleine cell actions`,
   {
@@ -34,7 +35,7 @@ describe(
       visitWithTimeRange(ALERTS_URL);
       openTimelineUsingToggle();
       createNewTimeline();
-      addNameAndDescriptionToTimeline(getTimeline());
+      addNameAndDescriptionToTimeline(mockTimeline);
       populateTimeline();
     });
     it('filter in', () => {
