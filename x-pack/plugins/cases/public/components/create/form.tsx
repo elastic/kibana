@@ -219,8 +219,12 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     attachments,
     initialValue,
   }) => {
-    const { owner, appId } = useCasesContext();
-    const draftStorageKey = getMarkdownEditorStorageKey(appId, 'createCase', 'description');
+    const { owner } = useCasesContext();
+    const draftStorageKey = getMarkdownEditorStorageKey({
+      appId: owner[0],
+      caseId: 'createCase',
+      commentId: 'description',
+    });
 
     const handleOnConfirmationCallback = (): void => {
       onCancel();
