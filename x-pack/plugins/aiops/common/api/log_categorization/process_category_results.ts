@@ -7,9 +7,9 @@
 
 import { get } from 'lodash';
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
-import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import type { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import type { Category, CategoriesAgg, CatResponse } from './types';
 
@@ -50,7 +50,12 @@ export function processCategoryResults(
       regex: b.regex,
     };
   });
+
+  // check the first category for examples to determine if examples are available
+  const hasExamples = categories[0]?.examples.some((e) => e !== undefined);
+
   return {
     categories,
+    hasExamples,
   };
 }

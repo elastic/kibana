@@ -67,7 +67,7 @@ function FilterBadge({
         `}
       >
         <EuiTextBlockTruncate lines={10}>
-          {!hideAlias && filter.meta.alias !== null ? (
+          {filter.meta.alias && !hideAlias ? (
             <>
               <span className={marginLeftLabelCss(euiTheme)}>
                 {prefix}

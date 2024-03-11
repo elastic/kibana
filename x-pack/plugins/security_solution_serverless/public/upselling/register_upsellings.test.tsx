@@ -13,13 +13,13 @@ import {
 } from './register_upsellings';
 import { ProductLine, ProductTier } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
-import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { mockServices } from '../common/services/__mocks__/services.mock';
 
-const mockGetProductAppFeatures = jest.fn();
+const mockGetProductProductFeatures = jest.fn();
 jest.mock('../../common/pli/pli_features', () => ({
-  getProductAppFeatures: () => mockGetProductAppFeatures(),
+  getProductProductFeatures: () => mockGetProductProductFeatures(),
 }));
 
 const allProductTypes: SecurityProductTypes = [
@@ -30,7 +30,7 @@ const allProductTypes: SecurityProductTypes = [
 
 describe('registerUpsellings', () => {
   it('should not register anything when all PLIs features are enabled', () => {
-    mockGetProductAppFeatures.mockReturnValue(ALL_APP_FEATURE_KEYS);
+    mockGetProductProductFeatures.mockReturnValue(ALL_PRODUCT_FEATURE_KEYS);
 
     const setPages = jest.fn();
     const setSections = jest.fn();
@@ -54,7 +54,7 @@ describe('registerUpsellings', () => {
   });
 
   it('should register all upsellings pages, sections and messages when PLIs features are disabled', () => {
-    mockGetProductAppFeatures.mockReturnValue([]);
+    mockGetProductProductFeatures.mockReturnValue([]);
 
     const setPages = jest.fn();
     const setSections = jest.fn();

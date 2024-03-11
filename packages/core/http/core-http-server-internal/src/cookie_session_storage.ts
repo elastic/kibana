@@ -113,6 +113,7 @@ export async function createCookieSessionStorageFactory<T>(
 
   return {
     asScoped(request: KibanaRequest) {
+      // @ts-expect-error upgrade typescript v4.9.5
       return new ScopedCookieSessionStorage<T>(log, server, ensureRawRequest(request));
     },
   };

@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
-import { TransformHealthTests } from './types/alerting';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
+import type { TransformHealthTests } from './types/alerting';
 
 export const DEFAULT_REFRESH_INTERVAL_MS = 30000;
 export const MINIMUM_REFRESH_INTERVAL_MS = 1000;
@@ -163,9 +164,14 @@ export const TRANSFORM_FUNCTION = {
 
 export type TransformFunction = typeof TRANSFORM_FUNCTION[keyof typeof TRANSFORM_FUNCTION];
 
+// Alerting
+
 export const TRANSFORM_RULE_TYPE = {
   TRANSFORM_HEALTH: 'transform_health',
 } as const;
+
+const TRANSFORM_ALERT_NAMESPACE = ALERT_NAMESPACE;
+export const TRANSFORM_HEALTH_RESULTS = `${TRANSFORM_ALERT_NAMESPACE}.results` as const;
 
 export const ALL_TRANSFORMS_SELECTION = '*';
 

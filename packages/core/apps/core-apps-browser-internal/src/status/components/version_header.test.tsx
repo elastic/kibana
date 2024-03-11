@@ -17,6 +17,7 @@ const buildServerVersion = (parts: Partial<ServerVersion> = {}): ServerVersion =
   build_number: 9000,
   build_snapshot: false,
   build_date: '2023-05-15T23:12:09.000Z',
+  build_flavor: 'traditional',
   ...parts,
 });
 

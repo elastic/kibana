@@ -11,10 +11,13 @@ import { PresentationContainer } from './interfaces/presentation_container';
 
 export const getMockPresentationContainer = (): PresentationContainer => {
   return {
-    registerPanelApi: jest.fn(),
     removePanel: jest.fn(),
+    addNewPanel: jest.fn(),
     replacePanel: jest.fn(),
+    registerPanelApi: jest.fn(),
     lastSavedState: new Subject<void>(),
     getLastSavedStateForChild: jest.fn(),
+    getChildIds: jest.fn(),
+    getChild: jest.fn(),
   };
 };

@@ -53,6 +53,7 @@ const chromeNavLink1: ChromeNavLink = {
   href: '/link1',
   url: '/link1',
   baseUrl: '',
+  visibleIn: [],
 };
 const devToolsChromeNavLink: ChromeNavLink = {
   id: 'dev_tools',
@@ -60,6 +61,7 @@ const devToolsChromeNavLink: ChromeNavLink = {
   href: '/dev_tools',
   url: '/dev_tools',
   baseUrl: '',
+  visibleIn: [],
 };
 
 const createTestProjectNavLinks = async (

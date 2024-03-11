@@ -28,5 +28,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/tooling-log",
     "@kbn/core-saved-objects-server",
+    "@kbn/utils",
   ]
 }

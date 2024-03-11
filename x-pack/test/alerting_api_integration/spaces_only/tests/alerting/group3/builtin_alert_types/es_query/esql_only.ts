@@ -45,8 +45,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     { label: 'host.name', searchPath: 'host.name' },
   ];
 
-  // FLAKY: https://github.com/elastic/kibana/issues/176116
-  describe.skip('rule', async () => {
+  describe('rule', async () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);

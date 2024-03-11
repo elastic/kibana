@@ -14,7 +14,7 @@ import type {
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { ConnectorTypeFields } from '../../common/types/domain';
 import { ConnectorTypes } from '../../common/types/domain';
-import type { CasesPluginStart } from '../types';
+import type { CasesPublicStartDependencies } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import type { CaseActionConnector } from './types';
 import type { CaseUser, CaseUsers } from '../../common/ui/types';
@@ -145,7 +145,7 @@ export const getConnectorsFormDeserializer = <T extends { fields: ConnectorTypeF
 };
 
 export const getConnectorIcon = (
-  triggersActionsUi: CasesPluginStart['triggersActionsUi'],
+  triggersActionsUi: CasesPublicStartDependencies['triggersActionsUi'],
   type?: string
 ): IconType => {
   /**
@@ -179,6 +179,7 @@ export const removeItemFromSessionStorage = (key: string) => {
 
 export const stringifyToURL = (parsedParams: Record<string, string> | URLSearchParams) =>
   new URLSearchParams(parsedParams).toString();
+
 export const parseURL = (queryString: string) =>
   Object.fromEntries(new URLSearchParams(queryString));
 

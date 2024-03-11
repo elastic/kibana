@@ -7,14 +7,16 @@
 
 import expect from 'expect';
 import {
-  deleteAllRules,
-  deleteAllAlerts,
   getPreviewAlerts,
-  getRuleForAlertTesting,
   previewRule,
   dataGeneratorFactory,
   enhanceDocument,
 } from '../../../../utils';
+import {
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+} from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 const getQueryRule = (docIdToQuery: string) => ({

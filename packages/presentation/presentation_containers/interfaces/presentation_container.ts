@@ -11,11 +11,15 @@ import { PublishesLastSavedState } from './last_saved_state';
 
 export interface PanelPackage {
   panelType: string;
-  initialState: unknown;
+  initialState?: object;
 }
 
 export type PresentationContainer = Partial<PublishesViewMode> &
   PublishesLastSavedState & {
+    addNewPanel: <ApiType extends unknown = unknown>(
+      panel: PanelPackage,
+      displaySuccessMessage?: boolean
+    ) => Promise<ApiType | undefined>;
     registerPanelApi: <ApiType extends unknown = unknown>(
       panelId: string,
       panelApi: ApiType
@@ -23,15 +27,18 @@ export type PresentationContainer = Partial<PublishesViewMode> &
     removePanel: (panelId: string) => void;
     canRemovePanels?: () => boolean;
     replacePanel: (idToRemove: string, newPanel: PanelPackage) => Promise<string>;
+    getChildIds: () => string[];
+    getChild: (childId: string) => unknown;
   };
 
-export const apiIsPresentationContainer = (
-  unknownApi: unknown | null
-): unknownApi is PresentationContainer => {
+export const apiIsPresentationContainer = (api: unknown | null): api is PresentationContainer => {
   return Boolean(
-    (unknownApi as PresentationContainer)?.removePanel !== undefined &&
-      (unknownApi as PresentationContainer)?.registerPanelApi !== undefined &&
-      (unknownApi as PresentationContainer)?.replacePanel !== undefined
+    typeof (api as PresentationContainer)?.removePanel === 'function' &&
+      typeof (api as PresentationContainer)?.registerPanelApi === 'function' &&
+      typeof (api as PresentationContainer)?.replacePanel === 'function' &&
+      typeof (api as PresentationContainer)?.addNewPanel === 'function' &&
+      typeof (api as PresentationContainer)?.getChildIds === 'function' &&
+      typeof (api as PresentationContainer)?.getChild === 'function'
   );
 };
 

@@ -44,6 +44,34 @@ export const createArtifactsClientMock = (): jest.Mocked<ArtifactsClientInterfac
       encodedSha256: '446086d1609189c3ad93a943976e4b7474c028612e5ec4810a81cc01a631f0f9',
       encodedSize: 24,
     }),
+    fetchAll: jest.fn(() => {
+      return createFetchAllArtifactsIterableMock();
+    }),
+  };
+};
+
+export const createFetchAllArtifactsIterableMock = (artifactPages: Artifact[][] = []) => {
+  const totalPagesOfResults = artifactPages.length;
+  let nextResults = 0;
+
+  return {
+    [Symbol.asyncIterator]() {
+      return {
+        async next() {
+          return {
+            value: artifactPages[nextResults++] ?? [],
+            done: nextResults > totalPagesOfResults,
+          };
+        },
+
+        async return() {
+          return {
+            value: [],
+            done: true,
+          };
+        },
+      };
+    },
   };
 };
 
@@ -100,6 +128,7 @@ export const generateArtifactEsGetSingleHitMock = (
     _version: 1,
     _score: 1,
     _source,
+    sort: ['abc'],
   };
 };
 

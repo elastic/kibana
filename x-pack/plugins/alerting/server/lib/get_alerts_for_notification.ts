@@ -19,18 +19,37 @@ export function getAlertsForNotification<
   flappingSettings: RulesSettingsFlappingProperties,
   notifyOnActionGroupChange: boolean,
   actionGroupId: string,
+  alertDelay: number,
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {},
-  currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}
+  currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {},
+  startedAt?: string | null
 ) {
   const currentActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
+  let delayedAlertsCount = 0;
 
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
     alert.incrementActiveCount();
     alert.resetPendingRecoveredCount();
-    currentActiveAlerts[id] = alert;
+    // do not trigger an action notification if the number of consecutive
+    // active alerts is less than the rule alertDelay threshold
+    if (alert.getActiveCount() < alertDelay) {
+      // remove from new alerts
+      delete newAlerts[id];
+      delayedAlertsCount += 1;
+    } else {
+      currentActiveAlerts[id] = alert;
+      // if the active count is equal to the alertDelay it is considered a new alert
+      if (alert.getActiveCount() === alertDelay) {
+        const currentTime = startedAt ?? new Date().toISOString();
+        const state = alert.getState();
+        // keep the state and update the start time and duration
+        alert.replaceState({ ...state, start: currentTime, duration: '0' });
+        newAlerts[id] = alert;
+      }
+    }
   }
 
   for (const id of keys(currentRecoveredAlerts)) {
@@ -83,5 +102,6 @@ export function getAlertsForNotification<
     currentActiveAlerts,
     recoveredAlerts,
     currentRecoveredAlerts,
+    delayedAlertsCount,
   };
 }

@@ -45,7 +45,7 @@ const actionVariables = {
       description: i18n.translate(
         'xpack.stackAlerts.geoContainment.actionVariableContextFromEntityDocumentIdLabel',
         {
-          defaultMessage: 'The id of the contained entity document',
+          defaultMessage: 'The ID of the contained entity document',
         }
       ),
     },
@@ -54,7 +54,7 @@ const actionVariables = {
       description: i18n.translate(
         'xpack.stackAlerts.geoContainment.actionVariableContextDetectionDateTimeLabel',
         {
-          defaultMessage: 'The alert interval end time this change was recorded',
+          defaultMessage: 'The end of the check interval when the alert occurred',
         }
       ),
     },
@@ -73,7 +73,7 @@ const actionVariables = {
         'xpack.stackAlerts.geoContainment.actionVariableContextContainingBoundaryIdLabel',
         {
           defaultMessage:
-            'The id of the boundary containing the entity. Value not set for recovered alerts',
+            'The ID of the boundary containing the entity. Value not set for recovered alerts',
         }
       ),
     },
@@ -184,6 +184,12 @@ export function getRuleType(): GeoContainmentRuleType {
     producer: STACK_ALERTS_FEATURE_ID,
     validate: {
       params: ParamsSchema,
+    },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: ParamsSchema,
+      },
     },
     actionVariables,
     minimumLicenseRequired: 'gold',

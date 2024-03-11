@@ -375,6 +375,9 @@ describe('rule_form', () => {
         enabled: false,
         mutedInstanceIds: [],
         ...(!showRulesList ? { ruleTypeId: ruleType.id } : {}),
+        alertDelay: {
+          active: 1,
+        },
       } as unknown as Rule;
 
       wrapper = mountWithIntl(
@@ -680,65 +683,6 @@ describe('rule_form', () => {
       expect(wrapper.find('[data-test-subj="ruleFormConsumerSelect"]').exists()).toBeFalsy();
     });
 
-    it('Do not show alert query in action when multi consumer rule type does not have a consumer selected', async () => {
-      await setup({
-        initialRuleOverwrite: {
-          name: 'Simple rule',
-          consumer: 'alerts',
-          ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-          schedule: {
-            interval: '1h',
-          },
-        },
-        ruleTypesOverwrite: [
-          {
-            id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-            name: 'Threshold Rule',
-            actionGroups: [
-              {
-                id: 'testActionGroup',
-                name: 'Test Action Group',
-              },
-            ],
-            enabledInLicense: true,
-            defaultActionGroupId: 'threshold.fired',
-            minimumLicenseRequired: 'basic',
-            recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            producer: ALERTS_FEATURE_ID,
-            authorizedConsumers: {
-              infrastructure: { read: true, all: true },
-              logs: { read: true, all: true },
-            },
-            actionVariables: {
-              context: [],
-              state: [],
-              params: [],
-            },
-            hasFieldsForAAD: true,
-            hasAlertsMappings: true,
-          },
-        ],
-        ruleTypeModelOverwrite: {
-          id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-          iconClass: 'test',
-          description: 'test',
-          documentationUrl: null,
-          validate: (): ValidationResult => {
-            return { errors: {} };
-          },
-          ruleParamsExpression: TestExpression,
-          requiresAppContext: false,
-        },
-      });
-
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-
-      expect(wrapper.find(ActionForm).props().hasFieldsForAAD).toEqual(false);
-    });
-
     it('Do not show alert query in action when we do not have  hasFieldsForAAD or hasAlertsMappings or belong to security', async () => {
       await setup({
         initialRuleOverwrite: {
@@ -1033,6 +977,27 @@ describe('rule_form', () => {
       });
 
       expect(wrapper.find(ActionForm).props().hasFieldsForAAD).toEqual(true);
+    });
+
+    it('renders rule alert delay', async () => {
+      const getAlertDelayInput = () => {
+        return wrapper.find('[data-test-subj="alertDelayInput"] input').first();
+      };
+
+      await setup();
+      // expect the accordion to be closed by default
+      expect(wrapper.find('.euiAccordion-isOpen').exists()).toBeFalsy();
+
+      expect(getAlertDelayInput().props().value).toEqual(1);
+
+      getAlertDelayInput().simulate('change', { target: { value: '2' } });
+      expect(getAlertDelayInput().props().value).toEqual(2);
+
+      getAlertDelayInput().simulate('change', { target: { value: '20' } });
+      expect(getAlertDelayInput().props().value).toEqual(20);
+
+      getAlertDelayInput().simulate('change', { target: { value: '999' } });
+      expect(getAlertDelayInput().props().value).toEqual(999);
     });
   });
 

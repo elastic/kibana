@@ -204,23 +204,31 @@
         "label": "getDashboardLocatorParamsFromEmbeddable",
         "description": [],
         "signature": [
-          "(source: ",
+          "(api: Partial<",
           {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IEmbeddable",
-            "text": "IEmbeddable"
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesLocalUnifiedSearch",
+            "text": "PublishesLocalUnifiedSearch"
           },
-          "<EmbeddableQueryInput, ",
+          " & ",
           {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasParentApi",
+            "text": "HasParentApi"
           },
-          ", any>, options: ",
+          "<Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesLocalUnifiedSearch",
+            "text": "PublishesLocalUnifiedSearch"
+          },
+          ">>>, options: ",
           {
             "pluginId": "presentationUtil",
             "scope": "public",
@@ -247,25 +255,34 @@
             "id": "def-public.getDashboardLocatorParamsFromEmbeddable.$1",
             "type": "Object",
             "tags": [],
-            "label": "source",
+            "label": "api",
             "description": [],
             "signature": [
+              "Partial<",
               {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.IEmbeddable",
-                "text": "IEmbeddable"
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.PublishesLocalUnifiedSearch",
+                "text": "PublishesLocalUnifiedSearch"
               },
-              "<EmbeddableQueryInput, ",
+              " & ",
               {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddableOutput",
-                "text": "EmbeddableOutput"
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.HasParentApi",
+                "text": "HasParentApi"
               },
-              ", any>"
+              "<Partial<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.PublishesLocalUnifiedSearch",
+                "text": "PublishesLocalUnifiedSearch"
+              },
+              ">>>"
             ],
             "path": "src/plugins/dashboard/public/dashboard_app/locator/get_dashboard_locator_params.ts",
             "deprecated": false,
@@ -2010,7 +2027,7 @@
           "\nFor BWC reasons, dashboard state is stored with panels as an array instead of a map"
         ],
         "signature": [
-          "{ id?: string | undefined; tags?: string[] | undefined; title?: string | undefined; version?: string | undefined; query?: ",
+          "{ id?: string | undefined; tags?: string[] | undefined; title?: string | undefined; query?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -2018,7 +2035,7 @@
             "section": "def-common.Query",
             "text": "Query"
           },
-          " | undefined; filters?: ",
+          " | undefined; version?: string | undefined; filters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",

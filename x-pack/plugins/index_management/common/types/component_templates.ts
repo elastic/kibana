@@ -18,12 +18,14 @@ export interface ComponentTemplateSerialized {
     lifecycle?: DataStream['lifecycle'];
   };
   version?: number;
+  deprecated?: boolean;
   _meta?: { [key: string]: any };
   lifecycle?: DataRetention;
 }
 
 export interface ComponentTemplateDeserialized extends ComponentTemplateSerialized {
   name: string;
+  isDeprecated?: boolean;
   _kbnMeta: {
     usedBy: string[];
     isManaged: boolean;
@@ -42,6 +44,7 @@ export interface ComponentTemplateListItem {
   hasAliases: boolean;
   hasSettings: boolean;
   isManaged: boolean;
+  isDeprecated?: boolean;
 }
 
 export interface ComponentTemplateDatastreams {

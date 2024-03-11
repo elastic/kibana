@@ -8,9 +8,9 @@
 import { EuiHeaderLink } from '@elastic/eui';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { hydrateDatasetSelection } from '@kbn/logs-explorer-plugin/common';
+import { hydrateDataSourceSelection } from '@kbn/logs-explorer-plugin/common';
 import {
-  getDiscoverColumnsFromDisplayOptions,
+  getDiscoverColumnsWithFallbackFieldsFromDisplayOptions,
   getDiscoverFiltersFromState,
 } from '@kbn/logs-explorer-plugin/public';
 import { getRouterLinkProps } from '@kbn/router-utils';
@@ -19,9 +19,9 @@ import { useActor } from '@xstate/react';
 import React, { useMemo } from 'react';
 import { discoverLinkTitle } from '../../common/translations';
 import {
-  ObservabilityLogExplorerService,
-  useObservabilityLogExplorerPageStateContext,
-} from '../state_machines/observability_log_explorer/src';
+  ObservabilityLogsExplorerService,
+  useObservabilityLogsExplorerPageStateContext,
+} from '../state_machines/observability_logs_explorer/src';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 export const ConnectedDiscoverLink = React.memo(() => {
@@ -29,9 +29,9 @@ export const ConnectedDiscoverLink = React.memo(() => {
     services: { discover },
   } = useKibanaContextForPlugin();
 
-  const [pageState] = useActor(useObservabilityLogExplorerPageStateContext());
+  const [pageState] = useActor(useObservabilityLogsExplorerPageStateContext());
 
-  if (pageState.matches({ initialized: 'validLogExplorerState' })) {
+  if (pageState.matches({ initialized: 'validLogsExplorerState' })) {
     return <DiscoverLinkForValidState discover={discover} pageState={pageState} />;
   } else {
     return <DiscoverLinkForUnknownState />;
@@ -39,32 +39,38 @@ export const ConnectedDiscoverLink = React.memo(() => {
 });
 
 type InitializedPageState = MatchedStateFromActor<
-  ObservabilityLogExplorerService,
-  { initialized: 'validLogExplorerState' }
+  ObservabilityLogsExplorerService,
+  { initialized: 'validLogsExplorerState' }
 >;
 
 export const DiscoverLinkForValidState = React.memo(
   ({
     discover,
     pageState: {
-      context: { logExplorerState },
+      context: { logsExplorerState },
     },
   }: {
     discover: DiscoverStart;
     pageState: InitializedPageState;
   }) => {
-    const discoverLinkParams = useMemo<DiscoverAppLocatorParams>(
-      () => ({
-        breakdownField: logExplorerState.chart.breakdownField ?? undefined,
-        columns: getDiscoverColumnsFromDisplayOptions(logExplorerState),
-        filters: getDiscoverFiltersFromState(logExplorerState.filters, logExplorerState.controls),
-        query: logExplorerState.query,
-        refreshInterval: logExplorerState.refreshInterval,
-        timeRange: logExplorerState.time,
-        dataViewSpec: hydrateDatasetSelection(logExplorerState.datasetSelection).toDataviewSpec(),
-      }),
-      [logExplorerState]
-    );
+    const discoverLinkParams = useMemo<DiscoverAppLocatorParams>(() => {
+      const index = hydrateDataSourceSelection(
+        logsExplorerState.dataSourceSelection
+      ).toDataviewSpec();
+      return {
+        breakdownField: logsExplorerState.chart.breakdownField ?? undefined,
+        columns: getDiscoverColumnsWithFallbackFieldsFromDisplayOptions(logsExplorerState),
+        filters: getDiscoverFiltersFromState(
+          index.id,
+          logsExplorerState.filters,
+          logsExplorerState.controls
+        ),
+        query: logsExplorerState.query,
+        refreshInterval: logsExplorerState.refreshInterval,
+        timeRange: logsExplorerState.time,
+        dataViewSpec: index,
+      };
+    }, [logsExplorerState]);
 
     return <DiscoverLink discover={discover} discoverLinkParams={discoverLinkParams} />;
   }

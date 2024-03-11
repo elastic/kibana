@@ -77,6 +77,12 @@ export const OUTPUT_MESSAGES = Object.freeze({
         defaultMessage: 'Hostname',
       }
     ),
+    agentType: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.expandSection.agentType',
+      {
+        defaultMessage: 'Agent type',
+      }
+    ),
   },
 });
 
@@ -205,10 +211,10 @@ export const FILTER_NAMES = Object.freeze({
   }),
   // TODO: change it to just a value instead of a function
   //  when responseActionsSentinelOneV1Enabled is enabled/removed
-  types: (suffix: string) =>
+  types: (countOfTypes: number) =>
     i18n.translate('xpack.securitySolution.responseActionsList.list.filter.types', {
-      defaultMessage: `Type{suffix}`,
-      values: { suffix },
+      defaultMessage: `{countOfTypes, plural, one {Type} other {Types}}`,
+      values: { countOfTypes },
     }),
   // replace above with:
   // types: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.types', {

@@ -48,14 +48,13 @@ export class EcsDataQualityDashboardPlugin
   public setup(core: CoreSetup, plugins: PluginSetupDependencies) {
     this.logger.debug('ecsDataQualityDashboard: Setup');
 
-    // TODO: Uncomment https://github.com/elastic/kibana/pull/173185#issuecomment-1908034302
-    // this.resultsDataStream.install({
-    //   esClient: core
-    //     .getStartServices()
-    //     .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
-    //   logger: this.logger,
-    //   pluginStop$: this.pluginStop$,
-    // });
+    this.resultsDataStream.install({
+      esClient: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      logger: this.logger,
+      pluginStop$: this.pluginStop$,
+    });
 
     core.http.registerRouteHandlerContext<
       DataQualityDashboardRequestHandlerContext,

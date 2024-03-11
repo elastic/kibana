@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiSpacer,
@@ -15,7 +17,6 @@ import {
   EuiFlexItem,
   EuiPageBody,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFormRow,
   EuiSkeletonText,
 } from '@elastic/eui';
@@ -89,6 +90,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [data, setData] = useState<{
     categories: Category[];
+    displayExamples: boolean;
   } | null>(null);
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
@@ -212,6 +214,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
       setFieldValidationResult(validationResult);
       setData({
         categories: categorizationResult.categories,
+        displayExamples: categorizationResult.hasExamples,
       });
     } catch (error) {
       toasts.addError(error, {
@@ -401,6 +404,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
           timefilter={timefilter}
+          displayExamples={data.displayExamples}
         />
       ) : null}
     </EuiPageBody>

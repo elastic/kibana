@@ -13,7 +13,8 @@
   ],
   "kbn_references": [
     "@kbn/core-status-common",
-    "@kbn/core-metrics-server"
+    "@kbn/core-metrics-server",
+    "@kbn/config"
   ],
   "exclude": [
     "target/**/*",

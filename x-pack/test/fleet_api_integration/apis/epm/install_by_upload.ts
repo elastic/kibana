@@ -207,7 +207,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect(res.error.text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Package at top-level directory apache-0.1.4 must contain a top-level manifest.yml file."}'
+        '{"statusCode":400,"error":"Bad Request","message":"Manifest file apache-0.1.4/manifest.yml not found in paths."}'
       );
     });
 
@@ -261,7 +261,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(403);
     });
 
-    it('should not allow non superusers', async () => {
+    it('should allow user with all access', async () => {
       const buf = fs.readFileSync(testPkgArchiveTgz);
       await supertestWithoutAuth
         .post(`/api/fleet/epm/packages`)
@@ -269,7 +269,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .type('application/gzip')
         .send(buf)
-        .expect(403);
+        .expect(200);
     });
   });
 }

@@ -63,6 +63,7 @@ describe('Component template serialization', () => {
           ]
         )
       ).toEqual({
+        isDeprecated: false,
         name: 'my_component_template',
         version: 1,
         _meta: {

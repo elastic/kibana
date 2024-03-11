@@ -163,6 +163,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         testData.dataGenerator
       );
 
+      await aiops.logRateAnalysisPage.assertUrlState(
+        testData.expected.globalState,
+        testData.expected.appState
+      );
+
       // The group switch should be disabled by default
       await aiops.logRateAnalysisPage.assertLogRateAnalysisResultsGroupSwitchExists(false);
 
@@ -274,8 +279,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/176066
-  describe.skip('log rate analysis', async function () {
+  describe('log rate analysis', async function () {
     for (const testData of logRateAnalysisTestData) {
       describe(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
         before(async () => {
@@ -292,6 +296,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         after(async () => {
           await elasticChart.setNewChartUiDebugFlag(false);
+          await ml.testResources.deleteDataViewByTitle(testData.sourceIndexOrSavedSearch);
           await aiops.logRateAnalysisDataGenerator.removeGeneratedData(testData.dataGenerator);
         });
 
