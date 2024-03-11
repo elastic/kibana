@@ -72,6 +72,7 @@ export function getTextBasedQueryFieldList(
       new DataViewField({
         name: column.name,
         type: column.meta?.type ?? 'unknown',
+        esTypes: column.meta?.esTypes,
         searchable: false,
         aggregatable: false,
         isNull: Boolean(column?.isNull),

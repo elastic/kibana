@@ -13,6 +13,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { flattenHit } from '@kbn/data-service/src/search/tabify';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { canProvideExamplesForField } from '../../utils/can_provide_stats';
 
 type FieldHitValue = any;
 
@@ -23,36 +24,12 @@ interface FieldValueCountsParams {
   count?: number;
 }
 
-export const canProvideExamplesForField = (field: DataViewField): boolean => {
-  if (field.name === '_score') {
-    return false;
-  }
-  return [
-    'string',
-    'text',
-    'keyword',
-    'version',
-    'ip',
-    'number',
-    'geo_point',
-    'geo_shape',
-  ].includes(field.type);
-};
-
-export const showExamplesForField = (field: DataViewField): boolean => {
-  return (
-    (!field.aggregatable && canProvideExamplesForField(field)) ||
-    field.type === 'geo_point' ||
-    field.type === 'geo_shape'
-  );
-};
-
 export function getFieldExampleBuckets(params: FieldValueCountsParams, formatter?: FieldFormat) {
   params = defaults(params, {
     count: 5,
   });
 
-  if (!canProvideExamplesForField(params.field)) {
+  if (!canProvideExamplesForField(params.field, false)) {
     throw new Error(
       `Analysis is not available this field type: "${params.field.type}". Field name: "${params.field.name}"`
     );

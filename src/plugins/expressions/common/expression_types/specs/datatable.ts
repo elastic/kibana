@@ -9,6 +9,7 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import { PointSeries, PointSeriesColumn } from './pointseries';
@@ -55,7 +56,14 @@ export type DatatableRow = Record<string, any>;
  * Datatable column meta information
  */
 export interface DatatableColumnMeta {
+  /**
+   * The Kibana normalized type of the column
+   */
   type: DatatableColumnType;
+  /**
+   * The original type of the column from ES
+   */
+  esTypes?: ES_FIELD_TYPES[];
   /**
    * field this column is based on
    */

@@ -29,6 +29,7 @@ import type {
   UnifiedFieldListSidebarContainerStateService,
   AddFieldFilterHandler,
 } from '../../types';
+import { canProvideStatsForFieldTextBased } from '../../utils/can_provide_stats';
 
 interface GetCommonFieldItemButtonPropsParams {
   stateService: UnifiedFieldListSidebarContainerStateService;
@@ -286,7 +287,7 @@ function UnifiedFieldListItemComponent({
           onAddFilter={addFilterAndClosePopover}
         />
 
-        {multiFields && (
+        {searchMode === 'documents' && multiFields && (
           <>
             <EuiSpacer size="m" />
             <MultiFields
@@ -299,7 +300,7 @@ function UnifiedFieldListItemComponent({
           </>
         )}
 
-        {!!services.uiActions && (
+        {searchMode === 'documents' && !!services.uiActions && (
           <FieldPopoverFooter
             field={field}
             dataView={dataView}
@@ -376,7 +377,12 @@ function UnifiedFieldListItemComponent({
           {...customPopoverHeaderProps}
         />
       )}
-      renderContent={searchMode === 'documents' ? renderPopover : undefined}
+      renderContent={
+        (searchMode === 'text-based' && canProvideStatsForFieldTextBased(field)) ||
+        searchMode === 'documents'
+          ? renderPopover
+          : undefined
+      }
     />
   );
 }

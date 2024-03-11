@@ -11,6 +11,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { getTimeZone } from '@kbn/visualization-utils';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -33,14 +34,15 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
-import { showExamplesForField } from '../../services/field_stats/field_examples_calculator';
 import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 import type { BucketedAggregation, NumberSummary } from '../../types';
 import {
+  showExamplesForField,
   canProvideStatsForField,
   canProvideNumberSummaryForField,
-} from '../../services/field_stats/field_stats_utils';
+} from '../../utils/can_provide_stats';
 import { loadFieldStats } from '../../services/field_stats';
+import { loadFieldStatsTextBased } from '../../services/field_stats_text_based';
 import type { AddFieldFilterHandler } from '../../types';
 import {
   FieldTopValues,
@@ -134,6 +136,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   const [dataView, changeDataView] = useState<DataView | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const isCanceledRef = useRef<boolean>(false);
+  const isTextBased = Boolean(query && isOfAggregateQueryType(query));
 
   const setState: typeof changeState = useCallback(
     (nextState) => {
@@ -184,17 +187,33 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       abortControllerRef.current?.abort();
       abortControllerRef.current = new AbortController();
 
-      const results = await loadFieldStats({
-        services: { data },
-        dataView: loadedDataView,
-        field,
-        fromDate,
-        toDate,
-        dslQuery:
-          dslQuery ??
-          buildEsQuery(loadedDataView, query ?? [], filters ?? [], getEsQueryConfig(uiSettings)),
-        abortController: abortControllerRef.current,
-      });
+      const results =
+        query && isOfAggregateQueryType(query)
+          ? await loadFieldStatsTextBased({
+              services: { data },
+              dataView: loadedDataView,
+              field,
+              fromDate,
+              toDate,
+              baseQuery: query,
+              abortController: abortControllerRef.current,
+            })
+          : await loadFieldStats({
+              services: { data },
+              dataView: loadedDataView,
+              field,
+              fromDate,
+              toDate,
+              dslQuery:
+                dslQuery ??
+                buildEsQuery(
+                  loadedDataView,
+                  query ?? [],
+                  filters ?? [],
+                  getEsQueryConfig(uiSettings)
+                ),
+              abortController: abortControllerRef.current,
+            });
 
       abortControllerRef.current = null;
 
@@ -338,7 +357,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     );
   }
 
-  if (!canProvideStatsForField(field)) {
+  if (!canProvideStatsForField(field, isTextBased)) {
     const messageNoAnalysis = (
       <FieldSummaryMessage
         message={i18n.translate('unifiedFieldList.fieldStats.notAvailableForThisFieldDescription', {
@@ -355,7 +374,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       : messageNoAnalysis;
   }
 
-  if (canProvideNumberSummaryForField(field) && isNumberSummaryValid(numberSummary)) {
+  if (canProvideNumberSummaryForField(field, isTextBased) && isNumberSummaryValid(numberSummary)) {
     title = (
       <EuiTitle size="xxxs">
         <h6>
@@ -458,7 +477,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     title = (
       <EuiTitle size="xxxs">
         <h6>
-          {showExamplesForField(field)
+          {showExamplesForField(field, isTextBased)
             ? i18n.translate('unifiedFieldList.fieldStats.examplesLabel', {
                 defaultMessage: 'Examples',
               })
@@ -563,7 +582,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   if (topValues && topValues.buckets.length) {
     return combineWithTitleAndFooter(
       <FieldTopValues
-        areExamples={showExamplesForField(field)}
+        areExamples={showExamplesForField(field, isTextBased)}
         buckets={topValues.buckets}
         dataView={dataView}
         field={field}
