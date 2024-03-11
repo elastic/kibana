@@ -146,12 +146,27 @@ export function tabifyAggResponse(
   }
 
   const write = new TabbedAggResponseWriter(aggConfigs, respOpts || {});
+  // This is a very special case where
+  const hasMultipleDocCountAtRootWithFilters = Object.keys(esResponse.aggregations ?? {}).some(
+    (key) => /doc_count_/.test(key)
+  );
+
+  const aggsRoot = aggConfigs.isSamplingEnabled()
+    ? esResponse.aggregations?.sampling
+    : esResponse.aggregations;
   const topLevelBucket: AggResponseBucket = {
-    ...(aggConfigs.isSamplingEnabled()
-      ? esResponse.aggregations?.sampling
-      : esResponse.aggregations),
-    doc_count: esResponse.aggregations?.doc_count || esResponse.hits?.total,
+    ...aggsRoot,
+    doc_count: aggsRoot?.doc_count,
   };
+
+  // The fix itself is one line, but it's a bit hard to clear assess the full impact of it
+  // therefore here's a check to scope down the impact to the known scenario with the bug
+  // this can be lifted off once the full impact is assessed
+  if (!topLevelBucket.doc_count) {
+    if (!hasMultipleDocCountAtRootWithFilters) {
+      topLevelBucket.doc_count = esResponse.hits?.total;
+    }
+  }
 
   collectBucket(aggConfigs, write, topLevelBucket, '', 1);
 
