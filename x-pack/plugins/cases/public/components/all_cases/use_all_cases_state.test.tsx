@@ -43,7 +43,7 @@ jest.mock('react-router-dom', () => ({
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 
-const LS_KEY = 'testAppId.cases.list.state';
+const LS_KEY = 'securitySolution.cases.list.state';
 
 describe('useAllCasesQueryParams', () => {
   beforeEach(() => {
@@ -563,7 +563,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     // first call is the initial call made by useLocalStorage
-    expect(lsSpy).toBeCalledTimes(1);
+    expect(lsSpy).toBeCalledTimes(2);
   });
 
   it('does not update the local storage when the custom field configuration is loading', async () => {

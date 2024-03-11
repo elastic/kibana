@@ -8,8 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { MlCoreSetup } from '../plugin';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, EditSwimlanePanelContext } from '../embeddables';
+import type { MlCoreSetup } from '../plugin';
+import type { EditSwimlanePanelContext } from '../embeddables';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
 
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 
@@ -31,14 +32,18 @@ export function createEditSwimlanePanelAction(
         throw new Error('Not possible to execute an action without the embeddable context');
       }
 
-      const [coreStart] = await getStartServices();
+      const [coreStart, deps] = await getStartServices();
 
       try {
         const { resolveAnomalySwimlaneUserInput } = await import(
           '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
         );
 
-        const result = await resolveAnomalySwimlaneUserInput(coreStart, embeddable.getInput());
+        const result = await resolveAnomalySwimlaneUserInput(
+          coreStart,
+          deps.data.dataViews,
+          embeddable.getInput()
+        );
         embeddable.updateInput(result);
       } catch (e) {
         return Promise.reject();

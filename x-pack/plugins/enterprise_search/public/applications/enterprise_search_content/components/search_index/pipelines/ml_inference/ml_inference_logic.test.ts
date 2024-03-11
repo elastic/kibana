@@ -199,6 +199,7 @@ describe('MlInferenceLogic', () => {
           ],
           indexName: 'test',
           modelId: 'test-model',
+          // @ts-expect-error pipeline._meta defined as mandatory
           pipelineDefinition: {},
           pipelineName: 'unit-test',
         });
@@ -259,6 +260,7 @@ describe('MlInferenceLogic', () => {
           ],
         });
         MLInferenceLogic.actions.fetchPipelineSuccess({
+          // @ts-expect-error pipeline._meta defined as mandatory
           'mock-pipeline': {},
         });
 
@@ -330,6 +332,7 @@ describe('MlInferenceLogic', () => {
           version: 1,
         };
         FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
+          // @ts-expect-error pipeline._meta defined as mandatory
           'unit-test': existingPipeline,
         });
         MLInferenceLogic.actions.setInferencePipelineConfiguration({
@@ -484,6 +487,7 @@ describe('MlInferenceLogic', () => {
         jest.spyOn(MLInferenceLogic.actions, 'setAddInferencePipelineStep');
 
         MLInferenceLogic.actions.fetchPipelineSuccess({
+          // @ts-expect-error pipeline._meta defined as mandatory
           'mock-pipeline': {},
         });
         expect(MLInferenceLogic.actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
