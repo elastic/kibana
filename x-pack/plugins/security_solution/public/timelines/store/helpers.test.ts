@@ -40,12 +40,14 @@ import {
   updateTimelineTitleAndDescription,
   upsertTimelineColumn,
   updateTimelineGraphEventId,
+  updateTimelineColumnWidth,
 } from './helpers';
 import type { TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
 import type { TimelineById } from './types';
 import { Direction } from '../../../common/search_strategy';
 import type { FilterManager } from '@kbn/data-plugin/public';
+import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
 
 jest.mock('../../common/utils/normalize_time_range');
 jest.mock('../../common/utils/default_date_settings', () => {
@@ -1850,6 +1852,38 @@ describe('Timeline', () => {
       expect(update[TimelineId.active].graphEventId).toEqual('');
       expect(update[TimelineId.active].activeTab).toEqual(TimelineTabs.eql);
       expect(update[TimelineId.active].prevActiveTab).toEqual(TimelineTabs.graph);
+    });
+  });
+
+  describe('#updateTimelineColumnWidth', () => {
+    let mockTimelineById: TimelineById;
+    beforeEach(() => {
+      mockTimelineById = {
+        ...structuredClone(timelineByIdMock),
+      };
+      mockTimelineById.foo.columns = structuredClone(defaultUdtHeaders);
+    });
+
+    it('should update column width correctly when correct column is supplied', () => {
+      const result = updateTimelineColumnWidth({
+        columnId: '@timestamp',
+        id: 'foo',
+        timelineById: mockTimelineById,
+        width: 500,
+      });
+
+      expect(result.foo.columns[0]).toHaveProperty('initialWidth', 500);
+    });
+
+    it('should be no-op when incorrect column is supplied', () => {
+      const result = updateTimelineColumnWidth({
+        columnId: 'invalid-column',
+        id: 'foo',
+        timelineById: mockTimelineById,
+        width: 500,
+      });
+
+      expect(result.foo.columns).toEqual(defaultUdtHeaders);
     });
   });
 });
