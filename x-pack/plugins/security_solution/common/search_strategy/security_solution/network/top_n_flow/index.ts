@@ -18,8 +18,12 @@ import type {
 
 export interface NetworkTopNFlowStrategyResponse extends IEsSearchResponse {
   edges: NetworkTopNFlowEdges[];
+  // pageInfo: PageInfoPaginated;
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkTopNFlowCountStrategyResponse extends IEsSearchResponse {
   totalCount: number;
-  pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }
 

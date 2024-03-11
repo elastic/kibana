@@ -39,7 +39,7 @@ export interface NetworkTopNFlowArgs {
   totalCount: number;
 }
 
-interface UseNetworkTopNFlow {
+interface UseNetworkTopNFlowProps {
   flowTarget: FlowTargetSourceDest;
   id: string;
   ip?: string;
@@ -61,7 +61,7 @@ export const useNetworkTopNFlow = ({
   skip,
   startDate,
   type,
-}: UseNetworkTopNFlow): [boolean, NetworkTopNFlowArgs] => {
+}: UseNetworkTopNFlowProps): [boolean, NetworkTopNFlowArgs] => {
   const getTopNFlowSelector = useMemo(() => networkSelectors.topNFlowSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state) =>
     getTopNFlowSelector(state, type, flowTarget)
@@ -90,44 +90,69 @@ export const useNetworkTopNFlow = ({
     loading,
     result: response,
     search,
-    refetch,
+    refetch: refetchData,
     inspect,
   } = useSearchStrategy<NetworkQueries.topNFlow>({
     factoryQueryType: NetworkQueries.topNFlow,
     initialResult: {
       edges: [],
-      totalCount: -1,
-      pageInfo: {
-        activePage: 0,
-        fakeTotalCount: 0,
-        showMorePagesIndicator: false,
-      },
+      // totalCount: -1,
+      // pageInfo: {
+      //   activePage: 0,
+      //   fakeTotalCount: 0,
+      //   showMorePagesIndicator: false,
+      // },
     },
     errorMessage: i18n.FAIL_NETWORK_TOP_N_FLOW,
     abort: skip,
   });
 
+  const {
+    loading: loadingTotalCount,
+    result: responseTotalCount,
+    search: searchTotalCount,
+    refetch: refetchTotalCount,
+    inspect: inspectTotalCount,
+  } = useSearchStrategy<NetworkQueries.topNFlowCount>({
+    factoryQueryType: NetworkQueries.topNFlowCount,
+    initialResult: { totalCount: -1 },
+    errorMessage: i18n.FAIL_NETWORK_TOP_N_FLOW,
+    abort: skip,
+  });
+
+  const refetch = useCallback(() => {
+    refetchData();
+    refetchTotalCount();
+  }, [refetchData, refetchTotalCount]);
+
   const networkTopNFlowResponse = useMemo(
     () => ({
-      endDate,
       networkTopNFlow: response.edges,
       id,
-      inspect,
+      inspect: {
+        dsl: [...inspect.dsl, ...inspectTotalCount.dsl],
+        response: [...inspect.response, ...inspectTotalCount.response],
+      },
       isInspected: false,
       loadPage: wrappedLoadMore,
-      pageInfo: response.pageInfo,
+      pageInfo: {
+        activePage,
+        fakeTotalCount: 0,
+        showMorePagesIndicator: false,
+      },
       refetch,
       startDate,
-      totalCount: response.totalCount,
+      totalCount: responseTotalCount.totalCount,
     }),
     [
-      endDate,
       id,
       inspect,
+      inspectTotalCount,
       refetch,
       response.edges,
-      response.pageInfo,
-      response.totalCount,
+      // response.pageInfo,
+      activePage,
+      responseTotalCount.totalCount,
       startDate,
       wrappedLoadMore,
     ]
@@ -160,8 +185,9 @@ export const useNetworkTopNFlow = ({
   useEffect(() => {
     if (!skip && networkTopNFlowRequest) {
       search(networkTopNFlowRequest);
+      searchTotalCount(networkTopNFlowRequest);
     }
-  }, [networkTopNFlowRequest, search, skip]);
+  }, [networkTopNFlowRequest, search, searchTotalCount, skip]);
 
-  return [loading, networkTopNFlowResponse];
+  return [loading || loadingTotalCount, networkTopNFlowResponse];
 };
