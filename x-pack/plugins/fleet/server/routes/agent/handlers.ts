@@ -144,7 +144,7 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const agentOptions = Array.isArray(request.body.agents)
     ? { agentIds: request.body.agents }
-    : { kuery: request.body.agents, showInactive: request.body.showInactive };
+    : { kuery: request.body.agents, showInactive: request.body.includeInactive };
 
   try {
     const results = await AgentService.updateAgentTags(
@@ -283,7 +283,7 @@ export const postBulkAgentReassignHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const agentOptions = Array.isArray(request.body.agents)
     ? { agentIds: request.body.agents }
-    : { kuery: request.body.agents, showInactive: request.body.showInactive };
+    : { kuery: request.body.agents, showInactive: request.body.includeInactive };
 
   try {
     const results = await AgentService.reassignAgents(

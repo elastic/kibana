@@ -257,7 +257,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               version,
               agents: getQuery(isUpdating ? updatingQuery : agents),
               force: isUpdating,
-              showInactive: true,
+              includeInactive: true,
               ...rolloutOptions,
             });
       if (error) {

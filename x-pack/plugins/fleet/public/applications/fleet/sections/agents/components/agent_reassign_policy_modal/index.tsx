@@ -77,7 +77,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         : await sendPostBulkAgentReassign({
             policy_id: selectedAgentPolicyId,
             agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
-            showInactive: true,
+            includeInactive: true,
           });
       if (res.error) {
         throw res.error;

@@ -114,7 +114,7 @@ export interface PostBulkAgentUpgradeRequest {
     rollout_duration_seconds?: number;
     start_time?: string;
     force?: boolean;
-    showInactive?: boolean;
+    includeInactive?: boolean;
   };
 }
 
@@ -148,7 +148,7 @@ export interface PostBulkAgentReassignRequest {
     policy_id: string;
     agents: string[] | string;
     batchSize?: number;
-    showInactive?: boolean;
+    includeInactive?: boolean;
   };
 }
 
@@ -187,7 +187,7 @@ export interface PostBulkUpdateAgentTagsRequest {
     agents: string[] | string;
     tagsToAdd?: string[];
     tagsToRemove?: string[];
-    showInactive?: boolean;
+    includeInactive?: boolean;
   };
 }
 

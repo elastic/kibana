@@ -84,7 +84,7 @@ export const useUpdateTags = () => {
             agents,
             tagsToAdd,
             tagsToRemove,
-            showInactive: true,
+            includeInactive: true,
           }),
         onSuccess,
         successMessage,
