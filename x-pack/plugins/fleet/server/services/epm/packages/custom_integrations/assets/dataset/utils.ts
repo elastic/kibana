@@ -22,6 +22,11 @@ export const generateDatastreamEntries = (
       release: 'ga' as const,
       // NOTE: This ensures our default.yml pipeline is used as the default_pipeline in the index template
       ingest_pipeline: 'default',
+      elasticsearch: {
+        'index_template.mappings': {
+          subobjects: false,
+        },
+      },
     };
   });
 };
