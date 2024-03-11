@@ -6,7 +6,7 @@
  */
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject, Observable } from 'rxjs';
-import { useKibana } from '../../common/lib/kibana';
+import { useKibana } from './kibana_react';
 
 interface UseApplicationReturn {
   appId: string | undefined;
