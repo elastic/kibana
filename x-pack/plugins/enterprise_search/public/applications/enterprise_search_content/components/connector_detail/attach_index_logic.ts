@@ -11,8 +11,6 @@ import { Connector } from '@kbn/search-connectors';
 
 import { HttpError, Status } from '../../../../../common/types/api';
 
-import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { KibanaLogic } from '../../../shared/kibana';
 import {
   AttachIndexApiLogic,
   AttachIndexApiLogicActions,
@@ -25,9 +23,6 @@ import {
   IndexExistsApiLogic,
   IndexExistsApiLogicActions,
 } from '../../api/index/index_exists_api_logic';
-import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
-
-import { ConnectorDetailTabId } from './connector_detail';
 
 export interface AttachIndexActions {
   attachIndex: AttachIndexApiLogicActions['makeRequest'];
@@ -93,14 +88,6 @@ export const AttachIndexLogic = kea<MakeLogicType<AttachIndexValues, AttachIndex
     ],
   },
   listeners: ({ actions, values }) => ({
-    attachIndexApiSuccess: ({ connectorId }) => {
-      KibanaLogic.values.navigateToUrl(
-        `${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-          connectorId,
-          tabId: ConnectorDetailTabId.CONFIGURATION,
-        })}`
-      );
-    },
     checkIndexExists: async ({ indexName }, breakpoint) => {
       await breakpoint(200);
       actions.callCheckIndexExists({ indexName });
