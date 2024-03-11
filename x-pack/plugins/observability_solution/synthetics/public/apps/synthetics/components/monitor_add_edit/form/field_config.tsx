@@ -795,7 +795,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       return {
         'data-test-subj': 'syntheticsHeaderFieldRequestHeaders',
         readOnly,
-        contentMode: !!(requestBody as Record<string, string>)?.value
+        contentMode: !!(requestBody as RequestBodyCheck)?.value
           ? (requestBody as RequestBodyCheck).type
           : undefined,
       };
