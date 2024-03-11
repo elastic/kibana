@@ -29,8 +29,6 @@ import {
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
@@ -82,6 +80,7 @@ const AssistantComponent: React.FC<Props> = ({
   setConversationTitle,
 }) => {
   const {
+    actionTypeRegistry,
     assistantTelemetry,
     augmentMessageCodeBlocks,
     assistantAvailability: { isAssistantEnabled },
@@ -136,18 +135,11 @@ const AssistantComponent: React.FC<Props> = ({
   }, [refetch]);
 
   // Connector details
-  const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({ http });
-  const defaultConnectorId = useMemo(() => getDefaultConnector(connectors)?.id, [connectors]);
-  const defaultProvider = useMemo(
-    () =>
-      (
-        getDefaultConnector(connectors) as ActionConnectorProps<
-          { apiProvider: OpenAiProviderType },
-          unknown
-        >
-      )?.config?.apiProvider,
-    [connectors]
-  );
+  const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
+    actionTypeRegistry,
+    http,
+  });
+  const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
 
   const [selectedConversationTitle, setSelectedConversationTitle] = useState<string>(
     isAssistantEnabled ? getLastConversationTitle(conversationTitle) : WELCOME_CONVERSATION_TITLE
@@ -558,8 +550,7 @@ const AssistantComponent: React.FC<Props> = ({
           <AssistantHeader
             currentConversation={currentConversation}
             setCurrentConversation={setCurrentConversation}
-            defaultConnectorId={defaultConnectorId}
-            defaultProvider={defaultProvider}
+            defaultConnector={defaultConnector}
             docLinks={docLinks}
             isDisabled={isDisabled}
             isSettingsModalVisible={isSettingsModalVisible}

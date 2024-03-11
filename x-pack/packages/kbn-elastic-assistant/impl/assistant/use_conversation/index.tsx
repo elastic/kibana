@@ -7,6 +7,7 @@
 
 import { useCallback } from 'react';
 
+import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../assistant_context';
 import { Conversation, Message } from '../../assistant_context/types';
 import * as i18n from './translations';
@@ -22,7 +23,6 @@ import { WELCOME_CONVERSATION } from './sample_conversations';
 export const DEFAULT_CONVERSATION_STATE: Conversation = {
   id: i18n.DEFAULT_CONVERSATION_TITLE,
   messages: [],
-  apiConfig: {},
   replacements: {},
   category: 'assistant',
   title: i18n.DEFAULT_CONVERSATION_TITLE,
@@ -35,7 +35,7 @@ interface CreateConversationProps {
 
 interface SetApiConfigProps {
   conversation: Conversation;
-  apiConfig: Conversation['apiConfig'];
+  apiConfig: ApiConfig;
 }
 
 interface UseConversation {
@@ -84,20 +84,18 @@ export const useConversation = (): UseConversation => {
 
   const clearConversation = useCallback(
     async (conversationId: string) => {
-      const prevConversation = await getConversationById({ http, id: conversationId, toasts });
-      if (prevConversation) {
+      const conversation = await getConversationById({ http, id: conversationId, toasts });
+      if (conversation && conversation.apiConfig) {
         const defaultSystemPromptId = getDefaultSystemPrompt({
           allSystemPrompts,
-          conversation: prevConversation,
+          conversation,
         })?.id;
 
         await updateConversation({
           http,
           toasts,
           conversationId,
-          apiConfig: {
-            defaultSystemPromptId,
-          },
+          apiConfig: { ...conversation.apiConfig, defaultSystemPromptId },
           messages: [],
           replacements: undefined,
         });
@@ -111,27 +109,18 @@ export const useConversation = (): UseConversation => {
    */
   const getDefaultConversation = useCallback(
     ({ cTitle, messages }: CreateConversationProps): Conversation => {
-      const defaultSystemPromptId = getDefaultSystemPrompt({
-        allSystemPrompts,
-        conversation: undefined,
-      })?.id;
-
       const newConversation: Conversation =
         cTitle === i18n.WELCOME_CONVERSATION_TITLE
           ? WELCOME_CONVERSATION
           : {
               ...DEFAULT_CONVERSATION_STATE,
-              apiConfig: {
-                ...DEFAULT_CONVERSATION_STATE.apiConfig,
-                defaultSystemPromptId,
-              },
               id: '',
               title: cTitle,
               messages: messages != null ? messages : [],
             };
       return newConversation;
     },
-    [allSystemPrompts]
+    []
   );
 
   /**

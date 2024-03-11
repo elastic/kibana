@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { ApiConfig } from '@kbn/elastic-assistant-common';
 
 export type ConversationRole = 'system' | 'user' | 'assistant';
 
@@ -44,7 +44,6 @@ export interface ConversationTheme {
     icon?: string;
   };
 }
-
 /**
  * Complete state to reconstruct a conversation instance.
  * Includes all messages, connector configured, and relevant UI state.
@@ -52,13 +51,7 @@ export interface ConversationTheme {
  */
 export interface Conversation {
   '@timestamp'?: string;
-  apiConfig: {
-    connectorId?: string;
-    connectorTypeTitle?: string;
-    defaultSystemPromptId?: string;
-    provider?: OpenAiProviderType;
-    model?: string;
-  };
+  apiConfig?: ApiConfig;
   user?: {
     id?: string;
     name?: string;

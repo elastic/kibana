@@ -72,14 +72,14 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
   };
 
   /**
-   * Creates a conversation, if given at least the "title" and "apiConfig"
+   * Creates a conversation, if given at least the "title" and "g"
    * See {@link https://www.elastic.co/guide/en/security/current/}
    * for more information around formats of the deserializer and serializer
    * @param options
    * @param options.id The id of the conversation to create or "undefined" if you want an "id" to be auto-created for you
    * @param options.title A custom deserializer for the conversation. Optionally, you an define this as handle bars. See online docs for more information.
    * @param options.messages Set this to true if this is a conversation that is "immutable"/"pre-packaged".
-   * @param options.apiConfig Determines how uploaded conversation item values are parsed. By default, conversation items are parsed using named regex groups. See online docs for more information.
+   * @param options.g Determines how uploaded conversation item values are parsed. By default, conversation items are parsed using named regex groups. See online docs for more information.
    * @returns The conversation created
    */
   public createConversation = async ({

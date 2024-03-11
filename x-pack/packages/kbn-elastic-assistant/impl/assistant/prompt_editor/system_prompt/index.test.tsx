@@ -22,6 +22,8 @@ import { WELCOME_CONVERSATION } from '../../use_conversation/sample_conversation
 const BASE_CONVERSATION: Conversation = {
   ...WELCOME_CONVERSATION,
   apiConfig: {
+    connectorId: '123',
+    connectorTypeTitle: 'OpenAI',
     defaultSystemPromptId: mockSystemPrompt.id,
   },
 };
@@ -374,6 +376,8 @@ describe('SystemPrompt', () => {
         id: 'second',
         category: 'assistant',
         apiConfig: {
+          connectorId: '123',
+          connectorTypeTitle: 'OpenAI',
           defaultSystemPromptId: undefined,
         },
         title: 'second',
@@ -457,6 +461,8 @@ describe('SystemPrompt', () => {
         [secondMockConversation.title]: {
           ...secondMockConversation,
           apiConfig: {
+            connectorId: '123',
+            connectorTypeTitle: 'OpenAI',
             defaultSystemPromptId: mockSystemPrompt.id,
           },
         },

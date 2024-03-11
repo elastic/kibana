@@ -7,7 +7,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { IHttpFetchError } from '@kbn/core-http-browser';
-import type { Conversation } from '../../assistant_context/types';
+import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { API_ERROR } from '../translations';
 import { getOptionalRequestParams, llmTypeDictionary } from '../helpers';
 export * from './conversations';
@@ -20,7 +20,7 @@ export interface FetchConnectorExecuteAction {
   allowReplacement?: string[];
   isEnabledKnowledgeBase: boolean;
   assistantStreamingEnabled: boolean;
-  apiConfig: Conversation['apiConfig'];
+  apiConfig: ApiConfig;
   http: HttpSetup;
   message?: string;
   replacements: Record<string, string>;
@@ -53,7 +53,7 @@ export const fetchConnectorExecuteAction = async ({
   signal,
   size,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
-  const llmType = llmTypeDictionary[apiConfig.connectorTypeTitle ?? 'OpenAI'];
+  const llmType = llmTypeDictionary[apiConfig.connectorTypeTitle];
   // TODO: Remove in part 3 of streaming work for security solution
   // tracked here: https://github.com/elastic/security-team/issues/7363
   // In part 3 I will make enhancements to langchain to introduce streaming
@@ -69,7 +69,7 @@ export const fetchConnectorExecuteAction = async ({
 
   const requestBody = {
     // only used for openai, azure and bedrock ignore field
-    model: apiConfig.model,
+    model: apiConfig?.model,
     message,
     subAction: isStream ? 'invokeStream' : 'invokeAI',
     conversationId,

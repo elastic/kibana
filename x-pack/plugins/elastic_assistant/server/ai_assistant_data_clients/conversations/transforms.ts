@@ -28,13 +28,17 @@ export const transformESToConversations = (
         title: conversationSchema.title,
         category: conversationSchema.category,
         summary: conversationSchema.summary,
-        apiConfig: {
-          connectorId: conversationSchema.api_config?.connector_id,
-          connectorTypeTitle: conversationSchema.api_config?.connector_type_title,
-          defaultSystemPromptId: conversationSchema.api_config?.default_system_prompt_id,
-          model: conversationSchema.api_config?.model,
-          provider: conversationSchema.api_config?.provider,
-        },
+        ...(conversationSchema.api_config != null
+          ? {
+              apiConfig: {
+                connectorId: conversationSchema.api_config.connector_id,
+                connectorTypeTitle: conversationSchema.api_config.connector_type_title,
+                defaultSystemPromptId: conversationSchema.api_config?.default_system_prompt_id,
+                model: conversationSchema.api_config?.model,
+                provider: conversationSchema.api_config?.provider,
+              },
+            }
+          : {}),
         excludeFromLastConversationStorage:
           conversationSchema.exclude_from_last_conversation_storage,
         isDefault: conversationSchema.is_default,

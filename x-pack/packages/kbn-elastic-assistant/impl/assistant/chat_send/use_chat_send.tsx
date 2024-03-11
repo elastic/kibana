@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
 import { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
@@ -61,6 +62,7 @@ export const useChatSend = ({
   const {
     assistantTelemetry,
     knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
+    toasts,
   } = useAssistantContext();
 
   const { isLoading, sendMessage } = useSendMessage();
@@ -74,6 +76,17 @@ export const useChatSend = ({
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
     async (promptText: string) => {
+      if (!currentConversation.apiConfig) {
+        toasts?.addError(
+          new Error('The conversation needs a connector configured in order to send a message.'),
+          {
+            title: i18n.translate('xpack.elasticAssistant.knowledgeBase.setupError', {
+              defaultMessage: 'Error setting up Knowledge Base',
+            }),
+          }
+        );
+        return;
+      }
       let replacements: Record<string, string> = {};
       const onNewReplacements = (newReplacements: Record<string, string>) => {
         replacements = { ...(currentConversation.replacements ?? {}), ...newReplacements };
@@ -114,6 +127,7 @@ export const useChatSend = ({
         conversationId: currentConversation.id,
         replacements,
       });
+
       assistantTelemetry?.reportAssistantMessageSent({
         conversationId: currentConversation.title,
         role: userMessage.role,
@@ -147,10 +161,22 @@ export const useChatSend = ({
       setCurrentConversation,
       setPromptTextPreview,
       setSelectedPromptContexts,
+      toasts,
     ]
   );
 
   const handleRegenerateResponse = useCallback(async () => {
+    if (!currentConversation.apiConfig) {
+      toasts?.addError(
+        new Error('The conversation needs a connector configured in order to send a message.'),
+        {
+          title: i18n.translate('xpack.elasticAssistant.knowledgeBase.setupError', {
+            defaultMessage: 'Error setting up Knowledge Base',
+          }),
+        }
+      );
+      return;
+    }
     // remove last message from the local state immediately
     setCurrentConversation({
       ...currentConversation,
@@ -171,7 +197,7 @@ export const useChatSend = ({
       ...currentConversation,
       messages: [...updatedMessages, responseMessage],
     });
-  }, [currentConversation, http, removeLastMessage, sendMessage, setCurrentConversation]);
+  }, [currentConversation, http, removeLastMessage, sendMessage, setCurrentConversation, toasts]);
 
   const handleButtonSendMessage = useCallback(
     (message: string) => {

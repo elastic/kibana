@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+  ApiConfig,
 } from '@kbn/elastic-assistant-common';
 import { Conversation, Message } from '../../../assistant_context/types';
 
@@ -53,13 +53,7 @@ export interface ConversationUpdateParams {
   id?: string;
   title?: string;
   messages?: Message[];
-  apiConfig?: {
-    connectorId?: string;
-    connectorTypeTitle?: string;
-    defaultSystemPromptId?: string;
-    provider?: OpenAiProviderType;
-    model?: string;
-  };
+  apiConfig?: ApiConfig;
 }
 
 export interface ConversationsBulkActions {

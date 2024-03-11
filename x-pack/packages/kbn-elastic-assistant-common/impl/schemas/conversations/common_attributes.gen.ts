@@ -135,11 +135,11 @@ export const ApiConfig = z.object({
   /**
    * connector Id
    */
-  connectorId: z.string().optional(),
+  connectorId: z.string(),
   /**
    * connector Type Title
    */
-  connectorTypeTitle: z.string().optional(),
+  connectorTypeTitle: z.string(),
   /**
    * defaultSystemPromptId
    */
@@ -215,7 +215,7 @@ export const ConversationResponse = z.object({
   /**
    * LLM API configuration.
    */
-  apiConfig: ApiConfig,
+  apiConfig: ApiConfig.optional(),
   /**
    * Is default conversation.
    */

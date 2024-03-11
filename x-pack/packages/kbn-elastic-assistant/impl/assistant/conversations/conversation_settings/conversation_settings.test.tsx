@@ -196,11 +196,6 @@ describe('ConversationSettings', () => {
     );
     fireEvent.click(getByTestId('change-convo-custom'));
     const newConvo = {
-      apiConfig: {
-        connectorId: '123',
-        defaultSystemPromptId: 'default-system-prompt',
-        provider: 'OpenAI',
-      },
       category: 'assistant',
       id: '',
       title: 'Cool new conversation',

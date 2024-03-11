@@ -26,6 +26,7 @@ const mockHttp = {
 
 const apiConfig: Conversation['apiConfig'] = {
   connectorId: 'foo',
+  connectorTypeTitle: 'OpenAI',
   model: 'gpt-4',
   provider: OpenAiProviderType.OpenAi,
 };

@@ -23,7 +23,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { css } from '@emotion/react';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation, Prompt, QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
@@ -58,8 +58,7 @@ export type SettingsTabs =
   | typeof KNOWLEDGE_BASE_TAB
   | typeof EVALUATION_TAB;
 interface Props {
-  defaultConnectorId?: string;
-  defaultProvider?: OpenAiProviderType;
+  defaultConnector?: AIConnector;
   onClose: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
   ) => void;
@@ -75,16 +74,20 @@ interface Props {
  */
 export const AssistantSettings: React.FC<Props> = React.memo(
   ({
-    defaultConnectorId,
-    defaultProvider,
+    defaultConnector,
     onClose,
     onSave,
     selectedConversation: defaultSelectedConversation,
     onConversationSelected,
     conversations,
   }) => {
-    const { modelEvaluatorEnabled, http, selectedSettingsTab, setSelectedSettingsTab } =
-      useAssistantContext();
+    const {
+      actionTypeRegistry,
+      modelEvaluatorEnabled,
+      http,
+      selectedSettingsTab,
+      setSelectedSettingsTab,
+    } = useAssistantContext();
 
     const {
       conversationSettings,
@@ -106,12 +109,10 @@ export const AssistantSettings: React.FC<Props> = React.memo(
 
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State
-    const [selectedConversation, setSelectedConversation] = useState<Conversation | undefined>(
-      () => {
-        return conversationSettings[defaultSelectedConversation.title];
-      }
-    );
-    const onHandleSelectedConversationChange = useCallback((conversation?: Conversation) => {
+    const [selectedConversation, setSelectedConversation] = useState<Conversation>(() => {
+      return conversationSettings[defaultSelectedConversation.title];
+    });
+    const onHandleSelectedConversationChange = useCallback((conversation: Conversation) => {
       setSelectedConversation(conversation);
     }, []);
     useEffect(() => {
@@ -287,8 +288,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               >
                 {selectedSettingsTab === CONVERSATIONS_TAB && (
                   <ConversationSettings
-                    defaultConnectorId={defaultConnectorId}
-                    defaultProvider={defaultProvider}
+                    actionTypeRegistry={actionTypeRegistry}
+                    defaultConnector={defaultConnector}
                     conversationSettings={conversationSettings}
                     setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
                     conversationsSettingsBulkActions={conversationsSettingsBulkActions}

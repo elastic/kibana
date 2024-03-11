@@ -77,7 +77,7 @@ describe('ConnectorSelectorInline', () => {
       id: 'conversation_id',
       category: 'assistant',
       messages: [],
-      apiConfig: {},
+      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
       replacements: {},
       title: 'conversation_id',
     };
@@ -98,7 +98,7 @@ describe('ConnectorSelectorInline', () => {
       id: 'conversation_id',
       category: 'assistant',
       messages: [],
-      apiConfig: {},
+      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
       replacements: {},
       title: 'conversation_id',
     };
@@ -122,7 +122,7 @@ describe('ConnectorSelectorInline', () => {
       id: 'conversation_id',
       category: 'assistant',
       messages: [],
-      apiConfig: {},
+      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
       replacements: {},
       title: 'conversation_id',
     };
@@ -148,7 +148,7 @@ describe('ConnectorSelectorInline', () => {
         provider: 'OpenAI',
       },
       conversation: {
-        apiConfig: {},
+        apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
         replacements: {},
         category: 'assistant',
         id: 'conversation_id',
@@ -162,7 +162,7 @@ describe('ConnectorSelectorInline', () => {
       id: 'conversation_id',
       category: 'assistant',
       messages: [],
-      apiConfig: {},
+      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
       replacements: {},
       title: 'conversation_id',
     };

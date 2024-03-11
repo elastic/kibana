@@ -7,15 +7,14 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useState } from 'react';
-
+import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../assistant_context';
-import { Conversation } from '../../assistant_context/types';
 import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
 
 interface SendMessageProps {
   allow?: string[];
   allowReplacement?: string[];
-  apiConfig: Conversation['apiConfig'];
+  apiConfig: ApiConfig;
   http: HttpSetup;
   message?: string;
   conversationId: string;

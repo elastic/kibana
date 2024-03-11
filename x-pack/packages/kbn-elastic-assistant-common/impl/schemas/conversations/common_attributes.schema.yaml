@@ -58,7 +58,7 @@ components:
       type: string
       description: Message role.
       enum:
-        - system 
+        - system
         - user
         - assistant
 
@@ -96,7 +96,7 @@ components:
           description: Message role.
         timestamp:
           $ref: '#/components/schemas/NonEmptyString'
-          description: The timestamp message was sent or received.         
+          description: The timestamp message was sent or received.
         isError:
           type: boolean
           description: Is error message.
@@ -106,6 +106,9 @@ components:
 
     ApiConfig:
       type: object
+      required:
+        - connectorId
+        - connectorTypeTitle
       properties:
         connectorId:
           type: string
@@ -122,7 +125,7 @@ components:
         model:
           type: string
           description: model
-    
+
     ConversationSummary:
       type: object
       properties:
@@ -167,7 +170,6 @@ components:
         - createdAt
         - users
         - namespace
-        - apiConfig
         - category
       properties:
         id:
@@ -254,7 +256,7 @@ components:
           type: string
           description: The conversation title.
         category:
-          $ref: '#/components/schemas/ConversationCategory'         
+          $ref: '#/components/schemas/ConversationCategory'
           description: The conversation category.
         messages:
           type: array
@@ -272,7 +274,7 @@ components:
           type: boolean
         replacements:
           $ref: '#/components/schemas/Replacement'
-    
+
     ConversationMessageCreateProps:
       type: object
       required:

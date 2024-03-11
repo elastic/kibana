@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { merge } from 'lodash/fp';
+import { AIConnector } from '../connectorland/connector_selector';
 import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
 import { Conversation } from '../..';
 import type { Message } from '../assistant_context/types';
@@ -78,9 +78,8 @@ export const getBlockBotConversation = (
  * @param connectors
  */
 export const getDefaultConnector = (
-  connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> | undefined
-): ActionConnector<Record<string, unknown>, Record<string, unknown>> | undefined =>
-  connectors?.length === 1 ? connectors[0] : undefined;
+  connectors: AIConnector[] | undefined
+): AIConnector | undefined => (connectors?.length === 1 ? connectors[0] : undefined);
 
 interface OptionalRequestParams {
   alertsIndexPattern?: string;

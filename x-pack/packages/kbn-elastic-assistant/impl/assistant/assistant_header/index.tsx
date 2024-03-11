@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConversationSelector } from '../conversations/conversation_selector';
@@ -26,8 +26,7 @@ import * as i18n from '../translations';
 
 interface OwnProps {
   currentConversation: Conversation;
-  defaultConnectorId?: string;
-  defaultProvider?: OpenAiProviderType;
+  defaultConnector?: AIConnector;
   docLinks: Omit<DocLinksStart, 'links'>;
   isDisabled: boolean;
   isSettingsModalVisible: boolean;
@@ -51,8 +50,7 @@ type Props = OwnProps;
  */
 export const AssistantHeader: React.FC<Props> = ({
   currentConversation,
-  defaultConnectorId,
-  defaultProvider,
+  defaultConnector,
   docLinks,
   isDisabled,
   isSettingsModalVisible,
@@ -110,8 +108,7 @@ export const AssistantHeader: React.FC<Props> = ({
           `}
         >
           <ConversationSelector
-            defaultConnectorId={defaultConnectorId}
-            defaultProvider={defaultProvider}
+            defaultConnector={defaultConnector}
             selectedConversationTitle={currentConversation.title}
             onConversationSelected={onConversationSelected}
             shouldDisableKeyboardShortcut={shouldDisableKeyboardShortcut}
@@ -142,8 +139,7 @@ export const AssistantHeader: React.FC<Props> = ({
 
               <EuiFlexItem grow={false}>
                 <AssistantSettingsButton
-                  defaultConnectorId={defaultConnectorId}
-                  defaultProvider={defaultProvider}
+                  defaultConnector={defaultConnector}
                   isDisabled={isDisabled}
                   isSettingsModalVisible={isSettingsModalVisible}
                   selectedConversation={currentConversation}

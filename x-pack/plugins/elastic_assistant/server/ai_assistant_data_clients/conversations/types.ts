@@ -38,8 +38,8 @@ export interface SearchEsConversationSchema {
     };
   }>;
   api_config?: {
-    connector_id?: string;
-    connector_type_title?: string;
+    connector_id: string;
+    connector_type_title: string;
     default_system_prompt_id?: string;
     provider?: Provider;
     model?: string;

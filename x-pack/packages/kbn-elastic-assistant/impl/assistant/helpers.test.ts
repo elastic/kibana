@@ -12,7 +12,7 @@ import {
   mergeBaseWithPersistedConversations,
 } from './helpers';
 import { enterpriseMessaging } from './use_conversation/sample_conversations';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import { AIConnector } from '../connectorland/connector_selector';
 
 describe('helpers', () => {
   describe('isAssistantEnabled = false', () => {
@@ -23,7 +23,7 @@ describe('helpers', () => {
         category: 'assistant',
         theme: {},
         messages: [],
-        apiConfig: {},
+        apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
         replacements: {},
         title: 'conversation_id',
       };
@@ -46,7 +46,7 @@ describe('helpers', () => {
             },
           },
         ],
-        apiConfig: {},
+        apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
         replacements: {},
         category: 'assistant',
         title: 'conversation_id',
@@ -60,7 +60,7 @@ describe('helpers', () => {
         id: 'conversation_id',
         title: 'conversation_id',
         messages: enterpriseMessaging,
-        apiConfig: {},
+        apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
         replacements: {},
         category: 'assistant',
       };
@@ -86,7 +86,7 @@ describe('helpers', () => {
             },
           },
         ],
-        apiConfig: {},
+        apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
         replacements: {},
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
@@ -102,7 +102,7 @@ describe('helpers', () => {
         title: 'conversation_id',
         category: 'assistant',
         messages: [],
-        apiConfig: {},
+        apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
         replacements: {},
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
@@ -124,7 +124,7 @@ describe('helpers', () => {
             },
           },
         ],
-        apiConfig: {},
+        apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
         replacements: {},
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
@@ -141,17 +141,17 @@ describe('helpers', () => {
     });
 
     it('should return undefined if connectors array is empty', () => {
-      const connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> =
-        [];
+      const connectors: AIConnector[] = [];
       const result = getDefaultConnector(connectors);
 
       expect(result).toBeUndefined();
     });
 
     it('should return the connector id if there is only one connector', () => {
-      const connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> = [
+      const connectors: AIConnector[] = [
         {
           actionTypeId: '.gen-ai',
+          connectorTypeTitle: 'OpenAI',
           isPreconfigured: false,
           isDeprecated: false,
           referencedByCount: 0,
@@ -172,9 +172,10 @@ describe('helpers', () => {
     });
 
     it('should return undefined if there are multiple connectors', () => {
-      const connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> = [
+      const connectors: AIConnector[] = [
         {
           actionTypeId: '.gen-ai',
+          connectorTypeTitle: 'OpenAI',
           isPreconfigured: false,
           isDeprecated: false,
           referencedByCount: 0,
@@ -190,6 +191,7 @@ describe('helpers', () => {
         },
         {
           actionTypeId: '.gen-ai',
+          connectorTypeTitle: 'OpenAI',
           isPreconfigured: false,
           isDeprecated: false,
           referencedByCount: 0,
@@ -266,7 +268,7 @@ describe('helpers', () => {
       messages,
       category: 'assistant',
       theme: {},
-      apiConfig: {},
+      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
       replacements: {},
     };
     const baseConversations = {

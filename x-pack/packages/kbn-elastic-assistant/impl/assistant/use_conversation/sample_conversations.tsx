@@ -42,7 +42,6 @@ export const WELCOME_CONVERSATION: Conversation = {
       },
     },
   ],
-  apiConfig: {},
   replacements: {},
 };
 

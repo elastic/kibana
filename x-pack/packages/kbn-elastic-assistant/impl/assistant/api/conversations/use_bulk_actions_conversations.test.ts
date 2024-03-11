@@ -16,7 +16,7 @@ import { IToasts } from '@kbn/core-notifications-browser';
 const conversation1 = {
   id: 'conversation1',
   title: 'Conversation 1',
-  apiConfig: {},
+  apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
   replacements: {},
   category: 'default',
   messages: [

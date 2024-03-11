@@ -7,16 +7,15 @@
 
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
+import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { AssistantSettings, CONVERSATIONS_TAB } from './assistant_settings';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 
 interface Props {
-  defaultConnectorId?: string;
-  defaultProvider?: OpenAiProviderType;
+  defaultConnector?: AIConnector;
   isSettingsModalVisible: boolean;
   selectedConversation: Conversation;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -31,8 +30,7 @@ interface Props {
  */
 export const AssistantSettingsButton: React.FC<Props> = React.memo(
   ({
-    defaultConnectorId,
-    defaultProvider,
+    defaultConnector,
     isDisabled = false,
     isSettingsModalVisible,
     setIsSettingsModalVisible,
@@ -86,8 +84,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
 
         {isSettingsModalVisible && (
           <AssistantSettings
-            defaultConnectorId={defaultConnectorId}
-            defaultProvider={defaultProvider}
+            defaultConnector={defaultConnector}
             selectedConversation={selectedConversation}
             onConversationSelected={onConversationSelected}
             onClose={handleCloseModal}

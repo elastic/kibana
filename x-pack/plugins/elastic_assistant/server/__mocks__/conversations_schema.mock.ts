@@ -43,7 +43,6 @@ export const getConversationSearchEsMock = () => {
             namespace: 'default',
             id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
             title: 'test',
-            api_config: {},
             exclude_from_last_conversation_storage: true,
             is_default: false,
             messages: [],
@@ -129,7 +128,11 @@ export const getConversationMock = (
   params: ConversationCreateProps | ConversationUpdateProps
 ): ConversationResponse => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-  apiConfig: {},
+  apiConfig: {
+    connectorId: '1',
+    defaultSystemPromptId: 'Default',
+    connectorTypeTitle: 'OpenAI',
+  },
   replacements: {},
   title: 'test',
   ...params,

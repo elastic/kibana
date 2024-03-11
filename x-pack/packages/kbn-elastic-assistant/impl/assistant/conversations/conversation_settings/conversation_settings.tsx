@@ -12,11 +12,12 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { noop } from 'lodash/fp';
+import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { Conversation, Prompt } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
 
-import { ConnectorSelector } from '../../../connectorland/connector_selector';
+import { AIConnector, ConnectorSelector } from '../../../connectorland/connector_selector';
 import { SelectSystemPrompt } from '../../prompt_editor/system_prompt/select_system_prompt';
 import { ModelSelector } from '../../../connectorland/models/model_selector/model_selector';
 import { ConversationSelectorSettings } from '../conversation_selector_settings';
@@ -26,14 +27,14 @@ import { getGenAiConfig } from '../../../connectorland/helpers';
 import { ConversationsBulkActions } from '../../api';
 
 export interface ConversationSettingsProps {
+  actionTypeRegistry: ActionTypeRegistryContract;
   allSystemPrompts: Prompt[];
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
-  defaultConnectorId?: string;
-  defaultProvider?: OpenAiProviderType;
+  defaultConnector?: AIConnector;
   http: HttpSetup;
-  onSelectedConversationChange: (conversation?: Conversation) => void;
-  selectedConversation: Conversation | undefined;
+  onSelectedConversationChange: (conversation: Conversation) => void;
+  selectedConversation: Conversation;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setConversationsSettingsBulkActions: React.Dispatch<
     React.SetStateAction<ConversationsBulkActions>
@@ -46,9 +47,9 @@ export interface ConversationSettingsProps {
  */
 export const ConversationSettings: React.FC<ConversationSettingsProps> = React.memo(
   ({
+    actionTypeRegistry,
     allSystemPrompts,
-    defaultConnectorId,
-    defaultProvider,
+    defaultConnector,
     selectedConversation,
     onSelectedConversationChange,
     conversationSettings,
@@ -66,13 +67,17 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
       return getDefaultSystemPrompt({ allSystemPrompts, conversation: selectedConversation });
     }, [allSystemPrompts, selectedConversation]);
 
-    const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({ http });
+    const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
+      actionTypeRegistry,
+      http,
+    });
 
     // Conversation callbacks
     // When top level conversation selection changes
     const onConversationSelectionChange = useCallback(
       (c?: Conversation | string) => {
         const isNew = typeof c === 'string';
+
         const newSelectedConversation: Conversation | undefined = isNew
           ? {
               id: '',
@@ -80,11 +85,16 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               category: 'assistant',
               messages: [],
               replacements: {},
-              apiConfig: {
-                connectorId: defaultConnectorId,
-                provider: defaultProvider,
-                defaultSystemPromptId: defaultSystemPrompt?.id,
-              },
+              ...(defaultConnector
+                ? {
+                    apiConfig: {
+                      connectorId: defaultConnector.id,
+                      connectorTypeTitle: defaultConnector.connectorTypeTitle,
+                      provider: defaultConnector.apiProvider,
+                      defaultSystemPromptId: defaultSystemPrompt?.id,
+                    },
+                  }
+                : {}),
             }
           : c;
 
@@ -109,13 +119,14 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           });
         }
 
-        onSelectedConversationChange(newSelectedConversation);
+        if (newSelectedConversation) {
+          onSelectedConversationChange(newSelectedConversation);
+        }
       },
       [
         conversationSettings,
         conversationsSettingsBulkActions,
-        defaultConnectorId,
-        defaultProvider,
+        defaultConnector,
         defaultSystemPrompt?.id,
         onSelectedConversationChange,
         setConversationSettings,
@@ -126,9 +137,9 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     const onConversationDeleted = useCallback(
       (conversationTitle: string) => {
         const conversationId = conversationSettings[conversationTitle].id;
-        const updatedConverationSettings = { ...conversationSettings };
-        delete updatedConverationSettings[conversationTitle];
-        setConversationSettings(updatedConverationSettings);
+        const updatedConversationSettings = { ...conversationSettings };
+        delete updatedConversationSettings[conversationTitle];
+        setConversationSettings(updatedConversationSettings);
 
         setConversationsSettingsBulkActions({
           ...conversationsSettingsBulkActions,
@@ -147,7 +158,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
 
     const handleOnSystemPromptSelectionChange = useCallback(
       (systemPromptId?: string | undefined) => {
-        if (selectedConversation != null) {
+        if (selectedConversation != null && selectedConversation.apiConfig) {
           const updatedConversation = {
             ...selectedConversation,
             apiConfig: {
@@ -201,16 +212,16 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     );
 
     const selectedConnector = useMemo(() => {
-      const selectedConnectorId = selectedConversation?.apiConfig.connectorId;
+      const selectedConnectorId = selectedConversation.apiConfig?.connectorId;
       if (areConnectorsFetched) {
         return connectors?.find((c) => c.id === selectedConnectorId);
       }
       return undefined;
-    }, [areConnectorsFetched, connectors, selectedConversation?.apiConfig.connectorId]);
+    }, [areConnectorsFetched, connectors, selectedConversation.apiConfig?.connectorId]);
 
     const selectedProvider = useMemo(
-      () => selectedConversation?.apiConfig.provider,
-      [selectedConversation?.apiConfig.provider]
+      () => selectedConversation.apiConfig?.provider,
+      [selectedConversation.apiConfig?.provider]
     );
 
     const handleOnConnectorSelectionChange = useCallback(
@@ -221,8 +232,8 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             ...selectedConversation,
             apiConfig: {
               ...selectedConversation.apiConfig,
-              connectorId: connector?.id,
-              connectorTypeTitle: connector?.connectorTypeTitle,
+              connectorId: connector.id,
+              connectorTypeTitle: connector.connectorTypeTitle,
               provider: config?.apiProvider,
               model: config?.defaultModel,
             },
@@ -278,12 +289,12 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     const selectedModel = useMemo(() => {
       const connectorModel = getGenAiConfig(selectedConnector)?.defaultModel;
       // Prefer conversation configuration over connector default
-      return selectedConversation?.apiConfig.model ?? connectorModel;
-    }, [selectedConnector, selectedConversation?.apiConfig.model]);
+      return selectedConversation.apiConfig?.model ?? connectorModel;
+    }, [selectedConnector, selectedConversation.apiConfig?.model]);
 
     const handleOnModelSelectionChange = useCallback(
       (model?: string) => {
-        if (selectedConversation != null) {
+        if (selectedConversation != null && selectedConversation.apiConfig) {
           const updatedConversation = {
             ...selectedConversation,
             apiConfig: {

@@ -19,7 +19,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { AIConnector } from '../../../connectorland/connector_selector';
 import { Conversation } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
 import * as i18n from './translations';
@@ -30,8 +30,7 @@ import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/sy
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 interface Props {
-  defaultConnectorId?: string;
-  defaultProvider?: OpenAiProviderType;
+  defaultConnector?: AIConnector;
   selectedConversationTitle: string | undefined;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   onConversationDeleted: (conversationId: string) => void;
@@ -67,8 +66,7 @@ export type ConversationSelectorOption = EuiComboBoxOptionOption<{
 export const ConversationSelector: React.FC<Props> = React.memo(
   ({
     selectedConversationTitle = DEFAULT_CONVERSATION_TITLE,
-    defaultConnectorId,
-    defaultProvider,
+    defaultConnector,
     onConversationSelected,
     onConversationDeleted,
     shouldDisableKeyboardShortcut = () => false,
@@ -116,11 +114,16 @@ export const ConversationSelector: React.FC<Props> = React.memo(
             category: 'assistant',
             messages: [],
             replacements: {},
-            apiConfig: {
-              connectorId: defaultConnectorId,
-              provider: defaultProvider,
-              defaultSystemPromptId: defaultSystemPrompt?.id,
-            },
+            ...(defaultConnector
+              ? {
+                  apiConfig: {
+                    connectorId: defaultConnector.id,
+                    connectorTypeTitle: defaultConnector.connectorTypeTitle,
+                    provider: defaultConnector.apiProvider,
+                    defaultSystemPromptId: defaultSystemPrompt?.id,
+                  },
+                }
+              : {}),
           };
           createdConversation = await createConversation(newConversation);
         }
@@ -131,13 +134,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
             : { cId: '', cTitle: DEFAULT_CONVERSATION_TITLE }
         );
       },
-      [
-        allSystemPrompts,
-        onConversationSelected,
-        defaultConnectorId,
-        defaultProvider,
-        createConversation,
-      ]
+      [allSystemPrompts, onConversationSelected, defaultConnector, createConversation]
     );
 
     // Callback for when user deletes a conversation

@@ -10,7 +10,6 @@ import React from 'react';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Assistant } from '.';
 import type { IHttpFetchError } from '@kbn/core/public';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { useConnectorSetup } from '../connectorland/connector_setup';
@@ -26,6 +25,7 @@ import { useFetchCurrentUserConversations } from './api';
 import { Conversation } from '../assistant_context/types';
 import * as all from './chat_send/use_chat_send';
 import { useConversation } from './use_conversation';
+import { AIConnector } from '../connectorland/connector_selector';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');
@@ -50,7 +50,7 @@ const mockData = {
     title: 'Welcome',
     category: 'assistant',
     messages: [],
-    apiConfig: {},
+    apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
     replacements: {},
   },
   'electric sheep': {
@@ -58,7 +58,7 @@ const mockData = {
     category: 'assistant',
     title: 'electric sheep',
     messages: [],
-    apiConfig: {},
+    apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
     replacements: {},
   },
 };
@@ -89,7 +89,7 @@ describe('Assistant', () => {
     jest.mocked(useLoadConnectors).mockReturnValue({
       isSuccess: true,
       data: connectors,
-    } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
+    } as unknown as UseQueryResult<AIConnector[], IHttpFetchError>);
 
     jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
       data: mockData,
@@ -169,7 +169,7 @@ describe('Assistant', () => {
       expect(chatSendSpy).toHaveBeenLastCalledWith(
         expect.objectContaining({
           currentConversation: {
-            apiConfig: {},
+            apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
             replacements: {},
             category: 'assistant',
             id: 'Welcome Id',
