@@ -90,7 +90,11 @@ const getTags = (filePath, testSuits) => {
     tags.push('SERVERLESS');
   }
 
-  if (filePath.startsWith(FTR_API_INTEGRATION) || filePath.startsWith(FTR_CSP_API)) {
+  if (
+    filePath.startsWith(FTR_API_INTEGRATION) ||
+    filePath.startsWith(FTR_CSP_API) ||
+    filePath.startsWith(FTR_SERVERLESS_API_INTEGRATION)
+  ) {
     tags.push('API INTEGRATION');
   }
 

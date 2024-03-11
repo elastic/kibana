@@ -9821,7 +9821,8 @@
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
     "tags": [
       "FTR",
-      "SERVERLESS"
+      "SERVERLESS",
+      "API INTEGRATION"
     ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/benchmark')",
@@ -9943,7 +9944,8 @@
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
     "tags": [
       "FTR",
-      "SERVERLESS"
+      "SERVERLESS",
+      "API INTEGRATION"
     ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/benchmark')",
@@ -10002,7 +10004,8 @@
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
     "tags": [
       "FTR",
-      "SERVERLESS"
+      "SERVERLESS",
+      "API INTEGRATION"
     ],
     "lines": [
       "  describe('GET internal/cloud_security_posture/rules/_find')",
@@ -10187,7 +10190,8 @@
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
     "tags": [
       "FTR",
-      "SERVERLESS"
+      "SERVERLESS",
+      "API INTEGRATION"
     ],
     "lines": [
       "  describe('cloud_security_posture')"
@@ -10223,7 +10227,8 @@
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
     "tags": [
       "FTR",
-      "SERVERLESS"
+      "SERVERLESS",
+      "API INTEGRATION"
     ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/status')",
@@ -10347,7 +10352,8 @@
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
     "tags": [
       "FTR",
-      "SERVERLESS"
+      "SERVERLESS",
+      "API INTEGRATION"
     ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/status')",
@@ -10471,7 +10477,8 @@
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
     "tags": [
       "FTR",
-      "SERVERLESS"
+      "SERVERLESS",
+      "API INTEGRATION"
     ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/status')",
@@ -10595,7 +10602,8 @@
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
     "tags": [
       "FTR",
-      "SERVERLESS"
+      "SERVERLESS",
+      "API INTEGRATION"
     ],
     "lines": [
       "  describe('Verify cloud_security_posture telemetry payloads')",
