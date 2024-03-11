@@ -190,6 +190,7 @@ export enum FeatureName {
   FILTERING_RULES = 'filtering_rules',
   DOCUMENT_LEVEL_SECURITY = 'document_level_security',
   INCREMENTAL_SYNC = 'incremental_sync',
+  NATIVE_CONNECTOR_API_KEYS = 'native_connector_api_keys',
   SYNC_RULES = 'sync_rules',
 }
 
@@ -198,6 +199,7 @@ export type ConnectorFeatures = Partial<{
   [FeatureName.FILTERING_ADVANCED_CONFIG]: boolean;
   [FeatureName.FILTERING_RULES]: boolean;
   [FeatureName.INCREMENTAL_SYNC]: { enabled: boolean };
+  [FeatureName.NATIVE_CONNECTOR_API_KEYS]: { enabled: boolean };
   [FeatureName.SYNC_RULES]: {
     advanced?: {
       enabled: boolean;
