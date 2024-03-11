@@ -78,3 +78,7 @@ export const buildRequiredCustomFieldsForRequest = (
         })
     : [];
 };
+
+export const constructRequiredKibanaPrivileges = (owner: string): string[] => {
+  return [`cases:${owner}/createCase`, `cases:${owner}/updateCase`];
+};

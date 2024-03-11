@@ -16,6 +16,7 @@ import {
   isRecordError,
   partitionRecordsByError,
   buildRequiredCustomFieldsForRequest,
+  constructRequiredKibanaPrivileges,
 } from './utils';
 
 describe('utils', () => {
@@ -234,6 +235,15 @@ describe('utils', () => {
       expect(buildRequiredCustomFieldsForRequest(customFieldsConfiguration).length).toEqual(
         customFieldsConfiguration.length
       );
+    });
+  });
+
+  describe('constructRequiredKibanaPrivileges', () => {
+    it('construct the required kibana privileges correctly', () => {
+      expect(constructRequiredKibanaPrivileges('my-owner')).toEqual([
+        'cases:my-owner/createCase',
+        'cases:my-owner/updateCase',
+      ]);
     });
   });
 });

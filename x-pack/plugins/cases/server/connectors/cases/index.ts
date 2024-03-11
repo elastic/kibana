@@ -14,6 +14,7 @@ import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE } from './constants';
 import type { CasesConnectorConfig, CasesConnectorSecrets } from './types';
 import { CasesConnectorConfigSchema, CasesConnectorSecretsSchema } from './schema';
 import type { CasesClient } from '../../client';
+import { constructRequiredKibanaPrivileges } from './utils';
 
 interface GetCasesConnectorTypeArgs {
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
@@ -53,4 +54,13 @@ export const getCasesConnectorType = ({
    */
   minimumLicenseRequired: 'platinum' as const,
   isSystemActionType: true,
+  getKibanaPrivileges: ({ params } = { params: { subAction: 'run', subActionParams: {} } }) => {
+    const owner = params?.subActionParams?.owner as string;
+
+    if (!owner) {
+      throw new Error('Cannot authorize cases. Owner is not defined in the subActionParams.');
+    }
+
+    return constructRequiredKibanaPrivileges(owner);
+  },
 });
