@@ -39,16 +39,22 @@ export type IModalTabContent<S extends IModalTabState> = (props: {
 }) => ReactElement;
 
 interface IModalTabActionBtn<S> extends CommonProps {
-  label: string;
-  handler: (args: { state: S }) => void;
+  id: string;
+  dataTestSubj: string;
+  defaultMessage: string;
+  formattedMessageId: string;
+  handler?: (args: { state: S }) => void;
 }
 
 export interface IModalTabDeclaration<S extends IModalTabState> extends EuiTabProps {
   id: string;
-  title: string;
+  title?: string;
+  name: string;
   initialState?: Partial<S>;
   reducer?: IReducer<S>;
-  content: IModalTabContent<S>;
+  description?: ReactElement;
+  'data-test-subj'?: string;
+  content?: IModalTabContent<S>;
   modalActionBtn: IModalTabActionBtn<S>;
 }
 
