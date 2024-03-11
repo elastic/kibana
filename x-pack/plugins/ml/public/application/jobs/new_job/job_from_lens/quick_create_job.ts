@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type {
   ChartInfo,
-  Embeddable,
   LensPublicStart,
   LensSavedObjectAttributes,
 } from '@kbn/lens-plugin/public';
@@ -17,7 +16,7 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-
+import type { LensApi } from '@kbn/lens-plugin/public';
 import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
 import { stashJobForCloning } from '../common/job_creator/util/general';
@@ -51,7 +50,7 @@ export class QuickLensJobCreator extends QuickJobCreatorBase {
   public async createAndSaveJob(
     jobId: string,
     bucketSpan: string,
-    embeddable: Embeddable,
+    embeddable: LensApi,
     startJob: boolean,
     runInRealTime: boolean,
     layerIndex: number
