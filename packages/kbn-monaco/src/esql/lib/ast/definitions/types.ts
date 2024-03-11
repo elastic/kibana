@@ -25,7 +25,6 @@ export interface FunctionDefinition {
       supportsWildcard?: boolean;
       literalOnly?: boolean;
     }>;
-    infiniteParams?: boolean;
     minParams?: number;
     returnType: string;
     examples?: string[];

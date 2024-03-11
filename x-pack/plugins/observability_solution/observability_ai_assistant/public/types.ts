@@ -46,6 +46,7 @@ import type { ChatActionClickHandler } from './components/chat/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { InsightProps } from './components/insight/insight';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
+import type { UseUserPreferredLanguageResult } from './hooks/use_user_preferred_language';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -70,6 +71,7 @@ export interface ObservabilityAIAssistantChatService {
     messages: Message[];
     persist: boolean;
     signal: AbortSignal;
+    responseLanguage: string;
   }) => Observable<StreamingChatResponseEventWithoutError>;
   getContexts: () => ContextDefinition[];
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
@@ -147,4 +149,5 @@ export interface ObservabilityAIAssistantPluginStart {
       RefAttributes<{}>
   > | null;
   useGenAIConnectors: () => UseGenAIConnectorsResult;
+  useUserPreferredLanguage: () => UseUserPreferredLanguageResult;
 }

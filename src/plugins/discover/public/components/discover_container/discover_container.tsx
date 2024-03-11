@@ -14,10 +14,9 @@ import { css } from '@emotion/react';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverMainRoute } from '../../application/main';
 import type { DiscoverServices } from '../../build_services';
-import type { CustomizationCallback } from '../../customizations';
+import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import { setHeaderActionMenuMounter, setScopedHistory } from '../../kibana_services';
 import { LoadingIndicator } from '../common/loading_indicator';
-import type { DiscoverCustomizationContext } from '../../application/types';
 
 export interface DiscoverContainerInternalProps {
   /*
@@ -48,7 +47,10 @@ const discoverContainerWrapperCss = css`
 
 const customizationContext: DiscoverCustomizationContext = {
   displayMode: 'embedded',
-  showLogsExplorerTabs: false,
+  inlineTopNav: {
+    enabled: false,
+    showLogsExplorerTabs: false,
+  },
 };
 
 export const DiscoverContainerInternal = ({
