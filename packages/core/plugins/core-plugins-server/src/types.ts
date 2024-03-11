@@ -269,6 +269,8 @@ export interface PluginManifest {
    * configured, etc.) Default is false.
    */
   readonly enabledOnAnonymousPages?: boolean;
+
+  readonly nodeRoles? : string[];
 }
 
 /**

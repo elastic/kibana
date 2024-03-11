@@ -109,6 +109,7 @@ export interface PluginPackageManifest extends PackageManifestBaseFields {
     type?: 'preboot';
     extraPublicDirs?: string[];
     [PLUGIN_CATEGORY]?: PluginCategoryInfo;
+    nodeRoles?: string[];
   };
 }
 
@@ -170,6 +171,10 @@ export interface PluginSelector {
    * When set to true, only select plugins which have browser-side components
    */
   browser?: boolean;
+  /**
+   * When set, only loads plugins for specific node roles
+   */
+  nodeRoles?: NodeRoles;
 }
 
 export interface KbnImportReq {
@@ -194,4 +199,22 @@ export interface PluginCategoryInfo {
   example: boolean;
   /** is this a test plugin? */
   testPlugin: boolean;
+}
+
+interface NodeRoles {
+  /**
+   * The backgroundTasks role includes operations which don't involve
+   * responding to incoming http traffic from the UI.
+   */
+  backgroundTasks: boolean;
+  /**
+   * The ui role covers any operations that need to occur in order
+   * to handle http traffic from the browser.
+   */
+  ui: boolean;
+  /**
+   * Start Kibana with the specific purpose of completing the migrations phase then shutting down.
+   * @remark This role is special as it precludes the use of other roles.
+   */
+  migrator: boolean;
 }

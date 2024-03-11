@@ -66,6 +66,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     enabledOnAnonymousPages,
     type,
     __category__,
+    nodeRoles,
   } = plugin;
 
   if (!isValidPluginId(id)) {
@@ -154,6 +155,18 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     );
   }
 
+  if (nodeRoles !== undefined && !isArrOfStrings(nodeRoles)) {
+    throw err(`plugin.nodeRoles`, nodeRoles, `must be an array of strings`);
+  }
+
+  if (isArrOfStrings(nodeRoles)) {
+    for (const role of nodeRoles) {
+      if (!['ui', 'background_tasks'].includes(role)) {
+        throw err(`plugin.nodeRoles[]`, nodeRoles, `must be either "ui" or "background_tasks"`);
+      }
+    }
+  }
+
   return {
     id,
     browser,
@@ -167,6 +180,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     enabledOnAnonymousPages,
     extraPublicDirs,
     [PLUGIN_CATEGORY]: __category__,
+    nodeRoles,
   };
 }
 

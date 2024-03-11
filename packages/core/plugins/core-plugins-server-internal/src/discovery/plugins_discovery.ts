@@ -68,6 +68,7 @@ export function discover({
         examples: coreContext.env.cliArgs.runExamples,
         paths: config.additionalPluginPaths,
         parentDirs: config.pluginSearchPaths,
+        nodeRoles: nodeInfo.roles,
       })
     ),
     map((pkg) => {

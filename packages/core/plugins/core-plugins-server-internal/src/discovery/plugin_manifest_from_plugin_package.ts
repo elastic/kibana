@@ -32,5 +32,6 @@ export function pluginManifestFromPluginPackage(
     server: manifest.plugin.server,
     ui: manifest.plugin.browser,
     configPath: manifest.plugin.configPath ?? snakeCase(manifest.plugin.id),
+    nodeRoles: manifest.plugin.nodeRoles,
   };
 }
