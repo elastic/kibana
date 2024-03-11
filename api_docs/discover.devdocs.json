@@ -1795,18 +1795,34 @@
         },
         {
           "parentPluginId": "discover",
-          "id": "def-public.DiscoverSetup.showLogsExplorerTabs",
+          "id": "def-public.DiscoverSetup.showInlineTopNav",
           "type": "Function",
           "tags": [],
-          "label": "showLogsExplorerTabs",
+          "label": "showInlineTopNav",
           "description": [],
           "signature": [
-            "() => void"
+            "(options?: Partial<Omit<{ enabled: boolean; showLogsExplorerTabs: boolean; }, \"enabled\">> | undefined) => void"
           ],
           "path": "src/plugins/discover/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false,
-          "children": [],
+          "children": [
+            {
+              "parentPluginId": "discover",
+              "id": "def-public.DiscoverSetup.showInlineTopNav.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "signature": [
+                "Partial<Omit<{ enabled: boolean; showLogsExplorerTabs: boolean; }, \"enabled\">> | undefined"
+              ],
+              "path": "src/plugins/discover/public/plugin.tsx",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
           "returnComment": []
         }
       ],

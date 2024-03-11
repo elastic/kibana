@@ -66,7 +66,7 @@ export function ApmMainTemplate({
   const basePath = http?.basePath.get();
   const { config } = useApmPluginContext();
 
-  const aiAssistant = services.observabilityAIAssistant.service;
+  const aiAssistant = services.observabilityAIAssistant;
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
@@ -119,7 +119,7 @@ export function ApmMainTemplate({
   });
 
   useEffect(() => {
-    return aiAssistant.setScreenContext({
+    return aiAssistant.service.setScreenContext({
       screenDescription: [
         hasApmData
           ? 'The user has APM data.'

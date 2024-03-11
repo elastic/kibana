@@ -13,9 +13,9 @@ export const websiteSearchGuideId = 'websiteSearch';
 export const databaseSearchGuideId = 'databaseSearch';
 
 const apiRoutes = {
-  [appSearchGuideId]: 'api',
-  [databaseSearchGuideId]: 'select_connector',
-  [websiteSearchGuideId]: 'crawler',
+  [appSearchGuideId]: '/search_indices/new_index/api',
+  [databaseSearchGuideId]: '/connectors/select_connector',
+  [websiteSearchGuideId]: '/crawlers',
 };
 
 export type EnterpriseSearchGuideIds =
@@ -35,7 +35,7 @@ const getAddDataStep: (method?: EnterpriseSearchGuideIds) => StepConfig = (metho
     }),
     location: {
       appID: 'enterpriseSearchContent',
-      path: `/search_indices/new_index/${method ? apiRoutes[method] : ''}`,
+      path: `${method ? apiRoutes[method] : '/search_indices/new_index'}`,
     },
   };
 };
