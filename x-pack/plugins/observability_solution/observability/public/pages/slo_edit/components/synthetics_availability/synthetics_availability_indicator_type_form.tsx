@@ -9,6 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiCallOut } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
 import { useFormContext } from 'react-hook-form';
+import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
+import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../synthetics_common/field_selector';
 import { DataPreviewChart } from '../common/data_preview_chart';
@@ -18,6 +20,7 @@ const ONE_DAY_IN_MILLISECONDS = 1 * 60 * 60 * 1000 * 24;
 
 export function SyntheticsAvailabilityIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm<SyntheticsAvailabilityIndicator>>();
+  const dataViewId = watch(DATA_VIEW_FIELD);
 
   const [monitorIds = [], projects = [], tags = [], index] = watch([
     'indicator.params.monitorIds',
@@ -25,6 +28,11 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
     'indicator.params.tags',
     'indicator.params.index',
   ]);
+
+  const { dataView } = useCreateDataView({
+    indexPatternString: index,
+    dataViewId,
+  });
 
   const [range, _] = useState({
     start: new Date().getTime() - ONE_DAY_IN_MILLISECONDS,
@@ -104,7 +112,7 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
         <EuiFlexItem>
           <QueryBuilder
             dataTestSubj="syntheticsAvailabilityFilterInput"
-            indexPatternString={index}
+            dataView={dataView}
             label={i18n.translate('xpack.observability.slo.sloEdit.syntheticsAvailability.filter', {
               defaultMessage: 'Query filter',
             })}

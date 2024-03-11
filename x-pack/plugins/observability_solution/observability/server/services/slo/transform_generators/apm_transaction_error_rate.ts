@@ -27,6 +27,7 @@ import { parseIndex } from './common';
 export class ApmTransactionErrorRateTransformGenerator extends TransformGenerator {
   public async getTransformParams(
     slo: SLO,
+    spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest> {
     if (!apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) {
@@ -120,7 +121,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
 
     const dataView = await this.getIndicatorDataView({
       dataViewService,
-      dataViewId: indicator.params.index,
+      dataViewId: indicator.params.dataViewId,
     });
 
     if (indicator.params.filter) {

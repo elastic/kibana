@@ -12,6 +12,7 @@ import {
   syntheticsAvailabilityIndicatorSchema,
   occurrencesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   getSLOTransformId,
@@ -23,7 +24,11 @@ import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo
 import { SyntheticsAvailabilityIndicator, SLO } from '../../../domain/models';
 import { InvalidTransformError } from '../../../errors';
 export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator {
-  public getTransformParams(slo: SLO, spaceId: string): TransformPutTransformRequest {
+  public async getTransformParams(
+    slo: SLO,
+    spaceId: string,
+    dataViewService: DataViewsService
+  ): Promise<TransformPutTransformRequest> {
     if (!syntheticsAvailabilityIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -31,7 +36,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
-      this.buildSource(slo, slo.indicator, spaceId),
+      await this.buildSource(slo, slo.indicator, spaceId, dataViewService),
       this.buildDestination(),
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo),
@@ -95,7 +100,12 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     );
   }
 
-  private buildSource(slo: SLO, indicator: SyntheticsAvailabilityIndicator, spaceId: string) {
+  private async buildSource(
+    slo: SLO,
+    indicator: SyntheticsAvailabilityIndicator,
+    spaceId: string,
+    dataViewService: DataViewsService
+  ) {
     const queryFilter: estypes.QueryDslQueryContainer[] = [
       { term: { 'summary.final_attempt': true } },
       { term: { 'meta.space_id': spaceId } },
@@ -141,11 +151,14 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
     }
 
+    const dataView = await this.getIndicatorDataView({
+      dataViewService,
+      dataViewId: indicator.params.dataViewId,
+    });
+
     return {
       index: SYNTHETICS_INDEX_PATTERN,
-      runtime_mappings: {
-        ...this.buildCommonRuntimeMappings(slo),
-      },
+      runtime_mappings: this.buildCommonRuntimeMappings(slo, dataView),
       query: {
         bool: {
           filter: queryFilter,

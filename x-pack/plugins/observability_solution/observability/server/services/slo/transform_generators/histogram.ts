@@ -27,6 +27,7 @@ import { GetHistogramIndicatorAggregation } from '../aggregations';
 export class HistogramTransformGenerator extends TransformGenerator {
   public async getTransformParams(
     slo: SLO,
+    spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest> {
     if (!histogramIndicatorSchema.is(slo.indicator)) {

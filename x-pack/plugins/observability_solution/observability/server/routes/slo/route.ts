@@ -244,7 +244,11 @@ const deleteSLORoute = createObservabilityServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
     const rulesClient = dependencies.getRulesClientWithRequest(request);
-    const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
+
+    const dataViewsService = await dependencies.dataViews.dataViewsServiceFactory(
+      soClient,
+      esClient
+    );
 
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const transformManager = new DefaultTransformManager(

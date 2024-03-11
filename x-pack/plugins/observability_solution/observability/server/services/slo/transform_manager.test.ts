@@ -206,6 +206,7 @@ describe('TransformManager', () => {
 class DummyTransformGenerator extends TransformGenerator {
   async getTransformParams(
     slo: SLO,
+    spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest> {
     return {} as TransformPutTransformRequest;
@@ -215,6 +216,7 @@ class DummyTransformGenerator extends TransformGenerator {
 class FailTransformGenerator extends TransformGenerator {
   getTransformParams(
     slo: SLO,
+    spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest> {
     throw new Error('Some error');

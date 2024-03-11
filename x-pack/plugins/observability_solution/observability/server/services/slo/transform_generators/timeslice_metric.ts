@@ -30,6 +30,7 @@ const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\
 export class TimesliceMetricTransformGenerator extends TransformGenerator {
   public async getTransformParams(
     slo: SLO,
+    spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest> {
     if (!timesliceMetricIndicatorSchema.is(slo.indicator)) {

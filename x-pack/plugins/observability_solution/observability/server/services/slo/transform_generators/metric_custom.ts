@@ -25,6 +25,7 @@ export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?
 export class MetricCustomTransformGenerator extends TransformGenerator {
   public async getTransformParams(
     slo: SLO,
+    spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest> {
     if (!metricCustomIndicatorSchema.is(slo.indicator)) {
@@ -53,7 +54,7 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
   ) {
     const dataView = await this.getIndicatorDataView({
       dataViewService,
-      dataViewId: indicator.params.index,
+      dataViewId: indicator.params.dataViewId,
     });
     return {
       index: parseIndex(indicator.params.index),

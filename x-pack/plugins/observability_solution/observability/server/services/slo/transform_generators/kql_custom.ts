@@ -22,6 +22,7 @@ import { KQLCustomIndicator, SLO } from '../../../domain/models';
 export class KQLCustomTransformGenerator extends TransformGenerator {
   public async getTransformParams(
     slo: SLO,
+    spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest> {
     if (!kqlCustomIndicatorSchema.is(slo.indicator)) {
@@ -50,7 +51,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
   ) {
     const dataView = await this.getIndicatorDataView({
       dataViewService,
-      dataViewId: indicator.params.index,
+      dataViewId: indicator.params.dataViewId,
     });
     return {
       index: parseIndex(indicator.params.index),

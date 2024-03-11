@@ -244,6 +244,7 @@ const syntheticsAvailabilityIndicatorSchema = t.type({
       tags: t.array(syntheticsParamSchema),
       projects: t.array(syntheticsParamSchema),
       filter: querySchema,
+      dataViewId: t.string,
     }),
   ]),
 });
