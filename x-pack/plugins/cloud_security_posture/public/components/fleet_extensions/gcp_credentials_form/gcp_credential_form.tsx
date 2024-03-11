@@ -25,22 +25,24 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { GcpCredentialsType } from '../../../common/types_old';
+
+import { GcpCredentialsType } from '../../../../common/types_old';
 import {
   CLOUDBEAT_GCP,
   SETUP_ACCESS_CLOUD_SHELL,
   SETUP_ACCESS_MANUAL,
-} from '../../../common/constants';
-import { CspRadioOption, RadioGroup } from './csp_boxed_radio_group';
+} from '../../../../common/constants';
+import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import {
   getCspmCloudShellDefaultValue,
   getPosturePolicy,
   NewPackagePolicyPostureInput,
-} from './utils';
-import { MIN_VERSION_GCP_CIS } from '../../common/constants';
-import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
-import { ReadDocumentation } from './aws_credentials_form/aws_credentials_form';
-import { GCP_ORGANIZATION_ACCOUNT } from './policy_template_form';
+} from '../utils';
+import { MIN_VERSION_GCP_CIS } from '../../../common/constants';
+import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
+import { ReadDocumentation } from '../aws_credentials_form/aws_credentials_form';
+import { GCP_ORGANIZATION_ACCOUNT } from '../policy_template_form';
+import { GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ } from '../../test_subjects';
 
 export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
   GOOGLE_CLOUD_SHELL_SETUP: 'google_cloud_shell_setup_test_id',
@@ -51,7 +53,7 @@ export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
   CREDENTIALS_JSON: 'credentials_json_test_id',
 };
 type SetupFormatGCP = 'google_cloud_shell' | 'manual';
-const GCPSetupInfoContent = () => (
+export const GCPSetupInfoContent = () => (
   <>
     <EuiHorizontalRule margin="xl" />
     <EuiTitle size="xs">
@@ -238,7 +240,7 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
       defaultMessage: 'Google Cloud Shell',
     }),
     disabled: false,
-    testId: 'gcpGoogleCloudShellOptionTestId',
+    testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUD_SHELL,
   },
   {
     id: SETUP_ACCESS_MANUAL,
@@ -246,11 +248,11 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
       defaultMessage: 'Manual',
     }),
     disabled: false,
-    testId: 'gcpManualOptionTestId',
+    testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL,
   },
 ];
 
-interface GcpFormProps {
+export interface GcpFormProps {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
@@ -486,7 +488,7 @@ export const GcpCredentialsForm = ({
   );
 };
 
-const GcpInputVarFields = ({
+export const GcpInputVarFields = ({
   fields,
   onChange,
   isOrganization,
@@ -511,7 +513,10 @@ const GcpInputVarFields = ({
   const credentialFieldValue = credentialOptionsList[0].value;
   const credentialJSONValue = credentialOptionsList[1].value;
 
-  const credentialsTypeValue = credentialsTypeFields?.value || credentialOptionsList[0].value;
+  const credentialsTypeValue =
+    credentialsTypeFields?.value ||
+    (credentialFilesFields && credentialFieldValue) ||
+    (credentialJSONFields && credentialJSONValue);
 
   return (
     <div>
