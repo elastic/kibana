@@ -6,14 +6,30 @@
  */
 
 import expect from 'expect';
+import cspParser from 'content-security-policy-parser';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
 
+  function expectMatchesCSP(baseCSP: string, actualCSP: string) {
+    const baseCSPMap = cspParser(baseCSP);
+    const actualCSPMap = cspParser(actualCSP);
+    for (const [directive, values] of baseCSPMap) {
+      expect(actualCSPMap.has(directive)).toBeTruthy();
+      for (const value of values) {
+        expect(actualCSPMap.get(directive)).toContain(value);
+      }
+    }
+  }
+
   describe('security/response_headers', function () {
-    const defaultCSP = `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; frame-ancestors 'self'`;
+    /**
+     * Serverless might contain more CSP directives and rules, we assert
+     * against a smaller set.
+     */
+    const baseCSP = `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; frame-ancestors 'self'`;
     const defaultCOOP = 'same-origin';
     const defaultPermissionsPolicy =
       'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()';
@@ -29,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(header).toBeDefined();
-      expect(header['content-security-policy']).toEqual(defaultCSP);
+      expectMatchesCSP(baseCSP, header['content-security-policy'] ?? '');
       expect(header['cross-origin-opener-policy']).toEqual(defaultCOOP);
       expect(header['permissions-policy']).toEqual(defaultPermissionsPolicy);
       expect(header['strict-transport-security']).toEqual(defaultStrictTransportSecurity);
@@ -45,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(header).toBeDefined();
-      expect(header['content-security-policy']).toEqual(defaultCSP);
+      expectMatchesCSP(baseCSP, header['content-security-policy'] ?? '');
       expect(header['cross-origin-opener-policy']).toEqual(defaultCOOP);
       expect(header['permissions-policy']).toEqual(defaultPermissionsPolicy);
       expect(header['strict-transport-security']).toEqual(defaultStrictTransportSecurity);
