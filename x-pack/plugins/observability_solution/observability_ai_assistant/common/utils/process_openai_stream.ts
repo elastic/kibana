@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import OpenAI from 'openai';
 import { filter, map, Observable, tap } from 'rxjs';
 import { v4 } from 'uuid';
 import {
@@ -12,7 +13,14 @@ import {
   createTokenLimitReachedError,
   StreamingChatResponseEventType,
 } from '../conversation_complete';
-import type { CreateChatCompletionResponseChunk } from '../types';
+
+export type CreateChatCompletionResponseChunk = Omit<OpenAI.ChatCompletionChunk, 'choices'> & {
+  choices: Array<
+    Omit<OpenAI.ChatCompletionChunk.Choice, 'message'> & {
+      delta: { content?: string; function_call?: { name?: string; arguments?: string } };
+    }
+  >;
+};
 
 export function processOpenAiStream() {
   return (source: Observable<string>): Observable<ChatCompletionChunkEvent> => {
