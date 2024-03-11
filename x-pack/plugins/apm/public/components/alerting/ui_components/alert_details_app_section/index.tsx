@@ -44,6 +44,9 @@ export function AlertDetailsAppSection({
   timeZone,
   setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) {
+  const { services } = useKibana();
+  createCallApmApi(services as CoreStart);
+
   const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID];
   const alertEvaluationValue = alert.fields[ALERT_EVALUATION_VALUE];
   const alertEvaluationThreshold = alert.fields[ALERT_EVALUATION_THRESHOLD];
@@ -104,12 +107,6 @@ export function AlertDetailsAppSection({
     serviceName,
     setAlertSummaryFields,
   ]);
-
-  const { services } = useKibana();
-
-  useEffect(() => {
-    createCallApmApi(services as CoreStart);
-  }, [services]);
 
   const params = rule.params;
   const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
