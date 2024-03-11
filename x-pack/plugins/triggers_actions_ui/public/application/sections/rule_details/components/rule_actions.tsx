@@ -15,13 +15,14 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isSystemAction, RuleDefaultAction, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
-import { ActionTypeRegistryContract, RuleAction, suspendedComponentWithProps } from '../../../..';
+import { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import { ActionTypeRegistryContract, suspendedComponentWithProps } from '../../../..';
 import { useFetchRuleActionConnectors } from '../../../hooks/use_fetch_rule_action_connectors';
 import { NOTIFY_WHEN_OPTIONS } from '../../rule_form/rule_notify_when';
+import { RuleUiAction } from '../../../../types';
 
 export interface RuleActionsProps {
-  ruleActions: RuleAction[];
+  ruleActions: RuleUiAction[];
   actionTypeRegistry: ActionTypeRegistryContract;
   legacyNotifyWhen?: RuleNotifyWhenType | null;
 }
@@ -51,10 +52,11 @@ export function RuleActions({
     );
   }
 
-  const getNotifyText = (action: RuleDefaultAction) =>
-    (NOTIFY_WHEN_OPTIONS.find((options) => options.value === action.frequency?.notifyWhen)
-      ?.inputDisplay ||
-      action.frequency?.notifyWhen) ??
+  const getNotifyText = (action: RuleUiAction) =>
+    ('frequency' in action &&
+      (NOTIFY_WHEN_OPTIONS.find((options) => options.value === action.frequency?.notifyWhen)
+        ?.inputDisplay ||
+        action.frequency?.notifyWhen)) ??
     legacyNotifyWhen;
 
   const getActionIconClass = (actionGroupId?: string): IconType | undefined => {
@@ -93,7 +95,7 @@ export function RuleActions({
                   <EuiFlexItem grow={false}>
                     <EuiIcon size="s" type="bell" />
                   </EuiFlexItem>
-                  {!isSystemAction(action) && (
+                  {!actionTypeRegistry.get(actionTypeId).isSystemActionType && (
                     <EuiFlexItem>
                       <EuiText
                         data-test-subj={`actionConnectorName-${index}-${

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleDefaultAction, RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { RuleAction, RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -130,7 +130,7 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
 ];
 
 interface ActionNotifyWhenProps {
-  frequency: RuleDefaultAction['frequency'];
+  frequency: RuleAction['frequency'];
   throttle: number | null;
   throttleUnit: string;
   onNotifyWhenChange: (notifyWhen: RuleNotifyWhenType) => void;

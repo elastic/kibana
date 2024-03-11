@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RuleActionTypes, RuleExecutionStatus, isSystemAction } from '@kbn/alerting-plugin/common';
+import { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
-import type { Rule, RuleAction, ResolvedRule, RuleLastRun } from '../../../types';
+import type { Rule, RuleUiAction, ResolvedRule, RuleLastRun } from '../../../types';
 
-const transformAction: RewriteRequestCase<RuleAction> = (action) => {
+const transformAction: RewriteRequestCase<RuleUiAction> = (action) => {
   const {
     uuid,
     id,
@@ -16,33 +16,24 @@ const transformAction: RewriteRequestCase<RuleAction> = (action) => {
     use_alert_data_for_template: useAlertDataForTemplate,
     params,
   } = action;
-  if (isSystemAction(action))
-    return {
-      id,
-      actionTypeId,
-      ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
-      ...(uuid && { uuid }),
-      params,
-      type: RuleActionTypes.SYSTEM,
-    };
-  const { group, frequency, alerts_filter: alertsFilter } = action;
   return {
-    group,
+    ...('group' in action && action.group ? { group: action.group } : {}),
     id,
     params,
     actionTypeId,
-    type: RuleActionTypes.DEFAULT,
     ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
-    ...(frequency
+    ...('frequency' in action && action.frequency
       ? {
           frequency: {
-            summary: frequency.summary,
-            notifyWhen: frequency.notify_when,
-            throttle: frequency.throttle,
+            summary: action.frequency.summary,
+            notifyWhen: action.frequency.notify_when,
+            throttle: action.frequency.throttle,
           },
         }
       : {}),
-    ...(alertsFilter ? { alertsFilter } : {}),
+    ...('alerts_filter' in action && action.alerts_filter
+      ? { alertsFilter: action.alerts_filter }
+      : {}),
     ...(uuid && { uuid }),
   };
 };
@@ -103,7 +94,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   snoozeSchedule,
   executionStatus: executionStatus ? transformExecutionStatus(executionStatus) : undefined,
   actions: actions
-    ? actions.map((action: AsApiContract<RuleAction>) => transformAction(action))
+    ? actions.map((action: AsApiContract<RuleUiAction>) => transformAction(action))
     : [],
   scheduledTaskId,
   isSnoozedUntil,

@@ -38,10 +38,11 @@ import {
   RuleTypeMetaData,
   TriggersActionsUiConfig,
   RuleNotifyWhenType,
+  RuleUiAction,
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
-import { ruleReducer, ConcreteRuleReducer } from './rule_reducer';
+import { getRuleReducer } from './rule_reducer';
 import { updateRule } from '../../lib/rule_api/update';
 import { loadRuleTypes } from '../../lib/rule_api/rule_types';
 import { HealthCheck } from '../../components/health_check';
@@ -62,7 +63,7 @@ const defaultUpdateRuleErrorMessage = i18n.translate(
 
 // Separate function for determining if an untyped action has a group property or not, which helps determine if
 // it is a default action or a system action. Consolidated here to deal with type definition complexity
-const actionHasDefinedGroup = (action: SanitizedRuleAction) => {
+const actionHasDefinedGroup = (action: RuleUiAction) => {
   if (!('group' in action)) return false;
   // If the group property is present, ensure that it isn't null or undefined
   return Boolean(action.group);
@@ -83,8 +84,8 @@ const cloneAndMigrateRule = (initialRule: Rule) => {
             initialRule.notifyWhen === RuleNotifyWhen.THROTTLE ? initialRule.throttle! : null,
         }
       : { summary: false, notifyWhen: RuleNotifyWhen.THROTTLE, throttle: initialRule.throttle! };
-    clonedRule.actions = clonedRule.actions.map((action: SanitizedRuleAction) => {
-      if (actionHasDefinedGroup(action as SanitizedRuleAction)) {
+    clonedRule.actions = clonedRule.actions.map((action: RuleUiAction) => {
+      if (actionHasDefinedGroup(action)) {
         return {
           ...action,
           frequency,
@@ -113,7 +114,7 @@ export const RuleEdit = <
   ...props
 }: RuleEditProps<Params, MetaData>) => {
   const onSaveHandler = onSave ?? reloadRules;
-  const [{ rule }, dispatch] = useReducer(ruleReducer as ConcreteRuleReducer, {
+  const [{ rule }, dispatch] = useReducer(getRuleReducer<Rule>(actionTypeRegistry), {
     rule: cloneAndMigrateRule(initialRule),
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -173,7 +174,8 @@ export const RuleEdit = <
   const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = getRuleErrors(
     rule as Rule,
     ruleType,
-    config
+    config,
+    actionTypeRegistry
   );
 
   const checkForChangesAndCloseFlyout = () => {

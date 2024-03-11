@@ -36,7 +36,7 @@ const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 
 const buildTimeRangeFilter = (
   dataView: DataView,
-  fetchedAlert: Rule<SearchThresholdAlertParams, 'withSystemAction'>,
+  fetchedAlert: Rule<SearchThresholdAlertParams>,
   timeFieldName: string
 ) => {
   const filter = getTime(dataView, {
@@ -75,7 +75,7 @@ export const getAlertUtils = (
 
   const fetchAlert = async (id: string) => {
     try {
-      return await core.http.get<Rule<SearchThresholdAlertParams, 'withSystemAction'>>(
+      return await core.http.get<Rule<SearchThresholdAlertParams>>(
         `${LEGACY_BASE_ALERT_API_PATH}/alert/${id}`
       );
     } catch (error) {
@@ -93,9 +93,7 @@ export const getAlertUtils = (
     }
   };
 
-  const fetchSearchSource = async (
-    fetchedAlert: Rule<SearchThresholdAlertParams, 'withSystemAction'>
-  ) => {
+  const fetchSearchSource = async (fetchedAlert: Rule<SearchThresholdAlertParams>) => {
     try {
       return {
         alert: fetchedAlert,
@@ -122,7 +120,7 @@ export const getAlertUtils = (
     alert,
     searchSource,
   }: {
-    alert: Rule<SearchThresholdAlertParams, 'withSystemAction'>;
+    alert: Rule<SearchThresholdAlertParams>;
     searchSource: ISearchSource;
   }): Promise<DiscoverAppLocatorParams> => {
     let dataView = searchSource.getField('index');

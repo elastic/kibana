@@ -10,9 +10,8 @@ import { nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { RuleActions } from './rule_actions';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-import { ActionConnector, ActionTypeModel, RuleAction } from '../../../../types';
+import { ActionConnector, ActionTypeModel } from '../../../../types';
 import * as useFetchRuleActionConnectorsHook from '../../../hooks/use_fetch_rule_action_connectors';
-import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockedUseFetchRuleActionConnectorsHook = jest.spyOn(
@@ -34,7 +33,7 @@ describe('Rule Actions', () => {
         actionTypeId: '.slack',
         params: {},
       },
-    ] as RuleAction[];
+    ];
 
     mockedUseFetchRuleActionConnectorsHook.mockReturnValue({
       isLoadingActionConnectors: false,
@@ -91,35 +90,30 @@ describe('Rule Actions', () => {
         group: 'metrics.inventory_threshold.fired',
         actionTypeId: '.server-log',
         params: {},
-        type: RuleActionTypes.DEFAULT,
       },
       {
         id: '1',
         group: 'metrics.inventory_threshold.fired',
         actionTypeId: '.server-log',
         params: {},
-        type: RuleActionTypes.DEFAULT,
       },
       {
         id: '2',
         group: 'metrics.inventory_threshold.fired',
         actionTypeId: '.server-log',
         params: {},
-        type: RuleActionTypes.DEFAULT,
       },
       {
         id: '3',
         group: 'metrics.inventory_threshold.fired',
         actionTypeId: '.slack',
         params: {},
-        type: RuleActionTypes.DEFAULT,
       },
       {
         id: '4',
         group: 'metrics.inventory_threshold.fired',
         actionTypeId: '.slack',
         params: {},
-        type: RuleActionTypes.DEFAULT,
       },
     ];
 

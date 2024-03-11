@@ -10,19 +10,13 @@ import React, { ReactElement, Suspense } from 'react';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { AddConnectorInFormProps } from './connector_add_inline';
 
-export const suspendedConnectorInlineWithProps = <
-  T extends 'withSystemAction' | 'defaultAction' = 'defaultAction'
->(
-  ComponentToSuspend: <P extends 'withSystemAction' | 'defaultAction' = T>(
-    props: AddConnectorInFormProps<P>
-  ) => ReactElement | null,
+export const suspendedConnectorInlineWithProps = (
+  ComponentToSuspend: (props: AddConnectorInFormProps) => ReactElement | null,
   size?: EuiLoadingSpinnerSize
 ) => {
-  return <K extends 'withSystemAction' | 'defaultAction' = T>(
-    props: AddConnectorInFormProps<K>
-  ) => (
+  return (props: AddConnectorInFormProps) => (
     <Suspense fallback={<CenterJustifiedSpinner size={size ?? 'm'} />}>
-      <ComponentToSuspend<K> {...props} />
+      <ComponentToSuspend {...props} />
     </Suspense>
   );
 };

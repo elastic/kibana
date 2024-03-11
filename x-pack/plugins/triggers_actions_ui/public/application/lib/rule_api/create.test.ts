@@ -8,7 +8,6 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { RuleUpdates } from '../../../types';
 import { createRule } from './create';
-import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 
 const http = httpServiceMock.createStartContract();
 
@@ -81,7 +80,6 @@ describe('createRule', () => {
       ruleTypeId: '.index-threshold',
       actions: [
         {
-          type: RuleActionTypes.DEFAULT,
           group: 'threshold met',
           id: '83d4d860-9316-11eb-a145-93ab369a4461',
           params: {

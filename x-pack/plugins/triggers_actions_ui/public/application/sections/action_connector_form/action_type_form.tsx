@@ -34,9 +34,9 @@ import {
 import { isEmpty, partition, some } from 'lodash';
 import {
   ActionVariable,
+  RuleAction,
   RuleActionAlertsFilterProperty,
   RuleActionParam,
-  RuleDefaultAction,
   RuleNotifyWhenType,
   RuleSystemAction,
 } from '@kbn/alerting-plugin/common';
@@ -71,7 +71,7 @@ import { validateActionFilterQuery } from '../../lib/value_validators';
 import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
 
 export type ActionTypeFormProps = (
-  | { actionItem: RuleDefaultAction; isSystemAction: false }
+  | { actionItem: RuleAction; isSystemAction: false }
   | { actionItem: RuleSystemAction; isSystemAction: true }
 ) & {
   actionConnector: ActionConnector;
@@ -191,7 +191,7 @@ export const ActionTypeForm = ({
 
   const isSummaryAction = !isSystemAction && actionItem.frequency?.summary;
 
-  const [useAadTemplateFields, setUseAadTemplateField] = useState(
+  const [useAadTemplateFields, setUseAadTemplateField] = useState<boolean>(
     actionItem?.useAlertDataForTemplate ?? false
   );
   const [storedActionParamsForAadToggle, setStoredActionParamsForAadToggle] = useState<

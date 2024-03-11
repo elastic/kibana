@@ -23,10 +23,9 @@ import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import { transformActionVariables } from '../../lib/action_variables';
 import {
-  RuleActionTypes,
-  RuleDefaultAction,
   RuleNotifyWhen,
   RuleNotifyWhenType,
+  SanitizedRuleAction,
 } from '@kbn/alerting-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
@@ -142,7 +141,6 @@ describe('action_type_form', () => {
       getActionTypeForm({
         index: 1,
         actionItem: {
-          type: RuleActionTypes.DEFAULT,
           id: '123',
           actionTypeId: '.pagerduty',
           group: 'recovered',
@@ -197,7 +195,6 @@ describe('action_type_form', () => {
         {getActionTypeForm({
           index: 1,
           actionItem: {
-            type: RuleActionTypes.DEFAULT,
             id: '123',
             actionTypeId: '.pagerduty',
             group: 'recovered',
@@ -247,7 +244,6 @@ describe('action_type_form', () => {
         {getActionTypeForm({
           index: 1,
           actionItem: {
-            type: RuleActionTypes.DEFAULT,
             id: '123',
             actionTypeId: '.pagerduty',
             group: 'recovered',
@@ -297,7 +293,6 @@ describe('action_type_form', () => {
       getActionTypeForm({
         index: 1,
         actionItem: {
-          type: RuleActionTypes.DEFAULT,
           id: '123',
           actionTypeId: '.pagerduty',
           group: 'recovered',
@@ -350,7 +345,6 @@ describe('action_type_form', () => {
       getActionTypeForm({
         index: 1,
         actionItem: {
-          type: RuleActionTypes.DEFAULT,
           id: '123',
           actionTypeId: '.pagerduty',
           group: 'recovered',
@@ -417,7 +411,6 @@ describe('action_type_form', () => {
       group: 'default',
       params: {},
       frequency: DEFAULT_FREQUENCY,
-      type: RuleActionTypes.DEFAULT,
     };
     const wrapper = render(
       <IntlProvider locale="en">
@@ -502,7 +495,6 @@ describe('action_type_form', () => {
           ruleTypeId: 'test',
           setActionParamsProperty,
           actionItem: {
-            type: RuleActionTypes.DEFAULT,
             id: '123',
             actionTypeId: '.pagerduty',
             group: 'recovered',
@@ -558,7 +550,6 @@ describe('action_type_form', () => {
           throttle: null,
           summary: true,
         },
-        type: RuleActionTypes.DEFAULT,
       };
       const wrapper = render(
         <IntlProvider locale="en">
@@ -613,7 +604,6 @@ describe('action_type_form', () => {
           throttle: null,
           summary: false,
         },
-        type: RuleActionTypes.DEFAULT,
       };
       const wrapper = render(
         <IntlProvider locale="en">
@@ -667,7 +657,7 @@ function getActionTypeForm({
 }: {
   index?: number;
   actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>;
-  actionItem?: RuleDefaultAction;
+  actionItem?: SanitizedRuleAction;
   defaultActionGroupId?: string;
   connectors?: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>>;
   actionTypeIndex?: Record<string, ActionType>;
@@ -699,7 +689,7 @@ function getActionTypeForm({
     secrets: {},
   };
 
-  const actionItemDefault: RuleDefaultAction = {
+  const actionItemDefault = {
     id: '123',
     actionTypeId: '.pagerduty',
     group: 'trigger',
@@ -707,7 +697,6 @@ function getActionTypeForm({
       eventAction: 'trigger',
       summary: '2323',
     },
-    type: RuleActionTypes.DEFAULT,
   };
 
   const connectorsDefault = [

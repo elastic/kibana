@@ -12,7 +12,6 @@ import { ToastsApi } from '@kbn/core/public';
 import { RuleRoute, getRuleSummary } from './rule_route';
 import { Rule, RuleSummary, RuleType } from '../../../../types';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 jest.mock('../../../../common/lib/kibana');
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
@@ -63,7 +62,6 @@ describe('getRuleState useEffect handler', () => {
     const rule = mockRule({
       actions: [
         {
-          type: RuleActionTypes.DEFAULT,
           group: '',
           id: uuidv4(),
           actionTypeId: connectorType.id,

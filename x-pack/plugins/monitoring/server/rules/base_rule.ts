@@ -23,7 +23,6 @@ import {
   RawAlertInstance,
   SanitizedRule,
   AlertInstanceContext,
-  RuleActionTypes,
 } from '@kbn/alerting-plugin/common';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/common';
@@ -184,7 +183,6 @@ export class BaseRule {
             notifyWhen: RuleNotifyWhen.THROTTLE,
             throttle,
           },
-          type: RuleActionTypes.DEFAULT,
         });
       }
     }

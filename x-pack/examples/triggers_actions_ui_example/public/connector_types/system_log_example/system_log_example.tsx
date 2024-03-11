@@ -50,5 +50,6 @@ export function getConnectorType(): ConnectorTypeModel<unknown, unknown, SystemL
     },
     actionConnectorFields: null,
     actionParamsFields: lazy(() => import('./system_log_example_params')),
+    isSystemActionType: true,
   };
 }

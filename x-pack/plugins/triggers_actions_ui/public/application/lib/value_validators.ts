@@ -8,8 +8,7 @@
 import { set } from '@kbn/safer-lodash-set';
 import { constant, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { isSystemAction } from '@kbn/alerting-plugin/common';
-import { UserConfiguredActionConnector, IErrorObject, Rule, RuleAction } from '../../types';
+import { UserConfiguredActionConnector, IErrorObject, Rule, RuleUiAction } from '../../types';
 
 const filterQueryRequiredError = i18n.translate(
   'xpack.triggersActionsUI.sections.actionTypeForm.error.requiredFilterQuery',
@@ -18,11 +17,12 @@ const filterQueryRequiredError = i18n.translate(
   }
 );
 
-export const validateActionFilterQuery = (actionItem: RuleAction): string | null => {
-  if (isSystemAction(actionItem)) return null;
-  const query = actionItem.alertsFilter?.query;
-  if (query && !query.kql) {
-    return filterQueryRequiredError;
+export const validateActionFilterQuery = (actionItem: RuleUiAction): string | null => {
+  if ('alertsFilter' in actionItem) {
+    const query = actionItem?.alertsFilter?.query;
+    if (query && !query.kql) {
+      return filterQueryRequiredError;
+    }
   }
   return null;
 };

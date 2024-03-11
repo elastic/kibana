@@ -58,7 +58,7 @@ import {
   rulesWarningReasonTranslationsMapping,
 } from '../../rules_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ruleReducer } from '../../rule_form/rule_reducer';
+import { getRuleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
 import { runRule } from '../../../lib/run_rule';
@@ -109,7 +109,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const [{}, dispatch] = useReducer(ruleReducer, { rule });
+  const [{}, dispatch] = useReducer(getRuleReducer(actionTypeRegistry), { rule });
   const setInitialRule = (value: Rule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
   };

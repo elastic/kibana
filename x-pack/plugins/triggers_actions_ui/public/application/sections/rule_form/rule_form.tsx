@@ -66,12 +66,12 @@ import {
   RuleTypeModel,
   Rule,
   IErrorObject,
-  RuleAction,
   RuleType,
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
   TriggersActionsUiConfig,
   RuleCreationValidConsumer,
+  RuleUiAction,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
@@ -360,7 +360,7 @@ export const RuleForm = ({
   );
 
   const setActions = useCallback(
-    (updatedActions: RuleAction[]) => setRuleProperty('actions', updatedActions),
+    (updatedActions: RuleUiAction[]) => setRuleProperty('actions', updatedActions),
     [setRuleProperty]
   );
 

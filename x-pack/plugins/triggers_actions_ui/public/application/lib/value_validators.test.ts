@@ -342,7 +342,6 @@ describe('getRuleWithInvalidatedFields', () => {
       },
       actions: [
         {
-          type: 'default',
           actionTypeId: 'test',
           group: 'qwer',
           id: '123',
@@ -390,7 +389,6 @@ describe('getRuleWithInvalidatedFields', () => {
       },
       actions: [
         {
-          type: 'default',
           actionTypeId: 'test',
           group: 'qwer',
           id: '123',
@@ -402,7 +400,6 @@ describe('getRuleWithInvalidatedFields', () => {
           uuid: '111-111',
         },
         {
-          type: 'default',
           actionTypeId: 'test',
           group: 'qwer',
           id: '123',

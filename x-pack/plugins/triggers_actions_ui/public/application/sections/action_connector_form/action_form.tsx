@@ -26,21 +26,20 @@ import {
   RuleActionAlertsFilterProperty,
   RuleActionFrequency,
   RuleActionParam,
-  RuleActionTypes,
-  RuleDefaultAction,
   RuleSystemAction,
+  SanitizedRuleAction,
 } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { betaBadgeProps } from './beta_badge_props';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   ActionTypeModel,
-  RuleAction,
   ActionTypeIndex,
   ActionConnector,
   ActionVariables,
   ActionTypeRegistryContract,
   NotifyWhenSelectOptions,
+  RuleUiAction,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ActionTypeForm } from './action_type_form';
@@ -57,16 +56,15 @@ export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
   omitMessageVariables?: OmitMessageVariablesType;
   defaultActionMessage?: string;
 }
-
 export interface ActionAccordionFormProps {
-  actions: RuleAction[];
+  actions: RuleUiAction[];
   defaultActionGroupId: string;
   actionGroups?: ActionGroupWithMessageVariables[];
   defaultActionMessage?: string;
   setActionIdByIndex: (id: string, index: number) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;
   setActionUseAlertDataForTemplate?: (enabled: boolean, index: number) => void;
-  setActions: (actions: RuleAction[]) => void;
+  setActions: (actions: RuleUiAction[]) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
   setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
   setActionAlertsFilterProperty: (
@@ -101,11 +99,11 @@ interface ActiveActionConnectorState {
 }
 
 const getTypedActionItemProps: (
-  actionItem: RuleAction,
+  actionItem: RuleUiAction,
   isSystemAction: boolean
 ) =>
   | {
-      actionItem: RuleDefaultAction;
+      actionItem: SanitizedRuleAction;
       isSystemAction: false;
     }
   | { actionItem: RuleSystemAction; isSystemAction: true } = (actionItem, isSystemAction) => {
@@ -115,7 +113,7 @@ const getTypedActionItemProps: (
         isSystemAction: true,
       }
     : {
-        actionItem: actionItem as RuleDefaultAction,
+        actionItem: actionItem as SanitizedRuleAction,
         isSystemAction: false,
       };
 };
@@ -282,7 +280,6 @@ export const ActionForm = ({
           actionTypeId: actionTypeModel.id,
           params: {},
           uuid: uuidv4(),
-          type: RuleActionTypes.SYSTEM,
         }
       : {
           id: '',
@@ -291,7 +288,6 @@ export const ActionForm = ({
           params: {},
           frequency: defaultRuleFrequency,
           uuid: uuidv4(),
-          type: RuleActionTypes.DEFAULT,
         };
 
     if (actionTypeConnectors.length === 0) {
@@ -399,7 +395,7 @@ export const ActionForm = ({
         </>
       )}
       {actionTypesIndex &&
-        actions.map((actionItem: RuleAction, index: number) => {
+        actions.map((actionItem: RuleUiAction, index: number) => {
           const isSystemAction = Boolean(
             actionTypesIndex[actionItem.actionTypeId]?.isSystemActionType
           );
@@ -431,11 +427,11 @@ export const ActionForm = ({
                 connectors={connectors}
                 onDeleteConnector={() => {
                   const updatedActions = actions.filter(
-                    (_item: RuleAction, i: number) => i !== index
+                    (_item: RuleUiAction, i: number) => i !== index
                   );
                   setActions(updatedActions);
                   setIsAddActionPanelOpen(
-                    updatedActions.filter((item: RuleAction) => item.id !== actionItem.id)
+                    updatedActions.filter((item: RuleUiAction) => item.id !== actionItem.id)
                       .length === 0
                   );
                   setActiveActionItem(undefined);
@@ -444,7 +440,7 @@ export const ActionForm = ({
                   setActiveActionItem({
                     actionTypeId: actionItem.actionTypeId,
                     indices: actions
-                      .map((item: RuleAction, idx: number) =>
+                      .map((item: RuleUiAction, idx: number) =>
                         item.id === actionItem.id ? idx : -1
                       )
                       .filter((idx: number) => idx >= 0),
@@ -457,7 +453,7 @@ export const ActionForm = ({
                   if (newConnector && newConnector.actionTypeId) {
                     const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
                     if (actionTypeRegistered.convertParamsBetweenGroups) {
-                      const updatedActions = actions.map((_item: RuleAction, i: number) => {
+                      const updatedActions = actions.map((_item: RuleUiAction, i: number) => {
                         if (i === index) {
                           return {
                             ..._item,
@@ -513,7 +509,7 @@ export const ActionForm = ({
                 ) {
                   const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
                   if (actionTypeRegistered.convertParamsBetweenGroups) {
-                    const updatedActions = actions.map((_item: RuleAction, i: number) => {
+                    const updatedActions = actions.map((_item: RuleUiAction, i: number) => {
                       if (i === index) {
                         return {
                           ..._item,
@@ -534,7 +530,7 @@ export const ActionForm = ({
               actionTypeRegistry={actionTypeRegistry}
               onDeleteAction={() => {
                 const updatedActions = actions.filter(
-                  (_item: RuleAction, i: number) => i !== index
+                  (_item: RuleUiAction, i: number) => i !== index
                 );
                 setActions(updatedActions);
                 setIsAddActionPanelOpen(updatedActions.length === 0);

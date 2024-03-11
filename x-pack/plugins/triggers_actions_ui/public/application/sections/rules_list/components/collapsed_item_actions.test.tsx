@@ -12,7 +12,6 @@ import { act } from 'react-dom/test-utils';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RuleTableItem, RuleTypeModel } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 jest.mock('../../../../common/lib/kibana');
 
 const onRuleChanged = jest.fn();
@@ -68,7 +67,6 @@ describe('CollapsedItemActions', () => {
           actionTypeId: 'the_connector',
           group: 'rule',
           params: { message: 'test' },
-          type: RuleActionTypes.DEFAULT,
         },
       ],
       params: { name: 'test rule type name' },

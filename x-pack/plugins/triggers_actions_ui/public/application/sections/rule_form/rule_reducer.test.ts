@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { ruleReducer } from './rule_reducer';
+import { getRuleReducer } from './rule_reducer';
 import { Rule } from '../../../types';
-import { RuleActionTypes, RuleDefaultAction } from '@kbn/alerting-plugin/common';
+import { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+
+const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('rule reducer', () => {
+  const ruleReducer = getRuleReducer(actionTypeRegistry);
   let initialRule: Rule;
   beforeAll(() => {
     initialRule = {
@@ -116,7 +120,6 @@ describe('rule reducer', () => {
       group: 'Rule',
       params: {},
       uuid: '123-456',
-      type: RuleActionTypes.DEFAULT,
     });
     const updatedRule = ruleReducer(
       { rule: initialRule },
@@ -158,7 +161,6 @@ describe('rule reducer', () => {
         testActionParam: 'some value',
       },
       uuid: '123-456',
-      type: RuleActionTypes.DEFAULT,
     });
     const updatedRule = ruleReducer(
       { rule: initialRule },
@@ -181,7 +183,6 @@ describe('rule reducer', () => {
       group: 'Rule',
       params: {},
       uuid: '123-456',
-      type: RuleActionTypes.DEFAULT,
     });
     const updatedRule = ruleReducer(
       { rule: initialRule },
@@ -194,7 +195,7 @@ describe('rule reducer', () => {
         },
       }
     );
-    expect((updatedRule.rule.actions[0] as RuleDefaultAction).group).toBe('Warning');
+    expect((updatedRule.rule.actions[0] as SanitizedRuleAction).group).toBe('Warning');
   });
 
   test('if rule action frequency was updated', () => {
@@ -204,7 +205,6 @@ describe('rule reducer', () => {
       group: 'Rule',
       params: {},
       uuid: '123-456',
-      type: RuleActionTypes.DEFAULT,
     });
     const updatedRule = ruleReducer(
       { rule: initialRule },
@@ -217,7 +217,7 @@ describe('rule reducer', () => {
         },
       }
     );
-    expect((updatedRule.rule.actions[0] as RuleDefaultAction).frequency?.notifyWhen).toBe(
+    expect((updatedRule.rule.actions[0] as SanitizedRuleAction).frequency?.notifyWhen).toBe(
       'onThrottleInterval'
     );
   });

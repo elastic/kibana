@@ -11,14 +11,13 @@ import { EuiAccordion } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult, Rule, RuleAction, GenericValidationResult } from '../../../types';
+import { ValidationResult, GenericValidationResult, RuleUiAction } from '../../../types';
 import ActionForm from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   RecoveredActionGroup,
-  RuleActionTypes,
-  RuleDefaultAction,
   isActionGroupDisabledForActionTypeId,
+  SanitizedRuleAction,
 } from '@kbn/alerting-plugin/common';
 
 jest.mock('../../../common/lib/kibana');
@@ -184,7 +183,7 @@ describe('action_form', () => {
   const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
   async function setup(
-    customActions?: RuleDefaultAction[],
+    customActions?: RuleUiAction[],
     customRecoveredActionGroup?: string,
     isExperimental?: boolean
   ) {
@@ -228,11 +227,10 @@ describe('action_form', () => {
       schedule: {
         interval: '1m',
       },
-      actions: customActions
+      actions: (customActions
         ? customActions
         : [
             {
-              type: RuleActionTypes.DEFAULT,
               group: 'default',
               id: 'test',
               actionTypeId: newActionType.id,
@@ -240,12 +238,12 @@ describe('action_form', () => {
                 message: '',
               },
             },
-          ],
+          ]) as SanitizedRuleAction[],
       tags: [],
       muteAll: false,
       enabled: false,
       mutedInstanceIds: [],
-    } as unknown as Omit<Rule, 'actions'> & { actions: RuleDefaultAction[] };
+    };
 
     loadActionTypes.mockResolvedValue([
       {
@@ -341,14 +339,17 @@ describe('action_form', () => {
         setActionGroupIdByIndex={(group: string, index: number) => {
           initialAlert.actions[index].group = group;
         }}
-        setActions={(_updatedActions: RuleAction[]) => {}}
+        setActions={(_updatedActions: RuleUiAction[]) => {}}
         setActionParamsProperty={(key: string, value: any, index: number) =>
           (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
         }
         setActionFrequencyProperty={(key: string, value: any, index: number) =>
           (initialAlert.actions[index] = {
             ...initialAlert.actions[index],
-            frequency: { ...initialAlert.actions[index].frequency!, [key]: value },
+            frequency: {
+              ...initialAlert.actions[index].frequency!,
+              [key]: value,
+            },
           })
         }
         setActionAlertsFilterProperty={(key: string, value: any, index: number) =>
@@ -445,7 +446,6 @@ describe('action_form', () => {
     it('renders disabled action groups for selected action type', async () => {
       const wrapper = await setup([
         {
-          type: RuleActionTypes.DEFAULT,
           group: 'recovered',
           id: 'test',
           actionTypeId: disabledByActionType.id,
@@ -485,7 +485,6 @@ describe('action_form', () => {
       const wrapper = await setup(
         [
           {
-            type: RuleActionTypes.DEFAULT,
             group: 'iHaveRecovered',
             id: 'test',
             actionTypeId: disabledByActionType.id,
@@ -629,7 +628,6 @@ describe('action_form', () => {
     it('recognizes actions with broken connectors', async () => {
       const wrapper = await setup([
         {
-          type: RuleActionTypes.DEFAULT,
           group: 'default',
           id: 'test',
           actionTypeId: actionType.id,
@@ -638,7 +636,6 @@ describe('action_form', () => {
           },
         },
         {
-          type: RuleActionTypes.DEFAULT,
           group: 'default',
           id: 'connector-doesnt-exist',
           actionTypeId: actionType.id,
@@ -647,7 +644,6 @@ describe('action_form', () => {
           },
         },
         {
-          type: RuleActionTypes.DEFAULT,
           group: 'not the default',
           id: 'connector-doesnt-exist',
           actionTypeId: actionType.id,

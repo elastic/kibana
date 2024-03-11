@@ -10,19 +10,13 @@ import React, { ReactElement, Suspense } from 'react';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { ActionAccordionFormProps } from './action_form';
 
-export const suspendedActionFormWithProps = <
-  T extends 'withSystemAction' | 'defaultAction' = 'defaultAction'
->(
-  ComponentToSuspend: <P extends 'withSystemAction' | 'defaultAction' = T>(
-    props: ActionAccordionFormProps<P>
-  ) => ReactElement | null,
+export const suspendedActionFormWithProps = (
+  ComponentToSuspend: (props: ActionAccordionFormProps) => ReactElement | null,
   size?: EuiLoadingSpinnerSize
 ) => {
-  return <K extends 'withSystemAction' | 'defaultAction' = T>(
-    props: ActionAccordionFormProps<K>
-  ) => (
+  return (props: ActionAccordionFormProps) => (
     <Suspense fallback={<CenterJustifiedSpinner size={size ?? 'm'} />}>
-      <ComponentToSuspend<K> {...props} />
+      <ComponentToSuspend {...props} />
     </Suspense>
   );
 };

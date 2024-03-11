@@ -22,19 +22,23 @@ const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({
 }): any => ({
   ...res,
   actions: actions.map((action) => {
-    const { group, id, params, frequency, uuid, alertsFilter, useAlertDataForTemplate } = action;
+    const { id, params, uuid, useAlertDataForTemplate } = action;
     return {
-      group,
+      ...('frequency' in action ? { group: action.group } : {}),
       id,
       params,
-      frequency: frequency
+      ...('frequency' in action
         ? {
-            notify_when: frequency!.notifyWhen,
-            throttle: frequency!.throttle,
-            summary: frequency!.summary,
+            frequency: action.frequency
+              ? {
+                  notify_when: action.frequency!.notifyWhen,
+                  throttle: action.frequency!.throttle,
+                  summary: action.frequency!.summary,
+                }
+              : undefined,
           }
-        : undefined,
-      alerts_filter: alertsFilter,
+        : {}),
+      ...('alertsFilter' in action ? { alerts_filter: action.alertsFilter } : {}),
       ...(typeof useAlertDataForTemplate !== 'undefined'
         ? { use_alert_data_for_template: useAlertDataForTemplate }
         : {}),

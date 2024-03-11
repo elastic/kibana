@@ -17,7 +17,6 @@ import { Rule } from '../../../../types';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
-import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../../common/lib/config_api', () => ({
@@ -157,7 +156,6 @@ describe('getRuleData useEffect handler', () => {
           id: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -209,7 +207,6 @@ describe('getRuleData useEffect handler', () => {
           id: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -253,7 +250,6 @@ describe('getRuleData useEffect handler', () => {
           id: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -300,7 +296,6 @@ describe('getRuleData useEffect handler', () => {
           id: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -351,7 +346,6 @@ describe('getRuleData useEffect handler', () => {
           id: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -405,14 +399,12 @@ describe('getRuleData useEffect handler', () => {
           id: uuidv4(),
           actionTypeId: availableConnectorType.id,
           params: {},
-          type: RuleActionTypes.DEFAULT,
         },
         {
           group: '',
           id: uuidv4(),
           actionTypeId: missingConnectorType.id,
           params: {},
-          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
