@@ -82,6 +82,7 @@ export default function (providerContext: FtrProviderContext) {
           AZURE_CREDENTIAL_SELECTOR,
           'service_principal_with_client_secret'
         );
+        pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(AZURE_CLIENT_ID_TEST_ID, clientId);
         await cisIntegration.fillInTextField(AZURE_TENANT_ID_TEST_ID, tenantId);
         await cisIntegration.fillInTextField(AZURE_CLIENT_SECRET_TEST_ID, clientSecret);
@@ -110,6 +111,7 @@ export default function (providerContext: FtrProviderContext) {
           AZURE_CREDENTIAL_SELECTOR,
           'service_principal_with_client_certificate'
         );
+        pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(AZURE_CLIENT_ID_CERTIFICATE_OPTION_TEST_ID, clientId);
         await cisIntegration.fillInTextField(AZURE_TENANT_ID_CERTIFICATE_OPTION_TEST_ID, tenantId);
         await cisIntegration.fillInTextField(
@@ -157,6 +159,9 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(AZURE_MANUAL_TEST_ID);
         await cisIntegration.selectValue(AZURE_CREDENTIAL_SELECTOR, 'managed_identity');
+        await cisIntegration.clickSaveButton();
+        pageObjects.header.waitUntilLoadingHasFinished();
+        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
       });
     });
 
@@ -168,6 +173,7 @@ export default function (providerContext: FtrProviderContext) {
           AZURE_CREDENTIAL_SELECTOR,
           'service_principal_with_client_secret'
         );
+        pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(AZURE_CLIENT_ID_TEST_ID, clientId);
         await cisIntegration.fillInTextField(AZURE_TENANT_ID_TEST_ID, tenantId);
         await cisIntegration.fillInTextField(AZURE_CLIENT_SECRET_TEST_ID, clientSecret);
@@ -196,6 +202,7 @@ export default function (providerContext: FtrProviderContext) {
           AZURE_CREDENTIAL_SELECTOR,
           'service_principal_with_client_certificate'
         );
+        pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(AZURE_CLIENT_ID_CERTIFICATE_OPTION_TEST_ID, clientId);
         await cisIntegration.fillInTextField(AZURE_TENANT_ID_CERTIFICATE_OPTION_TEST_ID, tenantId);
         await cisIntegration.fillInTextField(

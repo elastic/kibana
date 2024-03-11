@@ -13,8 +13,8 @@ const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 const AWS_MANUAL_TEST_ID = 'aws-manual-setup-option';
 const AWS_CREDENTIAL_SELECTOR = 'aws-credentials-type-selector';
 const ROLE_ARN_TEST_ID = 'roleArnInput';
-const ASSUME_ROLE_ID_TEST_ID = 'assumeRoleIdInput';
-const ASSUME_ROLE_ID_SECRET_KEY_TEST_ID = 'assumeRoleIdSecretKey';
+const DIRECT_ACCESS_KEY_ID_TEST_ID = 'directAccessKeyId';
+const DIRECT_ACCESS_SECRET_KEY_TEST_ID = 'directAccessSecretKey';
 const TEMP_ACCESS_KEY_ID_TEST_ID = 'temporaryKeysAccessKeyId';
 const TEMP_ACCESS_KEY_SECRET_KEY_TEST_ID = 'temporaryKeysSecretAccessKey';
 const TEMP_ACCESS_SESSION_TOKEN_TEST_ID = 'temporaryKeysSessionToken';
@@ -112,9 +112,10 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
-        await cisIntegration.fillInTextField(ASSUME_ROLE_ID_TEST_ID, directAccessKeyId);
+        pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.fillInTextField(DIRECT_ACCESS_KEY_ID_TEST_ID, directAccessKeyId);
         await cisIntegration.fillInTextField(
-          ASSUME_ROLE_ID_SECRET_KEY_TEST_ID,
+          DIRECT_ACCESS_SECRET_KEY_TEST_ID,
           directAccessSecretKey
         );
         await cisIntegration.clickSaveButton();
@@ -122,7 +123,7 @@ export default function (providerContext: FtrProviderContext) {
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect(
-          (await cisIntegration.getFieldValueInEditPage(ASSUME_ROLE_ID_TEST_ID)) ===
+          (await cisIntegration.getFieldValueInEditPage(DIRECT_ACCESS_KEY_ID_TEST_ID)) ===
             directAccessKeyId
         ).to.be(true);
       });
@@ -137,6 +138,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
+        pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(TEMP_ACCESS_KEY_ID_TEST_ID, accessKeyId);
         await cisIntegration.fillInTextField(
           TEMP_ACCESS_KEY_SECRET_KEY_TEST_ID,
@@ -169,6 +171,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'shared_credentials');
+        pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(SHARED_CREDENTIALS_FILE_TEST_ID, sharedCredentialFile);
         await cisIntegration.fillInTextField(
           SHARED_CREDETIALS_PROFILE_NAME_TEST_ID,
@@ -229,9 +232,10 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
-        await cisIntegration.fillInTextField(ASSUME_ROLE_ID_TEST_ID, directAccessKeyId);
+        pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.fillInTextField(DIRECT_ACCESS_KEY_ID_TEST_ID, directAccessKeyId);
         await cisIntegration.fillInTextField(
-          ASSUME_ROLE_ID_SECRET_KEY_TEST_ID,
+          DIRECT_ACCESS_SECRET_KEY_TEST_ID,
           directAccessSecretKey
         );
         await cisIntegration.clickSaveButton();
@@ -239,7 +243,7 @@ export default function (providerContext: FtrProviderContext) {
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect(
-          (await cisIntegration.getFieldValueInEditPage(ASSUME_ROLE_ID_TEST_ID)) ===
+          (await cisIntegration.getFieldValueInEditPage(DIRECT_ACCESS_KEY_ID_TEST_ID)) ===
             directAccessKeyId
         ).to.be(true);
       });
@@ -255,6 +259,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
+        pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(TEMP_ACCESS_KEY_ID_TEST_ID, accessKeyId);
         await cisIntegration.fillInTextField(
           TEMP_ACCESS_KEY_SECRET_KEY_TEST_ID,
@@ -288,6 +293,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'shared_credentials');
+        pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(SHARED_CREDENTIALS_FILE_TEST_ID, sharedCredentialFile);
         await cisIntegration.fillInTextField(
           SHARED_CREDETIALS_PROFILE_NAME_TEST_ID,

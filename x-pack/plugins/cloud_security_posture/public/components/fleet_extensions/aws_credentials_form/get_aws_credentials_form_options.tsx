@@ -145,11 +145,11 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
     }),
     info: DirectAccessKeysDescription,
     fields: {
-      access_key_id: { label: AWS_FIELD_LABEL.access_key_id, dataTestId: 'assumeRoleIdInput' },
+      access_key_id: { label: AWS_FIELD_LABEL.access_key_id, dataTestId: 'directAccessKeyId' },
       secret_access_key: {
         label: AWS_FIELD_LABEL.secret_access_key,
         type: 'password',
-        dataTestId: 'assumeRoleIdSecretKey',
+        dataTestId: 'directAccessSecretKey',
       },
     },
   },
