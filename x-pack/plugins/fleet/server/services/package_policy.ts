@@ -949,14 +949,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     return newPolicy;
   }
 
-  start: Record<string, number> = {};
-  avg: Record<string, number> = {};
-
-  setAvg(id: string, num: number) {
-    const a = 0.7;
-    this.avg[id] = a * num + (1 - a) * (this.avg[id] ?? num);
-  }
-
   public async bulkUpdate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -1008,7 +1000,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       try {
         const id = packagePolicyUpdate.id;
         const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
-        const oldPackagePolicy = oldPackagePolicies.find((p) => p.id === id); // todo
+        const oldPackagePolicy = oldPackagePolicies.find((p) => p.id === id);
         if (!oldPackagePolicy) {
           throw new PackagePolicyNotFoundError('Package policy not found');
         }
@@ -1092,18 +1084,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       policiesToUpdate
     );
 
-    const agentPolicyIds = [...new Set(packagePolicyUpdates.map((p) => p.policy_id))];
     console.timeEnd('🥭 C');
     console.time('🥭 D'); // todo SLOWEST PART, ~2 sec
-    // await pMap(agentPolicyIds, async (agentPolicyId) => {
-    //   // Bump revision of associated agent policy
-    //   await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
-    //     user: options?.user,
-    //   });
-    // });
 
-    await agentPolicyService.bumpRevisionForIds(soClient, esClient, agentPolicyIds, {
-      user: options?.user,
+    const agentPolicyIds = new Set(packagePolicyUpdates.map((p) => p.policy_id));
+
+    // CHANGED FOR MEASUREMENT: waiting here instead at the end
+    await pMap(agentPolicyIds, async (agentPolicyId) => {
+      // Bump revision of associated agent policy
+      await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
+        user: options?.user,
+      });
     });
     console.timeEnd('🥭 D');
     console.time('🥭 E');
@@ -1118,6 +1109,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
+    // CHANGED FOR MEASUREMENT: waiting here instead at the end
     await pMap(Object.keys(pkgVersions), async (pkgVersion) => {
       const { name, version } = pkgVersions[pkgVersion];
       await removeOldAssets({
@@ -1127,12 +1119,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
     });
     console.timeEnd('🥭 E');
+
     console.time('🥭 F');
+    // CHANGED FOR MEASUREMENT: waiting here instead at the end
     if (allSecretsToDelete.length) {
       await deleteSecrets({ esClient, soClient, ids: allSecretsToDelete.map((s) => s.id) });
     }
-
     console.timeEnd('🥭 F');
+
     console.time('🥭 G');
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, packagePolicyUpdates, oldPackagePolicies);
