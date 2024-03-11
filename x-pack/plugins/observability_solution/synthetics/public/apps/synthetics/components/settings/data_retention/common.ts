@@ -13,7 +13,7 @@ export const formatAge = (age?: string) => {
   }
   const [value] = age.split('d');
   return i18n.translate('xpack.synthetics.settingsRoute.table.retentionPeriodValue', {
-    defaultMessage: '{value} days + rollover',
+    defaultMessage: '{value} {value, plural, one {day} other {days}} + rollover',
     values: { value },
   });
 };
