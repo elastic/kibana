@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expect } from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function telemetryConfigTest({ getService }: FtrProviderContext) {
@@ -22,20 +23,13 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
       },
     };
 
-    after(async () => {
-      await supertest
-        .put('/internal/core/_settings')
-        .set(svlCommonApi.getInternalRequestHeader())
-        .set('elastic-api-version', '1')
-        .send({ 'telemetry.labels': baseConfig.labels })
-        .expect(200, { ok: true });
-    });
-
     it('GET should get the default config', async () => {
-      await supertest
+      const { body } = await supertest
         .get('/api/telemetry/v2/config')
         .set(svlCommonApi.getCommonRequestHeader())
         .expect(200, baseConfig);
+
+      expect(body).toMatchObject(baseConfig);
     });
 
     it('GET should get updated labels after dynamically updating them', async () => {
