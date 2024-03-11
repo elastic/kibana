@@ -36,7 +36,7 @@ export async function getBurnRates({
 }: {
   sloId: string;
   instanceId: string;
-  remoteName: string;
+  remoteName?: string;
   windows: LookbackWindow[];
   services: Services;
 }) {

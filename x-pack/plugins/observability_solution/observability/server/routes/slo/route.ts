@@ -427,9 +427,10 @@ const findSLOGroupsRoute = createObservabilityServerRoute({
     await assertPlatinumLicense(context);
     const spaceId =
       (await dependencies.spaces?.spacesService.getActiveSpace(request))?.id ?? 'default';
+    const soClient = (await context.core).savedObjects.client;
     const coreContext = context.core;
     const esClient = (await coreContext).elasticsearch.client.asCurrentUser;
-    const findSLOGroups = new FindSLOGroups(esClient, logger, spaceId);
+    const findSLOGroups = new FindSLOGroups(esClient, soClient, logger, spaceId);
     const response = await findSLOGroups.execute(params?.query ?? {});
     return response;
   },
