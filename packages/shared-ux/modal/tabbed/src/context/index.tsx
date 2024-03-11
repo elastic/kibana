@@ -114,7 +114,7 @@ export function ModalContextProvider<T extends Array<IModalTabDeclaration<IModal
     () =>
       tabs.reduce((result, { id, reducer, initialState, ...rest }) => {
         initialModalState.current[id] = initialState ?? {};
-        modalTabDefinitions.current.push({ id, ...rest });
+        modalTabDefinitions.current.push({ id, reducer, ...rest });
         result[id] = reducer;
         return result;
       }, {}),
