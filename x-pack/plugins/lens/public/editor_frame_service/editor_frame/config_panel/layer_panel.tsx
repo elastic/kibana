@@ -61,6 +61,8 @@ export function LayerPanel(props: LayerPanelProps) {
     registerNewLayerRef,
     layerIndex,
     activeVisualization,
+    visualizationMap,
+    datasourceMap,
     updateVisualization,
     updateDatasource,
     toggleFullscreen,
@@ -71,6 +73,7 @@ export function LayerPanel(props: LayerPanelProps) {
     core,
     onDropToDimension,
     setIsInlineFlyoutVisible,
+    shouldDisplayChartSwitch,
   } = props;
 
   const isSaveable = useLensSelector((state) => state.lens.isSaveable);
@@ -375,6 +378,9 @@ export function LayerPanel(props: LayerPanelProps) {
                       }),
                   }}
                   activeVisualization={activeVisualization}
+                  visualizationMap={visualizationMap}
+                  datasourceMap={datasourceMap}
+                  shouldDisplayChartSwitch={shouldDisplayChartSwitch}
                 />
               </EuiFlexItem>
               {props.displayLayerSettings && (

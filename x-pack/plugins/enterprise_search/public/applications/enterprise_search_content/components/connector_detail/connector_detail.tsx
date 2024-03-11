@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
-import { baseBreadcrumbs } from '../connectors/connectors';
+import { connectorsBreadcrumbs } from '../connectors/connectors';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { getHeaderActions } from '../search_index/components/header_actions/header_actions';
@@ -48,7 +48,7 @@ export const ConnectorDetail: React.FC = () => {
   const { startConnectorPoll } = useActions(ConnectorViewLogic);
   useEffect(() => {
     startConnectorPoll(connectorId);
-  }, []);
+  }, [connectorId]);
 
   const { tabId = ConnectorDetailTabId.OVERVIEW } = useParams<{
     tabId?: string;
@@ -226,7 +226,7 @@ export const ConnectorDetail: React.FC = () => {
 
   return (
     <EnterpriseSearchContentPageTemplate
-      pageChrome={[...baseBreadcrumbs, connector?.name ?? '...']}
+      pageChrome={[...connectorsBreadcrumbs, connector?.name ?? '...']}
       pageViewTelemetry={tabId}
       isLoading={isLoading}
       pageHeader={{
@@ -236,7 +236,7 @@ export const ConnectorDetail: React.FC = () => {
           responsive: false,
           wrap: false,
         },
-        rightSideItems: getHeaderActions(index, hasAppSearchAccess),
+        rightSideItems: getHeaderActions(index, hasAppSearchAccess, connector),
         tabs,
       }}
     >
