@@ -41,7 +41,7 @@ import { useSourcererDataView } from '../../../../../common/containers/sourcerer
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../../side_panel';
 import { SecurityCellActionsTrigger } from '../../../../../actions/constants';
-import { getUnifiedDataTableColumnHeader } from '../../body/column_headers/helpers';
+import { getColumnHeader } from '../../body/column_headers/helpers';
 import { getFormattedFields } from '../../body/renderers/formatted_field_udt';
 import { timelineBodySelector } from '../../body/selectors';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
@@ -290,7 +290,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           onSort(newState.sort);
         } else {
           const columnsStates = newState.columns.map((columnId) =>
-            getUnifiedDataTableColumnHeader(columnId, defaultUdtHeaders)
+            getColumnHeader(columnId, defaultUdtHeaders)
           );
           dispatch(timelineActions.updateColumns({ id: timelineId, columns: columnsStates }));
         }
