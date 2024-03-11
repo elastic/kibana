@@ -21,7 +21,10 @@ const getComponentFromEmbeddable = async (
   const embeddablePromise =
     typeof embeddable === 'function' ? embeddable() : Promise.resolve(embeddable);
   const [, unwrappedEmbeddable] = await Promise.all([startServicesPromise, embeddablePromise]);
-  if (unwrappedEmbeddable.parent && unwrappedEmbeddable.parent.getInput().panels[unwrappedEmbeddable.id]) {
+  if (
+    unwrappedEmbeddable.parent &&
+    unwrappedEmbeddable.parent.getInput().panels[unwrappedEmbeddable.id]
+  ) {
     await unwrappedEmbeddable.parent.untilEmbeddableLoaded(unwrappedEmbeddable.id);
   }
 
