@@ -21,7 +21,7 @@ import type {
 import { ML_PAGES } from '../../../common/constants/locator';
 import { formatGenericMlUrl } from './common';
 import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';
-import { AppPageState, ListingPageUrlState } from '../../../common/types/common';
+import type { AppPageState, ListingPageUrlState } from '../../../common/types/common';
 
 /**
  * Creates URL to the Anomaly Detection Job management page

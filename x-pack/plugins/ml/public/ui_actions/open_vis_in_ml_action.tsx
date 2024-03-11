@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { Embeddable } from '@kbn/lens-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { MlCoreSetup } from '../plugin';
+import type { MlCoreSetup } from '../plugin';
 import { isLensEmbeddable, isMapEmbeddable } from '../application/jobs/new_job/job_from_dashboard';
 
 export const CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION = 'createMLADJobAction';

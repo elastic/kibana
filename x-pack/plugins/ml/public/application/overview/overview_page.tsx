@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -13,7 +14,8 @@ import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
 import { OverviewStatsBar } from '../components/collapsible_panel/collapsible_panel';
 import { ML_PAGES } from '../../../common/constants/locator';
-import { ML_OVERVIEW_PANELS, MlStorageKey, TMlStorageMapped } from '../../../common/types/storage';
+import type { MlStorageKey, TMlStorageMapped } from '../../../common/types/storage';
+import { ML_OVERVIEW_PANELS } from '../../../common/types/storage';
 import { CollapsiblePanel } from '../components/collapsible_panel';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../ml_nodes_check';

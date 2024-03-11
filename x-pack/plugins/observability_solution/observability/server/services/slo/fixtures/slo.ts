@@ -11,11 +11,12 @@ import {
   CreateSLOParams,
   HistogramIndicator,
   sloSchema,
+  SyntheticsAvailabilityIndicator,
   TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { SLO_MODEL_VERSION } from '../../../../common/slo/constants';
+import { SLO_MODEL_VERSION, SYNTHETICS_INDEX_PATTERN } from '../../../../common/slo/constants';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
@@ -56,6 +57,19 @@ export const createAPMTransactionDurationIndicator = (
     transactionType: 'irrelevant',
     threshold: 500,
     index: 'metrics-apm*',
+    ...params,
+  },
+});
+
+export const createSyntheticsAvailabilityIndicator = (
+  params: Partial<SyntheticsAvailabilityIndicator['params']> = {}
+): Indicator => ({
+  type: 'sli.synthetics.availability',
+  params: {
+    index: SYNTHETICS_INDEX_PATTERN,
+    tags: [],
+    projects: [],
+    monitorIds: [],
     ...params,
   },
 });

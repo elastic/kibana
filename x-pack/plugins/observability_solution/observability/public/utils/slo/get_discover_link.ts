@@ -67,7 +67,8 @@ function createDiscoverLocator(
 
   const timeFieldName =
     slo.indicator.type !== 'sli.apm.transactionDuration' &&
-    slo.indicator.type !== 'sli.apm.transactionErrorRate'
+    slo.indicator.type !== 'sli.apm.transactionErrorRate' &&
+    slo.indicator.type !== 'sli.synthetics.availability'
       ? slo.indicator.params.timestampField
       : '@timestamp';
 
