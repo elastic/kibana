@@ -104,7 +104,8 @@ pageLoadAssetSize:
   newsfeed: 42228
   noDataPage: 5000
   observability: 115443
-  observabilityAIAssistant: 25000
+  observabilityAIAssistant: 58230
+  observabilityAIAssistantApp: 27680
   observabilityLogsExplorer: 46650
   observabilityOnboarding: 19573
   observabilityShared: 72039
