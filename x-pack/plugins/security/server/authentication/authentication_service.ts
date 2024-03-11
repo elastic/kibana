@@ -200,26 +200,7 @@ export class AuthenticationService {
         ? `${http.basePath.get(request)}/`
         : this.authenticator.getRequestOriginalURL(request);
 
-      if (
-        preResponse.statusCode >= 400 &&
-        canRedirectRequest(request) &&
-        (request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW) || preResponse.statusCode === 401)
-      ) {
-        if (!isLoginPageAvailable) {
-          const customBrandingValue = await customBranding.getBrandingFor(request, {
-            unauthenticated: true,
-          });
-
-          return toolkit.render({
-            body: renderUnauthenticatedPage({
-              staticAssets: http.staticAssets,
-              basePath: http.basePath,
-              originalURL,
-              customBranding: customBrandingValue,
-            }),
-            headers: { 'Content-Security-Policy': http.csp.header },
-          });
-        }
+      const redirectLoginLogout = async () => {
         const needsToLogout = (await this.session?.getSID(request)) !== undefined;
         if (needsToLogout) {
           this.logger.warn(
@@ -240,30 +221,37 @@ export class AuthenticationService {
             )}`,
           },
         });
+      };
+
+      if (
+        preResponse.statusCode >= 400 &&
+        canRedirectRequest(request) &&
+        (request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW) || preResponse.statusCode === 401)
+      ) {
+        if (!isLoginPageAvailable) {
+          const customBrandingValue = await customBranding.getBrandingFor(request, {
+            unauthenticated: true,
+          });
+
+          return toolkit.render({
+            body: renderUnauthenticatedPage({
+              staticAssets: http.staticAssets,
+              basePath: http.basePath,
+              originalURL,
+              customBranding: customBrandingValue,
+            }),
+            headers: { 'Content-Security-Policy': http.csp.header },
+          });
+        }
+
+        return await redirectLoginLogout();
       }
 
       if (preResponse.statusCode !== 401 || !canRedirectRequest(request)) {
         return toolkit.next();
       }
 
-      const needsToLogout = (await this.session?.getSID(request)) !== undefined;
-      if (needsToLogout) {
-        this.logger.warn('Could not authenticate user with the existing session. Forcing logout.');
-      }
-
-      return toolkit.render({
-        body: '<div/>',
-        headers: {
-          'Content-Security-Policy': http.csp.header,
-          Refresh: `0;url=${http.basePath.prepend(
-            `${
-              needsToLogout ? '/logout' : '/login'
-            }?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-              originalURL
-            )}`
-          )}`,
-        },
-      });
+      return await redirectLoginLogout();
     });
 
     elasticsearch.setUnauthorizedErrorHandler(async ({ error, request }, toolkit) => {
