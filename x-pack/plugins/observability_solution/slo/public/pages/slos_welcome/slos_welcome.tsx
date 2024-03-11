@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-// import { HeaderMenu } from '@kbn/observability-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { useLicense } from '../../hooks/use_license';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -28,6 +27,7 @@ import { paths } from '../../../common/locators/paths';
 import illustration from './assets/illustration.svg';
 import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnosis';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
 
 export function SlosWelcomePage() {
   const {
@@ -62,7 +62,7 @@ export function SlosWelcomePage() {
 
   return hasSlosAndHasPermissions || isLoading ? null : (
     <ObservabilityPageTemplate data-test-subj="slosPageWelcomePrompt">
-      {/* <HeaderMenu /> */}
+      <HeaderMenu />
       <SloOutdatedCallout />
       <EuiPageTemplate.EmptyPrompt
         title={

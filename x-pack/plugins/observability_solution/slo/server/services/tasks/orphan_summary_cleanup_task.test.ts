@@ -12,7 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { times } from 'lodash';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/constants';
+import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 
 const taskManagerSetup = taskManagerMock.createSetup();
 const taskManagerStart = taskManagerMock.createStart();

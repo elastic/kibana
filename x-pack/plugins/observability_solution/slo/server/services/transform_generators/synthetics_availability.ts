@@ -11,6 +11,7 @@ import {
   ALL_VALUE,
   syntheticsAvailabilityIndicatorSchema,
   occurrencesBudgetingMethodSchema,
+  SyntheticsAvailabilityIndicator,
 } from '@kbn/slo-schema';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
@@ -20,8 +21,8 @@ import {
   SYNTHETICS_INDEX_PATTERN,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { SyntheticsAvailabilityIndicator, SLO } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
+import { SLO } from '../../domain/models';
 export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO, spaceId: string): TransformPutTransformRequest {
     if (!syntheticsAvailabilityIndicatorSchema.is(slo.indicator)) {

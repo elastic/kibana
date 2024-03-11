@@ -11,11 +11,11 @@ import { fromKueryExpression, Query, TimeRange, toElasticsearchQuery } from '@kb
 import { kqlQuerySchema, kqlWithFiltersSchema } from '@kbn/slo-schema';
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { SearchBarProps } from './query_builder';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
-import { observabilityAppId } from '../../../../../common';
 import { OptionalText } from './optional_text';
 
 export const QuerySearchBar = memo(

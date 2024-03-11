@@ -52,6 +52,7 @@ import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SloPlugin } from './plugin';
 
 export interface SloPublicPluginsSetup {
@@ -74,6 +75,7 @@ export interface SloPublicPluginsStart {
   cases: CasesPublicStart;
   cloud?: CloudStart;
   dataViewEditor: DataViewEditorStart;
+  fieldFormats: FieldFormatsStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;

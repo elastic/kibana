@@ -20,6 +20,7 @@
       "dataViews",
       "lens",
       "dataViewEditor",
+      "fieldFormats",
       "observability",
       "observabilityShared",
       "ruleRegistry",
