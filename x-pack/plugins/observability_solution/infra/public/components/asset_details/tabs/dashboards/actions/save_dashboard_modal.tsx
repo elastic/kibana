@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import {
   EuiButton,
   EuiModal,
@@ -25,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
+import type {
   DashboardItemWithTitle,
   InfraCustomDashboardAssetType,
 } from '../../../../../../common/custom_dashboards';
@@ -118,13 +117,12 @@ export function SaveDashboardModal({
           }
         }
       } catch (error) {
-        console.error(error);
         notifications.toasts.danger({
           title: i18n.translate('xpack.infra.customDashboards.addFailure.toast.title', {
             defaultMessage: 'Error while adding "{dashboardName}" dashboard',
             values: { dashboardName: newDashboard.label },
-            // text: error.body.message,
           }),
+          body: error.body.message,
         });
       }
       onClose();

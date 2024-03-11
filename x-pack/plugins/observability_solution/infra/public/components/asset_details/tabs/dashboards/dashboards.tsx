@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -35,7 +35,7 @@ import type {
 } from '../../../../../common/custom_dashboards';
 
 import { EmptyDashboards } from './empty_dashboards';
-import { EditDashboard, GotoDashboard, LinkDashboard } from './actions';
+import { EditDashboard, GotoDashboard, LinkDashboard, UnlinkDashboard } from './actions';
 import { useCustomDashboard } from '../../hooks/use_custom_dashboards';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
@@ -84,7 +84,7 @@ export function Dashboards() {
   // const { share } = useApmPluginContext();
   const [urlState] = useAssetDetailsUrlState();
 
-  const { dashboards, loading, error, reload } = useCustomDashboard({ assetType: asset.type });
+  const { dashboards, loading, reload } = useCustomDashboard({ assetType: asset.type });
 
   useEffect(() => {
     const filteredCustomDashboards = (dashboards?.dashboardIdList ?? []).reduce(
@@ -100,7 +100,6 @@ export function Dashboards() {
       },
       []
     );
-
     setCustomDashboards(filteredCustomDashboards);
   }, [allAvailableDashboards, dashboards]);
 
@@ -134,7 +133,6 @@ export function Dashboards() {
   //       serviceName,
   //       dashboardId: params.dashboardId,
   //       query: {
-  //         // environment,
   //         // kuery,
   //         dateRange.from,
   //         dateRange.to,
@@ -164,7 +162,7 @@ export function Dashboards() {
           title={
             <h4>
               {i18n.translate('xpack.infra.customDashboards.loadingCustomDashboards', {
-                defaultMessage: 'Loading service dashboard',
+                defaultMessage: 'Loading dashboard',
               })}
             </h4>
           }
@@ -203,11 +201,12 @@ export function Dashboards() {
                       assetType={asset.type}
                     />,
                     // TODO
-                    // <UnlinkDashboard
-                    //   currentDashboard={currentDashboard}
-                    //   defaultDashboard={customDashboards[0]}
-                    //   onRefresh={reload}
-                    // />,
+                    <UnlinkDashboard
+                      currentDashboard={currentDashboard}
+                      defaultDashboard={customDashboards[0]}
+                      onRefresh={reload}
+                      assetType={asset.type}
+                    />,
                   ]}
                 />
               </EuiFlexItem>

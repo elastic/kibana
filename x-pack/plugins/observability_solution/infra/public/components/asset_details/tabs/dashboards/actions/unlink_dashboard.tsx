@@ -1,0 +1,128 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { EuiButtonEmpty, EuiConfirmModal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useState } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type {
+  DashboardItemWithTitle,
+  InfraCustomDashboardAssetType,
+} from '../../../../../../common/custom_dashboards';
+import { useUpdateCustomDashboard } from '../../../hooks/use_update_custom_dashboards';
+import { useCustomDashboard } from '../../../hooks/use_custom_dashboards';
+import { useAssetDetailsUrlState } from '../../../hooks/use_asset_details_url_state';
+
+export function UnlinkDashboard({
+  currentDashboard,
+  defaultDashboard,
+  onRefresh,
+  assetType,
+}: {
+  currentDashboard: DashboardItemWithTitle;
+  defaultDashboard: DashboardItemWithTitle;
+  onRefresh: () => void;
+  assetType: InfraCustomDashboardAssetType;
+}) {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const { notifications } = useKibana();
+
+  const [, setUrlState] = useAssetDetailsUrlState();
+  const { loading, updateCustomDashboard } = useUpdateCustomDashboard();
+  const { dashboards, loading: savedObjectDashboardsLoading } = useCustomDashboard({ assetType });
+
+  const onConfirm = useCallback(
+    async function () {
+      try {
+        if (!savedObjectDashboardsLoading) {
+          const dashboardList = (dashboards?.dashboardIdList ?? []).filter(
+            ({ id }) => id !== currentDashboard.id
+          );
+          const result = await updateCustomDashboard({
+            assetType,
+            dashboardIdList: [...dashboardList],
+          });
+
+          if (result && !loading) {
+            notifications.toasts.success({
+              title: i18n.translate('xpack.infra.customDashboards.unlinkSuccess.toast.title', {
+                defaultMessage: 'Unlinked "{dashboardName}" dashboard',
+                values: { dashboardName: currentDashboard?.title },
+              }),
+            });
+            setUrlState({ dashboardId: defaultDashboard.id });
+            onRefresh();
+          }
+        }
+      } catch (error) {
+        notifications.toasts.danger({
+          title: i18n.translate('xpack.infra.customDashboards.unlinkFailure.toast.title', {
+            defaultMessage: 'Error while unlinking "{dashboardName}" dashboard',
+            values: { dashboardName: currentDashboard?.title },
+          }),
+          body: error.body.message,
+        });
+      }
+      setIsModalVisible(!isModalVisible);
+    },
+    [
+      isModalVisible,
+      savedObjectDashboardsLoading,
+      dashboards?.dashboardIdList,
+      updateCustomDashboard,
+      assetType,
+      loading,
+      currentDashboard.id,
+      currentDashboard?.title,
+      notifications.toasts,
+      setUrlState,
+      defaultDashboard.id,
+      onRefresh,
+    ]
+  );
+
+  return (
+    <>
+      <EuiButtonEmpty
+        color="danger"
+        size="s"
+        iconType="unlink"
+        data-test-subj="infraUnLinkServiceDashboardMenu"
+        onClick={() => setIsModalVisible(true)}
+      >
+        {i18n.translate('xpack.infra.customDashboards.unlinkEmptyButtonLabel', {
+          defaultMessage: 'Unlink dashboard',
+        })}
+      </EuiButtonEmpty>
+      {isModalVisible && (
+        <EuiConfirmModal
+          title={i18n.translate(
+            'xpack.infra.customDashboards.unlinkEmptyButtonLabel.confirm.title',
+            {
+              defaultMessage: 'Unlink Dashboard',
+            }
+          )}
+          onCancel={() => setIsModalVisible(false)}
+          onConfirm={onConfirm}
+          confirmButtonText={i18n.translate(
+            'xpack.infra.customDashboards.unlinkEmptyButtonLabel.confirm.button',
+            {
+              defaultMessage: 'Unlink dashboard',
+            }
+          )}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+        >
+          <p>
+            {i18n.translate('xpack.infra.customDashboards.unlinkEmptyButtonLabel.confirm.body', {
+              defaultMessage: 'You are about to unlink the dashboard from the service context',
+            })}
+          </p>
+        </EuiConfirmModal>
+      )}
+    </>
+  );
+}
