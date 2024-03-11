@@ -7,15 +7,7 @@
  */
 
 export {
-  useReactEmbeddableApiHandle,
-  initializeReactEmbeddableUuid,
-  ReactEmbeddableParentContext,
-  useReactEmbeddableParentApi,
-} from './react_embeddable_api';
-export { useReactEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
-export {
   reactEmbeddableRegistryHasKey,
-  RegisterReactEmbeddable,
   registerReactEmbeddableFactory,
 } from './react_embeddable_registry';
 export { ReactEmbeddableRenderer } from './react_embeddable_renderer';
@@ -25,9 +17,9 @@ export {
   type ReactEmbeddableTitlesApi,
   type SerializedReactEmbeddableTitles,
 } from './react_embeddable_titles';
+export { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
 export type {
   DefaultEmbeddableApi,
-  ReactEmbeddable,
   ReactEmbeddableFactory,
   ReactEmbeddableRegistration,
 } from './types';
