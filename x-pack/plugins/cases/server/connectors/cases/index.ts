@@ -18,7 +18,7 @@ import { constructRequiredKibanaPrivileges } from './utils';
 
 interface GetCasesConnectorTypeArgs {
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
-  getScopedSavedObjectClient: (
+  getUnsecuredSavedObjectsClient: (
     request: KibanaRequest,
     savedObjectTypes: string[]
   ) => Promise<SavedObjectsClientContract>;
@@ -28,7 +28,7 @@ interface GetCasesConnectorTypeArgs {
 export const getCasesConnectorType = ({
   getCasesClient,
   getSpaceId,
-  getScopedSavedObjectClient,
+  getUnsecuredSavedObjectsClient,
 }: GetCasesConnectorTypeArgs): SubActionConnectorType<
   CasesConnectorConfig,
   CasesConnectorSecrets
@@ -37,7 +37,7 @@ export const getCasesConnectorType = ({
   name: CASES_CONNECTOR_TITLE,
   getService: (params) =>
     new CasesConnector({
-      casesParams: { getCasesClient, getSpaceId, getScopedSavedObjectClient },
+      casesParams: { getCasesClient, getSpaceId, getUnsecuredSavedObjectsClient },
       connectorParams: params,
     }),
   schema: {

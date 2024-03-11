@@ -15,7 +15,7 @@ describe('getCasesConnectorType', () => {
   beforeEach(() => {
     caseConnectorType = getCasesConnectorType({
       getCasesClient: jest.fn(),
-      getScopedSavedObjectClient: jest.fn(),
+      getUnsecuredSavedObjectsClient: jest.fn(),
       getSpaceId: jest.fn(),
     });
   });

@@ -32,7 +32,7 @@ interface CasesConnectorParams {
   casesParams: {
     getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
     getSpaceId: (request?: KibanaRequest) => string;
-    getScopedSavedObjectClient: (
+    getUnsecuredSavedObjectsClient: (
       request: KibanaRequest,
       savedObjectTypes: string[]
     ) => Promise<SavedObjectsClientContract>;
@@ -107,10 +107,10 @@ export class CasesConnector extends SubActionConnector<
        */
       const kibanaRequest = this.kibanaRequest as KibanaRequest;
       const casesClient = await this.casesParams.getCasesClient(kibanaRequest);
-      const savedObjectsClient = await this.casesParams.getScopedSavedObjectClient(kibanaRequest, [
-        ...SAVED_OBJECT_TYPES,
-        CASE_ORACLE_SAVED_OBJECT,
-      ]);
+      const savedObjectsClient = await this.casesParams.getUnsecuredSavedObjectsClient(
+        kibanaRequest,
+        [...SAVED_OBJECT_TYPES, CASE_ORACLE_SAVED_OBJECT]
+      );
 
       const spaceId = this.casesParams.getSpaceId(kibanaRequest);
 
