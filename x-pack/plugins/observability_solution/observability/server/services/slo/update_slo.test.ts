@@ -6,7 +6,11 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServiceMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { UpdateSLOParams } from '@kbn/slo-schema';
 import { cloneDeep, omit, pick } from 'lodash';
@@ -54,7 +58,8 @@ describe('UpdateSLO', () => {
       mockSummaryTransformManager,
       mockEsClient,
       loggerMock,
-      'some-space'
+      'some-space',
+      httpServiceMock.createStartContract().basePath
     );
   });
 
