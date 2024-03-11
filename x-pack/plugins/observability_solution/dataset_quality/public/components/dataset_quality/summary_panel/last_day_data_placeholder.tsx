@@ -46,7 +46,7 @@ export function LastDayDataPlaceholder({
           </EuiText>
         </EuiFlexGroup>
         {isLoading ? (
-          <EuiSkeletonTitle size="m" />
+          <EuiSkeletonTitle size="m" data-test-subj={`datasetQuality-${title}-loading`} />
         ) : (
           <EuiTitle data-test-subj={`datasetQualityDatasetHealthKpi-${title}`} size="m">
             <h3>{value}</h3>

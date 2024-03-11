@@ -54,6 +54,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       );
 
       await browser.refresh();
+      await PageObjects.datasetQuality.waitUntilSummaryPanelLoaded();
 
       await retry.try(async () => {
         const summary = await PageObjects.datasetQuality.parseSummaryPanel();
@@ -89,6 +90,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       );
 
       await browser.refresh();
+      await PageObjects.datasetQuality.waitUntilSummaryPanelLoaded();
 
       await retry.try(async () => {
         const { estimatedData, ...restOfSummary } =
@@ -116,16 +118,15 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         })
       );
 
-      await retry.tryForTime(30000, async () => {
+      await browser.refresh(); // Summary panel doesn't update reactively
+      await PageObjects.datasetQuality.waitUntilSummaryPanelLoaded();
+
+      await retry.try(async () => {
         const { activeDatasets: updatedActiveDatasets, estimatedData: updatedEstimatedData } =
           await PageObjects.datasetQuality.parseSummaryPanel();
 
         expect(updatedActiveDatasets).to.eql('3 of 3');
         expect(updatedEstimatedData).to.not.eql(existingEstimatedData);
-
-        if (updatedEstimatedData === existingEstimatedData) {
-          await browser.refresh();
-        }
       });
     });
   });

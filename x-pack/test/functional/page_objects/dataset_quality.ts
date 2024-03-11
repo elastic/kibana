@@ -102,6 +102,11 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       );
     },
 
+    async waitUntilSummaryPanelLoaded() {
+      await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`);
+      await testSubjects.missingOrFail(`datasetQuality-${texts.estimatedData}-loading`);
+    },
+
     async parseSummaryPanel(): Promise<SummaryPanelKpi> {
       const kpiTitleAndKeys = [
         { title: texts.datasetHealthPoor, key: 'datasetHealthPoor' },
