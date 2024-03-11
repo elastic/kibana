@@ -9,7 +9,7 @@ import React, { Fragment } from 'react';
 
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
-import { PivotGroupByConfigDict } from '../../../../common';
+import type { PivotGroupByConfigDict } from '../../../../common';
 
 import { GroupByLabelSummary } from './group_by_label_summary';
 

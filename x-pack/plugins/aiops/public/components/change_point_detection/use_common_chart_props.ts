@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { fnOperationTypeMapping } from './constants';
 import { useDataSource } from '../../hooks/use_data_source';
-import { ChangePointAnnotation, FieldConfig } from './change_point_detection_context';
+import type { ChangePointAnnotation, FieldConfig } from './change_point_detection_context';
 
 /**
  * Provides common props for the Lens Embeddable component
