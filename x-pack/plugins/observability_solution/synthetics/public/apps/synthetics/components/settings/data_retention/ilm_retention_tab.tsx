@@ -14,7 +14,7 @@ import { PolicyLink, PolicyNameLabel } from '../policy_link';
 import { useGetIlmPolicies } from '../hooks/use_get_ilm_policies';
 import { Unprivileged } from './unprivileged';
 
-export const IlmRetentionTab: React.FC = () => {
+export const IlmRetentionTab = () => {
   const { data, loading, error } = useGetIlmPolicies();
 
   if (error && (error as unknown as IHttpFetchError<ResponseErrorBody>).body?.statusCode === 403) {
