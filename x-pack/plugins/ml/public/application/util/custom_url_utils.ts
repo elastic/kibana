@@ -10,7 +10,7 @@
 import { get, flow } from 'lodash';
 import moment from 'moment';
 import rison, { type RisonValue } from '@kbn/rison';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import type {
   MlAnomalyRecordDoc,
   MlUrlConfig,
