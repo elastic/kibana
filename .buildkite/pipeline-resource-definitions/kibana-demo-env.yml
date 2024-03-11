@@ -2,8 +2,8 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: security-quality-gate-api-integrations
-  description: Runs the serverless security solution api integration tests for the Quality Gate
+  name: demo-env
+  description: Creates/updates demo environment for kibana with example plugins
 spec:
   type: buildkite-pipeline
   owner: 'group:kibana-operations'
@@ -11,13 +11,16 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana / serverless / security-solution-quality-gate / api-integration
-      description: Runs the serverless security solution api integration tests for the Quality Gate
+      name: kibana / demo-environment
+      description: Creates/updates demo environment for kibana with example plugins
     spec:
-      branch_configuration: ''
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        SLACK_NOTIFICATIONS_ENABLED: 'true'
+      branch_configuration: main 8.13 8.12 7.17
       default_branch: main
       repository: elastic/kibana
-      pipeline_file: .buildkite/pipelines/security_solution/api_integration.yml
+      pipeline_file: .buildkite/pipelines/update_demo_env.yml
       provider_settings:
         build_branches: false
         build_pull_requests: false

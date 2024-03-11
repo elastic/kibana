@@ -30,7 +30,7 @@ spec:
         build_pull_requests: false
         publish_commit_status: false
         skip_pull_request_builds_for_existing_commits: false
-        trigger_mode: none
+        trigger_mode: code
         build_tags: false
       teams:
         everyone:

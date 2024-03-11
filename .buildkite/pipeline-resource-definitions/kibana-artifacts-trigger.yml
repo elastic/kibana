@@ -2,8 +2,8 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: hourly
-  description: Runs full CI hourly
+  name: kibana_artifacts_trigger
+  description: Kibana artifact trigger
 spec:
   type: buildkite-pipeline
   owner: 'group:kibana-operations'
@@ -11,22 +11,32 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana / hourly
-      description: Runs full CI hourly
+      name: kibana / artifacts trigger
+      description: Kibana artifact trigger
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         SLACK_NOTIFICATIONS_ENABLED: 'true'
-        REPORT_FAILED_TESTS_TO_GITHUB: 'true'
-      branch_configuration: main 8.12 7.17
+        RELEASE_BUILD: 'true'
+      branch_configuration: 8.13 8.12
       default_branch: main
       repository: elastic/kibana
-      pipeline_file: .buildkite/pipelines/hourly.yml
+      pipeline_file: .buildkite/pipelines/artifacts_trigger.yml
       provider_settings:
+        build_branches: false
         build_pull_requests: false
         publish_commit_status: false
         skip_pull_request_builds_for_existing_commits: false
         trigger_mode: none
+        build_tags: false
       teams:
         everyone:
           access_level: MANAGE_BUILD_AND_READ
+      schedules:
+        Daily build (8.13):
+          cronline: 0 */2 * * * America/New_York
+          message: Daily build
+          branch: '8.13'
+        Daily build (8.12):
+          cronline: 0 */2 * * * America/New_York
+          message: Daily build
+          branch: '8.12'

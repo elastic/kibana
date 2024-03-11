@@ -18,7 +18,7 @@ spec:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         SLACK_NOTIFICATIONS_ENABLED: 'true'
         ES_SERVERLESS_IMAGE: latest
-      branch_configuration: main 8.12 7.17
+      branch_configuration: main 8.13 8.12 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_serverless/verify_es_serverless_image.yml
@@ -60,7 +60,7 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         SLACK_NOTIFICATIONS_ENABLED: 'true'
-      branch_configuration: main 8.12 7.17
+      branch_configuration: main 8.13 8.12 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/build.yml
@@ -79,6 +79,10 @@ spec:
           cronline: 0 9 * * * America/New_York
           message: Daily build
           branch: main
+        Daily build (8.13):
+          cronline: 0 9 * * * America/New_York
+          message: Daily build
+          branch: '8.13'
         Daily build (8.12):
           cronline: 0 9 * * * America/New_York
           message: Daily build
@@ -107,7 +111,7 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         SLACK_NOTIFICATIONS_ENABLED: 'true'
-      branch_configuration: main 8.12 7.17
+      branch_configuration: main 8.13 8.12 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/promote.yml
@@ -141,7 +145,7 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         SLACK_NOTIFICATIONS_ENABLED: 'true'
-      branch_configuration: main 8.12 7.17
+      branch_configuration: main 8.13 8.12 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/verify.yml
