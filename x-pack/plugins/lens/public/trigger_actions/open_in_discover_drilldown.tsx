@@ -21,7 +21,7 @@ import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { apiIsOfType } from '@kbn/presentation-publishing';
 import { DOC_TYPE } from '../../common/constants';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
-import { OpenInDiscoverActionApi } from './types';
+import { LensApi } from '../embeddable';
 
 export const getDiscoverHelpersAsync = async () => await import('../async_services');
 
@@ -33,7 +33,7 @@ interface UrlDrilldownDeps {
 }
 
 export type ActionContext = ApplyGlobalFilterActionContext & {
-  embeddable: OpenInDiscoverActionApi;
+  embeddable: LensApi;
 };
 
 export interface Config extends SerializableRecord {

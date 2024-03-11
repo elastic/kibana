@@ -10,7 +10,7 @@ import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { isApiCompatibleWithOpenInDiscoverAction } from './types';
+import { isLensApi } from '../embeddable';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
   timeRange?: TimeRange;
@@ -34,10 +34,7 @@ type Context = EmbeddableApiContext & {
 export async function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
   if (!hasDiscoverAccess) return false;
   try {
-    return (
-      isApiCompatibleWithOpenInDiscoverAction(embeddable) &&
-      (await embeddable.canViewUnderlyingData())
-    );
+    return isLensApi(embeddable) && (await embeddable.canViewUnderlyingData());
   } catch (e) {
     // Fetching underlying data failed, log the error and behave as if the action is not compatible
     // eslint-disable-next-line no-console
@@ -52,7 +49,7 @@ async function getDiscoverLocationParams({
   dataViews,
   timeFieldName,
 }: Pick<Context, 'dataViews' | 'embeddable' | 'filters' | 'timeFieldName'>) {
-  if (!isApiCompatibleWithOpenInDiscoverAction(embeddable)) {
+  if (!isLensApi(embeddable)) {
     // shouldn't be executed because of the isCompatible check
     throw new Error('Can only be executed in the context of Lens visualization');
   }
