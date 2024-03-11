@@ -1,0 +1,31 @@
+---
+elasticsearch:
+  installKibanaUser: false
+
+kibana:
+  installAssets: true
+
+indexing:
+  dataset: "fake_hosts"
+  eventsPerCycle: 1
+  interval: 10000
+
+schedule:
+  # Start with good events
+  - template: "good"
+    start: "now-2h"
+    end: false
+    eventsPerCycle: 1
+    metrics:
+      - name: "system.cpu.user.pct"
+        method: "sine"
+        start: 1
+        end: 4
+        period: 2500
+        randomness: 0.1
+      - name: "system.cpu.system.pct"
+        method: "exp"
+        start: 1
+        end: 4
+        randomness: 0.1
+

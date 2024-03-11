@@ -15,17 +15,18 @@ import { i18n } from '@kbn/i18n';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
-import { baseBreadcrumbs } from '../connectors/connectors';
+import { connectorsBreadcrumbs } from '../connectors/connectors';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { getHeaderActions } from '../search_index/components/header_actions/header_actions';
-import { ConnectorConfiguration } from '../search_index/connector/connector_configuration';
-import { ConnectorSchedulingComponent } from '../search_index/connector/connector_scheduling';
+import { ConnectorScheduling } from '../search_index/connector/connector_scheduling';
 import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connector_rules';
 import { SearchIndexDocuments } from '../search_index/documents';
 import { SearchIndexIndexMappings } from '../search_index/index_mappings';
 import { SearchIndexPipelines } from '../search_index/pipelines/pipelines';
 
+import { ConnectorConfiguration } from './connector_configuration';
+import { ConnectorNameAndDescription } from './connector_name_and_description';
 import { ConnectorViewLogic } from './connector_view_logic';
 import { ConnectorDetailOverview } from './overview';
 
@@ -44,10 +45,13 @@ export enum ConnectorDetailTabId {
 export const ConnectorDetail: React.FC = () => {
   const connectorId = decodeURIComponent(useParams<{ connectorId: string }>().connectorId);
   const { hasFilteringFeature, isLoading, index, connector } = useValues(ConnectorViewLogic);
-  const { fetchConnector } = useActions(ConnectorViewLogic);
+  const { fetchConnectorApiReset, startConnectorPoll, stopConnectorPoll } =
+    useActions(ConnectorViewLogic);
   useEffect(() => {
-    fetchConnector({ connectorId });
-  }, []);
+    stopConnectorPoll();
+    fetchConnectorApiReset();
+    startConnectorPoll(connectorId);
+  }, [connectorId]);
 
   const { tabId = ConnectorDetailTabId.OVERVIEW } = useParams<{
     tabId?: string;
@@ -118,29 +122,11 @@ export const ConnectorDetail: React.FC = () => {
   ];
 
   const CONNECTOR_TABS = [
-    {
-      content: <ConnectorConfiguration />,
-      id: ConnectorDetailTabId.CONFIGURATION,
-      isSelected: tabId === ConnectorDetailTabId.CONFIGURATION,
-      label: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorDetail.configurationTabLabel',
-        {
-          defaultMessage: 'Configuration',
-        }
-      ),
-      onClick: () =>
-        KibanaLogic.values.navigateToUrl(
-          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.CONFIGURATION,
-          })
-        ),
-    },
     ...(hasFilteringFeature
       ? [
           {
             content: <ConnectorSyncRules />,
-            disabled: !index,
+            disabled: !connector?.index_name,
             id: ConnectorDetailTabId.SYNC_RULES,
             isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
             label: i18n.translate(
@@ -160,8 +146,8 @@ export const ConnectorDetail: React.FC = () => {
         ]
       : []),
     {
-      content: <ConnectorSchedulingComponent />,
-      disabled: !index,
+      content: <ConnectorScheduling />,
+      disabled: !connector?.index_name,
       id: ConnectorDetailTabId.SCHEDULING,
       isSelected: tabId === ConnectorDetailTabId.SCHEDULING,
       label: i18n.translate(
@@ -180,9 +166,30 @@ export const ConnectorDetail: React.FC = () => {
     },
   ];
 
+  const CONFIG_TAB = [
+    {
+      content: <ConnectorConfiguration />,
+      id: ConnectorDetailTabId.CONFIGURATION,
+      isSelected: tabId === ConnectorDetailTabId.CONFIGURATION,
+      label: i18n.translate(
+        'xpack.enterpriseSearch.content.connectors.connectorDetail.configurationTabLabel',
+        {
+          defaultMessage: 'Configuration',
+        }
+      ),
+      onClick: () =>
+        KibanaLogic.values.navigateToUrl(
+          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId,
+            tabId: ConnectorDetailTabId.CONFIGURATION,
+          })
+        ),
+    },
+  ];
+
   const PIPELINES_TAB = {
     content: <SearchIndexPipelines />,
-    disabled: !index,
+    disabled: !connector?.index_name,
     id: ConnectorDetailTabId.PIPELINES,
     isSelected: tabId === ConnectorDetailTabId.PIPELINES,
     label: i18n.translate(
@@ -215,18 +222,24 @@ export const ConnectorDetail: React.FC = () => {
     ...ALL_INDICES_TABS,
     ...CONNECTOR_TABS,
     ...(hasDefaultIngestPipeline ? [PIPELINES_TAB] : []),
+    ...CONFIG_TAB,
   ];
 
   const selectedTab = tabs.find((tab) => tab.id === tabId);
 
   return (
     <EnterpriseSearchContentPageTemplate
-      pageChrome={[...baseBreadcrumbs, connector?.name ?? '...']}
+      pageChrome={[...connectorsBreadcrumbs, connector?.name ?? '...']}
       pageViewTelemetry={tabId}
       isLoading={isLoading}
       pageHeader={{
-        pageTitle: connector?.name ?? '...',
-        rightSideItems: getHeaderActions(index, hasAppSearchAccess),
+        pageTitle: connector ? <ConnectorNameAndDescription connector={connector} /> : '...',
+        rightSideGroupProps: {
+          gutterSize: 's',
+          responsive: false,
+          wrap: false,
+        },
+        rightSideItems: getHeaderActions(index, hasAppSearchAccess, connector),
         tabs,
       }}
     >

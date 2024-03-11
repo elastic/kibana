@@ -7,7 +7,7 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
@@ -84,6 +84,8 @@ export interface UpgradePrebuiltRulesTableState {
    */
   selectedRules: RuleUpgradeInfoForReview[];
 }
+
+export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
 
 export interface UpgradePrebuiltRulesTableActions {
   reFetchRules: () => void;
@@ -284,7 +286,14 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         ? [
             {
               id: 'updates',
-              name: ruleDetailsI18n.UPDATES_TAB_LABEL,
+              name: (
+                <EuiToolTip
+                  position="top"
+                  content={i18n.UPDATE_FLYOUT_PER_FIELD_TOOLTIP_DESCRIPTION}
+                >
+                  <>{ruleDetailsI18n.UPDATES_TAB_LABEL}</>
+                </EuiToolTip>
+              ),
               content: (
                 <TabContentPadding>
                   <PerFieldRuleDiffTab ruleDiff={activeRule.diff} />
@@ -297,7 +306,14 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         ? [
             {
               id: 'jsonViewUpdates',
-              name: ruleDetailsI18n.JSON_VIEW_UPDATES_TAB_LABEL,
+              name: (
+                <EuiToolTip
+                  position="top"
+                  content={i18n.UPDATE_FLYOUT_JSON_VIEW_TOOLTIP_DESCRIPTION}
+                >
+                  <>{ruleDetailsI18n.JSON_VIEW_UPDATES_TAB_LABEL}</>
+                </EuiToolTip>
+              ),
               content: (
                 <TabContentPadding>
                   <RuleDiffTab oldRule={activeRule.current_rule} newRule={activeRule.target_rule} />
@@ -329,6 +345,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
           <RuleDetailsFlyout
             rule={previewedRule}
             size={isJsonPrebuiltRulesDiffingEnabled ? 'l' : 'm'}
+            id={PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR}
             dataTestSubj="updatePrebuiltRulePreview"
             closeFlyout={closeRulePreview}
             ruleActions={

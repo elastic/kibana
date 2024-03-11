@@ -232,5 +232,16 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
         await popoverListItems[2].click();
       }
     },
+    async clickAlertsPageShowQueryMenuButton() {
+      await testSubjects.click('showQueryBarMenu');
+    },
+    async getAlertsPageQuickFilters() {
+      const queryBarMenuPanel = await find.byCssSelector('[data-test-subj="queryBarMenuPanel"]');
+      const $ = await queryBarMenuPanel.parseDomContent();
+      return $('[data-test-subj^="quick-filters-item"]');
+    },
+    async getAlertsPageAppliedFilters() {
+      return await find.allByCssSelector('[data-test-subj="filter-items-group"] > *');
+    },
   };
 }

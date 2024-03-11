@@ -253,6 +253,62 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.hasWildcardAndInvalidOperator",
+        "type": "Function",
+        "tags": [],
+        "label": "hasWildcardAndInvalidOperator",
+        "description": [],
+        "signature": [
+          "({ operator, value, }: { operator: \"match\" | \"wildcard\" | \"match_any\"; value: string; }) => boolean"
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-utils",
+            "id": "def-common.hasWildcardAndInvalidOperator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  operator,\n  value,\n}",
+            "description": [],
+            "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-utils",
+                "id": "def-common.hasWildcardAndInvalidOperator.$1.operator",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "operator",
+                "description": [],
+                "signature": [
+                  "\"match\" | \"wildcard\" | \"match_any\""
+                ],
+                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-utils",
+                "id": "def-common.hasWildcardAndInvalidOperator.$1.value",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
         "id": "def-common.isPathValid",
         "type": "Function",
         "tags": [],
@@ -328,7 +384,6 @@
                 "label": "field",
                 "description": [],
                 "signature": [
-                  "\"file.path.text\" | ",
                   {
                     "pluginId": "@kbn/securitysolution-utils",
                     "scope": "common",
@@ -343,7 +398,8 @@
                     "docId": "kibKbnSecuritysolutionUtilsPluginApi",
                     "section": "def-common.BlocklistConditionEntryField",
                     "text": "BlocklistConditionEntryField"
-                  }
+                  },
+                  " | \"file.path.text\""
                 ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
@@ -689,7 +745,6 @@
         "label": "AllConditionEntryFields",
         "description": [],
         "signature": [
-          "\"file.path.text\" | ",
           {
             "pluginId": "@kbn/securitysolution-utils",
             "scope": "common",
@@ -704,7 +759,8 @@
             "docId": "kibKbnSecuritysolutionUtilsPluginApi",
             "section": "def-common.BlocklistConditionEntryField",
             "text": "BlocklistConditionEntryField"
-          }
+          },
+          " | \"file.path.text\""
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,

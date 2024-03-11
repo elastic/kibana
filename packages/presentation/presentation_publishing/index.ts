@@ -74,6 +74,7 @@ export {
   type PublishesWritablePanelDescription,
 } from './interfaces/publishes_panel_description';
 export {
+  getPanelTitle,
   apiPublishesPanelTitle,
   apiPublishesWritablePanelTitle,
   useDefaultPanelTitle,
@@ -89,6 +90,10 @@ export {
 } from './interfaces/publishes_saved_object_id';
 export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
 export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
+export {
+  apiHasSupportedTriggers,
+  type HasSupportedTriggers,
+} from './interfaces/has_supported_triggers';
 export {
   apiPublishesViewMode,
   apiPublishesWritableViewMode,

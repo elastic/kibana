@@ -289,6 +289,7 @@ export class FleetPlugin
     registerSavedObjects(core.savedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
+    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
     // Register feature
     if (deps.features) {
       deps.features.registerKibanaFeature({
@@ -318,6 +319,115 @@ export class FleetPlugin
             },
           ],
         },
+        subFeatures: experimentalFeatures.subfeaturePrivileges
+          ? [
+              {
+                name: 'Agents',
+                requireAllSpaces: true,
+                privilegeGroups: [
+                  {
+                    groupType: 'mutually_exclusive',
+                    privileges: [
+                      {
+                        id: `${PLUGIN_ID}-agents-all`,
+                        api: [`${PLUGIN_ID}-agents-read`, `${PLUGIN_ID}-agents-all`],
+                        name: 'All',
+                        ui: ['read', 'all'],
+                        savedObject: {
+                          all: [],
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'all',
+                      },
+                      {
+                        id: `${PLUGIN_ID}-agents-read`,
+                        api: [`${PLUGIN_ID}-agents-read`],
+                        name: 'Read',
+                        ui: ['read'],
+                        savedObject: {
+                          all: [],
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'read',
+                        alerting: {},
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                name: 'Agent policies',
+                requireAllSpaces: true,
+                privilegeGroups: [
+                  {
+                    groupType: 'mutually_exclusive',
+                    privileges: [
+                      {
+                        id: `${PLUGIN_ID}-agent-policies-all`,
+                        api: [
+                          `${PLUGIN_ID}-agent-policies-read`,
+                          `${PLUGIN_ID}-agent-policies-all`,
+                        ],
+                        name: 'All',
+                        ui: ['read', 'all'],
+                        savedObject: {
+                          all: [],
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'all',
+                      },
+                      {
+                        id: `${PLUGIN_ID}-agent-policies-read`,
+                        api: [`${PLUGIN_ID}-agent-policies-read`],
+                        name: 'Read',
+                        ui: ['read'],
+                        savedObject: {
+                          all: [],
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'read',
+                        alerting: {},
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                name: 'Settings',
+                requireAllSpaces: true,
+                privilegeGroups: [
+                  {
+                    groupType: 'mutually_exclusive',
+                    privileges: [
+                      {
+                        id: `${PLUGIN_ID}-settings-all`,
+                        api: [`${PLUGIN_ID}-settings-read`, `${PLUGIN_ID}-settings-all`],
+                        name: 'All',
+                        ui: ['read', 'all'],
+                        savedObject: {
+                          all: [],
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'all',
+                      },
+                      {
+                        id: `${PLUGIN_ID}-settings-read`,
+                        api: [`${PLUGIN_ID}-settings-read`],
+                        name: 'Read',
+                        ui: ['read'],
+                        savedObject: {
+                          all: [],
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'read',
+                        alerting: {},
+                      },
+                    ],
+                  },
+                ],
+              },
+            ]
+          : [],
         privileges: {
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
@@ -340,7 +450,6 @@ export class FleetPlugin
               read: allSavedObjectTypes,
             },
             ui: ['read'],
-            disabled: true,
           },
         },
       });
@@ -511,7 +620,7 @@ export class FleetPlugin
 
     const logger = appContextService.getLogger();
 
-    this.policyWatcher = new PolicyWatcher(core.savedObjects, core.elasticsearch, logger);
+    this.policyWatcher = new PolicyWatcher(core.savedObjects, logger);
 
     this.policyWatcher.start(licenseService);
 
@@ -619,6 +728,8 @@ export class FleetPlugin
         getByIds: agentPolicyService.getByIDs,
         turnOffAgentTamperProtections:
           agentPolicyService.turnOffAgentTamperProtections.bind(agentPolicyService),
+        fetchAllAgentPolicies: agentPolicyService.fetchAllAgentPolicies,
+        fetchAllAgentPolicyIds: agentPolicyService.fetchAllAgentPolicyIds,
       },
       packagePolicyService,
       registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {

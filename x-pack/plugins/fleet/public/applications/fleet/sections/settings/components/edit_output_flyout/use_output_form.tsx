@@ -44,7 +44,6 @@ import {
   useRadioInput,
   sendPutOutput,
   useKeyValueInput,
-  useTopicsInput,
 } from '../../../../hooks';
 import type { Output } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
@@ -66,7 +65,6 @@ import {
   validateKafkaPasswordSecret,
   validateKafkaHeaders,
   validateKafkaDefaultTopic,
-  validateKafkaTopics,
   validateKafkaClientId,
   validateKafkaHosts,
   validateKafkaPartitioningGroupEvents,
@@ -118,7 +116,6 @@ export interface OutputFormInputsType {
   kafkaHeadersInput: ReturnType<typeof useKeyValueInput>;
   kafkaClientIdInput: ReturnType<typeof useInput>;
   kafkaDefaultTopicInput: ReturnType<typeof useInput>;
-  kafkaTopicsInput: ReturnType<typeof useTopicsInput>;
   kafkaCompressionInput: ReturnType<typeof useSwitchInput>;
   kafkaCompressionLevelInput: ReturnType<typeof useInput>;
   kafkaCompressionCodecInput: ReturnType<typeof useInput>;
@@ -339,14 +336,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     return lastTopic || '';
   };
 
-  const extractKafkaTopics = (topics?: Array<{ topic: string }>) => {
-    if (!topics || topics.length <= 1) {
-      return [];
-    }
-
-    return topics.slice(0, -1);
-  };
-
   const kafkaVersionInput = useInput(
     kafkaOutput?.version ?? '1.0.0',
     undefined,
@@ -449,12 +438,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   const kafkaDefaultTopicInput = useInput(
     extractDefaultKafkaTopic(kafkaOutput?.topics),
     validateKafkaDefaultTopic,
-    isDisabled('topics')
-  );
-  const kafkaTopicsInput = useTopicsInput(
-    'kafkaTopicsComboBox',
-    extractKafkaTopics(kafkaOutput?.topics),
-    validateKafkaTopics,
     isDisabled('topics')
   );
   const kafkaHeadersInput = useKeyValueInput(
@@ -565,7 +548,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     kafkaSslKeyInput,
     kafkaSslKeySecretInput,
     kafkaDefaultTopicInput,
-    kafkaTopicsInput,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -582,7 +564,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     const kafkaSslKeyPlainValid = kafkaSslKeyInput.validate();
     const kafkaSslKeySecretValid = kafkaSslKeySecretInput.validate();
     const kafkaDefaultTopicValid = kafkaDefaultTopicInput.validate();
-    const kafkaTopicsValid = kafkaTopicsInput.validate();
     const kafkaHeadersValid = kafkaHeadersInput.validate();
     const logstashHostsValid = logstashHostsInput.validate();
     const additionalYamlConfigValid = additionalYamlConfigInput.validate();
@@ -625,7 +606,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
         kafkaPasswordValid &&
         kafkaHeadersValid &&
         kafkaDefaultTopicValid &&
-        kafkaTopicsValid &&
         additionalYamlConfigValid &&
         kafkaClientIDValid &&
         partitioningRandomGroupEventsValid &&
@@ -662,7 +642,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     kafkaSslKeyInput,
     kafkaSslKeySecretInput,
     kafkaDefaultTopicInput,
-    kafkaTopicsInput,
     kafkaHeadersInput,
     logstashHostsInput,
     additionalYamlConfigInput,
@@ -839,7 +818,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                     },
                   }
                 : {}),
-              topics: [...kafkaTopicsInput.value, { topic: kafkaDefaultTopicInput.value }],
+              topics: [{ topic: kafkaDefaultTopicInput.value }],
               headers: kafkaHeadersInput.value,
               timeout: parseIntegerIfStringDefined(kafkaBrokerTimeoutInput.value),
               broker_timeout: parseIntegerIfStringDefined(
@@ -984,7 +963,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     kafkaPartitionTypeRandomInput.value,
     kafkaPartitionTypeRoundRobinInput.value,
     kafkaPartitionTypeHashInput.value,
-    kafkaTopicsInput.value,
     kafkaDefaultTopicInput.value,
     kafkaHeadersInput.value,
     kafkaBrokerTimeoutInput.value,

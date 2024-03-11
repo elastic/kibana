@@ -76,6 +76,7 @@ import {
   assetCriticalityDeleteRoute,
   assetCriticalityPrivilegesRoute,
 } from '../lib/entity_analytics/asset_criticality/routes';
+import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -160,8 +161,8 @@ export const initRoutes = (
   }
 
   if (config.experimentalFeatures.riskScoringRoutesEnabled) {
-    riskScorePreviewRoute(router, logger, config.experimentalFeatures);
-    riskScoreCalculationRoute(router, logger, config.experimentalFeatures);
+    riskScorePreviewRoute(router, logger);
+    riskScoreCalculationRoute(router, logger);
     riskEngineStatusRoute(router);
     riskEngineInitRoute(router, getStartServices);
     riskEngineEnableRoute(router, getStartServices);
@@ -171,11 +172,13 @@ export const initRoutes = (
       riskEnginePrivilegesRoute(router, getStartServices);
     }
   }
-  if (config.experimentalFeatures.entityAnalyticsAssetCriticalityEnabled) {
-    assetCriticalityStatusRoute(router, logger);
-    assetCriticalityUpsertRoute(router, logger);
-    assetCriticalityGetRoute(router, logger);
-    assetCriticalityDeleteRoute(router, logger);
-    assetCriticalityPrivilegesRoute(router, getStartServices, logger);
-  }
+
+  assetCriticalityStatusRoute(router, logger);
+  assetCriticalityUpsertRoute(router, logger);
+  assetCriticalityGetRoute(router, logger);
+  assetCriticalityDeleteRoute(router, logger);
+  assetCriticalityPrivilegesRoute(router, getStartServices, logger);
+
+  // Security Integrations
+  getFleetManagedIndexTemplatesRoute(router);
 };

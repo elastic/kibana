@@ -13,11 +13,11 @@ import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
-  deleteAllRules,
   deleteAllPrebuiltRuleAssets,
   getPrebuiltRulesStatus,
   installPrebuiltRulesPackageByVersion,
 } from '../../../../utils';
+import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');

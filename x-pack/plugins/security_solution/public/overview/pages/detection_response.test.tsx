@@ -45,7 +45,7 @@ jest.mock('../../common/components/filters_global', () => ({
   FiltersGlobal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-jest.mock('../../common/components/landing_page');
+jest.mock('../../common/components/empty_prompt');
 
 const defaultUseSourcererReturn = {
   indicesExist: true,
@@ -136,7 +136,7 @@ describe('DetectionResponse', () => {
       </TestProviders>
     );
 
-    expect(result.getByTestId('siem-landing-page')).toBeInTheDocument();
+    expect(result.getByTestId('empty-prompt')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponsePage')).not.toBeInTheDocument();
     expect(result.queryByTestId('mock_globalSearchBar')).not.toBeInTheDocument();
   });

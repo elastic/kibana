@@ -11,9 +11,11 @@ import { CoreSetup, Plugin } from '@kbn/core/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
+import { EnterpriseSearchPublicStart } from '@kbn/enterprise-search-plugin/public';
+
 import type {
-  ObservabilityAIAssistantPluginSetup,
-  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -25,12 +27,13 @@ export interface AiAssistantManagementObservabilityPluginStart {}
 export interface SetupDependencies {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
-  observabilityAIAssistant?: ObservabilityAIAssistantPluginSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
 }
 
 export interface StartDependencies {
-  observabilityAIAssistant?: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   serverless?: ServerlessPluginStart;
+  enterpriseSearch?: EnterpriseSearchPublicStart;
 }
 
 export class AiAssistantManagementObservabilityPlugin

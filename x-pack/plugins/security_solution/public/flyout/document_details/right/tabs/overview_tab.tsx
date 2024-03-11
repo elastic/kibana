@@ -26,9 +26,7 @@ export const OverviewTab: FC = memo(() => {
       paddingSize="none"
       aria-label={i18n.translate(
         'xpack.securitySolution.flyout.right.overview.overviewContentAriaLabel',
-        {
-          defaultMessage: 'Alert overview',
-        }
+        { defaultMessage: 'Overview' }
       )}
     >
       <AboutSection />

@@ -6,8 +6,15 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useCallback, useEffect, useMemo, useRef, useState, ReactElement } from 'react';
-import { EuiPage, EuiPageBody, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
+import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPanel,
+  EuiProgress,
+  useEuiBackgroundColor,
+  EuiDelayRender,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -46,6 +53,7 @@ import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { ESQLTechPreviewCallout } from './esql_tech_preview_callout';
 import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
+import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -65,7 +73,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     history,
     spaces,
     docLinks,
-    serverless,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
@@ -80,7 +87,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
-  const dataView = useInternalStateSelector((state) => state.dataView!);
+  const [dataView, dataViewLoading] = useInternalStateSelector((state) => [
+    state.dataView!,
+    state.isDataViewLoading,
+  ]);
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
 
@@ -240,9 +250,21 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     panelsToggle,
   ]);
 
+  const isLoading =
+    documentState.fetchStatus === FetchStatus.LOADING ||
+    documentState.fetchStatus === FetchStatus.PARTIAL;
+
+  const onCancelClick = useCallback(() => {
+    stateContainer.dataState.cancel();
+    sendErrorMsg(stateContainer.dataState.data$.documents$);
+    sendErrorMsg(stateContainer.dataState.data$.main$);
+  }, [stateContainer.dataState]);
+
   return (
     <EuiPage
-      className={classNames('dscPage', { 'dscPage--serverless': serverless })}
+      className={classNames('dscPage', {
+        'dscPage--topNavInline': stateContainer.customizationContext.inlineTopNav.enabled,
+      })}
       data-fetch-counter={fetchCounter.current}
       css={css`
         background-color: ${pageBackgroundColor};
@@ -271,6 +293,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         textBasedLanguageModeWarning={textBasedLanguageModeWarning}
         onFieldEdited={onFieldEdited}
+        isLoading={isLoading}
+        onCancelClick={onCancelClick}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <div
@@ -280,6 +304,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             height: 100%;
           `}
         >
+          {dataViewLoading && (
+            <EuiDelayRender delay={300}>
+              <EuiProgress size="xs" color="accent" position="absolute" />
+            </EuiDelayRender>
+          )}
           <SavedSearchURLConflictCallout
             savedSearch={savedSearch}
             spaces={spaces}

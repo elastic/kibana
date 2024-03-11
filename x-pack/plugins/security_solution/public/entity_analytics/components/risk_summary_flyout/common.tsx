@@ -11,10 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { sumBy } from 'lodash/fp';
 
 import type { HostRiskScore, RiskStats, UserRiskScore } from '../../../../common/search_strategy';
+import { formatRiskScore } from '../../common';
 
 interface TableItem {
   category: string;
-  count: number;
+  count: number | undefined;
   score: number;
 }
 
@@ -57,11 +58,11 @@ export const buildColumns: (showFooter: boolean) => Array<EuiBasicTableColumn<Ta
     sortable: true,
     dataType: 'number',
     align: 'right',
-    render: (score: number) => displayNumber(score),
+    render: formatRiskScore,
     footer: (props) =>
       showFooter ? (
         <span data-test-subj="risk-summary-result-score">
-          {displayNumber(sumBy((i) => i.score, props.items))}
+          {formatRiskScore(sumBy((i) => i.score, props.items))}
         </span>
       ) : undefined,
   },
@@ -80,7 +81,9 @@ export const buildColumns: (showFooter: boolean) => Array<EuiBasicTableColumn<Ta
     align: 'right',
     footer: (props) =>
       showFooter ? (
-        <span data-test-subj="risk-summary-result-count">{sumBy((i) => i.count, props.items)}</span>
+        <span data-test-subj="risk-summary-result-count">
+          {sumBy((i) => i.count ?? 0, props.items)}
+        </span>
       ) : undefined,
   },
 ];
@@ -101,13 +104,13 @@ export const getItems: (
       ? [
           {
             category: i18n.translate(
-              'xpack.securitySolution.flyout.entityDetails.contextGroupLabel',
+              'xpack.securitySolution.flyout.entityDetails.assetCriticalityGroupLabel',
               {
-                defaultMessage: 'Contexts',
+                defaultMessage: 'Asset Criticality',
               }
             ),
             score: entityData?.risk.category_2_score ?? 0,
-            count: entityData?.risk.category_2_count ?? 0,
+            count: undefined,
           },
         ]
       : []),
@@ -133,8 +136,6 @@ export const getEntityData = (
 
   return riskData.host;
 };
-
-const displayNumber = (num: number) => num.toFixed(2);
 
 export const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
 export const LENS_VISUALIZATION_MIN_WIDTH = 160; // Lens visualization min-width in pixels

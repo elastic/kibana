@@ -12,7 +12,11 @@ import {
   ALERTS_AS_DATA_FIND_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { getAlertStatus, createAlertsIndex, deleteAllAlerts } from '../../../utils';
+import { getAlertStatus } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
