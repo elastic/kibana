@@ -12,8 +12,7 @@
   ],
   "baseBranches": [
     "main",
-    "7.16",
-    "7.15"
+    "7.17"
   ],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
@@ -75,26 +74,6 @@
         "backport:skip",
         "Team:Operations",
         "Team:Core"
-      ],
-      "enabled": true
-    },
-    {
-      "groupName": "@elastic/elasticsearch",
-      "matchPackageNames": [
-        "@elastic/elasticsearch"
-      ],
-      "reviewers": [
-        "team:kibana-operations",
-        "team:kibana-core"
-      ],
-      "matchBaseBranches": [
-        "8.1"
-      ],
-      "labels": [
-        "release_note:skip",
-        "Team:Operations",
-        "Team:Core",
-        "backport:skip"
       ],
       "enabled": true
     },

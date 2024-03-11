@@ -340,6 +340,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
+  const fieldListCustomization = useDiscoverCustomization('field_list');
   const CustomDataViewPicker = searchBarCustomization?.CustomDataViewPicker;
 
   const createField = unifiedFieldListSidebarContainerApi?.createField;
@@ -416,6 +417,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             onAddFilter={onAddFilter}
             onFieldEdited={onFieldEdited}
             prependInFlyout={prependDataViewPickerForMobile}
+            additionalFieldGroups={fieldListCustomization?.additionalFieldGroups}
           />
         ) : null}
       </EuiFlexItem>

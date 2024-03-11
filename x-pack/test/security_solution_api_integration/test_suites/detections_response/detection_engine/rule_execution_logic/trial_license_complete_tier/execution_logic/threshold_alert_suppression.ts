@@ -23,8 +23,8 @@ import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/a
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { createRule } from '../../../../../../../common/utils/security_solution';
 import {
-  createRule,
   getOpenAlerts,
   getPreviewAlerts,
   getThresholdRuleForAlertTesting,
@@ -99,9 +99,9 @@ export default ({ getService }: FtrProviderContext) => {
               value: 'agent-1',
             },
           ],
-          // suppression boundaries equal to alert time, since no alert been suppressed
-          [ALERT_SUPPRESSION_START]: suppressionStart,
-          [ALERT_SUPPRESSION_END]: suppressionStart,
+          // suppression boundaries equals to document timestamp, since both documents has same timestamp
+          [ALERT_SUPPRESSION_START]: firstTimestamp,
+          [ALERT_SUPPRESSION_END]: firstTimestamp,
           [ALERT_ORIGINAL_TIME]: firstTimestamp,
           [TIMESTAMP]: suppressionStart,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
@@ -141,16 +141,11 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
           [ALERT_ORIGINAL_TIME]: firstTimestamp, // timestamp is the same
-          [ALERT_SUPPRESSION_START]: suppressionStart, // suppression start is the same
+          [ALERT_SUPPRESSION_START]: firstTimestamp, // suppression start is the same
+          [ALERT_SUPPRESSION_END]: secondTimestamp, // suppression end is updated by timestamp of the document suppressed in the second run
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         })
       );
-      // suppression end value should be greater than second document timestamp, but lesser than current time
-      const suppressionEnd = new Date(
-        secondAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_END] as string
-      ).getTime();
-      expect(suppressionEnd).toBeLessThan(new Date().getTime());
-      expect(suppressionEnd).toBeGreaterThan(new Date(secondTimestamp).getDate());
     });
 
     it('should NOT suppress and update an alert if the alert is closed', async () => {
@@ -304,8 +299,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
           [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
-          [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-          [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:00.000Z',
+          [ALERT_SUPPRESSION_START]: '2020-10-28T05:45:00.000Z',
+          [ALERT_SUPPRESSION_END]: '2020-10-28T05:45:00.000Z',
           [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         })
       );
@@ -319,8 +314,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
           [TIMESTAMP]: '2020-10-28T06:30:00.000Z',
-          [ALERT_SUPPRESSION_START]: '2020-10-28T06:30:00.000Z',
-          [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+          [ALERT_SUPPRESSION_START]: '2020-10-28T06:15:00.000Z',
+          [ALERT_SUPPRESSION_END]: '2020-10-28T06:15:00.000Z',
           [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         })
       );
@@ -389,8 +384,8 @@ export default ({ getService }: FtrProviderContext) => {
         [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
         [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
         [ALERT_ORIGINAL_TIME]: timestamp,
-        [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-        [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+        [ALERT_SUPPRESSION_START]: timestamp,
+        [ALERT_SUPPRESSION_END]: '2020-10-28T06:15:00.000Z',
         [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
       });
     });
@@ -463,8 +458,8 @@ export default ({ getService }: FtrProviderContext) => {
         [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
         [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
         [ALERT_ORIGINAL_TIME]: timestamp,
-        [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-        [ALERT_SUPPRESSION_END]: '2020-10-28T07:00:00.000Z',
+        [ALERT_SUPPRESSION_START]: timestamp,
+        [ALERT_SUPPRESSION_END]: '2020-10-28T06:45:00.000Z',
         [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
       });
     });
@@ -535,8 +530,8 @@ export default ({ getService }: FtrProviderContext) => {
         [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
         [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
         [ALERT_ORIGINAL_TIME]: timestamp,
-        [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-        [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+        [ALERT_SUPPRESSION_START]: timestamp,
+        [ALERT_SUPPRESSION_END]: '2020-10-28T06:15:00.000Z',
         [ALERT_SUPPRESSION_DOCS_COUNT]: 1, // only one suppressed alert as expected
       });
     });
@@ -630,8 +625,8 @@ export default ({ getService }: FtrProviderContext) => {
         [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
         [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
         [ALERT_ORIGINAL_TIME]: timestamp,
-        [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-        [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+        [ALERT_SUPPRESSION_START]: timestamp,
+        [ALERT_SUPPRESSION_END]: '2020-10-28T06:15:00.000Z',
         [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
       });
       expect(previewAlerts[1]._source).toEqual({
@@ -649,8 +644,8 @@ export default ({ getService }: FtrProviderContext) => {
         [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
         [ALERT_LAST_DETECTED]: '2020-10-28T06:00:00.000Z',
         [ALERT_ORIGINAL_TIME]: timestamp,
-        [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-        [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:00.000Z',
+        [ALERT_SUPPRESSION_START]: timestamp,
+        [ALERT_SUPPRESSION_END]: timestamp,
         [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // no suppressed alerts
       });
     });
@@ -724,8 +719,8 @@ export default ({ getService }: FtrProviderContext) => {
           [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
           [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z',
           [ALERT_ORIGINAL_TIME]: timestamp,
-          [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-          [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+          [ALERT_SUPPRESSION_START]: timestamp,
+          [ALERT_SUPPRESSION_END]: '2020-10-28T06:15:00.000Z',
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         })
       );
@@ -790,8 +785,8 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ],
         [ALERT_ORIGINAL_TIME]: timestamp,
-        [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-        [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+        [ALERT_SUPPRESSION_START]: timestamp,
+        [ALERT_SUPPRESSION_END]: '2020-10-28T06:10:00.000Z',
         [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
       });
     });

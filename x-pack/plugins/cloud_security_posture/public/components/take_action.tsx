@@ -31,6 +31,7 @@ interface TakeActionProps {
   createRuleFn?: (http: HttpSetup) => Promise<RuleResponse>;
   enableBenchmarkRuleFn?: () => Promise<void>;
   disableBenchmarkRuleFn?: () => Promise<void>;
+  isCreateDetectionRuleDisabled?: boolean;
 }
 
 export const showCreateDetectionRuleSuccessToast = (
@@ -94,68 +95,50 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
     text: toMountPoint(
       <div>
         <EuiText size="m">
-          {isBenchmarkRuleMuted ? (
-            <>
-              <EuiText size="m">
-                <strong data-test-subj="csp:toast-success-enable-rule-title">
-                  <FormattedMessage
-                    id="xpack.csp.flyout.ruleEnabledToastTitle"
-                    defaultMessage="Rule Enabled"
-                  />
-                </strong>
-              </EuiText>
+          <strong data-test-subj={`csp:toast-success-rule-title`}>
+            {isBenchmarkRuleMuted ? (
               <FormattedMessage
-                id="xpack.csp.flyout.ruleEnabledToastRulesCount"
-                defaultMessage="Successfully enabled {ruleCount, plural, one {# rule} other {# rules}} "
-                values={{
-                  ruleCount: data.numberOfRules,
-                }}
+                id="xpack.csp.flyout.ruleEnabledToastTitle"
+                defaultMessage="Rule Enabled"
               />
-              {data.numberOfDetectionRules > 0 ? (
-                <strong>
-                  <FormattedMessage
-                    id="xpack.csp.flyout.ruleEnabledToastDetectionRulesCount"
-                    defaultMessage="and {detectionRuleCount, plural, one {# detection rule} other {# detection rules}}"
-                    values={{
-                      detectionRuleCount: data.numberOfDetectionRules,
-                    }}
-                  />
-                </strong>
-              ) : undefined}
-            </>
-          ) : (
-            <>
-              <EuiText size="m">
-                <strong data-test-subj="csp:toast-success-disable-rule-title">
-                  <FormattedMessage
-                    id="xpack.csp.flyout.ruleDisabledToastTitle"
-                    defaultMessage="Rule Disabled"
-                  />
-                </strong>
-              </EuiText>
-
+            ) : (
               <FormattedMessage
-                id="xpack.csp.flyout.ruleDisabledToastRulesCount"
-                defaultMessage="Successfully disabled {ruleCount, plural, one {# rule} other {# rules}} "
-                values={{
-                  ruleCount: data.numberOfRules,
-                }}
+                id="xpack.csp.flyout.ruleDisabledToastTitle"
+                defaultMessage="Rule Disabled"
               />
-
-              {data.numberOfDetectionRules > 0 ? (
-                <strong>
-                  <FormattedMessage
-                    id="xpack.csp.flyout.ruleDisabledToastDetectionRulesCount"
-                    defaultMessage="and {detectionRuleCount, plural, one {# detection rule} other {# detection rules}}"
-                    values={{
-                      detectionRuleCount: data.numberOfDetectionRules,
-                    }}
-                  />
-                </strong>
-              ) : undefined}
-            </>
-          )}
+            )}
+          </strong>
         </EuiText>
+        {isBenchmarkRuleMuted ? (
+          <FormattedMessage
+            id="xpack.csp.flyout.ruleEnabledToastRulesCount"
+            defaultMessage="Successfully enabled {ruleCount, plural, one {# rule} other {# rules}} "
+            values={{
+              ruleCount: data.numberOfRules,
+            }}
+          />
+        ) : (
+          <>
+            <FormattedMessage
+              id="xpack.csp.flyout.ruleDisabledToastRulesCount"
+              defaultMessage="Successfully disabled {ruleCount, plural, one {# rule} other {# rules}} "
+              values={{
+                ruleCount: data.numberOfRules,
+              }}
+            />
+            {!isBenchmarkRuleMuted && data.numberOfDetectionRules > 0 && (
+              <strong>
+                <FormattedMessage
+                  id="xpack.csp.flyout.ruleDisabledToastDetectionRulesCount"
+                  defaultMessage=" and {detectionRuleCount, plural, one {# detection rule} other {# detection rules}}"
+                  values={{
+                    detectionRuleCount: data.numberOfDetectionRules,
+                  }}
+                />
+              </strong>
+            )}
+          </>
+        )}
       </div>
     ),
   });
@@ -169,6 +152,7 @@ export const TakeAction = ({
   createRuleFn,
   enableBenchmarkRuleFn,
   disableBenchmarkRuleFn,
+  isCreateDetectionRuleDisabled = false,
 }: TakeActionProps) => {
   const queryClient = useQueryClient();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -206,6 +190,7 @@ export const TakeAction = ({
         notifications={notifications}
         http={http}
         queryClient={queryClient}
+        isCreateDetectionRuleDisabled={isCreateDetectionRuleDisabled}
       />
     );
   if (enableBenchmarkRuleFn)
@@ -255,6 +240,7 @@ const CreateDetectionRule = ({
   notifications,
   http,
   queryClient,
+  isCreateDetectionRuleDisabled = false,
 }: {
   createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
   setIsLoading: (isLoading: boolean) => void;
@@ -262,10 +248,12 @@ const CreateDetectionRule = ({
   notifications: NotificationsStart;
   http: HttpSetup;
   queryClient: QueryClient;
+  isCreateDetectionRuleDisabled: boolean;
 }) => {
   return (
     <EuiContextMenuItem
       key="createRule"
+      disabled={isCreateDetectionRuleDisabled}
       onClick={async () => {
         closePopover();
         setIsLoading(true);

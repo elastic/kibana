@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // this is the number of renderings of the histogram needed when new data is fetched
-      let renderingCountInc = 1;
+      let renderingCountInc = 3; // Multiple renders caused by https://github.com/elastic/kibana/issues/177055
       const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
       await queryBar.submitQuery();
       await retry.waitFor('chart rendering complete', async () => {
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.discover.brushHistogram();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      renderingCountInc = 2;
+      renderingCountInc = 3; // Multiple renders caused by https://github.com/elastic/kibana/issues/177055
       await retry.waitFor('chart rendering complete after being brushed', async () => {
         const actualCount = await elasticChart.getVisualizationRenderingCount();
         const expectedCount = prevRenderingCount + renderingCountInc * 2;

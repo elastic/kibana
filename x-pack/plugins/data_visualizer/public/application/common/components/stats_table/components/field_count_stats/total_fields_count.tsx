@@ -7,7 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { dvFieldCountItemCss } from './styles';
 
 export interface TotalFieldsStats {

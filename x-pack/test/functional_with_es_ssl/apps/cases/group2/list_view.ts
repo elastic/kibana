@@ -752,7 +752,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await testSubjects.exists('all-cases-clear-filters-link-icon')).to.be(false);
       });
 
-      describe('assignees filtering', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/176716
+      describe.skip('assignees filtering', () => {
         it('filters cases by the first cases all user assignee', async () => {
           await cases.casesTable.filterByAssignee('all');
           await cases.casesTable.validateCasesTableHasNthRows(1);
@@ -883,7 +884,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('row actions', () => {
       afterEach(async () => {
-        await toasts.dismissAllToastsWithChecks();
+        await toasts.dismissAllWithChecks();
       });
 
       describe('Status', () => {
@@ -969,7 +970,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Column Selection', () => {
       afterEach(async () => {
-        await toasts.dismissAllToastsWithChecks();
+        await toasts.dismissAllWithChecks();
       });
 
       before(async () => {

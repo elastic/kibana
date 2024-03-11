@@ -8,6 +8,7 @@
 
 import { snakeCase } from 'lodash';
 import React, { FC, useState, useEffect } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiCard,
   EuiFlexGroup,
@@ -64,14 +65,14 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     docLinks,
     dataViews,
     share,
-    uiSettings,
     application,
     chrome,
     dataViewEditor,
     customBranding,
+    theme,
   } = services;
   const addBasePath = http.basePath.prepend;
-  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+  const currentTheme = useObservable(theme.theme$, { darkMode: false });
 
   // Home does not have a locator implemented, so hard-code it here.
   const addDataHref = addBasePath('/app/integrations/browse');
@@ -145,7 +146,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
               }}
               image={addBasePath(
                 `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${
-                  IS_DARK_THEME ? 'dark' : 'light'
+                  currentTheme.darkMode ? 'dark' : 'light'
                 }.svg`
               )}
               title={app.title}
