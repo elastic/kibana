@@ -73,6 +73,19 @@ function createDiscoverLocator(
       },
       query: customBadFilter as Record<string, any>,
     });
+
+    filters.push({
+      $state: { store: FilterStateStore.APP_STATE },
+      meta: {
+        type: 'custom',
+        alias: i18n.translate('xpack.observability.slo.sloDetails.totalFilterLabel', {
+          defaultMessage: 'Total events',
+        }),
+        value: JSON.stringify(customBadFilter),
+        index: indexId,
+      },
+      query: customTotalFilter as Record<string, any>,
+    });
   }
 
   const groupBy = [slo.groupBy].flat();
