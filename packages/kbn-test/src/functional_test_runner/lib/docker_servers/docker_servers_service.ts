@@ -75,10 +75,12 @@ export class DockerServersService {
         '--rm',
         '--name',
         'kibana_fips',
+        '--add-host=host.docker.internal:host-gateway',
         '-v',
         `${REPO_ROOT}/config/kibana.fips.ftr.yml:/usr/share/kibana/config/kibana.yml`,
         server.image,
       ].flat();
+      this.log.warning(dockerArgs);
       const res = await execa('docker', dockerArgs);
 
       return res.stdout.trim();
