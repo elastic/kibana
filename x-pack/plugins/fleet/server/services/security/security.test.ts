@@ -21,6 +21,7 @@ describe('When using calculateRouteAuthz()', () => {
       all: false,
       setup: false,
       readEnrollmentTokens: false,
+      allAgentPolicies: false,
       readAgentPolicies: false,
       readAgents: false,
       allAgents: false,

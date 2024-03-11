@@ -23,6 +23,7 @@ export interface FleetAuthz {
     setup: boolean;
     readEnrollmentTokens: boolean;
     readAgentPolicies: boolean;
+    allAgentPolicies: boolean;
     readAgents: boolean;
     allAgents: boolean;
     readSettings: boolean;
@@ -96,11 +97,13 @@ export const calculateAuthz = ({
     allAgents: (fleet.all || fleet.agents?.all) ?? false,
     readSettings: (fleet.all || fleet.read || fleet.settings?.read || fleet.settings?.all) ?? false,
     allSettings: (fleet.all || fleet.settings?.all) ?? false,
+    allAgentPolicies: (fleet.all || fleet.agentPolicies?.all) ?? false,
 
     // These are currently used by Fleet Server setup
     setup: fleet.all || fleet.setup,
-    readEnrollmentTokens: fleet.all || fleet.setup,
-    readAgentPolicies: fleet.all || fleet.setup,
+    readEnrollmentTokens: (fleet.all || fleet.setup || fleet.agents?.all) ?? false,
+    readAgentPolicies:
+      (fleet.all || fleet.read || fleet.setup || fleet.agentPolicies?.read) ?? false,
   },
 
   integrations: {
