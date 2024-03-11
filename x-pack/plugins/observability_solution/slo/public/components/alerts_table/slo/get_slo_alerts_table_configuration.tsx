@@ -10,7 +10,7 @@ import { ALERT_DURATION } from '@kbn/rule-data-utils';
 import { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import { casesFeatureId, observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
-import { useGetAlertFlyoutComponents } from '@kbn/observability-plugin/public';
+import { useGetAlertFlyoutComponents } from '../../alerts_flyout/use_get_alert_flyout_components';
 import { columns } from './default_columns';
 
 import { SLO_ALERTS_TABLE_CONFIG_ID } from '../../../embeddable/slo/constants';

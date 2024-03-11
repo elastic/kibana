@@ -32,6 +32,8 @@ export const plugin: PluginInitializer<
   return new Plugin(initializerContext);
 };
 
+export type { ConfigSchema } from './plugin';
+
 export {
   enableLegacyUptimeApp,
   syntheticsThrottlingEnabled,
@@ -52,9 +54,7 @@ export {
 } from '../common';
 
 export type { RulesParams } from './locators/rules';
-export { useGetAlertFlyoutComponents } from './components/alerts_flyout/use_get_alert_flyout_components';
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
-// export { DatePicker } from './pages/overview/components/date_picker/date_picker';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
 
 export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout/alerts_flyout'));

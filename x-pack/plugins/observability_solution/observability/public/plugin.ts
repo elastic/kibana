@@ -418,6 +418,7 @@ export class Plugin
       useRulesLink: createUseRulesLink(),
       rulesLocator,
       ruleDetailsLocator,
+      config,
     };
   }
 
@@ -440,6 +441,7 @@ export class Plugin
     });
 
     return {
+      config,
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
     };
