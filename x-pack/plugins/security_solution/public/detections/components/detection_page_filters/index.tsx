@@ -44,13 +44,12 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
   useEffect(() => {
     (async () => {
       // creates an adhoc dataview if it does not already exists just for alert index
-      const { timeFieldName = '@timestamp' } = await dataViewService.get(dataViewId ?? '');
       await dataViewService.create({
         id: SECURITY_ALERT_DATA_VIEW.id,
         name: SECURITY_ALERT_DATA_VIEW.name,
         title,
         allowNoIndex: true,
-        timeFieldName,
+        timeFieldName: '@timestamp',
       });
       setLoadingPageFilters(false);
     })();
