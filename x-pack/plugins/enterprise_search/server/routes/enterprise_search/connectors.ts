@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -44,7 +45,6 @@ import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
-  ElasticsearchResponseError,
   isAccessControlDisabledException,
   isExpensiveQueriesNotAllowedException,
   isIndexNotFoundException,
@@ -678,8 +678,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           path: `/_connector/${connectorId}/_index_name`,
         });
       } catch (error) {
-        // TODO
-        return error;
+        // This will almost always be a conflict because another connector has the index configured
+        // ES returns this reason nicely so we can just pass it through
+        return response.customError({
+          body: (error.meta.body as ElasticsearchErrorDetails)?.error?.reason,
+          statusCode: 500,
+        });
       }
 
       const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
