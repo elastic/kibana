@@ -169,12 +169,15 @@ export const ShareMenuTabs = ({
               payload: newCheckboxIdToSelectedMap,
             });
           };
-          return (
-            <EmbedModal urlParamExtensions={embedUrlParamExtensions} urlService={urlService} />
-          );
+          return <EmbedModal urlParamExtensions={embedUrlParamExtensions} />;
         },
         reducer(state, action) {
           switch (action.type) {
+            case String(1):
+              return {
+                ...state,
+                urlParams: action.payload,
+              };
             default:
               return state;
           }
