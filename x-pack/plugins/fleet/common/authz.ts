@@ -117,8 +117,11 @@ export const calculateAuthz = ({
     readPackageSettings: fleet.all && integrations.all,
     writePackageSettings: fleet.all && integrations.all,
 
-    readIntegrationPolicies: fleet.all && (integrations.all || integrations.read),
-    writeIntegrationPolicies: fleet.all && integrations.all,
+    readIntegrationPolicies:
+      ((fleet.all || fleet.read || fleet.agentPolicies?.read) ?? false) &&
+      (integrations.all || integrations.read),
+    writeIntegrationPolicies:
+      ((fleet.all || fleet.agentPolicies?.all) ?? false) && integrations.all,
   },
 });
 
