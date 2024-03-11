@@ -42,13 +42,16 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
       rollup_index: rollupIndex,
       allow_no_index: allowNoIndex,
       include_unmapped: includeUnmapped,
+      field_types: fieldTypes,
     } = request.query;
 
     let parsedFields: string[] = [];
     let parsedMetaFields: string[] = [];
+    let parsedFieldTypes: string[] = [];
     try {
-      parsedMetaFields = parseFields(metaFields);
-      parsedFields = parseFields(request.query.fields ?? []);
+      parsedMetaFields = parseFields(metaFields, 'meta_fields');
+      parsedFields = parseFields(request.query.fields ?? [], 'fields');
+      parsedFieldTypes = parseFields(fieldTypes || [], 'field_types');
     } catch (error) {
       return response.badRequest();
     }
@@ -63,6 +66,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           allow_no_indices: allowNoIndex || false,
           includeUnmapped,
         },
+        fieldTypes: parsedFieldTypes,
         indexFilter: getIndexFilterDsl({ excludedTiers }),
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
       });

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { INPUT_TYPE } from '../inference_base';
 import { TextInputForm } from './text_input';
 import { IndexInputForm } from './index_input';
-import { InferrerType } from '..';
+import type { InferrerType } from '..';
 
 interface Props {
   inferrer: InferrerType;
