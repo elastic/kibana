@@ -114,6 +114,11 @@ export const EQL_QUERY_VALIDATION_SPINNER = '[data-test-subj="eql-validation-loa
 
 export const EQL_QUERY_VALIDATION_ERROR = '[data-test-subj="eql-validation-errors-popover-button"]';
 
+export const EQL_OPTIONS_POPOVER_TRIGGER = '[data-test-subj="eql-settings-trigger"]';
+
+export const EQL_OPTIONS_TIMESTAMP_INPUT =
+  '[data-test-subj="eql-timestamp-field"] [data-test-subj="comboBoxInput"]';
+
 export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
   '[data-test-subj="importQueryFromSavedTimeline"]';
 
