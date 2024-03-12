@@ -227,7 +227,7 @@ export const schema = Joi.object()
         sourceArgs: Joi.array(),
         serverArgs: Joi.array(),
         installDir: Joi.string(),
-        useDedicatedTaskRunner: Joi.boolean().default(false),
+        useDedicatedTaskRunner: Joi.boolean().default(true),
         /** Options for how FTR should execute and interact with Kibana */
         runOptions: Joi.object()
           .keys({

@@ -46,7 +46,7 @@ export class DedicatedTaskRunner {
 
   constructor(config: Config, log: ToolingLog) {
     if (!config.get('kbnTestServer.useDedicatedTaskRunner')) {
-      this.enabled = false;
+      this.enabled = true;
       return;
     }
 
