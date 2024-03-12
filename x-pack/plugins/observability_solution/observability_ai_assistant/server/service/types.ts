@@ -10,10 +10,8 @@ import type {
   CompatibleJSONSchema,
   FunctionDefinition,
   FunctionResponse,
-  Message,
-  ObservabilityAIAssistantScreenContext,
-  RegisterContextDefinition,
-} from '../../common/types';
+} from '../../common/functions/types';
+import type { Message, ObservabilityAIAssistantScreenContext } from '../../common/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import { ChatFunctionClient } from './chat_function_client';
 import type { ObservabilityAIAssistantClient } from './client';
@@ -48,13 +46,11 @@ export type RegisterFunction = <
 ) => void;
 export type FunctionHandlerRegistry = Map<string, FunctionHandler>;
 
-export type ChatRegistrationFunction = ({}: {
+export type RegistrationCallback = ({}: {
   signal: AbortSignal;
   resources: RespondFunctionResources;
   client: ObservabilityAIAssistantClient;
-  registerFunction: RegisterFunction;
-  registerContext: RegisterContextDefinition;
-  hasFunction: ChatFunctionClient['hasFunction'];
+  functions: ChatFunctionClient;
 }) => Promise<void>;
 
 export interface ObservabilityAIAssistantResourceNames {
