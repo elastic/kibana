@@ -19,7 +19,7 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  const tenSeconds = 10000;
+  const fiveSeconds = 5000;
 
   return new (class ModelsFlyout {
     public async assertElserModelHeaderCopy(): Promise<void> {
@@ -52,7 +52,7 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
     public async assertDownloadButtonExists(): Promise<void> {
       expect(
         await testSubjects.exists('mlAddTrainedModelFlyoutDownloadButton', {
-          timeout: tenSeconds / 2,
+          timeout: fiveSeconds / 2,
         })
       ).to.be.ok();
     }
@@ -63,14 +63,14 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
         async () => await testSubjects.exists('mlModelsAddTrainedModelButton')
       );
       await testSubjects.clickWhenNotDisabled('mlModelsAddTrainedModelButton', {
-        timeout: tenSeconds,
+        timeout: fiveSeconds,
       });
     }
 
     public async assertOpen(): Promise<void> {
       await retry.try(async () => {
         await testSubjects.exists('mlAddTrainedModelFlyout', {
-          timeout: tenSeconds,
+          timeout: fiveSeconds,
         });
       });
     }
@@ -81,16 +81,16 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
 
     public async assertClosed(): Promise<void> {
       await testSubjects.missingOrFail('mlAddTrainedModelFlyout', {
-        timeout: tenSeconds,
+        timeout: fiveSeconds,
       });
     }
 
     public async assertFlyoutTabs(tabs: FlyoutTabs): Promise<void> {
-      const normalized = tabs.map((tab) => `mlAddTrainedModelFlyoutTab-${normalize(tab)}`);
+      const normalized = tabs.map((tab): string => `mlAddTrainedModelFlyoutTab-${normalize(tab)}`);
 
       for await (const tab of normalized) {
         const visibleText = await testSubjects.getVisibleText(tab);
-        expect(tabs.some((x) => x === visibleText)).to.be.ok();
+        expect(tabs.some((x): boolean => x === visibleText)).to.be.ok();
       }
 
       function normalize(tabName: string) {
