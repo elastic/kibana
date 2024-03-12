@@ -297,6 +297,71 @@ describe('EPM index template install', () => {
     );
   });
 
+  it('test prepareTemplate with default total_fields.limit in settings', () => {
+    const dataStream = {
+      type: 'logs',
+      dataset: 'package.dataset',
+      title: 'test data stream',
+      release: 'experimental',
+      package: 'package',
+      path: 'path',
+      ingest_pipeline: 'default',
+    } as RegistryDataStream;
+
+    const { componentTemplates } = prepareTemplate({
+      packageInstallContext,
+      dataStream,
+    });
+
+    const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
+
+    if (!('settings' in packageTemplate)) {
+      throw new Error('no settings on package template');
+    }
+
+    expect(packageTemplate.settings?.index?.mapping?.total_fields).toEqual(
+      expect.objectContaining({ limit: 1000 })
+    );
+  });
+
+  it('test prepareTemplate to override total_fields in settings', () => {
+    const dataStream = {
+      type: 'logs',
+      dataset: 'package.dataset',
+      title: 'test data stream',
+      release: 'experimental',
+      package: 'package',
+      path: 'path',
+      ingest_pipeline: 'default',
+      elasticsearch: {
+        'index_template.settings': {
+          index: {
+            mapping: {
+              total_fields: {
+                limit: 50000,
+              },
+            },
+          },
+        },
+      },
+    } as RegistryDataStream;
+
+    const { componentTemplates } = prepareTemplate({
+      packageInstallContext,
+      dataStream,
+    });
+
+    const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
+
+    if (!('settings' in packageTemplate)) {
+      throw new Error('no settings on package template');
+    }
+
+    expect(packageTemplate.settings?.index?.mapping?.total_fields).toEqual(
+      expect.objectContaining({ limit: 50000 })
+    );
+  });
+
   it('test prepareTemplate to set a runtime field in index_template.mappings', () => {
     const dataStream = {
       type: 'logs',
