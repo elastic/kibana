@@ -13,6 +13,9 @@
 
 import 'jest-styled-components';
 import '@testing-library/jest-dom';
+
+// uses subpath exports
+// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
 import 'web-streams-polyfill/polyfill'; // ReadableStream polyfill
 
 /**
