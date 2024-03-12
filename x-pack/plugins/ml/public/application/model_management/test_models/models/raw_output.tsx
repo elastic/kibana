@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import React, { FC } from 'react';
-import { Observable } from 'rxjs';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { FC } from 'react';
+import React from 'react';
+import type { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { MLJobEditor } from '../../../jobs/jobs_list/components/ml_job_editor';
 
 import type { InferrerType } from '.';
-import { NerResponse } from './ner';
-import { TextClassificationResponse } from './text_classification';
-import { TextEmbeddingResponse } from './text_embedding';
+import type { NerResponse } from './ner';
+import type { TextClassificationResponse } from './text_classification';
+import type { TextEmbeddingResponse } from './text_embedding';
 import { INPUT_TYPE, RUNNING_STATE } from './inference_base';
-import { RawTextClassificationResponse } from './text_classification/common';
-import { RawTextEmbeddingResponse } from './text_embedding/text_embedding_inference';
+import type { RawTextClassificationResponse } from './text_classification/common';
+import type { RawTextEmbeddingResponse } from './text_embedding/text_embedding_inference';
 
 type InferenceResponse = NerResponse[] | TextClassificationResponse[] | TextEmbeddingResponse[];
 type ResultResponses = Array<

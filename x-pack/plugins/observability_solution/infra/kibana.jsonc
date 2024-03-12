@@ -51,7 +51,6 @@
     "requiredBundles": [
       "unifiedSearch",
       "observability",
-      "observabilityAIAssistant",
       "licenseManagement",
       "kibanaUtils",
       "kibanaReact",

@@ -8,10 +8,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { AggName } from '../../../../../../common/types/aggregations';
+import type { AggName } from '../../../../../../common/types/aggregations';
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
-import { PivotAggsConfig } from '../../../../common';
+import type { PivotAggsConfig } from '../../../../common';
 
 import { AggLabelForm } from './agg_label_form';
 

@@ -9,4 +9,5 @@
 export { getSharedComponents } from './shared';
 export { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 export { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
+export { ReportingCsvPanelAction } from './panel_actions/get_csv_panel_action';
 export type { ReportingPublicComponents } from './shared/get_shared_components';
