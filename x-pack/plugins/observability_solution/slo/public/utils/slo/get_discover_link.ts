@@ -78,7 +78,9 @@ function createDiscoverLocator(
       $state: { store: FilterStateStore.APP_STATE },
       meta: {
         type: 'custom',
-        alias: i18n.translate('xpack.slo.sloDetails.totalFilterLabel', { defaultMessage: '' }),
+        alias: i18n.translate('xpack.slo.sloDetails.totalFilterLabel', {
+          defaultMessage: 'Total events',
+        }),
         value: JSON.stringify(customTotalFilter),
         index: indexId,
       },

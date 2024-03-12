@@ -92,5 +92,6 @@
     "@kbn/es",
     "@kbn/infra-forge",
     "@kbn/reporting-common",
+    "@kbn/slo-plugin",
   ]
 }
