@@ -8,34 +8,30 @@
 import dedent from 'dedent';
 import { registerContextFunction } from './context';
 import { registerSummarizationFunction } from './summarize';
-import { ChatRegistrationFunction } from '../service/types';
-import { registerAlertsFunction } from './alerts';
+import type { RegistrationCallback } from '../service/types';
 import { registerElasticsearchFunction } from './elasticsearch';
-import { registerQueryFunction } from './query';
 import { registerGetDatasetInfoFunction } from './get_dataset_info';
-import { registerLensFunction } from './lens';
 import { registerKibanaFunction } from './kibana';
-import { registerVisualizeESQLFunction } from './visualize_esql';
 
 export type FunctionRegistrationParameters = Omit<
-  Parameters<ChatRegistrationFunction>[0],
+  Parameters<RegistrationCallback>[0],
   'registerContext' | 'hasFunction'
 >;
 
-export const registerFunctions: ChatRegistrationFunction = async ({
+export const registerFunctions: RegistrationCallback = async ({
   client,
-  registerContext,
-  registerFunction,
-  hasFunction,
+  functions,
   resources,
   signal,
 }) => {
   const registrationParameters: FunctionRegistrationParameters = {
     client,
-    registerFunction,
+    functions,
     resources,
     signal,
   };
+
+  const isServerless = !!resources.plugins.serverless;
 
   return client.getKnowledgeBaseStatus().then((response) => {
     const isReady = response.ready;
@@ -77,25 +73,30 @@ export const registerFunctions: ChatRegistrationFunction = async ({
         If the "get_dataset_info" function returns no data, and the user asks for a query, generate a query anyway with the "query" function, but be explicit about it potentially being incorrect.
 
         ${
-          hasFunction('get_data_on_screen')
+          functions.hasFunction('get_data_on_screen')
             ? `You have access to data on the screen by calling the "get_data_on_screen" function.
         Use it to help the user understand what they are looking at. A short summary of what they are looking at is available in the return of the "context" function.
         Data that is compact enough automatically gets included in the response for the "context" function.
         `
             : ''
         }
+
+        The user is able to change the language which they want you to reply in on the settings page of the AI Assistant for Observability, which can be found in the ${
+          isServerless ? `Project settings.` : `Stack Management app under the option AI Assistants`
+        }.
+        If the user asks how to change the language, reply in the same language the user asked in.
         `
     );
 
     if (isReady) {
       description += `You can use the "summarize" functions to store new information you have learned in a knowledge database. Once you have established that you did not know the answer to a question, and the user gave you this information, it's important that you create a summarisation of what you have learned and store it in the knowledge database. Don't create a new summarization if you see a similar summarization in the conversation, instead, update the existing one by re-using its ID.
+        All summaries MUST be created in English, even if the conversation was carried out in a different language.
 
         Additionally, you can use the "context" function to retrieve relevant information from the knowledge database.
 
         `;
 
       registerSummarizationFunction(registrationParameters);
-      registerLensFunction(registrationParameters);
     } else {
       description += `You do not have a working memory. If the user expects you to remember the previous conversations, tell them they can set up the knowledge base.`;
     }
@@ -103,13 +104,20 @@ export const registerFunctions: ChatRegistrationFunction = async ({
     registerContextFunction({ ...registrationParameters, isKnowledgeBaseAvailable: isReady });
 
     registerElasticsearchFunction(registrationParameters);
-    registerKibanaFunction(registrationParameters);
-    registerQueryFunction(registrationParameters);
-    registerVisualizeESQLFunction(registrationParameters);
-    registerAlertsFunction(registrationParameters);
+    const request = registrationParameters.resources.request;
+
+    if ('id' in request) {
+      registerKibanaFunction({
+        ...registrationParameters,
+        resources: {
+          ...registrationParameters.resources,
+          request,
+        },
+      });
+    }
     registerGetDatasetInfoFunction(registrationParameters);
 
-    registerContext({
+    functions.registerContext({
       name: 'core',
       description: dedent(description),
     });

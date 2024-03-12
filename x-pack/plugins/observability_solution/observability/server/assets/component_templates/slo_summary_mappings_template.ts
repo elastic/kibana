@@ -92,6 +92,7 @@ export const getSLOSummaryMappingsTemplate = (
               type: 'keyword',
             },
             indicator: {
+              dynamic: false,
               properties: {
                 type: {
                   type: 'keyword',

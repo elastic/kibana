@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Connector } from '@kbn/search-connectors';
 
-import { Status } from '../../../../../common/types/api';
+import { HttpError, Status } from '../../../../../common/types/api';
 
 import {
   AttachIndexApiLogic,
@@ -28,7 +28,8 @@ export interface AttachIndexActions {
   attachIndex: AttachIndexApiLogicActions['makeRequest'];
   attachIndexApiError: AttachIndexApiLogicActions['apiError'];
   attachIndexApiSuccess: AttachIndexApiLogicActions['apiSuccess'];
-  checkIndexExists: IndexExistsApiLogicActions['makeRequest'];
+  callCheckIndexExists: IndexExistsApiLogicActions['makeRequest'];
+  checkIndexExists: ({ indexName }: { indexName: string }) => { indexName: string };
   checkIndexExistsApiError: IndexExistsApiLogicActions['apiError'];
   checkIndexExistsApiSuccess: IndexExistsApiLogicActions['apiSuccess'];
   createIndex: CreateApiIndexApiLogicActions['makeRequest'];
@@ -38,17 +39,24 @@ export interface AttachIndexActions {
 }
 
 export interface AttachIndexValues {
+  attachApiError: HttpError;
   attachApiStatus: Status;
-  canCreateSameNameIndex: boolean;
   connector: Connector | null;
+  createApiError: HttpError;
   createIndexApiStatus: Status;
+  indexExists: Record<string, boolean>;
   indexExistsApiStatus: Status;
   isExistLoading: boolean;
   isLoading: boolean;
 }
 
 export const AttachIndexLogic = kea<MakeLogicType<AttachIndexValues, AttachIndexActions>>({
-  actions: { setConnector: (connector) => connector },
+  actions: {
+    checkIndexExists: ({ indexName }) => ({
+      indexName,
+    }),
+    setConnector: (connector) => connector,
+  },
   connect: {
     actions: [
       AttachIndexApiLogic,
@@ -65,26 +73,24 @@ export const AttachIndexLogic = kea<MakeLogicType<AttachIndexValues, AttachIndex
       ],
       IndexExistsApiLogic,
       [
-        'makeRequest as checkIndexExists',
+        'makeRequest as callCheckIndexExists',
         'apiSuccess as checkIndexExistsApiSuccess',
         'apiError as checkIndexExistsApiError',
       ],
     ],
     values: [
       AttachIndexApiLogic,
-      ['status as attachApiStatus'],
+      ['status as attachApiStatus', 'error as attachApiError'],
       CreateApiIndexApiLogic,
-      ['status as createIndexApiStatus'],
+      ['status as createIndexApiStatus', 'error as createApiError'],
       IndexExistsApiLogic,
       ['status as indexExistsApiStatus'],
     ],
   },
   listeners: ({ actions, values }) => ({
-    attachIndexApiSuccess: () => {
-      if (values.connector) {
-        // TODO this is hacky
-        location.reload();
-      }
+    checkIndexExists: async ({ indexName }, breakpoint) => {
+      await breakpoint(200);
+      actions.callCheckIndexExists({ indexName });
     },
     createIndexApiSuccess: async ({ indexName }, breakpoint) => {
       if (values.connector) {
@@ -95,16 +101,19 @@ export const AttachIndexLogic = kea<MakeLogicType<AttachIndexValues, AttachIndex
   }),
   path: ['enterprise_search', 'content', 'attach_index_logic'],
   reducers: {
-    canCreateSameNameIndex: [
-      false,
-      {
-        checkIndexExistsApiSuccess: (_, { exists }) => !exists,
-      },
-    ],
     connector: [
       null,
       {
         setConnector: (_, connector) => connector,
+      },
+    ],
+    indexExists: [
+      {},
+      {
+        checkIndexExistsApiSuccess: (state, { exists, indexName }) => ({
+          ...state,
+          [indexName]: exists,
+        }),
       },
     ],
   },
