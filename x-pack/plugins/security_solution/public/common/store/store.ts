@@ -20,6 +20,8 @@ import type { EnhancerOptions } from 'redux-devtools-extension';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import reduceReducers from 'reduce-reducers';
+import { TimelineType } from '../../../common/api/timeline';
+import { TimelineId } from '../../../common/types';
 import { initialGroupingState } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
 import {
@@ -47,6 +49,7 @@ import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
 import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
 import { sourcererActions } from './sourcerer';
 import { createMiddlewares } from './middlewares';
+import { addNewTimeline } from '../../timelines/store/helpers';
 
 let store: Store<State, Action> | null = null;
 
@@ -104,6 +107,15 @@ export const createStoreFactory = async (
       ...subPlugins.timelines.store.initialState.timeline!,
       timelineById: {
         ...subPlugins.timelines.store.initialState.timeline.timelineById,
+        ...addNewTimeline({
+          id: TimelineId.active,
+          timelineById: {},
+          show: false,
+          timelineType: TimelineType.default,
+          columns: [],
+          dataViewId: null,
+          indexNames: [],
+        }),
       },
     },
   };
@@ -222,7 +234,6 @@ const sanitizeDataView = (dataView: SourcererDataView) => {
 const sanitizeTimelineModel = (timeline: TimelineModel) => {
   return {
     ...timeline,
-    filterManager: 'filterManager',
     footerText: 'footerText',
     loadingText: 'loadingText',
   };

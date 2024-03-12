@@ -12,10 +12,8 @@ import type {
   FieldSelectionItem,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { ml } from '../../../../../services/ml_api_service';
-import {
-  getJobConfigFromFormState,
-  State,
-} from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import type { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
 export const fetchExplainData = async (formState: State['form']) => {
   const jobConfig = getJobConfigFromFormState(formState);
