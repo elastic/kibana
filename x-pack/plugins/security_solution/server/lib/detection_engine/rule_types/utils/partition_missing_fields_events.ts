@@ -17,11 +17,11 @@ import type { SignalSourceHit } from '../types';
  * 2. where any of fields is empty
  */
 export const partitionMissingFieldsEvents = <
-  T extends SignalSourceHit | Record<string, SignalSourceHit>
+  T extends SignalSourceHit | { event: SignalSourceHit }
 >(
   events: T[],
   suppressedBy: string[] = [],
-  fieldsPath: string[] = []
+  fieldsPath: ['event'] | [] = []
 ): T[][] => {
   return partition(events, (event) => {
     if (suppressedBy.length === 0) {

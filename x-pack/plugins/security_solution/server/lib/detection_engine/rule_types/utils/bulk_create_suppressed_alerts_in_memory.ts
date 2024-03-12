@@ -102,7 +102,7 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
   });
 };
 
-export interface ExecuteBulkCreateAlertsParams
+export interface ExecuteBulkCreateAlertsParams<T extends SuppressionFieldsLatest & BaseFieldsLatest>
   extends Pick<
     SearchAfterAndBulkCreateSuppressedAlertsParams,
     | 'bulkCreate'
@@ -114,11 +114,13 @@ export interface ExecuteBulkCreateAlertsParams
     | 'alertTimestampOverride'
   > {
   unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
-  suppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
+  suppressibleWrappedDocs: Array<WrappedFieldsLatest<T>>;
   toReturn: SearchAfterAndBulkCreateReturnType;
 }
 
-export const executeBulkCreateAlerts = async ({
+export const executeBulkCreateAlerts = async <
+  T extends SuppressionFieldsLatest & BaseFieldsLatest
+>({
   unsuppressibleWrappedDocs,
   suppressibleWrappedDocs,
   toReturn,
@@ -129,7 +131,7 @@ export const executeBulkCreateAlerts = async ({
   alertSuppression,
   alertWithSuppression,
   alertTimestampOverride,
-}: ExecuteBulkCreateAlertsParams) => {
+}: ExecuteBulkCreateAlertsParams<T>) => {
   // max signals for suppression includes suppressed and created alerts
   // this allows to lift max signals limitation to higher value
   // and can detects events beyond default max_signals value

@@ -21,6 +21,7 @@ import { executeBulkCreateAlerts } from '../utils/bulk_create_suppressed_alerts_
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
+  NewTermsFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { partitionMissingFieldsEvents } from '../utils/partition_missing_fields_events';
 import type { EventsAndTerms } from './types';
@@ -42,10 +43,14 @@ export interface BulkCreateSuppressedAlertsParams
     | 'alertWithSuppression'
     | 'alertTimestampOverride'
   > {
-  wrapHits: (events: EventsAndTerms[]) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
+  wrapHits: (
+    events: EventsAndTerms[]
+  ) => Array<WrappedFieldsLatest<BaseFieldsLatest & NewTermsFieldsLatest>>;
   wrapSuppressedHits: (
     events: EventsAndTerms[]
-  ) => Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
+  ) => Array<
+    WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest & NewTermsFieldsLatest>
+  >;
   eventsAndTerms: EventsAndTerms[];
   toReturn: SearchAfterAndBulkCreateReturnType;
 }
