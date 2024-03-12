@@ -36,6 +36,7 @@ import {
   SPACE_IDS,
   TAGS,
   VERSION,
+  ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createEsQueryRule } from './helpers/alerting_api_helper';
@@ -113,6 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof hits1[ALERT_UUID]).to.be('string');
       expect(typeof hits1[ALERT_URL]).to.be('string');
       expect(typeof hits1[VERSION]).to.be('string');
+      expect(typeof hits1[ALERT_CONSECUTIVE_MATCHES]).to.be('number');
 
       // remove fields we aren't going to compare directly
       const fields = [
@@ -129,6 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.uuid',
         'kibana.alert.url',
         'kibana.version',
+        'kibana.alert.consecutive_matches',
       ];
 
       for (const field of fields) {
@@ -240,6 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(hits2[EVENT_ACTION]).to.be('active');
       expect(hits1[ALERT_DURATION]).to.not.be.lessThan(0);
       expect(hits2[ALERT_DURATION]).not.to.be(0);
+      expect(hits2[ALERT_CONSECUTIVE_MATCHES]).to.be.greaterThan(hits1[ALERT_CONSECUTIVE_MATCHES]);
 
       // remove fields we know will be different
       const fields = [
@@ -249,6 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.flapping_history',
         'kibana.alert.reason',
         'kibana.alert.rule.execution.uuid',
+        'kibana.alert.consecutive_matches',
       ];
 
       for (const field of fields) {
