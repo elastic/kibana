@@ -78,8 +78,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       .catch((error: any) => ({ error, response: undefined }));
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/176445
-  describe.skip('feature controls', () => {
+  describe('feature controls', () => {
     it(`settings can be saved with the advancedSettings: ["all"] feature privilege`, async () => {
       const username = 'settings_all';
       const roleName = 'settings_all';
