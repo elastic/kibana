@@ -223,12 +223,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await assertWorkspaceDimensions('600px', '375px');
     });
 
-    it('gauge size (absolute pixels) - 2/3 circle', async () => {
+    it('gauge size (absolute pixels) - major arc', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(
-          GaugeShapes.TWO_THIRDS_CIRCLE,
-          'gauge 2/3 circle'
-        );
+        await PageObjects.lens.switchToVisualization(GaugeShapes.MAJOR_ARC, 'gauge major arc');
       });
       await assertWorkspaceDimensions('600px', '400px');
     });
