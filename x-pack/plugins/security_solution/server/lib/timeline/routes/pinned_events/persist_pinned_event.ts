@@ -47,7 +47,13 @@ export const persistPinnedEventRoute = (
           const frameworkRequest = await buildFrameworkRequest(context, security, request);
           const { eventId } = request.body;
           const pinnedEventId = request.body?.pinnedEventId ?? null;
-          const timelineId = request.body?.timelineId ?? null;
+          const timelineId = request.body?.timelineId;
+
+          if (!timelineId) {
+            return response.badRequest({
+              body: 'Missing `timelineId`',
+            });
+          }
 
           const res = await persistPinnedEventOnTimeline(
             frameworkRequest,

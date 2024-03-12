@@ -24,7 +24,6 @@ import { SavedObjectPinnedEventRuntimeType } from '../../../../../common/types/t
 import type { SavedObjectPinnedEventWithoutExternalRefs } from '../../../../../common/types/timeline/pinned_event/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 
-import { createTimeline } from '../timelines';
 import { pinnedEventSavedObjectType } from '../../saved_object_mappings/pinned_events';
 import { pinnedEventFieldsMigrator } from './field_migrator';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
@@ -78,7 +77,7 @@ export const persistPinnedEventOnTimeline = async (
   request: FrameworkRequest,
   pinnedEventId: string | null, // pinned event saved object id
   eventId: string,
-  timelineId: string | null
+  timelineId: string
 ): Promise<PinnedEventResponse | null> => {
   try {
     if (pinnedEventId != null) {
@@ -87,16 +86,7 @@ export const persistPinnedEventOnTimeline = async (
       return null;
     }
 
-    const { timelineId: validatedTimelineId, timelineVersion } = await getValidTimelineIdAndVersion(
-      request,
-      timelineId
-    );
-
-    const pinnedEvents = await getPinnedEventsInTimelineWithEventId(
-      request,
-      validatedTimelineId,
-      eventId
-    );
+    const pinnedEvents = await getPinnedEventsInTimelineWithEventId(request, timelineId, eventId);
 
     // we already had this event pinned so let's just return the one we already had
     if (pinnedEvents.length > 0) {
@@ -132,32 +122,6 @@ export const persistPinnedEventOnTimeline = async (
     }
     throw err;
   }
-};
-
-const getValidTimelineIdAndVersion = async (
-  request: FrameworkRequest,
-  timelineId: string | null
-): Promise<{ timelineId: string; timelineVersion?: string }> => {
-  if (timelineId != null) {
-    return {
-      timelineId,
-    };
-  }
-
-  const savedObjectsClient = (await request.context.core).savedObjects.client;
-
-  // create timeline because it didn't exist
-  const { timeline: timelineResult } = await createTimeline({
-    timelineId: null,
-    timeline: {},
-    savedObjectsClient,
-    userInfo: request.user,
-  });
-
-  return {
-    timelineId: timelineResult.savedObjectId,
-    timelineVersion: timelineResult.version,
-  };
 };
 
 const getPinnedEventsInTimelineWithEventId = async (
