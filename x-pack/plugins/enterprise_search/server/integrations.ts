@@ -52,7 +52,7 @@ export const registerEnterpriseSearchIntegrations = (
         defaultMessage: 'Add search to your website with the web crawler.',
       }),
       categories: ['enterprise_search', 'app_search', 'web', 'elastic_stack', 'crawler'],
-      uiInternalPath: '/app/enterprise_search/content/search_indices/new_index/crawler',
+      uiInternalPath: '/app/enterprise_search/content/crawlers/new_crawler',
       icons: [
         {
           type: 'eui',
@@ -106,7 +106,7 @@ export const registerEnterpriseSearchIntegrations = (
         isBeta: connector.isBeta,
         shipper: 'enterprise_search',
         title: connector.name,
-        uiInternalPath: `/app/enterprise_search/content/search_indices/new_index/connector?connector_type=${connectorType}&service_type=${connector.serviceType}`,
+        uiInternalPath: `/app/enterprise_search/content/connectors/new_connector?connector_type=${connectorType}&service_type=${connector.serviceType}`,
       });
     });
   }
