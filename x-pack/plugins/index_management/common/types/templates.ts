@@ -49,7 +49,7 @@ export interface TemplateDeserialized {
   ignoreMissingComponentTemplates?: string[];
   version?: number;
   priority?: number; // Composable template only
-  allowAutoCreate?: boolean;
+  allowAutoCreate: string;
   order?: number; // Legacy template only
   ilmPolicy?: {
     name: string;
