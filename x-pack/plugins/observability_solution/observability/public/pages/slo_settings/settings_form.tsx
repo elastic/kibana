@@ -22,7 +22,7 @@ import React, { useEffect, useState } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isEqual } from 'lodash';
-import type { SloSettings } from '../../../server/domain/models';
+import { useGetSettings } from './use_get_settings';
 import { usePutSloSettings } from './use_put_slo_settings';
 
 export function SettingsForm() {
@@ -37,9 +37,7 @@ export function SettingsForm() {
     return http?.get<Array<{ name: string }>>('/api/remote_clusters');
   }, [http]);
 
-  const { data: currentSettings } = useFetcher(() => {
-    return http?.get<SloSettings>('/internal/observability/slo/settings');
-  }, [http]);
+  const currentSettings = useGetSettings();
 
   useEffect(() => {
     if (currentSettings) {
