@@ -46,6 +46,11 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
     canCreateSameNameIndex,
   } = useValues(AttachIndexLogic);
   const [selectedIndex, setSelectedIndex] = useState<{ label: string; shouldCreate?: boolean }>();
+  const [attachIndexInput, setAttachIndexInput] = useState<{
+    searchValue: string;
+    hasMatchingOptions: boolean | undefined;
+    isFullMatch: boolean;
+  }>();
   const [selectedLanguage] = useState<string>();
   const [showError, setShowError] = useState<boolean>(false);
   useEffect(() => {
@@ -75,6 +80,23 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
           label: index.name,
         };
       }) ?? [];
+
+  const shouldPrependUserInputAsOption =
+    attachIndexInput?.searchValue &&
+    attachIndexInput.hasMatchingOptions &&
+    !attachIndexInput.isFullMatch;
+
+  // Show current input in the options list
+  const optionsWithUserInput: Array<EuiComboBoxOptionOption<{ label: string }>> =
+    shouldPrependUserInputAsOption
+      ? [
+          {
+            label: attachIndexInput.searchValue,
+          },
+          ...options,
+        ]
+      : options;
+
   useEffect(() => {
     setConnector(connector);
     makeRequest({});
@@ -82,7 +104,6 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
       checkIndexExists({ indexName: connector.name });
     }
   }, [connector.id]);
-
   const { hash } = useLocation();
   useEffect(() => {
     if (hash) {
@@ -156,12 +177,27 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                 }
               )}
               isLoading={isLoading}
-              options={options}
+              options={optionsWithUserInput}
+              onSearchChange={(searchValue, hasMatchingOptions) => {
+                setAttachIndexInput({
+                  searchValue: searchValue,
+                  hasMatchingOptions: hasMatchingOptions,
+                  isFullMatch: options.some((option) => option.label === searchValue),
+                });
+              }}
               onChange={(selection) => {
                 if (showError) {
                   setShowError(false);
                 }
-                setSelectedIndex(selection[0] || undefined);
+                const selectedIndex = selection[0] ?? undefined;
+
+                const selectedIndexOption =
+                  shouldPrependUserInputAsOption &&
+                  selectedIndex?.label === attachIndexInput?.searchValue
+                    ? { ...selectedIndex, shouldCreate: true }
+                    : selectedIndex;
+
+                setSelectedIndex(selectedIndexOption);
               }}
               selectedOptions={selectedIndex ? [selectedIndex] : undefined}
               onCreateOption={(value) => {
