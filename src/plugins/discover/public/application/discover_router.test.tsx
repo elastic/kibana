@@ -50,7 +50,6 @@ const gatherRoutes = (wrapper: ShallowWrapper) => {
 };
 
 const props: DiscoverRoutesProps = {
-  isDev: false,
   customizationCallbacks: [],
   customizationContext: mockCustomizationContext,
 };
@@ -157,7 +156,6 @@ describe('CustomDiscoverRoutes', () => {
       <CustomDiscoverRoutes
         profileRegistry={profileRegistry}
         customizationContext={mockCustomizationContext}
-        isDev={props.isDev}
       />
     );
     expect(component.find(DiscoverRoutes).getElement()).toMatchObject(
@@ -165,7 +163,6 @@ describe('CustomDiscoverRoutes', () => {
         prefix={addProfile('', mockProfile)}
         customizationCallbacks={callbacks}
         customizationContext={mockCustomizationContext}
-        isDev={props.isDev}
       />
     );
   });
@@ -176,7 +173,6 @@ describe('CustomDiscoverRoutes', () => {
       <CustomDiscoverRoutes
         profileRegistry={profileRegistry}
         customizationContext={mockCustomizationContext}
-        isDev={props.isDev}
       />
     );
     expect(component.find(NotFoundRoute).getElement()).toMatchObject(<NotFoundRoute />);
@@ -195,7 +191,6 @@ describe('DiscoverRouter', () => {
         history={history}
         profileRegistry={profileRegistry}
         customizationContext={mockCustomizationContext}
-        isDev={props.isDev}
       />
     );
     gatherRoutes(component);
@@ -206,7 +201,6 @@ describe('DiscoverRouter', () => {
       <DiscoverRoutes
         customizationCallbacks={callbacks}
         customizationContext={mockCustomizationContext}
-        isDev={props.isDev}
       />
     );
   });
@@ -216,7 +210,6 @@ describe('DiscoverRouter', () => {
       <CustomDiscoverRoutes
         profileRegistry={profileRegistry}
         customizationContext={mockCustomizationContext}
-        isDev={props.isDev}
       />
     );
   });
