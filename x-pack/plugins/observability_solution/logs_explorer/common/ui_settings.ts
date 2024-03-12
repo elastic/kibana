@@ -13,20 +13,21 @@ import { DEFAULT_ALLOWED_DATA_VIEWS } from './constants';
 /**
  * uiSettings definitions for Logs Explorer.
  */
-export const LOGS_EXPLORER_ALLOWED_LOGS_DATA_VIEWS_SETTING_KEY =
-  'observability:logsExplorer:allowed_logs_data_views';
+export const LOGS_EXPLORER_ALLOWED_DATA_VIEWS_SETTING_KEY =
+  'observability:logsExplorer:allowed_data_views';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
-  [LOGS_EXPLORER_ALLOWED_LOGS_DATA_VIEWS_SETTING_KEY]: {
+  [LOGS_EXPLORER_ALLOWED_DATA_VIEWS_SETTING_KEY]: {
     category: ['observability'],
-    name: i18n.translate('xpack.logsExplorer.allowedLogsDataViews', {
+    name: i18n.translate('xpack.logsExplorer.allowedDataViews', {
       defaultMessage: 'Logs Explorer allowed data views',
     }),
     value: DEFAULT_ALLOWED_DATA_VIEWS,
-    description: i18n.translate('xpack.logsExplorer.allowedLogsDataViewsDescription', {
+    description: i18n.translate('xpack.logsExplorer.allowedDataViewsDescription', {
       defaultMessage:
-        'A list of base patterns to match logs data views and explore them in Logs Explorer. Remote clusters will be automatically matched for the passed base patterns.',
+        'A list of base patterns to match data views and explore them in Logs Explorer. Remote clusters will be automatically matched for the passed base patterns.',
     }),
+    type: 'array',
     schema: schema.arrayOf(schema.string()),
     requiresPageReload: true,
   },
