@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsResolveResponse } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { AttachmentTotals, Case, CaseAttributes, User } from '../../../common/types/domain';
 import type {
   AllCategoriesFindRequest,
@@ -33,7 +33,10 @@ import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
-import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import type {
+  CaseSavedObjectTransformed,
+  CaseTransformedAttributes,
+} from '../../common/types/case';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 import { CaseRt } from '../../../common/types/domain';
 
@@ -112,7 +115,7 @@ export const getCasesByAlertID = async (
     // if there was an error retrieving one of the cases (maybe it was deleted, but the alert comment still existed)
     // just ignore it
     const validCasesInfo = casesInfo.saved_objects.filter(
-      (caseInfo) => caseInfo.error === undefined
+      (caseInfo): caseInfo is SavedObject<CaseTransformedAttributes> => caseInfo.error === undefined
     );
 
     ensureSavedObjectsAreAuthorized(
