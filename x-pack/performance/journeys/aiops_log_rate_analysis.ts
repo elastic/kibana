@@ -22,35 +22,30 @@ interface DocWithArray {
 
 export const journey = new Journey({
   beforeSteps: async ({ es, kibanaServer }) => {
-    // Check if the index exists
-    const indexExists = await es.indices.exists({ index: indexName });
-
-    if (!indexExists) {
-      // Create index with mapping
-      await es.indices.create({
-        index: indexName,
-        mappings: {
-          properties: {
-            items: { type: 'keyword' },
-            '@timestamp': { type: 'date' },
-          },
+    // Create index with mapping
+    await es.indices.create({
+      index: indexName,
+      mappings: {
+        properties: {
+          items: { type: 'keyword' },
+          '@timestamp': { type: 'date' },
         },
-      });
+      },
+    });
 
-      // Ingest sample data
-      await es.bulk({
-        refresh: 'wait_for',
-        body: frequentItemSetsLargeArraysSource.reduce((docs, items) => {
-          if (docs === undefined) return [];
-          docs.push({ index: { _index: indexName } });
-          docs.push({
-            '@timestamp': 1562254538700,
-            items,
-          });
-          return docs;
-        }, [] as estypes.BulkRequest<DocWithArray, DocWithArray>['body']),
-      });
-    }
+    // Ingest sample data
+    await es.bulk({
+      refresh: 'wait_for',
+      body: frequentItemSetsLargeArraysSource.reduce((docs, items) => {
+        if (docs === undefined) return [];
+        docs.push({ index: { _index: indexName } });
+        docs.push({
+          '@timestamp': 1562254538700,
+          items,
+        });
+        return docs;
+      }, [] as estypes.BulkRequest<DocWithArray, DocWithArray>['body']),
+    });
 
     // Create data view
     const dataViewResp = await kibanaServer.request<DataView>({
