@@ -14,28 +14,29 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { flattenHit } from '@kbn/data-service/src/search/tabify';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { canProvideExamplesForField } from '../../utils/can_provide_stats';
+import { DEFAULT_SIMPLE_EXAMPLES_SIZE } from '../../constants';
 
 type FieldHitValue = any;
 
 interface FieldValueCountsParams {
-  hits: estypes.SearchHit[];
-  dataView: DataView;
+  values: FieldHitValue[];
   field: DataViewField;
   count?: number;
+  isTextBased: boolean;
 }
 
 export function getFieldExampleBuckets(params: FieldValueCountsParams, formatter?: FieldFormat) {
   params = defaults(params, {
-    count: 5,
+    count: DEFAULT_SIMPLE_EXAMPLES_SIZE,
   });
 
-  if (!canProvideExamplesForField(params.field, false)) {
+  if (!canProvideExamplesForField(params.field, params.isTextBased)) {
     throw new Error(
       `Analysis is not available this field type: "${params.field.type}". Field name: "${params.field.name}"`
     );
   }
 
-  const records = getFieldValues(params.hits, params.field, params.dataView);
+  const records = params.values;
 
   const { groups, sampledValues } = groupValues(records, formatter);
   const buckets = sortBy(groups, ['count', 'order'])
@@ -46,7 +47,7 @@ export function getFieldExampleBuckets(params: FieldValueCountsParams, formatter
   return {
     buckets,
     sampledValues,
-    sampledDocuments: params.hits.length,
+    sampledDocuments: params.values.length,
   };
 }
 

@@ -39,7 +39,6 @@ export type OverrideFieldTopValueBarCallback = (
 
 export interface FieldTopValuesBucketProps extends FieldTopValuesBucketParams {
   'data-test-subj': string;
-  areExamples?: boolean;
   onAddFilter?: AddFieldFilterHandler;
   /**
    * Optional callback to allow overriding props on bucket level
@@ -49,7 +48,6 @@ export interface FieldTopValuesBucketProps extends FieldTopValuesBucketParams {
 
 const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
   'data-test-subj': dataTestSubject,
-  areExamples,
   onAddFilter,
   overrideFieldTopValueBar,
   ...fieldTopValuesBucketOverridableProps
@@ -114,31 +112,30 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               </EuiText>
             )}
           </EuiFlexItem>
-          {!areExamples && (
-            <EuiFlexItem
-              grow={false}
-              data-test-subj={`${dataTestSubject}-topValues-formattedPercentage`}
+
+          <EuiFlexItem
+            grow={false}
+            data-test-subj={`${dataTestSubject}-topValues-formattedPercentage`}
+          >
+            <EuiToolTip
+              content={i18n.translate('unifiedFieldList.fieldStats.bucketPercentageTooltip', {
+                defaultMessage:
+                  '{formattedPercentage} ({count, plural, one {# record} other {# records}})',
+                values: {
+                  formattedPercentage,
+                  count,
+                },
+              })}
+              delay="long"
             >
-              <EuiToolTip
-                content={i18n.translate('unifiedFieldList.fieldStats.bucketPercentageTooltip', {
-                  defaultMessage:
-                    '{formattedPercentage} ({count, plural, one {# record} other {# records}})',
-                  values: {
-                    formattedPercentage,
-                    count,
-                  },
-                })}
-                delay="long"
-              >
-                <EuiText size="xs" textAlign="left" color={color}>
-                  {formattedPercentage}
-                </EuiText>
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
+              <EuiText size="xs" textAlign="left" color={color}>
+                {formattedPercentage}
+              </EuiText>
+            </EuiToolTip>
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiProgress
-          value={areExamples ? 0 : progressValue}
+          value={progressValue}
           max={1}
           size="s"
           color={type === 'other' ? 'subdued' : color}

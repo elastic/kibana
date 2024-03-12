@@ -12,13 +12,18 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldStatsResponse } from '../../types';
-import { getFieldExampleBuckets } from './field_examples_calculator';
+import { getFieldExampleBuckets, getFieldValues } from '../field_examples_calculator';
 import {
   canProvideExamplesForField,
   canProvideNumberSummaryForField,
   canProvideAggregatedStatsForField,
 } from '../../utils/can_provide_stats';
-import { SHARD_SIZE, DEFAULT_TOP_VALUES_SIZE, SIMPLE_EXAMPLES_SIZE } from '../../constants';
+import {
+  SHARD_SIZE,
+  DEFAULT_TOP_VALUES_SIZE,
+  SIMPLE_EXAMPLES_FETCH_SIZE,
+  DEFAULT_SIMPLE_EXAMPLES_SIZE,
+} from '../../constants';
 
 export type SearchHandler = ({
   aggs,
@@ -400,17 +405,17 @@ export async function getSimpleExamples(
     const fieldRef = getFieldRef(field);
 
     const simpleExamplesBody = {
-      size: SIMPLE_EXAMPLES_SIZE,
+      size: SIMPLE_EXAMPLES_FETCH_SIZE,
       fields: [fieldRef],
     };
 
     const simpleExamplesResult = await search(simpleExamplesBody);
     const fieldExampleBuckets = getFieldExampleBuckets(
       {
-        hits: simpleExamplesResult.hits.hits,
+        values: getFieldValues(simpleExamplesResult.hits.hits, field, dataView),
         field,
-        dataView,
-        count: DEFAULT_TOP_VALUES_SIZE,
+        count: DEFAULT_SIMPLE_EXAMPLES_SIZE,
+        isTextBased: false,
       },
       formatter
     );

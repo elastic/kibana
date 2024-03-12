@@ -58,7 +58,10 @@ export function showExamplesForField(field: DataViewField, isTextBased: boolean)
 
 export function canProvideExamplesForField(field: DataViewField, isTextBased: boolean): boolean {
   if (isTextBased) {
-    return field.type === 'string' && !canProvideTopValuesForFieldTextBased(field);
+    return (
+      (field.type === 'string' && !canProvideTopValuesForFieldTextBased(field)) ||
+      ['geo_point', 'geo_shape'].includes(field.type)
+    );
   }
   if (field.name === '_score') {
     return false;

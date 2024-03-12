@@ -41,9 +41,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   }
 
   const formatter = dataView.getFormatterForField(field);
-  const otherCount = areExamples
-    ? 0
-    : getOtherCount(getBucketsValuesCount(buckets), sampledValuesCount);
+  const otherCount = getOtherCount(getBucketsValuesCount(buckets), sampledValuesCount);
   const digitsRequired = buckets.some(
     (bucket) => !Number.isInteger(bucket.count / sampledValuesCount)
   );
@@ -63,7 +61,6 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
             <Fragment key={String(fieldValue)}>
               {index > 0 && <EuiSpacer size="s" />}
               <FieldTopValuesBucket
-                areExamples={areExamples}
                 field={field}
                 fieldValue={fieldValue}
                 formattedFieldValue={formatted}

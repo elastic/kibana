@@ -505,7 +505,7 @@ describe('UnifiedFieldList FieldStats', () => {
     expect(loadFieldStats).toHaveBeenCalledTimes(1);
 
     expect(wrapper.text()).toBe(
-      'Examples"success""info""security""warning""error""login"Calculated from 1624 records.'
+      'Examples"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%Calculated from 1624 records.'
     );
   });
 

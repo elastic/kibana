@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const SHARD_SIZE = 5000;
-export const DEFAULT_TOP_VALUES_SIZE = 10;
-export const SIMPLE_EXAMPLES_FETCH_SIZE = 100; // how many to fetch
-export const DEFAULT_SIMPLE_EXAMPLES_SIZE = 10; // how many to render in the end
+export { getFieldExampleBuckets, getFieldValues } from './field_examples_calculator';
