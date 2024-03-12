@@ -113,9 +113,9 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
             ],
           },
         ],
-        ...[{ label: SELECT_EXISTING_INDEX_GROUP_LABEL, options: options }],
+        ...[{ label: SELECT_EXISTING_INDEX_GROUP_LABEL, options }],
       ]
-    : [{ label: SELECT_EXISTING_INDEX_GROUP_LABEL, options: options }];
+    : [{ label: SELECT_EXISTING_INDEX_GROUP_LABEL, options }];
 
   useEffect(() => {
     setConnector(connector);
