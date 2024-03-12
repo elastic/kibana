@@ -219,9 +219,9 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     attachments,
     initialValue,
   }) => {
-    const { owner, appId } = useCasesContext();
+    const { owner } = useCasesContext();
     const draftStorageKey = getMarkdownEditorStorageKey({
-      appId,
+      appId: owner[0],
       caseId: 'createCase',
       commentId: 'description',
     });

@@ -18,11 +18,6 @@ import {
 } from '../../../mocks';
 
 import { mockDataPlugin, mountWithProvider } from '../../../mocks';
-jest.mock('../../../debounced_component', () => {
-  return {
-    debouncedComponent: (fn: unknown) => fn,
-  };
-});
 
 import { WorkspacePanel } from './workspace_panel';
 import { ReactWrapper } from 'enzyme';

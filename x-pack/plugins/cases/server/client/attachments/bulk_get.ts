@@ -13,7 +13,7 @@ import {
 } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../../common/api';
 import { flattenCommentSavedObjects } from '../../common/utils';
-import { createCaseError } from '../../common/error';
+import { createCaseError, generateCaseErrorResponse } from '../../common/error';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import type { BulkGetArgs } from './types';
@@ -122,12 +122,7 @@ const constructErrors = ({
   const errors: BulkGetAttachmentsResponse['errors'] = [];
 
   for (const soError of soBulkGetErrors) {
-    errors.push({
-      error: soError.error.error,
-      message: soError.error.message,
-      status: soError.error.statusCode,
-      attachmentId: soError.id,
-    });
+    errors.push({ ...generateCaseErrorResponse(soError.error), attachmentId: soError.id });
   }
 
   for (const attachment of associationErrors) {

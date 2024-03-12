@@ -49,7 +49,7 @@ export default function Filters() {
   );
 
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup data-test-subj="datasetQualityFiltersContainer" gutterSize="s">
       <EuiFlexItem>
         <FilterBar query={selectedQuery} onQueryChange={onQueryChange} />
       </EuiFlexItem>
@@ -69,8 +69,8 @@ export default function Filters() {
           onRefreshChange={onRefreshChange}
           commonlyUsedRanges={commonlyUsedRanges}
           showUpdateButton={true}
-          isPaused={timeRange.refresh.isPaused}
-          refreshInterval={timeRange.refresh.interval}
+          isPaused={timeRange.refresh.pause}
+          refreshInterval={timeRange.refresh.value}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

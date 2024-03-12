@@ -20,9 +20,8 @@ describe('getTableItemAsKQL', () => {
   });
   it('returns a KQL syntax for a group of significant items', () => {
     const groupTableItems = getGroupTableItems(finalSignificantItemGroups);
-    expect(getTableItemAsKQL(groupTableItems[0])).toBe('user:Peter AND url:login.php');
-    expect(getTableItemAsKQL(groupTableItems[1])).toBe('response_code:500 AND url:home.php');
-    expect(getTableItemAsKQL(groupTableItems[2])).toBe('url:login.php AND response_code:500');
-    expect(getTableItemAsKQL(groupTableItems[3])).toBe('user:Peter AND url:home.php');
+    expect(getTableItemAsKQL(groupTableItems[0])).toBe('response_code:500 AND url:home.php');
+    expect(getTableItemAsKQL(groupTableItems[1])).toBe('url:login.php AND response_code:500');
+    expect(getTableItemAsKQL(groupTableItems[2])).toBe('user:Peter AND url:home.php');
   });
 });

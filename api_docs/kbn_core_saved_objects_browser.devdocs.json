@@ -24,7 +24,9 @@
         "parentPluginId": "@kbn/core-saved-objects-browser",
         "id": "def-common.SavedObjectsStart",
         "type": "Interface",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsStart",
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-browser/src/contracts.ts",
@@ -103,7 +105,9 @@
             "type": "Object",
             "tags": [],
             "label": "client",
-            "description": ["{@link SavedObjectsClientContract}"],
+            "description": [
+              "{@link SavedObjectsClientContract}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",

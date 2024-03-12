@@ -8,45 +8,68 @@
 
 import '../control_group.scss';
 
-import {
-  arrayMove,
-  SortableContext,
-  rectSortingStrategy,
-  sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable';
+import classNames from 'classnames';
+import React, { useEffect, useMemo, useState } from 'react';
+
 import {
   closestCenter,
   DndContext,
   DragEndEvent,
   DragOverlay,
   KeyboardSensor,
+  LayoutMeasuringStrategy,
   PointerSensor,
   useSensor,
   useSensors,
-  LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
-import classNames from 'classnames';
-import React, { useMemo, useState } from 'react';
-import { TypedUseSelectorHook, useSelector } from 'react-redux';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-
+import {
+  arrayMove,
+  rectSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  EuiToolTip,
+  EuiTourStep,
+} from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import { ControlGroupReduxState } from '../types';
 import { ControlGroupStrings } from '../control_group_strings';
+import {
+  controlGroupSelector,
+  useControlGroupContainer,
+} from '../embeddable/control_group_container';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
-import { useControlGroupContainer } from '../embeddable/control_group_container';
-
-const contextSelect = useSelector as TypedUseSelectorHook<ControlGroupReduxState>;
 
 export const ControlGroup = () => {
   const controlGroup = useControlGroupContainer();
 
   // current state
-  const panels = contextSelect((state) => state.explicitInput.panels);
-  const viewMode = contextSelect((state) => state.explicitInput.viewMode);
-  const controlStyle = contextSelect((state) => state.explicitInput.controlStyle);
-  const showAddButton = contextSelect((state) => state.componentState.showAddButton);
+  const panels = controlGroupSelector((state) => state.explicitInput.panels);
+  const viewMode = controlGroupSelector((state) => state.explicitInput.viewMode);
+  const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
+  const showApplySelections = controlGroupSelector(
+    (state) => state.explicitInput.showApplySelections
+  );
+  const showAddButton = controlGroupSelector((state) => state.componentState.showAddButton);
+  const unpublishedFilters = controlGroupSelector(
+    (state) => state.componentState.unpublishedFilters
+  );
+  const controlWithInvalidSelectionsId = controlGroupSelector(
+    (state) => state.componentState.controlWithInvalidSelectionsId
+  );
+
+  const [tourStepOpen, setTourStepOpen] = useState<boolean>(true);
+  const [suppressTourChecked, setSuppressTourChecked] = useState<boolean>(false);
+  const [renderTourStep, setRenderTourStep] = useState(false);
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -60,6 +83,126 @@ export const ControlGroup = () => {
         }, [] as string[]),
     [panels]
   );
+
+  useEffect(() => {
+    /**
+     * This forces the tour step to get unmounted so that it can attach to the new invalid
+     * control - otherwise, the anchor will remain attached to the old invalid control
+     */
+    let mounted = true;
+    setRenderTourStep(false);
+    setTimeout(() => {
+      if (mounted) {
+        setRenderTourStep(true);
+      }
+    }, 100);
+    return () => {
+      mounted = false;
+    };
+  }, [controlWithInvalidSelectionsId]);
+
+  const applyButtonEnabled = useMemo(() => {
+    /**
+     * this is undefined if there are no unpublished filters / timeslice; note that an empty filter array counts
+     * as unpublished filters and so the apply button should still be enabled in this case
+     */
+    return Boolean(unpublishedFilters);
+  }, [unpublishedFilters]);
+
+  const showAppendedButtonGroup = useMemo(
+    () => showAddButton || showApplySelections,
+    [showAddButton, showApplySelections]
+  );
+
+  const ApplyButtonComponent = useMemo(() => {
+    return (
+      <EuiButtonIcon
+        size="m"
+        disabled={!applyButtonEnabled}
+        iconSize="m"
+        display="fill"
+        color={'success'}
+        iconType={'check'}
+        data-test-subj="controlGroup--applyFiltersButton"
+        aria-label={ControlGroupStrings.management.getApplyButtonTitle(applyButtonEnabled)}
+        onClick={() => {
+          if (unpublishedFilters) controlGroup.publishFilters(unpublishedFilters);
+        }}
+      />
+    );
+  }, [applyButtonEnabled, unpublishedFilters, controlGroup]);
+
+  const tourStep = useMemo(() => {
+    if (
+      !renderTourStep ||
+      !controlGroup.canShowInvalidSelectionsWarning() ||
+      !tourStepOpen ||
+      !controlWithInvalidSelectionsId
+    ) {
+      return null;
+    }
+    const invalidControlType = panels[controlWithInvalidSelectionsId].type;
+
+    return (
+      <EuiTourStep
+        step={1}
+        stepsTotal={1}
+        minWidth={300}
+        maxWidth={300}
+        display="block"
+        isStepOpen={true}
+        repositionOnScroll
+        onFinish={() => {}}
+        panelPaddingSize="m"
+        anchorPosition="downCenter"
+        panelClassName="controlGroup--invalidSelectionsTour"
+        anchor={`#controlFrame--${controlWithInvalidSelectionsId}`}
+        title={
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="warning" color="warning" />
+            </EuiFlexItem>
+            <EuiFlexItem>{ControlGroupStrings.invalidControlWarning.getTourTitle()}</EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        content={ControlGroupStrings.invalidControlWarning.getTourContent(invalidControlType)}
+        footerAction={[
+          <EuiCheckbox
+            compressed
+            checked={suppressTourChecked}
+            id={'controlGroup--suppressTourCheckbox'}
+            className="controlGroup--suppressTourCheckbox"
+            onChange={(e) => setSuppressTourChecked(e.target.checked)}
+            label={
+              <EuiText size="xs" className="controlGroup--suppressTourCheckboxLabel">
+                {ControlGroupStrings.invalidControlWarning.getSuppressTourLabel()}
+              </EuiText>
+            }
+          />,
+          <EuiButtonEmpty
+            size="xs"
+            flush="right"
+            color="text"
+            onClick={() => {
+              setTourStepOpen(false);
+              if (suppressTourChecked) {
+                controlGroup.suppressInvalidSelectionsWarning();
+              }
+            }}
+          >
+            {ControlGroupStrings.invalidControlWarning.getDismissButton()}
+          </EuiButtonEmpty>,
+        ]}
+      />
+    );
+  }, [
+    panels,
+    controlGroup,
+    tourStepOpen,
+    renderTourStep,
+    suppressTourChecked,
+    controlWithInvalidSelectionsId,
+  ]);
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const draggingIndex = useMemo(
@@ -111,12 +254,14 @@ export const ControlGroup = () => {
         >
           <EuiFlexGroup
             wrap={false}
-            gutterSize="m"
+            gutterSize="s"
             direction="row"
             responsive={false}
-            alignItems="center"
+            alignItems="stretch"
+            justifyContent="center"
             data-test-subj="controls-group"
           >
+            {tourStep}
             <EuiFlexItem>
               <DndContext
                 onDragStart={({ active }) => setDraggingId(active.id)}
@@ -156,16 +301,42 @@ export const ControlGroup = () => {
                 </DragOverlay>
               </DndContext>
             </EuiFlexItem>
-            {showAddButton && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  size="s"
-                  iconSize="m"
-                  display="base"
-                  iconType={'plusInCircle'}
-                  aria-label={ControlGroupStrings.management.getAddControlTitle()}
-                  onClick={() => controlGroup.openAddDataControlFlyout()}
-                />
+            {showAppendedButtonGroup && (
+              <EuiFlexItem
+                grow={false}
+                className="controlGroup--endButtonGroup"
+                data-test-subj="controlGroup--endButtonGroup"
+              >
+                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                  {showAddButton && (
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
+                        <EuiButtonIcon
+                          size="m"
+                          iconSize="m"
+                          display="base"
+                          iconType={'plusInCircle'}
+                          data-test-subj="controlGroup--addControlButton"
+                          aria-label={ControlGroupStrings.management.getAddControlTitle()}
+                          onClick={() => controlGroup.openAddDataControlFlyout()}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  )}
+                  {showApplySelections && (
+                    <EuiFlexItem grow={false}>
+                      {applyButtonEnabled ? (
+                        ApplyButtonComponent
+                      ) : (
+                        <EuiToolTip
+                          content={ControlGroupStrings.management.getApplyButtonTitle(false)}
+                        >
+                          {ApplyButtonComponent}
+                        </EuiToolTip>
+                      )}
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
