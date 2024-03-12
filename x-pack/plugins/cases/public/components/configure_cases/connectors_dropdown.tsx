@@ -33,21 +33,6 @@ export interface Props {
 
 const ICON_SIZE = 'm';
 
-// const EuiIconExtended = styled(EuiIcon)`
-//   margin-right: 13px;
-//   margin-bottom: 0 !important;
-// `;
-
-// const AddNewConnectorOption = styled.span`
-//   font-size: ${(props) => props.theme.eui.euiFontSizeXS};
-//   font-weight: ${(props) => props.theme.eui.euiFontWeightMedium};
-//   line-height: ${(props) => props.theme.eui.euiSizeL};
-
-//   &:hover {
-//     text-decoration: underline;
-//   }
-// `;
-
 const noConnectorOption = {
   value: 'none',
   inputDisplay: (
@@ -89,11 +74,6 @@ const addNewConnector = (euiTheme: EuiThemeComputed<{}>) => ({
   ),
   'data-test-subj': 'dropdown-connector-add-connector',
 });
-
-// const StyledEuiIconTip = euiStyled(EuiIconTip)`
-//   margin-left: ${({ theme }) => theme.eui.euiSizeS}
-//   margin-bottom: 0 !important;
-// `;
 
 const ConnectorsDropdownComponent: React.FC<Props> = ({
   connectors,

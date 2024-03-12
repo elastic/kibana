@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
@@ -22,7 +22,7 @@ interface FilePreviewProps {
   selectedFile: Pick<FileJSON, 'id' | 'name'>;
 }
 
-const StyledOverlayMask = styled(EuiOverlayMask)`
+const getOverlayMaskCss = css`
   padding-block-end: 0vh !important;
 
   img {
@@ -51,7 +51,7 @@ export const FilePreview = ({ closePreview, selectedFile }: FilePreviewProps) =>
   }, [closePreview]);
 
   return (
-    <StyledOverlayMask>
+    <EuiOverlayMask css={getOverlayMaskCss}>
       <EuiFocusTrap onClickOutside={closePreview}>
         <EuiImage
           alt={selectedFile.name}
@@ -63,7 +63,7 @@ export const FilePreview = ({ closePreview, selectedFile }: FilePreviewProps) =>
           data-test-subj="cases-files-image-preview"
         />
       </EuiFocusTrap>
-    </StyledOverlayMask>
+    </EuiOverlayMask>
   );
 };
 

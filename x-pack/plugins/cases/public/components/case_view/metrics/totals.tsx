@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CaseMetricsFeature } from '../../../../common/types/api';
 import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
@@ -45,11 +45,6 @@ export const CaseViewMetricItems = React.memo(
   }
 );
 CaseViewMetricItems.displayName = 'CaseViewMetricItems';
-
-// const MetricValue = euiStyled(EuiFlexItem)`
-//   font-size: ${({ theme }) => theme.eui.euiSizeL};
-//   font-weight: bold;
-// `;
 
 interface MetricItem {
   id: string;

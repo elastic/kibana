@@ -38,13 +38,6 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   disabledUiPlugins?: string[];
   initialValue?: string;
 };
-/* eslint-enable react/no-unused-prop-types */
-
-// const BottomContentWrapper = styled(EuiFlexGroup)`
-//   ${({ theme }) => `
-//     padding: ${theme.eui.euiSizeM} 0;
-//   `}
-// `;
 
 export const MarkdownEditorForm = React.memo(
   forwardRef<MarkdownEditorRef, MarkdownEditorFormProps>(

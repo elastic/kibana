@@ -34,11 +34,6 @@ const titleCss = css`
   overflow: hidden;
   word-break: break-word;
 `;
-// const EuiTextStyled = styled(EuiText)`
-//   ${({ theme }) => `
-//     margin-bottom: ${theme.eui?.paddingSizes?.s ?? 8}px;
-//   `}
-// `;
 
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   let alertsCount = 0;

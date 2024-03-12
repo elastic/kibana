@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useAllCasesNavigation } from '../../common/navigation';
@@ -19,40 +19,6 @@ interface HeaderProps {
   border?: boolean;
   isLoading?: boolean;
 }
-
-// const Header = styled.header.attrs({
-//   className: 'casesHeaderPage',
-// })<HeaderProps>`
-//   ${({ border, theme }) => css`
-//     margin-bottom: ${theme.eui.euiSizeL};
-
-//     ${border &&
-//     css`
-//       border-bottom: ${theme.eui.euiBorderThin};
-//       padding-bottom: ${theme.eui.euiSizeL};
-//       .euiProgress {
-//         top: ${theme.eui.euiSizeL};
-//       }
-//     `}
-//   `}
-// `;
-// Header.displayName = 'Header';
-
-// const FlexItem = styled(EuiFlexItem)`
-//   display: block;
-// `;
-// FlexItem.displayName = 'FlexItem';
-
-// const LinkBack = styled.div.attrs({
-//   className: 'casesHeaderPage__linkBack',
-// })`
-//   ${({ theme }) => css`
-//     font-size: ${theme.eui.euiFontSizeXS};
-//     line-height: ${theme.eui.euiLineHeight};
-//     margin-bottom: ${theme.eui.euiSizeS};
-//   `}
-// `;
-// LinkBack.displayName = 'LinkBack';
 
 export interface HeaderPageProps extends HeaderProps {
   showBackButton?: boolean;
@@ -89,11 +55,14 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
     <header
       css={css`
         margin-bottom: ${euiTheme.size.l};
-        border-bottom: ${euiTheme.border.thin};
-        padding-bottom: ${euiTheme.size.l};
-        .euiProgress {
-          top: ${euiTheme.size.l};
-        }
+        ${border &&
+        css`
+          border-bottom: ${euiTheme.border.thin};
+          padding-bottom: ${euiTheme.size.l};
+          .euiProgress {
+            top: ${euiTheme.size.l};
+          }
+        `}
       `}
       data-test-subj={dataTestSubj}
     >
@@ -108,7 +77,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
             <div
               className="casesHeaderPage__linkBack"
               css={css`
-                font-size: ${euiTheme.font.scale.xs};
+                ${useEuiFontSize('xs')};
                 margin-bottom: ${euiTheme.size.s};
               `}
             >

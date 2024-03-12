@@ -37,27 +37,6 @@ export interface EditTagsProps {
   tags: string[];
 }
 
-// const MyFlexGroup = styled(EuiFlexGroup)`
-//   ${({ theme }) => css`
-//     width: 100%;
-//     p {
-//       font-size: ${theme.eui.euiSizeM};
-//       margin-block-end: unset;
-//     }
-//   `}
-// `;
-
-// const ColumnFlexGroup = styled(EuiFlexGroup)`
-//   ${({ theme }) => css`
-//     & {
-//       max-width: 100%;
-//       @media only screen and (max-width: ${theme.eui.euiBreakpoints.m}) {
-//         flex-direction: row;
-//       }
-//     }
-//   `}
-// `;
-
 export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps) => {
   const { permissions } = useCasesContext();
   const initialState = { tags };

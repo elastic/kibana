@@ -7,7 +7,7 @@
 
 import { EuiBetaBadge, EuiNotificationBadge, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCaseViewNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -15,14 +15,6 @@ import { EXPERIMENTAL_DESC, EXPERIMENTAL_LABEL } from '../header_page/translatio
 import { ACTIVITY_TAB, ALERTS_TAB, FILES_TAB } from './translations';
 import type { CaseUI } from '../../../common';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
-
-const ExperimentalBadge = styled(EuiBetaBadge)`
-  margin-left: 5px;
-`;
-
-const StyledNotificationBadge = styled(EuiNotificationBadge)`
-  margin-left: 5px;
-`;
 
 const FilesTab = ({
   activeTab,
@@ -36,12 +28,15 @@ const FilesTab = ({
   <>
     {FILES_TAB}
     {!isLoading && fileStatsData && (
-      <StyledNotificationBadge
+      <EuiNotificationBadge
+        css={css`
+          margin-left: 5px;
+        `}
         data-test-subj="case-view-files-stats-badge"
         color={activeTab === CASE_VIEW_PAGE_TABS.FILES ? 'accent' : 'subdued'}
       >
         {fileStatsData.total > 0 ? fileStatsData.total : 0}
-      </StyledNotificationBadge>
+      </EuiNotificationBadge>
     )}
   </>
 );
@@ -57,19 +52,25 @@ const AlertsTab = ({
 }) => (
   <>
     {ALERTS_TAB}
-    <StyledNotificationBadge
+    <EuiNotificationBadge
+      css={css`
+        margin-left: 5px;
+      `}
       data-test-subj="case-view-alerts-stats-badge"
       color={activeTab === CASE_VIEW_PAGE_TABS.ALERTS ? 'accent' : 'subdued'}
     >
       {totalAlerts || 0}
-    </StyledNotificationBadge>
+    </EuiNotificationBadge>
     {isExperimental && (
-      <ExperimentalBadge
+      <EuiBetaBadge
         label={EXPERIMENTAL_LABEL}
         size="s"
         iconType="beaker"
         tooltipContent={EXPERIMENTAL_DESC}
         tooltipPosition="bottom"
+        css={css`
+          margin-left: 5px;
+        `}
         data-test-subj="case-view-alerts-table-experimental-badge"
       />
     )}

@@ -165,11 +165,6 @@ const getOpenCloseDuration = (openDate: string, closeDate: string | null): strin
   return formatDuration(closeDateObject.diff(openDateObject));
 };
 
-// const Title = euiStyled(EuiFlexItem)`
-//   font-size: ${({ theme }) => theme.eui.euiSizeM};
-//   font-weight: bold;
-// `;
-
 const CaseStatusMetricsItem: React.FC<{
   title: string;
   value: JSX.Element | string;

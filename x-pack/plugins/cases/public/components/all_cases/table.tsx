@@ -37,10 +37,6 @@ interface CasesTableProps {
   isLoadingColumns: boolean;
 }
 
-// const Div = styled.div`
-//   margin-top: ${({ theme }) => theme.eui.euiSizeM};
-// `;
-
 export const CasesTable: FunctionComponent<CasesTableProps> = ({
   columns,
   data,

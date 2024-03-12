@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
 import type {
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
@@ -21,10 +22,8 @@ import {
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import styled from 'styled-components';
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import type { ActionConnector } from '../../../common/types/domain';
 import { CaseSeverity } from '../../../common/types/domain';
@@ -50,7 +49,7 @@ type CasesColumns =
   | EuiTableFieldDataColumnType<CaseUI>;
 
 const LINE_CLAMP = 3;
-const LineClampedEuiBadgeGroup = euiStyled(EuiBadgeGroup)`
+const getLineClampedCss = css`
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: ${LINE_CLAMP};
@@ -61,10 +60,10 @@ const LineClampedEuiBadgeGroup = euiStyled(EuiBadgeGroup)`
 
 // margin-right is required here because -webkit-box-orient: vertical;
 // in the EuiBadgeGroup prevents us from defining gutterSize.
-const StyledEuiBadge = euiStyled(EuiBadge)`
-  max-width: 100px;
-  margin-right: 5px;
-`; // to allow for ellipsis
+// const StyledEuiBadge = euiStyled(EuiBadge)`
+//   max-width: 100px;
+//   margin-right: 5px;
+// `; // to allow for ellipsis
 
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyCellValue();
@@ -144,17 +143,21 @@ export const useCasesColumns = ({
         render: (tags: CaseUI['tags']) => {
           if (tags != null && tags.length > 0) {
             const clampedBadges = (
-              <LineClampedEuiBadgeGroup data-test-subj="case-table-column-tags">
+              <EuiBadgeGroup data-test-subj="case-table-column-tags" css={getLineClampedCss}>
                 {tags.map((tag: string, i: number) => (
-                  <StyledEuiBadge
+                  <EuiBadge
+                    css={css`
+                      max-width: 100px;
+                      margin-right: 5px;
+                    `}
                     color="hollow"
                     key={`${tag}-${i}`}
                     data-test-subj={`case-table-column-tags-${tag}`}
                   >
                     {tag}
-                  </StyledEuiBadge>
+                  </EuiBadge>
                 ))}
-              </LineClampedEuiBadgeGroup>
+              </EuiBadgeGroup>
             );
 
             const unclampedBadges = (
@@ -380,7 +383,7 @@ interface Props {
   connectors: ActionConnector[];
 }
 
-const IconWrapper = styled.span`
+const iconWrapperCss = css`
   svg {
     height: 20px !important;
     position: relative;
@@ -410,14 +413,14 @@ export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) 
   return (
     <p>
       {actions.read && (
-        <IconWrapper>
+        <span css={iconWrapperCss}>
           <EuiIcon
             size="original"
             title={theCase.externalService?.connectorName}
             type={getConnectorIcon(triggersActionsUi, lastPushedConnector?.actionTypeId)}
             data-test-subj="cases-table-connector-icon"
           />
-        </IconWrapper>
+        </span>
       )}
       <EuiLink
         data-test-subj={`case-table-column-external`}

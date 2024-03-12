@@ -39,12 +39,6 @@ interface UserListProps {
   dataTestSubj?: string;
 }
 
-// const MyFlexGroup = styled(EuiFlexGroup)`
-//   ${({ theme }) => css`
-//     margin-top: ${theme.eui.euiSizeM};
-//   `}
-// `;
-
 const renderUsers = (
   users: UserInfoWithAvatar[],
   handleSendEmail: (emailAddress: string | undefined | null) => void

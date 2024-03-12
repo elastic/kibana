@@ -16,16 +16,6 @@ import type { ErrorMessage } from '../use_push_to_service/callout/types';
 import { useCreateCaseNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
-// const ButtonFlexGroup = styled(EuiFlexGroup)`
-//   ${({ theme }) => css`
-//     & {
-//       @media only screen and (max-width: ${theme.eui.euiBreakpoints.s}) {
-//         flex-direction: column;
-//       }
-//     }
-//   `}
-// `;
-
 interface OwnProps {
   actionsErrors: ErrorMessage[];
 }

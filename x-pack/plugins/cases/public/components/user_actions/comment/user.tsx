@@ -7,8 +7,8 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import styled from 'styled-components';
-import { EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 
 import type { UserCommentAttachment } from '../../../../common/types/domain';
 import { UserActionTimestamp } from '../timestamp';
@@ -39,12 +39,13 @@ type BuilderArgs = Pick<
   isLoading: boolean;
 };
 
-const MyEuiCommentFooter = styled(EuiText)`
-  ${({ theme }) => `
-    border-top: ${theme.eui.euiBorderThin};
-    padding: ${theme.eui.euiSizeS};
-  `}
-`;
+const getCommentFooterCss = () => {
+  const { euiTheme } = useEuiTheme();
+  return css`
+    border-top: ${euiTheme.border.thin};
+    padding: ${euiTheme.size.s};
+  `;
+};
 
 const hasDraftComment = (
   applicationId = '',
@@ -102,11 +103,11 @@ export const createUserAttachmentUserActionBuilder = ({
             })}
           />
           {!isEdit && !isLoading && hasDraftComment(appId, caseId, comment.id, comment.comment) ? (
-            <MyEuiCommentFooter>
+            <EuiText css={getCommentFooterCss()}>
               <EuiText color="subdued" size="xs" data-test-subj="user-action-comment-unsaved-draft">
                 {i18n.UNSAVED_DRAFT_COMMENT}
               </EuiText>
-            </MyEuiCommentFooter>
+            </EuiText>
           ) : (
             ''
           )}

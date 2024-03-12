@@ -12,9 +12,10 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiSteps,
+  EuiThemeComputed,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
@@ -48,25 +49,14 @@ import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_
 import { Category } from './category';
 import { CustomFields } from './custom_fields';
 
-// interface ContainerProps {
-//   big?: boolean;
-// }
-
-const containerCss = css`
-  margin-top: ${euiThemeVars.euiSize ?? '16px'};
-`;
-
-// const Container = styled.div`
-//   margin-top: ${(props: ContainerProps) =>
-//     props.big ? euiThemeVars.euiSizeXL ?? '32px' : euiThemeVars.euiSize ?? '16px'};
-// `;
-
-// const MySpinner = styled(EuiLoadingSpinner)`
-//   position: absolute;
-//   top: 50%;
-//   left: 50%;
-//   z-index: 99;
-// `;
+const containerCss = (euiTheme: EuiThemeComputed<{}>, big?: boolean) =>
+  big
+    ? css`
+        margin-top: ${euiTheme.size.xl ?? '32px'};
+      `
+    : css`
+        margin-top: ${euiTheme.size.base ?? '16px'};
+      `;
 
 export interface CreateCaseFormFieldsProps {
   connectors: ActionConnector[];
@@ -102,6 +92,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
   }) => {
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
+    const { euiTheme } = useEuiTheme();
     const availableOwners = useAvailableCasesOwners();
     const canShowCaseSolutionSelection = !owner.length && availableOwners.length > 1;
 
@@ -112,45 +103,37 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
           <>
             <Title isLoading={isSubmitting} />
             {caseAssignmentAuthorized ? (
-              <div css={containerCss}>
+              <div css={containerCss(euiTheme)}>
                 <Assignees isLoading={isSubmitting} />
               </div>
             ) : null}
-            <div css={containerCss}>
+            <div css={containerCss(euiTheme)}>
               <Tags isLoading={isSubmitting} />
             </div>
-            <div css={containerCss}>
+            <div css={containerCss(euiTheme)}>
               <Category isLoading={isSubmitting} />
             </div>
-            <div css={containerCss}>
+            <div css={containerCss(euiTheme)}>
               <Severity isLoading={isSubmitting} />
             </div>
             {canShowCaseSolutionSelection && (
-              <div
-                css={css`
-                  ${euiThemeVars.euiSizeXL} ?? '32px'
-                `}
-              >
+              <div css={containerCss(euiTheme, true)}>
                 <CreateCaseOwnerSelector
                   availableOwners={availableOwners}
                   isLoading={isSubmitting}
                 />
               </div>
             )}
-            <div
-              css={css`
-                ${euiThemeVars.euiSizeXL} ?? '32px'
-              `}
-            >
+            <div css={containerCss(euiTheme, true)}>
               <Description isLoading={isSubmitting} draftStorageKey={draftStorageKey} />
             </div>
-            <div css={containerCss}>
+            <div css={containerCss(euiTheme)}>
               <CustomFields
                 isLoading={isSubmitting || isLoadingCaseConfiguration}
                 customFieldsConfiguration={customFieldsConfiguration}
               />
             </div>
-            <div css={containerCss} />
+            <div css={containerCss(euiTheme)} />
           </>
         ),
       }),

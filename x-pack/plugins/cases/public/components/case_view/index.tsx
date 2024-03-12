@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import { useGetCase } from '../../containers/use_get_case';
@@ -19,16 +19,19 @@ import { generateCaseViewPath, useCaseViewParams } from '../../common/navigation
 import { CaseViewPage } from './case_view_page';
 import type { CaseViewProps } from './types';
 
-const MyEuiFlexGroup = styled(EuiFlexGroup)`
-  height: 100%;
-`;
-
 export const CaseViewLoading = () => (
-  <MyEuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
+  <EuiFlexGroup
+    gutterSize="none"
+    justifyContent="center"
+    alignItems="center"
+    css={css`
+      height: 100%;
+    `}
+  >
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner data-test-subj="case-view-loading" size="xl" />
     </EuiFlexItem>
-  </MyEuiFlexGroup>
+  </EuiFlexGroup>
 );
 
 export const CaseView = React.memo(

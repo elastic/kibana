@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-
+import { css } from '@emotion/react';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
@@ -15,7 +15,6 @@ import type { PersistableStateAttachmentTypeRegistry } from '../../client/attach
 import { APP_OWNER } from '../../../common/constants';
 import { getCasesLazy } from '../../client/ui/get_cases';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
-import { Wrapper } from '../wrappers';
 import type { CasesRoutesProps } from './types';
 
 export type CasesProps = CasesRoutesProps;
@@ -34,7 +33,13 @@ const CasesAppComponent: React.FC<CasesAppProps> = ({
   const userCapabilities = useApplicationCapabilities();
 
   return (
-    <Wrapper data-test-subj="cases-app">
+    <div
+      css={css`
+        display: flex;
+        flex-direction: column;
+      `}
+      data-test-subj="cases-app"
+    >
       {getCasesLazy({
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
@@ -45,7 +50,7 @@ const CasesAppComponent: React.FC<CasesAppProps> = ({
         basePath: '/',
         features: { alerts: { enabled: true, sync: false } },
       })}
-    </Wrapper>
+    </div>
   );
 };
 

@@ -6,30 +6,19 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+import { Global, css } from '@emotion/react';
 
-import { createGlobalStyle } from '@kbn/kibana-react-plugin/common';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '../../common/lib/kibana';
 import type { LensProps } from './types';
 
 const LENS_VISUALIZATION_HEIGHT = 200;
 
-const Container = styled.div`
-  min-height: ${LENS_VISUALIZATION_HEIGHT}px;
-`;
-
-// when displaying chart in modal the tooltip is render under the modal
-const LensChartTooltipFix = createGlobalStyle`
-  div.euiOverlayMask[data-relative-to-header=above] ~ [id^='echTooltipPortal'] {
-    z-index: ${({ theme }) => theme.eui.euiZLevel7} !important;
-  }
-`;
-
 const LensRendererComponent: React.FC<LensProps> = ({ attributes, timeRange, metadata }) => {
   const {
     lens: { EmbeddableComponent },
   } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
 
   if (!attributes) {
     return null;
@@ -43,7 +32,11 @@ const LensRendererComponent: React.FC<LensProps> = ({ attributes, timeRange, met
           <EuiSpacer size="s" />
         </>
       )}
-      <Container>
+      <div
+        css={css`
+          min-height: ${LENS_VISUALIZATION_HEIGHT}px;
+        `}
+      >
         <EmbeddableComponent
           id=""
           style={{ height: LENS_VISUALIZATION_HEIGHT }}
@@ -57,8 +50,15 @@ const LensRendererComponent: React.FC<LensProps> = ({ attributes, timeRange, met
           syncTooltips={false}
           syncCursor={false}
         />
-        <LensChartTooltipFix />
-      </Container>
+        {/* when displaying chart in modal the tooltip is render under the modal */}
+        <Global
+          styles={css`
+            div.euiOverlayMask[data-relative-to-header='above'] ~ [id^='echTooltipPortal'] {
+              z-index: ${euiTheme.levels.modal} !important;
+            }
+          `}
+        />
+      </div>
     </>
   );
 };
