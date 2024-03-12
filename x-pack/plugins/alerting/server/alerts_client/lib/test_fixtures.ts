@@ -22,6 +22,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_STATUS,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
@@ -80,6 +81,7 @@ export const existingFlattenedNewAlert = {
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: 'alert-A',
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_CONSECUTIVE_MATCHES]: 1,
   [ALERT_STATUS]: 'active',
   [ALERT_START]: '2023-03-28T12:27:28.159Z',
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
@@ -98,6 +100,7 @@ export const existingFlattenedActiveAlert = {
   [ALERT_DURATION]: '3600',
   [ALERT_FLAPPING_HISTORY]: [true, false],
   [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-x'],
+  [ALERT_CONSECUTIVE_MATCHES]: 2,
 };
 
 export const existingFlattenedRecoveredAlert = {
@@ -110,6 +113,7 @@ export const existingFlattenedRecoveredAlert = {
   [ALERT_TIME_RANGE]: { gte: '2023-03-27T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
   [ALERT_FLAPPING_HISTORY]: [true, false, false, true],
   [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-x'],
+  [ALERT_CONSECUTIVE_MATCHES]: 0,
   [ALERT_STATUS]: 'recovered',
 };
 
