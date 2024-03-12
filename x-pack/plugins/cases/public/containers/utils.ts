@@ -44,6 +44,7 @@ import { throwErrors } from '../../common/api';
 import type { CaseUI, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
 import type { CustomFieldFactoryFilterOption } from '../components/custom_fields/types';
+import { createToasterPlainError } from './toaster_error';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 
@@ -52,8 +53,6 @@ export const covertToSnakeCase = (obj: Record<string, unknown>) =>
     const camelKey = Array.isArray(target) ? key : snakeCase(key);
     acc[camelKey] = isObject(value) ? covertToSnakeCase(value as Record<string, unknown>) : value;
   });
-
-export const createToasterPlainError = (message: string) => new ToasterError([message]);
 
 export const decodeCaseResponse = (respCase?: Case) =>
   pipe(CaseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
@@ -104,15 +103,6 @@ export const valueToUpdateIsStatus = (
   value: UpdateByKey['updateValue']
 ): value is CasePatchRequest['status'] => key === 'status';
 
-export class ToasterError extends Error {
-  public readonly messages: string[];
-
-  constructor(messages: string[]) {
-    super(messages[0]);
-    this.name = 'ToasterError';
-    this.messages = messages;
-  }
-}
 export const createUpdateSuccessToaster = (
   caseBeforeUpdate: CaseUI,
   caseAfterUpdate: CaseUI,

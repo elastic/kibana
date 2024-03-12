@@ -89,3 +89,4 @@ const ActionWrapperComponent: React.FC<ActionWrapperComponentProps> = ({
 ActionWrapperComponent.displayName = 'ActionWrapper';
 
 export const ActionWrapper = React.memo(ActionWrapperComponent);
+export type ActionWrapperProps = ActionWrapperComponentProps;

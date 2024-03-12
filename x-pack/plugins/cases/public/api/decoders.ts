@@ -21,7 +21,7 @@ import {
   CasesBulkGetResponseRt,
   CasesMetricsResponseRt,
 } from '../../common/types/api';
-import { createToasterPlainError } from '../containers/utils';
+import { createToasterPlainError } from '../containers/toaster_error';
 import { throwErrors } from '../../common';
 
 export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
