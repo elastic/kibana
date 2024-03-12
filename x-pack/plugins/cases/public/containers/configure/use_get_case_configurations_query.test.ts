@@ -47,13 +47,12 @@ describe('Use get case configurations query hook', () => {
 
     const spy = jest.spyOn(api, 'getCaseConfigure').mockRejectedValue(new Error('error'));
 
-    const { waitForNextUpdate } = renderHook(
+    renderHook(
       () => useGetCaseConfigurationsQuery({ select: (data) => data || initialConfiguration }),
       {
         wrapper: appMockRender.AppWrapper,
       }
     );
-    await waitForNextUpdate();
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({

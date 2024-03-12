@@ -34,5 +34,5 @@ export const getConfigurationByOwner = ({
   }
 
   // fallback to configuration 0 which was what happened before
-  return configurations.find((element) => element.owner === owner) ?? configurations[0];
+  return configurations.find((element) => element.owner === owner) ?? initialConfiguration;
 };

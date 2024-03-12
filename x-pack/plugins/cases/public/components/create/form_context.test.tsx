@@ -450,7 +450,7 @@ describe('Create case', () => {
         ...useGetAllCaseConfigurationsResponse,
         data: [
           {
-            ...useGetAllCaseConfigurationsResponse.data,
+            ...useGetAllCaseConfigurationsResponse.data[0],
             customFields: [
               ...customFieldsConfigurationMock,
               {

@@ -33,7 +33,7 @@ describe('CustomFields', () => {
       ...useGetAllCaseConfigurationsResponse,
       data: [
         {
-          ...useGetAllCaseConfigurationsResponse.data,
+          ...useGetAllCaseConfigurationsResponse.data[0],
           customFields: customFieldsConfigurationMock,
         },
       ],
@@ -62,7 +62,7 @@ describe('CustomFields', () => {
       ...useGetAllCaseConfigurationsResponse,
       data: [
         {
-          ...useGetAllCaseConfigurationsResponse.data,
+          ...useGetAllCaseConfigurationsResponse.data[0],
           customFields: [],
         },
       ],
@@ -85,7 +85,7 @@ describe('CustomFields', () => {
       ...useGetAllCaseConfigurationsResponse,
       data: [
         {
-          ...useGetAllCaseConfigurationsResponse.data,
+          ...useGetAllCaseConfigurationsResponse.data[0],
           customFields: reversedCustomFieldsConfiguration,
         },
       ],

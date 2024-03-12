@@ -25,15 +25,13 @@ describe('Use get case configuration hook', () => {
   it('returns a configuration matching the owner', async () => {
     const spy = jest.spyOn(api, 'getCaseConfigure');
     const targetConfiguration = {
+      ...initialConfiguration,
       id: 'my-new-configuration-3',
       owner: mockedTestProvidersOwner[0], // used in the AppMockRenderer
     };
     spy.mockResolvedValue([
-      // @ts-expect-error: no need to define all properties
-      { id: 'my-new-configuration-1', owner: 'foo' },
-      // @ts-expect-error: no need to define all properties
-      { id: 'my-new-configuration-2', owner: 'bar' },
-      // @ts-expect-error: no need to define all properties
+      { ...initialConfiguration, id: 'my-new-configuration-1', owner: 'foo' },
+      { ...initialConfiguration, id: 'my-new-configuration-2', owner: 'bar' },
       targetConfiguration,
     ]);
 
@@ -50,14 +48,16 @@ describe('Use get case configuration hook', () => {
     expect(result.all[1].data).toEqual(targetConfiguration);
   });
 
-  it('returns the configuration at position zero if none matches the owner', async () => {
+  it('returns the initial configuration if none matches the owner', async () => {
     const spy = jest.spyOn(api, 'getCaseConfigure');
-    const targetConfiguration = { id: 'my-new-configuration-1', owner: 'foo' };
+    const targetConfiguration = {
+      ...initialConfiguration,
+      id: 'my-new-configuration-1',
+      owner: 'foo',
+    };
     spy.mockResolvedValue([
-      // @ts-expect-error: no need to define all properties
       targetConfiguration,
-      // @ts-expect-error: no need to define all properties
-      { id: 'my-new-configuration-2', owner: 'bar' },
+      { ...initialConfiguration, id: 'my-new-configuration-2', owner: 'bar' },
     ]);
 
     const { result, waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
@@ -70,7 +70,7 @@ describe('Use get case configuration hook', () => {
      * The response after fetching
      */
     // @ts-expect-error: data is defined
-    expect(result.all[1].data).toEqual(targetConfiguration);
+    expect(result.all[1].data).toEqual(initialConfiguration);
   });
 
   it('returns the initial configuration if none exists', async () => {

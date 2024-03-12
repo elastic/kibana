@@ -16,17 +16,13 @@ describe('Utils', () => {
       );
     });
 
-    it('returns configuration in position 0 if owner is not found', () => {
+    it('returns the initial configuration if the owner is not found', () => {
       expect(
         getConfigurationByOwner({
           configurations: [{ owner: 'foo' }, { owner: 'bar' }] as CasesConfigurationUI[],
           owner: 'foobar',
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "owner": "foo",
-        }
-      `);
+      ).toBe(initialConfiguration);
     });
 
     it('returns the expected configuration when searching by owner', () => {

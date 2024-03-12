@@ -30,7 +30,7 @@ const mockConfigurationData = {
   mappings: [],
   version: '',
   id: '',
-  owner: mockedTestProvidersOwner,
+  owner: mockedTestProvidersOwner[0],
 };
 
 export const useCaseConfigureResponse = {
