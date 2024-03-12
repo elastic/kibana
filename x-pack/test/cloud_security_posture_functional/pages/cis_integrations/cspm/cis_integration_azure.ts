@@ -52,10 +52,10 @@ export default function (providerContext: FtrProviderContext) {
       it('Azure Organization ARM Template Workflow', async () => {
         await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
         await cisIntegration.clickSaveButton();
+        pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationAzure.getPostInstallArmTemplateModal()) !== undefined).to.be(
           true
         );
-        pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (await cisIntegration.getUrlOnPostInstallModal()) ===
             'https://azure.microsoft.com/en-us/get-started/azure-portal/resource-manager'
@@ -143,10 +143,10 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(CIS_AZURE_SINGLE_SUB_TEST_ID);
         await cisIntegration.clickSaveButton();
+        pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationAzure.getPostInstallArmTemplateModal()) !== undefined).to.be(
           true
         );
-        pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (await cisIntegration.getUrlOnPostInstallModal()) ===
             'https://azure.microsoft.com/en-us/get-started/azure-portal/resource-manager'
