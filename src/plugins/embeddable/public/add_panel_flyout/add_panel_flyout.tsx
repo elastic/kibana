@@ -159,7 +159,7 @@ export const AddPanelFlyout = ({
             return item.managed
               ? i18n.translate('embeddableApi.addPanel.managedPanelTooltip', {
                   defaultMessage:
-                    'This panel is managed by Elastic. It can be added but will be unlinked from the library.',
+                    'Elastic manages this panel. Adding it to a dashboard unlinks it from the library.',
                 })
               : undefined;
           }}
