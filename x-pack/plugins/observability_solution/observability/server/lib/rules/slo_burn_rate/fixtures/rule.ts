@@ -15,7 +15,10 @@ import {
 import { SLO } from '../../../../domain/models';
 import { BurnRateRuleParams } from '../types';
 
-export function createBurnRateRule(slo: SLO, params: Partial<BurnRateRuleParams> = {}) {
+export function createBurnRateRule(
+  slo: SLO,
+  params: Partial<BurnRateRuleParams> = {}
+): BurnRateRuleParams {
   return {
     sloId: slo.id,
     windows: [
