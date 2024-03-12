@@ -320,6 +320,22 @@ export class DataViewLazy extends AbstractDataView {
     return fld;
   }
 
+  /**
+   * Replaces all existing runtime fields with new fields.
+   * @param newFields Map of runtime field definitions by field name
+   */
+  // todo perhaps move to shared
+  replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
+    const oldRuntimeFieldNames = Object.keys(this.runtimeFieldMap);
+    oldRuntimeFieldNames.forEach((name) => {
+      this.removeRuntimeField(name);
+    });
+
+    Object.entries(newFields).forEach(([name, field]) => {
+      this.addRuntimeField(name, field);
+    });
+  }
+
   private getRuntimeFieldSpecMap = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) => {
     const spec: DataViewFieldSpecMap = {};
 
@@ -552,6 +568,19 @@ export class DataViewLazy extends AbstractDataView {
     );
   }
 
+  // todo perhaps move to shared
+  replaceAllScriptedFields(newFields: Record<string, FieldSpec>) {
+    const oldScriptedFieldNames = Object.keys(this.scriptedFields);
+
+    oldScriptedFieldNames.forEach((name) => {
+      this.removeScriptedField(name);
+    });
+
+    Object.entries(newFields).forEach(([name, field]) => {
+      this.upsertScriptedField(field);
+    });
+  }
+
   removeScriptedField(fieldName: string) {
     this.deleteScriptedFieldInternal(fieldName);
     this.fieldCache.delete(fieldName);
@@ -571,6 +600,7 @@ export class DataViewLazy extends AbstractDataView {
   getTimeField = () => (this.timeFieldName ? this.getFieldByName(this.timeFieldName) : undefined);
 
   async getFieldByName(name: string, forceRefresh = false) {
+    // todo is forceRefesh needed?
     const fieldMap = (await this.getFields({ fieldName: [name], forceRefresh })).getFieldMap();
     return fieldMap[name];
   }
@@ -586,7 +616,7 @@ export class DataViewLazy extends AbstractDataView {
     this.setFieldCustomLabelInternal(fieldName, customLabel);
     const fieldObject = this.fieldCache.get(fieldName);
     if (fieldObject) {
-      fieldObject.customLabel = newCustomLabel;
+      fieldObject.spec.customLabel = newCustomLabel;
     }
   }
 
@@ -596,7 +626,7 @@ export class DataViewLazy extends AbstractDataView {
     const fieldObject = this.fieldCache.get(fieldName);
     if (fieldObject) {
       if (!newCount) fieldObject.deleteCount();
-      else fieldObject.count = newCount;
+      else fieldObject.spec.count = newCount;
     }
   }
 }

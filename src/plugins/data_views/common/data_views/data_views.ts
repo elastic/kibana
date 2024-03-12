@@ -286,7 +286,7 @@ export interface DataViewsServicePublicMethods {
     saveAttempts?: number,
     ignoreErrors?: boolean,
     displayErrors?: boolean
-  ) => Promise<DataView | void | Error>;
+  ) => Promise<void>;
 
   /**
    * Returns whether a default data view exists.
@@ -1221,11 +1221,11 @@ export class DataViewsService {
    */
 
   async updateSavedObject(
-    indexPattern: DataView,
+    indexPattern: AbstractDataView,
     saveAttempts: number = 0,
     ignoreErrors: boolean = false,
     displayErrors: boolean = true
-  ): Promise<DataView | void | Error> {
+  ) {
     if (!indexPattern.id) return;
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError(indexPattern.id);
@@ -1244,18 +1244,17 @@ export class DataViewsService {
       }
     });
 
-    return this.savedObjectsClient
+    await this.savedObjectsClient
       .update(indexPattern.id, body, {
         version: indexPattern.version,
       })
       .then((response) => {
         indexPattern.id = response.id;
         indexPattern.version = response.version;
-        return indexPattern;
       })
       .catch(async (err) => {
         if (err?.response?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
-          const samePattern = await this.get(indexPattern.id as string, displayErrors);
+          const samePattern = await this.getDataViewLazy(indexPattern.id!);
           // What keys changed from now and what the server returned
           const updatedBody = samePattern.getAsSavedObjectBody();
 
@@ -1312,7 +1311,7 @@ export class DataViewsService {
           this.dataViewLazyCache.delete(indexPattern.id!);
 
           // Try the save again
-          return this.updateSavedObject(indexPattern, saveAttempts, ignoreErrors, displayErrors);
+          await this.updateSavedObject(indexPattern, saveAttempts, ignoreErrors, displayErrors);
         }
         throw err;
       });

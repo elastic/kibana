@@ -69,7 +69,7 @@ export const updateDataView = async ({
   counterName,
 }: UpdateDataViewArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getDataViewLazy(id);
   const {
     title,
     timeFieldName,
@@ -83,7 +83,6 @@ export const updateDataView = async ({
   } = spec;
 
   let isChanged = false;
-  let doRefreshFields = false;
 
   if (title !== undefined && title !== dataView.title) {
     isChanged = true;
@@ -122,14 +121,7 @@ export const updateDataView = async ({
 
   if (fields !== undefined) {
     isChanged = true;
-    doRefreshFields = true;
-    dataView.fields.replaceAll(
-      Object.values(fields || {}).map((field) => ({
-        ...field,
-        aggregatable: true,
-        searchable: true,
-      }))
-    );
+    dataView.replaceAllScriptedFields(fields);
   }
 
   if (runtimeFieldMap !== undefined) {
@@ -139,10 +131,6 @@ export const updateDataView = async ({
 
   if (isChanged) {
     await dataViewsService.updateSavedObject(dataView);
-
-    if (doRefreshFields && refreshFields) {
-      await dataViewsService.refreshFields(dataView);
-    }
   }
 
   return dataView;
@@ -217,7 +205,7 @@ const updateDataViewRouteFactory =
           });
 
           const body: Record<string, DataViewSpecRestResponse> = {
-            [serviceKey]: dataView.toSpec(),
+            [serviceKey]: await dataView.toSpec({ fieldParams: { fieldName: ['*'] } }),
           };
 
           return res.ok({
