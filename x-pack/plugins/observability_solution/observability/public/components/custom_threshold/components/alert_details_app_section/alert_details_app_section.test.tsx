@@ -64,6 +64,15 @@ jest.mock('../../../../utils/kibana_react', () => ({
       data: {
         search: jest.fn(),
       },
+      share: {
+        url: {
+          locators: {
+            get: jest
+              .fn()
+              .mockReturnValue({ getRedirectUrl: jest.fn().mockReturnValue('/view-in-app-url') }),
+          },
+        },
+      },
     },
   }),
 }));
@@ -105,19 +114,26 @@ describe('AlertDetailsAppSection', () => {
   it('should render alert summary fields', async () => {
     renderComponent();
 
-    expect(mockedSetAlertSummaryFields).toBeCalledTimes(1);
+    expect(mockedSetAlertSummaryFields).toBeCalledTimes(2);
     expect(mockedSetAlertSummaryFields).toBeCalledWith([
       {
         label: 'Source',
         value: (
-          <Groups
-            groups={[
-              {
-                field: 'host.name',
-                value: 'host-1',
-              },
-            ]}
-          />
+          <React.Fragment>
+            <Groups
+              groups={[
+                {
+                  field: 'host.name',
+                  value: 'host-1',
+                },
+              ]}
+            />
+            <span>
+              <a href="/view-in-app-url" target="_blank">
+                View logs
+              </a>
+            </span>
+          </React.Fragment>
         ),
       },
       {
@@ -139,7 +155,7 @@ describe('AlertDetailsAppSection', () => {
     const alertFields = { tags: [], 'kibana.alert.group': undefined };
     renderComponent({}, alertFields);
 
-    expect(mockedSetAlertSummaryFields).toBeCalledTimes(1);
+    expect(mockedSetAlertSummaryFields).toBeCalledTimes(2);
     expect(mockedSetAlertSummaryFields).toBeCalledWith([
       {
         label: 'Rule',

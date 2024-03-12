@@ -120,6 +120,8 @@ export default function AlertDetailsAppSection({
   const hasLogRateAnalysisLicense = hasAtLeast('platinum');
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
+  const [viewInAppUrl, setViewInAppUrl] = useState<string>();
+
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
   const chartProps = {
     baseTheme: charts.theme.useChartsBaseTheme(),
@@ -164,16 +166,20 @@ export default function AlertDetailsAppSection({
   annotations.push(alertStartAnnotation, alertRangeAnnotation);
 
   useEffect(() => {
-    const viewInAppUrl = getViewInAppUrl({
+    const appUrl = getViewInAppUrl({
       dataViewId: dataView?.id,
       groups,
       logsExplorerLocator: locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID),
       metrics: ruleParams.criteria[0]?.metrics,
-      searchConfiguration: rule.params
-        .searchConfiguration as unknown as SearchConfigurationWithExtractedReferenceType,
+      searchConfiguration:
+        ruleParams.searchConfiguration as SearchConfigurationWithExtractedReferenceType,
       startedAt: alertStart,
     });
 
+    setViewInAppUrl(appUrl);
+  }, [dataView, alertStart, groups, ruleParams, locators]);
+
+  useEffect(() => {
     const alertSummaryFields = [];
     if (groups) {
       alertSummaryFields.push({
@@ -223,17 +229,7 @@ export default function AlertDetailsAppSection({
     });
 
     setAlertSummaryFields(alertSummaryFields);
-  }, [
-    dataView,
-    alertStart,
-    ruleParams,
-    groups,
-    tags,
-    rule,
-    ruleLink,
-    setAlertSummaryFields,
-    locators,
-  ]);
+  }, [groups, tags, rule, ruleLink, setAlertSummaryFields, viewInAppUrl]);
 
   useEffect(() => {
     const initDataView = async () => {
