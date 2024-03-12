@@ -724,19 +724,19 @@ export default ({ getService }: FtrProviderContext) => {
     describe('using data without a @timestamp field', () => {
       before(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/no_@timestamp_field'
+          'x-pack/test/functional/es_archives/security_solution/no_at_timestamp_field'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/no_@timestamp_field'
+          'x-pack/test/functional/es_archives/security_solution/no_at_timestamp_field'
         );
       });
 
       it('specifying only timestamp_field results in a warning, and no alerts are generated', async () => {
         const rule: EqlRuleCreateProps = {
-          ...getEqlRuleForAlertTesting(['no_@timestamp_field']),
+          ...getEqlRuleForAlertTesting(['no_at_timestamp_field']),
           timestamp_field: 'event.ingested',
         };
 
@@ -747,7 +747,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(_log.errors).to.be.empty();
         expect(_log.warnings).to.contain(
-          'The following indices are missing the timestamp field "@timestamp": ["no_@timestamp_field"]'
+          'The following indices are missing the timestamp field "@timestamp": ["no_at_timestamp_field"]'
         );
 
         const previewAlerts = await getPreviewAlerts({ es, previewId });
@@ -756,7 +756,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('specifying only timestamp_override results in an error, and no alerts are generated', async () => {
         const rule: EqlRuleCreateProps = {
-          ...getEqlRuleForAlertTesting(['no_@timestamp_field']),
+          ...getEqlRuleForAlertTesting(['no_at_timestamp_field']),
           timestamp_override: 'event.ingested',
         };
 
@@ -775,7 +775,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('specifying both timestamp_override and timestamp_field behaves as expected', async () => {
         const rule: EqlRuleCreateProps = {
-          ...getEqlRuleForAlertTesting(['no_@timestamp_field']),
+          ...getEqlRuleForAlertTesting(['no_at_timestamp_field']),
           timestamp_field: 'event.ingested',
           timestamp_override: 'event.ingested',
         };
