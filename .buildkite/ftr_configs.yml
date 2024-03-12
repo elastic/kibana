@@ -150,7 +150,7 @@ disabled:
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/default_license/exception_lists_items/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/default_license/lists_items/configs/serverless.config.ts
 
-defaultQueue: 'n2-4-spot-test'
+defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
   - test/analytics/config.ts
