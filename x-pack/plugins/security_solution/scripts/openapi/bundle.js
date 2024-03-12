@@ -14,5 +14,5 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
 bundle({
   rootDir: SECURITY_SOLUTION_ROOT,
   sourceGlob: './common/api/**/*.schema.yaml',
-  outputFilePath: './target/openapi/security_solution.bundled.schema.yaml',
+  outputFilePath: './docs/openapi/public/security_solution.bundle.yaml',
 });
