@@ -13,15 +13,21 @@ export interface AttachIndexApiLogicArgs {
   indexName: string;
 }
 
+export interface AttachIndexApiLogicResponse {
+  connectorId: string;
+  indexName: string;
+}
+
 export const attachIndex = async ({
   connectorId,
   indexName,
-}: AttachIndexApiLogicArgs): Promise<void> => {
+}: AttachIndexApiLogicArgs): Promise<AttachIndexApiLogicResponse> => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/index_name/${indexName}`;
 
   await HttpLogic.values.http.put(route);
+  return { connectorId, indexName };
 };
 
 export const AttachIndexApiLogic = createApiLogic(['add_connector_api_logic'], attachIndex);
 
-export type AttachIndexApiLogicActions = Actions<AttachIndexApiLogicArgs, {}>;
+export type AttachIndexApiLogicActions = Actions<AttachIndexApiLogicArgs, AttachIndexApiLogicArgs>;

@@ -8,14 +8,12 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/react';
-import { setHeaderActionMenuMounter, setScopedHistory } from '../../kibana_services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DiscoverMainRoute, MainRouteProps } from './discover_main_route';
 import { MemoryRouter } from 'react-router-dom';
 import { DiscoverMainApp } from './discover_main_app';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { scopedHistoryMock } from '@kbn/core/public/mocks';
 import {
   createCustomizationService,
   DiscoverCustomizationService,
@@ -41,8 +39,6 @@ jest.mock('./discover_main_app', () => {
     DiscoverMainApp: jest.fn().mockReturnValue(<></>),
   };
 });
-
-setScopedHistory(scopedHistoryMock.create());
 
 describe('DiscoverMainRoute', () => {
   beforeEach(() => {
@@ -112,7 +108,6 @@ describe('DiscoverMainRoute', () => {
 
 const mountComponent = (hasESData = true, hasUserDataView = true) => {
   const props: MainRouteProps = {
-    isDev: false,
     customizationCallbacks: [],
     customizationContext: mockCustomizationContext,
   };
@@ -136,5 +131,3 @@ function getServicesMock(hasESData = true, hasUserDataView = true) {
   discoverServiceMock.core.http.get = jest.fn().mockResolvedValue({});
   return discoverServiceMock;
 }
-
-setHeaderActionMenuMounter(jest.fn());
