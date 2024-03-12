@@ -425,9 +425,6 @@ function isFunctionArgComplete(
   }
   const cleanedArgs = removeMarkerArgFromArgsList(arg)!.args;
   const argLengthCheck = fnDefinition.signatures.some((def) => {
-    if (def.infiniteParams && cleanedArgs.length > 0) {
-      return true;
-    }
     if (def.minParams && cleanedArgs.length >= def.minParams) {
       return true;
     }
@@ -444,9 +441,6 @@ function isFunctionArgComplete(
   }
   const hasCorrectTypes = fnDefinition.signatures.some((def) => {
     return arg.args.every((a, index) => {
-      if (def.infiniteParams) {
-        return true;
-      }
       return def.params[index].type === extractFinalTypeFromArg(a, references);
     });
   });
@@ -1087,7 +1081,7 @@ async function getFunctionArgsSuggestions(
     if (signature.params.length > argIndex) {
       return signature.params[argIndex].type;
     }
-    if (signature.infiniteParams || signature.minParams) {
+    if (signature.minParams) {
       return signature.params[signature.params.length - 1].type;
     }
     return [];
