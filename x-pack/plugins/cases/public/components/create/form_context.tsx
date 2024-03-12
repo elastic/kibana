@@ -144,7 +144,7 @@ export const FormContext: React.FC<Props> = ({
           ? normalizeActionConnector(caseConnector, fields)
           : getNoneConnector();
 
-        const configurationOwner: string = selectedOwner ? selectedOwner : owner[0];
+        const configurationOwner: string | undefined = selectedOwner ? selectedOwner : owner[0];
         const selectedConfiguration = allConfigurations.find(
           (element: CasesConfigurationUI) => element.owner === configurationOwner
         );

@@ -27,9 +27,9 @@ export const getConfigurationByOwner = ({
   owner,
 }: {
   configurations: CasesConfigurationUI[] | null;
-  owner: string;
+  owner: string | undefined;
 }): CasesConfigurationUI => {
-  if (!configurations || !configurations.length) {
+  if (!configurations || !configurations.length || !owner) {
     return initialConfiguration;
   }
 

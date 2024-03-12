@@ -28,16 +28,17 @@ describe('Use get case configurations query hook', () => {
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getCaseConfigure');
 
-    const { waitForNextUpdate } = renderHook(
+    renderHook(
       () => useGetCaseConfigurationsQuery({ select: (data) => data || initialConfiguration }),
       {
         wrapper: appMockRender.AppWrapper,
       }
     );
-    await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith({
-      signal: expect.any(AbortSignal),
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith({
+        signal: expect.any(AbortSignal),
+      });
     });
   });
 
@@ -63,66 +64,19 @@ describe('Use get case configurations query hook', () => {
     });
   });
 
-  it('returns the default if the response is null', async () => {
+  it('calls select correctly', async () => {
+    const select = jest.fn();
     const spy = jest.spyOn(api, 'getCaseConfigure');
-    spy.mockResolvedValue(null);
+    const data = [{ ...initialConfiguration, id: 'my-new-configuration' }];
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useGetCaseConfigurationsQuery({ select: (data) => data || initialConfiguration }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
+    spy.mockResolvedValue(data);
 
-    await waitForNextUpdate();
-
-    expect(result.current.data).toEqual({
-      closureType: 'close-by-user',
-      connector: { fields: null, id: 'none', name: 'none', type: '.none' },
-      customFields: [],
-      id: '',
-      mappings: [],
-      version: '',
-      owner: '',
-    });
-  });
-
-  it('sets the initial data correctly', async () => {
-    const spy = jest.spyOn(api, 'getCaseConfigure');
-    // @ts-expect-error: no need to define all properties
-    spy.mockResolvedValue([{ id: 'my-new-configuration' }]);
-
-    const { result, waitForNextUpdate } = renderHook(
-      () =>
-        useGetCaseConfigurationsQuery({
-          select: (data) => (data && data[0]) || initialConfiguration,
-        }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
-
-    await waitForNextUpdate();
-
-    /**
-     * Ensures that the initial data are returned
-     * before fetching
-     */
-    // @ts-expect-error: data are defined
-    expect(result.all[0].data).toEqual({
-      closureType: 'close-by-user',
-      connector: { fields: null, id: 'none', name: 'none', type: '.none' },
-      customFields: [],
-      id: '',
-      mappings: [],
-      version: '',
-      owner: '',
+    renderHook(() => useGetCaseConfigurationsQuery({ select }), {
+      wrapper: appMockRender.AppWrapper,
     });
 
-    /**
-     * The response after fetching
-     */
-    // @ts-expect-error: data are defined
-    expect(result.all[1].data).toEqual({ id: 'my-new-configuration' });
+    await waitFor(() => {
+      expect(select).toHaveBeenCalledWith(data);
+    });
   });
 });

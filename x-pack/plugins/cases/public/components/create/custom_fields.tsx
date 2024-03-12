@@ -23,11 +23,11 @@ interface Props {
 
 const CustomFieldsComponent: React.FC<Props> = ({ isLoading }) => {
   const { owner } = useCasesContext();
-  const [{ selectedOwner }] = useFormData({ watch: ['selectedOwner'] });
+  const [{ selectedOwner }] = useFormData<{ selectedOwner: string }>({ watch: ['selectedOwner'] });
   const { data: configurations, isLoading: isLoadingCaseConfiguration } =
     useGetAllCaseConfigurations();
 
-  const configurationOwner: string = selectedOwner ? selectedOwner : owner[0];
+  const configurationOwner: string | undefined = selectedOwner ? selectedOwner : owner[0];
   const customFieldsConfiguration = useMemo(
     () =>
       getConfigurationByOwner({

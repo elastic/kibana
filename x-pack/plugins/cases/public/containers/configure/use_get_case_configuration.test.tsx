@@ -44,8 +44,7 @@ describe('Use get case configuration hook', () => {
     /**
      * The response after fetching
      */
-    // @ts-expect-error: data is defined
-    expect(result.all[1].data).toEqual(targetConfiguration);
+    expect(result.current.data).toEqual(targetConfiguration);
   });
 
   it('returns the initial configuration if none matches the owner', async () => {
@@ -69,8 +68,7 @@ describe('Use get case configuration hook', () => {
     /**
      * The response after fetching
      */
-    // @ts-expect-error: data is defined
-    expect(result.all[1].data).toEqual(initialConfiguration);
+    expect(result.current.data).toEqual(initialConfiguration);
   });
 
   it('returns the initial configuration if none exists', async () => {
@@ -87,7 +85,24 @@ describe('Use get case configuration hook', () => {
     /**
      * The response after fetching
      */
-    // @ts-expect-error: data is defined
-    expect(result.all[0].data).toEqual(initialConfiguration);
+    expect(result.current.data).toEqual(initialConfiguration);
+  });
+
+  it('returns the initial configuration if the owner is undefined', async () => {
+    appMockRender = createAppMockRenderer({ owner: [] });
+    const spy = jest.spyOn(api, 'getCaseConfigure');
+
+    spy.mockResolvedValue([]);
+
+    const { result, waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    await waitForNextUpdate();
+
+    /**
+     * The response after fetching
+     */
+    expect(result.current.data).toEqual(initialConfiguration);
   });
 });

@@ -37,5 +37,14 @@ describe('Utils', () => {
         }
       `);
     });
+
+    it('returns the initial configuration if the owner is undefined', () => {
+      expect(
+        getConfigurationByOwner({
+          configurations: [{ owner: 'foobar' }, { owner: 'bar' }] as CasesConfigurationUI[],
+          owner: undefined,
+        })
+      ).toBe(initialConfiguration);
+    });
   });
 });
