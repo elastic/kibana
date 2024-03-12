@@ -130,7 +130,12 @@ export interface UninstallTokenServiceInterface {
    * @param force generate a new token even if one already exists
    * @returns hashedToken
    */
-  generateTokenForPolicyId(policyId: string, force?: boolean): Promise<void>;
+  generateTokenForPolicyId(
+    policyId: string,
+    force?: boolean,
+    spaceId?: string,
+    request?: KibanaRequest
+  ): Promise<void>;
 
   /**
    * Generate uninstall tokens for given policy ids
@@ -461,13 +466,20 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     return this.getHashedTokensForPolicyIds(policyIds);
   }
 
-  public generateTokenForPolicyId(policyId: string, force: boolean = false): Promise<void> {
-    return this.generateTokensForPolicyIds([policyId], force);
+  public generateTokenForPolicyId(
+    policyId: string,
+    force: boolean = false,
+    spaceId?: string,
+    request?: KibanaRequest
+  ): Promise<void> {
+    return this.generateTokensForPolicyIds([policyId], force, spaceId, request);
   }
 
   public async generateTokensForPolicyIds(
     policyIds: string[],
-    force: boolean = false
+    force: boolean = false,
+    spaceId?: string,
+    request?: KibanaRequest
   ): Promise<void> {
     const { agentTamperProtectionEnabled } = appContextService.getExperimentalFeatures();
 
@@ -493,7 +505,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         [policyId]: token,
       };
     }, {} as Record<string, string>);
-    await this.persistTokens(missingTokenPolicyIds, newTokensMap);
+    await this.persistTokens(missingTokenPolicyIds, newTokensMap, spaceId, request);
     if (force) {
       const config = appContextService.getConfig();
       const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
@@ -552,7 +564,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   private async persistTokens(
     policyIds: string[],
-    tokensMap: Record<string, string>
+    tokensMap: Record<string, string>,
+    spaceId?: string,
+    request?: KibanaRequest
   ): Promise<void> {
     if (!policyIds.length) {
       return;
@@ -561,10 +575,18 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     const config = appContextService.getConfig();
     const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
 
+    const soClient = request
+      ? appContextService.getSavedObjects().getScopedClient(request, {
+          excludedExtensions: [SECURITY_EXTENSION_ID],
+          includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+        })
+      : this.soClient;
+
     await asyncForEach(chunk(policyIds, batchSize), async (policyIdsBatch) => {
-      await this.soClient.bulkCreate<Partial<UninstallTokenSOAttributes>>(
+      await soClient.bulkCreate<Partial<UninstallTokenSOAttributes>>(
         policyIdsBatch.map((policyId) => ({
           type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+          ...(spaceId ? { initialNamespaces: [spaceId] } : {}),
           attributes: this.isEncryptionAvailable
             ? {
                 policy_id: policyId,

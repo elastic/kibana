@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
@@ -94,6 +98,7 @@ interface CreateAgentPolicyParams {
   user?: AuthenticatedUser;
   authorizationHeader?: HTTPAuthorizationHeader | null;
   force?: boolean;
+  request?: KibanaRequest;
 }
 
 export async function createAgentPolicyWithPackages({
@@ -107,6 +112,7 @@ export async function createAgentPolicyWithPackages({
   user,
   authorizationHeader,
   force,
+  request,
 }: CreateAgentPolicyParams) {
   let agentPolicyId = newPolicy.id;
   const packagesToInstall = [];
@@ -143,6 +149,8 @@ export async function createAgentPolicyWithPackages({
     id: agentPolicyId,
     authorizationHeader,
     skipDeploy: true, // skip deploying the policy until package policies are added
+    spaceId,
+    request,
   });
 
   // Create the fleet server package policy and add it to agent policy.

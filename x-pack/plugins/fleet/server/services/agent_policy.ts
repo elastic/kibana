@@ -12,6 +12,7 @@ import pMap from 'p-map';
 import { lt } from 'semver';
 import type {
   ElasticsearchClient,
+  KibanaRequest,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
@@ -293,6 +294,8 @@ class AgentPolicyService {
       user?: AuthenticatedUser;
       authorizationHeader?: HTTPAuthorizationHeader | null;
       skipDeploy?: boolean;
+      spaceId?: string;
+      request?: KibanaRequest;
     } = {}
   ): Promise<AgentPolicy> {
     // Ensure an ID is provided, so we can include it in the audit logs below
@@ -336,7 +339,9 @@ class AgentPolicyService {
       options
     );
 
-    await appContextService.getUninstallTokenService()?.generateTokenForPolicyId(newSo.id);
+    await appContextService
+      .getUninstallTokenService()
+      ?.generateTokenForPolicyId(newSo.id, false, options.spaceId, options.request);
     await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id, {
       skipDeploy: options.skipDeploy,
     });
