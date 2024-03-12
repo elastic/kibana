@@ -19,7 +19,7 @@ import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
-import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
+import { AlertsClientError, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { getAlertUrl } from '@kbn/observability-plugin/common';
 import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
@@ -42,7 +42,6 @@ import {
   stateToAlertMessage,
 } from '../common/messages';
 import {
-  AdditionalContext,
   createScopedLogger,
   flattenAdditionalContext,
   getContextForRecoveredAlerts,
@@ -59,25 +58,9 @@ type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
 export const FIRED_ACTIONS_ID = 'metrics.inventory_threshold.fired';
 export const WARNING_ACTIONS_ID = 'metrics.inventory_threshold.warning';
 
-type InventoryThrehsoldActionGroup = typeof FIRED_ACTIONS_ID | typeof WARNING_ACTIONS_ID;
-
 export type InventoryMetricThresholdRuleTypeState = RuleTypeState; // no specific state used
 export type InventoryMetricThresholdAlertState = AlertState; // no specific state used
 export type InventoryMetricThresholdAlertContext = AlertContext; // no specific instance context used
-
-type InventoryMetricThresholdAlert = Alert<
-  InventoryMetricThresholdAlertState,
-  InventoryMetricThresholdAlertContext,
-  InventoryMetricThresholdAllowedActionGroups
->;
-type InventoryMetricThresholdAlertFactory = (
-  id: string,
-  reason: string,
-  actionGroup: InventoryThrehsoldActionGroup,
-  additionalContext?: AdditionalContext | null,
-  evaluationValues?: Array<number | null>,
-  thresholds?: Array<number | null>
-) => InventoryMetricThresholdAlert;
 
 export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   libs.metricsRules.createLifecycleRuleExecutor<
@@ -109,32 +92,11 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
 
       const esClient = services.scopedClusterClient.asCurrentUser;
 
-      const {
-        alertWithLifecycle,
-        savedObjectsClient,
-        getAlertStartedDate,
-        getAlertUuid,
-        getAlertByAlertUuid,
-        alertFactory: baseAlertFactory,
-      } = services;
-      const alertFactory: InventoryMetricThresholdAlertFactory = (
-        id,
-        reason,
-        actionGroup,
-        additionalContext,
-        evaluationValues,
-        thresholds
-      ) =>
-        alertWithLifecycle({
-          id,
-          fields: {
-            [ALERT_REASON]: reason,
-            [ALERT_ACTION_GROUP]: actionGroup,
-            [ALERT_EVALUATION_VALUES]: evaluationValues,
-            [ALERT_EVALUATION_THRESHOLD]: thresholds,
-            ...flattenAdditionalContext(additionalContext),
-          },
-        });
+      const { savedObjectsClient, alertFactory: baseAlertFactory, alertsClient } = services;
+
+      if (!alertsClient) {
+        throw new AlertsClientError();
+      }
 
       if (!params.filterQuery && params.filterQueryText) {
         try {
@@ -142,34 +104,45 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           fromKueryExpression(params.filterQueryText);
         } catch (e) {
           logger.error(e.message);
-          const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
-          const reason = buildInvalidQueryAlertReason(params.filterQueryText);
-          const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason, actionGroupId);
-          const indexedStartedAt =
-            getAlertStartedDate(UNGROUPED_FACTORY_KEY) ?? startedAt.toISOString();
-          const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
 
-          alert.scheduleActions(actionGroupId, {
-            alertDetailsUrl: await getAlertUrl(
-              alertUuid,
-              spaceId,
-              indexedStartedAt,
-              libs.alertsLocator,
-              libs.basePath.publicBaseUrl
-            ),
-            alertState: stateToAlertMessage[AlertStates.ERROR],
-            group: UNGROUPED_FACTORY_KEY,
-            metric: mapToConditionsLookup(criteria, (c) => c.metric),
-            reason,
-            timestamp: startedAt.toISOString(),
-            value: null,
-            viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
-              basePath: libs.basePath,
-              criteria,
-              nodeType,
-              timestamp: indexedStartedAt,
-              spaceId,
-            }),
+          const actionGroup = FIRED_ACTIONS.id; // Change this to an Error action group when able,
+          const reason = buildInvalidQueryAlertReason(params.filterQueryText);
+
+          const { uuid, start } = alertsClient.report({
+            id: UNGROUPED_FACTORY_KEY,
+            actionGroup,
+          });
+
+          const indexedStartedAt = start ?? startedAt.toISOString();
+
+          alertsClient.setAlertData({
+            id: UNGROUPED_FACTORY_KEY,
+            payload: {
+              [ALERT_REASON]: reason,
+              [ALERT_ACTION_GROUP]: actionGroup,
+            },
+            context: {
+              alertDetailsUrl: await getAlertUrl(
+                uuid,
+                spaceId,
+                indexedStartedAt,
+                libs.alertsLocator,
+                libs.basePath.publicBaseUrl
+              ),
+              alertState: stateToAlertMessage[AlertStates.ERROR],
+              group: UNGROUPED_FACTORY_KEY,
+              metric: mapToConditionsLookup(criteria, (c) => c.metric),
+              reason,
+              timestamp: startedAt.toISOString(),
+              value: null,
+              viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
+                basePath: libs.basePath,
+                criteria,
+                nodeType,
+                timestamp: indexedStartedAt,
+                spaceId,
+              }),
+            },
           });
 
           return { state: {} };
@@ -265,7 +238,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           }
         }
         if (reason) {
-          const actionGroupId =
+          const actionGroup =
             nextState === AlertStates.WARNING ? WARNING_ACTIONS_ID : FIRED_ACTIONS_ID;
 
           const additionalContext = results && results.length > 0 ? results[0][group].context : {};
@@ -276,22 +249,18 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           const evaluationValues = getEvaluationValues<ConditionResult>(results, group);
           const thresholds = getThresholds<InventoryMetricConditions>(criteria);
 
-          const alert = alertFactory(
-            group,
-            reason,
-            actionGroupId,
-            additionalContext,
-            evaluationValues,
-            thresholds
-          );
-          const indexedStartedAt = getAlertStartedDate(group) ?? startedAt.toISOString();
-          const alertUuid = getAlertUuid(group);
+          const { uuid, start } = alertsClient.report({
+            id: group,
+            actionGroup,
+          });
+
+          const indexedStartedAt = start ?? startedAt.toISOString();
 
           scheduledActionsCount++;
 
           const context = {
             alertDetailsUrl: await getAlertUrl(
-              alertUuid,
+              uuid,
               spaceId,
               indexedStartedAt,
               libs.alertsLocator,
@@ -316,23 +285,35 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             }),
             ...additionalContext,
           };
-          alert.scheduleActions(actionGroupId, context);
+
+          const payload = {
+            [ALERT_REASON]: reason,
+            [ALERT_ACTION_GROUP]: actionGroup,
+            [ALERT_EVALUATION_VALUES]: evaluationValues,
+            [ALERT_EVALUATION_THRESHOLD]: thresholds,
+            ...flattenAdditionalContext(additionalContext),
+          };
+
+          alertsClient.setAlertData({
+            id: group,
+            payload,
+            context,
+          });
         }
       }
 
-      baseAlertFactory.alertLimit.setLimitReached(hasReachedLimit);
-      const { getRecoveredAlerts } = services.alertFactory.done();
-      const recoveredAlerts = getRecoveredAlerts();
+      alertsClient.setAlertLimitReached(hasReachedLimit);
+      const recoveredAlerts = alertsClient?.getRecoveredAlerts() ?? [];
 
-      for (const alert of recoveredAlerts) {
-        const recoveredAlertId = alert.getId();
-        const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
-        const alertUuid = getAlertUuid(recoveredAlertId);
-        const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
+      for (const recoveredAlert of recoveredAlerts) {
+        const recoveredAlertId = recoveredAlert.alert.getId();
+        const indexedStartedAt = recoveredAlert.alert.getStart() ?? startedAt.toISOString();
+        const alertUuid = recoveredAlert.alert.getUuid();
+        const alertHits = recoveredAlert.hit;
         const additionalContext = getContextForRecoveredAlerts(alertHits);
         const originalActionGroup = getOriginalActionGroup(alertHits);
 
-        alert.setContext({
+        recoveredAlert.alert.setContext({
           alertDetailsUrl: await getAlertUrl(
             alertUuid,
             spaceId,

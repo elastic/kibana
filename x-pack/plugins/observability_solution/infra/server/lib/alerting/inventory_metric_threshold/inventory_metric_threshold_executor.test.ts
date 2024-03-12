@@ -9,11 +9,7 @@ import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/server';
-import {
-  AlertInstanceMock,
-  RuleExecutorServicesMock,
-  alertsMock,
-} from '@kbn/alerting-plugin/server/mocks';
+import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { createLifecycleRuleExecutorMock } from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_rule_executor_mock';
@@ -34,12 +30,10 @@ import { logsSharedPluginMock } from '@kbn/logs-shared-plugin/server/mocks';
 jest.mock('./evaluate_condition', () => ({ evaluateCondition: jest.fn() }));
 
 interface AlertTestInstance {
-  instance: AlertInstanceMock;
-  actionQueue: any[];
-  state: any;
+  actionGroup: string;
+  payload: any[];
+  context: any[];
 }
-
-const persistAlertInstances = false;
 
 const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) => {};
 
@@ -146,38 +140,33 @@ const services: RuleExecutorServicesMock &
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
 };
 
-const alertInstances = new Map<string, AlertTestInstance>();
+const alerts = new Map<string, AlertTestInstance>();
 
-services.alertFactory.create.mockImplementation((instanceID: string) => {
-  const newAlertInstance: AlertTestInstance = {
-    instance: alertsMock.createAlertFactory.create(),
-    actionQueue: [],
-    state: {},
+services.alertsClient.report.mockImplementation((params: any) => {
+  alerts.set(params.id, { actionGroup: params.actionGroup, context: [], payload: [] });
+  return {
+    uuid: `uuid-${params.id}`,
+    start: new Date().toISOString(),
+    alertDoc: {},
   };
+});
 
-  const alertInstance: AlertTestInstance = persistAlertInstances
-    ? alertInstances.get(instanceID) || newAlertInstance
-    : newAlertInstance;
-  alertInstances.set(instanceID, alertInstance);
-
-  (alertInstance.instance.scheduleActions as jest.Mock).mockImplementation(
-    (id: string, action: any) => {
-      alertInstance.actionQueue.push({ id, action });
-      return alertInstance.instance;
-    }
-  );
-
-  return alertInstance.instance;
+services.alertsClient.setAlertData.mockImplementation((params: any) => {
+  const alert = alerts.get(params.id);
+  if (alert) {
+    alert.payload.push(params.payload);
+    alert.context.push(params.context);
+  }
 });
 
 function mostRecentAction(id: string) {
-  const instance = alertInstances.get(id);
+  const instance = alerts.get(id);
   if (!instance) return undefined;
-  return instance.actionQueue.pop();
+  return instance.context.pop();
 }
 
 function clearInstances() {
-  alertInstances.clear();
+  alerts.clear();
 }
 
 const executor = createInventoryMetricThresholdExecutor(mockLibs);
@@ -255,13 +244,13 @@ describe('The inventory threshold alert type', () => {
         },
       });
       await execute(Comparator.GT, [0.75]);
-      expect(mostRecentAction(instanceIdA).action.tags).toStrictEqual([
+      expect(mostRecentAction(instanceIdA).tags).toStrictEqual([
         'host-01_tag1',
         'host-01_tag2',
         'ruleTag1',
         'ruleTag2',
       ]);
-      expect(mostRecentAction(instanceIdB).action.tags).toStrictEqual([
+      expect(mostRecentAction(instanceIdB).tags).toStrictEqual([
         'host-02_tag1',
         'host-02_tag2',
         'ruleTag1',
@@ -305,8 +294,8 @@ describe('The inventory threshold alert type', () => {
         },
       });
       await execute(Comparator.GT, [0.75]);
-      expect(mostRecentAction(instanceIdA).action.tags).toStrictEqual(['ruleTag1', 'ruleTag2']);
-      expect(mostRecentAction(instanceIdB).action.tags).toStrictEqual(['ruleTag1', 'ruleTag2']);
+      expect(mostRecentAction(instanceIdA).tags).toStrictEqual(['ruleTag1', 'ruleTag2']);
+      expect(mostRecentAction(instanceIdB).tags).toStrictEqual(['ruleTag1', 'ruleTag2']);
     });
 
     test('should call evaluation query with delay', async () => {
