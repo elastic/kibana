@@ -39,7 +39,7 @@ export interface AttachIndexBoxProps {
 }
 
 export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => {
-  const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
+  const { indexName } = useParams<{ indexName: string }>();
   const { createIndex, attachIndex, setConnector, checkIndexExists } = useActions(AttachIndexLogic);
   const {
     isLoading: isSaveLoading,
@@ -116,7 +116,6 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
           }
         )
       : attachApiError?.body?.message || createApiError?.body?.message || undefined;
-
   if (indexName) {
     // We don't want to let people edit indices when on the index route
     return <></>;
