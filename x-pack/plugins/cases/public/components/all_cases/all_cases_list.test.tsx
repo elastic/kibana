@@ -24,7 +24,7 @@ import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
 
 import { SortFieldCase } from '../../../common/ui/types';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { MAX_DOCS_PER_PAGE, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyCellValue } from '../empty_value';
 import { useKibana } from '../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
@@ -204,7 +204,7 @@ describe('AllCasesListGeneric', () => {
         screen.getAllByTestId('case-table-column-createdAt')[0].querySelector('.euiToolTipAnchor')
       ).toHaveTextContent(removeMsFromDate(useGetCasesMockState.data.cases[0].createdAt));
       expect(screen.getByTestId('case-table-case-count')).toHaveTextContent(
-        `Showing 10 of ${useGetCasesMockState.data.total} cases`
+        `Showing 1 to 10 of ${useGetCasesMockState.data.total} cases`
       );
 
       expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
@@ -663,6 +663,54 @@ describe('AllCasesListGeneric', () => {
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(DEFAULT_CASES_TABLE_STATE);
     });
+  });
+
+  describe('Pagination', () => {
+    const pageLimits = [10, 25, 50, 100];
+
+    it.each(pageLimits)(
+      'should not show next page when cases are more than 10K and last page is displayed pageSize %s',
+      async (item) => {
+        const lastPage = MAX_DOCS_PER_PAGE / item;
+
+        // set local storage with custom query params
+        const LS_KEY = 'testAppId.cases.list.state';
+        const existingLocalStorageValues = {
+          queryParams: {
+            ...DEFAULT_CASES_TABLE_STATE.queryParams,
+            perPage: item,
+            page: lastPage - 1,
+            sortOrder: 'asc',
+            sortField: SortFieldCase.severity,
+          },
+          filterOptions: DEFAULT_CASES_TABLE_STATE.filterOptions,
+        };
+
+        localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
+
+        useGetCasesMock.mockReturnValue({
+          ...defaultGetCases,
+          data: {
+            ...defaultGetCases.data,
+            page: lastPage,
+            perPage: item,
+            total: MAX_DOCS_PER_PAGE + item,
+          },
+        });
+
+        appMockRenderer.render(<AllCasesList isSelectorView={false} />);
+
+        expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
+        expect(screen.queryByTestId(`pagination-button-${lastPage}`)).not.toBeInTheDocument();
+
+        userEvent.click(await screen.findByTestId(`pagination-button-${lastPage - 1}`));
+
+        await waitFor(() => {
+          expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
+          expect(screen.getByTestId('pagination-button-next')).toHaveAttribute('disabled');
+        });
+      }
+    );
   });
 
   describe('Solutions', () => {

@@ -6,7 +6,6 @@
  */
 
 import type { FunctionComponent } from 'react';
-import { css } from '@emotion/react';
 import React, { useCallback, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
 import {
@@ -17,8 +16,6 @@ import {
   EuiPopover,
   EuiText,
   useEuiTheme,
-  EuiCallOut,
-  EuiSpacer,
 } from '@elastic/eui';
 import * as i18n from './translations';
 import type { CasesUI } from '../../../common/ui/types';
@@ -28,7 +25,6 @@ import { useRefreshCases } from './use_on_refresh_cases';
 import { useBulkActions } from './use_bulk_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { ColumnsPopover } from './columns_popover';
-import { useCasesLocalStorage } from '../../common/use_cases_local_storage';
 
 interface Props {
   isSelectorView?: boolean;
@@ -59,20 +55,9 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
     const { permissions } = useCasesContext();
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const [isMessageDismissed, setIsMessageDismissed] = useState(false);
-    const localStorageKey = `cases.utilityBar.hideMaxLimitWarning`;
-    const [doNotShowAgain, setDoNotShowAgain] = useCasesLocalStorage<boolean>(
-      localStorageKey,
-      false
-    );
 
     const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-
-    const toggleWarning = useCallback(
-      () => setIsMessageDismissed(!isMessageDismissed),
-      [isMessageDismissed]
-    );
 
     const onRefresh = useCallback(() => {
       deselectCases();
@@ -85,10 +70,6 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
       onActionSuccess: onRefresh,
     });
 
-    const handleNotShowAgain = () => {
-      setDoNotShowAgain(true);
-    };
-
     /**
      * At least update or delete permissions needed to show bulk actions.
      * Granular permission check for each action is performed
@@ -96,49 +77,14 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
      */
     const showBulkActions = (permissions.update || permissions.delete) && selectedCases.length > 0;
 
+    const pageStart = pagination?.pageSize ? pagination.pageSize * pagination.pageIndex + 1 : 0;
+
     const visibleCases =
-      pagination?.pageSize && totalCases > pagination.pageSize ? pagination.pageSize : totalCases;
+      pagination?.pageSize && totalCases > pagination.pageSize * (pagination.pageIndex + 1)
+        ? pagination.pageSize * (pagination.pageIndex + 1)
+        : totalCases;
 
-    const hasReachedMaxCases =
-      pagination.pageSize &&
-      totalCases >= MAX_DOCS_PER_PAGE &&
-      pagination.pageSize * (pagination.pageIndex + 1) >= MAX_DOCS_PER_PAGE;
-
-    const renderMaxLimitWarning = (): React.ReactNode => (
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiText
-            color="default"
-            size="m"
-            css={css`
-              margin-top: 4px;
-            `}
-          >
-            {i18n.MAX_CASES(MAX_DOCS_PER_PAGE)}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            color="warning"
-            data-test-subj="dismiss-warning"
-            onClick={toggleWarning}
-          >
-            {i18n.DISMISS}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            color="warning"
-            data-test-subj="do-not-show-warning"
-            onClick={handleNotShowAgain}
-          >
-            {i18n.NOT_SHOW_AGAIN}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    const totalCasesDisplayed = totalCases > MAX_DOCS_PER_PAGE ? MAX_DOCS_PER_PAGE : totalCases;
 
     return (
       <>
@@ -165,7 +111,9 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
                 }}
               >
                 <EuiText size="xs" color="subdued">
-                  {i18n.SHOWING_CASES(totalCases, visibleCases)}
+                  {visibleCases > 0
+                    ? i18n.SHOWING_CASES(totalCasesDisplayed, pageStart, visibleCases)
+                    : i18n.SHOWING_ZERO_CASES(totalCasesDisplayed, visibleCases)}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem data-test-subj="case-table-utility-bar-actions" grow={false}>
@@ -246,22 +194,6 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
         </EuiFlexGroup>
         {modals}
         {flyouts}
-        {hasReachedMaxCases && !isMessageDismissed && !doNotShowAgain && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiCallOut
-                  title={renderMaxLimitWarning()}
-                  color="warning"
-                  size="s"
-                  data-test-subj="all-cases-maximum-limit-warning"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-          </>
-        )}
       </>
     );
   }

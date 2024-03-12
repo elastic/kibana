@@ -12,6 +12,7 @@ import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable } from '@elastic/eui';
 import classnames from 'classnames';
 import styled from 'styled-components';
 
+import { MaxCasesWarning } from './max_cases_warning';
 import { LinkButton } from '../links';
 
 import type { CasesFindResponseUI, CaseUI } from '../../../common/ui/types';
@@ -70,6 +71,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
     },
     [goToCreateCase, navigateToCreateCase]
   );
+  const totalCases = data.total ?? 0;
 
   return (isCasesLoading && isDataEmpty) || isLoadingColumns ? (
     <Div>
@@ -115,6 +117,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         sorting={sorting}
         hasActions={false}
       />
+      <MaxCasesWarning totalCases={totalCases} pagination={pagination} />
     </>
   );
 };

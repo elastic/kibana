@@ -16,6 +16,7 @@ import type { EuiBasicTableOnChange } from './types';
 
 import { SortFieldCase } from '../../../common/ui/types';
 import type { CaseStatuses } from '../../../common/types/domain';
+import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import { useCasesColumns } from './use_cases_columns';
 import { CasesTableFilters } from './table_filters';
 import { CASES_TABLE_PER_PAGE_VALUES } from './types';
@@ -154,14 +155,16 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       selectedColumns,
     });
 
+    const totalCases = data.total > MAX_DOCS_PER_PAGE ? MAX_DOCS_PER_PAGE : data.total;
+
     const pagination = useMemo(
       () => ({
         pageIndex: queryParams.page - 1,
         pageSize: queryParams.perPage,
-        totalItemCount: data.total ?? 0,
+        totalItemCount: totalCases ?? 0,
         pageSizeOptions: CASES_TABLE_PER_PAGE_VALUES,
       }),
-      [data, queryParams]
+      [queryParams, totalCases]
     );
 
     const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<CaseUI>>(
