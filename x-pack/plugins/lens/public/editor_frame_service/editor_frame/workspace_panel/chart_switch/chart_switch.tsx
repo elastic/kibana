@@ -41,7 +41,7 @@ import {
   selectDatasourceStates,
 } from '../../../../state_management';
 import { generateId } from '../../../../id_generator/id_generator';
-import { ConfigPreview, ExperimentalBadge } from './configuration_preview';
+import { ChartOptionAppend } from './chart_option_append';
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -52,7 +52,6 @@ interface VisualizationSelection {
   datasourceId?: string;
   datasourceState?: unknown;
   sameDatasources?: boolean;
-  topSuggestion?: Suggestion;
 }
 
 export interface ChartSwitchProps {
@@ -211,7 +210,6 @@ export const ChartSwitch = memo(function ChartSwitch({
     }
 
     return {
-      topSuggestion,
       visualizationId,
       subVisualizationId,
       dataLoss,
@@ -332,22 +330,11 @@ export const ChartSwitch = memo(function ChartSwitch({
                     ),
                     append:
                       v.selection.dataLoss !== 'nothing' || v.showExperimentalBadge ? (
-                        <EuiFlexGroup
-                          gutterSize="xs"
-                          responsive={false}
-                          alignItems="center"
-                          className="lnsChartSwitch__append"
-                        >
-                          {v.showExperimentalBadge ? <ExperimentalBadge /> : null}
-                          <ConfigPreview
-                            visualizationMap={visualizationMap}
-                            dataLoss={v.selection.dataLoss}
-                            id={v.selection.subVisualizationId}
-                            datasourceMap={datasourceMap}
-                            framePublicAPI={framePublicAPI}
-                            suggestion={v.selection.topSuggestion}
-                          />
-                        </EuiFlexGroup>
+                        <ChartOptionAppend
+                          dataLoss={v.selection.dataLoss}
+                          showExperimentalBadge={v.showExperimentalBadge}
+                          id={v.selection.subVisualizationId}
+                        />
                       ) : null,
                     // Apparently checked: null is not valid for TS
                     ...(subVisualizationId === v.id && { checked: 'on' }),
