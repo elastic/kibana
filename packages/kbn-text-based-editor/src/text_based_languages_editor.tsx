@@ -231,16 +231,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, [isLoading]);
 
   useEffect(() => {
+    const timeZone = uiSettings!.get('dateFormat:tz');
     if (isLoading) {
       addQueriesToCache({
         queryString,
+        timeZone,
       });
     } else {
-      const timeZone = uiSettings!.get('dateFormat:tz');
       updateCachedQueries({
         queryString,
         status: serverErrors?.length ? 'error' : 'success',
-        timeZone,
       });
     }
   }, [isLoading, queryString, serverErrors?.length, uiSettings]);

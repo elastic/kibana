@@ -26,14 +26,27 @@ const getKey = (queryString: string) => {
   return queryString.replaceAll('\n', '').trim();
 };
 
-export const getHistoryItems = (): QueryHistoryItem[] => {
+const getMomentTimeZone = (timeZone?: string) => {
+  return !timeZone || timeZone === 'Browser' ? moment.tz.guess() : timeZone;
+};
+
+const sortDates = (date1?: string, date2?: string) => {
+  return moment(date1)?.valueOf() - moment(date2)?.valueOf();
+};
+
+export const getHistoryItems = (sortDirection: 'desc' | 'asc'): QueryHistoryItem[] => {
   const localStorageString = localStorage.getItem(QUERY_HISTORY_ITEM_KEY) ?? '[]';
   const historyItems: QueryHistoryItem[] = JSON.parse(localStorageString);
-  return historyItems;
+  const sortedByDate = historyItems.sort((a, b) => {
+    return sortDirection === 'desc'
+      ? sortDates(b?.timeRun, a?.timeRun)
+      : sortDates(a?.timeRun, b?.timeRun);
+  });
+  return sortedByDate;
 };
 
 const cachedQueries = new Map<string, QueryHistoryItem>();
-const localStorageQueries = getHistoryItems();
+const localStorageQueries = getHistoryItems('desc');
 
 localStorageQueries.forEach((queryItem) => {
   const trimmedQueryString = getKey(queryItem.queryString);
@@ -42,22 +55,31 @@ localStorageQueries.forEach((queryItem) => {
 
 export const addQueriesToCache = (item: QueryHistoryItem) => {
   const trimmedQueryString = getKey(item.queryString);
-  if (!localStorageQueries.some((queryItem) => queryItem.queryString === trimmedQueryString)) {
-    cachedQueries.set(item.queryString, item);
-    if (localStorageQueries.length === MAX_QUERIES_NUMBER) {
-      // delete from map and local storage
-    }
+  if (localStorageQueries.length === MAX_QUERIES_NUMBER) {
+    // delete the last element
+    const toBeDeletedQuery = localStorageQueries[MAX_QUERIES_NUMBER - 1];
+    cachedQueries.delete(toBeDeletedQuery.queryString);
   }
+  const tz = getMomentTimeZone(item.timeZone);
+  cachedQueries.set(trimmedQueryString, {
+    ...item,
+    timeRun: moment().tz(tz).format('MMM. d, YY HH:mm:ss.SSS'),
+  });
 };
 
 export const updateCachedQueries = (item: QueryHistoryItem) => {
   const trimmedQueryString = getKey(item.queryString);
   const query = cachedQueries.get(trimmedQueryString);
-  const tz = !item.timeZone || item.timeZone === 'Browser' ? moment.tz.guess() : item.timeZone;
+  const tz = getMomentTimeZone(query?.timeZone);
+  const now = moment().tz(tz).format('MMM. d, YY HH:mm:ss.SSS');
+  const duration = moment(now).diff(moment(query?.timeRun));
+
   if (query) {
     cachedQueries.set(trimmedQueryString, {
-      ...item,
-      timeRun: moment().tz(tz).format('MMM. d, YY HH:mm:ss'),
+      ...query,
+      timeRun: moment(query?.timeRun).format('MMM. d, YY HH:mm:ss'),
+      duration: `${duration}ms`,
+      status: item.status,
     });
   }
   const queriesToStore = Array.from(cachedQueries, ([name, value]) => ({ ...value }));

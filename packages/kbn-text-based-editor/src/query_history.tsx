@@ -36,7 +36,7 @@ export function QueryHistoryAction({
   isSpaceReduced?: boolean;
 }) {
   // get history items from local storage
-  const items: QueryHistoryItem[] = getHistoryItems();
+  const items: QueryHistoryItem[] = getHistoryItems('desc');
   if (!items.length) return null;
   return (
     <>
@@ -173,6 +173,9 @@ export function QueryHistory({
                     type="playFilled"
                     size="m"
                     onClick={() => onUpdateAndSubmit(item.queryString)}
+                    css={css`
+                      cursor: pointer;
+                    `}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
@@ -186,7 +189,16 @@ export function QueryHistory({
                     }
                   )}
                 >
-                  {(copy) => <EuiIcon type="copy" size="m" onClick={copy} />}
+                  {(copy) => (
+                    <EuiIcon
+                      type="copy"
+                      size="m"
+                      onClick={copy}
+                      css={css`
+                        cursor: pointer;
+                      `}
+                    />
+                  )}
                 </EuiCopy>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -219,7 +231,7 @@ export function QueryHistory({
 
   const { euiTheme } = useEuiTheme();
   // get history items from local storage
-  const items: QueryHistoryItem[] = getHistoryItems();
+  const items: QueryHistoryItem[] = getHistoryItems(sortDirection);
   return (
     <EuiFlexGroup
       gutterSize="none"
