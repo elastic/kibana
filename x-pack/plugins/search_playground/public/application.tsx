@@ -17,6 +17,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { PLUGIN_ID } from '../common';
 import { AppPluginStartDependencies } from './types';
 import { SearchPlaygroundApp } from './components/app';
+import { PlaygroundProvider } from './providers/playground_provider';
 
 export const renderApp = (
   core: CoreStart,
@@ -31,22 +32,24 @@ export const renderApp = (
         <I18nProvider>
           <Router basename={appBasePath}>
             <navigation.ui.TopNavMenu appName={PLUGIN_ID} />
-            <KibanaPageTemplate
-              pageChrome={[
-                i18n.translate('searchPlayground.breadcrumb', {
-                  defaultMessage: 'Playground',
-                }),
-              ]}
-              pageHeader={{
-                pageTitle: i18n.translate('searchPlayground.pageTitle', {
-                  defaultMessage: 'Playground',
-                }),
-              }}
-              bottomBorder="extended"
-              restrictWidth={false}
-            >
-              <SearchPlaygroundApp navigation={services.navigation} />
-            </KibanaPageTemplate>
+            <PlaygroundProvider navigateToIndexPage={() => {}}>
+              <KibanaPageTemplate
+                pageChrome={[
+                  i18n.translate('searchPlayground.breadcrumb', {
+                    defaultMessage: 'Playground',
+                  }),
+                ]}
+                pageHeader={{
+                  pageTitle: i18n.translate('searchPlayground.pageTitle', {
+                    defaultMessage: 'Playground',
+                  }),
+                }}
+                bottomBorder="extended"
+                restrictWidth={false}
+              >
+                <SearchPlaygroundApp />
+              </KibanaPageTemplate>
+            </PlaygroundProvider>
           </Router>
         </I18nProvider>
       </KibanaContextProvider>

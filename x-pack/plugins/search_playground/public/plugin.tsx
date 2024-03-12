@@ -13,7 +13,7 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/public';
 import { PLUGIN_NAME } from '../common';
-import { renderEmbeddableApp } from './embedable';
+import { PlaygroundToolbar, PlaygroundProvider, Playground } from './embedable';
 import {
   AppPluginStartDependencies,
   SearchPlaygroundPluginSetup,
@@ -42,7 +42,9 @@ export class SearchPlaygroundPlugin
 
   public start(core: CoreStart, deps: AppPluginStartDependencies): SearchPlaygroundPluginStart {
     return {
-      renderPlayground: () => renderEmbeddableApp(deps),
+      PlaygroundProvider,
+      PlaygroundToolbar,
+      Playground,
     };
   }
 

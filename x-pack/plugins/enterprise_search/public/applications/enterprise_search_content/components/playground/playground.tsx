@@ -5,37 +5,41 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../shared/kibana';
+import { NEW_INDEX_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 export const Playground: React.FC = () => {
-  const { searchPlayground } = useValues(KibanaLogic);
+  const { searchPlayground, navigateToUrl } = useValues(KibanaLogic);
+  const handleNavigateToIndex = useCallback(() => navigateToUrl(NEW_INDEX_PATH), [navigateToUrl]);
 
   return (
-    <EnterpriseSearchContentPageTemplate
-      pageChrome={[
-        i18n.translate('xpack.enterpriseSearch.content.playground.breadcrumb', {
-          defaultMessage: 'Playground',
-        }),
-      ]}
-      pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.content.playground.headerTitle', {
-          defaultMessage: 'Playground',
-        }),
-        rightSideItems: [],
-      }}
-      pageViewTelemetry="Playground"
-      restrictWidth={false}
-      customPageSections
-      bottomBorder="extended"
-    >
-      {!!searchPlayground && searchPlayground?.renderPlayground()}
-    </EnterpriseSearchContentPageTemplate>
+    <searchPlayground.PlaygroundProvider navigateToIndexPage={handleNavigateToIndex}>
+      <EnterpriseSearchContentPageTemplate
+        pageChrome={[
+          i18n.translate('xpack.enterpriseSearch.content.playground.breadcrumb', {
+            defaultMessage: 'Playground',
+          }),
+        ]}
+        pageHeader={{
+          pageTitle: i18n.translate('xpack.enterpriseSearch.content.playground.headerTitle', {
+            defaultMessage: 'Playground',
+          }),
+          rightSideItems: [<searchPlayground.PlaygroundToolbar />],
+        }}
+        pageViewTelemetry="Playground"
+        restrictWidth={false}
+        customPageSections
+        bottomBorder="extended"
+      >
+        <searchPlayground.Playground />
+      </EnterpriseSearchContentPageTemplate>
+    </searchPlayground.PlaygroundProvider>
   );
 };

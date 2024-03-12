@@ -7,27 +7,19 @@
 
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import { Chat } from './chat';
-import { PlaygroundProvider } from '../providers/playground_provider';
 
-interface SearchPlaygroundAppDeps {
-  navigation: NavigationPublicPluginStart;
-}
-
-export const SearchPlaygroundApp = ({ navigation }: SearchPlaygroundAppDeps) => {
+export const SearchPlaygroundApp: React.FC = () => {
   return (
-    <PlaygroundProvider navigateToIndexPage={() => {}}>
-      <KibanaPageTemplate.Section
-        alignment="top"
-        restrictWidth={false}
-        grow
-        contentProps={{ css: { display: 'flex', flexGrow: 1 } }}
-        paddingSize="none"
-      >
-        <Chat />
-      </KibanaPageTemplate.Section>
-    </PlaygroundProvider>
+    <KibanaPageTemplate.Section
+      alignment="top"
+      restrictWidth={false}
+      grow
+      contentProps={{ css: { display: 'flex', flexGrow: 1 } }}
+      paddingSize="none"
+    >
+      <Chat />
+    </KibanaPageTemplate.Section>
   );
 };

@@ -5,15 +5,38 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
-import { AppPluginStartDependencies } from './types';
+import React, { ComponentType, lazy, LazyExoticComponent, Suspense } from 'react';
+import type { SearchPlaygroundApp } from './components/app';
+import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
+import type { Toolbar } from './components/toolbar';
 
-const RemoteSearchPlayground = lazy(() =>
-  import('./components/app').then((module) => ({ default: module.SearchPlaygroundApp }))
+const lazyRender =
+  <P extends {}>(
+    Component: LazyExoticComponent<ComponentType<P>>
+  ): React.FC<React.ComponentProps<typeof Component>> =>
+  (props) =>
+    (
+      <Suspense fallback={null}>
+        <Component {...props} />
+      </Suspense>
+    );
+
+export const Playground = lazyRender<React.ComponentProps<typeof SearchPlaygroundApp>>(
+  lazy<typeof SearchPlaygroundApp>(async () => ({
+    default: (await import('./components/app')).SearchPlaygroundApp,
+  }))
 );
 
-export const renderEmbeddableApp = (services: AppPluginStartDependencies) => (
-  <Suspense fallback={<></>}>
-    <RemoteSearchPlayground navigation={services.navigation} />
-  </Suspense>
+export const PlaygroundToolbar = lazyRender<React.ComponentProps<typeof Toolbar>>(
+  lazy<typeof Toolbar>(async () => ({
+    default: (await import('./components/toolbar')).Toolbar,
+  }))
+);
+
+export const PlaygroundProvider = lazyRender<
+  React.ComponentProps<typeof PlaygroundProviderComponent>
+>(
+  lazy(async () => ({
+    default: (await import('./providers/playground_provider')).PlaygroundProvider,
+  }))
 );

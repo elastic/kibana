@@ -15,14 +15,19 @@ import {
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { HttpStart } from '@kbn/core-http-browser';
-import { ReactElement } from 'react';
+import React from 'react';
+import type { SearchPlaygroundApp } from './components/app';
+import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
+import type { Toolbar } from './components/toolbar';
 
 export * from '../common/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}
 export interface SearchPlaygroundPluginStart {
-  renderPlayground: () => ReactElement | null;
+  PlaygroundProvider: React.FC<React.ComponentProps<typeof PlaygroundProviderComponent>>;
+  PlaygroundToolbar: React.FC<React.ComponentProps<typeof Toolbar>>;
+  Playground: React.FC<React.ComponentProps<typeof SearchPlaygroundApp>>;
 }
 
 export interface AppPluginStartDependencies {

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { createContext, ReactNode } from 'react';
+import React, { createContext } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ChatForm } from '../types';
 
 interface PlaygroundProviderProps {
   navigateToIndexPage: () => void;
-  children: ReactNode;
 }
 
 export const ChatContext = createContext<{ navigateToIndexPage?: () => void }>({});
