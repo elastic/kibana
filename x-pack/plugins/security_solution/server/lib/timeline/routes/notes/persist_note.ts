@@ -53,7 +53,7 @@ export const persistNoteRoute = (
             noteId,
             note: {
               ...note,
-              timelineId: note.timelineId || null,
+              timelineId: note.timelineId,
             },
             overrideOwner: true,
           });

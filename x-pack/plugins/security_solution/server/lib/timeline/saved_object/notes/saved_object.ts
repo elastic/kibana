@@ -6,8 +6,6 @@
  */
 
 import { failure } from 'io-ts/lib/PathReporter';
-import { getOr } from 'lodash/fp';
-import { v1 as uuidv1 } from 'uuid';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
@@ -87,35 +85,17 @@ export const persistNote = async ({
   note: BareNote;
   overrideOwner?: boolean;
 }): Promise<ResponseNote> => {
-  try {
-    if (noteId == null) {
-      return await createNote({
-        request,
-        noteId,
-        note,
-        overrideOwner,
-      });
-    }
-
-    // Update existing note
-    return await updateNote({ request, noteId, note, overrideOwner });
-  } catch (err) {
-    if (getOr(null, 'output.statusCode', err) === 403) {
-      const noteToReturn: Note = {
-        ...note,
-        noteId: uuidv1(),
-        version: '',
-        timelineId: '',
-        timelineVersion: '',
-      };
-      return {
-        code: 403,
-        message: err.message,
-        note: noteToReturn,
-      };
-    }
-    throw err;
+  if (noteId == null) {
+    return createNote({
+      request,
+      noteId,
+      note,
+      overrideOwner,
+    });
   }
+
+  // Update existing note
+  return updateNote({ request, noteId, note, overrideOwner });
 };
 
 const createNote = async ({
@@ -175,7 +155,7 @@ const createNote = async ({
 
   const repopulatedSavedObject = noteFieldsMigrator.populateFieldsFromReferences(createdNote);
 
-  const convertedNote = convertSavedObjectToSavedNote(repopulatedSavedObject, timelineVersion);
+  const convertedNote = convertSavedObjectToSavedNote(repopulatedSavedObject);
 
   // Create new note
   return {
@@ -266,17 +246,13 @@ const getAllSavedNote = async (request: FrameworkRequest, options: SavedObjectsF
   };
 };
 
-export const convertSavedObjectToSavedNote = (
-  savedObject: unknown,
-  timelineVersion?: string | undefined | null
-): Note =>
+export const convertSavedObjectToSavedNote = (savedObject: unknown): Note =>
   pipe(
     SavedObjectNoteRuntimeType.decode(savedObject),
     map((savedNote) => {
       return {
         noteId: savedNote.id,
         version: savedNote.version,
-        timelineVersion,
         timelineId: savedNote.attributes.timelineId,
         eventId: savedNote.attributes.eventId,
         note: savedNote.attributes.note,
