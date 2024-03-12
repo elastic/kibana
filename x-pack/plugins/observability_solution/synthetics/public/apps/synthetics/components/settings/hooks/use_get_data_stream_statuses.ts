@@ -45,8 +45,8 @@ export function useGetDataStreamStatuses(): DataStreamStatusResponse {
   for (const { indexTemplate, label } of policyLabels) {
     const dataStream = dataStreamMap[indexTemplate];
     if (dataStream) {
-      dataStreamStatuses.push(formatDataStreamInfo(dataStreamMap[indexTemplate]));
-      totalBytes += dataStreamMap[indexTemplate].storageSizeBytes ?? 0;
+      dataStreamStatuses.push(formatDataStreamInfo(dataStream));
+      totalBytes += dataStream.storageSizeBytes ?? 0;
     } else {
       const missingStream = toMissingDataStream({ indexTemplate, label });
       dataStreamStatuses.push(missingStream);

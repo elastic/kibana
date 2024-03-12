@@ -19,4 +19,8 @@ describe('formatAge', () => {
   it('should return formatted age when age is provided', () => {
     expect(formatAge('5d')).toBe('5 days + rollover');
   });
+
+  it('handles a string with no "d" in it', () => {
+    expect(formatAge('5')).toBe('5 days + rollover');
+  });
 });
