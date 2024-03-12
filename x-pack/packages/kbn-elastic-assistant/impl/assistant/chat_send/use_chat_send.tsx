@@ -87,15 +87,6 @@ export const useChatSend = ({
         );
         return;
       }
-      let replacements: Record<string, string> = {};
-      const onNewReplacements = (newReplacements: Record<string, string>) => {
-        replacements = { ...(currentConversation.replacements ?? {}), ...newReplacements };
-        setCurrentConversation({
-          ...currentConversation,
-          replacements,
-        });
-      };
-
       const systemPrompt = allSystemPrompts.find((prompt) => prompt.id === editingSystemPromptId);
 
       const userMessage = getCombinedMessage({
@@ -104,15 +95,16 @@ export const useChatSend = ({
         promptText,
         selectedPromptContexts,
         selectedSystemPrompt: systemPrompt,
-        onNewReplacements,
       });
 
+      const replacements = userMessage.replacements ?? currentConversation.replacements;
       const updatedMessages = [...currentConversation.messages, userMessage].map((m) => ({
         ...m,
         content: m.content ?? '',
       }));
       setCurrentConversation({
         ...currentConversation,
+        replacements,
         messages: updatedMessages,
       });
 
@@ -139,6 +131,7 @@ export const useChatSend = ({
 
       setCurrentConversation({
         ...currentConversation,
+        replacements,
         messages: [...updatedMessages, responseMessage],
       });
       assistantTelemetry?.reportAssistantMessageSent({

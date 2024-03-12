@@ -35,3 +35,18 @@ export const replaceAnonymizedValuesWithOriginalValues = ({
         return acc.replaceAll(uuid, value);
       }, messageContent)
     : messageContent;
+
+// TODO: Improve with anonimized fields work by usage proper transformRawData instead
+export const replaceOriginalValuesWithUuidValues = ({
+  messageContent,
+  replacements,
+}: {
+  messageContent: string;
+  replacements: Record<string, string>;
+}): string =>
+  replacements != null
+    ? Object.keys(replacements).reduce((acc, uuid) => {
+        const value = replacements[uuid];
+        return acc.replaceAll(value, uuid);
+      }, messageContent)
+    : messageContent;

@@ -21,6 +21,9 @@ export {
 } from './impl/data_anonymization/helpers';
 
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
-export { replaceAnonymizedValuesWithOriginalValues } from './impl/data_anonymization/helpers';
+export {
+  replaceAnonymizedValuesWithOriginalValues,
+  replaceOriginalValuesWithUuidValues, // TODO: replace with transformRawData
+} from './impl/data_anonymization/helpers';
 
 export * from './constants';

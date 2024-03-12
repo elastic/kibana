@@ -6,7 +6,11 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { ConversationResponse, Replacement } from '@kbn/elastic-assistant-common';
+import {
+  ConversationResponse,
+  Replacement,
+  replaceOriginalValuesWithUuidValues,
+} from '@kbn/elastic-assistant-common';
 import { SearchEsConversationSchema } from './types';
 
 export const transformESToConversations = (
@@ -46,7 +50,11 @@ export const transformESToConversations = (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           conversationSchema.messages?.map((message: Record<string, any>) => ({
             timestamp: new Date(message['@timestamp']).toLocaleString(),
-            content: message.content,
+            // always return anonymized data from the client
+            content: replaceOriginalValuesWithUuidValues({
+              messageContent: message.content,
+              replacements: (conversationSchema.replacements ?? {}) as Record<string, string>,
+            }),
             ...(message.is_error ? { isError: message.is_error } : {}),
             ...(message.reader ? { reader: message.reader } : {}),
             role: message.role,

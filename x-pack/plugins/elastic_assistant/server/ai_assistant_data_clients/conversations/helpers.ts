@@ -17,20 +17,24 @@ export const getUpdateScript = ({
   return {
     source: `
     if (params.assignEmpty == true || params.containsKey('api_config')) {
-      if (params.assignEmpty == true || params.api_config.containsKey('connector_id')) {
-        ctx._source.api_config.connector_id = params.api_config.connector_id;
-      }
-      if (params.assignEmpty == true || params.api_config.containsKey('connector_type_title')) {
-        ctx._source.api_config.connector_type_title = params.api_config.connector_type_title;
-      }
-      if (params.assignEmpty == true || params.api_config.containsKey('default_system_prompt_id')) {
-        ctx._source.api_config.default_system_prompt_id = params.api_config.default_system_prompt_id;
-      }
-      if (params.assignEmpty == true || params.api_config.containsKey('model')) {
-        ctx._source.api_config.model = params.api_config.model;
-      }
-      if (params.assignEmpty == true || params.api_config.containsKey('provider')) {
-        ctx._source.api_config.provider = params.api_config.provider;
+      if (ctx._source.api_config != null) {
+        if (params.assignEmpty == true || params.api_config.containsKey('connector_id')) {
+          ctx._source.api_config.connector_id = params.api_config.connector_id;
+        }
+        if (params.assignEmpty == true || params.api_config.containsKey('connector_type_title')) {
+          ctx._source.api_config.connector_type_title = params.api_config.connector_type_title;
+        }
+        if (params.assignEmpty == true || params.api_config.containsKey('default_system_prompt_id')) {
+          ctx._source.api_config.default_system_prompt_id = params.api_config.default_system_prompt_id;
+        }
+        if (params.assignEmpty == true || params.api_config.containsKey('model')) {
+          ctx._source.api_config.model = params.api_config.model;
+        }
+        if (params.assignEmpty == true || params.api_config.containsKey('provider')) {
+          ctx._source.api_config.provider = params.api_config.provider;
+        }
+      } else {
+        ctx._source.api_config = params.api_config;
       }
     }
     if (params.assignEmpty == true || params.containsKey('exclude_from_last_conversation_storage')) {
@@ -50,7 +54,10 @@ export const getUpdateScript = ({
         newMessage.content = message.content;
         newMessage.is_error = message.is_error;
         newMessage.reader = message.reader;
-        newMessage.role = message.role; 
+        newMessage.role = message.role;
+        if (message.trace_data != null) {
+          newMessage.trace_data = message.trace_data;
+        }
         messages.add(newMessage);
       }
       ctx._source.messages = messages;

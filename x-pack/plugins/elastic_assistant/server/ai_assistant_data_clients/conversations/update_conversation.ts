@@ -18,6 +18,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getConversation } from './get_conversation';
+import { getUpdateScript } from './helpers';
 
 export interface UpdateConversationSchema {
   id: UUID;
@@ -76,64 +77,7 @@ export const updateConversation = async ({
         },
       },
       refresh: true,
-      script: {
-        lang: 'painless',
-        params: {
-          ...params,
-          // when assigning undefined in painless, it will remove property and wil set it to null
-          // for patch we don't want to remove unspecified value in payload
-          assignEmpty: !(isPatch ?? true),
-        },
-        source: `
-          if (params.assignEmpty == true || params.containsKey('api_config')) {
-            if (ctx._source.api_config != null) {
-              if (params.assignEmpty == true || params.api_config.containsKey('connector_id')) {
-                ctx._source.api_config.connector_id = params.api_config.connector_id;
-              }
-              if (params.assignEmpty == true || params.api_config.containsKey('connector_type_title')) {
-                ctx._source.api_config.connector_type_title = params.api_config.connector_type_title;
-              }
-              if (params.assignEmpty == true || params.api_config.containsKey('default_system_prompt_id')) {
-                ctx._source.api_config.default_system_prompt_id = params.api_config.default_system_prompt_id;
-              }
-              if (params.assignEmpty == true || params.api_config.containsKey('model')) {
-                ctx._source.api_config.model = params.api_config.model;
-              }
-              if (params.assignEmpty == true || params.api_config.containsKey('provider')) {
-                ctx._source.api_config.provider = params.api_config.provider;
-              }
-            } else {
-              ctx._source.api_config = params.api_config;
-            }
-          }
-          if (params.assignEmpty == true || params.containsKey('exclude_from_last_conversation_storage')) {
-            ctx._source.exclude_from_last_conversation_storage = params.exclude_from_last_conversation_storage;
-          }
-          if (params.assignEmpty == true || params.containsKey('replacements')) {
-            ctx._source.replacements = params.replacements;
-          }
-          if (params.assignEmpty == true || params.containsKey('title')) {
-            ctx._source.title = params.title;
-          }
-          if (params.assignEmpty == true || params.containsKey('messages')) {
-            def messages = [];
-            for (message in params.messages) {
-              def newMessage = [:];
-              newMessage['@timestamp'] = message['@timestamp'];
-              newMessage.content = message.content;
-              newMessage.is_error = message.is_error;
-              newMessage.reader = message.reader;
-              newMessage.role = message.role;
-              if (message.trace_data != null) {
-                newMessage.trace_data = message.trace_data;
-              }
-              messages.add(newMessage);
-            }
-            ctx._source.messages = messages;
-          }
-          ctx._source.updated_at = params.updated_at;
-        `,
-      },
+      script: getUpdateScript({ conversation: params, isPatch }),
     });
 
     if (response.failures && response.failures.length > 0) {

@@ -13,6 +13,7 @@ import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   ExecuteConnectorRequestBody,
   Message,
+  replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
@@ -100,15 +101,27 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
 
+            // messages are anonymized by dataClient
             prevMessages = conversation?.messages?.map((c) => ({
               role: c.role,
               content: c.content,
             }));
 
-            if (newMessage) {
+            if (request.body.message) {
               const res = await dataClient?.appendConversationMessages({
                 existingConversation: conversation,
-                messages: [{ ...newMessage, timestamp: new Date().toISOString() }],
+                messages: [
+                  {
+                    ...{
+                      content: replaceAnonymizedValuesWithOriginalValues({
+                        messageContent: request.body.message,
+                        replacements: request.body.replacements,
+                      }),
+                      role: 'user',
+                    },
+                    timestamp: new Date().toISOString(),
+                  },
+                ],
               });
 
               if (res == null) {
@@ -137,7 +150,10 @@ export const postActionsConnectorExecuteRoute = (
                   existingConversation: updatedConversation,
                   messages: [
                     getMessageFromRawResponse({
-                      rawContent: content,
+                      rawContent: replaceAnonymizedValuesWithOriginalValues({
+                        messageContent: content,
+                        replacements: latestReplacements,
+                      }),
                       traceData,
                     }),
                   ],

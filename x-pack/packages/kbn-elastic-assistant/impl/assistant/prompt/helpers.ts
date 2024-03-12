@@ -35,7 +35,6 @@ export const getSystemMessages = ({
 export function getCombinedMessage({
   currentReplacements,
   getAnonymizedValue = defaultGetAnonymizedValue,
-  onNewReplacements,
   isNewChat,
   promptText,
   selectedPromptContexts,
@@ -50,15 +49,19 @@ export function getCombinedMessage({
     rawValue: string;
   }) => string;
   isNewChat: boolean;
-  onNewReplacements: (newReplacements: Record<string, string>) => void;
   promptText: string;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   selectedSystemPrompt: Prompt | undefined;
 }): Message {
+  let replacements: Record<string, string> = {};
+  const onNewReplacements = (newReplacements: Record<string, string>) => {
+    replacements = { ...(currentReplacements ?? {}), ...newReplacements };
+  };
+
   const promptContextsContent = Object.keys(selectedPromptContexts)
     .sort()
     .map((id) => {
-      const promptContext = transformRawData({
+      const promptContextData = transformRawData({
         allow: selectedPromptContexts[id].allow,
         allowReplacement: selectedPromptContexts[id].allowReplacement,
         currentReplacements,
@@ -67,7 +70,7 @@ export function getCombinedMessage({
         rawData: selectedPromptContexts[id].rawData,
       });
 
-      return `${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContext)}`;
+      return `${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContextData)}`;
     });
 
   return {
@@ -76,5 +79,6 @@ export function getCombinedMessage({
     }${promptContextsContent}\n\n${promptText}`,
     role: 'user', // we are combining the system and user messages into one message
     timestamp: new Date().toLocaleString(),
+    replacements,
   };
 }
