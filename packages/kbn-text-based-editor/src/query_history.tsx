@@ -21,6 +21,7 @@ import {
   EuiButtonIcon,
   CustomItemAction,
   EuiCopy,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css, Interpolation, Theme } from '@emotion/react';
 import { type QueryHistoryItem, getHistoryItems } from './history_localStorage';
@@ -159,14 +160,32 @@ export function QueryHistory({
           return (
             <EuiFlexGroup gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon
-                  type="playFilled"
-                  size="m"
-                  onClick={() => onUpdateAndSubmit(item.queryString)}
-                />
+                <EuiToolTip
+                  position="top"
+                  content={i18n.translate(
+                    'textBasedEditor.query.textBasedLanguagesEditor.querieshistoryRun',
+                    {
+                      defaultMessage: 'Run query',
+                    }
+                  )}
+                >
+                  <EuiIcon
+                    type="playFilled"
+                    size="m"
+                    onClick={() => onUpdateAndSubmit(item.queryString)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiCopy textToCopy={item.queryString}>
+                <EuiCopy
+                  textToCopy={item.queryString}
+                  content={i18n.translate(
+                    'textBasedEditor.query.textBasedLanguagesEditor.querieshistoryCopy',
+                    {
+                      defaultMessage: 'Copy query to clipboard',
+                    }
+                  )}
+                >
                   {(copy) => <EuiIcon type="copy" size="m" onClick={copy} />}
                 </EuiCopy>
               </EuiFlexItem>

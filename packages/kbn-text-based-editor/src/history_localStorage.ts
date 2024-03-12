@@ -8,6 +8,10 @@
 import moment from 'moment';
 const QUERY_HISTORY_ITEM_KEY = 'QUERY_HISTORY_ITEM_KEY';
 
+/**
+ * We show maximum 20 ES|QL queries in the Query history component
+ */
+
 export interface QueryHistoryItem {
   status?: 'success' | 'error';
   queryString: string;
@@ -15,6 +19,12 @@ export interface QueryHistoryItem {
   timeZone?: string;
   duration?: string;
 }
+
+const MAX_QUERIES_NUMBER = 20;
+
+const getKey = (queryString: string) => {
+  return queryString.replaceAll('\n', '').trim();
+};
 
 export const getHistoryItems = (): QueryHistoryItem[] => {
   const localStorageString = localStorage.getItem(QUERY_HISTORY_ITEM_KEY) ?? '[]';
@@ -24,23 +34,28 @@ export const getHistoryItems = (): QueryHistoryItem[] => {
 
 const cachedQueries = new Map<string, QueryHistoryItem>();
 const localStorageQueries = getHistoryItems();
+
 localStorageQueries.forEach((queryItem) => {
-  const trimmedQueryString = queryItem.queryString.replaceAll('\n', '').trim();
+  const trimmedQueryString = getKey(queryItem.queryString);
   cachedQueries.set(trimmedQueryString, queryItem);
 });
 
 export const addQueriesToCache = (item: QueryHistoryItem) => {
-  const trimmedQueryString = item.queryString.replaceAll('\n', '').trim();
+  const trimmedQueryString = getKey(item.queryString);
   if (!localStorageQueries.some((queryItem) => queryItem.queryString === trimmedQueryString)) {
     cachedQueries.set(item.queryString, item);
+    if (localStorageQueries.length === MAX_QUERIES_NUMBER) {
+      // delete from map and local storage
+    }
   }
 };
 
 export const updateCachedQueries = (item: QueryHistoryItem) => {
-  const query = cachedQueries.get(item.queryString);
+  const trimmedQueryString = getKey(item.queryString);
+  const query = cachedQueries.get(trimmedQueryString);
   const tz = !item.timeZone || item.timeZone === 'Browser' ? moment.tz.guess() : item.timeZone;
   if (query) {
-    cachedQueries.set(item.queryString, {
+    cachedQueries.set(trimmedQueryString, {
       ...item,
       timeRun: moment().tz(tz).format('MMM. d, YY HH:mm:ss'),
     });
