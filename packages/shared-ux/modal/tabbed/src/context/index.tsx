@@ -43,7 +43,8 @@ interface IModalTabActionBtn<S> extends CommonProps {
   dataTestSubj: string;
   defaultMessage: string;
   formattedMessageId: string;
-  handler?: (args: { state: S }) => void;
+  handler: (args: { state: S }) => string;
+  isCopy?: boolean;
 }
 
 export interface IModalTabDeclaration<S extends IModalTabState> extends EuiTabProps {
