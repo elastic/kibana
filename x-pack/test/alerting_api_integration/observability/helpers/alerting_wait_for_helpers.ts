@@ -16,9 +16,9 @@ import type {
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { retry } from '../../common/retry';
 
-const TIMEOUT = 60000;
+const TIMEOUT = 10000;
 const RETRIES = 10;
-const RETRY_DELAY = 3000;
+const RETRY_DELAY = 500;
 
 export async function waitForRuleStatus({
   id,
