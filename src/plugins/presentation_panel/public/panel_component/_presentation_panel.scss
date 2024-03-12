@@ -173,7 +173,7 @@
     transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
 
     &:hover {
-      // background-color: transparentize($e, lightOrDarkTheme(.9, .7));
+      background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
       cursor: move;
     }
   }
