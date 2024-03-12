@@ -82,7 +82,7 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
       } catch (error) {
         kibana.notifications.toasts.addDanger({
           title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
-          text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
+          text: error?.body?.message ?? error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
         });
       } finally {
         store.dispatch(
