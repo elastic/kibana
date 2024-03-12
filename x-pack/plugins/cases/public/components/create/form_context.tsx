@@ -148,11 +148,10 @@ export const FormContext: React.FC<Props> = ({
         const selectedConfiguration = allConfigurations.find(
           (element: CasesConfigurationUI) => element.owner === configurationOwner
         );
-        const backupConfiguration = allConfigurations[0];
 
         const customFieldsConfiguration = selectedConfiguration
           ? selectedConfiguration.customFields
-          : backupConfiguration.customFields;
+          : [];
 
         const transformedCustomFields = transformCustomFieldsData(
           customFields,
