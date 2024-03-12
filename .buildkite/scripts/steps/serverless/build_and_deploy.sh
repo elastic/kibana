@@ -53,7 +53,6 @@ deploy() {
 
   PROJECT_ID=$(jq -r --slurp '[.[0].items[] | select(.name == "'$PROJECT_NAME'")] | .[0].id' $DEPLOY_LOGS)
   if is_pr_with_label "ci:project-redeploy"; then
-    echo "--- Shutdown Previous Project"
     if [ -z "${PROJECT_ID}" ]; then
       echo "No project to remove"
     else
