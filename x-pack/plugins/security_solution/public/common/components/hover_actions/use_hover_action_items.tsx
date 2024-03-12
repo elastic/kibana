@@ -94,15 +94,12 @@ export const useHoverActionItems = ({
     getFilterOutValueButton,
     getOverflowButton,
   } = timelines.getHoverActions();
-  const filterManagerBackup = useMemo(
-    () => kibana.services.data.query.filterManager,
-    [kibana.services.data.query.filterManager]
-  );
 
-  const filterManager = useMemo(
-    () => (isActiveTimeline(scopeId ?? '') ? timelineFilterManager : filterManagerBackup),
-    [scopeId, timelineFilterManager, filterManagerBackup]
-  );
+  const filterManager = useMemo(() => {
+    return isActiveTimeline(scopeId ?? '')
+      ? timelineFilterManager
+      : kibana.services.data.query.filterManager;
+  }, [scopeId, timelineFilterManager, kibana.services.data.query.filterManager]);
 
   /*
    *   Add to Timeline button, adds data to dataprovider but does not persists the Timeline
