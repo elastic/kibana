@@ -39,7 +39,7 @@ export interface AttachIndexBoxProps {
 }
 
 export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => {
-  const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
+  const indexName = useParams<{ indexName: string | undefined }>().indexName;
   const { createIndex, attachIndex, setConnector, checkIndexExists } = useActions(AttachIndexLogic);
   const {
     isLoading: isSaveLoading,
