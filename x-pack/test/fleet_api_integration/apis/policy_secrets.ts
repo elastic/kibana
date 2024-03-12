@@ -360,11 +360,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('Should correctly create the policy with secrets', async () => {
       // Policy secrets requires at least one Fleet server on v8.10+
-      const fleetServerAgentId = await createFleetServerAgent(
-        fleetServerAgentPolicyId,
-        'server_1',
-        '8.10.0'
-      );
+      await createFleetServerAgent(fleetServerAgentPolicyId, 'server_1', '8.10.0');
 
       const { body: createResBody } = await supertest
         .post(`/api/fleet/package_policies`)
@@ -401,8 +397,6 @@ export default function (providerContext: FtrProviderContext) {
             version: '1.0.0',
           },
         });
-
-      console.log(JSON.stringify(createResBody, null, 2));
 
       createdPackagePolicy = createResBody.item;
       createdPackagePolicyId = createdPackagePolicy.id;
