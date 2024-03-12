@@ -96,7 +96,9 @@ export interface UninstallTokenServiceInterface {
     policyNameSearchTerm?: string,
     page?: number,
     perPage?: number,
-    excludedPolicyIds?: string[]
+    excludedPolicyIds?: string[],
+    spaceId?: string,
+    request?: KibanaRequest
   ): Promise<GetUninstallTokensMetadataResponse>;
 
   /**
@@ -220,7 +222,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     policyNameSearchTerm?: string,
     page = 1,
     perPage = 20,
-    excludedPolicyIds?: string[]
+    excludedPolicyIds?: string[],
+    spaceId?: string,
+    request?: KibanaRequest
   ): Promise<GetUninstallTokensMetadataResponse> {
     const policyIdFilter = this.prepareSearchString(policyIdSearchTerm, '.*');
 
@@ -240,7 +244,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
     const tokenObjects = await this.getTokenObjectsByPolicyIdFilter(
       includeFilter,
-      excludedPolicyIds
+      excludedPolicyIds,
+      spaceId,
+      request
     );
     const tokenObjectsCurrentPage = tokenObjects.slice((page - 1) * perPage, page * perPage);
     const policyIds = tokenObjectsCurrentPage.map(
@@ -390,12 +396,15 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   private async getTokenObjectsByPolicyIdFilter(
     include?: AggregationsTermsInclude,
-    exclude?: AggregationsTermsExclude
+    exclude?: AggregationsTermsExclude,
+    spaceId?: string,
+    request?: KibanaRequest
   ): Promise<Array<SearchHit<any>>> {
     const bucketSize = 10000;
 
     const query: SavedObjectsCreatePointInTimeFinderOptions = {
       type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+      ...(spaceId ? { namespaces: [spaceId] } : {}),
       perPage: 0,
       aggs: {
         by_policy_id: {
@@ -418,9 +427,16 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       },
     };
 
+    const soClient = request
+      ? appContextService.getSavedObjects().getScopedClient(request, {
+          excludedExtensions: [SECURITY_EXTENSION_ID],
+          includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+        })
+      : this.soClient;
+
     // encrypted saved objects doesn't decrypt aggregation values so we get
     // the ids first from saved objects to use with encrypted saved objects
-    const idFinder = this.soClient.createPointInTimeFinder<
+    const idFinder = soClient.createPointInTimeFinder<
       UninstallTokenSOAttributes,
       UninstallTokenSOAggregation
     >(query);

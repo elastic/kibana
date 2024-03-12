@@ -693,7 +693,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     name: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
     indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: true,
-    namespaceType: 'agnostic',
+    namespaceType: 'multiple',
     management: {
       importableAndExportable: false,
     },

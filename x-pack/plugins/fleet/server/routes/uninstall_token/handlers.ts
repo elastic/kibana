@@ -68,7 +68,9 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
       policyNameSearchTerm,
       page,
       perPage,
-      managedPolicyIds.length > 0 ? managedPolicyIds : undefined
+      managedPolicyIds.length > 0 ? managedPolicyIds : undefined,
+      fleetContext.spaceId,
+      request
     );
 
     return response.ok({ body });
