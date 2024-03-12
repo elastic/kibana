@@ -11,29 +11,22 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DashboardLocatorParams, DashboardStart } from '@kbn/dashboard-plugin/public';
+import type {
+  DashboardAPI,
+  DashboardLocatorParams,
+  DashboardStart,
+} from '@kbn/dashboard-plugin/public';
+import { getPanelTitle } from '@kbn/presentation-publishing';
 import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import type { Embeddable } from '@kbn/lens-plugin/public';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { MlApiServices } from '../../../services/ml_api_service';
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
-import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
+import type { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
 import { createQueries } from '../utils/new_job_utils';
 import { createDatafeedId } from '../../../../../common/util/job_utils';
-
-export function isLensEmbeddable(arg: any): arg is Embeddable {
-  return arg.hasOwnProperty('type') && arg.type === 'lens';
-}
-
-export function isMapEmbeddable(arg: any): arg is MapEmbeddable {
-  return arg.hasOwnProperty('type') && arg.type === 'map';
-}
-
-export type Dashboard = Embeddable['parent'];
 
 interface CreationState {
   success: boolean;
@@ -85,7 +78,7 @@ export class QuickJobCreatorBase {
     end: number | undefined;
     startJob: boolean;
     runInRealTime: boolean;
-    dashboard?: Dashboard;
+    dashboard?: DashboardAPI;
   }) {
     const datafeedId = createDatafeedId(jobId);
     const datafeed = { ...datafeedConfig, job_id: jobId, datafeed_id: datafeedId };
@@ -232,23 +225,14 @@ export class QuickJobCreatorBase {
     return mergedQueries;
   }
 
-  private async createDashboardLink(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
-    const dashboardTitle = dashboard?.getTitle();
-    if (dashboardTitle === undefined || dashboardTitle === '') {
-      // embeddable may have not been in a dashboard
-      // and my not have been given a title as it is unsaved.
-      return null;
-    }
-
-    const findDashboardsService = await this.dashboardService.findDashboardsService();
-    // find the dashboard from the dashboard service as the dashboard passed in may not have the correct id
-    const foundDashboard = await findDashboardsService.findByTitle(dashboardTitle);
-    if (foundDashboard === undefined) {
+  private async createDashboardLink(dashboard: DashboardAPI, datafeedConfig: estypes.MlDatafeed) {
+    const savedObjectId = dashboard.savedObjectId?.value;
+    if (!savedObjectId) {
       return null;
     }
 
     const params: DashboardLocatorParams = {
-      dashboardId: foundDashboard.id,
+      dashboardId: savedObjectId,
       timeRange: {
         from: '$earliest$',
         to: '$latest$',
@@ -270,13 +254,13 @@ export class QuickJobCreatorBase {
     const url = `${location.app}${location.path}`;
     const urlName = i18n.translate('xpack.ml.newJob.fromLens.createJob.namedUrlDashboard', {
       defaultMessage: 'Open {dashboardTitle}',
-      values: { dashboardTitle },
+      values: { dashboardTitle: getPanelTitle(dashboard) ?? 'dashboard' },
     });
 
     return { url_name: urlName, url_value: url, time_range: 'auto' };
   }
 
-  private async getCustomUrls(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
+  private async getCustomUrls(dashboard: DashboardAPI, datafeedConfig: estypes.MlDatafeed) {
     const customUrls = await this.createDashboardLink(dashboard, datafeedConfig);
     return dashboard !== undefined && customUrls !== null ? { custom_urls: [customUrls] } : {};
   }
