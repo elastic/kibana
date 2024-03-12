@@ -5,19 +5,6 @@
  * 2.0.
  */
 
-import type { JSONSchema } from 'json-schema-to-ts';
-import type OpenAI from 'openai';
-import type { Observable } from 'rxjs';
-import { ChatCompletionChunkEvent, MessageAddEvent } from './conversation_complete';
-
-export type CreateChatCompletionResponseChunk = Omit<OpenAI.ChatCompletionChunk, 'choices'> & {
-  choices: Array<
-    Omit<OpenAI.ChatCompletionChunk.Choice, 'message'> & {
-      delta: { content?: string; function_call?: { name?: string; arguments?: string } };
-    }
-  >;
-};
-
 export enum MessageRole {
   System = 'system',
   Assistant = 'assistant',
@@ -89,43 +76,6 @@ export interface KnowledgeBaseEntry {
   labels?: Record<string, string>;
   role: KnowledgeBaseEntryRole;
 }
-
-export type CompatibleJSONSchema = Exclude<JSONSchema, boolean>;
-
-export interface ContextDefinition {
-  name: string;
-  description: string;
-}
-
-export type FunctionResponse =
-  | {
-      content?: any;
-      data?: any;
-    }
-  | Observable<ChatCompletionChunkEvent | MessageAddEvent>;
-
-export enum FunctionVisibility {
-  AssistantOnly = 'assistantOnly',
-  UserOnly = 'userOnly',
-  Internal = 'internal',
-  All = 'all',
-}
-
-export interface FunctionDefinition<
-  TParameters extends CompatibleJSONSchema = CompatibleJSONSchema
-> {
-  name: string;
-  description: string;
-  visibility?: FunctionVisibility;
-  descriptionForUser?: string;
-  parameters: TParameters;
-  contexts: string[];
-}
-
-export type RegisterContextDefinition = (options: ContextDefinition) => void;
-
-export type ContextRegistry = Map<string, ContextDefinition>;
-export type FunctionRegistry = Map<string, FunctionDefinition>;
 
 export interface ObservabilityAIAssistantScreenContext {
   screenDescription?: string;
