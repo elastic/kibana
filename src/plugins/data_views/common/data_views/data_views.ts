@@ -1207,7 +1207,7 @@ export class DataViewsService {
     if (this.savedObjectsCache) {
       this.savedObjectsCache.push(response as SavedObject<IndexPatternListSavedObjectAttrs>);
     }
-    dataView.id = response.id; // todo is the id assigned here or when created?
+    // dataView.id = response.id; // todo is the id assigned here or when created?
     dataView.version = response.version;
     dataView.namespaces = response.namespaces || [];
   }

@@ -571,7 +571,6 @@ export class DataViewLazy extends AbstractDataView {
   getTimeField = () => (this.timeFieldName ? this.getFieldByName(this.timeFieldName) : undefined);
 
   async getFieldByName(name: string, forceRefresh = false) {
-    // todo is forceRefesh needed?
     const fieldMap = (await this.getFields({ fieldName: [name], forceRefresh })).getFieldMap();
     return fieldMap[name];
   }
