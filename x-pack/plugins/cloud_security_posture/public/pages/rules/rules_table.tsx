@@ -354,7 +354,7 @@ const CspBenchmarkRuleStateSwitch = ({
       setIsRuleMuted(!isRuleMuted);
       showChangeBenchmarkRuleStatesSuccessToast(notifications, isRuleMuted, {
         numberOfRules: 1,
-        numberOfDetectionRules: response?.disabled_detection_rules?.length || 0,
+        numberOfDetectionRules: response.disabled_detection_rules?.length || 0,
       });
     }
   };
