@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, memo } from 'react';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 import { EuiHealth, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getSeverityColor, getFormattedSeverityScore } from '@kbn/ml-anomaly-utils';
 
