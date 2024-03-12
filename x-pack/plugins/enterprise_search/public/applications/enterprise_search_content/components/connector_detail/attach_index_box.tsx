@@ -210,7 +210,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                 setQuery({
                   hasMatchingOptions: !!hasMatchingOptions,
                   isFullMatch: options.some((option) => option.label === searchValue),
-                  searchValue: searchValue,
+                  searchValue,
                 });
               }}
               onChange={(selection) => {
