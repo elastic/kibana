@@ -42,8 +42,17 @@ export const rewriteRule = ({
   ...rest
 }: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] }) => {
   const actionsTemp: unknown[] = [];
-  actions.forEach(({ id, actionTypeId, params, uuid, useAlertDataForTemplate, ...action }) => {
-    const { group, frequency, alertsFilter } = action;
+  actions.forEach((action) => {
+    const {
+      id,
+      actionTypeId,
+      params,
+      uuid,
+      useAlertDataForTemplate,
+      group,
+      frequency,
+      alertsFilter,
+    } = action;
     actionsTemp.push({
       group,
       id,
@@ -60,11 +69,15 @@ export const rewriteRule = ({
         : {}),
       ...(uuid && { uuid }),
       ...(alertsFilter && { alerts_filter: alertsFilter }),
+      ...(typeof useAlertDataForTemplate !== 'undefined'
+        ? { use_alert_data_for_template: useAlertDataForTemplate }
+        : {}),
     });
   });
-  (systemActions ?? []).forEach((actionTypeId, useAlertDataForTemplate, ...systemAction) => {
+  (systemActions ?? []).forEach((systemAction) => {
+    const { actionTypeId, useAlertDataForTemplate, ...restSystemAction } = systemAction;
     actionsTemp.push({
-      ...systemAction,
+      ...restSystemAction,
       connector_type_id: actionTypeId,
       ...(typeof useAlertDataForTemplate !== 'undefined'
         ? { use_alert_data_for_template: useAlertDataForTemplate }

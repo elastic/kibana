@@ -24,6 +24,7 @@ const paramSchema = schema.object({
 
 const rewriteBodyRes = ({
   actions,
+  systemActions,
   alertTypeId,
   scheduledTaskId,
   createdBy,
@@ -66,7 +67,7 @@ const rewriteBodyRes = ({
     : {}),
   ...(actions
     ? {
-        actions: transformRuleActions(actions),
+        actions: transformRuleActions(actions, systemActions),
       }
     : {}),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),

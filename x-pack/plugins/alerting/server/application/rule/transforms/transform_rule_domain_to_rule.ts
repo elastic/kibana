@@ -26,6 +26,7 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     consumer: ruleDomain.consumer,
     schedule: ruleDomain.schedule,
     actions: ruleDomain.actions,
+    systemActions: ruleDomain.systemActions,
     params: ruleDomain.params,
     mapped_params: ruleDomain.mapped_params,
     scheduledTaskId: ruleDomain.scheduledTaskId,
