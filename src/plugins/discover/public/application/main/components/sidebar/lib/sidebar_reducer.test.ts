@@ -116,7 +116,7 @@ describe('sidebar reducer', function () {
             name: 'text2',
             meta: {
               type: 'string',
-              esTypes: ['keyword'],
+              esType: 'keyword',
             },
           },
         ] as DatatableColumn[],

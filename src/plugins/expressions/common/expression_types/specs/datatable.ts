@@ -9,7 +9,6 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import { PointSeries, PointSeriesColumn } from './pointseries';
@@ -63,7 +62,7 @@ export interface DatatableColumnMeta {
   /**
    * The original type of the column from ES
    */
-  esTypes?: ES_FIELD_TYPES[];
+  esType?: string;
   /**
    * field this column is based on
    */
