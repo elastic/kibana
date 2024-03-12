@@ -23,7 +23,6 @@ import {
   DashboardCreationOptions,
   DashboardRenderer,
 } from '@kbn/dashboard-plugin/public';
-// import { SerializableRecord } from '@kbn/utility-types';
 
 import { buildPhraseFilter, Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -66,22 +65,13 @@ export function getFilterByAssetName(
 }
 
 export function Dashboards() {
-  // const {
-  //   path: { serviceName },
-  //   query: { environment, kuery, dateRange.from, dateRange.to, dashboardId },
-  // } = useAnyOfApmParams(
-  //   '/services/{serviceName}/dashboards',
-  //   '/mobile-services/{serviceName}/dashboards'
-  // );
   const { dateRange } = useDatePickerContext();
   const { asset } = useAssetDetailsRenderPropsContext();
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
   const [customDashboards, setCustomDashboards] = useState<DashboardItemWithTitle[]>([]);
   const [currentDashboard, setCurrentDashboard] = useState<DashboardItemWithTitle>();
   const { data: allAvailableDashboards } = useDashboardFetcher();
-  // const { dataView } = useAdHocApmDataView();
   const { metrics } = useDataViewsContext();
-  // const { share } = useApmPluginContext();
   const [urlState] = useAssetDetailsUrlState();
 
   const { dashboards, loading, reload } = useCustomDashboard({ assetType: asset.type });
@@ -120,39 +110,16 @@ export function Dashboards() {
           ? getFilterByAssetName(asset.name, asset.type, metrics.dataView)
           : [],
       timeRange: { from: dateRange.from, to: dateRange.to },
-      // query: { query: kuery, language: 'kuery' },
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metrics.dataView, asset.name, dashboard, dateRange.from, dateRange.to]);
-
-  // TODO LOCATOR
-
-  // const getLocatorParams = useCallback(
-  //   (params) => {
-  //     return {
-  //       serviceName,
-  //       dashboardId: params.dashboardId,
-  //       query: {
-  //         // kuery,
-  //         dateRange.from,
-  //         dateRange.to,
-  //       },
-  //     };
-  //   },
-  //   [serviceName, environment, kuery, dateRange.from, dateRange.to]
-  // );
-
-  // const locator = useMemo(() => {
-  //   const baseLocator = share.url.locators.get(APM_APP_LOCATOR_ID);
-  //   if (!baseLocator) return;
-
-  //   return {
-  //     ...baseLocator,
-  //     getRedirectUrl: (params: SerializableRecord) =>
-  //       baseLocator.getRedirectUrl(getLocatorParams(params)),
-  //     navigate: (params: SerializableRecord) => baseLocator.navigate(getLocatorParams(params)),
-  //   };
-  // }, [share, getLocatorParams]);
+  }, [
+    metrics.dataView,
+    asset.name,
+    dashboard,
+    dateRange.from,
+    dateRange.to,
+    currentDashboard?.hostNameFilterEnabled,
+    asset.type,
+  ]);
 
   return (
     <EuiPanel hasBorder>
@@ -200,7 +167,6 @@ export function Dashboards() {
                       onRefresh={reload}
                       assetType={asset.type}
                     />,
-                    // TODO
                     <UnlinkDashboard
                       currentDashboard={currentDashboard}
                       defaultDashboard={customDashboards[0]}
@@ -216,7 +182,6 @@ export function Dashboards() {
             <EuiSpacer size="l" />
             {urlState?.dashboardId && (
               <DashboardRenderer
-                // locator={locator}
                 savedObjectId={urlState?.dashboardId}
                 getCreationOptions={getCreationOptions}
                 ref={setDashboard}

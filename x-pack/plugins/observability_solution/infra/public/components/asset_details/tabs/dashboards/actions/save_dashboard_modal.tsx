@@ -28,13 +28,10 @@ import type {
   DashboardItemWithTitle,
   InfraCustomDashboardAssetType,
 } from '../../../../../../common/custom_dashboards';
-// import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { useDashboardFetcher, FETCH_STATUS } from '../../../hooks/use_dashboards_fetcher';
 import { useUpdateCustomDashboard } from '../../../hooks/use_update_custom_dashboards';
 import { useCustomDashboard } from '../../../hooks/use_custom_dashboards';
 import { useAssetDetailsUrlState } from '../../../hooks/use_asset_details_url_state';
-// import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
-// import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 
 interface Props {
   onClose: () => void;
@@ -231,7 +228,7 @@ function getLinkSuccessToastLabels(dashboardName: string) {
       values: { dashboardName },
     }),
     text: i18n.translate('xpack.infra.customDashboards.linkSuccess.toast.text', {
-      defaultMessage: 'Your dashboard is now visible in the service overview page.',
+      defaultMessage: 'Your dashboard is now visible in the asset details page.',
     }),
   };
 }

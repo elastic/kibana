@@ -17,7 +17,6 @@ export function GotoDashboard({ currentDashboard }: { currentDashboard: Dashboar
     },
   } = useKibanaContextForPlugin();
 
-  // TODO Persist filter ?
   const url = dashboardLocator?.getRedirectUrl({
     dashboardId: currentDashboard?.id,
   });

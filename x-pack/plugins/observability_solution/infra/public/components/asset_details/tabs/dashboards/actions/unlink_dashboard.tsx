@@ -90,7 +90,7 @@ export function UnlinkDashboard({
         color="danger"
         size="s"
         iconType="unlink"
-        data-test-subj="infraUnLinkServiceDashboardMenu"
+        data-test-subj="infraUnLinkCustomDashboardMenu"
         onClick={() => setIsModalVisible(true)}
       >
         {i18n.translate('xpack.infra.customDashboards.unlinkEmptyButtonLabel', {
@@ -118,7 +118,7 @@ export function UnlinkDashboard({
         >
           <p>
             {i18n.translate('xpack.infra.customDashboards.unlinkEmptyButtonLabel.confirm.body', {
-              defaultMessage: 'You are about to unlink the dashboard from the service context',
+              defaultMessage: `You are about to unlink the dashboard from the ${assetType} context`,
             })}
           </p>
         </EuiConfirmModal>
