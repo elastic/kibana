@@ -6,7 +6,7 @@
  */
 
 import type { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
-import type { ObservabilityAIAssistantRoutes } from '@kbn/observability-ai-assistant-plugin/public/routes/config';
+import type { ObservabilityAIAssistantRoutes } from '@kbn/observability-ai-assistant-app-plugin/public/routes/config';
 import qs from 'query-string';
 import type { Role } from '@kbn/security-plugin-types-common';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '@kbn/observability-ai-assistant-plugin/common/feature';
@@ -32,6 +32,7 @@ const pages = {
     setupGenAiConnectorsButtonSelector: `observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton`,
     chatInput: 'observabilityAiAssistantChatPromptEditorTextArea',
     retryButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
+    conversationLink: 'observabilityAiAssistantConversationsLink',
   },
   createConnectorFlyout: {
     flyout: 'create-connector-flyout',

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -19,17 +20,12 @@ import {
 import { ml } from '../../../../../services/ml_api_service';
 
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
-import {
-  DataFrameAnalyticsListRow,
-  DATA_FRAME_MODE,
-} from '../../../analytics_management/components/analytics_list/common';
+import type { DataFrameAnalyticsListRow } from '../../../analytics_management/components/analytics_list/common';
+import { DATA_FRAME_MODE } from '../../../analytics_management/components/analytics_list/common';
 import { ExpandedRow } from '../../../analytics_management/components/analytics_list/expanded_row';
 
-import {
-  ExpandableSection,
-  ExpandableSectionProps,
-  HEADER_ITEMS_LOADING,
-} from './expandable_section';
+import type { ExpandableSectionProps } from './expandable_section';
+import { ExpandableSection, HEADER_ITEMS_LOADING } from './expandable_section';
 
 const getAnalyticsSectionHeaderItems = (
   expandedRowItem: DataFrameAnalyticsListRow | undefined
