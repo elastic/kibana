@@ -600,6 +600,7 @@ export class DataViewLazy extends AbstractDataView {
   getTimeField = () => (this.timeFieldName ? this.getFieldByName(this.timeFieldName) : undefined);
 
   async getFieldByName(name: string, forceRefresh = false) {
+    // todo is forceRefesh needed?
     const fieldMap = (await this.getFields({ fieldName: [name], forceRefresh })).getFieldMap();
     return fieldMap[name];
   }
@@ -615,7 +616,7 @@ export class DataViewLazy extends AbstractDataView {
     this.setFieldCustomLabelInternal(fieldName, customLabel);
     const fieldObject = this.fieldCache.get(fieldName);
     if (fieldObject) {
-      fieldObject.customLabel = newCustomLabel;
+      fieldObject.spec.customLabel = newCustomLabel;
     }
   }
 
@@ -625,7 +626,7 @@ export class DataViewLazy extends AbstractDataView {
     const fieldObject = this.fieldCache.get(fieldName);
     if (fieldObject) {
       if (!newCount) fieldObject.deleteCount();
-      else fieldObject.count = newCount;
+      else fieldObject.spec.count = newCount;
     }
   }
 }

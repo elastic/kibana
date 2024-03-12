@@ -25,7 +25,7 @@ import {
   SERVICE_KEY_TYPE,
   INITIAL_REST_VERSION,
 } from '../../../constants';
-import { responseFormatter } from './response_formatter';
+import { responseFormatterLazy } from './response_formatter';
 import { runtimeResponseSchema } from '../../schema';
 import type { RuntimeResponseType } from '../../route_types';
 
@@ -47,19 +47,23 @@ export const createRuntimeField = async ({
   runtimeField,
 }: CreateRuntimeFieldArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getDataViewLazy(id);
 
-  if (dataView.fields.getByName(name) || dataView.getRuntimeField(name)) {
+  const fld = Object.keys((await dataView.getFields({ fieldName: [name] })).getFieldMap());
+
+  if (fld.length || dataView.getRuntimeField(name)) {
     throw new Error(`Field [name = ${name}] already exists.`);
   }
 
   const firstNameSegment = name.split('.')[0];
 
-  if (dataView.fields.getByName(firstNameSegment) || dataView.getRuntimeField(firstNameSegment)) {
+  const fld2 = Object.keys((await dataView.getFields({ fieldName: [name] })).getFieldMap());
+
+  if (fld2.length || dataView.getRuntimeField(firstNameSegment)) {
     throw new Error(`Field [name = ${firstNameSegment}] already exists.`);
   }
 
-  const createdRuntimeFields = dataView.addRuntimeField(name, runtimeField);
+  const createdRuntimeFields = await dataView.addRuntimeField(name, runtimeField);
 
   await dataViewsService.updateSavedObject(dataView);
 
@@ -124,7 +128,7 @@ const runtimeCreateFieldRouteFactory =
           runtimeField: runtimeField as RuntimeField,
         });
 
-        const response: RuntimeResponseType = responseFormatter({
+        const response: RuntimeResponseType = await responseFormatterLazy({
           serviceKey,
           dataView,
           fields,
