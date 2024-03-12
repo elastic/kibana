@@ -245,6 +245,8 @@ export const schema: FormSchema<DefineStepRule> = {
     ],
   },
   relatedIntegrations: {
+    defaultValue: [],
+    type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsLabel',
       {
@@ -254,7 +256,7 @@ export const schema: FormSchema<DefineStepRule> = {
     helpText: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsHelpText',
       {
-        defaultMessage: 'Integration related to this Rule.',
+        defaultMessage: 'Integrations related to this Rule.',
       }
     ),
   },

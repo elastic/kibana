@@ -1114,6 +1114,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </UseMultiFields>
             </IntendedRuleTypeEuiFormRow>
           </>
+
+          <RuleTypeEuiFormRow label={i18n.RELATED_INTEGRATIONS} $isVisible fullWidth>
+            <UseField path="relatedIntegrations" component={RelatedIntegrations} />
+          </RuleTypeEuiFormRow>
+
           <UseField
             path="timeline"
             component={PickTimeline}
