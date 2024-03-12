@@ -9,8 +9,9 @@ import { get } from 'lodash';
 import { mean } from 'd3-array';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import dateMath from '@kbn/datemath';
 
+import dateMath from '@kbn/datemath';
+import type { DocumentCountStatsChangePoint } from '@kbn/aiops-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
@@ -22,7 +23,7 @@ import type { GroupTableItem } from './components/log_rate_analysis_results_tabl
 export interface DocumentCountStats {
   interval?: number;
   buckets?: { [key: string]: number };
-  changePoint?: { key: number; lower: number; upper: number; type: string };
+  changePoint?: DocumentCountStatsChangePoint;
   timeRangeEarliest?: number;
   timeRangeLatest?: number;
   totalCount: number;

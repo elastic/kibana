@@ -8,6 +8,7 @@
 export { getLogRateAnalysisType } from './get_log_rate_analysis_type';
 export { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from './log_rate_analysis_type';
 export { type LogRateHistogramItem } from './log_rate_histogram_item';
+export { type DocumentCountStatsChangePoint } from './types';
 export {
   getSnappedWindowParameters,
   getWindowParameters,

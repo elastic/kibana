@@ -44,3 +44,10 @@ export interface SimpleHierarchicalTreeNode {
   children: SimpleHierarchicalTreeNode[];
   addNode: (node: SimpleHierarchicalTreeNode) => void;
 }
+
+export interface DocumentCountStatsChangePoint {
+  key: number;
+  lower: number;
+  upper: number;
+  type: string;
+}

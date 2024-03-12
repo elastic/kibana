@@ -19,6 +19,7 @@ import type {
   BarStyleAccessor,
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+
 import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -26,6 +27,7 @@ import {
   getLogRateAnalysisType,
   getSnappedWindowParameters,
   getWindowParameters,
+  type DocumentCountStatsChangePoint,
   type LogRateAnalysisType,
   type LogRateHistogramItem,
   type WindowParameters,
@@ -38,6 +40,37 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DualBrush, DualBrushAnnotation } from '../..';
 
 import { BrushBadge } from './brush_badge';
+
+function getWindowParametersForTrigger(
+  startRange: number | WindowParameters,
+  interval: number,
+  timeRangeEarliest: number,
+  timeRangeLatest: number,
+  changePoint?: DocumentCountStatsChangePoint
+) {
+  if (
+    typeof startRange === 'number' &&
+    changePoint &&
+    startRange >= changePoint.lower &&
+    startRange <= changePoint.upper
+  ) {
+    return getWindowParameters(
+      changePoint.lower + interval,
+      timeRangeEarliest,
+      timeRangeLatest + interval,
+      changePoint.upper,
+      interval
+    );
+  } else if (typeof startRange === 'number') {
+    return getWindowParameters(
+      startRange + interval / 2,
+      timeRangeEarliest,
+      timeRangeLatest + interval
+    );
+  }
+
+  return startRange;
+}
 
 declare global {
   interface Window {
@@ -129,6 +162,8 @@ export interface DocumentCountChartProps {
   baselineBrush?: BrushSettings;
   /** Optional data-test-subject */
   dataTestSubj?: string;
+  /** Optional change point metadata */
+  changePoint?: DocumentCountStatsChangePoint;
 }
 
 const SPEC_ID = 'document_count';
@@ -163,6 +198,7 @@ function getBaselineBadgeOverflow(
  */
 export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
   const {
+    changePoint,
     dataTestSubj,
     dependencies,
     brushSelectionUpdateHandler,
@@ -306,14 +342,13 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           windowParameters === undefined &&
           adjustedChartPoints !== undefined
         ) {
-          const wp =
-            typeof startRange === 'number'
-              ? getWindowParameters(
-                  startRange + interval / 2,
-                  timeRangeEarliest,
-                  timeRangeLatest + interval
-                )
-              : startRange;
+          const wp = getWindowParametersForTrigger(
+            startRange,
+            interval,
+            timeRangeEarliest,
+            timeRangeLatest,
+            changePoint
+          );
           const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
           setOriginalWindowParameters(wpSnap);
           setWindowParameters(wpSnap);
@@ -329,6 +364,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
       }
     },
     [
+      changePoint,
       interval,
       timeRangeEarliest,
       timeRangeLatest,
