@@ -2682,6 +2682,61 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionType.getService",
+            "type": "Function",
+            "tags": [],
+            "label": "getService",
+            "description": [],
+            "signature": [
+              "((params: ",
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.ServiceParams",
+                "text": "ServiceParams"
+              },
+              "<Config, Secrets>) => ",
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.SubActionConnector",
+                "text": "SubActionConnector"
+              },
+              "<Config, Secrets>) | undefined"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.ActionType.getService.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "actions",
+                    "scope": "server",
+                    "docId": "kibActionsPluginApi",
+                    "section": "def-server.ServiceParams",
+                    "text": "ServiceParams"
+                  },
+                  "<Config, Secrets>"
+                ],
+                "path": "x-pack/plugins/actions/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
