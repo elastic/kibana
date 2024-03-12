@@ -117,12 +117,7 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       actions.fetchConnectorApiReset();
     },
   }),
-  listeners: ({ actions }) => ({
-    fetchConnectorApiSuccess: (response) => {
-      if (response.connector?.index_name) {
-        actions.setIndexName(response.connector.index_name);
-      }
-    },
+  listeners: ({ actions, values }) => ({
     updateConnectorConfigurationSuccess: () => {
       if (values.connectorId) {
         actions.fetchConnector({ connectorId: values.connectorId });
