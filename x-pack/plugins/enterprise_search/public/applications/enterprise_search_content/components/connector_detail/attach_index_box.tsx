@@ -154,7 +154,6 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
           }
         )
       : attachApiError?.body?.message || createApiError?.body?.message || undefined;
-
   if (indexName) {
     // We don't want to let people edit indices when on the index route
     return <></>;
