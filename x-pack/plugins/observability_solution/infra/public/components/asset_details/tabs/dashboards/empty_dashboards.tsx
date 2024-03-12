@@ -28,7 +28,7 @@ export function EmptyDashboards({ actions }: Props) {
         title={
           <h2>
             {i18n.translate('xpack.infra.assetDetails.dashboards.emptyTitle', {
-              defaultMessage: 'The best way to understand your data is to visualize it.',
+              defaultMessage: 'Want your own view?',
             })}
           </h2>
         }
@@ -39,17 +39,17 @@ export function EmptyDashboards({ actions }: Props) {
             <ul>
               <li>
                 {i18n.translate('xpack.infra.assetDetails.dashboards.emptyBody.first', {
-                  defaultMessage: 'bring clarity to your data',
+                  defaultMessage: 'Link your own dashboard to this view',
                 })}
               </li>
               <li>
                 {i18n.translate('xpack.infra.assetDetails.dashboards.emptyBody.second', {
-                  defaultMessage: 'tell a story about your data',
+                  defaultMessage: 'Provide the best visualizations relevant to your business',
                 })}
               </li>
               <li>
                 {i18n.translate('xpack.infra.assetDetails.dashboards.emptyBody', {
-                  defaultMessage: 'focus on only the data that’s important to you',
+                  defaultMessage: 'Add or remove them at any time',
                 })}
               </li>
             </ul>
