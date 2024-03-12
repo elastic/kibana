@@ -2958,6 +2958,10 @@
       }
     }
   },
+  "slo-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "space": {
     "dynamic": false,
     "properties": {
