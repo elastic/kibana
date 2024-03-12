@@ -69,7 +69,7 @@ export FORCE_COLOR=1
 export TEST_BROWSER_HEADLESS=1
 
 export ELASTIC_APM_ENVIRONMENT=ci
-export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.01
+export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
 
 if is_pr; then
   if is_pr_with_label "ci:collect-apm"; then
