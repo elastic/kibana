@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import deepEqual from 'react-fast-compare';
+import { BehaviorSubject } from 'rxjs';
+
 import {
   initializeReactEmbeddableTitles,
   initializeReactEmbeddableUuid,
@@ -19,31 +22,24 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public/plugin';
 import { FileImageMetadata } from '@kbn/shared-ux-file-types';
-import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
-import deepEqual from 'react-fast-compare';
-import { BehaviorSubject } from 'rxjs';
+
 import { imageClickTrigger } from '../actions';
 import { openImageEditor } from '../image_editor/open_image_editor';
 import { ImageViewer, ImageViewerContext } from '../image_viewer';
-import { FilesStart, imageEmbeddableFileKind } from '../imports';
+import { imageEmbeddableFileKind } from '../imports';
+import {
+  coreServices,
+  filesService,
+  screenshotModeService,
+  uiActionsService,
+} from '../services/kibana_services';
 import { createValidateUrl } from '../utils/validate_url';
 import { IMAGE_EMBEDDABLE_TYPE } from './constants';
 import { ImageEmbeddableStrings } from './image_embeddable_strings';
 import { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
 
-export interface ImageEmbeddableFactoryDeps {
-  core: CoreStart;
-  files: FilesStart;
-  security?: SecurityPluginStart;
-  uiActions: UiActionsPublicStart;
-  screenshotMode?: ScreenshotModePluginStart;
-}
-
-export const registerImageEmbeddableFactory = (deps: ImageEmbeddableFactoryDeps) => {
+export const registerImageEmbeddableFactory = () => {
   const imageEmbeddableFactory: ReactEmbeddableFactory<
     ImageEmbeddableSerializedState,
     ImageEmbeddableApi
@@ -55,7 +51,7 @@ export const registerImageEmbeddableFactory = (deps: ImageEmbeddableFactoryDeps)
       const uuid = initializeReactEmbeddableUuid(maybeId);
       const { titlesApi, titleComparators, serializeTitles } =
         initializeReactEmbeddableTitles(initialState);
-      const filesClient = deps.files.filesClientFactory.asUnscoped<FileImageMetadata>();
+      const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
       const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.imageConfig);
 
       return RegisterReactEmbeddable<ImageEmbeddableApi>((apiRef) => {
@@ -87,14 +83,7 @@ export const registerImageEmbeddableFactory = (deps: ImageEmbeddableFactoryDeps)
             unsavedChanges,
             resetUnsavedChanges,
             onEdit: async () => {
-              const newImageConfig = await openImageEditor(
-                {
-                  core: deps.core,
-                  files: deps.files,
-                  security: deps.security,
-                },
-                imageConfig
-              );
+              const newImageConfig = await openImageEditor(imageConfig);
 
               if (apiIsPresentationContainer(parentApi)) {
                 parentApi.replacePanel(uuid, {
@@ -124,7 +113,7 @@ export const registerImageEmbeddableFactory = (deps: ImageEmbeddableFactoryDeps)
           // hack: timeout to give a chance for a drilldown action to be registered just after it is created by user
           setTimeout(() => {
             if (!mounted) return;
-            deps.uiActions
+            uiActionsService
               .getTriggerCompatibleActions(imageClickTrigger.id, { embeddable: this })
               .catch(() => [])
               .then((actions) => mounted && setHasTriggerActions(actions.length > 0));
@@ -143,13 +132,13 @@ export const registerImageEmbeddableFactory = (deps: ImageEmbeddableFactoryDeps)
                   fileKind: imageEmbeddableFileKind.id,
                 });
               },
-              validateUrl: createValidateUrl(deps.core.http.externalUrl),
+              validateUrl: createValidateUrl(coreServices.http.externalUrl),
             }}
           >
             <ImageViewer
               className="imageEmbeddableImage"
               imageConfig={imageConfig}
-              isScreenshotMode={deps.screenshotMode?.isScreenshotMode()}
+              isScreenshotMode={screenshotModeService?.isScreenshotMode()}
               // onLoad={() => {
               //   this.renderComplete.dispatchComplete();
               // }}
@@ -160,7 +149,7 @@ export const registerImageEmbeddableFactory = (deps: ImageEmbeddableFactoryDeps)
                 // note: passing onClick enables the cursor pointer style, so we only pass it if there are compatible actions
                 hasTriggerActions
                   ? () => {
-                      deps.uiActions.executeTriggerActions(imageClickTrigger.id, {
+                      uiActionsService.executeTriggerActions(imageClickTrigger.id, {
                         embeddable: this,
                       });
                     }

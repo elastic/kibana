@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './configure_image';
+export { openImageEditor } from './open_image_editor';

@@ -38,8 +38,8 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { FileImageMetadata, imageEmbeddableFileKind } from '../imports';
 import { ImageConfig } from '../types';
 import { ImageViewer } from '../image_viewer/image_viewer'; // use eager version to avoid flickering
-import { ValidateUrlFn } from '../utils/validate_url';
 import { validateImageConfig, DraftImageConfig } from '../utils/validate_image_config';
+import { useImageViewerContext } from '../image_viewer/image_viewer_context';
 
 /**
  * Shared sizing css for image, upload placeholder, empty and not found state
@@ -56,13 +56,14 @@ export interface ImageEditorFlyoutProps {
   onCancel: () => void;
   onSave: (imageConfig: ImageConfig) => void;
   initialImageConfig?: ImageConfig;
-  validateUrl: ValidateUrlFn;
   user?: AuthenticatedUser;
 }
 
 export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
   const isEditing = !!props.initialImageConfig;
   const { euiTheme } = useEuiTheme();
+  const { validateUrl } = useImageViewerContext();
+
   const [fileId, setFileId] = useState<undefined | string>(() =>
     props.initialImageConfig?.src?.type === 'file' ? props.initialImageConfig.src.fileId : undefined
   );
@@ -78,7 +79,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
     props.initialImageConfig?.src?.type === 'url' ? props.initialImageConfig.src.url : ''
   );
   const [srcUrlError, setSrcUrlError] = useState<string | null>(() => {
-    if (srcUrl) return props.validateUrl(srcUrl)?.error ?? null;
+    if (srcUrl) return validateUrl(srcUrl)?.error ?? null;
     return null;
   });
   const [isFilePickerOpen, setIsFilePickerOpen] = useState<boolean>(false);
@@ -108,7 +109,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
   };
 
   const isDraftImageConfigValid = validateImageConfig(draftImageConfig, {
-    validateUrl: props.validateUrl,
+    validateUrl,
   });
 
   const onSave = () => {
@@ -289,7 +290,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                 onChange={(e) => {
                   const url = e.target.value;
 
-                  const { isValid, error } = props.validateUrl(url);
+                  const { isValid, error } = validateUrl(url);
                   if (!isValid) {
                     setSrcUrlError(error!);
                   } else {

@@ -18,8 +18,9 @@ import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { imageClickTrigger } from './actions';
 import { registerCreateImageAction } from './actions/create_image_action';
 import { registerImageEmbeddableFactory } from './image_embeddable/register_image_embeddable_factory';
+import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 
-export interface SetupDependencies {
+export interface ImageEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;
   files: FilesSetup;
   security?: SecurityPluginSetup;
@@ -27,7 +28,7 @@ export interface SetupDependencies {
   screenshotMode?: ScreenshotModePluginSetup;
 }
 
-export interface StartDependencies {
+export interface ImageEmbeddableStartDependencies {
   files: FilesStart;
   security?: SecurityPluginStart;
   uiActions: UiActionsStart;
@@ -41,21 +42,32 @@ export interface SetupContract {}
 export interface StartContract {}
 
 export class ImageEmbeddablePlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
+  implements
+    Plugin<
+      SetupContract,
+      StartContract,
+      ImageEmbeddableSetupDependencies,
+      ImageEmbeddableStartDependencies
+    >
 {
   constructor() {}
 
-  public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
+  public setup(
+    core: CoreSetup<ImageEmbeddableStartDependencies>,
+    plugins: ImageEmbeddableSetupDependencies
+  ): SetupContract {
     plugins.uiActions.registerTrigger(imageClickTrigger);
     return {};
   }
 
-  public start(
-    core: CoreStart,
-    { files, security, uiActions, screenshotMode }: StartDependencies
-  ): StartContract {
-    registerCreateImageAction({ core, files, security, uiActions });
-    registerImageEmbeddableFactory({ core, files, security, uiActions, screenshotMode });
+  public start(core: CoreStart, plugins: ImageEmbeddableStartDependencies): StartContract {
+    setKibanaServices(core, plugins);
+
+    untilPluginStartServicesReady().then(() => {
+      registerCreateImageAction();
+      registerImageEmbeddableFactory();
+    });
+
     return {};
   }
 

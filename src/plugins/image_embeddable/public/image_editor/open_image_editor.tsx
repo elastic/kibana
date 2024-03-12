@@ -6,45 +6,75 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import React from 'react';
+
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { FilesContext } from '@kbn/shared-ux-file-context';
+import { skip, Subject, take, takeUntil } from 'rxjs';
 import { ImageConfig } from '../image_embeddable/types';
-import { FileImageMetadata, FilesStart, imageEmbeddableFileKind } from '../imports';
+import { ImageViewerContext } from '../image_viewer/image_viewer_context';
+import { FileImageMetadata, imageEmbeddableFileKind } from '../imports';
+import { coreServices, filesService, securityService } from '../services/kibana_services';
 import { createValidateUrl } from '../utils/validate_url';
 
-interface ImageEditorDeps {
-  core: CoreStart;
-  files: FilesStart;
-  security?: SecurityPluginStart;
-}
+export const openImageEditor = async (initialImageConfig?: ImageConfig) => {
+  const { overlays, theme, application, i18n, http } = coreServices;
+  const user = securityService ? await securityService.authc.getCurrentUser() : undefined;
+  const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
 
-export const openImageEditor = async (
-  { core, files, security }: ImageEditorDeps,
-  initialConfig?: ImageConfig
-) => {
-  const { configureImage } = await import('./configure_image');
-  const { overlays, theme, application } = core;
-  const user = security ? await security.authc.getCurrentUser() : undefined;
-  const filesClient = files.filesClientFactory.asUnscoped<FileImageMetadata>();
+  const { ImageEditorFlyout } = await import('./image_editor_flyout');
 
-  const imageConfig = await configureImage(
-    {
-      files: filesClient,
-      overlays,
-      theme,
-      user,
-      i18n: core.i18n,
-      currentAppId$: application.currentAppId$,
-      validateUrl: createValidateUrl(core.http.externalUrl),
-      getImageDownloadHref: (fileId: string) => {
-        return filesClient.getDownloadHref({
-          id: fileId,
-          fileKind: imageEmbeddableFileKind.id,
-        });
-      },
-    },
-    initialConfig
-  );
+  return new Promise((resolve, reject) => {
+    const closed$ = new Subject<true>();
 
-  return imageConfig;
+    const onSave = (imageConfig: ImageConfig) => {
+      resolve(imageConfig);
+      handle.close();
+    };
+
+    const onCancel = () => {
+      reject();
+      handle.close();
+    };
+
+    // TODO replace with tracksOverlays logic
+    // Close the flyout on application change.
+    application.currentAppId$.pipe(takeUntil(closed$), skip(1), take(1)).subscribe(() => {
+      handle.close();
+    });
+
+    const handle = overlays.openFlyout(
+      toMountPoint(
+        <FilesContext client={filesClient}>
+          <ImageViewerContext.Provider
+            value={{
+              getImageDownloadHref: (fileId: string) => {
+                return filesClient.getDownloadHref({
+                  id: fileId,
+                  fileKind: imageEmbeddableFileKind.id,
+                });
+              },
+              validateUrl: createValidateUrl(http.externalUrl),
+            }}
+          >
+            <ImageEditorFlyout
+              user={user}
+              onCancel={onCancel}
+              onSave={onSave}
+              initialImageConfig={initialImageConfig}
+            />
+          </ImageViewerContext.Provider>
+        </FilesContext>,
+        { theme, i18n }
+      ),
+      {
+        ownFocus: true,
+        'data-test-subj': 'createImageEmbeddableFlyout',
+      }
+    );
+
+    handle.onClose.then(() => {
+      closed$.next(true);
+    });
+  });
 };
