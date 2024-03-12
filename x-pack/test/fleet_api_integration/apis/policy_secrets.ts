@@ -43,6 +43,7 @@ function createdPolicyToUpdatePolicy(policy: any) {
 }
 
 const SECRETS_INDEX_NAME = '.fleet-secrets';
+
 export default function (providerContext: FtrProviderContext) {
   describe('fleet policy secrets', () => {
     const { getService } = providerContext;
@@ -325,17 +326,12 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     let fleetServerAgentPolicyId: string;
-    before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-
-      await deleteAllSecrets();
-      await clearAgents();
-      await enableSecrets();
-    });
 
     setupFleetAndAgents(providerContext);
 
     before(async () => {
+      getService('esArchiver').load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -351,12 +347,27 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
       await getService('esArchiver').unload(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
     });
+
+    beforeEach(async () => {
+      await deleteAllSecrets();
+      await clearAgents();
+      await enableSecrets();
+    });
+
     it('Should correctly create the policy with secrets', async () => {
+      // Policy secrets requires at least one Fleet server on v8.10+
+      const fleetServerAgentId = await createFleetServerAgent(
+        fleetServerAgentPolicyId,
+        'server_1',
+        '8.10.0'
+      );
+
+      console.log({ fleetServerAgentId });
+
       const { body: createResBody } = await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -391,12 +402,14 @@ export default function (providerContext: FtrProviderContext) {
             name: 'secrets',
             version: '1.0.0',
           },
-        })
-        .expect(200);
+        });
+
+      console.log(JSON.stringify(createResBody, null, 2));
 
       createdPackagePolicy = createResBody.item;
       createdPackagePolicyId = createdPackagePolicy.id;
       packageVarId = createdPackagePolicy.vars.package_var_secret.value.id;
+
       expect(packageVarId).to.be.an('string');
       inputVarId = createdPackagePolicy.inputs[0].vars.input_var_secret.value.id;
       expect(inputVarId).to.be.an('string');
@@ -460,6 +473,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(packagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.id).eql(streamVarId);
     });
 
+    // TODO: Output secrets should be moved to another test suite
     it('Should return output secrets if policy uses output with secrets', async () => {
       // Output secrets require at least one Fleet server on 8.12.0 or higher (and none under 8.12.0).
       await createFleetServerAgent(fleetServerAgentPolicyId, 'server_1', '8.12.0');
