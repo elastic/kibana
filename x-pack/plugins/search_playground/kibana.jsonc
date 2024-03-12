@@ -8,8 +8,7 @@
     "browser": true,
     "configPath": [
       "xpack",
-      "playground",
-      "search"
+      "searchPlayground"
     ],
     "requiredPlugins": [
       "navigation",
