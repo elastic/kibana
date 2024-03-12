@@ -59,16 +59,15 @@ import {
   ConnectorTypes,
   CustomFieldTypes,
 } from '../../../common/types/domain';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
-
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/configure/use_get_all_case_configurations');
-
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 jest.mock('../connectors/jira/use_get_issue_types');
@@ -79,12 +78,11 @@ jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/user_profiles/api');
 jest.mock('../../common/use_license');
 jest.mock('../../containers/use_get_categories');
+jest.mock('../app/use_available_owners');
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
-
 const usePostCaseMock = usePostCase as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
@@ -98,6 +96,7 @@ const pushCaseToExternalService = jest.fn();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useLicenseMock = useLicense as jest.Mock;
 const useGetCategoriesMock = useGetCategories as jest.Mock;
+const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
 
 const sampleId = 'case-id';
 
@@ -214,6 +213,7 @@ describe('Create case', () => {
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
     useGetCategoriesMock.mockReturnValue({ isLoading: false, data: categories });
+    useAvailableOwnersMock.mockReturnValue(['securitySolution', 'observability', 'cases']);
 
     (useGetTags as jest.Mock).mockImplementation(() => ({
       data: sampleTags,
@@ -510,6 +510,120 @@ describe('Create case', () => {
           ],
         },
       });
+    });
+
+    it('should change custom fields based on the selected owner', async () => {
+      appMockRender = createAppMockRenderer({ owner: [] });
+
+      const securityCustomField = {
+        key: 'security_custom_field',
+        type: CustomFieldTypes.TEXT,
+        label: 'security custom field',
+        required: false,
+      };
+      const o11yCustomField = {
+        key: 'o11y_field_key',
+        type: CustomFieldTypes.TEXT,
+        label: 'observability custom field',
+        required: false,
+      };
+      const stackCustomField = {
+        key: 'stack_field_key',
+        type: CustomFieldTypes.TEXT,
+        label: 'stack custom field',
+        required: false,
+      };
+
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            owner: 'securitySolution',
+            customFields: [securityCustomField],
+          },
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            owner: 'observability',
+            customFields: [o11yCustomField],
+          },
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            owner: 'cases',
+            customFields: [stackCustomField],
+          },
+        ],
+      }));
+
+      appMockRender.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
+
+      const createCaseCustomFields = await screen.findByTestId('create-case-custom-fields');
+
+      // the default selectedOwner is securitySolution
+      // only the security custom field should be displayed
+      expect(
+        await within(createCaseCustomFields).findByTestId(
+          `${securityCustomField.key}-${securityCustomField.type}-create-custom-field`
+        )
+      ).toBeInTheDocument();
+      expect(
+        await within(createCaseCustomFields).queryByTestId(
+          `${o11yCustomField.key}-${o11yCustomField.type}-create-custom-field`
+        )
+      ).not.toBeInTheDocument();
+      expect(
+        await within(createCaseCustomFields).queryByTestId(
+          `${stackCustomField.key}-${stackCustomField.type}-create-custom-field`
+        )
+      ).not.toBeInTheDocument();
+
+      const caseOwnerSelector = await screen.findByTestId('caseOwnerSelector');
+
+      userEvent.click(await within(caseOwnerSelector).findByLabelText('Observability'));
+
+      // only the o11y custom field should be displayed
+      expect(
+        await within(createCaseCustomFields).findByTestId(
+          `${o11yCustomField.key}-${o11yCustomField.type}-create-custom-field`
+        )
+      ).toBeInTheDocument();
+      expect(
+        await within(createCaseCustomFields).queryByTestId(
+          `${securityCustomField.key}-${securityCustomField.type}-create-custom-field`
+        )
+      ).not.toBeInTheDocument();
+      expect(
+        await within(createCaseCustomFields).queryByTestId(
+          `${stackCustomField.key}-${stackCustomField.type}-create-custom-field`
+        )
+      ).not.toBeInTheDocument();
+
+      userEvent.click(await within(caseOwnerSelector).findByLabelText('Stack'));
+
+      // only the stack custom field should be displayed
+      expect(
+        await within(createCaseCustomFields).findByTestId(
+          `${stackCustomField.key}-${stackCustomField.type}-create-custom-field`
+        )
+      ).toBeInTheDocument();
+      expect(
+        await within(createCaseCustomFields).queryByTestId(
+          `${securityCustomField.key}-${securityCustomField.type}-create-custom-field`
+        )
+      ).not.toBeInTheDocument();
+      expect(
+        await within(createCaseCustomFields).queryByTestId(
+          `${o11yCustomField.key}-${o11yCustomField.type}-create-custom-field`
+        )
+      ).not.toBeInTheDocument();
     });
 
     it('should select the default connector set in the configuration', async () => {
