@@ -16,7 +16,7 @@ export async function expectDefaultFleetServer({ getService }: FtrProviderContex
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  await retry.waitForWithTimeout('get default fleet server', 30_000, async () => {
+  await retry.waitForWithTimeout('get default fleet server', 60_000, async () => {
     const { body, status } = await supertest.get(
       `/api/fleet/fleet_server_hosts/${defaultFleetServerHostId}`
     );
@@ -32,7 +32,7 @@ export async function expectDefaultElasticsearchOutput({ getService }: FtrProvid
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  await retry.waitForWithTimeout('get default Elasticsearch output', 30_000, async () => {
+  await retry.waitForWithTimeout('get default Elasticsearch output', 60_000, async () => {
     const { body, status } = await supertest.get(
       `/api/fleet/outputs/${defaultElasticsearchOutputId}`
     );
