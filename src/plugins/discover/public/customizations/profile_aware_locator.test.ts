@@ -6,30 +6,24 @@
  * Side Public License, v 1.
  */
 
+import { History } from 'history';
 import { addProfile } from '../../common/customizations';
+import { HistoryLocationState } from '../build_services';
 import { ProfileAwareLocator } from './profile_aware_locator';
 
-let mockPathname: string | undefined;
-
-jest.mock('../kibana_services', () => {
-  const originalModule = jest.requireActual('../kibana_services');
-  return {
-    ...originalModule,
-    getHistory: jest.fn(() => ({
-      location: {
-        pathname: mockPathname,
-      },
-    })),
-  };
-});
+let mockHistory: History<HistoryLocationState>;
 
 describe('ProfileAwareLocator', () => {
   beforeEach(() => {
-    mockPathname = undefined;
+    mockHistory = {
+      location: {
+        pathname: '',
+      },
+    } as History<HistoryLocationState>;
   });
 
   it('should inject profile', async () => {
-    mockPathname = addProfile('', 'test');
+    mockHistory.location.pathname = addProfile('', 'test');
     const locator = {
       id: 'test',
       migrations: {},
@@ -43,7 +37,7 @@ describe('ProfileAwareLocator', () => {
       inject: jest.fn(),
       extract: jest.fn(),
     };
-    const profileAwareLocator = new ProfileAwareLocator(locator);
+    const profileAwareLocator = new ProfileAwareLocator(locator, mockHistory);
     const params = { foo: 'bar' };
     const injectedParams = { foo: 'bar', profile: 'test' };
     await profileAwareLocator.getLocation(params);
@@ -69,7 +63,7 @@ describe('ProfileAwareLocator', () => {
   });
 
   it('should not overwrite the provided profile with an injected one', async () => {
-    mockPathname = addProfile('', 'test');
+    mockHistory.location.pathname = addProfile('', 'test');
     const locator = {
       id: 'test',
       migrations: {},
@@ -83,7 +77,7 @@ describe('ProfileAwareLocator', () => {
       inject: jest.fn(),
       extract: jest.fn(),
     };
-    const profileAwareLocator = new ProfileAwareLocator(locator);
+    const profileAwareLocator = new ProfileAwareLocator(locator, mockHistory);
     const params = { foo: 'bar', profile: 'test2' };
     await profileAwareLocator.getLocation(params);
     expect(locator.getLocation).toHaveBeenCalledWith(params);
@@ -121,7 +115,7 @@ describe('ProfileAwareLocator', () => {
       inject: jest.fn(),
       extract: jest.fn(),
     };
-    const profileAwareLocator = new ProfileAwareLocator(locator);
+    const profileAwareLocator = new ProfileAwareLocator(locator, mockHistory);
     const params = { foo: 'bar' };
     await profileAwareLocator.getLocation(params);
     expect(locator.getLocation).toHaveBeenCalledWith(params);

@@ -608,7 +608,13 @@
         "label": "AwaitingDashboardAPI",
         "description": [],
         "signature": [
-          "DashboardContainer",
+          {
+            "pluginId": "dashboard",
+            "scope": "public",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-public.DashboardAPI",
+            "text": "DashboardAPI"
+          },
           " | null"
         ],
         "path": "src/plugins/dashboard/public/dashboard_container/external_api/dashboard_api.ts",
@@ -669,7 +675,40 @@
         "label": "DashboardAPI",
         "description": [],
         "signature": [
-          "DashboardContainer"
+          "DashboardContainer",
+          " & Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasType",
+            "text": "HasType"
+          },
+          "<\"dashboard\"> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesLocalUnifiedSearch",
+            "text": "PublishesLocalUnifiedSearch"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPanelTitle",
+            "text": "PublishesPanelTitle"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesSavedObjectId",
+            "text": "PublishesSavedObjectId"
+          },
+          ">"
         ],
         "path": "src/plugins/dashboard/public/dashboard_container/external_api/dashboard_api.ts",
         "deprecated": false,
