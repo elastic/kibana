@@ -55,7 +55,6 @@ export class ImageEmbeddablePlugin
     { files, security, uiActions, screenshotMode }: StartDependencies
   ): StartContract {
     registerCreateImageAction({ core, files, security, uiActions });
-
     registerImageEmbeddableFactory({ core, files, security, uiActions, screenshotMode });
     return {};
   }

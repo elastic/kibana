@@ -14,9 +14,11 @@ import {
   RegisterReactEmbeddable,
   registerReactEmbeddableFactory,
   useReactEmbeddableApiHandle,
+  useReactEmbeddableParentApi,
   useReactEmbeddableUnsavedChanges,
 } from '@kbn/embeddable-plugin/public';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiHasParentApi, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public/plugin';
 import { FileImageMetadata } from '@kbn/shared-ux-file-types';
@@ -25,10 +27,12 @@ import React, { useEffect, useLayoutEffect, useState } from 'react';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 import { imageClickTrigger } from '../actions';
+import { getImageConfig } from '../image_editor/open_image_editor';
 import { ImageViewer, ImageViewerContext } from '../image_viewer';
 import { FilesStart, imageEmbeddableFileKind } from '../imports';
 import { createValidateUrl } from '../utils/validate_url';
 import { IMAGE_EMBEDDABLE_TYPE } from './constants';
+import { ImageEmbeddableStrings } from './image_embeddable_strings';
 import {
   ImageEmbeddableApi,
   ImageEmbeddableSerializedState,
@@ -73,6 +77,8 @@ export const registerImageEmbeddableFactory = (deps: ImageEmbeddableFactoryDeps)
           altText$,
           backgroundColor$
         );
+
+        const parentApi = useReactEmbeddableParentApi();
         // const imageConfig = usePublishingSubject(imageConfig$);
 
         useLayoutEffect(() => {
@@ -100,11 +106,25 @@ export const registerImageEmbeddableFactory = (deps: ImageEmbeddableFactoryDeps)
             ...titlesApi,
             unsavedChanges,
             resetUnsavedChanges,
-            onEdit: () => {
-              console.log('on edit');
+            onEdit: async () => {
+              const imageConfig = await getImageConfig(
+                {
+                  core: deps.core,
+                  files: deps.files,
+                  security: deps.security,
+                },
+                { src, sizing, altText, backgroundColor }
+              );
+
+              if (apiIsPresentationContainer(parentApi)) {
+                parentApi.replacePanel(uuid, {
+                  panelType: IMAGE_EMBEDDABLE_TYPE,
+                  initialState: imageConfig,
+                });
+              }
             },
             isEditingEnabled: () => true,
-            getTypeDisplayName: () => 'test',
+            getTypeDisplayName: ImageEmbeddableStrings.getEditDisplayName,
             serializeState: async () => {
               return { rawState: { src, sizing, altText, backgroundColor, ...serializeTitles() } };
             },

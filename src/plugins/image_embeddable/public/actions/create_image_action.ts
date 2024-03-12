@@ -13,10 +13,12 @@ import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
+import { getImageConfig } from '../image_editor/open_image_editor';
 import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
   IMAGE_EMBEDDABLE_TYPE,
 } from '../image_embeddable/constants';
+import { ImageEmbeddableStrings } from '../image_embeddable/image_embeddable_strings';
 import { FileImageMetadata, FilesStart, imageEmbeddableFileKind } from '../imports';
 import { createValidateUrl } from '../utils/validate_url';
 
@@ -42,38 +44,14 @@ export const registerCreateImageAction = ({
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
 
-      const { configureImage } = await import('../image_editor');
-      const { overlays, theme, application } = core;
-      const user = security ? await security.authc.getCurrentUser() : undefined;
-      const filesClient = files.filesClientFactory.asUnscoped<FileImageMetadata>();
-
-      const imageConfig = await configureImage(
-        {
-          files: filesClient,
-          overlays,
-          theme,
-          user,
-          currentAppId$: application.currentAppId$,
-          validateUrl: createValidateUrl(core.http.externalUrl),
-          getImageDownloadHref: (fileId: string) => {
-            return filesClient.getDownloadHref({
-              id: fileId,
-              fileKind: imageEmbeddableFileKind.id,
-            });
-          },
-        },
-        undefined
-      );
+      const imageConfig = await getImageConfig({ core, files, security });
 
       embeddable.addNewPanel({
         panelType: IMAGE_EMBEDDABLE_TYPE,
         initialState: imageConfig,
       });
     },
-    getDisplayName: () =>
-      i18n.translate('imageEmbeddable.imageEmbeddableFactory.displayName', {
-        defaultMessage: 'Image',
-      }),
+    getDisplayName: ImageEmbeddableStrings.getCreateDisplayName,
   });
   uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_IMAGE_EMBEDDABLE_ACTION_ID);
 };

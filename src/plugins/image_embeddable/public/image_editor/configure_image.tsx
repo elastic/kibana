@@ -6,23 +6,24 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { FilesContext } from '@kbn/shared-ux-file-context';
-import { skip, take, takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { I18nStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { ImageConfig } from '../types';
-import { ImageEditorFlyout } from './image_editor_flyout';
+import { FilesContext } from '@kbn/shared-ux-file-context';
+import React from 'react';
+import { Subject } from 'rxjs';
+import { skip, take, takeUntil } from 'rxjs/operators';
 import { ImageViewerContext } from '../image_viewer';
 import {
-  OverlayStart,
   ApplicationStart,
-  FilesClient,
   FileImageMetadata,
+  FilesClient,
+  OverlayStart,
   ThemeServiceStart,
 } from '../imports';
+import { ImageConfig } from '../types';
 import { ValidateUrlFn } from '../utils/validate_url';
+import { ImageEditorFlyout } from './image_editor_flyout';
 
 /**
  * @throws in case user cancels
@@ -32,6 +33,7 @@ export async function configureImage(
     files: FilesClient<FileImageMetadata>;
     overlays: OverlayStart;
     theme: ThemeServiceStart;
+    i18n: I18nStart;
     currentAppId$: ApplicationStart['currentAppId$'];
     validateUrl: ValidateUrlFn;
     getImageDownloadHref: (fileId: string) => string;
@@ -75,7 +77,7 @@ export async function configureImage(
             />
           </ImageViewerContext.Provider>
         </FilesContext>,
-        { theme$: deps.theme.theme$ }
+        { theme: deps.theme, i18n: deps.i18n }
       ),
       {
         ownFocus: true,

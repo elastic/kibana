@@ -24,11 +24,6 @@ export interface HasEditCapabilities extends HasTypeDisplayName {
  * A type guard which determines whether or not a given API is editable.
  */
 export const hasEditCapabilities = (root: unknown): root is HasEditCapabilities => {
-  console.log(
-    'haseditcapabilities',
-    (root as HasEditCapabilities).onEdit &&
-      typeof (root as HasEditCapabilities).onEdit === 'function'
-  );
   return Boolean(
     root &&
       (root as HasEditCapabilities).onEdit &&
