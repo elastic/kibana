@@ -130,7 +130,6 @@ export const addTimelineToStore = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      filterManager: timelineById[id].filterManager,
       isLoading: timelineById[id].isLoading,
       initialized: timeline.initialized ?? timelineById[id].initialized,
       resolveTimelineConfig,

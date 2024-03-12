@@ -123,6 +123,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         application: { capabilities },
         theme,
         data: dataPluginContract,
+        timelineFilterManager,
       },
     } = useKibana();
 
@@ -148,8 +149,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const defaultColumnIds = useMemo(() => columns.map((c) => c.id), [columns]);
 
-    const { timeline: { filterManager, rowHeight, sampleSize } = timelineDefaults } = useSelector(
-      (state: State) => timelineBodySelector(state, timelineId)
+    const { timeline: { rowHeight, sampleSize } = timelineDefaults } = useSelector((state: State) =>
+      timelineBodySelector(state, timelineId)
     );
 
     // const { activeStep, isTourShown, incrementStep } = useTourContext();
@@ -331,14 +332,20 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const onAddFilter = useCallback(
       (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
-        if (dataView && filterManager) {
+        if (dataView && timelineFilterManager) {
           const fieldName = typeof field === 'string' ? field : field.name;
           popularizeField(dataView, fieldName, dataViews, capabilities);
-          const newFilters = generateFilters(filterManager, field, values, operation, dataView);
-          return filterManager.addFilters(newFilters);
+          const newFilters = generateFilters(
+            timelineFilterManager,
+            field,
+            values,
+            operation,
+            dataView
+          );
+          return timelineFilterManager.addFilters(newFilters);
         }
       },
-      [filterManager, dataView, dataViews, capabilities]
+      [timelineFilterManager, dataView, dataViews, capabilities]
     );
 
     const onChangeItemsPerPage = useCallback(

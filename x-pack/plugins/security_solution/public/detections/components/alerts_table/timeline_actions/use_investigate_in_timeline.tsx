@@ -20,17 +20,15 @@ import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
-import { timelineDefaults } from '../../../../timelines/store/defaults';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineType } from '../../../../../common/api/timeline';
-import { timelineActions, timelineSelectors } from '../../../../timelines/store';
+import { timelineActions } from '../../../../timelines/store';
 import { sendAlertToTimelineAction } from '../actions';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import type { CreateTimelineProps } from '../types';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../translations';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { getField } from '../../../../helpers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
@@ -99,7 +97,7 @@ export const useInvestigateInTimeline = ({
 }: UseInvestigateInTimelineActionProps) => {
   const { addError } = useAppToasts();
   const {
-    data: { search: searchStrategyClient, query },
+    data: { search: searchStrategyClient },
   } = useKibana().services;
   const dispatch = useDispatch();
   const { startTransaction } = useStartTransaction();
@@ -136,16 +134,6 @@ export const useInvestigateInTimeline = ({
     [addError, getExceptionFilterFromIds]
   );
 
-  const filterManagerBackup = useMemo(() => query.filterManager, [query.filterManager]);
-  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { filterManager: activeFilterManager } = useDeepEqualSelector(
-    (state) => getManageTimeline(state, TimelineId.active ?? '') ?? timelineDefaults
-  );
-  const filterManager = useMemo(
-    () => activeFilterManager ?? filterManagerBackup,
-    [activeFilterManager, filterManagerBackup]
-  );
-
   const updateTimelineIsLoading = useCallback(
     (payload) => dispatch(timelineActions.updateIsLoading(payload)),
     [dispatch]
@@ -172,7 +160,6 @@ export const useInvestigateInTimeline = ({
         timeline: {
           ...timeline,
           columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
-          filterManager,
           indexNames: timeline.indexNames ?? [],
           show: true,
         },
@@ -180,13 +167,7 @@ export const useInvestigateInTimeline = ({
         ruleNote,
       })();
     },
-    [
-      dispatch,
-      filterManager,
-      updateTimelineIsLoading,
-      clearActiveTimeline,
-      unifiedComponentsInTimelineEnabled,
-    ]
+    [dispatch, updateTimelineIsLoading, clearActiveTimeline, unifiedComponentsInTimelineEnabled]
   );
 
   const investigateInTimelineAlertClick = useCallback(async () => {

@@ -22,9 +22,9 @@ import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
-import { FilterManager } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -60,7 +60,6 @@ import { useTimelineFullScreen } from '../../../../common/containers/use_full_sc
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { getDefaultControlColumn } from '../body/control_columns';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 import { defaultUdtHeaders } from '../unified_components/default_headers';
@@ -162,7 +161,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   columns,
   dataProviders,
   end,
-  expandedDetail,
   filters,
   timelineId,
   isLive,
@@ -181,6 +179,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   status,
   sort,
   timerangeKind,
+  expandedDetail,
 }) => {
   const dispatch = useDispatch();
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
@@ -196,7 +195,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const { uiSettings } = useKibana().services;
+  const { uiSettings, timelineFilterManager } = useKibana().services;
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
@@ -210,12 +209,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     getManageTimeline(state, timelineId ?? TimelineId.active)
   );
 
-  const { filterManager: activeFilterManager, sampleSize } = currentTimeline;
-
-  const filterManager = useMemo(
-    () => activeFilterManager ?? new FilterManager(uiSettings),
-    [activeFilterManager, uiSettings]
-  );
+  const { sampleSize } = currentTimeline;
 
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const kqlQuery: {
@@ -279,12 +273,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   useEffect(() => {
     dispatch(
       timelineActions.initializeTimelineSettings({
-        filterManager,
         id: timelineId,
         defaultColumns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
       })
     );
-  }, [dispatch, filterManager, timelineId, unifiedComponentsInTimelineEnabled]);
+  }, [dispatch, timelineId, unifiedComponentsInTimelineEnabled]);
 
   const [
     dataLoadingState,
@@ -359,7 +352,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
           <EuiFlexItem data-test-subj="timeline-date-picker-container">
             <QueryTabHeaderContainer data-test-subj="timelineHeader">
               <QueryTabHeader
-                filterManager={filterManager}
+                filterManager={timelineFilterManager}
                 show={show && activeTab === TimelineTabs.query}
                 showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
                 status={status}
@@ -377,7 +370,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     ),
     [
       activeTab,
-      filterManager,
+      timelineFilterManager,
       show,
       showCallOutUnauthorizedMsg,
       status,

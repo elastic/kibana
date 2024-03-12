@@ -528,7 +528,7 @@ describe('query tab with unified timeline', () => {
       expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
     });
 
-    it.only('should be able to add column by dragging', async () => {
+    it('should be able to add column by dragging', async () => {
       const field = {
         name: 'agent.id',
       };

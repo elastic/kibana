@@ -6,7 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
 import React, { useMemo, useCallback, useState, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { generateFilters } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-plugin/common';
@@ -38,15 +38,13 @@ import type {
   ToggleDetailPanel,
   TimelineTabs,
 } from '../../../../../common/types/timeline';
-import type { State, inputsModel } from '../../../../common/store';
+import type { inputsModel } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { getColumnHeader } from '../body/column_headers/helpers';
-import { timelineBodySelector } from '../body/selectors';
 import { StyledPageContentWrapper, StyledMainEuiPanel, StyledSplitFlexItem } from './styles';
 import { DRAG_DROP_FIELD } from './data_table/translations';
 import { TimelineResizableLayout } from './resizable_layout';
 import TimelineDataTable from './data_table';
-import { timelineDefaults } from '../../../store/defaults';
 import { timelineActions } from '../../../store';
 import { getFieldsListCreationOptions } from './get_fields_list_creation_options';
 
@@ -151,6 +149,7 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
       charts,
       docLinks,
       analytics,
+      timelineFilterManager,
     },
   } = useKibana();
 
@@ -183,10 +182,6 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
 
   const [sidebarContainer, setSidebarContainer] = useState<HTMLDivElement | null>(null);
   const [, setMainContainer] = useState<HTMLDivElement | null>(null);
-
-  const { timeline: { filterManager } = timelineDefaults } = useSelector((state: State) =>
-    timelineBodySelector(state, timelineId)
-  );
 
   const defaultColumns = useMemo(() => {
     return columns.map((c) => c.id);
@@ -246,14 +241,20 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
-      if (dataView && filterManager) {
+      if (dataView && timelineFilterManager) {
         const fieldName = typeof field === 'string' ? field : field.name;
         popularizeField(dataView, fieldName, dataViews, capabilities);
-        const newFilters = generateFilters(filterManager, field, values, operation, dataView);
-        return filterManager.addFilters(newFilters);
+        const newFilters = generateFilters(
+          timelineFilterManager,
+          field,
+          values,
+          operation,
+          dataView
+        );
+        return timelineFilterManager.addFilters(newFilters);
       }
     },
-    [filterManager, dataView, dataViews, capabilities]
+    [timelineFilterManager, dataView, dataViews, capabilities]
   );
 
   const [{ dragging }] = useDragDropContext();
