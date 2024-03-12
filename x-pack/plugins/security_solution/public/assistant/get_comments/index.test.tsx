@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { getComments } from '.';
 import type { ConversationRole } from '@kbn/elastic-assistant/impl/assistant_context/types';
 
 const user: ConversationRole = 'user';
 const currentConversation = {
-  apiConfig: {},
+  apiConfig: {
+    connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
+    connectorTypeTitle: 'OpenAI',
+    provider: OpenAiProviderType.OpenAi,
+  },
   replacements: {},
   category: 'assistant',
   id: '1',
@@ -42,7 +47,11 @@ describe('getComments', () => {
       ...testProps,
       currentConversation: {
         category: 'assistant',
-        apiConfig: {},
+        apiConfig: {
+          connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
+          connectorTypeTitle: 'OpenAI',
+          provider: OpenAiProviderType.OpenAi,
+        },
         replacements: {},
         id: '1',
         title: '1',

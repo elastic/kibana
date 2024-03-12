@@ -83,13 +83,15 @@ export const transformToCreateScheme = (
     ],
     title,
     category: category ?? ConversationCategoryEnum.assistant,
-    api_config: {
-      connector_id: apiConfig?.connectorId,
-      connector_type_title: apiConfig?.connectorTypeTitle,
-      default_system_prompt_id: apiConfig?.defaultSystemPromptId,
-      model: apiConfig?.model,
-      provider: apiConfig?.provider,
-    },
+    api_config: apiConfig
+      ? {
+          connector_id: apiConfig.connectorId,
+          connector_type_title: apiConfig.connectorTypeTitle,
+          default_system_prompt_id: apiConfig.defaultSystemPromptId,
+          model: apiConfig.model,
+          provider: apiConfig.provider,
+        }
+      : undefined,
     exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
     is_default: isDefault,
     messages: messages?.map((message) => ({

@@ -72,8 +72,10 @@ export const useLoadConnectors = ({
                   ...connector,
                   connectorTypeTitle: connectorDetails[connector.actionTypeId],
                   apiProvider:
-                    !connector.isPreconfigured && !connector.isSystemAction
-                      ? (`${connector?.config?.apiProvider}` as OpenAiProviderType)
+                    !connector.isPreconfigured &&
+                    !connector.isSystemAction &&
+                    connector?.config?.apiProvider
+                      ? (connector?.config?.apiProvider as OpenAiProviderType)
                       : undefined,
                 },
               ]

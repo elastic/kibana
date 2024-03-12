@@ -51,12 +51,8 @@ describe('conversations api', () => {
     http.fetch.mockRejectedValue(new Error('this is an error'));
     const deleteProps = { http, toasts, id: 'test' } as unknown as DeleteConversationParams;
 
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => deleteConversation(deleteProps));
-      await waitForNextUpdate();
-
-      expect(toasts.addError).toHaveBeenCalled();
-    });
+    await expect(deleteConversation(deleteProps)).rejects.toThrowError('this is an error');
+    expect(toasts.addError).toHaveBeenCalled();
   });
 
   it('should call api to get conversation', async () => {
@@ -81,11 +77,7 @@ describe('conversations api', () => {
     http.fetch.mockRejectedValue(new Error('this is an error'));
     const getProps = { http, toasts, id: 'test' } as unknown as GetConversationByIdParams;
 
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => getConversationById(getProps));
-      await waitForNextUpdate();
-
-      expect(toasts.addError).toHaveBeenCalled();
-    });
+    await expect(getConversationById(getProps)).rejects.toThrowError('this is an error');
+    expect(toasts.addError).toHaveBeenCalled();
   });
 });

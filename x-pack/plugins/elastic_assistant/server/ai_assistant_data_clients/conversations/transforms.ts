@@ -28,14 +28,14 @@ export const transformESToConversations = (
         title: conversationSchema.title,
         category: conversationSchema.category,
         summary: conversationSchema.summary,
-        ...(conversationSchema.api_config != null
+        ...(conversationSchema.api_config
           ? {
               apiConfig: {
                 connectorId: conversationSchema.api_config.connector_id,
                 connectorTypeTitle: conversationSchema.api_config.connector_type_title,
-                defaultSystemPromptId: conversationSchema.api_config?.default_system_prompt_id,
-                model: conversationSchema.api_config?.model,
-                provider: conversationSchema.api_config?.provider,
+                defaultSystemPromptId: conversationSchema.api_config.default_system_prompt_id,
+                model: conversationSchema.api_config.model,
+                provider: conversationSchema.api_config.provider,
               },
             }
           : {}),
