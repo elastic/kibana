@@ -21,7 +21,7 @@ export default function (ctx: FtrProviderContext) {
 
   describe('fleet', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('system_indices_superuser');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
 
     after(async () => {
