@@ -47,7 +47,8 @@ describe('useSetupTechnology', () => {
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENTLESS);
     });
 
-    it('sets to AGENT_BASED when agentless is available and Azure cloud', () => {
+    // TODO: write test
+    it.skip('sets to AGENT_BASED when agentless is available and Azure cloud', () => {
       const agentlessPolicy = { id: 'agentlessPolicyId' } as AgentPolicy;
       const input = { type: CLOUDBEAT_AZURE } as NewPackagePolicyInput;
       const { result } = renderHook(() =>

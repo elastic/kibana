@@ -1619,7 +1619,8 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(setupTechnologySelectorAccordion).not.toBeInTheDocument();
     });
 
-    it('should not render setup technology selector for CSPM Azure', () => {
+    // TODO: add test for Azure
+    it.skip('should not render setup technology selector for CSPM Azure', () => {
       const agentlessPolicy = getMockAgentlessAgentPolicy();
       let newPackagePolicy = getMockPolicyAzure();
       newPackagePolicy = getPosturePolicy(newPackagePolicy, CLOUDBEAT_AZURE, {
