@@ -22,7 +22,7 @@ export function SloSettingsPage() {
   useBreadcrumbs([
     {
       href: basePath.prepend(paths.observability.slosSettings),
-      text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
+      text: i18n.translate('xpack.observability.breadcrumbs.slosSettingsText', {
         defaultMessage: 'SLOs Settings',
       }),
       deepLinkId: 'observability-overview:slos',

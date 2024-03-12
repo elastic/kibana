@@ -91,14 +91,14 @@ export function SettingsForm() {
       <EuiDescribedFormGroup
         title={
           <h3>
-            {i18n.translate('xpack.observability.settingsForm.h3.sourceSettingsLabel', {
+            {i18n.translate('xpack.observability.settingsForm.h3.remoteSettingsLabel', {
               defaultMessage: 'Remote clusters',
             })}
           </h3>
         }
         description={
           <p>
-            {i18n.translate('xpack.observability.settingsForm.p.fetchSlosFromAllLabel', {
+            {i18n.translate('xpack.observability.settingsForm.select.fetchSlosFromAllLabel', {
               defaultMessage: 'Select remote clusters to fetch SLOs from.',
             })}
           </p>
@@ -106,7 +106,7 @@ export function SettingsForm() {
       >
         <EuiFormRow
           label={i18n.translate(
-            'xpack.observability.settingsForm.euiFormRow.selectRemoteClustersLabel',
+            'xpack.observability.settingsForm.euiFormRow.select.selectRemoteClustersLabel',
             { defaultMessage: 'Select remote clusters' }
           )}
         >

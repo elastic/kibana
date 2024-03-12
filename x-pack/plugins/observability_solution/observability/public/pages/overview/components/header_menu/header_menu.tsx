@@ -39,7 +39,7 @@ export function HeaderMenu(): React.ReactElement | null {
               href={http.basePath.prepend('/app/observability/slos/settings')}
               iconType="gear"
             >
-              {i18n.translate('xpack.observability.home.addData', {
+              {i18n.translate('xpack.observability.home.settings', {
                 defaultMessage: 'Settings',
               })}
             </EuiHeaderLink>
