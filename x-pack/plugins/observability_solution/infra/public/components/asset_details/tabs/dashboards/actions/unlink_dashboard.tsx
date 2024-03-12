@@ -18,12 +18,10 @@ import { useAssetDetailsUrlState } from '../../../hooks/use_asset_details_url_st
 
 export function UnlinkDashboard({
   currentDashboard,
-  defaultDashboard,
   onRefresh,
   assetType,
 }: {
   currentDashboard: DashboardItemWithTitle;
-  defaultDashboard: DashboardItemWithTitle;
   onRefresh: () => void;
   assetType: InfraCustomDashboardAssetType;
 }) {
@@ -31,32 +29,28 @@ export function UnlinkDashboard({
   const { notifications } = useKibana();
 
   const [, setUrlState] = useAssetDetailsUrlState();
-  const { loading, updateCustomDashboard } = useUpdateCustomDashboard();
-  const { dashboards, loading: savedObjectDashboardsLoading } = useCustomDashboard({ assetType });
+  const { updateCustomDashboard } = useUpdateCustomDashboard();
+  const { dashboards } = useCustomDashboard({ assetType });
 
   const onConfirm = useCallback(
     async function () {
       try {
-        if (!savedObjectDashboardsLoading) {
-          const dashboardList = (dashboards?.dashboardIdList ?? []).filter(
-            ({ id }) => id !== currentDashboard.id
-          );
-          const result = await updateCustomDashboard({
-            assetType,
-            dashboardIdList: [...dashboardList],
-          });
+        const dashboardList = (dashboards?.dashboardIdList ?? []).filter(
+          ({ id }) => id !== currentDashboard.id
+        );
+        await updateCustomDashboard({
+          assetType,
+          dashboardIdList: [...dashboardList],
+        });
+        setUrlState({ dashboardId: dashboardList[0]?.id });
 
-          if (result && !loading) {
-            notifications.toasts.success({
-              title: i18n.translate('xpack.infra.customDashboards.unlinkSuccess.toast.title', {
-                defaultMessage: 'Unlinked "{dashboardName}" dashboard',
-                values: { dashboardName: currentDashboard?.title },
-              }),
-            });
-            setUrlState({ dashboardId: defaultDashboard.id });
-            onRefresh();
-          }
-        }
+        notifications.toasts.success({
+          title: i18n.translate('xpack.infra.customDashboards.unlinkSuccess.toast.title', {
+            defaultMessage: 'Unlinked "{dashboardName}" dashboard',
+            values: { dashboardName: currentDashboard?.title },
+          }),
+        });
+        onRefresh();
       } catch (error) {
         notifications.toasts.danger({
           title: i18n.translate('xpack.infra.customDashboards.unlinkFailure.toast.title', {
@@ -70,16 +64,13 @@ export function UnlinkDashboard({
     },
     [
       isModalVisible,
-      savedObjectDashboardsLoading,
       dashboards?.dashboardIdList,
       updateCustomDashboard,
       assetType,
-      loading,
       currentDashboard.id,
       currentDashboard?.title,
       notifications.toasts,
       setUrlState,
-      defaultDashboard.id,
       onRefresh,
     ]
   );

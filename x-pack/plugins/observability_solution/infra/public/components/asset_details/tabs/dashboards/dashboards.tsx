@@ -169,7 +169,6 @@ export function Dashboards() {
                     />,
                     <UnlinkDashboard
                       currentDashboard={currentDashboard}
-                      defaultDashboard={customDashboards[0]}
                       onRefresh={reload}
                       assetType={asset.type}
                     />,
