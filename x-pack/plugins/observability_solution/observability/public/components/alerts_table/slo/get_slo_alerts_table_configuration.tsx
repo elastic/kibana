@@ -15,7 +15,7 @@ import {
 } from '@kbn/observability-shared-plugin/public';
 import { getRenderCellValue } from '../common/render_cell_value';
 import type { ObservabilityRuleTypeRegistry } from '../../..';
-import { useGetAlertFlyoutComponents } from '../../..';
+import { useGetAlertFlyoutComponents } from '../../alerts_flyout/use_get_alert_flyout_components';
 import { columns } from './default_columns';
 
 export const getSloAlertsTableConfiguration = (
