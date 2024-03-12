@@ -77,6 +77,7 @@ export interface EqlQueryBarProps {
   onOptionsChange?: (field: FieldsEqlOptions, newValue: string | undefined) => void;
   onValidityChange?: (arg: boolean) => void;
   onValiditingChange?: (arg: boolean) => void;
+  onUsingSequenceQuery?: (arg: boolean) => void;
 }
 
 export const EqlQueryBar: FC<EqlQueryBarProps> = ({
@@ -92,6 +93,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   onOptionsChange,
   onValidityChange,
   onValiditingChange,
+  onUsingSequenceQuery,
 }) => {
   const { addError } = useAppToasts();
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
@@ -174,8 +176,10 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
         },
         saved_id: null,
       });
+
+      if (onUsingSequenceQuery) onUsingSequenceQuery(newQuery.startsWith('sequence'));
     },
-    [fieldValue, setFieldValue, onValiditingChange]
+    [fieldValue, setFieldValue, onValiditingChange, onUsingSequenceQuery]
   );
 
   return (

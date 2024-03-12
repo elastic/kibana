@@ -183,6 +183,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
+  const [eqlSequenceQueryInUse, setEqlSequenceQueryInUse] = useState(false);
   const license = useLicense();
 
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
@@ -810,6 +811,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [isUpdateView, mlCapabilities]
   );
 
+  const onUsingEqlSequenceQuery = (isSequence: boolean) => {
+    setEqlSequenceQueryInUse(isSequence);
+  };
   return (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
@@ -855,6 +859,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     showFilterBar: true,
                     // isLoading: indexPatternsLoading,
                     dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
+                    onUsingSequenceQuery: onUsingEqlSequenceQuery,
                   }}
                   config={{
                     ...schema.queryBar,
@@ -1006,8 +1011,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               component={MultiSelectFieldsAutocomplete}
               componentProps={{
                 browserFields: termsAggregationFields,
-                disabledText: alertSuppressionUpsellingMessage,
-                isDisabled: !isAlertSuppressionLicenseValid,
+                disabledText: eqlSequenceQueryInUse
+                  ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TEXT
+                  : alertSuppressionUpsellingMessage,
+                isDisabled: !isAlertSuppressionLicenseValid || eqlSequenceQueryInUse,
               }}
             />
           </RuleTypeEuiFormRow>

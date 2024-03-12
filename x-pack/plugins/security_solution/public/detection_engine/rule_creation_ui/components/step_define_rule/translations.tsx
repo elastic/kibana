@@ -217,3 +217,10 @@ export const getEnableThresholdSuppressionLabel = (fields: string[] | undefined)
       }
     )
   );
+
+export const EQL_SEQUENCE_SUPPRESSION_DISABLE_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlSequenceSuppressionDisableText',
+  {
+    defaultMessage: 'Suppression is not available for sequence based queries',
+  }
+);
