@@ -321,21 +321,6 @@ export class DataView extends AbstractDataView implements DataViewBase {
   }
 
   /**
-   * Replaces all existing runtime fields with new fields.
-   * @param newFields Map of runtime field definitions by field name
-   */
-  replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
-    const oldRuntimeFieldNames = Object.keys(this.runtimeFieldMap);
-    oldRuntimeFieldNames.forEach((name) => {
-      this.removeRuntimeField(name);
-    });
-
-    Object.entries(newFields).forEach(([name, field]) => {
-      this.addRuntimeField(name, field);
-    });
-  }
-
-  /**
    * Remove a runtime field - removed from mapped field or removed unmapped
    * field as appropriate. Doesn't clear associated field attributes.
    * @param name - Field name to remove

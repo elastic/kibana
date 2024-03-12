@@ -377,7 +377,6 @@ export abstract class AbstractDataView {
       title: this.getIndexPattern(),
       timeFieldName: this.timeFieldName,
       sourceFilters: [...(this.sourceFilters || [])],
-      // fields,
       typeMeta: this.typeMeta,
       type: this.type,
       fieldFormats: { ...this.fieldFormatMap },
@@ -405,6 +404,26 @@ export abstract class AbstractDataView {
   protected deleteScriptedFieldInternal = (fieldName: string) => {
     delete this.scriptedFields[fieldName];
   };
+
+  replaceAllScriptedFields(newFields: Record<string, FieldSpec>) {
+    const oldScriptedFieldNames = Object.keys(this.scriptedFields);
+
+    oldScriptedFieldNames.forEach((name) => {
+      this.removeScriptedField(name);
+    });
+
+    Object.entries(newFields).forEach(([name, field]) => {
+      this.upsertScriptedField(field);
+    });
+  }
+
+  removeScriptedField(name: string) {
+    return this.deleteScriptedFieldInternal(name);
+  }
+
+  upsertScriptedField(field: FieldSpec) {
+    return this.upsertScriptedFieldInternal(field);
+  }
 
   /**
    * Checks if runtime field exists
@@ -450,6 +469,29 @@ export abstract class AbstractDataView {
       }),
       {}
     );
+  }
+
+  /**
+   * Replaces all existing runtime fields with new fields.
+   * @param newFields Map of runtime field definitions by field name
+   */
+  replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
+    const oldRuntimeFieldNames = Object.keys(this.runtimeFieldMap);
+    oldRuntimeFieldNames.forEach((name) => {
+      this.removeRuntimeField(name);
+    });
+
+    Object.entries(newFields).forEach(([name, field]) => {
+      this.addRuntimeField(name, field);
+    });
+  }
+
+  removeRuntimeField(name: string) {
+    return this.removeRuntimeFieldInteral(name);
+  }
+
+  addRuntimeField(name: string, runtimeField: RuntimeField) {
+    return this.addRuntimeFieldInteral(name, runtimeField);
   }
 
   protected removeRuntimeFieldInteral(name: string) {
