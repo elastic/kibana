@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import type { CreateSLOInput } from '@kbn/slo-schema';
-import { SO_SLO_TYPE } from '@kbn/observability-plugin/server/saved_objects';
+import { SO_SLO_TYPE } from '@kbn/slo-plugin/server/saved_objects';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { sloData } from './fixtures/create_slo';
