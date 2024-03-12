@@ -30,12 +30,12 @@ interface Props {
   hasPermissionToImport: boolean;
 }
 
-const aboutPanelContentStyle = css`
-  .euiFilePicker__icon {
-    width: ${euiThemeVars.euiSizeXXL};
-    height: ${euiThemeVars.euiSizeXXL};
-  }
-`;
+const aboutPanelContentStyle = css({
+  '.euiFilePicker__icon': {
+    width: euiThemeVars.euiSizeXXL,
+    height: euiThemeVars.euiSizeXXL,
+  },
+});
 
 export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImport }) => {
   return (

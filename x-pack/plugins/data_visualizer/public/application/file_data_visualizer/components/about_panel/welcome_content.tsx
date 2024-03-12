@@ -20,6 +20,13 @@ const docIconStyle = css({
   marginTop: euiThemeVars.euiSizeXS,
 });
 
+const mainIconStyle = css({
+  width: '96px',
+  height: '96px',
+  marginLeft: euiThemeVars.euiSizeXL,
+  marginRight: euiThemeVars.euiSizeL,
+});
+
 interface Props {
   hasPermissionToImport: boolean;
 }
@@ -35,16 +42,7 @@ export const WelcomeContent: FC<Props> = ({ hasPermissionToImport }) => {
   return (
     <EuiFlexGroup gutterSize="xl" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiIcon
-          size="xxl"
-          type="addDataApp"
-          css={{
-            width: '96px',
-            height: '96px',
-            marginLeft: euiThemeVars.euiSizeXL,
-            marginRight: euiThemeVars.euiSizeL,
-          }}
-        />
+        <EuiIcon size="xxl" type="addDataApp" css={mainIconStyle} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="m">
