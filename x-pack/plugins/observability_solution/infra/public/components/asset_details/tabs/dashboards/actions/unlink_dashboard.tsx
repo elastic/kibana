@@ -109,7 +109,8 @@ export function UnlinkDashboard({
         >
           <p>
             {i18n.translate('xpack.infra.customDashboards.unlinkEmptyButtonLabel.confirm.body', {
-              defaultMessage: `You are about to unlink the dashboard from the ${assetType} context`,
+              defaultMessage: `You are about to unlink the dashboard from the {assetType} context`,
+              values: { assetType },
             })}
           </p>
         </EuiConfirmModal>
