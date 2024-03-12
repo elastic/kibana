@@ -49,8 +49,8 @@ export const gaugeTitlesByType: Record<GaugeShape, string> = {
   [GaugeShapes.ARC]: i18n.translate('xpack.lens.gaugeArc.gaugeLabel', {
     defaultMessage: 'Gauge arc',
   }),
-  [GaugeShapes.TWO_THIRDS_CIRCLE]: i18n.translate('xpack.lens.gaugeTwoThirdsCircle.gaugeLabel', {
-    defaultMessage: 'Gauge 2/3 Circle',
+  [GaugeShapes.MAJOR_ARC]: i18n.translate('xpack.lens.gaugeTwoThirdsCircle.gaugeLabel', {
+    defaultMessage: 'Gauge major arc',
   }),
   [GaugeShapes.CIRCLE]: i18n.translate('xpack.lens.gaugeCircle.gaugeLabel', {
     defaultMessage: 'Gauge circle',

@@ -15,7 +15,7 @@ export const getSubtypeByGaugeType = (type: GaugeShape): BulletProps['subtype'] 
       [GaugeShapes.HORIZONTAL_BULLET]: BulletSubtype.horizontal,
       [GaugeShapes.VERTICAL_BULLET]: BulletSubtype.vertical,
       [GaugeShapes.ARC]: BulletSubtype.halfCircle,
-      [GaugeShapes.TWO_THIRDS_CIRCLE]: BulletSubtype.twoThirdsCircle,
+      [GaugeShapes.MAJOR_ARC]: BulletSubtype.twoThirdsCircle,
       [GaugeShapes.CIRCLE]: BulletSubtype.circle,
     } as const
   )[type]);

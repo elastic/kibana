@@ -57,7 +57,7 @@ export const gaugeRenderer: (
         case GaugeShapes.CIRCLE:
           type = `${EXPRESSION_GAUGE_NAME}_circle`;
           break;
-        case GaugeShapes.TWO_THIRDS_CIRCLE:
+        case GaugeShapes.MAJOR_ARC:
           type = `${EXPRESSION_GAUGE_NAME}_twoThirdsCircle`;
           break;
         default:

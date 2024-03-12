@@ -50,7 +50,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
         GaugeShapes.HORIZONTAL_BULLET,
         GaugeShapes.VERTICAL_BULLET,
         GaugeShapes.ARC,
-        GaugeShapes.TWO_THIRDS_CIRCLE,
+        GaugeShapes.MAJOR_ARC,
         GaugeShapes.CIRCLE,
       ],
       help: i18n.translate('expressionGauge.functions.gauge.args.shape.help', {

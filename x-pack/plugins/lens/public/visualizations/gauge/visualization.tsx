@@ -24,9 +24,9 @@ import {
   getValueFromAccessor,
 } from '@kbn/expression-gauge-plugin/public';
 import {
-  IconChartGaugeHalfCircle,
+  IconChartGaugeArc,
   IconChartGaugeCircle,
-  IconChartGaugeTwoThirdsCircle,
+  IconChartGaugeMajorArc,
   IconChartHorizontalBullet,
   IconChartVerticalBullet,
 } from '@kbn/chart-icons';
@@ -81,15 +81,15 @@ export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
   },
   [GaugeShapes.ARC]: {
     id: GaugeShapes.ARC,
-    icon: IconChartGaugeHalfCircle,
+    icon: IconChartGaugeArc,
     label: gaugeTitlesByType.arc,
     groupLabel: groupLabelForGauge,
     showExperimentalBadge: true,
   },
-  [GaugeShapes.TWO_THIRDS_CIRCLE]: {
-    id: GaugeShapes.TWO_THIRDS_CIRCLE,
-    icon: IconChartGaugeTwoThirdsCircle,
-    label: gaugeTitlesByType.twoThirdsCircle,
+  [GaugeShapes.MAJOR_ARC]: {
+    id: GaugeShapes.MAJOR_ARC,
+    icon: IconChartGaugeMajorArc,
+    label: gaugeTitlesByType.majorArc,
     groupLabel: groupLabelForGauge,
     showExperimentalBadge: true,
   },
@@ -206,7 +206,7 @@ export const getGaugeVisualization = ({
     CHART_NAMES[GaugeShapes.HORIZONTAL_BULLET],
     CHART_NAMES[GaugeShapes.VERTICAL_BULLET],
     CHART_NAMES[GaugeShapes.ARC],
-    CHART_NAMES[GaugeShapes.TWO_THIRDS_CIRCLE],
+    CHART_NAMES[GaugeShapes.MAJOR_ARC],
     CHART_NAMES[GaugeShapes.CIRCLE],
   ],
   getVisualizationTypeId(state) {

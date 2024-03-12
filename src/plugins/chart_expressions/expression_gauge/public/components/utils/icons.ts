@@ -9,8 +9,8 @@
 import {
   IconChartHorizontalBullet,
   IconChartVerticalBullet,
-  IconChartGaugeHalfCircle,
-  IconChartGaugeTwoThirdsCircle,
+  IconChartGaugeArc,
+  IconChartGaugeMajorArc,
   IconChartGaugeCircle,
 } from '@kbn/chart-icons';
 import { GaugeShape, GaugeShapes } from '../../../common';
@@ -19,7 +19,7 @@ export const getGaugeIconByType = (type: GaugeShape) =>
   ({
     [GaugeShapes.HORIZONTAL_BULLET]: IconChartHorizontalBullet,
     [GaugeShapes.VERTICAL_BULLET]: IconChartVerticalBullet,
-    [GaugeShapes.ARC]: IconChartGaugeHalfCircle,
-    [GaugeShapes.TWO_THIRDS_CIRCLE]: IconChartGaugeTwoThirdsCircle,
+    [GaugeShapes.ARC]: IconChartGaugeArc,
+    [GaugeShapes.MAJOR_ARC]: IconChartGaugeMajorArc,
     [GaugeShapes.CIRCLE]: IconChartGaugeCircle,
   }[type]);

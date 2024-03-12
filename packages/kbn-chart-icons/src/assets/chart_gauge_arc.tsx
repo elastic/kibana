@@ -10,11 +10,7 @@ import React from 'react';
 import type { EuiIconProps } from '@elastic/eui';
 import { colors } from './common_styles';
 
-export const IconChartGaugeHalfCircle = ({
-  title,
-  titleId,
-  ...props
-}: Omit<EuiIconProps, 'type'>) => {
+export const IconChartGaugeArc = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => {
   return (
     <svg
       width="30"

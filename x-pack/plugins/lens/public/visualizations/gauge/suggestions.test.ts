@@ -9,8 +9,8 @@ import { getSuggestions } from './suggestions';
 import {
   IconChartVerticalBullet,
   IconChartHorizontalBullet,
-  IconChartGaugeHalfCircle,
-  IconChartGaugeTwoThirdsCircle,
+  IconChartGaugeArc,
+  IconChartGaugeMajorArc,
   IconChartGaugeCircle,
 } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -222,7 +222,7 @@ describe('shows suggestions', () => {
       {
         hide: false,
         incomplete: false,
-        previewIcon: IconChartGaugeHalfCircle,
+        previewIcon: IconChartGaugeArc,
         score: 0.5,
         state: {
           labelMajorMode: 'auto',
@@ -237,17 +237,17 @@ describe('shows suggestions', () => {
       {
         hide: false,
         incomplete: false,
-        previewIcon: IconChartGaugeTwoThirdsCircle,
+        previewIcon: IconChartGaugeMajorArc,
         score: 0.5,
         state: {
           labelMajorMode: 'auto',
           layerId: 'first',
           layerType: 'data',
           metricAccessor: 'metric-column',
-          shape: 'twoThirdsCircle',
+          shape: 'majorArc',
           ticksPosition: 'auto',
         },
-        title: 'Gauge 2/3 Circle',
+        title: 'Gauge major arc',
       },
       {
         hide: false,

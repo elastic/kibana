@@ -40,8 +40,8 @@ export {
   IconChartHeatmap,
   IconChartHorizontalBullet,
   IconChartVerticalBullet,
-  IconChartGaugeHalfCircle,
-  IconChartGaugeTwoThirdsCircle,
+  IconChartGaugeArc,
+  IconChartGaugeMajorArc,
   IconChartGaugeCircle,
   IconChartTagcloud,
 } from './src/assets';

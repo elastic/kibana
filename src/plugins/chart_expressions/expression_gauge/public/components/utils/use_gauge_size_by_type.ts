@@ -23,7 +23,7 @@ export const useGaugeSizeByType = (type: GaugeShape, setChartSize: (d: ChartSize
           y: 1.25,
         },
       },
-      [GaugeShapes.TWO_THIRDS_CIRCLE]: {
+      [GaugeShapes.MAJOR_ARC]: {
         maxDimensions: {
           x: { value: 600, unit: 'pixels' },
           y: { value: 600, unit: 'pixels' },
