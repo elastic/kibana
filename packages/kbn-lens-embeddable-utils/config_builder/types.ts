@@ -11,7 +11,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
-export type LensByValueAttributes = TypedLensByValueInput['attributes'];
+export type LensAttributes = TypedLensByValueInput['attributes'];
 export const DEFAULT_LAYER_ID = 'layer_0';
 
 type Identity<T> = T extends object
