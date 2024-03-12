@@ -313,8 +313,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.dashboardControls.rangeSliderWaitForLoading(rangeSliderControl); // wait for range slider to respond to options list selections before proceeding
           await PageObjects.dashboardControls.rangeSliderSetLowerBound(rangeSliderControl, '1000');
           await PageObjects.dashboardControls.rangeSliderSetUpperBound(rangeSliderControl, '15000');
-          await PageObjects.dashboard.clickQuickSave();
           await PageObjects.dashboard.waitForRenderComplete();
+          await PageObjects.dashboard.clickQuickSave();
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
           /** Destination Dashboard */
           await createControls(dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME, [
