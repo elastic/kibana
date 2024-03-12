@@ -117,7 +117,7 @@ export function clearUnscheduledSnooze<Params extends RuleParams>(rule: RuleDoma
 
 export function clearScheduledSnoozesAttributesById(attributes: RuleAttributes, ids: string[]) {
   return attributes.snoozeSchedule
-    ? attributes.snoozeSchedule.filter((s) => !s.id || !ids.includes(s.id))
+    ? attributes.snoozeSchedule.filter((s) => !(s.id && ids.includes(s.id)))
     : [];
 }
 
