@@ -25,6 +25,7 @@ interface EmbedProps {
   shareableUrlForSavedObject?: string;
   shareableUrl?: string;
   isEmbedded?: boolean;
+  onChange: (optionId: string) => void;
 }
 interface UrlParams {
   [extensionName: string]: {
@@ -42,6 +43,7 @@ export const EmbedModal = ({
   shareableUrlForSavedObject,
   shareableUrl,
   isEmbedded,
+  onChange,
 }: EmbedProps) => {
   const isMounted = useMountedState();
   const [urlParams, setUrlParams] = useState<UrlParams | undefined>(undefined);
@@ -51,6 +53,10 @@ export const EmbedModal = ({
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
   const [anonymousAccessParameters] = useState<AnonymousAccessState['accessURLParameters']>(null);
   const [usePublicUrl] = useState<boolean>(false);
+
+  useEffect(() => {
+    onChange(url);
+  }, [url]);
 
   const getUrlParamExtensions = useCallback(
     (tempUrl: string): string => {

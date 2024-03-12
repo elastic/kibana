@@ -43,7 +43,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose }) => {
   const {
     content: SelectedTabContent,
     description: string,
-    modalActionBtn: { defaultMessage, handler, dataTestSubj, formattedMessageId },
+    modalActionBtn: { defaultMessage, handler, dataTestSubj, formattedMessageId, isCopy },
     title,
   } = useMemo(() => {
     return tabs.find((obj) => obj.id === selectedTabId)!;
@@ -68,6 +68,28 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose }) => {
     ));
   };
 
+  const tempHandler = useMemo(
+    () => (isCopy ? handler({ state: selectedTabState }) : ''),
+    [selectedTabState, isCopy]
+  );
+
+  const renderButton = () => {
+    console.log('temp handler', tempHandler);
+    return isCopy ? (
+      <EuiCopy textToCopy={tempHandler}>
+        {(copy) => (
+          <EuiButton fill data-test-subj={dataTestSubj} data-share-url={state.url} onClick={copy}>
+            <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
+          </EuiButton>
+        )}
+      </EuiCopy>
+    ) : (
+      <EuiButton fill data-test-subj={dataTestSubj} data-share-url={state.url}>
+        <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
+      </EuiButton>
+    );
+  };
+
   // const btnClickHandler = useCallback(() => {
   //   handler!({ state: selectedTabState });
   // }, [handler, selectedTabState]);
@@ -87,13 +109,24 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose }) => {
         </Fragment>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiCopy textToCopy={selectedTabState.shortUrlCache ?? selectedTabState.urlParams}>
-          {(copy) => (
-            <EuiButton fill data-test-subj={dataTestSubj} data-share-url={state.url} onClick={copy}>
-              <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
-            </EuiButton>
-          )}
-        </EuiCopy>
+        {isCopy ? (
+          <EuiCopy textToCopy={tempHandler}>
+            {(copy) => (
+              <EuiButton
+                fill
+                data-test-subj={dataTestSubj}
+                data-share-url={state.url}
+                onClick={copy}
+              >
+                <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
+              </EuiButton>
+            )}
+          </EuiCopy>
+        ) : (
+          <EuiButton fill data-test-subj={dataTestSubj} data-share-url={state.url}>
+            <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
+          </EuiButton>
+        )}
       </EuiModalFooter>
     </EuiModal>
   );
