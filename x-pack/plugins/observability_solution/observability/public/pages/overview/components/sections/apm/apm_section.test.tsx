@@ -7,7 +7,6 @@
 
 import React from 'react';
 import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
-import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { render, data as dataMock } from '../../../../../utils/test_helper';
 import { CoreStart } from '@kbn/core/public';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../../../plugin';
@@ -19,6 +18,7 @@ import { HasDataContextValue } from '../../../../../context/has_data_context/has
 import { AppMountParameters } from '@kbn/core/public';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../../rules/observability_rule_type_registry_mock';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -28,7 +28,7 @@ jest.mock('react-router-dom', () => ({
   useHistory: jest.fn(),
 }));
 
-const { ObservabilityAIAssistantActionMenuItem, ObservabilityAIAssistantContextualInsight } =
+const { ObservabilityAIAssistantContextualInsight } =
   observabilityAIAssistantPluginMock.createStartContract();
 
 describe('APMSection', () => {
@@ -65,7 +65,6 @@ describe('APMSection', () => {
       plugins: {} as ObservabilityPublicPluginsStart,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       ObservabilityPageTemplate: KibanaPageTemplate,
-      ObservabilityAIAssistantActionMenuItem,
       ObservabilityAIAssistantContextualInsight,
     }));
   });

@@ -17,8 +17,8 @@ import React, { useMemo } from 'react';
 import { ProfilingEmptyState } from '@kbn/observability-shared-plugin/public';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
-import { ProfilingFlamegraph } from './profiling_flamegraph';
-import { ProfilingTopNFunctions } from './profiling_top_functions';
+import { ProfilingFlamegraph } from '../../shared/profiling/flamegraph';
+import { ProfilingTopNFunctions } from '../../shared/profiling/top_functions';
 
 function ProfilingTab() {
   const {

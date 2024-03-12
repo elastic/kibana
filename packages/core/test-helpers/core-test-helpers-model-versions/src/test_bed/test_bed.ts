@@ -40,7 +40,7 @@ import type { ModelVersionTestBed } from './types';
  *
  *   afterEach(async () => {
  *     if(testkit) {
- *       await testkit.tearsDown();
+ *       await testkit.tearDown();
  *     }
  *   });
  *

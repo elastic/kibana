@@ -22,13 +22,14 @@ import {
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '../../common/conversation_complete';
-import { FunctionDefinition, ObservabilityAIAssistantScreenContext } from '../../common/types';
+import { ObservabilityAIAssistantScreenContext } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import { throwSerializedChatCompletionErrors } from '../../common/utils/throw_serialized_chat_completion_errors';
 import { APIReturnType, ObservabilityAIAssistantAPIClientRequestParamsOf } from '../../public';
-import { getAssistantSetupMessage } from '../../public/service/get_assistant_setup_message';
+import { getAssistantSystemMessage } from '../../public/service/get_assistant_system_message';
 import { streamIntoObservable } from '../../server/service/util/stream_into_observable';
 import { EvaluationResult } from './types';
+import { FunctionDefinition } from '../../common/functions/types';
 
 // eslint-disable-next-line spaced-comment
 /// <reference types="@kbn/ambient-ftr-types"/>
@@ -260,7 +261,7 @@ export class KibanaClient {
       chat: async (message) => {
         const { functionDefinitions, contextDefinitions } = await getFunctions();
         const messages = [
-          getAssistantSetupMessage({ contexts: contextDefinitions }),
+          getAssistantSystemMessage({ contexts: contextDefinitions }),
           ...getMessages(message).map((msg) => ({
             message: msg,
             '@timestamp': new Date().toISOString(),
@@ -297,7 +298,7 @@ export class KibanaClient {
 
         const { contextDefinitions } = await getFunctions();
         const messages = [
-          getAssistantSetupMessage({ contexts: contextDefinitions }),
+          getAssistantSystemMessage({ contexts: contextDefinitions }),
           ...getMessages(messagesArg!).map((msg) => ({
             message: msg,
             '@timestamp': new Date().toISOString(),
