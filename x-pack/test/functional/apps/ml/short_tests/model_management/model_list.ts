@@ -6,6 +6,7 @@
  */
 
 import { getDefaultOnFailureConfiguration } from '@kbn/ml-plugin/public/application/components/ml_inference/state';
+import type { AddModelFlyoutTabId } from '@kbn/ml-plugin/public/application/model_management/add_model_flyout';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../services/ml/api';
 
@@ -151,7 +152,8 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsFlyout.assertOpen(true);
 
         await ml.testExecution.logTestStep('Assert the Click to Download tab exists');
-        await ml.trainedModelsFlyout.assertFlyoutTabs(['manualDownload']);
+        const manualDownloadTab: AddModelFlyoutTabId = 'manualDownload';
+        await ml.trainedModelsFlyout.assertFlyoutTabs([manualDownloadTab]);
 
         await ml.testExecution.logTestStep('Assert all eland code blocks exist within the flyout');
         await ml.trainedModelsFlyout.assertElandPythonClientCodeBlocks();
@@ -540,7 +542,9 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep(
           'Assert the "Click to Download" and "Manual Download" tabs exists'
         );
-        await ml.trainedModelsFlyout.assertFlyoutTabs(['clickToDownload', 'manualDownload']);
+        const clickToDownloadTab: AddModelFlyoutTabId = 'clickToDownload';
+        const manualDownloadTab: AddModelFlyoutTabId = 'manualDownload';
+        await ml.trainedModelsFlyout.assertFlyoutTabs([clickToDownloadTab, manualDownloadTab]);
       });
 
       it('should list Elser panels contents correctly', async () => {
