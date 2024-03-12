@@ -108,19 +108,6 @@ const CaseContainerComponent: React.FC = () => {
         selected_endpoint: endpointId,
       }),
     });
-  // TO-DO: onComponentInitialized not needed after removing the expandedEvent state from timeline
-  const onComponentInitialized = useCallback(() => {
-    dispatch(
-      timelineActions.createTimeline({
-        id: TimelineId.casePage,
-        columns: [],
-        dataViewId: null,
-        indexNames: [],
-        expandedDetail: {},
-        show: false,
-      })
-    );
-  }, [dispatch]);
 
   const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
   const { activeStep, endTourStep, isTourShown } = useTourContext();
@@ -133,6 +120,20 @@ const CaseContainerComponent: React.FC = () => {
   useEffect(() => {
     if (isTourActive) endTourStep(SecurityStepId.alertsCases);
   }, [endTourStep, isTourActive]);
+
+  useEffect(() => {
+    dispatch(
+      timelineActions.createTimeline({
+        id: TimelineId.casePage,
+        columns: [],
+        dataViewId: null,
+        indexNames: [],
+        expandedDetail: {},
+        show: false,
+      })
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <SecuritySolutionPageWrapper noPadding>
@@ -151,7 +152,6 @@ const CaseContainerComponent: React.FC = () => {
             alerts: { isExperimental: false },
           },
           refreshRef,
-          onComponentInitialized,
           actionsNavigation: {
             href: endpointDetailsHref,
             onClick: (endpointId: string, e) => {

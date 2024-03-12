@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../../locator';
-import { NavigateToPath, useMlKibana } from '../../../contexts/kibana';
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
+import type { NavigateToPath } from '../../../contexts/kibana';
+import { useMlKibana } from '../../../contexts/kibana';
+import type { MlRoute, PageProps } from '../../router';
+import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';

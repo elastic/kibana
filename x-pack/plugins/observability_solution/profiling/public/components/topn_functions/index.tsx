@@ -299,13 +299,13 @@ export const TopNFunctionsGrid = ({
         )}
         columns={columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
-        rowCount={sortedRows.length > 100 ? 100 : sortedRows.length}
+        rowCount={sortedRows.length}
         renderCellValue={RenderCellValue}
         sorting={{ columns: [{ id: sortField, direction: sortDirection }], onSort }}
         leadingControlColumns={leadingControlColumns}
         pagination={{
           pageIndex,
-          pageSize: 50,
+          pageSize: 100,
           // Left it empty on purpose as it is a required property on the pagination
           onChangeItemsPerPage: () => {},
           onChangePage,
