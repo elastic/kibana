@@ -41,6 +41,7 @@
     "@kbn/management-settings-types",
     "@kbn/management-settings-utilities",
     "@kbn/core-chrome-browser",
+    "@kbn/rule-data-utils",
   ],
   "exclude": ["target/**/*"]
 }

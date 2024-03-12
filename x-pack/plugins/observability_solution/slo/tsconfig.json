@@ -8,7 +8,7 @@
     "public/**/*",
     "server/**/*",
     "../../../typings/**/*"
-, "../observability/public/components/alerts_table/slo"  ],
+    , "../observability/public/components/alerts_table/slo"  ],
   "exclude": [
     "target/**/*"
   ],
@@ -20,7 +20,6 @@
     "@kbn/navigation-plugin",
     "@kbn/translations-plugin",
     "@kbn/rule-data-utils",
-    "@kbn/timelines-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/observability-plugin",
     "@kbn/observability-shared-plugin",
@@ -84,7 +83,6 @@
     "@kbn/unified-field-list",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/discover-plugin",
-    "@kbn/alerts-ui-shared",
     "@kbn/field-formats-plugin",
     "@kbn/core-http-server"
   ]
