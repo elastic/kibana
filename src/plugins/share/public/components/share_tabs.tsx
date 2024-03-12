@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import { IModalTabDeclaration, TabbedModal } from '@kbn/shared-ux-tabbed-modal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { copyToClipboard } from '@elastic/eui';
 import { LocatorPublic, AnonymousAccessServiceContract } from '../../common';
 import { ShareMenuItem, UrlParamExtension, BrowserUrlService } from '../types';
 import { LinkModal } from './link_modal';
@@ -72,7 +73,7 @@ export const ShareMenuTabs = ({
         id: string;
         dataTestSubj: string;
         defaultMessage: string;
-        handler: () => void;
+        handler: () => string;
       }>
     > = [];
     tabs.push({
@@ -87,9 +88,7 @@ export const ShareMenuTabs = ({
         dataTestSubj: 'copyShareUrlButton',
         formattedMessageId: 'share.link.copyLinkButton',
         defaultMessage: 'Copy link',
-        handler: ({ state }) => {
-          setLinkData(state.shortUrlCache ?? state.url);
-        },
+        handler: ({ state }) => copyToClipboard(state.shortUrlCache),
       },
       title: `Share this ${objectType}`,
       description: (
@@ -155,28 +154,24 @@ export const ShareMenuTabs = ({
           formattedMessageId: 'share.link.copyEmbedCodeButton',
           defaultMessage: 'Copy Embed',
           handler: ({ state }) => {
-            setEmbedData(state.urlParams);
+            copyToClipboard(state.url);
           },
         },
         content: ({ state, dispatch }) => {
-          const onChange = (optionId) => {
-            const newCheckboxIdToSelectedMap = {
-              embedUrlParamExtensions,
-            };
-
+          const onChange = (shareUrl: string) => {
             dispatch({
-              type: '0',
-              payload: newCheckboxIdToSelectedMap,
+              type: '1',
+              payload: shareUrl,
             });
           };
-          return <EmbedModal urlParamExtensions={embedUrlParamExtensions} />;
+          return <EmbedModal urlParamExtensions={embedUrlParamExtensions} onChange={onChange} />;
         },
         reducer(state, action) {
           switch (action.type) {
             case String(1):
               return {
                 ...state,
-                urlParams: action.payload,
+                url: action.payload,
               };
             default:
               return state;
