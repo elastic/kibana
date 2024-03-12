@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { AddModelFlyoutTabId } from '@kbn/ml-plugin/public/application/model_management/add_model_flyout';
+import type { AddModelFlyoutTabId } from '@kbn/ml-plugin/public/application/model_management/add_model_flyout';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export type FlyoutTabs = [AddModelFlyoutTabId];
