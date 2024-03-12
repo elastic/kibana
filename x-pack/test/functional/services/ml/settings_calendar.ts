@@ -19,6 +19,31 @@ export function MachineLearningSettingsCalendarProvider(
   const comboBox = getService('comboBox');
 
   return {
+    async assertOnlyConnectedToJobsAppliedDuringCreation() {
+      const visibleText = await testSubjects.getVisibleText('mlCalendarListColumnJobs');
+      expect(visibleText).to.match(/test_calendar_ad_1, test_calendar_ad_2/);
+
+      await testSubjects.click('mlMainTab anomalyDetection');
+
+      const [one, two, three, four] = await testSubjects.findAll('mlJobListRowDetailsToggle');
+
+      // assert that the created calendar IS applied to test_calendar_ad_1 and test_calendar_ad_2
+      await one.click();
+      await testSubjects.existOrFail('mlJobRowDetailsSection-calendars');
+      await one.click();
+      await two.click();
+      await testSubjects.existOrFail('mlJobRowDetailsSection-calendars');
+      await two.click();
+
+      // assert that the created calendar is NOT applied to test_calendar_ad_3 and test_calendar_ad_4
+      await three.click();
+      await testSubjects.missingOrFail('mlJobRowDetailsSection-calendars');
+      await three.click();
+      await four.click();
+      await testSubjects.missingOrFail('mlJobRowDetailsSection-calendars');
+      await four.click();
+    },
+
     async parseCalendarTable() {
       const table = await testSubjects.find('~mlCalendarTable');
       const $ = await table.parseDomContent();
