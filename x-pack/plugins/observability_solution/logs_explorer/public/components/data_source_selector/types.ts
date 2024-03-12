@@ -26,6 +26,7 @@ import {
   UNCATEGORIZED_TAB_ID,
 } from './constants';
 import {
+  IsDataViewAllowed,
   IsDataViewAvailable,
   LoadDataViews,
   ReloadDataViews,
@@ -57,6 +58,8 @@ export interface DataSourceSelectorProps {
   isSearchingIntegrations: boolean;
   /* Flag for determining whether ESQL is enabled or not */
   isEsqlEnabled: boolean;
+  /* Used against a data view to assert if its allowed on the selector */
+  isDataViewAllowed: IsDataViewAllowed;
   /* Used against a data view to assert its availability */
   isDataViewAvailable: IsDataViewAvailable;
   /* Triggered when retrying to load the data views */

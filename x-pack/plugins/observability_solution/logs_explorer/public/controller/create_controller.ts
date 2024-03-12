@@ -75,6 +75,7 @@ export const createLogsExplorerControllerFactory =
       initialContext,
       query: discoverServices.data.query,
       toasts: core.notifications.toasts,
+      uiSettings: customUiSettings,
     });
 
     const service = interpret(machine, {
