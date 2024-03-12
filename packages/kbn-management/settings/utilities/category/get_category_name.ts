@@ -11,6 +11,7 @@ import {
   ACCESSIBILITY_CATEGORY,
   AUTOCOMPLETE_CATEGORY,
   BANNER_CATEGORY,
+  DEV_TOOLS_CATEGORY,
   DISCOVER_CATEGORY,
   ENTERPRISE_SEARCH_CATEGORY,
   GENERAL_CATEGORY,
@@ -91,6 +92,9 @@ const names: Record<string, string> = {
   }),
   [ROLLUPS_CATEGORY]: i18n.translate('management.settings.categoryNames.rollupsLabel', {
     defaultMessage: 'Rollups',
+  }),
+  [DEV_TOOLS_CATEGORY]: i18n.translate('management.settings.categoryNames.devToolsLabel', {
+    defaultMessage: 'Developer Tools',
   }),
 };
 

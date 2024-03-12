@@ -12,7 +12,6 @@ import type { Props as PackageListGridProps } from '../package_list_grid';
 
 type Category = PackageListGridProps['selectedCategory'];
 
-// exported for testing
 export function _promoteFeaturedIntegrations(
   featuredIntegrationsByCategory: Partial<Record<Category, string[]>>,
   packageList: PackageListGridProps['list'],
@@ -26,10 +25,14 @@ export function _promoteFeaturedIntegrations(
     featuredIntegrationNames.includes(card.name)
   );
 
-  // now return the integrations in the order they are defined in
-  const orderedFeaturedIntegrations = featuredIntegrationNames
-    .map((integrationName) => featuredIntegrations.find(({ name }) => name === integrationName))
-    .filter((v) => v) as PackageListGridProps['list'];
+  // Create a new array to keep the order and all matched integrations
+  const orderedFeaturedIntegrations = [];
+  for (const name of featuredIntegrationNames) {
+    const matchingIntegrations = featuredIntegrations.filter(
+      ({ name: integrationName }) => integrationName === name
+    );
+    orderedFeaturedIntegrations.push(...matchingIntegrations);
+  }
 
   return [...orderedFeaturedIntegrations, ...otherIntegrations];
 }

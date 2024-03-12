@@ -16,7 +16,7 @@ function createNumericAggDefinition({
 }: {
   name: string;
   description: string;
-  args?: Array<{ name: string; type: string; value: string }>;
+  args?: Array<{ name: string; type: string; value: string; literalOnly?: boolean }>;
 }): FunctionDefinition {
   const extraParamsExample = args.length ? `, ${args.map(({ value }) => value).join(',')}` : '';
   return {
@@ -28,10 +28,11 @@ function createNumericAggDefinition({
       {
         params: [
           { name: 'column', type: 'number', noNestingFunctions: true },
-          ...args.map(({ name: paramName, type }) => ({
+          ...args.map(({ name: paramName, type, literalOnly }) => ({
             name: paramName,
             type,
             noNestingFunctions: true,
+            literalOnly,
           })),
         ],
         returnType: 'number',
@@ -87,7 +88,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
     description: i18n.translate('monaco.esql.definitions.percentiletDoc', {
       defaultMessage: 'Returns the n percentile of a field.',
     }),
-    args: [{ name: 'percentile', type: 'number', value: '90' }],
+    args: [{ name: 'percentile', type: 'number', value: '90', literalOnly: true }],
   },
 ]
   .map(createNumericAggDefinition)
@@ -124,7 +125,10 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       supportedCommands: ['stats'],
       signatures: [
         {
-          params: [{ name: 'column', type: 'any', noNestingFunctions: true }],
+          params: [
+            { name: 'column', type: 'any', noNestingFunctions: true },
+            { name: 'precision', type: 'number', noNestingFunctions: true, optional: true },
+          ],
           returnType: 'number',
           examples: [
             `from index | stats result = count_distinct(field)`,
@@ -143,7 +147,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       signatures: [
         {
           params: [{ name: 'column', type: 'cartesian_point', noNestingFunctions: true }],
-          returnType: 'number',
+          returnType: 'cartesian_point',
           examples: [
             `from index | stats result = st_centroid(cartesian_field)`,
             `from index | stats st_centroid(cartesian_field)`,
@@ -151,7 +155,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         },
         {
           params: [{ name: 'column', type: 'geo_point', noNestingFunctions: true }],
-          returnType: 'number',
+          returnType: 'geo_point',
           examples: [
             `from index | stats result = st_centroid(geo_field)`,
             `from index | stats st_centroid(geo_field)`,

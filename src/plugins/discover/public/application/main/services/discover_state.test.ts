@@ -25,20 +25,16 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import { waitFor } from '@testing-library/react';
-import { DiscoverCustomizationContext, FetchStatus } from '../../types';
+import { FetchStatus } from '../../types';
 import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view_complex';
 import { copySavedSearch } from './discover_saved_search_container';
 import { createKbnUrlStateStorage, IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 
 const startSync = (appState: DiscoverAppStateContainer) => {
   const { start, stop } = appState.syncState();
   start();
   return stop;
-};
-
-const customizationContext: DiscoverCustomizationContext = {
-  displayMode: 'standalone',
-  showLogsExplorerTabs: false,
 };
 
 async function getState(
@@ -58,7 +54,7 @@ async function getState(
   const nextState = getDiscoverStateContainer({
     services: discoverServiceMock,
     history: nextHistory,
-    customizationContext,
+    customizationContext: mockCustomizationContext,
   });
   nextState.appState.isEmptyURL = jest.fn(() => isEmptyUrl ?? true);
   jest.spyOn(nextState.dataState, 'fetch');
@@ -95,7 +91,7 @@ describe('Test discover state', () => {
     state = getDiscoverStateContainer({
       services: discoverServiceMock,
       history,
-      customizationContext,
+      customizationContext: mockCustomizationContext,
     });
     state.savedSearchState.set(savedSearchMock);
     state.appState.update({}, true);
@@ -178,7 +174,7 @@ describe('Test discover state with overridden state storage', () => {
     state = getDiscoverStateContainer({
       services: discoverServiceMock,
       history,
-      customizationContext,
+      customizationContext: mockCustomizationContext,
       stateStorageContainer: stateStorage,
     });
     state.savedSearchState.set(savedSearchMock);
@@ -264,7 +260,7 @@ describe('Test createSearchSessionRestorationDataProvider', () => {
   const discoverStateContainer = getDiscoverStateContainer({
     services: discoverServiceMock,
     history,
-    customizationContext,
+    customizationContext: mockCustomizationContext,
   });
   discoverStateContainer.appState.update({
     index: savedSearchMock.searchSource.getField('index')!.id,
@@ -439,6 +435,7 @@ describe('Test discover state actions', () => {
         "columns": Array [
           "default_column",
         ],
+        "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
         "refreshInterval": undefined,
@@ -846,7 +843,7 @@ describe('Test discover state with embedded mode', () => {
       services: discoverServiceMock,
       history,
       customizationContext: {
-        ...customizationContext,
+        ...mockCustomizationContext,
         displayMode: 'embedded',
       },
     });

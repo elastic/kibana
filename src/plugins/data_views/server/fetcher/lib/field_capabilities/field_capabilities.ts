@@ -24,6 +24,8 @@ interface FieldCapabilitiesParams {
   indexFilter?: QueryDslQueryContainer;
   fields?: string[];
   expandWildcards?: ExpandWildcard;
+  fieldTypes?: string[];
+  includeEmptyFields?: boolean;
 }
 
 /**
@@ -45,6 +47,8 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     metaFields = [],
     fields,
     expandWildcards,
+    fieldTypes,
+    includeEmptyFields,
   } = params;
   const esFieldCaps = await callFieldCapsApi({
     callCluster,
@@ -53,6 +57,8 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     indexFilter,
     fields,
     expandWildcards,
+    fieldTypes,
+    includeEmptyFields,
   });
   const fieldCapsArr = readFieldCapsResponse(esFieldCaps.body);
   const fieldsFromFieldCapsByName = keyBy(fieldCapsArr, 'name');

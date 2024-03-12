@@ -137,8 +137,8 @@ RUN set -e ; \
  chown -R 1000:0 /usr/share/kibana/openssl-3.0.8
 
 # Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
-RUN echo -e '\n--enable-fips' >> config/node.options
-RUN echo '--openssl-config=/usr/share/kibana/openssl-3.0.8/nodejs.cnf' >> config/node.options
+RUN /usr/bin/echo -e '\n--enable-fips' >> config/node.options
+RUN /usr/bin/echo '--openssl-config=/usr/share/kibana/openssl-3.0.8/nodejs.cnf' >> config/node.options
 COPY --chown=1000:0 openssl/nodejs.cnf /usr/share/kibana/openssl-3.0.8/nodejs.cnf
 ENV OPENSSL_MODULES=/usr/local/lib64/ossl-modules
 
@@ -158,8 +158,9 @@ COPY --chown=1000:0 config/serverless.es.yml /usr/share/kibana/config/serverless
 COPY --chown=1000:0 config/serverless.oblt.yml /usr/share/kibana/config/serverless.oblt.yml
 COPY --chown=1000:0 config/serverless.security.yml /usr/share/kibana/config/serverless.security.yml
 # Supportability enhancement: enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
-RUN echo -e '\n--heapsnapshot-signal=SIGUSR2' >> config/node.options
-RUN echo '--diagnostic-dir=./data' >> config/node.options
+RUN /usr/bin/echo -e '\n--heapsnapshot-signal=SIGUSR2' >> config/node.options
+RUN /usr/bin/echo '--diagnostic-dir=./data' >> config/node.options
+ENV PROFILER_SIGNAL=SIGUSR1
 {{/serverless}}
 {{^opensslLegacyProvider}}
 RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options
@@ -221,7 +222,7 @@ ENTRYPOINT ["/bin/tini", "--"]
 CMD ["/app/kibana.sh"]
 # Generate a stub command that will be overwritten at runtime
 RUN mkdir /app && \
-    echo -e '#!/bin/bash\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
+    /usr/bin/echo -e '#!/bin/bash\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
     chmod 0555 /app/kibana.sh
 {{/cloud}}
 

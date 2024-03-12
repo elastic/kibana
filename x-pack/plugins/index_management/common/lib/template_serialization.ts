@@ -23,9 +23,11 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
     indexPatterns,
     template,
     composedOf,
+    ignoreMissingComponentTemplates,
     dataStream,
     _meta,
     allowAutoCreate,
+    deprecated,
   } = templateDeserialized;
 
   return {
@@ -35,8 +37,10 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
     index_patterns: indexPatterns,
     data_stream: dataStream,
     composed_of: composedOf,
+    ignore_missing_component_templates: ignoreMissingComponentTemplates,
     allow_auto_create: allowAutoCreate,
     _meta,
+    deprecated,
   };
 }
 
@@ -52,6 +56,7 @@ export function deserializeTemplate(
     priority,
     _meta,
     composed_of: composedOf,
+    ignore_missing_component_templates: ignoreMissingComponentTemplates,
     data_stream: dataStream,
     deprecated,
     allow_auto_create: allowAutoCreate,
@@ -76,6 +81,7 @@ export function deserializeTemplate(
     template,
     ilmPolicy: settings?.index?.lifecycle,
     composedOf: composedOf ?? [],
+    ignoreMissingComponentTemplates: ignoreMissingComponentTemplates ?? [],
     dataStream,
     allowAutoCreate,
     _meta,

@@ -29,7 +29,6 @@ import {
 import { ConfigureFields } from './configure_fields';
 import { ConfigurePipeline } from './configure_pipeline';
 import { EMPTY_PIPELINE_CONFIGURATION } from './ml_inference_logic';
-import { NoModelsPanel } from './no_models';
 import { ReviewPipeline } from './review_pipeline';
 import { TestPipeline } from './test_pipeline';
 import { AddInferencePipelineSteps } from './types';
@@ -81,11 +80,6 @@ describe('AddInferencePipelineFlyout', () => {
       setMockValues({ ...DEFAULT_VALUES, isLoading: true });
       const wrapper = shallow(<AddInferencePipelineContent onClose={onClose} />);
       expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
-    });
-    it('renders no models panel when there are no models', () => {
-      setMockValues({ ...DEFAULT_VALUES, supportedMLModels: [] });
-      const wrapper = shallow(<AddInferencePipelineContent onClose={onClose} />);
-      expect(wrapper.find(NoModelsPanel)).toHaveLength(1);
     });
     it('renders AddInferencePipelineHorizontalSteps', () => {
       const wrapper = shallow(<AddInferencePipelineContent onClose={onClose} />);

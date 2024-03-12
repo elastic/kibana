@@ -23,6 +23,7 @@ describe('multi select filter', () => {
         { label: 'tag d', key: 'tag d' },
       ],
       onChange,
+      isLoading: false,
     };
 
     render(<MultiSelectFilter {...props} />);
@@ -46,6 +47,7 @@ describe('multi select filter', () => {
       selectedOptionKeys: ['tag a'],
       limit: 1,
       limitReachedMessage: 'Limit reached',
+      isLoading: false,
     };
 
     const { rerender } = render(<MultiSelectFilter {...props} />);
@@ -76,6 +78,7 @@ describe('multi select filter', () => {
       selectedOptionKeys: ['tag a'],
       limit: 2,
       limitReachedMessage: 'Limit reached',
+      isLoading: false,
     };
 
     const { rerender } = render(<MultiSelectFilter {...props} />);
@@ -109,6 +112,7 @@ describe('multi select filter', () => {
       selectedOptionKeys: ['tag a'],
       limit: 1,
       limitReachedMessage: 'Limit reached',
+      isLoading: false,
     };
 
     render(<MultiSelectFilter {...props} />);
@@ -134,6 +138,7 @@ describe('multi select filter', () => {
       ],
       onChange,
       selectedOptionKeys: ['tag b'],
+      isLoading: false,
     };
 
     const { rerender } = render(<MultiSelectFilter {...props} />);
@@ -154,6 +159,7 @@ describe('multi select filter', () => {
       ],
       onChange,
       renderOption,
+      isLoading: false,
     };
 
     render(<MultiSelectFilter {...props} />);
@@ -173,6 +179,7 @@ describe('multi select filter', () => {
       ],
       onChange,
       selectedOptionKeys: ['tag b'],
+      isLoading: false,
     };
 
     const { rerender } = render(<MultiSelectFilter {...props} />);

@@ -78,7 +78,9 @@ export const App: FunctionComponent = () => {
         initialFilter=""
         initialPageSize={50}
         listingLimit={1000}
-        onClickTitle={({ attributes }) => setSelectedFile(attributes as unknown as FileJSON)}
+        getOnClickTitle={({ attributes }) =>
+          () =>
+            setSelectedFile(attributes as unknown as FileJSON)}
         deleteItems={async (items) => {
           await filesClient.bulkDelete({ ids: items.map(({ id }) => id) });
         }}

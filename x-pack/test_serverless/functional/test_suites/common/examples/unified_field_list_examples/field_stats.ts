@@ -29,8 +29,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
   describe('Field stats', () => {
     before(async () => {
-      // TODO: Serverless tests require login first
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(

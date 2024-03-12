@@ -28,6 +28,7 @@ export const templateSchema = schema.object({
     })
   ),
   composedOf: schema.maybe(schema.arrayOf(schema.string())),
+  ignoreMissingComponentTemplates: schema.maybe(schema.arrayOf(schema.string())),
   dataStream: schema.maybe(
     schema.object(
       {
@@ -48,4 +49,5 @@ export const templateSchema = schema.object({
     hasDatastream: schema.maybe(schema.boolean()),
     isLegacy: schema.maybe(schema.boolean()),
   }),
+  deprecated: schema.maybe(schema.boolean()),
 });

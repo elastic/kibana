@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 
 // Just copying all feature keys for now.
-// We may need a different set of keys in the future if we create serverless-specific appFeatures
-export const DEFAULT_APP_FEATURES = [...ALL_APP_FEATURE_KEYS];
+// We may need a different set of keys in the future if we create serverless-specific productFeatures
+export const DEFAULT_PRODUCT_FEATURES = [...ALL_PRODUCT_FEATURE_KEYS];

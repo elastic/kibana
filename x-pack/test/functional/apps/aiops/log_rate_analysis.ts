@@ -36,8 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await ml.jobSourceSelection.selectSourceForLogRateAnalysis(testData.sourceIndexOrSavedSearch);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/176387
-    it.skip(`${testData.suiteTitle} displays index details`, async () => {
+    it(`${testData.suiteTitle} displays index details`, async () => {
       await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the time range step`);
       await aiops.logRateAnalysisPage.assertTimeRangeSelectorSectionExists();
 
@@ -162,6 +161,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.logRateAnalysisPage.assertAnalysisComplete(
         testData.analysisType,
         testData.dataGenerator
+      );
+
+      await aiops.logRateAnalysisPage.assertUrlState(
+        testData.expected.globalState,
+        testData.expected.appState
       );
 
       // The group switch should be disabled by default
@@ -292,6 +296,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         after(async () => {
           await elasticChart.setNewChartUiDebugFlag(false);
+          await ml.testResources.deleteDataViewByTitle(testData.sourceIndexOrSavedSearch);
           await aiops.logRateAnalysisDataGenerator.removeGeneratedData(testData.dataGenerator);
         });
 

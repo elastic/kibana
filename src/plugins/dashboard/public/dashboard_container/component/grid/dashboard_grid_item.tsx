@@ -6,20 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
-import classNames from 'classnames';
-
-import { PhaseEvent } from '@kbn/presentation-publishing';
+import { css } from '@emotion/react';
 import {
-  ReactEmbeddableRenderer,
   EmbeddablePanel,
   reactEmbeddableRegistryHasKey,
+  ReactEmbeddableRenderer,
   ViewMode,
 } from '@kbn/embeddable-plugin/public';
-
-import { css } from '@emotion/react';
+import { PhaseEvent } from '@kbn/presentation-publishing';
+import classNames from 'classnames';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { DashboardPanelState } from '../../../../common';
+import { getReferencesForPanelId } from '../../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
@@ -101,17 +100,19 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       : css``;
 
     const renderedEmbeddable = useMemo(() => {
+      const references = getReferencesForPanelId(id, container.savedObjectReferences);
+      // render React embeddable
       if (reactEmbeddableRegistryHasKey(type)) {
         return (
           <ReactEmbeddableRenderer
             uuid={id}
             key={`${type}_${id}`}
             type={type}
-            // TODO Embeddable refactor. References here
-            state={{ rawState: panel.explicitInput, version: panel.version, references: [] }}
+            state={{ rawState: panel.explicitInput, version: panel.version, references }}
           />
         );
       }
+      // render legacy embeddable
       return (
         <EmbeddablePanel
           key={type}
@@ -124,8 +125,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         />
       );
     }, [container, id, index, onPanelStatusChange, type, panel]);
-
-    // render legacy embeddable
 
     return (
       <div
