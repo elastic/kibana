@@ -46,7 +46,7 @@ describe('CasesConnector', () => {
   const mockExecute = jest.fn();
   const getCasesClient = jest.fn().mockResolvedValue({ foo: 'bar' });
   const getSpaceId = jest.fn().mockReturnValue('default');
-  const getScopedSavedObjectClient = jest.fn();
+  const getUnsecuredSavedObjectsClient = jest.fn();
   // 1ms delay before retrying
   const nextBackOff = jest.fn().mockReturnValue(1);
 
@@ -54,7 +54,7 @@ describe('CasesConnector', () => {
     create: () => ({ nextBackOff }),
   };
 
-  const casesParams = { getCasesClient, getSpaceId, getScopedSavedObjectClient };
+  const casesParams = { getCasesClient, getSpaceId, getUnsecuredSavedObjectsClient };
   const connectorParams = {
     configurationUtilities: actionsConfigMock.create(),
     config: {},
