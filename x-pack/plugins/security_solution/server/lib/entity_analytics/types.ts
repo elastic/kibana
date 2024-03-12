@@ -27,6 +27,7 @@ export interface CalculateScoresParams {
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
   isAlertSamplingDisabled?: boolean;
+  alertSampleSizePerShard?: number;
 }
 
 export interface CalculateAndPersistScoresParams {
@@ -40,6 +41,7 @@ export interface CalculateAndPersistScoresParams {
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
   isAlertSamplingDisabled?: boolean;
+  alertSampleSizePerShard?: number;
 }
 
 export interface CalculateAndPersistScoresResponse {
@@ -153,4 +155,5 @@ export interface RiskEngineConfiguration {
   pageSize: number;
   range: Range;
   isAlertSamplingDisabled: boolean;
+  alertSampleSizePerShard: number;
 }

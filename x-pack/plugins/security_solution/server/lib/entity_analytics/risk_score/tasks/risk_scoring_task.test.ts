@@ -195,6 +195,7 @@ describe('Risk Scoring Task', () => {
         pageSize: 10_000,
         range: { start: 'now-30d', end: 'now' },
         isAlertSamplingDisabled: false,
+        alertSampleSizePerShard: 10_000,
       });
       mockIsCancelled = jest.fn().mockReturnValue(false);
 
@@ -272,6 +273,7 @@ describe('Risk Scoring Task', () => {
           pageSize: 11_111,
           range: { start: 'now-30d', end: 'now' },
           isAlertSamplingDisabled: false,
+          alertSampleSizePerShard: 10_000,
         });
         await runTask({
           getRiskScoreService,
@@ -307,6 +309,7 @@ describe('Risk Scoring Task', () => {
             pageSize: 10_000,
             range: { start: 'now-30d', end: 'now' },
             isAlertSamplingDisabled: false,
+            alertSampleSizePerShard: 10_000,
           });
           // add additional mock responses for the additional identifier calls
           mockRiskScoreService.calculateAndPersistScores
@@ -377,6 +380,7 @@ describe('Risk Scoring Task', () => {
             pageSize: 11_111,
             range: { start: 'now-30d', end: 'now' },
             isAlertSamplingDisabled: false,
+            alertSampleSizePerShard: 10_000,
           });
           await runTask({
             getRiskScoreService,

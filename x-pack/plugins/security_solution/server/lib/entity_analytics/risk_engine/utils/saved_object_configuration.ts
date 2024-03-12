@@ -27,6 +27,7 @@ const getDefaultRiskEngineConfiguration = ({
   pageSize: 3_500,
   range: { start: 'now-30d', end: 'now' },
   isAlertSamplingDisabled: false,
+  alertSampleSizePerShard: 10_000,
 });
 
 const getConfigurationSavedObject = async ({

@@ -235,6 +235,7 @@ export const runTask = async ({
       range: configuredRange,
       pageSize,
       isAlertSamplingDisabled,
+      alertSampleSizePerShard,
     } = configuration;
     if (!enabled) {
       log('risk engine is not enabled, exiting task');
@@ -263,6 +264,7 @@ export const runTask = async ({
           runtimeMappings,
           weights: [],
           isAlertSamplingDisabled,
+          alertSampleSizePerShard,
         });
 
         isWorkComplete = isRiskScoreCalculationComplete(result) || isCancelled();

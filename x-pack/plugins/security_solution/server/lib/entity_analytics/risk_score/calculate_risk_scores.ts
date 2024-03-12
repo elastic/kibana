@@ -210,12 +210,14 @@ const buildIdentifierTypeAggregation = ({
   pageSize,
   weights,
   isAlertSamplingDisabled,
+  alertSampleSizePerShard,
 }: {
   afterKeys: AfterKeys;
   identifierType: IdentifierType;
   pageSize: number;
   weights?: RiskWeights;
   isAlertSamplingDisabled: boolean;
+  alertSampleSizePerShard: number;
 }): AggregationsAggregationContainer => {
   const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType({ identifierType, weights });
   const identifierField = getFieldForIdentifierAgg(identifierType);
@@ -234,7 +236,7 @@ const buildIdentifierTypeAggregation = ({
     : {
         top_n_per_shard: {
           sampler: {
-            shard_size: 10000, // How many alerts per shard we process
+            shard_size: alertSampleSizePerShard,
           },
           aggs: {
             inputs: riskInputsAggregation,
@@ -322,6 +324,7 @@ export const calculateRiskScores = async ({
   runtimeMappings,
   weights,
   isAlertSamplingDisabled = false,
+  alertSampleSizePerShard = 10000,
 }: {
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
@@ -377,6 +380,7 @@ export const calculateRiskScores = async ({
           pageSize,
           weights,
           isAlertSamplingDisabled,
+          alertSampleSizePerShard,
         });
         return aggs;
       }, {} as Record<string, AggregationsAggregationContainer>),
