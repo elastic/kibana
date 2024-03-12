@@ -22,6 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
   const es = getService('es');
+  const logger = getService('log');
 
   describe('Custom Threshold rule data view >', () => {
     const DATA_VIEW_ID = 'data-view-id';
@@ -51,6 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
         name: 'test-data-view',
         id: DATA_VIEW_ID,
         title: 'random-index*',
+        logger,
       });
     });
 
@@ -59,6 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
       await deleteDataView({
         supertest,
         id: DATA_VIEW_ID,
+        logger,
       });
     });
 
@@ -66,6 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('create a threshold rule', async () => {
         const createdRule = await createRule({
           supertest,
+          logger,
           tags: ['observability'],
           consumer: 'logs',
           name: 'Threshold rule',

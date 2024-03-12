@@ -28,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const supertest = getService('supertest');
   const logger = getService('log');
+  const retryService = getService('retry');
 
   describe('Metric threshold rule >', () => {
     let ruleId: string;
@@ -57,9 +58,11 @@ export default function ({ getService }: FtrProviderContext) {
           supertest,
           name: 'Index Connector: Metric threshold API test',
           indexName: ALERT_ACTION_INDEX,
+          logger,
         });
         const createdRule = await createRule<MetricThresholdParams>({
           supertest,
+          logger,
           ruleTypeId: InfraRuleType.MetricThreshold,
           consumer: 'infrastructure',
           tags: ['infrastructure'],
@@ -125,6 +128,8 @@ export default function ({ getService }: FtrProviderContext) {
           id: ruleId,
           expectedStatus: 'active',
           supertest,
+          retryService,
+          logger,
         });
         expect(executionStatus.status).to.be('active');
       });
@@ -134,6 +139,8 @@ export default function ({ getService }: FtrProviderContext) {
           esClient,
           indexName: METRICS_ALERTS_INDEX,
           ruleId,
+          retryService,
+          logger,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
         startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
@@ -191,6 +198,8 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await waitForDocumentInIndex<{ ruleType: string; alertDetailsUrl: string }>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
+          retryService,
+          logger,
         });
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('metrics.alert.threshold');
