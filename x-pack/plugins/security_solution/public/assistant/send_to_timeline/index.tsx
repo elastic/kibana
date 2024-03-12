@@ -18,13 +18,11 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 import type { TimeRange } from '../../common/store/inputs/model';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
-import { TimelineType } from '../../../common/api/timeline';
 import {
   ACTION_CANNOT_INVESTIGATE_IN_TIMELINE,
   ACTION_INVESTIGATE_IN_TIMELINE,
 } from '../../detections/components/alerts_table/translations';
 import type { DataProvider } from '../../timelines/components/timeline/data_providers/data_provider';
-import { useCreateTimeline } from '../../timelines/hooks/use_create_timeline';
 import {
   applyKqlFilterQuery,
   setActiveTabTimeline,
@@ -69,14 +67,6 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
 
-  const hasTemplateProviders =
-    dataProviders && dataProviders.find((provider) => provider.type === 'template');
-
-  const clearTimeline = useCreateTimeline({
-    timelineId: TimelineId.active,
-    timelineType: hasTemplateProviders ? TimelineType.template : TimelineType.default,
-  });
-
   const configureAndOpenTimeline = useCallback(async () => {
     // Hide the assistant overlay so timeline can be seen (noop if using assistant in timeline)
     showAssistantOverlay({ showOverlay: false });
@@ -120,14 +110,6 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
         return;
       }
 
-      // Reset the current timeline
-      if (timeRange) {
-        await clearTimeline({
-          timeRange,
-        });
-      } else {
-        await clearTimeline();
-      }
       if (dataProviders) {
         // Ensure Security Solution Default DataView is selected (so it's not just alerts)
         dispatch(
@@ -228,11 +210,9 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
     showAssistantOverlay,
     dataProviders,
     filters,
-    timeRange,
     keepDataView,
     dispatch,
     discoverStateContainer,
-    clearTimeline,
     timelineDataViewId,
     defaultDataView.id,
     signalIndexName,
