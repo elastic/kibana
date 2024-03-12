@@ -6,5 +6,5 @@
  */
 
 export function asInteger(value: number) {
-  return Math.round(value ?? 0).toString();
+  return Math.round(value).toString();
 }
