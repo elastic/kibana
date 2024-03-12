@@ -6,64 +6,30 @@
  * Side Public License, v 1.
  */
 
-import type { DeepPartial, SerializableRecord } from '@kbn/utility-types';
-import { noop } from 'lodash';
+import type { SerializableRecord } from '@kbn/utility-types';
 import React, { createContext, FC, useContext, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDiscoverServices } from '../hooks/use_discover_services';
 import { RuntimeContextManager } from './runtime_context_manager';
 
-export enum DataSourceType {
-  DataView = 'data_view',
-  Esql = 'esql',
-}
-
 export interface DiscoverRuntimeContext extends SerializableRecord {
-  /**
-   * The type of data source that is currently being used.
-   */
-  dataSourceType: DataSourceType;
   returnLocation?: {
     url: string;
     title: string;
   };
 }
 
-export interface DiscoverRuntimeContextEvents {
-  /**
-   * Fired when the data source type changes.
-   */
-  onDataSourceTypeChange: (dataSourceType: DataSourceType) => void;
-}
-
 export const createDiscoverRuntimeContext = (
-  runtimeContext: DeepPartial<DiscoverRuntimeContext> = {}
+  runtimeContext: Partial<DiscoverRuntimeContext> = {}
 ): Readonly<DiscoverRuntimeContext> => {
   return {
-    dataSourceType: runtimeContext.dataSourceType ?? DataSourceType.DataView,
+    returnLocation: runtimeContext.returnLocation,
   };
 };
 
 const runtimeContext = createContext(createDiscoverRuntimeContext());
 
-export const createDiscoverRuntimeContextEvents = (): DiscoverRuntimeContextEvents => ({
-  onDataSourceTypeChange: noop,
-});
-
-const eventsContext = createContext(createDiscoverRuntimeContextEvents());
-
 export const DiscoverRuntimeContextProvider: FC = ({ children }) => {
-  // const [context, setContext] = useState(createDiscoverRuntimeContext());
-
-  const events = useMemo<DiscoverRuntimeContextEvents>(
-    () => ({
-      onDataSourceTypeChange: (dataSourceType: DataSourceType) => {
-        // setContext((ctx) => ({ ...ctx, dataSourceType }));
-      },
-    }),
-    []
-  );
-
   const { storage } = useDiscoverServices();
   const [runtimeContextManager] = useState(() => new RuntimeContextManager(storage));
   const { location } = useHistory();
@@ -78,13 +44,7 @@ export const DiscoverRuntimeContextProvider: FC = ({ children }) => {
     [contextId, runtimeContextManager]
   );
 
-  return (
-    <runtimeContext.Provider value={context}>
-      <eventsContext.Provider value={events}>{children}</eventsContext.Provider>
-    </runtimeContext.Provider>
-  );
+  return <runtimeContext.Provider value={context}>{children}</runtimeContext.Provider>;
 };
 
 export const useDiscoverRuntimeContext = () => useContext(runtimeContext);
-
-export const useDiscoverRuntimeContextEvents = () => useContext(eventsContext);

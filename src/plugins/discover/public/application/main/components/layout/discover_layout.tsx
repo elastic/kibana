@@ -54,7 +54,7 @@ import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { ESQLTechPreviewCallout } from './esql_tech_preview_callout';
 import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
-import { DataSourceType, useDiscoverContext } from '../../../../customizations';
+import { useDiscoverContext } from '../../../../customizations';
 import { RuntimeContextNavigator } from '../../../../customizations/runtime_context_navigator';
 import { RuntimeContextManager } from '../../../../customizations/runtime_context_manager';
 
@@ -230,31 +230,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       <>
         {/* Temporarily display a tech preview callout for ES|QL*/}
         {isPlainRecord && <ESQLTechPreviewCallout docLinks={docLinks} />}
-        <div>
-          <a
-            href={locator.getRedirectUrl({})}
-            onClick={(e) => {
-              e.preventDefault();
-              navigator.navigateWithContext(
-                {
-                  runtimeContext: {
-                    ...runtimeContext,
-                    dataSourceType:
-                      runtimeContext.dataSourceType === DataSourceType.DataView
-                        ? DataSourceType.Esql
-                        : DataSourceType.DataView,
-                  },
-                },
-                { openInNewTab: true }
-              );
-            }}
-            css={{
-              marginRight: 10,
-            }}
-          >
-            SWAP
-          </a>
-          <span css={{ marginRight: 10, fontWeight: 'bold' }}>{runtimeContext.dataSourceType}</span>
+        <div css={{ margin: '8px 0 0 0' }}>
+          <span css={{ margin: '0 10px', fontWeight: 'bold' }}>Profile: </span>
           {allProfiles.map((profile) => (
             <a
               key={profile.id}
@@ -271,6 +248,33 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
               {profile.displayName}
             </a>
           ))}
+          <span css={{ margin: '0 10px', fontWeight: 'bold' }}>Runtime context: </span>
+          <a
+            href={locator.getRedirectUrl({})}
+            onClick={(e) => {
+              e.preventDefault();
+              navigator.navigateWithContext(
+                {
+                  runtimeContext: {
+                    returnLocation: {
+                      title: 'Return to SLOs',
+                      url: 'http://localhost:5601/app/observability/slos',
+                    },
+                  },
+                  timeRange: {
+                    from: 'now-7d',
+                    to: 'now',
+                  },
+                },
+                { openInNewTab: true }
+              );
+            }}
+            css={{
+              marginRight: 10,
+            }}
+          >
+            Navigate with &quot;Return to SLOs&quot; button
+          </a>
         </div>
         <DiscoverHistogramLayout
           isPlainRecord={isPlainRecord}
@@ -302,7 +306,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     onFieldEdited,
     panelsToggle,
     resultState,
-    runtimeContext,
     stateContainer,
     viewMode,
   ]);

@@ -36,7 +36,6 @@ import {
   DiscoverCustomizationProvider,
   useDiscoverContext,
   useDiscoverCustomizationService,
-  useDiscoverRuntimeContextEvents,
 } from '../../customizations';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { isTextBasedQuery } from './utils/is_text_based_query';
@@ -67,12 +66,10 @@ export function DiscoverMainRoute({ stateStorageContainer }: MainRouteProps) {
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
   const { rootContext } = useDiscoverContext();
-  const runtimeContextEvents = useDiscoverRuntimeContextEvents();
   const { stateContainer, resetStateContainer } = useDiscoverStateContainer({
     history,
     services,
     rootContext,
-    runtimeContextEvents,
     stateStorageContainer,
   });
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
