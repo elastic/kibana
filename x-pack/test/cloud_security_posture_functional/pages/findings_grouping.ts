@@ -292,7 +292,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('3 cloud accounts');
+        expect(groupCount).to.be('2 cloud accounts');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
@@ -349,7 +349,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('3 kubernetes clusters');
+        expect(groupCount).to.be('2 kubernetes clusters');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
