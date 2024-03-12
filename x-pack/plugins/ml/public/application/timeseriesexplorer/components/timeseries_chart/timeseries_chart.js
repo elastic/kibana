@@ -40,7 +40,7 @@ import {
 import { timeBucketsServiceFactory } from '../../../util/time_buckets_service';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
-import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
+import { timeSeriesExplorerServiceFactory } from '../../../util/time_series_explorer_service';
 import { mlEscape } from '../../../util/string_utils';
 import {
   ANNOTATION_MASK_ID,
@@ -136,6 +136,7 @@ class TimeseriesChartIntl extends Component {
 
   static contextType = context;
   getTimeBuckets;
+  mlTimeSeriesExplorer;
 
   rowMouseenterSubscriber = null;
   rowMouseleaveSubscriber = null;
@@ -158,6 +159,11 @@ class TimeseriesChartIntl extends Component {
   }
 
   componentDidMount() {
+    this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
+      this.context.services.uiSettings,
+      this.context.services.mlServices.mlApiServices,
+      this.context.services.mlServices.mlResultsService
+    );
     this.getTimeBuckets = timeBucketsServiceFactory(
       this.context.services.uiSettings
     ).getTimeBuckets;
@@ -1878,7 +1884,7 @@ class TimeseriesChartIntl extends Component {
     // Depending on the way the chart is aggregated, there may not be
     // a point at exactly the same time as the record being highlighted.
     const anomalyTime = record.source.timestamp;
-    const markerToSelect = findChartPointForAnomalyTime(
+    const markerToSelect = this.mlTimeSeriesExplorer.findChartPointForAnomalyTime(
       focusChartData,
       anomalyTime,
       focusAggregationInterval

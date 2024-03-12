@@ -21,12 +21,12 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { withKibana, context } from '@kbn/kibana-react-plugin/public';
 import { timeFormatter } from '@kbn/ml-date-utils';
 
 import { FORECAST_REQUEST_STATE } from '../../../../../../../common/constants/states';
 import { addItemToRecentlyAccessed } from '../../../../../util/recently_accessed';
-import { mlForecastService } from '../../../../../services/forecast_service';
+import { forecastServiceProvider } from '../../../../../services/forecast_service_provider';
 import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
@@ -45,13 +45,22 @@ export class ForecastsTableUI extends Component {
       isLoading: props.job.data_counts.processed_record_count !== 0,
       forecasts: [],
     };
+    this.mlForecastService;
   }
 
+  /**
+   * Access ML services in react context.
+   */
+  static contextType = context;
+
   componentDidMount() {
+    this.mlForecastService = forecastServiceProvider(
+      this.context.services.mlServices.mlApiServices
+    );
     const dataCounts = this.props.job.data_counts;
     if (dataCounts.processed_record_count > 0) {
       // Get the list of all the forecasts with results at or later than the specified 'from' time.
-      mlForecastService
+      this.mlForecastService
         .getForecastsSummary(
           this.props.job,
           null,

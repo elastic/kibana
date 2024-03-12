@@ -18,7 +18,7 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { withKibana, context } from '@kbn/kibana-react-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../../../common/constants/states';
@@ -29,7 +29,7 @@ import { Modal } from './modal';
 import { PROGRESS_STATES } from './progress_states';
 import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';
-import { mlForecastService } from '../../../services/forecast_service';
+import { forecastServiceProvider } from '../../../services/forecast_service_provider';
 
 export const FORECAST_DURATION_MAX_DAYS = 3650; // Max forecast duration allowed by analytics.
 
@@ -70,6 +70,19 @@ export class ForecastingModalUI extends Component {
 
     // Used to poll for updates on a running forecast.
     this.forecastChecker = null;
+
+    this.mlForecastService;
+  }
+
+  /**
+   * Access ML services in react context.
+   */
+  static contextType = context;
+
+  componentDidMount() {
+    this.mlForecastService = forecastServiceProvider(
+      this.context.services.mlServices.mlApiServices
+    );
   }
 
   addMessage = (message, status, clearFirst = false) => {
@@ -238,7 +251,7 @@ export class ForecastingModalUI extends Component {
     // formats accepted by Kibana (w, M, y) are not valid formats in Elasticsearch.
     const durationInSeconds = parseInterval(this.state.newForecastDuration).asSeconds();
 
-    mlForecastService
+    this.mlForecastService
       .runForecast(this.props.job.job_id, `${durationInSeconds}s`)
       .then((resp) => {
         // Endpoint will return { acknowledged:true, id: <now timestamp> } before forecast is complete.
@@ -259,7 +272,7 @@ export class ForecastingModalUI extends Component {
     let previousProgress = 0;
     let noProgressMs = 0;
     this.forecastChecker = setInterval(() => {
-      mlForecastService
+      this.mlForecastService
         .getForecastRequestStats(this.props.job, forecastId)
         .then((resp) => {
           // Get the progress (stats value is between 0 and 1).
@@ -387,7 +400,7 @@ export class ForecastingModalUI extends Component {
           forecast_status: FORECAST_REQUEST_STATE.FINISHED,
         },
       };
-      mlForecastService
+      this.mlForecastService
         .getForecastsSummary(job, statusFinishedQuery, bounds.min.valueOf(), FORECASTS_VIEW_MAX)
         .then((resp) => {
           this.setState({

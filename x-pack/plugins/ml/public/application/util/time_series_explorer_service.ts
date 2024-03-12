@@ -25,11 +25,6 @@ import { timeBucketsServiceFactory } from './time_buckets_service';
 import type { TimeRangeBounds } from './time_buckets';
 import type { Job } from '../../../common/types/anomaly_detection_jobs';
 import type { TimeBucketsInterval } from './time_buckets';
-import type {
-  ChartDataPoint,
-  FocusData,
-  Interval,
-} from '../timeseriesexplorer/timeseriesexplorer_utils/get_focus_data';
 import type { CriteriaField } from '../services/results_service';
 import {
   MAX_SCHEDULED_EVENTS,
@@ -40,6 +35,28 @@ import { mlResultsServiceProvider, type MlResultsService } from '../services/res
 import { forecastServiceProvider } from '../services/forecast_service_provider';
 import { timeSeriesSearchServiceFactory } from '../timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 import { useMlKibana } from '../contexts/kibana';
+
+export interface Interval {
+  asMilliseconds: () => number;
+  expression: string;
+}
+
+export interface ChartDataPoint {
+  date: Date;
+  value: number | null;
+  upper?: number | null;
+  lower?: number | null;
+}
+
+export interface FocusData {
+  focusChartData: ChartDataPoint[];
+  anomalyRecords: MlAnomalyRecordDoc[];
+  scheduledEvents: any;
+  showForecastCheckbox?: boolean;
+  focusAnnotationError?: string;
+  focusAnnotationData?: any[];
+  focusForecastData?: any;
+}
 
 // TODO Consolidate with legacy code in
 // `ml/public/application/timeseriesexplorer/timeseriesexplorer_utils/timeseriesexplorer_utils.js`.
