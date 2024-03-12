@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CHART_TYPE, ChartType } from '../constants/charts';
+import type { ChartType } from '../constants/charts';
+import { CHART_TYPE } from '../constants/charts';
 import type { SeriesConfigWithMetadata } from '../types/results';
 
 /**
