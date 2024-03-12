@@ -12,10 +12,17 @@ import {
 } from '@kbn/unified-search-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getUiActions } from '../../../kibana_services';
+import { DiscoverServices } from '../../../build_services';
 
-export const updateFiltersReferences = (prevDataView: DataView, nextDataView: DataView) => {
-  const uiActions = getUiActions();
+export const updateFiltersReferences = ({
+  prevDataView,
+  nextDataView,
+  services: { uiActions },
+}: {
+  prevDataView: DataView;
+  nextDataView: DataView;
+  services: DiscoverServices;
+}) => {
   const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
   const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
   action?.execute({

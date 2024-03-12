@@ -122,7 +122,7 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
   }
 
   const isManaged = componentTemplateDetails?._kbnMeta.isManaged;
-  const isDeprecated = componentTemplateDetails?.isDeprecated;
+  const isDeprecated = componentTemplateDetails?.deprecated;
 
   return (
     <>
