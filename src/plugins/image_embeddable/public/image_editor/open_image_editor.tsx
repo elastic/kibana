@@ -18,7 +18,7 @@ interface ImageEditorDeps {
   security?: SecurityPluginStart;
 }
 
-export const getImageConfig = async (
+export const openImageEditor = async (
   { core, files, security }: ImageEditorDeps,
   initialConfig?: ImageConfig
 ) => {

@@ -18,7 +18,7 @@ import {
   useReactEmbeddableUnsavedChanges,
 } from '@kbn/embeddable-plugin/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { apiHasParentApi, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public/plugin';
 import { FileImageMetadata } from '@kbn/shared-ux-file-types';
@@ -27,7 +27,7 @@ import React, { useEffect, useLayoutEffect, useState } from 'react';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 import { imageClickTrigger } from '../actions';
-import { getImageConfig } from '../image_editor/open_image_editor';
+import { openImageEditor } from '../image_editor/open_image_editor';
 import { ImageViewer, ImageViewerContext } from '../image_viewer';
 import { FilesStart, imageEmbeddableFileKind } from '../imports';
 import { createValidateUrl } from '../utils/validate_url';
@@ -107,7 +107,7 @@ export const registerImageEmbeddableFactory = (deps: ImageEmbeddableFactoryDeps)
             unsavedChanges,
             resetUnsavedChanges,
             onEdit: async () => {
-              const imageConfig = await getImageConfig(
+              const imageConfig = await openImageEditor(
                 {
                   core: deps.core,
                   files: deps.files,

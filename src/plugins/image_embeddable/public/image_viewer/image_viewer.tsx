@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
-import { css, SerializedStyles } from '@emotion/react';
-import { FileImage } from '@kbn/shared-ux-file-image';
-import classNames from 'classnames';
 import {
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiImage,
-  useEuiTheme,
-  useResizeObserver,
-  useIsWithinBreakpoints,
   EuiImageProps,
+  useEuiTheme,
+  useIsWithinBreakpoints,
+  useResizeObserver,
 } from '@elastic/eui';
+import { css, SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FileImage } from '@kbn/shared-ux-file-image';
+import classNames from 'classnames';
+import React, { useEffect, useState } from 'react';
 import { ImageConfig } from '../types';
-import notFound from './not_found/not_found_light.png';
-import notFound2x from './not_found/not_found_light@2x.png';
 import { validateImageConfig } from '../utils/validate_image_config';
 import { useImageViewerContext } from './image_viewer_context';
+import notFound from './not_found/not_found_light.png';
+import notFound2x from './not_found/not_found_light@2x.png';
 
 export interface ImageViewerProps {
   imageConfig: ImageConfig;
@@ -50,7 +50,6 @@ export function ImageViewer({
   containerCSS,
   isScreenshotMode,
 }: ImageViewerProps) {
-  console.log('HJERE', { imageConfig });
   const { euiTheme } = useEuiTheme();
   const { getImageDownloadHref, validateUrl } = useImageViewerContext();
 

@@ -6,21 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, IExternalUrl } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
+import { CoreStart } from '@kbn/core/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
-import { getImageConfig } from '../image_editor/open_image_editor';
+import { openImageEditor } from '../image_editor/open_image_editor';
 import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
   IMAGE_EMBEDDABLE_TYPE,
 } from '../image_embeddable/constants';
 import { ImageEmbeddableStrings } from '../image_embeddable/image_embeddable_strings';
-import { FileImageMetadata, FilesStart, imageEmbeddableFileKind } from '../imports';
-import { createValidateUrl } from '../utils/validate_url';
+import { FilesStart } from '../imports';
 
 interface CreateImageDeps {
   core: CoreStart;
@@ -44,7 +42,7 @@ export const registerCreateImageAction = ({
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
 
-      const imageConfig = await getImageConfig({ core, files, security });
+      const imageConfig = await openImageEditor({ core, files, security });
 
       embeddable.addNewPanel({
         panelType: IMAGE_EMBEDDABLE_TYPE,

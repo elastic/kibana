@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import {
@@ -43,7 +43,7 @@ export interface StartContract {}
 export class ImageEmbeddablePlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
 {
-  constructor(protected readonly context: PluginInitializerContext) {}
+  constructor() {}
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
     plugins.uiActions.registerTrigger(imageClickTrigger);
