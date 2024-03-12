@@ -16,7 +16,9 @@ import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { singleSearchAfter } from '../utils/single_search_after';
 import { getFilter } from '../utils/get_filter';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
-import type { EventsAndTerms } from './wrap_new_terms_alerts';
+import { wrapSuppressedNewTermsAlerts } from './wrap_suppressed_new_terms_alerts';
+import { bulkCreateSuppressedAlertsInMemoryForNewTerms } from './bulk_create_suppressed_alerts_in_memory';
+import type { EventsAndTerms } from './types';
 import type {
   RecentTermsAggResult,
   DocFetchAggResult,
@@ -37,12 +39,13 @@ import {
   getMaxSignalsWarning,
 } from '../utils/utils';
 import { createEnrichEventsFunction } from '../utils/enrichments';
+import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import { multiTermsComposite } from './multi_terms_composite';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<NewTermsRuleParams, {}, {}, 'default'> => {
-  const { logger } = createOptions;
+  const { logger, licensing } = createOptions;
   return {
     id: NEW_TERMS_RULE_TYPE_ID,
     name: 'New Terms Rule',
@@ -104,6 +107,8 @@ export const createNewTermsAlertType = (
           alertTimestampOverride,
           publicBaseUrl,
           inputIndexFields,
+          experimentalFeatures,
+          alertWithSuppression,
         },
         services,
         params,
@@ -137,6 +142,11 @@ export const createNewTermsAlertType = (
         name: 'historyWindowStart',
       });
 
+      const isAlertSuppressionActive = await getIsAlertSuppressionActive({
+        alertSuppression: params.alertSuppression,
+        licensing,
+        isFeatureDisabled: !experimentalFeatures?.alertSuppressionForNewTermsRuleEnabled,
+      });
       let afterKey;
 
       const result = createSearchAfterReturnType();
@@ -191,6 +201,32 @@ export const createNewTermsAlertType = (
         const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
 
         const createAlertsHook: CreateAlertsHook = async (aggResult) => {
+          const wrapHits = (eventsAndTerms: EventsAndTerms[]) =>
+            wrapNewTermsAlerts({
+              eventsAndTerms,
+              spaceId,
+              completeRule,
+              mergeStrategy,
+              indicesToQuery: inputIndex,
+              alertTimestampOverride,
+              ruleExecutionLogger,
+              publicBaseUrl,
+            });
+
+          const wrapSuppressedHits = (eventsAndTerms: EventsAndTerms[]) =>
+            wrapSuppressedNewTermsAlerts({
+              eventsAndTerms,
+              spaceId,
+              completeRule,
+              mergeStrategy,
+              indicesToQuery: inputIndex,
+              alertTimestampOverride,
+              ruleExecutionLogger,
+              publicBaseUrl,
+              primaryTimestamp,
+              secondaryTimestamp,
+            });
+
           const eventsAndTerms: EventsAndTerms[] = (
             aggResult?.aggregations?.new_terms.buckets ?? []
           ).map((bucket) => {
@@ -201,29 +237,38 @@ export const createNewTermsAlertType = (
             };
           });
 
-          const wrappedAlerts = wrapNewTermsAlerts({
-            eventsAndTerms,
-            spaceId,
-            completeRule,
-            mergeStrategy,
-            indicesToQuery: inputIndex,
-            alertTimestampOverride,
-            ruleExecutionLogger,
-            publicBaseUrl,
-          });
-
-          const bulkCreateResult = await bulkCreate(
-            wrappedAlerts,
-            params.maxSignals - result.createdSignalsCount,
-            createEnrichEventsFunction({
+          if (isAlertSuppressionActive) {
+            const bulkCreateResult = await bulkCreateSuppressedAlertsInMemoryForNewTerms({
+              eventsAndTerms,
+              toReturn: result,
+              wrapHits,
+              bulkCreate,
               services,
-              logger: ruleExecutionLogger,
-            })
-          );
+              ruleExecutionLogger,
+              tuple,
+              alertSuppression: params.alertSuppression,
+              wrapSuppressedHits,
+              alertTimestampOverride,
+              alertWithSuppression,
+            });
 
-          addToSearchAfterReturn({ current: result, next: bulkCreateResult });
+            return bulkCreateResult;
+          } else {
+            const wrappedAlerts = wrapHits(eventsAndTerms);
 
-          return bulkCreateResult;
+            const bulkCreateResult = await bulkCreate(
+              wrappedAlerts,
+              params.maxSignals - result.createdSignalsCount,
+              createEnrichEventsFunction({
+                services,
+                logger: ruleExecutionLogger,
+              })
+            );
+
+            addToSearchAfterReturn({ current: result, next: bulkCreateResult });
+
+            return bulkCreateResult;
+          }
         };
 
         // separate route for multiple new terms
