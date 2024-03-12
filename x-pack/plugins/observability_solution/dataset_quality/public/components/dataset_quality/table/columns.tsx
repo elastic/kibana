@@ -144,7 +144,7 @@ export const getDatasetQualityTableColumns = ({
 
         return (
           <EuiButtonIcon
-            data-test-subj="datasetQualityGetDatasetQualityTableColumnsButton"
+            data-test-subj="datasetQualityExpandButton"
             size="m"
             color="text"
             onClick={() => openFlyout(dataStreamStat as FlyoutDataset)}
@@ -207,7 +207,7 @@ export const getDatasetQualityTableColumns = ({
           </span>
         </EuiToolTip>
       ),
-      field: 'degradedDocs',
+      field: 'degradedDocs.percentage',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
         <DegradedDocsPercentageLink

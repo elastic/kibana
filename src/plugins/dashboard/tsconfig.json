@@ -76,6 +76,7 @@
     "@kbn/content-management-table-list-view-common",
     "@kbn/shared-ux-utility",
     "@kbn/managed-content-badge",
+    "@kbn/core-test-helpers-model-versions",
   ],
   "exclude": ["target/**/*"]
 }
