@@ -25,7 +25,8 @@ import { timelineActions } from '../../../store';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, flatten } from 'lodash';
+import { COLUMNS_WITH_LINKS } from '../../../../common/lib/cell_actions/helpers';
 
 jest.mock('../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -611,5 +612,39 @@ describe('query tab with unified timeline', () => {
         expect(screen.queryAllByTestId('fieldListGroupedAvailableFields-count')).toHaveLength(0);
       });
     }, 10000);
+
+    it('should have all populated fields in Available fields section', async () => {
+      const listOfPopulatedFields = new Set(
+        flatten(
+          mockTimelineData.map((dataItem) =>
+            dataItem.data.map((item) =>
+              item.value && item.value.length > 0 ? item.field : undefined
+            )
+          )
+        ).filter((item) => typeof item !== 'undefined')
+      );
+
+      renderTestComponents();
+      expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
+      expect(await screen.findByTestId('fieldListGroupedAvailableFields')).toBeVisible();
+      const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
+
+      for (const field of listOfPopulatedFields) {
+        fireEvent.change(screen.getByTestId('fieldListFiltersFieldSearch'), {
+          target: { value: field },
+        });
+
+        expect(within(availableFields).getByTestId(`field-${field}`));
+      }
+    });
+  });
+  describe('when data view changes', () => {
+    it.todo('should display columns not applicable to that data view as blank');
+  });
+
+  describe('column rendering', () => {
+    for (const column of COLUMNS_WITH_LINKS) {
+      it.todo(`should render ${column.columnId} as a link`);
+    }
   });
 });

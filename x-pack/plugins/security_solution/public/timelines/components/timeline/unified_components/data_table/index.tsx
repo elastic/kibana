@@ -22,10 +22,10 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getAllFieldsByName } from '../../../../../common/containers/source';
+import memoizeOne from 'memoize-one';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../../../../common/types';
-import type { TimelineItem } from '../../../../../../common/search_strategy';
+import type { BrowserFields, TimelineItem } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type {
   ColumnHeaderOptions,
@@ -41,7 +41,7 @@ import { useSourcererDataView } from '../../../../../common/containers/sourcerer
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../../side_panel';
 import { SecurityCellActionsTrigger } from '../../../../../actions/constants';
-import { getColumnHeader } from '../../body/column_headers/helpers';
+import { getColumnHeader, getColumnHeaders } from '../../body/column_headers/helpers';
 import { getFormattedFields } from '../../body/renderers/formatted_field_udt';
 import { timelineBodySelector } from '../../body/selectors';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
@@ -78,6 +78,12 @@ interface CommonDataTableProps {
 interface DataTableProps extends CommonDataTableProps {
   dataView: DataView;
 }
+
+const memoizedGetColumnHeaders: (
+  headers: ColumnHeaderOptions[],
+  browserFields: BrowserFields,
+  isEventRenderedView: boolean
+) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
 /* eslint-disable react/display-name */
 export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
@@ -152,42 +158,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     const { timeline: { rowHeight, sampleSize } = timelineDefaults } = useSelector((state: State) =>
       timelineBodySelector(state, timelineId)
     );
-
-    // const { activeStep, isTourShown, incrementStep } = useTourContext();
-
-    /* const isTourAnchor = useMemo(
-        () =>
-          isTourShown(SecurityStepId.alertsCases) &&
-          eventType === 'signal' &&
-          isDetectionsAlertsTable(timelineId) &&
-          ariaRowindex === 1,
-        [isTourShown, ariaRowindex, eventType, timelineId]
-      );
-      const onExpandEvent = useCallback(() => {
-        if (
-          isTourAnchor &&
-          activeStep === AlertsCasesTourSteps.expandEvent &&
-          isTourShown(SecurityStepId.alertsCases)
-        ) {
-          incrementStep(SecurityStepId.alertsCases);
-        }
-        onEventDetailsPanelOpened();
-      }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);*/
-
-    /* const onRowSelected: OnRowSelected = useCallback(
-        ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
-          dispatch(
-            timelineActions.setSelected({
-              id,
-              eventIds: getEventIdToDataMapping(data, eventIds, queryFields),
-              isSelected,
-              isSelectAllChecked:
-                isSelected && Object.keys(selectedEventIds).length + 1 === data.length,
-            })
-          );
-        },
-        [data, dispatch, id, queryFields, selectedEventIds]
-      );*/
 
     const tableRows: Array<DataTableRecord & TimelineItem> = useMemo(
       () =>
@@ -356,17 +326,16 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [dispatch, timelineId]
     );
 
-    const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
+    const augumentedColumnHeaders = memoizedGetColumnHeaders(columns, browserFields, false);
 
     const customColumnRenderers = useMemo(
       () =>
         getFormattedFields({
           dataTableRows: tableRows,
           scopeId: 'timeline',
-          headers: columns,
-          browserFieldsByName,
+          headers: augumentedColumnHeaders,
         }),
-      [browserFieldsByName, columns, tableRows]
+      [augumentedColumnHeaders, tableRows]
     );
 
     const handleFetchMoreRecords = useCallback(() => {
