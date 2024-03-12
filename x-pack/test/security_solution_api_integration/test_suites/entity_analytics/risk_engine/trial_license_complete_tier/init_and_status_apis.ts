@@ -279,6 +279,7 @@ export default ({ getService }: FtrProviderContext) => {
             end: 'now',
             start: 'now-30d',
           },
+          isAlertSamplingDisabled: false,
         });
       });
 
