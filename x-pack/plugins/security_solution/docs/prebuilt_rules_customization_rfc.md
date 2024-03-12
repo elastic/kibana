@@ -102,9 +102,9 @@ pandoc prebuilt_rules_customization_rfc.md --toc --toc-depth=6 --wrap=none  -s -
 
 This RFC was initially planned to have a scope strictly limited to the Customization of Prebuilt Rules epic. However, another epic is, in parallel, in the discussion phase: the [Detections-as-Code (DaC) epic](https://docs.google.com/document/d/1MfPFa3Io82S91rRfdQde8Xi_9AGEbE44Z2MkIYWD10U/edit).
 
-Both epics have many areas of contact, and features/decisions in one need to take account features in the others.
+Both epics have many areas of contact, and features/decisions in one need to take account features in the other.
 
-This RFC includes some decision that will be taken in order to future-proof our archtecture for the upcoming DaC epic, but the vast majority will refer specifically to the Prebuilt Rules Customization epic. Elastic prebuilt rules will become a specific case of externally sourced rules: in the future, rules can be installed as Elastic prebuilt rules from our `detection-rules` repo, but also from any other repository handled by the user.
+This RFC includes some decisions that will be taken in order to future-proof our archtecture for the upcoming DaC epic, but the vast majority will refer specifically to the Prebuilt Rules Customization epic. Elastic prebuilt rules will become a specific case of externally sourced rules: in the future, rules can be installed as Elastic prebuilt rules from our `detection-rules` repo, but also from any other repository handled by the user.
 
 During this RFC, we will explicitly refer to case of Elastic prebuilt rules, but take into account that this will be only a specific case of all the possible external sources for rules.
 
@@ -2774,7 +2774,7 @@ The endpoint currently implemented contract needs to be updated as described in 
 
 #### Changes to `/upgrade/_perform` endpoint contract
 
-The endpoint's currently impled as deemented contract needs to be updatscribed in this [PoC](https://github.com/elastic/kibana/pull/144060).
+The endpoint's currently implemented contract needs to be updated as described in this [PoC](https://github.com/elastic/kibana/pull/144060).
 
 
 
@@ -2827,7 +2827,19 @@ Rules whose diffing algorithm resulted in a `CONFLICT` need to be manually resol
 
 > See [designs](https://www.figma.com/file/gLHm8LpTtSkAUQHrkG3RHU/%5B8.7%5D-%5BRules%5D-Rule-Immutability%2FCustomization?type=design&mode=design&t=LkauhLzUKUatF6cL-0#712870904).
 
+## Other changes to UX/UI
 
+### Rules Table page
+
+- The Rules Table's filter should be updated so that rules can be fitlered according to their status as **custom**, **Elastic prebuilt** and **customized Elastic prebuilt**. Notice that **customized Elastic prebuilt** will be a subset of **Elastic prebuilt**.
+
+### Rule Details page
+
+- The Rule Details page shouls include some kind of indication or text field that lets the user know if the current rules is **custom**, **Elastic prebuilt** and **customized Elastic prebuilt**. 
+
+## Design Discussion link
+
+For an up-to-date discussion on the design changes needed for Milestone 3, please see [this ticket](https://github.com/elastic/kibana/issues/178211).
 
 
 
