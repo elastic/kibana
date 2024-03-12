@@ -90,6 +90,7 @@ export const calculateAuthz = ({
   integrations,
   subfeatureEnabled,
 }: CalculateParams): FleetAuthz => {
+  // TODO remove fallback when the feature flag is removed
   const fleetAuthz: FleetAuthz['fleet'] = subfeatureEnabled
     ? {
         all: fleet.all && (integrations.all || integrations.read),
