@@ -108,6 +108,12 @@ export {
   useUnsavedChanges,
 } from './interfaces/publishes_unsaved_changes';
 export {
+  type HasLibraryTransforms,
+  apiHasLibraryTransforms,
+  type HasLegacyLibraryTransforms,
+  apiHasLegacyLibraryTransforms,
+} from './interfaces/has_library_transforms';
+export {
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
   usePublishingSubject,

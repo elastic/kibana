@@ -19,14 +19,14 @@ import {
 } from '@elastic/eui';
 
 import {
-  UnlinkFromLibraryAction,
-  UnlinkPanelFromLibraryActionApi,
-} from './unlink_from_library_action';
+  LegacyUnlinkFromLibraryAction,
+  LegacyUnlinkPanelFromLibraryActionApi,
+} from './legacy_unlink_from_library_action';
 import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
 
 export interface LibraryNotificationProps {
-  api: UnlinkPanelFromLibraryActionApi;
-  unlinkAction: UnlinkFromLibraryAction;
+  api: LegacyUnlinkPanelFromLibraryActionApi;
+  unlinkAction: LegacyUnlinkFromLibraryAction;
 }
 
 export function LibraryNotificationPopover({ unlinkAction, api }: LibraryNotificationProps) {

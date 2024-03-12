@@ -69,7 +69,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-lifecycle-browser",
     "@kbn/logging",
-    "@kbn/presentation-library",
     "@kbn/presentation-publishing",
     "@kbn/presentation-containers",
     "@kbn/presentation-panel-plugin",
