@@ -17,9 +17,6 @@ export {
   MOCK_IDP_ATTRIBUTE_ROLES,
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
-  MOCK_IDP_SEARCH_ROLE_NAMES,
-  MOCK_IDP_OBSERVABILITY_ROLE_NAMES,
-  MOCK_IDP_SECURITY_ROLE_NAMES,
 } from './constants';
 
 export { createMockIdpMetadata, createSAMLResponse, ensureSAMLRoleMapping } from './utils';

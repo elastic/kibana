@@ -69,6 +69,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .post(CHAT_API_URL)
         .set('kbn-xsrf', 'foo')
         .send({
+          name: 'my_api_call',
           messages,
           connectorId: 'does not exist',
           functions: [],
@@ -96,6 +97,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .set('kbn-xsrf', 'foo')
               .on('error', reject)
               .send({
+                name: 'my_api_call',
                 messages,
                 connectorId,
                 functions: [],
@@ -136,6 +138,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .post(CHAT_API_URL)
         .set('kbn-xsrf', 'foo')
         .send({
+          name: 'my_api_call',
           messages,
           connectorId,
           functions: [],
@@ -170,8 +173,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const response = JSON.parse(data);
 
-      expect(response.message).to.contain(
-        `an error occurred while running the action - Status code: 400. Message: API Error: Bad Request - This model's maximum context length is 8192 tokens. However, your messages resulted in 11036 tokens. Please reduce the length of the messages.`
+      expect(response.message).to.be(
+        `Token limit reached. Token limit is 8192, but the current conversation has 11036 tokens.`
       );
     });
 

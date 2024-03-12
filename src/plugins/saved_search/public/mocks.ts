@@ -57,6 +57,7 @@ const savedSearchStartMock = (): SavedSearchPublicPluginStart => ({
         id,
         title: result.attributes.title,
         searchSource: createEmptySearchSource(),
+        managed: false,
       })
     ),
   },

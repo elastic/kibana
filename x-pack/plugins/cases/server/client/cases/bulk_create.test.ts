@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
+import Boom from '@hapi/boom';
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_TAGS_PER_CASE,
@@ -21,7 +23,6 @@ import { bulkCreate } from './bulk_create';
 import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
-import { omit } from 'lodash';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -354,6 +355,38 @@ describe('bulkCreate', () => {
         expect(error.wrappedError.output).toEqual({
           headers: {},
           payload: { error: 'Not Found', message: 'My error', statusCode: 404 },
+          statusCode: 404,
+        });
+      }
+    });
+
+    it('constructs the case error correctly in case of an SO decorated error', async () => {
+      expect.assertions(1);
+
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [
+          caseSO,
+          {
+            id: '1',
+            type: 'cases',
+            // @ts-expect-error: the error property of the SO client is not typed correctly
+            error: {
+              ...Boom.boomify(new Error('My error'), {
+                statusCode: 404,
+                message: 'SO not found',
+              }),
+            },
+            references: [],
+          },
+        ],
+      });
+
+      try {
+        await bulkCreate({ cases: getCases() }, clientArgs, casesClientMock);
+      } catch (error) {
+        expect(error.wrappedError.output).toEqual({
+          headers: {},
+          payload: { error: 'Not Found', message: 'Not Found', statusCode: 404 },
           statusCode: 404,
         });
       }
@@ -752,29 +785,23 @@ describe('bulkCreate', () => {
 
   describe('Custom Fields', () => {
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({ saved_objects: [caseSO] });
     const theCase = getCases()[0];
-
     const casesClient = createCasesClientMock();
-    casesClient.configure.get = jest.fn().mockResolvedValue([
+    const defaultCustomFieldsConfiguration = [
       {
-        owner: theCase.owner,
-        customFields: [
-          {
-            key: 'first_key',
-            type: CustomFieldTypes.TEXT,
-            label: 'foo',
-            required: true,
-          },
-          {
-            key: 'second_key',
-            type: CustomFieldTypes.TOGGLE,
-            label: 'foo',
-            required: false,
-          },
-        ],
+        key: 'first_key',
+        type: CustomFieldTypes.TEXT,
+        label: 'label 1',
+        required: true,
+        defaultValue: 'default value',
       },
-    ]);
+      {
+        key: 'second_key',
+        type: CustomFieldTypes.TOGGLE,
+        label: 'label 2',
+        required: false,
+      },
+    ];
 
     const theCustomFields: CaseCustomFields = [
       {
@@ -789,6 +816,19 @@ describe('bulkCreate', () => {
       },
     ];
 
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+      casesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: theCase.owner,
+          customFields: defaultCustomFieldsConfiguration,
+        },
+      ]);
+    });
+
     it('should bulkCreate customFields correctly', async () => {
       await expect(
         bulkCreate({ cases: getCases({ customFields: theCustomFields }) }, clientArgs, casesClient)
@@ -800,22 +840,16 @@ describe('bulkCreate', () => {
       expect(customFields).toEqual(theCustomFields);
     });
 
-    it('should not throw an error and fill out missing customFields when they are undefined', async () => {
+    it('fills out missing required custom fields', async () => {
       casesClient.configure.get = jest.fn().mockResolvedValue([
         {
           owner: theCase.owner,
           customFields: [
+            defaultCustomFieldsConfiguration[0],
             {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'foo',
-              required: false,
-            },
-            {
-              key: 'second_key',
-              type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
-              required: false,
+              ...defaultCustomFieldsConfiguration[1],
+              required: true,
+              defaultValue: true,
             },
           ],
         },
@@ -829,55 +863,25 @@ describe('bulkCreate', () => {
         clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0].customFields;
 
       expect(customFields).toEqual([
-        { key: 'first_key', type: 'text', value: null },
-        { key: 'second_key', type: 'toggle', value: null },
+        { key: 'first_key', type: 'text', value: 'default value' },
+        { key: 'second_key', type: 'toggle', value: true },
       ]);
     });
 
-    it('should throw an error when required customFields are undefined', async () => {
+    it('throws error when required customFields are null', async () => {
       casesClient.configure.get = jest.fn().mockResolvedValue([
         {
           owner: theCase.owner,
           customFields: [
             {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
+              ...defaultCustomFieldsConfiguration[0],
               label: 'missing field 1',
-              required: true,
             },
             {
-              key: 'second_key',
-              type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
-              required: false,
-            },
-          ],
-        },
-      ]);
-
-      await expect(
-        bulkCreate({ cases: getCases() }, clientArgs, casesClient)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: Missing required custom fields: \\"missing field 1\\""`
-      );
-    });
-
-    it('should throw an error when required customFields are null', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
-        {
-          owner: theCase.owner,
-          customFields: [
-            {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'missing field 1',
-              required: true,
-            },
-            {
-              key: 'second_key',
-              type: CustomFieldTypes.TOGGLE,
+              ...defaultCustomFieldsConfiguration[1],
               label: 'missing field 2',
               required: true,
+              defaultValue: true,
             },
           ],
         },
@@ -905,7 +909,32 @@ describe('bulkCreate', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: Missing required custom fields: \\"missing field 1\\", \\"missing field 2\\""`
+        `"Failed to bulk create cases: Error: Invalid value \\"null\\" supplied for the following required custom fields: \\"missing field 1\\", \\"missing field 2\\""`
+      );
+    });
+
+    it('throws error when required customFields are undefined and missing a default value', async () => {
+      casesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: theCase.owner,
+          customFields: [
+            {
+              ...defaultCustomFieldsConfiguration[0],
+              required: true,
+              defaultValue: undefined,
+            },
+            {
+              ...defaultCustomFieldsConfiguration[1],
+              required: true,
+            },
+          ],
+        },
+      ]);
+
+      await expect(
+        bulkCreate({ cases: getCases() }, clientArgs, casesClient)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to bulk create cases: Error: Missing required custom fields without default value configured: \\"label 1\\", \\"label 2\\""`
       );
     });
 
@@ -925,7 +954,7 @@ describe('bulkCreate', () => {
       );
     });
 
-    it('throws with duplicated customFields keys', async () => {
+    it('throws error with duplicated customFields keys', async () => {
       await expect(
         bulkCreate(
           {
@@ -974,28 +1003,6 @@ describe('bulkCreate', () => {
       );
     });
 
-    it('throws error when required custom fields are missing', async () => {
-      await expect(
-        bulkCreate(
-          {
-            cases: getCases({
-              customFields: [
-                {
-                  key: 'second_key',
-                  type: CustomFieldTypes.TEXT,
-                  value: 'this is a text field value',
-                },
-              ],
-            }),
-          },
-          clientArgs,
-          casesClient
-        )
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: Missing required custom fields: \\"missing field 1\\""`
-      );
-    });
-
     it('throws when the customField types do not match the configuration', async () => {
       await expect(
         bulkCreate(
@@ -1019,7 +1026,7 @@ describe('bulkCreate', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: The following custom fields have the wrong type in the request: first_key,second_key"`
+        `"Failed to bulk create cases: Error: The following custom fields have the wrong type in the request: \\"label 1\\", \\"label 2\\""`
       );
     });
 
@@ -1062,7 +1069,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: casesWithDifferentOwners }, clientArgs, casesClient)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: Missing required custom fields: \\"stack cases custom field\\""`
+        `"Failed to bulk create cases: Error: Missing required custom fields without default value configured: \\"stack cases custom field\\""`
       );
     });
 

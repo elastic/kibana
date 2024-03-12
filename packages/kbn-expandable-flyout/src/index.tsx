@@ -11,7 +11,8 @@ import { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlyout } from '@elastic/eui';
 import { useSectionSizes } from './hooks/use_sections_sizes';
 import { useWindowSize } from './hooks/use_window_size';
-import { useExpandableFlyoutContext } from './context';
+import { useExpandableFlyoutState } from './hooks/use_expandable_flyout_state';
+import { useExpandableFlyoutApi } from './hooks/use_expandable_flyout_api';
 import { PreviewSection } from './components/preview_section';
 import { RightSection } from './components/right_section';
 import type { FlyoutPanelProps, Panel } from './types';
@@ -40,9 +41,8 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
 }) => {
   const windowWidth = useWindowSize();
 
-  const { closeFlyout, panels } = useExpandableFlyoutContext();
-
-  const { left, right, preview } = panels;
+  const { left, right, preview } = useExpandableFlyoutState();
+  const { closeFlyout } = useExpandableFlyoutApi();
 
   const leftSection = useMemo(
     () => registeredPanels.find((panel) => panel.key === left?.id),

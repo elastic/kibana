@@ -911,7 +911,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.etw',
       {
-        defaultMessage: 'Enable collection of ETW events. Default: true',
+        defaultMessage: 'Deprecated.',
       }
     ),
   },
@@ -1520,6 +1520,83 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'How much memory (in MB) should Endpoint aim to keep resident in RAM? This setting affects Private Working Set on Windows. It does not affect the amount of virtual memory that Endpoint requests from the OS (Private Bytes aka Commit Charge). If plenty of unused RAM is available, Windows may give Endpoint more RAM than requested to reduce unnecessary paging and improve performance. If the current Defend configuration requires regularly touching more than the requested amount of memory, then the Private Working Set will be higher than requested here. Default 200. This value cannot be decreased below 50.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.alerts.sample_collection',
+    first_supported_version: '8.13',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.sample_collection',
+      {
+        defaultMessage:
+          "A value of 'false' disables malicious sample collection for Windows alerts. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.alerts.sample_collection',
+    first_supported_version: '8.13',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.sample_collection',
+      {
+        defaultMessage:
+          "A value of 'false' disables malicious sample collection for Mac alerts. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.alerts.sample_collection',
+    first_supported_version: '8.13',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.sample_collection',
+      {
+        defaultMessage:
+          "A value of 'false' disables malicious sample collection for Linux alerts. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.disable_image_load_suppression_cache',
+    first_supported_version: '8.12.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.disable_image_load_suppression_cache',
+      {
+        defaultMessage:
+          'The image load suppression cache improves system performance by enabling Endpoint to tell its kernel driver about DLLs which are un-interesting and will never be evented upon. This feature improves system reponsiveness and reduces Endpoint CPU usage.  Use this setting only for troubleshooting if image load events are not being generated as expected. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.disable_registry_write_suppression',
+    first_supported_version: '8.12.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.disable_registry_write_suppression',
+      {
+        defaultMessage:
+          'Registry write suppression improves system performance by enabling Endpoint to tell its driver that certain types of registry operations are uninteresting. Once deemed uninteresting, the driver can quickly drop these events, improving system responsiveness and reducing Endpoint CPU usage. Use this setting only for troubleshooting if registry events are not functioning as expected. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.process.creation_flags',
+    first_supported_version: '8.13.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process.creation_flags',
+      {
+        defaultMessage:
+          'Enables an additional enrichment for process events. Use this setting only for troubleshooting if process events are not functioning as expected. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.flags',
+    first_supported_version: '8.13.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.flags',
+      {
+        defaultMessage:
+          'A comma-separated list of feature flags. Currently no feature flags are supported.',
       }
     ),
   },

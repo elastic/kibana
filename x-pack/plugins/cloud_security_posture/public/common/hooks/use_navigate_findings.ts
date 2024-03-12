@@ -57,7 +57,7 @@ const useNavigate = (pathname: string, dataViewId = SECURITY_DEFAULT_DATA_VIEW_I
   const { services } = useKibana();
 
   return useCallback(
-    (filterParams: NavFilter = {}) => {
+    (filterParams: NavFilter = {}, groupBy?: string[]) => {
       const filters = Object.entries(filterParams).map(([key, filterValue]) =>
         createFilter(key, filterValue, dataViewId)
       );
@@ -68,10 +68,11 @@ const useNavigate = (pathname: string, dataViewId = SECURITY_DEFAULT_DATA_VIEW_I
           // Set query language from user's preference
           query: services.data.query.queryString.getDefaultQuery(),
           filters,
+          ...(groupBy && { groupBy }),
         }),
       });
     },
-    [pathname, history, services.data.query.queryString, dataViewId]
+    [history, pathname, services.data.query.queryString, dataViewId]
   );
 };
 

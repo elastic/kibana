@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ResizeObserver } from '@juggle/resize-observer';
 import type React from 'react';
 import type { Store, Middleware, Dispatch, AnyAction } from 'redux';
 import type { BBox } from 'rbush';
@@ -315,6 +314,8 @@ export interface DataState {
   };
 
   readonly detectedBounds?: TimeFilters;
+
+  readonly overriddenTimeBounds?: TimeFilters;
 
   readonly tree?: {
     /**

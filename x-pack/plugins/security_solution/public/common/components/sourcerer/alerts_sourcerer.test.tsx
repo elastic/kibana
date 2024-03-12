@@ -9,14 +9,7 @@ import React from 'react';
 
 import { Sourcerer } from '.';
 import { sourcererModel } from '../../store/sourcerer';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../mock';
-import { createStore } from '../../store';
+import { TestProviders } from '../../mock';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -57,14 +50,11 @@ jest.mock('../../utils/global_query_string', () => {
   };
 });
 
-let store: ReturnType<typeof createStore>;
 const sourcererDataView = {
   indicesExist: true,
   loading: false,
 };
 describe('sourcerer on alerts page or rules details page', () => {
-  const { storage } = createSecuritySolutionStorageMock();
-  store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const testProps = {
     scope: sourcererModel.SourcererScopeName.detections,
   };
@@ -85,7 +75,7 @@ describe('sourcerer on alerts page or rules details page', () => {
     });
 
     render(
-      <TestProviders store={store}>
+      <TestProviders>
         <Sourcerer {...testProps} />
       </TestProviders>
     );

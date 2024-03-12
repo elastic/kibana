@@ -32,20 +32,6 @@ export const NOTES = i18n.translate('xpack.securitySolution.timeline.properties.
   defaultMessage: 'Notes',
 });
 
-export const NEW_TIMELINE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.newTimelineButtonLabel',
-  {
-    defaultMessage: 'Create new Timeline',
-  }
-);
-
-export const NEW_TEMPLATE_TIMELINE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.newTemplateTimelineButtonLabel',
-  {
-    defaultMessage: 'Create new Timeline template',
-  }
-);
-
 export const ADD_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.properties.addTimelineButtonLabel',
   {

@@ -7,8 +7,6 @@
  */
 
 import * as fs from 'fs';
-import { extname } from 'path';
-import { load as loadYaml } from 'js-yaml';
 import { Role, User } from './types';
 
 export const readCloudUsersFromFile = (filePath: string): Array<[Role, User]> => {
@@ -21,16 +19,4 @@ export const readCloudUsersFromFile = (filePath: string): Array<[Role, User]> =>
   }
 
   return Object.entries(JSON.parse(data)) as Array<[Role, User]>;
-};
-
-export const readRolesFromResource = (resourcePath: string) => {
-  if (!fs.existsSync(resourcePath) || extname(resourcePath) !== '.yml') {
-    throw new Error(`${resourcePath} does not exist or not a yml file`);
-  }
-  const data = loadYaml(fs.readFileSync(resourcePath, 'utf8'));
-  if (typeof data === 'object' && data !== null) {
-    return Object.keys(data);
-  } else {
-    throw new Error(`expected ${resourcePath} file to parse to an object`);
-  }
 };

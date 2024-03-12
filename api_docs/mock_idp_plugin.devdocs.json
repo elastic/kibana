@@ -46,7 +46,7 @@
         "label": "MOCK_IDP_REALM_NAME",
         "description": [],
         "signature": [
-          "\"mock-idp\""
+          "\"cloud-saml-kibana\""
         ],
         "path": "packages/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,

@@ -18,7 +18,6 @@ import { SessionView } from '.';
 import userEvent from '@testing-library/user-event';
 import { useDateFormat } from '../../hooks';
 import { GET_TOTAL_IO_BYTES_ROUTE, PROCESS_EVENTS_ROUTE } from '../../../common/constants';
-import { ResizeObserver } from '@juggle/resize-observer';
 
 jest.mock('../../hooks/use_date_format');
 const mockUseDateFormat = useDateFormat as jest.Mock;
@@ -45,8 +44,6 @@ describe('SessionView component', () => {
         dispatchEvent: jest.fn(),
       })),
     });
-
-    global.ResizeObserver = ResizeObserver;
   });
 
   beforeEach(() => {

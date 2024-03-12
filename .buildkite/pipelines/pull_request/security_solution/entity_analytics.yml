@@ -3,7 +3,9 @@ steps:
     label: 'Serverless Entity Analytics - Security Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -15,7 +17,9 @@ steps:
     label: 'Entity Analytics - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 2
     retry:

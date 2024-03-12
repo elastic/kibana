@@ -119,10 +119,10 @@ export const AGENT_BINARY_SOURCES_FLYOUT = {
 export const SETTINGS_OUTPUTS = {
   EDIT_BTN: 'editOutputBtn',
   ADD_BTN: 'addOutputBtn',
+  TABLE: 'settingsOutputsTable',
   NAME_INPUT: 'settingsOutputsFlyout.nameInput',
   TYPE_INPUT: 'settingsOutputsFlyout.typeInput',
   ADD_HOST_ROW_BTN: 'fleetServerHosts.multiRowInput.addRowButton',
-  WARNING_KAFKA_CALLOUT: 'settingsOutputsFlyout.kafkaOutputTypeCallout',
   WARNING_ELASTICSEARCH_CALLOUT: 'settingsOutputsFlyout.elasticsearchOutputTypeCallout',
   PRESET_INPUT: 'settingsOutputsFlyout.presetInput',
 };
@@ -163,12 +163,6 @@ export const SETTINGS_OUTPUTS_KAFKA = {
   PARTITIONING_HASH_INPUT: 'settingsOutputsFlyout.kafkaPartitionTypeHashInput',
   TOPICS_PANEL: 'settingsOutputsFlyout.kafkaTopicsPanel',
   TOPICS_DEFAULT_TOPIC_INPUT: 'settingsOutputsFlyout.kafkaDefaultTopicInput',
-  TOPICS_ADD_ROW_BUTTON: 'fleetServerHosts.kafkaTopicsInput.addRowButton',
-  TOPICS_DRAG_HANDLE_ICON: 'settingsOutputsFlyout.kafkaTopicsProcessorDragHandle0',
-  TOPICS_WHEN_INPUT: 'settingsOutputsFlyout.kafkaTopicsProcessorWhenInput0',
-  TOPICS_CONDITION_INPUT: 'settingsOutputsFlyout.kafkaTopicsProcessorConditionInput0',
-  TOPICS_TOPIC_INPUT: 'settingsOutputsFlyout.kafkaTopicsProcessorTopicInput0',
-  TOPICS_REMOVE_ROW_BUTTON: 'settingsOutputsFlyout.kafkaTopicsProcessorDeleteButton0',
   HEADERS_PANEL: 'settingsOutputsFlyout.kafkaHeadersPanel',
   HEADERS_KEY_INPUT: 'settingsOutputsFlyout.kafkaHeadersKeyInput0',
   HEADERS_VALUE_INPUT: 'settingsOutputsFlyout.kafkaHeadersValueInput0',
@@ -189,6 +183,7 @@ export const SETTINGS_OUTPUTS_KAFKA = {
 export const SETTINGS_FLEET_SERVER_HOSTS = {
   ADD_BUTTON: 'settings.fleetServerHosts.addFleetServerHostBtn',
   EDIT_BUTTON: 'fleetServerHostsTable.edit.btn',
+  TABLE: 'settingsFleetServerHostsTable',
 };
 
 export const AGENT_POLICY_FORM = {

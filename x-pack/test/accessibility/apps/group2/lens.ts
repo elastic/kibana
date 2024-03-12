@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -14,6 +15,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
+  const find = getService('find');
+
+  const hasFocus = async (testSubject: string) => {
+    const targetElement = await testSubjects.find(testSubject);
+    const activeElement = await find.activeElement();
+    return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
+  };
 
   describe('Lens Accessibility', () => {
     const lensChartName = 'MyLensChart';
@@ -81,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('lens datatable with palette panel open', async () => {
-      await PageObjects.lens.openPalettePanel('lnsDatatable');
+      await PageObjects.lens.openPalettePanel();
       await a11y.testAppSnapshot();
     });
 
@@ -174,6 +182,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.checkListingSelectAllCheckbox();
       await listingTable.clickDeleteSelected();
       await PageObjects.common.clickConfirmOnModal();
+    });
+
+    describe('focus behavior when adding or removing layers', () => {
+      it('should focus the added layer', async () => {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVisType('lens');
+        await PageObjects.lens.createLayer();
+        expect(await hasFocus('lns-layerPanel-1')).to.be(true);
+      });
+      it('should focus the remaining layer when the first is removed', async () => {
+        await PageObjects.lens.removeLayer(0);
+        expect(await hasFocus('lns-layerPanel-0')).to.be(true);
+        await PageObjects.lens.createLayer();
+        await PageObjects.lens.removeLayer(1);
+        expect(await hasFocus('lns-layerPanel-0')).to.be(true);
+      });
+      it('should focus the only layer when resetting the layer', async () => {
+        await PageObjects.lens.removeLayer();
+        expect(await hasFocus('lns-layerPanel-0')).to.be(true);
+      });
     });
   });
 }

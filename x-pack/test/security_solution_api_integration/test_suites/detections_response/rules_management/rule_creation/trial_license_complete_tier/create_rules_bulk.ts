@@ -18,22 +18,24 @@ import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detect
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-  getRuleForAlertTesting,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
-  waitForRuleSuccess,
   getActionsWithFrequencies,
   getActionsWithoutFrequencies,
   getSomeActionsWithFrequencies,
   removeUUIDFromActions,
 } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+  waitForRuleSuccess,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {

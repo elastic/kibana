@@ -99,6 +99,7 @@ describe('Test discover app state container', () => {
       hideChart: true,
       rowsPerPage: 250,
       hideAggregatedPreview: true,
+      managed: false,
     } as SavedSearch;
 
     test('should return correct output', () => {
@@ -114,6 +115,7 @@ describe('Test discover app state container', () => {
           interval: 'auto',
           query: customQuery,
           rowHeight: undefined,
+          headerRowHeight: undefined,
           rowsPerPage: 250,
           hideAggregatedPreview: true,
           savedQuery: undefined,
@@ -135,6 +137,7 @@ describe('Test discover app state container', () => {
           filter: [customFilter],
           query: undefined,
         }),
+        managed: false,
       };
       const appState = state.getAppStateFromSavedSearch(newSavedSearchMock);
       expect(appState).toMatchObject(
@@ -148,6 +151,7 @@ describe('Test discover app state container', () => {
           interval: 'auto',
           query: defaultQuery,
           rowHeight: undefined,
+          headerRowHeight: undefined,
           rowsPerPage: undefined,
           hideAggregatedPreview: undefined,
           savedQuery: undefined,

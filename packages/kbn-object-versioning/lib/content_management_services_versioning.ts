@@ -69,18 +69,20 @@ const validateServiceDefinitions = (definitions: ServiceDefinitionVersioned) => 
  * ```ts
  * From this
  * {
+ *   // Service definition version 1
  *   1: {
  *     get: {
  *       in: {
- *         options: { up: () => {} } // 1
+ *         options: { up: () => {} }
  *       }
  *     },
  *     ...
  *   },
+ *   // Service definition version 2
  *   2: {
  *     get: {
  *       in: {
- *         options: { up: () => {} } // 2
+ *         options: { up: () => {} }
  *       }
  *     },
  *   }

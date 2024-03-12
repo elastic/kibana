@@ -22,6 +22,7 @@ import {
   DashboardDrilldownOptions,
   DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
 } from '@kbn/presentation-util-plugin/public';
+import type { HasParentApi, PublishesLocalUnifiedSearch } from '@kbn/presentation-publishing';
 
 import {
   DASHBOARD_LINK_TYPE,
@@ -115,7 +116,12 @@ export const DashboardLinkComponent = ({
 
     const params: DashboardLocatorParams = {
       dashboardId: link.destination,
-      ...getDashboardLocatorParamsFromEmbeddable(linksEmbeddable, linkOptions),
+      ...getDashboardLocatorParamsFromEmbeddable(
+        linksEmbeddable as Partial<
+          PublishesLocalUnifiedSearch & HasParentApi<Partial<PublishesLocalUnifiedSearch>>
+        >,
+        linkOptions
+      ),
     };
 
     const locator = dashboardContainer.locator;

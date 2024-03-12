@@ -1,0 +1,37 @@
+---
+# Define the connection to Elasticsearch
+elasticsearch:
+  host: "http://localhost:9200"
+  username: "elastic"
+  password: "changeme"
+  installKibanaUser: false
+
+# Define the connection to Kibana
+kibana:
+  host: "http://localhost:5601"
+  username: "elastic"
+  password: "changeme"
+  installAssets: false
+
+# Define the indexing options
+indexing:
+  dataset: "fake_stack"
+  interval: 6000
+  eventsPerCycle: 1
+  payloadSize: 10000
+  concurrency: 5
+
+# Define the schedule
+schedule:
+  # This step will send "good" events
+  - template: "good"
+    start: "now-2m"
+    end: "now+1m"
+  # This step will send "bad" events, with errors
+  - template: "bad"
+    start: "now+1m"
+    end: "now+5m"
+  # Recover to good events
+  - template: "good"
+    start: "now+5m"
+    end: "now+10m" 

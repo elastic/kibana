@@ -1186,7 +1186,7 @@
             "section": "def-public.ExpressionInputProps",
             "text": "ExpressionInputProps"
           },
-          " extends Pick<React.HTMLAttributes<HTMLDivElement>, \"style\" | \"className\">"
+          " extends Pick<React.HTMLAttributes<HTMLDivElement>, \"className\" | \"style\">"
         ],
         "path": "src/plugins/presentation_util/public/components/types.ts",
         "deprecated": false,

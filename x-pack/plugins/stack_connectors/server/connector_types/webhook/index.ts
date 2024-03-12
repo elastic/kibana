@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import type {
@@ -139,12 +140,13 @@ export function getConnectorType(): WebhookConnectorType {
 }
 
 function renderParameterTemplates(
+  logger: Logger,
   params: ActionParamsType,
   variables: Record<string, unknown>
 ): ActionParamsType {
   if (!params.body) return params;
   return {
-    body: renderMustacheString(params.body, variables, 'json'),
+    body: renderMustacheString(logger, params.body, variables, 'json'),
   };
 }
 

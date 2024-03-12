@@ -11,3 +11,4 @@ export { useLastSeenInactiveAgentsCount } from './use_last_seen_inactive_agents_
 export { useInactiveAgentsCalloutHasBeenDismissed } from './use_inactive_agents_callout_has_been_dismissed';
 export { useAgentSoftLimit } from './use_agent_soft_limit';
 export { useMissingEncryptionKeyCallout } from './use_missing_encryption_key_callout';
+export { useFetchAgentsData } from './use_fetch_agents_data';

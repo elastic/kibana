@@ -54,7 +54,8 @@ export default function ({ getService }: FtrProviderContext) {
       monitors = _monitors;
     });
 
-    describe('get many monitors', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/169753
+    describe.skip('get many monitors', () => {
       it('without params', async () => {
         const [mon1, mon2] = await Promise.all(monitors.map(saveMonitor));
 

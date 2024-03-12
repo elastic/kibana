@@ -26,6 +26,8 @@ export const DEFAULT_OUTPUT: NewOutput = {
   hosts: [''],
 };
 
+export const SERVERLESS_DEFAULT_OUTPUT_ID = 'es-default-output';
+
 export const LICENCE_FOR_PER_POLICY_OUTPUT = 'platinum';
 
 /**
@@ -122,12 +124,12 @@ export const kafkaSupportedVersions = [
 
 export const RESERVED_CONFIG_YML_KEYS = [
   'bulk_max_size',
-  'workers',
+  'compression_level',
+  'connection_idle_timeout',
   'queue.mem.events',
-  'flush.min_events',
-  'flush.timeout',
-  'compression',
-  'idle_timeout',
+  'queue.mem.flush.min_events',
+  'queue.mem.flush.timeout',
+  'worker',
 ];
 
 export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [

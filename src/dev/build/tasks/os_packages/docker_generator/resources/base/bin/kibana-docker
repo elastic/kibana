@@ -136,12 +136,14 @@ kibana_vars=(
     ops.interval
     path.data
     pid.file
+    profiler.signal
     regionmap
     savedObjects.maxImportExportSize
     savedObjects.maxImportPayloadBytes
     savedObjects.allowHttpApiAccess
     security.showInsecureClusterWarning
     server.basePath
+    server.cdn.url
     server.compression.enabled
     server.compression.referrerWhitelist
     server.cors
@@ -337,6 +339,7 @@ kibana_vars=(
     xpack.reporting.csv.maxSizeBytes
     xpack.reporting.csv.scroll.duration
     xpack.reporting.csv.scroll.size
+    xpack.reporting.csv.scroll.strategy
     xpack.reporting.csv.useByteOrderMarkEncoding
     xpack.reporting.enabled
     xpack.reporting.encryptionKey

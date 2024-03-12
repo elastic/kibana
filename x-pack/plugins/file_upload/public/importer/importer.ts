@@ -73,7 +73,7 @@ export abstract class Importer implements IImporter {
     return { success: true };
   }
 
-  protected abstract _createDocs(t: string, isLastPart: boolean): CreateDocsResponse;
+  protected abstract _createDocs(t: string, isLastPart: boolean): CreateDocsResponse<ImportDoc>;
 
   public async initializeImport(
     index: string,

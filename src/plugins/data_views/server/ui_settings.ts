@@ -8,7 +8,24 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
+import type { UiSettingsParams } from '@kbn/core/server';
+import { DATA_VIEWS_FIELDS_EXCLUDED_TIERS } from '../common/constants';
 import { DEFAULT_FIELD_CACHE_FRESHNESS } from './constants';
+
+export const dataTiersUiSettingsConfig: Record<string, UiSettingsParams> = {
+  [DATA_VIEWS_FIELDS_EXCLUDED_TIERS]: {
+    name: i18n.translate('dataViews.advancedSettings.dataTiersName', {
+      defaultMessage: 'Data tiers excluded from field requests',
+    }),
+    value: '',
+    type: 'string',
+    description: i18n.translate('dataViews.advancedSettings.dataTiersText', {
+      defaultMessage:
+        'Exclude fields from specified tiers (such as data_frozen) for faster performance. Comma delimit to exclude multiple tiers - data_warm,data_cold',
+    }),
+    schema: schema.string(),
+  },
+};
 
 export const cacheMaxAge = {
   'data_views:cache_max_age': {

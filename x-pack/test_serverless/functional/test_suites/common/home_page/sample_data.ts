@@ -14,12 +14,11 @@ export default function ({ getPageObjects }: FtrProviderContext) {
   // Failing - should be fixed with https://github.com/elastic/kibana/pull/164052
   describe.skip('Sample data in serverless', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async () => {
       await pageObjects.home.removeSampleDataSet('ecommerce');
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('Sample data loads', async () => {

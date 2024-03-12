@@ -29,6 +29,7 @@ export const getEventList = async ({
   exceptionFilter,
   eventListConfig,
   indexFields,
+  sortOrder = 'desc',
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -59,7 +60,7 @@ export const getEventList = async ({
     filter: queryFilter,
     primaryTimestamp,
     secondaryTimestamp,
-    sortOrder: 'desc',
+    sortOrder,
     trackTotalHits: false,
     runtimeMappings,
     overrideBody: eventListConfig,

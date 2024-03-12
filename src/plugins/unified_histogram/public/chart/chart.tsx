@@ -20,6 +20,8 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils';
+import type { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import { Histogram } from './histogram';
 import type {
   UnifiedHistogramBreakdownContext,
@@ -45,6 +47,7 @@ import { useRefetch } from './hooks/use_refetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
 
 export interface ChartProps {
+  abortController?: AbortController;
   isChartAvailable: boolean;
   hiddenPanel?: boolean;
   className?: string;
@@ -121,6 +124,7 @@ export function Chart({
   onFilter,
   onBrushEnd,
   withDefaultActions,
+  abortController,
 }: ChartProps) {
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -267,6 +271,37 @@ export function Chart({
     });
   }
 
+  const removeTables = (attributes: LensAttributes) => {
+    if (!attributes.state.datasourceStates.textBased) {
+      return attributes;
+    }
+    const layers = attributes.state.datasourceStates.textBased?.layers;
+
+    const newState = {
+      ...attributes,
+      state: {
+        ...attributes.state,
+        datasourceStates: {
+          ...attributes.state.datasourceStates,
+          textBased: {
+            ...(attributes.state.datasourceStates.textBased || {}),
+            layers: {} as TextBasedPersistedState['layers'],
+          },
+        },
+      },
+    };
+
+    if (layers) {
+      for (const key of Object.keys(layers)) {
+        const newLayer = { ...layers[key] };
+        delete newLayer.table;
+        newState.state.datasourceStates.textBased!.layers[key] = newLayer;
+      }
+    }
+
+    return newState;
+  };
+
   return (
     <EuiFlexGroup
       {...a11yCommonProps}
@@ -373,6 +408,7 @@ export function Chart({
               />
             )}
             <HistogramMemoized
+              abortController={abortController}
               services={services}
               dataView={dataView}
               request={request}
@@ -397,7 +433,9 @@ export function Chart({
       )}
       {canSaveVisualization && isSaveModalVisible && lensAttributesContext.attributes && (
         <LensSaveModalComponent
-          initialInput={lensAttributesContext.attributes as unknown as LensEmbeddableInput}
+          initialInput={
+            removeTables(lensAttributesContext.attributes) as unknown as LensEmbeddableInput
+          }
           onSave={() => {}}
           onClose={() => setIsSaveModalVisible(false)}
           isSaveable={false}

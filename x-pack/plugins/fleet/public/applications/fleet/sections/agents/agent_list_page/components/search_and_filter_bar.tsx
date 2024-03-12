@@ -21,7 +21,8 @@ import { useIsFirstTimeAgentUserQuery } from '../../../../../integrations/sectio
 import type { Agent, AgentPolicy } from '../../../../types';
 import { SearchBar } from '../../../../components';
 import { AGENTS_INDEX, AGENTS_PREFIX } from '../../../../constants';
-import { useFleetServerStandalone } from '../../../../hooks';
+
+import { useStartServices } from '../../../../hooks';
 
 import { AgentBulkActions } from './bulk_actions';
 import type { SelectionMode } from './types';
@@ -45,18 +46,16 @@ export interface SearchAndFilterBarProps {
   tags: string[];
   selectedTags: string[];
   onSelectedTagsChange: (selectedTags: string[]) => void;
-  shownAgents: number;
-  inactiveShownAgents: number;
+  nAgentsInTable: number;
   totalInactiveAgents: number;
   totalManagedAgentIds: string[];
-  inactiveManagedAgentIds: string[];
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   onClickAddAgent: () => void;
   onClickAddFleetServer: () => void;
-  visibleAgents: Agent[];
+  agentsOnCurrentPage: Agent[];
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
 }
@@ -75,25 +74,22 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   tags,
   selectedTags,
   onSelectedTagsChange,
-  shownAgents,
-  inactiveShownAgents,
+  nAgentsInTable,
   totalInactiveAgents,
   totalManagedAgentIds,
-  inactiveManagedAgentIds,
   selectionMode,
   currentQuery,
   selectedAgents,
   refreshAgents,
   onClickAddAgent,
   onClickAddFleetServer,
-  visibleAgents,
+  agentsOnCurrentPage,
   onClickAgentActivity,
   showAgentActivityTour,
 }) => {
-  const { isFleetServerStandalone } = useFleetServerStandalone();
   const { isFirstTimeAgentUser, isLoading: isFirstTimeAgentUserLoading } =
     useIsFirstTimeAgentUserQuery();
-  const showAddFleetServerBtn = !isFleetServerStandalone;
+  const { cloud } = useStartServices();
 
   return (
     <>
@@ -110,7 +106,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                 showAgentActivityTour={showAgentActivityTour}
               />
             </EuiFlexItem>
-            {showAddFleetServerBtn && (
+            {!cloud?.isServerlessEnabled && (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={
@@ -198,17 +194,15 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
               </EuiFilterGroup>
             </EuiFlexItem>
             {(selectionMode === 'manual' && selectedAgents.length) ||
-            (selectionMode === 'query' && shownAgents > 0) ? (
+            (selectionMode === 'query' && nAgentsInTable > 0) ? (
               <EuiFlexItem grow={false}>
                 <AgentBulkActions
-                  shownAgents={shownAgents}
-                  inactiveShownAgents={inactiveShownAgents}
+                  nAgentsInTable={nAgentsInTable}
                   totalManagedAgentIds={totalManagedAgentIds}
-                  inactiveManagedAgentIds={inactiveManagedAgentIds}
                   selectionMode={selectionMode}
                   currentQuery={currentQuery}
                   selectedAgents={selectedAgents}
-                  visibleAgents={visibleAgents}
+                  agentsOnCurrentPage={agentsOnCurrentPage}
                   refreshAgents={refreshAgents}
                   allTags={tags}
                   agentPolicies={agentPolicies}

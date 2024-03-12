@@ -58,6 +58,6 @@ export const transformCreateBody = <Params extends RuleParams = never>(
     schedule: createBody.schedule,
     actions: transformCreateBodyActions(createBody.actions),
     ...(createBody.notify_when ? { notifyWhen: createBody.notify_when } : {}),
-    ...(createBody.notification_delay ? { notificationDelay: createBody.notification_delay } : {}),
+    ...(createBody.alert_delay ? { alertDelay: createBody.alert_delay } : {}),
   };
 };

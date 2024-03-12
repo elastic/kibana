@@ -11,8 +11,8 @@ import { EventEmitter } from 'events';
 
 // If you want to know why these mocks are created,
 // please check: https://github.com/elastic/kibana/pull/44750
-jest.mock('@juggle/resize-observer');
-import { ResizeObserver } from '@juggle/resize-observer';
+jest.mock('resize-observer-polyfill');
+import ResizeObserver from 'resize-observer-polyfill';
 
 class MockElement {
   public clientWidth: number;

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
-import { EuiPageBody, EuiPanel } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
+import { EuiFlexGroup, EuiPageBody, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
@@ -20,7 +21,13 @@ export interface PageProps {
 
 const RESULTS_PER_PAGE = 20;
 
-export const Page: FC<PageProps> = ({ nextStepPath }) => {
+export const Page: FC<PageProps> = ({
+  nextStepPath,
+  extraButtons,
+}: {
+  nextStepPath: string;
+  extraButtons?: React.ReactNode;
+}) => {
   const { contentManagement, uiSettings } = useMlKibana().services;
   const navigateToPath = useNavigateToPath();
 
@@ -80,7 +87,13 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
               uiSettings,
             }}
           >
-            <CreateDataViewButton onDataViewCreated={onObjectSelection} allowAdHocDataView={true} />
+            <EuiFlexGroup direction="row" gutterSize="s">
+              <CreateDataViewButton
+                onDataViewCreated={onObjectSelection}
+                allowAdHocDataView={true}
+              />
+              {extraButtons ? extraButtons : null}
+            </EuiFlexGroup>
           </SavedObjectFinder>
         </EuiPanel>
       </EuiPageBody>

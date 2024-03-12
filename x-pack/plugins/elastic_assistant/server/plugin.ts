@@ -43,6 +43,7 @@ import {
   GetRegisteredTools,
 } from './services/app_context';
 import { getCapabilitiesRoute } from './routes/capabilities/get_capabilities_route';
+import { getEvaluateRoute } from './routes/evaluate/get_evaluate';
 
 interface CreateRouteHandlerContextParams {
   core: CoreSetup<ElasticAssistantPluginStart, unknown>;
@@ -124,6 +125,7 @@ export class ElasticAssistantPlugin
     postActionsConnectorExecuteRoute(router, getElserId);
     // Evaluate
     postEvaluateRoute(router, getElserId);
+    getEvaluateRoute(router);
     // Capabilities
     getCapabilitiesRoute(router);
     return {

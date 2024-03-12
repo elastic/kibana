@@ -27,6 +27,7 @@ import {
   setStorage,
 } from '../services';
 import { createUsageTracker } from '../services/tracker';
+import { loadActiveApi } from '../lib/kb';
 import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { Main } from './containers';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
@@ -42,9 +43,10 @@ export interface BootDependencies {
   theme$: Observable<CoreTheme>;
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
+  isMonacoEnabled: boolean;
 }
 
-export function renderApp({
+export async function renderApp({
   I18nContext,
   notifications,
   docLinkVersion,
@@ -54,10 +56,12 @@ export function renderApp({
   theme$,
   docLinks,
   autocompleteInfo,
+  isMonacoEnabled,
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
 
+  await loadActiveApi(http);
   const storage = createStorage({
     engine: window.localStorage,
     prefix: 'sense:',
@@ -90,6 +94,9 @@ export function renderApp({
               autocompleteInfo,
             },
             theme$,
+            config: {
+              isMonacoEnabled,
+            },
           }}
         >
           <RequestContextProvider>
