@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Reducer, ReducerAction, ReducerState } from 'react';
+import type { Reducer, ReducerAction, ReducerState } from 'react';
 
 type StringReducerPayload = string | string[] | undefined;
 export type StringReducer = Reducer<string, StringReducerPayload>;

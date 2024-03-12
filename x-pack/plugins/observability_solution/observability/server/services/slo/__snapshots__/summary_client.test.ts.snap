@@ -3,6 +3,7 @@
 exports[`SummaryClient fetchSummary with calendar aligned and timeslices SLO returns the summary 1`] = `
 Object {
   "groupings": Object {},
+  "meta": Object {},
   "summary": Object {
     "errorBudget": Object {
       "consumed": 0,
@@ -19,6 +20,7 @@ Object {
 exports[`SummaryClient fetchSummary with rolling and occurrences SLO returns the summary 1`] = `
 Object {
   "groupings": Object {},
+  "meta": Object {},
   "summary": Object {
     "errorBudget": Object {
       "consumed": 0,
@@ -35,6 +37,7 @@ Object {
 exports[`SummaryClient fetchSummary with rolling and timeslices SLO returns the summary 1`] = `
 Object {
   "groupings": Object {},
+  "meta": Object {},
   "summary": Object {
     "errorBudget": Object {
       "consumed": 0,

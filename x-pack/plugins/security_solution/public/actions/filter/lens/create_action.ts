@@ -73,6 +73,8 @@ export const createFilterLensAction = ({
     execute: async ({ data }) => {
       const field = data[0]?.columnMeta?.field;
       const rawValue = data[0]?.value;
+      const mayBeDataViewId = data[0]?.columnMeta?.sourceParams?.indexPatternId;
+      const dataViewId = typeof mayBeDataViewId === 'string' ? mayBeDataViewId : undefined;
       const value = filterOutNullableValues(valueToArray(rawValue));
 
       if (!isValueSupportedByDefaultActions(value)) {
@@ -90,10 +92,10 @@ export const createFilterLensAction = ({
       const timeline = getTimelineById(store.getState(), TimelineId.active);
       // timeline is open add the filter to timeline, otherwise add filter to global filters
       const filterManager = timeline?.show
-        ? timeline.filterManager
+        ? services.timelineFilterManager
         : dataService.query.filterManager;
 
-      addFilter({ filterManager, fieldName: field, value });
+      addFilter({ filterManager, fieldName: field, value, dataViewId });
     },
   });
 };
