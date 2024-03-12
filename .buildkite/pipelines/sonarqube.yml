@@ -1,3 +1,7 @@
+env:
+  SKIP_NODE_SETUP: true
+
+steps:
   - label: ":sonarqube: Continuous Code Inspection"
     agents:
       image: docker.elastic.co/cloud-ci/sonarqube/buildkite-scanner:latest

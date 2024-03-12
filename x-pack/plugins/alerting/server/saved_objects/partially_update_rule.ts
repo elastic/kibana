@@ -47,7 +47,7 @@ export async function partiallyUpdateRule(
   options: PartiallyUpdateRuleSavedObjectOptions = {}
 ): Promise<void> {
   // ensure we only have the valid attributes that are not encrypted and are excluded from AAD
-  const attributeUpdates = omit(attributes, [
+  const attributeUpdates: RuleAttributes = omit(attributes, [
     ...RuleAttributesToEncrypt,
     ...RuleAttributesIncludedInAAD,
   ]);
