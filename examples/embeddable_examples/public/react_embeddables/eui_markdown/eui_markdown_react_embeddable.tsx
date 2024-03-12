@@ -44,7 +44,9 @@ const markdownEmbeddableFactory: ReactEmbeddableFactory<
     const content$ = new BehaviorSubject(state.content);
 
     /**
-     * Register the API for this embeddable.
+     * Register the API for this embeddable. This API will be published into the imperative handle
+     * of the React component. Methods on this API will be exposed to siblings, to registered actions
+     * and to the parent api.
      */
     const api = buildApi(
       {
@@ -58,6 +60,13 @@ const markdownEmbeddableFactory: ReactEmbeddableFactory<
           };
         },
       },
+
+      /**
+       * Provide state comparators. Each comparator is 3 element tuple:
+       * 1) current value (publishing subject)
+       * 2) setter, allowing parent to reset value
+       * 3) optional comparator which provides logic to diff lasted stored value and current value
+       */
       {
         content: [content$, (value) => content$.next(value)],
         ...titleComparators,

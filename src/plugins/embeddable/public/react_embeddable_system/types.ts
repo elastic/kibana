@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { SerializedPanelState } from '@kbn/presentation-containers';
+import { HasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import { HasType, PublishesUnsavedChanges, PublishingSubject } from '@kbn/presentation-publishing';
 import React, { ReactElement } from 'react';
@@ -22,9 +22,8 @@ export type ReactEmbeddableRegistration<
 export interface DefaultEmbeddableApi<StateType extends object = object>
   extends DefaultPresentationPanelApi,
     HasType,
-    PublishesUnsavedChanges {
-  serializeState: () => SerializedPanelState<StateType>;
-}
+    PublishesUnsavedChanges,
+    HasSerializableState<StateType> {}
 
 export type ReactEmbeddableApiRegistration<
   StateType extends object = object,
