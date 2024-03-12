@@ -15,7 +15,10 @@ import {
 } from '@kbn/apm-synthtrace';
 import url from 'url';
 import { kbnTestConfig } from '@kbn/test';
-import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
+import {
+  enableInfrastructureAssetCustomDashboards,
+  enableInfrastructureHostsView,
+} from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -136,6 +139,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const setHostViewEnabled = (value: boolean = true) =>
     kibanaServer.uiSettings.update({ [enableInfrastructureHostsView]: value });
+
+  const setCustomDashboardsEnabled = (value: boolean = true) =>
+    kibanaServer.uiSettings.update({ [enableInfrastructureAssetCustomDashboards]: value });
 
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
@@ -337,6 +343,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('should render logs tab', async () => {
             await pageObjects.assetDetails.logsExists();
+          });
+        });
+
+        describe('Dashboards Tab', () => {
+          before(async () => {
+            await setCustomDashboardsEnabled(true);
+            await pageObjects.assetDetails.clickDashboardsTab();
+          });
+
+          it('should render dashboards tab splash screen with option to add dashboard', async () => {
+            await pageObjects.assetDetails.addDashboardExists();
           });
         });
 
