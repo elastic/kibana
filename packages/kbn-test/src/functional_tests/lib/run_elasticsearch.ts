@@ -12,6 +12,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
+import { isServerlessProjectType } from '@kbn/es/src/utils';
 import type { Config } from '../../functional_test_runner';
 import { createTestEsCluster, esTestConfig } from '../../es';
 
@@ -53,7 +54,9 @@ function getEsConfig({
   const serverless: boolean = config.get('serverless');
   const files: string[] | undefined = config.get('esTestCluster.files');
 
-  const esServerlessOptions = getESServerlessOptions(esServerlessImage, config);
+  const esServerlessOptions = serverless
+    ? getESServerlessOptions(esServerlessImage, config)
+    : undefined;
 
   return {
     ssl,
@@ -162,6 +165,7 @@ async function startEsNode({
 }
 
 interface EsServerlessOptions {
+  projectType: ServerlessProjectType;
   host?: string;
   resources: string[];
   kibanaUrl: string;
@@ -189,19 +193,20 @@ function getESServerlessOptions(
       (config.get('kbnTestServer.serverArgs') as string[])) ||
     [];
 
-  const projectTypeFromArgs = kbnServerArgs
+  const projectType = kbnServerArgs
     .filter((arg) => arg.startsWith('--serverless'))
     .reduce((acc, arg) => {
       const match = arg.match(/--serverless[=\s](\w+)/);
       return acc + (match ? match[1] : '');
-    }, '');
-  const projectType = projectTypeFromArgs.length
-    ? (projectTypeFromArgs as ServerlessProjectType)
-    : undefined;
+    }, '') as ServerlessProjectType;
+
+  if (!isServerlessProjectType(projectType)) {
+    throw new Error(`Unsupported serverless projectType: ${projectType}`);
+  }
 
   const commonOptions = {
-    host: serverlessHost,
     projectType,
+    host: serverlessHost,
     resources: serverlessResources,
     kibanaUrl: Url.format({
       protocol: config.get('servers.kibana.protocol'),

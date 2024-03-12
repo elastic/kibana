@@ -17,8 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176109
-  describe.skip('visual builder tsdb check', function describeIndexTests() {
+  describe('visual builder tsdb check', function describeIndexTests() {
     before(async () => {
       log.info(`loading sample TSDB index...`);
       await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb');

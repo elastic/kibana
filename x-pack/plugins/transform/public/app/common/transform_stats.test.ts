@@ -10,7 +10,7 @@ import { TRANSFORM_STATE } from '../../../common/constants';
 import mockTransformListRow from './__mocks__/transform_list_row.json';
 import mockTransformStats from './__mocks__/transform_stats.json';
 
-import { TransformListRow } from './transform_list';
+import type { TransformListRow } from './transform_list';
 import { getTransformProgress, isCompletedBatchTransform } from './transform_stats';
 
 const getRow = (statsId: string) => {

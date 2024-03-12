@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useActor } from '@xstate/react';
 import React from 'react';
-import { ObservabilityLogExplorerPageTemplate } from '../../components/page_template';
+import { ObservabilityLogsExplorerPageTemplate } from '../../components/page_template';
 import {
   ObservabilityDatasetQualityPageStateProvider,
   useObservabilityDatasetQualityPageStateContext,
@@ -30,13 +30,13 @@ export interface DatasetQualityRouteProps {
 export const DatasetQualityRoute = () => {
   const { services } = useKibanaContextForPlugin();
   const { datasetQuality, serverless, chrome, notifications } = services;
-  const logExplorerLinkProps = useLinkProps({ app: OBSERVABILITY_LOGS_EXPLORER_APP_ID });
+  const logsExplorerLinkProps = useLinkProps({ app: OBSERVABILITY_LOGS_EXPLORER_APP_ID });
 
   useBreadcrumbs(
     [
       {
         text: 'Datasets',
-        ...logExplorerLinkProps,
+        ...logsExplorerLinkProps,
       },
     ],
     chrome,
@@ -78,7 +78,7 @@ const ConnectedContent = React.memo(() => {
 });
 
 const InitializingContent = React.memo(() => (
-  <ObservabilityLogExplorerPageTemplate>
+  <ObservabilityLogsExplorerPageTemplate>
     <EuiEmptyPrompt
       icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
       title={
@@ -88,7 +88,7 @@ const InitializingContent = React.memo(() => (
         />
       }
     />
-  </ObservabilityLogExplorerPageTemplate>
+  </ObservabilityLogsExplorerPageTemplate>
 ));
 
 const InitializedContent = React.memo(
@@ -100,9 +100,9 @@ const InitializedContent = React.memo(
     datasetQualityController: DatasetQualityController;
   }) => {
     return (
-      <ObservabilityLogExplorerPageTemplate pageProps={{ paddingSize: 'l' }}>
+      <ObservabilityLogsExplorerPageTemplate pageSectionProps={{ paddingSize: 'l' }}>
         <datasetQuality.DatasetQuality controller={datasetQualityController} />
-      </ObservabilityLogExplorerPageTemplate>
+      </ObservabilityLogsExplorerPageTemplate>
     );
   }
 );

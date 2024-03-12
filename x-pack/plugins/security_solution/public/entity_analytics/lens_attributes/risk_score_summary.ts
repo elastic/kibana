@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
+import capitalize from 'lodash/capitalize';
 import { SEVERITY_UI_SORT_ORDER, RISK_SEVERITY_COLOUR, RISK_SCORE_RANGES } from '../common/utils';
 import type { RiskSeverity } from '../../../common/search_strategy';
 import { RiskScoreEntity, RiskScoreFields } from '../../../common/search_strategy';
@@ -78,9 +79,9 @@ export const getRiskScoreSummaryAttributes: (
             [layerIds[0]]: {
               columns: {
                 [columnIds[0]]: {
-                  label: 'Risk',
+                  label: `${capitalize(riskEntity)} Risk`,
                   dataType: 'number',
-                  operationType: 'max',
+                  operationType: 'last_value',
                   isBucketed: false,
                   scale: 'ratio',
                   sourceField,

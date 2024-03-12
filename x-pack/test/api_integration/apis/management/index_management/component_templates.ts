@@ -92,6 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
             usedBy: [],
             isManaged: false,
             hasSettings: true,
+            isDeprecated: false,
             hasMappings: true,
             hasAliases: false,
           });
@@ -278,6 +279,35 @@ export default function ({ getService }: FtrProviderContext) {
               type: 'resource_not_found_exception',
             },
           },
+        });
+      });
+
+      it('should allow a deprecated component template to be updated', async () => {
+        const deprecatedTemplateName = 'deprecated_component_template';
+        const deprecatedTemplate = {
+          template: {},
+          deprecated: true,
+        };
+        try {
+          await addComponentTemplate(
+            { body: deprecatedTemplate, name: deprecatedTemplateName },
+            CACHE_TEMPLATES
+          );
+        } catch (err) {
+          log.debug('[Setup error] Error creating component template');
+          throw err;
+        }
+        const { body } = await updateComponentTemplate(deprecatedTemplateName, {
+          ...deprecatedTemplate,
+          version: 1,
+          _kbnMeta: {
+            usedBy: [],
+            isManaged: false,
+          },
+        }).expect(200);
+
+        expect(body).to.eql({
+          acknowledged: true,
         });
       });
     });

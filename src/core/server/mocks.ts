@@ -98,6 +98,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
         branch: 'branch',
         buildNum: 100,
         buildSha: 'buildSha',
+        buildShaShort: 'buildShaShort',
         dist: false,
         buildDate: new Date('2023-05-15T23:12:09.000Z'),
         buildFlavor: 'traditional',
@@ -142,6 +143,7 @@ export type CustomRequestHandlerMock<T> = {
 };
 
 const createCustomRequestHandlerContextMock = <T>(contextParts: T): CustomRequestHandlerMock<T> => {
+  // @ts-expect-error upgrade typescript v4.9.5
   const mock = Object.entries(contextParts).reduce(
     (context, [key, value]) => {
       // @ts-expect-error type matching from inferred types is hard

@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-export type { ObservabilityLogExplorerLocationState } from '@kbn/deeplinks-observability/locators';
-import { AllDatasetsLocator } from './all_datasets';
-import { SingleDatasetLocator } from './single_dataset';
+export type { ObservabilityLogsExplorerLocationState } from '@kbn/deeplinks-observability/locators';
+import { AllDatasetsLocator } from './all_datasets_locator';
+import { DataViewLocator } from './data_view_locator';
+import { SingleDatasetLocator } from './single_dataset_locator';
+import { DatasetQualityLocator } from './dataset_quality_locator';
 
-export * from './single_dataset';
-export * from './all_datasets';
+export * from './dataset_quality_locator';
+export * from './single_dataset_locator';
+export * from './all_datasets_locator';
 export * from './utils';
 
-export interface ObservabilityLogExplorerLocators {
+export interface ObservabilityLogsExplorerLocators {
   allDatasetsLocator: AllDatasetsLocator;
+  dataViewLocator: DataViewLocator;
   singleDatasetLocator: SingleDatasetLocator;
+  datasetQualityLocator: DatasetQualityLocator;
 }

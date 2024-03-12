@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
+import { ChartSwitchTrigger } from '@kbn/visualization-ui-components';
 import {
   Visualization,
   FramePublicAPI,
@@ -55,47 +55,14 @@ interface VisualizationSelection {
   sameDatasources?: boolean;
 }
 
-interface Props {
+export interface ChartSwitchProps {
   framePublicAPI: FramePublicAPI;
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
+  size?: 's' | 'm';
 }
 
 type SelectableEntry = EuiSelectableOption<{ value: string }>;
-
-function VisualizationSummary({
-  visualizationMap,
-  visualization,
-}: {
-  visualizationMap: VisualizationMap;
-  visualization: {
-    activeId: string | null;
-    state: unknown;
-  };
-}) {
-  const activeVisualization = visualizationMap[visualization.activeId || ''];
-
-  if (!activeVisualization) {
-    return (
-      <>
-        {i18n.translate('xpack.lens.configPanel.selectVisualization', {
-          defaultMessage: 'Select a visualization',
-        })}
-      </>
-    );
-  }
-
-  const description = activeVisualization.getDescription(visualization.state);
-
-  return (
-    <>
-      {description.icon && (
-        <EuiIcon size="l" className="lnsChartSwitch__summaryIcon" type={description.icon} />
-      )}
-      <span className="lnsChartSwitch__summaryText">{description.label}</span>
-    </>
-  );
-}
 
 const MAX_LIST_HEIGHT = 380;
 const ENTRY_HEIGHT = 32;
@@ -126,12 +93,24 @@ function getCurrentVisualizationId(
   );
 }
 
-export const ChartSwitch = memo(function ChartSwitch(props: Props) {
+export const ChartSwitch = memo(function ChartSwitch({
+  framePublicAPI,
+  visualizationMap: completeVisualizationMap,
+  datasourceMap,
+  size = 'm',
+}: ChartSwitchProps) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const visualization = useLensSelector(selectVisualization);
   const datasourceStates = useLensSelector(selectDatasourceStates);
+
+  const visualizationMap = { ...completeVisualizationMap };
+  Object.keys(visualizationMap).forEach((key) => {
+    if (completeVisualizationMap[key]?.hideFromChartSwitch?.(framePublicAPI)) {
+      delete visualizationMap[key];
+    }
+  });
 
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
@@ -152,7 +131,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       dispatchLens(
         removeLayers({
           visualizationId: visualization.activeId,
-          layerIds: Object.keys(props.framePublicAPI.datasourceLayers),
+          layerIds: Object.keys(framePublicAPI.datasourceLayers),
         })
       );
     }
@@ -162,17 +141,17 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
     visualizationId: string,
     subVisualizationId: string
   ): VisualizationSelection {
-    const newVisualization = props.visualizationMap[visualizationId];
+    const newVisualization = visualizationMap[visualizationId];
     const switchVisType = (type: string, state: unknown) => {
-      if (props.visualizationMap[visualizationId].switchVisualizationType) {
+      if (visualizationMap[visualizationId].switchVisualizationType) {
         return safeFnCall(
-          () => props.visualizationMap[visualizationId].switchVisualizationType!(type, state),
+          () => visualizationMap[visualizationId].switchVisualizationType!(type, state),
           state
         );
       }
       return state;
     };
-    const layers = Object.entries(props.framePublicAPI.datasourceLayers);
+    const layers = Object.entries(framePublicAPI.datasourceLayers);
     const containsData = layers.some(
       ([_layerId, datasource]) => datasource && datasource.getTableSpec().length > 0
     );
@@ -189,14 +168,16 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
         visualizationId,
         subVisualizationId,
         dataLoss: 'nothing',
-        keptLayerIds: Object.keys(props.framePublicAPI.datasourceLayers),
+        keptLayerIds: Object.keys(framePublicAPI.datasourceLayers),
         getVisualizationState: () => switchVisType(subVisualizationId, visualization.state),
         sameDatasources: true,
       };
     }
 
     const topSuggestion = getTopSuggestion(
-      props,
+      visualizationMap,
+      datasourceMap,
+      framePublicAPI,
       visualizationId,
       datasourceStates,
       visualization,
@@ -245,11 +226,8 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
               newVisualization.initialize(
                 addNewLayer,
                 visualization.activeId === newVisualization.id ? visualization.state : undefined,
-                visualization.activeId &&
-                  props.visualizationMap[visualization.activeId].getMainPalette
-                  ? props.visualizationMap[visualization.activeId].getMainPalette!(
-                      visualization.state
-                    )
+                visualization.activeId && visualizationMap[visualization.activeId].getMainPalette
+                  ? visualizationMap[visualization.activeId].getMainPalette!(visualization.state)
                   : undefined
               )
             ),
@@ -268,11 +246,8 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
         return { visualizationTypes: [], visualizationsLookup: {} };
       }
       const subVisualizationId =
-        visualization.activeId && props.visualizationMap[visualization.activeId]
-          ? getCurrentVisualizationId(
-              props.visualizationMap[visualization.activeId],
-              visualization.state
-            )
+        visualization.activeId && visualizationMap[visualization.activeId]
+          ? getCurrentVisualizationId(visualizationMap[visualization.activeId], visualization.state)
           : undefined;
       const lowercasedSearchTerm = searchTerm.toLowerCase();
       // reorganize visualizations in groups
@@ -296,7 +271,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
           selection: VisualizationSelection;
         }
       > = {};
-      Object.entries(props.visualizationMap).forEach(([visualizationId, v]) => {
+      Object.entries(visualizationMap).forEach(([visualizationId, v]) => {
         for (const visualizationType of v.visualizationTypes) {
           const isSearchMatch =
             visualizationType.label.toLowerCase().includes(lowercasedSearchTerm) ||
@@ -408,13 +383,21 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       flyoutOpen,
-      props.visualizationMap,
-      props.framePublicAPI,
+      visualizationMap,
+      framePublicAPI,
       visualization.activeId,
       visualization.state,
       searchTerm,
     ]
   );
+
+  const { icon, label } = (visualization.activeId &&
+    visualizationMap[visualization.activeId]?.getDescription(visualization.state)) || {
+    label: i18n.translate('xpack.lens.configPanel.selectVisualization', {
+      defaultMessage: 'Select a visualization',
+    }),
+    icon: undefined,
+  };
 
   return (
     <div className="lnsChartSwitch__header">
@@ -425,16 +408,12 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
         panelClassName="lnsChartSwitch__popoverPanel"
         panelPaddingSize="s"
         button={
-          <ToolbarButton
+          <ChartSwitchTrigger
+            size={size}
+            icon={icon}
+            label={label}
+            dataTestSubj="lnsChartSwitchPopover"
             onClick={() => setFlyoutOpen(!flyoutOpen)}
-            data-test-subj="lnsChartSwitchPopover"
-            fontWeight="bold"
-            label={
-              <VisualizationSummary
-                visualization={visualization}
-                visualizationMap={props.visualizationMap}
-              />
-            }
           />
         }
         isOpen={flyoutOpen}
@@ -494,7 +473,9 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
 });
 
 function getTopSuggestion(
-  props: Props,
+  visualizationMap: VisualizationMap,
+  datasourceMap: DatasourceMap,
+  framePublicAPI: FramePublicAPI,
   visualizationId: string,
   datasourceStates: DatasourceStates,
   visualization: VisualizationState,
@@ -503,23 +484,23 @@ function getTopSuggestion(
 ): Suggestion | undefined {
   const mainPalette =
     visualization.activeId &&
-    props.visualizationMap[visualization.activeId] &&
-    props.visualizationMap[visualization.activeId].getMainPalette
-      ? props.visualizationMap[visualization.activeId].getMainPalette!(visualization.state)
+    visualizationMap[visualization.activeId] &&
+    visualizationMap[visualization.activeId].getMainPalette
+      ? visualizationMap[visualization.activeId].getMainPalette!(visualization.state)
       : undefined;
 
   const unfilteredSuggestions = getSuggestions({
-    datasourceMap: props.datasourceMap,
+    datasourceMap,
     datasourceStates,
     visualizationMap: { [visualizationId]: newVisualization },
     activeVisualization: visualization.activeId
-      ? props.visualizationMap[visualization.activeId]
+      ? visualizationMap[visualization.activeId]
       : undefined,
     visualizationState: visualization.state,
     subVisualizationId,
-    activeData: props.framePublicAPI.activeData,
+    activeData: framePublicAPI.activeData,
     mainPalette,
-    dataViews: props.framePublicAPI.dataViews,
+    dataViews: framePublicAPI.dataViews,
   });
   const suggestions = unfilteredSuggestions.filter((suggestion) => {
     // don't use extended versions of current data table on switching between visualizations

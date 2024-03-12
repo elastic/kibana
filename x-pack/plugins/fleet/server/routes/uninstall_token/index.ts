@@ -24,7 +24,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       .get({
         path: UNINSTALL_TOKEN_ROUTES.LIST_PATTERN,
         fleetAuthz: {
-          fleet: { all: true },
+          fleet: { allAgents: true },
         },
       })
       .addVersion(
@@ -39,7 +39,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       .get({
         path: UNINSTALL_TOKEN_ROUTES.INFO_PATTERN,
         fleetAuthz: {
-          fleet: { all: true },
+          fleet: { allAgents: true },
         },
       })
       .addVersion(

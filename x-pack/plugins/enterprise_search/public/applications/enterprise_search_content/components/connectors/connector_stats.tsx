@@ -29,6 +29,8 @@ export interface ConnectorStatsProps {
 export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => {
   const { makeRequest } = useActions(FetchSyncJobsStatsApiLogic);
   const { data } = useValues(FetchSyncJobsStatsApiLogic);
+  const connectorCount = (data?.connected || 0) + (data?.incomplete || 0);
+  const hasMultipleConnectors = connectorCount > 1;
 
   useEffect(() => {
     makeRequest({ isCrawler });
@@ -58,17 +60,29 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
               <EuiFlexItem>
                 <EuiText>
                   {!isCrawler
-                    ? i18n.translate('xpack.enterpriseSearch.connectorStats.connectorsTextLabel', {
-                        defaultMessage: '{count} connectors',
-                        values: {
-                          count: (data?.connected || 0) + (data?.incomplete || 0),
-                        },
-                      })
-                    : i18n.translate('xpack.enterpriseSearch.connectorStats.crawlersTextLabel', {
+                    ? hasMultipleConnectors
+                      ? i18n.translate(
+                          'xpack.enterpriseSearch.connectorStats.multipleConnectorsText',
+                          {
+                            defaultMessage: '{count} connectors',
+                            values: { count: connectorCount },
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.enterpriseSearch.connectorStats.singleConnectorText',
+                          {
+                            defaultMessage: '{count} connector',
+                            values: { count: connectorCount },
+                          }
+                        )
+                    : hasMultipleConnectors
+                    ? i18n.translate('xpack.enterpriseSearch.connectorStats.multipleCrawlersText', {
                         defaultMessage: '{count} web crawlers',
-                        values: {
-                          count: (data?.connected || 0) + (data?.incomplete || 0),
-                        },
+                        values: { count: connectorCount },
+                      })
+                    : i18n.translate('xpack.enterpriseSearch.connectorStats.singleCrawlerText', {
+                        defaultMessage: '{count} web crawler',
+                        values: { count: connectorCount },
                       })}
                 </EuiText>
               </EuiFlexItem>
@@ -123,15 +137,29 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
           </EuiSplitPanel.Inner>
 
           <EuiSplitPanel.Inner grow={false} color="subdued">
-            {i18n.translate('xpack.enterpriseSearch.connectorStats.idleSyncsOrphanedSyncsLabel', {
-              defaultMessage:
-                '{idleCount} Idle syncs  / {orphanedCount} Orphaned syncs / {errorCount} Sync errors',
-              values: {
-                errorCount: data?.errors || 0,
-                idleCount: data?.idle,
-                orphanedCount: data?.orphaned_jobs,
-              },
-            })}
+            {isCrawler
+              ? i18n.translate(
+                  'xpack.enterpriseSearch.connectorStats.crawlerSyncsOrphanedSyncsLabel',
+                  {
+                    defaultMessage: '{orphanedCount} Orphaned syncs / {errorCount} Sync errors',
+                    values: {
+                      errorCount: data?.errors || 0,
+                      orphanedCount: data?.orphaned_jobs,
+                    },
+                  }
+                )
+              : i18n.translate(
+                  'xpack.enterpriseSearch.connectorStats.connectorSyncsOrphanedSyncsLabel',
+                  {
+                    defaultMessage:
+                      '{idleCount} Idle syncs  / {orphanedCount} Orphaned syncs / {errorCount} Sync errors',
+                    values: {
+                      errorCount: data?.errors || 0,
+                      idleCount: data?.idle,
+                      orphanedCount: data?.orphaned_jobs,
+                    },
+                  }
+                )}
           </EuiSplitPanel.Inner>
         </EuiSplitPanel.Outer>
       </EuiFlexItem>

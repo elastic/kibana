@@ -80,7 +80,7 @@ import { MissingPrivilegesCallOut } from '../../components/callouts/missing_priv
 import { useKibana } from '../../../common/lib/kibana';
 import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
-import { LandingPageComponent } from '../../../common/components/landing_page';
+import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
 import type { Status } from '../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
@@ -467,7 +467,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <EuiFlexGroup gutterSize="m">
                   <EuiFlexItem>
                     <FilterByAssigneesPopover
-                      assignedUserIds={assignees}
+                      selectedUserIds={assignees}
                       onSelectionChange={handleSelectedAssignees}
                     />
                   </EuiFlexItem>
@@ -516,7 +516,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
     </>
   );

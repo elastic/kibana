@@ -9,30 +9,15 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { Provider } from 'react-redux';
 
-import {
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../mock';
-import { createStore } from '../../store/store';
+import { createMockStore } from '../../mock';
 
 import { ErrorToastDispatcher } from '.';
-import type { State } from '../../store/types';
 
 describe('Error Toast Dispatcher', () => {
-  const state: State = mockGlobalState;
-  const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
-  beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-  });
-
   describe('rendering', () => {
     test('it renders', () => {
       const wrapper = shallow(
-        <Provider store={store}>
+        <Provider store={createMockStore()}>
           <ErrorToastDispatcher toastLifeTimeMs={9999999999} />
         </Provider>
       );

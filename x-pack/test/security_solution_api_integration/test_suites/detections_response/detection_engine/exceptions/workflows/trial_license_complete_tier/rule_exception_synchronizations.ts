@@ -18,13 +18,12 @@ import type {
   RuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import { createRuleWithExceptionEntries, getSimpleRule } from '../../../../utils';
 import {
   deleteAllAlerts,
-  getSimpleRule,
-  createRuleWithExceptionEntries,
   deleteAllRules,
   createRule,
-} from '../../../../utils';
+} from '../../../../../../../common/utils/security_solution';
 import {
   createListsIndex,
   deleteAllExceptions,
@@ -45,8 +44,8 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllExceptions(supertest, log);
     });
     /*
-        This test to mimic if we have two browser tabs, and the user tried to 
-        edit an exception in a tab after deleting it in another 
+        This test to mimic if we have two browser tabs, and the user tried to
+        edit an exception in a tab after deleting it in another
       */
     it('should Not edit an exception after being deleted', async () => {
       const { list_id: skippedListId, ...newExceptionItem } =
@@ -101,13 +100,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
     /*
-        This test to mimic if we have two browser tabs, and the user tried to 
+        This test to mimic if we have two browser tabs, and the user tried to
         edit an exception with value-list was deleted in another tab
       */
     it('should Not allow editing an Exception with deleted ValueList', async () => {
       await createListsIndex(supertest, log);
 
-      const valueListId = 'value-list-id';
+      const valueListId = 'value-list-id.txt';
       await importFile(supertest, log, 'keyword', ['suricata-sensor-amsterdam'], valueListId);
       const rule: QueryRuleCreateProps = {
         ...getSimpleRule(),

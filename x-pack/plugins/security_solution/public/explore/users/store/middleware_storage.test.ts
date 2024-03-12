@@ -5,28 +5,16 @@
  * 2.0.
  */
 
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-} from '../../../common/mock';
-import { createStore } from '../../../common/store';
+import { createMockStore, createSecuritySolutionStorageMock } from '../../../common/mock';
 import { addUserAssetTableField, removeUserAssetTableField } from './actions';
 import { UserAssetTableType } from './model';
 import { getUserAssetTableFromStorage } from './storage';
-import type { Store } from 'redux';
 
-let store: Store;
 const storage = createSecuritySolutionStorageMock().storage;
 
 describe('UsersAssetTable localStorage middleware', () => {
-  beforeEach(() => {
-    storage.clear();
-    store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-  });
-
   it('persist asset table when adding and removing fields', async () => {
+    const store = createMockStore(undefined, undefined, undefined, storage);
     const fieldName = 'test-field';
 
     // Add field to the table

@@ -103,6 +103,7 @@ export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
     id: schema.string(),
     name: schema.string(),
     is_default: schema.boolean({ defaultValue: false }),
+    is_internal: schema.maybe(schema.boolean()),
     host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
     proxy_id: schema.nullable(schema.string()),
   }),

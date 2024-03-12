@@ -396,28 +396,42 @@ export class Table extends PureComponent<TableProps, TableState> {
           onChange={this.onChange}
           defaultQuery={this.props.initialQuery}
           toolsRight={[
-            <EuiButton
-              key="deleteSO"
-              iconType="trash"
-              color="danger"
-              onClick={onDelete}
-              isDisabled={
-                selectedSavedObjects.length === 0 || !capabilities.savedObjectsManagement.delete
+            <EuiToolTip
+              content={
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
+                  defaultMessage="Selected objects can’t be deleted because they are either Elastic managed objects or hidden objects."
+                />
               }
-              title={
-                capabilities.savedObjectsManagement.delete
-                  ? undefined
-                  : i18n.translate('savedObjectsManagement.objectsTable.table.deleteButtonTitle', {
-                      defaultMessage: 'Unable to delete saved objects',
-                    })
-              }
-              data-test-subj="savedObjectsManagementDelete"
             >
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
-                defaultMessage="Delete"
-              />
-            </EuiButton>,
+              <EuiButton
+                key="deleteSO"
+                iconType="trash"
+                color="danger"
+                onClick={onDelete}
+                isDisabled={
+                  selectedSavedObjects.filter(
+                    ({ managed, meta: { hiddenType } }) => !managed && !hiddenType
+                  ).length === 0 || !capabilities.savedObjectsManagement.delete
+                }
+                title={
+                  capabilities.savedObjectsManagement.delete
+                    ? undefined
+                    : i18n.translate(
+                        'savedObjectsManagement.objectsTable.table.deleteButtonTitle',
+                        {
+                          defaultMessage: 'Unable to delete saved objects',
+                        }
+                      )
+                }
+                data-test-subj="savedObjectsManagementDelete"
+              >
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
+                  defaultMessage="Delete"
+                />
+              </EuiButton>
+            </EuiToolTip>,
             <EuiPopover
               key="exportSOOptions"
               button={button}

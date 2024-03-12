@@ -150,7 +150,6 @@ export class PluginsService
     const config = await firstValueFrom(this.config$);
     if (config.initialize) {
       await this.prebootPluginsSystem.setupPlugins(deps);
-      this.registerPluginStaticDirs(deps, this.prebootUiPluginInternalInfo);
     } else {
       this.log.info(
         'Skipping `setup` for `preboot` plugins since plugin initialization is disabled.'
@@ -166,7 +165,6 @@ export class PluginsService
     let contracts = new Map<PluginName, unknown>();
     if (config.initialize) {
       contracts = await this.standardPluginsSystem.setupPlugins(deps);
-      this.registerPluginStaticDirs(deps, this.standardUiPluginInternalInfo);
     } else {
       this.log.info(
         'Skipping `setup` for `standard` plugins since plugin initialization is disabled.'
@@ -441,17 +439,5 @@ export class PluginsService
       enabled: false,
       missingOrIncompatibleDependencies,
     };
-  }
-
-  private registerPluginStaticDirs(
-    deps: PluginsServiceSetupDeps | PluginsServicePrebootSetupDeps,
-    uiPluginInternalInfo: Map<PluginName, InternalPluginInfo>
-  ) {
-    for (const [pluginName, pluginInfo] of uiPluginInternalInfo) {
-      deps.http.registerStaticDir(
-        `/plugins/${pluginName}/assets/{path*}`,
-        pluginInfo.publicAssetsDir
-      );
-    }
   }
 }

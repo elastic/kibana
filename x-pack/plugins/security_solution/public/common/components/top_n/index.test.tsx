@@ -11,16 +11,8 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 import '../../mock/match_media';
 import { mockBrowserFields } from '../../containers/source/mock';
-import {
-  mockGlobalState,
-  TestProviders,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-  mockIndexPattern,
-} from '../../mock';
+import { mockGlobalState, TestProviders, mockIndexPattern, createMockStore } from '../../mock';
 import type { State } from '../../store';
-import { createStore } from '../../store';
 
 import type { Props } from './top_n';
 import { StatefulTopN } from '.';
@@ -149,8 +141,7 @@ const state: State = {
   },
 };
 
-const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const store = createMockStore(state);
 
 const testProps = {
   browserFields: mockBrowserFields,

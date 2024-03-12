@@ -46,9 +46,29 @@ const datasetRT = rt.intersection([
   ),
 ]);
 
+const timeRangeRT = rt.strict({
+  from: rt.string,
+  to: rt.string,
+  refresh: rt.strict({
+    pause: rt.boolean,
+    value: rt.number,
+  }),
+});
+
 export const flyoutRT = rt.exact(
   rt.partial({
     dataset: datasetRT,
+    insightsTimeRange: timeRangeRT,
+  })
+);
+
+export const filtersRT = rt.exact(
+  rt.partial({
+    inactive: rt.boolean,
+    fullNames: rt.boolean,
+    timeRange: timeRangeRT,
+    integrations: rt.array(rt.string),
+    query: rt.string,
   })
 );
 
@@ -57,6 +77,7 @@ export const urlSchemaRT = rt.exact(
     v: rt.literal(1),
     table: tableRT,
     flyout: flyoutRT,
+    filters: filtersRT,
   })
 );
 

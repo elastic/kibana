@@ -92,6 +92,8 @@ export const combineResults = (
   createdSignals: [...currentResult.createdSignals, ...newResult.createdSignals],
   warningMessages: [...currentResult.warningMessages, ...newResult.warningMessages],
   errors: [...new Set([...currentResult.errors, ...newResult.errors])],
+  suppressedAlertsCount:
+    (currentResult.suppressedAlertsCount ?? 0) + (newResult.suppressedAlertsCount ?? 0),
 });
 
 /**
@@ -120,6 +122,8 @@ export const combineConcurrentResults = (
         createdSignals: [...accum.createdSignals, ...item.createdSignals],
         warningMessages: [...accum.warningMessages, ...item.warningMessages],
         errors: [...new Set([...accum.errors, ...item.errors])],
+        suppressedAlertsCount:
+          (accum.suppressedAlertsCount ?? 0) + (item.suppressedAlertsCount ?? 0),
       };
     },
     {
@@ -130,6 +134,7 @@ export const combineConcurrentResults = (
       enrichmentTimes: [],
       lastLookBackDate: undefined,
       createdSignalsCount: 0,
+      suppressedAlertsCount: 0,
       createdSignals: [],
       errors: [],
       warningMessages: [],

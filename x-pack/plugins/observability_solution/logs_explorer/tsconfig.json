@@ -22,7 +22,6 @@
     "@kbn/deeplinks-observability",
     "@kbn/discover-plugin",
     "@kbn/discover-utils",
-    "@kbn/ecs",
     "@kbn/elastic-agent-utils",
     "@kbn/embeddable-plugin",
     "@kbn/es-query",

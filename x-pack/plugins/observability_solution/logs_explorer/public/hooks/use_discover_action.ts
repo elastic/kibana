@@ -5,10 +5,10 @@
  * 2.0.
  */
 import createContainer from 'constate';
-import type { LogExplorerFlyoutContentProps } from '../customizations/types';
+import type { LogsExplorerFlyoutContentProps } from '../customizations/types';
 
 interface UseFlyoutActionsDeps {
-  value: LogExplorerFlyoutContentProps['actions'];
+  value: LogsExplorerFlyoutContentProps['actions'];
 }
 
 const useDiscoverActions = ({ value }: UseFlyoutActionsDeps) => value;

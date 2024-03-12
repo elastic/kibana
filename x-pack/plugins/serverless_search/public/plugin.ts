@@ -41,7 +41,7 @@ export class ServerlessSearchPlugin
 {
   public setup(
     core: CoreSetup<ServerlessSearchPluginStartDependencies, ServerlessSearchPluginStart>,
-    _setupDeps: ServerlessSearchPluginSetupDependencies
+    setupDeps: ServerlessSearchPluginSetupDependencies
   ): ServerlessSearchPluginSetup {
     const queryClient = new QueryClient({
       mutationCache: new MutationCache({
@@ -102,7 +102,7 @@ export class ServerlessSearchPlugin
       appRoute: '/app/connectors',
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      searchable: false,
+      visibleIn: [],
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/connectors');
         const [coreStart, services] = await core.getStartServices();
@@ -111,6 +111,9 @@ export class ServerlessSearchPlugin
         return await renderApp(element, coreStart, { history, ...services }, queryClient);
       },
     });
+
+    setupDeps.discover.showInlineTopNav();
+
     return {};
   }
 

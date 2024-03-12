@@ -11,6 +11,7 @@ import type {
   CheckPrivilegesResponse,
   SecurityPluginStart,
 } from '@kbn/security-plugin/server';
+import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../../common/entity_analytics/asset_criticality/constants';
 import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics/common';
 const groupPrivilegesByName = <PrivilegeName extends string>(
   privileges: Array<{
@@ -69,5 +70,21 @@ export async function checkAndFormatPrivileges({
   return {
     privileges: _formatPrivileges(privileges),
     has_all_required: hasAllRequested,
+    ...hasReadWritePermissions(privileges.elasticsearch, ASSET_CRITICALITY_INDEX_PATTERN),
   };
 }
+
+export const hasReadWritePermissions = (
+  { index, cluster }: CheckPrivilegesResponse['privileges']['elasticsearch'],
+  indexKey = ''
+) => {
+  const has =
+    (type: string) =>
+    ({ privilege, authorized }: { privilege: string; authorized: boolean }) =>
+      privilege === type && authorized;
+  return {
+    has_read_permissions: index[indexKey]?.some(has('read')) || cluster.some(has('read')),
+
+    has_write_permissions: index[indexKey]?.some(has('write')) || cluster.some(has('write')),
+  };
+};

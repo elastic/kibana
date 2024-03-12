@@ -51,7 +51,7 @@ export function deserializeComponentTemplate(
   indexTemplatesEs: TemplateFromEs[]
 ) {
   const { name, component_template: componentTemplate } = componentTemplateEs;
-  const { template, _meta, version } = componentTemplate;
+  const { template, _meta, version, deprecated } = componentTemplate;
 
   const indexTemplatesToUsedBy = getIndexTemplatesToUsedBy(indexTemplatesEs);
 
@@ -60,6 +60,7 @@ export function deserializeComponentTemplate(
     template,
     version,
     _meta,
+    deprecated,
     _kbnMeta: {
       usedBy: indexTemplatesToUsedBy[name] || [],
       isManaged: Boolean(_meta?.managed === true),
@@ -74,13 +75,14 @@ export function deserializeComponentTemplateList(
   indexTemplatesEs: TemplateFromEs[]
 ) {
   const { name, component_template: componentTemplate } = componentTemplateEs;
-  const { template, _meta } = componentTemplate;
+  const { template, _meta, deprecated } = componentTemplate;
 
   const indexTemplatesToUsedBy = getIndexTemplatesToUsedBy(indexTemplatesEs);
 
   const componentTemplateListItem: ComponentTemplateListItem = {
     name,
     usedBy: indexTemplatesToUsedBy[name] || [],
+    isDeprecated: Boolean(deprecated === true),
     isManaged: Boolean(_meta?.managed === true),
     hasSettings: hasEntries(template.settings),
     hasMappings: hasEntries(template.mappings),
@@ -93,11 +95,12 @@ export function deserializeComponentTemplateList(
 export function serializeComponentTemplate(
   componentTemplateDeserialized: ComponentTemplateDeserialized
 ): ComponentTemplateSerialized {
-  const { version, template, _meta } = componentTemplateDeserialized;
+  const { version, template, _meta, deprecated } = componentTemplateDeserialized;
 
   return {
     version,
     template,
     _meta,
+    deprecated,
   };
 }

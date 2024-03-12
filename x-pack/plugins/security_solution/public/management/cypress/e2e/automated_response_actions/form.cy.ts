@@ -17,22 +17,26 @@ import { cleanupRule, generateRandomStringName, loadRule } from '../../tasks/api
 import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';
 import { login, ROLE } from '../../tasks/login';
 
+export const RESPONSE_ACTIONS_ERRORS = 'response-actions-error';
+
 describe(
   'Form',
   {
-    tags: [
-      '@ess',
-      '@serverless',
-
-      // Not supported in serverless! Test suite uses custom roles
-      '@brokenInServerless',
-    ],
+    tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'automatedProcessActionsEnabled',
+          ])}`,
+        ],
+      },
+    },
   },
   () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/169334
-    describe.skip('User with no access can not create an endpoint response action', () => {
+    describe('User with no access can not create an endpoint response action', () => {
       beforeEach(() => {
-        login(ROLE.endpoint_response_actions_no_access);
+        login(ROLE.rule_author);
       });
 
       it('no endpoint response action option during rule creation', () => {
@@ -43,11 +47,12 @@ describe(
 
     describe('User with access can create and save an endpoint response action', () => {
       const testedCommand = 'isolate';
+      const secondTestedCommand = 'suspend-process';
       let ruleId: string;
       const [ruleName, ruleDescription] = generateRandomStringName(2);
 
       beforeEach(() => {
-        login(ROLE.endpoint_response_actions_access);
+        login(ROLE.soc_manager);
       });
       afterEach(() => {
         if (ruleId) {
@@ -75,20 +80,53 @@ describe(
         });
         cy.getByTestSubj(`command-type-${testedCommand}`).should('not.have.attr', 'disabled');
         cy.getByTestSubj(`command-type-${testedCommand}`).click();
+
+        addEndpointResponseAction();
+        focusAndOpenCommandDropdown(1);
+        cy.getByTestSubj(`command-type-${secondTestedCommand}`).click();
+        cy.getByTestSubj('config-overwrite-toggle').click();
+        cy.getByTestSubj('config-custom-field-name').should('have.value', '');
+
         cy.intercept('POST', '/api/detection_engine/rules', (request) => {
-          const result = {
+          const isolateResult = {
             action_type_id: ResponseActionTypesEnum['.endpoint'],
             params: {
               command: testedCommand,
               comment: 'example1',
             },
           };
-          expect(request.body.response_actions[0]).to.deep.equal(result);
+          const processResult = {
+            action_type_id: ResponseActionTypesEnum['.endpoint'],
+            params: {
+              command: secondTestedCommand,
+              comment: 'example1',
+              config: {
+                field: 'process.entity_id',
+                overwrite: false,
+              },
+            },
+          };
+          expect(request.body.response_actions[0]).to.deep.equal(isolateResult);
+          expect(request.body.response_actions[1]).to.deep.equal(processResult);
           request.continue((response) => {
             ruleId = response.body.id;
             response.send(response.body);
           });
         });
+        cy.getByTestSubj(RESPONSE_ACTIONS_ERRORS).should('not.exist');
+
+        cy.getByTestSubj('create-enabled-false').click();
+
+        cy.getByTestSubj(RESPONSE_ACTIONS_ERRORS).within(() => {
+          cy.contains(
+            'Custom field name selection is required when the process.pid toggle is disabled.'
+          );
+        });
+
+        cy.getByTestSubj(`response-actions-list-item-1`).within(() => {
+          cy.getByTestSubj('config-custom-field-name').type('process.entity_id{downArrow}{enter}');
+        });
+
         cy.getByTestSubj('create-enabled-false').click();
         cy.contains(`${ruleName} was created`);
       });
@@ -97,11 +135,11 @@ describe(
     describe('User with access can edit and delete an endpoint response action', () => {
       let ruleId: string;
       let ruleName: string;
-      const testedCommand = 'isolate';
-      const newDescription = 'Example isolate host description';
+      const newDescription = 'Example suspend process description';
+      const secondTestedCommand = 'suspend-process';
 
       beforeEach(() => {
-        login(ROLE.endpoint_response_actions_access);
+        login(ROLE.soc_manager);
         loadRule().then((res) => {
           ruleId = res.id;
           ruleName = res.name;
@@ -115,24 +153,30 @@ describe(
         visitRuleActions(ruleId);
         cy.getByTestSubj('edit-rule-actions-tab').click();
 
-        cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
-          cy.getByTestSubj('input').should('have.value', 'Isolate host');
-          cy.getByTestSubj('input').should('have.value', 'Isolate host');
+        cy.getByTestSubj(`response-actions-list-item-1`).within(() => {
+          cy.getByTestSubj('input').should('have.value', 'Suspend host');
           cy.getByTestSubj('input').type(`{selectall}{backspace}${newDescription}`);
-          cy.getByTestSubj('commandTypeField').click();
+          cy.getByTestSubj('config-overwrite-toggle').click();
+          cy.getByTestSubj('config-custom-field-name').should('have.value', '');
+          cy.getByTestSubj('config-overwrite-toggle').click();
+          cy.getByTestSubj('config-custom-field-name').type('process.entity_id{downArrow}{enter}');
         });
-        validateAvailableCommands();
+
         cy.intercept('PUT', '/api/detection_engine/rules').as('updateResponseAction');
         cy.getByTestSubj('ruleEditSubmitButton').click();
         cy.wait('@updateResponseAction').should(({ request }) => {
           const query = {
-            action_type_id: ResponseActionTypesEnum['.endpoint'],
             params: {
-              command: testedCommand,
+              command: secondTestedCommand,
               comment: newDescription,
+              config: {
+                field: 'process.entity_id',
+                overwrite: false,
+              },
             },
+            action_type_id: ResponseActionTypesEnum['.endpoint'],
           };
-          expect(request.body.response_actions[0]).to.deep.equal(query);
+          expect(request.body.response_actions[1]).to.deep.equal(query);
         });
         cy.contains(`${ruleName} was saved`).should('exist');
       });
@@ -147,7 +191,7 @@ describe(
         cy.intercept('PUT', '/api/detection_engine/rules').as('deleteResponseAction');
         cy.getByTestSubj('ruleEditSubmitButton').click();
         cy.wait('@deleteResponseAction').should(({ request }) => {
-          expect(request.body.response_actions).to.be.equal(undefined);
+          expect(request.body.response_actions.length).to.be.equal(2);
         });
         cy.contains(`${ruleName} was saved`).should('exist');
       });
@@ -157,13 +201,14 @@ describe(
       const [ruleName, ruleDescription] = generateRandomStringName(2);
 
       beforeEach(() => {
-        login(ROLE.endpoint_response_actions_no_access);
+        login(ROLE.rule_author);
       });
 
+      // let currentUrl
       it('response actions are disabled', () => {
         fillUpNewRule(ruleName, ruleDescription);
         cy.getByTestSubj('response-actions-wrapper').within(() => {
-          cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
+          cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').should(
             'be.disabled'
           );
         });
@@ -174,7 +219,7 @@ describe(
       let ruleId: string;
 
       beforeEach(() => {
-        login(ROLE.endpoint_response_actions_no_access);
+        login(ROLE.rule_author);
         loadRule().then((res) => {
           ruleId = res.id;
         });
@@ -189,7 +234,7 @@ describe(
         cy.getByTestSubj('edit-rule-actions-tab').click();
 
         cy.getByTestSubj('response-actions-wrapper').within(() => {
-          cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
+          cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').should(
             'be.disabled'
           );
         });
@@ -200,8 +245,8 @@ describe(
           // Try removing action
           cy.getByTestSubj('remove-response-action').click({ force: true });
         });
-        cy.getByTestSubj(`response-actions-list-item-0`).should('exist');
-        tryAddingDisabledResponseAction(1);
+        cy.getByTestSubj(`response-actions-list-item-2`).should('exist');
+        tryAddingDisabledResponseAction(3);
       });
     });
   }

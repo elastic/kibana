@@ -121,6 +121,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-0',
+      'SmartFields-0',
     ]);
 
     expect(fieldGroups).toMatchSnapshot();
@@ -183,6 +184,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-3',
+      'SmartFields-0',
     ]);
 
     expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
@@ -254,6 +256,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-1',
       'EmptyFields-0',
       'MetaFields-3',
+      'SmartFields-0',
     ]);
 
     expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
@@ -311,6 +314,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-28-28',
       'EmptyFields-0-0',
       'MetaFields-3-3',
+      'SmartFields-0-0',
     ]);
 
     act(() => {
@@ -334,6 +338,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-2-28',
       'EmptyFields-0-0',
       'MetaFields-0-3',
+      'SmartFields-0-0',
     ]);
 
     act(() => {
@@ -357,6 +362,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-1-28',
       'EmptyFields-0-0',
       'MetaFields-0-3',
+      'SmartFields-0-0',
     ]);
   });
 
@@ -410,6 +416,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-3',
+      'SmartFields-0',
     ]);
   });
 
@@ -440,6 +447,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-3',
+      'SmartFields-0',
     ]);
   });
 
@@ -466,6 +474,47 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'AvailableFields-56', // even unmapped fields fall into Available
       'UnmappedFields-0',
       'MetaFields-0',
+      'SmartFields-0',
+    ]);
+
+    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
+  });
+
+  it('should work correctly for text-based queries (no data view) with isNull fields', async () => {
+    const allFieldsEmpty = [...new Array(2)].flatMap((_, index) =>
+      allFields.map((field) => {
+        return new DataViewField({
+          ...field.toSpec(),
+          name: `${field.name}${index || ''}`,
+          isNull: true,
+        });
+      })
+    );
+    const { result } = renderHook(useGroupedFields, {
+      initialProps: {
+        dataViewId: null,
+        allFields: allFieldsEmpty,
+        services: mockedServices,
+      },
+    });
+
+    const fieldListGroupedProps = result.current.fieldListGroupedProps;
+    const fieldGroups = fieldListGroupedProps.fieldGroups;
+
+    expect(
+      Object.keys(fieldGroups!).map(
+        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+      )
+    ).toStrictEqual([
+      'SpecialFields-0',
+      'SelectedFields-0',
+      'PopularFields-0',
+      'AvailableFields-0',
+      'UnmappedFields-0',
+      'EmptyFields-56',
+      'MetaFields-0',
+      'SmartFields-0',
     ]);
 
     expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
@@ -542,6 +591,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'EmptyFields-23',
       'MetaFields-3',
+      'SmartFields-0',
     ]);
 
     expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
@@ -569,6 +619,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'AvailableFields-8',
       'UnmappedFields-0',
       'MetaFields-0',
+      'SmartFields-0',
     ]);
 
     expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
@@ -607,6 +658,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-3',
+      'SmartFields-0',
     ]);
 
     expect(fieldGroups.PopularFields?.fields.map((field) => field.name).join(',')).toBe(
@@ -655,6 +707,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-28',
       'EmptyFields-0',
       'MetaFields-3',
+      'SmartFields-0',
     ]);
   });
 
@@ -689,6 +742,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-3',
+      'SmartFields-0',
     ]);
 
     expect(fieldGroups.SelectedFields?.fields).toBe(customSortedFields);
@@ -736,5 +790,47 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     expect(result.current.fieldListGroupedProps.fieldGroups.AvailableFields?.fields?.length).toBe(
       3
     );
+  });
+
+  it('should include additional fields when additionalFieldGroups are provided', async () => {
+    const smartFields = [
+      new DataViewField({
+        name: 'mock_field',
+        type: 'mock_field',
+        searchable: false,
+        aggregatable: false,
+      }),
+    ];
+
+    const additionalFieldGroups = {
+      smartFields,
+    };
+    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+      initialProps: {
+        dataViewId: dataView.id!,
+        allFields,
+        services: mockedServices,
+        additionalFieldGroups,
+      },
+    });
+
+    await waitForNextUpdate();
+    const fieldListGroupedProps = result.current.fieldListGroupedProps;
+    const fieldGroups = fieldListGroupedProps.fieldGroups;
+    expect(fieldGroups.SmartFields?.fields?.length).toBe(1);
+    expect(
+      Object.keys(fieldGroups!).map(
+        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+      )
+    ).toStrictEqual([
+      'SpecialFields-0',
+      'SelectedFields-0',
+      'PopularFields-0',
+      'AvailableFields-25',
+      'UnmappedFields-0',
+      'EmptyFields-0',
+      'MetaFields-3',
+      'SmartFields-1',
+    ]);
   });
 });

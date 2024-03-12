@@ -16,7 +16,7 @@ export interface KnowledgeBaseEntryCategory {
 
 export function categorizeEntries({ entries }: { entries: KnowledgeBaseEntry[] }) {
   return entries.reduce((acc, entry) => {
-    const categoryName = entry.labels.category ?? entry.id;
+    const categoryName = entry.labels?.category ?? entry.id;
 
     const index = acc.findIndex((item) => item.categoryName === categoryName);
 

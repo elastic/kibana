@@ -19,6 +19,7 @@ interface State {
   numberOfActiveAlerts: number;
   numberOfRecoveredAlerts: number;
   numberOfNewAlerts: number;
+  numberOfDelayedAlerts: number;
   hasReachedAlertLimit: boolean;
   connectorTypes: {
     [key: string]: {
@@ -43,6 +44,7 @@ export class RuleRunMetricsStore {
     numberOfActiveAlerts: 0,
     numberOfRecoveredAlerts: 0,
     numberOfNewAlerts: 0,
+    numberOfDelayedAlerts: 0,
     hasReachedAlertLimit: false,
     connectorTypes: {},
     hasReachedQueuedActionsLimit: false,
@@ -78,6 +80,9 @@ export class RuleRunMetricsStore {
   };
   public getNumberOfNewAlerts = () => {
     return this.state.numberOfNewAlerts;
+  };
+  public getNumberOfDelayedAlerts = () => {
+    return this.state.numberOfDelayedAlerts;
   };
   public getStatusByConnectorType = (actionTypeId: string) => {
     return this.state.connectorTypes[actionTypeId];
@@ -127,6 +132,9 @@ export class RuleRunMetricsStore {
   };
   public setNumberOfNewAlerts = (numberOfNewAlerts: number) => {
     this.state.numberOfNewAlerts = numberOfNewAlerts;
+  };
+  public setNumberOfDelayedAlerts = (numberOfDelayedAlerts: number) => {
+    this.state.numberOfDelayedAlerts = numberOfDelayedAlerts;
   };
   public setTriggeredActionsStatusByConnectorType = ({
     actionTypeId,
