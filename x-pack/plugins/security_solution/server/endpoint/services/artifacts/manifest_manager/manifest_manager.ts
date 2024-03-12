@@ -15,7 +15,6 @@ import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
-import { UnifiedManifestClient } from '../unified_manifest_client';
 import { stringify } from '../../../utils/stringify';
 import { QueueProcessor } from '../../../utils/queue_processor';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
@@ -128,10 +127,6 @@ export class ManifestManager {
    */
   protected getManifestClient(): ManifestClient {
     return new ManifestClient(this.savedObjectsClient, this.schemaVersion);
-  }
-
-  protected getUnifiedManifestClient(): UnifiedManifestClient {
-    return new UnifiedManifestClient(this.savedObjectsClient);
   }
 
   /**
