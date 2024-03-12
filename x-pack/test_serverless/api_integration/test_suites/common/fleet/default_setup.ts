@@ -12,6 +12,24 @@ const defaultFleetServerHostUrl = 'https://localhost:8220';
 const defaultElasticsearchOutputId = 'es-default-output';
 const defaultElasticsearchOutputHostUrl = 'https://localhost:9200';
 
+export const kbnServerArgs = [
+  '--xpack.cloud.serverless.project_id=ftr_fake_project_id',
+  `--xpack.fleet.fleetServerHosts=[${JSON.stringify({
+    id: defaultFleetServerHostId,
+    name: 'Default Fleet Server',
+    is_default: true,
+    host_urls: [defaultFleetServerHostUrl],
+  })}]`,
+  `--xpack.fleet.outputs=[${JSON.stringify({
+    id: defaultElasticsearchOutputId,
+    name: 'Default Output',
+    type: 'elasticsearch',
+    is_default: true,
+    is_default_monitoring: true,
+    hosts: [defaultElasticsearchOutputHostUrl],
+  })}]`,
+];
+
 export async function expectDefaultFleetServer({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
@@ -45,21 +63,3 @@ export async function expectDefaultElasticsearchOutput({ getService }: FtrProvid
     }
   });
 }
-
-export const kbnServerArgs = [
-  '--xpack.cloud.serverless.project_id=ftr_fake_project_id',
-  `--xpack.fleet.fleetServerHosts=[${JSON.stringify({
-    id: defaultFleetServerHostId,
-    name: 'Default Fleet Server',
-    is_default: true,
-    host_urls: [defaultFleetServerHostUrl],
-  })}]`,
-  `--xpack.fleet.outputs=[${JSON.stringify({
-    id: defaultElasticsearchOutputId,
-    name: 'Default Output',
-    type: 'elasticsearch',
-    is_default: true,
-    is_default_monitoring: true,
-    hosts: [defaultElasticsearchOutputHostUrl],
-  })}]`,
-];

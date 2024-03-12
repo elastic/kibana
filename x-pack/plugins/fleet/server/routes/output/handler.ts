@@ -174,16 +174,26 @@ async function validateOutputServerless(
   if (outputId && !output.hosts) {
     return;
   }
-  const defaultOutput = await outputService.get(soClient, SERVERLESS_DEFAULT_OUTPUT_ID);
-  let originalOutput;
-  if (outputId) {
-    originalOutput = await outputService.get(soClient, outputId);
-  }
-  const type = output.type || originalOutput?.type;
-  if (type === outputType.Elasticsearch && !isEqual(output.hosts, defaultOutput.hosts)) {
-    throw Boom.badRequest(
-      `Elasticsearch output host must have default URL in serverless: ${defaultOutput.hosts}`
-    );
+  try {
+    const defaultOutput = await outputService.get(soClient, SERVERLESS_DEFAULT_OUTPUT_ID);
+    let originalOutput;
+    if (outputId) {
+      originalOutput = await outputService.get(soClient, outputId);
+    }
+    const type = output.type || originalOutput?.type;
+    if (type === outputType.Elasticsearch && !isEqual(output.hosts, defaultOutput.hosts)) {
+      throw Boom.badRequest(
+        `Elasticsearch output host must have default URL in serverless: ${defaultOutput.hosts}`
+      );
+    }
+  } catch (error) {
+    if (error.output.statusCode === 404) {
+      throw Boom.notFound(
+        `Cannot retrieve default Elasticsearch output host id ${SERVERLESS_DEFAULT_OUTPUT_ID}: ${error.message}`
+      );
+    } else {
+      throw error;
+    }
   }
 }
 
