@@ -12,7 +12,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
 
   describe('lens gauge', () => {
     before(async () => {
@@ -36,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should switch to gauge and render a gauge with default values', async () => {
-      await PageObjects.lens.switchToVisualization('horizontalBullet', 'bullet horizontal');
+      await PageObjects.lens.switchToVisualization('horizontalBullet', 'horizontal');
       await PageObjects.lens.waitForVisualization('gaugeChart');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
@@ -47,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reflect edits for gauge', async () => {
-      await PageObjects.lens.switchToVisualization('horizontalBullet', 'gauge');
+      await PageObjects.lens.switchToVisualization('horizontalBullet', 'horizontal');
       await PageObjects.lens.waitForVisualization('gaugeChart');
       await PageObjects.lens.configureDimension({
         dimension: 'lnsGauge_metricDimensionPanel > lns-dimensionTrigger',
@@ -86,27 +85,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.waitForVisualization('gaugeChart');
       await PageObjects.lens.closeDimensionEditor();
 
-      const elementWithInfo = await find.byCssSelector('.echScreenReaderOnly');
-      const textContent = await elementWithInfo.getAttribute('textContent');
-      expect(textContent).to.contain('custom title');
-      expect(textContent).to.contain('custom subtitle');
-      expect(textContent).to.contain('horizontalBullet chart');
-      expect(textContent).to.contain('Minimum:1000');
-      expect(textContent).to.contain('Maximum:25000');
-      expect(textContent).to.contain('Target:11250');
-      expect(textContent).to.contain('Value:14005');
+      const { bullet } = await elasticChart.getChartDebugData();
+      const debugData = bullet?.rows[0][0];
+      expect(debugData?.subtype).to.be('horizontal');
+      expect(debugData?.title).to.be('custom title');
+      expect(debugData?.subtitle).to.be('custom subtitle');
+      expect(debugData?.value).to.be(14005);
+      expect(debugData?.target).to.be(11250);
+      expect(debugData?.domain).to.eql([1000, 25000]);
     });
     it('should seamlessly switch to vertical chart without losing configuration', async () => {
-      await PageObjects.lens.switchToVisualization('verticalBullet', 'gauge');
-      const elementWithInfo = await find.byCssSelector('.echScreenReaderOnly');
-      const textContent = await elementWithInfo.getAttribute('textContent');
-      expect(textContent).to.contain('custom title');
-      expect(textContent).to.contain('custom subtitle');
-      expect(textContent).to.contain('verticalBullet chart');
-      expect(textContent).to.contain('Minimum:1000');
-      expect(textContent).to.contain('Maximum:25000');
-      expect(textContent).to.contain('Target:11250');
-      expect(textContent).to.contain('Value:14005');
+      await PageObjects.lens.switchToVisualization('verticalBullet', 'vertical');
+      const { bullet } = await elasticChart.getChartDebugData();
+      const debugData = bullet?.rows[0][0];
+      expect(debugData?.subtype).to.be('vertical');
+      expect(debugData?.title).to.be('custom title');
+      expect(debugData?.subtitle).to.be('custom subtitle');
+      expect(debugData?.value).to.be(14005);
+      expect(debugData?.target).to.be(11250);
+      expect(debugData?.domain).to.eql([1000, 25000]);
     });
     it('should switch to table chart and filter not supported static values', async () => {
       await PageObjects.lens.switchToVisualization('lnsDatatable');

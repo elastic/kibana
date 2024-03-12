@@ -197,10 +197,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('gauge size (absolute pixels) - horizontal', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(
-          GaugeShapes.HORIZONTAL_BULLET,
-          'bullet horizontal'
-        );
+        await PageObjects.lens.switchToVisualization(GaugeShapes.HORIZONTAL_BULLET, 'horizontal');
       });
 
       await assertWorkspaceDimensions('600px', '200px');
@@ -208,10 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('gauge size (absolute pixels) - vertical', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(
-          GaugeShapes.VERTICAL_BULLET,
-          'bullet vertical'
-        );
+        await PageObjects.lens.switchToVisualization(GaugeShapes.VERTICAL_BULLET, 'vertical');
       });
 
       // this height is below the requested 600px
@@ -224,7 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('gauge size (absolute pixels) - arc', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(GaugeShapes.ARC, 'gauge arc');
+        await PageObjects.lens.switchToVisualization(GaugeShapes.ARC, 'arc');
       });
       await assertWorkspaceDimensions('600px', '375px');
     });
@@ -241,7 +235,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('gauge size (absolute pixels) - circle', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(GaugeShapes.CIRCLE, 'gauge circle');
+        await PageObjects.lens.switchToVisualization(GaugeShapes.CIRCLE, 'circle');
       });
       await assertWorkspaceDimensions('600px', '400px');
     });

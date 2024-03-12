@@ -572,7 +572,7 @@ exports[`GaugeComponent renders the chart 1`] = `
         ],
       ]
     }
-    id="goal"
+    id="bullet"
     subtype="vertical"
   />
 </Chart>
