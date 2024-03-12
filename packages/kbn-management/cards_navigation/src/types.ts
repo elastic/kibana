@@ -27,7 +27,6 @@ export enum AppIds {
   MAINTENANCE_WINDOWS = 'maintenanceWindows',
   SERVERLESS_SETTINGS = 'settings',
   ROLES = 'roles',
-  MEMBERS = 'organization_members', // this is not a real app
   API_KEYS = 'api_keys',
 }
 

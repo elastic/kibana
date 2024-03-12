@@ -10,6 +10,7 @@ import type {
   CardNavExtensionDefinition,
 } from '@kbn/management-cards-navigation/src/types';
 import { getNavigationPropsFromId, SecurityPageName } from '@kbn/security-solution-navigation';
+import { orgMembersAppName, orgMembersNavCard } from '@kbn/serverless-nav-cards';
 import type { Services } from '../common/services';
 import { ExternalPageName } from './links/constants';
 import type { ProjectPageName } from './links/types';
@@ -41,6 +42,9 @@ export const enableManagementCardsLanding = (services: Services) => {
       }
       return acc;
     }, {});
+
+    const roleManagementEnabled = true; // This needs to come from either the config, or the security plugin
+    if (roleManagementEnabled) extendCardNavDefinitions[orgMembersAppName] = orgMembersNavCard;
 
     management.setupCardsNavigation({
       enabled: true,

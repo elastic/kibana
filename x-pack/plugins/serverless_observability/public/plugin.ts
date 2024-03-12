@@ -8,8 +8,12 @@
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appIds } from '@kbn/management-cards-navigation';
-import { appCategories } from '@kbn/management-cards-navigation/src/types';
+import {
+  appCategories,
+  CardNavExtensionDefinition,
+} from '@kbn/management-cards-navigation/src/types';
 import { of } from 'rxjs';
+import { orgMembersAppName, orgMembersNavCard } from '@kbn/serverless-nav-cards';
 import { navigationTree } from './navigation_tree';
 import { createObservabilityDashboardRegistration } from './logs_signal/overview_registration';
 import {
@@ -60,25 +64,30 @@ export class ServerlessObservabilityPlugin
     serverless.initNavigation(navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
 
     management.setIsSidebarEnabled(false);
+
+    const extendCardNavDefinitions: Record<string, CardNavExtensionDefinition> = {
+      aiAssistantManagementObservability: {
+        category: appCategories.OTHER,
+        title: i18n.translate('xpack.serverlessObservability.aiAssistantManagementTitle', {
+          defaultMessage: 'AI assistant for Observability settings',
+        }),
+        description: i18n.translate(
+          'xpack.serverlessObservability.aiAssistantManagementDescription',
+          {
+            defaultMessage: 'Manage your AI assistant for Observability settings.',
+          }
+        ),
+        icon: 'sparkles',
+      },
+    };
+    const roleManagementEnabled = true; // This needs to come from either the config, or the security plugin
+    if (roleManagementEnabled) extendCardNavDefinitions[orgMembersAppName] = orgMembersNavCard;
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.RULES],
-      extendCardNavDefinitions: {
-        aiAssistantManagementObservability: {
-          category: appCategories.OTHER,
-          title: i18n.translate('xpack.serverlessObservability.aiAssistantManagementTitle', {
-            defaultMessage: 'AI assistant for Observability settings',
-          }),
-          description: i18n.translate(
-            'xpack.serverlessObservability.aiAssistantManagementDescription',
-            {
-              defaultMessage: 'Manage your AI assistant for Observability settings.',
-            }
-          ),
-          icon: 'sparkles',
-        },
-      },
+      extendCardNavDefinitions,
     });
+
     return {};
   }
 

@@ -17,6 +17,7 @@ import { appIds } from '@kbn/management-cards-navigation';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
 import { of } from 'rxjs';
+import { orgMembersAppName, orgMembersNavCard } from '@kbn/serverless-nav-cards';
 import { createIndexMappingsDocsLinkContent as createIndexMappingsContent } from './application/components/index_management/index_mappings_docs_link';
 import { createIndexOverviewContent } from './application/components/index_management/index_overview_content';
 import { docLinks } from '../common/doc_links';
@@ -121,17 +122,27 @@ export class ServerlessSearchPlugin
     core: CoreStart,
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
-    const { serverless, management, indexManagement } = services;
+    const { serverless, management, indexManagement, security } = services;
     serverless.setProjectHome('/app/elasticsearch');
 
     const navigationTree$ = of(navigationTree);
     serverless.initNavigation(navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
     management.setIsSidebarEnabled(false);
+
+    const roleManagementEnabled = security.authz.isRoleManagementEnabled(); // this.config['xpack.security.roleManagementEnabled']; // This needs to come from either the config, or the security plugin
+    // console.log(`*** roleManagementEnabled: ${roleManagementEnabled}`);
+    // console.log(`*** CONFIG: ${JSON.stringify(this.config)}`);
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
+      extendCardNavDefinitions: roleManagementEnabled
+        ? {
+            [orgMembersAppName]: orgMembersNavCard,
+          }
+        : undefined,
     });
+
     indexManagement?.extensionsService.setIndexMappingsContent(createIndexMappingsContent(core));
     indexManagement?.extensionsService.addIndexDetailsTab(
       createIndexDocumentsContent(core, services)

@@ -7,6 +7,7 @@
 
 import type { Subscription } from 'rxjs';
 
+import type { BuildFlavor } from '@kbn/config';
 import type { Capabilities, FatalErrorsSetup, StartServicesAccessor } from '@kbn/core/public';
 import type {
   ManagementApp,
@@ -35,6 +36,7 @@ interface SetupParams {
   authc: AuthenticationServiceSetup;
   fatalErrors: FatalErrorsSetup;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
+  buildFlavor: BuildFlavor;
 }
 
 interface StartParams {
@@ -55,7 +57,7 @@ export class ManagementService {
     this.roleMappingManagementEnabled = config.ui?.roleMappingManagementEnabled !== false;
   }
 
-  setup({ getStartServices, management, authc, license, fatalErrors }: SetupParams) {
+  setup({ getStartServices, management, authc, license, fatalErrors, buildFlavor }: SetupParams) {
     this.license = license;
     this.securitySection = management.sections.section.security;
 
@@ -65,7 +67,7 @@ export class ManagementService {
 
     if (this.roleManagementEnabled) {
       this.securitySection.registerApp(
-        rolesManagementApp.create({ fatalErrors, license, getStartServices })
+        rolesManagementApp.create({ fatalErrors, license, getStartServices, buildFlavor })
       );
     }
 
