@@ -68,7 +68,7 @@ import {
   CHARTS_POINT_TARGET,
   TIME_FIELD_NAME,
 } from './timeseriesexplorer_constants';
-import { mlTimeSeriesSearchService } from './timeseries_search_service';
+import { timeSeriesSearchServiceFactory } from './timeseriesexplorer_utils/time_series_search_service';
 import {
   createTimeSeriesJobData,
   getTimeseriesexplorerDefaultState,
@@ -138,6 +138,7 @@ export class TimeSeriesExplorer extends React.Component {
   static contextType = context;
 
   mlTimeSeriesExplorer;
+  mlTimeSeriesSearchService;
   mlForecastService;
   mlResultsService;
   mlIndexUtils;
@@ -522,7 +523,7 @@ export class TimeSeriesExplorer extends React.Component {
         // for the most recent call to the load the data in cases where the job selection and time filter
         // have been altered in quick succession (such as from the job picker with 'Apply time range').
         const counter = loadCounter;
-        mlTimeSeriesSearchService
+        this.mlTimeSeriesSearchService
           .getMetricData(
             selectedJob,
             detectorIndex,
@@ -578,7 +579,7 @@ export class TimeSeriesExplorer extends React.Component {
           });
 
         // Query 3 - load details on the chart used in the chart title (charting function and entity(s)).
-        mlTimeSeriesSearchService
+        this.mlTimeSeriesSearchService
           .getChartDetails(
             selectedJob,
             detectorIndex,
@@ -709,19 +710,19 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   componentDidMount() {
-    this.mlResultsService = mlResultsServiceProvider(
-      this.context.services.mlServices.mlApiServices
+    const { mlApiServices } = this.context.services.mlServices;
+    this.mlResultsService = mlResultsServiceProvider(mlApiServices);
+    this.mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(
+      this.mlResultsService,
+      mlApiServices
     );
     this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
       this.context.services.uiSettings,
-      this.context.services.mlServices.mlApiServices,
+      mlApiServices,
       this.mlResultsService
     );
     this.mlIndexUtils = indexServiceFactory(this.context.services.data.dataViews);
-
-    this.mlForecastService = forecastServiceProvider(
-      this.context.services.mlServices.mlApiServices
-    );
+    this.mlForecastService = forecastServiceProvider(mlApiServices);
     // if timeRange used in the url is incorrect
     // perhaps due to user's advanced setting using incorrect date-maths
     const { invalidTimeRangeError } = this.props;

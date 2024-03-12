@@ -118,8 +118,6 @@ const proxyHttpStart = new Proxy<HttpStart>({} as unknown as HttpStart, {
   },
 });
 
-export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;
-
 export const ml = mlApiServicesProvider(new HttpService(proxyHttpStart));
 
 export function mlApiServicesProvider(httpService: HttpService) {
@@ -820,3 +818,5 @@ export function mlApiServicesProvider(httpService: HttpService) {
     jsonSchema: jsonSchemaProvider(httpService),
   };
 }
+
+export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;
