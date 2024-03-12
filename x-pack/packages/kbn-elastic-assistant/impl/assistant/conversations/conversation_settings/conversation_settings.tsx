@@ -33,8 +33,8 @@ export interface ConversationSettingsProps {
   conversationsSettingsBulkActions: ConversationsBulkActions;
   defaultConnector?: AIConnector;
   http: HttpSetup;
-  onSelectedConversationChange: (conversation: Conversation) => void;
-  selectedConversation: Conversation;
+  onSelectedConversationChange: (conversation?: Conversation) => void;
+  selectedConversation?: Conversation;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setConversationsSettingsBulkActions: React.Dispatch<
     React.SetStateAction<ConversationsBulkActions>
@@ -119,9 +119,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           });
         }
 
-        if (newSelectedConversation) {
-          onSelectedConversationChange(newSelectedConversation);
-        }
+        onSelectedConversationChange(newSelectedConversation);
       },
       [
         conversationSettings,
@@ -212,16 +210,16 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     );
 
     const selectedConnector = useMemo(() => {
-      const selectedConnectorId = selectedConversation.apiConfig?.connectorId;
+      const selectedConnectorId = selectedConversation?.apiConfig?.connectorId;
       if (areConnectorsFetched) {
         return connectors?.find((c) => c.id === selectedConnectorId);
       }
       return undefined;
-    }, [areConnectorsFetched, connectors, selectedConversation.apiConfig?.connectorId]);
+    }, [areConnectorsFetched, connectors, selectedConversation?.apiConfig?.connectorId]);
 
     const selectedProvider = useMemo(
-      () => selectedConversation.apiConfig?.provider,
-      [selectedConversation.apiConfig?.provider]
+      () => selectedConversation?.apiConfig?.provider,
+      [selectedConversation?.apiConfig?.provider]
     );
 
     const handleOnConnectorSelectionChange = useCallback(
@@ -289,8 +287,8 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     const selectedModel = useMemo(() => {
       const connectorModel = getGenAiConfig(selectedConnector)?.defaultModel;
       // Prefer conversation configuration over connector default
-      return selectedConversation.apiConfig?.model ?? connectorModel;
-    }, [selectedConnector, selectedConversation.apiConfig?.model]);
+      return selectedConversation?.apiConfig?.model ?? connectorModel;
+    }, [selectedConnector, selectedConversation?.apiConfig?.model]);
 
     const handleOnModelSelectionChange = useCallback(
       (model?: string) => {

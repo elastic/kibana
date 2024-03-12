@@ -76,7 +76,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
       return Object.values(conversations).map((conversation) => ({
         value: { isDefault: conversation.isDefault ?? false },
         label: conversation.title,
-        id: conversation.title,
+        id: conversation.id,
         'data-test-subj': conversation.title,
       }));
     });
@@ -93,8 +93,9 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
           conversationSelectorSettingsOption.length === 0
             ? undefined
             : Object.values(conversations).find(
-                (conversation) => conversation.title === conversationSelectorSettingsOption[0]?.id
-              ) ?? conversationSelectorSettingsOption[0]?.id;
+                (conversation) =>
+                  conversation.title === conversationSelectorSettingsOption[0]?.label
+              ) ?? conversationSelectorSettingsOption[0]?.label;
 
         onConversationSelectionChange(newConversation);
       },
@@ -118,7 +119,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
         const newOption = {
           value: searchValue,
           label: searchValue,
-          id: searchValue,
+          id: '',
         };
 
         if (!optionExists) {
@@ -143,12 +144,12 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
 
     // Callback for when user deletes a conversation
     const onDelete = useCallback(
-      (title: string) => {
-        setConversationOptions(conversationOptions.filter((o) => o.label !== title));
-        if (selectedOptions?.[0]?.title === title) {
+      (label: string) => {
+        setConversationOptions(conversationOptions.filter((o) => o.label !== label));
+        if (selectedOptions?.[0]?.label === label) {
           handleSelectionChange([]);
         }
-        onConversationDeleted(title);
+        onConversationDeleted(label);
       },
       [conversationOptions, handleSelectionChange, onConversationDeleted, selectedOptions]
     );
