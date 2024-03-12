@@ -2,3 +2,7 @@
   min-width: 260px;
   max-width: 300px;
 }
+
+.lnsFieldItem__draggable {
+  @include euiSlightShadow;
+}

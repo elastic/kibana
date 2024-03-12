@@ -3,9 +3,8 @@
 // Draggable item
 .domDraggable {
   cursor: grab;
-  border-radius: $euiBorderRadius;
   @include mixinDomDragDrop;
-  @include mixinDomDragDropHover;
+  @include mixinDomDraggableHover;
 
   // Include a possible nested button like when using FieldButton
   & .kbnFieldButton__button,

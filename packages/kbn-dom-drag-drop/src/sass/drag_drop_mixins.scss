@@ -8,8 +8,6 @@ $domDragDropZLevel3: 3;
 // from mixins
 
 // sass-lint:disable-block indentation, no-color-keywords
-
-// TODO description
 @mixin mixinDomDragDrop {
   transition: $euiAnimSpeedFast ease-in-out;
   transition-property: background-color, border-color, opacity;
@@ -17,7 +15,7 @@ $domDragDropZLevel3: 3;
 }
 
 // Hovering state for drag item and drop area
-@mixin mixinDomDragDropHover {
+@mixin mixinDomDraggableHover {
   &:hover {
     transform: translateX($euiSizeXS);
     transition: transform $euiAnimSpeedSlow ease-out;

@@ -9,7 +9,6 @@
 }
 
 .domDraggable_ghost {
-  border: $euiBorderWidthThin dashed $euiBorderColor;
   position: absolute !important;  // sass-lint:disable-line no-important
   margin: 0 !important;  // sass-lint:disable-line no-important
   top: 0;
