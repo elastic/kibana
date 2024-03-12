@@ -27,6 +27,7 @@ export function TrainedModelsProvider({ getService }: FtrProviderContext, mlComm
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const browser = getService('browser');
+  const find = getService('find');
 
   class TestModelFactory {
     public static createAssertionInstance(modelType: ModelType) {
@@ -153,6 +154,10 @@ export function TrainedModelsProvider({ getService }: FtrProviderContext, mlComm
 
     async selectModel(name: string): Promise<void> {
       await testSubjects.click(`checkboxSelectRow-${name}`);
+    },
+
+    async clickBulkDelete() {
+      await find.clickByButtonText('Delete');
     },
   };
 }

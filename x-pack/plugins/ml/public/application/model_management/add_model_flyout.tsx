@@ -40,18 +40,24 @@ export interface AddModelFlyoutProps {
   modelDownloads: ModelItem[];
   onClose: () => void;
   onSubmit: (modelId: string) => void;
+  'data-test-subj'?: string;
 }
 
-type FlyoutTabId = 'clickToDownload' | 'manualDownload';
+export type AddModelFlyoutTabId = 'clickToDownload' | 'manualDownload';
 
 /**
  * Flyout for downloading elastic curated models and showing instructions for importing third-party models.
  */
-export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, modelDownloads }) => {
+export const AddModelFlyout: FC<AddModelFlyoutProps> = ({
+  onClose,
+  onSubmit,
+  modelDownloads,
+  'data-test-subj': dataTestSubj,
+}) => {
   const canCreateTrainedModels = usePermissionCheck('canCreateTrainedModels');
   const isClickToDownloadTabVisible = canCreateTrainedModels && modelDownloads.length > 0;
 
-  const [selectedTabId, setSelectedTabId] = useState<FlyoutTabId>(
+  const [selectedTabId, setSelectedTabId] = useState<AddModelFlyoutTabId>(
     isClickToDownloadTabVisible ? 'clickToDownload' : 'manualDownload'
   );
 
@@ -94,7 +100,12 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
   }, [selectedTabId, tabs]);
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={'addTrainedModelFlyout'}>
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      aria-labelledby={'addTrainedModelFlyout'}
+      data-test-subj={'mlAddTrainedModelFlyout'}
+    >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id={'addTrainedModelFlyout'}>
@@ -110,7 +121,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
               key={tab.id}
               isSelected={selectedTabId === tab.id}
               onClick={setSelectedTabId.bind(null, tab.id)}
-              data-test-subj={`mlAddTrainedModelFlyoutTab-${normalize(tab.id)}`}
+              data-test-subj={`mlAddTrainedModelFlyoutTab-${tab.id}`}
             >
               {tab.name}
             </EuiTab>
@@ -133,10 +144,6 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
     </EuiFlyout>
   );
 };
-
-function normalize(tabName: string) {
-  return tabName.toLowerCase().split(' ').join('');
-}
 
 interface ClickToDownloadTabContentProps {
   modelDownloads: ModelItem[];

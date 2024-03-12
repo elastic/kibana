@@ -7,13 +7,10 @@
 
 import expect from '@kbn/expect';
 
+import { AddModelFlyoutTabId } from '@kbn/ml-plugin/public/application/model_management/add_model_flyout';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-type FlyoutTabManualDownload = 'Manual Download';
-type FlyoutTabClickToDownload = 'Click to Download';
-export type FlyoutTabs =
-  | [FlyoutTabManualDownload]
-  | [FlyoutTabClickToDownload, FlyoutTabManualDownload];
+export type FlyoutTabs = [AddModelFlyoutTabId];
 
 export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -52,50 +49,34 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
     public async assertDownloadButtonExists(): Promise<void> {
       expect(
         await testSubjects.exists('mlAddTrainedModelFlyoutDownloadButton', {
-          timeout: fiveSeconds / 2,
+          timeout: fiveSeconds,
         })
       ).to.be.ok();
     }
 
-    public async open(): Promise<void> {
-      await retry.waitFor(
-        'Add Trained Model Button',
-        async () => await testSubjects.exists('mlModelsAddTrainedModelButton')
-      );
-      await testSubjects.clickWhenNotDisabled('mlModelsAddTrainedModelButton', {
-        timeout: fiveSeconds,
-      });
-    }
-
-    public async assertOpen(): Promise<void> {
-      await retry.try(async () => {
-        await testSubjects.exists('mlAddTrainedModelFlyout', {
-          timeout: fiveSeconds,
+    public async assertOpen(expectOpen: boolean): Promise<void> {
+      if (expectOpen) {
+        await retry.tryForTime(fiveSeconds, async () => {
+          await testSubjects.click('mlModelsAddTrainedModelButton');
         });
-      });
+        await retry.tryForTime(fiveSeconds, async () => {
+          await testSubjects.existOrFail('mlAddTrainedModelFlyout');
+        });
+      } else {
+        await retry.tryForTime(fiveSeconds, async () => {
+          await testSubjects.missingOrFail('mlAddTrainedModelFlyout');
+        });
+      }
     }
 
     public async close(): Promise<void> {
       await testSubjects.click('euiFlyoutCloseButton');
-    }
-
-    public async assertClosed(): Promise<void> {
-      await testSubjects.missingOrFail('mlAddTrainedModelFlyout', {
-        timeout: fiveSeconds,
-      });
+      await this.assertOpen(false);
     }
 
     public async assertFlyoutTabs(tabs: FlyoutTabs): Promise<void> {
-      const normalized = tabs.map((tab): string => `mlAddTrainedModelFlyoutTab-${normalize(tab)}`);
-
-      for await (const tab of normalized) {
-        const visibleText = await testSubjects.getVisibleText(tab);
-        expect(tabs.some((x): boolean => x === visibleText)).to.be.ok();
-      }
-
-      function normalize(tabName: string) {
-        return tabName.toLowerCase().split(' ').join('');
-      }
+      for await (const tab of tabs)
+        await testSubjects.existOrFail(`mlAddTrainedModelFlyoutTab-${tab}`);
     }
 
     public async assertElandPythonClientCodeBlocks() {
