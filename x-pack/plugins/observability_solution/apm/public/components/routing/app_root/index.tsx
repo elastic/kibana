@@ -131,7 +131,6 @@ export function ApmAppRoot({
 function MountApmHeaderActionMenu() {
   const {
     appMountParameters: { setHeaderActionMenu, theme$ },
-    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
   } = useApmPluginContext();
 
   return (
@@ -140,11 +139,6 @@ function MountApmHeaderActionMenu() {
         <EuiFlexItem>
           <ApmHeaderActionMenu />
         </EuiFlexItem>
-        {ObservabilityAIAssistantActionMenuItem ? (
-          <EuiFlexItem>
-            <ObservabilityAIAssistantActionMenuItem />
-          </EuiFlexItem>
-        ) : null}
       </EuiFlexGroup>
     </HeaderMenuPortal>
   );
