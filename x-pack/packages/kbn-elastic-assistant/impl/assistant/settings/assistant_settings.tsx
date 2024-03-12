@@ -314,6 +314,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 {selectedSettingsTab === SYSTEM_PROMPTS_TAB && (
                   <SystemPromptSettings
                     conversationSettings={conversationSettings}
+                    defaultConnector={defaultConnector}
                     systemPromptSettings={systemPromptSettings}
                     onSelectedSystemPromptChange={onHandleSelectedSystemPromptChange}
                     selectedSystemPrompt={selectedSystemPrompt}
