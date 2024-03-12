@@ -47,7 +47,7 @@ export async function partiallyUpdateRule(
   options: PartiallyUpdateRuleSavedObjectOptions = {}
 ): Promise<void> {
   // ensure we only have the valid attributes that are not encrypted and are excluded from AAD
-  const attributeUpdates: RuleAttributes = omit(attributes, [
+  const attributeUpdates = omit(attributes, [
     ...RuleAttributesToEncrypt,
     ...RuleAttributesIncludedInAAD,
   ]);
@@ -59,12 +59,7 @@ export async function partiallyUpdateRule(
   );
 
   try {
-    await savedObjectsClient.update<RuleAttributes>(
-      RULE_SAVED_OBJECT_TYPE,
-      id,
-      attributeUpdates,
-      updateOptions
-    );
+    await savedObjectsClient.update(RULE_SAVED_OBJECT_TYPE, id, attributeUpdates, updateOptions);
   } catch (err) {
     if (options?.ignore404 && SavedObjectsErrorHelpers.isNotFoundError(err)) {
       return;
