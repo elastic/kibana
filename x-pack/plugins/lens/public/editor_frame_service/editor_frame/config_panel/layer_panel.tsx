@@ -61,6 +61,8 @@ export function LayerPanel(props: LayerPanelProps) {
     registerNewLayerRef,
     layerIndex,
     activeVisualization,
+    visualizationMap,
+    datasourceMap,
     updateVisualization,
     updateDatasource,
     toggleFullscreen,
@@ -71,7 +73,10 @@ export function LayerPanel(props: LayerPanelProps) {
     core,
     onDropToDimension,
     setIsInlineFlyoutVisible,
+    shouldDisplayChartSwitch,
   } = props;
+
+  const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
 
   const isSaveable = useLensSelector((state) => state.lens.isSaveable);
 
@@ -375,6 +380,9 @@ export function LayerPanel(props: LayerPanelProps) {
                       }),
                   }}
                   activeVisualization={activeVisualization}
+                  visualizationMap={visualizationMap}
+                  datasourceMap={datasourceMap}
+                  shouldDisplayChartSwitch={shouldDisplayChartSwitch}
                 />
               </EuiFlexItem>
               {props.displayLayerSettings && (
@@ -428,7 +436,7 @@ export function LayerPanel(props: LayerPanelProps) {
             .map((group, groupIndex) => {
               let errorText: string = '';
 
-              if (!isEmptyLayer) {
+              if (!isEmptyLayer || isInlineEditing) {
                 if (
                   group.requiredMinDimensionCount &&
                   group.requiredMinDimensionCount > group.accessors.length
@@ -653,7 +661,7 @@ export function LayerPanel(props: LayerPanelProps) {
           handleClose={() => {
             setPanelSettingsOpen(false);
           }}
-          isInlineEditing={Boolean(props?.setIsInlineFlyoutVisible)}
+          isInlineEditing={isInlineEditing}
         >
           <div id={layerId}>
             <div className="lnsIndexPatternDimensionEditor--padded">
@@ -720,7 +728,7 @@ export function LayerPanel(props: LayerPanelProps) {
         isOpen={isDimensionPanelOpen}
         isFullscreen={isFullscreen}
         label={openColumnGroup?.dimensionEditorGroupLabel ?? (openColumnGroup?.groupLabel || '')}
-        isInlineEditing={Boolean(props?.setIsInlineFlyoutVisible)}
+        isInlineEditing={isInlineEditing}
         handleClose={closeDimensionEditor}
         panel={
           <>
@@ -780,7 +788,7 @@ export function LayerPanel(props: LayerPanelProps) {
                         addLayer: props.addLayer,
                         removeLayer: props.onRemoveLayer,
                         panelRef,
-                        isInlineEditing: Boolean(props?.setIsInlineFlyoutVisible),
+                        isInlineEditing,
                       }}
                     />
                   </div>

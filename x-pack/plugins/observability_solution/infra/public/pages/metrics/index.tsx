@@ -20,7 +20,6 @@ import {
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -34,7 +33,7 @@ import { SourceLoadingPage } from '../../components/source_loading_page';
 import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
-import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
+import { AnomalyDetectionFlyout } from '../../components/ml/anomaly_detection/anomaly_detection_flyout';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { CreateDerivedIndexPattern, useSourceContext } from '../../containers/metrics_source';
 import { NotFoundPage } from '../404';
@@ -48,9 +47,6 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
 });
 
 export const InfrastructurePage = () => {
-  const {
-    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
-  } = useKibanaContextForPlugin().services;
   const config = usePluginConfig();
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
@@ -91,6 +87,18 @@ export const InfrastructurePage = () => {
                         {settingsTabTitle}
                       </EuiHeaderLink>
                       <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                      <Route
+                        path={'/hosts'}
+                        render={() => {
+                          return <AnomalyDetectionFlyout hideJobType hideSelectGroup />;
+                        }}
+                      />
+                      <Route
+                        path={'/detail/host'}
+                        render={() => {
+                          return <AnomalyDetectionFlyout hideJobType hideSelectGroup />;
+                        }}
+                      />
                       {config.featureFlags.alertsAndRulesDropdownEnabled && (
                         <MetricsAlertDropdown />
                       )}
@@ -103,11 +111,6 @@ export const InfrastructurePage = () => {
                       </EuiHeaderLink>
                     </EuiHeaderLinks>
                   </EuiFlexItem>
-                  {ObservabilityAIAssistantActionMenuItem ? (
-                    <EuiFlexItem>
-                      <ObservabilityAIAssistantActionMenuItem />
-                    </EuiFlexItem>
-                  ) : null}
                 </EuiFlexGroup>
               </HeaderMenuPortal>
             )}

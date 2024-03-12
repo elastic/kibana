@@ -32,10 +32,10 @@ import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plu
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
-import {
+import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -45,17 +45,16 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
 import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
+import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import {
-  getMlSharedServices,
-  MlSharedServices,
-} from './application/services/get_shared_ml_services';
+import type { MlSharedServices } from './application/services/get_shared_ml_services';
+import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { registerManagementSection } from './application/management';
-import { MlLocatorDefinition, MlLocatorParams, type MlLocator } from './locator';
+import type { MlLocatorParams } from './locator';
+import { MlLocatorDefinition, type MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { registerHomeFeature } from './register_home_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
@@ -68,11 +67,11 @@ import {
   type ConfigSchema,
 } from '../common/constants/app';
 import type { MlCapabilities } from './shared';
-import { ElasticModels } from './application/services/elastic_models_service';
+import type { ElasticModels } from './application/services/elastic_models_service';
 import type { MlApiServices } from './application/services/ml_api_service';
 
 export interface MlStartDependencies {
-  cases?: CasesUiStart;
+  cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;
@@ -97,7 +96,7 @@ export interface MlStartDependencies {
 
 export interface MlSetupDependencies {
   alerting?: AlertingSetup;
-  cases?: CasesUiSetup;
+  cases?: CasesPublicSetup;
   dashboard: DashboardSetup;
   embeddable: EmbeddableSetup;
   fieldFormats: FieldFormatsSetup;
@@ -292,10 +291,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   } {
     setDependencyCache({
       docLinks: core.docLinks!,
-      basePath: core.http.basePath,
       http: core.http,
       i18n: core.i18n,
-      lens: deps.lens,
     });
 
     return {

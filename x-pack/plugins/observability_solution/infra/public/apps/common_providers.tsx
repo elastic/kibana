@@ -9,10 +9,11 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-shared-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import {
   type KibanaEnvContext,
   useKibanaContextForPluginProvider,
@@ -27,7 +28,7 @@ export const CommonInfraProviders: React.FC<{
   appName: string;
   storage: Storage;
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
 }> = ({
@@ -79,13 +80,19 @@ export const CoreProviders: React.FC<CoreProvidersProps> = ({
   const KibanaEnvContextForPluginProvider = useKibanaEnvironmentContextProvider(kibanaEnvironment);
 
   return (
-    <KibanaContextProviderForPlugin services={{ ...core, ...plugins, ...pluginStart }}>
-      <KibanaEnvContextForPluginProvider kibanaEnv={kibanaEnvironment}>
-        <core.i18n.Context>
-          <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
-        </core.i18n.Context>
-      </KibanaEnvContextForPluginProvider>
-    </KibanaContextProviderForPlugin>
+    <RedirectAppLinks
+      coreStart={{
+        application: core.application,
+      }}
+    >
+      <KibanaContextProviderForPlugin services={{ ...core, ...plugins, ...pluginStart }}>
+        <KibanaEnvContextForPluginProvider kibanaEnv={kibanaEnvironment}>
+          <core.i18n.Context>
+            <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
+          </core.i18n.Context>
+        </KibanaEnvContextForPluginProvider>
+      </KibanaContextProviderForPlugin>
+    </RedirectAppLinks>
   );
 };
 

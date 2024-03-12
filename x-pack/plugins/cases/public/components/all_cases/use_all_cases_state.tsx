@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import deepEqual from 'react-fast-compare';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { isEmpty } from 'lodash';
 
 import type { FilterOptions, QueryParams } from '../../../common/ui/types';
@@ -24,9 +22,9 @@ import { stringifyUrlParams } from './utils/stringify_url_params';
 import { allCasesUrlStateDeserializer } from './utils/all_cases_url_state_deserializer';
 import { allCasesUrlStateSerializer } from './utils/all_cases_url_state_serializer';
 import { parseUrlParams } from './utils/parse_url_params';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { sanitizeState } from './utils/sanitize_state';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useCasesLocalStorage } from '../../common/use_cases_local_storage';
 
 interface UseAllCasesStateReturn {
   filterOptions: FilterOptions;
@@ -177,13 +175,14 @@ const isURLStateEmpty = (urlState: AllCasesURLState) => {
 
 const useAllCasesLocalStorage = (): [
   AllCasesTableState | undefined,
-  Dispatch<SetStateAction<AllCasesTableState | undefined>>
+  (item: AllCasesTableState | undefined) => void
 ] => {
-  const { appId } = useCasesContext();
-
-  const [state, setState] = useLocalStorage<AllCasesTableState>(
-    getAllCasesTableStateLocalStorageKey(appId),
-    { queryParams: DEFAULT_QUERY_PARAMS, filterOptions: DEFAULT_FILTER_OPTIONS }
+  const [state, setState] = useCasesLocalStorage<AllCasesTableState | undefined>(
+    LOCAL_STORAGE_KEYS.casesTableState,
+    {
+      queryParams: DEFAULT_QUERY_PARAMS,
+      filterOptions: DEFAULT_FILTER_OPTIONS,
+    }
   );
 
   const sanitizedState = sanitizeState(state);
@@ -198,9 +197,4 @@ const useAllCasesLocalStorage = (): [
     },
     setState,
   ];
-};
-
-const getAllCasesTableStateLocalStorageKey = (appId: string) => {
-  const key = LOCAL_STORAGE_KEYS.casesTableState;
-  return `${appId}.${key}`;
 };

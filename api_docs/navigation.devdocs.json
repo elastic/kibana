@@ -70,7 +70,7 @@
                 "id": "def-public.NavigationPublicPlugin.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "_initializerContext",
+                "label": "initializerContext",
                 "description": [],
                 "signature": [
                   {
@@ -80,7 +80,9 @@
                     "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<object>"
+                  "<",
+                  "ConfigSchema",
+                  ">"
                 ],
                 "path": "src/plugins/navigation/public/plugin.ts",
                 "deprecated": false,
@@ -152,7 +154,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "(_core: ",
+              "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
                 "scope": "common",
@@ -160,7 +162,7 @@
                 "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
-              ", { unifiedSearch }: ",
+              ", { unifiedSearch, cloud }: ",
               "NavigationPublicStartDependencies",
               ") => ",
               {
@@ -180,7 +182,7 @@
                 "id": "def-public.NavigationPublicPlugin.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "_core",
+                "label": "core",
                 "description": [],
                 "signature": [
                   {
@@ -201,7 +203,7 @@
                 "id": "def-public.NavigationPublicPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ unifiedSearch }",
+                "label": "{ unifiedSearch, cloud }",
                 "description": [],
                 "signature": [
                   "NavigationPublicStartDependencies"
@@ -812,6 +814,36 @@
     "misc": [
       {
         "parentPluginId": "navigation",
+        "id": "def-public.SolutionNavigationOptInStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "SolutionNavigationOptInStatus",
+        "description": [],
+        "signature": [
+          "\"hidden\" | \"visible\" | \"ask\""
+        ],
+        "path": "src/plugins/navigation/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
+        "id": "def-public.SolutionType",
+        "type": "Type",
+        "tags": [],
+        "label": "SolutionType",
+        "description": [],
+        "signature": [
+          "\"security\" | \"es\" | \"oblt\""
+        ],
+        "path": "src/plugins/navigation/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
         "id": "def-public.TopNavMenuBadgeProps",
         "type": "Type",
         "tags": [],
@@ -1031,6 +1063,42 @@
           "path": "src/plugins/navigation/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "navigation",
+          "id": "def-public.NavigationPublicStart.addSolutionNavigation",
+          "type": "Function",
+          "tags": [],
+          "label": "addSolutionNavigation",
+          "description": [
+            "Add a solution navigation to the header nav switcher."
+          ],
+          "signature": [
+            "(solutionNavigation: ",
+            "SolutionNavigation",
+            ") => void"
+          ],
+          "path": "src/plugins/navigation/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "navigation",
+              "id": "def-public.NavigationPublicStart.addSolutionNavigation.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "solutionNavigation",
+              "description": [],
+              "signature": [
+                "SolutionNavigation"
+              ],
+              "path": "src/plugins/navigation/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -1050,7 +1118,53 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "navigation",
+        "id": "def-common.DEFAULT_SOLUTION_NAV_UI_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_SOLUTION_NAV_UI_SETTING_ID",
+        "description": [],
+        "signature": [
+          "\"solutionNav:default\""
+        ],
+        "path": "src/plugins/navigation/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
+        "id": "def-common.ENABLE_SOLUTION_NAV_UI_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLE_SOLUTION_NAV_UI_SETTING_ID",
+        "description": [],
+        "signature": [
+          "\"solutionNav:enable\""
+        ],
+        "path": "src/plugins/navigation/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
+        "id": "def-common.OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID",
+        "description": [],
+        "signature": [
+          "\"solutionNav:optInStatus\""
+        ],
+        "path": "src/plugins/navigation/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

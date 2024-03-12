@@ -7,7 +7,7 @@
  */
 
 import { EditorError } from '../../../../types';
-import { CharStreams } from 'antlr4ts';
+import { CharStreams } from 'antlr4';
 import { getActions } from './actions';
 import { getParser, ROOT_STATEMENT } from '../../antlr_facade';
 import { ESQLErrorListener } from '../../monaco/esql_error_listener';

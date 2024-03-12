@@ -17,6 +17,8 @@ import {
   CUSTOM_METRIC_DEFAULT_VALUES,
   HISTOGRAM_DEFAULT_VALUES,
   SLO_EDIT_FORM_DEFAULT_VALUES,
+  SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY,
+  SYNTHETICS_AVAILABILITY_DEFAULT_VALUES,
   TIMESLICE_METRIC_DEFAULT_VALUES,
 } from '../constants';
 import { CreateSLOForm } from '../types';
@@ -120,6 +122,15 @@ function transformPartialIndicatorState(
         type: 'sli.apm.transactionErrorRate' as const,
         params: Object.assign({}, APM_AVAILABILITY_DEFAULT_VALUES.params, indicator.params ?? {}),
       };
+    case 'sli.synthetics.availability':
+      return {
+        type: 'sli.synthetics.availability' as const,
+        params: Object.assign(
+          {},
+          SYNTHETICS_AVAILABILITY_DEFAULT_VALUES.params,
+          indicator.params ?? {}
+        ),
+      };
     case 'sli.histogram.custom':
       return {
         type: 'sli.histogram.custom' as const,
@@ -148,9 +159,17 @@ function transformPartialIndicatorState(
 export function transformPartialUrlStateToFormState(
   values: RecursivePartial<CreateSLOInput>
 ): CreateSLOForm {
-  const state: CreateSLOForm = cloneDeep(SLO_EDIT_FORM_DEFAULT_VALUES);
-
+  let state: CreateSLOForm;
   const indicator = transformPartialIndicatorState(values.indicator);
+
+  switch (indicator?.type) {
+    case 'sli.synthetics.availability':
+      state = cloneDeep(SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY);
+      break;
+    default:
+      state = cloneDeep(SLO_EDIT_FORM_DEFAULT_VALUES);
+  }
+
   if (indicator !== undefined) {
     state.indicator = indicator;
   }

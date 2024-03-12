@@ -90,6 +90,7 @@ export function IntegrationsSelector({
 
   const button = (
     <EuiFilterButton
+      data-test-subj="datasetQualityIntegrationsSelectableButton"
       iconType="arrowDown"
       badgeColor="success"
       onClick={onButtonClick}
@@ -111,6 +112,7 @@ export function IntegrationsSelector({
         panelPaddingSize="none"
       >
         <EuiSelectable
+          data-test-subj="datasetQualityIntegrationsSelectable"
           searchable
           searchProps={{
             placeholder: integrationsSelectorSearchPlaceholder,

@@ -8,6 +8,7 @@
 import {
   ElasticsearchClientMock,
   elasticsearchServiceMock,
+  httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
@@ -30,6 +31,8 @@ describe('CreateSLO', () => {
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let createSLO: CreateSLO;
 
+  jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
+
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     loggerMock = loggingSystemMock.createLogger();
@@ -42,7 +45,8 @@ describe('CreateSLO', () => {
       mockTransformManager,
       mockSummaryTransformManager,
       loggerMock,
-      'some-space'
+      'some-space',
+      httpServiceMock.createStartContract().basePath
     );
   });
 
