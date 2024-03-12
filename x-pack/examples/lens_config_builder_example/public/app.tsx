@@ -25,13 +25,14 @@ import type { LensEmbeddableInput, FormulaPublicApi } from '@kbn/lens-plugin/pub
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { LensConfig, LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { StartDependencies } from './plugin';
 
 export const App = (props: {
   core: CoreStart;
   plugins: StartDependencies;
-  dataViews: DataViewsServicePublic;
+  dataViews: DataViewsContract;
   formula: FormulaPublicApi;
 }) => {
   const [error, setError] = useState<string | null>(null);
@@ -60,10 +61,9 @@ export const App = (props: {
 
   const attributes = useAsync(async () => {
     const configBuilder = new LensConfigBuilder(props.formula, props.dataViews);
-    const config = await configBuilder.build(lensConfig, {
+    return (await configBuilder.build(lensConfig, {
       embeddable: false,
-    });
-    return config;
+    })) as TypedLensByValueInput['attributes'];
   }, [lensConfig]);
 
   if (!attributes.value && !attributes.error && !error) return null;

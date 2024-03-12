@@ -9,7 +9,7 @@
 import type { FormulaPublicApi, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
-import { LensAttributes, LensConfig, LensConfigOptions } from './types';
+import { LensByValueAttributes, LensConfig, LensConfigOptions } from './types';
 import {
   buildGauge,
   buildHeatmap,
@@ -46,14 +46,14 @@ export class LensConfigBuilder {
   async build(
     config: LensConfig,
     options: LensConfigOptions = {}
-  ): Promise<LensAttributes | LensEmbeddableInput | undefined> {
+  ): Promise<LensByValueAttributes | LensEmbeddableInput | undefined> {
     const { chartType } = config;
     const chartConfig = await this.charts[chartType](config as any, {
       formulaAPI: this.formulaAPI,
       dataViewsAPI: this.dataViewsAPI,
     });
 
-    const chartState = {
+    const chartState: LensByValueAttributes = {
       ...chartConfig,
       state: {
         ...chartConfig.state,
