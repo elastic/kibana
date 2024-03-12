@@ -27,6 +27,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import type { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 import { debounce } from 'lodash';
 import moment from 'moment-timezone';
 import type { FunctionComponent } from 'react';
@@ -55,6 +56,21 @@ import { useAuthentication } from '../../../components/use_current_user';
 import type { CreateAPIKeyResult } from '../api_keys_api_client';
 import { APIKeysAPIClient } from '../api_keys_api_client';
 
+const parseSearchBarQuery = (query: Query): QueryContainer => {
+  let parsedQuery = query;
+
+  if (query.text.includes('type:managed')) {
+    const subQuery = query.text.replace('type:managed', '');
+    parsedQuery = EuiSearchBar.Query.parse(`${subQuery} (metadata.managed:true OR Alerting*)`);
+  } else if (query.text.includes('type:rest') || query.text.includes('type:cross_cluster')) {
+    parsedQuery = EuiSearchBar.Query.parse(`${query.text} -metadata.managed:true -Alerting*`);
+  }
+
+  parsedQuery = parsedQuery.addSimpleFieldValue('invalidated', false);
+
+  return EuiSearchBar.Query.toESQuery(parsedQuery);
+};
+
 export const APIKeysGridPage: FunctionComponent = () => {
   const { services } = useKibana<CoreStart>();
   const history = useHistory();
@@ -65,9 +81,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
   const [pageSize, setPageSize] = useState(25);
 
   const [state, queryApiKeysAndAggregations] = useAsyncFn(() => {
-    const parsedQuery = query.addSimpleFieldValue('invalidated', false);
-    const queryContainer = EuiSearchBar.Query.toESQuery(parsedQuery);
-
+    const queryContainer = parseSearchBarQuery(query);
     const requestBody = {
       query: queryContainer,
       from,
@@ -673,9 +687,9 @@ export const TypesFilterButton: FunctionComponent<TypesFilterButtonProps> = ({
           hasActiveFilters={query.hasSimpleFieldClause('type', 'managed')}
           onClick={() =>
             onChange(
-              query.hasClauses()
-                ? query.removeAllClauses()
-                : EuiSearchBar.Query.parse('(metadata.managed:true OR Alerting*)')
+              query.hasSimpleFieldClause('type', 'managed')
+                ? query.removeSimpleFieldClauses('type')
+                : query.removeSimpleFieldClauses('type').addSimpleFieldValue('type', 'managed')
             )
           }
         >
