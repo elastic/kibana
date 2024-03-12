@@ -4,7 +4,7 @@
   max-inline-size: 100% !important;
 }
 
-.timeSlider-playToggle {
+.timeSlider-playToggle:enabled {
   background-color: $euiColorPrimary !important;
 }
 
