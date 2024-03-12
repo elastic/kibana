@@ -63,6 +63,7 @@ import {
   setIsDiscoverSavedSearchLoaded,
   setDataProviderVisibility,
   setChanged,
+  setConfirmingNoteId,
 } from './actions';
 
 import {
@@ -572,6 +573,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         changed,
+      },
+    },
+  }))
+  .case(setConfirmingNoteId, (state, { id, confirmingNoteId }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        confirmingNoteId,
       },
     },
   }))
