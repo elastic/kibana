@@ -366,8 +366,6 @@ export default function (providerContext: FtrProviderContext) {
         '8.10.0'
       );
 
-      console.log({ fleetServerAgentId });
-
       const { body: createResBody } = await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
