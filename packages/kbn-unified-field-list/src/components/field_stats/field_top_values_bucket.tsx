@@ -39,7 +39,7 @@ export type OverrideFieldTopValueBarCallback = (
 
 export interface FieldTopValuesBucketProps extends FieldTopValuesBucketParams {
   'data-test-subj': string;
-  areExamples: boolean;
+  areExamples?: boolean;
   onAddFilter?: AddFieldFilterHandler;
   /**
    * Optional callback to allow overriding props on bucket level

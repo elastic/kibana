@@ -87,7 +87,6 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
             <EuiSpacer size="s" />
             <FieldTopValuesBucket
               type="other"
-              areExamples={areExamples}
               field={field}
               fieldValue={undefined}
               formattedPercentage={getFormattedPercentageValue(
