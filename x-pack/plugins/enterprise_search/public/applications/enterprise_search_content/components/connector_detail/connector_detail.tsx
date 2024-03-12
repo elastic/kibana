@@ -45,8 +45,11 @@ export enum ConnectorDetailTabId {
 export const ConnectorDetail: React.FC = () => {
   const connectorId = decodeURIComponent(useParams<{ connectorId: string }>().connectorId);
   const { hasFilteringFeature, isLoading, index, connector } = useValues(ConnectorViewLogic);
-  const { startConnectorPoll } = useActions(ConnectorViewLogic);
+  const { fetchConnectorApiReset, startConnectorPoll, stopConnectorPoll } =
+    useActions(ConnectorViewLogic);
   useEffect(() => {
+    stopConnectorPoll();
+    fetchConnectorApiReset();
     startConnectorPoll(connectorId);
   }, [connectorId]);
 
@@ -236,7 +239,7 @@ export const ConnectorDetail: React.FC = () => {
           responsive: false,
           wrap: false,
         },
-        rightSideItems: getHeaderActions(index, hasAppSearchAccess),
+        rightSideItems: getHeaderActions(index, hasAppSearchAccess, connector),
         tabs,
       }}
     >
