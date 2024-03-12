@@ -28,7 +28,6 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
         .get('/api/telemetry/v2/config')
         .set(svlCommonApi.getCommonRequestHeader())
         .expect(200);
-
       expect(body).toMatchObject(baseConfig);
     });
 
