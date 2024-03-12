@@ -38,7 +38,11 @@ import {
   isNestedFieldParent,
   usePager,
 } from '@kbn/discover-utils';
-import { fieldNameWildcardMatcher, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
+import {
+  fieldNameWildcardMatcher,
+  getFieldSearchMatchingHighlight,
+  getTextBasedColumnIconType,
+} from '@kbn/field-utils';
 import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
 import { FieldName } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
@@ -167,14 +171,10 @@ export const DocViewerTable = ({
     (field: string) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
-      const columnMeta =
-        columnsMeta?.[field] && columnsMeta[field].type ? columnsMeta[field] : null;
-      const fieldType = columnMeta
-        ? getFieldIconType({
-            name: field,
-            type: columnMeta.type,
-            esTypes: columnMeta.esType ? [columnMeta.esType] : undefined,
-          }) // for text-based results types come separately
+      const columnMeta = columnsMeta?.[field];
+      const columnIconType = getTextBasedColumnIconType(columnMeta);
+      const fieldType = columnIconType
+        ? columnIconType // for text-based results types come separately
         : isNestedFieldParent(field, dataView)
         ? 'nested'
         : fieldMapping

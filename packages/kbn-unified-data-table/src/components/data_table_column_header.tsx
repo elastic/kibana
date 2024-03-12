@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { css, CSSObject } from '@emotion/react';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldIcon, getFieldIconProps, getFieldIconType } from '@kbn/field-utils';
+import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
 import { isNestedFieldParent } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -82,15 +82,9 @@ function getRenderedToken({
   // for text-based searches
   if (columnsMeta) {
     const columnMeta = columnsMeta[columnName];
-    const iconType = columnMeta
-      ? getFieldIconType({
-          name: columnName,
-          type: columnMeta.type,
-          esTypes: columnMeta.esType ? [columnMeta.esType] : [],
-        })
-      : null;
-    return iconType && iconType !== 'unknown' ? ( // renders an icon or nothing
-      <FieldIcon type={iconType} css={fieldIconCss} />
+    const columnIconType = getTextBasedColumnIconType(columnMeta);
+    return columnIconType && columnIconType !== 'unknown' ? ( // renders an icon or nothing
+      <FieldIcon type={columnIconType} css={fieldIconCss} />
     ) : null;
   }
 
