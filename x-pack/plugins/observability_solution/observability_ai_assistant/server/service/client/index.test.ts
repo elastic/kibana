@@ -23,7 +23,7 @@ import {
   MessageAddEvent,
   StreamingChatResponseEventType,
 } from '../../../common/conversation_complete';
-import type { CreateChatCompletionResponseChunk } from '../../../public/types';
+import type { CreateChatCompletionResponseChunk } from '../../../common/utils/process_openai_stream';
 import type { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { createFunctionResponseMessage } from '../util/create_function_response_message';
@@ -409,7 +409,8 @@ describe('Observability AI Assistant client', () => {
                 {
                   '@timestamp': expect.any(String),
                   message: {
-                    content: 'This is a system message',
+                    content:
+                      'You MUST respond in the users preferred language which is: English. This is a system message',
                     role: MessageRole.System,
                   },
                 },
@@ -544,7 +545,8 @@ describe('Observability AI Assistant client', () => {
             {
               '@timestamp': expect.any(String),
               message: {
-                content: 'This is a system message',
+                content:
+                  'You MUST respond in the users preferred language which is: English. This is a system message',
                 role: MessageRole.System,
               },
             },
@@ -764,7 +766,8 @@ describe('Observability AI Assistant client', () => {
               '@timestamp': expect.any(String),
               message: {
                 role: MessageRole.System,
-                content: 'This is a system message',
+                content:
+                  'You MUST respond in the users preferred language which is: English. This is a system message',
               },
             },
             {
@@ -891,7 +894,8 @@ describe('Observability AI Assistant client', () => {
             {
               '@timestamp': expect.any(String),
               message: {
-                content: 'This is a system message',
+                content:
+                  'You MUST respond in the users preferred language which is: English. This is a system message',
                 role: MessageRole.System,
               },
             },
@@ -1406,5 +1410,62 @@ describe('Observability AI Assistant client', () => {
 
       expect(parsed.truncated.includes('word ')).toBe(true);
     });
+  });
+
+  it('Adds the default language to the system prompt', async () => {
+    client = createClient();
+    const chatSpy = jest.spyOn(client, 'chat');
+
+    actionsClientMock.execute.mockImplementation(async () => {
+      return {
+        actionId: '',
+        status: 'ok',
+        data: createLlmSimulator().stream,
+      };
+    });
+
+    client
+      .complete({
+        connectorId: 'foo',
+        messages: [system('This is a system message'), user('A user message to cause completion')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        title: 'My predefined title',
+        persist: false,
+      })
+      .subscribe(() => {}); // To trigger call to chat
+
+    expect(chatSpy.mock.calls[0][1].messages[0].message.content).toEqual(
+      'You MUST respond in the users preferred language which is: English. This is a system message'
+    );
+  });
+
+  it("Adds the user's preferred language to the system prompt", async () => {
+    client = createClient();
+    const chatSpy = jest.spyOn(client, 'chat');
+
+    actionsClientMock.execute.mockImplementation(async () => {
+      return {
+        actionId: '',
+        status: 'ok',
+        data: createLlmSimulator().stream,
+      };
+    });
+
+    client
+      .complete({
+        connectorId: 'foo',
+        messages: [system('This is a system message'), user('A user message to cause completion')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        title: 'My predefined title',
+        persist: false,
+        responseLanguage: 'Orcish',
+      })
+      .subscribe(() => {}); // To trigger call to chat
+
+    expect(chatSpy.mock.calls[0][1].messages[0].message.content).toEqual(
+      'You MUST respond in the users preferred language which is: Orcish. This is a system message'
+    );
   });
 });
