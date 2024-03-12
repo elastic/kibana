@@ -29,6 +29,7 @@ import { UpgradeWarning } from '../../../../components/upgrade';
 import {
   BLOCKED_JOBS_REFRESH_INTERVAL_MS,
   BLOCKED_JOBS_REFRESH_INTERVAL_SLOW_MS,
+  BLOCKED_JOBS_REFRESH_THRESHOLD_MS,
 } from '../../../../../../common/constants/jobs_list';
 import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
 import { StopDatafeedsConfirmModal } from '../confirm_modals/stop_datafeeds_confirm_modal';
@@ -401,7 +402,7 @@ export class JobsListView extends Component {
 
   getBlockedJobsRefreshInterval() {
     const runningTimeMs = Date.now() - this.state.blockingJobsFirstFoundMs;
-    if (runningTimeMs > 60000) {
+    if (runningTimeMs > BLOCKED_JOBS_REFRESH_THRESHOLD_MS) {
       // if the jobs have been in a blocked state for more than a minute
       // increase the polling interval
       return BLOCKED_JOBS_REFRESH_INTERVAL_SLOW_MS;
