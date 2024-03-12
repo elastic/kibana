@@ -602,6 +602,11 @@ describe('getAuthzFromRequest', () => {
               privilege: 'api:fleet-all',
               authorized: true,
             },
+            {
+              resource: 'default',
+              privilege: 'api:fleet-agents-read',
+              authorized: true,
+            },
           ],
           elasticsearch: {} as any,
         },
@@ -619,6 +624,11 @@ describe('getAuthzFromRequest', () => {
             {
               resource: 'default',
               privilege: 'api:fleet-read',
+              authorized: true,
+            },
+            {
+              resource: 'default',
+              privilege: 'api:fleet-agents-read',
               authorized: true,
             },
           ],
@@ -777,6 +787,11 @@ describe('getAuthzFromRequest', () => {
               privilege: 'api:fleet-all',
               authorized: true,
             },
+            {
+              resource: 'default',
+              privilege: 'api:fleet-settings-read',
+              authorized: true,
+            },
           ],
           elasticsearch: {} as any,
         },
@@ -796,6 +811,11 @@ describe('getAuthzFromRequest', () => {
               privilege: 'api:fleet-read',
               authorized: true,
             },
+            {
+              resource: 'default',
+              privilege: 'api:fleet-settings-read',
+              authorized: true,
+            },
           ],
           elasticsearch: {} as any,
         },
@@ -806,13 +826,13 @@ describe('getAuthzFromRequest', () => {
       expect(res.fleet.readSettings).toBe(true);
     });
 
-    it('should authorize Fleet:Agents:Read', async () => {
+    it('should authorize Fleet:Settings:Read', async () => {
       checkPrivileges.mockResolvedValue({
         privileges: {
           kibana: [
             {
               resource: 'default',
-              privilege: 'api:fleet-agents-read',
+              privilege: 'api:fleet-settings-read',
               authorized: true,
             },
           ],
@@ -822,7 +842,7 @@ describe('getAuthzFromRequest', () => {
         username: 'test',
       });
       const res = await getAuthzFromRequest({} as any);
-      expect(res.fleet.readAgents).toBe(true);
+      expect(res.fleet.readSettings).toBe(true);
     });
 
     it('should authorize Fleet:Agents:All', async () => {

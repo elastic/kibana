@@ -91,7 +91,7 @@ export default function (providerContext: FtrProviderContext) {
             testUsers.fleet_minimal_all_only.username,
             testUsers.fleet_minimal_all_only.password
           )
-          .expect(200);
+          .expect(403);
       });
     });
 

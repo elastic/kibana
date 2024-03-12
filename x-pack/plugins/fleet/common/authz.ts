@@ -93,11 +93,11 @@ export const calculateAuthz = ({
   fleet: {
     all: fleet.all && (integrations.all || integrations.read),
 
-    readAgents: (fleet.all || fleet.read || fleet.agents?.read || fleet.agents?.all) ?? false,
+    readAgents: (fleet.agents?.read || fleet.agents?.all) ?? false,
     allAgents: (fleet.all || fleet.agents?.all) ?? false,
-    readSettings: (fleet.all || fleet.read || fleet.settings?.read || fleet.settings?.all) ?? false,
-    allSettings: (fleet.all || fleet.settings?.all) ?? false,
-    allAgentPolicies: (fleet.all || fleet.agentPolicies?.all) ?? false,
+    readSettings: (fleet.settings?.read || fleet.settings?.all) ?? false,
+    allSettings: fleet.settings?.all ?? false,
+    allAgentPolicies: fleet.agentPolicies?.all ?? false,
 
     // These are currently used by Fleet Server setup
     setup: fleet.all || fleet.setup,
