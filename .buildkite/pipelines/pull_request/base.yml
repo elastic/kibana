@@ -19,7 +19,7 @@ steps:
     label: 'Default CI Group'
     parallelism: 27
     agents:
-      queue: n2-4
+      queue: n2-4-spot-test
     depends_on: build
     timeout_in_minutes: 150
     key: default-cigroup
@@ -31,7 +31,7 @@ steps:
   - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Docker CI Group'
     agents:
-      queue: n2-4
+      queue: n2-4-spot-test
     depends_on: build
     timeout_in_minutes: 120
     key: default-cigroup-docker
@@ -67,7 +67,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/xpack_accessibility.sh
     label: 'Default Accessibility Tests'
     agents:
-      queue: n2-4
+      queue: n2-4-spot-test
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -89,7 +89,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/xpack_firefox.sh
     label: 'Default Firefox Tests'
     agents:
-      queue: n2-4
+      queue: n2-4-spot-test
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -100,7 +100,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/oss_misc.sh
     label: 'OSS Misc Functional Tests'
     agents:
-      queue: n2-4
+      queue: n2-4-spot-test
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -111,7 +111,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/xpack_saved_object_field_metrics.sh
     label: 'Saved Object Field Metrics'
     agents:
-      queue: n2-4
+      queue: n2-4-spot-test
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -123,7 +123,7 @@ steps:
     label: 'Jest Tests'
     parallelism: 8
     agents:
-      queue: n2-4
+      queue: n2-4-spot-test
     timeout_in_minutes: 90
     key: jest
 
@@ -131,7 +131,7 @@ steps:
     label: 'Jest Integration Tests'
     parallelism: 3
     agents:
-      queue: n2-4
+      queue: n2-4-spot-test
     timeout_in_minutes: 120
     key: jest-integration
 
@@ -182,6 +182,6 @@ steps:
   - command: .buildkite/scripts/steps/build_api_docs.sh
     label: 'Build API Docs'
     agents:
-      queue: n2-4
+      queue: n2-4-spot-test
     key: build_api_docs
     timeout_in_minutes: 60
