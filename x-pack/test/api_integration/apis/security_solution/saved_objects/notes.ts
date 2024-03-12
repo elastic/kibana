@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(() => kibanaServer.savedObjects.cleanStandardList());
 
     describe('create a note', () => {
-      it('should return a timelineId, timelineVersion, noteId and version', async () => {
+      it('should return a timelineId, noteId and version', async () => {
         const myNote = 'world test';
         const response = await supertest
           .patch('/api/note')
@@ -29,13 +29,12 @@ export default function ({ getService }: FtrProviderContext) {
             note: { note: myNote, timelineId: null },
           });
 
-        const { note, noteId, timelineId, timelineVersion, version } =
+        const { note, noteId, timelineId, version } =
           response.body.data && response.body.data.persistNote.note;
 
         expect(note).to.be(myNote);
         expect(noteId).to.not.be.empty();
         expect(timelineId).to.not.be.empty();
-        expect(timelineVersion).to.not.be.empty();
         expect(version).to.not.be.empty();
       });
 

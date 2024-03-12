@@ -8,7 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { TestProviders } from '../../../../../common/mock';
+import { TestProviders, mockGlobalState } from '../../../../../common/mock';
 
 import { EventColumnView } from './event_column_view';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
@@ -77,7 +77,6 @@ jest.mock('../../../../../common/lib/kibana', () => {
 
 describe('EventColumnView', () => {
   useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-  (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
   const ACTION_BUTTON_COUNT = 4;
   const leadingControlColumns = getDefaultControlColumn(ACTION_BUTTON_COUNT);
 
@@ -120,6 +119,15 @@ describe('EventColumnView', () => {
     setEventsDeleted: jest.fn(),
   };
 
+  const testTimeline = {
+    ...mockGlobalState.timeline.timelineById[TimelineId.test],
+    savedObjectId: 'hasBeenSaved',
+  };
+
+  beforeEach(() => {
+    (useShallowEqualSelector as jest.Mock).mockReturnValue(testTimeline);
+  });
+
   test('it does NOT render a notes button when isEventsViewer is true', () => {
     const wrapper = mount(<EventColumnView {...props} isEventViewer={true} />, {
       wrappingComponent: TestProviders,
@@ -145,14 +153,16 @@ describe('EventColumnView', () => {
   });
 
   test('it renders correct tooltip for NotesButton - timeline template', () => {
-    (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.template);
+    (useShallowEqualSelector as jest.Mock).mockReturnValue({
+      ...testTimeline,
+      timelineType: TimelineType.template,
+    });
 
     const wrapper = mount(<EventColumnView {...props} />, { wrappingComponent: TestProviders });
 
     expect(wrapper.find('[data-test-subj="add-note"]').prop('toolTip')).toEqual(
       NOTES_DISABLE_TOOLTIP
     );
-    (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
   });
 
   test('it does NOT render a pin button when isEventViewer is true', () => {

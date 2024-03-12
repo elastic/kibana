@@ -347,7 +347,24 @@ describe('Body', () => {
     });
 
     test('Add a note to an event', async () => {
-      const wrapper = await getWrapper(<StatefulBody {...props} />);
+      const mockStateWithSavedTimeline: State = {
+        ...mockGlobalState,
+        timeline: {
+          ...mockGlobalState.timeline,
+          timelineById: {
+            ...mockGlobalState.timeline.timelineById,
+            [TimelineId.test]: {
+              ...mockGlobalState.timeline.timelineById[TimelineId.test],
+              savedObjectId: 'thisTimelineHasBeenSaved',
+            },
+          },
+        },
+      };
+
+      const storeWithSavedTimeline = createMockStore(mockStateWithSavedTimeline);
+      const wrapper = await getWrapper(<StatefulBody {...props} />, {
+        store: storeWithSavedTimeline,
+      });
 
       addaNoteToEvent(wrapper, 'hello world');
       wrapper.update();
@@ -385,6 +402,7 @@ describe('Body', () => {
             [TimelineId.test]: {
               ...mockGlobalState.timeline.timelineById[TimelineId.test],
               id: 'timeline-test',
+              savedObjectId: 'thisTimelineHasBeenSaved',
               pinnedEventIds: { 1: true }, // we should NOT dispatch a pin event, because it's already pinned
             },
           },
