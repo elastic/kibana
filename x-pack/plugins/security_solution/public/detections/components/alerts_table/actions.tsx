@@ -102,7 +102,6 @@ export const updateAlertStatusAction = async ({
       signalIds: alertIds,
     });
 
-    // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: alertIds, isDeleted: true });
 
     if (response.version_conflicts && alertIds.length === 1) {
@@ -271,6 +270,13 @@ export const isThresholdAlert = (ecsData: Ecs): boolean => {
   return (
     ruleType === 'threshold' ||
     (Array.isArray(ruleType) && ruleType.length > 0 && ruleType[0] === 'threshold')
+  );
+};
+
+export const isEqlAlert = (ecsData: Ecs): boolean => {
+  const ruleType = getField(ecsData, ALERT_RULE_TYPE);
+  return (
+    ruleType === 'eql' || (Array.isArray(ruleType) && ruleType.length > 0 && ruleType[0] === 'eql')
   );
 };
 
@@ -1021,7 +1027,8 @@ export const sendAlertToTimelineAction = async ({
             },
             getExceptionFilter
           );
-        } else if (isSuppressedAlert(ecsData)) {
+          // The Query field should remain unpopulated with the suppressed EQL alert.
+        } else if (isSuppressedAlert(ecsData) && !isEqlAlert(ecsData)) {
           return createSuppressedTimeline(
             ecsData,
             createTimeline,
@@ -1091,7 +1098,8 @@ export const sendAlertToTimelineAction = async ({
     return createThresholdTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else if (isNewTermsAlert(ecsData)) {
     return createNewTermsTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
-  } else if (isSuppressedAlert(ecsData)) {
+    // The Query field should remain unpopulated with the suppressed EQL alert.
+  } else if (isSuppressedAlert(ecsData) && !isEqlAlert(ecsData)) {
     return createSuppressedTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else {
     let { dataProviders, filters } = buildTimelineDataProviderOrFilter(
