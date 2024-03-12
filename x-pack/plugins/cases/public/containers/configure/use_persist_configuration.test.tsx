@@ -130,9 +130,7 @@ describe('useCreateAttachments', () => {
 
     await waitForNextUpdate();
 
-    expect(queryClientSpy).toHaveBeenCalledWith(
-      casesQueriesKeys.configuration({ owner: [SECURITY_SOLUTION_OWNER] })
-    );
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.configuration({}));
   });
 
   it('shows the success toaster', async () => {
