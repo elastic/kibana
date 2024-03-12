@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FileBasedFieldVisConfig } from '../stats_table/types';
+import type { FileBasedFieldVisConfig } from '../stats_table/types';
 
 export const FileBasedNumberContentPreview = ({ config }: { config: FileBasedFieldVisConfig }) => {
   const stats = config.stats;

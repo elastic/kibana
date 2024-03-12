@@ -401,6 +401,25 @@ describe('agent policy', () => {
         'Cannot delete an agent policy that is assigned to any active or inactive agents'
       );
     });
+
+    it('should delete .fleet-policies entries on agent policy delete', async () => {
+      esClient.deleteByQuery.mockResolvedValueOnce({
+        deleted: 2,
+      });
+
+      await agentPolicyService.delete(soClient, esClient, 'mocked');
+
+      expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: AGENT_POLICY_INDEX,
+          query: {
+            term: {
+              policy_id: 'mocked',
+            },
+          },
+        })
+      );
+    });
   });
 
   describe('bumpRevision', () => {
@@ -865,7 +884,7 @@ describe('agent policy', () => {
       expect(esClient.bulk).toBeCalledWith(
         expect.objectContaining({
           index: AGENT_POLICY_INDEX,
-          body: [
+          operations: [
             expect.objectContaining({
               index: {
                 _id: expect.anything(),
@@ -1008,6 +1027,164 @@ describe('agent policy', () => {
     });
   });
 
+  describe('Fetch Agent Policies Methods', () => {
+    const soList = Array.from({ length: 2 }, () => ({
+      updated_at: '2020-01-01T00:00:00.000Z',
+    }));
+
+    const createSOMock = (soResult?: []) => {
+      return {
+        saved_objects: !soResult
+          ? soList.map((soAttributes) => {
+              return {
+                score: 1,
+                id: 'so-123',
+                type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+                version: 'abc',
+                updated_at: soAttributes.updated_at,
+                attributes: soAttributes,
+                references: [],
+                sort: ['created_at'],
+              };
+            })
+          : soResult,
+        total: soList.length,
+        per_page: 10,
+        page: 1,
+        pit_id: 'pit-id-1',
+      };
+    };
+
+    describe('fetchAllAgentPolicyIds()', () => {
+      let soClientMock: ReturnType<typeof savedObjectsClientMock.create>;
+
+      beforeEach(() => {
+        soClientMock = savedObjectsClientMock.create();
+
+        soClientMock.find
+          .mockResolvedValueOnce(createSOMock())
+          .mockResolvedValueOnce(createSOMock())
+          .mockResolvedValueOnce(createSOMock([]));
+      });
+
+      it('should return an iterator', async () => {
+        expect(agentPolicyService.fetchAllAgentPolicyIds(soClientMock)).toEqual({
+          [Symbol.asyncIterator]: expect.any(Function),
+        });
+      });
+
+      it('should provide item ids on every iteration', async () => {
+        for await (const ids of agentPolicyService.fetchAllAgentPolicyIds(soClientMock)) {
+          expect(ids).toEqual(['so-123', 'so-123']);
+        }
+
+        expect(soClientMock.find).toHaveBeenCalledTimes(3);
+      });
+
+      it('should use default options', async () => {
+        for await (const ids of agentPolicyService.fetchAllAgentPolicyIds(soClientMock)) {
+          expect(ids);
+        }
+
+        expect(soClientMock.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            perPage: 1000,
+            sortField: 'created_at',
+            sortOrder: 'asc',
+            fields: ['id'],
+            filter: undefined,
+          })
+        );
+      });
+
+      it('should use custom options when defined', async () => {
+        for await (const ids of agentPolicyService.fetchAllAgentPolicyIds(soClientMock, {
+          perPage: 13,
+          kuery: 'one=two',
+        })) {
+          expect(ids);
+        }
+
+        expect(soClientMock.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            perPage: 13,
+            sortField: 'created_at',
+            sortOrder: 'asc',
+            fields: ['id'],
+            filter: 'one=two',
+          })
+        );
+      });
+    });
+
+    describe('fetchAllItems()', () => {
+      let soClientMock: ReturnType<typeof savedObjectsClientMock.create>;
+
+      beforeEach(() => {
+        soClientMock = savedObjectsClientMock.create();
+
+        soClientMock.find
+          .mockResolvedValueOnce(createSOMock())
+          .mockResolvedValueOnce(createSOMock())
+          .mockResolvedValueOnce(createSOMock([]));
+      });
+
+      it('should return an iterator', async () => {
+        expect(agentPolicyService.fetchAllAgentPolicies(soClientMock)).toEqual({
+          [Symbol.asyncIterator]: expect.any(Function),
+        });
+      });
+
+      it('should provide items on every iteration', async () => {
+        for await (const items of agentPolicyService.fetchAllAgentPolicies(soClientMock)) {
+          expect(items.map((item) => item.id)).toEqual(soList.map((_so) => 'so-123'));
+        }
+
+        expect(soClientMock.find).toHaveBeenCalledTimes(3);
+      });
+
+      it('should use default options', async () => {
+        for await (const ids of agentPolicyService.fetchAllAgentPolicies(soClientMock)) {
+          expect(ids);
+        }
+
+        expect(soClientMock.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            perPage: 1000,
+            sortField: 'created_at',
+            sortOrder: 'asc',
+            fields: [],
+            filter: undefined,
+          })
+        );
+      });
+
+      it('should use custom options when defined', async () => {
+        for await (const ids of agentPolicyService.fetchAllAgentPolicies(soClientMock, {
+          kuery: 'one=two',
+          perPage: 12,
+          sortOrder: 'desc',
+          sortField: 'updated_by',
+        })) {
+          expect(ids);
+        }
+
+        expect(soClientMock.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            perPage: 12,
+            sortField: 'updated_by',
+            sortOrder: 'desc',
+            filter: 'one=two',
+          })
+        );
+      });
+    });
+  });
+
   describe('turnOffAgentTamperProtections', () => {
     const createPolicySO = (id: string, isProtected: boolean, error?: SavedObjectError) => ({
       id,
@@ -1020,21 +1197,27 @@ describe('agent policy', () => {
       ...(error ? { error } : {}),
     });
 
-    const createMockSoClientThatReturns = (policies: Array<ReturnType<typeof createPolicySO>>) => {
-      const mockSoClient = savedObjectsClientMock.create();
+    const generateAgentPolicy = (id: string, isProtected: boolean): AgentPolicy => ({
+      id,
+      is_protected: isProtected,
+      updated_at: '2020-01-01T00:00:00.000Z',
+      updated_by: 'user',
+      revision: 1,
+      name: 'test',
+      namespace: 'default',
+      status: 'active',
+      is_managed: false,
+    });
 
-      const resolvedValue = {
-        saved_objects: policies,
-        page: 1,
-        per_page: 10,
-        total: policies.length,
-      };
-      mockSoClient.find.mockResolvedValue(resolvedValue);
-      return mockSoClient;
-    };
+    const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
+      jest.fn(async function* () {
+        yield items;
+      });
 
     it('should return if all policies are compliant', async () => {
-      const mockSoClient = createMockSoClientThatReturns([]);
+      const mockSoClient = savedObjectsClientMock.create();
+
+      jest.spyOn(agentPolicyService, 'fetchAllAgentPolicies').mockReturnValue([] as any);
 
       expect(await agentPolicyService.turnOffAgentTamperProtections(mockSoClient)).toEqual({
         failedPolicies: [],
@@ -1044,10 +1227,11 @@ describe('agent policy', () => {
     });
 
     it('should bulk update policies that are not compliant', async () => {
-      const mockSoClient = createMockSoClientThatReturns([
-        createPolicySO('policy1', true),
-        createPolicySO('policy2', true),
-        createPolicySO('policy3', false),
+      const mockSoClient = savedObjectsClientMock.create();
+
+      agentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
+        generateAgentPolicy('policy1', true),
+        generateAgentPolicy('policy2', true),
       ]);
 
       mockSoClient.bulkUpdate.mockResolvedValueOnce({
@@ -1074,11 +1258,14 @@ describe('agent policy', () => {
     });
 
     it('should return failed policies if bulk update fails', async () => {
-      const mockSoClient = createMockSoClientThatReturns([
-        createPolicySO('policy1', true),
-        createPolicySO('policy2', true),
-        createPolicySO('policy3', false),
+      const mockSoClient = savedObjectsClientMock.create();
+
+      agentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
+        generateAgentPolicy('policy1', true),
+        generateAgentPolicy('policy2', true),
+        generateAgentPolicy('policy3', false),
       ]);
+
       mockSoClient.bulkUpdate.mockResolvedValueOnce({
         saved_objects: [
           createPolicySO('policy1', false, { error: 'Oops!', message: 'Ooops!', statusCode: 500 }),

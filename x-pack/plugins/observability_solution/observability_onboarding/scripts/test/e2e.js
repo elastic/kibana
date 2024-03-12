@@ -10,6 +10,7 @@ const { times } = require('lodash');
 const path = require('path');
 const yargs = require('yargs');
 const childProcess = require('child_process');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 const { argv } = yargs(process.argv.slice(2))
   .parserConfiguration({ 'unknown-options-as-args': true })
@@ -65,7 +66,7 @@ if (cypressCliArgs.grep) {
 
 const ftrConfig = argv.open ? './ftr_config_open.ts' : './ftr_config_runner.ts';
 const spawnArgs = [
-  `../../../../../scripts/${ftrScript}`,
+  `${REPO_ROOT}/scripts/${ftrScript}`,
   `--config=${ftrConfig}`,
   `--kibana-install-dir=${argv.kibanaInstallDir}`,
   ...(argv.bail ? [`--bail`] : []),

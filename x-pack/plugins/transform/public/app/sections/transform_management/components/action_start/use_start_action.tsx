@@ -10,7 +10,7 @@ import React, { useMemo, useState } from 'react';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import { TransformListAction, TransformListRow } from '../../../../common';
+import type { TransformListAction, TransformListRow } from '../../../../common';
 import { useTransformCapabilities, useStartTransforms } from '../../../../hooks';
 
 import { isStartActionDisabled, startActionNameText, StartActionName } from './start_action_name';
