@@ -48,9 +48,11 @@ export class HomePageObject extends FtrService {
 
   async isSampleDataSetInstalled(id: string) {
     const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
-    const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
-    this.log.debug(`Sample data installed: ${deleteButton.length > 0}`);
-    return deleteButton.length > 0;
+    const installStatus = await (
+      await sampleDataCard.findByCssSelector('[data-status]')
+    ).getAttribute('data-status');
+
+    return installStatus === 'installed';
   }
 
   async isWelcomeInterstitialDisplayed() {
