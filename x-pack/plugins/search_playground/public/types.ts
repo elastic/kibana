@@ -16,7 +16,7 @@ import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { HttpStart } from '@kbn/core-http-browser';
 import React from 'react';
-import type { SearchPlaygroundApp } from './components/app';
+import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
 import type { Toolbar } from './components/toolbar';
 
@@ -27,7 +27,7 @@ export interface SearchPlaygroundPluginSetup {}
 export interface SearchPlaygroundPluginStart {
   PlaygroundProvider: React.FC<React.ComponentProps<typeof PlaygroundProviderComponent>>;
   PlaygroundToolbar: React.FC<React.ComponentProps<typeof Toolbar>>;
-  Playground: React.FC<React.ComponentProps<typeof SearchPlaygroundApp>>;
+  Playground: React.FC<React.ComponentProps<typeof App>>;
 }
 
 export interface AppPluginStartDependencies {

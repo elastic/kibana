@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentType, lazy, LazyExoticComponent, Suspense } from 'react';
-import type { SearchPlaygroundApp } from './components/app';
+import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
 import type { Toolbar } from './components/toolbar';
 
@@ -21,9 +21,9 @@ const lazyRender =
       </Suspense>
     );
 
-export const Playground = lazyRender<React.ComponentProps<typeof SearchPlaygroundApp>>(
-  lazy<typeof SearchPlaygroundApp>(async () => ({
-    default: (await import('./components/app')).SearchPlaygroundApp,
+export const Playground = lazyRender<React.ComponentProps<typeof App>>(
+  lazy<typeof App>(async () => ({
+    default: (await import('./components/app')).App,
   }))
 );
 

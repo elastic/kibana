@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { PLUGIN_ID } from '../common';
 import { AppPluginStartDependencies } from './types';
-import { SearchPlaygroundApp } from './components/app';
+import { App } from './components/app';
 import { PlaygroundProvider } from './providers/playground_provider';
 
 export const renderApp = (
@@ -47,7 +47,7 @@ export const renderApp = (
                 bottomBorder="extended"
                 restrictWidth={false}
               >
-                <SearchPlaygroundApp />
+                <App />
               </KibanaPageTemplate>
             </PlaygroundProvider>
           </Router>
