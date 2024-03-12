@@ -9,9 +9,7 @@ notify:
     if: "build.state == 'passed' || build.state == 'failed' || build.state == 'scheduled'"
 
 steps:
-  - trigger: "kibana-artifacts-container-image"
-    label: ":docker: Build Kibana Artifacts Container Image"
-    build:
-      branch: $BUILDKITE_BRANCH
-      commit: $BUILDKITE_COMMIT
-      message: Running PR build for $BUILDKITE_BRANCH
+  - command: "ts-node .buildkite/scripts/serverless/emergency_release/trigger_container_build.ts"
+    label: "Trigger container build if there are new commits"
+    env:
+      DRY_RUN: $DRY_RUN

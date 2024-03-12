@@ -6,29 +6,20 @@
  */
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React, { ComponentType } from 'react';
-import { ObservabilityAIAssistantChatServiceProvider } from '../context/observability_ai_assistant_chat_service_provider';
+import { ObservabilityAIAssistantChatServiceContext } from '../context/observability_ai_assistant_chat_service_context';
 import { ObservabilityAIAssistantProvider } from '../context/observability_ai_assistant_provider';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { mockChatService, mockService } from '../mock';
+import { createStorybookService, createStorybookChatService } from '../storybook_mock';
+
+const mockService = createStorybookService();
+const mockChatService = createStorybookChatService();
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {
   return (
-    <KibanaContextProvider
-      services={{
-        triggersActionsUi: { getAddRuleFlyout: {} },
-        uiSettings: {
-          get: (setting: string) => {
-            if (setting === 'dateFormat') {
-              return 'MMM D, YYYY HH:mm';
-            }
-          },
-        },
-      }}
-    >
+    <KibanaContextProvider>
       <ObservabilityAIAssistantProvider value={mockService}>
-        <ObservabilityAIAssistantChatServiceProvider value={mockChatService}>
+        <ObservabilityAIAssistantChatServiceContext.Provider value={mockChatService}>
           <Story />
-        </ObservabilityAIAssistantChatServiceProvider>
+        </ObservabilityAIAssistantChatServiceContext.Provider>
       </ObservabilityAIAssistantProvider>
     </KibanaContextProvider>
   );
