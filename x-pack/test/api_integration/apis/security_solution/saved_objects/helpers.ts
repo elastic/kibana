@@ -16,6 +16,7 @@ export const createBasicTimeline = async (
   await supertest
     .post('/api/timeline')
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
     .send({
       timelineId: null,
       version: null,
@@ -31,6 +32,7 @@ export const createBasicTimelineTemplate = async (
   await supertest
     .post('/api/timeline')
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
     .send({
       timelineId: null,
       version: null,

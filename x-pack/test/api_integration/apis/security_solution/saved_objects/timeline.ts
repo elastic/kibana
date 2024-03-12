@@ -133,11 +133,15 @@ export default function ({ getService }: FtrProviderContext) {
           sort: { columnId: '@timestamp', sortDirection: 'desc' },
         };
 
-        const response = await supertest.post('/api/timeline').set('kbn-xsrf', 'true').send({
-          timelineId: null,
-          version: null,
-          timeline: timelineObject,
-        });
+        const response = await supertest
+          .post('/api/timeline')
+          .set('elastic-api-version', '2023-10-31')
+          .set('kbn-xsrf', 'true')
+          .send({
+            timelineId: null,
+            version: null,
+            timeline: timelineObject,
+          });
         const {
           columns,
           dataProviders,
@@ -176,6 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const responseToTest = await supertest
           .patch('/api/timeline')
+          .set('elastic-api-version', '2023-10-31')
           .set('kbn-xsrf', 'true')
           .send({
             timelineId: savedObjectId,
@@ -202,6 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const responseToTest = await supertest
           .patch('/api/timeline/_favorite')
+          .set('elastic-api-version', '2023-10-31')
           .set('kbn-xsrf', 'true')
           .send({
             timelineId: savedObjectId,
@@ -230,6 +236,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const responseToTest = await supertest
           .patch('/api/timeline/_favorite')
+          .set('elastic-api-version', '2023-10-31')
           .set('kbn-xsrf', 'true')
           .send({
             timelineId: savedObjectId,
@@ -257,15 +264,20 @@ export default function ({ getService }: FtrProviderContext) {
         const { savedObjectId, version } =
           response.body.data && response.body.data.persistTimeline.timeline;
 
-        await supertest.patch('/api/timeline/_favorite').set('kbn-xsrf', 'true').send({
-          timelineId: savedObjectId,
-          templateTimelineId: null,
-          templateTimelineVersion: null,
-          timelineType: TimelineType.default,
-        });
+        await supertest
+          .patch('/api/timeline/_favorite')
+          .set('elastic-api-version', '2023-10-31')
+          .set('kbn-xsrf', 'true')
+          .send({
+            timelineId: savedObjectId,
+            templateTimelineId: null,
+            templateTimelineVersion: null,
+            timelineType: TimelineType.default,
+          });
 
         const responseToTest = await supertest
           .patch('/api/timeline/_favorite')
+          .set('elastic-api-version', '2023-10-31')
           .set('kbn-xsrf', 'true')
           .send({
             timelineId: savedObjectId,
@@ -292,15 +304,20 @@ export default function ({ getService }: FtrProviderContext) {
         const { savedObjectId, version } =
           response.body.data && response.body.data.persistTimeline.timeline;
 
-        await supertest.patch('/api/timeline/_favorite').set('kbn-xsrf', 'true').send({
-          timelineId: savedObjectId,
-          templateTimelineId: templateTimelineIdFromStore,
-          templateTimelineVersion: templateTimelineVersionFromStore,
-          timelineType: TimelineType.template,
-        });
+        await supertest
+          .patch('/api/timeline/_favorite')
+          .set('elastic-api-version', '2023-10-31')
+          .set('kbn-xsrf', 'true')
+          .send({
+            timelineId: savedObjectId,
+            templateTimelineId: templateTimelineIdFromStore,
+            templateTimelineVersion: templateTimelineVersionFromStore,
+            timelineType: TimelineType.template,
+          });
 
         const responseToTest = await supertest
           .patch('/api/timeline/_favorite')
+          .set('elastic-api-version', '2023-10-31')
           .set('kbn-xsrf', 'true')
           .send({
             timelineId: savedObjectId,
@@ -326,6 +343,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('to a timeline without a timelineId', async () => {
         const response = await supertest
           .patch('/api/timeline/_favorite')
+          .set('elastic-api-version', '2023-10-31')
           .set('kbn-xsrf', 'true')
           .send({
             timelineId: null,
@@ -348,6 +366,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const response = await supertest
           .patch('/api/timeline/_favorite')
+          .set('elastic-api-version', '2023-10-31')
           .set('kbn-xsrf', 'true')
           .send({
             timelineId: null,
@@ -377,6 +396,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const responseToTest = await supertest
           .delete('/api/timeline')
+          .set('elastic-api-version', '2023-10-31')
           .set('kbn-xsrf', 'true')
           .send({
             savedObjectIds: [savedObjectId],
@@ -401,6 +421,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const responseToTest = await supertest
           .delete('/api/timeline')
+          .set('elastic-api-version', '2023-10-31')
           .set('kbn-xsrf', 'true')
           .send({
             savedObjectIds: [savedObjectId1, savedObjectId2],

@@ -15,13 +15,20 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
+  function supertestResolveTimeline() {
+    return supertest.get('/api/timeline/resolve').set('elastic-api-version', '2023-10-31');
+  }
+
   describe('Timeline', () => {
     describe('timelines', () => {
       it('Make sure that we get Timeline data', async () => {
         const titleToSaved = 'hello timeline';
         await createBasicTimeline(supertest, titleToSaved);
 
-        const resp = await supertest.get('/api/timelines').set('kbn-xsrf', 'true');
+        const resp = await supertest
+          .get('/api/timelines')
+          .set('elastic-api-version', '2023-10-31')
+          .set('kbn-xsrf', 'true');
 
         const timelines = resp.body.timeline;
 
@@ -34,6 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const resp = await supertest
           .get('/api/timelines?page_size=1&page_index=1')
+          .set('elastic-api-version', '2023-10-31')
           .set('kbn-xsrf', 'true');
 
         const timelines = resp.body.timeline;
@@ -47,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const resp = await supertest
           .get('/api/timelines?timeline_type=template')
+          .set('elastic-api-version', '2023-10-31')
           .set('kbn-xsrf', 'true');
 
         const templates: SavedTimeline[] = resp.body.timeline;
@@ -69,9 +78,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return outcome exactMatch when the id is unchanged', async () => {
-        const resp = await supertest
-          .get('/api/timeline/resolve')
-          .query({ id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7' });
+        const resp = await supertestResolveTimeline().query({
+          id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7',
+        });
 
         expect(resp.body.data.outcome).to.be('exactMatch');
         expect(resp.body.data.alias_target_id).to.be(undefined);
@@ -80,17 +89,17 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('notes', () => {
         it('should return notes with eventId', async () => {
-          const resp = await supertest
-            .get('/api/timeline/resolve')
-            .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
+          const resp = await supertestResolveTimeline().query({
+            id: '6484cc90-126e-11ec-83d2-db1096c73738',
+          });
 
           expect(resp.body.data.timeline.notes[0].eventId).to.be('Edo00XsBEVtyvU-8LGNe');
         });
 
         it('should return notes with the timelineId matching request id', async () => {
-          const resp = await supertest
-            .get('/api/timeline/resolve')
-            .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
+          const resp = await supertestResolveTimeline().query({
+            id: '6484cc90-126e-11ec-83d2-db1096c73738',
+          });
 
           expect(resp.body.data.timeline.notes[0].timelineId).to.be(
             '6484cc90-126e-11ec-83d2-db1096c73738'
@@ -103,9 +112,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('pinned events', () => {
         it('should pinned events with eventId', async () => {
-          const resp = await supertest
-            .get('/api/timeline/resolve')
-            .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
+          const resp = await supertestResolveTimeline().query({
+            id: '6484cc90-126e-11ec-83d2-db1096c73738',
+          });
 
           expect(resp.body.data.timeline.pinnedEventsSaveObject[0].eventId).to.be(
             'DNo00XsBEVtyvU-8LGNe'
@@ -116,9 +125,9 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should return pinned events with the timelineId matching request id', async () => {
-          const resp = await supertest
-            .get('/api/timeline/resolve')
-            .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
+          const resp = await supertestResolveTimeline().query({
+            id: '6484cc90-126e-11ec-83d2-db1096c73738',
+          });
 
           expect(resp.body.data.timeline.pinnedEventsSaveObject[0].timelineId).to.be(
             '6484cc90-126e-11ec-83d2-db1096c73738'

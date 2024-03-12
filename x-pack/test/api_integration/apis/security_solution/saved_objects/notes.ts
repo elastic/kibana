@@ -23,10 +23,11 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await supertest
           .patch('/api/note')
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             noteId: null,
             version: null,
-            note: { note: myNote, timelineId: null },
+            note: { note: myNote, timelineId: 'testTimelineId' },
           });
 
         const { note, noteId, timelineId, version } =
@@ -43,10 +44,11 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await supertest
           .patch('/api/note')
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             noteId: null,
             version: null,
-            note: { note: myNote, timelineId: null },
+            note: { note: myNote, timelineId: 'testTimelineId' },
           });
 
         const { noteId, timelineId, version } =
@@ -56,6 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
         const responseToTest = await supertest
           .patch('/api/note')
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             noteId,
             version,
