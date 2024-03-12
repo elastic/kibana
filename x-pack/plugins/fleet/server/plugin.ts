@@ -323,7 +323,7 @@ export class FleetPlugin
           ? [
               {
                 name: 'Agents',
-                requireAllSpaces: true,
+                requireAllSpaces: false,
                 privilegeGroups: [
                   {
                     groupType: 'mutually_exclusive',
@@ -357,7 +357,7 @@ export class FleetPlugin
               },
               {
                 name: 'Agent policies',
-                requireAllSpaces: true,
+                requireAllSpaces: false,
                 privilegeGroups: [
                   {
                     groupType: 'mutually_exclusive',
@@ -394,7 +394,7 @@ export class FleetPlugin
               },
               {
                 name: 'Settings',
-                requireAllSpaces: true,
+                requireAllSpaces: false,
                 privilegeGroups: [
                   {
                     groupType: 'mutually_exclusive',
@@ -432,7 +432,7 @@ export class FleetPlugin
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
             app: [PLUGIN_ID],
-            requireAllSpaces: true,
+            requireAllSpaces: false,
             catalogue: ['fleet'],
             savedObject: {
               all: allSavedObjectTypes,
@@ -444,7 +444,7 @@ export class FleetPlugin
             api: [`${PLUGIN_ID}-read`],
             app: [PLUGIN_ID],
             catalogue: ['fleet'],
-            requireAllSpaces: true,
+            requireAllSpaces: false,
             savedObject: {
               all: [],
               read: allSavedObjectTypes,
