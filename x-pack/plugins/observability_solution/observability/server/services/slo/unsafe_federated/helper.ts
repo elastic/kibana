@@ -95,9 +95,23 @@ export function fromSummaryDocumentToSlo(
   } else {
     const formattedSlo = res.right;
     if ('params' in summaryDoc.slo.indicator) {
+      const rawParams = summaryDoc.slo.indicator.params;
+      if (typeof rawParams === 'string') {
+        try {
+          formattedSlo.indicator.params = JSON.parse(rawParams);
+        } catch (e) {
+          logger.error(
+            `Invalid remote stored SLO with id [${summaryDoc.slo.id}]. Error parsing params`
+          );
+          logger.error(e);
+        }
+      } else {
+        // @ts-expect-error
+        formattedSlo.indicator.params = rawParams;
+      }
       return formattedSlo;
     } else {
-      // @ts-ignore
+      // @ts-expect-error
       formattedSlo.indicator.params = {};
       return formattedSlo;
     }

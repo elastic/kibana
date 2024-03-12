@@ -623,7 +623,7 @@ const putSloSettings = createObservabilityServerRoute({
       return object.attributes;
     } catch (e) {
       return {
-        useAllRemoteClusters: true,
+        useAllRemoteClusters: false,
         selectedRemoteClusters: [],
       };
     }

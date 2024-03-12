@@ -33,7 +33,7 @@ export function SettingsForm() {
 
   const { mutateAsync: updateSettings } = usePutSloSettings();
 
-  const { data } = useFetcher(() => {
+  const { data, loading } = useFetcher(() => {
     return http?.get<Array<{ name: string }>>('/api/remote_clusters');
   }, [http]);
 
@@ -126,6 +126,7 @@ export function SettingsForm() {
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              isLoading={loading}
               data-test-subj="o11ySettingsFormCancelButton"
               onClick={() => {
                 setUseAllRemoteClusters(currentSettings?.useAllRemoteClusters || false);
@@ -143,6 +144,7 @@ export function SettingsForm() {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              isLoading={loading}
               data-test-subj="o11ySettingsFormSaveButton"
               color="primary"
               fill

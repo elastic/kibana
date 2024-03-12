@@ -24,6 +24,7 @@ import { fromSummaryDocumentToSlo } from './unsafe_federated/helper';
 export interface SLOSummary {
   id: SLOId;
   remoteName?: string;
+  kibanaUrl?: string;
   unsafeSlo?: SLO;
   instanceId: string;
   summary: Summary;
@@ -137,6 +138,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
           return {
             remoteName,
             unsafeSlo,
+            kibanaUrl: summaryDoc.kibanaUrl,
             id: summaryDoc.slo.id,
             instanceId: summaryDoc.slo.instanceId ?? ALL_VALUE,
             summary: {

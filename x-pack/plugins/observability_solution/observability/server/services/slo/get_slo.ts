@@ -27,6 +27,7 @@ export class GetSLO {
     const remoteName = params.remoteName;
 
     let slo;
+    let kibanaUrl;
     if (remoteName) {
       const summarySearch = await this.esClient.search<EsSummaryDocument>({
         index: `${remoteName}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`,
@@ -44,8 +45,10 @@ export class GetSLO {
       if (summarySearch.hits.hits.length === 0) {
         throw new Error('SLO not found');
       }
+      const doc = summarySearch.hits.hits[0]._source!;
+      kibanaUrl = doc.kibanaUrl;
 
-      slo = fromSummaryDocumentToSlo(summarySearch.hits.hits[0]._source!, this.logger);
+      slo = fromSummaryDocumentToSlo(doc, this.logger);
     } else {
       slo = await this.repository.findById(sloId);
     }
@@ -57,7 +60,7 @@ export class GetSLO {
       });
 
       return getSLOResponseSchema.encode(
-        mergeSloWithSummary(slo, summary, instanceId, groupings, meta, remoteName)
+        mergeSloWithSummary(slo, summary, instanceId, groupings, meta, remoteName, kibanaUrl)
       );
     } else {
       throw new Error('SLO not found');
@@ -71,7 +74,8 @@ function mergeSloWithSummary(
   instanceId: string,
   groupings: Groupings,
   meta: Meta,
-  remoteName?: string
+  remoteName?: string,
+  kibanaUrl?: string
 ) {
-  return { ...slo, instanceId, summary, groupings, meta, remoteName };
+  return { ...slo, instanceId, summary, groupings, meta, remoteName, kibanaUrl };
 }

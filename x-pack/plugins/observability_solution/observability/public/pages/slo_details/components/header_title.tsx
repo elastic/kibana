@@ -5,11 +5,21 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
+import { paths } from '../../../../common/locators/paths';
 import { SloRemoteBadge } from '../../slos/components/card_view/slo_remote_badge';
 import { SLOGroupings } from '../../slos/components/common/slo_groupings';
 import { SloStatusBadge } from '../../../components/slo/slo_status_badge';
@@ -23,6 +33,17 @@ export function HeaderTitle({ isLoading, slo }: Props) {
   if (isLoading || !slo) {
     return <EuiSkeletonText lines={1} data-test-subj="loadingTitle" />;
   }
+
+  const sloDetailsUrl = slo.kibanaUrl
+    ? (
+        slo.kibanaUrl +
+        paths.observability.sloDetails(
+          slo.id,
+          ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined,
+          slo.remoteName
+        )
+      ).replace(/\/\//g, '/')
+    : undefined;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
@@ -61,6 +82,32 @@ export function HeaderTitle({ isLoading, slo }: Props) {
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      {slo.remoteName && (
+        <EuiCallOut
+          title={i18n.translate('xpack.observability.slo.sloDetails.headerTitle.calloutMessage', {
+            defaultMessage: 'Remote SLO',
+          })}
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.observability.slo.sloDetails.headerTitle.calloutDescription"
+              defaultMessage="This is remote SLO which belongs to another Kibana instance. it is fetched from remote cluster: {remoteName}."
+              values={{ remoteName: <strong>{slo.remoteName}</strong> }}
+            />
+          </p>
+          <EuiButton
+            data-test-subj="o11yHeaderTitleLinkButtonButton"
+            href={sloDetailsUrl}
+            color="primary"
+            target="_blank"
+          >
+            {i18n.translate('xpack.observability.headerTitle.linkButtonButtonLabel', {
+              defaultMessage: 'View remote SLO details',
+            })}
+          </EuiButton>
+        </EuiCallOut>
+      )}
     </EuiFlexGroup>
   );
 }

@@ -88,8 +88,12 @@ export function SloItemActions({
     navigateToUrl(sloDetailsUrl);
   };
 
-  const handleEdit = () => {
-    navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
+  const editHref = () => {
+    if (slo.kibanaUrl) {
+      return (slo.kibanaUrl + paths.observability.sloEdit(slo.id)).replace(/\/\//g, '/');
+    } else {
+      return basePath.prepend(paths.observability.sloEdit(slo.id));
+    }
   };
 
   const navigateToClone = useCloneSlo();
@@ -135,7 +139,7 @@ export function SloItemActions({
       {...btnProps}
     />
   );
-  const isRemote = Boolean(slo.remoteName);
+  const isRemote = !!slo.remoteName;
 
   return (
     <EuiPopover
@@ -161,8 +165,9 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="edit"
             icon="pencil"
-            disabled={!hasWriteCapabilities || isRemote}
-            onClick={handleEdit}
+            disabled={!hasWriteCapabilities || (isRemote && !slo.kibanaUrl)}
+            href={editHref()}
+            target={slo.kibanaUrl ? '_blank' : undefined}
             data-test-subj="sloActionsEdit"
           >
             {i18n.translate('xpack.observability.slo.item.actions.edit', {
@@ -175,6 +180,7 @@ export function SloItemActions({
             disabled={!hasWriteCapabilities || isRemote}
             onClick={handleCreateRule}
             data-test-subj="sloActionsCreateRule"
+            toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
           >
             {i18n.translate('xpack.observability.slo.item.actions.createRule', {
               defaultMessage: 'Create new alert rule',
@@ -186,6 +192,7 @@ export function SloItemActions({
             disabled={!hasWriteCapabilities || isRemote}
             onClick={handleNavigateToRules}
             data-test-subj="sloActionsManageRules"
+            toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
           >
             {i18n.translate('xpack.observability.slo.item.actions.manageRules', {
               defaultMessage: 'Manage rules',
@@ -197,6 +204,7 @@ export function SloItemActions({
             icon="copy"
             onClick={handleClone}
             data-test-subj="sloActionsClone"
+            toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
           >
             {i18n.translate('xpack.observability.slo.item.actions.clone', {
               defaultMessage: 'Clone',
@@ -208,6 +216,7 @@ export function SloItemActions({
             disabled={!hasWriteCapabilities || isRemote}
             onClick={handleDelete}
             data-test-subj="sloActionsDelete"
+            toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
           >
             {i18n.translate('xpack.observability.slo.item.actions.delete', {
               defaultMessage: 'Delete',
@@ -219,6 +228,7 @@ export function SloItemActions({
             onClick={handleAddToDashboard}
             disabled={!hasWriteCapabilities || isRemote}
             data-test-subj="sloActionsAddToDashboard"
+            toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
           >
             {i18n.translate('xpack.observability.slo.item.actions.addToDashboard', {
               defaultMessage: 'Add to Dashboard',
@@ -229,3 +239,10 @@ export function SloItemActions({
     </EuiPopover>
   );
 }
+
+const NOT_AVAILABLE_FOR_REMOTE = i18n.translate(
+  'xpack.observability.slo.item.actions.notAvailable',
+  {
+    defaultMessage: 'This action is not available for remote SLOs',
+  }
+);

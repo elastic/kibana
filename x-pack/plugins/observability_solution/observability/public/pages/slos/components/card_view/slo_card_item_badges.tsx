@@ -10,6 +10,7 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
+import { SloIndicatorTypeBadge } from '../badges/slo_indicator_type_badge';
 import { SloRemoteBadge } from './slo_remote_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { BurnRateRuleParams } from '../../../../typings';
@@ -56,6 +57,7 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
         ) : (
           <>
             <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} viewMode="compact" />
+            <SloIndicatorTypeBadge slo={slo} color="default" />
             <SLOCardItemInstanceBadge slo={slo} />
             <SloTimeWindowBadge slo={slo} color="default" />
             <SloRulesBadge rules={rules} onClick={handleCreateRule} />

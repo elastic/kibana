@@ -11,7 +11,7 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { paths } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 
-export function useCloneSlo() {
+export function useCloneSlo(remoteKibanaUrl?: string) {
   const {
     http: { basePath },
     application: { navigateToUrl },
@@ -19,14 +19,15 @@ export function useCloneSlo() {
 
   return useCallback(
     (slo: SLOWithSummaryResponse) => {
-      navigateToUrl(
-        basePath.prepend(
-          paths.observability.sloCreateWithEncodedForm(
-            encode({ ...slo, name: `[Copy] ${slo.name}`, id: undefined })
-          )
-        )
+      const clonePath = paths.observability.sloCreateWithEncodedForm(
+        encode({ ...slo, name: `[Copy] ${slo.name}`, id: undefined })
       );
+      if (remoteKibanaUrl) {
+        window.open((slo.kibanaUrl + clonePath).replace(/\/\//g, '/'), '_blank');
+      } else {
+        navigateToUrl(basePath.prepend(clonePath));
+      }
     },
-    [navigateToUrl, basePath]
+    [navigateToUrl, basePath, remoteKibanaUrl]
   );
 }

@@ -7,14 +7,33 @@
 
 import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React, { MouseEvent } from 'react';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '../../../../../common/locators/paths';
 
 export function SloRemoteBadge({ slo }: { slo: SLOWithSummaryResponse }) {
+  const sloDetailsUrl = slo.kibanaUrl
+    ? (
+        slo.kibanaUrl +
+        paths.observability.sloDetails(
+          slo.id,
+          ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined,
+          slo.remoteName
+        )
+      ).replace(/\/\//g, '/')
+    : undefined;
+
   return slo.remoteName ? (
     <EuiFlexItem grow={false}>
-      <EuiToolTip content={slo.remoteName}>
-        <EuiBadge color="default">
+      <EuiToolTip content={slo.kibanaUrl} title={slo.remoteName}>
+        <EuiBadge
+          color="default"
+          href={sloDetailsUrl!}
+          target="_blank"
+          onMouseDown={(e: MouseEvent) => {
+            e.stopPropagation();
+          }}
+        >
           {i18n.translate('xpack.observability.sloCardItemBadges.remoteBadgeLabel', {
             defaultMessage: 'Remote',
           })}

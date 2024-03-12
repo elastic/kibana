@@ -79,6 +79,7 @@ const getPreviewDataParamsSchema = t.type({
       objective: objectiveSchema,
       instanceId: t.string,
       groupBy: t.string,
+      remoteName: t.string,
       groupings: t.record(t.string, t.unknown),
     }),
   ]),
@@ -149,6 +150,7 @@ const sloResponseSchema = t.intersection([
   t.partial({
     instanceId: allOrAnyString,
     remoteName: t.string,
+    kibanaUrl: t.string,
   }),
 ]);
 

@@ -48,9 +48,13 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const handleEdit = () => {
+  const editHref = () => {
     if (slo) {
-      navigate(basePath.prepend(paths.observability.sloEdit(slo.id)));
+      if (slo.kibanaUrl) {
+        return (slo.kibanaUrl + paths.observability.sloEdit(slo.id)).replace(/\/\//g, '/');
+      } else {
+        return basePath.prepend(paths.observability.sloEdit(slo.id));
+      }
     }
   };
 
@@ -111,6 +115,9 @@ export function HeaderControl({ isLoading, slo }: Props) {
     (url: string) => setTimeout(() => navigateToUrl(url)),
     [navigateToUrl]
   );
+  const isRemote = !!slo?.remoteName;
+
+  const canEditRemote = Boolean(isRemote && slo.kibanaUrl);
 
   return (
     <>
@@ -124,7 +131,8 @@ export function HeaderControl({ isLoading, slo }: Props) {
             iconType="arrowDown"
             iconSize="s"
             onClick={handleActionsClick}
-            disabled={isLoading || !slo || Boolean(slo.remoteName)}
+            isLoading={isLoading}
+            disabled={isLoading}
           >
             {i18n.translate('xpack.observability.slo.sloDetails.headerControl.actions', {
               defaultMessage: 'Actions',
@@ -139,9 +147,10 @@ export function HeaderControl({ isLoading, slo }: Props) {
           items={[
             <EuiContextMenuItem
               key="edit"
-              disabled={!hasWriteCapabilities}
+              disabled={!hasWriteCapabilities || !canEditRemote}
               icon="pencil"
-              onClick={handleEdit}
+              href={editHref()}
+              target={isRemote ? '_blank' : undefined}
               data-test-subj="sloDetailsHeaderControlPopoverEdit"
             >
               {i18n.translate('xpack.observability.slo.sloDetails.headerControl.edit', {
@@ -150,10 +159,11 @@ export function HeaderControl({ isLoading, slo }: Props) {
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key="createBurnRateRule"
-              disabled={!hasWriteCapabilities}
+              disabled={!hasWriteCapabilities || isRemote}
               icon="bell"
               onClick={handleOpenRuleFlyout}
               data-test-subj="sloDetailsHeaderControlPopoverCreateRule"
+              toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
             >
               {i18n.translate(
                 'xpack.observability.slo.sloDetails.headerControl.createBurnRateRule',
@@ -164,10 +174,11 @@ export function HeaderControl({ isLoading, slo }: Props) {
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key="manageRules"
-              disabled={!hasWriteCapabilities}
+              disabled={!hasWriteCapabilities || isRemote}
               icon="gear"
               onClick={handleNavigateToRules}
               data-test-subj="sloDetailsHeaderControlPopoverManageRules"
+              toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
             >
               {i18n.translate('xpack.observability.slo.sloDetails.headerControl.manageRules', {
                 defaultMessage: 'Manage rules',
@@ -179,9 +190,10 @@ export function HeaderControl({ isLoading, slo }: Props) {
                 <EuiContextMenuItem
                   key="exploreInApm"
                   icon="bullseye"
-                  disabled={!hasApmReadCapabilities}
+                  disabled={!hasApmReadCapabilities || isRemote}
                   onClick={handleNavigateToApm}
                   data-test-subj="sloDetailsHeaderControlPopoverExploreInApm"
+                  toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
                 >
                   {i18n.translate(
                     'xpack.observability.slos.sloDetails.headerControl.exploreInApm',
@@ -197,10 +209,11 @@ export function HeaderControl({ isLoading, slo }: Props) {
             .concat(
               <EuiContextMenuItem
                 key="clone"
-                disabled={!hasWriteCapabilities}
+                disabled={!hasWriteCapabilities || isRemote}
                 icon="copy"
                 onClick={handleClone}
                 data-test-subj="sloDetailsHeaderControlPopoverClone"
+                toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
               >
                 {i18n.translate('xpack.observability.slo.slo.item.actions.clone', {
                   defaultMessage: 'Clone',
@@ -209,9 +222,10 @@ export function HeaderControl({ isLoading, slo }: Props) {
               <EuiContextMenuItem
                 key="delete"
                 icon="trash"
-                disabled={!hasWriteCapabilities}
+                disabled={!hasWriteCapabilities || isRemote}
                 onClick={handleDelete}
                 data-test-subj="sloDetailsHeaderControlPopoverDelete"
+                toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
               >
                 {i18n.translate('xpack.observability.slo.slo.item.actions.delete', {
                   defaultMessage: 'Delete',
@@ -242,3 +256,10 @@ export function HeaderControl({ isLoading, slo }: Props) {
     </>
   );
 }
+
+const NOT_AVAILABLE_FOR_REMOTE = i18n.translate(
+  'xpack.observability.slo.item.actions.notAvailable',
+  {
+    defaultMessage: 'This action is not available for remote SLOs',
+  }
+);

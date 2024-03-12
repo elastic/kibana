@@ -51,6 +51,7 @@ export interface EsSummaryDocument {
   status: Status;
   isTempDoc: boolean;
   spaceId: string;
+  kibanaUrl?: string;
 }
 
 export function createTempSummaryDocument(slo: SLO, spaceId: string): EsSummaryDocument {

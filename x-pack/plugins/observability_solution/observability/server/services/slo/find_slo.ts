@@ -62,6 +62,7 @@ function mergeSloWithSummary(sloList: SLO[], sloSummaryList: SLOSummary[]): SLOW
         summary: remoteSloSummary.summary,
         groupings: remoteSloSummary.groupings,
         remoteName: remoteSloSummary.remoteName,
+        kibanaUrl: remoteSloSummary.kibanaUrl,
       })),
   ];
 }
