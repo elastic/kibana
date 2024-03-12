@@ -144,7 +144,7 @@ describe('AddPrebuiltRulesTable', () => {
     expect(installAllButton).toBeDisabled();
   });
 
-  it('renders Install all` button when user has permissions', async () => {
+  it('enables Install all` button when user has permissions', async () => {
     (useUserData as jest.Mock).mockReturnValue([
       {
         loading: false,
@@ -165,40 +165,47 @@ describe('AddPrebuiltRulesTable', () => {
     expect(installAllButton).toBeEnabled();
   });
 
-  it('renders `No rules available for install` if there are none', async () => {
-    (useUserData as jest.Mock).mockReturnValue([
-      {
-        loading: false,
-        canUserCRUD: true,
-      },
-    ]);
-    (usePrebuiltRulesInstallReview as jest.Mock).mockReturnValueOnce({
-      data: {
-        rules: [],
-        stats: {
-          num_rules_to_install: 0,
-          tags: [],
+  it.each([
+    ['Security:Read', true],
+    ['Security:Write', false],
+  ])(
+    `renders "No rules available for install" when there are no rules to install and user has %s`,
+    async (_permissions, canUserCRUD) => {
+      (useUserData as jest.Mock).mockReturnValue([
+        {
+          loading: false,
+          canUserCRUD,
         },
-      },
-      isLoading: false,
-      isFetched: true,
-    });
-    (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValueOnce({
-      data: {
-        prebuiltRulesStatus: {
-          num_prebuilt_rules_total_in_package: 0,
+      ]);
+
+      (usePrebuiltRulesInstallReview as jest.Mock).mockReturnValueOnce({
+        data: {
+          rules: [],
+          stats: {
+            num_rules_to_install: 0,
+            tags: [],
+          },
         },
-      },
-    });
+        isLoading: false,
+        isFetched: true,
+      });
+      (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValueOnce({
+        data: {
+          prebuiltRulesStatus: {
+            num_prebuilt_rules_total_in_package: 0,
+          },
+        },
+      });
 
-    const { findByText } = render(
-      <AddPrebuiltRulesTableContextProvider>
-        <AddPrebuiltRulesTable />
-      </AddPrebuiltRulesTableContextProvider>
-    );
+      const { findByText } = render(
+        <AddPrebuiltRulesTableContextProvider>
+          <AddPrebuiltRulesTable />
+        </AddPrebuiltRulesTableContextProvider>
+      );
 
-    expect(await findByText('All Elastic rules have been installed')).toBeInTheDocument();
-  });
+      expect(await findByText('All Elastic rules have been installed')).toBeInTheDocument();
+    }
+  );
 
   it('does not render `Install rule` on rule rows for users with no write permissions', async () => {
     (useUserData as jest.Mock).mockReturnValue([
