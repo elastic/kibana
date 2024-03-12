@@ -11,7 +11,7 @@ import type { CaseAttributes } from '../../../common/types/domain';
 import type { CasesBulkGetRequest, CasesBulkGetResponse } from '../../../common/types/api';
 import { CasesBulkGetResponseRt, CasesBulkGetRequestRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../../common/api';
-import { createCaseError } from '../../common/error';
+import { createCaseError, generateCaseErrorResponse } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
@@ -88,12 +88,7 @@ const constructErrors = (
   const errors: CasesBulkGetResponse['errors'] = [];
 
   for (const soError of soBulkGetErrors) {
-    errors.push({
-      error: soError.error.error,
-      message: soError.error.message,
-      status: soError.error.statusCode,
-      caseId: soError.id,
-    });
+    errors.push({ ...generateCaseErrorResponse(soError.error), caseId: soError.id });
   }
 
   for (const theCase of unauthorizedCases) {
