@@ -10,10 +10,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { getRuleStatesKey } from '../configurations/latest_findings/use_get_benchmark_rules_state_api';
 import { getCspmStatsKey, getKspmStatsKey } from '../../common/api';
 import { BENCHMARK_INTEGRATION_QUERY_KEY_V2 } from '../benchmarks/use_csp_benchmark_integrations';
-import {
-  CspBenchmarkRulesBulkActionRequestSchema,
-  RuleStateAttributes,
-} from '../../../common/types/latest';
+import { RuleStateAttributes } from '../../../common/types/latest';
 import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../common/constants';
 
 export type RuleStateAttributesWithoutStates = Omit<RuleStateAttributes, 'muted'>;
@@ -27,13 +24,15 @@ export const useChangeCspRuleState = () => {
       rules: ruleIds,
     };
 
-    const cspRuleBulkActionResponse = await http?.post<CspBenchmarkRulesBulkActionRequestSchema>(
-      CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH,
-      {
-        version: '1',
-        body: JSON.stringify(query),
-      }
-    );
+    const cspRuleBulkActionResponse = await http!.post<
+      Promise<{
+        disabled_detection_rules?: number[];
+        message: string;
+      }>
+    >(CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH, {
+      version: '1',
+      body: JSON.stringify(query),
+    });
     await queryClient.invalidateQueries(BENCHMARK_INTEGRATION_QUERY_KEY_V2); // causing rules counters refetch
     await queryClient.invalidateQueries(getCspmStatsKey); // causing cloud dashboard refetch
     await queryClient.invalidateQueries(getKspmStatsKey); // causing kubernetes dashboard refetch

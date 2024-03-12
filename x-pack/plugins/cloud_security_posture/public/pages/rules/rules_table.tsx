@@ -17,18 +17,18 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTableSortingType,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
 import { CoreStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
+import { css } from '@emotion/react';
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
 import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
 import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
-import { fetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
 
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 export const RULES_ROW_SELECT_ALL_CURRENT_PAGE = 'cloud-security-fields-selector-item-all';
@@ -53,7 +53,10 @@ type GetColumnProps = Pick<
   postRequestChangeRulesStates: (
     actionOnRule: 'mute' | 'unmute',
     ruleIds: RuleStateAttributesWithoutStates[]
-  ) => void;
+  ) => Promise<{
+    disabled_detection_rules?: number[];
+    message: string;
+  }>;
   items: CspBenchmarkRulesWithStates[];
   setIsAllRulesSelectedThisPage: (isAllRulesSelected: boolean) => void;
   isAllRulesSelectedThisPage: boolean;
@@ -301,47 +304,81 @@ const getColumns = ({
     width: '100px',
     truncateText: true,
     render: (name, rule: CspBenchmarkRulesWithStates) => {
-      const rulesObjectRequest = {
-        benchmark_id: rule?.metadata.benchmark.id,
-        benchmark_version: rule?.metadata.benchmark.version,
-        /* Rule number always exists from 8.7 */
-        rule_number: rule?.metadata.benchmark.rule_number!,
-        rule_id: rule?.metadata.id,
-      };
-      const isRuleMuted = rule?.state === 'muted';
-      const nextRuleState = isRuleMuted ? 'unmute' : 'mute';
-      const changeCspRuleStateFn = async () => {
-        if (rule?.metadata.benchmark.rule_number) {
-          // Calling this function this way to make sure it didn't get called on every single row render, its only being called when user click on the switch button
-          const detectionRuleCount = (
-            await fetchDetectionRulesByTags(
-              getFindingsDetectionRuleSearchTags(rule.metadata),
-              { match: 'all' },
-              http
-            )
-          ).total;
-          await postRequestChangeRulesStates(nextRuleState, [rulesObjectRequest]);
-          await refetchRulesStates();
-          await showChangeBenchmarkRuleStatesSuccessToast(notifications, isRuleMuted, {
-            numberOfRules: 1,
-            numberOfDetectionRules: detectionRuleCount || 0,
-          });
-        }
-      };
       return (
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              className="eui-textTruncate"
-              checked={!isRuleMuted}
-              onChange={changeCspRuleStateFn}
-              data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
-              label=""
-              compressed={true}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <CspBenchmarkRuleStateSwitch
+          rule={rule}
+          refetchRulesStates={refetchRulesStates}
+          postRequestChangeRulesStates={postRequestChangeRulesStates}
+          notifications={notifications}
+          http={http}
+        />
       );
     },
   },
 ];
+
+const CspBenchmarkRuleStateSwitch = ({
+  rule,
+  refetchRulesStates,
+  postRequestChangeRulesStates,
+  notifications,
+  http,
+}: {
+  rule: CspBenchmarkRulesWithStates;
+  refetchRulesStates: () => void;
+  postRequestChangeRulesStates: (
+    actionOnRule: 'mute' | 'unmute',
+    ruleIds: RuleStateAttributesWithoutStates[]
+  ) => Promise<{
+    disabled_detection_rules?: number[];
+    message: string;
+  }>;
+  notifications: NotificationsStart;
+  http: HttpSetup;
+}) => {
+  const rulesObjectRequest = {
+    benchmark_id: rule?.metadata.benchmark.id,
+    benchmark_version: rule?.metadata.benchmark.version,
+    /* Rule number always exists from 8.7 */
+    rule_number: rule?.metadata.benchmark.rule_number!,
+    rule_id: rule?.metadata.id,
+  };
+  const [isRuleMuted, setIsRuleMuted] = useState(rule?.state === 'muted');
+  const [isLoading, setIsLoading] = useState(false);
+  const nextRuleState = isRuleMuted ? 'unmute' : 'mute';
+  const changeCspRuleStateFn = async () => {
+    if (rule?.metadata.benchmark.rule_number) {
+      setIsLoading(true);
+      const response = await postRequestChangeRulesStates(nextRuleState, [rulesObjectRequest]);
+      setIsLoading(false);
+      setIsRuleMuted(!isRuleMuted);
+      showChangeBenchmarkRuleStatesSuccessToast(notifications, isRuleMuted, {
+        numberOfRules: 1,
+        numberOfDetectionRules: response?.disabled_detection_rules?.length || 0,
+      });
+    }
+  };
+  return (
+    <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexItem grow={false}>
+        {isLoading ? (
+          <EuiLoadingSpinner
+            size="s"
+            css={css`
+              margin-right: 10px;
+            `}
+          />
+        ) : (
+          <EuiSwitch
+            className="eui-textTruncate"
+            checked={!isRuleMuted}
+            onChange={changeCspRuleStateFn}
+            data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
+            label=""
+            compressed={true}
+          />
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
