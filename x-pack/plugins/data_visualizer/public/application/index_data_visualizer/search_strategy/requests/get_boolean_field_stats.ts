@@ -6,7 +6,8 @@
  */
 import { get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import type {
   IKibanaSearchRequest,
@@ -24,8 +25,9 @@ import type {
   BooleanFieldStats,
   Aggs,
   FieldStatsCommonRequestParams,
+  FieldStatsError,
 } from '../../../../../common/types/field_stats';
-import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
+import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 
 export const getBooleanFieldsStatsRequest = (
   params: FieldStatsCommonRequestParams,
