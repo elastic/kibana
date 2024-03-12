@@ -10,8 +10,6 @@ import expect from '@kbn/expect';
 import type { AddModelFlyoutTabId } from '@kbn/ml-plugin/public/application/model_management/add_model_flyout';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-export type FlyoutTabs = AddModelFlyoutTabId[];
-
 export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -74,7 +72,7 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
       await this.assertOpen(false);
     }
 
-    public async assertFlyoutTabs(tabs: FlyoutTabs[]): Promise<void> {
+    public async assertFlyoutTabs(tabs: AddModelFlyoutTabId[]): Promise<void> {
       for await (const tab of tabs)
         await testSubjects.existOrFail(`mlAddTrainedModelFlyoutTab-${tab}`);
     }
