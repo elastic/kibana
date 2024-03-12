@@ -9,6 +9,6 @@
     "browser": true,
     "requiredPlugins": ["embeddable", "files", "uiActions", "kibanaReact"],
     "optionalPlugins": ["security", "screenshotMode"],
-    "requiredBundles": ["kibanaUtils", "kibanaReact"]
+    "requiredBundles": []
   }
 }

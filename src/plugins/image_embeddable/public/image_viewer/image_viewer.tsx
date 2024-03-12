@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import classNames from 'classnames';
+import React, { useEffect, useState } from 'react';
+
 import {
   EuiButtonIcon,
   EuiEmptyPrompt,
@@ -19,8 +22,7 @@ import { css, SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FileImage } from '@kbn/shared-ux-file-image';
-import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
+
 import { ImageConfig } from '../types';
 import { validateImageConfig } from '../utils/validate_image_config';
 import notFound from './assets/not_found_light.png';
