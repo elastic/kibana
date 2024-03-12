@@ -12,7 +12,9 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { HasEditCapabilities } from '@kbn/presentation-publishing';
 
-export type ImageEmbeddableSerializedState = SerializedReactEmbeddableTitles & ImageConfig;
+export type ImageEmbeddableSerializedState = SerializedReactEmbeddableTitles & {
+  imageConfig: ImageConfig;
+};
 
 export type ImageEmbeddableApi = DefaultEmbeddableApi & HasEditCapabilities;
 

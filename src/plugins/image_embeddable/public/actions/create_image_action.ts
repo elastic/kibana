@@ -46,7 +46,7 @@ export const registerCreateImageAction = ({
 
       embeddable.addNewPanel({
         panelType: IMAGE_EMBEDDABLE_TYPE,
-        initialState: imageConfig,
+        initialState: { imageConfig },
       });
     },
     getDisplayName: ImageEmbeddableStrings.getCreateDisplayName,

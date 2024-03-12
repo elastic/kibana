@@ -18,7 +18,7 @@ import {
   useReactEmbeddableUnsavedChanges,
 } from '@kbn/embeddable-plugin/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public/plugin';
 import { FileImageMetadata } from '@kbn/shared-ux-file-types';
@@ -33,13 +33,7 @@ import { FilesStart, imageEmbeddableFileKind } from '../imports';
 import { createValidateUrl } from '../utils/validate_url';
 import { IMAGE_EMBEDDABLE_TYPE } from './constants';
 import { ImageEmbeddableStrings } from './image_embeddable_strings';
-import {
-  ImageEmbeddableApi,
-  ImageEmbeddableSerializedState,
-  ImageFileSrc,
-  ImageSizing,
-  ImageUrlSrc,
-} from './types';
+import { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
 
 export interface ImageEmbeddableFactoryDeps {
   core: CoreStart;
@@ -62,24 +56,13 @@ export const registerImageEmbeddableFactory = (deps: ImageEmbeddableFactoryDeps)
       const { titlesApi, titleComparators, serializeTitles } =
         initializeReactEmbeddableTitles(initialState);
       const filesClient = deps.files.filesClientFactory.asUnscoped<FileImageMetadata>();
-      const altText$ = new BehaviorSubject<string | undefined>(initialState.altText);
-      const src$ = new BehaviorSubject<ImageFileSrc | ImageUrlSrc>(initialState.src);
-      const sizing$ = new BehaviorSubject<{ objectFit: ImageSizing }>(initialState.sizing);
-      const backgroundColor$ = new BehaviorSubject<string | undefined>(
-        initialState.backgroundColor
-      );
+      const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.imageConfig);
 
       return RegisterReactEmbeddable<ImageEmbeddableApi>((apiRef) => {
-        const [hasTriggerActions, setHasTriggerActions] = useState(false);
-        const [src, sizing, altText, backgroundColor] = useBatchedPublishingSubjects(
-          src$,
-          sizing$,
-          altText$,
-          backgroundColor$
-        );
-
         const parentApi = useReactEmbeddableParentApi();
-        // const imageConfig = usePublishingSubject(imageConfig$);
+        const imageConfig = useStateFromPublishingSubject(imageConfig$);
+
+        const [hasTriggerActions, setHasTriggerActions] = useState(false);
 
         useLayoutEffect(() => {
           import('./image_embeddable_lazy');
@@ -89,14 +72,11 @@ export const registerImageEmbeddableFactory = (deps: ImageEmbeddableFactoryDeps)
           uuid,
           imageEmbeddableFactory,
           {
-            src: [src$, (value) => src$.next(value), (a, b) => deepEqual(a, b)],
-            sizing: [
-              sizing$,
-              (value) => sizing$.next(value),
-              (a, b) => a?.objectFit === b?.objectFit,
+            imageConfig: [
+              imageConfig$,
+              (value) => imageConfig$.next(value),
+              (a, b) => deepEqual(a, b),
             ],
-            altText: [altText$, (value) => altText$.next(value)],
-            backgroundColor: [backgroundColor$, (value) => backgroundColor$.next(value)],
             ...titleComparators,
           }
         );
@@ -107,26 +87,31 @@ export const registerImageEmbeddableFactory = (deps: ImageEmbeddableFactoryDeps)
             unsavedChanges,
             resetUnsavedChanges,
             onEdit: async () => {
-              const imageConfig = await openImageEditor(
+              const newImageConfig = await openImageEditor(
                 {
                   core: deps.core,
                   files: deps.files,
                   security: deps.security,
                 },
-                { src, sizing, altText, backgroundColor }
+                imageConfig
               );
 
               if (apiIsPresentationContainer(parentApi)) {
                 parentApi.replacePanel(uuid, {
                   panelType: IMAGE_EMBEDDABLE_TYPE,
-                  initialState: imageConfig,
+                  initialState: { imageConfig: newImageConfig, ...serializeTitles() },
                 });
               }
             },
             isEditingEnabled: () => true,
             getTypeDisplayName: ImageEmbeddableStrings.getEditDisplayName,
             serializeState: async () => {
-              return { rawState: { src, sizing, altText, backgroundColor, ...serializeTitles() } };
+              return {
+                rawState: {
+                  imageConfig,
+                  ...serializeTitles(),
+                },
+              };
             },
           },
           apiRef,
@@ -163,7 +148,7 @@ export const registerImageEmbeddableFactory = (deps: ImageEmbeddableFactoryDeps)
           >
             <ImageViewer
               className="imageEmbeddableImage"
-              imageConfig={{ src, sizing, altText, backgroundColor }}
+              imageConfig={imageConfig}
               isScreenshotMode={deps.screenshotMode?.isScreenshotMode()}
               // onLoad={() => {
               //   this.renderComplete.dispatchComplete();
