@@ -39,8 +39,8 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import {
-  ObservabilityAIAssistantPluginSetup,
-  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -66,7 +66,7 @@ export interface SloPublicPluginsSetup {
   uiActions: UiActionsSetup;
   serverless?: ServerlessPluginSetup;
   presentationUtil?: PresentationUtilPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   usageCollection: UsageCollectionSetup;
 }
 
@@ -91,7 +91,7 @@ export interface SloPublicPluginsStart {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   lens: LensPublicStart;
   charts: ChartsPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
