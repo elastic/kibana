@@ -73,9 +73,9 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
   );
   const [selectedLanguage] = useState<string>();
   const [query, setQuery] = useState<{
-    searchValue: string;
     hasMatchingOptions: boolean;
     isFullMatch: boolean;
+    searchValue: string;
   }>();
 
   const { makeRequest } = useActions(FetchAllIndicesAPILogic);
@@ -208,19 +208,19 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
               options={groupedOptions}
               onSearchChange={(searchValue, hasMatchingOptions) => {
                 setQuery({
-                  searchValue: searchValue,
                   hasMatchingOptions: !!hasMatchingOptions,
                   isFullMatch: options.some((option) => option.label === searchValue),
+                  searchValue: searchValue,
                 });
               }}
               onChange={(selection) => {
-                const selectedIndex = selection[0] ?? undefined;
-                const selectedIndexOption = selectedIndex
+                const currentSelection = selection[0] ?? undefined;
+                const selectedIndexOption = currentSelection
                   ? {
-                      label: selectedIndex.label,
+                      label: currentSelection.label,
                       shouldCreate:
                         shouldPrependUserInputAsOption &&
-                        !!(selectedIndex?.label === query?.searchValue),
+                        !!(currentSelection?.label === query?.searchValue),
                     }
                   : undefined;
                 setSelectedIndex(selectedIndexOption);
