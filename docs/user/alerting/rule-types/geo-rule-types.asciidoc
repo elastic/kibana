@@ -29,7 +29,10 @@ image::user/alerting/images/alert-types-tracking-containment-conditions.png[Crea
   Boundaries data is expected to be static (not updating).
   Boundaries are collected once when the rule is created and anytime after when boundary configuration is modified.
 
-. Set the check interval, which defines how often to evaluate the rule conditions. 
+. Set the check interval, which defines how often to evaluate the rule conditions.
+
+. In the advanced options, you can change the number of consecutive runs that must meet the rule conditions before an alert occurs.
+  The default value is `1`.
 
 Entity locations are queried to determine whether they are contained within any monitored boundaries.
 Entity data should be somewhat "real time", meaning the dates of new documents aren't older than the current time minus the amount of the interval.

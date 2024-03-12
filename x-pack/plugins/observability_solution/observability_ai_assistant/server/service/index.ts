@@ -21,7 +21,7 @@ import { conversationComponentTemplate } from './conversation_component_template
 import { kbComponentTemplate } from './kb_component_template';
 import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './knowledge_base_service';
 import type {
-  ChatRegistrationFunction,
+  RegistrationCallback,
   ObservabilityAIAssistantResourceNames,
   RespondFunctionResources,
 } from './types';
@@ -76,7 +76,7 @@ export class ObservabilityAIAssistantService {
 
   private readonly resourceNames: ObservabilityAIAssistantResourceNames = createResourceNamesMap();
 
-  private readonly registrations: ChatRegistrationFunction[] = [];
+  private readonly registrations: RegistrationCallback[] = [];
 
   constructor({
     logger,
@@ -300,9 +300,7 @@ export class ObservabilityAIAssistantService {
 
     const params = {
       signal,
-      registerContext: fnClient.registerContext.bind(fnClient),
-      registerFunction: fnClient.registerFunction.bind(fnClient),
-      hasFunction: fnClient.hasFunction.bind(fnClient),
+      functions: fnClient,
       resources,
       client,
     };
@@ -373,7 +371,7 @@ export class ObservabilityAIAssistantService {
     );
   }
 
-  register(fn: ChatRegistrationFunction) {
-    this.registrations.push(fn);
+  register(cb: RegistrationCallback) {
+    this.registrations.push(cb);
   }
 }

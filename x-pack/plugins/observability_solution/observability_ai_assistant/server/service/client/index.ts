@@ -35,10 +35,12 @@ import {
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import {
+  CompatibleJSONSchema,
   FunctionResponse,
   FunctionVisibility,
+} from '../../../common/functions/types';
+import {
   MessageRole,
-  type CompatibleJSONSchema,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
