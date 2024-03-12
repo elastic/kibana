@@ -11,7 +11,7 @@ import type { Agent, AgentPolicy } from '../../../../types';
 
 export const getCommonTags = (
   agents: string | Agent[],
-  visibleAgents: Agent[],
+  agentsOnCurrentPage: Agent[],
   agentPolicies: AgentPolicy[]
 ): string[] => {
   const isManagedPolicy = (agent: Agent): boolean => {
@@ -33,12 +33,12 @@ export const getCommonTags = (
   if (!Array.isArray(agents)) {
     // in query mode, returning common tags of all agents in current page
     // this is a simplification to avoid querying all agents from backend to determine common tags
-    return commonSelectedTags(visibleAgents);
+    return commonSelectedTags(agentsOnCurrentPage);
   }
   // taking latest tags from freshly loaded agents data, as selected agents array does not contain the latest tags of agents
   const freshSelectedAgentsData =
-    visibleAgents.length > 0
-      ? visibleAgents.filter((newAgent) =>
+    agentsOnCurrentPage.length > 0
+      ? agentsOnCurrentPage.filter((newAgent) =>
           agents.find((existingAgent) => existingAgent.id === newAgent.id)
         )
       : agents;

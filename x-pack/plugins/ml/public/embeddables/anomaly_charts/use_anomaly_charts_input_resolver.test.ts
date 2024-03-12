@@ -6,13 +6,14 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
-import { AnomalyChartsEmbeddableInput, AnomalyChartsServices } from '../types';
-import { CoreStart } from '@kbn/core/public';
-import { MlStartDependencies } from '../../plugin';
+import type { AnomalyChartsEmbeddableInput, AnomalyChartsServices } from '../types';
+import type { CoreStart } from '@kbn/core/public';
+import type { MlStartDependencies } from '../../plugin';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
-import { EmbeddableAnomalyChartsContainerProps } from './embeddable_anomaly_charts_container';
+import type { EmbeddableAnomalyChartsContainerProps } from './embeddable_anomaly_charts_container';
 import moment from 'moment';
 import { createMlResultsServiceMock } from '../../application/services/ml_results_service';
 import { createCoreStartMock } from '../../__mocks__/core_start';
