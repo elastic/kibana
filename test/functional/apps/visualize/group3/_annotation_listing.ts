@@ -50,8 +50,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('by text', () => {
         it('matches on the first word', async function () {
-          await listingTable.searchForItemWithName('search');
-          await listingTable.expectItemsCount('eventAnnotation', 1);
+          await retry.try(async () => {
+            await listingTable.searchForItemWithName('search');
+            await listingTable.expectItemsCount('eventAnnotation', 1);
+          });
         });
 
         it('matches the second word', async function () {
