@@ -21,8 +21,8 @@ import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public'
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
-  ObservabilityAIAssistantPluginSetup,
-  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type {
@@ -33,7 +33,7 @@ import type {
 export interface ProfilingPluginPublicSetupDeps {
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
   data: DataPublicPluginSetup;
   charts: ChartsPluginSetup;
@@ -46,7 +46,7 @@ export interface ProfilingPluginPublicSetupDeps {
 export interface ProfilingPluginPublicStartDeps {
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;

@@ -28,6 +28,17 @@
           },
           {
             "parentPluginId": "savedObjectsTagging",
+            "id": "def-public.Tag.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsTagging",
             "id": "def-public.Tag.name",
             "type": "string",
             "tags": [],
@@ -1193,6 +1204,17 @@
           },
           {
             "parentPluginId": "savedObjectsTagging",
+            "id": "def-common.Tag.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsTagging",
             "id": "def-common.Tag.name",
             "type": "string",
             "tags": [],
@@ -1400,7 +1422,7 @@
             "label": "errors",
             "description": [],
             "signature": [
-              "{ id?: string | undefined; name?: string | undefined; color?: string | undefined; description?: string | undefined; }"
+              "{ id?: string | undefined; name?: string | undefined; color?: string | undefined; description?: string | undefined; managed?: string | undefined; }"
             ],
             "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
             "deprecated": false,
