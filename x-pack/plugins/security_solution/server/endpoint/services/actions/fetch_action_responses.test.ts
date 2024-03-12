@@ -41,6 +41,7 @@ describe('fetchActionResponses()', () => {
             error: '',
             started_at: '2022-04-30T12:56:00.449Z',
           },
+          sort: ['abc'],
         },
         {
           _id: 'ef278144-d8b9-45c6-9c3c-484c86b57d0b',
@@ -77,6 +78,7 @@ describe('fetchActionResponses()', () => {
               id: 'agent-a',
             },
           },
+          sort: ['abc'],
         },
         {
           _id: 'ef278144-d8b9-45c6-9c3c-484c86b57d0b',
@@ -94,6 +96,7 @@ describe('fetchActionResponses()', () => {
             error: '',
             started_at: '2022-04-30T12:56:00.449Z',
           },
+          sort: ['abc'],
         },
         {
           _id: 'ef278144-d8b9-45c6-9c3c-484c86b57d0b',
@@ -130,6 +133,7 @@ describe('fetchActionResponses()', () => {
               id: 'agent-a',
             },
           },
+          sort: ['abc'],
         },
       ],
     });
