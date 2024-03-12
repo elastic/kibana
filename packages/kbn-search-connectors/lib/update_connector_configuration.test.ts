@@ -24,13 +24,9 @@ describe('updateConnectorConfiguration lib function', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (fetchConnectorById as jest.Mock).mockResolvedValue({
-      primaryTerm: 0,
-      seqNo: 3,
-      value: {
-        configuration: { test: { label: 'haha', value: 'this' } },
-        id: 'connectorId',
-        status: ConnectorStatus.NEEDS_CONFIGURATION,
-      },
+      configuration: { test: { label: 'haha', value: 'this' } },
+      id: 'connectorId',
+      status: ConnectorStatus.NEEDS_CONFIGURATION,
     });
   });
 
@@ -46,8 +42,6 @@ describe('updateConnectorConfiguration lib function', () => {
         status: ConnectorStatus.CONFIGURED,
       },
       id: 'connectorId',
-      if_primary_term: 0,
-      if_seq_no: 3,
       index: CONNECTORS_INDEX,
     });
   });

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { vulnerabilitiesLatestMock } from '../mocks/vulnerabilities_latest_mock';
 
@@ -44,9 +44,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      const groupSelector = await findings.groupSelector();
-      await groupSelector.openDropDown();
-      await groupSelector.setValue('None');
       await findings.vulnerabilitiesIndex.remove();
     });
 
@@ -95,6 +92,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('groups vulnerabilities by CVE and sort by number of vulnerabilities desc', async () => {
         const groupSelector = findings.groupSelector();
         await groupSelector.openDropDown();
+        await groupSelector.setValue('None');
+        await groupSelector.openDropDown();
         await groupSelector.setValue('CVE');
 
         const grouping = await findings.findingsGrouping();
@@ -132,6 +131,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       it('groups vulnerabilities by resource and sort by number of vulnerabilities desc', async () => {
         const groupSelector = findings.groupSelector();
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('None');
         await groupSelector.openDropDown();
         await groupSelector.setValue('Resource');
         const grouping = await findings.findingsGrouping();
@@ -172,7 +173,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     describe('SearchBar', () => {
       it('add filter', async () => {
+        const groupSelector = await findings.groupSelector();
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('None');
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('Resource');
+
         // Filter bar uses the field's customLabel in the DataView
+
         await filterBar.addFilter({
           field: 'Resource Name',
           operation: 'is',

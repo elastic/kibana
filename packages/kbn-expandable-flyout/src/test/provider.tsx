@@ -9,17 +9,20 @@
 import { Provider as ReduxProvider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import React, { FC, PropsWithChildren } from 'react';
+import { ExpandableFlyoutContextProvider } from '../context';
 import { reducer } from '../reducer';
 import { Context } from '../redux';
 import { initialState, State } from '../state';
 
 interface TestProviderProps {
   state?: State;
+  urlKey?: string;
 }
 
 export const TestProvider: FC<PropsWithChildren<TestProviderProps>> = ({
   children,
   state = initialState,
+  urlKey,
 }) => {
   const store = configureStore({
     reducer,
@@ -29,8 +32,10 @@ export const TestProvider: FC<PropsWithChildren<TestProviderProps>> = ({
   });
 
   return (
-    <ReduxProvider store={store} context={Context}>
-      {children}
-    </ReduxProvider>
+    <ExpandableFlyoutContextProvider urlKey={urlKey}>
+      <ReduxProvider store={store} context={Context}>
+        {children}
+      </ReduxProvider>
+    </ExpandableFlyoutContextProvider>
   );
 };

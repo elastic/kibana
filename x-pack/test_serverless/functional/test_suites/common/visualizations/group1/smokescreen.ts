@@ -10,7 +10,7 @@ import { range } from 'lodash';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'svlCommonPage']);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
@@ -20,6 +20,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const config = getService('config');
 
   describe('lens smokescreen tests', () => {
+    before(async () => {
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
+    });
+
     it('should allow creation of lens xy chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');

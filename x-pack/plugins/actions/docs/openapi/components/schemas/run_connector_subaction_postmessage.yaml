@@ -1,0 +1,41 @@
+title: The postMessage subaction
+type: object
+description: >
+  Test an action that sends a message to Slack.
+  It is applicable only when the connector type is `.slack_api`.
+required:
+  - subAction
+  - subActionParams
+properties: 
+  subAction:
+    type: string
+    description: The action to test.
+    enum:
+      - postMessage
+  subActionParams:
+    type: object
+    description: The set of configuration properties for the action.
+    properties:
+      channelIds:
+        type: array
+        maxItems: 1
+        description: >
+          The Slack channel identifier, which must be one of the `allowedChannels` in the connector configuration.
+        items:
+          type: string
+      channels:
+        type: array
+        deprecated: true
+        description: >
+          The name of a channel that your Slack app has access to.
+        maxItems: 1
+        items:
+          type: string
+      text:
+        type: string
+        description: >
+          The Slack message text.
+          If it is a Slack webhook connector, the text cannot contain Markdown, images, or other advanced formatting.
+          If it is a Slack web API connector, it can contain either plain text or block kit messages.
+        minLength: 1
+       

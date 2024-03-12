@@ -5,49 +5,63 @@
  * 2.0.
  */
 
-import { useGeneratedHtmlId } from '@elastic/eui';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-
-import { useToggle } from 'react-use';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
+import { useHasSecurityCapability } from '../../../helper_hooks';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
 import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics/common';
 import type { AssetCriticality } from '../../api/api';
 import { useEntityAnalyticsRoutes } from '../../api/api';
 
-// SUGGESTION: @tiansivive Move this to some more general place within Entity Analytics
-export const buildCriticalityQueryKeys = (id: string) => {
-  const ASSET_CRITICALITY = 'ASSET_CRITICALITY';
-  const PRIVILEGES = 'PRIVILEGES';
-  return {
-    doc: [ASSET_CRITICALITY, id],
-    privileges: [ASSET_CRITICALITY, PRIVILEGES, id],
-  };
+const ASSET_CRITICALITY_KEY = 'ASSET_CRITICALITY';
+const PRIVILEGES_KEY = 'PRIVILEGES';
+
+const nonAuthorizedResponse: Promise<EntityAnalyticsPrivileges> = Promise.resolve({
+  has_all_required: false,
+  privileges: {
+    elasticsearch: {},
+  },
+});
+
+export const useAssetCriticalityPrivileges = (
+  entityName: string
+): UseQueryResult<EntityAnalyticsPrivileges> => {
+  const { fetchAssetCriticalityPrivileges } = useEntityAnalyticsRoutes();
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
+  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
+  const isEnabled = isAssetCriticalityEnabled && hasEntityAnalyticsCapability;
+
+  return useQuery({
+    queryKey: [ASSET_CRITICALITY_KEY, PRIVILEGES_KEY, entityName, isEnabled],
+    queryFn: isEnabled ? fetchAssetCriticalityPrivileges : () => nonAuthorizedResponse,
+  });
 };
 
-export const useAssetCriticalityData = (entity: Entity, modal: ModalState): State => {
+export const useAssetCriticalityData = ({
+  entity,
+  enabled = true,
+}: {
+  entity: Entity;
+  enabled?: boolean;
+}): State => {
   const QC = useQueryClient();
-  const QUERY_KEYS = buildCriticalityQueryKeys(entity.name);
+  const QUERY_KEY = [ASSET_CRITICALITY_KEY, entity.name];
+  const { fetchAssetCriticality, createAssetCriticality } = useEntityAnalyticsRoutes();
 
-  const { fetchAssetCriticality, createAssetCriticality, fetchAssetCriticalityPrivileges } =
-    useEntityAnalyticsRoutes();
-
-  const privileges = useQuery({
-    queryKey: QUERY_KEYS.privileges,
-    queryFn: fetchAssetCriticalityPrivileges,
-  });
+  const privileges = useAssetCriticalityPrivileges(entity.name);
   const query = useQuery<AssetCriticalityRecord, { body: { statusCode: number } }>({
-    queryKey: QUERY_KEYS.doc,
+    queryKey: QUERY_KEY,
     queryFn: () => fetchAssetCriticality({ idField: `${entity.type}.name`, idValue: entity.name }),
     retry: (failureCount, error) => error.body.statusCode === 404 && failureCount > 0,
-    enabled: privileges.data?.has_all_required,
+    enabled,
   });
 
   const mutation = useMutation({
     mutationFn: createAssetCriticality,
     onSuccess: (data) => {
-      QC.setQueryData(QUERY_KEYS.doc, data);
-      modal.toggle(false);
+      QC.setQueryData(QUERY_KEY, data);
     },
   });
 
@@ -59,12 +73,6 @@ export const useAssetCriticalityData = (entity: Entity, modal: ModalState): Stat
   };
 };
 
-export const useCriticalityModal = () => {
-  const [visible, toggle] = useToggle(false);
-  const basicSelectId = useGeneratedHtmlId({ prefix: 'basicSelect' });
-  return { visible, toggle, basicSelectId };
-};
-
 export interface State {
   status: 'create' | 'update';
   query: UseQueryResult<AssetCriticalityRecord>;
@@ -74,7 +82,6 @@ export interface State {
 type Params = Pick<AssetCriticality, 'idField' | 'idValue' | 'criticalityLevel'>;
 
 export interface ModalState {
-  basicSelectId: string;
   visible: boolean;
   toggle: (next: boolean) => void;
 }

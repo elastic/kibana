@@ -332,14 +332,16 @@ export class CommonPageObject extends FtrService {
         }
 
         currentUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
+        const decodedAppUrl = decodeURIComponent(appUrl);
+        const decodedCurrentUrl = decodeURIComponent(currentUrl);
 
-        const navSuccessful = currentUrl
+        const navSuccessful = decodedCurrentUrl
           .replace(':80/', '/')
           .replace(':443/', '/')
-          .startsWith(appUrl.replace(':80/', '/').replace(':443/', '/'));
+          .startsWith(decodedAppUrl.replace(':80/', '/').replace(':443/', '/'));
 
         if (!navSuccessful) {
-          const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;
+          const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${decodedAppUrl} currentUrl=${decodedCurrentUrl}`;
           this.log.debug(msg);
           throw new Error(msg);
         }
@@ -476,39 +478,6 @@ export class CommonPageObject extends FtrService {
         throw new Error('Local nav not visible yet');
       }
     });
-  }
-
-  async closeToast() {
-    const toast = await this.find.byCssSelector('.euiToast', 6 * this.defaultFindTimeout);
-    await toast.moveMouseTo();
-    const title = await (await this.testSubjects.find('euiToastHeader__title')).getVisibleText();
-
-    await this.testSubjects.click('toastCloseButton');
-    return title;
-  }
-
-  async closeToastIfExists() {
-    const toastShown = await this.find.existsByCssSelector('.euiToast');
-    if (toastShown) {
-      try {
-        await this.testSubjects.click('toastCloseButton');
-      } catch (err) {
-        // ignore errors, toast clear themselves after timeout
-      }
-    }
-  }
-
-  async clearAllToasts() {
-    const toasts = await this.find.allByCssSelector('.euiToast');
-    for (const toastElement of toasts) {
-      try {
-        await toastElement.moveMouseTo();
-        const closeBtn = await toastElement.findByTestSubject('toastCloseButton');
-        await closeBtn.click();
-      } catch (err) {
-        // ignore errors, toast clear themselves after timeout
-      }
-    }
   }
 
   async getJsonBodyText() {

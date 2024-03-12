@@ -122,6 +122,7 @@ import {
   RULE_INDICES,
   ALERTS_INDEX_BUTTON,
   INVESTIGATIONS_INPUT,
+  QUERY_BAR_ADD_FILTER,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -408,7 +409,7 @@ export const removeAlertsIndex = () => {
   });
 };
 
-export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
+export const fillDefineCustomRule = (rule: QueryRuleCreateProps) => {
   if (rule.data_view_id !== undefined) {
     cy.get(DATA_VIEW_OPTION).click();
     cy.get(DATA_VIEW_COMBO_BOX).type(`${rule.data_view_id}{enter}`);
@@ -416,6 +417,10 @@ export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
     .type(rule.query || '');
+};
+
+export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
+  fillDefineCustomRule(rule);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 
@@ -557,7 +562,7 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
 
 export const fillEsqlQueryBar = (query: string) => {
   // eslint-disable-next-line cypress/no-force
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(query, { force: true });
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('not.be.disabled').type(query, { force: true });
 };
 
 export const clearEsqlQueryBar = () => {
@@ -684,7 +689,7 @@ export const getIndicatorAtLeastOneInvalidationText = () => cy.contains(AT_LEAST
 export const getIndexPatternInvalidationText = () => cy.contains(AT_LEAST_ONE_INDEX_PATTERN);
 
 /** Returns the continue button on the step of about */
-const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
+export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 
 /** Returns the continue button on the step of define */
 export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
@@ -877,4 +882,8 @@ export const checkLoadQueryDynamically = () => {
 export const uncheckLoadQueryDynamically = () => {
   cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).click({ force: true });
   cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).should('not.be.checked');
+};
+
+export const openAddFilterPopover = () => {
+  cy.get(QUERY_BAR_ADD_FILTER).click();
 };

@@ -9,31 +9,33 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
-import { AttachmentType } from '@kbn/cases-plugin/common';
-import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
+import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
+import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
+import { i18n } from '@kbn/i18n';
+import { getActionRequestExpiration } from '../../utils';
+import { isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import { APP_ID } from '../../../../../../common';
 import type {
-  ResponseActionsApiCommandNames,
   ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
 import {
-  addRuleInfoToAction,
-  getActionParameters,
-  getActionRequestExpiration,
-} from '../../create/write_action_to_indices';
-import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
-import type { ResponseActionsClient } from './types';
+import type { CommonResponseActionMethodOptions, ResponseActionsClient } from './types';
 import type {
   ActionDetails,
+  EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
   GetProcessesActionOutputContent,
   KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
+  LogsEndpointAction,
+  LogsEndpointActionResponse,
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
@@ -42,21 +44,33 @@ import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
-  LogsEndpointAction,
-  EndpointActionDataParameterTypes,
-  LogsEndpointActionResponse,
-  EndpointActionResponseDataOutput,
+  WithAllKeys,
 } from '../../../../../../common/endpoint/types';
 import type {
-  IsolationRouteRequestBody,
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
+  IsolationRouteRequestBody,
   ResponseActionGetFileRequestBody,
-  UploadActionApiRequestBody,
   ResponseActionsRequestBody,
+  UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
-import type { CreateActionPayload } from '../../create/types';
 import { stringify } from '../../../../utils/stringify';
+import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
+import { EMPTY_COMMENT } from '../../../../utils/translations';
+
+const ENTERPRISE_LICENSE_REQUIRED_MSG = i18n.translate(
+  'xpack.securitySolution.responseActionsList.error.licenseTooLow',
+  {
+    defaultMessage: 'At least Enterprise license is required to use Response Actions.',
+  }
+);
+
+export const HOST_NOT_ENROLLED = i18n.translate(
+  'xpack.securitySolution.responseActionsList.error.hostNotEnrolled',
+  {
+    defaultMessage: 'The host does not have Elastic Defend integration installed',
+  }
+);
 
 export interface ResponseActionsClientOptions {
   endpointService: EndpointAppContextService;
@@ -64,6 +78,12 @@ export interface ResponseActionsClientOptions {
   casesClient?: CasesClient;
   /** Username that will be stored along with the action's ES documents */
   username: string;
+  /**
+   * Is the instance of the client being used for automated response actions.
+   * When set to `true`, additional checks will be performed and the Endpoint response action
+   * request will (almost) always be created, even if there certain errors occur along the way
+   */
+  isAutomated?: boolean;
 }
 
 export interface ResponseActionsClientUpdateCasesOptions {
@@ -79,11 +99,16 @@ export interface ResponseActionsClientUpdateCasesOptions {
   alertIds?: string[];
   /** Comment to include in the Case attachment */
   comment?: string;
+  /** The id of the action that was taken */
+  actionId: string;
 }
 
 export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
   ResponseActionsRequestBody &
-    Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name'>;
+    Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> & {
+      command: ResponseActionsApiCommandNames;
+      actionId?: string;
+    };
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
@@ -92,6 +117,16 @@ export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
   actionId: string;
 } & Pick<LogsEndpointActionResponse, 'error'> &
   Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>;
+
+export type ResponseActionsClientValidateRequestResponse =
+  | {
+      isValid: true;
+      error: undefined;
+    }
+  | {
+      isValid: false;
+      error: ResponseActionsClientError;
+    };
 
 /**
  * Base class for a Response Actions client
@@ -119,14 +154,15 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     caseIds = [],
     alertIds = [],
     comment = '',
+    actionId,
   }: ResponseActionsClientUpdateCasesOptions): Promise<void> {
     if (caseIds.length === 0 && alertIds.length === 0) {
-      this.log.debug(`Nothing to do. 'caseIds' and 'alertIds' are empty`);
+      this.log.debug(`No updates to Cases needed. 'caseIds' and 'alertIds' are empty`);
       return;
     }
 
     if (hosts.length === 0) {
-      this.log.debug(`Nothing to do. 'hosts' is empty`);
+      this.log.debug(`No updates to Cases needed. 'hosts' is empty`);
       return;
     }
 
@@ -160,41 +196,64 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     const allCases = [...new Set([...caseIds, ...casesFromAlertIds])];
 
     if (allCases.length === 0) {
-      this.log.debug(`Nothing to do. Alert IDs are not tied to Cases`);
+      this.log.debug(`No updates to Cases needed. Alert IDs are not tied to Cases`);
       return;
     }
 
     this.log.debug(`Updating cases:\n${stringify(allCases)}`);
 
-    // Create an attachment for each case that includes info. about the response actions taken against the hosts
-    const attachments = allCases.map(() => ({
-      type: AttachmentType.actions,
-      comment,
-      actions: {
-        targets: hosts.map(({ hostId: endpointId, hostname }) => ({ endpointId, hostname })),
-        type: command,
+    const attachments: CaseAttachments = [
+      {
+        type: AttachmentType.externalReference,
+        externalReferenceId: actionId,
+        externalReferenceStorage: {
+          type: ExternalReferenceStorageType.elasticSearchDoc,
+        },
+        externalReferenceAttachmentTypeId: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+        externalReferenceMetadata: {
+          targets: hosts.map(({ hostId: endpointId, hostname }) => {
+            return {
+              endpointId,
+              hostname,
+              agentType: this.agentType,
+            };
+          }),
+          command,
+          comment: comment || EMPTY_COMMENT,
+        },
+        owner: APP_ID,
       },
-      owner: APP_ID,
-    })) as BulkCreateArgs['attachments'];
+    ];
 
     const casesUpdateResponse = await Promise.all(
-      allCases.map((caseId) =>
-        casesClient.attachments
-          .bulkCreate({
+      allCases.map(async (caseId) => {
+        try {
+          return await casesClient.attachments.bulkCreate({
             caseId,
             attachments,
-          })
-          .catch((err) => {
-            // Log any error, BUT: do not fail execution
-            this.log.warn(
-              `Attempt to update case ID [${caseId}] failed: ${err.message}\n${stringify(err)}`
-            );
-            return null;
-          })
-      )
+          });
+        } catch (err) {
+          this.log.warn(
+            `Attempt to update case ID [${caseId}] failed: ${err.message}\n${stringify(err)}`
+          );
+          return null;
+        }
+      })
     );
 
     this.log.debug(`Update to cases done:\n${stringify(casesUpdateResponse)}`);
+  }
+
+  protected getMethodOptions<
+    T extends CommonResponseActionMethodOptions = CommonResponseActionMethodOptions
+  >(options: Partial<T> = {}): WithAllKeys<CommonResponseActionMethodOptions> {
+    return {
+      hosts: undefined,
+      ruleId: undefined,
+      ruleName: undefined,
+      error: undefined,
+      ...options,
+    };
   }
 
   /**
@@ -213,12 +272,70 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   /**
+   * Provides validations against a response action request and returns the result.
+   * Checks made should be generic to all response actions and not specific to any one action.
+   *
+   * @param actionRequest
+   * @protected
+   */
+  protected async validateRequest(
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+  ): Promise<ResponseActionsClientValidateRequestResponse> {
+    // Validation for Automated Response actions
+    if (this.options.isAutomated) {
+      // Automated response actions is an Enterprise level feature
+      if (!this.options.endpointService.getLicenseService().isEnterprise()) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(ENTERPRISE_LICENSE_REQUIRED_MSG, 403),
+        };
+      }
+    }
+
+    if (actionRequest.endpoint_ids.length === 0) {
+      return {
+        isValid: false,
+        error: new ResponseActionsClientError(HOST_NOT_ENROLLED, 400),
+      };
+    }
+
+    if (
+      !isActionSupportedByAgentType(
+        this.agentType,
+        actionRequest.command,
+        this.options.isAutomated ? 'automated' : 'manual'
+      )
+    ) {
+      return {
+        isValid: false,
+        error: new ResponseActionsNotSupportedError(actionRequest.command),
+      };
+    }
+
+    return { isValid: true, error: undefined };
+  }
+
+  /**
    * Creates a Response Action request document in the Endpoint index (`.logs-endpoint.actions-default`)
    * @protected
    */
   protected async writeActionRequestToEndpointIndex(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
   ): Promise<LogsEndpointAction> {
+    let errorMsg = String(actionRequest.error ?? '').trim();
+
+    if (!errorMsg) {
+      const validation = await this.validateRequest(actionRequest);
+
+      if (!validation.isValid) {
+        if (this.options.isAutomated) {
+          errorMsg = validation.error.message;
+        } else {
+          throw validation.error;
+        }
+      }
+    }
+
     this.notifyUsage(actionRequest.command);
 
     const doc: LogsEndpointAction = {
@@ -227,7 +344,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         id: actionRequest.endpoint_ids,
       },
       EndpointActions: {
-        action_id: uuidv4(),
+        action_id: actionRequest.actionId || uuidv4(),
         expiration: getActionRequestExpiration(),
         type: 'INPUT_ACTION',
         input_type: this.agentType,
@@ -236,13 +353,16 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
           comment: actionRequest.comment ?? undefined,
           ...(actionRequest.alert_ids ? { alert_id: actionRequest.alert_ids } : {}),
           ...(actionRequest.hosts ? { hosts: actionRequest.hosts } : {}),
-          parameters: getActionParameters(actionRequest) as EndpointActionDataParameterTypes,
+          parameters: actionRequest.parameters as EndpointActionDataParameterTypes,
         },
       },
       user: {
         id: this.options.username,
       },
-      ...addRuleInfoToAction(actionRequest),
+      ...(errorMsg ? { error: { message: errorMsg } } : {}),
+      ...(actionRequest.ruleId && actionRequest.ruleName
+        ? { rule: { id: actionRequest.ruleId, name: actionRequest.ruleName } }
+        : {}),
     };
 
     try {
@@ -342,16 +462,23 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     usageService.notifyUsage(featureKey);
   }
 
-  public async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+  public async isolate(
+    actionRequest: IsolationRouteRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails> {
     throw new ResponseActionsNotSupportedError('isolate');
   }
 
-  public async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+  public async release(
+    actionRequest: IsolationRouteRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails> {
     throw new ResponseActionsNotSupportedError('unisolate');
   }
 
   public async killProcess(
-    options: KillOrSuspendProcessRequestBody
+    actionRequest: KillOrSuspendProcessRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   > {
@@ -359,7 +486,8 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async suspendProcess(
-    options: KillOrSuspendProcessRequestBody
+    actionRequest: KillOrSuspendProcessRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   > {
@@ -367,25 +495,29 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async runningProcesses(
-    options: GetProcessesRequestBody
+    actionRequest: GetProcessesRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
     throw new ResponseActionsNotSupportedError('running-processes');
   }
 
   public async getFile(
-    options: ResponseActionGetFileRequestBody
+    actionRequest: ResponseActionGetFileRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
     throw new ResponseActionsNotSupportedError('get-file');
   }
 
   public async execute(
-    options: ExecuteActionRequestBody
+    actionRequest: ExecuteActionRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>> {
     throw new ResponseActionsNotSupportedError('execute');
   }
 
   public async upload(
-    options: UploadActionApiRequestBody
+    actionRequest: UploadActionApiRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>> {
     throw new ResponseActionsNotSupportedError('upload');
   }

@@ -6,8 +6,8 @@
  */
 
 import { mlJobService } from '../services/job_service';
-import { Entity } from './components/entity_control/entity_control';
-import { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { Entity } from './components/entity_control/entity_control';
+import type { JobId, CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
 /**
  * Extracts entities from the detector configuration
@@ -15,9 +15,10 @@ import { JobId } from '../../../common/types/anomaly_detection_jobs';
 export function getControlsForDetector(
   selectedDetectorIndex: number,
   selectedEntities: Record<string, any>,
-  selectedJobId: JobId
+  selectedJobId: JobId,
+  job?: CombinedJob
 ): Entity[] {
-  const selectedJob = mlJobService.getJob(selectedJobId);
+  const selectedJob = job ?? mlJobService.getJob(selectedJobId);
 
   const entities: Entity[] = [];
 

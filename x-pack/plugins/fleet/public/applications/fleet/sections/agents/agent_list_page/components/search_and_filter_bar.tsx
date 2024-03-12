@@ -22,6 +22,8 @@ import type { Agent, AgentPolicy } from '../../../../types';
 import { SearchBar } from '../../../../components';
 import { AGENTS_INDEX, AGENTS_PREFIX } from '../../../../constants';
 
+import { useStartServices } from '../../../../hooks';
+
 import { AgentBulkActions } from './bulk_actions';
 import type { SelectionMode } from './types';
 import { AgentActivityButton } from './agent_activity_button';
@@ -44,18 +46,16 @@ export interface SearchAndFilterBarProps {
   tags: string[];
   selectedTags: string[];
   onSelectedTagsChange: (selectedTags: string[]) => void;
-  shownAgents: number;
-  inactiveShownAgents: number;
+  nAgentsInTable: number;
   totalInactiveAgents: number;
   totalManagedAgentIds: string[];
-  inactiveManagedAgentIds: string[];
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   onClickAddAgent: () => void;
   onClickAddFleetServer: () => void;
-  visibleAgents: Agent[];
+  agentsOnCurrentPage: Agent[];
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
 }
@@ -74,23 +74,22 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   tags,
   selectedTags,
   onSelectedTagsChange,
-  shownAgents,
-  inactiveShownAgents,
+  nAgentsInTable,
   totalInactiveAgents,
   totalManagedAgentIds,
-  inactiveManagedAgentIds,
   selectionMode,
   currentQuery,
   selectedAgents,
   refreshAgents,
   onClickAddAgent,
   onClickAddFleetServer,
-  visibleAgents,
+  agentsOnCurrentPage,
   onClickAgentActivity,
   showAgentActivityTour,
 }) => {
   const { isFirstTimeAgentUser, isLoading: isFirstTimeAgentUserLoading } =
     useIsFirstTimeAgentUserQuery();
+  const { cloud } = useStartServices();
 
   return (
     <>
@@ -107,23 +106,25 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                 showAgentActivityTour={showAgentActivityTour}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.addFleetServerButton.tooltip"
-                    defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
-                  />
-                }
-              >
-                <EuiButton onClick={onClickAddFleetServer} data-test-subj="addFleetServerButton">
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.addFleetServerButton"
-                    defaultMessage="Add Fleet Server"
-                  />
-                </EuiButton>
-              </EuiToolTip>
-            </EuiFlexItem>
+            {!cloud?.isServerlessEnabled && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.fleet.agentList.addFleetServerButton.tooltip"
+                      defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
+                    />
+                  }
+                >
+                  <EuiButton onClick={onClickAddFleetServer} data-test-subj="addFleetServerButton">
+                    <FormattedMessage
+                      id="xpack.fleet.agentList.addFleetServerButton"
+                      defaultMessage="Add Fleet Server"
+                    />
+                  </EuiButton>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={
@@ -193,17 +194,15 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
               </EuiFilterGroup>
             </EuiFlexItem>
             {(selectionMode === 'manual' && selectedAgents.length) ||
-            (selectionMode === 'query' && shownAgents > 0) ? (
+            (selectionMode === 'query' && nAgentsInTable > 0) ? (
               <EuiFlexItem grow={false}>
                 <AgentBulkActions
-                  shownAgents={shownAgents}
-                  inactiveShownAgents={inactiveShownAgents}
+                  nAgentsInTable={nAgentsInTable}
                   totalManagedAgentIds={totalManagedAgentIds}
-                  inactiveManagedAgentIds={inactiveManagedAgentIds}
                   selectionMode={selectionMode}
                   currentQuery={currentQuery}
                   selectedAgents={selectedAgents}
-                  visibleAgents={visibleAgents}
+                  agentsOnCurrentPage={agentsOnCurrentPage}
                   refreshAgents={refreshAgents}
                   allTags={tags}
                   agentPolicies={agentPolicies}

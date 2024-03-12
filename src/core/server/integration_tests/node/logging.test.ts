@@ -7,6 +7,7 @@
  */
 
 import { createRoot as createkbnTestServerRoot } from '@kbn/core-test-helpers-kbn-server';
+import { unsafeConsole } from '@kbn/security-hardening';
 
 function createRootWithRoles(roles: string[]) {
   return createkbnTestServerRoot({
@@ -39,7 +40,7 @@ describe('node service global context', () => {
       let mockConsoleLog: jest.SpyInstance;
 
       beforeAll(async () => {
-        mockConsoleLog = jest.spyOn(global.console, 'log');
+        mockConsoleLog = jest.spyOn(unsafeConsole, 'log');
         root = createRootWithRoles(roles);
 
         await root.preboot();

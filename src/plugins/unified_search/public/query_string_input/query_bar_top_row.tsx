@@ -717,7 +717,7 @@ export const QueryBarTopRow = React.memo(
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
             detectTimestamp={detectTimestamp}
-            onTextLangQuerySubmit={() =>
+            onTextLangQuerySubmit={async () =>
               onSubmit({
                 query: queryRef.current,
                 dateRange: dateRangeRef.current,
