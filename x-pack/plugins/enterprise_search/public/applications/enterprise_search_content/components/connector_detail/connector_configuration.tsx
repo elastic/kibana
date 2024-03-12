@@ -66,7 +66,6 @@ export const ConnectorConfiguration: React.FC = () => {
     return <></>;
   }
 
-  // TODO make it work without index if possible
   if (connector.is_native && connector.service_type) {
     return <NativeConnectorConfiguration />;
   }
@@ -353,12 +352,12 @@ export const ConnectorConfiguration: React.FC = () => {
               ]}
             />
           </EuiPanel>
-          {!connector.index_name && (
+          {
             <>
               <EuiSpacer />
               <AttachIndexBox connector={connector} />
             </>
-          )}
+          }
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiFlexGroup direction="column">
