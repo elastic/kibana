@@ -53,8 +53,8 @@ export const useDatasetQualityFilters = () => {
         timeRange: {
           ...timeRange,
           refresh: {
-            isPaused,
-            interval: refreshInterval,
+            pause: isPaused,
+            value: refreshInterval,
           },
         },
       });

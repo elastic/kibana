@@ -97,7 +97,7 @@ export const Description = ({
   const descriptionMarkdownRef = useRef<DescriptionMarkdownRefObject | null>(null);
 
   const { euiTheme } = useEuiTheme();
-  const { appId, permissions } = useCasesContext();
+  const { permissions, owner } = useCasesContext();
 
   const {
     clearDraftComment: clearLensDraftComment,
@@ -121,7 +121,7 @@ export const Description = ({
 
   const toggleCollapse = () => setIsCollapsed((oldValue: boolean) => !oldValue);
 
-  const draftDescription = getDraftDescription(appId, caseData.id, DESCRIPTION_ID);
+  const draftDescription = getDraftDescription(owner[0], caseData.id, DESCRIPTION_ID);
 
   if (
     hasIncomingLensState &&

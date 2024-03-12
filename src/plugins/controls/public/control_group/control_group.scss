@@ -199,3 +199,12 @@ $controlMinWidth: $euiSize * 14;
     top: (-$euiSizeXS) !important;
   }
 }
+
+.controlGroup--invalidSelectionsTour {
+  .controlGroup--suppressTourCheckbox {
+    height: 22px;
+    &Label {
+      font-weight: $euiFontWeightMedium;
+    }
+  }
+}

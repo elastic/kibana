@@ -7,14 +7,13 @@
 
 import type { SetStateAction } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { merge, isEqual, isEmpty } from 'lodash';
+import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import type { CasesConfigurationUI, FilterOptions } from '../../../../common/ui';
 import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 import type { FilterConfig, FilterConfigState } from './types';
 import { useCustomFieldsFilterConfig } from './use_custom_fields_filter_config';
-import { useCasesContext } from '../../cases_context/use_cases_context';
-import { deflattenCustomFieldKey, getLocalStorageKey, isFlattenCustomField } from '../utils';
+import { deflattenCustomFieldKey, isFlattenCustomField } from '../utils';
 
 const mergeSystemAndCustomFieldConfigs = ({
   systemFilterConfig,
@@ -50,9 +49,8 @@ const shouldBeActive = ({
 };
 
 const useActiveByFilterKeyState = ({ filterOptions }: { filterOptions: FilterOptions }) => {
-  const { appId } = useCasesContext();
-  const [activeByFilterKey, setActiveByFilterKey] = useLocalStorage<FilterConfigState[]>(
-    getLocalStorageKey(LOCAL_STORAGE_KEYS.casesTableFiltersConfig, appId),
+  const [activeByFilterKey, setActiveByFilterKey] = useCasesLocalStorage<FilterConfigState[]>(
+    LOCAL_STORAGE_KEYS.casesTableFiltersConfig,
     []
   );
 

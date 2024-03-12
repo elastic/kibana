@@ -60,7 +60,6 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/cell-actions",
     "@kbn/shared-ux-utility",
-    "@kbn/core-application-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/discover-utils",
     "@kbn/search-errors",
@@ -79,12 +78,13 @@
     "@kbn/core-chrome-browser",
     "@kbn/core-plugins-server",
     "@kbn/shared-ux-button-toolbar",
-    "@kbn/serverless",
     "@kbn/deeplinks-observability",
     "@kbn/esql-utils",
     "@kbn/managed-content-badge",
     "@kbn/deeplinks-analytics",
-    "@kbn/shared-ux-markdown"
+    "@kbn/shared-ux-markdown",
+    "@kbn/data-view-utils",
+    "@kbn/presentation-publishing"
   ],
   "exclude": ["target/**/*"]
 }

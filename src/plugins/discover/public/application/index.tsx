@@ -12,14 +12,13 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { DiscoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
 import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
-import type { DiscoverCustomizationContext } from './types';
+import type { DiscoverCustomizationContext } from '../customizations';
 
 export interface RenderAppProps {
   element: HTMLElement;
   services: DiscoverServices;
   profileRegistry: DiscoverProfileRegistry;
   customizationContext: DiscoverCustomizationContext;
-  isDev: boolean;
 }
 
 export const renderApp = ({
@@ -27,11 +26,9 @@ export const renderApp = ({
   services,
   profileRegistry,
   customizationContext,
-  isDev,
 }: RenderAppProps) => {
-  const { history: getHistory, capabilities, chrome, data, core } = services;
+  const { history, capabilities, chrome, data, core } = services;
 
-  const history = getHistory();
   if (!capabilities.discover.save) {
     chrome.setBadge({
       text: i18n.translate('discover.badge.readOnly.text', {
@@ -49,7 +46,6 @@ export const renderApp = ({
       profileRegistry={profileRegistry}
       customizationContext={customizationContext}
       history={history}
-      isDev={isDev}
     />,
     {
       theme: core.theme,
