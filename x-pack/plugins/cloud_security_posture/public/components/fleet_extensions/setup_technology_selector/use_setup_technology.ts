@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 
 import { AgentPolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { CLOUDBEAT_AWS } from '../../../../common/constants';
+import { CLOUDBEAT_AWS, CLOUDBEAT_GCP } from '../../../../common/constants';
 
 export const useSetupTechnology = ({
   input,
@@ -24,7 +24,9 @@ export const useSetupTechnology = ({
   isEditPage: boolean;
 }) => {
   const isCspmAws = input.type === CLOUDBEAT_AWS;
-  const isAgentlessAvailable = Boolean(isCspmAws && agentlessPolicy);
+  const isCspmGcp = input.type === CLOUDBEAT_GCP;
+  const isAgentlessSupportedForCloudProvider = isCspmAws || isCspmGcp;
+  const isAgentlessAvailable = Boolean(isAgentlessSupportedForCloudProvider && agentlessPolicy);
   const agentPolicyId = agentPolicy?.id;
   const agentlessPolicyId = agentlessPolicy?.id;
   const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(() => {

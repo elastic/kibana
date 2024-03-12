@@ -37,6 +37,7 @@ export function registerGrokSimulateRoute(framework: KibanaFramework) {
         const esClient = (await requestContext.core).elasticsearch.client;
         const grokdebuggerRequest = GrokdebuggerRequest.fromDownstreamJSON(request.body);
         const simulateResponseFromES = await esClient.asCurrentUser.ingest.simulate({
+          // @ts-expect-error pipeline._meta defined as mandatory
           body: grokdebuggerRequest.upstreamJSON,
         });
         const grokdebuggerResponse = GrokdebuggerResponse.fromUpstreamJSON(simulateResponseFromES);
