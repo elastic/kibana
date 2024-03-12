@@ -84,7 +84,7 @@ import {
   getIndicatorAndButton,
   getIndicatorAtLeastOneInvalidationText,
   getIndicatorDeleteButton,
-  getIndicatorIndex,
+  getRuleIndexInput,
   getIndicatorIndexComboField,
   getIndicatorIndicatorIndex,
   getIndicatorInvalidationText,
@@ -141,7 +141,7 @@ describe('indicator match', { tags: ['@ess', '@serverless'] }, () => {
         });
 
         it('Contains a predefined index pattern', () => {
-          getIndicatorIndex().should('have.text', getIndexPatterns().join(''));
+          getRuleIndexInput().should('have.text', getIndexPatterns().join(''));
         });
 
         it('Does NOT show invalidation text on initial page load if indicator index pattern is filled out', () => {

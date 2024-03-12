@@ -69,7 +69,7 @@ export const THREAT_MATCH_CUSTOM_QUERY_INPUT =
 export const THREAT_MATCH_QUERY_INPUT =
   '[data-test-subj="detectionEngineStepDefineThreatRuleQueryBar"] [data-test-subj="queryInput"]';
 
-export const THREAT_MATCH_INDICATOR_INDEX =
+export const CUSTOM_INDEX_PATTERN_INPUT =
   '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
 
 export const THREAT_MATCH_INDICATOR_INDICATOR_INDEX =
