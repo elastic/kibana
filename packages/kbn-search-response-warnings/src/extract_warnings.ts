@@ -23,7 +23,9 @@ export function extractWarnings(
   const warnings: SearchResponseWarning[] = [];
 
   const isPartial = rawResponse._clusters
-    ? rawResponse._clusters.partial > 0 || rawResponse._clusters.skipped > 0
+    ? rawResponse._clusters.partial > 0 ||
+      rawResponse._clusters.skipped > 0 ||
+      rawResponse._clusters.running > 0
     : rawResponse.timed_out || rawResponse._shards.failed > 0;
   if (isPartial) {
     warnings.push({
