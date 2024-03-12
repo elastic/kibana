@@ -64,6 +64,7 @@ import {
   setDataProviderVisibility,
   setChanged,
   setConfirmingNoteId,
+  deleteNoteFromEvent,
 } from './actions';
 
 import {
@@ -583,6 +584,21 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         confirmingNoteId,
+      },
+    },
+  }))
+  .case(deleteNoteFromEvent, (state, { id, noteId, eventId }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        eventIdToNoteIds: {
+          ...state.timelineById[id].eventIdToNoteIds,
+          [eventId]: state.timelineById[id].eventIdToNoteIds[eventId].filter(
+            (note) => note !== noteId
+          ),
+        },
       },
     },
   }))

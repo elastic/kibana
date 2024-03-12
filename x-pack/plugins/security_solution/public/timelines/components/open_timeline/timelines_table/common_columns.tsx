@@ -17,6 +17,7 @@ import type { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../t
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineId } from '../../../../../common/types';
 
 const LineClampTextContainer = styled.span`
   text-overflow: ellipsis;
@@ -53,7 +54,7 @@ export const getCommonColumns = ({
               ? onToggleShowNotes(omit(savedObjectId, itemIdToExpandedNotesRowMap))
               : onToggleShowNotes({
                   ...itemIdToExpandedNotesRowMap,
-                  [savedObjectId]: <NotePreviews notes={notes} />,
+                  [savedObjectId]: <NotePreviews notes={notes} timelineId={TimelineId.active} />,
                 })
           }
           aria-label={itemIdToExpandedNotesRowMap[savedObjectId] ? i18n.COLLAPSE : i18n.EXPAND}

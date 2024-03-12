@@ -31,6 +31,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useDeleteNote } from './hooks/use_delete_note';
+import { getTimelineNoteSelector } from '../../timeline/notes_tab_content/selectors';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -100,11 +101,13 @@ const DeleteNoteButton = React.memo<{
   noteId?: string | null;
   eventId?: string | null;
   confirmingNoteId?: string | null;
+  savedObjectId?: string | null;
   timelineId?: string;
-}>(({ noteId, eventId, confirmingNoteId, timelineId }) => {
+  eventIdToNoteIds?: Record<string, string[]>;
+}>(({ noteId, eventId, confirmingNoteId, timelineId, eventIdToNoteIds, savedObjectId }) => {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
-  const { mutate, isLoading } = useDeleteNote(noteId, eventId);
+  const { mutate, isLoading } = useDeleteNote(noteId, eventId, eventIdToNoteIds, savedObjectId);
 
   const handleOpenDeleteModal = useCallback(() => {
     setShowModal(true);
@@ -127,7 +130,7 @@ const DeleteNoteButton = React.memo<{
   }, [dispatch, timelineId]);
 
   const handleConfirmDelete = useCallback(() => {
-    mutate(noteId);
+    mutate(savedObjectId);
     setShowModal(false);
     dispatch(
       timelineActions.setConfirmingNoteId({
@@ -135,11 +138,11 @@ const DeleteNoteButton = React.memo<{
         id: timelineId ?? TimelineId.active,
       })
     );
-  }, [mutate, noteId, dispatch, timelineId]);
+  }, [mutate, savedObjectId, dispatch, timelineId]);
 
   const disableDelete = useMemo(() => {
-    return isLoading || noteId == null;
-  }, [isLoading, noteId]);
+    return isLoading || savedObjectId == null;
+  }, [isLoading, savedObjectId]);
   return (
     <>
       <EuiButtonIcon
@@ -164,8 +167,10 @@ const NoteActions = React.memo<{
   eventId: string | null;
   timelineId?: string;
   noteId?: string | null;
+  savedObjectId?: string | null;
   confirmingNoteId?: string | null;
-}>(({ eventId, timelineId, noteId, confirmingNoteId }) => {
+  eventIdToNoteIds?: Record<string, string[]>;
+}>(({ eventId, timelineId, noteId, confirmingNoteId, eventIdToNoteIds, savedObjectId }) => {
   return eventId && timelineId ? (
     <>
       <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
@@ -173,7 +178,9 @@ const NoteActions = React.memo<{
         noteId={noteId}
         eventId={eventId}
         confirmingNoteId={confirmingNoteId}
+        savedObjectId={savedObjectId}
         timelineId={timelineId}
+        eventIdToNoteIds={eventIdToNoteIds}
       />
     </>
   ) : (
@@ -181,7 +188,9 @@ const NoteActions = React.memo<{
       noteId={noteId}
       eventId={eventId}
       confirmingNoteId={confirmingNoteId}
+      savedObjectId={savedObjectId}
       timelineId={timelineId}
+      eventIdToNoteIds={eventIdToNoteIds}
     />
   );
 });
@@ -192,19 +201,22 @@ NoteActions.displayName = 'NoteActions';
  */
 
 interface NotePreviewsProps {
-  eventIdToNoteIds?: Record<string, string[]>;
   notes?: TimelineResultNote[] | null;
   timelineId?: string;
   showTimelineDescription?: boolean;
 }
 
 export const NotePreviews = React.memo<NotePreviewsProps>(
-  ({ eventIdToNoteIds, notes, timelineId, showTimelineDescription }) => {
+  ({ notes, timelineId, showTimelineDescription }) => {
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+    const getTimelineNotes = useMemo(() => getTimelineNoteSelector(), []);
     const timeline = useDeepEqualSelector((state) =>
-      timelineId ? getTimeline(state, timelineId) : null
+      getTimeline(state, timelineId ?? TimelineId.active)
     );
-
+    const timelineNotes = useDeepEqualSelector((state) =>
+      getTimelineNotes(state, timelineId ?? TimelineId.active)
+    );
+    const eventIdToNoteIds = timelineNotes?.eventIdToNoteIds;
     const descriptionList = useMemo(
       () =>
         showTimelineDescription && timelineId && timeline?.description
@@ -265,8 +277,10 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
               <NoteActions
                 eventId={eventId}
                 timelineId={timelineId}
-                noteId={note.savedObjectId}
+                noteId={note.noteId}
+                savedObjectId={note.savedObjectId}
                 confirmingNoteId={timeline?.confirmingNoteId}
+                eventIdToNoteIds={eventIdToNoteIds}
               />
             ),
             timelineAvatar: (

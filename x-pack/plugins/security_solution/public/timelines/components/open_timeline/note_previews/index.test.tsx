@@ -14,6 +14,7 @@ import React from 'react';
 import '../../../../common/mock/formatted_relative';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
+import { TestProviders } from '../../../../common/mock';
 import type { OpenTimelineResult, TimelineResultNote } from '../types';
 import { NotePreviews } from '.';
 import { useDeleteNote } from './hooks/use_delete_note';
@@ -261,32 +262,36 @@ describe('NotePreviews', () => {
     it('should delete note correctly', async () => {
       const timeline = {
         ...mockTimelineResults[0],
-        confirmingNoteId: 'test-id-1',
+        confirmingNoteId: 'noteId1',
       };
       (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
 
       render(
-        <QueryClientProvider client={queryClient}>
-          <NotePreviews
-            notes={[
-              {
-                note: 'first note',
-                savedObjectId: 'test-id-1',
-                updated: note2updated,
-                updatedBy: 'alice',
-              },
+        <TestProviders>
+          <QueryClientProvider client={queryClient}>
+            <NotePreviews
+              notes={[
+                {
+                  note: 'first note',
+                  noteId: 'noteId1',
+                  savedObjectId: 'test-id-1',
+                  updated: note2updated,
+                  updatedBy: 'alice',
+                },
 
-              {
-                note: 'second note',
-                savedObjectId: 'test-id-2',
-                updated: note2updated,
-                updatedBy: 'alice',
-              },
-            ]}
-            showTimelineDescription
-            timelineId="test-timeline-id"
-          />
-        </QueryClientProvider>
+                {
+                  note: 'second note',
+                  noteId: 'noteId2',
+                  savedObjectId: 'test-id-2',
+                  updated: note2updated,
+                  updatedBy: 'alice',
+                },
+              ]}
+              showTimelineDescription
+              timelineId="test-timeline-id"
+            />
+          </QueryClientProvider>
+        </TestProviders>
       );
 
       fireEvent.click(screen.queryAllByTestId('delete-note')[0]);

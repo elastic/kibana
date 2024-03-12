@@ -16,7 +16,9 @@ import * as i18n from '../translations';
 
 export function useDeleteNote(
   noteId: string | null | undefined,
-  eventId: string | null | undefined
+  eventId: string | null | undefined,
+  eventIdToNoteIds?: Record<string, string[]>,
+  savedObjectId?: string | null
 ) {
   const {
     services: { http },
@@ -32,14 +34,24 @@ export function useDeleteNote(
       });
     },
     onSuccess: () => {
-      if (noteId) {
+      const notes = eventIdToNoteIds?.[eventId ?? ''];
+      if (savedObjectId) {
         dispatch(
           appActions.deleteNote({
-            id: noteId,
+            id: savedObjectId,
           })
         );
       }
-      if (eventId) {
+      if (noteId && eventId) {
+        dispatch(
+          timelineActions.deleteNoteFromEvent({
+            id: TimelineId.active,
+            noteId,
+            eventId,
+          })
+        );
+      }
+      if (eventId && notes && notes.length === 1) {
         dispatch(
           timelineActions.unPinEvent({
             eventId,
