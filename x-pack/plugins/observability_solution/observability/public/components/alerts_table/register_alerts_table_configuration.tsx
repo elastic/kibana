@@ -10,6 +10,7 @@ import type { ConfigSchema } from '../../plugin';
 import { ObservabilityRuleTypeRegistry } from '../..';
 import { getAlertsPageTableConfiguration } from './alerts/get_alerts_page_table_configuration';
 import { getRuleDetailsTableConfiguration } from './rule_details/get_rule_details_table_configuration';
+import { getSloAlertsTableConfiguration } from './slo/get_slo_alerts_table_configuration';
 
 export const registerAlertsTableConfiguration = (
   alertTableConfigRegistry: AlertTableConfigRegistry,
@@ -29,4 +30,8 @@ export const registerAlertsTableConfiguration = (
     config
   );
   alertTableConfigRegistry.register(ruleDetailsAlertsTableConfig);
+
+  // SLO
+  const sloAlertsTableConfig = getSloAlertsTableConfiguration(observabilityRuleTypeRegistry);
+  alertTableConfigRegistry.register(sloAlertsTableConfig);
 };

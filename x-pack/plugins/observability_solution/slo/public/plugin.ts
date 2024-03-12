@@ -28,16 +28,6 @@ import { registerBurnRateRuleType } from './rules/register_burn_rate_rule_type';
 export class SloPlugin
   implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
 {
-  private lazyRegisterEmbeddableAlertsTableConfiguration() {
-    /**
-     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-     * See https://webpack.js.org/api/module-methods/#magic-comments
-     */
-    return import(
-      /* webpackChunkName: "lazy_register_observability_alerts_table_configuration" */
-      './components/alerts_table/register_embeddable_alerts_table_configuration'
-    );
-  }
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(private readonly initContext: PluginInitializerContext) {}
@@ -143,15 +133,6 @@ export class SloPlugin
   }
 
   public start(coreStart: CoreStart, pluginsStart: SloPublicPluginsStart) {
-    const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
-    this.lazyRegisterEmbeddableAlertsTableConfiguration().then(
-      ({ registerEmbeddableAlertsTableConfiguration }) => {
-        return registerEmbeddableAlertsTableConfiguration(
-          alertsTableConfigurationRegistry,
-          pluginsStart.observability.observabilityRuleTypeRegistry
-        );
-      }
-    );
     const kibanaVersion = this.initContext.env.packageInfo.version;
     const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 

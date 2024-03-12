@@ -8,12 +8,14 @@
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_DURATION } from '@kbn/rule-data-utils';
 import { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
-import { casesFeatureId, observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
-import { useGetAlertFlyoutComponents, getRenderCellValue } from '@kbn/observability-plugin/public';
+import {
+  casesFeatureId,
+  observabilityFeatureId,
+  SLO_ALERTS_TABLE_CONFIG_ID,
+} from '@kbn/observability-shared-plugin/public';
+import type { ObservabilityRuleTypeRegistry } from '../../..';
+import { useGetAlertFlyoutComponents, getRenderCellValue } from '../../..';
 import { columns } from './default_columns';
-
-import { SLO_ALERTS_TABLE_CONFIG_ID } from '../../../embeddable/slo/constants';
 
 export const getSloAlertsTableConfiguration = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry

@@ -25,7 +25,7 @@ export const columns: Array<
   {
     columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
-      'xpack.slo.sloAlertsEmbeddable.alertsTGrid.statusColumnDescription',
+      'xpack.observability.slo.sloAlertsEmbeddable.alertsTGrid.statusColumnDescription',
       {
         defaultMessage: 'Status',
       }
@@ -36,7 +36,7 @@ export const columns: Array<
   {
     columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
-      'xpack.slo.sloAlertsEmbeddable.alertsTGrid.durationColumnDescription',
+      'xpack.observability.slo.sloAlertsEmbeddable.alertsTGrid.durationColumnDescription',
       {
         defaultMessage: 'Duration',
       }
@@ -47,7 +47,7 @@ export const columns: Array<
   {
     columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
-      'xpack.slo.sloAlertsEmbeddable.alertsTGrid.sloColumnDescription',
+      'xpack.observability.slo.sloAlertsEmbeddable.alertsTGrid.sloColumnDescription',
       {
         defaultMessage: 'Rule name',
       }
@@ -58,7 +58,7 @@ export const columns: Array<
   {
     columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
-      'xpack.slo.sloAlertsEmbeddable.alertsTGrid.reasonColumnDescription',
+      'xpack.observability.slo.sloAlertsEmbeddable.alertsTGrid.reasonColumnDescription',
       {
         defaultMessage: 'Reason',
       }

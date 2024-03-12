@@ -8,7 +8,7 @@
     "public/**/*",
     "server/**/*",
     "../../../typings/**/*"
-  ],
+, "../observability/public/components/alerts_table/slo"  ],
   "exclude": [
     "target/**/*"
   ],
