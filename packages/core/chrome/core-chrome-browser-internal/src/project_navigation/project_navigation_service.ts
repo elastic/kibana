@@ -216,8 +216,8 @@ export class ProjectNavigationService {
   }
 
   /**
-   * Initialize a "serverless style" navigation. The serverless style navigation
-   * is going to land in "stateful" Kibana under "solution navigations".
+   * Initialize a "serverless style" navigation. For stateful deployments (not serverless), this
+   * handler initialize one of the solution navigations registered.
    *
    * @param navTreeDefinition$ The navigation tree definition
    * @param location Optional location to use to detect the active node in the new navigation tree
@@ -251,7 +251,7 @@ export class ProjectNavigationService {
           this.navigationTreeUi$.next(navigationTreeUI);
 
           this.projectNavigationNavTreeFlattened = flattenNav(navigationTree);
-          this.updateActiveProjectNavigationNodes(location, true);
+          this.updateActiveProjectNavigationNodes(location);
         },
         error: (err) => {
           this.logger?.error(err);
@@ -285,7 +285,13 @@ export class ProjectNavigationService {
     return findActiveNodes(currentPathname, flattendTree, location, this.http?.basePath.prepend);
   }
 
-  private updateActiveProjectNavigationNodes(location?: Location, forceUpdate = false) {
+  /**
+   * Find the active nodes in the navigation tree based on the current location (or a location passed in params)
+   * and update the activeNodes$ Observable.
+   *
+   * @param location Optional location to use to detect the active node in the new navigation tree, if not set the current location is used
+   */
+  private updateActiveProjectNavigationNodes(location?: Location) {
     const activeNodes = this.findActiveNodes({ location });
     // Each time we call findActiveNodes() we create a new array of activeNodes. As this array is used
     // in React in useCallback() and useMemo() dependencies arrays it triggers an infinite navigation
