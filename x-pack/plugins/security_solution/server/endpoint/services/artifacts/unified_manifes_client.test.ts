@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UnifiedManifestClient } from './unified_manifest_client';
+import { UNIFIED_MANIFEST_ALL_NAMESPACES, UnifiedManifestClient } from './unified_manifest_client';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { ManifestConstants } from '../../lib/artifacts';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -57,7 +57,8 @@ describe('unified_manifest_client', () => {
     test('can create unified manifest', async () => {
       await unifiedManifestClient.createUnifiedManifest(mockUnifiedManifestAttributes());
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-        expect.arrayContaining([mockSoClientCallParams()])
+        expect.arrayContaining([mockSoClientCallParams()]),
+        { initialNamespaces: [UNIFIED_MANIFEST_ALL_NAMESPACES] }
       );
     });
     test('can create unified manifests', async () => {
@@ -66,7 +67,8 @@ describe('unified_manifest_client', () => {
         mockUnifiedManifestAttributes(),
       ]);
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-        expect.arrayContaining([mockSoClientCallParams(), mockSoClientCallParams()])
+        expect.arrayContaining([mockSoClientCallParams(), mockSoClientCallParams()]),
+        { initialNamespaces: [UNIFIED_MANIFEST_ALL_NAMESPACES] }
       );
     });
   });
@@ -74,7 +76,8 @@ describe('unified_manifest_client', () => {
     test('can get unified manifest by id', async () => {
       await unifiedManifestClient.getUnifiedManifestById('123');
       expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
-        expect.arrayContaining([mockSoClientCallParams({ id: '123' }, false)])
+        expect.arrayContaining([mockSoClientCallParams({ id: '123' }, false)]),
+        { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
       );
     });
 
@@ -84,7 +87,8 @@ describe('unified_manifest_client', () => {
         expect.arrayContaining([
           mockSoClientCallParams({ id: '123' }, false),
           mockSoClientCallParams({ id: '456' }, false),
-        ])
+        ]),
+        { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
       );
     });
 
@@ -94,6 +98,7 @@ describe('unified_manifest_client', () => {
         search: '123',
         type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
         searchFields: ['policyId'],
+        namespaces: [UNIFIED_MANIFEST_ALL_NAMESPACES],
       });
     });
 
@@ -138,7 +143,8 @@ describe('unified_manifest_client', () => {
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         expect.arrayContaining([
           mockSoClientCallParams({ id: '1234', version: 'abcd' }, true, false),
-        ])
+        ]),
+        { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
       );
     });
     test('can update unified manifests', async () => {
@@ -150,7 +156,8 @@ describe('unified_manifest_client', () => {
         expect.arrayContaining([
           mockSoClientCallParams({ id: '1234', version: 'abcd' }, true, false),
           mockSoClientCallParams({ id: '1234', version: 'abcd' }, true, false),
-        ])
+        ]),
+        { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
       );
     });
   });
@@ -158,7 +165,8 @@ describe('unified_manifest_client', () => {
     test('can delete unified manifest', async () => {
       await unifiedManifestClient.deleteUnifiedManifestById('123');
       expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith(
-        expect.arrayContaining([{ id: '123', type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE }])
+        expect.arrayContaining([{ id: '123', type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE }]),
+        { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
       );
     });
     test('can delete unified manifests', async () => {
@@ -167,7 +175,8 @@ describe('unified_manifest_client', () => {
         expect.arrayContaining([
           mockSoClientCallParams({ id: '123' }, false),
           mockSoClientCallParams({ id: '456' }, false),
-        ])
+        ]),
+        { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
       );
     });
   });

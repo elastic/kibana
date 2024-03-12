@@ -30,6 +30,8 @@ interface FetchAllUnifiedManifestsOptions {
   fields?: string[];
 }
 
+export const UNIFIED_MANIFEST_ALL_NAMESPACES = '*';
+
 export class UnifiedManifestClient {
   private savedObjectsClient: SavedObjectsClientContract;
 
@@ -57,7 +59,8 @@ export class UnifiedManifestClient {
           ...attributes,
           created: Date.now(),
         },
-      }))
+      })),
+      { initialNamespaces: [UNIFIED_MANIFEST_ALL_NAMESPACES] }
     );
   }
 
@@ -72,6 +75,7 @@ export class UnifiedManifestClient {
       type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
       search: policyId,
       searchFields: ['policyId'],
+      namespaces: [UNIFIED_MANIFEST_ALL_NAMESPACES],
     });
   }
 
@@ -85,7 +89,8 @@ export class UnifiedManifestClient {
     manifestIds: string[]
   ): Promise<SavedObjectsBulkResponse<InternalUnifiedManifestSchema>> {
     return this.savedObjectsClient.bulkGet(
-      manifestIds.map((id) => ({ id, type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE }))
+      manifestIds.map((id) => ({ id, type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE })),
+      { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
     );
   }
 
@@ -129,7 +134,8 @@ export class UnifiedManifestClient {
           attributes,
           ...(version ? { version } : {}),
         };
-      })
+      }),
+      { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
     );
   }
 
@@ -145,7 +151,8 @@ export class UnifiedManifestClient {
     manifestIds: string[]
   ): Promise<SavedObjectsBulkDeleteResponse> {
     return this.savedObjectsClient.bulkDelete(
-      manifestIds.map((id) => ({ id, type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE }))
+      manifestIds.map((id) => ({ id, type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE })),
+      { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
     );
   }
 
@@ -180,6 +187,7 @@ export class UnifiedManifestClient {
         sortOrder,
         sortField,
         fields,
+        namespaces: [UNIFIED_MANIFEST_ALL_NAMESPACES],
       },
       resultsMapper(results) {
         return results.saved_objects.map(mapUnifiedManifestSavedObjectToUnifiedManifest);

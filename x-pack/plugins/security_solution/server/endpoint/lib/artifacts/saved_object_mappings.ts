@@ -59,6 +59,6 @@ export const unifiedManifestType: SavedObjectsType = {
   name: unifiedManifestSavedObjectType,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
-  namespaceType: 'agnostic',
+  namespaceType: 'multiple',
   mappings: unifiedManifestSavedObjectMappings,
 };

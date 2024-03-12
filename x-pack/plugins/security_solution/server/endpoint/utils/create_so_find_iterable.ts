@@ -28,6 +28,7 @@ export interface CreateSoFindIterableOptions<TDocument = unknown> {
   resultsMapper?: (data: SavedObjectsFindResponse<TDocument>) => any;
   /** If a Point in Time should be used while executing the search. Defaults to `true` */
   usePointInTime?: boolean;
+  namespaces?: string[];
 }
 
 export type InferSoFindIteratorResultValue<TDocument = unknown> =
@@ -47,6 +48,7 @@ export const createSoFindIterable = <TDocument = unknown>({
   findRequest: { perPage = 1000, ...findOptions },
   resultsMapper,
   usePointInTime = true,
+  namespaces = ['*'],
 }: CreateSoFindIterableOptions<TDocument>): AsyncIterable<
   InferSoFindIteratorResultValue<TDocument>
 > => {
@@ -88,6 +90,7 @@ export const createSoFindIterable = <TDocument = unknown>({
           : {}),
         perPage,
         searchAfter: searchAfterValue,
+        namespaces,
       })
       .catch((e) => {
         Error.captureStackTrace(e);
