@@ -5332,6 +5332,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-ai-assistant-app-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant_app":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-ai-assistant-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant":
   version "0.0.0"
   uid ""

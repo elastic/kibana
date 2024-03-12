@@ -148,11 +148,11 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
       ) : null}
       {isDashboardAttachmentReady ? (
         <SavedObjectSaveModalDashboard
-          objectType={i18n.translate('xpack.slo.item.actions.attachToDashboard.objectTypeLabel', {
+          objectType={i18n.translate('xpack.slo.item.actions.addToDashboard.objectTypeLabel', {
             defaultMessage: 'SLO Overview',
           })}
           documentInfo={{
-            title: i18n.translate('xpack.slo.item.actions.attachToDashboard.attachmentTitle', {
+            title: i18n.translate('xpack.slo.item.actions.addToDashboard.attachmentTitle', {
               defaultMessage: 'SLO Overview',
             }),
           }}
