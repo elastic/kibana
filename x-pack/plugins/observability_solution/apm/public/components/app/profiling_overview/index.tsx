@@ -27,11 +27,12 @@ import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferre
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { push } from '../../shared/links/url_helpers';
+import { ProfilingFlamegraph } from '../../shared/profiling/flamegraph';
+import { ProfilingTopNFunctions } from '../../shared/profiling/top_functions';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { ProfilingHostsCallout } from './profiling_hosts_callout';
 import { ProfilingHostsFlamegraph } from './profiling_hosts_flamegraph';
 import { ProfilingHostsTopNFunctions } from './profiling_hosts_top_functions';
-import { ProfilingServiceFlamegraph } from './profiling_service_flamegraph';
-import { ProfilingServiceTopNFunctions } from './profiling_service_top_functions';
 
 export function ProfilingOverview() {
   const history = useHistory();
@@ -49,7 +50,7 @@ export function ProfilingOverview() {
     numBuckets: 20,
   });
 
-  const { agentName } = useApmServiceContext();
+  const { agentName, transactionType } = useApmServiceContext();
   const isJavaAgent = getIsJavaAgentName(agentName);
 
   const tabs = useMemo((): EuiTabbedContentProps['tabs'] => {
@@ -63,13 +64,13 @@ export function ProfilingOverview() {
           <>
             <EuiSpacer />
             {isJavaAgent ? (
-              <ProfilingServiceFlamegraph
+              <ProfilingFlamegraph
                 serviceName={serviceName}
-                start={start}
-                end={end}
                 kuery={kuery}
                 rangeFrom={rangeFrom}
                 rangeTo={rangeTo}
+                environment={environment}
+                transactionType={transactionType}
               />
             ) : (
               <ProfilingHostsFlamegraph
@@ -95,15 +96,13 @@ export function ProfilingOverview() {
           <>
             <EuiSpacer />
             {isJavaAgent ? (
-              <ProfilingServiceTopNFunctions
+              <ProfilingTopNFunctions
                 serviceName={serviceName}
-                start={start}
-                end={end}
-                startIndex={0}
-                endIndex={10}
                 kuery={kuery}
                 rangeFrom={rangeFrom}
                 rangeTo={rangeTo}
+                environment={environment}
+                transactionType={transactionType}
               />
             ) : (
               <ProfilingHostsTopNFunctions
@@ -133,6 +132,7 @@ export function ProfilingOverview() {
     rangeTo,
     serviceName,
     start,
+    transactionType,
   ]);
 
   if (isLoading) {
@@ -154,27 +154,29 @@ export function ProfilingOverview() {
 
   return (
     <>
-      {!isJavaAgent ? (
+      {isJavaAgent ? (
+        <SearchBar showTransactionTypeSelector />
+      ) : (
         <>
           <ProfilingHostsCallout serviceName={serviceName} />
           <EuiSpacer />
+          <EmbeddableProfilingSearchBar
+            kuery={kuery}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            onQuerySubmit={(next) => {
+              push(history, {
+                query: {
+                  kuery: next.query,
+                  rangeFrom: next.dateRange.from,
+                  rangeTo: next.dateRange.to,
+                },
+              });
+            }}
+            onRefresh={refreshTimeRange}
+          />
         </>
-      ) : null}
-      <EmbeddableProfilingSearchBar
-        kuery={kuery}
-        rangeFrom={rangeFrom}
-        rangeTo={rangeTo}
-        onQuerySubmit={(next) => {
-          push(history, {
-            query: {
-              kuery: next.query,
-              rangeFrom: next.dateRange.from,
-              rangeTo: next.dateRange.to,
-            },
-          });
-        }}
-        onRefresh={refreshTimeRange}
-      />
+      )}
       <EuiSpacer />
       <EuiTabbedContent
         tabs={tabs}

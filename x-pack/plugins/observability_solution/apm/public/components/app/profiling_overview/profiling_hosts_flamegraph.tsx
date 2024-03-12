@@ -15,7 +15,7 @@ import {
   toKueryFilterFormat,
 } from '../../../../common/utils/kuery_utils';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { ProfilingFlamegraphChart } from '../../shared/profiling/flamegraph';
+import { FlamegraphChart } from '../../shared/charts/flamegraph';
 import { ProfilingFlamegraphLink } from '../../shared/profiling/flamegraph/flamegraph_link';
 import { HostnamesFilterWarning } from './host_names_filter_warning';
 
@@ -87,7 +87,7 @@ export function ProfilingHostsFlamegraph({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <ProfilingFlamegraphChart data={data?.flamegraph} status={status} />
+      <FlamegraphChart data={data?.flamegraph} status={status} />
     </>
   );
 }

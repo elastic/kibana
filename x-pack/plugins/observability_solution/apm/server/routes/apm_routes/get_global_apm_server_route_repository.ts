@@ -33,7 +33,6 @@ import { mobileRouteRepository } from '../mobile/route';
 import { observabilityOverviewRouteRepository } from '../observability_overview/route';
 import { profilingHostsRouteRepository } from '../profiling/hosts/route';
 import { profilingRouteRepository } from '../profiling/route';
-import { profilingTransactionsRouteRepository } from '../profiling/transactions/route';
 import { serviceRouteRepository } from '../services/route';
 import { serviceGroupRouteRepository } from '../service_groups/route';
 import { serviceMapRouteRepository } from '../service_map/route';
@@ -88,7 +87,6 @@ function getTypedGlobalApmServerRouteRepository() {
     ...diagnosticsRepository,
     ...assistantRouteRepository,
     ...profilingRouteRepository,
-    ...profilingTransactionsRouteRepository,
     ...profilingHostsRouteRepository,
     ...serviceDashboardsRouteRepository,
   };
