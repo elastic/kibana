@@ -84,7 +84,7 @@ export const ResultsView: FC<Props> = ({
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
-      <div className="results">
+      <div>
         <EuiPanel data-test-subj="dataVisualizerFileFileContentPanel" hasShadow={false} hasBorder>
           <FileContents
             data={data}
