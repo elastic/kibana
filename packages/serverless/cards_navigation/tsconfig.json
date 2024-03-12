@@ -14,5 +14,6 @@
   ],
   "kbn_references": [
     "@kbn/management-cards-navigation",
+    "@kbn/i18n",
   ]
 }
