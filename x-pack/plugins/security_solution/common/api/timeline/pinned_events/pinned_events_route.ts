@@ -51,9 +51,6 @@ export const PinnedEventRuntimeType = runtimeTypes.intersection([
     version: runtimeTypes.string,
   }),
   BarePinnedEventType,
-  runtimeTypes.partial({
-    timelineVersion: unionWithNullType(runtimeTypes.string),
-  }),
 ]);
 
 export interface PinnedEvent extends runtimeTypes.TypeOf<typeof PinnedEventRuntimeType> {}

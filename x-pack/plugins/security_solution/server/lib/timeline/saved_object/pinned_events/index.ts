@@ -96,8 +96,7 @@ export const persistPinnedEventOnTimeline = async (
     return await createPinnedEvent({
       request,
       eventId,
-      timelineId: validatedTimelineId,
-      timelineVersion,
+      timelineId,
     });
   } catch (err) {
     if (getOr(null, 'output.statusCode', err) === 404) {
@@ -114,7 +113,6 @@ export const persistPinnedEventOnTimeline = async (
             message: err.message,
             pinnedEventId: eventId,
             timelineId: '',
-            timelineVersion: '',
             version: '',
             eventId: '',
           }
@@ -139,12 +137,10 @@ const createPinnedEvent = async ({
   request,
   eventId,
   timelineId,
-  timelineVersion,
 }: {
   request: FrameworkRequest;
   eventId: string;
   timelineId: string;
-  timelineVersion?: string;
 }): Promise<PinnedEventResponse> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
@@ -180,7 +176,7 @@ const createPinnedEvent = async ({
 
   // create Pinned Event on Timeline
   return {
-    ...convertSavedObjectToSavedPinnedEvent(repopulatedSavedObject, timelineVersion),
+    ...convertSavedObjectToSavedPinnedEvent(repopulatedSavedObject),
     code: 200,
   };
 };
@@ -218,17 +214,13 @@ export const savePinnedEvents = (
     )
   );
 
-export const convertSavedObjectToSavedPinnedEvent = (
-  savedObject: unknown,
-  timelineVersion?: string | undefined | null
-): PinnedEvent =>
+export const convertSavedObjectToSavedPinnedEvent = (savedObject: unknown): PinnedEvent =>
   pipe(
     SavedObjectPinnedEventRuntimeType.decode(savedObject),
     map((savedPinnedEvent) => {
       return {
         pinnedEventId: savedPinnedEvent.id,
         version: savedPinnedEvent.version,
-        timelineVersion,
         timelineId: savedPinnedEvent.attributes.timelineId,
         created: savedPinnedEvent.attributes.created,
         createdBy: savedPinnedEvent.attributes.createdBy,
