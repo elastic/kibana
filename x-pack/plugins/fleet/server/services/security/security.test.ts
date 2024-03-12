@@ -578,6 +578,9 @@ describe('getAuthzFromRequest', () => {
     jest.mocked(appContextService.getSecurityLicense).mockReturnValue({
       isEnabled: () => true,
     } as any);
+    jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
+      subfeaturePrivileges: true,
+    } as any);
   });
   it('should not authorize access if RBAC is not enabled', async () => {
     mockSecurity.authz.mode.useRbacForRequest.mockReturnValue(false);
@@ -845,13 +848,13 @@ describe('getAuthzFromRequest', () => {
       expect(res.fleet.readSettings).toBe(true);
     });
 
-    it('should authorize Fleet:Agents:All', async () => {
+    it('should authorize Fleet:Settings:All', async () => {
       checkPrivileges.mockResolvedValue({
         privileges: {
           kibana: [
             {
               resource: 'default',
-              privilege: 'api:fleet-agents-all',
+              privilege: 'api:fleet-settings-all',
               authorized: true,
             },
           ],
@@ -861,7 +864,7 @@ describe('getAuthzFromRequest', () => {
         username: 'test',
       });
       const res = await getAuthzFromRequest({} as any);
-      expect(res.fleet.readAgents).toBe(true);
+      expect(res.fleet.readSettings).toBe(true);
     });
 
     it('without kibana privilege it should not authorize Fleet Read', async () => {

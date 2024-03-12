@@ -78,6 +78,8 @@ const FLEET_SUBFEATURES = ['agents', 'agent-policies', 'settings'];
 
 export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuthz> {
   const security = appContextService.getSecurity();
+  const isSubfeatureEnabled =
+    appContextService.getExperimentalFeatures()?.subfeaturePrivileges ?? false;
 
   if (security.authz.mode.useRbacForRequest(req)) {
     const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(req);
@@ -178,7 +180,7 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
           all: intAllAuth,
           read: intReadAuth,
         },
-        isSuperuser: checkSuperuser(req),
+        subfeatureEnabled: isSubfeatureEnabled,
       }),
       packagePrivileges: calculatePackagePrivilegesFromKibanaPrivileges(privileges.kibana),
       endpointExceptionsPrivileges: calculateEndpointExceptionsPrivilegesFromKibanaPrivileges(
@@ -193,7 +195,7 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
       all: false,
       read: false,
     },
-    isSuperuser: false,
+    subfeatureEnabled: isSubfeatureEnabled,
   });
 }
 
