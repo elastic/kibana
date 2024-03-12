@@ -67,13 +67,13 @@ export const EmbeddablePanel = (props: EmbeddablePanelProps) => {
   // can not use useMountedState
   // 1. useMountedState defaults mountedRef to false and sets mountedRef to true in useEffect
   // 2. embeddable can be an object or a function that returns a promise
-  // 3. when embeddable is an object, Promise.resolve(embeddable) returns before 
+  // 3. when embeddable is an object, Promise.resolve(embeddable) returns before
   //    useMountedState useEffect is called and thus isMounted() returns false when component has not been unmounted
   const mountedRef = useRef<boolean>(true);
   useEffect(() => {
     return () => {
       mountedRef.current = false;
-    }
+    };
   }, []);
   const isMounted = () => {
     return mountedRef.current;
