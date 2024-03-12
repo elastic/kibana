@@ -113,7 +113,6 @@ const createNote = async ({
   const userInfo = request.user;
 
   const shallowCopyOfNote = { ...note };
-  let timelineVersion: string | undefined;
 
   if (note.timelineId == null) {
     const { timeline: timelineResult } = await createTimeline({
@@ -124,7 +123,6 @@ const createNote = async ({
     });
 
     shallowCopyOfNote.timelineId = timelineResult.savedObjectId;
-    timelineVersion = timelineResult.version;
   }
 
   const noteWithCreator = overrideOwner
