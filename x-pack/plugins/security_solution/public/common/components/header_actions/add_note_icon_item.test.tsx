@@ -22,8 +22,8 @@ describe('AddEventNoteAction', () => {
     jest.clearAllMocks();
   });
 
-  describe('isDisabled', () => {
-    test('it disables the add note button when the user does NOT have crud privileges', () => {
+  describe('timeline is saved', () => {
+    it('should disable the add note button when the user does NOT have crud privileges', () => {
       useUserPrivilegesMock.mockReturnValue({
         kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
         endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
@@ -35,14 +35,15 @@ describe('AddEventNoteAction', () => {
             showNotes={false}
             timelineType={TimelineType.default}
             toggleShowNotes={jest.fn}
+            isTimelineSaved={true}
           />
         </TestProviders>
       );
 
-      expect(screen.getByTestId('timeline-notes-button-small')).toHaveProperty('disabled', true);
+      expect(screen.getByTestId('timeline-notes-button-small')).toBeDisabled();
     });
 
-    test('it enables the add note button when the user has crud privileges', () => {
+    it('should enable the add note button when the user has crud privileges', () => {
       useUserPrivilegesMock.mockReturnValue({
         kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
         endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
@@ -54,11 +55,76 @@ describe('AddEventNoteAction', () => {
             showNotes={false}
             timelineType={TimelineType.default}
             toggleShowNotes={jest.fn}
+            isTimelineSaved={true}
           />
         </TestProviders>
       );
 
       expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+    });
+  });
+
+  describe('timeline is not saved', () => {
+    it('should disable the add note button when the user does NOT have crud privileges', () => {
+      useUserPrivilegesMock.mockReturnValue({
+        kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+      });
+
+      render(
+        <TestProviders>
+          <AddEventNoteAction
+            showNotes={false}
+            timelineType={TimelineType.default}
+            toggleShowNotes={jest.fn}
+            isTimelineSaved={false}
+          />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('timeline-notes-button-small')).toBeDisabled();
+    });
+
+    it('should disable the add note button when the user has crud privileges', () => {
+      useUserPrivilegesMock.mockReturnValue({
+        kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+      });
+
+      render(
+        <TestProviders>
+          <AddEventNoteAction
+            showNotes={false}
+            timelineType={TimelineType.default}
+            toggleShowNotes={jest.fn}
+            isTimelineSaved={false}
+          />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('timeline-notes-button-small')).toBeDisabled();
+    });
+  });
+
+  describe('it is a timeline template', () => {
+    it('should disable the add note button when the user does have crud privileges and the timeline is saved', () => {
+      useUserPrivilegesMock.mockReturnValue({
+        kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+      });
+
+      render(
+        <TestProviders>
+          <AddEventNoteAction
+            showNotes={false}
+            timelineType={TimelineType.template}
+            toggleShowNotes={jest.fn}
+            isTimelineSaved={true}
+          />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('timeline-notes-button-small')).toBeDisabled();
     });
   });
 });

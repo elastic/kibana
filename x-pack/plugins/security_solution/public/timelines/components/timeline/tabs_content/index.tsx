@@ -99,6 +99,7 @@ interface BasicTimelineTab {
   graphEventId?: string;
   sessionViewConfig?: SessionViewConfig | null;
   timelineDescription: string;
+  isTimelineSaved: boolean;
 }
 
 const AssistantTab: React.FC<{
@@ -290,6 +291,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   graphEventId,
   sessionViewConfig,
   timelineDescription,
+  isTimelineSaved,
 }) => {
   const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
   const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
@@ -392,6 +394,8 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     }
   }, [activeTab, graphEventId, setQueryAsActiveTab]);
 
+  const isTimelineTemplate = timelineType === TimelineType.template;
+
   return (
     <>
       {!timelineFullScreen && (
@@ -428,7 +432,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               />
             </StyledEuiTab>
           )}
-          {timelineType === TimelineType.default && (
+          {!isTimelineTemplate && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.eql}`}
               onClick={setEqlAsActiveTab}
@@ -464,11 +468,11 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
             onClick={setNotesAsActiveTab}
             isSelected={activeTab === TimelineTabs.notes}
-            disabled={timelineType === TimelineType.template}
+            disabled={isTimelineTemplate || !isTimelineSaved}
             key={TimelineTabs.notes}
           >
             <span>{i18n.NOTES_TAB}</span>
-            {showTimeline && numberOfNotes > 0 && timelineType === TimelineType.default && (
+            {showTimeline && numberOfNotes > 0 && !isTimelineTemplate && (
               <div>
                 <CountBadge>{numberOfNotes}</CountBadge>
               </div>
@@ -477,12 +481,12 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
             onClick={setPinnedAsActiveTab}
-            disabled={timelineType === TimelineType.template}
+            disabled={isTimelineTemplate || !isTimelineSaved}
             isSelected={activeTab === TimelineTabs.pinned}
             key={TimelineTabs.pinned}
           >
             <span>{i18n.PINNED_TAB}</span>
-            {showTimeline && numberOfPinnedEvents > 0 && timelineType === TimelineType.default && (
+            {showTimeline && numberOfPinnedEvents > 0 && !isTimelineTemplate && (
               <div>
                 <CountBadge>{numberOfPinnedEvents}</CountBadge>
               </div>
@@ -492,7 +496,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.securityAssistant}`}
               onClick={setSecurityAssistantAsActiveTab}
-              disabled={timelineType === TimelineType.template}
+              disabled={isTimelineTemplate}
               isSelected={activeTab === TimelineTabs.securityAssistant}
               key={TimelineTabs.securityAssistant}
             >
@@ -511,6 +515,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
         timelineDescription={timelineDescription}
         setConversationId={setConversationId}
         showTimeline={showTimeline}
+        isTimelineSaved={isTimelineSaved}
       />
     </>
   );

@@ -22,8 +22,8 @@ describe('PinEventAction', () => {
     jest.clearAllMocks();
   });
 
-  describe('isDisabled', () => {
-    test('it disables the pin event button when the user does NOT have crud privileges', () => {
+  describe('timeline is saved', () => {
+    it('should disable the pin event button when the user does NOT have crud privileges', () => {
       useUserPrivilegesMock.mockReturnValue({
         kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
         endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
@@ -37,14 +37,15 @@ describe('PinEventAction', () => {
             onPinClicked={jest.fn}
             eventIsPinned={false}
             timelineType={TimelineType.default}
+            isTimelineSaved={true}
           />
         </TestProviders>
       );
 
-      expect(screen.getByTestId('pin')).toHaveProperty('disabled', true);
+      expect(screen.getByTestId('pin')).toBeDisabled();
     });
 
-    test('it enables the pin event button when the user has crud privileges', () => {
+    it('should enable the pin event button when the user has crud privileges', () => {
       useUserPrivilegesMock.mockReturnValue({
         kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
         endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
@@ -58,11 +59,60 @@ describe('PinEventAction', () => {
             onPinClicked={jest.fn}
             eventIsPinned={false}
             timelineType={TimelineType.default}
+            isTimelineSaved={true}
           />
         </TestProviders>
       );
 
-      expect(screen.getByTestId('pin')).not.toHaveClass('euiButtonIcon-isDisabled');
+      expect(screen.getByTestId('pin')).not.toBeDisabled();
+    });
+  });
+
+  describe('timeline is not saved', () => {
+    it('should disable the pin event button when the user has crud privileges', () => {
+      useUserPrivilegesMock.mockReturnValue({
+        kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+      });
+
+      render(
+        <TestProviders>
+          <PinEventAction
+            isAlert={false}
+            noteIds={[]}
+            onPinClicked={jest.fn}
+            eventIsPinned={false}
+            timelineType={TimelineType.default}
+            isTimelineSaved={false}
+          />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('pin')).toBeDisabled();
+    });
+  });
+
+  describe('is timeline template', () => {
+    it('should disable the pin event button when the user has crud privileges and the timeline is saved', () => {
+      useUserPrivilegesMock.mockReturnValue({
+        kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+      });
+
+      render(
+        <TestProviders>
+          <PinEventAction
+            isAlert={false}
+            noteIds={[]}
+            onPinClicked={jest.fn}
+            eventIsPinned={false}
+            timelineType={TimelineType.template}
+            isTimelineSaved={true}
+          />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('pin')).toBeDisabled();
     });
   });
 });

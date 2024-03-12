@@ -70,10 +70,10 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const timelineType = useShallowEqualSelector(
-    (state) =>
-      (isTimelineScope(timelineId) ? getTimeline(state, timelineId) : timelineDefaults).timelineType
+  const { timelineType, savedObjectId } = useShallowEqualSelector((state) =>
+    isTimelineScope(timelineId) ? getTimeline(state, timelineId) : timelineDefaults
   );
+  const isTimelineSaved = savedObjectId !== null;
   const { startTransaction } = useStartTransaction();
 
   const isEnterprisePlus = useLicense().isEnterprise();
@@ -282,6 +282,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
               showNotes={showNotes ?? false}
               toggleShowNotes={toggleShowNotes}
               timelineType={timelineType}
+              isTimelineSaved={isTimelineSaved}
             />
             <PinEventAction
               ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}
@@ -291,6 +292,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
               noteIds={eventIdToNoteIds ? eventIdToNoteIds[eventId] || emptyNotes : emptyNotes}
               eventIsPinned={isEventPinned}
               timelineType={timelineType}
+              isTimelineSaved={isTimelineSaved}
             />
           </>
         )}

@@ -21,6 +21,13 @@ export const NOTES_DISABLE_TOOLTIP = i18n.translate(
   }
 );
 
+export const NOTES_DISABLED_UNSAVED_TIMELINE = i18n.translate(
+  'xpack.securitySolution.timeline.body.notes.disabledNotesUnsavedTimeline',
+  {
+    defaultMessage: 'Notes may not be added to an unsaved timeline',
+  }
+);
+
 export const NOTES_TOOLTIP = i18n.translate(
   'xpack.securitySolution.timeline.body.notes.addNoteTooltip',
   {

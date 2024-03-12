@@ -16,6 +16,7 @@ interface AddEventNoteActionProps {
   ariaLabel?: string;
   showNotes: boolean;
   timelineType: TimelineType;
+  isTimelineSaved: boolean;
   toggleShowNotes: () => void;
 }
 
@@ -23,22 +24,32 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   ariaLabel,
   showNotes,
   timelineType,
+  isTimelineSaved,
   toggleShowNotes,
 }) => {
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+  const hasSecurityCrudPriviliges = kibanaSecuritySolutionsPrivileges.crud === true;
+  const isTimelineTemplate = timelineType === TimelineType.template;
+
+  const isDisabled = isTimelineTemplate || !isTimelineSaved || !hasSecurityCrudPriviliges;
+
+  let toolTipText = i18n.NOTES_TOOLTIP;
+  if (isTimelineTemplate) {
+    toolTipText = i18n.NOTES_DISABLE_TOOLTIP;
+  } else if (!isTimelineSaved) {
+    toolTipText = i18n.NOTES_DISABLED_UNSAVED_TIMELINE;
+  }
 
   return (
     <ActionIconItem>
       <NotesButton
         ariaLabel={ariaLabel}
         data-test-subj="add-note"
-        isDisabled={kibanaSecuritySolutionsPrivileges.crud === false}
+        isDisabled={isDisabled}
         showNotes={showNotes}
         timelineType={timelineType}
         toggleShowNotes={toggleShowNotes}
-        toolTip={
-          timelineType === TimelineType.template ? i18n.NOTES_DISABLE_TOOLTIP : i18n.NOTES_TOOLTIP
-        }
+        toolTip={toolTipText}
       />
     </ActionIconItem>
   );

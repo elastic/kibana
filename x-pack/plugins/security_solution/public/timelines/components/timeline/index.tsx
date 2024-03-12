@@ -117,8 +117,10 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const { timelineFullScreen } = useTimelineFullScreen();
 
+  const isTimelineSaved = savedObjectId !== null;
+
   useEffect(() => {
-    if (!savedObjectId && !initialized) {
+    if (!isTimelineSaved && !initialized) {
       dispatch(
         timelineActions.createTimeline({
           id: timelineId,
@@ -135,7 +137,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const onSourcererChange = useCallback(() => {
     if (
       // timeline not initialized, so this must be initial state and not user change
-      !savedObjectId ||
+      !isTimelineSaved ||
       selectedDataViewIdSourcerer == null ||
       // initial state will get set on create
       (selectedDataViewIdTimeline === null && selectedPatternsTimeline.length === 0) ||
@@ -154,7 +156,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     );
   }, [
     dispatch,
-    savedObjectId,
+    isTimelineSaved,
     selectedDataViewIdSourcerer,
     selectedDataViewIdTimeline,
     selectedPatternsSourcerer,
@@ -249,6 +251,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
             timelineType={timelineType}
             timelineDescription={description}
             timelineFullScreen={timelineFullScreen}
+            isTimelineSaved={isTimelineSaved}
           />
         </TimelineBody>
       </TimelineContainer>
