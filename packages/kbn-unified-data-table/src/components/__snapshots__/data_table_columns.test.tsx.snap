@@ -1463,8 +1463,161 @@ Array [
               Array [
                 "message",
               ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
             ],
             "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
               Object {
                 "type": "return",
                 "value": Object {
@@ -1515,7 +1668,7 @@ Array [
     "displayAsText": "extension",
     "id": "extension",
     "isSortable": false,
-    "schema": "kibana-json",
+    "schema": "numeric",
     "visibleCellActions": undefined,
   },
   Object {
@@ -1633,8 +1786,161 @@ Array [
               Array [
                 "message",
               ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
             ],
             "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
               Object {
                 "type": "return",
                 "value": Object {
@@ -1685,7 +1991,7 @@ Array [
     "displayAsText": "message",
     "id": "message",
     "isSortable": false,
-    "schema": "kibana-json",
+    "schema": "string",
     "visibleCellActions": undefined,
   },
 ]

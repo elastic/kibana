@@ -140,7 +140,7 @@ function buildEuiGridColumn({
       : [];
   }
 
-  const columnType = columnsMeta?.[columnName] ?? dataViewField?.type;
+  const columnType = columnsMeta?.[columnName]?.type ?? dataViewField?.type;
 
   const column: EuiDataGridColumn = {
     id: columnName,
