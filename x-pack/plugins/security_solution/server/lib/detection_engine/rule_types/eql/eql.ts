@@ -143,6 +143,7 @@ export const eqlExecutor = async ({
         alertTimestampOverride,
         alertWithSuppression,
       });
+      // TODO ask if we need to throw exception if the user uses the API with Suppression fields for Sequence queries?
     } else {
       const newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> =
         sequences !== undefined
