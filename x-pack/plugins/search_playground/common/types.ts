@@ -21,7 +21,7 @@ export interface QuerySourceFields {
 }
 
 export enum APIRoutes {
-  POST_API_KEY = '/internal/enterprise_search/ai_playground/api_key',
-  POST_CHAT_MESSAGE = '/internal/enterprise_search/ai_playground/chat',
-  POST_QUERY_SOURCE_FIELDS = '/internal/enterprise_search/ai_playground/query_source_fields',
+  POST_API_KEY = '/internal/search_playground/api_key',
+  POST_CHAT_MESSAGE = '/internal/search_playground/chat',
+  POST_QUERY_SOURCE_FIELDS = '/internal/search_playground/query_source_fields',
 }

@@ -12,12 +12,13 @@ import {
   AppMountParameters,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/public';
+import { PLUGIN_NAME } from '../common';
+import { renderEmbeddableApp } from './embedable';
 import {
+  AppPluginStartDependencies,
   SearchPlaygroundPluginSetup,
   SearchPlaygroundPluginStart,
-  AppPluginStartDependencies,
 } from './types';
-import { PLUGIN_NAME } from '../common';
 
 export class SearchPlaygroundPlugin
   implements Plugin<SearchPlaygroundPluginSetup, SearchPlaygroundPluginStart>
@@ -39,8 +40,10 @@ export class SearchPlaygroundPlugin
     return {};
   }
 
-  public start(core: CoreStart): SearchPlaygroundPluginStart {
-    return {};
+  public start(core: CoreStart, deps: AppPluginStartDependencies): SearchPlaygroundPluginStart {
+    return {
+      renderPlayground: () => renderEmbeddableApp(deps),
+    };
   }
 
   public stop() {}

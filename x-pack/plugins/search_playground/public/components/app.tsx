@@ -9,10 +9,8 @@ import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
-import { i18n } from '@kbn/i18n';
 import { Chat } from './chat';
 import { PlaygroundProvider } from '../providers/playground_provider';
-import { PLUGIN_ID } from '../../common';
 
 interface SearchPlaygroundAppDeps {
   navigation: NavigationPublicPluginStart;
@@ -21,32 +19,15 @@ interface SearchPlaygroundAppDeps {
 export const SearchPlaygroundApp = ({ navigation }: SearchPlaygroundAppDeps) => {
   return (
     <PlaygroundProvider navigateToIndexPage={() => {}}>
-      <navigation.ui.TopNavMenu appName={PLUGIN_ID} />
-
-      <KibanaPageTemplate
-        pageChrome={[
-          i18n.translate('searchPlayground.breadcrumb', {
-            defaultMessage: 'Playground',
-          }),
-        ]}
-        pageHeader={{
-          pageTitle: i18n.translate('searchPlayground.pageTitle', {
-            defaultMessage: 'Playground',
-          }),
-        }}
-        bottomBorder="extended"
+      <KibanaPageTemplate.Section
+        alignment="top"
         restrictWidth={false}
+        grow
+        contentProps={{ css: { display: 'flex', flexGrow: 1 } }}
+        paddingSize="none"
       >
-        <KibanaPageTemplate.Section
-          alignment="top"
-          restrictWidth={false}
-          grow
-          contentProps={{ css: { display: 'flex', flexGrow: 1 } }}
-          paddingSize="none"
-        >
-          <Chat />
-        </KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
+        <Chat />
+      </KibanaPageTemplate.Section>
     </PlaygroundProvider>
   );
 };

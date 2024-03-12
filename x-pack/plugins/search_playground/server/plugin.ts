@@ -29,7 +29,6 @@ export class SearchPlaygroundPlugin
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('searchPlayground: Started');
     return {};
   }
 

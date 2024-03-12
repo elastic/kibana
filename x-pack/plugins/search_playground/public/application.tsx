@@ -12,6 +12,9 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
+import { i18n } from '@kbn/i18n';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { PLUGIN_ID } from '../common';
 import { AppPluginStartDependencies } from './types';
 import { SearchPlaygroundApp } from './components/app';
 
@@ -20,12 +23,30 @@ export const renderApp = (
   services: AppPluginStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) => {
+  const navigation = services.navigation;
+
   ReactDOM.render(
     <KibanaThemeProvider theme={core.theme}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
           <Router basename={appBasePath}>
-            <SearchPlaygroundApp navigation={services.navigation} />
+            <navigation.ui.TopNavMenu appName={PLUGIN_ID} />
+            <KibanaPageTemplate
+              pageChrome={[
+                i18n.translate('searchPlayground.breadcrumb', {
+                  defaultMessage: 'Playground',
+                }),
+              ]}
+              pageHeader={{
+                pageTitle: i18n.translate('searchPlayground.pageTitle', {
+                  defaultMessage: 'Playground',
+                }),
+              }}
+              bottomBorder="extended"
+              restrictWidth={false}
+            >
+              <SearchPlaygroundApp navigation={services.navigation} />
+            </KibanaPageTemplate>
           </Router>
         </I18nProvider>
       </KibanaContextProvider>

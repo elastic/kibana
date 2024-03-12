@@ -7,12 +7,16 @@
 
 import React from 'react';
 
-import { EuiPageTemplate } from '@elastic/eui';
+import { useValues } from 'kea';
+
 import { i18n } from '@kbn/i18n';
 
+import { KibanaLogic } from '../../../shared/kibana';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 export const Playground: React.FC = () => {
+  const { searchPlayground } = useValues(KibanaLogic);
+
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
@@ -31,13 +35,7 @@ export const Playground: React.FC = () => {
       customPageSections
       bottomBorder="extended"
     >
-      <EuiPageTemplate.Section
-        alignment="top"
-        restrictWidth={false}
-        grow
-        contentProps={{ css: { display: 'flex', flexGrow: 1 } }}
-        paddingSize="none"
-      />
+      {!!searchPlayground && searchPlayground?.renderPlayground()}
     </EnterpriseSearchContentPageTemplate>
   );
 };

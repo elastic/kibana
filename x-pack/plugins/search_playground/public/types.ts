@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
-import { HttpStart } from '@kbn/core-http-browser';
 import {
   HealthStatus,
   IndexName,
@@ -15,13 +12,18 @@ import {
   QueryDslQueryContainer,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { HttpStart } from '@kbn/core-http-browser';
+import { ReactElement } from 'react';
 
 export * from '../common/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchPlaygroundPluginStart {}
+export interface SearchPlaygroundPluginStart {
+  renderPlayground: () => ReactElement | null;
+}
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
