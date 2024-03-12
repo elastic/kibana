@@ -43,7 +43,6 @@ export interface ColumnHeadersComponentProps {
   isSelectAllChecked: boolean;
   onSelectAll: OnSelectAll;
   show: boolean;
-  showEventsSelect: boolean;
   showSelectAllCheckbox: boolean;
   sort: Sort[];
   tabType: TimelineTabs;
@@ -92,7 +91,6 @@ export const ColumnHeadersComponent = ({
   isSelectAllChecked,
   onSelectAll,
   show,
-  showEventsSelect,
   showSelectAllCheckbox,
   sort,
   tabType,
@@ -217,7 +215,6 @@ export const ColumnHeadersComponent = ({
                 isEventViewer={isEventViewer}
                 isSelectAllChecked={isSelectAllChecked}
                 onSelectAll={onSelectAll}
-                showEventsSelect={showEventsSelect}
                 showSelectAllCheckbox={showSelectAllCheckbox}
                 sort={sort}
                 tabType={tabType}
@@ -239,7 +236,6 @@ export const ColumnHeadersComponent = ({
     isEventViewer,
     isSelectAllChecked,
     onSelectAll,
-    showEventsSelect,
     showSelectAllCheckbox,
     sort,
     tabType,
@@ -266,7 +262,6 @@ export const ColumnHeadersComponent = ({
                 isEventViewer={isEventViewer}
                 isSelectAllChecked={isSelectAllChecked}
                 onSelectAll={onSelectAll}
-                showEventsSelect={showEventsSelect}
                 showSelectAllCheckbox={showSelectAllCheckbox}
                 sort={sort}
                 tabType={tabType}
@@ -288,7 +283,6 @@ export const ColumnHeadersComponent = ({
     isEventViewer,
     isSelectAllChecked,
     onSelectAll,
-    showEventsSelect,
     showSelectAllCheckbox,
     sort,
     tabType,

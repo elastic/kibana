@@ -62,7 +62,6 @@ const defaultProps: HeaderActionProps = {
   columnHeaders: [],
   isSelectAllChecked: false,
   onSelectAll: jest.fn(),
-  showEventsSelect: false,
   showSelectAllCheckbox: false,
   sort: [],
   tabType: TimelineTabs.query,

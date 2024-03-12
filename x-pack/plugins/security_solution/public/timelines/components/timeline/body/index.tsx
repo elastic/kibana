@@ -232,7 +232,6 @@ export const StatefulBody = React.memo<Props>(
               isSelectAllChecked={isSelectAllChecked}
               onSelectAll={onSelectAll}
               show={show}
-              showEventsSelect={false}
               showSelectAllCheckbox={false}
               sort={sort}
               tabType={tabType}

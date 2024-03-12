@@ -88,7 +88,6 @@ export const transformControlColumns = ({
                 isEventViewer={false}
                 isSelectAllChecked={isSelectAllChecked}
                 onSelectAll={onSelectPage}
-                showEventsSelect={false}
                 showSelectAllCheckbox={showCheckboxes}
                 sort={sort}
                 tabType={tabType}

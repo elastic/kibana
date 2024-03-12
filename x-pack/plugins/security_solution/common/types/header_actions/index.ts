@@ -57,7 +57,6 @@ export interface HeaderActionProps {
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
   onSelectAll: ({ isSelected }: { isSelected: boolean }) => void;
-  showEventsSelect: boolean;
   showSelectAllCheckbox: boolean;
   sort: SortColumnTable[];
   tabType: string;

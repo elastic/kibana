@@ -77,7 +77,6 @@ describe('ColumnHeaders', () => {
     isSelectAllChecked: false,
     onSelectAll: jest.fn,
     show: true,
-    showEventsSelect: false,
     showSelectAllCheckbox: false,
     sort,
     tabType: TimelineTabs.query,

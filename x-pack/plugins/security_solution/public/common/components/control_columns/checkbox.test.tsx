@@ -59,7 +59,6 @@ describe('checkbox control column', () => {
       columnHeaders: [],
       isSelectAllChecked: true,
       onSelectAll: jest.fn(),
-      showEventsSelect: true,
       showSelectAllCheckbox: true,
       sort: [],
       tabType: TimelineTabs.query,

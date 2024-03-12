@@ -781,7 +781,6 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
   }
   onSelectAll={[Function]}
   show={true}
-  showEventsSelect={false}
   showSelectAllCheckbox={false}
   sort={
     Array [

@@ -24,7 +24,6 @@ import { DEFAULT_ACTION_BUTTON_WIDTH } from '.';
 import { EventsTh, EventsThContent } from '../../../timelines/components/timeline/styles';
 import { StatefulRowRenderersBrowser } from '../../../timelines/components/row_renderers_browser';
 import { EXIT_FULL_SCREEN } from '../exit_full_screen/translations';
-import { EventsSelect } from '../../../timelines/components/timeline/body/column_headers/events_select';
 import * as i18n from './translations';
 
 const SortingColumnsContainer = styled.div`
@@ -71,7 +70,6 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   isEventViewer = false,
   isSelectAllChecked,
   onSelectAll,
-  showEventsSelect,
   showSelectAllCheckbox,
   sort,
   tabType,
@@ -261,14 +259,6 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
             <EuiToolTip content={i18n.SORT_FIELDS}>
               <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
             </EuiToolTip>
-          </EventsThContent>
-        </EventsTh>
-      )}
-
-      {showEventsSelect && (
-        <EventsTh role="button">
-          <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            <EventsSelect checkState="unchecked" timelineId={timelineId} />
           </EventsThContent>
         </EventsTh>
       )}
