@@ -38,7 +38,7 @@ export const persistNoteRoute = (
         validate: {
           request: { body: buildRouteValidationWithExcess(persistNoteSchema) },
         },
-        version: '2023-10-31',
+        version: '2024-03-12',
       },
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
