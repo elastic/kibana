@@ -1221,7 +1221,7 @@ export class DataViewsService {
    */
 
   async updateSavedObject(
-    indexPattern: DataView,
+    indexPattern: AbstractDataView,
     saveAttempts: number = 0,
     ignoreErrors: boolean = false,
     displayErrors: boolean = true
@@ -1251,11 +1251,10 @@ export class DataViewsService {
       .then((response) => {
         indexPattern.id = response.id;
         indexPattern.version = response.version;
-        // return indexPattern;
       })
       .catch(async (err) => {
         if (err?.response?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
-          const samePattern = await this.get(indexPattern.id as string, displayErrors);
+          const samePattern = await this.getDataViewLazy(indexPattern.id!);
           // What keys changed from now and what the server returned
           const updatedBody = samePattern.getAsSavedObjectBody();
 

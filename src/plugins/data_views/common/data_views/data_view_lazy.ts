@@ -320,6 +320,22 @@ export class DataViewLazy extends AbstractDataView {
     return fld;
   }
 
+  /**
+   * Replaces all existing runtime fields with new fields.
+   * @param newFields Map of runtime field definitions by field name
+   */
+  // todo perhaps move to shared
+  replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
+    const oldRuntimeFieldNames = Object.keys(this.runtimeFieldMap);
+    oldRuntimeFieldNames.forEach((name) => {
+      this.removeRuntimeField(name);
+    });
+
+    Object.entries(newFields).forEach(([name, field]) => {
+      this.addRuntimeField(name, field);
+    });
+  }
+
   private getRuntimeFieldSpecMap = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) => {
     const spec: DataViewFieldSpecMap = {};
 
@@ -550,6 +566,19 @@ export class DataViewLazy extends AbstractDataView {
     return Object.values(fieldMap).some(
       (field) => field.timeSeriesDimension || field.timeSeriesMetric
     );
+  }
+
+  // todo perhaps move to shared
+  replaceAllScriptedFields(newFields: Record<string, FieldSpec>) {
+    const oldScriptedFieldNames = Object.keys(this.scriptedFields);
+
+    oldScriptedFieldNames.forEach((name) => {
+      this.removeScriptedField(name);
+    });
+
+    Object.entries(newFields).forEach(([name, field]) => {
+      this.upsertScriptedField(field);
+    });
   }
 
   removeScriptedField(fieldName: string) {
