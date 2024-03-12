@@ -58,6 +58,10 @@
   }
 }
 
+.unifiedFieldListItemButton__draggable {
+  background: $euiColorEmptyShade;
+}
+
 .unifiedFieldListItemButton__dragging {
   padding: 0 $euiSizeXS;
   border-radius: $euiBorderRadius;

@@ -335,6 +335,7 @@ function UnifiedFieldListItemComponent({
       button={
         <Draggable
           dragType="copy"
+          className="unifiedFieldListItemButton__draggable"
           dragClassName="unifiedFieldListItemButton__dragging"
           order={order}
           value={value}
