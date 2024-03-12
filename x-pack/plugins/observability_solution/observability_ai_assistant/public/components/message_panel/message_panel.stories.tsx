@@ -8,7 +8,7 @@ import { EuiPanel } from '@elastic/eui';
 import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import dedent from 'dedent';
 import React from 'react';
-import { FeedbackButtons } from '../feedback_buttons';
+import { FeedbackButtons } from '../buttons/feedback_buttons';
 import { MessagePanel as Component } from './message_panel';
 import { MessageText } from './message_text';
 
