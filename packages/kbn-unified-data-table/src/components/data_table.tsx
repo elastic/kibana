@@ -49,7 +49,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
-  DataTableColumnTypes,
+  DataTableColumnsMeta,
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
   CustomControlColumnConfiguration,
@@ -123,10 +123,10 @@ export interface UnifiedDataTableProps {
   columns: string[];
   /**
    * If not provided, types will be derived by default from the dataView field types.
-   * For displaying text-based search results, pass column types (which are available separately in the fetch request) down here.
-   * Check available utils in `utils/get_column_types.ts`
+   * For displaying text-based search results, pass columns meta (which are available separately in the fetch request) down here.
+   * Check available utils in `utils/get_columns_meta.ts`
    */
-  columnTypes?: DataTableColumnTypes;
+  columnsMeta?: DataTableColumnsMeta;
   /**
    * Field tokens could be rendered in column header next to the field name.
    */
@@ -282,7 +282,7 @@ export interface UnifiedDataTableProps {
     hit: DataTableRecord,
     displayedRows: DataTableRecord[],
     displayedColumns: string[],
-    columnTypes?: DataTableColumnTypes
+    columnsMeta?: DataTableColumnsMeta
   ) => JSX.Element | undefined;
   /**
    * Optional value for providing configuration setting for enabling to display the complex fields in the table. Default is true.
@@ -375,7 +375,7 @@ const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
 export const UnifiedDataTable = ({
   ariaLabelledBy,
   columns,
-  columnTypes,
+  columnsMeta,
   showColumnTokens,
   configHeaderRowHeight,
   headerRowHeightState,
@@ -636,11 +636,11 @@ export const UnifiedDataTable = ({
       canPrependTimeFieldColumn(
         activeColumns,
         timeFieldName,
-        columnTypes,
+        columnsMeta,
         showTimeCol,
         isPlainRecord
       ),
-    [timeFieldName, isPlainRecord, showTimeCol, columnTypes]
+    [timeFieldName, isPlainRecord, showTimeCol, columnsMeta]
   );
 
   const visibleColumns = useMemo(
@@ -723,13 +723,13 @@ export const UnifiedDataTable = ({
         onFilter,
         editField,
         visibleCellActions,
-        columnTypes,
+        columnsMeta,
         showColumnTokens,
         headerRowHeightLines,
         customGridColumnsConfiguration,
       }),
     [
-      columnTypes,
+      columnsMeta,
       columnsCellActions,
       customGridColumnsConfiguration,
       dataView,
@@ -1039,7 +1039,7 @@ export const UnifiedDataTable = ({
         )}
         {canSetExpandedDoc &&
           expandedDoc &&
-          renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnTypes)}
+          renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
       </span>
     </UnifiedDataTableContext.Provider>
   );

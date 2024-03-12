@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { getTextBasedColumnTypes } from './get_column_types';
+import { getTextBasedColumnsMeta } from './get_columns_meta';
 
 describe('getColumnTypes', () => {
-  describe('getTextBasedColumnTypes', () => {
+  describe('getTextBasedColumnsMeta', () => {
     test('returns a correct column types map', async () => {
-      const result = getTextBasedColumnTypes([
+      const result = getTextBasedColumnsMeta([
         {
           id: '@timestamp',
           name: '@timestamp',
@@ -24,6 +24,7 @@ describe('getColumnTypes', () => {
           name: 'agent.keyword',
           meta: {
             type: 'string',
+            esType: 'keyword',
           },
         },
         {
@@ -36,9 +37,16 @@ describe('getColumnTypes', () => {
       ]);
       expect(result).toMatchInlineSnapshot(`
         Object {
-          "@timestamp": "date",
-          "agent.keyword": "string",
-          "bytes": "number",
+          "@timestamp": Object {
+            "type": "date",
+          },
+          "agent.keyword": Object {
+            "esType": "keyword",
+            "type": "string",
+          },
+          "bytes": Object {
+            "type": "number",
+          },
         }
       `);
     });

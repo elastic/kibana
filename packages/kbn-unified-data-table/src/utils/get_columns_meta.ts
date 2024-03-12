@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
-type TextBasedColumnTypes = Record<string, DatatableColumnType>;
+type TextBasedColumnTypes = Record<string, DatatableColumnMeta>;
 
 /**
- * Column types for text based searches
+ * Columns meta for text based searches
  * @param textBasedColumns
  */
-export const getTextBasedColumnTypes = (
+export const getTextBasedColumnsMeta = (
   textBasedColumns: DatatableColumn[]
 ): TextBasedColumnTypes => {
   return textBasedColumns.reduce<TextBasedColumnTypes>((map, next) => {
-    map[next.name] = next.meta.type;
+    map[next.name] = next.meta;
     return map;
   }, {});
 };

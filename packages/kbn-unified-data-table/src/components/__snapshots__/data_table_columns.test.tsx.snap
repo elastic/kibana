@@ -1393,10 +1393,15 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="extension"
       columnName="extension"
-      columnTypes={
+      columnsMeta={
         Object {
-          "extension": "number",
-          "message": "keyword",
+          "extension": Object {
+            "type": "number",
+          },
+          "message": Object {
+            "esType": "keyword",
+            "type": "string",
+          },
         }
       }
       dataView={
@@ -1458,161 +1463,8 @@ Array [
               Array [
                 "message",
               ],
-              Array [
-                "timestamp",
-              ],
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "timestamp",
-              ],
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "timestamp",
-              ],
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
             ],
             "results": Array [
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
               Object {
                 "type": "return",
                 "value": Object {
@@ -1663,7 +1515,7 @@ Array [
     "displayAsText": "extension",
     "id": "extension",
     "isSortable": false,
-    "schema": "numeric",
+    "schema": "kibana-json",
     "visibleCellActions": undefined,
   },
   Object {
@@ -1711,10 +1563,15 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="message"
       columnName="message"
-      columnTypes={
+      columnsMeta={
         Object {
-          "extension": "number",
-          "message": "keyword",
+          "extension": Object {
+            "type": "number",
+          },
+          "message": Object {
+            "esType": "keyword",
+            "type": "string",
+          },
         }
       }
       dataView={
@@ -1776,161 +1633,8 @@ Array [
               Array [
                 "message",
               ],
-              Array [
-                "timestamp",
-              ],
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "timestamp",
-              ],
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "timestamp",
-              ],
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
             ],
             "results": Array [
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
               Object {
                 "type": "return",
                 "value": Object {
