@@ -8,25 +8,20 @@
 import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
-import {
-  Axis,
+import type {
   BrushEndListener,
-  Chart,
   ElementClickListener,
-  HistogramBarSeries,
-  Position,
-  ScaleType,
-  Settings,
   XYChartElementEvent,
   XYBrushEvent,
 } from '@elastic/charts';
-import {
+import { Axis, Chart, HistogramBarSeries, Position, ScaleType, Settings } from '@elastic/charts';
+import type {
   BarStyleAccessor,
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   getLogRateAnalysisType,
   getSnappedWindowParameters,

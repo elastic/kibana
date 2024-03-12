@@ -17,12 +17,7 @@ import {
   HostsMetricsSearchAggregationResponse,
   HostsMetricsSearchAggregationResponseRT,
 } from '../types';
-import {
-  createFilters,
-  systemMetricsFilter,
-  getInventoryModelAggregations,
-  runQuery,
-} from '../helpers/query';
+import { createFilters, getInventoryModelAggregations, runQuery } from '../helpers/query';
 
 export const getAllHosts = async (
   { searchClient, sourceConfig, params }: GetHostsArgs,
@@ -49,7 +44,6 @@ const createQuery = (
       size: 0,
       query: {
         bool: {
-          ...systemMetricsFilter,
           filter: createFilters({
             params,
             hostNamesShortList,

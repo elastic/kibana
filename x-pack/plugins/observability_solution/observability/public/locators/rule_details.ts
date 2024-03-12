@@ -29,7 +29,7 @@ export interface RuleDetailsLocatorParams extends SerializableRecord {
 }
 
 export const getRuleDetailsPath = (ruleId: string) => {
-  return `${RULES_PATH}/${encodeURI(ruleId)}`;
+  return `${RULES_PATH}/${encodeURIComponent(ruleId)}`;
 };
 
 export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetailsLocatorParams> {

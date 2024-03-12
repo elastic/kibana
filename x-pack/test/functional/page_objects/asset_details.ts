@@ -27,8 +27,7 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     async getAssetDetailsKPITileValue(type: string) {
-      const container = await testSubjects.find('infraAssetDetailsKPIGrid');
-      const element = await container.findByTestSubject(`infraAssetDetailsKPI${type}`);
+      const element = await testSubjects.find(`infraAssetDetailsKPI${type}`);
       const div = await element.findByClassName('echMetricText__value');
       return div.getAttribute('title');
     },

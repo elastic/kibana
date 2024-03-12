@@ -40,7 +40,7 @@ import {
 } from '@kbn/observability-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -52,8 +52,8 @@ import type {
 } from '@kbn/observability-shared-plugin/public';
 import { AppStatus, AppUpdater } from '@kbn/core-application-browser';
 import {
-  ObservabilityAIAssistantPluginStart,
-  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantPublicStart,
+  ObservabilityAIAssistantPublicSetup,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
 import {
@@ -73,7 +73,7 @@ export interface ClientPluginsSetup {
   exploratoryView: ExploratoryViewPublicSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
@@ -89,10 +89,10 @@ export interface ClientPluginsStart {
   exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
   dataViews: DataViewsPublicPluginStart;
   spaces?: SpacesPluginStart;
   cloud?: CloudStart;
