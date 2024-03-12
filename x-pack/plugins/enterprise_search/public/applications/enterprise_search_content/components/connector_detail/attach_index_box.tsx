@@ -99,7 +99,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
       }) ?? [];
 
   const shouldPrependUserInputAsOption =
-    query?.searchValue && query.hasMatchingOptions && !query.isFullMatch;
+    !!query?.searchValue && query.hasMatchingOptions && !query.isFullMatch;
 
   const groupedOptions: Array<EuiComboBoxOptionOption<string>> = shouldPrependUserInputAsOption
     ? [
@@ -216,11 +216,14 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
               }}
               onChange={(selection) => {
                 const selectedIndex = selection[0] ?? undefined;
-                const selectedIndexOption =
-                  shouldPrependUserInputAsOption && selectedIndex?.label === query?.searchValue
-                    ? { ...selectedIndex, shouldCreate: true }
-                    : selectedIndex;
-
+                const selectedIndexOption = selectedIndex
+                  ? {
+                      label: selectedIndex.label,
+                      shouldCreate:
+                        shouldPrependUserInputAsOption &&
+                        !!(selectedIndex?.label === query?.searchValue),
+                    }
+                  : undefined;
                 setSelectedIndex(selectedIndexOption);
               }}
               selectedOptions={selectedIndex ? [selectedIndex] : undefined}
