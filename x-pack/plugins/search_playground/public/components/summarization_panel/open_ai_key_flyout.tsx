@@ -8,7 +8,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldText,
+  EuiFieldPassword,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -70,7 +70,7 @@ export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({
             }
           >
             <EuiFlexItem grow>
-              <EuiFieldText
+              <EuiFieldPassword
                 fullWidth
                 placeholder={i18n.translate('playground.sidebar.openAIFlyOut.placeholder', {
                   defaultMessage: 'Enter API Key here',
