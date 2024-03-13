@@ -29,6 +29,7 @@ export const getSolutionNavSwitcherBreadCrumb = ({
     text: i18n.translate('core.ui.primaryNav.cloud.breadCrumbDropdown.myDeploymentLabel', {
       defaultMessage: 'My deployment',
     }),
+    'data-test-subj': 'solutionNavSwitcher',
     popoverContent: (
       <>
         <EuiTitle size="xxxs">
@@ -46,6 +47,7 @@ export const getSolutionNavSwitcherBreadCrumb = ({
               label={title}
               isActive={id === activeId}
               iconType={icon as string}
+              data-test-subj={`solutionNavSwitcher-${id}`}
               onClick={() => {
                 onChange(id, { redirect: true });
               }}
@@ -56,7 +58,12 @@ export const getSolutionNavSwitcherBreadCrumb = ({
         <EuiSpacer size="s" />
 
         {cloudLinks.deployment && (
-          <EuiButtonEmpty href={cloudLinks.deployment.href} color="text" iconType="gear">
+          <EuiButtonEmpty
+            href={cloudLinks.deployment.href}
+            color="text"
+            iconType="gear"
+            data-test-subj="manageDeploymentBtn"
+          >
             {i18n.translate('core.ui.primaryNav.cloud.breadCrumbDropdown.manageDeploymentLabel', {
               defaultMessage: 'Manage this deployment',
             })}
@@ -64,12 +71,24 @@ export const getSolutionNavSwitcherBreadCrumb = ({
         )}
 
         {cloudLinks.deployments && (
-          <EuiButtonEmpty href={cloudLinks.deployments.href} color="text" iconType="spaces">
+          <EuiButtonEmpty
+            href={cloudLinks.deployments.href}
+            color="text"
+            iconType="spaces"
+            data-test-subj="viewDeploymentsBtn"
+          >
             {cloudLinks.deployments.title}
           </EuiButtonEmpty>
         )}
       </>
     ),
-    popoverProps: { panelPaddingSize: 'm', zIndex: 6000, panelStyle: { width: 260 } },
+    popoverProps: {
+      panelPaddingSize: 'm',
+      zIndex: 6000,
+      panelStyle: { width: 260 },
+      panelProps: {
+        'data-test-subj': 'solutionNavSwitcherPanel',
+      },
+    },
   };
 };

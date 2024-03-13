@@ -52,4 +52,18 @@ export class GlobalNavService extends FtrService {
   public async badgeMissingOrFail(): Promise<void> {
     await this.testSubjects.missingOrFail('headerBadge');
   }
+
+  public async openSolutionNavSwitcher(): Promise<void> {
+    if (await this.testSubjects.exists(`~solutionNavSwitcherPanel`, { timeout: 0 })) return;
+
+    await this.testSubjects.click('~solutionNavSwitcher');
+    await this.testSubjects.existOrFail('~solutionNavSwitcherPanel');
+  }
+
+  public async changeSolutionNavigation(id: 'es' | 'oblt' | 'search'): Promise<void> {
+    if (!(await this.testSubjects.exists(`~solutionNavSwitcherPanel`, { timeout: 0 }))) {
+      await this.openSolutionNavSwitcher();
+    }
+    await this.testSubjects.click(`~solutionNavSwitcherPanel > ${`~solutionNavSwitcher-${id}`}`);
+  }
 }
