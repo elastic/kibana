@@ -45,6 +45,7 @@ import {
   AssetCriticalityDataClient,
   assetCriticalityServiceFactory,
 } from '../../asset_criticality';
+import type { CalculateAndPersistScoresResponse } from '../../types';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -260,10 +261,18 @@ export const runTask = async ({
       ? [configuredIdentifierType]
       : [RiskScoreEntity.host, RiskScoreEntity.user];
 
+    // TODO: Not sure we want to keep this?
+    const runs: Array<{
+      identifierType: IdentifierType;
+      scoresWritten: number;
+      tookMs: number;
+      config: CalculateAndPersistScoresResponse['config'];
+    }> = [];
     await asyncForEach(identifierTypes, async (identifierType) => {
       let isWorkComplete = isCancelled();
       let afterKeys: AfterKeys = {};
       while (!isWorkComplete) {
+        const now = Date.now();
         const result = await riskScoreService.calculateAndPersistScores({
           afterKeys,
           index,
@@ -276,6 +285,14 @@ export const runTask = async ({
           isAlertSamplingEnabled,
           alertSampleSizePerShard,
           entityAnalyticsConfig,
+        });
+        const tookMs = Date.now() - now;
+
+        runs.push({
+          identifierType,
+          scoresWritten: result.scores_written,
+          tookMs,
+          config: result.config,
         });
 
         isWorkComplete = isRiskScoreCalculationComplete(result) || isCancelled();
@@ -303,7 +320,7 @@ export const runTask = async ({
     }
 
     log('task run completed');
-    log(JSON.stringify(telemetryEvent));
+    log(JSON.stringify({ ...telemetryEvent, runs }));
     return {
       state: updatedState,
     };

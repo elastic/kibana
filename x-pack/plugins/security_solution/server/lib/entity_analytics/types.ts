@@ -51,6 +51,10 @@ export interface CalculateAndPersistScoresResponse {
   after_keys: AfterKeys;
   errors: string[];
   scores_written: number;
+  config: {
+    isAlertSamplingEnabled: boolean;
+    alertSampleSizePerShard: number;
+  };
 }
 
 export interface CalculateScoresResponse {
@@ -63,6 +67,8 @@ export interface CalculateScoresResponse {
     host?: RiskScore[];
     user?: RiskScore[];
   };
+  isAlertSamplingEnabled: boolean;
+  alertSampleSizePerShard: number;
 }
 
 export interface GetRiskEngineStatusResponse {

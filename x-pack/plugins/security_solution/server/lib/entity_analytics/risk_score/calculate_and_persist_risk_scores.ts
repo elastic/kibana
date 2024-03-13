@@ -26,10 +26,20 @@ export const calculateAndPersistRiskScores = async (
   const writer = await riskScoreDataClient.getWriter({
     namespace: spaceId,
   });
-  const { after_keys: afterKeys, scores } = await calculateRiskScores(rest);
+  const {
+    after_keys: afterKeys,
+    scores,
+    isAlertSamplingEnabled,
+    alertSampleSizePerShard,
+  } = await calculateRiskScores(rest);
+
+  const config = {
+    isAlertSamplingEnabled,
+    alertSampleSizePerShard,
+  };
 
   if (!scores.host?.length && !scores.user?.length) {
-    return { after_keys: {}, errors: [], scores_written: 0 };
+    return { after_keys: {}, errors: [], scores_written: 0, config };
   }
 
   try {
@@ -42,5 +52,5 @@ export const calculateAndPersistRiskScores = async (
 
   const { errors, docs_written: scoresWritten } = await writer.bulk(scores);
 
-  return { after_keys: afterKeys, errors, scores_written: scoresWritten };
+  return { after_keys: afterKeys, errors, scores_written: scoresWritten, config };
 };

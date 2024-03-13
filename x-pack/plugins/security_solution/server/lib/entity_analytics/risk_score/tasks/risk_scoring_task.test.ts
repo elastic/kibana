@@ -216,6 +216,10 @@ describe('Risk Scoring Task', () => {
           after_keys: {},
           scores_written: 0,
           errors: [],
+          config: {
+            isAlertSamplingEnabled: false,
+            alertSampleSizePerShard: 10_000,
+          },
         });
       });
 
@@ -239,11 +243,19 @@ describe('Risk Scoring Task', () => {
             after_keys: { host: { 'host.name': 'value' } },
             scores_written: 5,
             errors: [],
+            config: {
+              isAlertSamplingEnabled: false,
+              alertSampleSizePerShard: 10_000,
+            },
           })
           .mockResolvedValueOnce({
             after_keys: {},
             scores_written: 5,
             errors: [],
+            config: {
+              isAlertSamplingEnabled: false,
+              alertSampleSizePerShard: 10_000,
+            },
           });
       });
 
@@ -329,11 +341,19 @@ describe('Risk Scoring Task', () => {
               after_keys: { host: { 'user.name': 'value' } },
               scores_written: 5,
               errors: [],
+              config: {
+                isAlertSamplingEnabled: false,
+                alertSampleSizePerShard: 10_000,
+              },
             })
             .mockResolvedValueOnce({
               after_keys: {},
               scores_written: 5,
               errors: [],
+              config: {
+                isAlertSamplingEnabled: false,
+                alertSampleSizePerShard: 10_000,
+              },
             });
         });
 

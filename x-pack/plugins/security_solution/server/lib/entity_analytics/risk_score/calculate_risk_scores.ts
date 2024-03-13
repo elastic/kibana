@@ -414,6 +414,8 @@ export const calculateRiskScores = async ({
           host: [],
           user: [],
         },
+        isAlertSamplingEnabled,
+        alertSampleSizePerShard,
       };
     }
 
@@ -447,5 +449,7 @@ export const calculateRiskScores = async ({
         host: hostScores,
         user: userScores,
       },
+      isAlertSamplingEnabled,
+      alertSampleSizePerShard,
     };
   });

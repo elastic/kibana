@@ -10,6 +10,10 @@ import type { CalculateAndPersistScoresResponse } from '../types';
 const buildResponseMock = (
   overrides: Partial<CalculateAndPersistScoresResponse> = {}
 ): CalculateAndPersistScoresResponse => ({
+  config: {
+    isAlertSamplingEnabled: false,
+    alertSampleSizePerShard: 0,
+  },
   after_keys: {
     host: { 'host.name': 'hostname' },
   },
