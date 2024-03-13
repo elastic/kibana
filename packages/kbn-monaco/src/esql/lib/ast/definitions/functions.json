@@ -2,1774 +2,1960 @@
   {
     "name": "abs",
     "description": "Returns the absolute value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "n",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double|integer|long|unsigned_long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "n",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double|integer|long|unsigned_long"
+      }
+    ]
   },
   {
     "name": "acos",
     "description": "The arccosine of an angle, expressed in radians.",
-    "signatures": {
-      "params": [
-        {
-          "name": "n",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "n",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "asin",
     "description": "Inverse sine trigonometric function.",
-    "signatures": {
-      "params": [
-        {
-          "name": "n",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "n",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "atan",
     "description": "Inverse tangent trigonometric function.",
-    "signatures": {
-      "params": [
-        {
-          "name": "n",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "n",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "atan2",
     "description": "The angle between the positive x-axis and the ray from the origin to the point (x , y) in the Cartesian plane.",
-    "signatures": {
-      "params": [
-        {
-          "name": "y",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        },
-        {
-          "name": "x",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "y",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          },
+          {
+            "name": "x",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "auto_bucket",
     "description": "Creates human-friendly buckets and returns a datetime value for each row that corresponds to the resulting bucket the row falls into.",
-    "signatures": {
-      "params": [
-        {
-          "name": "field",
-          "type": [
-            "number",
-            "date"
-          ],
-          "optional": false
-        },
-        {
-          "name": "buckets",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        },
-        {
-          "name": "from",
-          "type": [
-            "number",
-            "date",
-            "string"
-          ],
-          "optional": false
-        },
-        {
-          "name": "to",
-          "type": [
-            "number",
-            "date",
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double|date"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": [
+              "number",
+              "date"
+            ],
+            "optional": false
+          },
+          {
+            "name": "buckets",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          },
+          {
+            "name": "from",
+            "type": [
+              "number",
+              "date",
+              "string"
+            ],
+            "optional": false
+          },
+          {
+            "name": "to",
+            "type": [
+              "number",
+              "date",
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double|date"
+      }
+    ]
   },
   {
     "name": "avg",
     "description": "The average of a numeric field.",
-    "signatures": {
-      "params": [
-        {
-          "name": "field",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "case",
     "description": "Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to true.",
-    "signatures": {
-      "params": [
-        {
-          "name": "condition",
-          "type": [
-            "boolean"
-          ],
-          "optional": false
-        },
-        {
-          "name": "rest",
-          "type": [
-            "boolean",
-            "cartesian_point",
-            "date",
-            "number",
-            "geo_point",
-            "ip",
-            "string",
-            "version"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "boolean|cartesian_point|date|double|geo_point|integer|ip|keyword|long|text|unsigned_long|version"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "condition",
+            "type": [
+              "boolean"
+            ],
+            "optional": false
+          },
+          {
+            "name": "rest",
+            "type": [
+              "boolean",
+              "cartesian_point",
+              "date",
+              "number",
+              "geo_point",
+              "ip",
+              "string",
+              "version"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "boolean|cartesian_point|date|double|geo_point|integer|ip|keyword|long|text|unsigned_long|version",
+        "minParams": 2
+      }
+    ]
   },
   {
     "name": "ceil",
     "description": "Round a number up to the nearest integer.",
-    "signatures": {
-      "params": [
-        {
-          "name": "n",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double|integer|long|unsigned_long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "n",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double|integer|long|unsigned_long"
+      }
+    ]
   },
   {
     "name": "cidr_match",
     "description": "Returns true if the provided IP is contained in one of the provided CIDR blocks.",
-    "signatures": {
-      "params": [
-        {
-          "name": "ip",
-          "type": [
-            "ip"
-          ],
-          "optional": false
-        },
-        {
-          "name": "blockX",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "boolean"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "ip",
+            "type": [
+              "ip"
+            ],
+            "optional": false
+          },
+          {
+            "name": "blockX",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "boolean",
+        "minParams": 2
+      }
+    ]
   },
   {
     "name": "coalesce",
     "description": "Returns the first of its arguments that is not null.",
-    "signatures": {
-      "params": [
-        {
-          "name": "expression",
-          "type": [
-            "boolean",
-            "string",
-            "number"
-          ],
-          "optional": false
-        },
-        {
-          "name": "expressionX",
-          "type": [
-            "boolean",
-            "string",
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "boolean|text|integer|keyword|long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "expression",
+            "type": [
+              "boolean",
+              "string",
+              "number"
+            ],
+            "optional": false
+          },
+          {
+            "name": "expressionX",
+            "type": [
+              "boolean",
+              "string",
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "boolean|text|integer|keyword|long",
+        "minParams": 2
+      }
+    ]
   },
   {
     "name": "concat",
     "description": "Concatenates two or more strings.",
-    "signatures": {
-      "params": [
-        {
-          "name": "first",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        },
-        {
-          "name": "rest",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "keyword"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "first",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          },
+          {
+            "name": "rest",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "keyword",
+        "minParams": 2
+      }
+    ]
   },
   {
     "name": "cos",
     "description": "Returns the trigonometric cosine of an angle",
-    "signatures": {
-      "params": [
-        {
-          "name": "n",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "n",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "cosh",
     "description": "Returns the hyperbolic cosine of a number",
-    "signatures": {
-      "params": [
-        {
-          "name": "n",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "n",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "count",
     "description": "Returns the total number (count) of input values.",
-    "signatures": {
-      "params": [
-        {
-          "name": "field",
-          "type": [
-            "boolean",
-            "cartesian_point",
-            "date",
-            "number",
-            "geo_point",
-            "ip",
-            "string",
-            "version"
-          ],
-          "optional": true
-        }
-      ],
-      "returnType": "long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": [
+              "boolean",
+              "cartesian_point",
+              "date",
+              "number",
+              "geo_point",
+              "ip",
+              "string",
+              "version"
+            ],
+            "optional": true
+          }
+        ],
+        "returnType": "long"
+      }
+    ]
   },
   {
     "name": "count_distinct",
     "description": "Returns the approximate number of distinct values.",
-    "signatures": {
-      "params": [
-        {
-          "name": "field",
-          "type": [
-            "boolean",
-            "cartesian_point",
-            "date",
-            "number",
-            "geo_point",
-            "ip",
-            "string",
-            "version"
-          ],
-          "optional": false
-        },
-        {
-          "name": "precision",
-          "type": [
-            "number"
-          ],
-          "optional": true
-        }
-      ],
-      "returnType": "long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": [
+              "boolean",
+              "cartesian_point",
+              "date",
+              "number",
+              "geo_point",
+              "ip",
+              "string",
+              "version"
+            ],
+            "optional": false
+          },
+          {
+            "name": "precision",
+            "type": [
+              "number"
+            ],
+            "optional": true
+          }
+        ],
+        "returnType": "long"
+      }
+    ]
   },
   {
     "name": "date_diff",
     "description": "Subtract 2 dates and return their difference in multiples of a unit specified in the 1st argument",
-    "signatures": {
-      "params": [
-        {
-          "name": "unit",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        },
-        {
-          "name": "startTimestamp",
-          "type": [
-            "date"
-          ],
-          "optional": false
-        },
-        {
-          "name": "endTimestamp",
-          "type": [
-            "date"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "integer"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "unit",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          },
+          {
+            "name": "startTimestamp",
+            "type": [
+              "date"
+            ],
+            "optional": false
+          },
+          {
+            "name": "endTimestamp",
+            "type": [
+              "date"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "integer"
+      }
+    ]
   },
   {
     "name": "date_extract",
     "description": "Extracts parts of a date, like year, month, day, hour.",
-    "signatures": {
-      "params": [
-        {
-          "name": "date_part",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        },
-        {
-          "name": "field",
-          "type": [
-            "date"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "date_part",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          },
+          {
+            "name": "field",
+            "type": [
+              "date"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "long"
+      }
+    ]
   },
   {
     "name": "date_format",
     "description": "Returns a string representation of a date, in the provided format.",
-    "signatures": {
-      "params": [
-        {
-          "name": "format",
-          "type": [
-            "string"
-          ],
-          "optional": true
-        },
-        {
-          "name": "date",
-          "type": [
-            "date"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "keyword"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "format",
+            "type": [
+              "string"
+            ],
+            "optional": true
+          },
+          {
+            "name": "date",
+            "type": [
+              "date"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "keyword"
+      }
+    ]
   },
   {
     "name": "date_parse",
     "description": "Parses a string into a date value",
-    "signatures": {
-      "params": [
-        {
-          "name": "datePattern",
-          "type": [
-            "string"
-          ],
-          "optional": true
-        },
-        {
-          "name": "dateString",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "date"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "datePattern",
+            "type": [
+              "string"
+            ],
+            "optional": true
+          },
+          {
+            "name": "dateString",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "date"
+      }
+    ]
   },
   {
     "name": "date_trunc",
     "description": "Rounds down a date to the closest interval.",
-    "signatures": {
-      "params": [
-        {
-          "name": "interval",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        },
-        {
-          "name": "date",
-          "type": [
-            "date"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "date"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "interval",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          },
+          {
+            "name": "date",
+            "type": [
+              "date"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "date"
+      }
+    ]
   },
   {
     "name": "e",
     "description": "Euler’s number.",
-    "signatures": {
-      "params": [],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "ends_with",
     "description": "Returns a boolean that indicates whether a keyword string ends with another string",
-    "signatures": {
-      "params": [
-        {
-          "name": "str",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        },
-        {
-          "name": "suffix",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "boolean"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "str",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          },
+          {
+            "name": "suffix",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      }
+    ]
   },
   {
     "name": "floor",
     "description": "Round a number down to the nearest integer.",
-    "signatures": {
-      "params": [
-        {
-          "name": "n",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double|integer|long|unsigned_long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "n",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double|integer|long|unsigned_long"
+      }
+    ]
   },
   {
     "name": "greatest",
     "description": "Returns the maximum value from many columns.",
-    "signatures": {
-      "params": [
-        {
-          "name": "first",
-          "type": [
-            "number",
-            "boolean",
-            "string",
-            "ip",
-            "version"
-          ],
-          "optional": false
-        },
-        {
-          "name": "rest",
-          "type": [
-            "number",
-            "boolean",
-            "string",
-            "ip",
-            "version"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "integer|long|double|boolean|keyword|text|ip|version"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "first",
+            "type": [
+              "number",
+              "boolean",
+              "string",
+              "ip",
+              "version"
+            ],
+            "optional": false
+          },
+          {
+            "name": "rest",
+            "type": [
+              "number",
+              "boolean",
+              "string",
+              "ip",
+              "version"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "integer|long|double|boolean|keyword|text|ip|version",
+        "minParams": 2
+      }
+    ]
   },
   {
     "name": "least",
     "description": "Returns the minimum value from many columns.",
-    "signatures": {
-      "params": [
-        {
-          "name": "first",
-          "type": [
-            "number",
-            "boolean",
-            "string",
-            "ip",
-            "version"
-          ],
-          "optional": false
-        },
-        {
-          "name": "rest",
-          "type": [
-            "number",
-            "boolean",
-            "string",
-            "ip",
-            "version"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "integer|long|double|boolean|keyword|text|ip|version"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "first",
+            "type": [
+              "number",
+              "boolean",
+              "string",
+              "ip",
+              "version"
+            ],
+            "optional": false
+          },
+          {
+            "name": "rest",
+            "type": [
+              "number",
+              "boolean",
+              "string",
+              "ip",
+              "version"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "integer|long|double|boolean|keyword|text|ip|version",
+        "minParams": 2
+      }
+    ]
   },
   {
     "name": "left",
     "description": "Return the substring that extracts length chars from the string starting from the left.",
-    "signatures": {
-      "params": [
-        {
-          "name": "str",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        },
-        {
-          "name": "length",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "keyword"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "str",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          },
+          {
+            "name": "length",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "keyword"
+      }
+    ]
   },
   {
     "name": "length",
     "description": "Returns the character length of a string.",
-    "signatures": {
-      "params": [
-        {
-          "name": "str",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "integer"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "str",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "integer"
+      }
+    ]
   },
   {
     "name": "log",
     "description": "Returns the logarithm of a value to a base.",
-    "signatures": {
-      "params": [
-        {
-          "name": "base",
-          "type": [
-            "number"
-          ],
-          "optional": true
-        },
-        {
-          "name": "value",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "base",
+            "type": [
+              "number"
+            ],
+            "optional": true
+          },
+          {
+            "name": "value",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "log10",
     "description": "Returns the log base 10.",
-    "signatures": {
-      "params": [
-        {
-          "name": "n",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "n",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "ltrim",
     "description": "Removes leading whitespaces from a string.",
-    "signatures": {
-      "params": [
-        {
-          "name": "str",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "keyword|text"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "str",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "keyword|text"
+      }
+    ]
   },
   {
     "name": "max",
     "description": "The maximum value of a numeric field.",
-    "signatures": {
-      "params": [
-        {
-          "name": "field",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double|integer|long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double|integer|long"
+      }
+    ]
   },
   {
     "name": "median",
     "description": "The value that is greater than half of all values and less than half of all values.",
-    "signatures": {
-      "params": [
-        {
-          "name": "field",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double|integer|long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double|integer|long"
+      }
+    ]
   },
   {
     "name": "median_absolute_deviation",
     "description": "The median absolute deviation, a measure of variability.",
-    "signatures": {
-      "params": [
-        {
-          "name": "field",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double|integer|long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double|integer|long"
+      }
+    ]
   },
   {
     "name": "min",
     "description": "The minimum value of a numeric field.",
-    "signatures": {
-      "params": [
-        {
-          "name": "field",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double|integer|long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double|integer|long"
+      }
+    ]
   },
   {
     "name": "mv_avg",
     "description": "Converts a multivalued field into a single valued field containing the average of all of the values.",
-    "signatures": {
-      "params": [
-        {
-          "name": "field",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "mv_concat",
     "description": "Reduce a multivalued string field to a single valued field by concatenating all values.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        },
-        {
-          "name": "delim",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "keyword"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          },
+          {
+            "name": "delim",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "keyword"
+      }
+    ]
   },
   {
     "name": "mv_count",
     "description": "Reduce a multivalued field to a single valued field containing the count of values.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "cartesian_point",
-            "cartesian_shape",
-            "date",
-            "number",
-            "geo_point",
-            "geo_shape",
-            "ip",
-            "string",
-            "version"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "integer"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "cartesian_point",
+              "cartesian_shape",
+              "date",
+              "number",
+              "geo_point",
+              "geo_shape",
+              "ip",
+              "string",
+              "version"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "integer"
+      }
+    ]
   },
   {
     "name": "mv_dedupe",
     "description": "Remove duplicate values from a multivalued field.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "date",
-            "number",
-            "ip",
-            "string",
-            "version"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "boolean|date|double|integer|ip|keyword|long|text|version"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "date",
+              "number",
+              "ip",
+              "string",
+              "version"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "boolean|date|double|integer|ip|keyword|long|text|version"
+      }
+    ]
   },
   {
     "name": "mv_first",
     "description": "Reduce a multivalued field to a single valued field containing the first value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "cartesian_point",
-            "cartesian_shape",
-            "date",
-            "number",
-            "geo_point",
-            "geo_shape",
-            "ip",
-            "string",
-            "version"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "boolean|cartesian_point|cartesian_shape|date|double|geo_point|geo_shape|integer|ip|keyword|long|text|unsigned_long|version"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "cartesian_point",
+              "cartesian_shape",
+              "date",
+              "number",
+              "geo_point",
+              "geo_shape",
+              "ip",
+              "string",
+              "version"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "boolean|cartesian_point|cartesian_shape|date|double|geo_point|geo_shape|integer|ip|keyword|long|text|unsigned_long|version"
+      }
+    ]
   },
   {
     "name": "mv_last",
     "description": "Reduce a multivalued field to a single valued field containing the last value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "cartesian_point",
-            "cartesian_shape",
-            "date",
-            "number",
-            "geo_point",
-            "geo_shape",
-            "ip",
-            "string",
-            "version"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "boolean|cartesian_point|cartesian_shape|date|double|geo_point|geo_shape|integer|ip|keyword|long|text|unsigned_long|version"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "cartesian_point",
+              "cartesian_shape",
+              "date",
+              "number",
+              "geo_point",
+              "geo_shape",
+              "ip",
+              "string",
+              "version"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "boolean|cartesian_point|cartesian_shape|date|double|geo_point|geo_shape|integer|ip|keyword|long|text|unsigned_long|version"
+      }
+    ]
   },
   {
     "name": "mv_max",
     "description": "Reduce a multivalued field to a single valued field containing the maximum value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "date",
-            "number",
-            "ip",
-            "string",
-            "version"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "boolean|date|double|integer|ip|keyword|long|text|unsigned_long|version"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "date",
+              "number",
+              "ip",
+              "string",
+              "version"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "boolean|date|double|integer|ip|keyword|long|text|unsigned_long|version"
+      }
+    ]
   },
   {
     "name": "mv_median",
     "description": "Converts a multivalued field into a single valued field containing the median value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double|integer|long|unsigned_long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double|integer|long|unsigned_long"
+      }
+    ]
   },
   {
     "name": "mv_min",
     "description": "Reduce a multivalued field to a single valued field containing the minimum value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "date",
-            "number",
-            "ip",
-            "string",
-            "version"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "boolean|date|double|integer|ip|keyword|long|text|unsigned_long|version"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "date",
+              "number",
+              "ip",
+              "string",
+              "version"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "boolean|date|double|integer|ip|keyword|long|text|unsigned_long|version"
+      }
+    ]
   },
   {
     "name": "mv_sum",
     "description": "Converts a multivalued field into a single valued field containing the sum of all of the values.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double|integer|long|unsigned_long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double|integer|long|unsigned_long"
+      }
+    ]
   },
   {
     "name": "now",
     "description": "Returns current date and time.",
-    "signatures": {
-      "params": [],
-      "returnType": "date"
-    }
+    "signatures": [
+      {
+        "params": [],
+        "returnType": "date"
+      }
+    ]
   },
   {
     "name": "percentile",
     "description": "The value at which a certain percentage of observed values occur.",
-    "signatures": {
-      "params": [
-        {
-          "name": "field",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        },
-        {
-          "name": "percentile",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double|integer|long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          },
+          {
+            "name": "percentile",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double|integer|long"
+      }
+    ]
   },
   {
     "name": "pi",
     "description": "The ratio of a circle’s circumference to its diameter.",
-    "signatures": {
-      "params": [],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "pow",
     "description": "Returns the value of a base raised to the power of an exponent.",
-    "signatures": {
-      "params": [
-        {
-          "name": "base",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        },
-        {
-          "name": "exponent",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "base",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          },
+          {
+            "name": "exponent",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "replace",
     "description": "The function substitutes in the string any match of the regular expression with the replacement string.",
-    "signatures": {
-      "params": [
-        {
-          "name": "str",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        },
-        {
-          "name": "regex",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        },
-        {
-          "name": "newStr",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "keyword"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "str",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          },
+          {
+            "name": "regex",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          },
+          {
+            "name": "newStr",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "keyword"
+      }
+    ]
   },
   {
     "name": "right",
     "description": "Return the substring that extracts length chars from the string starting from the right.",
-    "signatures": {
-      "params": [
-        {
-          "name": "str",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        },
-        {
-          "name": "length",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "keyword"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "str",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          },
+          {
+            "name": "length",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "keyword"
+      }
+    ]
   },
   {
     "name": "round",
     "description": "Rounds a number to the closest number with the specified number of digits.",
-    "signatures": {
-      "params": [
-        {
-          "name": "value",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        },
-        {
-          "name": "decimals",
-          "type": [
-            "number"
-          ],
-          "optional": true
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "value",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          },
+          {
+            "name": "decimals",
+            "type": [
+              "number"
+            ],
+            "optional": true
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "rtrim",
     "description": "Removes trailing whitespaces from a string.",
-    "signatures": {
-      "params": [
-        {
-          "name": "str",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "keyword|text"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "str",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "keyword|text"
+      }
+    ]
   },
   {
     "name": "sin",
     "description": "Returns the trigonometric sine of an angle",
-    "signatures": {
-      "params": [
-        {
-          "name": "n",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "n",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "sinh",
     "description": "Returns the hyperbolic sine of a number",
-    "signatures": {
-      "params": [
-        {
-          "name": "n",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "n",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "split",
     "description": "Split a single valued string into multiple strings.",
-    "signatures": {
-      "params": [
-        {
-          "name": "str",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        },
-        {
-          "name": "delim",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "keyword"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "str",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          },
+          {
+            "name": "delim",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "keyword"
+      }
+    ]
   },
   {
     "name": "sqrt",
     "description": "Returns the square root of a number.",
-    "signatures": {
-      "params": [
-        {
-          "name": "n",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "n",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "st_centroid",
     "description": "The centroid of a spatial field.",
-    "signatures": {
-      "params": [
-        {
-          "name": "field",
-          "type": [
-            "geo_point",
-            "cartesian_point"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "geo_point|cartesian_point"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": [
+              "geo_point",
+              "cartesian_point"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "geo_point|cartesian_point"
+      }
+    ]
   },
   {
     "name": "starts_with",
     "description": "Returns a boolean that indicates whether a keyword string starts with another string",
-    "signatures": {
-      "params": [
-        {
-          "name": "str",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        },
-        {
-          "name": "prefix",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "boolean"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "str",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          },
+          {
+            "name": "prefix",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      }
+    ]
   },
   {
     "name": "substring",
     "description": "Returns a substring of a string, specified by a start position and an optional length",
-    "signatures": {
-      "params": [
-        {
-          "name": "str",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        },
-        {
-          "name": "start",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        },
-        {
-          "name": "length",
-          "type": [
-            "number"
-          ],
-          "optional": true
-        }
-      ],
-      "returnType": "keyword"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "str",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          },
+          {
+            "name": "start",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          },
+          {
+            "name": "length",
+            "type": [
+              "number"
+            ],
+            "optional": true
+          }
+        ],
+        "returnType": "keyword"
+      }
+    ]
   },
   {
     "name": "sum",
     "description": "The sum of a numeric field.",
-    "signatures": {
-      "params": [
-        {
-          "name": "field",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "field",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "long"
+      }
+    ]
   },
   {
     "name": "tan",
     "description": "Returns the trigonometric tangent of an angle",
-    "signatures": {
-      "params": [
-        {
-          "name": "n",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "n",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "tanh",
     "description": "Returns the hyperbolic tangent of a number",
-    "signatures": {
-      "params": [
-        {
-          "name": "n",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "n",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "tau",
     "description": "The ratio of a circle’s circumference to its radius.",
-    "signatures": {
-      "params": [],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "to_bool",
     "description": "Converts an input value to a boolean value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "string",
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "boolean"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "string",
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      }
+    ]
   },
   {
     "name": "to_boolean",
     "description": "Converts an input value to a boolean value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "string",
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "boolean"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "string",
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "boolean"
+      }
+    ]
   },
   {
     "name": "to_cartesianpoint",
     "description": "Converts an input value to a point value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "cartesian_point",
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "cartesian_point"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "cartesian_point",
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "cartesian_point"
+      }
+    ]
   },
   {
     "name": "to_cartesianshape",
     "description": "Converts an input value to a shape value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "cartesian_point",
-            "cartesian_shape",
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "cartesian_shape"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "cartesian_point",
+              "cartesian_shape",
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "cartesian_shape"
+      }
+    ]
   },
   {
     "name": "to_datetime",
     "description": "Converts an input value to a date value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "date",
-            "string",
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "date"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "date",
+              "string",
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "date"
+      }
+    ]
   },
   {
     "name": "to_dbl",
     "description": "Converts an input value to a double value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "date",
-            "string",
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "date",
+              "string",
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "to_degrees",
     "description": "Converts a number in radians to degrees.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "to_double",
     "description": "Converts an input value to a double value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "date",
-            "string",
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "date",
+              "string",
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "to_dt",
     "description": "Converts an input value to a date value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "date",
-            "string",
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "date"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "date",
+              "string",
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "date"
+      }
+    ]
   },
   {
     "name": "to_geopoint",
     "description": "Converts an input value to a geo_point value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "geo_point",
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "geo_point"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "geo_point",
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "geo_point"
+      }
+    ]
   },
   {
     "name": "to_geoshape",
     "description": "Converts an input value to a geo_shape value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "geo_point",
-            "geo_shape",
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "geo_shape"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "geo_point",
+              "geo_shape",
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "geo_shape"
+      }
+    ]
   },
   {
     "name": "to_int",
     "description": "Converts an input value to an integer value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "date",
-            "string",
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "integer"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "date",
+              "string",
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "integer"
+      }
+    ]
   },
   {
     "name": "to_integer",
     "description": "Converts an input value to an integer value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "date",
-            "string",
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "integer"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "date",
+              "string",
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "integer"
+      }
+    ]
   },
   {
     "name": "to_ip",
     "description": "Converts an input string to an IP value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "ip",
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "ip"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "ip",
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "ip"
+      }
+    ]
   },
   {
     "name": "to_long",
     "description": "Converts an input value to a long value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "date",
-            "string",
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "date",
+              "string",
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "long"
+      }
+    ]
   },
   {
     "name": "to_lower",
     "description": "Returns a new string representing the input string converted to lower case.",
-    "signatures": {
-      "params": [
-        {
-          "name": "str",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "keyword|text"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "str",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "keyword|text"
+      }
+    ]
   },
   {
     "name": "to_radians",
     "description": "Converts a number in degrees to radians.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "double"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "double"
+      }
+    ]
   },
   {
     "name": "to_str",
     "description": "Converts a field into a string.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "cartesian_point",
-            "cartesian_shape",
-            "date",
-            "number",
-            "geo_point",
-            "geo_shape",
-            "ip",
-            "string",
-            "version"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "keyword"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "cartesian_point",
+              "cartesian_shape",
+              "date",
+              "number",
+              "geo_point",
+              "geo_shape",
+              "ip",
+              "string",
+              "version"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "keyword"
+      }
+    ]
   },
   {
     "name": "to_string",
     "description": "Converts a field into a string.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "cartesian_point",
-            "cartesian_shape",
-            "date",
-            "number",
-            "geo_point",
-            "geo_shape",
-            "ip",
-            "string",
-            "version"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "keyword"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "cartesian_point",
+              "cartesian_shape",
+              "date",
+              "number",
+              "geo_point",
+              "geo_shape",
+              "ip",
+              "string",
+              "version"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "keyword"
+      }
+    ]
   },
   {
     "name": "to_ul",
     "description": "Converts an input value to an unsigned long value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "date",
-            "string",
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "unsigned_long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "date",
+              "string",
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "unsigned_long"
+      }
+    ]
   },
   {
     "name": "to_ulong",
     "description": "Converts an input value to an unsigned long value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "date",
-            "string",
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "unsigned_long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "date",
+              "string",
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "unsigned_long"
+      }
+    ]
   },
   {
     "name": "to_unsigned_long",
     "description": "Converts an input value to an unsigned long value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "boolean",
-            "date",
-            "string",
-            "number"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "unsigned_long"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "boolean",
+              "date",
+              "string",
+              "number"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "unsigned_long"
+      }
+    ]
   },
   {
     "name": "to_upper",
     "description": "Returns a new string representing the input string converted to upper case.",
-    "signatures": {
-      "params": [
-        {
-          "name": "str",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "keyword|text"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "str",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "keyword|text"
+      }
+    ]
   },
   {
     "name": "to_ver",
     "description": "Converts an input string to a version value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "string",
-            "version"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "version"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "string",
+              "version"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "version"
+      }
+    ]
   },
   {
     "name": "to_version",
     "description": "Converts an input string to a version value.",
-    "signatures": {
-      "params": [
-        {
-          "name": "v",
-          "type": [
-            "string",
-            "version"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "version"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "v",
+            "type": [
+              "string",
+              "version"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "version"
+      }
+    ]
   },
   {
     "name": "trim",
     "description": "Removes leading and trailing whitespaces from a string.",
-    "signatures": {
-      "params": [
-        {
-          "name": "str",
-          "type": [
-            "string"
-          ],
-          "optional": false
-        }
-      ],
-      "returnType": "keyword|text"
-    }
+    "signatures": [
+      {
+        "params": [
+          {
+            "name": "str",
+            "type": [
+              "string"
+            ],
+            "optional": false
+          }
+        ],
+        "returnType": "keyword|text"
+      }
+    ]
   }
 ]

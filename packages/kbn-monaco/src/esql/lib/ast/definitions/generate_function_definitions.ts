@@ -1191,17 +1191,25 @@ const showFunctionsOutput = {
       dedupe(argType.split('|').map(elasticsearchToKibanaType))
     );
 
+    const getMinParams = () =>
+      value[columnIndices.variadic]
+        ? ensureArray(value[columnIndices.optionalArgs]).length
+        : undefined;
+
     const functionDefinition = {
       name: value[columnIndices.name],
       description: value[columnIndices.description],
-      signatures: {
-        params: ensureArray(value[columnIndices.argNames]).map((argName, i) => ({
-          name: argName,
-          type: kbnArgTypes[i],
-          optional: ensureArray(value[columnIndices.optionalArgs])[i],
-        })),
-        returnType: value[columnIndices.returnType],
-      },
+      signatures: [
+        {
+          params: ensureArray(value[columnIndices.argNames]).map((argName, i) => ({
+            name: argName,
+            type: kbnArgTypes[i],
+            optional: ensureArray(value[columnIndices.optionalArgs])[i],
+          })),
+          returnType: value[columnIndices.returnType],
+          minParams: getMinParams(),
+        },
+      ],
     };
 
     functionDefinitions.push(functionDefinition);
