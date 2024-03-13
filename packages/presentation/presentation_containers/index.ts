@@ -25,5 +25,9 @@ export {
   type PanelPackage,
   type PresentationContainer,
 } from './interfaces/presentation_container';
-export { type SerializedPanelState } from './interfaces/serialized_state';
+export {
+  apiHasSerializableState,
+  type HasSerializableState,
+  type SerializedPanelState,
+} from './interfaces/serialized_state';
 export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';

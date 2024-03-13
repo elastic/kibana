@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import type { VFC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandableSection } from './expandable_section';
 import { ABOUT_SECTION_TEST_ID } from './test_ids';
-import { Description } from './description';
+import { AlertDescription } from './alert_description';
 import { Reason } from './reason';
 import { MitreAttack } from './mitre_attack';
+import { getField } from '../../shared/utils';
+import { EventKind } from '../../shared/constants/event_kinds';
+import { useRightPanelContext } from '../context';
+import { isEcsAllowedValue } from '../utils/event_utils';
+import { EventCategoryDescription } from './event_category_description';
+import { EventKindDescription } from './event_kind_description';
+import { EventRenderer } from './event_renderer';
 
 export interface AboutSectionProps {
   /**
@@ -23,9 +29,36 @@ export interface AboutSectionProps {
 }
 
 /**
- * Most top section of the overview tab. It contains the description, reason and mitre attack information (for a document of type alert).
+ * Most top section of the overview tab.
+ * For alerts (event.kind is signal), it contains the description, reason and mitre attack information.
+ * For generic events (event.kind is event), it shows the event category description and event renderer.
+ * For all other events, it shows the event kind description, a list of event categories and event renderer.
  */
 export const AboutSection: VFC<AboutSectionProps> = ({ expanded = true }) => {
+  const { getFieldsData } = useRightPanelContext();
+  const eventKind = getField(getFieldsData('event.kind'));
+  const eventKindInECS = eventKind && isEcsAllowedValue('event.kind', eventKind);
+
+  if (eventKind === EventKind.signal) {
+    return (
+      <ExpandableSection
+        expanded={expanded}
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.about.sectionTitle"
+            defaultMessage="About"
+          />
+        }
+        data-test-subj={ABOUT_SECTION_TEST_ID}
+        gutterSize="s"
+      >
+        <AlertDescription />
+        <Reason />
+        <MitreAttack />
+      </ExpandableSection>
+    );
+  }
+
   return (
     <ExpandableSection
       expanded={expanded}
@@ -36,11 +69,17 @@ export const AboutSection: VFC<AboutSectionProps> = ({ expanded = true }) => {
         />
       }
       data-test-subj={ABOUT_SECTION_TEST_ID}
+      gutterSize="s"
     >
-      <Description />
-      <EuiSpacer size="m" />
-      <Reason />
-      <MitreAttack />
+      {eventKindInECS &&
+        (eventKind === 'event' ? (
+          // if event kind is event, show a detailed description based on event category
+          <EventCategoryDescription />
+        ) : (
+          // if event kind is not event, show a higher level description on event kind
+          <EventKindDescription eventKind={eventKind} />
+        ))}
+      <EventRenderer />
     </ExpandableSection>
   );
 };

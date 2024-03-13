@@ -19,12 +19,8 @@ import {
 } from '@kbn/data-views-plugin/public';
 import {
   initializeReactEmbeddableTitles,
-  initializeReactEmbeddableUuid,
   ReactEmbeddableFactory,
-  RegisterReactEmbeddable,
   registerReactEmbeddableFactory,
-  useReactEmbeddableApiHandle,
-  useReactEmbeddableUnsavedChanges,
 } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -72,6 +68,7 @@ export const registerFieldListFactory = (
     FieldListSerializedStateState,
     FieldListApi
   > = {
+    type: FIELD_LIST_ID,
     deserializeState: (state) => {
       const serializedState = cloneDeep(state.rawState) as FieldListSerializedStateState;
       // inject the reference
@@ -84,9 +81,8 @@ export const registerFieldListFactory = (
       }
       return serializedState;
     },
-    getComponent: async (initialState, maybeId) => {
+    buildEmbeddable: async (initialState, buildApi) => {
       const subscriptions = new Subscription();
-      const uuid = initializeReactEmbeddableUuid(maybeId);
       const { titlesApi, titleComparators, serializeTitles } =
         initializeReactEmbeddableTitles(initialState);
 
@@ -110,135 +106,126 @@ export const registerFieldListFactory = (
         initialState.selectedFieldNames
       );
 
-      return RegisterReactEmbeddable((apiRef) => {
-        const { unsavedChanges, resetUnsavedChanges } = useReactEmbeddableUnsavedChanges(
-          uuid,
-          fieldListEmbeddableFactory,
-          {
-            dataViewId: [selectedDataViewId$, (value) => selectedDataViewId$.next(value)],
-            selectedFieldNames: [
-              selectedFieldNames$,
-              (value) => selectedFieldNames$.next(value),
-              (a, b) => {
-                return (a?.slice().sort().join(',') ?? '') === (b?.slice().sort().join(',') ?? '');
+      const api = buildApi(
+        {
+          ...titlesApi,
+          serializeState: () => {
+            const dataViewId = selectedDataViewId$.getValue();
+            const references: Reference[] = dataViewId
+              ? [
+                  {
+                    type: DATA_VIEW_SAVED_OBJECT_TYPE,
+                    name: FIELD_LIST_DATA_VIEW_REF_NAME,
+                    id: dataViewId,
+                  },
+                ]
+              : [];
+            return {
+              rawState: {
+                ...serializeTitles(),
+                // here we skip serializing the dataViewId, because the reference contains that information.
+                selectedFieldNames: selectedFieldNames$.getValue(),
               },
-            ],
-            ...titleComparators,
-          }
-        );
-
-        useReactEmbeddableApiHandle(
-          {
-            type: FIELD_LIST_ID,
-            ...titlesApi,
-            unsavedChanges,
-            resetUnsavedChanges,
-            dataViews: dataViews$,
-            selectedFields: selectedFieldNames$,
-            serializeState: async () => {
-              const dataViewId = selectedDataViewId$.getValue();
-              const references: Reference[] = dataViewId
-                ? [
-                    {
-                      type: DATA_VIEW_SAVED_OBJECT_TYPE,
-                      name: FIELD_LIST_DATA_VIEW_REF_NAME,
-                      id: dataViewId,
-                    },
-                  ]
-                : [];
-              return {
-                rawState: {
-                  ...serializeTitles(),
-                  // here we skip serializing the dataViewId, because the reference contains that information.
-                  selectedFieldNames: selectedFieldNames$.getValue(),
-                },
-                references,
-              };
-            },
+              references,
+            };
           },
-          apiRef,
-          uuid
-        );
+        },
+        {
+          ...titleComparators,
+          dataViewId: [selectedDataViewId$, (value) => selectedDataViewId$.next(value)],
+          selectedFieldNames: [
+            selectedFieldNames$,
+            (value) => selectedFieldNames$.next(value),
+            (a, b) => {
+              return (a?.slice().sort().join(',') ?? '') === (b?.slice().sort().join(',') ?? '');
+            },
+          ],
+        }
+      );
 
-        const [selectedDataViewId, selectedFieldNames] = useBatchedPublishingSubjects(
-          selectedDataViewId$,
-          selectedFieldNames$
-        );
+      return {
+        api,
+        Component: () => {
+          const [selectedDataViewId, selectedFieldNames] = useBatchedPublishingSubjects(
+            selectedDataViewId$,
+            selectedFieldNames$
+          );
 
-        const [selectedDataView, setSelectedDataView] = useState<DataView | undefined>(undefined);
+          const [selectedDataView, setSelectedDataView] = useState<DataView | undefined>(undefined);
 
-        useEffect(() => {
-          if (!selectedDataViewId) return;
-          let mounted = true;
-          (async () => {
-            const dataView = await dataViews.get(selectedDataViewId);
-            if (!mounted) return;
-            setSelectedDataView(dataView);
-          })();
-          return () => {
-            mounted = false;
-          };
-        }, [selectedDataViewId]);
+          useEffect(() => {
+            if (!selectedDataViewId) return;
+            let mounted = true;
+            (async () => {
+              const dataView = await dataViews.get(selectedDataViewId);
+              if (!mounted) return;
+              setSelectedDataView(dataView);
+            })();
+            return () => {
+              mounted = false;
+            };
+          }, [selectedDataViewId]);
 
-        // On destroy
-        useEffect(() => {
-          return () => {
-            subscriptions.unsubscribe();
-          };
-        }, []);
+          // On destroy
+          useEffect(() => {
+            return () => {
+              subscriptions.unsubscribe();
+            };
+          }, []);
 
-        return (
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem
-              grow={false}
-              css={css`
-                padding: ${euiThemeVars.euiSizeS};
-              `}
-            >
-              <DataViewPicker
-                dataViews={allDataViews}
-                selectedDataViewId={selectedDataViewId}
-                onChangeDataViewId={(nextSelection) => {
-                  selectedDataViewId$.next(nextSelection);
-                }}
-                trigger={{
-                  label:
-                    selectedDataView?.getName() ??
-                    i18n.translate('embeddableExamples.unifiedFieldList.selectDataViewMessage', {
-                      defaultMessage: 'Please select a data view',
-                    }),
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {selectedDataView ? (
-                <UnifiedFieldListSidebarContainer
-                  fullWidth={true}
-                  variant="list-always"
-                  dataView={selectedDataView}
-                  allFields={selectedDataView.fields}
-                  getCreationOptions={getCreationOptions}
-                  workspaceSelectedFieldNames={selectedFieldNames}
-                  services={{ dataViews, data, fieldFormats, charts, core }}
-                  onAddFieldToWorkspace={(field) =>
-                    selectedFieldNames$.next([
-                      ...(selectedFieldNames$.getValue() ?? []),
-                      field.name,
-                    ])
-                  }
-                  onRemoveFieldFromWorkspace={(field) => {
-                    selectedFieldNames$.next(
-                      (selectedFieldNames$.getValue() ?? []).filter((name) => name !== field.name)
-                    );
+          return (
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  padding: ${euiThemeVars.euiSizeS};
+                `}
+              >
+                <DataViewPicker
+                  dataViews={allDataViews}
+                  selectedDataViewId={selectedDataViewId}
+                  onChangeDataViewId={(nextSelection) => {
+                    selectedDataViewId$.next(nextSelection);
+                  }}
+                  trigger={{
+                    label:
+                      selectedDataView?.getName() ??
+                      i18n.translate('embeddableExamples.unifiedFieldList.selectDataViewMessage', {
+                        defaultMessage: 'Please select a data view',
+                      }),
                   }}
                 />
-              ) : null}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      });
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {selectedDataView ? (
+                  <UnifiedFieldListSidebarContainer
+                    fullWidth={true}
+                    variant="list-always"
+                    dataView={selectedDataView}
+                    allFields={selectedDataView.fields}
+                    getCreationOptions={getCreationOptions}
+                    workspaceSelectedFieldNames={selectedFieldNames}
+                    services={{ dataViews, data, fieldFormats, charts, core }}
+                    onAddFieldToWorkspace={(field) =>
+                      selectedFieldNames$.next([
+                        ...(selectedFieldNames$.getValue() ?? []),
+                        field.name,
+                      ])
+                    }
+                    onRemoveFieldFromWorkspace={(field) => {
+                      selectedFieldNames$.next(
+                        (selectedFieldNames$.getValue() ?? []).filter((name) => name !== field.name)
+                      );
+                    }}
+                  />
+                ) : null}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
+      };
     },
   };
 
-  registerReactEmbeddableFactory(FIELD_LIST_ID, fieldListEmbeddableFactory);
+  registerReactEmbeddableFactory(fieldListEmbeddableFactory);
 };

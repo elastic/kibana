@@ -54,3 +54,4 @@ export { MAJOR_VERSION } from './plugin';
 
 export { Section, IndexDetailsSection } from './home_sections';
 export type { IndexDetailsTab, IndexDetailsTabId } from './home_sections';
+export * from './allow_auto_create';

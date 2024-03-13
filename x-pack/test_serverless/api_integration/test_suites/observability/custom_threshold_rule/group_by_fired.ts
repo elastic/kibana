@@ -12,7 +12,6 @@
  */
 
 import { kbnTestConfig } from '@kbn/test';
-import moment from 'moment';
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
   Aggregators,
@@ -31,7 +30,6 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
   let alertId: string;
-  let startedAt: string;
 
   describe('Custom Threshold rule - GROUP_BY - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
@@ -181,7 +179,6 @@ export default function ({ getService }: FtrProviderContext) {
           ruleId,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
-        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
@@ -238,7 +235,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should set correct action variables', async () => {
-        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
         const resp = await alertingApi.waitForDocumentInIndex<{
           ruleType: string;
           alertDetailsUrl: string;
@@ -252,7 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `${protocol}://${hostname}:${port}/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+          `${protocol}://${hostname}:${port}/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
           `Average system.cpu.total.norm.pct is 80%, above or equal the threshold of 20%. (duration: 1 min, data view: ${DATA_VIEW}, group: host-0)`

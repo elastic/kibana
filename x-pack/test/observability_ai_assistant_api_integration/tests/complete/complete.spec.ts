@@ -10,7 +10,9 @@ import { omit } from 'lodash';
 import { PassThrough } from 'stream';
 import expect from '@kbn/expect';
 import {
+  ChatCompletionChunkEvent,
   ConversationCreateEvent,
+  MessageAddEvent,
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
@@ -91,6 +93,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           messages,
           connectorId,
           persist: false,
+          screenContexts: [],
         })
         .pipe(passThrough);
 
@@ -109,22 +112,63 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
 
-      const parsedChunks = receivedChunks
+      const parsedEvents = receivedChunks
         .join('')
         .split('\n')
         .map((line) => line.trim())
         .filter(Boolean)
         .map((line) => JSON.parse(line) as StreamingChatResponseEvent);
 
-      expect(parsedChunks.length).to.be(2);
-      expect(omit(parsedChunks[0], 'id')).to.eql({
+      expect(parsedEvents.map((event) => event.type)).to.eql([
+        StreamingChatResponseEventType.MessageAdd,
+        StreamingChatResponseEventType.MessageAdd,
+        StreamingChatResponseEventType.ChatCompletionChunk,
+        StreamingChatResponseEventType.MessageAdd,
+      ]);
+
+      const messageEvents = parsedEvents.filter(
+        (msg): msg is MessageAddEvent => msg.type === StreamingChatResponseEventType.MessageAdd
+      );
+
+      const chunkEvents = parsedEvents.filter(
+        (msg): msg is ChatCompletionChunkEvent =>
+          msg.type === StreamingChatResponseEventType.ChatCompletionChunk
+      );
+
+      expect(omit(messageEvents[0], 'id', 'message.@timestamp')).to.eql({
+        type: StreamingChatResponseEventType.MessageAdd,
+        message: {
+          message: {
+            content: '',
+            role: MessageRole.Assistant,
+            function_call: {
+              name: 'context',
+              arguments: JSON.stringify({ queries: [], categories: [] }),
+              trigger: MessageRole.Assistant,
+            },
+          },
+        },
+      });
+
+      expect(omit(messageEvents[1], 'id', 'message.@timestamp')).to.eql({
+        type: StreamingChatResponseEventType.MessageAdd,
+        message: {
+          message: {
+            role: MessageRole.User,
+            name: 'context',
+            content: JSON.stringify({ screen_description: '', learnings: [] }),
+          },
+        },
+      });
+
+      expect(omit(chunkEvents[0], 'id')).to.eql({
         type: StreamingChatResponseEventType.ChatCompletionChunk,
         message: {
           content: 'Hello',
         },
       });
 
-      expect(omit(parsedChunks[1], 'id', 'message.@timestamp')).to.eql({
+      expect(omit(messageEvents[2], 'id', 'message.@timestamp')).to.eql({
         type: StreamingChatResponseEventType.MessageAdd,
         message: {
           message: {
@@ -167,6 +211,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               messages,
               connectorId,
               persist: true,
+              screenContexts: [],
             })
             .end((err, response) => {
               if (err) {
@@ -196,7 +241,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .split('\n')
           .map((line) => line.trim())
           .filter(Boolean)
-          .map((line) => JSON.parse(line) as StreamingChatResponseEvent);
+          .map((line) => JSON.parse(line) as StreamingChatResponseEvent)
+          .slice(2); // ignore context request/response, we're testing this elsewhere
       });
 
       it('creates a new conversation', async () => {

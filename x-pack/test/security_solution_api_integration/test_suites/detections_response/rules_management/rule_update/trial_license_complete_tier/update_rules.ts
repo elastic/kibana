@@ -16,9 +16,6 @@ import { RuleActionArray, RuleActionThrottle } from '@kbn/securitysolution-io-ts
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
@@ -28,7 +25,6 @@ import {
   getSimpleRuleUpdate,
   getSimpleMlRuleUpdate,
   getSimpleSavedQueryRule,
-  createRule,
   getSimpleRule,
   getThresholdRuleForAlertTesting,
   getSimpleRuleWithoutRuleId,
@@ -38,6 +34,12 @@ import {
   getActionsWithoutFrequencies,
   getSomeActionsWithFrequencies,
 } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  createRule,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

@@ -15,3 +15,6 @@ export interface FeaturesAvailability {
 }
 export type GetLicense = () => Promise<FeaturesAvailability>;
 export { registerReportingUsageCollector } from './reporting_usage_collector';
+
+export { registerReportingEventTypes } from './register_event_types';
+export { EventTracker } from './event_tracker';

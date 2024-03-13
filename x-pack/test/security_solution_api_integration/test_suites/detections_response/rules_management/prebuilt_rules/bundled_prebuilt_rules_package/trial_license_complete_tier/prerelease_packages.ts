@@ -9,7 +9,6 @@ import expect from 'expect';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
-  deleteAllRules,
   deletePrebuiltRulesFleetPackage,
   getInstalledRules,
   getPrebuiltRulesFleetPackage,
@@ -17,6 +16,7 @@ import {
   installPrebuiltRules,
   installPrebuiltRulesPackageViaFleetAPI,
 } from '../../../../utils';
+import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');

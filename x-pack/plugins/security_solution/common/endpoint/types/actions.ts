@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { EcsError } from '@kbn/ecs';
+import type { EcsError } from '@elastic/ecs';
 import type { BaseFileMetadata, FileCompression, FileJSON } from '@kbn/files-plugin/common';
 import type { ResponseActionBodySchema, UploadActionApiRequestBody } from '../../api/endpoint';
 import type { ActionStatusRequestSchema } from '../../api/endpoint/actions/action_status_route';
@@ -205,6 +205,9 @@ export type EndpointActionResponseDataOutput =
   | SuspendProcessActionOutputContent
   | KillProcessActionOutputContent;
 
+/**
+ * The data stored with each Response Action under `EndpointActions.data` property
+ */
 export interface EndpointActionData<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput

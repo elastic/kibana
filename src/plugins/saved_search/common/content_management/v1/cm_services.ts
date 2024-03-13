@@ -46,6 +46,7 @@ const savedSearchAttributesSchema = schema.object(
     ),
     hideAggregatedPreview: schema.maybe(schema.boolean()),
     rowHeight: schema.maybe(schema.number()),
+    headerRowHeight: schema.maybe(schema.number()),
     hits: schema.maybe(schema.number()),
     timeRestore: schema.maybe(schema.boolean()),
     timeRange: schema.maybe(

@@ -9,7 +9,7 @@ import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { MlEntitySelector } from './ml_entity_selector';
 import { useMlApiContext } from '../../contexts/kibana';
-import { MlApiServices } from '../../services/ml_api_service';
+import type { MlApiServices } from '../../services/ml_api_service';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
 jest.mock('../../contexts/kibana');

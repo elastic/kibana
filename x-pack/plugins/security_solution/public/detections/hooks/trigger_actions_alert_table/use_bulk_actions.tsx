@@ -10,7 +10,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { SerializableRecord } from '@kbn/utility-types';
 import { isEqual } from 'lodash';
 import type { Filter } from '@kbn/es-query';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
@@ -65,7 +65,7 @@ export const getBulkActionHook =
   (query) => {
     const { from, to } = useGlobalTime();
     const filters = getFiltersForDSLQuery(query);
-    const getGlobalQueries = inputsSelectors.globalQuery();
+    const getGlobalQueries = useMemo(() => inputsSelectors.globalQuery(), []);
 
     const globalQuery = useShallowEqualSelector((state: State) => getGlobalQueries(state));
 

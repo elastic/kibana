@@ -7,7 +7,7 @@
 
 import { createElement as h } from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { Plugin, CoreSetup, CoreStart, AppNavLinkStatus } from '@kbn/core/public';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   AdvancedUiActionsSetup,
@@ -130,7 +130,7 @@ export class UiActionsEnhancedExamplesPlugin
     core.application.register({
       id: 'ui_actions_enhanced-explorer',
       title: 'UI Actions Enhanced Explorer',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: mount(core),
     });
 

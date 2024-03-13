@@ -36,7 +36,7 @@ import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_eng
 const spaceId = 'default';
 
 describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
+  beforeEach(() => {
     login();
     deleteRiskEngineConfiguration();
     createRule(getNewRule({ rule_id: 'rule1' }));
@@ -44,7 +44,6 @@ describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('show upgrade risk button', () => {
     beforeEach(() => {
-      login();
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
       installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId);

@@ -18,7 +18,48 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.parseDarkModeValue",
+        "type": "Function",
+        "tags": [],
+        "label": "parseDarkModeValue",
+        "description": [],
+        "signature": [
+          "(rawValue: unknown) => ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.DarkModeValue",
+            "text": "DarkModeValue"
+          }
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/dark_mode.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-ui-settings-common",
+            "id": "def-common.parseDarkModeValue.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "rawValue",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-common/src/dark_mode.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-ui-settings-common",
@@ -454,6 +495,23 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.DarkModeValue",
+        "type": "Type",
+        "tags": [],
+        "label": "DarkModeValue",
+        "description": [
+          "\nThe list of possible values for the dark mode UI setting.\n- false: dark mode is disabled\n- true: dark mode is enabled\n- \"system\": dark mode will follow the user system preference."
+        ],
+        "signature": [
+          "boolean | \"system\""
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/dark_mode.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-ui-settings-common",
         "id": "def-common.ReadonlyModeType",

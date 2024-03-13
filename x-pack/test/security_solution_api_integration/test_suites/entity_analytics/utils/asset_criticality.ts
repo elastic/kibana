@@ -19,7 +19,7 @@ import type { AssetCriticalityRecord } from '@kbn/security-solution-plugin/commo
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import querystring from 'querystring';
-import { routeWithNamespace, waitFor } from '../../detections_response/utils';
+import { routeWithNamespace, waitFor } from '../../../../common/utils/security_solution';
 
 export const getAssetCriticalityIndex = (namespace?: string) =>
   `.asset-criticality.asset-criticality-${namespace ?? 'default'}`;

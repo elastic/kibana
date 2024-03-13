@@ -17,5 +17,6 @@ export const coreServiceFactory: CoreServiceFactory = () => {
   return {
     theme: themeServiceMock.createSetupContract(),
     i18n: corePluginMock.i18n,
+    notifications: corePluginMock.notifications,
   };
 };

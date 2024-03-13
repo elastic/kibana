@@ -7,7 +7,7 @@
 
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/constants';
 import expect from '@kbn/expect';
-import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // the archived data holds a report created by test_user

@@ -219,7 +219,7 @@ export type {
   AppenderConfigType,
 } from '@kbn/core-logging-server';
 export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';
-export type { Ecs, EcsEvent } from '@kbn/ecs';
+export type { Ecs, EcsEvent } from '@elastic/ecs';
 
 export type { NodeInfo, NodeRoles } from '@kbn/core-node-server';
 

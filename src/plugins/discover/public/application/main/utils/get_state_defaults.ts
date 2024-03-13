@@ -69,6 +69,7 @@ export function getStateDefaults({
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
     rowHeight: undefined,
+    headerRowHeight: undefined,
     rowsPerPage: undefined,
     sampleSize: undefined,
     grid: undefined,
@@ -82,6 +83,9 @@ export function getStateDefaults({
   }
   if (savedSearch.rowHeight !== undefined) {
     defaultState.rowHeight = savedSearch.rowHeight;
+  }
+  if (savedSearch.headerRowHeight !== undefined) {
+    defaultState.headerRowHeight = savedSearch.headerRowHeight;
   }
   if (savedSearch.viewMode) {
     defaultState.viewMode = getValidViewMode({

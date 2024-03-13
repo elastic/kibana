@@ -107,7 +107,7 @@
         "label": "apiIsPresentationContainer",
         "description": [],
         "signature": [
-          "(unknownApi: unknown) => unknownApi is ",
+          "(api: unknown) => api is ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "common",
@@ -125,7 +125,7 @@
             "id": "def-common.apiIsPresentationContainer.$1",
             "type": "Unknown",
             "tags": [],
-            "label": "unknownApi",
+            "label": "api",
             "description": [],
             "signature": [
               "unknown"
@@ -796,11 +796,11 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/core-saved-objects-common",
+                "pluginId": "@kbn/content-management-utils",
                 "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.Reference",
+                "text": "Reference"
               },
               "[] | undefined"
             ],
@@ -973,7 +973,7 @@
             "section": "def-common.PanelPackage",
             "text": "PanelPackage"
           },
-          ") => Promise<string>; }"
+          ") => Promise<string>; getChildIds: () => string[]; getChild: (childId: string) => unknown; }"
         ],
         "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
         "deprecated": false,

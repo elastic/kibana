@@ -595,6 +595,22 @@
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/text-based-editor",
+            "id": "def-public.TextBasedLanguagesEditorProps.hideTimeFilterInfo",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideTimeFilterInfo",
+            "description": [
+              "hide @timestamp info"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

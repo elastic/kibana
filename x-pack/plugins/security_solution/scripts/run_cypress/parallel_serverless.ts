@@ -179,7 +179,7 @@ async function resetCredentials(
 
   const fetchResetCredentialsStatusAttempt = async (attemptNum: number) => {
     const response = await axios.post(
-      `${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/_reset-credentials`,
+      `${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/_reset-internal-credentials`,
       {},
       {
         headers: {
@@ -199,7 +199,7 @@ async function resetCredentials(
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
         log.info('Project is not reachable. A retry will be triggered soon..');
       } else {
-        log.info(error);
+        log.error(`${error.message}`);
       }
     },
     retries: 100,
@@ -223,6 +223,7 @@ function waitForProjectInitialized(projectId: string, apiKey: string): Promise<v
       }
     );
     if (response.data.phase !== 'initialized') {
+      log.info(response.data);
       throw new Error('Project is not initialized. A retry will be triggered soon...');
     } else {
       log.info('Project is initialized');
@@ -233,7 +234,7 @@ function waitForProjectInitialized(projectId: string, apiKey: string): Promise<v
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
         log.info('Project is not reachable. A retry will be triggered soon...');
       } else {
-        log.info(error);
+        log.error(`${error.message}`);
       }
     },
     retries: 100,
@@ -294,7 +295,7 @@ function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): 
           `${runnerId}: The Kibana URL is not yet reachable. A retry will be triggered soon...`
         );
       } else {
-        log.info(`${runnerId}: ${error}`);
+        log.info(`${runnerId}: ${error.message}`);
       }
     },
     retries: 50,
@@ -350,7 +351,7 @@ function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<vo
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
         log.info('Project is not reachable. A retry will be triggered soon...');
       } else {
-        log.info(error);
+        log.error(`${error.message}`);
       }
     },
     retries: 100,

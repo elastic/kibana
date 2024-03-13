@@ -6974,6 +6974,10 @@
           "force": {
             "type": "boolean",
             "description": "Force upgrade, skipping validation (should be used with caution)"
+          },
+          "skipRateLimitCheck": {
+            "type": "boolean",
+            "description": "Skip rate limit check for upgrade"
           }
         },
         "required": [
@@ -7038,6 +7042,10 @@
           "force": {
             "type": "boolean",
             "description": "Force upgrade, skipping validation (should be used with caution)"
+          },
+          "skipRateLimitCheck": {
+            "type": "boolean",
+            "description": "Skip rate limit check for upgrade"
           }
         },
         "required": [
@@ -7385,6 +7393,10 @@
           },
           "is_protected": {
             "type": "boolean"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force agent policy creation even if packages are not verified."
           }
         },
         "required": [
@@ -7457,6 +7469,10 @@
           },
           "is_protected": {
             "type": "boolean"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force agent policy creation even if packages are not verified."
           }
         },
         "required": [
@@ -8292,7 +8308,12 @@
               }
             }
           },
+          "topic": {
+            "type": "string"
+          },
           "topics": {
+            "deprecated": true,
+            "description": "Use topic instead.",
             "type": "array",
             "items": {
               "type": "object",
@@ -8301,6 +8322,8 @@
                   "type": "string"
                 },
                 "when": {
+                  "deprecated": true,
+                  "description": "Deprecated, kafka output do not support conditionnal topics anymore.",
                   "type": "object",
                   "properties": {
                     "type": {
@@ -8806,7 +8829,12 @@
               }
             }
           },
+          "topic": {
+            "type": "string"
+          },
           "topics": {
+            "deprecated": true,
+            "description": "Use topic instead.",
             "type": "array",
             "items": {
               "type": "object",
@@ -8815,6 +8843,8 @@
                   "type": "string"
                 },
                 "when": {
+                  "deprecated": true,
+                  "description": "Deprecated, kafka output do not support conditionnal topics anymore.",
                   "type": "object",
                   "properties": {
                     "type": {

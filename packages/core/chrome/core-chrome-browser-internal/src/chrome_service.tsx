@@ -212,6 +212,10 @@ export class ChromeService {
       return `kbnVersion-${formattedVersionClass}`;
     };
 
+    const setChromeStyle = (style: ChromeStyle) => {
+      chromeStyle$.next(style);
+    };
+
     const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
     const bodyClasses$ = combineLatest([
       headerBanner$,
@@ -238,6 +242,7 @@ export class ChromeService {
       http,
       chromeBreadcrumbs$: breadcrumbs$,
       logger: this.logger,
+      setChromeStyle,
     });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start();
@@ -258,10 +263,6 @@ export class ChromeService {
     };
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
-
-    const setChromeStyle = (style: ChromeStyle) => {
-      chromeStyle$.next(style);
-    };
 
     const validateChromeStyle = () => {
       const chromeStyle = chromeStyle$.getValue();
@@ -358,8 +359,11 @@ export class ChromeService {
     }
 
     const getHeaderComponent = () => {
+      const defaultChromeStyle = chromeStyle$.getValue();
+
       const HeaderComponent = () => {
         const isVisible = useObservable(this.isVisible$);
+        const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
 
         if (!isVisible) {
           return (
@@ -371,7 +375,7 @@ export class ChromeService {
         }
 
         // render header
-        if (chromeStyle$.getValue() === 'project') {
+        if (chromeStyle === 'project') {
           const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
           const projectBreadcrumbs$ = projectNavigation
             .getProjectBreadcrumbs$()
@@ -547,6 +551,8 @@ export class ChromeService {
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
+        updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
+        changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
       },
     };
   }

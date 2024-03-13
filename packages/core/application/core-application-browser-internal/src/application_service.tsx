@@ -29,7 +29,7 @@ import type {
   NavigateToUrlOptions,
 } from '@kbn/core-application-browser';
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
-import { AppStatus, AppNavLinkStatus } from '@kbn/core-application-browser';
+import { AppStatus } from '@kbn/core-application-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
@@ -206,7 +206,6 @@ export class ApplicationService {
         this.apps.set(app.id, {
           ...appProps,
           status: app.status ?? AppStatus.accessible,
-          navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
           deepLinks: populateDeepLinkDefaults(appProps.deepLinks),
         });
         if (updater$) {
@@ -468,10 +467,6 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
           changes.status ?? AppStatus.accessible,
           fields.status ?? AppStatus.accessible
         ),
-        navLinkStatus: Math.max(
-          changes.navLinkStatus ?? AppNavLinkStatus.default,
-          fields.navLinkStatus ?? AppNavLinkStatus.default
-        ),
         ...(fields.deepLinks ? { deepLinks: populateDeepLinkDefaults(fields.deepLinks) } : {}),
       };
     }
@@ -489,7 +484,7 @@ const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
   }
   return deepLinks.map((deepLink) => ({
     ...deepLink,
-    navLinkStatus: deepLink.navLinkStatus ?? AppNavLinkStatus.default,
+    visibleIn: deepLink.visibleIn ?? ['globalSearch'], // by default, deepLinks are only visible in global search.
     deepLinks: populateDeepLinkDefaults(deepLink.deepLinks),
   }));
 };

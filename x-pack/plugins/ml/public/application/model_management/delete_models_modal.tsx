@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -18,6 +19,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { type WithRequired } from '../../../common/types/common';
@@ -43,6 +45,12 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
   const modelsWithPipelines = models.filter((m) => isPopulatedObject(m.pipelines)) as Array<
     WithRequired<ModelItem, 'pipelines'>
   >;
+
+  const modelsWithInferenceAPIs = models.filter((m) => m.hasInferenceServices);
+
+  const inferenceAPIsIDs: string[] = modelsWithInferenceAPIs.flatMap((model) => {
+    return (model.inference_apis ?? []).map((inference) => inference.model_id);
+  });
 
   const pipelinesCount = modelsWithPipelines.reduce((acc, curr) => {
     return acc + Object.keys(curr.pipelines).length;
@@ -102,54 +110,90 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
-      {modelsWithPipelines.length > 0 ? (
-        <EuiModalBody>
+      <EuiModalBody>
+        {modelsWithPipelines.length > 0 ? (
+          <>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.deleteModal.pipelinesWarningHeader"
+                  defaultMessage="{modelsCount, plural, one {{modelId} has} other {# models have}} associated pipelines."
+                  values={{
+                    modelsCount: modelsWithPipelines.length,
+                    modelId: modelsWithPipelines[0].model_id,
+                  }}
+                />
+              }
+              color="warning"
+              iconType="warning"
+            >
+              <div>
+                <p>
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.modelsList.deleteModal.warningMessage"
+                    defaultMessage="Deleting the trained model and its associated {pipelinesCount, plural, one {pipeline} other {pipelines}} will permanently remove these resources. Any process configured to send data to the {pipelinesCount, plural, one {pipeline} other {pipelines}} will no longer be able to do so once you delete the {pipelinesCount, plural, one {pipeline} other {pipelines}}. Deleting only the trained model will cause failures in the {pipelinesCount, plural, one {pipeline} other {pipelines}} that {pipelinesCount, plural, one {depends} other {depend}} on the model."
+                    values={{ pipelinesCount }}
+                  />
+                </p>
+                <EuiCheckbox
+                  id={'delete-model-pipelines'}
+                  label={
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.deleteModal.approvePipelinesDeletionLabel"
+                      defaultMessage="Delete {pipelinesCount, plural, one {pipeline} other {pipelines}}"
+                      values={{ pipelinesCount }}
+                    />
+                  }
+                  checked={deletePipelines}
+                  onChange={setDeletePipelines.bind(null, (prev) => !prev)}
+                  data-test-subj="mlModelsDeleteModalDeletePipelinesCheckbox"
+                />
+              </div>
+              <ul>
+                {modelsWithPipelines.flatMap((model) => {
+                  return Object.keys(model.pipelines).map((pipelineId) => (
+                    <li key={pipelineId}>{pipelineId}</li>
+                  ));
+                })}
+              </ul>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
+
+        {modelsWithInferenceAPIs.length > 0 ? (
           <EuiCallOut
             title={
               <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.deleteModal.pipelinesWarningHeader"
-                defaultMessage="{modelsCount, plural, one {{modelId} has} other {# models have}} associated pipelines."
+                id="xpack.ml.trainedModels.modelsList.deleteModal.inferenceAPIWarningHeader"
+                defaultMessage="{modelsCount, plural, one {{modelId} has} other {# models have}} associated inference services."
                 values={{
-                  modelsCount: modelsWithPipelines.length,
-                  modelId: modelsWithPipelines[0].model_id,
+                  modelsCount: modelsWithInferenceAPIs.length,
+                  modelId: modelsWithInferenceAPIs[0].model_id,
                 }}
               />
             }
             color="warning"
             iconType="warning"
           >
+            <ul>
+              {inferenceAPIsIDs.map((inferenceAPIModelId) => (
+                <li key={inferenceAPIModelId}>{inferenceAPIModelId}</li>
+              ))}
+            </ul>
+
             <div>
               <p>
                 <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.deleteModal.warningMessage"
-                  defaultMessage="Deleting the trained model and its associated {pipelinesCount, plural, one {pipeline} other {pipelines}} will permanently remove these resources. Any process configured to send data to the {pipelinesCount, plural, one {pipeline} other {pipelines}} will no longer be able to do so once you delete the {pipelinesCount, plural, one {pipeline} other {pipelines}}. Deleting only the trained model will cause failures in the {pipelinesCount, plural, one {pipeline} other {pipelines}} that {pipelinesCount, plural, one {depends} other {depend}} on the model."
-                  values={{ pipelinesCount }}
+                  id="xpack.ml.trainedModels.modelsList.deleteModal.warningInferenceMessage"
+                  defaultMessage="Deleting the trained model will cause failures in the inference {inferenceAPIsCount, plural, one {service} other {services}} that {inferenceAPIsCount, plural, one {depends} other {depend}} on the model."
+                  values={{ inferenceAPIsCount: inferenceAPIsIDs.length }}
                 />
               </p>
-              <EuiCheckbox
-                id={'delete-model-pipelines'}
-                label={
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.modelsList.deleteModal.approvePipelinesDeletionLabel"
-                    defaultMessage="Delete {pipelinesCount, plural, one {pipeline} other {pipelines}}"
-                    values={{ pipelinesCount }}
-                  />
-                }
-                checked={deletePipelines}
-                onChange={setDeletePipelines.bind(null, (prev) => !prev)}
-                data-test-subj="mlModelsDeleteModalDeletePipelinesCheckbox"
-              />
             </div>
-            <ul>
-              {modelsWithPipelines.flatMap((model) => {
-                return Object.keys(model.pipelines).map((pipelineId) => (
-                  <li key={pipelineId}>{pipelineId}</li>
-                ));
-              })}
-            </ul>
           </EuiCallOut>
-        </EuiModalBody>
-      ) : null}
+        ) : null}
+      </EuiModalBody>
 
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose.bind(null, false)} name="cancelModelDeletion">

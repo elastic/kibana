@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
 import type { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-pdf-common';
 import type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
 import type { JobParamsCSV, JobParamsDownloadCSV } from '@kbn/reporting-export-types-csv-common';
 import rison from '@kbn/rison';
 import { LoadActionPerfOptions } from '@kbn/es-archiver';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {

@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const EXPANDABLE_FLYOUT_URL_KEY = 'eventFlyout' as const;
+/**
+ * This is a reserved word that we use as an id when no urlKey is provided and we are in memory storage mode
+ */
+export const REDUX_ID_FOR_MEMORY_STORAGE = 'memory';

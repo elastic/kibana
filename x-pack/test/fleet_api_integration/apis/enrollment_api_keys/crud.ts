@@ -73,7 +73,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should return 400 if the passed kuery is not correct', async () => {
+      it('with enableStrictKQLValidation should return 400 if the passed kuery is not correct', async () => {
         await supertest
           .get(
             `/api/fleet/enrollment_api_keys?kuery=fleet-enrollment-api-keys.non_existent_parameter:test`
@@ -82,7 +82,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should return 400 if the passed kuery is invalid', async () => {
+      it('with enableStrictKQLValidation should return 400 if the passed kuery is invalid', async () => {
         await supertest
           .get(`/api/fleet/enrollment_api_keys?kuery='test%3A'`)
           .set('kbn-xsrf', 'xxxx')

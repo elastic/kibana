@@ -18,6 +18,10 @@ import { AgentActivityFlyout } from './agent_activity_flyout';
 jest.mock('../hooks');
 jest.mock('../../../../hooks');
 
+jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
+  RedirectAppLinks: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 const mockUseActionStatus = useActionStatus as jest.Mock;
 const mockUseGetAgentPolicies = useGetAgentPolicies as jest.Mock;
 const mockUseStartServices = useStartServices as jest.Mock;
@@ -46,6 +50,8 @@ describe('AgentActivityFlyout', () => {
     });
     mockUseStartServices.mockReturnValue({
       docLinks: { links: { fleet: { upgradeElasticAgent: 'https://elastic.co' } } },
+      application: { navigateToUrl: jest.fn() },
+      http: { basePath: { prepend: jest.fn() } },
     });
   });
 
@@ -493,5 +499,84 @@ describe('AgentActivityFlyout', () => {
         .querySelector('[data-test-subj="statusDescription"]')!
         .textContent?.replace(/\s/g, '')
     ).toContain('Policy1 changed to revision 2 at Sep 15, 2022 10:00 AM.'.replace(/\s/g, ''));
+  });
+
+  it('should keep flyout state on new data', () => {
+    const failedAction = {
+      actionId: 'action1',
+      nbAgentsActionCreated: 1,
+      nbAgentsAck: 0,
+      version: '8.5.0',
+      startTime: '2022-09-14T10:00:00.000Z',
+      type: 'UPGRADE',
+      nbAgentsActioned: 1,
+      status: 'FAILED',
+      expiration: '2099-09-16T10:00:00.000Z',
+      creationTime: '2022-09-14T10:00:00.000Z',
+      nbAgentsFailed: 0,
+      latestErrors: [
+        {
+          agentId: 'agent1',
+          error: 'Agent 1 is not upgradeable',
+          timestamp: '2022-09-14T10:00:00.000Z',
+        },
+      ],
+    };
+    const inProgressAction = {
+      actionId: 'action2',
+      nbAgentsActionCreated: 5,
+      nbAgentsAck: 0,
+      version: '8.5.0',
+      startTime: '2022-09-14T10:00:00.000Z',
+      type: 'UPGRADE',
+      nbAgentsActioned: 5,
+      status: 'IN_PROGRESS',
+      expiration: '2099-09-16T10:00:00.000Z',
+      creationTime: '2022-09-14T10:00:00.000Z',
+      nbAgentsFailed: 0,
+      hasRolloutPeriod: true,
+    };
+    mockUseActionStatus.mockImplementation((onAbortSuccess, refreshAgentActivity) => {
+      if (!refreshAgentActivity) {
+        return {
+          currentActions: [failedAction],
+          abortUpgrade: mockAbortUpgrade,
+          isFirstLoading: true,
+        };
+      } else {
+        return {
+          currentActions: [inProgressAction, failedAction],
+          abortUpgrade: mockAbortUpgrade,
+          isFirstLoading: false,
+        };
+      }
+    });
+    const result = renderComponent();
+
+    expect(result.getByText('Agent activity')).toBeInTheDocument();
+    expect(result.container.querySelector('[data-test-subj="upgradeInProgressTitle"]')).toBe(null);
+
+    act(() => {
+      fireEvent.click(result.getByText('Show errors'));
+    });
+
+    expect(result.getByText('Agent 1 is not upgradeable')).toBeInTheDocument();
+
+    result.rerender(
+      <IntlProvider timeZone="UTC" locale="en">
+        <AgentActivityFlyout
+          onClose={mockOnClose}
+          onAbortSuccess={mockOnAbortSuccess}
+          refreshAgentActivity={true}
+          setSearch={mockSetSearch}
+          setSelectedStatus={mockSetSelectedStatus}
+        />
+      </IntlProvider>
+    );
+
+    expect(
+      result.container.querySelector('[data-test-subj="upgradeInProgressTitle"]')!.textContent
+    ).toEqual('Upgrading 5 agents to version 8.5.0');
+    expect(result.getByText('Agent 1 is not upgradeable')).toBeInTheDocument();
   });
 });

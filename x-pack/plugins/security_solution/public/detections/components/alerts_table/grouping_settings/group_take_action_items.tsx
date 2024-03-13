@@ -42,7 +42,7 @@ export const useGroupTakeActionsItems = ({
 }: TakeActionsProps) => {
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
-  const getGlobalQuerySelector = inputsSelectors.globalQuery();
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
   const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
   const refetchQuery = useCallback(() => {
     globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());

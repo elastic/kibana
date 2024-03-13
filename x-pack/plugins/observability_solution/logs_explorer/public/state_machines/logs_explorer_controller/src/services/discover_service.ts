@@ -7,6 +7,8 @@
 
 import { isEmpty } from 'lodash';
 import { ActionFunction, actions, InvokeCallback } from 'xstate';
+import { LogsExplorerCustomizations } from '../../../../controller';
+import { isDataViewSelection } from '../../../../../common/data_source_selection';
 import {
   getChartDisplayOptionsFromDiscoverAppState,
   getDiscoverAppStateFromContext,
@@ -106,3 +108,15 @@ export const updateDiscoverAppStateFromContext: ActionFunction<
 
   context.discoverStateContainer.appState.update(getDiscoverAppStateFromContext(context));
 };
+
+export const redirectToDiscover =
+  (
+    events?: LogsExplorerCustomizations['events']
+  ): ActionFunction<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>
+  (context, event) => {
+    if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
+      if (events?.onUknownDataViewSelection) {
+        return events.onUknownDataViewSelection({ ...context, dataSourceSelection: event.data });
+      }
+    }
+  };

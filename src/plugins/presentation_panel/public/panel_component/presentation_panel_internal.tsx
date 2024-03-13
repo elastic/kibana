@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
   apiPublishesPhaseEvents,
@@ -132,19 +132,17 @@ export const PresentationPanelInternal = <
           <PresentationPanelError api={api} error={blockingError} />
         </EuiFlexGroup>
       )}
-      {!blockingError && !initialLoadComplete && <PanelLoader />}
-      <div
-        className={
-          blockingError || !initialLoadComplete ? 'embPanel__content--hidden' : 'embPanel__content'
-        }
-      >
-        <Component
-          {...(componentProps as React.ComponentProps<typeof Component>)}
-          {...contentAttrs}
-          ref={(newApi) => {
-            if (newApi && !api) setApi(newApi);
-          }}
-        />
+      {!initialLoadComplete && <PanelLoader />}
+      <div className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}>
+        <EuiErrorBoundary>
+          <Component
+            {...(componentProps as React.ComponentProps<typeof Component>)}
+            {...contentAttrs}
+            ref={(newApi) => {
+              if (newApi && !api) setApi(newApi);
+            }}
+          />
+        </EuiErrorBoundary>
       </div>
     </EuiPanel>
   );

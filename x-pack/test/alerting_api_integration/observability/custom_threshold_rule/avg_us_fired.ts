@@ -48,7 +48,6 @@ export default function ({ getService }: FtrProviderContext) {
     let actionId: string;
     let ruleId: string;
     let alertId: string;
-    let startedAt: string;
 
     before(async () => {
       synthtraceEsClient = await getSyntraceClient({ esClient, kibanaUrl });
@@ -159,7 +158,6 @@ export default function ({ getService }: FtrProviderContext) {
           ruleId,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
-        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
@@ -210,7 +208,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should set correct action parameter: ruleType', async () => {
-        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
         const resp = await waitForDocumentInIndex<ActionDocument>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
@@ -218,7 +215,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+          `https://localhost:5601/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
           `Average span.self_time.sum.us is 10,000,000, above the threshold of 7,500,000. (duration: 5 mins, data view: ${DATA_VIEW_NAME})`

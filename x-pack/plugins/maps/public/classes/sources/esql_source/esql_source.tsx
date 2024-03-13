@@ -28,6 +28,7 @@ import { isValidStringConfig } from '../../util/valid_string_config';
 import type { SourceEditorArgs } from '../source';
 import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_source';
 import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_source';
+import type { IESSource } from '../es_source';
 import type { IField } from '../../fields/field';
 import { InlineField } from '../../fields/inline_field';
 import { getData, getUiSettings } from '../../../kibana_services';
@@ -44,7 +45,10 @@ export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
 });
 
-export class ESQLSource extends AbstractVectorSource implements IVectorSource {
+export class ESQLSource
+  extends AbstractVectorSource
+  implements IVectorSource, Pick<IESSource, 'getIndexPatternId' | 'getGeoFieldName'>
+{
   readonly _descriptor: ESQLSourceDescriptor;
 
   static createDescriptor(descriptor: Partial<ESQLSourceDescriptor>): ESQLSourceDescriptor {
@@ -324,5 +328,9 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
 
   getIndexPatternId() {
     return this._descriptor.dataViewId;
+  }
+
+  getGeoFieldName() {
+    return this._descriptor.geoField;
   }
 }

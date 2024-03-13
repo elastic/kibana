@@ -30,7 +30,7 @@ const styles = {
 };
 
 export interface TestQueryRowTableProps {
-  rawResults: { cols: EuiDataGridColumn[]; rows: Array<Record<string, string | null>> };
+  rawResults: { cols: EuiDataGridColumn[]; rows: Array<Record<string, string | null | undefined>> };
   alerts: string[] | null;
 }
 
@@ -53,7 +53,7 @@ export const TestQueryRowTable: React.FC<TestQueryRowTableProps> = ({ rawResults
           border: 'horizontal',
           rowHover: 'none',
         }}
-        renderCellValue={({ rowIndex, columnId }) => rawResults.rows[rowIndex][columnId]}
+        renderCellValue={({ rowIndex, columnId }) => rawResults.rows[rowIndex][columnId] ?? '—'}
         pagination={{
           pageIndex: 0,
           pageSize: 10,

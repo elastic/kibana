@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import {
@@ -18,14 +19,14 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import { RandomSampler } from '@kbn/ml-random-sampler-utils';
+import type { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import { getDataTestSubject } from '../../util/get_data_test_subject';
 import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
+import type { RandomSamplerOption } from '../../../index_data_visualizer/constants/random_sampler';
 import {
   MIN_SAMPLER_PROBABILITY,
   RANDOM_SAMPLER_OPTION,
   RANDOM_SAMPLER_SELECT_OPTIONS,
-  RandomSamplerOption,
 } from '../../../index_data_visualizer/constants/random_sampler';
 import { ProbabilityUsedMessage } from './probability_used';
 

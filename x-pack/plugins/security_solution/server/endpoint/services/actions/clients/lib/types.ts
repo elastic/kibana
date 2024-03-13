@@ -18,6 +18,7 @@ import type {
   ResponseActionsExecuteParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
+  EndpointActionData,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -25,41 +26,81 @@ import type {
   ResponseActionGetFileRequestBody,
   ExecuteActionRequestBody,
   UploadActionApiRequestBody,
+  BaseActionRequestBody,
 } from '../../../../../../common/api/endpoint';
+
+type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
+  T,
+  // We don't need agent type in the Response Action client because each client is initialized for only 1 agent type
+  'agent_type'
+>;
+
+/**
+ * Additional options for response action methods that fall outside of the Request Body
+ */
+export interface CommonResponseActionMethodOptions
+  /**
+   * Host names are sometime passed in from the Alert when running in automated
+   * mode so that it gets stored with the action request if the host is no
+   * longer running elastic defend
+   */
+  extends Pick<EndpointActionData, 'hosts'> {
+  /** Used when invoked from rules */
+  ruleId?: string;
+  /** Used when invoked from rules */
+  ruleName?: string;
+  /**
+   * If defined, then action request will be created with an Error. Note that teh action will
+   * not be dispatched to Fleet or an external EDR system if this value is defined
+   */
+  error?: string;
+}
 
 /**
  * The interface required for a Response Actions provider
  */
 export interface ResponseActionsClient {
-  isolate: (options: IsolationRouteRequestBody) => Promise<ActionDetails>;
+  isolate: (
+    actionRequest: OmitUnsupportedAttributes<IsolationRouteRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<ActionDetails>;
 
-  release: (options: IsolationRouteRequestBody) => Promise<ActionDetails>;
+  release: (
+    actionRequest: OmitUnsupportedAttributes<IsolationRouteRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<ActionDetails>;
 
   killProcess: (
-    options: KillOrSuspendProcessRequestBody
+    actionRequest: OmitUnsupportedAttributes<KillOrSuspendProcessRequestBody>,
+    options?: CommonResponseActionMethodOptions
   ) => Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   >;
 
   suspendProcess: (
-    options: KillOrSuspendProcessRequestBody
+    actionRequest: OmitUnsupportedAttributes<KillOrSuspendProcessRequestBody>,
+    options?: CommonResponseActionMethodOptions
   ) => Promise<
     ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   >;
 
   runningProcesses: (
-    options: GetProcessesRequestBody
+    actionRequest: OmitUnsupportedAttributes<GetProcessesRequestBody>,
+    options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<GetProcessesActionOutputContent>>;
 
   getFile: (
-    options: ResponseActionGetFileRequestBody
+    actionRequest: OmitUnsupportedAttributes<ResponseActionGetFileRequestBody>,
+    options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>>;
 
   execute: (
-    options: ExecuteActionRequestBody
+    actionRequest: OmitUnsupportedAttributes<ExecuteActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>>;
 
   upload: (
-    options: UploadActionApiRequestBody
+    actionRequest: OmitUnsupportedAttributes<UploadActionApiRequestBody>,
+    options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>>;
 }

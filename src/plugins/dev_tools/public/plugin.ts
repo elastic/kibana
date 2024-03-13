@@ -7,19 +7,14 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { Plugin, CoreSetup, AppMountParameters, AppDeepLink } from '@kbn/core/public';
+import { Plugin, CoreSetup, AppMountParameters, AppDeepLink, AppStatus } from '@kbn/core/public';
 import { AppUpdater } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
 
-import {
-  PluginInitializerContext,
-  AppNavLinkStatus,
-  DEFAULT_APP_CATEGORIES,
-} from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
 import { deepLinkIds as devtoolsDeeplinkIds } from '@kbn/deeplinks-devtools';
-import { ConfigSchema } from './types';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 import { DocTitleService, BreadcrumbService } from './services';
 
@@ -50,7 +45,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
     return sortBy([...this.devTools.values()], 'order');
   }
 
-  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
+  constructor() {}
 
   public setup(coreSetup: CoreSetup, { urlForwarding }: { urlForwarding: UrlForwardingSetup }) {
     const { application: applicationSetup, getStartServices } = coreSetup;
@@ -112,12 +107,8 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
 
   public start() {
     if (this.getSortedDevTools().length === 0) {
-      this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
+      this.appStateUpdater.next(() => ({ status: AppStatus.inaccessible }));
     } else {
-      const config = this.initializerContext.config.get();
-      const navLinkStatus =
-        AppNavLinkStatus[config.deeplinks.navLinkStatus as keyof typeof AppNavLinkStatus];
-
       this.appStateUpdater.next(() => {
         const deepLinks: AppDeepLink[] = [...this.devTools.values()]
           .filter(
@@ -125,11 +116,10 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
             (tool) => !tool.enableRouting && !tool.isDisabled() && typeof tool.title === 'string'
           )
           .map((tool) => {
-            const deepLink = {
+            const deepLink: AppDeepLink = {
               id: tool.id,
               title: tool.title as string,
               path: `#/${tool.id}`,
-              navLinkStatus,
             };
             if (!devtoolsDeeplinkIds.some((id) => id === deepLink.id)) {
               throw new Error('Deeplink must be registered in package.');
@@ -139,7 +129,6 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
 
         return {
           deepLinks,
-          navLinkStatus,
         };
       });
     }

@@ -14,86 +14,56 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('security/authorization', function () {
     describe('route access', () => {
-      describe('disabled', () => {
-        it('get all privileges', async () => {
-          const { body, status } = await supertest
-            .get('/api/security/privileges')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-
-        it('get built-in elasticsearch privileges', async () => {
-          const { body, status } = await supertest
-            .get('/internal/security/esPrivileges/builtin')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-
-        // ToDo: Uncomment when we disable role APIs
-        // it('create/update role', async () => {
-        //   const { body, status } = await supertest
-        //     .put('/api/security/role/test')
-        //     .set(svlCommonApi.getInternalRequestHeader());
-        //   svlCommonApi.assertApiNotFound(body, status);
-        // });
-
-        // it('get role', async () => {
-        //   const { body, status } = await supertest
-        //     .get('/api/security/role/superuser')
-        //     .set(svlCommonApi.getInternalRequestHeader());
-        //   svlCommonApi.assertApiNotFound(body, status);
-        // });
-
-        // it('get all roles', async () => {
-        //   const { body, status } = await supertest
-        //     .get('/api/security/role')
-        //     .set(svlCommonApi.getInternalRequestHeader());
-        //   svlCommonApi.assertApiNotFound(body, status);
-        // });
-
-        // it('delete role', async () => {
-        //   const { body, status } = await supertest
-        //     .delete('/api/security/role/superuser')
-        //     .set(svlCommonApi.getInternalRequestHeader());
-        //   svlCommonApi.assertApiNotFound(body, status);
-        // });
-
-        it('get shared saved object permissions', async () => {
-          const { body, status } = await supertest
-            .get('/internal/security/_share_saved_object_permissions')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-      });
-
-      // ToDo: remove when we disable role APIs
       describe('internal', () => {
-        it('create/update role', async () => {
-          const { status } = await supertest
-            .put('/api/security/role/test')
-            .set(svlCommonApi.getInternalRequestHeader());
-          expect(status).not.toBe(404);
-        });
+        describe('disabled', () => {
+          it('get all privileges', async () => {
+            const { body, status } = await supertest
+              .get('/api/security/privileges')
+              .set(svlCommonApi.getInternalRequestHeader());
+            svlCommonApi.assertApiNotFound(body, status);
+          });
 
-        it('get role', async () => {
-          const { status } = await supertest
-            .get('/api/security/role/superuser')
-            .set(svlCommonApi.getInternalRequestHeader());
-          expect(status).not.toBe(404);
-        });
+          it('get built-in elasticsearch privileges', async () => {
+            const { body, status } = await supertest
+              .get('/internal/security/esPrivileges/builtin')
+              .set(svlCommonApi.getInternalRequestHeader());
+            svlCommonApi.assertApiNotFound(body, status);
+          });
 
-        it('get all roles', async () => {
-          const { status } = await supertest
-            .get('/api/security/role')
-            .set(svlCommonApi.getInternalRequestHeader());
-          expect(status).not.toBe(404);
-        });
+          it('create/update role', async () => {
+            const { body, status } = await supertest
+              .put('/api/security/role/test')
+              .set(svlCommonApi.getInternalRequestHeader());
+            svlCommonApi.assertApiNotFound(body, status);
+          });
 
-        it('delete role', async () => {
-          const { status } = await supertest
-            .delete('/api/security/role/superuser')
-            .set(svlCommonApi.getInternalRequestHeader());
-          expect(status).not.toBe(404);
+          it('get role', async () => {
+            const { body, status } = await supertest
+              .get('/api/security/role/superuser')
+              .set(svlCommonApi.getInternalRequestHeader());
+            svlCommonApi.assertApiNotFound(body, status);
+          });
+
+          it('get all roles', async () => {
+            const { body, status } = await supertest
+              .get('/api/security/role')
+              .set(svlCommonApi.getInternalRequestHeader());
+            svlCommonApi.assertApiNotFound(body, status);
+          });
+
+          it('delete role', async () => {
+            const { body, status } = await supertest
+              .delete('/api/security/role/superuser')
+              .set(svlCommonApi.getInternalRequestHeader());
+            svlCommonApi.assertApiNotFound(body, status);
+          });
+
+          it('get shared saved object permissions', async () => {
+            const { body, status } = await supertest
+              .get('/internal/security/_share_saved_object_permissions')
+              .set(svlCommonApi.getInternalRequestHeader());
+            svlCommonApi.assertApiNotFound(body, status);
+          });
         });
       });
 

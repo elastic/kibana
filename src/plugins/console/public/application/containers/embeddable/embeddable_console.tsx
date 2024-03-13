@@ -31,6 +31,8 @@ import { setLoadFromParameter, removeLoadFromParameter } from '../../lib/load_fr
 import { ConsoleWrapper } from './console_wrapper';
 import './_index.scss';
 
+const KBN_BODY_CONSOLE_CLASS = 'kbnBody--hasEmbeddableConsole';
+
 const landmarkHeading = i18n.translate('console.embeddableConsole.landmarkHeading', {
   defaultMessage: 'Developer console',
 });
@@ -58,6 +60,10 @@ export const EmbeddableConsole = ({
       removeLoadFromParameter();
     }
   }, [consoleState.isOpen, consoleState.loadFromContent]);
+  useEffect(() => {
+    document.body.classList.add(KBN_BODY_CONSOLE_CLASS);
+    return () => document.body.classList.remove(KBN_BODY_CONSOLE_CLASS);
+  }, []);
 
   const isConsoleOpen = consoleState.isOpen;
   const setIsConsoleOpen = (value: boolean) => {

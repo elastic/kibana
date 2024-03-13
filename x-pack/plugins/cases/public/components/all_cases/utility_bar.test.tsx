@@ -23,7 +23,7 @@ import { CasesTableUtilityBar } from './utility_bar';
 describe('Severity form field', () => {
   let appMockRender: AppMockRenderer;
   const deselectCases = jest.fn();
-  const localStorageKey = 'cases.testAppId.utilityBar.hideMaxLimitWarning';
+  const localStorageKey = 'securitySolution.cases.utilityBar.hideMaxLimitWarning';
 
   const props = {
     totalCases: 5,
@@ -337,7 +337,7 @@ describe('Severity form field', () => {
         expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
         expect(await screen.findByTestId('do-not-show-warning')).toBeInTheDocument();
 
-        expect(localStorage.getItem(localStorageKey)).toBe(null);
+        expect(localStorage.getItem(localStorageKey)).toBe('false');
       });
 
       it('should hide warning correctly when do not show button clicked', async () => {

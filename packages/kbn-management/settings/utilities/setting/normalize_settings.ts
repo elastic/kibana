@@ -49,6 +49,10 @@ const deriveType = (setting: UiSetting<SettingType>): SettingType => {
   return typeofVal;
 };
 
+const isNumericValue = (value: unknown): boolean => {
+  return value != null && value !== '' && !isNaN(Number(value.toString()));
+};
+
 /**
  * UiSettings have an extremely permissive set of types, which makes it difficult to code
  * against them.  The `value` property is typed as `unknown`, but the setting has a `type`
@@ -71,7 +75,7 @@ const deriveValue = (type: SettingType, value: unknown): Value => {
     case 'string':
       return value as string;
     case 'number':
-      return value ? Number(value) : undefined;
+      return isNumericValue(value) ? Number(value) : undefined;
     case 'boolean':
       return Boolean(value);
     case 'array':

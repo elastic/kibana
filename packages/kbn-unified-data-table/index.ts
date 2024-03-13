@@ -12,6 +12,10 @@ export type {
   UnifiedDataTableRenderCustomToolbar,
   UnifiedDataTableRenderCustomToolbarProps,
 } from './src/components/data_table';
+export {
+  RowHeightSettings,
+  type RowHeightSettingsProps,
+} from './src/components/row_height_settings';
 export { getDisplayedColumns } from './src/utils/columns';
 export { getTextBasedColumnTypes } from './src/utils/get_column_types';
 export { ROWS_HEIGHT_OPTIONS } from './src/constants';

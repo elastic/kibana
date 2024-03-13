@@ -8,16 +8,48 @@
 
 import { CommandDefinition, FunctionDefinition } from './types';
 
+/**
+ * Given a function definition, this function will return a list of function signatures
+ *
+ * If withTypes is true, the function will return a formal function definition with all arguments typed.
+ * This is used when generating the function signature for the monaco editor. If withTypes is false, you get
+ * an "injectable" version of the signature to be used to generate test cases.
+ */
 export function getFunctionSignatures(
   { name, signatures }: FunctionDefinition,
   { withTypes }: { withTypes: boolean } = { withTypes: true }
 ) {
-  return signatures.map(({ params, returnType, infiniteParams, examples }) => ({
-    declaration: `${name}(${params.map((arg) => printArguments(arg, withTypes)).join(', ')}${
-      infiniteParams ? ` ,[... ${params.map((arg) => printArguments(arg, withTypes))}]` : ''
-    })${withTypes ? `: ${returnType}` : ''}`,
-    examples,
-  }));
+  return signatures.map(({ params, returnType, minParams, examples }) => {
+    // for functions with a minimum number of args, repeat the last arg multiple times
+    // just make sure to compute the right number of args to add
+    const minParamsToAdd = Math.max((minParams || 0) - params.length, 0);
+    const extraArg = Array(minParamsToAdd || 1).fill(params[Math.max(params.length - 1, 0)]);
+    return {
+      declaration: `${name}(${params
+        .map((arg) => printArguments(arg, withTypes))
+        .join(', ')}${handleAdditionalArgs(minParamsToAdd > 0, extraArg, withTypes)})${
+        withTypes ? `: ${returnType}` : ''
+      }`,
+      examples,
+    };
+  });
+}
+
+function handleAdditionalArgs(
+  criteria: boolean,
+  additionalArgs: Array<{
+    name: string;
+    type: string | string[];
+    optional?: boolean;
+    reference?: string;
+  }>,
+  withTypes: boolean
+) {
+  return criteria
+    ? `${withTypes ? ' ,[... ' : ', '}${additionalArgs
+        .map((arg) => printArguments(arg, withTypes))
+        .join(', ')}${withTypes ? ']' : ''}`
+    : '';
 }
 
 export function getCommandSignature(
