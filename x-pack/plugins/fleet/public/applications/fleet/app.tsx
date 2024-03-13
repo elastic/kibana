@@ -180,7 +180,8 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
               });
             }
             if (!hasFleetAllPrivileges) {
-              setPermissionsError('MISSING_PRIVILEGES');
+              // TODO add condition
+              // setPermissionsError('MISSING_PRIVILEGES');
             }
           } catch (err) {
             setInitializationError(err);
@@ -330,17 +331,23 @@ export const AppRoutes = memo(
     const fleetStatus = useFleetStatus();
     const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
 
+    const authz = useAuthz();
+
     return (
       <>
         <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
 
         <Routes>
-          <Route path={FLEET_ROUTING_PATHS.agents}>
-            <AgentsApp />
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.policies}>
-            <AgentPolicyApp />
-          </Route>
+          {authz.fleet.readAgents ? (
+            <Route path={FLEET_ROUTING_PATHS.agents}>
+              <AgentsApp />
+            </Route>
+          ) : null}
+          {authz.fleet.readAgentPolicies ? (
+            <Route path={FLEET_ROUTING_PATHS.policies}>
+              <AgentPolicyApp />
+            </Route>
+          ) : null}
           <Route path={FLEET_ROUTING_PATHS.enrollment_tokens}>
             <EnrollmentTokenListPage />
           </Route>

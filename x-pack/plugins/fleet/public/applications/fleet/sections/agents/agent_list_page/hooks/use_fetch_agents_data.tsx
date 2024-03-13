@@ -21,6 +21,7 @@ import {
   useStartServices,
   sendGetAgentTags,
   sendGetAgentPolicies,
+  useAuthz,
 } from '../../../../hooks';
 import { AgentStatusKueryHelper, ExperimentalFeaturesService } from '../../../../services';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
@@ -30,6 +31,7 @@ import { getKuery } from '../utils/get_kuery';
 const REFRESH_INTERVAL_MS = 30000;
 
 export function useFetchAgentsData() {
+  const authz = useAuthz();
   const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   const { notifications } = useStartServices();
@@ -153,6 +155,14 @@ export function useFetchAgentsData() {
               kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
               perPage: SO_SEARCH_LIMIT,
               full: false,
+            }).catch(() => {
+              // TODO fix that
+              return {
+                error: undefined,
+                data: {
+                  items: [],
+                },
+              };
             }),
             sendGetAgentTags({
               kuery: kuery && kuery !== '' ? kuery : undefined,
@@ -268,7 +278,7 @@ export function useFetchAgentsData() {
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: SO_SEARCH_LIMIT,
-    full: true,
+    full: authz.fleet.readAgentPolicies ? true : false,
   });
 
   const agentPolicies = useMemo(

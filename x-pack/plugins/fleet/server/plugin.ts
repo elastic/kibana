@@ -332,7 +332,7 @@ export class FleetPlugin
                         id: `agents_all`,
                         api: [`${PLUGIN_ID}-agents-read`, `${PLUGIN_ID}-agents-all`],
                         name: 'All',
-                        ui: ['read', 'all'],
+                        ui: ['agents_read', 'agents_all'],
                         savedObject: {
                           all: [],
                           read: allSavedObjectTypes,
@@ -343,7 +343,7 @@ export class FleetPlugin
                         id: `agents_read`,
                         api: [`${PLUGIN_ID}-agents-read`],
                         name: 'Read',
-                        ui: ['read'],
+                        ui: ['agents_read'],
                         savedObject: {
                           all: [],
                           read: allSavedObjectTypes,
@@ -369,7 +369,7 @@ export class FleetPlugin
                           `${PLUGIN_ID}-agent-policies-all`,
                         ],
                         name: 'All',
-                        ui: ['read', 'all'],
+                        ui: ['agent_policies_read', 'agent_policies_all'],
                         savedObject: {
                           all: [],
                           read: allSavedObjectTypes,
@@ -380,7 +380,7 @@ export class FleetPlugin
                         id: `agent_policies_read`,
                         api: [`${PLUGIN_ID}-agent-policies-read`],
                         name: 'Read',
-                        ui: ['read'],
+                        ui: ['agent_policies_read'],
                         savedObject: {
                           all: [],
                           read: allSavedObjectTypes,
@@ -403,7 +403,7 @@ export class FleetPlugin
                         id: `settings_all`,
                         api: [`${PLUGIN_ID}-settings-read`, `${PLUGIN_ID}-settings-all`],
                         name: 'All',
-                        ui: ['read', 'all'],
+                        ui: ['settings_read', 'settings_all'],
                         savedObject: {
                           all: [],
                           read: allSavedObjectTypes,
@@ -414,7 +414,7 @@ export class FleetPlugin
                         id: `settings_read`,
                         api: [`${PLUGIN_ID}-settings-read`],
                         name: 'Read',
-                        ui: ['read'],
+                        ui: ['settings_read'],
                         savedObject: {
                           all: [],
                           read: allSavedObjectTypes,

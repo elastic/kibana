@@ -38,7 +38,8 @@ export const AgentPolicyActionMenu = memo<{
     enrollmentFlyoutOpenByDefault = false,
     onCancelEnrollment,
   }) => {
-    const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+    const authz = useAuthz();
+
     const [isYamlFlyoutOpen, setIsYamlFlyoutOpen] = useState<boolean>(false);
     const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(
       enrollmentFlyoutOpenByDefault
@@ -101,6 +102,7 @@ export const AgentPolicyActionMenu = memo<{
             : [
                 <EuiContextMenuItem
                   icon="plusInCircle"
+                  disabled={!authz.fleet.allAgents}
                   onClick={() => {
                     setIsContextMenuOpen(false);
                     setIsEnrollmentFlyoutOpen(true);
@@ -121,7 +123,9 @@ export const AgentPolicyActionMenu = memo<{
                 </EuiContextMenuItem>,
                 viewPolicyItem,
                 <EuiContextMenuItem
-                  disabled={!canWriteIntegrationPolicies}
+                  disabled={
+                    !authz.fleet.allAgentPolicies || !authz.integrations.writeIntegrationPolicies
+                  }
                   icon="copy"
                   onClick={() => {
                     setIsContextMenuOpen(false);
@@ -141,7 +145,7 @@ export const AgentPolicyActionMenu = memo<{
                   {(deleteAgentPolicyPrompt) => (
                     <EuiContextMenuItem
                       data-test-subj="agentPolicyActionMenuDeleteButton"
-                      disabled={hasManagedPackagePolicy}
+                      disabled={!authz.fleet.allAgentPolicies || hasManagedPackagePolicy}
                       toolTipContent={
                         hasManagedPackagePolicy ? (
                           <FormattedMessage
@@ -165,7 +169,7 @@ export const AgentPolicyActionMenu = memo<{
                 </AgentPolicyDeleteProvider>,
               ];
 
-          if (agentTamperProtectionEnabled && !agentPolicy?.is_managed) {
+          if (authz.fleet.allAgents && agentTamperProtectionEnabled && !agentPolicy?.is_managed) {
             menuItems.push(
               <EuiContextMenuItem
                 icon="minusInCircle"

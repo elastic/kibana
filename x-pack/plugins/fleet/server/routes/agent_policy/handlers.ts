@@ -48,7 +48,11 @@ import type {
   GetFullAgentManifestResponse,
   BulkGetAgentPoliciesResponse,
 } from '../../../common/types';
-import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
+import {
+  defaultFleetErrorHandler,
+  AgentPolicyNotFoundError,
+  FleetUnauthorizedError,
+} from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 
 export async function populateAssignedAgentsCount(
@@ -78,7 +82,13 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { full: withPackagePolicies = false, noAgentCount = false, ...restOfQuery } = request.query;
+
   try {
+    if (!fleetContext.authz.fleet.readAgentPolicies && withPackagePolicies) {
+      throw new FleetUnauthorizedError(
+        'full query parameter require agent policies read permissions'
+      );
+    }
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
       withPackagePolicies,
       esClient,
@@ -87,6 +97,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     });
 
     const body: GetAgentPoliciesResponse = {
+      // Todo sanitize items for readAgents only permissions
       items,
       total,
       page,
