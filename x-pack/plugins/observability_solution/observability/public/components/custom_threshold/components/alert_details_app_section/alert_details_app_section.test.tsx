@@ -127,6 +127,10 @@ describe('AlertDetailsAppSection', () => {
                   value: 'host-1',
                 },
               ]}
+              timeRange={{
+                from: '2023-03-28T10:43:13.802Z',
+                to: '2023-03-29T13:14:09.581Z',
+              }}
             />
             <span>
               <a href="/view-in-app-url" target="_blank">

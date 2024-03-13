@@ -174,10 +174,11 @@ export default function AlertDetailsAppSection({
       searchConfiguration:
         ruleParams.searchConfiguration as SearchConfigurationWithExtractedReferenceType,
       startedAt: alertStart,
+      endedAt: alertEnd,
     });
 
     setViewInAppUrl(appUrl);
-  }, [dataView, alertStart, groups, ruleParams, locators]);
+  }, [dataView, alertStart, alertEnd, groups, ruleParams, locators]);
 
   useEffect(() => {
     const alertSummaryFields = [];
@@ -191,7 +192,7 @@ export default function AlertDetailsAppSection({
         ),
         value: (
           <>
-            <Groups groups={groups} />
+            <Groups groups={groups} timeRange={timeRange} />
             <span>
               <a href={viewInAppUrl} target="_blank">
                 {i18n.translate('xpack.observability.alertDetailsAppSection.a.viewLogsLabel', {
@@ -229,7 +230,7 @@ export default function AlertDetailsAppSection({
     });
 
     setAlertSummaryFields(alertSummaryFields);
-  }, [groups, tags, rule, ruleLink, setAlertSummaryFields, viewInAppUrl]);
+  }, [groups, tags, rule, ruleLink, setAlertSummaryFields, timeRange, viewInAppUrl]);
 
   useEffect(() => {
     const initDataView = async () => {

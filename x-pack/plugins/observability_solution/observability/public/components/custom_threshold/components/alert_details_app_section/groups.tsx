@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { useKibana } from '../../../../utils/kibana_react';
+import { TimeRange } from '../../types';
 
 const HOST_NAME = 'host.name';
 const CONTAINER_ID = 'container.id';
@@ -35,7 +36,12 @@ const infraSources = [
 
 const apmSources = [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME];
 
-export function Groups({ groups }: { groups: Array<{ field: string; value: string }> }) {
+interface GroupItem {
+  field: string;
+  value: string;
+}
+
+export function Groups({ groups, timeRange }: { groups: GroupItem[]; timeRange: TimeRange }) {
   const {
     http: {
       basePath: { prepend },
@@ -52,14 +58,7 @@ export function Groups({ groups }: { groups: Array<{ field: string; value: strin
     [AWS_SQS_QUEUE]: prepend(`${METRICS_DETAILS_PATH}/awsSQS`),
   };
 
-  const apmSourceLinks: Record<string, string> = {
-    [SERVICE_NAME]: prepend(`${APM_PATH}`),
-    [SERVICE_ENVIRONMENT]: prepend(`${APM_PATH}`),
-    [TRANSACTION_TYPE]: prepend(`${APM_PATH}`),
-    [TRANSACTION_NAME]: prepend(`${APM_PATH}`),
-  };
-
-  const generateInfraSourceLink = ({ field, value }: { field: string; value: string }) => {
+  const generateInfraSourceLink = ({ field, value }: GroupItem) => {
     return (
       <a href={`${infraSourceLinks[field]}/${value}`} target="_blank">
         {value}
@@ -67,17 +66,19 @@ export function Groups({ groups }: { groups: Array<{ field: string; value: strin
     );
   };
 
-  const generateApmSourceLink = ({ field, value }: { field: string; value: string }) => {
+  const generateApmSourceLink = ({ field, value }: GroupItem) => {
     const serviceName = groups.find((group) => group.field === SERVICE_NAME)?.value;
+    const apmServiceView = `${prepend(APM_PATH)}/${serviceName}`;
+    const alertTimeRange = `rangeFrom=${timeRange.from}&rangeTo=${timeRange.to}`;
 
     const link =
       field === TRANSACTION_NAME
-        ? `${apmSourceLinks[field]}/${serviceName}/transactions/view?transactionName=${value}`
+        ? `${apmServiceView}/transactions/view?transactionName=${value}&${alertTimeRange}`
         : field === TRANSACTION_TYPE
-        ? `${apmSourceLinks[field]}/${serviceName}?transactionType=${value}`
+        ? `${apmServiceView}?transactionType=${value}&${alertTimeRange}`
         : field === SERVICE_ENVIRONMENT
-        ? `${apmSourceLinks[field]}/${serviceName}?environment=${value}`
-        : `${apmSourceLinks[field]}/${value}`;
+        ? `${apmServiceView}?environment=${value}&${alertTimeRange}`
+        : `${apmServiceView}?${alertTimeRange}`;
 
     return (
       <a href={link} target="_blank">
@@ -86,11 +87,11 @@ export function Groups({ groups }: { groups: Array<{ field: string; value: strin
     );
   };
 
-  const generateNoSourceLink = ({ value }: { field: string; value: string }) => {
+  const generateNoSourceLink = ({ value }: GroupItem) => {
     return <strong>{value}</strong>;
   };
 
-  const generateSourceLink = ({ field, value }: { field: string; value: string }) => {
+  const generateSourceLink = ({ field, value }: GroupItem) => {
     return infraSources.includes(field)
       ? generateInfraSourceLink({ field, value })
       : apmSources.includes(field)
