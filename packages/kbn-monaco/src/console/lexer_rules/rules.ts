@@ -10,6 +10,15 @@ import { monaco } from '../../monaco_imports';
 
 export const languageConfiguration: monaco.languages.LanguageConfiguration = {};
 
+const addNextStateToAction = (tokens: string[], nextState?: string) => {
+  return tokens.map((token, index) => {
+    if (index === tokens.length - 1 && nextState) {
+      return { token, next: nextState };
+    }
+    return token;
+  });
+};
+
 /*
  if regex is matched, tokenize as "token" and move to the state "nextState" if defined
  */
@@ -26,23 +35,41 @@ const matchToken = (token: string, regex: string | RegExp, nextState?: string) =
  */
 const matchTokens = (tokens: string[], regex: string | RegExp, nextState?: string) => {
   // only last action needs to specify the next state
-  const action = tokens.map((token, index) => {
-    if (index === tokens.length - 1 && nextState) {
-      return { token, next: nextState };
-    }
-    return token;
-  });
+  const action = addNextStateToAction(tokens, nextState);
   return {
     regex,
     action,
   };
 };
 
-/*
- if end of line is matched, tokenize as "whitespace" and move to the state "nextState"
- */
-const matchEndOfLine = (nextState: string = 'root') => {
-  return matchToken('whitespace', /@regex_end_of_line/, nextState);
+const addEOL = (
+  tokens: string | string[],
+  regex: string | RegExp,
+  nextIfEOL: string,
+  normalNext?: string
+) => {
+  if (Array.isArray(tokens)) {
+    const endOfLineAction = addNextStateToAction(tokens, nextIfEOL);
+    const action = addNextStateToAction(tokens, normalNext);
+    return {
+      regex,
+      action: {
+        cases: {
+          '@eos': endOfLineAction,
+          '@default': action,
+        },
+      },
+    };
+  }
+  return {
+    regex,
+    action: {
+      cases: {
+        '@eos': { token: tokens, next: nextIfEOL },
+        '@default': { token: tokens, next: normalNext },
+      },
+    },
+  };
 };
 
 export const lexerRules: monaco.languages.IMonarchLanguage = {
@@ -55,42 +82,40 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       // comments
       { include: '@comments' },
       // method
-      matchToken('method', /([a-zA-Z]+)/, 'method_sep'),
+      addEOL('method', /([a-zA-Z]+)/, 'root', 'method_sep'),
     ],
     method_sep: [
-      matchEndOfLine(),
       // protocol host with slash
-      matchTokens(
+      addEOL(
         ['whitespace', 'url.protocol_host', 'url.slash'],
         /(\s+)(https?:\/\/[^?\/,]+)(\/)/,
+        'root',
         'url'
       ),
       // variable template
-      matchTokens(['whitespace', 'variable.template'], /(\s+)(\${\w+})/, 'url'),
+      addEOL(['whitespace', 'variable.template'], /(\s+)(\${\w+})/, 'root', 'url'),
       // protocol host
-      matchTokens(['whitespace', 'url.protocol_host'], /(\s+)(https?:\/\/[^?\/,]+)/, 'url'),
+      addEOL(['whitespace', 'url.protocol_host'], /(\s+)(https?:\/\/[^?\/,]+)/, 'root', 'url'),
       // slash
-      matchTokens(['whitespace', 'url.slash'], /(\s+)(\/)/, 'url'),
+      addEOL(['whitespace', 'url.slash'], /(\s+)(\/)/, 'root', 'url'),
       // whitespace
-      matchToken('whitespace', /(\s+)/, 'url'),
+      addEOL('whitespace', /(\s+)/, 'root', 'url'),
     ],
     url: [
-      matchEndOfLine(),
       // variable template
-      matchToken('variable.template', /(\${\w+})/),
+      addEOL('variable.template', /(\${\w+})/, 'root'),
       // pathname
-      matchToken('url.part', /([^?\/,\s]+)/),
+      addEOL('url.part', /([^?\/,\s]+)\s*/, 'root'),
       // comma
-      matchToken('url.comma', /(,)/),
+      addEOL('url.comma', /(,)/, 'root'),
       // slash
-      matchToken('url.slash', /(\/)/),
+      addEOL('url.slash', /(\/)/, 'root'),
       // question mark
-      matchToken('url.questionmark', /(\?)/, 'urlParams'),
+      addEOL('url.questionmark', /(\?)/, 'root', 'urlParams'),
       // comment
-      matchTokens(['whitespace', 'comment.punctuation', 'comment.line'], /(\s+)(\/\/)(.*$)/),
+      addEOL(['whitespace', 'comment.punctuation', 'comment.line'], /(\s+)(\/\/)(.*$)/, 'root'),
     ],
     urlParams: [
-      matchEndOfLine(),
       // param with variable template
       matchTokens(['url.param', 'url.equal', 'variable.template'], /([^&=]+)(=)(\${\w+})/),
       // param with value
