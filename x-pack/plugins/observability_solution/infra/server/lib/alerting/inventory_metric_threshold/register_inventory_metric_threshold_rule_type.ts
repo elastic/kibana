@@ -8,7 +8,11 @@
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
+import {
+  GetViewInAppRelativeUrlFnOpts,
+  IRuleTypeAlerts,
+  PluginSetupContract,
+} from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
@@ -16,6 +20,7 @@ import {
   SnapshotMetricType,
   SnapshotMetricTypeKeys,
 } from '@kbn/metrics-data-access-plugin/common';
+import { MetricThresholdAlert } from '../metric_threshold/metric_threshold_executor';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import {
   Comparator,
@@ -162,7 +167,10 @@ export async function registerInventoryThresholdRuleType(
         },
       ],
     },
-    alerts: MetricsRulesTypeAlertDefinition,
+    alerts: {
+      ...MetricsRulesTypeAlertDefinition,
+      shouldWrite: true,
+    } as IRuleTypeAlerts<MetricThresholdAlert>,
     fieldsForAAD: O11Y_AAD_FIELDS,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
