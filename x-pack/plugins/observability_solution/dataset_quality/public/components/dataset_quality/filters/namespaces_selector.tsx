@@ -76,6 +76,7 @@ export function NamespacesSelector({
 
   const button = (
     <EuiFilterButton
+      data-test-subj="datasetQualityNamespacesSelectableButton"
       iconType="arrowDown"
       badgeColor="success"
       onClick={onButtonClick}
@@ -97,6 +98,7 @@ export function NamespacesSelector({
         panelPaddingSize="none"
       >
         <EuiSelectable
+          data-test-subj="datasetQualityNamespacesSelectable"
           searchable
           searchProps={{
             placeholder: namespacesSelectorSearchPlaceholder,

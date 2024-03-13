@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { DatasetQualityFtrProviderContext } from './config';
-import { datasetNames, getInitialTestLogs, getLogsForDataset } from './data';
+import { datasetNames, defaultNamespace, getInitialTestLogs, getLogsForDataset } from './data';
 
 export default function ({ getService, getPageObjects }: DatasetQualityFtrProviderContext) {
   const PageObjects = getPageObjects([
@@ -113,6 +113,43 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const datasetNameColAfterFilter = colsAfterFilter['Dataset Name'];
       const datasetNameColCellTextsAfterFilter = await datasetNameColAfterFilter.getCellTexts();
       expect(datasetNameColCellTextsAfterFilter).to.eql([apacheAccessDatasetHumanName]);
+    });
+
+    it('filters for namespace', async () => {
+      const apacheAccessDatasetName = 'apache.access';
+      const datasetNamespace = 'prod';
+
+      await PageObjects.observabilityLogsExplorer.navigateTo();
+
+      // Add initial integrations
+      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
+
+      // Index 10 logs for `logs-apache.access` dataset
+      await synthtrace.index(
+        getLogsForDataset({
+          to,
+          count: 10,
+          dataset: apacheAccessDatasetName,
+          namespace: datasetNamespace,
+        })
+      );
+
+      await PageObjects.datasetQuality.navigateTo();
+
+      // Get default namespaces
+      const cols = await PageObjects.datasetQuality.parseDatasetTable();
+      const namespaceCol = cols.Namespace;
+      const namespaceColCellTexts = await namespaceCol.getCellTexts();
+      expect(namespaceColCellTexts).to.contain(defaultNamespace);
+
+      // Filter for integration
+      await PageObjects.datasetQuality.filterForNamespaces([datasetNamespace]);
+
+      const colsAfterFilter = await PageObjects.datasetQuality.parseDatasetTable();
+      const namespaceColAfterFilter = colsAfterFilter.Namespace;
+      const namespaceColCellTextsAfterFilter = await namespaceColAfterFilter.getCellTexts();
+
+      expect(namespaceColCellTextsAfterFilter).to.eql([datasetNamespace]);
     });
   });
 }
