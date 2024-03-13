@@ -827,17 +827,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepDefineRule">
-          <StyledVisibleContainer isVisible={false}>
-            <UseField
-              path="dataSourceType"
-              componentProps={{
-                euiFieldProps: {
-                  fullWidth: true,
-                  placeholder: '',
-                },
-              }}
-            />
-          </StyledVisibleContainer>
+          <UseField
+            path="dataSourceType"
+            component={HiddenField}
+            componentProps={{
+              euiFieldProps: {
+                fullWidth: true,
+                placeholder: '',
+              },
+            }}
+          />
           <UseField
             path="ruleType"
             component={SelectRuleType}
