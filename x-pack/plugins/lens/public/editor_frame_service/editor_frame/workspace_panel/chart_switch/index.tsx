@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ChartSwitch } from './chart_switch';
+export { ChartSwitch, ChartSwitchProps } from './chart_switch';
