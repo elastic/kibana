@@ -41,9 +41,7 @@ describe('Customize panel action', () => {
       to: 'now',
     });
     context.embeddable.filters = new BehaviorSubject<Filter[] | undefined>([]);
-    context.embeddable.query = new BehaviorSubject<Query | AggregateQuery | undefined>(
-      undefined
-    );
+    context.embeddable.query = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     expect(await action.isCompatible(context)).toBe(true);
   });
 
