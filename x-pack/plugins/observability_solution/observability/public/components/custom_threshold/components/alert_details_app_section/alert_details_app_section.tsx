@@ -199,9 +199,12 @@ export default function AlertDetailsAppSection({
             <Groups groups={groups} timeRange={timeRange} />
             <span>
               <a href={viewInAppUrl} target="_blank">
-                {i18n.translate('xpack.observability.alertDetailsAppSection.a.viewLogsLabel', {
-                  defaultMessage: 'View logs',
-                })}
+                {i18n.translate(
+                  'xpack.observability.alertDetailsAppSection.a.viewRelatedLogsLabel',
+                  {
+                    defaultMessage: 'View related logs',
+                  }
+                )}
               </a>
             </span>
           </>
