@@ -33,7 +33,9 @@ import { isResourceNotFoundException } from '@kbn/search-connectors/utils/identi
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
 import { startSync } from '../../lib/connectors/start_sync';
+import { fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
+import { fetchConnectorIndices } from '../../lib/indices/fetch_connector_indices';
 import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
@@ -694,6 +696,51 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       }
 
       return response.ok();
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/connectors/available_indices',
+      validate: {
+        query: schema.object({
+          from: schema.number({ defaultValue: 0, min: 0 }),
+          search_query: schema.maybe(schema.string()),
+          size: schema.number({ defaultValue: 40, min: 0 }),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { from, size, search_query: searchQuery } = request.query;
+      const { client } = (await context.core).elasticsearch;
+
+      const { indexNames, indices, totalResults } = await fetchConnectorIndices(
+        client,
+        searchQuery,
+        from,
+        size
+      );
+      const connectors = await fetchConnectors(client.asCurrentUser, indexNames);
+      const crawlers = await fetchCrawlers(client, indexNames);
+      const enrichedIndices = indices.map((index) => ({
+        ...index,
+        connector: connectors.find((connector) => connector.index_name === index.name),
+        crawler: crawlers.find((crawler) => crawler.index_name === index.name),
+      }));
+
+      return response.ok({
+        body: {
+          indices: enrichedIndices,
+          meta: {
+            page: {
+              from,
+              size,
+              total: totalResults,
+            },
+          },
+        },
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 }
