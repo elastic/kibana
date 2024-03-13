@@ -58,11 +58,12 @@ export function Groups({ groups, timeRange }: { groups: GroupItem[]; timeRange: 
     [AWS_SQS_QUEUE]: prepend(`${METRICS_DETAILS_PATH}/awsSQS`),
   };
 
-  const generateInfraSourceLink = ({ field, value }: GroupItem) => {
-    const alertTimeRange = `assetDetails=(dateRange:(from:'${timeRange.from}',to:'${timeRange.to}'))`;
+  const infraTimeRange = `assetDetails=(dateRange:(from:'${timeRange.from}',to:'${timeRange.to}'))`;
+  const apmTimeRange = `rangeFrom=${timeRange.from}&rangeTo=${timeRange.to}`;
 
+  const generateInfraSourceLink = ({ field, value }: GroupItem) => {
     return (
-      <a href={`${infraSourceLinks[field]}/${value}?${alertTimeRange}`} target="_blank">
+      <a href={`${infraSourceLinks[field]}/${value}?${infraTimeRange}`} target="_blank">
         {value}
       </a>
     );
@@ -71,16 +72,15 @@ export function Groups({ groups, timeRange }: { groups: GroupItem[]; timeRange: 
   const generateApmSourceLink = ({ field, value }: GroupItem) => {
     const serviceName = groups.find((group) => group.field === SERVICE_NAME)?.value;
     const apmServiceView = `${prepend(APM_PATH)}/${serviceName}`;
-    const alertTimeRange = `rangeFrom=${timeRange.from}&rangeTo=${timeRange.to}`;
 
     const link =
       field === TRANSACTION_NAME
-        ? `${apmServiceView}/transactions/view?transactionName=${value}&${alertTimeRange}`
+        ? `${apmServiceView}/transactions/view?transactionName=${value}&${apmTimeRange}`
         : field === TRANSACTION_TYPE
-        ? `${apmServiceView}?transactionType=${value}&${alertTimeRange}`
+        ? `${apmServiceView}?transactionType=${value}&${apmTimeRange}`
         : field === SERVICE_ENVIRONMENT
-        ? `${apmServiceView}?environment=${value}&${alertTimeRange}`
-        : `${apmServiceView}?${alertTimeRange}`;
+        ? `${apmServiceView}?environment=${value}&${apmTimeRange}`
+        : `${apmServiceView}?${apmTimeRange}`;
 
     return (
       <a href={link} target="_blank">
