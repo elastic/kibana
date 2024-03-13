@@ -47,8 +47,10 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./execute'));
     loadTestFile(require.resolve('./get_all'));
+    loadTestFile(require.resolve('./get_all_system'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./connector_types'));
+    loadTestFile(require.resolve('./connector_types_system'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./bulk_enqueue'));
 
