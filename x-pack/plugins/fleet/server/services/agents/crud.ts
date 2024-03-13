@@ -350,9 +350,19 @@ export async function getAgentsByKuery(
   }
 
   if (getStatusSummary) {
-    res.aggregations?.status.buckets.forEach((bucket) => {
-      statusSummary[bucket.key] = bucket.doc_count;
-    });
+    if (showUpgradeable) {
+      // when showUpgradeable is selected, calculate the summary status manually from the upgradeable agents above
+      // the bucket count doesn't take in account the upgradeable agents
+      agents.forEach((agent) => {
+        if (!agent?.status) return;
+        if (!statusSummary[agent.status]) statusSummary[agent.status] = 0;
+        statusSummary[agent.status]++;
+      });
+    } else {
+      res.aggregations?.status.buckets.forEach((bucket) => {
+        statusSummary[bucket.key] = bucket.doc_count;
+      });
+    }
   }
 
   return {

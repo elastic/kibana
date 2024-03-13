@@ -583,6 +583,22 @@
           },
           {
             "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicense.getUnavailableReason",
+            "type": "Function",
+            "tags": [],
+            "label": "getUnavailableReason",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
             "id": "def-common.SecurityLicense.isEnabled",
             "type": "Function",
             "tags": [],

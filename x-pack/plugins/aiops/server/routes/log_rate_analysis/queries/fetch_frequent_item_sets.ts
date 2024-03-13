@@ -51,17 +51,36 @@ export function groupDuplicates(
   return groups;
 }
 
+/**
+ * Creates ES bool should clauses for each provided significant item.
+ * In previous versions of this helper we grouped values for the same field
+ * in a `terms` agg, but this might clash with the `minimum_should_match: 2` clause
+ * used in the query for the `frequent_item_sets`, because even multiple matches within
+ * the `terms` agg would count as just 1 match in the outer `should` part.
+ *
+ * @param significantItems
+ * @returns an array of term filters
+ */
 export function getShouldClauses(significantItems: SignificantItem[]) {
-  return Array.from(
-    group(significantItems, ({ fieldName }) => fieldName),
-    ([field, values]) => ({ terms: { [field]: values.map((d) => d.fieldValue) } })
-  );
+  return significantItems.map((d) => ({ term: { [d.fieldName]: d.fieldValue } }));
 }
 
+/**
+ * Creates a filter for each field to be used in the `frequent_items_sets` agg.
+ * Considers a limit per field to work around scaling limitations of the agg.
+ *
+ * @param significantItems
+ * @returns field filter for the `frequent_item_sets` agg
+ */
 export function getFrequentItemSetsAggFields(significantItems: SignificantItem[]) {
   return Array.from(
     group(significantItems, ({ fieldName }) => fieldName),
-    ([field, values]) => ({ field, include: values.map((d) => String(d.fieldValue)) })
+    ([field, values]) => ({
+      field,
+      include: values
+        .map((d) => String(d.fieldValue))
+        .slice(0, LOG_RATE_ANALYSIS_SETTINGS.FREQUENT_ITEMS_SETS_FIELD_VALUE_LIMIT),
+    })
   );
 }
 
@@ -166,7 +185,7 @@ export async function fetchFrequentItemSets(
 
   fiss.forEach((fis) => {
     const result: ItemSet = {
-      set: {},
+      set: [],
       size: 0,
       maxPValue: 0,
       doc_count: 0,
@@ -174,16 +193,18 @@ export async function fetchFrequentItemSets(
       total_doc_count: 0,
     };
     let maxPValue: number | undefined;
-    Object.entries(fis.key).forEach(([key, value]) => {
-      result.set[key] = value[0];
+    Object.entries(fis.key).forEach(([key, values]) => {
+      values.forEach((value) => {
+        result.set.push({ fieldName: key, fieldValue: value });
 
-      const pValue = sortedSignificantItems.find(
-        (t) => t.fieldName === key && t.fieldValue === value[0]
-      )?.pValue;
+        const pValue = sortedSignificantItems.find(
+          (t) => t.fieldName === key && t.fieldValue === value
+        )?.pValue;
 
-      if (pValue !== undefined && pValue !== null) {
-        maxPValue = Math.max(maxPValue ?? 0, pValue);
-      }
+        if (pValue !== undefined && pValue !== null) {
+          maxPValue = Math.max(maxPValue ?? 0, pValue);
+        }
+      });
     });
 
     if (maxPValue === undefined) {
@@ -203,7 +224,7 @@ export async function fetchFrequentItemSets(
     return b.doc_count - a.doc_count;
   });
 
-  const uniqueFields = uniq(results.flatMap((r) => Object.keys(r.set)));
+  const uniqueFields = uniq(results.flatMap((r) => r.set.map((d) => d.fieldName)));
 
   return {
     fields: uniqueFields,

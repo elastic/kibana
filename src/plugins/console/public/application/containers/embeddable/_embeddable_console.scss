@@ -19,7 +19,7 @@
 
   &--fixed {
     position: fixed;
-    z-index: $euiZLevel1;
+    z-index: $euiZLevel1 - 2;
   }
 
   &--projectChrome {

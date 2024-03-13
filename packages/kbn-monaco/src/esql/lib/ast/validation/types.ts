@@ -33,6 +33,7 @@ export interface ReferenceMaps {
   fields: Map<string, ESQLRealField>;
   policies: Map<string, ESQLPolicy>;
   metadataFields: Set<string>;
+  query: string;
 }
 
 export interface ValidationErrors {
@@ -47,7 +48,29 @@ export interface ValidationErrors {
   };
   wrongArgumentNumber: {
     message: string;
-    type: { fn: string; numArgs: number; passedArgs: number; exactly: number };
+    type: {
+      fn: string;
+      numArgs: number;
+      passedArgs: number;
+    };
+  };
+  wrongArgumentNumberTooMany: {
+    message: string;
+    type: {
+      fn: string;
+      numArgs: number;
+      passedArgs: number;
+      extraArgs: number;
+    };
+  };
+  wrongArgumentNumberTooFew: {
+    message: string;
+    type: {
+      fn: string;
+      numArgs: number;
+      passedArgs: number;
+      missingArgs: number;
+    };
   };
   unknownColumn: {
     message: string;

@@ -17,6 +17,7 @@ interface HostDocument extends Fields {
   'host.hostname': string;
   'host.name': string;
   'metricset.name'?: string;
+  'event.module'?: string;
 }
 
 class Host extends Entity<HostDocument> {
@@ -131,6 +132,7 @@ class HostMetrics extends Serializable<HostMetricsDocument> {}
 
 export function host(name: string): Host {
   return new Host({
+    'event.module': 'system',
     'agent.id': 'synthtrace',
     'host.hostname': name,
     'host.name': name,

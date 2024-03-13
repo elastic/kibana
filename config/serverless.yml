@@ -64,7 +64,6 @@ xpack.security.showInsecureClusterWarning: false
 
 # Disable UI of security management plugins
 xpack.security.ui.userManagementEnabled: false
-xpack.security.ui.roleManagementEnabled: false
 xpack.security.ui.roleMappingManagementEnabled: false
 
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
@@ -150,7 +149,6 @@ xpack.reporting.statefulSettings.enabled: false
 # Disabled Observability plugins
 xpack.ux.enabled: false
 xpack.monitoring.enabled: false
-xpack.uptime.enabled: false
 xpack.legacy_uptime.enabled: false
 monitoring.ui.enabled: false
 

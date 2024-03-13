@@ -78,6 +78,7 @@ export function getLeadControlColumns(canSetExpandedDoc: boolean) {
 }
 
 function buildEuiGridColumn({
+  numberOfColumns,
   columnName,
   columnWidth = 0,
   dataView,
@@ -97,6 +98,7 @@ function buildEuiGridColumn({
   headerRowHeight,
   customGridColumnsConfiguration,
 }: {
+  numberOfColumns: number;
   columnName: string;
   columnWidth: number | undefined;
   dataView: DataView;
@@ -199,7 +201,9 @@ function buildEuiGridColumn({
         headerRowHeight={headerRowHeight}
       />
     );
-    column.initialWidth = defaultTimeColumnWidth;
+    if (numberOfColumns > 1) {
+      column.initialWidth = defaultTimeColumnWidth;
+    }
   }
 
   if (columnWidth > 0) {
@@ -266,9 +270,11 @@ export function getEuiGridColumns({
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
   const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
+  const numberOfColumns = columns.length;
 
   return columns.map((column, columnIndex) =>
     buildEuiGridColumn({
+      numberOfColumns,
       columnName: column,
       columnCellActions: columnsCellActions?.[columnIndex],
       columnWidth: getColWidth(column),
@@ -291,24 +297,36 @@ export function getEuiGridColumns({
   );
 }
 
-export function hasSourceTimeFieldValue(
+export function canPrependTimeFieldColumn(
   columns: string[],
-  dataView: DataView,
+  timeFieldName: string | undefined,
   columnTypes: DataTableColumnTypes | undefined,
   showTimeCol: boolean,
   isPlainRecord: boolean
 ) {
-  const timeFieldName = dataView.timeFieldName;
-  if (!isPlainRecord || !columns.includes('_source') || !timeFieldName || !columnTypes) {
-    return showTimeCol;
+  if (!showTimeCol || !timeFieldName) {
+    return false;
   }
-  return timeFieldName in columnTypes;
+
+  if (isPlainRecord) {
+    return !!columnTypes && timeFieldName in columnTypes && columns.includes('_source');
+  }
+
+  return true;
 }
 
-export function getVisibleColumns(columns: string[], dataView: DataView, showTimeCol: boolean) {
+export function getVisibleColumns(
+  columns: string[],
+  dataView: DataView,
+  shouldPrependTimeFieldColumn: boolean
+) {
   const timeFieldName = dataView.timeFieldName;
 
-  if (showTimeCol && timeFieldName && !columns.find((col) => col === timeFieldName)) {
+  if (
+    shouldPrependTimeFieldColumn &&
+    timeFieldName &&
+    !columns.find((col) => col === timeFieldName)
+  ) {
     return [timeFieldName, ...columns];
   }
 

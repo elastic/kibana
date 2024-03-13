@@ -76,3 +76,7 @@ export enum JOB_STATUS {
 // automation that have no version value in the job params, we assume the
 // intended version is 7.14.0
 export const UNVERSIONED_VERSION = '7.14.0';
+
+// Test Subjects
+export const REPORT_TABLE_ID = 'reportJobListing';
+export const REPORT_TABLE_ROW_ID = 'reportJobRow';

@@ -129,7 +129,7 @@ export const RESERVED_CONFIG_YML_KEYS = [
   'queue.mem.events',
   'queue.mem.flush.min_events',
   'queue.mem.flush.timeout',
-  'workers',
+  'worker',
 ];
 
 export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [

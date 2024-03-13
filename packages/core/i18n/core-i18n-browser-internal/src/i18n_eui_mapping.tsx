@@ -1544,6 +1544,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Search for anything...',
       }
     ),
+    'euiSideNav.mobileToggleAriaLabel': i18n.translate('core.euiSideNav.mobileToggleAriaLabel', {
+      defaultMessage: 'Toggle navigation',
+    }),
     'euiStat.loadingText': i18n.translate('core.euiStat.loadingText', {
       defaultMessage: 'Statistic is loading',
     }),

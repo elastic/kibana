@@ -9,7 +9,7 @@
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
-import { getIndexForESQLQuery } from '@kbn/esql-utils';
+import { getIndexForESQLQuery, getInitialESQLQuery } from '@kbn/esql-utils';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 export type DiscoverESQLLocatorParams = SerializableRecord;
@@ -30,7 +30,7 @@ export class DiscoverESQLLocatorDefinition implements LocatorDefinition<Discover
     const { discoverAppLocator, getIndices } = this.deps;
 
     const indexName = await getIndexForESQLQuery({ dataViews: { getIndices } });
-    const esql = `from ${indexName ?? '*'} | limit 10`;
+    const esql = getInitialESQLQuery(indexName ?? '*');
 
     const params = {
       query: { esql },

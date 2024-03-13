@@ -30,7 +30,7 @@ import type {
   EsAssetReference,
   ExperimentalDataStreamFeature,
 } from '../../../../types';
-import { loadFieldsFromYaml, processFields } from '../../fields/field';
+import { loadDatastreamsFieldsFromYaml, processFields } from '../../fields/field';
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import {
   FLEET_COMPONENT_TEMPLATES,
@@ -509,7 +509,7 @@ export function prepareTemplate({
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
 }): { componentTemplates: TemplateMap; indexTemplate: IndexTemplateEntry } {
   const { name: packageName, version: packageVersion } = packageInstallContext.packageInfo;
-  const fields = loadFieldsFromYaml(packageInstallContext, dataStream.path);
+  const fields = loadDatastreamsFieldsFromYaml(packageInstallContext, dataStream.path);
 
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||

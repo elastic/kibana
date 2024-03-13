@@ -153,6 +153,7 @@ describe('PipelinesLogic', () => {
         PipelinesLogic.actions.savePipeline = jest.fn();
         PipelinesLogic.actions.fetchCustomPipeline = jest.fn();
         PipelinesLogic.actions.fetchIndexApiSuccess(connectorIndex);
+        // @ts-expect-error pipeline._meta defined as mandatory
         PipelinesLogic.actions.createCustomPipelineSuccess({ [connectorIndex.name]: {} });
         expect(flashSuccessToast).toHaveBeenCalledWith('Custom pipeline created');
         expect(PipelinesLogic.actions.setPipelineState).toHaveBeenCalledWith({
@@ -216,6 +217,7 @@ describe('PipelinesLogic', () => {
           ...apiIndex,
         });
         const indexName = apiIndex.name;
+        // @ts-expect-error pipeline._meta defined as mandatory
         const indexPipelines: Record<string, IngestPipeline> = {
           [indexName]: {
             processors: [],

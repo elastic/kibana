@@ -25,8 +25,7 @@ import {
   buildComponentTemplates,
   installComponentAndIndexTemplateForDataStream,
 } from '../template/install';
-import { isFields, processFields } from '../../fields/field';
-import { generateMappings } from '../template/template';
+import { isFields } from '../../fields/field';
 import { getESAssetMetadata } from '../meta';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
@@ -47,6 +46,7 @@ import { isUserSettingsTemplate } from '../template/utils';
 
 import { deleteTransforms } from './remove';
 import { getDestinationIndexAliases } from './transform_utils';
+import { loadMappingForTransform } from './mappings';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {
@@ -183,8 +183,6 @@ const processTransformAssetsPerModule = (
 
     // Handling fields.yml and all other files within 'fields' folder
     if (fileName === TRANSFORM_SPECS_TYPES.FIELDS || isFields(path)) {
-      const validFields = processFields(content);
-      const mappings = generateMappings(validFields);
       const templateName = getTransformAssetNameForInstallation(
         installablePackage,
         transformModuleId,
@@ -208,14 +206,6 @@ const processTransformAssetsPerModule = (
       } else {
         destinationIndexTemplates[indexToModify] = template;
       }
-
-      // If there's already mappings set previously, append it to new
-      const previousMappings =
-        transformsSpecifications.get(transformModuleId)?.get('mappings') ?? {};
-
-      transformsSpecifications.get(transformModuleId)?.set('mappings', {
-        properties: { ...previousMappings.properties, ...mappings.properties },
-      });
     }
 
     if (fileName === TRANSFORM_SPECS_TYPES.TRANSFORM) {
@@ -393,6 +383,20 @@ const processTransformAssetsPerModule = (
     type: ElasticsearchAssetType.transform,
     version: t.transformVersion,
   }));
+
+  // Load and generate mappings
+  for (const destinationIndexTemplate of destinationIndexTemplates) {
+    if (!destinationIndexTemplate.transformModuleId) {
+      continue;
+    }
+
+    transformsSpecifications
+      .get(destinationIndexTemplate.transformModuleId)
+      ?.set(
+        'mappings',
+        loadMappingForTransform(packageInstallContext, destinationIndexTemplate.transformModuleId)
+      );
+  }
 
   return {
     indicesToAddRefs,

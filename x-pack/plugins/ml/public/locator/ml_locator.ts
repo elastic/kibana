@@ -8,7 +8,7 @@
 import type { LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
 import { formatChangePointDetectionUrl } from './formatters/aiops';
 import { formatNotificationsUrl } from './formatters/notifications';
-import {
+import type {
   DataFrameAnalyticsExplorationUrlState,
   MlLocatorParams,
   MlLocator,

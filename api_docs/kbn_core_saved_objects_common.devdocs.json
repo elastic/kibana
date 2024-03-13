@@ -2499,6 +2499,14 @@
             "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
           },
           {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_lens.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_lens.ts"
+          },
+          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/common/migrations/references.ts"
           },
@@ -2525,14 +2533,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_lens.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_lens.ts"
           },
           {
             "plugin": "canvas",

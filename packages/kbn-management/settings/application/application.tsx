@@ -128,9 +128,10 @@ export const SettingsApplication = () => {
       {globalTabEnabled && (
         <>
           <EuiTabs>
-            {Object.keys(tabs).map((id) => (
+            {Object.keys(tabs).map((id, i) => (
               <Tab
                 id={id}
+                key={i}
                 name={tabs[id].name}
                 onChangeSelectedTab={() => setSelectedTabId(id)}
                 isSelected={id === selectedTabId}

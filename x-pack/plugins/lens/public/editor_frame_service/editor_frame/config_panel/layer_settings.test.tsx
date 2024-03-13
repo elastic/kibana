@@ -8,7 +8,11 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import faker from 'faker';
-import { createMockFramePublicAPI, createMockVisualization } from '../../../mocks';
+import {
+  createMockDatasource,
+  createMockFramePublicAPI,
+  createMockVisualization,
+} from '../../../mocks';
 import { LayerSettings } from './layer_settings';
 import { renderWithReduxStore } from '../../../mocks';
 
@@ -16,6 +20,12 @@ describe('LayerSettings', () => {
   const renderLayerSettings = (propsOverrides = {}) => {
     return renderWithReduxStore(
       <LayerSettings
+        datasourceMap={{
+          testDatasource: createMockDatasource(),
+        }}
+        visualizationMap={{
+          testVis: createMockVisualization(),
+        }}
         activeVisualization={createMockVisualization()}
         layerConfigProps={{
           layerId: 'myLayer',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useMemo, useState } from 'react';
+import React, { FunctionComponent, useMemo, useState } from 'react';
 import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,15 +14,11 @@ import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { DetailsPageMappingsContent } from './details_page_mappings_content';
 import { Index } from '../../../../../../common';
 import { useLoadIndexMappings } from '../../../../services';
-import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 
 export const DetailsPageMappings: FunctionComponent<{ index: Index }> = ({ index }) => {
   const { isLoading, data, error, resendRequest } = useLoadIndexMappings(index.name);
   const [jsonError, setJsonError] = useState<boolean>(false);
 
-  useEffect(() => {
-    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetailsMappings);
-  }, []);
   const stringifiedData = useMemo(() => {
     if (data) {
       try {

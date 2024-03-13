@@ -12,12 +12,6 @@ export type { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/sha
 export type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 export { useRequest } from '@kbn/es-ui-shared-plugin/public';
 
-export { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-
-import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
-import type { KibanaContext } from './types';
-export const useKibana = () => _useKibana<KibanaContext>();
-
 export type { SerializableRecord } from '@kbn/utility-types';
 
 export type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
