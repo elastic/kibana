@@ -58,12 +58,18 @@ export function Groups({ groups, timeRange }: { groups: GroupItem[]; timeRange: 
     [AWS_SQS_QUEUE]: prepend(`${METRICS_DETAILS_PATH}/awsSQS`),
   };
 
-  const infraTimeRange = `assetDetails=(dateRange:(from:'${timeRange.from}',to:'${timeRange.to}'))`;
   const apmTimeRange = `rangeFrom=${timeRange.from}&rangeTo=${timeRange.to}`;
+  const hostTimeRange = `assetDetails=(dateRange:(from:'${timeRange.from}',to:'${timeRange.to}'))`;
+  const infraTimeRange = `_a=(time:(from:'${timeRange.from}',to:'${timeRange.to}',interval:>=1m))`;
 
   const generateInfraSourceLink = ({ field, value }: GroupItem) => {
+    const link =
+      field === HOST_NAME
+        ? `${infraSourceLinks[field]}/${value}?${hostTimeRange}`
+        : `${infraSourceLinks[field]}/${value}?${infraTimeRange}`;
+
     return (
-      <a href={`${infraSourceLinks[field]}/${value}?${infraTimeRange}`} target="_blank">
+      <a href={link} target="_blank">
         {value}
       </a>
     );
