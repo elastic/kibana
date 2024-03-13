@@ -16,7 +16,7 @@ import {
   onKeyDownFocusHandler,
 } from '@kbn/timelines-plugin/public';
 import { ThemeContext } from 'styled-components';
-import { EuiText } from '@elastic/eui';
+import { EuiResizableContainer } from '@elastic/eui';
 import { getActionsColumnWidth } from '../../../../common/components/header_actions';
 import type { ControlColumnProps } from '../../../../../common/types';
 import type { CellValueElementProps } from '../cell_rendering';
@@ -216,67 +216,108 @@ export const StatefulBody = React.memo<Props>(
       [columnHeaders.length, containerRef, data.length]
     );
 
+    const graphStyle = getCytoscapeDivStyle(useContext(ThemeContext));
+
+    const graphData = useMemo(() => {
+      // remove duplicated data
+      return data
+        .reduce((acc, event) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const existing = acc.find((n: any) => {
+            return n?.ecs.event.action[0] === event?.ecs?.event?.action?.[0];
+          });
+
+          if (!existing) {
+            event.occurrences = 0;
+            acc.push(event);
+          } else {
+            existing.occurrences += 1;
+          }
+          return acc;
+        }, [])
+        .map((event) => {
+          return {
+            ...event,
+            ecs: {
+              ...event.ecs,
+              event: {
+                ...event.ecs.event,
+                action: [`${event.ecs.event.action} x ${event.occurrences}`],
+              },
+            },
+          };
+        });
+    }, [data]);
+
     return (
       <>
         <TimelineBody data-test-subj="timeline-body" ref={containerRef}>
-          <EventsTable
-            $activePage={activePage}
-            $columnCount={columnCount}
-            data-test-subj={`${tabType}-events-table`}
-            columnWidths={totalWidth}
-            onKeyDown={onKeyDown}
-            $rowCount={data.length}
-            $totalPages={totalPages}
-          >
-            <ColumnHeaders
-              actionsColumnWidth={actionsColumnWidth}
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              isEventViewer={isEventViewer}
-              isSelectAllChecked={isSelectAllChecked}
-              onSelectAll={onSelectAll}
-              show={show}
-              showEventsSelect={false}
-              showSelectAllCheckbox={false}
-              sort={sort}
-              tabType={tabType}
-              timelineId={id}
-              leadingControlColumns={leadingControlColumns}
-              trailingControlColumns={trailingControlColumns}
-            />
+          <EuiResizableContainer style={{ height: '400px' }} direction="vertical">
+            {(EuiResizablePanel, EuiResizableButton) => (
+              <>
+                <EuiResizablePanel mode="collapsible" initialSize={60} minSize="20%" tabIndex={0}>
+                  <EventsTable
+                    $activePage={activePage}
+                    $columnCount={columnCount}
+                    data-test-subj={`${tabType}-events-table`}
+                    columnWidths={totalWidth}
+                    onKeyDown={onKeyDown}
+                    $rowCount={data.length}
+                    $totalPages={totalPages}
+                  >
+                    <ColumnHeaders
+                      actionsColumnWidth={actionsColumnWidth}
+                      browserFields={browserFields}
+                      columnHeaders={columnHeaders}
+                      isEventViewer={isEventViewer}
+                      isSelectAllChecked={isSelectAllChecked}
+                      onSelectAll={onSelectAll}
+                      show={show}
+                      showEventsSelect={false}
+                      showSelectAllCheckbox={false}
+                      sort={sort}
+                      tabType={tabType}
+                      timelineId={id}
+                      leadingControlColumns={leadingControlColumns}
+                      trailingControlColumns={trailingControlColumns}
+                    />
 
-            <Events
-              containerRef={containerRef}
-              actionsColumnWidth={actionsColumnWidth}
-              columnHeaders={columnHeaders}
-              data={data}
-              eventIdToNoteIds={eventIdToNoteIds}
-              id={id}
-              isEventViewer={isEventViewer}
-              lastFocusedAriaColindex={lastFocusedAriaColindex}
-              loadingEventIds={loadingEventIds}
-              onRowSelected={onRowSelected}
-              pinnedEventIds={pinnedEventIds}
-              refetch={refetch}
-              renderCellValue={renderCellValue}
-              rowRenderers={enabledRowRenderers}
-              onRuleChange={onRuleChange}
-              selectedEventIds={selectedEventIds}
-              showCheckboxes={false}
-              leadingControlColumns={leadingControlColumns}
-              trailingControlColumns={trailingControlColumns}
-              tabType={tabType}
-            />
-          </EventsTable>
-          <Cytoscape
-            elements={convertToCytoscapeElements(data)}
-            height={400}
-            serviceName={'serviceName'}
-            style={getCytoscapeDivStyle(useContext(ThemeContext))}
-          />
-          <EuiText size="s" color="subdued" textAlign="center">
-            {data.map((d) => JSON.stringify(d))}
-          </EuiText>
+                    <Events
+                      containerRef={containerRef}
+                      actionsColumnWidth={actionsColumnWidth}
+                      columnHeaders={columnHeaders}
+                      data={data}
+                      eventIdToNoteIds={eventIdToNoteIds}
+                      id={id}
+                      isEventViewer={isEventViewer}
+                      lastFocusedAriaColindex={lastFocusedAriaColindex}
+                      loadingEventIds={loadingEventIds}
+                      onRowSelected={onRowSelected}
+                      pinnedEventIds={pinnedEventIds}
+                      refetch={refetch}
+                      renderCellValue={renderCellValue}
+                      rowRenderers={enabledRowRenderers}
+                      onRuleChange={onRuleChange}
+                      selectedEventIds={selectedEventIds}
+                      showCheckboxes={false}
+                      leadingControlColumns={leadingControlColumns}
+                      trailingControlColumns={trailingControlColumns}
+                      tabType={tabType}
+                    />
+                  </EventsTable>
+                </EuiResizablePanel>
+                <EuiResizableButton />
+                <EuiResizablePanel mode="main" initialSize={400} minSize="20%" tabIndex={-1}>
+                  <Cytoscape
+                    elements={convertToCytoscapeElements(graphData)}
+                    height={600}
+                    serviceName={'serviceName'}
+                    style={graphStyle}
+                  />
+                </EuiResizablePanel>
+              </>
+            )}
+          </EuiResizableContainer>
         </TimelineBody>
         <TimelineBodyGlobalStyle />
       </>
