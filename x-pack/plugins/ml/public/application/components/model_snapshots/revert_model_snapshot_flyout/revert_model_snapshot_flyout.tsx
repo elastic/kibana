@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useCallback, useMemo, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 
 import {
   EuiFlyout,
@@ -31,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { timeFormatter } from '@kbn/ml-date-utils';
 
-import {
+import type {
   ModelSnapshot,
   CombinedJobWithStats,
 } from '../../../../../common/types/anomaly_detection_jobs';
@@ -39,11 +40,12 @@ import { ml } from '../../../services/ml_api_service';
 import { useNotifications } from '../../../contexts/kibana';
 import { chartLoaderProvider } from './chart_loader';
 import { mlResultsService } from '../../../services/results_service';
-import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader';
+import type { LineChartPoint } from '../../../jobs/new_job/common/chart_loader';
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
-import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
+import type { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 import { parseInterval } from '../../../../../common/util/parse_interval';
-import { CreateCalendar, CalendarEvent } from './create_calendar';
+import type { CalendarEvent } from './create_calendar';
+import { CreateCalendar } from './create_calendar';
 
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 

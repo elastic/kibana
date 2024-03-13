@@ -7712,7 +7712,7 @@
         "tags": [],
         "label": "EmbeddablePanel",
         "description": [
-          "\nLoads and renders a legacy embeddable."
+          "\nLoads and renders a legacy embeddable.\n\nAncestry chain must use 'key' attribute to reset DOM and state when embeddable changes\nFor example <Parent key={embeddableId}><EmbeddablePanel/></Parent>"
         ],
         "signature": [
           "(props: ",
@@ -9964,14 +9964,6 @@
           {
             "plugin": "embeddableEnhanced",
             "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
           }
         ],
         "children": [

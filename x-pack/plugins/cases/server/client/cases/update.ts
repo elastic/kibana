@@ -31,7 +31,7 @@ import {
   MAX_USER_ACTIONS_PER_CASE,
 } from '../../../common/constants';
 import { Operations } from '../../authorization';
-import { createCaseError } from '../../common/error';
+import { createCaseError, isSOError } from '../../common/error';
 import {
   createAlertUpdateStatusRequest,
   flattenCaseSavedObject,
@@ -281,7 +281,7 @@ function partitionPatchRequest(
   for (const reqCase of patchReqCases) {
     const foundCase = casesMap.get(reqCase.id);
 
-    if (!foundCase || foundCase.error) {
+    if (!foundCase || isSOError(foundCase)) {
       nonExistingCases.push(reqCase);
     } else if (foundCase.version !== reqCase.version) {
       conflictedCases.push(reqCase);
@@ -341,7 +341,7 @@ export const update = async (
      * only for read.
      */
     const casesMap = myCases.saved_objects.reduce((acc, so) => {
-      acc.set(so.id, so);
+      acc.set(so.id, so as CaseSavedObjectTransformed);
       return acc;
     }, new Map<string, CaseSavedObjectTransformed>());
 
