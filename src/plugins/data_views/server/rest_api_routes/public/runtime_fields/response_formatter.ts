@@ -6,44 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { DataView, DataViewField, DataViewLazy } from '../../../../common';
+import { DataViewField, DataViewLazy } from '../../../../common';
 import { SERVICE_KEY_LEGACY, SERVICE_KEY_TYPE, SERVICE_KEY } from '../../../constants';
 
 interface ResponseFormatterArgs {
   serviceKey: SERVICE_KEY_TYPE;
   fields: DataViewField[];
-  dataView: DataView;
-}
-
-export const responseFormatter = ({ serviceKey, fields, dataView }: ResponseFormatterArgs) => {
-  const response = {
-    body: {
-      fields: fields.map((field) => field.toSpec()),
-      [SERVICE_KEY]: dataView.toSpec(),
-    },
-  };
-
-  const legacyResponse = {
-    body: {
-      [SERVICE_KEY_LEGACY]: dataView.toSpec(),
-      field: fields[0].toSpec(),
-    },
-  };
-
-  return serviceKey === SERVICE_KEY_LEGACY ? legacyResponse : response;
-};
-
-interface ResponseFormatterLazyArgs {
-  serviceKey: SERVICE_KEY_TYPE;
-  fields: DataViewField[];
   dataView: DataViewLazy;
 }
 
-export const responseFormatterLazy = async ({
+export const responseFormatter = async ({
   serviceKey,
   fields,
   dataView,
-}: ResponseFormatterLazyArgs) => {
+}: ResponseFormatterArgs) => {
   const response = {
     body: {
       fields: fields.map((field) => field.toSpec()),

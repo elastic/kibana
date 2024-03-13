@@ -25,7 +25,7 @@ import {
   SERVICE_KEY_TYPE,
   INITIAL_REST_VERSION,
 } from '../../../constants';
-import { responseFormatterLazy } from './response_formatter';
+import { responseFormatter } from './response_formatter';
 import { RuntimeResponseType } from '../../route_types';
 import { runtimeResponseSchema } from '../../schema';
 
@@ -127,7 +127,7 @@ const putRuntimeFieldRouteFactory =
           counterName: `${req.route.method} ${path}`,
         });
 
-        const response: RuntimeResponseType = await responseFormatterLazy({
+        const response: RuntimeResponseType = await responseFormatter({
           serviceKey,
           dataView,
           fields,
