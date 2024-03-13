@@ -151,8 +151,6 @@ User prompt text`);
     });
 
     describe('when there is data to anonymize', () => {
-      const onNewReplacements = jest.fn();
-
       const mockPromptContextWithDataToAnonymize: SelectedPromptContext = {
         allow: ['field1', 'field2'],
         allowReplacement: ['field1', 'field2'],
