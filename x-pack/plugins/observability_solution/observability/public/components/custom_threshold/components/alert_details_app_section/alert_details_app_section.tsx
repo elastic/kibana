@@ -129,7 +129,6 @@ export default function AlertDetailsAppSection({
   };
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
-  // const timeRange = getPaddedAlertTimeRange(alertStart!, alertEnd);
   const groups = alert.fields[ALERT_GROUP];
   const tags = alert.fields[TAGS];
 
