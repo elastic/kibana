@@ -14,6 +14,7 @@ import type { DatasourceDimensionEditorProps, DataType } from '../../../types';
 import { FieldSelect } from './field_select';
 import type { TextBasedPrivateState } from '../types';
 import { retrieveLayerColumnsFromCache, getColumnsFromCache } from '../fieldlist_cache';
+import { isNotNumeric, isNumeric } from '../utils';
 
 export type TextBasedDimensionEditorProps =
   DatasourceDimensionEditorProps<TextBasedPrivateState> & {
@@ -28,7 +29,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     query
   );
   const allFields = query ? getColumnsFromCache(query) : [];
-  const hasNumberTypeColumns = allColumns?.some((c) => c?.meta?.type === 'number');
+  const hasNumberTypeColumns = allColumns?.some(isNumeric);
   const fields = allFields.map((col) => {
     return {
       id: col.id,
@@ -38,7 +39,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
         props.isMetricDimension && hasNumberTypeColumns
           ? props.filterOperations({
               dataType: col?.meta?.type as DataType,
-              isBucketed: Boolean(col?.meta?.type !== 'number'),
+              isBucketed: Boolean(isNotNumeric(col)),
               scale: 'ordinal',
             })
           : true,
