@@ -70,7 +70,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: SETTINGS_API_ROUTES.INFO_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readSettings: true },
       },
     })
     .addVersion(
@@ -84,7 +84,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .put({
       path: SETTINGS_API_ROUTES.UPDATE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
     })
     .addVersion(
