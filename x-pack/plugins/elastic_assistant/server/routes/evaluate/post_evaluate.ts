@@ -149,7 +149,7 @@ export const postEvaluateRoute = (
               allow: [],
               allowReplacement: [],
               subAction: 'invokeAI',
-              replacements: [ß],
+              replacements: [],
               size: DEFAULT_SIZE,
               isEnabledKnowledgeBase: true,
               isEnabledRAGAlerts: true,

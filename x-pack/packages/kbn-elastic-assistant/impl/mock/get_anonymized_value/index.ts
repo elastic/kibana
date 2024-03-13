@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { Replacement } from '@kbn/elastic-assistant-common';
-
 /** This mock returns the reverse of `value` */
 export const mockGetAnonymizedValue = ({
   currentReplacements,
   rawValue,
 }: {
-  currentReplacements: Replacement[] | undefined;
+  currentReplacements: Record<string, string> | undefined;
   rawValue: string;
-}): Replacement => ({ value: rawValue, uuid: rawValue.split('').reverse().join('') });
+}): string => rawValue.split('').reverse().join('');

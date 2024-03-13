@@ -95,7 +95,7 @@ export const callAgentExecutor = async ({
   const executor = await initializeAgentExecutorWithOptions(tools, llm, {
     agentType: 'chat-conversational-react-description',
     memory,
-    verbose: true,
+    verbose: false,
   });
 
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx

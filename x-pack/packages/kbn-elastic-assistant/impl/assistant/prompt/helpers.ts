@@ -45,9 +45,9 @@ export function getCombinedMessage({
     currentReplacements,
     rawValue,
   }: {
-    currentReplacements: Replacement[] | undefined;
+    currentReplacements: Record<string, string> | undefined;
     rawValue: string;
-  }) => Replacement;
+  }) => string;
   isNewChat: boolean;
   promptText: string;
   selectedPromptContexts: Record<string, SelectedPromptContext>;

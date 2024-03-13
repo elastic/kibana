@@ -68,10 +68,24 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
 
         // Accumulate replacements locally so we can, for example use the same
         // replacement for a hostname when we see it in multiple alerts:
-        let localReplacements = replacements ? [...replacements] : [];
+        let localReplacements: Replacement[] = replacements ?? [];
         const localOnNewReplacements = (newReplacements: Replacement[]) => {
-          localReplacements = [...localReplacements, ...newReplacements]; // update the local state
-
+          const localReplacementsDict = localReplacements.reduce(
+            (acc: Record<string, string>, r) => {
+              acc[r.value] = r.uuid;
+              return acc;
+            },
+            {}
+          );
+          const newReplacementsDict = newReplacements.reduce((acc: Record<string, string>, r) => {
+            acc[r.value] = r.uuid;
+            return acc;
+          }, {});
+          const updatedReplacements = { ...localReplacementsDict, ...newReplacementsDict };
+          localReplacements = Object.keys(updatedReplacements).map((key) => ({
+            value: key,
+            uuid: updatedReplacements[key],
+          }));
           onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
           return Promise.resolve(localReplacements);
         };

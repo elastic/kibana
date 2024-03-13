@@ -21,7 +21,7 @@ describe('getAnonymizedData', () => {
   const commonArgs = {
     allow: ['doNotReplace', 'empty', 'host.ip', 'host.name'],
     allowReplacement: ['empty', 'host.ip', 'host.name'],
-    currentReplacements: [],
+    currentReplacements: {},
     rawData,
     getAnonymizedValue: mockGetAnonymizedValue,
     getAnonymizedValues,
@@ -45,10 +45,10 @@ describe('getAnonymizedData', () => {
       ...commonArgs,
     });
 
-    expect(result.replacements).toEqual([
-      { uuid: '1.0.0.721', value: '127.0.0.1' },
-      { uuid: '1.0.0.01', value: '10.0.0.1' },
-      { uuid: 'tsoh-tset', value: 'test-host' },
-    ]);
+    expect(result.replacements).toEqual({
+      '1.0.0.721': '127.0.0.1',
+      '1.0.0.01': '10.0.0.1',
+      'tsoh-tset': 'test-host',
+    });
   });
 });

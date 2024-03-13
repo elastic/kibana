@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { Replacement } from '../schemas';
-
 export interface AnonymizedValues {
   /** The original values were transformed to these anonymized values */
   anonymizedValues: string[];
 
   /** A map from replacement value to original value */
-  replacements: Replacement[];
+  replacements: Record<string, string>;
 }
 
 export interface AnonymizedData {
@@ -20,7 +18,7 @@ export interface AnonymizedData {
   anonymizedData: Record<string, string[]>;
 
   /** A map from replacement value to original value */
-  replacements: Replacement[];
+  replacements: Record<string, string>;
 }
 
 export type GetAnonymizedValues = ({
@@ -33,14 +31,14 @@ export type GetAnonymizedValues = ({
 }: {
   allowReplacementSet: Set<string>;
   allowSet: Set<string>;
-  currentReplacements: Replacement[] | undefined;
+  currentReplacements: Record<string, string> | undefined;
   field: string;
   getAnonymizedValue: ({
     currentReplacements,
     rawValue,
   }: {
-    currentReplacements: Replacement[] | undefined;
+    currentReplacements: Record<string, string> | undefined;
     rawValue: string;
-  }) => Replacement;
+  }) => string;
   rawData: Record<string, unknown[]>;
 }) => AnonymizedValues;

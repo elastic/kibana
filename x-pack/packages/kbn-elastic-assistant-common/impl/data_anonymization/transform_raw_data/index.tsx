@@ -25,9 +25,9 @@ export const transformRawData = ({
     currentReplacements,
     rawValue,
   }: {
-    currentReplacements: Replacement[] | undefined;
+    currentReplacements: Record<string, string> | undefined;
     rawValue: string;
-  }) => Replacement;
+  }) => string;
   onNewReplacements?: (replacements: Replacement[]) => void;
   rawData: string | Record<string, unknown[]>;
 }): string => {
@@ -38,14 +38,22 @@ export const transformRawData = ({
   const anonymizedData = getAnonymizedData({
     allow,
     allowReplacement,
-    currentReplacements,
+    currentReplacements: currentReplacements?.reduce((acc: Record<string, string>, r) => {
+      acc[r.uuid] = r.value;
+      return acc;
+    }, {}),
     rawData,
     getAnonymizedValue,
     getAnonymizedValues,
   });
 
   if (onNewReplacements != null) {
-    onNewReplacements(anonymizedData.replacements);
+    onNewReplacements(
+      Object.keys(anonymizedData.replacements).map((key) => ({
+        uuid: key,
+        value: anonymizedData.replacements[key],
+      }))
+    );
   }
 
   return getCsvFromData(anonymizedData.anonymizedData);

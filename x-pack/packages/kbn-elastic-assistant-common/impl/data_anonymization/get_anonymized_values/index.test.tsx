@@ -13,7 +13,7 @@ describe('getAnonymizedValues', () => {
     const result = getAnonymizedValues({
       allowReplacementSet: new Set(),
       allowSet: new Set(),
-      currentReplacements: [],
+      currentReplacements: {},
       field: 'test.field',
       getAnonymizedValue: jest.fn(),
       rawData: {},
@@ -21,7 +21,7 @@ describe('getAnonymizedValues', () => {
 
     expect(result).toEqual({
       anonymizedValues: [],
-      replacements: [],
+      replacements: {},
     });
   });
 
@@ -33,7 +33,7 @@ describe('getAnonymizedValues', () => {
     const result = getAnonymizedValues({
       allowReplacementSet: new Set(['test.field']),
       allowSet: new Set(['test.field']),
-      currentReplacements: [],
+      currentReplacements: {},
       field: 'test.field',
       getAnonymizedValue: mockGetAnonymizedValue,
       rawData,
@@ -50,16 +50,16 @@ describe('getAnonymizedValues', () => {
     const result = getAnonymizedValues({
       allowReplacementSet: new Set(['test.field']),
       allowSet: new Set(['test.field']),
-      currentReplacements: [],
+      currentReplacements: {},
       field: 'test.field',
       getAnonymizedValue: mockGetAnonymizedValue,
       rawData,
     });
 
-    expect(result.replacements).toEqual([
-      { uuid: '1tset', value: 'test1' },
-      { uuid: '2tset', value: 'test2' },
-    ]);
+    expect(result.replacements).toEqual({
+      '1tset': 'test1',
+      '2tset': 'test2',
+    });
   });
 
   it('returns non-anonymized values when the field is not a member of the `allowReplacementSet`', () => {
@@ -70,7 +70,7 @@ describe('getAnonymizedValues', () => {
     const result = getAnonymizedValues({
       allowReplacementSet: new Set(), // does NOT include `test.field`
       allowSet: new Set(['test.field']),
-      currentReplacements: [],
+      currentReplacements: {},
       field: 'test.field',
       getAnonymizedValue: mockGetAnonymizedValue,
       rawData,
@@ -87,7 +87,7 @@ describe('getAnonymizedValues', () => {
     const result = getAnonymizedValues({
       allowReplacementSet: new Set(['test.field']),
       allowSet: new Set(), // does NOT include `test.field`
-      currentReplacements: [],
+      currentReplacements: {},
       field: 'test.field',
       getAnonymizedValue: mockGetAnonymizedValue,
       rawData,

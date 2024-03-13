@@ -73,9 +73,25 @@ export const postActionsConnectorExecuteRoute = (
           }
           const dataClient = await assistantContext.getAIAssistantConversationsDataClient();
 
-          const latestReplacements = request.body.replacements;
+          let latestReplacements: Replacement[] = request.body.replacements;
           const onNewReplacements = (newReplacements: Replacement[]) => {
-            latestReplacements.push(...latestReplacements, ...newReplacements);
+            const latestReplacementsDict = latestReplacements.reduce(
+              (acc: Record<string, string>, r) => {
+                acc[r.value] = r.uuid;
+                return acc;
+              },
+              {}
+            );
+            const newReplacementsDict = newReplacements.reduce((acc: Record<string, string>, r) => {
+              acc[r.value] = r.uuid;
+              return acc;
+            }, {});
+
+            const updatedReplacements = { ...latestReplacementsDict, ...newReplacementsDict };
+            latestReplacements = Object.keys(updatedReplacements).map((key) => ({
+              value: key,
+              uuid: updatedReplacements[key],
+            }));
           };
 
           let onLlmResponse;
