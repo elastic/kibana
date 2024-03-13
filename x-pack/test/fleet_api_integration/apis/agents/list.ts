@@ -46,10 +46,24 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it.skip('should return a 200 if a user with the fleet all try to access the list', async () => {
-      await supertest
+    it('should return a 200 if a user with the fleet all try to access the list', async () => {
+      await supertestWithoutAuth
         .get(`/api/fleet/agents`)
         .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
+        .expect(200);
+    });
+
+    it('should return a 200 if a user with the fleet read try to access the list', async () => {
+      await supertestWithoutAuth
+        .get(`/api/fleet/agents`)
+        .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+        .expect(200);
+    });
+
+    it('should return a 200 if a user with the fleet agents read try to access the list', async () => {
+      await supertestWithoutAuth
+        .get(`/api/fleet/agents`)
+        .auth(testUsers.fleet_agents_read_only.username, testUsers.fleet_agents_read_only.password)
         .expect(200);
     });
 
@@ -63,12 +77,6 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return the list of agents when requesting as admin', async () => {
       const { body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200);
 
-      expect(apiResponse).to.have.keys('page', 'total', 'items', 'list');
-      expect(apiResponse.total).to.eql(4);
-    });
-
-    it('should return the list of agents when requesting as a user with fleet read permissions', async () => {
-      const { body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200);
       expect(apiResponse).to.have.keys('page', 'total', 'items', 'list');
       expect(apiResponse.total).to.eql(4);
     });

@@ -185,4 +185,31 @@ describe('grouping container', () => {
       true
     );
   });
+
+  describe('groupsUnit', () => {
+    it('renders default groupsUnit text correctly', () => {
+      const { getByTestId } = render(
+        <I18nProvider>
+          <Grouping {...testProps} />
+        </I18nProvider>
+      );
+      expect(getByTestId('group-count').textContent).toBe('3 groups');
+    });
+    it('calls custom groupsUnit callback correctly', () => {
+      // Provide a custom groupsUnit function in testProps
+      const customGroupsUnit = jest.fn(
+        (n, parentSelectedGroup, hasNullGroup) => `${n} custom units`
+      );
+      const customProps = { ...testProps, groupsUnit: customGroupsUnit };
+
+      const { getByTestId } = render(
+        <I18nProvider>
+          <Grouping {...customProps} />
+        </I18nProvider>
+      );
+
+      expect(customGroupsUnit).toHaveBeenCalledWith(3, testProps.selectedGroup, true);
+      expect(getByTestId('group-count').textContent).toBe('3 custom units');
+    });
+  });
 });
