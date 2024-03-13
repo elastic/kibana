@@ -29,7 +29,7 @@ export const VideCodeFlyout: React.FC<VideCodeFlyoutProps> = ({ onClose }) => {
   const steps = useMemo(
     () => [
       {
-        title: i18n.translate('playground.viewCode.flyout.step.apiKeyTitle', {
+        title: i18n.translate('xpack.searchPlayground.viewCode.flyout.step.apiKeyTitle', {
           defaultMessage: 'Generate and copy an API key',
         }),
         children: (
@@ -37,7 +37,7 @@ export const VideCodeFlyout: React.FC<VideCodeFlyoutProps> = ({ onClose }) => {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="playground.viewCode.flyout.step.apiKeyDescription"
+                  id="xpack.searchPlayground.viewCode.flyout.step.apiKeyDescription"
                   defaultMessage="You will only be able to see this API key once after creation."
                 />
               </p>
@@ -48,14 +48,14 @@ export const VideCodeFlyout: React.FC<VideCodeFlyoutProps> = ({ onClose }) => {
         ),
       },
       {
-        title: i18n.translate('playground.viewCode.flyout.step.createApplication', {
+        title: i18n.translate('xpack.searchPlayground.viewCode.flyout.step.createApplication', {
           defaultMessage: 'Create application',
         }),
         children: (
           <>
             <EuiFormLabel>
               <FormattedMessage
-                id="playground.viewCode.flyout.step.installLabel"
+                id="xpack.searchPlayground.viewCode.flyout.step.installLabel"
                 defaultMessage="Use this code in your CLI"
               />
             </EuiFormLabel>
@@ -75,14 +75,17 @@ export const VideCodeFlyout: React.FC<VideCodeFlyoutProps> = ({ onClose }) => {
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
-            <FormattedMessage id="playground.viewCode.flyout.title" defaultMessage="Export" />
+            <FormattedMessage
+              id="xpack.searchPlayground.viewCode.flyout.title"
+              defaultMessage="Export"
+            />
           </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText color="subdued">
           <p>
             <FormattedMessage
-              id="playground.viewCode.flyout.subtitle"
+              id="xpack.searchPlayground.viewCode.flyout.subtitle"
               defaultMessage="Use this custom built playground experience in your application"
             />
           </p>

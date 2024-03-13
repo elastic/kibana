@@ -40,15 +40,15 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
 
   return (
     <EuiComment
-      username={i18n.translate('playground.chat.message.assistant.username', {
+      username={i18n.translate('xpack.searchPlayground.chat.message.assistant.username', {
         defaultMessage: 'AI',
       })}
-      event={i18n.translate('playground.chat.message.assistant.event', {
+      event={i18n.translate('xpack.searchPlayground.chat.message.assistant.event', {
         defaultMessage: 'responded',
       })}
       timestamp={
         createdAt &&
-        i18n.translate('playground.chat.message.assistant.createdAt', {
+        i18n.translate('xpack.searchPlayground.chat.message.assistant.createdAt', {
           defaultMessage: 'on {date}',
           values: {
             date: moment(createdAt).format('MMM DD, YYYY'),
@@ -56,13 +56,16 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
         })
       }
       timelineAvatar="compute"
-      timelineAvatarAriaLabel={i18n.translate('playground.chat.message.assistant.avatarAriaLabel', {
-        defaultMessage: 'AI',
-      })}
+      timelineAvatarAriaLabel={i18n.translate(
+        'xpack.searchPlayground.chat.message.assistant.avatarAriaLabel',
+        {
+          defaultMessage: 'AI',
+        }
+      )}
       actions={
         <CopyActionButton
           copyText={String(content)}
-          ariaLabel={i18n.translate('playground.chat.message.assistant.copyLabel', {
+          ariaLabel={i18n.translate('xpack.searchPlayground.chat.message.assistant.copyLabel', {
             defaultMessage: 'Copy assistant message',
           })}
         />
@@ -71,7 +74,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiTitle size="xs">
           <p>
-            {i18n.translate('playground.chat.message.assistant.title', {
+            {i18n.translate('xpack.searchPlayground.chat.message.assistant.title', {
               defaultMessage: 'Summary',
             })}
           </p>
@@ -79,7 +82,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
         {!!retrievalDocs?.length && (
           <>
             <EuiButtonEmpty onClick={() => setIsDocsFlyoutOpen(true)}>
-              {i18n.translate('playground.chat.message.assistant.retrievalDocButton', {
+              {i18n.translate('xpack.searchPlayground.chat.message.assistant.retrievalDocButton', {
                 defaultMessage:
                   '{count} {count, plural, one {document} other {documents}} retrieved',
                 values: { count: retrievalDocs.length },
@@ -104,7 +107,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
           <EuiSpacer size="l" />
           <EuiTitle size="xs">
             <p>
-              {i18n.translate('playground.chat.message.assistant.citations.title', {
+              {i18n.translate('xpack.searchPlayground.chat.message.assistant.citations.title', {
                 defaultMessage: 'Citations',
               })}
             </p>

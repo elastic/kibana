@@ -128,9 +128,12 @@ export const Chat = () => {
                     button={
                       isSubmitting ? (
                         <EuiButtonIcon
-                          aria-label={i18n.translate('playground.chat.stopButtonAriaLabel', {
-                            defaultMessage: 'Stop request',
-                          })}
+                          aria-label={i18n.translate(
+                            'xpack.searchPlayground.chat.stopButtonAriaLabel',
+                            {
+                              defaultMessage: 'Stop request',
+                            }
+                          )}
                           display="base"
                           size="s"
                           iconType="stop"
@@ -138,9 +141,12 @@ export const Chat = () => {
                         />
                       ) : (
                         <EuiButtonIcon
-                          aria-label={i18n.translate('playground.chat.sendButtonAriaLabel', {
-                            defaultMessage: 'Send a question',
-                          })}
+                          aria-label={i18n.translate(
+                            'xpack.searchPlayground.chat.sendButtonAriaLabel',
+                            {
+                              defaultMessage: 'Send a question',
+                            }
+                          )}
                           display={isValid ? 'base' : 'empty'}
                           size="s"
                           type="submit"

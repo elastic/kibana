@@ -52,7 +52,7 @@ export const CreateApiKeyForm = () => {
     <EuiForm>
       <EuiFormRow
         fullWidth
-        label={i18n.translate('playground.viewCode.apiForm.name.label', {
+        label={i18n.translate('xpack.searchPlayground.viewCode.apiForm.name.label', {
           defaultMessage: 'Name',
         })}
       >
@@ -64,9 +64,12 @@ export const CreateApiKeyForm = () => {
           render={({ field }) => (
             <EuiFieldText
               fullWidth
-              placeholder={i18n.translate('playground.viewCode.apiForm.name.placeholder', {
-                defaultMessage: 'Enter a name for your API key',
-              })}
+              placeholder={i18n.translate(
+                'xpack.searchPlayground.viewCode.apiForm.name.placeholder',
+                {
+                  defaultMessage: 'Enter a name for your API key',
+                }
+              )}
               value={field.value}
               onChange={field.onChange}
             />
@@ -86,7 +89,7 @@ export const CreateApiKeyForm = () => {
                 <EuiText size="xs">
                   <strong>
                     <FormattedMessage
-                      id="playground.viewCode.apiForm.expire.days"
+                      id="xpack.searchPlayground.viewCode.apiForm.expire.days"
                       defaultMessage="Days"
                     />
                   </strong>
@@ -96,9 +99,12 @@ export const CreateApiKeyForm = () => {
               <EuiFieldText
                 fullWidth
                 type="number"
-                placeholder={i18n.translate('playground.viewCode.apiForm.expire.placeholder', {
-                  defaultMessage: 'Set expiry in days',
-                })}
+                placeholder={i18n.translate(
+                  'xpack.searchPlayground.viewCode.apiForm.expire.placeholder',
+                  {
+                    defaultMessage: 'Set expiry in days',
+                  }
+                )}
                 value={field.value || ''}
                 onChange={field.onChange}
               />
@@ -112,7 +118,7 @@ export const CreateApiKeyForm = () => {
           {isSuccess && !isDirty ? (
             <EuiButton color="success" iconType="check">
               <FormattedMessage
-                id="playground.viewCode.apiForm.createdButton"
+                id="xpack.searchPlayground.viewCode.apiForm.createdButton"
                 defaultMessage="Created"
               />
             </EuiButton>
@@ -124,7 +130,7 @@ export const CreateApiKeyForm = () => {
               color={isError ? 'danger' : 'primary'}
             >
               <FormattedMessage
-                id="playground.viewCode.apiForm.createButton"
+                id="xpack.searchPlayground.viewCode.apiForm.createButton"
                 defaultMessage="Create API key"
               />
             </EuiButton>
@@ -137,7 +143,7 @@ export const CreateApiKeyForm = () => {
             target="_blank"
           >
             <FormattedMessage
-              id="playground.viewCode.apiForm.viewKeysButton"
+              id="xpack.searchPlayground.viewCode.apiForm.viewKeysButton"
               defaultMessage="View all API keys"
             />
           </EuiButtonEmpty>

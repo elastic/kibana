@@ -20,8 +20,6 @@ import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
-import { ConnectorDetailRouter } from './components/connector_detail/connector_detail_router';
-import { Connectors } from './components/connectors/connectors';
 import { ConnectorsRouter } from './components/connectors/connectors_router';
 import { CrawlersRouter } from './components/connectors/crawlers_router';
 import { NotFound } from './components/not_found';

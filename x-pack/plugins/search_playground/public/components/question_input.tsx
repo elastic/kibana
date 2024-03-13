@@ -35,9 +35,12 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
           padding: '20px 76px 20px 20px',
           height: '56px',
         }}
-        placeholder={i18n.translate('playground.chat.questionInput.askQuestionPlaceholder', {
-          defaultMessage: 'Ask a question',
-        })}
+        placeholder={i18n.translate(
+          'xpack.searchPlayground.chat.questionInput.askQuestionPlaceholder',
+          {
+            defaultMessage: 'Ask a question',
+          }
+        )}
         value={value}
         onChange={handleChange}
         disabled={isDisabled}

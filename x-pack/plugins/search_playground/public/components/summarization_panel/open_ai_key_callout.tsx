@@ -18,20 +18,20 @@ interface OpenAIKeyCalloutProps {
 export const OpenAIKeyCallout: React.FC<OpenAIKeyCalloutProps> = ({ openAIFlyOutOpen }) => {
   return (
     <EuiCallOut
-      title={i18n.translate('playground.sidebar.openAICallout.headerText', {
+      title={i18n.translate('xpack.searchPlayground.sidebar.openAICallout.headerText', {
         defaultMessage: 'Add OpenAI API Key',
       })}
       color="warning"
       iconType="warning"
     >
       <p>
-        {i18n.translate('playground.sidebar.openAICallout.description', {
+        {i18n.translate('xpack.searchPlayground.sidebar.openAICallout.description', {
           defaultMessage:
             'The AI Playground uses OpenAl models for summarization. Add your OpenAI API key to continue.',
         })}
       </p>
       <EuiButton onClick={openAIFlyOutOpen} color="warning" fill data-test-subj="openaiflyout-open">
-        {i18n.translate('playground.sidebar.openAICallout.buttonLabelText', {
+        {i18n.translate('xpack.searchPlayground.sidebar.openAICallout.buttonLabelText', {
           defaultMessage: 'Add OpenAI API Key',
         })}
       </EuiButton>

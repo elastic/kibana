@@ -35,12 +35,12 @@ export const renderApp = (
             <PlaygroundProvider navigateToIndexPage={() => {}}>
               <KibanaPageTemplate
                 pageChrome={[
-                  i18n.translate('searchPlayground.breadcrumb', {
+                  i18n.translate('xpack.searchPlayground.breadcrumb', {
                     defaultMessage: 'Playground',
                   }),
                 ]}
                 pageHeader={{
-                  pageTitle: i18n.translate('searchPlayground.pageTitle', {
+                  pageTitle: i18n.translate('xpack.searchPlayground.pageTitle', {
                     defaultMessage: 'Playground',
                   }),
                 }}

@@ -43,9 +43,12 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
   const columns: Array<EuiBasicTableColumn<{ field: string; value: unknown }>> = [
     {
       field: 'field',
-      name: i18n.translate('playground.chat.message.assistant.retrievalDoc.result.nameColumn', {
-        defaultMessage: 'Field',
-      }),
+      name: i18n.translate(
+        'xpack.searchPlayground.chat.message.assistant.retrievalDoc.result.nameColumn',
+        {
+          defaultMessage: 'Field',
+        }
+      ),
       render: (field: string) => {
         return (
           <EuiText>
@@ -60,9 +63,12 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
     },
     {
       field: 'value',
-      name: i18n.translate('playground.chat.message.assistant.retrievalDoc.result.valueColumn', {
-        defaultMessage: 'Value',
-      }),
+      name: i18n.translate(
+        'xpack.searchPlayground.chat.message.assistant.retrievalDoc.result.valueColumn',
+        {
+          defaultMessage: 'Value',
+        }
+      ),
       render: (value: unknown) => (
         <EuiCodeBlock paddingSize="none" transparentBackground fontSize="m">
           {(typeof value === 'string' ? value : JSON.stringify(value)).slice(0, 255)}
@@ -76,7 +82,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h3>
-            {i18n.translate('playground.chat.message.assistant.retrievalDoc.title', {
+            {i18n.translate('xpack.searchPlayground.chat.message.assistant.retrievalDoc.title', {
               defaultMessage: 'Documents retrieved',
             })}
           </h3>
@@ -84,7 +90,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
         <EuiSpacer size="s" />
         <EuiText color="subdued">
           <p>
-            {i18n.translate('playground.chat.message.assistant.retrievalDoc.subtitle', {
+            {i18n.translate('xpack.searchPlayground.chat.message.assistant.retrievalDoc.subtitle', {
               defaultMessage:
                 'The documents that were referenced in order to create an answer to your query',
             })}
@@ -98,16 +104,19 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexGroup justifyContent="spaceBetween">
                   <code>
-                    {i18n.translate('playground.chat.message.assistant.retrievalDoc.result.id', {
-                      defaultMessage: 'ID: {id}',
-                      values: { id: doc.id },
-                    })}
+                    {i18n.translate(
+                      'xpack.searchPlayground.chat.message.assistant.retrievalDoc.result.id',
+                      {
+                        defaultMessage: 'ID: {id}',
+                        values: { id: doc.id },
+                      }
+                    )}
                   </code>
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup gutterSize="xs" alignItems="center">
                       <code>
                         {i18n.translate(
-                          'playground.chat.message.assistant.retrievalDoc.result.fromIndex',
+                          'xpack.searchPlayground.chat.message.assistant.retrievalDoc.result.fromIndex',
                           {
                             defaultMessage: 'from',
                           }
@@ -118,20 +127,6 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiBasicTable items={truncateFields(doc)} columns={columns} />
-                {/* {hiddenFields > 0 && (*/}
-                {/*  <EuiFlexGroup gutterSize="s" alignItems="center">*/}
-                {/*    <EuiIcon type="arrowRight" color="subdued" />*/}
-                {/*    <EuiTextColor color="subdued">*/}
-                {/*      <code>*/}
-                {/*        <FormattedMessage*/}
-                {/*          id=""*/}
-                {/*          defaultMessage="{count} {count, plural, one {More Field} other {More Fields}}"*/}
-                {/*          values={{ count: hiddenFields }}*/}
-                {/*        />*/}
-                {/*      </code>*/}
-                {/*    </EuiTextColor>*/}
-                {/*  </EuiFlexGroup>*/}
-                {/* )}*/}
               </EuiFlexGroup>
             </EuiPanel>
           ))}

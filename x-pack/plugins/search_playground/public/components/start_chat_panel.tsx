@@ -43,7 +43,7 @@ export const StartChatPanel: React.FC<StartChatPanelProps> = ({
             <EuiText size="xs" color="success">
               <p>
                 <FormattedMessage
-                  id="playground.startChatPanel.verified"
+                  id="xpack.searchPlayground.startChatPanel.verified"
                   defaultMessage="Completed"
                 />
               </p>

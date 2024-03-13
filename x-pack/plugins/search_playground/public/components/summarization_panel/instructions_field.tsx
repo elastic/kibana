@@ -23,14 +23,14 @@ export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onC
     <EuiFormRow
       label={
         <EuiToolTip
-          content={i18n.translate('playground.sidebar.instructionsField.help', {
+          content={i18n.translate('xpack.searchPlayground.sidebar.instructionsField.help', {
             defaultMessage:
               'This is the instruction or question you want the AI to respond to. Be clear and specific for the best results.',
           })}
         >
           <>
             <span>
-              {i18n.translate('playground.sidebar.instructionsField.label', {
+              {i18n.translate('xpack.searchPlayground.sidebar.instructionsField.label', {
                 defaultMessage: 'Instructions',
               })}
             </span>
@@ -40,9 +40,12 @@ export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onC
       }
     >
       <EuiTextArea
-        placeholder={i18n.translate('playground.sidebar.instructionsField.placeholder', {
-          defaultMessage: 'Replace me',
-        })}
+        placeholder={i18n.translate(
+          'xpack.searchPlayground.sidebar.instructionsField.placeholder',
+          {
+            defaultMessage: 'Replace me',
+          }
+        )}
         value={value}
         onChange={handlePromptChange}
         fullWidth

@@ -47,7 +47,7 @@ export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h3>
-            {i18n.translate('playground.sidebar.openAIFlyOut.headerTitle', {
+            {i18n.translate('xpack.searchPlayground.sidebar.openAIFlyOut.headerTitle', {
               defaultMessage: 'OpenAI API Key',
             })}
           </h3>
@@ -58,7 +58,7 @@ export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({
         <EuiFlexGroup direction="column" gutterSize="l">
           <EuiFormRow
             fullWidth
-            label={i18n.translate('playground.sidebar.openAIFlyOut.labelTitle', {
+            label={i18n.translate('xpack.searchPlayground.sidebar.openAIFlyOut.labelTitle', {
               defaultMessage: 'OpenAI API Key',
             })}
             labelAppend={
@@ -72,9 +72,12 @@ export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({
             <EuiFlexItem grow>
               <EuiFieldPassword
                 fullWidth
-                placeholder={i18n.translate('playground.sidebar.openAIFlyOut.placeholder', {
-                  defaultMessage: 'Enter API Key here',
-                })}
+                placeholder={i18n.translate(
+                  'xpack.searchPlayground.sidebar.openAIFlyOut.placeholder',
+                  {
+                    defaultMessage: 'Enter API Key here',
+                  }
+                )}
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
               />
@@ -89,7 +92,7 @@ export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({
               data-telemetry-id="entSearchAIPlayground-addingOpenAIKey-cancel"
               onClick={onClose}
             >
-              {i18n.translate('playground.sidebar.openAIFlyOut.cancelButtonLabel', {
+              {i18n.translate('xpack.searchPlayground.sidebar.openAIFlyOut.cancelButtonLabel', {
                 defaultMessage: 'Cancel',
               })}
             </EuiButtonEmpty>
@@ -102,7 +105,7 @@ export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({
               fill
               onClick={handleSave}
             >
-              {i18n.translate('playground.sidebar.openAIFlyOut.saveButtonLabel', {
+              {i18n.translate('xpack.searchPlayground.sidebar.openAIFlyOut.saveButtonLabel', {
                 defaultMessage: 'Save',
               })}
             </EuiButton>

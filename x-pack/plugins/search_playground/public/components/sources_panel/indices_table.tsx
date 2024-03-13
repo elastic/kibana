@@ -20,7 +20,7 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({ indices, onRemoveCli
     columns={[
       {
         field: 'index',
-        name: i18n.translate('playground.sources.indices.table.label', {
+        name: i18n.translate('xpack.searchPlayground.sources.indices.table.label', {
           defaultMessage: 'Selected indices',
         }),
         truncateText: true,
@@ -30,12 +30,15 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({ indices, onRemoveCli
         actions: [
           {
             type: 'icon',
-            name: i18n.translate('playground.sources.indices.table.remove.label', {
+            name: i18n.translate('xpack.searchPlayground.sources.indices.table.remove.label', {
               defaultMessage: 'Remove',
             }),
-            description: i18n.translate('playground.sources.indices.table.remove.description', {
-              defaultMessage: 'Remove index',
-            }),
+            description: i18n.translate(
+              'xpack.searchPlayground.sources.indices.table.remove.description',
+              {
+                defaultMessage: 'Remove index',
+              }
+            ),
             icon: 'minusInCircle',
             onClick: (item: { index: string }) => onRemoveClick(item.index),
           },
