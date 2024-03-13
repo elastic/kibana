@@ -20,7 +20,12 @@
     "@kbn/logging",
     "@kbn/ml-response-stream",
     "@kbn/security-plugin",
-    "@kbn/user-profile-components"
+    "@kbn/user-profile-components",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/shared-ux-router",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/navigation-plugin",
+    "@kbn/core-http-server"
   ],
   "exclude": [
     "target/**/*",
