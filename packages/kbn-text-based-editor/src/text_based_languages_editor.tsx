@@ -232,7 +232,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   useEffect(() => {
     const timeZone = uiSettings!.get('dateFormat:tz');
-    if (isLoading) {
+    if (isQueryLoading) {
       addQueriesToCache({
         queryString,
         timeZone,
@@ -243,7 +243,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         status: serverErrors?.length ? 'error' : 'success',
       });
     }
-  }, [isLoading, queryString, serverErrors?.length, uiSettings]);
+  }, [isQueryLoading, queryString, serverErrors?.length, uiSettings]);
 
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();

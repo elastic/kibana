@@ -10,7 +10,7 @@ import React, { memo, useState, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
-  // EuiCode,
+  EuiCode,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -32,29 +32,52 @@ export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: b
   const { euiTheme } = useEuiTheme();
   return (
     <>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="discuss" color="primary" size="s" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiLink
-          href={FEEDBACK_LINK}
-          external={false}
-          target="_blank"
-          css={css`
-            font-size: 12px;
-            margin-right: ${euiTheme.size.m};
-          `}
-          data-test-subj="TextBasedLangEditor-feedback-link"
-        >
-          {isSpaceReduced
-            ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.feedback', {
-                defaultMessage: 'Feedback',
-              })
-            : i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.submitFeedback', {
-                defaultMessage: 'Submit feedback',
-              })}
-        </EuiLink>
-      </EuiFlexItem>
+      {isSpaceReduced && (
+        <EuiFlexItem grow={false}>
+          <EuiLink
+            href={FEEDBACK_LINK}
+            external={false}
+            target="_blank"
+            data-test-subj="TextBasedLangEditor-feedback-link"
+          >
+            <EuiIcon
+              type="discuss"
+              color="primary"
+              size="m"
+              css={css`
+                margin-right: ${euiTheme.size.s};
+              `}
+            />
+          </EuiLink>
+        </EuiFlexItem>
+      )}
+      {!isSpaceReduced && (
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="discuss" color="primary" size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              href={FEEDBACK_LINK}
+              external={false}
+              target="_blank"
+              css={css`
+                font-size: 12px;
+                margin-right: ${euiTheme.size.m};
+              `}
+              data-test-subj="TextBasedLangEditor-feedback-link"
+            >
+              {isSpaceReduced
+                ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.feedback', {
+                    defaultMessage: 'Feedback',
+                  })
+                : i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.submitFeedback', {
+                    defaultMessage: 'Submit feedback',
+                  })}
+            </EuiLink>
+          </EuiFlexItem>
+        </>
+      )}
     </>
   );
 }
@@ -222,23 +245,23 @@ export const EditorFooter = memo(function EditorFooter({
                   toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
                   isHistoryOpen={isHistoryOpen}
                 />
-                {/* <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-run-query">
-                <p>
-                  {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
-                    defaultMessage: 'Run query',
-                  })}
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiCode
-                transparentBackground
-                css={css`
-                  font-size: 12px;
-                `}
-              >{`${COMMAND_KEY} + Enter`}</EuiCode>
-            </EuiFlexItem> */}
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-run-query">
+                    <p>
+                      {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
+                        defaultMessage: 'Run query',
+                      })}
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiCode
+                    transparentBackground
+                    css={css`
+                      font-size: 12px;
+                    `}
+                  >{`${COMMAND_KEY} + Enter`}</EuiCode>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           )}
@@ -246,7 +269,12 @@ export const EditorFooter = memo(function EditorFooter({
             <>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-                  <SubmitFeedbackComponent isSpaceReduced={isSpaceReduced} />
+                  <SubmitFeedbackComponent isSpaceReduced={true} />
+                  <QueryHistoryAction
+                    toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
+                    isHistoryOpen={isHistoryOpen}
+                    isSpaceReduced={true}
+                  />
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       color="text"

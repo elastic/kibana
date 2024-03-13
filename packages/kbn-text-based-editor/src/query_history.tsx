@@ -35,6 +35,7 @@ export function QueryHistoryAction({
   isHistoryOpen: boolean;
   isSpaceReduced?: boolean;
 }) {
+  const { euiTheme } = useEuiTheme();
   // get history items from local storage
   const items: QueryHistoryItem[] = getHistoryItems('desc');
   if (!items.length) return null;
@@ -42,7 +43,15 @@ export function QueryHistoryAction({
     <>
       {isSpaceReduced && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type="clock" color="primary" size="s" />
+          <EuiIcon
+            type="clock"
+            color="primary"
+            size="m"
+            onClick={toggleHistory}
+            css={css`
+              margin-right: ${euiTheme.size.s};
+            `}
+          />
         </EuiFlexItem>
       )}
       {!isSpaceReduced && (
@@ -53,6 +62,7 @@ export function QueryHistoryAction({
             onClick={toggleHistory}
             css={css`
               padding-inline: 0;
+              margin-right: ${euiTheme.size.s};
             `}
             iconType="clock"
           >
