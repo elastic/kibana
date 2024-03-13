@@ -41,7 +41,7 @@ import {
   installMockPrebuiltRules,
   findImmutableRuleById,
   getPrebuiltRulesAndTimelinesStatus,
-  getOpenAlerts,
+  getAlerts,
   createRuleWithExceptionEntries,
   getEqlRuleForAlertTesting,
   SAMPLE_PREBUILT_RULES,
@@ -652,7 +652,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
+          const alertsOpen = await getAlerts(supertest, log, es, createdRule);
           expect(alertsOpen.hits.hits.length).toEqual(0);
         });
 
@@ -701,8 +701,8 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
-          const alertsOpen2 = await getOpenAlerts(supertest, log, es, createdRule2);
+          const alertsOpen = await getAlerts(supertest, log, es, createdRule);
+          const alertsOpen2 = await getAlerts(supertest, log, es, createdRule2);
           // Expect alerts here because all values are "Ubuntu"
           // and exception is one of ["ubuntu"]
           expect(alertsOpen.hits.hits.length).toEqual(10);
@@ -726,7 +726,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
+          const alertsOpen = await getAlerts(supertest, log, es, createdRule);
           expect(alertsOpen.hits.hits.length).toEqual(0);
         });
 
@@ -748,7 +748,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
+          const alertsOpen = await getAlerts(supertest, log, es, createdRule);
           expect(alertsOpen.hits.hits.length).toEqual(0);
         });
 
@@ -791,7 +791,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
+          const alertsOpen = await getAlerts(supertest, log, es, createdRule);
           expect(alertsOpen.hits.hits.length).toEqual(0);
         });
         describe('rules with value list exceptions', () => {
@@ -831,7 +831,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
             ]);
-            const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
+            const alertsOpen = await getAlerts(supertest, log, es, createdRule);
             expect(alertsOpen.hits.hits.length).toEqual(0);
           });
 
@@ -879,7 +879,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
             ]);
-            const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
+            const alertsOpen = await getAlerts(supertest, log, es, createdRule);
             expect(alertsOpen.hits.hits.length).toEqual(0);
           });
 
@@ -916,7 +916,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
             ]);
-            const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
+            const alertsOpen = await getAlerts(supertest, log, es, createdRule);
             expect(alertsOpen.hits.hits.length).toEqual(0);
           });
 
@@ -941,7 +941,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
             ]);
-            const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
+            const alertsOpen = await getAlerts(supertest, log, es, createdRule);
             expect(alertsOpen.hits.hits.length).toEqual(0);
           });
           it('should Not allow deleting value list when there are references and ignoreReferences is false', async () => {

@@ -17,14 +17,27 @@ import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/dete
 import { refreshIndex } from '..';
 import { getAlertsByIds, waitForRuleStatus } from '../../../../../common/utils/security_solution';
 
-export const getOpenAlerts = async (
+export type GetAlerts = (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   es: Client,
   rule: RuleResponse,
-  status: RuleExecutionStatus = RuleExecutionStatusEnum.succeeded,
+  status?: RuleExecutionStatus,
   size?: number,
   afterDate?: Date
+) => ReturnType<typeof getAlertsByIds>;
+
+/**
+ * returns all alerts: opened and closed
+ */
+export const getAlerts: GetAlerts = async (
+  supertest,
+  log,
+  es,
+  rule,
+  status = RuleExecutionStatusEnum.succeeded,
+  size,
+  afterDate
 ) => {
   await waitForRuleStatus(status, { supertest, log, id: rule.id, afterDate });
   // Critically important that we wait for rule success AND refresh the write index in that order before we

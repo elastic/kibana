@@ -37,6 +37,7 @@ import {
   createSearchAfterReturnType,
   getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
+  getSuppressionMaxSignalsWarning,
 } from '../utils/utils';
 import { createEnrichEventsFunction } from '../utils/enrichments';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
@@ -371,7 +372,11 @@ export const createNewTermsAlertType = (
             const bulkCreateResult = await createAlertsHook(docFetchResultWithAggs);
 
             if (bulkCreateResult.alertsWereTruncated) {
-              result.warningMessages.push(getMaxSignalsWarning());
+              result.warningMessages.push(
+                isAlertSuppressionActive
+                  ? getSuppressionMaxSignalsWarning()
+                  : getMaxSignalsWarning()
+              );
               break;
             }
           }

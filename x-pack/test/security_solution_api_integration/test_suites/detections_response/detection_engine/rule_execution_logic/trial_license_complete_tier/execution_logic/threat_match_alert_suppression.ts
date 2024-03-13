@@ -334,8 +334,8 @@ export default ({ getService }: FtrProviderContext) => {
           const secondDocument = {
             id,
             '@timestamp': secondTimestamp,
-            agent: {
-              name: 'agent-1',
+            host: {
+              name: 'host-a',
             },
           };
           // Add new documents, then disable and re-enable to trigger another rule run. The second doc should

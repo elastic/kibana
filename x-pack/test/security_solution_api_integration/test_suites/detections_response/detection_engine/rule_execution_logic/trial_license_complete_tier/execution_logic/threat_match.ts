@@ -38,7 +38,7 @@ import {
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
-import { previewRule, getOpenAlerts, getPreviewAlerts } from '../../../../utils';
+import { previewRule, getAlerts, getPreviewAlerts } from '../../../../utils';
 import {
   deleteAllAlerts,
   deleteAllRules,
@@ -175,7 +175,7 @@ export default ({ getService }: FtrProviderContext) => {
       const rule: ThreatMatchRuleCreateProps = createThreatMatchRule();
 
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(
+      const alerts = await getAlerts(
         supertest,
         log,
         es,
@@ -356,7 +356,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(
+      const alerts = await getAlerts(
         supertest,
         log,
         es,
@@ -558,7 +558,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const createdRuleTerm = await createRule(supertest, log, termRule);
       const createdRuleMatch = await createRule(supertest, log, matchRule);
-      const alertsTerm = await getOpenAlerts(
+      const alertsTerm = await getAlerts(
         supertest,
         log,
         es,
@@ -566,7 +566,7 @@ export default ({ getService }: FtrProviderContext) => {
         RuleExecutionStatusEnum.succeeded,
         100
       );
-      const alertsMatch = await getOpenAlerts(
+      const alertsMatch = await getAlerts(
         supertest,
         log,
         es,
