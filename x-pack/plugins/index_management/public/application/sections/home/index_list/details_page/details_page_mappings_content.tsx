@@ -17,25 +17,23 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
-  EuiFieldSearch,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
-import { SearchResult } from '../../../../components/mappings_editor/components/document_fields/search_fields';
-
 import { Index } from '../../../../../../common';
+import { useAppContext } from '../../../../app_context';
+import { DocumentFieldsSearch } from '../../../../components/mappings_editor/components/document_fields/document_fields_search';
 import { FieldsList } from '../../../../components/mappings_editor/components/document_fields/fields';
+import { SearchResult } from '../../../../components/mappings_editor/components/document_fields/search_fields';
 import { extractMappingsDefinition } from '../../../../components/mappings_editor/lib';
 import { MappingsEditorParsedMetadata } from '../../../../components/mappings_editor/mappings_editor';
 import {
-  useMappingsState,
   useDispatch,
+  useMappingsState,
 } from '../../../../components/mappings_editor/mappings_state_context';
 import { useMappingsStateListener } from '../../../../components/mappings_editor/use_state_listener';
-import { useAppContext } from '../../../../app_context';
 import { documentationService } from '../../../../services';
 
 export const DetailsPageMappingsContent: FunctionComponent<{
@@ -132,33 +130,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const treeViewBlock = (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <EuiFieldSearch
-          style={{ minWidth: '350px' }}
-          placeholder={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.documentFields.searchFieldsPlaceholder',
-            {
-              defaultMessage: 'Search fields',
-            }
-          )}
-          value={search.term}
-          onChange={(e) => {
-            if (typeof e === 'string') {
-              onSearchChange(e);
-            } else {
-              onSearchChange(e.target.value);
-            }
-          }}
-          // ...
-
-          aria-label={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.documentFields.searchFieldsAriaLabel',
-            {
-              defaultMessage: 'Search mapped fields',
-            }
-          )}
-        />
-      </EuiFlexItem>
+      <DocumentFieldsSearch searchValue={search.term} onSearchChange={onSearchChange} />
       <EuiFlexItem>
         {searchTerm !== '' ? (
           <SearchResult result={search.result} documentFieldsState={documentFields} />
