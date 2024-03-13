@@ -151,9 +151,6 @@ export function tabifyAggResponse(
     (key) => /doc_count_/.test(key)
   );
 
-  const aggsRoot = aggConfigs.isSamplingEnabled()
-    ? esResponse.aggregations?.sampling
-    : esResponse.aggregations;
   const topLevelBucket: AggResponseBucket = {
     ...(aggConfigs.isSamplingEnabled()
       ? esResponse.aggregations?.sampling
