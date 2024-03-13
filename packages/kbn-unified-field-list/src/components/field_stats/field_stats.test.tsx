@@ -467,6 +467,7 @@ describe('UnifiedFieldList FieldStats', () => {
         sampledDocuments: 1624,
         sampledValues: 3248,
         topValues: {
+          areExamples: true,
           buckets: [
             {
               count: 1349,

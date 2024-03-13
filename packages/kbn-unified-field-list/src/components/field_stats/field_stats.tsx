@@ -37,7 +37,6 @@ import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 import type { BucketedAggregation, NumberSummary } from '../../types';
 import {
-  showExamplesForField,
   canProvideStatsForField,
   canProvideNumberSummaryForField,
 } from '../../utils/can_provide_stats';
@@ -477,7 +476,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     title = (
       <EuiTitle size="xxxs">
         <h6>
-          {showExamplesForField(field, isTextBased)
+          {topValues.areExamples
             ? i18n.translate('unifiedFieldList.fieldStats.examplesLabel', {
                 defaultMessage: 'Examples',
               })
@@ -582,7 +581,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   if (topValues && topValues.buckets.length) {
     return combineWithTitleAndFooter(
       <FieldTopValues
-        areExamples={showExamplesForField(field, isTextBased)}
+        areExamples={topValues.areExamples}
         buckets={topValues.buckets}
         dataView={dataView}
         field={field}

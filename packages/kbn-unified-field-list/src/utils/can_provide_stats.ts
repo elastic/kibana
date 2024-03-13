@@ -14,7 +14,8 @@ export function canProvideStatsForField(field: DataViewField, isTextBased: boole
   }
   return (
     (field.aggregatable && canProvideAggregatedStatsForField(field, isTextBased)) ||
-    showExamplesForField(field, isTextBased)
+    ((!field.aggregatable || field.type === 'geo_point' || field.type === 'geo_shape') &&
+      canProvideExamplesForField(field, isTextBased))
   );
 }
 
@@ -45,17 +46,6 @@ export function canProvideNumberSummaryForField(
   return field.timeSeriesMetric === 'counter';
 }
 
-export function showExamplesForField(field: DataViewField, isTextBased: boolean): boolean {
-  if (isTextBased) {
-    return canProvideExamplesForField(field, isTextBased);
-  }
-  return (
-    (!field.aggregatable && canProvideExamplesForField(field, isTextBased)) ||
-    field.type === 'geo_point' ||
-    field.type === 'geo_shape'
-  );
-}
-
 export function canProvideExamplesForField(field: DataViewField, isTextBased: boolean): boolean {
   if (isTextBased) {
     return (
@@ -79,6 +69,9 @@ export function canProvideExamplesForField(field: DataViewField, isTextBased: bo
 }
 
 export function canProvideTopValuesForFieldTextBased(field: DataViewField): boolean {
+  if (field.name === '_id') {
+    return false;
+  }
   const esTypes = field.esTypes?.[0];
   return (
     Boolean(field.type === 'string' && esTypes && ['keyword', 'version'].includes(esTypes)) ||
@@ -87,8 +80,5 @@ export function canProvideTopValuesForFieldTextBased(field: DataViewField): bool
 }
 
 export function canProvideStatsForFieldTextBased(field: DataViewField): boolean {
-  if (canProvideTopValuesForFieldTextBased(field) || canProvideExamplesForField(field, true)) {
-    return true;
-  }
-  return false;
+  return canProvideTopValuesForFieldTextBased(field) || canProvideExamplesForField(field, true);
 }

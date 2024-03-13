@@ -14,6 +14,7 @@ import {
   getFieldValues,
   type FieldValueCountsParams,
 } from './field_examples_calculator';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 
 const hitsAsValues: Array<Record<string, string | number | string[] | object>> = [
   {
@@ -282,6 +283,37 @@ describe('fieldExamplesCalculator', function () {
       params.field = dataView.fields.getByName('phpmemory')!;
       params.values = getFieldValues(hits, params.field, dataView);
       expect(getFieldExampleBuckets(params).sampledValues).toBe(5);
+    });
+
+    it('works for text-based', function () {
+      const result = getFieldExampleBuckets({
+        values: [['a'], ['b'], ['a'], ['a']],
+        field: { name: 'message', type: 'string', esTypes: ['text'] } as DataViewField,
+        isTextBased: true,
+      });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "buckets": Array [
+            Object {
+              "count": 3,
+              "key": "a",
+            },
+            Object {
+              "count": 1,
+              "key": "b",
+            },
+          ],
+          "sampledDocuments": 4,
+          "sampledValues": 4,
+        }
+      `);
+      expect(() =>
+        getFieldExampleBuckets({
+          values: [['a'], ['b'], ['a'], ['a']],
+          field: { name: 'message', type: 'string', esTypes: ['keyword'] } as DataViewField,
+          isTextBased: true,
+        })
+      ).toThrowError();
     });
   });
 });

@@ -426,6 +426,7 @@ export async function getSimpleExamples(
       sampledValues: fieldExampleBuckets.sampledValues,
       topValues: {
         buckets: fieldExampleBuckets.buckets,
+        areExamples: true,
       },
     };
   } catch (error) {

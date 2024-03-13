@@ -14,7 +14,7 @@ import FieldTopValuesBucket from './field_top_values_bucket';
 import type { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 
 export interface FieldTopValuesProps {
-  areExamples: boolean; // real top values or only examples
+  areExamples: boolean | undefined; // real top values or only examples distributed in buckets
   buckets: BucketedAggregation<number | string | boolean>['buckets'];
   dataView: DataView;
   field: DataViewField;
