@@ -92,7 +92,11 @@ const QualityIndicator = ({
       ) : (
         <EuiTitle size="m">
           <h3>
-            <EuiHealth textSize="inherit" color={quality}>
+            <EuiHealth
+              data-test-subj={`datasetQualityDatasetHealthKpi-${description}`}
+              textSize="inherit"
+              color={quality}
+            >
               {value || 0}
             </EuiHealth>
           </h3>
