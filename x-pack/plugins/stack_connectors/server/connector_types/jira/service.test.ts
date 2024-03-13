@@ -284,6 +284,9 @@ describe('Jira service', () => {
         issueType: '10006',
         priority: 'High',
         parent: 'RJ-107',
+        customFields: {
+          foo: 'bar',
+        },
       },
     };
 
@@ -357,6 +360,7 @@ describe('Jira service', () => {
           priority: 'High',
           issueType: null,
           parent: null,
+          customFields: null,
         },
       });
 
@@ -421,6 +425,7 @@ describe('Jira service', () => {
           priority: 'High',
           issueType: null,
           parent: null,
+          customFields: null,
         },
       });
 
@@ -471,6 +476,7 @@ describe('Jira service', () => {
             labels: [],
             priority: { name: 'High' },
             parent: { key: 'RJ-107' },
+            foo: 'bar',
           },
         },
       });
@@ -517,6 +523,9 @@ describe('Jira service', () => {
         issueType: '10006',
         priority: 'High',
         parent: 'RJ-107',
+        customFields: {
+          foo: 'bar',
+        },
       },
     };
 
@@ -569,6 +578,7 @@ describe('Jira service', () => {
             issuetype: { id: '10006' },
             project: { key: 'CK' },
             parent: { key: 'RJ-107' },
+            foo: 'bar',
           },
         },
       });

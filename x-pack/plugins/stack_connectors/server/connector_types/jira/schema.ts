@@ -42,6 +42,7 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
       )
     ),
     parent: schema.nullable(schema.string()),
+    customFields: schema.nullable(schema.recordOf(schema.string(), schema.string())),
   }),
   comments: schema.nullable(
     schema.arrayOf(

@@ -51,7 +51,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
   let jiraSimulatorURL: string = '<could not determine kibana url>';
 
-  describe('Jira', () => {
+  describe.only('Jira', () => {
     before(() => {
       jiraSimulatorURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA)
@@ -408,6 +408,40 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                   incident: {
                     ...mockJira.params.subActionParams.incident,
                     issueType: '10006',
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(proxyHaveBeenCalled).to.equal(true);
+          expect(body).to.eql({
+            status: 'ok',
+            connector_id: simulatedActionId,
+            data: {
+              id: '123',
+              title: 'CK-1',
+              pushedDate: '2020-04-27T14:17:45.490Z',
+              url: `${jiraSimulatorURL}/browse/CK-1`,
+            },
+          });
+        });
+
+        it('should handle creating an incident with custom fields', async () => {
+          const { body } = await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockJira.params,
+                subActionParams: {
+                  ...mockJira.params.subActionParams,
+                  incident: {
+                    ...mockJira.params.subActionParams.incident,
+                    customFields: {
+                      foo: 'bar',
+                    },
                   },
                   comments: [],
                 },

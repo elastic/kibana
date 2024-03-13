@@ -73,6 +73,9 @@ describe('api', () => {
           parent: null,
           description: 'Incident description',
           summary: 'Incident title',
+          customFields: {
+            foo: 'bar',
+          },
         },
       });
       expect(externalService.updateIncident).not.toHaveBeenCalled();
@@ -90,6 +93,9 @@ describe('api', () => {
           labels: ['kibana', 'elastic'],
           priority: 'High',
           parent: null,
+          customFields: {
+            foo: 'bar',
+          },
         },
       });
       expect(externalService.updateIncident).not.toHaveBeenCalled();
@@ -193,6 +199,9 @@ describe('api', () => {
           parent: null,
           description: 'Incident description',
           summary: 'Incident title',
+          customFields: {
+            foo: 'bar',
+          },
         },
       });
       expect(externalService.createIncident).not.toHaveBeenCalled();
@@ -211,6 +220,9 @@ describe('api', () => {
           labels: ['kibana', 'elastic'],
           priority: 'High',
           parent: null,
+          customFields: {
+            foo: 'bar',
+          },
         },
       });
       expect(externalService.createIncident).not.toHaveBeenCalled();
