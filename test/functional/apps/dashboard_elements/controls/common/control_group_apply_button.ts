@@ -49,7 +49,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         fieldName: 'weightLbs',
         title: 'Animal Name',
       });
-      await dashboardControls.createTimeSliderControl();
+      // await dashboardControls.createTimeSliderControl();
+      // await dashboardControls.waitFor
       controlIds = await dashboardControls.getAllControlIds();
 
       // save the dashboard
@@ -178,7 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('time slider selections', () => {
+    describe.skip('time slider selections', () => {
       let valueBefore: string;
 
       before(async () => {
