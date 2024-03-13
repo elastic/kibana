@@ -138,7 +138,14 @@ export class NavigationPublicPlugin
         AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
         createTopNavWithCustomContext: createCustomTopNav,
       },
-      addSolutionNavigation: (solutionNavigation: SolutionNavigation) => {
+      addSolutionNavigation: (
+        solutionNavigation: Omit<SolutionNavigation, 'sideNavComponent'> & {
+          /** Data test subj for the side navigation */
+          dataTestSubj?: string;
+          /** Panel content provider for the side navigation */
+          panelContentProvider?: PanelContentProvider;
+        }
+      ) => {
         if (!isSolutionNavEnabled) return;
         return this.addSolutionNavigation(solutionNavigation);
       },
@@ -172,7 +179,13 @@ export class NavigationPublicPlugin
       });
   }
 
-  private getSideNavComponent(): SolutionNavigationDefinition['sideNavComponent'] {
+  private getSideNavComponent({
+    dataTestSubj,
+    panelContentProvider,
+  }: {
+    panelContentProvider?: PanelContentProvider;
+    dataTestSubj?: string;
+  } = {}): SolutionNavigationDefinition['sideNavComponent'] {
     if (!this.coreStart) throw new Error('coreStart is not available');
     if (!this.depsStart) throw new Error('depsStart is not available');
 
@@ -183,18 +196,28 @@ export class NavigationPublicPlugin
 
     return () => (
       <SideNavComponent
-        navProps={{ navigationTree$: navigationTreeUi$ }}
+        navProps={{ navigationTree$: navigationTreeUi$, dataTestSubj, panelContentProvider }}
         deps={{ core, activeNodes$: activeNavigationNodes$ }}
       />
     );
   }
 
-  private addSolutionNavigation(solutionNavigation: SolutionNavigation) {
+  private addSolutionNavigation(
+    solutionNavigation: SolutionNavigation & {
+      /** Data test subj for the side navigation */
+      dataTestSubj?: string;
+      /** Panel content provider for the side navigation */
+      panelContentProvider?: PanelContentProvider;
+    }
+  ) {
     if (!this.coreStart) throw new Error('coreStart is not available');
-    const sideNavComponent = solutionNavigation.sideNavComponent ?? this.getSideNavComponent();
+    const { dataTestSubj, panelContentProvider, ...rest } = solutionNavigation;
+    const sideNavComponent =
+      solutionNavigation.sideNavComponent ??
+      this.getSideNavComponent({ dataTestSubj, panelContentProvider });
     const { project } = this.coreStart.chrome as InternalChromeStart;
     project.updateSolutionNavigations({
-      [solutionNavigation.id]: { ...solutionNavigation, sideNavComponent },
+      [solutionNavigation.id]: { ...rest, sideNavComponent },
     });
   }
 
@@ -202,11 +225,11 @@ export class NavigationPublicPlugin
     const solutionNavs: SolutionNavigationDefinitions = {
       es: {
         ...esDefinition,
-        sideNavComponent: this.getSideNavComponent(),
+        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'svlSearchSideNav' }),
       },
       oblt: {
         ...obltDefinition,
-        sideNavComponent: this.getSideNavComponent(),
+        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'svlObservabilitySideNav' }),
       },
     };
 
