@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { ENABLE_DOCKED_CONSOLE_UI_SETTING_ID } from '@kbn/dev-tools-plugin/public';
+import { ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID } from '@kbn/dev-tools-plugin/public';
 
 import { renderEmbeddableConsole } from './application/containers/embeddable';
 import {
@@ -34,6 +34,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
   ): ConsolePluginSetup {
     const {
       ui: { enabled: isConsoleUiEnabled },
+      dev: { enableMonaco: isMonacoEnabled },
     } = this.ctx.config.get<ClientConfigType>();
 
     this.autocompleteInfo.setup(http);
@@ -83,6 +84,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
             element,
             theme$,
             autocompleteInfo: this.autocompleteInfo,
+            isMonacoEnabled,
           });
         },
       });
@@ -111,7 +113,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
 
     const consoleStart: ConsolePluginStart = {};
     const embeddedConsoleUiSetting = core.uiSettings.get<boolean>(
-      ENABLE_DOCKED_CONSOLE_UI_SETTING_ID
+      ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID
     );
     const embeddedConsoleAvailable =
       isConsoleUiEnabled &&

@@ -38,16 +38,14 @@ export const CreateCdnAssets: Task = {
       const manifest = Jsonc.parse(readFileSync(path, 'utf8')) as any;
       if (manifest?.plugin?.id) {
         const pluginRoot = resolve(dirname(path));
-
+        // packages/core/apps/core-apps-server-internal/src/core_app.ts
+        const assetsSource = resolve(pluginRoot, 'public', 'assets');
+        const assetsDest = resolve(assets, buildSha, 'plugins', manifest.plugin.id, 'assets');
         try {
-          // packages/core/plugins/core-plugins-server-internal/src/plugins_service.ts
-          const assetsSource = resolve(pluginRoot, 'assets');
-          const assetsDest = resolve('plugins', manifest.plugin.id, 'assets');
           await access(assetsSource);
           await mkdirp(assetsDest);
           await copyAll(assetsSource, assetsDest);
         } catch (e) {
-          // assets are optional
           if (!(e.code === 'ENOENT' && e.syscall === 'access')) throw e;
         }
 

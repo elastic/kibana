@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames';
 import TooltipTrigger from 'react-popper-tooltip';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { TooltipValueFormatter } from '@elastic/charts';
+import type { TooltipValueFormatter } from '@elastic/charts';
 
 import './_index.scss';
 
-import { ChildrenArg, TooltipTriggerProps } from 'react-popper-tooltip/dist/types';
-import { ChartTooltipService, ChartTooltipValue, TooltipData } from './chart_tooltip_service';
+import type { ChildrenArg, TooltipTriggerProps } from 'react-popper-tooltip/dist/types';
+import type { ChartTooltipValue, TooltipData } from './chart_tooltip_service';
+import { ChartTooltipService } from './chart_tooltip_service';
 
 const renderHeader = (headerData?: ChartTooltipValue, formatter?: TooltipValueFormatter) => {
   if (!headerData) {

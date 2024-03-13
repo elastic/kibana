@@ -69,14 +69,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getTinesConnectorType());
   connectorTypeRegistry.register(getD3SecurityConnectorType());
 
-  // get sentinelOne connector type
-  // when either feature flag is enabled
-  if (
-    // 8.12
-    ExperimentalFeaturesService.get().sentinelOneConnectorOn ||
-    // 8.13
-    ExperimentalFeaturesService.get().sentinelOneConnectorOnBeta
-  ) {
+  if (ExperimentalFeaturesService.get().sentinelOneConnectorOn) {
     connectorTypeRegistry.register(getSentinelOneConnectorType());
   }
 }

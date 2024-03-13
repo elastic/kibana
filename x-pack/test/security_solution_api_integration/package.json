@@ -8,8 +8,11 @@
     "initialize-server:genai": "node ./scripts/index.js server genai trial_license_complete_tier",
     "run-tests:genai": "node ./scripts/index.js runner genai trial_license_complete_tier",
 
-    "initialize-server:ea": "node ./scripts/index.js server entity_analytics trial_license_complete_tier",
-    "run-tests:ea": "node ./scripts/index.js runner entity_analytics trial_license_complete_tier",
+    "initialize-server:ea:trial_complete": "node ./scripts/index.js server entity_analytics trial_license_complete_tier",
+    "run-tests:ea:trial_complete": "node ./scripts/index.js runner entity_analytics trial_license_complete_tier",
+
+    "initialize-server:ea:basic_essentials": "node ./scripts/index.js server entity_analytics basic_license_essentials_tier",
+    "run-tests:ea:basic_essentials": "node ./scripts/index.js runner entity_analytics basic_license_essentials_tier",
 
     "initialize-server:dr": "node ./scripts/index.js server detections_response trial_license_complete_tier",
     "run-tests:dr": "node ./scripts/index.js runner detections_response trial_license_complete_tier",
@@ -35,11 +38,17 @@
     "genai:server:ess": "npm run initialize-server:genai invoke_ai ess",
     "genai:runner:ess": "npm run run-tests:genai invoke_ai ess essEnv",
 
-    "entity_analytics:server:serverless": "npm run initialize-server:ea risk_engine serverless",
-    "entity_analytics:runner:serverless": "npm run run-tests:ea risk_engine serverless serverlessEnv",
-    "entity_analytics:qa:serverless": "npm run run-tests:ea risk_engine serverless qaEnv",
-    "entity_analytics:server:ess": "npm run initialize-server:ea risk_engine ess",
-    "entity_analytics:runner:ess": "npm run run-tests:ea risk_engine ess essEnv",
+    "entity_analytics:server:serverless": "npm run initialize-server:ea:trial_complete risk_engine serverless",
+    "entity_analytics:runner:serverless": "npm run run-tests:ea:trial_complete risk_engine serverless serverlessEnv",
+    "entity_analytics:qa:serverless": "npm run run-tests:ea:trial_complete risk_engine serverless qaEnv",
+    "entity_analytics:server:ess": "npm run initialize-server:ea:trial_complete risk_engine ess",
+    "entity_analytics:runner:ess": "npm run run-tests:ea:trial_complete risk_engine ess essEnv",
+
+    "entity_analytics:essentials:server:serverless": "npm run initialize-server:ea:basic_essentials risk_engine serverless",
+    "entity_analytics:essentials:runner:serverless": "npm run run-tests:ea:basic_essentials risk_engine serverless serverlessEnv",
+    "entity_analytics:essentials:qa:serverless": "npm run run-tests:ea:basic_essentials risk_engine serverless qaEnv",
+    "entity_analytics:essentials:server:ess": "npm run initialize-server:ea:basic_essentials risk_engine ess",
+    "entity_analytics:essentials:runner:ess": "npm run run-tests:ea:basic_essentials risk_engine ess essEnv",
 
     "exception_lists_items:server:serverless": "npm run initialize-server:lists:complete exception_lists_items serverless",
     "exception_lists_items:runner:serverless": "npm run run-tests:lists:complete exception_lists_items serverless serverlessEnv",

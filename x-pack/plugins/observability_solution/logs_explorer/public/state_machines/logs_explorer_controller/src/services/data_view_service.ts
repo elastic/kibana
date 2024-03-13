@@ -15,7 +15,7 @@ export const createAdHocDataView =
     if (!('discoverStateContainer' in context)) return;
     const { discoverStateContainer } = context;
     const dataView = await discoverStateContainer.actions.createAndAppendAdHocDataView(
-      context.datasetSelection.toDataviewSpec()
+      context.dataSourceSelection.toDataviewSpec()
     );
     /**
      * We can't fully rely on the url update of the index param to create and restore the data view
@@ -41,9 +41,12 @@ export const changeDataView =
     // We need to manually retrieve the data view and force a set and change on the state container
     // to guarantee the correct update on the data view selection and avoid a race condition
     // when updating the control panels.
-    const nextDataView = await dataViews.get(context.datasetSelection.toDataviewSpec().id, false);
+    const nextDataView = await dataViews.get(
+      context.dataSourceSelection.toDataviewSpec().id,
+      false
+    );
     if (nextDataView.id) {
-      await discoverStateContainer.actions.onChangeDataView(nextDataView.id);
+      await discoverStateContainer.actions.onChangeDataView(nextDataView);
     }
     discoverStateContainer.actions.setDataView(nextDataView);
   };

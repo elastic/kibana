@@ -12,13 +12,17 @@ import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks
 import { PublishesDataViews, PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import React, { useImperativeHandle } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { PresentationPanel } from '.';
 import { uiActions } from '../kibana_services';
 import { getMockPresentationPanelCompatibleComponent } from '../mocks';
 import * as openCustomizePanel from '../panel_actions/customize_panel_action/open_customize_panel';
-import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
+import {
+  DefaultPresentationPanelApi,
+  PanelCompatibleComponent,
+  PresentationPanelInternalProps,
+} from './types';
 
 describe('Presentation panel', () => {
   const renderPresentationPanel = async ({
@@ -49,6 +53,24 @@ describe('Presentation panel', () => {
     };
     render(<PresentationPanel Component={getMockPresentationPanelCompatibleComponent(api)} />);
     await waitFor(() => expect(screen.getByTestId('embeddableStackError')).toBeInTheDocument());
+  });
+
+  it('renders error boundary when internal component throws during rendering', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => null);
+    function ComponentThatThrows() {
+      throw new Error('simulated error during rendering');
+      return <div />;
+    }
+    function getComponent(api?: DefaultPresentationPanelApi): Promise<PanelCompatibleComponent> {
+      return Promise.resolve(
+        React.forwardRef((_, apiRef) => {
+          useImperativeHandle(apiRef, () => api ?? {});
+          return <ComponentThatThrows />;
+        })
+      );
+    }
+    render(<PresentationPanel Component={getComponent()} />);
+    await waitFor(() => expect(screen.getByTestId('euiErrorBoundary')).toBeInTheDocument());
   });
 
   describe('actions', () => {

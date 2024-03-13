@@ -12,7 +12,7 @@ import type {
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
   ResponseActionsClientWriteActionResponseToEndpointIndexOptions,
 } from './base_response_actions_client';
-import { ResponseActionsClientImpl } from './base_response_actions_client';
+import { HOST_NOT_ENROLLED, ResponseActionsClientImpl } from './base_response_actions_client';
 import type {
   ActionDetails,
   LogsEndpointAction,
@@ -34,6 +34,7 @@ import { set } from 'lodash';
 import { responseActionsClientMock } from '../mocks';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getResponseActionFeatureKey } from '../../../feature_usage/feature_keys';
+import { isActionSupportedByAgentType as _isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');
@@ -44,7 +45,22 @@ jest.mock('../../action_details_by_id', () => {
   };
 });
 
+jest.mock(
+  '../../../../../../common/endpoint/service/response_actions/is_response_action_supported',
+  () => {
+    const original = jest.requireActual(
+      '../../../../../../common/endpoint/service/response_actions/is_response_action_supported'
+    );
+
+    return {
+      ...original,
+      isActionSupportedByAgentType: jest.fn(original.isActionSupportedByAgentType),
+    };
+  }
+);
+
 const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
+const isActionSupportedByAgentTypeMock = _isActionSupportedByAgentType as jest.Mock;
 
 describe('ResponseActionsClientImpl base class', () => {
   let constructorOptions: ReturnType<typeof responseActionsClientMock.createConstructorOptions>;
@@ -66,6 +82,12 @@ describe('ResponseActionsClientImpl base class', () => {
 
   afterEach(() => {
     getActionDetailsByIdMock.mockClear();
+    isActionSupportedByAgentTypeMock.mockReset();
+    isActionSupportedByAgentTypeMock.mockImplementation(
+      jest.requireActual(
+        '../../../../../../common/endpoint/service/response_actions/is_response_action_supported'
+      ).isActionSupportedByAgentType
+    );
   });
 
   describe('Public methods', () => {
@@ -142,7 +164,7 @@ describe('ResponseActionsClientImpl base class', () => {
       expect(casesClient.cases.getCasesByAlertID).not.toHaveBeenCalled();
       expect(casesClient.attachments.bulkCreate).not.toHaveBeenCalled();
       expect(logger.debug).toHaveBeenCalledWith(
-        "Nothing to do. 'caseIds' and 'alertIds' are empty"
+        "No updates to Cases needed. 'caseIds' and 'alertIds' are empty"
       );
     });
 
@@ -152,7 +174,7 @@ describe('ResponseActionsClientImpl base class', () => {
 
       expect(casesClient.cases.getCasesByAlertID).not.toHaveBeenCalled();
       expect(casesClient.attachments.bulkCreate).not.toHaveBeenCalled();
-      expect(logger.debug).toHaveBeenCalledWith("Nothing to do. 'hosts' is empty");
+      expect(logger.debug).toHaveBeenCalledWith("No updates to Cases needed. 'hosts' is empty");
     });
 
     it('should do nothing if cases client was not provided', async () => {
@@ -191,7 +213,9 @@ describe('ResponseActionsClientImpl base class', () => {
       updateCasesOptions.alertIds = [KNOWN_ALERT_ID_3];
       await baseClassMock.updateCases(updateCasesOptions);
 
-      expect(logger.debug).toHaveBeenCalledWith(`Nothing to do. Alert IDs are not tied to Cases`);
+      expect(logger.debug).toHaveBeenCalledWith(
+        `No updates to Cases needed. Alert IDs are not tied to Cases`
+      );
     });
 
     it('should update cases with an attachment for each host', async () => {
@@ -283,8 +307,8 @@ describe('ResponseActionsClientImpl base class', () => {
         agent_type: 'endpoint',
         endpoint_ids: ['one'],
         comment: 'test comment',
-        rule_name: undefined,
-        rule_id: undefined,
+        ruleName: undefined,
+        ruleId: undefined,
         alert_ids: undefined,
         case_ids: undefined,
         hosts: undefined,
@@ -365,11 +389,11 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     it('should include Rule information if rule_id and rule_name were provided', async () => {
-      indexDocOptions.rule_id = '1-2-3';
-      indexDocOptions.rule_name = 'rule 123';
+      indexDocOptions.ruleId = '1-2-3';
+      indexDocOptions.ruleName = 'rule 123';
       expectedIndexDoc.rule = {
-        name: indexDocOptions.rule_name,
-        id: indexDocOptions.rule_id,
+        name: indexDocOptions.ruleName,
+        id: indexDocOptions.ruleId,
       };
 
       await expect(
@@ -378,7 +402,7 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     it('should NOT include Rule information if rule_id or rule_name are missing', async () => {
-      indexDocOptions.rule_id = '1-2-3';
+      indexDocOptions.ruleId = '1-2-3';
 
       await expect(
         baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
@@ -405,6 +429,68 @@ describe('ResponseActionsClientImpl base class', () => {
         'message',
         expect.stringContaining('Failed to create action request document:')
       );
+    });
+
+    it('should throw error if endpoint_ids is empty', async () => {
+      indexDocOptions.endpoint_ids = [];
+      const responsePromise = baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+
+      await expect(responsePromise).rejects.toHaveProperty('message', HOST_NOT_ENROLLED);
+      await expect(responsePromise).rejects.toHaveProperty('statusCode', 400);
+    });
+
+    it('should throw error is response action is not supported by agent type', async () => {
+      isActionSupportedByAgentTypeMock.mockReturnValue(false);
+      const responsePromise = baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+
+      await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsNotSupportedError);
+    });
+
+    describe('And class is instantiated with `isAutomated` set to `true`', () => {
+      beforeEach(() => {
+        constructorOptions.isAutomated = true;
+        baseClassMock = new MockClassWithExposedProtectedMembers(constructorOptions);
+      });
+
+      describe('#riteActionRequestToEndpointIndex()', () => {
+        it('should write doc with error when license is not Enterprise', async () => {
+          (
+            constructorOptions.endpointService.getLicenseService().isEnterprise as jest.Mock
+          ).mockReturnValue(false);
+
+          await expect(
+            baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+          ).resolves.toMatchObject({
+            error: {
+              message: 'At least Enterprise license is required to use Response Actions.',
+            },
+          });
+        });
+
+        it('should write doc with error when endpoint_ids is empty', async () => {
+          indexDocOptions.endpoint_ids = [];
+
+          await expect(
+            baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+          ).resolves.toMatchObject({
+            error: {
+              message: HOST_NOT_ENROLLED,
+            },
+          });
+        });
+
+        it('should write doc with error when action is not supported by agent', async () => {
+          isActionSupportedByAgentTypeMock.mockReturnValue(false);
+
+          await expect(
+            baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+          ).resolves.toMatchObject({
+            error: {
+              message: 'Action [isolate] not supported',
+            },
+          });
+        });
+      });
     });
   });
 

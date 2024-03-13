@@ -8,6 +8,8 @@
 import type { EuiSuperSelectOption } from '@elastic/eui';
 
 import {
+  EuiToolTip,
+  EuiIcon,
   EuiSpacer,
   useEuiFontSize,
   EuiButtonIcon,
@@ -148,16 +150,7 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({ entity }) => {
       <EuiAccordion
         initialIsOpen
         id="asset-criticality-selector"
-        buttonContent={
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTitle"
-                defaultMessage="Asset Criticality"
-              />
-            </h3>
-          </EuiTitle>
-        }
+        buttonContent={<AssetCriticalityTitle />}
         buttonProps={{
           css: css`
             color: ${euiTheme.colors.primary};
@@ -172,6 +165,34 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({ entity }) => {
   );
 };
 
+export const AssetCriticalityTitle = () => (
+  <EuiToolTip
+    position="top"
+    content={
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTooltip"
+        defaultMessage="You can now categorize entities based on your organization's sensitivity and business risk. The classification tiers can be used to prioritize alert triage and investigation tasks. If the entity risk engine is enabled, the asset classification tier will dynamically impact the entity risk."
+      />
+    }
+  >
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xs">
+          <h3>
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTitle"
+              defaultMessage="Asset Criticality"
+            />
+          </h3>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="iInCircle" color="subdued" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiToolTip>
+);
+
 interface ModalProps {
   criticality: State;
   toggle: (nextValue: boolean) => void;
@@ -181,7 +202,7 @@ interface ModalProps {
 const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, entity, toggle }) => {
   const basicSelectId = useGeneratedHtmlId({ prefix: 'basicSelect' });
   const [value, setNewValue] = useState<CriticalityLevel>(
-    criticality.query.data?.criticality_level ?? 'normal'
+    criticality.query.data?.criticality_level ?? 'medium_impact'
   );
 
   return (
@@ -238,7 +259,6 @@ const option = (level: CriticalityLevel): EuiSuperSelectOption<CriticalityLevel>
       criticalityLevel={level}
       style={{ lineHeight: 'inherit' }}
       dataTestSubj="asset-criticality-modal-select-option"
-      withDescription
     />
   ),
   inputDisplay: (
@@ -246,10 +266,10 @@ const option = (level: CriticalityLevel): EuiSuperSelectOption<CriticalityLevel>
   ),
 });
 const options: Array<EuiSuperSelectOption<CriticalityLevel>> = [
-  option('normal'),
-  option('not_important'),
-  option('important'),
-  option('very_important'),
+  option('low_impact'),
+  option('medium_impact'),
+  option('high_impact'),
+  option('extreme_impact'),
 ];
 
 export const AssetCriticalityAccordion = React.memo(AssetCriticalityAccordionComponent);

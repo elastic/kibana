@@ -260,8 +260,23 @@ export class TaskManagerRunner implements TaskRunner {
       // this allows us to catch tasks that remain in Pending/Finalizing without being
       // cleaned up
       isReadyToRun(this.instance) ? this.instance.task.startedAt : this.instance.timestamp,
-      this.definition.timeout
+      this.timeout
     )!;
+  }
+
+  /*
+   * Gets the timeout of the current task. Uses the timeout
+   * defined by the task type unless this is an ad-hoc task that specifies an override
+   */
+  public get timeout() {
+    if (this.instance.task.schedule) {
+      // recurring tasks should use timeout in task type
+      return this.definition.timeout;
+    }
+
+    return this.instance.task.timeoutOverride
+      ? this.instance.task.timeoutOverride
+      : this.definition.timeout;
   }
 
   /**
@@ -521,17 +536,13 @@ export class TaskManagerRunner implements TaskRunner {
             attempts,
             retryAt:
               (this.instance.task.schedule
-                ? maxIntervalFromDate(
-                    now,
-                    this.instance.task.schedule.interval,
-                    this.definition.timeout
-                  )
+                ? maxIntervalFromDate(now, this.instance.task.schedule.interval, this.timeout)
                 : this.getRetryDelay({
                     attempts,
                     // Fake an error. This allows retry logic when tasks keep timing out
                     // and lets us set a proper "retryAt" value each time.
                     error: new Error('Task timeout'),
-                    addDuration: this.definition.timeout,
+                    addDuration: this.timeout,
                   })) ?? null,
             // This is a safe conversion as we're setting the startAt above
           },

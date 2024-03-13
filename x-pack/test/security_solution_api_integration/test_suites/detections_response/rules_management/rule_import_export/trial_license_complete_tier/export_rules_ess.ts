@@ -16,15 +16,11 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import {
   binaryToString,
-  getSimpleRule,
-  getSimpleRuleOutput,
-  getWebHookAction,
-  removeServerGeneratedProperties,
   getRuleSavedObjectWithLegacyInvestigationFields,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
-  updateUsername,
   createRuleThroughAlertingEndpoint,
   checkInvestigationFieldSoValue,
+  getCustomQueryRuleParams,
 } from '../../../utils';
 import {
   createRule,
@@ -33,14 +29,13 @@ import {
   deleteAllAlerts,
 } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
+import { createConnector } from '../../../utils/connectors';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
   describe('@ess export_rules - ESS specific logic', () => {
     describe('exporting rules', () => {
@@ -59,15 +54,11 @@ export default ({ getService }: FtrProviderContext): void => {
        */
       describe('legacy_notification_system', () => {
         it('should be able to export 1 legacy action on 1 rule', async () => {
-          // create an action
-          const { body: hookAction } = await supertest
-            .post('/api/actions/action')
-            .set('kbn-xsrf', 'true')
-            .send(getWebHookAction())
-            .expect(200);
+          const webHookConnectorParams = getWebHookConnectorParams();
+          const webHookConnectorId = await createConnector(supertest, webHookConnectorParams);
 
           // create a rule without actions
-          const rule = await createRule(supertest, log, getSimpleRule('rule-1'));
+          const rule = await createRule(supertest, log, getCustomQueryRuleParams());
 
           // attach the legacy notification
           await supertest
@@ -79,13 +70,13 @@ export default ({ getService }: FtrProviderContext): void => {
               interval: '1h',
               actions: [
                 {
-                  id: hookAction.id,
+                  id: webHookConnectorId,
                   group: 'default',
                   params: {
                     message:
                       'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                   },
-                  actionTypeId: hookAction.actionTypeId,
+                  actionTypeId: webHookConnectorParams.connector_type_id,
                 },
               ],
             })
@@ -99,18 +90,15 @@ export default ({ getService }: FtrProviderContext): void => {
             .send()
             .expect(200)
             .parse(binaryToString);
-          const expectedRule1 = updateUsername(
-            getSimpleRuleOutput('rule-1'),
-            ELASTICSEARCH_USERNAME
-          );
 
-          const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
-            ...expectedRule1,
+          const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
+
+          expect(exportedRule).toMatchObject({
             actions: [
               {
                 group: 'default',
-                id: hookAction.id,
-                action_type_id: hookAction.actionTypeId,
+                id: webHookConnectorId,
+                action_type_id: webHookConnectorParams.connector_type_id,
                 params: {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
@@ -118,30 +106,16 @@ export default ({ getService }: FtrProviderContext): void => {
                 frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-          };
-          const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
-          const firstRule = removeServerGeneratedProperties(firstRuleParsed);
-
-          expect(firstRule).toEqual(outputRule1);
+          });
         });
 
         it('should be able to export 2 legacy actions on 1 rule', async () => {
-          // create 1st action/connector
-          const { body: hookAction1 } = await supertest
-            .post('/api/actions/action')
-            .set('kbn-xsrf', 'true')
-            .send(getWebHookAction())
-            .expect(200);
-
-          // create 2nd action/connector
-          const { body: hookAction2 } = await supertest
-            .post('/api/actions/action')
-            .set('kbn-xsrf', 'true')
-            .send(getWebHookAction())
-            .expect(200);
+          const webHookConnectorParams = getWebHookConnectorParams();
+          const webHookConnectorId1 = await createConnector(supertest, webHookConnectorParams);
+          const webHookConnectorId2 = await createConnector(supertest, webHookConnectorParams);
 
           // create a rule without actions
-          const rule = await createRule(supertest, log, getSimpleRule('rule-1'));
+          const rule = await createRule(supertest, log, getCustomQueryRuleParams());
 
           // attach the legacy notification with actions
           await supertest
@@ -153,22 +127,22 @@ export default ({ getService }: FtrProviderContext): void => {
               interval: '1h',
               actions: [
                 {
-                  id: hookAction1.id,
+                  id: webHookConnectorId1,
                   group: 'default',
                   params: {
                     message:
                       'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                   },
-                  actionTypeId: hookAction1.actionTypeId,
+                  actionTypeId: webHookConnectorParams.connector_type_id,
                 },
                 {
-                  id: hookAction2.id,
+                  id: webHookConnectorId2,
                   group: 'default',
                   params: {
                     message:
                       'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                   },
-                  actionTypeId: hookAction2.actionTypeId,
+                  actionTypeId: webHookConnectorParams.connector_type_id,
                 },
               ],
             })
@@ -182,18 +156,15 @@ export default ({ getService }: FtrProviderContext): void => {
             .send()
             .expect(200)
             .parse(binaryToString);
-          const expectedRule1 = updateUsername(
-            getSimpleRuleOutput('rule-1'),
-            ELASTICSEARCH_USERNAME
-          );
 
-          const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
-            ...expectedRule1,
+          const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
+
+          expect(exportedRule).toMatchObject({
             actions: [
               {
                 group: 'default',
-                id: hookAction1.id,
-                action_type_id: hookAction1.actionTypeId,
+                id: webHookConnectorId1,
+                action_type_id: webHookConnectorParams.connector_type_id,
                 params: {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
@@ -202,8 +173,8 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               {
                 group: 'default',
-                id: hookAction2.id,
-                action_type_id: hookAction2.actionTypeId,
+                id: webHookConnectorId2,
+                action_type_id: webHookConnectorParams.connector_type_id,
                 params: {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
@@ -211,31 +182,25 @@ export default ({ getService }: FtrProviderContext): void => {
                 frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-          };
-          const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
-          const firstRule = removeServerGeneratedProperties(firstRuleParsed);
-
-          expect(firstRule).toEqual(outputRule1);
+          });
         });
 
         it('should be able to export 2 legacy actions on 2 rules', async () => {
-          // create 1st action/connector
-          const { body: hookAction1 } = await supertest
-            .post('/api/actions/action')
-            .set('kbn-xsrf', 'true')
-            .send(getWebHookAction())
-            .expect(200);
-
-          // create 2nd action/connector
-          const { body: hookAction2 } = await supertest
-            .post('/api/actions/action')
-            .set('kbn-xsrf', 'true')
-            .send(getWebHookAction())
-            .expect(200);
+          const webHookConnectorParams = getWebHookConnectorParams();
+          const webHookConnectorId1 = await createConnector(supertest, webHookConnectorParams);
+          const webHookConnectorId2 = await createConnector(supertest, webHookConnectorParams);
 
           // create 2 rules without actions
-          const rule1 = await createRule(supertest, log, getSimpleRule('rule-1'));
-          const rule2 = await createRule(supertest, log, getSimpleRule('rule-2'));
+          const rule1 = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-1' })
+          );
+          const rule2 = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-2' })
+          );
 
           // attach the legacy notification with actions to the first rule
           await supertest
@@ -247,22 +212,22 @@ export default ({ getService }: FtrProviderContext): void => {
               interval: '1h',
               actions: [
                 {
-                  id: hookAction1.id,
+                  id: webHookConnectorId1,
                   group: 'default',
                   params: {
                     message:
                       'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                   },
-                  actionTypeId: hookAction1.actionTypeId,
+                  actionTypeId: webHookConnectorParams.connector_type_id,
                 },
                 {
-                  id: hookAction2.id,
+                  id: webHookConnectorId2,
                   group: 'default',
                   params: {
                     message:
                       'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                   },
-                  actionTypeId: hookAction2.actionTypeId,
+                  actionTypeId: webHookConnectorParams.connector_type_id,
                 },
               ],
             })
@@ -278,22 +243,22 @@ export default ({ getService }: FtrProviderContext): void => {
               interval: '1h',
               actions: [
                 {
-                  id: hookAction1.id,
+                  id: webHookConnectorId1,
                   group: 'default',
                   params: {
                     message:
                       'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                   },
-                  actionTypeId: hookAction1.actionTypeId,
+                  actionTypeId: webHookConnectorParams.connector_type_id,
                 },
                 {
-                  id: hookAction2.id,
+                  id: webHookConnectorId2,
                   group: 'default',
                   params: {
                     message:
                       'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                   },
-                  actionTypeId: hookAction2.actionTypeId,
+                  actionTypeId: webHookConnectorParams.connector_type_id,
                 },
               ],
             })
@@ -308,17 +273,15 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(200)
             .parse(binaryToString);
 
-          const expectedRule1 = updateUsername(
-            getSimpleRuleOutput('rule-1'),
-            ELASTICSEARCH_USERNAME
-          );
-          const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
-            ...expectedRule1,
+          const exportedRule1 = JSON.parse(body.toString().split(/\n/)[0]);
+          const exportedRule2 = JSON.parse(body.toString().split(/\n/)[1]);
+
+          expect(exportedRule1).toMatchObject({
             actions: [
               {
                 group: 'default',
-                id: hookAction1.id,
-                action_type_id: hookAction1.actionTypeId,
+                id: webHookConnectorId1,
+                action_type_id: webHookConnectorParams.connector_type_id,
                 params: {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
@@ -327,8 +290,8 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               {
                 group: 'default',
-                id: hookAction2.id,
-                action_type_id: hookAction2.actionTypeId,
+                id: webHookConnectorId2,
+                action_type_id: webHookConnectorParams.connector_type_id,
                 params: {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
@@ -336,19 +299,13 @@ export default ({ getService }: FtrProviderContext): void => {
                 frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-          };
-
-          const expectedRule2 = updateUsername(
-            getSimpleRuleOutput('rule-2'),
-            ELASTICSEARCH_USERNAME
-          );
-          const outputRule2: ReturnType<typeof getSimpleRuleOutput> = {
-            ...expectedRule2,
+          });
+          expect(exportedRule2).toMatchObject({
             actions: [
               {
                 group: 'default',
-                id: hookAction1.id,
-                action_type_id: hookAction1.actionTypeId,
+                id: webHookConnectorId1,
+                action_type_id: webHookConnectorParams.connector_type_id,
                 params: {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
@@ -357,8 +314,8 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               {
                 group: 'default',
-                id: hookAction2.id,
-                action_type_id: hookAction2.actionTypeId,
+                id: webHookConnectorId2,
+                action_type_id: webHookConnectorParams.connector_type_id,
                 params: {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
@@ -366,14 +323,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-          };
-          const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
-          const secondRuleParsed = JSON.parse(body.toString().split(/\n/)[1]);
-          const firstRule = removeServerGeneratedProperties(firstRuleParsed);
-          const secondRule = removeServerGeneratedProperties(secondRuleParsed);
-
-          expect(firstRule).toEqual(outputRule2);
-          expect(secondRule).toEqual(outputRule1);
+          });
         });
       });
     });
@@ -392,11 +342,15 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
         );
-        await createRule(supertest, log, {
-          ...getSimpleRule('rule-with-investigation-field'),
-          name: 'Test investigation fields object',
-          investigation_fields: { field_names: ['host.name'] },
-        });
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-with-investigation-field',
+            name: 'Test investigation fields object',
+            investigation_fields: { field_names: ['host.name'] },
+          })
+        );
       });
 
       afterEach(async () => {

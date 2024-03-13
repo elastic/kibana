@@ -13,7 +13,7 @@ import { inputsSelectors } from '../../store';
 import type { VisualizationResponse } from './types';
 
 export const useVisualizationResponse = ({ visualizationId }: { visualizationId: string }) => {
-  const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
+  const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
   const { inspect, loading, searchSessionId } = useDeepEqualSelector((state) =>
     getGlobalQuery(state, visualizationId)
   );

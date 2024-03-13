@@ -124,8 +124,8 @@ components:
           description: The number of risk input documents that contributed to the Category 2 score (`category_2_score`).
         criticality_level:
           type: string
-          example: very_important
-          description: The designated criticality level of the entity. Possible values are `not_important`, `normal`, `important`, and `very_important`.
+          example: extreme_impact
+          description: The designated criticality level of the entity. Possible values are `low_impact`, `medium_impact`, `high_impact`, and `extreme_impact`.
         criticality_modifier:
           type: number
           format: double

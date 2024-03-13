@@ -22,7 +22,7 @@ export const esArchiver = (
   const isCloudServerless = config.env.CLOUD_SERVERLESS;
 
   const serverlessCloudUser = {
-    username: 'elastic',
+    username: config.env.ELASTICSEARCH_USERNAME,
     password: config.env.ELASTICSEARCH_PASSWORD,
   };
 

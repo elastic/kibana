@@ -23,3 +23,4 @@ export * from './get_stats';
 export * from './get_detection_metrics_from_body';
 export * from './get_stats_url';
 export * from './retry';
+export * from './combine_to_ndjson';

@@ -3,8 +3,14 @@ $mediumControl: $euiSize * 25;
 $largeControl: $euiSize * 50;
 $controlMinWidth: $euiSize * 14;
 
-.controlGroup {
+.controlsWrapper {
+  display: flex;
+  align-items: center;
   min-height: $euiSize * 4;
+
+  .controlGroup--endButtonGroup {
+    align-self: end;
+  }
 }
 
 .controlsWrapper--twoLine {
@@ -197,5 +203,14 @@ $controlMinWidth: $euiSize * 14;
 
   &--twoLine {
     top: (-$euiSizeXS) !important;
+  }
+}
+
+.controlGroup--invalidSelectionsTour {
+  .controlGroup--suppressTourCheckbox {
+    height: 22px;
+    &Label {
+      font-weight: $euiFontWeightMedium;
+    }
   }
 }

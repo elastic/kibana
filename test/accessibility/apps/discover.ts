@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
       });
 
       await a11y.testAppSnapshot();

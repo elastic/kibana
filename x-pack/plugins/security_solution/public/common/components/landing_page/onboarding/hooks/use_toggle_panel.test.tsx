@@ -6,7 +6,6 @@
  */
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useTogglePanel } from './use_toggle_panel';
-import { onboardingStorage } from '../storage';
 
 import type { StepId } from '../types';
 import {
@@ -23,8 +22,13 @@ import {
 } from '../types';
 import type { SecurityProductTypes } from '../configs';
 import { ProductLine } from '../configs';
+import { OnboardingStorage } from '../storage';
+import * as mockStorage from '../__mocks__/storage';
 
-jest.mock('../storage');
+jest.mock('../storage', () => ({
+  OnboardingStorage: jest.fn(),
+}));
+
 jest.mock('react-router-dom', () => ({
   useLocation: jest.fn().mockReturnValue({ hash: '' }),
 }));
@@ -54,12 +58,25 @@ describe('useTogglePanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (onboardingStorage.getAllFinishedStepsFromStorage as jest.Mock).mockReturnValue({
+    (OnboardingStorage as jest.Mock).mockImplementation(() => ({
+      getAllFinishedStepsFromStorage: mockStorage.mockGetAllFinishedStepsFromStorage,
+      getFinishedStepsFromStorageByCardId: mockStorage.mockGetFinishedStepsFromStorageByCardId,
+      getActiveProductsFromStorage: mockStorage.mockGetActiveProductsFromStorage,
+      toggleActiveProductsInStorage: mockStorage.mockToggleActiveProductsInStorage,
+      resetAllExpandedCardStepsToStorage: mockStorage.mockResetAllExpandedCardStepsToStorage,
+      addFinishedStepToStorage: mockStorage.mockAddFinishedStepToStorage,
+      removeFinishedStepFromStorage: mockStorage.mockRemoveFinishedStepFromStorage,
+      addExpandedCardStepToStorage: mockStorage.mockAddExpandedCardStepToStorage,
+      removeExpandedCardStepFromStorage: mockStorage.mockRemoveExpandedCardStepFromStorage,
+      getAllExpandedCardStepsFromStorage: mockStorage.mockGetAllExpandedCardStepsFromStorage,
+    }));
+
+    (mockStorage.mockGetAllFinishedStepsFromStorage as jest.Mock).mockReturnValue({
       [QuickStartSectionCardsId.createFirstProject]: new Set([
         CreateProjectSteps.createFirstProject,
       ]),
     });
-    (onboardingStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([
+    (mockStorage.mockGetActiveProductsFromStorage as jest.Mock).mockReturnValue([
       ProductLine.security,
       ProductLine.cloud,
       ProductLine.endpoint,
@@ -67,7 +84,7 @@ describe('useTogglePanel', () => {
   });
 
   test('should initialize state with correct initial values - when no active products from local storage', () => {
-    (onboardingStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([]);
+    (mockStorage.mockGetActiveProductsFromStorage as jest.Mock).mockReturnValue([]);
 
     const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps }));
 
@@ -191,7 +208,7 @@ describe('useTogglePanel', () => {
   });
 
   test('should initialize state with correct initial values - when security product active', () => {
-    (onboardingStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([
+    (mockStorage.mockGetActiveProductsFromStorage as jest.Mock).mockReturnValue([
       ProductLine.security,
     ]);
     const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps }));
@@ -267,7 +284,7 @@ describe('useTogglePanel', () => {
       });
     });
 
-    expect(onboardingStorage.resetAllExpandedCardStepsToStorage).toHaveBeenCalledTimes(1);
+    expect(mockStorage.mockResetAllExpandedCardStepsToStorage).toHaveBeenCalledTimes(1);
   });
 
   test('should add the current step to storage when it is expanded', () => {
@@ -284,8 +301,8 @@ describe('useTogglePanel', () => {
       });
     });
 
-    expect(onboardingStorage.addExpandedCardStepToStorage).toHaveBeenCalledTimes(1);
-    expect(onboardingStorage.addExpandedCardStepToStorage).toHaveBeenCalledWith(
+    expect(mockStorage.mockAddExpandedCardStepToStorage).toHaveBeenCalledTimes(1);
+    expect(mockStorage.mockAddExpandedCardStepToStorage).toHaveBeenCalledWith(
       QuickStartSectionCardsId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity
     );
@@ -305,8 +322,8 @@ describe('useTogglePanel', () => {
       });
     });
 
-    expect(onboardingStorage.removeExpandedCardStepFromStorage).toHaveBeenCalledTimes(1);
-    expect(onboardingStorage.removeExpandedCardStepFromStorage).toHaveBeenCalledWith(
+    expect(mockStorage.mockRemoveExpandedCardStepFromStorage).toHaveBeenCalledTimes(1);
+    expect(mockStorage.mockRemoveExpandedCardStepFromStorage).toHaveBeenCalledWith(
       QuickStartSectionCardsId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity
     );
@@ -325,8 +342,8 @@ describe('useTogglePanel', () => {
       });
     });
 
-    expect(onboardingStorage.addFinishedStepToStorage).toHaveBeenCalledTimes(1);
-    expect(onboardingStorage.addFinishedStepToStorage).toHaveBeenCalledWith(
+    expect(mockStorage.mockAddFinishedStepToStorage).toHaveBeenCalledTimes(1);
+    expect(mockStorage.mockAddFinishedStepToStorage).toHaveBeenCalledWith(
       QuickStartSectionCardsId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity
     );
@@ -346,8 +363,8 @@ describe('useTogglePanel', () => {
       });
     });
 
-    expect(onboardingStorage.removeFinishedStepFromStorage).toHaveBeenCalledTimes(1);
-    expect(onboardingStorage.removeFinishedStepFromStorage).toHaveBeenCalledWith(
+    expect(mockStorage.mockRemoveFinishedStepFromStorage).toHaveBeenCalledTimes(1);
+    expect(mockStorage.mockRemoveFinishedStepFromStorage).toHaveBeenCalledWith(
       QuickStartSectionCardsId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity,
       onboardingSteps
@@ -363,8 +380,8 @@ describe('useTogglePanel', () => {
       onProductSwitchChanged({ id: ProductLine.security, label: 'Analytics' });
     });
 
-    expect(onboardingStorage.toggleActiveProductsInStorage).toHaveBeenCalledTimes(1);
-    expect(onboardingStorage.toggleActiveProductsInStorage).toHaveBeenCalledWith(
+    expect(mockStorage.mockToggleActiveProductsInStorage).toHaveBeenCalledTimes(1);
+    expect(mockStorage.mockToggleActiveProductsInStorage).toHaveBeenCalledWith(
       ProductLine.security
     );
   });

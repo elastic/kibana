@@ -6,9 +6,15 @@
  */
 
 import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
+import { isNumber } from 'lodash';
 import { isErr, tryAsResult } from './lib/result_type';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { DecoratedError } from './task_running';
+
+export enum TaskPriority {
+  Low = 1,
+  Normal = 50,
+}
 
 /*
  * Type definitions and validations for tasks.
@@ -133,6 +139,10 @@ export const taskDefinitionSchema = schema.object(
      */
     title: schema.maybe(schema.string()),
     /**
+     * Priority of this task type. Defaults to "NORMAL" if not defined
+     */
+    priority: schema.maybe(schema.number()),
+    /**
      * An optional more detailed description of what this task does.
      */
     description: schema.maybe(schema.string()),
@@ -179,9 +189,15 @@ export const taskDefinitionSchema = schema.object(
     indirectParamsSchema: schema.maybe(schema.any()),
   },
   {
-    validate({ timeout }) {
+    validate({ timeout, priority }) {
       if (!isInterval(timeout) || isErr(tryAsResult(() => parseIntervalAsMillisecond(timeout)))) {
         return `Invalid timeout "${timeout}". Timeout must be of the form "{number}{cadance}" where number is an integer. Example: 5m.`;
+      }
+
+      if (priority && (!isNumber(priority) || !(priority in TaskPriority))) {
+        return `Invalid priority "${priority}". Priority must be one of ${Object.keys(TaskPriority)
+          .filter((key) => isNaN(Number(key)))
+          .map((key) => `${key} => ${TaskPriority[key as keyof typeof TaskPriority]}`)}`;
       }
     },
   }
@@ -329,6 +345,11 @@ export interface TaskInstance {
    * Indicates the number of skipped executions.
    */
   numSkippedRuns?: number;
+
+  /*
+   * Optionally override the timeout defined in the task type for this specific task instance
+   */
+  timeoutOverride?: string;
 }
 
 /**

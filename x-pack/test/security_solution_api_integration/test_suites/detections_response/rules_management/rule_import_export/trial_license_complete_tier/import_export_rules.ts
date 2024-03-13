@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import {
@@ -18,7 +18,7 @@ import {
 } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { binaryToString, getSimpleRule } from '../../../utils';
+import { binaryToString, getCustomQueryRuleParams } from '../../../utils';
 import {
   createRule,
   createAlertsIndex,
@@ -88,7 +88,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .expect(200);
 
-        expect(exceptionItem.comments).to.eql([
+        expect(exceptionItem.comments).toEqual([
           {
             comment: 'this exception item rocks',
             created_at: `${exceptionItem.comments[0].created_at}`,
@@ -97,17 +97,20 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         ]);
 
-        await createRule(supertest, log, {
-          ...getSimpleRule(),
-          exceptions_list: [
-            {
-              id: exceptionBody.id,
-              list_id: exceptionBody.list_id,
-              type: exceptionBody.type,
-              namespace_type: exceptionBody.namespace_type,
-            },
-          ],
-        });
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            exceptions_list: [
+              {
+                id: exceptionBody.id,
+                list_id: exceptionBody.list_id,
+                type: exceptionBody.type,
+                namespace_type: exceptionBody.namespace_type,
+              },
+            ],
+          })
+        );
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -132,7 +135,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // NOTE: Existing comment is uploaded successfully
         // however, the meta now reflects who imported it,
         // not who created the initial comment
-        expect(exceptionItemFind2.comments).to.eql([
+        expect(exceptionItemFind2.comments).toEqual([
           {
             comment: 'this exception item rocks',
             created_at: `${exceptionItemFind2.comments[0].created_at}`,
@@ -167,7 +170,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .expect(200);
 
-        expect(exceptionItem.comments).to.eql([
+        expect(exceptionItem.comments).toEqual([
           {
             comment: 'this exception item rocks',
             created_at: `${exceptionItem.comments[0].created_at}`,
@@ -176,17 +179,20 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         ]);
 
-        await createRule(supertest, log, {
-          ...getSimpleRule(),
-          exceptions_list: [
-            {
-              id: exceptionBody.id,
-              list_id: exceptionBody.list_id,
-              type: exceptionBody.type,
-              namespace_type: exceptionBody.namespace_type,
-            },
-          ],
-        });
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            exceptions_list: [
+              {
+                id: exceptionBody.id,
+                list_id: exceptionBody.list_id,
+                type: exceptionBody.type,
+                namespace_type: exceptionBody.namespace_type,
+              },
+            ],
+          })
+        );
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -211,7 +217,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // NOTE: Existing comment is uploaded successfully
         // however, the meta now reflects who imported it,
         // not who created the initial comment
-        expect(exceptionItemFind2.comments).to.eql([
+        expect(exceptionItemFind2.comments).toEqual([
           {
             comment: 'this exception item rocks',
             created_at: `${exceptionItemFind2.comments[0].created_at}`,
@@ -255,7 +261,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .expect(200);
 
-        expect(exceptionItem.comments).to.eql([
+        expect(exceptionItem.comments).toEqual([
           {
             comment: 'this exception item rocks',
             created_at: `${exceptionItem.comments[0].created_at}`,
@@ -264,17 +270,20 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         ]);
 
-        await createRule(supertest, log, {
-          ...getSimpleRule(),
-          exceptions_list: [
-            {
-              id: exceptionBody.id,
-              list_id: exceptionBody.list_id,
-              type: exceptionBody.type,
-              namespace_type: exceptionBody.namespace_type,
-            },
-          ],
-        });
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            exceptions_list: [
+              {
+                id: exceptionBody.id,
+                list_id: exceptionBody.list_id,
+                type: exceptionBody.type,
+                namespace_type: exceptionBody.namespace_type,
+              },
+            ],
+          })
+        );
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -299,7 +308,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // NOTE: Existing comment is uploaded successfully
         // however, the meta now reflects who imported it,
         // not who created the initial comment
-        expect(exceptionItemFind2.comments).to.eql([
+        expect(exceptionItemFind2.comments).toEqual([
           {
             comment: 'this exception item rocks',
             created_at: `${exceptionItemFind2.comments[0].created_at}`,
@@ -334,7 +343,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .expect(200);
 
-        expect(exceptionItem.comments).to.eql([
+        expect(exceptionItem.comments).toEqual([
           {
             comment: 'this exception item rocks',
             created_at: `${exceptionItem.comments[0].created_at}`,
@@ -343,17 +352,20 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         ]);
 
-        await createRule(supertest, log, {
-          ...getSimpleRule(),
-          exceptions_list: [
-            {
-              id: exceptionBody.id,
-              list_id: exceptionBody.list_id,
-              type: exceptionBody.type,
-              namespace_type: exceptionBody.namespace_type,
-            },
-          ],
-        });
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            exceptions_list: [
+              {
+                id: exceptionBody.id,
+                list_id: exceptionBody.list_id,
+                type: exceptionBody.type,
+                namespace_type: exceptionBody.namespace_type,
+              },
+            ],
+          })
+        );
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -378,7 +390,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // NOTE: Existing comment is uploaded successfully
         // however, the meta now reflects who imported it,
         // not who created the initial comment
-        expect(exceptionItemFind2.comments).to.eql([
+        expect(exceptionItemFind2.comments).toEqual([
           {
             comment: 'this exception item rocks',
             created_at: `${exceptionItemFind2.comments[0].created_at}`,

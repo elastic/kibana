@@ -1378,6 +1378,20 @@
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskInstance.timeoutOverride",
+            "type": "string",
+            "tags": [],
+            "label": "timeoutOverride",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1422,6 +1436,29 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskRegisterDefinition.priority",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "priority",
+            "description": [
+              "\nAn optional definition of task priority. Tasks will be sorted by priority prior to claiming\nso high priority tasks will always be claimed before normal priority, which will always be\nclaimed before low priority"
+            ],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskPriority",
+                "text": "TaskPriority"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
             "deprecated": false,
@@ -1609,6 +1646,18 @@
         "label": "TaskErrorSource",
         "description": [],
         "path": "x-pack/plugins/task_manager/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.TaskPriority",
+        "type": "Enum",
+        "tags": [],
+        "label": "TaskPriority",
+        "description": [],
+        "path": "x-pack/plugins/task_manager/server/task.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
