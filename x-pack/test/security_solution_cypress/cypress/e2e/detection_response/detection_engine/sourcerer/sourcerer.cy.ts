@@ -45,13 +45,11 @@ describe('Sourcerer', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('correctly loads SIEM data view', () => {
-    cy.log('open sourcerer');
     openSourcerer();
     isDataViewSelection(siemDataViewTitle);
     openAdvancedSettings();
     isSourcererSelection(`auditbeat-*`);
     isSourcererOptions(DEFAULT_INDEX_PATTERN.filter((pattern) => pattern !== 'auditbeat-*'));
-    cy.screenshot();
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/177586
