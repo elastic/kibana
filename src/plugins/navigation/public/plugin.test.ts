@@ -17,6 +17,7 @@ import {
 } from '../common';
 import { NavigationPublicPlugin } from './plugin';
 import { ConfigSchema } from './types';
+import type { BuildFlavor } from '@kbn/config';
 
 const defaultConfig: ConfigSchema['solutionNavigation'] = {
   featureOn: true,
@@ -28,14 +29,18 @@ const defaultConfig: ConfigSchema['solutionNavigation'] = {
 const setup = (
   partialConfig: Partial<ConfigSchema['solutionNavigation']> & {
     featureOn: boolean;
-  }
+  },
+  { buildFlavor = 'traditional' }: { buildFlavor?: BuildFlavor } = {}
 ) => {
-  const initializerContext = coreMock.createPluginInitializerContext({
-    solutionNavigation: {
-      ...defaultConfig,
-      ...partialConfig,
+  const initializerContext = coreMock.createPluginInitializerContext(
+    {
+      solutionNavigation: {
+        ...defaultConfig,
+        ...partialConfig,
+      },
     },
-  });
+    { buildFlavor }
+  );
   const plugin = new NavigationPublicPlugin(initializerContext);
 
   const coreStart = coreMock.createStart();
@@ -61,6 +66,11 @@ describe('Navigation Plugin', () => {
       plugin.start(coreStart, { unifiedSearch });
       expect(coreStart.chrome.project.updateSolutionNavigations).not.toHaveBeenCalled();
       expect(coreStart.chrome.project.changeActiveSolutionNavigation).not.toHaveBeenCalled();
+    });
+
+    it('should return flag to indicate that the solution navigation is disabled', () => {
+      const { plugin, coreStart, unifiedSearch } = setup({ featureOn });
+      expect(plugin.start(coreStart, { unifiedSearch }).isSolutionNavigationEnabled()).toBe(false);
     });
   });
 
@@ -134,6 +144,23 @@ describe('Navigation Plugin', () => {
       expect(coreStart.chrome.project.changeActiveSolutionNavigation).toHaveBeenCalledWith(null, {
         onlyIfNotSet: true,
       });
+    });
+
+    it('should return flag to indicate that the solution navigation is enabled', () => {
+      const { plugin, coreStart, unifiedSearch, cloud } = setup({ featureOn });
+      expect(plugin.start(coreStart, { unifiedSearch, cloud }).isSolutionNavigationEnabled()).toBe(
+        true
+      );
+    });
+
+    it('on serverless should return flag to indicate that the solution navigation is disabled', () => {
+      const { plugin, coreStart, unifiedSearch, cloud } = setup(
+        { featureOn },
+        { buildFlavor: 'serverless' }
+      );
+      expect(plugin.start(coreStart, { unifiedSearch, cloud }).isSolutionNavigationEnabled()).toBe(
+        false
+      );
     });
   });
 });

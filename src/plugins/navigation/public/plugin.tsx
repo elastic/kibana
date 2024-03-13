@@ -16,6 +16,7 @@ import type {
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { definition as esDefinition } from '@kbn/solution-nav-es';
 import { definition as obltDefinition } from '@kbn/solution-nav-oblt';
+import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import {
   ENABLE_SOLUTION_NAV_UI_SETTING_ID,
   OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID,
@@ -95,7 +96,8 @@ export class NavigationPublicPlugin
     } = config;
 
     const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
-    const isSolutionNavEnabled = isSolutionNavigationFeatureOn && onCloud;
+    const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    const isSolutionNavEnabled = isSolutionNavigationFeatureOn && onCloud && !isServerless;
 
     if (isSolutionNavEnabled) {
       chrome.project.setCloudUrls(cloud);
@@ -149,6 +151,7 @@ export class NavigationPublicPlugin
         if (!isSolutionNavEnabled) return;
         return this.addSolutionNavigation(solutionNavigation);
       },
+      isSolutionNavigationEnabled: () => isSolutionNavEnabled,
     };
   }
 
