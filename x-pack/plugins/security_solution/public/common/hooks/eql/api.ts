@@ -24,7 +24,7 @@ interface Params {
   data: DataPublicPluginStart;
   signal: AbortSignal;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  options: Omit<EqlOptionsSelected, 'query' | 'size'>;
+  options: Omit<EqlOptionsSelected, 'query' | 'size'> | undefined;
 }
 
 export const validateEql = async ({
