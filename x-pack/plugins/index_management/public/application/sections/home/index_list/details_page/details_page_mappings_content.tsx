@@ -118,7 +118,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
     <>
       <EuiFlexGroup style={{ marginBottom: euiTheme.size.l }}>
-        <EuiButton onClick={onToggleChange}>
+        <EuiButton data-test-subj="indexDetailsMappingsToggleViewButton" onClick={onToggleChange}>
           {!toggleOn ? (
             <FormattedMessage id="xpack.idxMgmt.indexDetails.mappings.json" defaultMessage="JSON" />
           ) : (
