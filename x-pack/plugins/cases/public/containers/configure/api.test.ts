@@ -18,7 +18,6 @@ import {
   casesConfigurationsMock,
 } from './mock';
 import { ConnectorTypes } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { KibanaServices } from '../../common/lib/kibana';
 import { actionTypesMock, connectorsMock } from '../../common/mock/connectors';
 
@@ -57,29 +56,24 @@ describe('Case Configuration API', () => {
     });
 
     test('check url, method, signal', async () => {
-      await getCaseConfigure({ signal: abortCtrl.signal, owner: [SECURITY_SOLUTION_OWNER] });
+      await getCaseConfigure({ signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/cases/configure', {
         method: 'GET',
         signal: abortCtrl.signal,
-        query: {
-          owner: [SECURITY_SOLUTION_OWNER],
-        },
       });
     });
 
     test('happy path', async () => {
       const resp = await getCaseConfigure({
         signal: abortCtrl.signal,
-        owner: [SECURITY_SOLUTION_OWNER],
       });
-      expect(resp).toEqual(casesConfigurationsMock);
+      expect(resp).toEqual([casesConfigurationsMock]);
     });
 
     test('return null on empty response', async () => {
       fetchMock.mockResolvedValue({});
       const resp = await getCaseConfigure({
         signal: abortCtrl.signal,
-        owner: [SECURITY_SOLUTION_OWNER],
       });
       expect(resp).toBe(null);
     });
