@@ -120,7 +120,10 @@ export class EmbeddableExamplesPlugin
     registerMarkdownEditorEmbeddable();
     registerCreateEuiMarkdownAction(deps.uiActions);
 
-    registerSearchEmbeddableFactory();
+    registerSearchEmbeddableFactory({
+      data: deps.data,
+      dataViews: deps.dataViews
+    });
     registerCreateSearchEmbeddableAction(deps.uiActions);
 
     return {

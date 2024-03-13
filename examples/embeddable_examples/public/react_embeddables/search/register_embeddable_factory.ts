@@ -10,26 +10,26 @@ import {
   ReactEmbeddableFactory,
   registerReactEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
-import { Api } from './types';
+import { Api, Services } from './types';
 
-const factory: ReactEmbeddableFactory<
-  {},
-  Api
-> = {
-  type: 'SEARCH_REACT_EMBEDDABLE',
-  deserializeState: (state) => {
-    return state.rawState;
-  },
-  /**
-   * The buildEmbeddable function is async so you can async import the component or load a saved
-   * object here. The loading will be handed gracefully by the Presentation Container.
-   */
-  buildEmbeddable: async (state, buildApi) => {
-    const { buildEmbeddable } = await import('./build_embeddable');
-    return buildEmbeddable(state, buildApi);
-  },
-};
+export const registerEmbeddableFactory = (services: Services) => {
+  const factory: ReactEmbeddableFactory<
+    {},
+    Api,
+  > = {
+    type: 'SEARCH_REACT_EMBEDDABLE',
+    deserializeState: (state) => {
+      return state.rawState;
+    },
+    /**
+     * The buildEmbeddable function is async so you can async import the component or load a saved
+     * object here. The loading will be handed gracefully by the Presentation Container.
+     */
+    buildEmbeddable: async (state, buildApi) => {
+      const { buildEmbeddable } = await import('./build_embeddable');
+      return buildEmbeddable(state, buildApi, services);
+    },
+  };
 
-export const registerEmbeddableFactory = () =>
-  console.log('registerReactEmbeddableFactory');
   registerReactEmbeddableFactory(factory);
+}

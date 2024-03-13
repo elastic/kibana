@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type {
   DefaultEmbeddableApi
 } from '@kbn/embeddable-plugin/public';
 
 export type Api = DefaultEmbeddableApi;
+
+export type Services = {
+  data: DataPublicPluginStart,
+  dataViews: DataViewsPublicPluginStart,
+}
