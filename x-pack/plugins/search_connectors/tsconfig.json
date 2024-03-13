@@ -17,12 +17,8 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
-    "@kbn/management-plugin",
     "@kbn/doc-links",
-    "@kbn/i18n",
-    "@kbn/kibana-react-plugin",
-    "@kbn/i18n-react",
-    "@kbn/core-lifecycle-browser",
     "@kbn/search-connectors",
+    "@kbn/core-http-browser",
   ]
 }
