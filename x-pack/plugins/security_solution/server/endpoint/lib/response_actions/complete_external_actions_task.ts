@@ -11,12 +11,14 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { CompleteExternalActionsTaskRunner } from './complete_external_actions_task_runner';
 import type { EndpointAppContext } from '../../types';
 
 export const COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE =
   'endpoint:complete-external-response-actions';
+export const COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION = `1.0.0';`;
 export const COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TITLE =
   'Security Solution Complete External Response Actions';
 
@@ -48,6 +50,10 @@ export class CompleteExternalResponseActionsTask {
     );
   }
 
+  private get taskId(): string {
+    return `${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}-${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION}`;
+  }
+
   public async setup({ taskManager }: CompleteExternalResponseActionsTaskSetupOptions) {
     if (this.wasSetup) {
       throw new Error(`Task has already been setup!`);
@@ -77,10 +83,18 @@ export class CompleteExternalResponseActionsTask {
       [COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE]: {
         title: COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TITLE,
         timeout: this.taskTimeout,
-        createTaskRunner: () => {
+        createTaskRunner: ({ taskInstance }) => {
           if (!this.esClient) {
             throw new EndpointError(
               `esClient not defined. Was [${this.constructor.name}.start()] called?`
+            );
+          }
+
+          if (taskInstance.id !== this.taskId) {
+            throwUnrecoverableError(
+              new EndpointError(
+                `Outdated task version. Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
+              )
             );
           }
 
