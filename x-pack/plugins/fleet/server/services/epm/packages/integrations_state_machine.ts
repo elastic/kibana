@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// import { appContextService } from '../../app_context';
+import { appContextService } from '../../app_context';
 
 export interface State {
   event: any;
@@ -28,9 +28,10 @@ export const installStateNames = [
 
 type StateNamesTuple = typeof installStateNames;
 type StateNames = StateNamesTuple[number];
+type StateMachineStates<T extends string> = Record<T, State>;
 
 // example our install states
-const installStates: Record<StateNames, State> = {
+const installStates: StateMachineStates<StateNames> = {
   create_restart_installation: {
     nextState: 'install_kibana_assets',
     event: () => undefined,
@@ -74,19 +75,19 @@ const installStates: Record<StateNames, State> = {
 };
 
 export async function handleStateMachine(
-  startState: StateNames,
-  states: Record<StateNames, State>,
+  startState: string,
+  states: StateMachineStates<string>,
   data: any
 ) {
   await handleTransition(startState, states, data);
 }
 
 async function handleTransition(
-  currentStateName: StateNames,
-  states: Record<StateNames, State>,
+  currentStateName: string,
+  states: StateMachineStates<string>,
   stateData?: any
 ) {
-  // const logger = appContextService.getLogger();
+  const logger = appContextService.getLogger();
   const currentState = states[currentStateName];
   let currentStatus = 'pending';
   let stateResult;
@@ -97,23 +98,17 @@ async function handleTransition(
       currentStatus = 'success';
     } catch (error) {
       currentStatus = 'failed';
-      console.error(
+      logger.warn(
         `Error during execution of state "${currentStateName}" with status "${currentStatus}": ${error.message}`
       );
-      // logger.warn(
-      //   `Error during execution of state "${currentStateName}" with status "${currentStatus}": ${error.message}`
-      // );
     }
   } else {
     currentStatus = 'failed';
   }
   // update SO with current state data
-  console.log(
+  logger.info(
     `state: ${currentStateName} - status ${currentStatus} - stateResult: ${stateResult} - nextState: ${currentState.nextState}`
   );
-  // logger.info(
-  //   `state: ${currentStateName} - status ${currentStatus} - stateResult: ${stateResult} - nextState: ${currentState.nextState}`
-  // );
   if (currentStatus === 'success' && currentState?.nextState && currentState?.nextState !== 'end') {
     handleTransition(currentState.nextState, states, stateData);
   } else {

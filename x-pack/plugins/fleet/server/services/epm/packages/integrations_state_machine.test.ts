@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { createAppContextStartContractMock } from '../../../mocks';
+import { appContextService } from '../..';
+
 import { handleStateMachine } from './integrations_state_machine';
 
 const getTestStates = (mockEvent1: any, mockEvent2: any, mockEvent3: any) => {
@@ -25,8 +28,15 @@ const getTestStates = (mockEvent1: any, mockEvent2: any, mockEvent3: any) => {
 };
 
 describe('handleStateMachine', () => {
+  let mockContract: ReturnType<typeof createAppContextStartContractMock>;
+  beforeEach(async () => {
+    // prevents `Logger not set.` and other appContext errors
+    mockContract = createAppContextStartContractMock();
+    appContextService.start(mockContract);
+  });
   afterEach(() => {
     jest.resetAllMocks();
+    appContextService.stop();
   });
 
   it('should execute all the state machine transitions based on the provided data structure', async () => {
@@ -39,6 +49,15 @@ describe('handleStateMachine', () => {
     expect(mockEventState1).toHaveBeenCalledTimes(1);
     expect(mockEventState2).toHaveBeenCalledTimes(1);
     expect(mockEventState3).toHaveBeenCalledTimes(1);
+    expect(mockContract.logger?.info).toHaveBeenCalledWith(
+      'state: state1 - status success - stateResult: undefined - nextState: state2'
+    );
+    expect(mockContract.logger?.info).toHaveBeenCalledWith(
+      'state: state2 - status success - stateResult: undefined - nextState: state3'
+    );
+    expect(mockContract.logger?.info).toHaveBeenCalledWith(
+      'state: state3 - status success - stateResult: undefined - nextState: end'
+    );
   });
 
   it('should execute the transition from the provided state', async () => {
@@ -54,7 +73,7 @@ describe('handleStateMachine', () => {
   });
 
   it('should exit when a state returns error', async () => {
-    const error = new Error('Insallation failed');
+    const error = new Error('Installation failed');
     const mockEventState1 = jest.fn().mockRejectedValue(error);
     const mockEventState2 = jest.fn();
     const mockEventState3 = jest.fn();
@@ -64,5 +83,8 @@ describe('handleStateMachine', () => {
     expect(mockEventState1).toHaveBeenCalledTimes(1);
     expect(mockEventState2).toHaveBeenCalledTimes(0);
     expect(mockEventState3).toHaveBeenCalledTimes(0);
+    expect(mockContract.logger?.warn).toHaveBeenCalledWith(
+      'Error during execution of state "state1" with status "failed": Installation failed'
+    );
   });
 });
