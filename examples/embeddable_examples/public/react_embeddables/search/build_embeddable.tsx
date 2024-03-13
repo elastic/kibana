@@ -41,13 +41,15 @@ export const buildEmbeddable = async (
     searchSource.setField('index', dataView);
     searchSource.setField('size', 0);
     searchSource.setField('trackTotalHits', true);
-    console.log('raw ES request', searchSource.getSearchRequestBody());
+    console.log('ES request', searchSource.getSearchRequestBody());
+    // eslint-disable-next-line no-console
     const { rawResponse: resp } = await lastValueFrom(
       searchSource.fetch$({
         legacyHitsTotal: false,
       })
     );
-    console.log('raw ES response', resp);
+    // eslint-disable-next-line no-console
+    console.log('ES response', resp);
     return resp.hits.total?.value ?? 0;
   }
 
@@ -56,6 +58,7 @@ export const buildEmbeddable = async (
     Component: () => {
       const [count, setCount] = useState<number>(0);
       const [error, setError] = useState<Error | undefined>();
+      
       useEffect(() => {
         let ignore = false;
         setError(undefined);
@@ -98,9 +101,9 @@ export const buildEmbeddable = async (
       }
 
       return (
-        <div>
-         Found {count} from {dataView.name} 
-        </div>
+        <p>
+         Found <strong>{count}</strong> from {dataView.name} 
+        </p>
       );
     },
   };
