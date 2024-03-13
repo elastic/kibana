@@ -25,7 +25,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     value: DEFAULT_ALLOWED_DATA_VIEWS,
     description: i18n.translate('xpack.logsExplorer.allowedDataViewsDescription', {
       defaultMessage:
-        'A list of base patterns to match data views and explore them in Logs Explorer. Remote clusters will be automatically matched for the passed base patterns.',
+        'A list of base patterns to match and explore data views in Logs Explorer. Remote clusters will be automatically matched for the provided base patterns.',
     }),
     type: 'array',
     schema: schema.arrayOf(schema.string()),
