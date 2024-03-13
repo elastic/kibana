@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { ApmDataSourceWithSummary } from '../../../../common/data_source';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -15,8 +14,9 @@ import {
   mergeKueries,
   toKueryFilterFormat,
 } from '../../../../common/utils/kuery_utils';
-import { isPending, useFetcher } from '../../../hooks/use_fetcher';
-import { ProfilingTopNFunctionsLink } from '../../shared/profiling/top_functions/top_functions_link';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { FlamegraphChart } from '../../shared/charts/flamegraph';
+import { ProfilingFlamegraphLink } from '../../shared/profiling/flamegraph/flamegraph_link';
 import { HostnamesFilterWarning } from './host_names_filter_warning';
 
 interface Props {
@@ -24,8 +24,6 @@ interface Props {
   start: string;
   end: string;
   environment: string;
-  startIndex: number;
-  endIndex: number;
   dataSource?: ApmDataSourceWithSummary<
     ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent
   >;
@@ -34,13 +32,11 @@ interface Props {
   rangeTo: string;
 }
 
-export function ProfilingTopNFunctions({
-  serviceName,
+export function ProfilingHostsFlamegraph({
   start,
   end,
+  serviceName,
   environment,
-  startIndex,
-  endIndex,
   dataSource,
   kuery,
   rangeFrom,
@@ -50,7 +46,7 @@ export function ProfilingTopNFunctions({
     (callApmApi) => {
       if (dataSource) {
         return callApmApi(
-          'GET /internal/apm/services/{serviceName}/profiling/functions',
+          'GET /internal/apm/services/{serviceName}/profiling/hosts/flamegraph',
           {
             params: {
               path: { serviceName },
@@ -58,8 +54,6 @@ export function ProfilingTopNFunctions({
                 start,
                 end,
                 environment,
-                startIndex,
-                endIndex,
                 documentType: dataSource.documentType,
                 rollupInterval: dataSource.rollupInterval,
                 kuery,
@@ -69,16 +63,7 @@ export function ProfilingTopNFunctions({
         );
       }
     },
-    [
-      dataSource,
-      serviceName,
-      start,
-      end,
-      environment,
-      startIndex,
-      endIndex,
-      kuery,
-    ]
+    [dataSource, serviceName, start, end, environment, kuery]
   );
 
   const hostNamesKueryFormat = toKueryFilterFormat(
@@ -93,7 +78,7 @@ export function ProfilingTopNFunctions({
           <HostnamesFilterWarning hostNames={data?.hostNames} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <ProfilingTopNFunctionsLink
+          <ProfilingFlamegraphLink
             kuery={mergeKueries([`(${hostNamesKueryFormat})`, kuery])}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
@@ -102,12 +87,7 @@ export function ProfilingTopNFunctions({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EmbeddableFunctions
-        data={data?.functions}
-        isLoading={isPending(status)}
-        rangeFrom={new Date(start).valueOf()}
-        rangeTo={new Date(end).valueOf()}
-      />
+      <FlamegraphChart data={data?.flamegraph} status={status} />
     </>
   );
 }
