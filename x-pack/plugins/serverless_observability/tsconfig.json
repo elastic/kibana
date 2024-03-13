@@ -28,6 +28,6 @@
     "@kbn/serverless-observability-settings",
     "@kbn/core-chrome-browser",
     "@kbn/discover-plugin",
-    "@kbn/serverless-nav-cards",
+    "@kbn/security-plugin",
   ]
 }

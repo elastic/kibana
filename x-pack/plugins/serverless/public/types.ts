@@ -14,6 +14,8 @@ import type {
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { Observable } from 'rxjs';
 import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
+import { CardNavExtensionDefinition } from '@kbn/management-cards-navigation';
+// import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessPluginSetup {}
@@ -35,6 +37,10 @@ export interface ServerlessPluginStart {
    * @deprecated Use {@link ServerlessPluginStart.initNavigation} instead.
    */
   setSideNavComponentDeprecated: (navigation: SideNavComponent) => void;
+  getNavigationCards(
+    roleManagementEnabled?: boolean,
+    extendCardNavDefinitions?: Record<string, CardNavExtensionDefinition>
+  ): Record<string, CardNavExtensionDefinition> | undefined;
 }
 
 export interface ServerlessPluginSetupDependencies {
@@ -43,4 +49,5 @@ export interface ServerlessPluginSetupDependencies {
 
 export interface ServerlessPluginStartDependencies {
   cloud: CloudStart;
+  // security: SecurityPluginStart; // Referencing the security plugin caused a cyclic dep issue, not sure why
 }

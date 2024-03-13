@@ -1418,8 +1418,6 @@
       "@kbn/serverless/*": ["x-pack/plugins/serverless/*"],
       "@kbn/serverless-common-settings": ["packages/serverless/settings/common"],
       "@kbn/serverless-common-settings/*": ["packages/serverless/settings/common/*"],
-      "@kbn/serverless-nav-cards": ["packages/serverless/cards_navigation"],
-      "@kbn/serverless-nav-cards/*": ["packages/serverless/cards_navigation/*"],
       "@kbn/serverless-observability": ["x-pack/plugins/serverless_observability"],
       "@kbn/serverless-observability/*": ["x-pack/plugins/serverless_observability/*"],
       "@kbn/serverless-observability-settings": ["packages/serverless/settings/observability_project"],

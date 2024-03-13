@@ -715,7 +715,6 @@
     "@kbn/server-route-repository": "link:packages/kbn-server-route-repository",
     "@kbn/serverless": "link:x-pack/plugins/serverless",
     "@kbn/serverless-common-settings": "link:packages/serverless/settings/common",
-    "@kbn/serverless-nav-cards": "link:packages/serverless/cards_navigation",
     "@kbn/serverless-observability": "link:x-pack/plugins/serverless_observability",
     "@kbn/serverless-observability-settings": "link:packages/serverless/settings/observability_project",
     "@kbn/serverless-project-switcher": "link:packages/serverless/project_switcher",

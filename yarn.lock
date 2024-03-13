@@ -5900,10 +5900,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-nav-cards@link:packages/serverless/cards_navigation":
-  version "0.0.0"
-  uid ""
-
 "@kbn/serverless-observability-settings@link:packages/serverless/settings/observability_project":
   version "0.0.0"
   uid ""

@@ -47,6 +47,5 @@
     "@kbn/management-cards-navigation",
     "@kbn/core-application-browser",
     "@kbn/discover-plugin",
-    "@kbn/serverless-nav-cards"
   ]
 }

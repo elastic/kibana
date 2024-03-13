@@ -15,7 +15,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
 import { ServerlessConfig } from './config';
-import { SideNavComponent } from './navigation';
+import {
+  generateManageOrgMembersNavCard,
+  manageOrgMembersNavCardName,
+  SideNavComponent,
+} from './navigation';
 import {
   ServerlessPluginSetup,
   ServerlessPluginSetupDependencies,
@@ -100,6 +104,17 @@ export class ServerlessPlugin
       },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       setProjectHome: (homeHref: string) => project.setHome(homeHref),
+      getNavigationCards: (roleManagementEnabled, extendCardNavDefinitions) => {
+        // const roleManagementEnabled = security.authz.isRoleManagementEnabled(); // Could not reference the security plugin without cyclic dep issue, not sure why
+        if (!roleManagementEnabled) return extendCardNavDefinitions;
+
+        const manageOrgMembersNavCard = generateManageOrgMembersNavCard(cloud.organizationUrl);
+        if (extendCardNavDefinitions) {
+          extendCardNavDefinitions[manageOrgMembersNavCardName] = manageOrgMembersNavCard;
+          return extendCardNavDefinitions;
+        }
+        return { [manageOrgMembersNavCardName]: manageOrgMembersNavCard };
+      },
     };
   }
 

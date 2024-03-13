@@ -10,7 +10,6 @@ import type {
   CardNavExtensionDefinition,
 } from '@kbn/management-cards-navigation/src/types';
 import { getNavigationPropsFromId, SecurityPageName } from '@kbn/security-solution-navigation';
-import { orgMembersAppName, orgMembersNavCard } from '@kbn/serverless-nav-cards';
 import type { Services } from '../common/services';
 import { ExternalPageName } from './links/constants';
 import type { ProjectPageName } from './links/types';
@@ -25,30 +24,31 @@ export const enableManagementCardsLanding = (services: Services) => {
   const { management, application } = services;
 
   services.getProjectNavLinks$().subscribe((projectNavLinks) => {
-    const extendCardNavDefinitions = projectNavLinks.reduce<
-      Record<string, CardNavExtensionDefinition>
-    >((acc, projectNavLink) => {
-      if (SecurityManagementCards.has(projectNavLink.id)) {
-        const { appId, deepLinkId, path } = getNavigationPropsFromId(projectNavLink.id);
+    const cardNavDefinitions = projectNavLinks.reduce<Record<string, CardNavExtensionDefinition>>(
+      (acc, projectNavLink) => {
+        if (SecurityManagementCards.has(projectNavLink.id)) {
+          const { appId, deepLinkId, path } = getNavigationPropsFromId(projectNavLink.id);
 
-        acc[projectNavLink.id] = {
-          category: SecurityManagementCards.get(projectNavLink.id) ?? 'other',
-          title: projectNavLink.title,
-          description: projectNavLink.description ?? '',
-          icon: projectNavLink.landingIcon ?? '',
-          href: application.getUrlForApp(appId, { deepLinkId, path }),
-          skipValidation: true,
-        };
-      }
-      return acc;
-    }, {});
-
-    const roleManagementEnabled = true; // This needs to come from either the config, or the security plugin
-    if (roleManagementEnabled) extendCardNavDefinitions[orgMembersAppName] = orgMembersNavCard;
+          acc[projectNavLink.id] = {
+            category: SecurityManagementCards.get(projectNavLink.id) ?? 'other',
+            title: projectNavLink.title,
+            description: projectNavLink.description ?? '',
+            icon: projectNavLink.landingIcon ?? '',
+            href: application.getUrlForApp(appId, { deepLinkId, path }),
+            skipValidation: true,
+          };
+        }
+        return acc;
+      },
+      {}
+    );
 
     management.setupCardsNavigation({
       enabled: true,
-      extendCardNavDefinitions,
+      extendCardNavDefinitions: services.serverless.getNavigationCards(
+        services.security.authz.isRoleManagementEnabled(),
+        cardNavDefinitions
+      ),
     });
   });
 };
