@@ -215,7 +215,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.capture_command_line',
       {
-        defaultMessage: 'Include process command line in all events that are related to this process. Default: false.',
+        defaultMessage:
+          'Include process command line in all events that are related to this process. Default: false.',
       }
     ),
   },
@@ -225,7 +226,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.capture_command_line',
       {
-        defaultMessage: 'Include process command line in all events that are related to this process. Default: false.',
+        defaultMessage:
+          'Include process command line in all events that are related to this process. Default: false.',
       }
     ),
   },
@@ -448,7 +450,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.capture_command_line',
       {
-        defaultMessage: 'Include process command line in all events that are related to this process. Default: false.',
+        defaultMessage:
+          'Include process command line in all events that are related to this process. Default: false.',
       }
     ),
   },
