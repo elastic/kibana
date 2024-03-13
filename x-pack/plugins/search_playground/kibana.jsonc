@@ -1,6 +1,6 @@
 {
   "type": "plugin",
-  "id": "@kbn/search_playground",
+  "id": "@kbn/search-playground",
   "owner": "@elastic/enterprise-search-frontend",
   "plugin": {
     "id": "searchPlayground",
