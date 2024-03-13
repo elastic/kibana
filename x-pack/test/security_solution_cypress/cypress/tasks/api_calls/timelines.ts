@@ -153,20 +153,3 @@ export const favoriteTimeline = ({
       templateTimelineVersion: templateTimelineVersion || null,
     },
   });
-
-
-/**
- * 
- * @param savedObjectIds - ids of the timelines to delete
- * @param savedSearchIds - saved search ids to delete
- * @returns 
- */
- export const deleteTimelines = (savedObjectIds: string[], savedSearchIds: string[]) =>
- rootRequest<AllTimelinesResponse>({
-   method: 'DELETE',
-   url: 'api/timeline',
-   body: {
-     savedObjectIds: savedObjectIds,
-     searchIds: savedSearchIds,
-   },
- });

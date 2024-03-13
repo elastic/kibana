@@ -44,9 +44,9 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
   describe('Basic functions', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
+      createRule(getNewRule());
       login();
       disableExpandableFlyout();
-      createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
@@ -70,6 +70,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
 
     beforeEach(() => {
       deleteAlertsAndRules();
+      createRule(getNewRule());
       login();
       disableExpandableFlyout();
       createRule({ ...getUnmappedRule(), investigation_fields: { field_names: ['event.kind'] } });
@@ -143,6 +144,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
 
     beforeEach(() => {
       deleteAlertsAndRules();
+      createRule(getNewRule());
       login();
       disableExpandableFlyout();
       visitWithTimeRange(ALERTS_URL);
@@ -191,8 +193,12 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     });
 
+    after(() => {
+      cy.task('esArchiverUnload', 'query_alert');
+    })
+
     beforeEach(() => {
-      deleteAlertsAndRules();
+      createRule(getNewRule());
       login();
       disableExpandableFlyout();
       visitWithTimeRange(ALERTS_URL);

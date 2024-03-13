@@ -19,27 +19,19 @@ import {
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { createTimeline, favoriteTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
+import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
+import { deleteTimelines } from '../../../tasks/api_calls/common';
 
 const mockTimeline = getTimeline();
 const mockFavoritedTimeline = getFavoritedTimeline();
 
 describe('timeline overview search', { tags: ['@ess', 'serverless'] }, () => {
-  let currentTimelineIds: string[];
-  let currentSavedSearchIds: string[];
   beforeEach(() => {
-    if (currentTimelineIds || currentSavedSearchIds) {
-      deleteTimelines(currentTimelineIds, currentSavedSearchIds)
-    }
+    deleteTimelines();
     createTimeline(mockFavoritedTimeline)
-      .then((response) => {
-        const { savedObjectId, savedSearchId } = response.body.data.persistTimeline.timeline;
-        currentTimelineIds = [savedObjectId];
-        if (savedSearchId) currentSavedSearchIds = [savedSearchId];
-        return savedObjectId;
-      })
+      .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId) => favoriteTimeline({ timelineId, timelineType: 'default' }));
     createTimeline();
   });
@@ -61,7 +53,6 @@ describe('timeline overview search', { tags: ['@ess', 'serverless'] }, () => {
 
   it('should show the correct timelines when the favorite filter is activated', () => {
     cy.get(TIMELINES_OVERVIEW_ONLY_FAVORITES).click(); // enable the filter
-
     cy.get(TIMELINES_OVERVIEW_TABLE).contains(mockTimeline.title).should('not.exist');
     cy.get(TIMELINES_OVERVIEW_TABLE).contains(mockFavoritedTimeline.title);
     cy.get(TIMELINES_OVERVIEW_ONLY_FAVORITES).contains(1);
@@ -70,7 +61,7 @@ describe('timeline overview search', { tags: ['@ess', 'serverless'] }, () => {
   });
 
   it('should find the correct timeline and have the correct favorite count when searching by timeline title', () => {
-    cy.get(TIMELINES_OVERVIEW_SEARCH).type(`"${mockTimeline.title}"{enter}`);
+    cy.get(TIMELINES_OVERVIEW_SEARCH).type(`${mockTimeline.title}{enter}`);
 
     cy.get(TIMELINES_OVERVIEW_TABLE).contains(mockFavoritedTimeline.title).should('not.exist');
     cy.get(TIMELINES_OVERVIEW_TABLE).contains(mockTimeline.title);
@@ -79,8 +70,8 @@ describe('timeline overview search', { tags: ['@ess', 'serverless'] }, () => {
 
   it('should find the correct timelines when searching for favorited timelines', () => {
     cy.get(TIMELINES_OVERVIEW_ONLY_FAVORITES).click(); // enable the filter
-    cy.get(TIMELINES_OVERVIEW_SEARCH).type(`"${mockFavoritedTimeline.title}"{enter}`);
-
+    cy.get(TIMELINES_OVERVIEW_TABLE).should('be.visible');
+    cy.get(TIMELINES_OVERVIEW_SEARCH).type(`${mockFavoritedTimeline.title}{enter}`);
     cy.get(TIMELINES_OVERVIEW_TABLE).contains(mockTimeline.title).should('not.exist');
     cy.get(TIMELINES_OVERVIEW_TABLE).contains(mockFavoritedTimeline.title);
     cy.get(TIMELINES_OVERVIEW_ONLY_FAVORITES).contains(1);
@@ -89,7 +80,7 @@ describe('timeline overview search', { tags: ['@ess', 'serverless'] }, () => {
   });
 
   it('should find the correct timelines when both favorited and non-favorited timelines match', () => {
-    cy.get(TIMELINES_OVERVIEW_SEARCH).type(`"${sharedTimelineTitleFragment}"{enter}`);
+    cy.get(TIMELINES_OVERVIEW_SEARCH).type(`${sharedTimelineTitleFragment}{enter}`);
 
     cy.get(TIMELINES_OVERVIEW_TABLE).contains(mockTimeline.title);
     cy.get(TIMELINES_OVERVIEW_TABLE).contains(mockFavoritedTimeline.title);
