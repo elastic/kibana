@@ -34,6 +34,13 @@ export class RemovePanelAction implements Action<EmbeddableApiContext> {
   public readonly id = ACTION_REMOVE_PANEL;
   public order = 1;
 
+  public grouping = [
+    {
+      id: 'delete_panel_action',
+      order: 1,
+    },
+  ];
+
   constructor() {}
 
   public getDisplayName() {
