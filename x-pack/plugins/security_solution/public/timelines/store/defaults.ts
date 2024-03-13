@@ -27,9 +27,9 @@ export const timelineDefaults: SubsetTimelineModel &
   dateRange: { start, end },
   description: '',
   eqlOptions: {
-    eventCategoryField: undefined,
-    tiebreakerField: undefined,
-    timestampField: undefined,
+    eventCategoryField: 'event.category',
+    tiebreakerField: '',
+    timestampField: '@timestamp',
     query: '',
     size: 100,
   },

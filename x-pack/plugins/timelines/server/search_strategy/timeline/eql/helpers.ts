@@ -44,7 +44,7 @@ export const buildEqlDsl = (options: TimelineEqlRequestOptions): Record<string, 
     index: options.defaultIndex,
     ignore_unavailable: true,
     body: {
-      event_category_field: options.eventCategoryField,
+      event_category_field: options.eventCategoryField ?? 'event.category',
       filter: {
         bool: {
           filter: requestFilter,
@@ -57,7 +57,7 @@ export const buildEqlDsl = (options: TimelineEqlRequestOptions): Record<string, 
           }
         : {}),
       size: options.size ?? 100,
-      timestamp_field: options.timestampField,
+      timestamp_field: options.timestampField ?? '@timestamp',
       fields: [
         { field: '*', include_unmapped: true },
         {
