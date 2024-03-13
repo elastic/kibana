@@ -472,7 +472,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:logsExplorer:allowed_data_views': {
+  'observability:logsExplorer:allowedDataViews': {
     type: 'array',
     items: {
       type: 'keyword',

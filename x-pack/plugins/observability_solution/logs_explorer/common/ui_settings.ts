@@ -14,7 +14,7 @@ import { DEFAULT_ALLOWED_DATA_VIEWS } from './constants';
  * uiSettings definitions for Logs Explorer.
  */
 export const LOGS_EXPLORER_ALLOWED_DATA_VIEWS_SETTING_KEY =
-  'observability:logsExplorer:allowed_data_views';
+  'observability:logsExplorer:allowedDataViews';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
   [LOGS_EXPLORER_ALLOWED_DATA_VIEWS_SETTING_KEY]: {
