@@ -10,19 +10,13 @@ import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import type { TimeRange } from '@kbn/es-query';
 import {
   type ReactEmbeddableFactory,
   initializeReactEmbeddableTitles,
-  initializeReactEmbeddableUuid,
-  RegisterReactEmbeddable,
-  useReactEmbeddableApiHandle,
-  useReactEmbeddableUnsavedChanges,
-  ReactEmbeddable
 } from '@kbn/embeddable-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { extract, type MapEmbeddablePersistableState } from '../../common/embeddable';
-import type { MapApi } from './types';
+import type { MapApi, MapSerializeState } from './types';
 import { useActionHandlers } from './use_action_handlers';
 import type { MapEmbeddableInput } from '../embeddable/types';
 import { SavedMap } from '../routes/map_page';
@@ -32,20 +26,17 @@ import { MapContainer } from '../connected_components/map_container';
 import { initReduxStateSync } from './init_redux_state_sync';
 import { getLibraryInterface } from './get_library_interface';
 
-export async function getMapEmbeddable(
-  factory: ReactEmbeddableFactory<MapEmbeddableInput, MapApi>,
-  state: MapEmbeddableInput, 
-  maybeId?: string
-): Promise<ReactEmbeddable<MapApi>> {
+export const getMapEmbeddable: ReactEmbeddableFactory<MapSerializeState, MapApi>['buildEmbeddable'] = async (
+  state, 
+  buildApi,
+) => {
   const savedMap = new SavedMap({
-    mapEmbeddableInput: state
+    mapEmbeddableInput: state as unknown as MapEmbeddableInput
   });
   await savedMap.whenReady();
 
-  const uuid = initializeReactEmbeddableUuid(maybeId);
   const { titlesApi, titleComparators, serializeTitles } =
     initializeReactEmbeddableTitles(state);
-  const timeRange = new BehaviorSubject<TimeRange | undefined>(state.timeRange);
   
   const {
     cleanupReduxStateSync,
@@ -53,55 +44,43 @@ export async function getMapEmbeddable(
     serializeReduxState,
   } = initReduxStateSync(savedMap.getStore(), state);
 
-  return RegisterReactEmbeddable((apiRef) => {
-    
-    const { unsavedChanges, resetUnsavedChanges } = useReactEmbeddableUnsavedChanges(
-      uuid,
-      factory,
-      {
-        ...titleComparators,
-        ...reduxStateComparators,
-      }
-    );
-
-    const thisApi = useReactEmbeddableApiHandle(
-      {
-        ...titlesApi,
-        type: MAP_SAVED_OBJECT_TYPE,
-        defaultPanelTitle: new BehaviorSubject<string | undefined>(savedMap.getAttributes().title),
-        ...getLibraryInterface(savedMap),
-        localTimeRange: timeRange,
-        setLocalTimeRange: (timeRange: TimeRange | undefined) => {
-          timeRange.next(timeRange);
-        },
-        unsavedChanges,
-        resetUnsavedChanges,
-        serializeState: async () => {
-          const { state: rawState, references } = extract({
-            ...state,
-            ...serializeTitles(),
-            ...serializeReduxState(),
-          } as unknown as MapEmbeddablePersistableState);
-          return {
-            rawState,
-            references
-          };
-        },
+  const api = buildApi(
+    {
+      defaultPanelTitle: new BehaviorSubject<string | undefined>(savedMap.getAttributes().title),
+      ...titlesApi,
+      ...getLibraryInterface(savedMap),
+      serializeState: () => {
+        const { state: rawState, references } = extract({
+          ...state,
+          ...serializeTitles(),
+          ...serializeReduxState(),
+        } as unknown as MapEmbeddablePersistableState);
+        return {
+          rawState: rawState as unknown as MapEmbeddableInput,
+          references
+        };
       },
-      apiRef,
-      uuid
-    ) as MapApi;
+    },
+    {
+      ...titleComparators,
+      ...reduxStateComparators,
+    }
+  );
 
-    const { addFilters, getActionContext, getFilterActions, onSingleValueTrigger } = useActionHandlers(thisApi);
+  const sharingSavedObjectProps = savedMap.getSharingSavedObjectProps();
+  const spaces = getSpacesApi();
 
-    useEffect(() => {
-      return () => {
-        cleanupReduxStateSync();
-      }
-    }, []);
+  return {
+    api,
+    Component: () => {
+      useEffect(() => {
+        return () => {
+          cleanupReduxStateSync();
+        }
+      }, []);
 
-    const sharingSavedObjectProps = savedMap.getSharingSavedObjectProps();
-      const spaces = getSpacesApi();
+      const { addFilters, getActionContext, getFilterActions, onSingleValueTrigger } = useActionHandlers(api);
+  
       return sharingSavedObjectProps && spaces && sharingSavedObjectProps?.outcome === 'conflict' ? (
           <div className="mapEmbeddedError">
             <EuiEmptyPrompt
@@ -128,5 +107,6 @@ export async function getMapEmbeddable(
             />
           </Provider>
         );
-  });
+    },
+  };
 }

@@ -19,7 +19,8 @@ import {
 } from '../selectors/map_selectors';
 import { setGotoWithCenter, setHiddenLayers, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions';
 import { MapCenterAndZoom } from '@kbn/maps-plugin/common/descriptor_types';
-import { MapEmbeddableInput } from '../embeddable/types';
+import type { MapSerializeState } from './types';
+import { EmbeddableStateComparators } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
 
 function getMapCenterAndZoom(state: MapStoreState) {
   return {
@@ -32,7 +33,7 @@ function getHiddenLayerIds(state: MapStoreState) {
   return getLayerListRaw(state).filter((layer) => !layer.visible).map((layer) => layer.id)
 }
 
-export function initReduxStateSync(store: MapStore, state: MapEmbeddableInput) {
+export function initReduxStateSync(store: MapStore, state: MapSerializeState) {
   // initializing comparitor publishing subjects to state instead of store state values
   // because store is not settled until map is rendered and mapReady is true
   const hiddenLayers$ = new BehaviorSubject<string[]>(state.hiddenLayers ?? getHiddenLayerIds(store.getState()));
@@ -96,7 +97,7 @@ export function initReduxStateSync(store: MapStore, state: MapEmbeddableInput) {
         },
         fastIsEqual
       ]
-    },
+    } as EmbeddableStateComparators<MapSerializeState>,
     serializeReduxState: () => {
       return {
         hiddenLayers: getHiddenLayerIds(store.getState()),
