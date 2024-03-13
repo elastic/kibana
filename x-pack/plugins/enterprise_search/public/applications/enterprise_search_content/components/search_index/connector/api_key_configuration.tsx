@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Status } from '../../../../../../common/types/api';
 import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector/generate_connector_api_key_api_logic';
@@ -176,12 +175,9 @@ export const ApiKeyConfig: React.FC<{
           <EuiFlexItem>
             <ApiKey
               apiKey={data?.encoded}
-              label={
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.apiKeyConfig.apiKey.apiKeyLabel"
-                  defaultMessage="API Key"
-                />
-              }
+              label={i18n.translate('xpack.enterpriseSearch.apiKeyConfig.apiKey.apiKeyLabel', {
+                defaultMessage: 'API Key',
+              })}
             />
           </EuiFlexItem>
         </>
