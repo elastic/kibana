@@ -126,7 +126,7 @@ export type JSONValue = null | string | number | boolean | { [x: string]: JSONVa
 
 export interface ChatRequestOptions {
   options?: RequestOptions;
-  data?: Record<string, string>;
+  data?: Record<string, string | boolean>;
 }
 
 export type CreateMessage = Omit<Message, 'id'> & {

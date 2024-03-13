@@ -6628,10 +6628,10 @@
     uuid "^9.0.0"
     zod "^3.22.3"
 
-"@langchain/core@^0.1.43", "@langchain/core@~0.1.13", "@langchain/core@~0.1.16", "@langchain/core@~0.1.41":
-  version "0.1.43"
-  resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.1.43.tgz#2d0af42817f8d431bba5252b2ff667a9cb3a25e5"
-  integrity sha512-owE+UU38e4TsUq5yoaKCF+ag6u0ppwgdaqEt2Q57pdcr9nEcy8/PgTunxB10Vksq4fTJgnwWEYf/wMGZnFlRow==
+"@langchain/core@^0.1.45", "@langchain/core@~0.1.13", "@langchain/core@~0.1.16", "@langchain/core@~0.1.41":
+  version "0.1.45"
+  resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.1.45.tgz#8acb3d85ca868489cb2d047da981f17b0b246f3e"
+  integrity sha512-3kjaScJwwUu1so3o4Lvr+tNKIGP/+dORZ4avZYve5qRtIiegRG7J3W66d//Gcgs5UwwfVgadj5ELGvWWUym8TA==
   dependencies:
     ansi-styles "^5.0.0"
     camelcase "6"

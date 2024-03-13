@@ -11,7 +11,6 @@ import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { ChatPromptTemplate, PromptTemplate } from '@langchain/core/prompts';
 import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { BytesOutputParser, StringOutputParser } from '@langchain/core/output_parsers';
-import { AIMessageChunk } from '@langchain/core/messages';
 import {
   createStreamDataTransformer,
   experimental_StreamData,
@@ -150,7 +149,7 @@ class ConversationalChainFn {
               });
             },
             handleChainEnd(outputs, runId, parentRunId) {
-              if (outputs instanceof AIMessageChunk) {
+              if (outputs?.constructor?.name === 'AIMessageChunk') {
                 data.appendMessageAnnotation({
                   type: 'citations',
                   documents: getCitations(

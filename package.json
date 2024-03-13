@@ -870,7 +870,7 @@
     "@kbn/xstate-utils": "link:packages/kbn-xstate-utils",
     "@kbn/zod-helpers": "link:packages/kbn-zod-helpers",
     "@langchain/community": "^0.0.20",
-    "@langchain/core": "^0.1.43",
+    "@langchain/core": "^0.1.45",
     "@langchain/openai": "^0.0.12",
     "@loaders.gl/core": "^3.4.7",
     "@loaders.gl/json": "^3.4.7",

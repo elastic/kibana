@@ -52,7 +52,7 @@ export const Chat = () => {
           prompt: data[ChatFormFields.prompt],
           indices: data[ChatFormFields.indices].join(),
           api_key: data[ChatFormFields.openAIKey],
-          citations: data[ChatFormFields.citations].toString(),
+          citations: data[ChatFormFields.citations],
           elasticsearchQuery: JSON.stringify(data[ChatFormFields.elasticsearchQuery]),
           summarization_model:
             data[ChatFormFields.summarizationModel] ?? SummarizationModelName.gpt3_5_turbo_1106,
