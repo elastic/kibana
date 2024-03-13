@@ -4,7 +4,5 @@ steps:
 
   - command: .buildkite/scripts/lifecycle/post_build.sh
     label: Post-Build
-    retry:
-      manual: false
     agents:
       queue: kibana-default
