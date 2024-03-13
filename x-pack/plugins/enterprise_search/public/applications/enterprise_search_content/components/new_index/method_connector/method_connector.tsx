@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -22,7 +22,6 @@ import {
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 
 import { FetchCloudHealthApiLogic } from '../../../api/stats/fetch_cloud_health_api_logic';
-import { BETA_CONNECTORS, NATIVE_CONNECTORS } from '../../search_index/connector/constants';
 
 import { errorToText } from '../utils/error_to_text';
 
@@ -40,8 +39,16 @@ export const MethodConnector: React.FC<MethodConnectorProps> = ({
 }) => {
   const { apiReset, makeRequest } = useActions(AddConnectorLogic);
   const { error, status } = useValues(AddConnectorApiLogic);
-  const { isCloud } = useValues(KibanaLogic);
+  const { connectorTypes, isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const NATIVE_CONNECTORS = useMemo(
+    () => connectorTypes.filter(({ isNative }) => isNative),
+    [connectorTypes]
+  );
+  const BETA_CONNECTORS = useMemo(
+    () => connectorTypes.filter(({ isBeta }) => isBeta),
+    [connectorTypes]
+  );
 
   const isNativeAvailable =
     Boolean(NATIVE_CONNECTORS.find((connector) => connector.serviceType === serviceType)) &&

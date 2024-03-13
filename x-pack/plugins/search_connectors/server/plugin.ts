@@ -12,13 +12,14 @@ import type {
   Plugin,
   CoreSetup,
 } from '@kbn/core/server';
+import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
+import { getConnectorTypes } from '../common/lib/connector_types';
 import type {
   SearchConnectorsPluginSetup as SearchConnectorsPluginSetup,
   SearchConnectorsPluginStart as SearchConnectorsPluginStart,
   SetupDependencies,
   StartDependencies,
 } from './types';
-import { registerConnectorsRoutes } from './routes/connectors_routes';
 
 export interface RouteDependencies {
   http: CoreSetup<StartDependencies>['http'];
@@ -37,27 +38,25 @@ export class SearchConnectorsPlugin
 {
   private readonly logger: Logger;
 
+  private connectors: ConnectorServerSideDefinition[];
+
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.connectors = [];
   }
 
   public setup({ getStartServices, http }: CoreSetup<StartDependencies>) {
-    const router = http.createRouter();
-    getStartServices().then(([]) => {
-      const dependencies = {
-        http,
-        logger: this.logger,
-        router,
-      };
+    this.connectors = getConnectorTypes(http.staticAssets);
 
-      registerConnectorsRoutes(dependencies);
-    });
-
-    return {};
+    return {
+      getConnectorTypes: () => this.connectors,
+    };
   }
 
   public start() {
-    return {};
+    return {
+      getConnectors: () => this.connectors,
+    };
   }
 
   public stop() {}

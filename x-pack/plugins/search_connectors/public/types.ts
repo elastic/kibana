@@ -6,13 +6,17 @@
  */
 
 import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
+import { ConnectorDefinition } from '../common/types';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-export interface SearchConnectorsPluginSetup {}
+export interface SearchConnectorsPluginSetup {
+  // we don't have docLinks here yet
+  getConnectorTypes: () => ConnectorServerSideDefinition[];
+}
 
 export interface SearchConnectorsPluginStart {
-  getConnectorTypes: () => ConnectorServerSideDefinition[];
+  getConnectorTypes: () => ConnectorDefinition[];
 }
 
 export interface SearchConnectorsPluginSetupDependencies {}

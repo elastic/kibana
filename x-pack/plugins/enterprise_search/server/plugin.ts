@@ -23,6 +23,7 @@ import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { SearchConnectorsPluginSetup } from '@kbn/search-connectors-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -93,6 +94,7 @@ interface PluginsSetup {
   guidedOnboarding?: GuidedOnboardingPluginSetup;
   logsShared: LogsSharedPluginSetup;
   ml?: MlPluginSetup;
+  searchConnectors?: SearchConnectorsPluginSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -147,6 +149,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       ml,
       guidedOnboarding,
       cloud,
+      searchConnectors,
     }: PluginsSetup
   ) {
     this.globalConfigService.setup(elasticsearch.legacy.config$, cloud);
@@ -163,7 +166,13 @@ export class EnterpriseSearchPlugin implements Plugin {
     const isCloud = !!cloud.cloudId;
 
     if (customIntegrations) {
-      registerEnterpriseSearchIntegrations(config, http, customIntegrations, isCloud);
+      registerEnterpriseSearchIntegrations(
+        config,
+        http,
+        customIntegrations,
+        isCloud,
+        searchConnectors?.getConnectorTypes() || []
+      );
     }
 
     /*

@@ -6,7 +6,8 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { getConnectorTypes } from './lib/connector_types';
+import { docLinks } from '../common/doc_links';
+import { getConnectorFullTypes, getConnectorTypes } from '../common/lib/connector_types';
 import {
   SearchConnectorsPluginSetup,
   SearchConnectorsPluginSetupDependencies,
@@ -27,7 +28,10 @@ export class SearchConnectorsPlugin
     core: CoreSetup<SearchConnectorsPluginStartDependencies, SearchConnectorsPluginStart>,
     setupDeps: SearchConnectorsPluginSetupDependencies
   ): SearchConnectorsPluginSetup {
-    return {};
+    const connectorTypes = getConnectorTypes(core.http.staticAssets);
+    return {
+      getConnectorTypes: () => connectorTypes,
+    };
   }
 
   public start(
@@ -35,7 +39,8 @@ export class SearchConnectorsPlugin
     services: SearchConnectorsPluginStartDependencies
   ): SearchConnectorsPluginStart {
     const { http } = core;
-    const connectorTypes = getConnectorTypes(http);
+    docLinks.setDocLinks(core.docLinks.links);
+    const connectorTypes = getConnectorFullTypes(http.staticAssets);
     return {
       getConnectorTypes: () => connectorTypes,
     };

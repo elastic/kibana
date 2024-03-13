@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
+
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-export interface SearchConnectorsPluginSetup {}
+export interface SearchConnectorsPluginSetup {
+  getConnectorTypes: () => ConnectorServerSideDefinition[];
+}
 
 export interface SearchConnectorsPluginStart {}
 

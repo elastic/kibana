@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/search-connectors-plugin",
   "owner": "@elastic/enterprise-search-frontend",
-  "description": "Serverless customizations for search.",
+  "description": "Plugin hosting shared features for connectors",
   "plugin": {
     "id": "searchConnectors",
     "server": true,

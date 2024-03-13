@@ -11,7 +11,6 @@ export interface ConnectorClientSideDefinition {
   docsUrl?: string;
   externalAuthDocsUrl?: string;
   externalDocsUrl: string;
-  icon: string;
   platinumOnly?: boolean;
 }
 
