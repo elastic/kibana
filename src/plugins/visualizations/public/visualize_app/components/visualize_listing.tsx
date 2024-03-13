@@ -269,7 +269,7 @@ const useTableListViewProps = (
               reason: managed
                 ? i18n.translate('visualizations.managedLegacyVisMessage', {
                     defaultMessage:
-                      'This visualization is managed by Elastic and cannot be changed.',
+                      'Elastic manages this visualisation. Changing it is not possible.',
                   })
                 : i18n.translate('visualizations.readOnlyLegacyVisMessage', {
                     defaultMessage:
