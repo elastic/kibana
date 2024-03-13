@@ -39,6 +39,8 @@ import { registerMarkdownEditorEmbeddable } from './react_embeddables/eui_markdo
 import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
 import { registerFieldListFactory } from './react_embeddables/field_list/field_list_react_embeddable';
 import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
+import { registerEmbeddableFactory as registerSearchEmbeddableFactory } from './react_embeddables/search/register_embeddable_factory';
+import { registerCreateAction as registerCreateSearchEmbeddableAction } from './react_embeddables/search/register_create_action';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -117,6 +119,9 @@ export class EmbeddableExamplesPlugin
 
     registerMarkdownEditorEmbeddable();
     registerCreateEuiMarkdownAction(deps.uiActions);
+
+    registerSearchEmbeddableFactory();
+    registerCreateSearchEmbeddableAction(deps.uiActions);
 
     return {
       createSampleData: async () => {},
