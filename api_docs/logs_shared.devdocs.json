@@ -2729,8 +2729,8 @@
                 "pluginId": "observabilityAIAssistant",
                 "scope": "public",
                 "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-public.ObservabilityAIAssistantPluginStart",
-                "text": "ObservabilityAIAssistantPluginStart"
+                "section": "def-public.ObservabilityAIAssistantPublicStart",
+                "text": "ObservabilityAIAssistantPublicStart"
               }
             ],
             "path": "x-pack/plugins/observability_solution/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
@@ -3017,8 +3017,8 @@
                 "pluginId": "observabilityAIAssistant",
                 "scope": "public",
                 "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-public.ObservabilityAIAssistantPluginStart",
-                "text": "ObservabilityAIAssistantPluginStart"
+                "section": "def-public.ObservabilityAIAssistantPublicStart",
+                "text": "ObservabilityAIAssistantPublicStart"
               }
             ],
             "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
