@@ -30,6 +30,7 @@ export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   suppressedItemsCount: number;
   createdItems: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: string[];
+  alertsWereTruncated: boolean;
 }
 
 export const bulkCreateWithSuppression = async <
@@ -62,6 +63,7 @@ export const bulkCreateWithSuppression = async <
       createdItemsCount: 0,
       suppressedItemsCount: 0,
       createdItems: [],
+      alertsWereTruncated: false,
     };
   }
 
@@ -87,18 +89,19 @@ export const bulkCreateWithSuppression = async <
     }
   };
 
-  const { createdAlerts, errors, suppressedAlerts } = await alertWithSuppression(
-    wrappedDocs.map((doc) => ({
-      _id: doc._id,
-      // `fields` should have already been merged into `doc._source`
-      _source: doc._source,
-    })),
-    suppressionWindow,
-    enrichAlertsWrapper,
-    alertTimestampOverride,
-    isSuppressionPerRuleExecution,
-    maxAlerts
-  );
+  const { createdAlerts, errors, suppressedAlerts, alertsWereTruncated } =
+    await alertWithSuppression(
+      wrappedDocs.map((doc) => ({
+        _id: doc._id,
+        // `fields` should have already been merged into `doc._source`
+        _source: doc._source,
+      })),
+      suppressionWindow,
+      enrichAlertsWrapper,
+      alertTimestampOverride,
+      isSuppressionPerRuleExecution,
+      maxAlerts
+    );
 
   const end = performance.now();
 
@@ -114,6 +117,7 @@ export const bulkCreateWithSuppression = async <
       createdItemsCount: createdAlerts.length,
       createdItems: createdAlerts,
       suppressedItemsCount: suppressedAlerts.length,
+      alertsWereTruncated,
     };
   } else {
     return {
@@ -124,6 +128,7 @@ export const bulkCreateWithSuppression = async <
       createdItemsCount: createdAlerts.length,
       createdItems: createdAlerts,
       suppressedItemsCount: suppressedAlerts.length,
+      alertsWereTruncated,
     };
   }
 };

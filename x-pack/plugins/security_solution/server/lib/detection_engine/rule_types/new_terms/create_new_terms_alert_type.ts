@@ -25,6 +25,7 @@ import type {
   NewTermsAggResult,
   CreateAlertsHook,
 } from './build_new_terms_aggregation';
+import type { NewTermsFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import {
   buildRecentTermsAgg,
   buildNewTermsAgg,
@@ -42,6 +43,7 @@ import {
 import { createEnrichEventsFunction } from '../utils/enrichments';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import { multiTermsComposite } from './multi_terms_composite';
+import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
@@ -238,7 +240,18 @@ export const createNewTermsAlertType = (
             };
           });
 
-          let bulkCreateResult;
+          let bulkCreateResult: Omit<
+            GenericBulkCreateResponse<NewTermsFieldsLatest>,
+            'suppressedItemsCount'
+          > = {
+            errors: [],
+            success: true,
+            enrichmentDuration: '0',
+            bulkCreateDuration: '0',
+            createdItemsCount: 0,
+            createdItems: [],
+            alertsWereTruncated: false,
+          };
 
           // wrap and create alerts by chunks
           // large number of matches, processed in possibly 10,000 size of events and terms
