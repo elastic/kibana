@@ -996,8 +996,8 @@ export function alertingServiceProvider(
 
       const result = await fetchResult(queryParams);
 
-      if (!isPopulatedObject(state?.contextFieldFormatters)) {
-        contextFieldFormatters = state!.contextFieldFormatters;
+      if (isPopulatedObject(state?.contextFieldFormatters)) {
+        contextFieldFormatters = state.contextFieldFormatters;
       }
 
       const formattedResult = result
