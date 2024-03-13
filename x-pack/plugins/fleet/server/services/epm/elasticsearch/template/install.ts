@@ -30,7 +30,8 @@ import type {
   EsAssetReference,
   ExperimentalDataStreamFeature,
 } from '../../../../types';
-import { Fields, loadDatastreamsFieldsFromYaml, processFields } from '../../fields/field';
+import type { Fields } from '../../fields/field';
+import { loadDatastreamsFieldsFromYaml, processFields } from '../../fields/field';
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import {
   FLEET_COMPONENT_TEMPLATES,
