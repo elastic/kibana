@@ -119,7 +119,7 @@ export interface ResolvedCase {
 
 export type CasesConfigurationUI = Pick<
   SnakeToCamelCase<Configuration>,
-  'closureType' | 'connector' | 'mappings' | 'customFields' | 'id' | 'version'
+  'closureType' | 'connector' | 'mappings' | 'customFields' | 'id' | 'version' | 'owner'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
