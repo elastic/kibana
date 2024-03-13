@@ -111,7 +111,7 @@ export const SaveModal = (props: Props) => {
         managed
           ? i18n.translate('xpack.lens.app.mustCopyOnSave', {
               defaultMessage:
-                'This visualization is managed by Elastic. Changes here must be saved to a new visualization.',
+                'Elastic manages this visualization. Save any changes to a new visualization.',
             })
           : undefined
       }
