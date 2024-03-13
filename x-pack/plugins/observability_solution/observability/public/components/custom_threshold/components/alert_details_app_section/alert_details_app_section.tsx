@@ -38,6 +38,7 @@ import type {
 } from '@kbn/event-annotation-common';
 import moment from 'moment';
 import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import { TimeRange } from '@kbn/es-query';
 import { AlertHistoryChart } from './alert_history';
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
@@ -121,14 +122,14 @@ export default function AlertDetailsAppSection({
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
-
+  const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
   const chartProps = {
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
-  const timeRange = getPaddedAlertTimeRange(alertStart!, alertEnd);
+  // const timeRange = getPaddedAlertTimeRange(alertStart!, alertEnd);
   const groups = alert.fields[ALERT_GROUP];
   const tags = alert.fields[TAGS];
 
@@ -164,6 +165,10 @@ export default function AlertDetailsAppSection({
 
   const annotations: EventAnnotationConfig[] = [];
   annotations.push(alertStartAnnotation, alertRangeAnnotation);
+
+  useEffect(() => {
+    setTimeRange(getPaddedAlertTimeRange(alertStart!, alertEnd));
+  }, [alertStart, alertEnd]);
 
   useEffect(() => {
     const appUrl = getViewInAppUrl({
