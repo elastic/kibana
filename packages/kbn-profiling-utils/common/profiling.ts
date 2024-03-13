@@ -220,9 +220,9 @@ function checkIfStringHasParentheses(s: string) {
 }
 
 function getFunctionName(metadata: StackFrameMetadata) {
-  return !checkIfStringHasParentheses(metadata.FunctionName)
-    ? `${metadata.FunctionName}()`
-    : metadata.FunctionName;
+  return checkIfStringHasParentheses(metadata.FunctionName)
+    ? metadata.FunctionName
+    : `${metadata.FunctionName}()`;
 }
 
 function getExeFileName(metadata: StackFrameMetadata) {
@@ -254,7 +254,7 @@ export function getCalleeLabel(metadata: StackFrameMetadata) {
   const sourceFilename = metadata.SourceFilename;
   const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
 
-  if (sourceURL === undefined || sourceURL === '') {
+  if (!sourceURL) {
     return `${inlineLabel}${getExeFileName(metadata)}: ${getFunctionName(metadata)}`;
   }
 
