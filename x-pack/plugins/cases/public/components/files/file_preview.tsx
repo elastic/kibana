@@ -51,18 +51,20 @@ export const FilePreview = ({ closePreview, selectedFile }: FilePreviewProps) =>
   }, [closePreview]);
 
   return (
-    <EuiOverlayMask css={getOverlayMaskCss}>
-      <EuiFocusTrap onClickOutside={closePreview}>
-        <EuiImage
-          alt={selectedFile.name}
-          size="original"
-          src={filesClient.getDownloadHref({
-            id: selectedFile.id,
-            fileKind: constructFileKindIdByOwner(owner[0] as Owner),
-          })}
-          data-test-subj="cases-files-image-preview"
-        />
-      </EuiFocusTrap>
+    <EuiOverlayMask>
+      <div css={getOverlayMaskCss}>
+        <EuiFocusTrap onClickOutside={closePreview}>
+          <EuiImage
+            alt={selectedFile.name}
+            size="original"
+            src={filesClient.getDownloadHref({
+              id: selectedFile.id,
+              fileKind: constructFileKindIdByOwner(owner[0] as Owner),
+            })}
+            data-test-subj="cases-files-image-preview"
+          />
+        </EuiFocusTrap>
+      </div>
     </EuiOverlayMask>
   );
 };

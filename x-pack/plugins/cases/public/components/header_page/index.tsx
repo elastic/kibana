@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -28,6 +29,18 @@ export interface HeaderPageProps extends HeaderProps {
   'data-test-subj'?: string;
 }
 
+const getHeaderCss = (euiTheme: EuiThemeComputed<{}>, border?: boolean) => css`
+  margin-bottom: ${euiTheme.size.l};
+  ${border &&
+  css`
+    border-bottom: ${euiTheme.border.thin};
+    padding-bottom: ${euiTheme.size.l};
+    .euiProgress {
+      top: ${euiTheme.size.l};
+    }
+  `}
+`;
+
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   showBackButton = false,
   border,
@@ -38,8 +51,9 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const { releasePhase } = useCasesContext();
-  const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
+  const { navigateToAllCases } = useAllCasesNavigation();
   const { euiTheme } = useEuiTheme();
+  const xsFontSize = useEuiFontSize('xs').fontSize;
 
   const navigateToAllCasesClick = useCallback(
     (e) => {
@@ -52,20 +66,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   );
 
   return (
-    <header
-      css={css`
-        margin-bottom: ${euiTheme.size.l};
-        ${border &&
-        css`
-          border-bottom: ${euiTheme.border.thin};
-          padding-bottom: ${euiTheme.size.l};
-          .euiProgress {
-            top: ${euiTheme.size.l};
-          }
-        `}
-      `}
-      data-test-subj={dataTestSubj}
-    >
+    <header css={getHeaderCss(euiTheme, border)} data-test-subj={dataTestSubj}>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem
           css={css`
@@ -77,14 +78,13 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
             <div
               className="casesHeaderPage__linkBack"
               css={css`
-                ${useEuiFontSize('xs')};
+                font-size: ${xsFontSize};
                 margin-bottom: ${euiTheme.size.s};
               `}
             >
               <LinkIcon
                 dataTestSubj="backToCases"
                 onClick={navigateToAllCasesClick}
-                href={getAllCasesUrl()}
                 iconType="arrowLeft"
               >
                 {i18n.BACK_TO_ALL}

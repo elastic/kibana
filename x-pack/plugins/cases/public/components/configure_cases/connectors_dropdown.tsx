@@ -6,13 +6,13 @@
  */
 
 import React, { useMemo } from 'react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiIconTip,
   EuiSuperSelect,
-  EuiThemeComputed,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';

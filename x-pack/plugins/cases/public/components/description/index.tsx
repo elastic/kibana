@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiPanel,
@@ -14,7 +15,6 @@ import {
   EuiFlexItem,
   EuiText,
   useEuiTheme,
-  EuiThemeComputed,
 } from '@elastic/eui';
 
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
@@ -45,7 +45,7 @@ const getFlexGroupCss = ({
 }: {
   euiTheme: EuiThemeComputed<{}>;
   isCollapsed: boolean;
-  hasUnsavedChanges: boolean;
+  hasUnsavedChanges?: boolean;
 }) => css`
   padding: ${euiTheme.size.s};
   align-items: center;
@@ -146,8 +146,9 @@ export const Description = ({
     }
   }, [clearLensDraftComment, lensDraftComment, hasIncomingLensState, openLensModal]);
 
-  const hasUnsavedChanges =
-    draftDescription && draftDescription !== caseData.description && !isLoadingDescription;
+  const hasUnsavedChanges = Boolean(
+    draftDescription && draftDescription !== caseData.description && !isLoadingDescription
+  );
 
   return isEditable ? (
     <EditableMarkdown

@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiFlexItem,
@@ -16,7 +17,6 @@ import {
   EuiPageBody,
   EuiPageSection,
   EuiSpacer,
-  EuiThemeComputed,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -332,7 +332,12 @@ export const ConfigureCases: React.FC = React.memo(() => {
   ) : null;
 
   return (
-    <EuiPageSection restrictWidth={true}>
+    <EuiPageSection
+      restrictWidth={true}
+      css={css`
+        min-height: 85vh;
+      `}
+    >
       <HeaderPage
         showBackButton={true}
         data-test-subj="case-configure-title"

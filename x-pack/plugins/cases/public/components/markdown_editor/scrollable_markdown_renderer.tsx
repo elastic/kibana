@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 
 import { MarkdownRenderer } from './renderer';
 

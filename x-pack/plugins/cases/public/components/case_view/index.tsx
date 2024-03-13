@@ -20,14 +20,7 @@ import { CaseViewPage } from './case_view_page';
 import type { CaseViewProps } from './types';
 
 export const CaseViewLoading = () => (
-  <EuiFlexGroup
-    gutterSize="none"
-    justifyContent="center"
-    alignItems="center"
-    css={css`
-      height: 100%;
-    `}
-  >
+  <EuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner data-test-subj="case-view-loading" size="xl" />
     </EuiFlexItem>
@@ -79,24 +72,32 @@ export const CaseView = React.memo(
       return null;
     }, [basePath, data, spacesApi]);
 
-    return isError ? (
-      <DoesNotExist caseId={caseId} />
-    ) : isLoading ? (
-      <CaseViewLoading />
-    ) : data ? (
-      <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-        {getLegacyUrlConflictCallout()}
-        <CaseViewPage
-          caseData={data.case}
-          fetchCase={refetch}
-          actionsNavigation={actionsNavigation}
-          ruleDetailsNavigation={ruleDetailsNavigation}
-          showAlertDetails={showAlertDetails}
-          useFetchAlertData={useFetchAlertData}
-          refreshRef={refreshRef}
-        />
-      </CasesTimelineIntegrationProvider>
-    ) : null;
+    return (
+      <div
+        css={css`
+          min-height: 85vh;
+        `}
+      >
+        {isError ? (
+          <DoesNotExist caseId={caseId} />
+        ) : isLoading ? (
+          <CaseViewLoading />
+        ) : data ? (
+          <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
+            {getLegacyUrlConflictCallout()}
+            <CaseViewPage
+              caseData={data.case}
+              fetchCase={refetch}
+              actionsNavigation={actionsNavigation}
+              ruleDetailsNavigation={ruleDetailsNavigation}
+              showAlertDetails={showAlertDetails}
+              useFetchAlertData={useFetchAlertData}
+              refreshRef={refreshRef}
+            />
+          </CasesTimelineIntegrationProvider>
+        ) : null}
+      </div>
+    );
   }
 );
 

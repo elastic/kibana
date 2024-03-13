@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiThemeComputed,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedRelative } from '@kbn/i18n-react';

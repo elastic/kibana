@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import { isEmpty } from 'lodash/fp';
 import { sortBy } from 'lodash';
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiText,
@@ -41,10 +42,10 @@ interface UserListProps {
 
 const renderUsers = (
   users: UserInfoWithAvatar[],
-  handleSendEmail: (emailAddress: string | undefined | null) => void
-) => {
-  const { euiTheme } = useEuiTheme();
-  return users.map((userInfo, key) => (
+  handleSendEmail: (emailAddress: string | undefined | null) => void,
+  euiTheme: EuiThemeComputed<{}>
+) =>
+  users.map((userInfo, key) => (
     <EuiFlexGroup
       css={css`
         margin-top: ${euiTheme.size.m};
@@ -69,7 +70,6 @@ const renderUsers = (
       </EuiFlexItem>
     </EuiFlexGroup>
   ));
-};
 
 const getEmailContent = ({ caseTitle, caseUrl }: { caseTitle: string; caseUrl: string }) => ({
   subject: i18n.EMAIL_SUBJECT(caseTitle),
@@ -79,7 +79,7 @@ const getEmailContent = ({ caseTitle, caseUrl }: { caseTitle: string; caseUrl: s
 export const UserList: React.FC<UserListProps> = React.memo(
   ({ theCase, userProfiles, headline, loading, users, dataTestSubj }) => {
     const { getCaseViewUrl } = useCaseViewNavigation();
-
+    const { euiTheme } = useEuiTheme();
     const caseUrl = getCaseViewUrl({ detailName: theCase.id });
     const email = getEmailContent({ caseTitle: theCase.title, caseUrl });
 
@@ -114,7 +114,7 @@ export const UserList: React.FC<UserListProps> = React.memo(
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
-          {renderUsers(orderedUsers, handleSendEmail)}
+          {renderUsers(orderedUsers, handleSendEmail, euiTheme)}
         </EuiText>
       </EuiFlexItem>
     );

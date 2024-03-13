@@ -6,7 +6,7 @@
  */
 
 import { first } from 'rxjs/operators';
-import { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition, useEuiTheme } from '@elastic/eui';
+import type { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition } from '@elastic/eui';
 import {
   EuiCodeBlock,
   EuiModalBody,
@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiBetaBadge,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useContext, useMemo, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';

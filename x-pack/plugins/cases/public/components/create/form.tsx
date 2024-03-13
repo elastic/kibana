@@ -6,13 +6,13 @@
  */
 
 import React, { useMemo } from 'react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiSteps,
-  EuiThemeComputed,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -139,6 +139,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       }),
       [
         isSubmitting,
+        euiTheme,
         caseAssignmentAuthorized,
         canShowCaseSolutionSelection,
         availableOwners,

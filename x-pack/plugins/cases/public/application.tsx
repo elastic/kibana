@@ -9,18 +9,15 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 
-import { EuiErrorBoundary, EuiThemeProvider } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import type { RenderAppProps } from './types';
 
 import { CasesApp } from './components/app';
-import { useIsDarkTheme } from './common/use_is_dark_theme';
 
 export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
@@ -45,16 +42,12 @@ const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
     persistableStateAttachmentTypeRegistry,
     getFilesClient,
   }) => {
-    const isDarkTheme = useIsDarkTheme();
-
     return (
-      <EuiThemeProvider colorMode={isDarkTheme ? 'dark' : 'light'}>
-        <CasesApp
-          externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
-          persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
-          getFilesClient={getFilesClient}
-        />
-      </EuiThemeProvider>
+      <CasesApp
+        externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
+        persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
+        getFilesClient={getFilesClient}
+      />
     );
   }
 );
@@ -66,30 +59,24 @@ export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
   const { history } = mountParams;
 
   return (
-    <EuiErrorBoundary>
-      <I18nProvider>
-        <KibanaThemeProvider theme={coreStart.theme}>
-          <KibanaContextProvider
-            services={{
-              kibanaVersion,
-              ...coreStart,
-              ...pluginsStart,
-              storage,
-            }}
-          >
-            <Router history={history}>
-              <CasesAppWithContext
-                externalReferenceAttachmentTypeRegistry={
-                  deps.externalReferenceAttachmentTypeRegistry
-                }
-                persistableStateAttachmentTypeRegistry={deps.persistableStateAttachmentTypeRegistry}
-                getFilesClient={pluginsStart.files.filesClientFactory.asScoped}
-              />
-            </Router>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </I18nProvider>
-    </EuiErrorBoundary>
+    <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
+      <KibanaContextProvider
+        services={{
+          kibanaVersion,
+          ...coreStart,
+          ...pluginsStart,
+          storage,
+        }}
+      >
+        <Router history={history}>
+          <CasesAppWithContext
+            externalReferenceAttachmentTypeRegistry={deps.externalReferenceAttachmentTypeRegistry}
+            persistableStateAttachmentTypeRegistry={deps.persistableStateAttachmentTypeRegistry}
+            getFilesClient={pluginsStart.files.filesClientFactory.asScoped}
+          />
+        </Router>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>
   );
 };
 
