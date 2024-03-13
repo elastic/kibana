@@ -1231,7 +1231,8 @@ const elasticsearchToKibanaType = (elasticsearchType) => {
     return acc;
   }, {});
 
-  const functionDefinitions = [];
+  const evalFunctionDefinitions = [];
+  const aggFunctionDefinitions = [];
   for (const value of showFunctionsOutput.values) {
     if (aliases.has(value[columnIndices.name])) {
       continue;
@@ -1284,8 +1285,18 @@ const elasticsearchToKibanaType = (elasticsearchType) => {
       signatures,
     };
 
-    functionDefinitions.push(functionDefinition);
+    value[columnIndices.isAggregation]
+      ? aggFunctionDefinitions.push(functionDefinition)
+      : evalFunctionDefinitions.push(functionDefinition);
   }
 
-  await writeFile(join(__dirname, 'functions.json'), JSON.stringify(functionDefinitions, null, 2));
+  await writeFile(
+    join(__dirname, 'eval_functions.json'),
+    JSON.stringify(evalFunctionDefinitions, null, 2)
+  );
+
+  await writeFile(
+    join(__dirname, 'agg_functions.json'),
+    JSON.stringify(aggFunctionDefinitions, null, 2)
+  );
 })();

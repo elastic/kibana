@@ -11,7 +11,7 @@ import { AutocompleteCommandDefinition } from '../autocomplete/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
-import { evalFunctionsDefinitions } from '../definitions/functions';
+import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import {
@@ -136,7 +136,7 @@ let commandLookups: Map<string, CommandDefinition> | undefined;
 function buildFunctionLookup() {
   if (!fnLookups) {
     fnLookups = builtinFunctions
-      .concat(evalFunctionsDefinitions, statsAggregationFunctionDefinitions)
+      .concat(evalFunctionDefinitions, statsAggregationFunctionDefinitions)
       .reduce((memo, def) => {
         memo.set(def.name, def);
         if (def.alias) {

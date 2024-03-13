@@ -14,7 +14,7 @@ import { AstListener } from '../ast_factory';
 import { validateAst } from './validation';
 import { ESQLAst } from '../types';
 import { ESQLErrorListener } from '../../monaco/esql_error_listener';
-import { evalFunctionsDefinitions } from '../definitions/functions';
+import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { FunctionDefinition } from '../definitions/types';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
@@ -90,13 +90,13 @@ function getCallbackMocks() {
   };
 }
 
-const toInteger = evalFunctionsDefinitions.find(({ name }) => name === 'to_integer')!;
-const toStringSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_string')!;
-const toDateSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_datetime')!;
-const toBooleanSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_boolean')!;
-const toIpSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_ip')!;
-const toGeoPointSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_geopoint')!;
-const toCartesianPointSignature = evalFunctionsDefinitions.find(
+const toInteger = evalFunctionDefinitions.find(({ name }) => name === 'to_integer')!;
+const toStringSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_string')!;
+const toDateSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_datetime')!;
+const toBooleanSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_boolean')!;
+const toIpSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_ip')!;
+const toGeoPointSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_geopoint')!;
+const toCartesianPointSignature = evalFunctionDefinitions.find(
   ({ name }) => name === 'to_cartesianpoint'
 )!;
 
@@ -513,7 +513,7 @@ describe('validation logic', () => {
         .replace(/ipField/g, 'to_ip("127.0.0.1")');
     }
 
-    for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
+    for (const { name, alias, signatures, ...defRest } of evalFunctionDefinitions) {
       for (const { params, ...signRest } of signatures) {
         const fieldMapping = getFieldMapping(params);
         const signatureStringCorrect = tweakSignatureForRowCommand(
@@ -1103,7 +1103,7 @@ describe('validation logic', () => {
     }
 
     // Test that all functions work in where
-    const numericOrStringFunctions = evalFunctionsDefinitions.filter(({ name, signatures }) => {
+    const numericOrStringFunctions = evalFunctionDefinitions.filter(({ name, signatures }) => {
       return signatures.some(
         ({ returnType, params }) =>
           ['number', 'string'].includes(returnType) &&
@@ -1306,7 +1306,7 @@ describe('validation logic', () => {
       }
     }
 
-    for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
+    for (const { name, alias, signatures, ...defRest } of evalFunctionDefinitions) {
       for (const { params, ...signRest } of signatures) {
         const fieldMapping = getFieldMapping(params);
         testErrorsAndWarnings(

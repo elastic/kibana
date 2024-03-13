@@ -12,7 +12,7 @@ import { suggest } from './autocomplete';
 import { getParser, ROOT_STATEMENT } from '../../antlr_facade';
 import { ESQLErrorListener } from '../../monaco/esql_error_listener';
 import { AstListener } from '../ast_factory';
-import { evalFunctionsDefinitions } from '../definitions/functions';
+import { evalFunctionDefinitions } from '../definitions/functions';
 import { builtinFunctions } from '../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
@@ -92,7 +92,7 @@ function getFunctionSignaturesByReturnType(
   }
   // eval functions (eval is a special keyword in JS)
   if (evalMath) {
-    list.push(...evalFunctionsDefinitions);
+    list.push(...evalFunctionDefinitions);
   }
   if (builtin) {
     list.push(...builtinFunctions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
@@ -1058,7 +1058,7 @@ describe('autocomplete', () => {
     );
 
     // Test suggestions for each possible param, within each signature variation, for each function
-    for (const fn of evalFunctionsDefinitions) {
+    for (const fn of evalFunctionDefinitions) {
       // skip this fn for the moment as it's quite hard to test
       if (fn.name !== 'auto_bucket') {
         for (const signature of fn.signatures) {

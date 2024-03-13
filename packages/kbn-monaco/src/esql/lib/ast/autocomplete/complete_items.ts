@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { AutocompleteCommandDefinition } from './types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
-import { evalFunctionsDefinitions } from '../definitions/functions';
+import { evalFunctionDefinitions } from '../definitions/functions';
 import { getAllCommands } from '../shared/helpers';
 import {
   getAutocompleteFunctionDefinition,
@@ -20,7 +20,7 @@ import {
   buildConstantsDefinitions,
 } from './factories';
 
-export const mathCommandDefinition: AutocompleteCommandDefinition[] = evalFunctionsDefinitions.map(
+export const mathCommandDefinition: AutocompleteCommandDefinition[] = evalFunctionDefinitions.map(
   getAutocompleteFunctionDefinition
 );
 

@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { AutocompleteCommandDefinition } from './types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
-import { evalFunctionsDefinitions } from '../definitions/functions';
+import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import {
@@ -22,7 +22,7 @@ import { getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 
-const allFunctions = statsAggregationFunctionDefinitions.concat(evalFunctionsDefinitions);
+const allFunctions = statsAggregationFunctionDefinitions.concat(evalFunctionDefinitions);
 
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
