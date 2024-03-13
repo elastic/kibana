@@ -21,7 +21,6 @@ import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_
 
 import type { ActionConnector } from '../../../common/types/domain';
 import type { CasePostRequest } from '../../../common/types/api';
-import type { CasesConfigurationUI } from '../../../common/ui';
 import { Title } from './title';
 import { Description, fieldName as descriptionFieldName } from './description';
 import { Tags } from './tags';
@@ -60,11 +59,8 @@ const containerCss = (euiTheme: EuiThemeComputed<{}>, big?: boolean) =>
 
 export interface CreateCaseFormFieldsProps {
   connectors: ActionConnector[];
-  customFieldsConfiguration: CasesConfigurationUI['customFields'];
-  isLoadingCaseConfiguration: boolean;
   isLoadingConnectors: boolean;
   withSteps: boolean;
-  owner: string[];
   draftStorageKey: string;
 }
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
@@ -81,15 +77,8 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
 
 const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
-  ({
-    connectors,
-    isLoadingConnectors,
-    withSteps,
-    owner,
-    draftStorageKey,
-    customFieldsConfiguration,
-    isLoadingCaseConfiguration,
-  }) => {
+  ({ connectors, isLoadingConnectors, withSteps, draftStorageKey }) => {
+    const { owner } = useCasesContext();
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
     const { euiTheme } = useEuiTheme();
@@ -128,10 +117,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
               <Description isLoading={isSubmitting} draftStorageKey={draftStorageKey} />
             </div>
             <div css={containerCss(euiTheme)}>
-              <CustomFields
-                isLoading={isSubmitting || isLoadingCaseConfiguration}
-                customFieldsConfiguration={customFieldsConfiguration}
-              />
+              <CustomFields isLoading={isSubmitting} />
             </div>
             <div css={containerCss(euiTheme)} />
           </>
@@ -144,8 +130,6 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         canShowCaseSolutionSelection,
         availableOwners,
         draftStorageKey,
-        customFieldsConfiguration,
-        isLoadingCaseConfiguration,
       ]
     );
 
@@ -258,11 +242,8 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
         >
           <CreateCaseFormFields
             connectors={empty}
-            customFieldsConfiguration={[]}
             isLoadingConnectors={false}
-            isLoadingCaseConfiguration={false}
             withSteps={withSteps}
-            owner={owner}
             draftStorageKey={draftStorageKey}
           />
           <div>
