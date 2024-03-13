@@ -25,7 +25,7 @@ export default function (ctx: FtrProviderContext) {
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKey(roleAuthc.cookieHeader, roleAuthc.apiKey);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('rejects request to create a new fleet server hosts if host url is different from default', async () => {

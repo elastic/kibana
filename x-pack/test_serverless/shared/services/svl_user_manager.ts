@@ -100,12 +100,12 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
 
       return { apiKey, apiKeyHeader, cookieHeader };
     },
-    async invalidateApiKey(cookieHeader: { Cookie: string }, apiKey: { id: string; name: string }) {
+    async invalidateApiKeyForRole(roleCredentials: RoleCredentials) {
       const requestBody = {
         apiKeys: [
           {
-            id: apiKey.id,
-            name: apiKey.name,
+            id: roleCredentials.apiKey.id,
+            name: roleCredentials.apiKey.name,
           },
         ],
         isAdmin: true,
@@ -114,7 +114,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
       const { status } = await supertestWithoutAuth
         .post('/internal/security/api_key/invalidate')
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(cookieHeader)
+        .set(roleCredentials.cookieHeader)
         .send(requestBody);
 
       expect(status).to.be(200);
