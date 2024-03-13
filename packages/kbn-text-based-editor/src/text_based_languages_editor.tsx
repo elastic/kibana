@@ -528,7 +528,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   useEffect(() => {
     // make sure to always update the code in expanded editor when query prop changes
-    if (isCodeEditorExpanded) {
+    if (isCodeEditorExpanded && editor1.current?.getValue() !== queryString) {
       setCode(queryString);
     }
   }, [isCodeEditorExpanded, queryString]);
