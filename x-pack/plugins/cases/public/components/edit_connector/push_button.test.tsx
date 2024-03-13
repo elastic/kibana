@@ -25,9 +25,7 @@ const defaultProps = {
   pushToService,
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/176671
-// FLAKY: https://github.com/elastic/kibana/issues/176672
-describe.skip('PushButton ', () => {
+describe('PushButton ', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
