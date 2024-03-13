@@ -303,7 +303,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       }
 
       alertsClient.setAlertLimitReached(hasReachedLimit);
-      const recoveredAlerts = alertsClient?.getRecoveredAlerts() ?? [];
+      const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
 
       for (const recoveredAlert of recoveredAlerts) {
         const recoveredAlertId = recoveredAlert.alert.getId();

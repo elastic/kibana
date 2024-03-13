@@ -132,32 +132,33 @@ const mockLibs = {
   },
   logger,
 } as unknown as InfraBackendLibs;
-
-const alertsServices = alertsMock.createRuleExecutorServices();
-const services: RuleExecutorServicesMock &
-  LifecycleAlertServices<AlertState, AlertContext, string> = {
-  ...alertsServices,
-  ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
-};
-
 const alerts = new Map<string, AlertTestInstance>();
+let services: RuleExecutorServicesMock & LifecycleAlertServices<AlertState, AlertContext, string>;
 
-services.alertsClient.report.mockImplementation((params: any) => {
-  alerts.set(params.id, { actionGroup: params.actionGroup, context: [], payload: [] });
-  return {
-    uuid: `uuid-${params.id}`,
-    start: new Date().toISOString(),
-    alertDoc: {},
+const setup = () => {
+  const alertsServices = alertsMock.createRuleExecutorServices();
+  services = {
+    ...alertsServices,
+    ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
   };
-});
 
-services.alertsClient.setAlertData.mockImplementation((params: any) => {
-  const alert = alerts.get(params.id);
-  if (alert) {
-    alert.payload.push(params.payload);
-    alert.context.push(params.context);
-  }
-});
+  services.alertsClient.report.mockImplementation((params: any) => {
+    alerts.set(params.id, { actionGroup: params.actionGroup, context: [], payload: [] });
+    return {
+      uuid: `uuid-${params.id}`,
+      start: new Date().toISOString(),
+      alertDoc: {},
+    };
+  });
+
+  services.alertsClient.setAlertData.mockImplementation((params: any) => {
+    const alert = alerts.get(params.id);
+    if (alert) {
+      alert.payload.push(params.payload);
+      alert.context.push(params.context);
+    }
+  });
+};
 
 function mostRecentAction(id: string) {
   const instance = alerts.get(id);
@@ -183,6 +184,9 @@ const baseCriterion = {
 describe('The inventory threshold alert type', () => {
   describe('querying with Hosts and rule tags', () => {
     afterAll(() => clearInstances());
+
+    setup();
+
     const execute = (comparator: Comparator, threshold: number[], options?: any) =>
       executor({
         ...mockOptions,
@@ -207,6 +211,18 @@ describe('The inventory threshold alert type', () => {
 
     const instanceIdA = 'host-01';
     const instanceIdB = 'host-02';
+
+    test('throws error when alertsClient is null', async () => {
+      try {
+        services.alertsClient = null;
+        await execute(Comparator.GT, [0.75]);
+      } catch (e) {
+        expect(e).toMatchInlineSnapshot(
+          '[Error: Expected alertsClient not to be null! There may have been an issue installing alert resources.]'
+        );
+        setup();
+      }
+    });
 
     test('when tags are present in the source, rule tags and source tags are combined in alert context', async () => {
       setEvaluationResults({
