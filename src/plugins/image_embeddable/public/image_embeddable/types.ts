@@ -20,7 +20,7 @@ export type ImageEmbeddableSerializedState = SerializedReactEmbeddableTitles & {
   imageConfig: ImageConfig;
 };
 
-export type ImageEmbeddableApi = DefaultEmbeddableApi &
+export type ImageEmbeddableApi = DefaultEmbeddableApi<ImageEmbeddableSerializedState> &
   HasEditCapabilities &
   PublishesDataLoading &
   PublishesBlockingError;
