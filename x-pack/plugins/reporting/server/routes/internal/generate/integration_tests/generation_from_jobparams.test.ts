@@ -12,14 +12,14 @@ import supertest from 'supertest';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 
 import { ReportingCore } from '../../../..';
-import { INTERNAL_ROUTES } from '../../../../../common/constants';
 import { ReportingStore } from '../../../../lib';
-import { ExportTypesRegistry } from '../../../../lib/export_types_registry';
 import { Report } from '../../../../lib/store';
 import { reportingMock } from '../../../../mocks';
 import {

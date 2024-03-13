@@ -30,7 +30,7 @@ export const KubernetesContainer = React.memo(() => {
   const { kubernetesSecurity, uiSettings } = useKibana().services;
 
   const { globalFullScreen } = useGlobalFullScreen();
-  const { indexPattern, sourcererDataView } = useSourcererDataView();
+  const { indexPattern, sourcererDataView, dataViewId } = useSourcererDataView();
   const { from, to } = useGlobalTime();
 
   const getGlobalFiltersQuerySelector = useMemo(
@@ -91,6 +91,7 @@ export const KubernetesContainer = React.memo(() => {
           endDate: to,
         },
         renderSessionsView,
+        dataViewId: dataViewId ?? undefined,
       })}
       <SpyRoute pageName={SecurityPageName.kubernetes} />
     </SecuritySolutionPageWrapper>

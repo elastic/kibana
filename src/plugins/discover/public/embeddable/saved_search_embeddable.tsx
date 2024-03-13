@@ -185,7 +185,7 @@ export class SavedSearchEmbeddable
     const title = this.getCurrentTitle();
     const description = input.hidePanelTitles ? '' : input.description ?? savedSearch.description;
     const savedObjectId = (input as SearchByReferenceInput).savedObjectId;
-    const locatorParams = getDiscoverLocatorParams({ input, savedSearch });
+    const locatorParams = getDiscoverLocatorParams(this);
     // We need to use a redirect URL if this is a by value saved search using
     // an ad hoc data view to ensure the data view spec gets encoded in the URL
     const useRedirect = !savedObjectId && !dataView?.isPersisted();
@@ -330,7 +330,6 @@ export class SavedSearchEmbeddable
         searchProps.totalHitCount = result.records.length;
         searchProps.isLoading = false;
         searchProps.isPlainRecord = true;
-        searchProps.showTimeCol = false;
         searchProps.isSortEnabled = true;
 
         return;

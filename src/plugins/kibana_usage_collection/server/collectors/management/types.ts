@@ -47,7 +47,7 @@ export interface UsageStats {
   'observability:apmAWSLambdaRequestCostPerMillion': number;
   'observability:enableInfrastructureHostsView': boolean;
   'observability:enableInfrastructureProfilingIntegration': boolean;
-  'observability:enableInfrastructureHostsCustomDashboards': boolean;
+  'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmAgentExplorerView': boolean;
   'observability:apmEnableTableSearchBar': boolean;
   'visualization:heatmap:maxBuckets': number;
@@ -170,5 +170,5 @@ export interface UsageStats {
   'observability:profilingAzureCostDiscountRate': number;
   'data_views:fields_excluded_data_tiers': string;
   'observability:apmEnableTransactionProfiling': boolean;
-  'devTools:enableDockedConsole': boolean;
+  'devTools:enablePersistentConsole': boolean;
 }

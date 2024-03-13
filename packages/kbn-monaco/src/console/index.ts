@@ -6,5 +6,19 @@
  * Side Public License, v 1.
  */
 
+/**
+ * This import registers the Console monaco language contribution
+ */
+import './language';
+
+import type { LangModuleType } from '../types';
+import { CONSOLE_LANG_ID } from './constants';
+import { lexerRules, languageConfiguration } from './lexer_rules';
+
 export { CONSOLE_LANG_ID } from './constants';
-export { ConsoleLang } from './language';
+
+export const ConsoleLang: LangModuleType = {
+  ID: CONSOLE_LANG_ID,
+  lexerRules,
+  languageConfiguration,
+};

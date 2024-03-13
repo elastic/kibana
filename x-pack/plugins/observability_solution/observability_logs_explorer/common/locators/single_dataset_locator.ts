@@ -36,7 +36,7 @@ export class SingleDatasetLocatorDefinition
     });
 
     return constructLocatorPath({
-      datasetSelection: unresolvedDatasetSelection.toPlainSelection(),
+      dataSourceSelection: unresolvedDatasetSelection.toPlainSelection(),
       locatorParams: params,
       useHash,
     });

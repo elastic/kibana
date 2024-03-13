@@ -21,7 +21,7 @@ import {
   FetchConnectorsApiLogicActions,
 } from '../../api/connector/fetch_connectors.api';
 
-export type ConnectorViewItem = Connector & { docsCount?: number };
+export type ConnectorViewItem = Connector & { docsCount?: number; indexExists: boolean };
 export interface ConnectorsActions {
   apiError: FetchConnectorsApiLogicActions['apiError'];
   apiSuccess: FetchConnectorsApiLogicActions['apiSuccess'];
@@ -192,6 +192,7 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
               return {
                 ...connector,
                 docsCount: data?.counts[indexName],
+                indexExists: data?.indexExists[indexName],
               };
             }
             return connector;

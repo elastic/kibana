@@ -29,6 +29,7 @@ export {
   LineStyleSettings,
   TextDecorationSetting,
   emptyTitleText,
+  ChartSwitchTrigger,
 } from './components';
 
 export { isFieldLensCompatible } from './util';

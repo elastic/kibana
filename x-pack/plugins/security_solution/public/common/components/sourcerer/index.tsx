@@ -15,13 +15,13 @@ import {
 } from '@elastic/eui';
 import type { ChangeEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import * as i18n from './translations';
 import type { sourcererModel } from '../../store/sourcerer';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
 import type { SourcererUrlState } from '../../store/sourcerer/model';
+import type { State } from '../../store';
 import type { ModifiedTypes } from './use_pick_index_patterns';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
@@ -129,17 +129,18 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const isDefaultSourcerer = scopeId === SourcererScopeName.default;
   const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
 
-  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
-  const {
-    defaultDataView,
-    kibanaDataViews,
-    signalIndexName,
-    sourcererScope: {
-      selectedDataViewId,
-      selectedPatterns,
-      missingPatterns: sourcererMissingPatterns,
-    },
-  } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
+  const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
+  const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
+  const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
+  const selectedDataViewId = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedDataViewId(state, scopeId);
+  });
+  const selectedPatterns = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedPatterns(state, scopeId);
+  });
+  const sourcererMissingPatterns = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeMissingPatterns(state, scopeId);
+  });
   const { pollForSignalIndex } = useSignalHelpers();
 
   useEffect(() => {

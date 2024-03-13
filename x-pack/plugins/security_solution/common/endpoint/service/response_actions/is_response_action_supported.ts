@@ -77,3 +77,96 @@ export const isResponseActionSupported = (
     agentType,
   });
 };
+
+/** @private */
+const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
+  isolate: {
+    automated: {
+      endpoint: true,
+      sentinel_one: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: true,
+    },
+  },
+  unisolate: {
+    automated: {
+      endpoint: true,
+      sentinel_one: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: true,
+    },
+  },
+  upload: {
+    automated: {
+      endpoint: true,
+      sentinel_one: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: false,
+    },
+  },
+  'get-file': {
+    automated: {
+      endpoint: true,
+      sentinel_one: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: false,
+    },
+  },
+  'kill-process': {
+    automated: {
+      endpoint: true,
+      sentinel_one: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: false,
+    },
+  },
+  execute: {
+    automated: {
+      endpoint: true,
+      sentinel_one: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: false,
+    },
+  },
+  'suspend-process': {
+    automated: {
+      endpoint: true,
+      sentinel_one: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: false,
+    },
+  },
+  'running-processes': {
+    automated: {
+      endpoint: true,
+      sentinel_one: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: false,
+    },
+  },
+};
+
+// FIXME:PT reemove once this module is refactored.
+export const isActionSupportedByAgentType = (
+  agentType: ResponseActionAgentType,
+  actionName: ResponseActionsApiCommandNames,
+  actionType: ResponseActionType
+): boolean => {
+  return RESPONSE_ACTIONS_SUPPORT_MAP[actionName][actionType][agentType];
+};

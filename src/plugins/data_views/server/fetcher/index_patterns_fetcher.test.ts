@@ -9,7 +9,7 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexPatternsFetcher } from '.';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { DataViewMissingIndices } from '../../common';
+import { DataViewMissingIndices, DataViewType } from '../../common';
 
 const rollupResponse = {
   foo: {
@@ -51,7 +51,7 @@ describe('Index Pattern Fetcher - server', () => {
     indexPatterns = new IndexPatternsFetcher(esClient, true, true);
     await indexPatterns.getFieldsForWildcard({
       pattern: patternList,
-      type: 'rollup',
+      type: DataViewType.ROLLUP,
       rollupIndex: 'foo',
     });
     expect(esClient.rollup.getRollupIndexCaps).toHaveBeenCalledTimes(1);
@@ -64,7 +64,7 @@ describe('Index Pattern Fetcher - server', () => {
     indexPatterns = new IndexPatternsFetcher(esClient, true, false);
     await indexPatterns.getFieldsForWildcard({
       pattern: patternList,
-      type: 'rollup',
+      type: DataViewType.ROLLUP,
       rollupIndex: 'foo',
     });
     expect(esClient.rollup.getRollupIndexCaps).toHaveBeenCalledTimes(0);

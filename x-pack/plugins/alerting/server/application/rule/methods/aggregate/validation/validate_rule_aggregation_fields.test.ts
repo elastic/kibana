@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getRuleTagsAggregation } from '../../../../../../common';
 import { defaultRuleAggregationFactory } from '..';
 
@@ -65,7 +64,7 @@ describe('validateAggregationTerms', () => {
                 tags: {
                   terms: {
                     field: 'alert.attributes.tags',
-                    order: 'asc' as unknown as AggregationsAggregateOrder,
+                    order: 'asc' as const,
                   },
                 },
               },

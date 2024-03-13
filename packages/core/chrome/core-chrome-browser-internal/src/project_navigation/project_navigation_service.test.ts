@@ -19,6 +19,7 @@ import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinition,
   GroupDefinition,
+  SolutionNavigationDefinition,
 } from '@kbn/core-chrome-browser';
 import { ProjectNavigationService } from './project_navigation_service';
 
@@ -51,7 +52,12 @@ const logger = loggerMock.create();
 const setup = ({
   locationPathName = '/',
   navLinkIds,
-}: { locationPathName?: string; navLinkIds?: Readonly<string[]> } = {}) => {
+  setChromeStyle = jest.fn(),
+}: {
+  locationPathName?: string;
+  navLinkIds?: Readonly<string[]>;
+  setChromeStyle?: () => void;
+} = {}) => {
   const history = createMemoryHistory();
   history.replace(locationPathName);
 
@@ -68,6 +74,7 @@ const setup = ({
     http: httpServiceMock.createStartContract(),
     chromeBreadcrumbs$,
     logger,
+    setChromeStyle,
   });
 
   return { projectNavigation, history, chromeBreadcrumbs$ };
@@ -866,5 +873,148 @@ describe('getActiveNodes$()', () => {
         },
       ],
     ]);
+  });
+});
+
+describe('solution navigations', () => {
+  const solution1: SolutionNavigationDefinition = {
+    id: 'solution1',
+    title: 'Solution 1',
+    icon: 'logoSolution1',
+    homePage: 'discover',
+  };
+
+  const solution2: SolutionNavigationDefinition = {
+    id: 'solution2',
+    title: 'Solution 2',
+    icon: 'logoSolution2',
+    homePage: 'discover',
+    sideNavComponentGetter: () => () => null,
+  };
+
+  const solution3: SolutionNavigationDefinition = {
+    id: 'solution3',
+    title: 'Solution 3',
+    icon: 'logoSolution3',
+    homePage: 'discover',
+  };
+
+  const localStorageGetItem = jest.fn();
+  const originalLocalStorage = window.localStorage;
+
+  beforeAll(() => {
+    Object.defineProperty(window, 'localStorage', {
+      value: {
+        getItem: localStorageGetItem,
+      },
+      writable: true,
+    });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(window, 'localStorage', {
+      value: originalLocalStorage,
+      writable: true,
+    });
+  });
+
+  it('should update the solution navigation definition', async () => {
+    const { projectNavigation } = setup();
+
+    {
+      const solutionNavs = await lastValueFrom(
+        projectNavigation.getSolutionsNavDefinitions$().pipe(take(1))
+      );
+      expect(solutionNavs).toEqual({});
+    }
+
+    {
+      projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2 });
+
+      const solutionNavs = await lastValueFrom(
+        projectNavigation.getSolutionsNavDefinitions$().pipe(take(1))
+      );
+      expect(solutionNavs).toEqual({ 1: solution1, 2: solution2 });
+    }
+
+    {
+      // Test partial update
+      projectNavigation.updateSolutionNavigations({ 3: solution3 }, false);
+      const solutionNavs = await lastValueFrom(
+        projectNavigation.getSolutionsNavDefinitions$().pipe(take(1))
+      );
+      expect(solutionNavs).toEqual({ 1: solution1, 2: solution2, 3: solution3 });
+    }
+
+    {
+      // Test full replacement
+      projectNavigation.updateSolutionNavigations({ 4: solution3 }, true);
+      const solutionNavs = await lastValueFrom(
+        projectNavigation.getSolutionsNavDefinitions$().pipe(take(1))
+      );
+      expect(solutionNavs).toEqual({ 4: solution3 });
+    }
+  });
+
+  it('should return the active solution navigation', async () => {
+    const { projectNavigation } = setup();
+
+    {
+      const activeSolution = await lastValueFrom(
+        projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1))
+      );
+      expect(activeSolution).toBeNull();
+    }
+
+    projectNavigation.changeActiveSolutionNavigation('2'); // Set **before** the navs are registered
+    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2 });
+
+    {
+      const activeSolution = await lastValueFrom(
+        projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1))
+      );
+      // sideNavComponentGetter should not be exposed to consumers
+      expect('sideNavComponentGetter' in activeSolution!).toBe(false);
+      const { sideNavComponentGetter, ...rest } = solution2;
+      expect(activeSolution).toEqual(rest);
+    }
+
+    projectNavigation.changeActiveSolutionNavigation('1'); // Set **after** the navs are registered
+
+    {
+      const activeSolution = await lastValueFrom(
+        projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1))
+      );
+      expect(activeSolution).toEqual(solution1);
+    }
+  });
+
+  it('should throw if the active solution navigation is not registered', async () => {
+    const { projectNavigation } = setup();
+
+    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2 });
+    projectNavigation.changeActiveSolutionNavigation('3');
+
+    expect(() => {
+      return lastValueFrom(projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1)));
+    }).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Solution navigation definition with id \\"3\\" does not exist."`
+    );
+  });
+
+  it('should set the Chrome style when the active solution navigation changes', async () => {
+    const setChromeStyle = jest.fn();
+    const { projectNavigation } = setup({ setChromeStyle });
+
+    expect(setChromeStyle).not.toHaveBeenCalled();
+
+    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2 });
+    expect(setChromeStyle).toHaveBeenCalledWith('classic'); // No active solution yet, we are still on classic Kibana
+
+    projectNavigation.changeActiveSolutionNavigation('2');
+    expect(setChromeStyle).toHaveBeenCalledWith('project'); // We have an active solution nav, we should switch to project style
+
+    projectNavigation.changeActiveSolutionNavigation(null);
+    expect(setChromeStyle).toHaveBeenCalledWith('classic'); // No active solution, we should switch back to classic Kibana
   });
 });

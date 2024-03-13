@@ -8,8 +8,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { REPORTING_SYSTEM_INDEX } from '@kbn/reporting-common';
 import { get, pick } from 'lodash';
+import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { GetLicense } from '.';
-import type { ExportTypesRegistry } from '../lib/export_types_registry';
 import {
   FIELD_EXECUTION_TIME_MS,
   FIELD_QUEUE_TIME_MS,

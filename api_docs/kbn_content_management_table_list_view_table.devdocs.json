@@ -109,7 +109,7 @@
             "section": "def-common.UserContentCommonSchema",
             "text": "UserContentCommonSchema"
           },
-          ">({ tableCaption, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, rowItemActions, findItems, createItem, editItem, deleteItems, getDetailViewLink, onClickTitle, id: listingId, contentEditor, titleColumnName, withoutPageTemplateWrapper, onFetchSuccess, refreshListBouncer, setPageDataTestSubject, }: ",
+          ">({ tableCaption, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, rowItemActions, findItems, createItem, editItem, deleteItems, getDetailViewLink, getOnClickTitle, id: listingId, contentEditor, titleColumnName, withoutPageTemplateWrapper, onFetchSuccess, refreshListBouncer, setPageDataTestSubject, }: ",
           {
             "pluginId": "@kbn/content-management-table-list-view-table",
             "scope": "public",
@@ -661,15 +661,15 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-public.TableListViewTableProps.onClickTitle",
+            "id": "def-public.TableListViewTableProps.getOnClickTitle",
             "type": "Function",
             "tags": [],
-            "label": "onClickTitle",
+            "label": "getOnClickTitle",
             "description": [
               "Handler to execute when clicking the item title"
             ],
             "signature": [
-              "((item: T) => void) | undefined"
+              "((item: T) => (() => void) | undefined) | undefined"
             ],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
@@ -677,7 +677,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-table-list-view-table",
-                "id": "def-public.TableListViewTableProps.onClickTitle.$1",
+                "id": "def-public.TableListViewTableProps.getOnClickTitle.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "item",

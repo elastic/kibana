@@ -16,7 +16,10 @@ import { PluginServiceFactory } from './factory';
  * The `StartParameters` generic determines what parameters are expected to
  * start the service.
  */
-export type PluginServiceProviders<Services, StartParameters = {}> = {
+export type PluginServiceProviders<
+  Services extends Record<keyof Services, {}>,
+  StartParameters = {}
+> = {
   [K in keyof Services]: PluginServiceProvider<
     Services[K],
     StartParameters,

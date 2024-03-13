@@ -59,7 +59,7 @@ function dfDepthFirstSearch(
   displayOther: boolean
 ) {
   const filteredItemSets = iss.filter((is) => {
-    for (const [key, setValue] of Object.entries(is.set)) {
+    for (const { fieldName: key, fieldValue: setValue } of is.set) {
       if (key === field && setValue === value) {
         return true;
       }

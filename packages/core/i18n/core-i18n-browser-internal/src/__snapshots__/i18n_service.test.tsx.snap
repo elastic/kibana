@@ -303,6 +303,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiSelectableTemplateSitewide.noResults": "No results available",
           "euiSelectableTemplateSitewide.onFocusBadgeGoTo": "Go to",
           "euiSelectableTemplateSitewide.searchPlaceholder": "Search for anything...",
+          "euiSideNav.mobileToggleAriaLabel": "Toggle navigation",
           "euiSkeletonLoading.loadedAriaText": [Function],
           "euiSkeletonLoading.loadingAriaText": [Function],
           "euiStat.loadingText": "Statistic is loading",

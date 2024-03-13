@@ -22,6 +22,7 @@ const langSpecificWorkerIds = [
   ESQLLang.ID,
   monaco.languages.json.jsonDefaults.languageId,
   YAML_LANG_ID,
+  ConsoleLang.ID,
 ];
 
 /**
