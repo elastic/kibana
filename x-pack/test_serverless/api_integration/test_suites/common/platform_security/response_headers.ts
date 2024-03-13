@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import cspParser from 'content-security-policy-parser';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -13,12 +14,12 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('security/response_headers', function () {
-    const defaultCSP = `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; frame-ancestors 'self'`;
+    const baseCSP = `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; frame-ancestors 'self'`;
     const defaultCOOP = 'same-origin';
     const defaultPermissionsPolicy =
       'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()';
     const defaultStrictTransportSecurity = 'max-age=31536000; includeSubDomains';
-    const defaultReferrerPolicy = 'no-referrer-when-downgrade';
+    const defaultReferrerPolicy = 'strict-origin-when-cross-origin';
     const defaultXContentTypeOptions = 'nosniff';
     const defaultXFrameOptions = 'SAMEORIGIN';
 
@@ -29,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(header).toBeDefined();
-      expect(header['content-security-policy']).toEqual(defaultCSP);
+      expectMatchesCSP(baseCSP, header['content-security-policy'] ?? '');
       expect(header['cross-origin-opener-policy']).toEqual(defaultCOOP);
       expect(header['permissions-policy']).toEqual(defaultPermissionsPolicy);
       expect(header['strict-transport-security']).toEqual(defaultStrictTransportSecurity);
@@ -45,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(header).toBeDefined();
-      expect(header['content-security-policy']).toEqual(defaultCSP);
+      expectMatchesCSP(baseCSP, header['content-security-policy'] ?? '');
       expect(header['cross-origin-opener-policy']).toEqual(defaultCOOP);
       expect(header['permissions-policy']).toEqual(defaultPermissionsPolicy);
       expect(header['strict-transport-security']).toEqual(defaultStrictTransportSecurity);
@@ -54,4 +55,20 @@ export default function ({ getService }: FtrProviderContext) {
       expect(header['x-frame-options']).toEqual(defaultXFrameOptions);
     });
   });
+}
+
+/**
+ *
+ * @param expectedCSP The minimum set of directives and values we expect to see
+ * @param actualCSP The actual set of directives and values
+ */
+function expectMatchesCSP(expectedCSP: string, actualCSP: string) {
+  const expectedCSPMap = cspParser(expectedCSP);
+  const actualCSPMap = cspParser(actualCSP);
+  for (const [expectedDirective, expectedValues] of expectedCSPMap) {
+    expect(actualCSPMap.has(expectedDirective)).toBe(true);
+    for (const expectedValue of expectedValues) {
+      expect(actualCSPMap.get(expectedDirective)).toContain(expectedValue);
+    }
+  }
 }

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
@@ -23,9 +24,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { deleteJobs } from '../utils';
-import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
+import { BLOCKED_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
-import { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
+import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { isManagedJob } from '../../../jobs_utils';
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
 
@@ -90,7 +91,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
     setTimeout(() => {
       closeModal();
       refreshJobs();
-    }, DELETING_JOBS_REFRESH_INTERVAL_MS);
+    }, BLOCKED_JOBS_REFRESH_INTERVAL_MS);
   }, [jobIds, deleteUserAnnotations, deleteAlertingRules, closeModal, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {

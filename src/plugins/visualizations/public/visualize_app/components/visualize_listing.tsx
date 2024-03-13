@@ -261,8 +261,23 @@ const useTableListViewProps = (
     editItem,
     emptyPrompt: noItemsFragment,
     createItem: createNewVis,
-    rowItemActions: ({ attributes: { readOnly } }) =>
-      !visualizeCapabilities.save || readOnly ? { edit: { enabled: false } } : undefined,
+    rowItemActions: ({ managed, attributes: { readOnly } }) =>
+      !visualizeCapabilities.save || readOnly
+        ? {
+            edit: {
+              enabled: false,
+              reason: managed
+                ? i18n.translate('visualizations.managedLegacyVisMessage', {
+                    defaultMessage:
+                      'Elastic manages this visualisation. Changing it is not possible.',
+                  })
+                : i18n.translate('visualizations.readOnlyLegacyVisMessage', {
+                    defaultMessage:
+                      "These details can't be edited because this visualization is no longer supported.",
+                  }),
+            },
+          }
+        : undefined,
   };
 
   return props;
@@ -388,9 +403,9 @@ export const VisualizeListing = () => {
             entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
               defaultMessage: 'visualizations',
             })}
-            onClickTitle={(item) => {
-              tableViewProps.editItem?.(item);
-            }}
+            getOnClickTitle={(item) =>
+              item.attributes.readOnly ? undefined : () => tableViewProps.editItem?.(item)
+            }
             getDetailViewLink={({ editor, attributes: { error, readOnly } }) =>
               readOnly || (editor && 'onEdit' in editor)
                 ? undefined

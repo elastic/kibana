@@ -205,7 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('event.action', 'open');
 
         expect(resp.hits.hits[0]._source).not.have.property('kibana.alert.group');
-        expect(resp.hits.hits[0]._source).property('kibana.alert.evaluation.threshold').eql([1, 2]);
+        expect(resp.hits.hits[0]._source).not.have.property('kibana.alert.evaluation.threshold');
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
           .eql({
@@ -252,6 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
           dataset: DATA_VIEW_ID,
           timeRange: { to: 'now' },
           query: { query: 'host.name:* and container.id:*', language: 'kuery' },
+          filters: [],
         });
         expect(parsedViewInAppUrl.params.timeRange.from).match(ISO_DATE_REGEX);
       });

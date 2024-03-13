@@ -123,12 +123,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -207,12 +207,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -291,12 +291,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -375,12 +375,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -447,12 +447,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -490,12 +490,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -533,12 +533,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -660,12 +660,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -746,6 +746,11 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.consecutive_matches": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
     },
     "kibana.alert.depth": Object {
       "array": false,
@@ -1794,6 +1799,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.consecutive_matches": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.depth": Object {
       "array": false,
       "required": true,
@@ -2840,6 +2850,11 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.consecutive_matches": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
     },
     "kibana.alert.depth": Object {
       "array": false,
@@ -3888,6 +3903,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.consecutive_matches": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.depth": Object {
       "array": false,
       "required": true,
@@ -4934,6 +4954,11 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.consecutive_matches": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
     },
     "kibana.alert.depth": Object {
       "array": false,
@@ -5988,6 +6013,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.consecutive_matches": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.depth": Object {
       "array": false,
       "required": true,
@@ -7034,6 +7064,11 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.consecutive_matches": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
     },
     "kibana.alert.depth": Object {
       "array": false,
@@ -8082,6 +8117,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.consecutive_matches": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.depth": Object {
       "array": false,
       "required": true,
@@ -9085,12 +9125,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9394,12 +9434,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9493,12 +9533,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9592,12 +9632,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9691,12 +9731,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9796,12 +9836,12 @@ Object {
       "type": "object",
     },
     "kibana.alert.group.field": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "kibana.alert.group.value": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "keyword",
     },

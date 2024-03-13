@@ -12,6 +12,12 @@ const ALL_VALUE = '*';
 
 const allOrAnyString = t.union([t.literal(ALL_VALUE), t.string]);
 
+const allOrAnyStringOrArray = t.union([
+  t.literal(ALL_VALUE),
+  t.string,
+  t.array(t.union([t.literal(ALL_VALUE), t.string])),
+]);
+
 const dateType = new t.Type<Date, string, unknown>(
   'DateType',
   (input: unknown): input is Date => input instanceof Date,
@@ -41,6 +47,16 @@ const summarySchema = t.type({
   status: statusSchema,
   sliValue: t.number,
   errorBudget: errorBudgetSchema,
+});
+
+const groupingsSchema = t.record(t.string, t.union([t.string, t.number]));
+
+const metaSchema = t.partial({
+  synthetics: t.type({
+    monitorId: t.string,
+    locationId: t.string,
+    configId: t.string,
+  }),
 });
 
 const groupSummarySchema = t.type({
@@ -115,13 +131,16 @@ const querySchema = t.union([kqlQuerySchema, kqlWithFiltersSchema]);
 export {
   ALL_VALUE,
   allOrAnyString,
+  allOrAnyStringOrArray,
   dateRangeSchema,
   dateType,
   errorBudgetSchema,
+  groupingsSchema,
   historicalSummarySchema,
   previewDataSchema,
   statusSchema,
   summarySchema,
+  metaSchema,
   groupSummarySchema,
   kqlWithFiltersSchema,
   querySchema,
