@@ -99,6 +99,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
     const euiAccordionStyles = useMemo(
       () => css`
         z-index: 100;
+        margin: ${euiTheme.size.m} 0;
         .euiAccordion__buttonContent {
           cursor: pointer;
           width: 100%;
@@ -106,11 +107,11 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
         .euiAccordion__triggerWrapper {
           border-radius: ${euiTheme.border.radius.medium};
           padding: ${euiTheme.size.base};
-          margin: ${euiTheme.size.xs} 0;
+
           ${panelShadow}
         }
       `,
-      [euiTheme.border.radius.medium, euiTheme.size.base, euiTheme.size.xs, panelShadow]
+      [euiTheme.border.radius.medium, euiTheme.size.base, euiTheme.size.m, panelShadow]
     );
 
     const {
@@ -165,7 +166,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
             buttonElement="div"
             onToggle={() => setToggleAccordion(!toggleAccordion)}
             buttonContent={
-              <ListHeaderContainer gutterSize="m" alignItems="flexStart">
+              <ListHeaderContainer gutterSize="m" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup
                     direction="column"
