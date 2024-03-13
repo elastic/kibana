@@ -42,7 +42,6 @@ export const transformRawData = ({
     rawData,
     getAnonymizedValue,
     getAnonymizedValues,
-    anonymizedData: {},
   });
 
   if (onNewReplacements != null) {

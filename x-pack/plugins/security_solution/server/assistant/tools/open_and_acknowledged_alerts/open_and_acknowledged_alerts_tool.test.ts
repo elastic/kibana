@@ -21,7 +21,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
   const esClient = {
     search: jest.fn().mockResolvedValue(mockAlertsFieldsApi),
   } as unknown as ElasticsearchClient;
-  const replacements = { key: 'value' };
+  const replacements = [{ uuid: 'key', value: 'value' }];
   const request = {
     body: {
       isEnabledKnowledgeBase: false,
