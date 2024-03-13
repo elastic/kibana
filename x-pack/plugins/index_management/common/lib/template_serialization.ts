@@ -27,6 +27,7 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
     dataStream,
     _meta,
     allowAutoCreate,
+    deprecated,
   } = templateDeserialized;
 
   return {
@@ -39,6 +40,7 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
     ignore_missing_component_templates: ignoreMissingComponentTemplates,
     allow_auto_create: allowAutoCreate,
     _meta,
+    deprecated,
   };
 }
 

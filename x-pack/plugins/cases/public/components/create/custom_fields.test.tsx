@@ -15,6 +15,12 @@ import { FormTestComponent } from '../../common/test_utils';
 import { customFieldsConfigurationMock } from '../../containers/mock';
 import { CustomFields } from './custom_fields';
 import * as i18n from './translations';
+import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
+import { useGetAllCaseConfigurationsResponse } from '../configure_cases/__mock__';
+
+jest.mock('../../containers/configure/use_get_all_case_configurations');
+
+const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
 
 // FLAKY: https://github.com/elastic/kibana/issues/176805
 describe.skip('CustomFields', () => {
@@ -24,12 +30,21 @@ describe.skip('CustomFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+    useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+      ...useGetAllCaseConfigurationsResponse,
+      data: [
+        {
+          ...useGetAllCaseConfigurationsResponse.data[0],
+          customFields: customFieldsConfigurationMock,
+        },
+      ],
+    }));
   });
 
   it('renders correctly', async () => {
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
-        <CustomFields isLoading={false} customFieldsConfiguration={customFieldsConfigurationMock} />
+        <CustomFields isLoading={false} />
       </FormTestComponent>
     );
 
@@ -44,9 +59,19 @@ describe.skip('CustomFields', () => {
   });
 
   it('should not show the custom fields if the configuration is empty', async () => {
+    useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+      ...useGetAllCaseConfigurationsResponse,
+      data: [
+        {
+          ...useGetAllCaseConfigurationsResponse.data[0],
+          customFields: [],
+        },
+      ],
+    }));
+
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
-        <CustomFields isLoading={false} customFieldsConfiguration={[]} />
+        <CustomFields isLoading={false} />
       </FormTestComponent>
     );
 
@@ -55,11 +80,21 @@ describe.skip('CustomFields', () => {
   });
 
   it('should sort the custom fields correctly', async () => {
-    const reversedConfiguration = [...customFieldsConfigurationMock].reverse();
+    const reversedCustomFieldsConfiguration = [...customFieldsConfigurationMock].reverse();
+
+    useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+      ...useGetAllCaseConfigurationsResponse,
+      data: [
+        {
+          ...useGetAllCaseConfigurationsResponse.data[0],
+          customFields: reversedCustomFieldsConfiguration,
+        },
+      ],
+    }));
 
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
-        <CustomFields isLoading={false} customFieldsConfiguration={reversedConfiguration} />
+        <CustomFields isLoading={false} />
       </FormTestComponent>
     );
 
@@ -80,7 +115,7 @@ describe.skip('CustomFields', () => {
 
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
-        <CustomFields isLoading={false} customFieldsConfiguration={customFieldsConfigurationMock} />
+        <CustomFields isLoading={false} />
       </FormTestComponent>
     );
 
