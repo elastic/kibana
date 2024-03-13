@@ -1149,32 +1149,76 @@ const showFunctionsOutput = {
   ],
 };
 
+/**
+ * Report the possible combinations of parameter types for a function
+ *
+ * For example, given
+ *
+ * [
+ *  { name: 'a', type: ['number', 'string'], optional: true },
+ *  { name: 'b', type: ['number', 'boolean'] }
+ * ]
+ *
+ * this function will return
+ * [
+ *   [
+ *    { name: 'a', type: 'number', optional: true },
+ *    { name: 'b', type: 'number' }
+ *  ],
+ *  [
+ *    { name: 'a', type: 'number', optional: true },
+ *    { name: 'b', type: 'boolean' }
+ *  ],
+ *  [
+ *    { name: 'a', type: 'string', optional: true },
+ *    { name: 'b', type: 'number' }
+ *  ],
+ *  [
+ *    { name: 'a', type: 'string', optional: true },
+ *    { name: 'b', type: 'boolean' }
+ *  ]
+ * ]
+ */
+function expandParams(params) {
+  let result = [[]];
+
+  params.forEach((param) => {
+    const temp = [];
+    result.forEach((res) => {
+      param.type.forEach((type) => {
+        temp.push([...res, { ...param, type }]);
+      });
+    });
+    result = temp;
+  });
+
+  return result;
+}
+
+const ensureArray = (value) => (Array.isArray(value) ? value : value === null ? [] : [value]);
+
+const dedupe = (arr) => Array.from(new Set(arr));
+
+const elasticsearchToKibanaType = (elasticsearchType) => {
+  const numberType = ['double', 'unsigned_long', 'long', 'integer'];
+  const stringType = ['text', 'keyword'];
+
+  if (numberType.includes(elasticsearchType)) {
+    return 'number';
+  }
+
+  if (stringType.includes(elasticsearchType)) {
+    return 'string';
+  }
+
+  return elasticsearchType;
+};
+
 (async function main() {
   const columnIndices = showFunctionsOutput.columns.reduce((acc, curr, index) => {
     acc[curr.name] = index;
     return acc;
   }, {});
-
-  console.log(columnIndices);
-
-  const ensureArray = (value) => (Array.isArray(value) ? value : value === null ? [] : [value]);
-
-  const dedupe = (arr) => Array.from(new Set(arr));
-
-  const elasticsearchToKibanaType = (elasticsearchType) => {
-    const numberType = ['double', 'unsigned_long', 'long', 'integer'];
-    const stringType = ['text', 'keyword'];
-
-    if (numberType.includes(elasticsearchType)) {
-      return 'number';
-    }
-
-    if (stringType.includes(elasticsearchType)) {
-      return 'string';
-    }
-
-    return elasticsearchType;
-  };
 
   const functionDefinitions = [];
   for (const value of showFunctionsOutput.values) {
@@ -1205,20 +1249,24 @@ const showFunctionsOutput = {
       return allReturnTypes.length === 1 ? allReturnTypes[0] : 'any';
     };
 
+    const unexpandedParams = ensureArray(value[columnIndices.argNames]).map((argName, i) => ({
+      name: argName,
+      type: kbnArgTypes[i],
+      optional: ensureArray(value[columnIndices.optionalArgs])[i],
+    }));
+
+    const expandedParams = expandParams(unexpandedParams);
+
+    const signatures = expandedParams.map((params) => ({
+      params,
+      returnType: getReturnType(),
+      minParams: getMinParams(),
+    }));
+
     const functionDefinition = {
       name: value[columnIndices.name],
       description: value[columnIndices.description],
-      signatures: [
-        {
-          params: ensureArray(value[columnIndices.argNames]).map((argName, i) => ({
-            name: argName,
-            type: kbnArgTypes[i],
-            optional: ensureArray(value[columnIndices.optionalArgs])[i],
-          })),
-          returnType: getReturnType(),
-          minParams: getMinParams(),
-        },
-      ],
+      signatures,
     };
 
     functionDefinitions.push(functionDefinition);
