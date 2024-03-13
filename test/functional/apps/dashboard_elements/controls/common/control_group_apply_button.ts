@@ -43,14 +43,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         fieldName: 'animal.keyword',
         title: 'Animal',
       });
+      controlIds = await dashboardControls.getAllControlIds();
       await dashboardControls.createControl({
         controlType: RANGE_SLIDER_CONTROL,
         dataViewTitle: 'animals-*',
         fieldName: 'weightLbs',
         title: 'Animal Name',
       });
-      await dashboardControls.createTimeSliderControl();
+      controlIds = await dashboardControls.getAllControlIds();
+      await dashboardControls.optionsListWaitForLoading(controlIds[0]);
+      await dashboardControls.rangeSliderWaitForLoading(controlIds[1]);
 
+      await dashboardControls.createTimeSliderControl();
       controlIds = await dashboardControls.getAllControlIds();
 
       // save the dashboard

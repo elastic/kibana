@@ -304,7 +304,7 @@ export class DashboardPageControls extends FtrService {
     await this.openControlsMenu();
     await this.testSubjects.click('controls-create-timeslider-button');
     await this.retry.waitFor('time slider control to load', async () => {
-      return this.testSubjects.exists('timeSlider__popoverOverride');
+      return this.testSubjects.exists('timeSlider-popoverToggleButton');
     });
   }
 
