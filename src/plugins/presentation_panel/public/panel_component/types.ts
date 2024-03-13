@@ -77,5 +77,5 @@ export type PresentationPanelProps<
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
   PropsType extends {} = {}
 > = Omit<PresentationPanelInternalProps<ApiType, PropsType>, 'Component'> & {
-  Component: MaybePromise<PanelCompatibleComponent<ApiType, PropsType>>;
+  Component: MaybePromise<PanelCompatibleComponent<ApiType, PropsType> | null>;
 };

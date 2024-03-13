@@ -31,7 +31,8 @@
       "taskManager",
       "triggersActionsUi",
       "usageCollection",
-      "bfetch"
+      "bfetch",
+      "unifiedSearch"
     ],
     "optionalPlugins": [
       "cloud",
