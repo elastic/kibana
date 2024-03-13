@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -31,7 +31,8 @@ export class CreateSLO {
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private logger: Logger,
-    private spaceId: string
+    private spaceId: string,
+    private basePath: IBasePath
   ) {}
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
@@ -46,7 +47,10 @@ export class CreateSLO {
       await this.transformManager.install(slo);
       await this.transformManager.start(rollupTransformId);
       await retryTransientEsErrors(
-        () => this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(slo, this.spaceId)),
+        () =>
+          this.esClient.ingest.putPipeline(
+            getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
+          ),
         { logger: this.logger }
       );
 
@@ -95,7 +99,7 @@ export class CreateSLO {
     validateSLO(slo);
 
     const rollUpTransform = this.transformManager.inspect(slo);
-    const pipeline = getSLOSummaryPipelineTemplate(slo, this.spaceId);
+    const pipeline = getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath);
 
     const summaryTransform = this.summaryTransformManager.inspect(slo);
 

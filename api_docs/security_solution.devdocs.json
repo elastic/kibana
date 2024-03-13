@@ -1523,20 +1523,20 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.TimelineModel.filterManager",
-            "type": "Object",
+            "id": "def-public.TimelineModel.filters",
+            "type": "Array",
             "tags": [],
-            "label": "filterManager",
+            "label": "filters",
             "description": [],
             "signature": [
               {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.FilterManager",
-                "text": "FilterManager"
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
               },
-              " | undefined"
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
@@ -1733,27 +1733,6 @@
             "label": "id",
             "description": [
               "Uniquely identifies the timeline"
-            ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.TimelineModel.filters",
-            "type": "Array",
-            "tags": [],
-            "label": "filters",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined"
             ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
