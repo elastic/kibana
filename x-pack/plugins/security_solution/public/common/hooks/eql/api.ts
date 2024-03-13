@@ -43,7 +43,7 @@ export const validateEql = async ({
           body: { query, runtime_mappings: runtimeMappings, size: 0 },
           // @ts-expect-error top-level keys are unexpected in {@link EqlSearchRequest}
           timestamp_field: options?.timestampField,
-          tiebreaker_field: options?.tiebreakerField,
+          tiebreaker_field: options?.tiebreakerField || undefined,
           event_category_field: options?.eventCategoryField,
         },
         options: { ignore: [400] },
