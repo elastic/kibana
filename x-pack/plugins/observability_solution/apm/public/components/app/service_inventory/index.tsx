@@ -7,33 +7,29 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { createScreenContextAction } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import { useStateDebounced } from '../../../hooks/use_debounce';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   ServiceInventoryFieldName,
   ServiceListItem,
 } from '../../../../common/service_inventory';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../hooks/use_apm_router';
-import { useStateDebounced } from '../../../hooks/use_debounce';
 import { FETCH_STATUS, isFailure, isPending } from '../../../hooks/use_fetcher';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { push } from '../../shared/links/url_helpers';
-import { SortFunction } from '../../shared/managed_table';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ServiceList } from './service_list';
 import { orderServiceItems } from './service_list/order_service_items';
+import { SortFunction } from '../../shared/managed_table';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
 
@@ -229,12 +225,6 @@ export function ServiceInventory() {
     false
   );
 
-  const apmRouter = useApmRouter();
-
-  const { query } = useApmParams('/services');
-
-  const history = useHistory();
-
   const displayMlCallout =
     !userHasDismissedCallout &&
     shouldDisplayMlCallout(anomalyDetectionSetupState);
@@ -276,7 +266,7 @@ export function ServiceInventory() {
     [tiebreakerField]
   );
 
-  const { setScreenContext, navigate } =
+  const { setScreenContext } =
     useApmPluginContext().observabilityAIAssistant.service;
 
   useEffect(() => {
@@ -300,44 +290,8 @@ export function ServiceInventory() {
           value: mainStatisticsData.items,
         },
       ],
-      actions: [
-        createScreenContextAction(
-          {
-            name: 'filter_service_inventory',
-            description:
-              'Filter the service inventory with a specific KQL query',
-            parameters: {
-              type: 'object',
-              properties: {
-                filter: {
-                  type: 'string',
-                  description:
-                    'The KQL filter that will be entered into the search bar',
-                },
-              },
-            },
-          },
-          async ({ args: { filter } }) => {
-            return navigate(() => {
-              push(history, {
-                query: {
-                  kuery: filter,
-                },
-              });
-            });
-          }
-        ),
-      ],
     });
-  }, [
-    mainStatisticsStatus,
-    mainStatisticsData.items,
-    setScreenContext,
-    apmRouter,
-    history,
-    navigate,
-    query,
-  ]);
+  }, [mainStatisticsStatus, mainStatisticsData.items, setScreenContext]);
 
   return (
     <>
