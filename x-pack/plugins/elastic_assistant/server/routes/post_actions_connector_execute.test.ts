@@ -187,7 +187,6 @@ describe('postActionsConnectorExecuteRoute', () => {
                 body: {
                   connector_id: 'mock-connector-id',
                   data: mockActionResponse,
-                  replacements: [],
                   status: 'ok',
                 },
               });
