@@ -25,10 +25,9 @@ export const getSolutionNavSwitcherBreadCrumb = ({
   onChange: (id: string, options?: { redirect?: boolean }) => void;
   cloudLinks: CloudLinks;
 }): ChromeProjectBreadcrumb => {
+  const title = Object.values(definitions).find(({ id }) => id === activeId)?.title;
   return {
-    text: i18n.translate('core.ui.primaryNav.cloud.breadCrumbDropdown.myDeploymentLabel', {
-      defaultMessage: 'My deployment',
-    }),
+    text: title,
     'data-test-subj': 'solutionNavSwitcher',
     popoverContent: (
       <>
