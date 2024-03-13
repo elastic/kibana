@@ -43,7 +43,7 @@ export const isApiCompatibleWithCustomizePanelAction = (
 export class CustomizePanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CUSTOMIZE_PANEL;
   public id = ACTION_CUSTOMIZE_PANEL;
-  public order = 40;
+  public order = 45;
 
   constructor() {}
 

@@ -43,6 +43,8 @@ export const PresentationPanelContextMenu = ({
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean | undefined>(undefined);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
 
+  console.log({ contextMenuActions, contextMenuPanels });
+
   const [title, parentViewMode] = useBatchedPublishingSubjects(
     api.panelTitle,
 
@@ -84,13 +86,14 @@ export const PresentationPanelContextMenu = ({
           (action) => disabledActions.indexOf(action.id) === -1
         );
       }
-      compatibleActions.sort(
-        ({ order: orderA }, { order: orderB }) => (orderB || 0) - (orderA || 0)
-      );
 
       if (actionPredicate) {
         compatibleActions = compatibleActions.filter(({ id }) => actionPredicate(id));
       }
+
+      compatibleActions.sort(
+        ({ order: orderA }, { order: orderB }) => (orderB || 0) - (orderA || 0)
+      );
 
       /**
        * Build context menu panel from actions
