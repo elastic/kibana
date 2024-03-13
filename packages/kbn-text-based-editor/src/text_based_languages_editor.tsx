@@ -757,7 +757,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       >
         <EuiResizeObserver onResize={onResize}>
           {(resizeRef) => (
-            <EuiOutsideClickDetector onOutsideClick={restoreInitialMode}>
+            <EuiOutsideClickDetector
+              onOutsideClick={() => {
+                restoreInitialMode();
+              }}
+            >
               <div ref={resizeRef} css={styles.resizableContainer}>
                 <EuiFlexItem
                   data-test-subj={dataTestSubj ?? 'TextBasedLangEditor'}
@@ -976,7 +980,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           lines={lines}
           containerCSS={styles.bottomContainer}
           onErrorClick={onErrorClick}
-          runQuery={onQuerySubmit}
+          runQuery={() => {
+            onQuerySubmit();
+          }}
           detectTimestamp={detectTimestamp}
           hideRunQueryText={hideRunQueryText}
           editorIsInline={editorIsInline}
