@@ -142,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.settingsCalendar.assertOnlyConnectedToJobsAppliedDuringCreation();
 
       await ml.testExecution.logTestStep(
-        'Assert that the calendar can connect to jobs applied during creation'
+        'Assert that the calendar can connect to jobs applied after creation'
       );
       await ml.settingsCalendar.assertConnectedToJobsAppliedAfterCreation();
     });
