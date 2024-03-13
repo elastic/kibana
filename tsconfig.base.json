@@ -970,6 +970,8 @@
       "@kbn/kubernetes-security-plugin/*": ["x-pack/plugins/kubernetes_security/*"],
       "@kbn/language-documentation-popover": ["packages/kbn-language-documentation-popover"],
       "@kbn/language-documentation-popover/*": ["packages/kbn-language-documentation-popover/*"],
+      "@kbn/lens-config-builder-example-plugin": ["x-pack/examples/lens_config_builder_example"],
+      "@kbn/lens-config-builder-example-plugin/*": ["x-pack/examples/lens_config_builder_example/*"],
       "@kbn/lens-embeddable-utils": ["packages/kbn-lens-embeddable-utils"],
       "@kbn/lens-embeddable-utils/*": ["packages/kbn-lens-embeddable-utils/*"],
       "@kbn/lens-formula-docs": ["packages/kbn-lens-formula-docs"],
