@@ -46,6 +46,7 @@ const useDataViews = ({ core, dataViewsService, events }: DataViewsContextDeps) 
 
   const isLoading = useSelector(dataViewsStateService, (state) => state.matches('loading'));
 
+  // Test whether a data view can be explored in Logs Explorer based on the settings
   const isDataViewAllowed: IsDataViewAllowed = useCallback(
     (dataView) =>
       dataView.testAgainstAllowedList(
@@ -54,6 +55,7 @@ const useDataViews = ({ core, dataViewsService, events }: DataViewsContextDeps) 
     [core.uiSettings]
   );
 
+  // Test whether a data view can be explored in Logs Explorer based on the settings or has fallback handler
   const isDataViewAvailable: IsDataViewAvailable = useCallback(
     (dataView) => {
       const isAllowedDataView = isDataViewAllowed(dataView);

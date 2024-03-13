@@ -7,9 +7,17 @@
 
 import { IToasts, IUiSettingsClient } from '@kbn/core/public';
 import { QueryStart } from '@kbn/data-plugin/public';
-import { actions, createMachine, interpret, InterpreterFrom, raise } from 'xstate';
+import {
+  actions,
+  ConditionPredicate,
+  createMachine,
+  interpret,
+  InterpreterFrom,
+  raise,
+} from 'xstate';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
+import { negate } from 'lodash';
 import { LogsExplorerCustomizations } from '../../../controller';
 import { ControlPanelRT } from '../../../../common/control_panels';
 import {
@@ -336,8 +344,20 @@ export const createLogsExplorerControllerStateMachine = ({
   query,
   toasts,
   uiSettings,
-}: LogsExplorerControllerStateMachineDependencies) =>
-  createPureLogsExplorerControllerStateMachine(initialContext).withConfig({
+}: LogsExplorerControllerStateMachineDependencies) => {
+  const isDataViewAllowed: ConditionPredicate<
+    LogsExplorerControllerContext,
+    LogsExplorerControllerEvent
+  > = (_context, event) => {
+    if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
+      return event.data.selection.dataView.testAgainstAllowedList(
+        uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
+      );
+    }
+    return false;
+  };
+
+  return createPureLogsExplorerControllerStateMachine(initialContext).withConfig({
     actions: {
       notifyCreateDataViewFailed: createCreateDataViewFailedNotifier(toasts),
       notifyDatasetSelectionRestoreFailed: createDatasetSelectionRestoreFailedNotifier(toasts),
@@ -356,24 +376,11 @@ export const createLogsExplorerControllerStateMachine = ({
       timefilterService: subscribeToTimefilterService(query),
     },
     guards: {
-      isDataViewAllowed: (_context, event) => {
-        if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
-          return event.data.selection.dataView.testAgainstAllowedList(
-            uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
-          );
-        }
-        return false;
-      },
-      isDataViewNotAllowed: (_context, event) => {
-        if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
-          return !event.data.selection.dataView.testAgainstAllowedList(
-            uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
-          );
-        }
-        return false;
-      },
+      isDataViewAllowed,
+      isDataViewNotAllowed: negate(isDataViewAllowed),
     },
   });
+};
 
 export const initializeLogsExplorerControllerStateService = (
   deps: LogsExplorerControllerStateMachineDependencies
