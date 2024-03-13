@@ -18,6 +18,7 @@ import {
   toArray,
 } from 'rxjs';
 import {
+  MessageRole,
   StreamingChatResponseEventType,
   type BufferFlushEvent,
   type ConversationCreateEvent,
@@ -116,6 +117,14 @@ export function complete(
         const requestedAction = allActions.find((action) => action.name === functionCall.name);
 
         function next(nextMessages: Message[]) {
+          if (
+            nextMessages[nextMessages.length - 1].message.role === MessageRole.Assistant &&
+            !persist
+          ) {
+            subscriber.complete();
+            return;
+          }
+
           complete(
             {
               client,
@@ -142,17 +151,6 @@ export function complete(
           return;
         }
 
-        const executedMessage = createFunctionResponseMessage({
-          name: functionCall.name,
-          content: {
-            executed: true,
-          },
-        });
-
-        allMessages.push(executedMessage.message);
-
-        subscriber.next(executedMessage);
-
         requestedAction
           .respond({
             signal,
@@ -163,7 +161,18 @@ export function complete(
           })
           .then(async (functionResponse) => {
             if (isObservable(functionResponse)) {
-              await new Promise<void>((resolve, reject) => {
+              const executedMessage = createFunctionResponseMessage({
+                name: functionCall.name,
+                content: {
+                  executed: true,
+                },
+              });
+
+              allMessages.push(executedMessage.message);
+
+              subscriber.next(executedMessage);
+
+              return await new Promise<void>((resolve, reject) => {
                 functionResponse.subscribe({
                   next: (val) => {
                     if (val.type === StreamingChatResponseEventType.MessageAdd) {
@@ -172,7 +181,6 @@ export function complete(
                     subscriber.next(val);
                   },
                   error: (error) => {
-                    subscriber.error(error);
                     reject(error);
                   },
                   complete: () => {
@@ -180,17 +188,26 @@ export function complete(
                   },
                 });
               });
-            } else {
-              const event = createFunctionResponseMessage({
-                name: functionCall.name,
-                content: functionResponse.content,
-                data: functionResponse.data,
-              });
-
-              allMessages.push(event.message);
-              subscriber.next(event);
             }
 
+            return createFunctionResponseMessage({
+              name: functionCall.name,
+              content: functionResponse.content,
+              data: functionResponse.data,
+            });
+          })
+          .catch((error) => {
+            return createFunctionResponseError({
+              name: functionCall.name,
+              error,
+            });
+          })
+          .then((event) => {
+            if (event) {
+              allMessages.push(event.message);
+
+              subscriber.next(event);
+            }
             next(allMessages);
           });
       },
