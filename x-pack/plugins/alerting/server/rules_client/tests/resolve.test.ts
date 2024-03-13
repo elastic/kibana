@@ -130,7 +130,6 @@ describe('resolve()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
         ],
@@ -151,6 +150,7 @@ describe('resolve()', () => {
           "interval": "10s",
         },
         "snoozeSchedule": Array [],
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -313,7 +313,6 @@ describe('resolve()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
         ],
@@ -335,6 +334,7 @@ describe('resolve()', () => {
           "interval": "10s",
         },
         "snoozeSchedule": Array [],
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);

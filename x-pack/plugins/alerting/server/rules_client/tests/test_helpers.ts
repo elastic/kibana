@@ -438,6 +438,7 @@ export const returnedRuleForBulkOps1 = {
   },
   scheduledTaskId: 'id1',
   snoozeSchedule: [],
+  systemActions: [],
   tags: ['ups'],
   params: { param: 1 },
   muteAll: false,
@@ -463,6 +464,7 @@ export const returnedRuleForBulkOps2 = {
   },
   scheduledTaskId: 'id2',
   snoozeSchedule: [],
+  systemActions: [],
   tags: ['ups'],
   params: { param: 1 },
   muteAll: false,
@@ -489,6 +491,7 @@ export const returnedRuleForBulkOps3 = {
   },
   scheduledTaskId: 'id3',
   snoozeSchedule: [],
+  systemActions: [],
   tags: ['ups'],
   params: { param: 1 },
   muteAll: false,
@@ -508,7 +511,7 @@ export const returnedRuleForBulkDisable2 = {
 
 export const returnedRuleForBulkDisableWithActions1 = {
   ...returnedRuleForBulkDisable1,
-  sytemActions: [
+  systemActions: [
     {
       actionTypeId: '1',
       id: 'system_action:id',

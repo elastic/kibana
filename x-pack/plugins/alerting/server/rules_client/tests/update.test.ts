@@ -356,7 +356,6 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
           Object {
@@ -366,7 +365,6 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
           Object {
@@ -376,7 +374,6 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
         ],
@@ -395,6 +392,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -722,7 +720,6 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
           Object {
@@ -732,7 +729,6 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
           Object {
@@ -742,7 +738,6 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
         ],
@@ -758,6 +753,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -969,7 +965,6 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
           Object {
@@ -977,7 +972,6 @@ describe('update()', () => {
             "group": "default",
             "id": "system_action-id",
             "params": Object {},
-            "type": "default",
             "uuid": undefined,
           },
           Object {
@@ -985,7 +979,6 @@ describe('update()', () => {
             "group": "custom",
             "id": "system_action-id",
             "params": Object {},
-            "type": "default",
             "uuid": undefined,
           },
         ],
@@ -1001,6 +994,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -1178,7 +1172,6 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
         ],
@@ -1195,6 +1188,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -1272,7 +1266,6 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
         ],
@@ -1289,6 +1282,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -1435,7 +1429,6 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
         ],
@@ -1452,6 +1445,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -2545,7 +2539,6 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
         ],
@@ -2561,6 +2554,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -3235,7 +3229,6 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
         ],
@@ -3253,6 +3246,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);

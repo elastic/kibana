@@ -185,7 +185,6 @@ describe('find()', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "type": "default",
                 "uuid": undefined,
               },
             ],
@@ -200,6 +199,7 @@ describe('find()', () => {
               "interval": "10s",
             },
             "snoozeSchedule": Array [],
+            "systemActions": Array [],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
         ],
@@ -282,7 +282,6 @@ describe('find()', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "type": "default",
                 "uuid": undefined,
               },
               Object {
@@ -292,7 +291,6 @@ describe('find()', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "type": "default",
                 "uuid": undefined,
               },
             ],
@@ -307,6 +305,7 @@ describe('find()', () => {
               "interval": "10s",
             },
             "snoozeSchedule": Array [],
+            "systemActions": Array [],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
         ],
@@ -387,7 +386,6 @@ describe('find()', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "type": "default",
                 "uuid": undefined,
               },
               Object {
@@ -395,7 +393,6 @@ describe('find()', () => {
                 "group": "default",
                 "id": "system_action-id",
                 "params": Object {},
-                "type": "default",
                 "uuid": undefined,
               },
             ],
@@ -410,6 +407,7 @@ describe('find()', () => {
               "interval": "10s",
             },
             "snoozeSchedule": Array [],
+            "systemActions": Array [],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
         ],
@@ -637,7 +635,6 @@ describe('find()', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "type": "default",
                 "uuid": undefined,
               },
             ],
@@ -652,6 +649,7 @@ describe('find()', () => {
               "interval": "10s",
             },
             "snoozeSchedule": Array [],
+            "systemActions": Array [],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
           Object {
@@ -663,7 +661,6 @@ describe('find()', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "type": "default",
                 "uuid": undefined,
               },
             ],
@@ -679,6 +676,7 @@ describe('find()', () => {
               "interval": "20s",
             },
             "snoozeSchedule": Array [],
+            "systemActions": Array [],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
         ],
@@ -905,6 +903,7 @@ describe('find()', () => {
               "params": undefined,
               "schedule": undefined,
               "snoozeSchedule": Array [],
+              "systemActions": Array [],
               "tags": Array [
                 "myTag",
               ],

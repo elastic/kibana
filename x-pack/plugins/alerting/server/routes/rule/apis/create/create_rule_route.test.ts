@@ -222,6 +222,7 @@ describe('createRuleRoute', () => {
             "schedule": Object {
               "interval": "10s",
             },
+            "systemActions": Array [],
             "tags": Array [
               "foo",
             ],
@@ -338,6 +339,7 @@ describe('createRuleRoute', () => {
             "schedule": Object {
               "interval": "10s",
             },
+            "systemActions": Array [],
             "tags": Array [
               "foo",
             ],
@@ -455,6 +457,7 @@ describe('createRuleRoute', () => {
             "schedule": Object {
               "interval": "10s",
             },
+            "systemActions": Array [],
             "tags": Array [
               "foo",
             ],
@@ -572,6 +575,7 @@ describe('createRuleRoute', () => {
             "schedule": Object {
               "interval": "10s",
             },
+            "systemActions": Array [],
             "tags": Array [
               "foo",
             ],
@@ -707,14 +711,6 @@ describe('createRuleRoute', () => {
                   },
                   "uuid": "123-456",
                 },
-                Object {
-                  "actionTypeId": "test-2",
-                  "id": "system_action-id",
-                  "params": Object {
-                    "foo": true,
-                  },
-                  "uuid": "123-456",
-                },
               ],
               "alertTypeId": "1",
               "consumer": "bar",
@@ -727,6 +723,16 @@ describe('createRuleRoute', () => {
               "schedule": Object {
                 "interval": "10s",
               },
+              "systemActions": Array [
+                Object {
+                  "actionTypeId": "test-2",
+                  "id": "system_action-id",
+                  "params": Object {
+                    "foo": true,
+                  },
+                  "uuid": "123-456",
+                },
+              ],
               "tags": Array [
                 "foo",
               ],

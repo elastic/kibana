@@ -126,7 +126,6 @@ describe('createAlertRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -204,7 +203,6 @@ describe('createAlertRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -283,7 +281,6 @@ describe('createAlertRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -362,7 +359,6 @@ describe('createAlertRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "type": "default",
               },
             ],
             "alertTypeId": "1",

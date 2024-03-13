@@ -121,7 +121,6 @@ describe('get()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
         ],
@@ -136,6 +135,7 @@ describe('get()', () => {
           "interval": "10s",
         },
         "snoozeSchedule": Array [],
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -198,7 +198,6 @@ describe('get()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
           Object {
@@ -208,7 +207,6 @@ describe('get()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
         ],
@@ -223,6 +221,7 @@ describe('get()', () => {
           "interval": "10s",
         },
         "snoozeSchedule": Array [],
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -283,7 +282,6 @@ describe('get()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
           Object {
@@ -291,7 +289,6 @@ describe('get()', () => {
             "group": "default",
             "id": "system_action-id",
             "params": Object {},
-            "type": "default",
             "uuid": undefined,
           },
         ],
@@ -306,6 +303,7 @@ describe('get()', () => {
           "interval": "10s",
         },
         "snoozeSchedule": Array [],
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -401,7 +399,6 @@ describe('get()', () => {
             "params": Object {
               "foo": true,
             },
-            "type": "default",
             "uuid": undefined,
           },
         ],
@@ -417,6 +414,7 @@ describe('get()', () => {
           "interval": "10s",
         },
         "snoozeSchedule": Array [],
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
