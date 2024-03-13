@@ -10,7 +10,22 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
+import { SynthtraceGenerator } from '@kbn/apm-synthtrace-client/src/types';
+import { Readable } from 'stream';
 import { BaseStepCtx } from './journey';
+import { SynthtraceClientType } from '../services/synthtrace';
+
+export interface SynthtraceOptions {
+  from: string;
+  to: string;
+  count?: number;
+}
+
+interface JourneySynthtrace<T extends { '@timestamp'?: number | undefined }> {
+  type: SynthtraceClientType;
+  generator: (options: SynthtraceOptions) => Readable | SynthtraceGenerator<T>;
+  options: SynthtraceOptions;
+}
 
 export interface RampConcurrentUsersAction {
   action: 'rampConcurrentUsers';
@@ -69,7 +84,7 @@ export interface ScalabilitySetup {
   test: ScalabilityAction[];
 }
 
-export interface JourneyConfigOptions<CtxExt> {
+export interface JourneyConfigOptions<CtxExt extends { '@timestamp'?: number | undefined }> {
   /**
    * Relative path to FTR config file. Use to override the default ones:
    * 'x-pack/test/functional/config.base.js', 'test/functional/config.base.js'
@@ -119,6 +134,20 @@ export interface JourneyConfigOptions<CtxExt> {
    * but before archives are loaded. APM traces are not collected for this hook.
    */
   beforeSteps?: (ctx: BaseStepCtx & CtxExt) => Promise<void>;
+  /**
+   * Use to setup ES data ingestion with APM Synthtrace
+   *
+   * synthtrace: {
+   *   type: 'infra',
+   *   generator: (options: SynthtraceOptions) => generateHostsData(options),
+   *   options: {
+   *      from: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
+   *      to: new Date().toISOString(),
+   *      count: 1000,
+   *   },
+   * },
+   */
+  synthtrace?: JourneySynthtrace<CtxExt>;
 }
 
 export class JourneyConfig<CtxExt extends object> {
@@ -191,5 +220,9 @@ export class JourneyConfig<CtxExt extends object> {
     } else {
       new Promise<void>((resolve) => resolve());
     }
+  }
+
+  getSynthtraceConfig() {
+    return this.#opts.synthtrace;
   }
 }

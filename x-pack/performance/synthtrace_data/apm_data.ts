@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { apm, httpExitSpan, timerange } from '@kbn/apm-synthtrace-client';
+import { Readable } from 'stream';
 
-export function generateData({ from, to }: { from: number; to: number }) {
+export function generateData({ from, to }: { from: string; to: string }) {
   const range = timerange(from, to);
   const transactionName = '240rpm/75% 1000ms';
 
@@ -20,7 +21,7 @@ export function generateData({ from, to }: { from: number; to: number }) {
     .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
     .instance('my-instance');
 
-  return range.interval('1m').generator((timestamp) => {
+  const data = range.interval('1m').generator((timestamp) => {
     return synthRum
       .transaction({ transactionName })
       .duration(400)
@@ -74,4 +75,6 @@ export function generateData({ from, to }: { from: number; to: number }) {
           )
       );
   });
+
+  return Readable.from(Array.from(data).flatMap((event) => event.serialize()));
 }

@@ -12,6 +12,7 @@ export type {
   ScalabilityAction,
   ScalabilitySetup,
   ResponseTimeMetric,
+  SynthtraceOptions,
 } from './journey/journey_config';
 
 export { Journey } from './journey/journey';
