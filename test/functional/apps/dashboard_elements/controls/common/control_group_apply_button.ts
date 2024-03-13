@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  describe.only('Dashboard control group apply button', () => {
+  describe('Dashboard control group apply button', () => {
     let controlIds: string[];
 
     before(async () => {
@@ -43,7 +43,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         fieldName: 'animal.keyword',
         title: 'Animal',
       });
-      controlIds = await dashboardControls.getAllControlIds();
       await dashboardControls.createControl({
         controlType: RANGE_SLIDER_CONTROL,
         dataViewTitle: 'animals-*',
@@ -183,7 +182,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('time slider selections', () => {
+    describe('time slider selections', () => {
       let valueBefore: string;
 
       before(async () => {
