@@ -6,11 +6,28 @@
  * Side Public License, v 1.
  */
 
-import type { PublishesWritableLocalUnifiedSearch } from '@kbn/presentation-publishing';
+import {
+  apiIsOfType,
+  apiPublishesLocalUnifiedSearch,
+  apiPublishesPanelTitle,
+  HasType,
+  PublishesWritableLocalUnifiedSearch,
+} from '@kbn/presentation-publishing';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { CanLinkToLibrary, CanUnlinkFromLibrary } from '@kbn/presentation-library';
+import { CONTENT_ID } from '../../common';
 
-export type LinksApi = DefaultEmbeddableApi &
+export type LinksApi = HasType<typeof CONTENT_ID> &
+  DefaultEmbeddableApi &
   CanLinkToLibrary &
   CanUnlinkFromLibrary &
-  Pick<PublishesWritableLocalUnifiedSearch, 'localTimeRange' | 'setLocalTimeRange'>;
+  PublishesWritableLocalUnifiedSearch;
+
+export const isLinksApi = (api: unknown): api is LinksApi => {
+  return Boolean(
+    api &&
+      apiIsOfType(api, CONTENT_ID) &&
+      apiPublishesPanelTitle(api) &&
+      apiPublishesLocalUnifiedSearch(api)
+  );
+};

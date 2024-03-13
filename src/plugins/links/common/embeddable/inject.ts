@@ -11,7 +11,7 @@ import { LinksAttributes } from '../content_management';
 import { injectReferences } from '../persistable_state';
 import { LinksPersistableState } from './types';
 
-export const inject: EmbeddableRegistryDefinition['inject'] = (state, references) => {
+export const inject: NonNullable<EmbeddableRegistryDefinition['inject']> = (state, references) => {
   const typedState = state as LinksPersistableState;
 
   // by-reference embeddable

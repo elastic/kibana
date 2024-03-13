@@ -7,11 +7,9 @@
  */
 
 import classNames from 'classnames';
-import React, { useEffect, useMemo, useState } from 'react';
-import useAsync from 'react-use/lib/useAsync';
-import useObservable from 'react-use/lib/useObservable';
+import React, { useMemo } from 'react';
 
-import { EuiButtonEmpty, EuiListGroupItem } from '@elastic/eui';
+import { EuiListGroupItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DashboardLocatorParams,
@@ -31,45 +29,20 @@ import {
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
 import { trackUiMetric } from '../../services/kibana_services';
-import { useLinks } from '../links_hooks';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { fetchDashboard } from './dashboard_link_tools';
+import { LinksApi } from '../../react_embeddable/types';
 
 export const DashboardLinkComponent = ({
   link,
   layout,
-  onLoading,
-  onRender,
+  api,
 }: {
-  link: Link;
+  link: Link & { title: string; description?: string; error?: Error };
   layout: LinksLayoutType;
-  onLoading: () => void;
-  onRender: () => void;
+  api: LinksApi;
 }) => {
-  const linksEmbeddable = useLinks();
-  const [error, setError] = useState<Error | undefined>();
-
-  const dashboardContainer = linksEmbeddable.parent as DashboardContainer;
-  const parentDashboardInput = useObservable(dashboardContainer.getInput$());
-  const parentDashboardId = dashboardContainer.select((state) => state.componentState.lastSavedId);
-
-  /** Fetch the dashboard that the link is pointing to */
-  const { loading: loadingDestinationDashboard, value: destinationDashboard } =
-    useAsync(async () => {
-      if (link.id !== parentDashboardId && link.destination) {
-        /**
-         * only fetch the dashboard if it's not the current dashboard - if it is the current dashboard,
-         * use `dashboardContainer` and its corresponding state (title, description, etc.) instead.
-         */
-        const dashboard = await fetchDashboard(link.destination)
-          .then((result) => {
-            setError(undefined);
-            return result;
-          })
-          .catch((e) => setError(e));
-        return dashboard;
-      }
-    }, [link, parentDashboardId]);
+  const dashboardContainer = api.parentApi as DashboardContainer;
+  const parentDashboardId = dashboardContainer.getDashboardSavedObjectId();
 
   /**
    * Returns the title and description of the dashboard that the link points to; note that, if the link points to
@@ -78,29 +51,22 @@ export const DashboardLinkComponent = ({
    */
   const [dashboardTitle, dashboardDescription] = useMemo(() => {
     return link.destination === parentDashboardId
-      ? [parentDashboardInput?.title, parentDashboardInput?.description]
-      : [destinationDashboard?.attributes.title, destinationDashboard?.attributes.description];
-  }, [link.destination, parentDashboardId, parentDashboardInput, destinationDashboard]);
-
-  /**
-   * Memoized link information
-   */
-  const linkLabel = useMemo(() => {
-    return link.label || (dashboardTitle ?? DashboardLinkStrings.getDashboardErrorLabel());
-  }, [link, dashboardTitle]);
+      ? [dashboardContainer.getTitle(), dashboardContainer.getDescription()]
+      : [link.title, link.description];
+  }, [link, parentDashboardId, dashboardContainer]);
 
   const { tooltipTitle, tooltipMessage } = useMemo(() => {
-    if (error) {
+    if (link.error) {
       return {
         tooltipTitle: DashboardLinkStrings.getDashboardErrorLabel(),
-        tooltipMessage: error.message,
+        tooltipMessage: link.error.message,
       };
     }
     return {
-      tooltipTitle: Boolean(dashboardDescription) ? linkLabel : undefined,
-      tooltipMessage: dashboardDescription || linkLabel,
+      tooltipTitle: Boolean(dashboardDescription) ? dashboardTitle : undefined,
+      tooltipMessage: dashboardDescription || dashboardTitle,
     };
-  }, [error, linkLabel, dashboardDescription]);
+  }, [link, dashboardTitle, dashboardDescription]);
 
   /**
    * Dashboard-to-dashboard navigation
@@ -117,7 +83,7 @@ export const DashboardLinkComponent = ({
     const params: DashboardLocatorParams = {
       dashboardId: link.destination,
       ...getDashboardLocatorParamsFromEmbeddable(
-        linksEmbeddable as Partial<
+        api as Partial<
           PublishesLocalUnifiedSearch & HasParentApi<Partial<PublishesLocalUnifiedSearch>>
         >,
         linkOptions
@@ -151,30 +117,16 @@ export const DashboardLinkComponent = ({
         }
       },
     };
-  }, [link, dashboardContainer.locator, linksEmbeddable, parentDashboardId]);
-
-  useEffect(() => {
-    if (loadingDestinationDashboard) {
-      onLoading();
-    } else {
-      onRender();
-    }
-  }, [link, linksEmbeddable, loadingDestinationDashboard, onLoading, onRender]);
+  }, [link, parentDashboardId, api, dashboardContainer]);
 
   const id = `dashboardLink--${link.id}`;
 
-  return loadingDestinationDashboard ? (
-    <li id={`${id}--loading`}>
-      <EuiButtonEmpty size="s" isLoading={true} data-test-subj={`${id}--loading`}>
-        {DashboardLinkStrings.getLoadingDashboardLabel()}
-      </EuiButtonEmpty>
-    </li>
-  ) : (
+  return (
     <EuiListGroupItem
       size="s"
       color="text"
       {...onClickProps}
-      id={`dashboardLink--${link.id}`}
+      id={id}
       showToolTip={true}
       toolTipProps={{
         title: tooltipTitle,
@@ -184,17 +136,17 @@ export const DashboardLinkComponent = ({
         delay: 'long',
         'data-test-subj': `${id}--tooltip`,
       }}
-      iconType={error ? 'warning' : undefined}
+      iconType={link.error ? 'warning' : undefined}
       iconProps={{ className: 'dashboardLinkIcon' }}
-      isDisabled={Boolean(error)}
+      isDisabled={Boolean(link.error)}
       className={classNames('linksPanelLink', {
         linkCurrent: link.destination === parentDashboardId,
-        dashboardLinkError: Boolean(error),
+        dashboardLinkError: Boolean(link.error),
         'dashboardLinkError--noLabel': !link.label,
       })}
-      label={linkLabel}
+      label={dashboardTitle}
       external={link.options?.openInNewTab}
-      data-test-subj={error ? `${id}--error` : `${id}`}
+      data-test-subj={link.error ? `${id}--error` : `${id}`}
       aria-current={link.destination === parentDashboardId}
     />
   );

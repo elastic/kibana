@@ -11,7 +11,7 @@ import type { LinksAttributes } from '../content_management';
 import { extractReferences } from '../persistable_state';
 import { LinksPersistableState } from './types';
 
-export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {
+export const extract: NonNullable<EmbeddableRegistryDefinition['extract']> = (state) => {
   const typedState = state as LinksPersistableState;
 
   // by-reference embeddable
