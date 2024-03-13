@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFieldText, EuiFlexGroup, EuiFormRow, keys } from '@elastic/eui';
+import { EuiButton, EuiFieldPassword, EuiFlexGroup, EuiFormRow, keys } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
@@ -30,7 +30,7 @@ export const OpenAIKeyField: React.FC = () => {
       fullWidth
     >
       <EuiFlexGroup>
-        <EuiFieldText
+        <EuiFieldPassword
           fullWidth
           placeholder={i18n.translate('playground.sidebar.openAIFlyOut.placeholder', {
             defaultMessage: 'Enter API Key here',
