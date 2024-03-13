@@ -6,17 +6,24 @@
  */
 
 import { alertResultsMultipleConditions } from '../mocks/custom_threshold_alert_result';
-import { criteriaMultipleConditions } from '../mocks/custom_threshold_metric_params';
+import {
+  criteriaMultipleConditions,
+  criteriaMultipleConditionsWithIsBetween,
+} from '../mocks/custom_threshold_metric_params';
 import { getEvaluationValues, getThreshold } from './get_values';
 
 describe('getValue helpers', () => {
   describe('getThreshold', () => {
     test('should return threshold for one condition', () => {
-      expect(getThreshold([criteriaMultipleConditions[1]])).toEqual([4, 5]);
+      expect(getThreshold([criteriaMultipleConditions[1]])).toEqual([4]);
     });
 
     test('should return threshold for multiple conditions', () => {
-      expect(getThreshold(criteriaMultipleConditions)).toEqual([1, 2, 4, 5]);
+      expect(getThreshold(criteriaMultipleConditions)).toEqual([1, 4]);
+    });
+
+    test('should return undefined there is at least one multiple threshold comparator such as is between', () => {
+      expect(getThreshold(criteriaMultipleConditionsWithIsBetween)).toBeUndefined();
     });
   });
 

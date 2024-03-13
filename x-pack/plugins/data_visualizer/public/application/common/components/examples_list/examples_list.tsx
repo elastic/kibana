@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { GeoPointExample } from '../../../../../common/types/field_request_config';
+import type { GeoPointExample } from '../../../../../common/types/field_request_config';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
 import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
 

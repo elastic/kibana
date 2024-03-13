@@ -73,7 +73,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     history,
     spaces,
     docLinks,
-    serverless,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
@@ -263,7 +262,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   return (
     <EuiPage
-      className={classNames('dscPage', { 'dscPage--serverless': serverless })}
+      className={classNames('dscPage', {
+        'dscPage--topNavInline': stateContainer.customizationContext.inlineTopNav.enabled,
+      })}
       data-fetch-counter={fetchCounter.current}
       css={css`
         background-color: ${pageBackgroundColor};

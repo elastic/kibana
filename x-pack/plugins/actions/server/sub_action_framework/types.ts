@@ -81,6 +81,7 @@ export interface SubActionConnectorType<Config, Secrets> {
   validators?: Array<ConfigValidator<Config> | SecretsValidator<Secrets>>;
   getService: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
   renderParameterTemplates?: RenderParameterTemplates<ExecutorParams>;
+  isSystemActionType?: boolean;
 }
 
 export interface ExecutorParams extends ActionTypeParams {

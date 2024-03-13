@@ -6,12 +6,10 @@
  */
 
 import { useCurrentThemeVars } from '../../../../../../contexts/kibana';
-import {
-  isMultiMetricJobCreator,
-  isPopulationJobCreator,
-  JobCreatorType,
-} from '../../../../common/job_creator';
-import { getTimeBucketsFromCache, TimeBuckets } from '../../../../../../util/time_buckets';
+import type { JobCreatorType } from '../../../../common/job_creator';
+import { isMultiMetricJobCreator, isPopulationJobCreator } from '../../../../common/job_creator';
+import type { TimeBuckets } from '../../../../../../util/time_buckets';
+import { getTimeBucketsFromCache } from '../../../../../../util/time_buckets';
 
 export function useChartColors() {
   const { euiTheme } = useCurrentThemeVars();

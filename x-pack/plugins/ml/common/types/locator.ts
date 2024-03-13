@@ -13,7 +13,7 @@ import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { JobId } from './anomaly_detection_jobs/job';
 import type { ListingPageUrlState } from './common';
-import { ML_PAGES } from '../constants/locator';
+import type { ML_PAGES } from '../constants/locator';
 
 type OptionalPageState = object | undefined;
 

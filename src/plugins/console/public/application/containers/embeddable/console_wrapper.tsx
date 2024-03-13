@@ -76,7 +76,7 @@ const loadDependencies = async (
     theme: { theme$ },
   } = core;
   const trackUiMetric = createUsageTracker(usageCollection);
-  trackUiMetric.load('opened_remote_app');
+  trackUiMetric.load('opened_embedded_app');
 
   await loadActiveApi(core.http);
   const autocompleteInfo = getAutocompleteInfo();

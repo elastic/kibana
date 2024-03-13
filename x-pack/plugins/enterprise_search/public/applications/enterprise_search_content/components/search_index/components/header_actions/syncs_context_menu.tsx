@@ -28,21 +28,16 @@ import { Status } from '../../../../../../../common/types/api';
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { CancelSyncsApiLogic } from '../../../../api/connector/cancel_syncs_api_logic';
+import { ConnectorViewLogic } from '../../../connector_detail/connector_view_logic';
 import { CancelSyncsLogic } from '../../connector/cancel_syncs_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
 export const SyncsContextMenu: React.FC = () => {
   const { config, productFeatures } = useValues(KibanaLogic);
-  const {
-    connector,
-    hasDocumentLevelSecurityFeature,
-    hasIncrementalSyncFeature,
-    ingestionMethod,
-    ingestionStatus,
-    isCanceling,
-    isSyncing,
-    isWaitingForSync,
-  } = useValues(IndexViewLogic);
+  const { ingestionMethod, ingestionStatus, isCanceling, isSyncing, isWaitingForSync } =
+    useValues(IndexViewLogic);
+  const { connector, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
+    useValues(ConnectorViewLogic);
   const { cancelSyncs } = useActions(CancelSyncsLogic);
   const { status } = useValues(CancelSyncsApiLogic);
   const { startSync, startIncrementalSync, startAccessControlSync } = useActions(IndexViewLogic);
@@ -83,7 +78,8 @@ export const SyncsContextMenu: React.FC = () => {
   );
   const isSyncsDisabled =
     (connector?.is_native && isEnterpriseSearchNotAvailable) ||
-    ingestionStatus === IngestionStatus.INCOMPLETE;
+    ingestionStatus === IngestionStatus.INCOMPLETE ||
+    !connector?.index_name;
 
   const panels: EuiContextMenuProps['panels'] = [
     {

@@ -405,7 +405,7 @@ disable, set to `null`. *Default:* `"nosniff"`
 Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy[`Referrer-Policy`] header is used in all
 responses to the client from the {kib} server, and specifies what value is used. Allowed values are `no-referrer`,
 `no-referrer-when-downgrade`, `origin`, `origin-when-cross-origin`, `same-origin`, `strict-origin`, `strict-origin-when-cross-origin`,
-`unsafe-url`, or `null`. To disable, set to `null`. *Default:* `"no-referrer-when-downgrade"`
+`unsafe-url`, or `null`. To disable, set to `null`. *Default:* `"strict-origin-when-cross-origin"`
 
 [[server-securityResponseHeaders-permissionsPolicy]] `server.securityResponseHeaders.permissionsPolicy`::
 experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy`] header

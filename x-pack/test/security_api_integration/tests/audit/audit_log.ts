@@ -23,7 +23,8 @@ export default function ({ getService }: FtrProviderContext) {
       await logFile.reset();
     });
 
-    it('logs audit events when reading and writing saved objects', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/119267
+    it.skip('logs audit events when reading and writing saved objects', async () => {
       await supertest.get('/audit_log?query=param').set('kbn-xsrf', 'foo').expect(204);
       await logFile.isWritten();
       const content = await logFile.readJSON();

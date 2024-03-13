@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 
-import {
-  Chart,
-  BarSeries,
-  PartialTheme,
-  ScaleType,
-  Settings,
-  Tooltip,
-  TooltipType,
-} from '@elastic/charts';
+import type { PartialTheme } from '@elastic/charts';
+import { Chart, BarSeries, ScaleType, Settings, Tooltip, TooltipType } from '@elastic/charts';
 import { EuiLoadingChart, EuiTextColor } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';

@@ -8,7 +8,7 @@
 import React, { useContext, useCallback } from 'react';
 import { connect, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
-import { withState, withProps, withHandlers, compose, getContext } from 'recompose';
+import { withState, withProps, withHandlers, compose, getContext } from 'react-recompose';
 import { selectToplevelNodes } from '../../../state/actions/transient';
 import { getSelectedPageIndex, getPages, getWorkpad } from '../../../state/selectors/workpad';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';

@@ -20,7 +20,8 @@ export function renderApp(
   plugins: ClientPluginsSetup,
   startPlugins: ClientPluginsStart,
   appMountParameters: AppMountParameters,
-  isDev: boolean
+  isDev: boolean,
+  isServerless: boolean
 ) {
   const {
     application: { capabilities },
@@ -70,7 +71,8 @@ export function renderApp(
       }),
     setBadge,
     appMountParameters,
-    setBreadcrumbs: core.chrome.setBreadcrumbs,
+    isServerless,
+    setBreadcrumbs: startPlugins.serverless?.setBreadcrumbs ?? core.chrome.setBreadcrumbs,
   };
 
   ReactDOM.render(<SyntheticsApp {...props} />, appMountParameters.element);

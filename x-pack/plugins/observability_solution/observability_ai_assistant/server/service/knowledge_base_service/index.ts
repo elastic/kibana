@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
-import type { QueryDslTextExpansionQuery } from '@elastic/elasticsearch/lib/api/types';
 import { serverUnavailable, gatewayTimeout } from '@hapi/boom';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -314,7 +313,7 @@ export class KnowledgeBaseService {
               model_text: text,
               model_id: modelId,
             },
-          } as unknown as QueryDslTextExpansionQuery,
+          },
         })),
         filter: [
           ...getAccessQuery({
@@ -385,7 +384,7 @@ export class KnowledgeBaseService {
                     model_text: query,
                     model_id: modelId,
                   },
-                } as unknown as QueryDslTextExpansionQuery,
+                },
               },
             ],
             filter: [

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { PageUrlStateService, usePageUrlState } from '@kbn/ml-url-state';
-import { ExplorerAppState } from '../../../../common/types/locator';
+import type { PageUrlStateService } from '@kbn/ml-url-state';
+import { usePageUrlState } from '@kbn/ml-url-state';
+import type { ExplorerAppState } from '../../../../common/types/locator';
 import { ML_PAGES } from '../../../../common/constants/locator';
 
 export type AnomalyExplorerUrlStateService = PageUrlStateService<ExplorerAppState>;

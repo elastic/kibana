@@ -20,6 +20,7 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin as PluginClass,
   PluginInitializerContext,
+  ToastsStart,
 } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -52,8 +53,8 @@ import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public'
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import {
-  ObservabilityAIAssistantPluginSetup,
-  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -68,6 +69,7 @@ import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/publ
 import { firstValueFrom } from 'rxjs';
 
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
@@ -117,7 +119,7 @@ export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   fieldFormats: FieldFormatsSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
@@ -144,7 +146,7 @@ export interface ObservabilityPublicPluginsStart {
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   security: SecurityPluginStart;
   share: SharePluginStart;
@@ -160,6 +162,8 @@ export interface ObservabilityPublicPluginsStart {
   uiActions: UiActionsStart;
   presentationUtil?: PresentationUtilPluginStart;
   theme: CoreStart['theme'];
+  dataViewFieldEditor: DataViewFieldEditorStart;
+  toastNotifications: ToastsStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 

@@ -57,7 +57,8 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('with new risk score', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177964
+  describe.skip('with new risk score', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_complete_data' });
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });

@@ -11,17 +11,15 @@ import type { DraggableId } from '@hello-pangea/dnd';
 
 import { isEmpty } from 'lodash';
 
-import { FilterManager } from '@kbn/data-plugin/public';
 import { useDispatch } from 'react-redux';
-import { isActiveTimeline } from '../../../helpers';
-import { timelineSelectors } from '../../../timelines/store';
+import { getSourcererScopeId, isActiveTimeline } from '../../../helpers';
 import { useKibana } from '../../lib/kibana';
 import { allowTopN } from '../drag_and_drop/helpers';
 import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
 import { addProvider } from '../../../timelines/store/actions';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { useDataViewId } from '../../hooks/use_data_view_id';
 export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
   dataType?: string;
@@ -84,7 +82,9 @@ export const useHoverActionItems = ({
 }: UseHoverActionItemsProps): UseHoverActionItems => {
   const kibana = useKibana();
   const dispatch = useDispatch();
-  const { timelines, uiSettings } = kibana.services;
+  const { timelines, timelineFilterManager } = kibana.services;
+  const dataViewId = useDataViewId(getSourcererScopeId(scopeId ?? ''));
+
   // Common actions used by the alert table and alert flyout
   const {
     getAddToTimelineButton,
@@ -98,17 +98,10 @@ export const useHoverActionItems = ({
     () => kibana.services.data.query.filterManager,
     [kibana.services.data.query.filterManager]
   );
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
-  const activeFilterManager = useDeepEqualSelector((state) =>
-    isActiveTimeline(scopeId ?? '') ? getTimeline(state, scopeId ?? '')?.filterManager : undefined
-  );
   const filterManager = useMemo(
-    () =>
-      isActiveTimeline(scopeId ?? '')
-        ? activeFilterManager ?? new FilterManager(uiSettings)
-        : filterManagerBackup,
-    [scopeId, activeFilterManager, uiSettings, filterManagerBackup]
+    () => (isActiveTimeline(scopeId ?? '') ? timelineFilterManager : filterManagerBackup),
+    [scopeId, timelineFilterManager, filterManagerBackup]
   );
 
   /*
@@ -193,6 +186,7 @@ export const useHoverActionItems = ({
               ownFocus,
               showTooltip: enableOverflowButton ? false : true,
               value: values,
+              dataViewId,
             })}
           </div>
         ) : null,
@@ -207,6 +201,7 @@ export const useHoverActionItems = ({
               onClick: handleHoverActionClicked,
               showTooltip: enableOverflowButton ? false : true,
               value: values,
+              dataViewId,
             })}
           </div>
         ) : null,
@@ -294,6 +289,7 @@ export const useHoverActionItems = ({
       stKeyboardEvent,
       toggleColumn,
       values,
+      dataViewId,
     ]
   ) as JSX.Element[];
 

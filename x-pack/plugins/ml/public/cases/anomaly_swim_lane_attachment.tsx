@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { memoize } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { EuiDescriptionList } from '@elastic/eui';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import deepEqual from 'fast-deep-equal';
-import { AnomalySwimlaneEmbeddableInput } from '..';
+import type { AnomalySwimlaneEmbeddableInput } from '..';
 
 export const initComponent = memoize(
   (fieldFormats: FieldFormatsStart, EmbeddableComponent: FC<AnomalySwimlaneEmbeddableInput>) => {
