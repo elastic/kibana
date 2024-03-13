@@ -49,8 +49,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         fieldName: 'weightLbs',
         title: 'Animal Name',
       });
-      // await dashboardControls.createTimeSliderControl();
-      // await dashboardControls.waitFor
+      await dashboardControls.createTimeSliderControl();
+
       controlIds = await dashboardControls.getAllControlIds();
 
       // save the dashboard
