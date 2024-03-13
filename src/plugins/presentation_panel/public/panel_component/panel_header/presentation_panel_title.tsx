@@ -71,7 +71,7 @@ export const PresentationPanelTitle = ({
     }
     return (
       <EuiToolTip
-        title={panelTitle || undefined}
+        title={!hideTitle ? panelTitle || undefined : undefined}
         content={panelDescription}
         delay="regular"
         position="top"
