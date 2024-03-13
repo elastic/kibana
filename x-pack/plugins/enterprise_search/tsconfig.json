@@ -11,8 +11,6 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "../search_connectors/common/constants.ts",
-    "../search_connectors/common/types.ts",
   ],
   "kbn_references": [
     "@kbn/core",
