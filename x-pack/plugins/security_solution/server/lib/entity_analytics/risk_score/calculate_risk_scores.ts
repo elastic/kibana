@@ -337,12 +337,6 @@ export const calculateRiskScores = async ({
     const alertSampleSizePerShard =
       alertSampleSizePerShardParam ?? entityAnalyticsConfig.alertSampling.sampleSizePerShard;
     const now = new Date().toISOString();
-
-    console.log('calculateRiskScores', {
-      isAlertSamplingEnabled,
-      alertSampleSizePerShard,
-    });
-
     const filter = [
       filterFromRange(range),
       { bool: { must_not: { term: { [ALERT_WORKFLOW_STATUS]: 'closed' } } } },
