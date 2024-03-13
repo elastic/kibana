@@ -18,7 +18,6 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import type { ConfigType } from '../../../..';
 import {
   type AfterKeys,
   type IdentifierType,
@@ -45,7 +44,7 @@ import {
   AssetCriticalityDataClient,
   assetCriticalityServiceFactory,
 } from '../../asset_criticality';
-import type { CalculateAndPersistScoresResponse } from '../../types';
+import type { CalculateAndPersistScoresResponse, EntityAnalyticsConfig } from '../../types';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -71,7 +70,7 @@ export const registerRiskScoringTask = ({
   logger: Logger;
   taskManager: TaskManagerSetupContract | undefined;
   telemetry: AnalyticsServiceSetup;
-  entityAnalyticsConfig: ConfigType['entityAnalytics'];
+  entityAnalyticsConfig: EntityAnalyticsConfig;
 }): void => {
   if (!taskManager) {
     logger.info('Task Manager is unavailable; skipping risk engine task registration.');
@@ -200,7 +199,7 @@ export const runTask = async ({
   getRiskScoreService: GetRiskScoreService;
   taskInstance: ConcreteTaskInstance;
   telemetry: AnalyticsServiceSetup;
-  entityAnalyticsConfig: ConfigType['entityAnalytics'];
+  entityAnalyticsConfig: EntityAnalyticsConfig;
 }): Promise<{
   state: RiskScoringTaskState;
 }> => {
@@ -340,7 +339,7 @@ const createTaskRunnerFactory =
     logger: Logger;
     getRiskScoreService: GetRiskScoreService;
     telemetry: AnalyticsServiceSetup;
-    entityAnalyticsConfig: ConfigType['entityAnalytics'];
+    entityAnalyticsConfig: EntityAnalyticsConfig;
   }) =>
   ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
     let cancelled = false;

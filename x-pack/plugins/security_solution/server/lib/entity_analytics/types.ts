@@ -16,6 +16,7 @@ import type {
   RiskEngineStatus,
   RiskScore,
 } from '../../../common/entity_analytics/risk_engine';
+export type EntityAnalyticsConfig = ConfigType['entityAnalytics'];
 
 export interface CalculateScoresParams {
   afterKeys: AfterKeys;
@@ -29,7 +30,7 @@ export interface CalculateScoresParams {
   weights?: RiskWeights;
   isAlertSamplingEnabled?: boolean;
   alertSampleSizePerShard?: number;
-  entityAnalyticsConfig: ConfigType['entityAnalytics'];
+  entityAnalyticsConfig: EntityAnalyticsConfig;
 }
 
 export interface CalculateAndPersistScoresParams {
@@ -44,7 +45,7 @@ export interface CalculateAndPersistScoresParams {
   weights?: RiskWeights;
   isAlertSamplingEnabled?: boolean;
   alertSampleSizePerShard?: number;
-  entityAnalyticsConfig: ConfigType['entityAnalytics'];
+  entityAnalyticsConfig: EntityAnalyticsConfig;
 }
 
 export interface CalculateAndPersistScoresResponse {
