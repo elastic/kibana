@@ -13,9 +13,8 @@ import {
   EuiFlexItem,
   EuiIcon,
   useEuiTheme,
-  EuiBasicTable,
+  EuiInMemoryTable,
   EuiBasicTableColumn,
-  EuiTableSortingType,
   EuiButtonEmpty,
   Criteria,
   EuiButtonIcon,
@@ -26,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { css, Interpolation, Theme } from '@emotion/react';
 import { type QueryHistoryItem, getHistoryItems } from './history_localStorage';
+import { getReducedSpaceStyling } from './query_history_helpers';
 
 const CONTAINER_MAX_HEIGHT = 190;
 
@@ -53,6 +53,7 @@ export function QueryHistoryAction({
             onClick={toggleHistory}
             css={css`
               margin-right: ${euiTheme.size.s};
+              cursor: pointer;
             `}
           />
         </EuiFlexItem>
@@ -84,14 +85,15 @@ export function QueryHistoryAction({
 
 export const getTableColumns = (
   width: number,
+  isOnReducedSpaceLayout: boolean,
   actions: Array<CustomItemAction<QueryHistoryItem>>
 ): Array<EuiBasicTableColumn<QueryHistoryItem>> => {
-  const shouldHideOptions = width < 560;
   return [
     {
       field: 'status',
       name: '',
       sortable: false,
+      'data-test-subj': 'status',
       render: (status: QueryHistoryItem['status']) => {
         switch (status) {
           case 'success':
@@ -101,10 +103,12 @@ export const getTableColumns = (
             return <EuiIcon type="error" color="danger" size="s" />;
         }
       },
-      width: '40px',
+      width: isOnReducedSpaceLayout ? 'auto' : '40px',
+      css: { height: '100%' }, // Vertically align icon
     },
     {
       field: 'queryString',
+      'data-test-subj': 'queryString',
       name: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.recentQueriesColumnLabel',
         {
@@ -112,46 +116,39 @@ export const getTableColumns = (
         }
       ),
       render: (queryString: QueryHistoryItem['queryString']) => (
-        <QueryColumn queryString={queryString} containerWidth={width} />
+        <QueryColumn
+          queryString={queryString}
+          containerWidth={width}
+          isOnReducedSpaceLayout={isOnReducedSpaceLayout}
+        />
       ),
-      truncateText: false,
-      sortable: false,
     },
-    ...(!shouldHideOptions
-      ? [
-          {
-            field: 'timeRun',
-            name: i18n.translate(
-              'textBasedEditor.query.textBasedLanguagesEditor.timeRunColumnLabel',
-              {
-                defaultMessage: 'Time run',
-              }
-            ),
-            sortable: true,
-            render: (timeRun: QueryHistoryItem['timeRun']) => timeRun,
-            width: '240px',
-          },
-        ]
-      : []),
-    ...(!shouldHideOptions
-      ? [
-          {
-            field: 'duration',
-            name: i18n.translate(
-              'textBasedEditor.query.textBasedLanguagesEditor.lastDurationColumnLabel',
-              {
-                defaultMessage: 'Last duration',
-              }
-            ),
-            sortable: false,
-            width: '120px',
-          },
-        ]
-      : []),
+    {
+      field: 'timeRun',
+      'data-test-subj': 'timeRan',
+      name: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.timeRunColumnLabel', {
+        defaultMessage: 'Time run',
+      }),
+      sortable: true,
+      render: (timeRun: QueryHistoryItem['timeRun']) => timeRun,
+      width: isOnReducedSpaceLayout ? 'auto' : '240px',
+    },
+    {
+      field: 'duration',
+      'data-test-subj': 'duration',
+      name: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.lastDurationColumnLabel',
+        {
+          defaultMessage: 'Last duration',
+        }
+      ),
+      sortable: false,
+      width: isOnReducedSpaceLayout ? 'auto' : '120px',
+    },
     {
       name: '',
       actions,
-      width: '40px',
+      width: isOnReducedSpaceLayout ? 'auto' : '40px',
     },
   ];
 };
@@ -222,9 +219,10 @@ export function QueryHistory({
       },
     ];
   }, [onUpdateAndSubmit]);
+  const isOnReducedSpaceLayout = containerWidth < 560;
   const columns = useMemo(() => {
-    return getTableColumns(containerWidth, actions);
-  }, [actions, containerWidth]);
+    return getTableColumns(containerWidth, isOnReducedSpaceLayout, actions);
+  }, [actions, containerWidth, isOnReducedSpaceLayout]);
 
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -235,17 +233,31 @@ export function QueryHistory({
     }
   };
 
-  const sorting: EuiTableSortingType<QueryHistoryItem> = {
+  const sorting = {
     sort: {
       field: 'timeRun',
       direction: sortDirection,
     },
-    enableAllColumns: false,
-    readOnly: false,
   };
   const { euiTheme } = theme;
   // get history items from local storage
   const items: QueryHistoryItem[] = getHistoryItems(sortDirection);
+  const extraStyling = isOnReducedSpaceLayout
+    ? getReducedSpaceStyling()
+    : `width: ${containerWidth}px`;
+  const tableStyling = css`
+    .euiTable {
+      background-color: ${euiTheme.colors.lightestShade};
+    }
+    .euiTable tbody tr:nth-child(odd) {
+      background-color: ${euiTheme.colors.emptyShade};
+    }
+    max-height: ${CONTAINER_MAX_HEIGHT}px;
+    overflow-y: auto;
+    ${scrollBarStyles}
+    ${extraStyling}
+  `;
+
   return (
     <EuiFlexGroup
       gutterSize="none"
@@ -253,7 +265,7 @@ export function QueryHistory({
       css={containerCSS}
       responsive={false}
     >
-      <EuiBasicTable
+      <EuiInMemoryTable
         tableCaption={i18n.translate(
           'textBasedEditor.query.textBasedLanguagesEditor.querieshistoryTable',
           {
@@ -265,19 +277,8 @@ export function QueryHistory({
         columns={columns}
         sorting={sorting}
         onChange={onTableChange}
-        css={css`
-          width: ${containerWidth}px;
-          max-height: ${CONTAINER_MAX_HEIGHT}px;
-          overflow-y: auto;
-          ${scrollBarStyles}
-          .euiTable {
-            background-color: ${euiTheme.colors.lightestShade};
-          }
-          .euiTable tbody tr:nth-child(odd) {
-            background-color: ${euiTheme.colors.emptyShade};
-          }
-        `}
-        tableLayout="fixed"
+        css={tableStyling}
+        tableLayout={containerWidth < 560 ? 'auto' : 'fixed'}
       />
     </EuiFlexGroup>
   );
@@ -286,9 +287,11 @@ export function QueryHistory({
 export function QueryColumn({
   queryString,
   containerWidth,
+  isOnReducedSpaceLayout,
 }: {
   containerWidth: number;
   queryString: string;
+  isOnReducedSpaceLayout: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLElement>(null);
@@ -328,7 +331,9 @@ export function QueryColumn({
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: ${isRowExpanded ? 'pre-wrap' : 'nowrap'};
-          padding-left: ${isExpandable ? euiTheme.size.s : euiTheme.size.xl};
+          padding-left: ${isExpandable ? euiTheme.size.s : euiTheme.size.m ? 0 : euiTheme.size.xl};
+          color: ${isOnReducedSpaceLayout ? euiTheme.colors.subduedText : euiTheme.colors.text};
+          font-size: ${isOnReducedSpaceLayout ? euiTheme.size.m : 'inherit'};
         `}
         ref={containerRef}
       >

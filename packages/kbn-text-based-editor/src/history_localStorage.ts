@@ -60,24 +60,26 @@ export const addQueriesToCache = (item: QueryHistoryItem) => {
     const toBeDeletedQuery = localStorageQueries[MAX_QUERIES_NUMBER - 1];
     cachedQueries.delete(toBeDeletedQuery.queryString);
   }
-  const tz = getMomentTimeZone(item.timeZone);
-  cachedQueries.set(trimmedQueryString, {
-    ...item,
-    timeRun: moment().tz(tz).format('MMM. d, YY HH:mm:ss.SSS'),
-  });
+  if (item.queryString) {
+    const tz = getMomentTimeZone(item.timeZone);
+    cachedQueries.set(trimmedQueryString, {
+      ...item,
+      timeRun: moment().tz(tz).format('MMM. D, YY HH:mm:ss.SSS'),
+    });
+  }
 };
 
 export const updateCachedQueries = (item: QueryHistoryItem) => {
   const trimmedQueryString = getKey(item.queryString);
   const query = cachedQueries.get(trimmedQueryString);
-  const tz = getMomentTimeZone(query?.timeZone);
-  const now = moment().tz(tz).format('MMM. d, YY HH:mm:ss.SSS');
-  const duration = moment(now).diff(moment(query?.timeRun));
 
   if (query) {
+    const tz = getMomentTimeZone(query?.timeZone);
+    const now = moment().tz(tz).format('MMM. D, YY HH:mm:ss.SSS');
+    const duration = moment(now).diff(moment(query?.timeRun));
     cachedQueries.set(trimmedQueryString, {
       ...query,
-      timeRun: moment(query?.timeRun).format('MMM. d, YY HH:mm:ss'),
+      timeRun: moment(query?.timeRun).format('MMM. D, YY HH:mm:ss'),
       duration: `${duration}ms`,
       status: item.status,
     });
