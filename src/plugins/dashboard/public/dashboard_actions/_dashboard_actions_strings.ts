@@ -118,35 +118,6 @@ export const dashboardLibraryNotificationStrings = {
     }),
 };
 
-export const dashboardReplacePanelActionStrings = {
-  getDisplayName: () =>
-    i18n.translate('dashboard.panel.removePanel.replacePanel', {
-      defaultMessage: 'Replace panel',
-    }),
-  getFlyoutHeader: (panelName?: string) =>
-    i18n.translate('dashboard.panel.replacePanel.flyoutHeader', {
-      defaultMessage: 'Replace panel {panelName} with:',
-      values: {
-        panelName: `'${panelName}'`,
-      },
-    }),
-  getSuccessMessage: (savedObjectName?: string) =>
-    savedObjectName
-      ? i18n.translate('dashboard.addPanel.savedObjectAddedToContainerSuccessMessageTitle', {
-          defaultMessage: '{savedObjectName} was added',
-          values: {
-            savedObjectName: `'${savedObjectName}'`,
-          },
-        })
-      : i18n.translate('dashboard.addPanel.panelAddedToContainerSuccessMessageTitle', {
-          defaultMessage: 'A panel was added',
-        }),
-  getNoMatchingObjectsMessage: () =>
-    i18n.translate('dashboard.addPanel.noMatchingObjectsMessage', {
-      defaultMessage: 'No matching objects found.',
-    }),
-};
-
 export const dashboardFilterNotificationActionStrings = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.filters', {

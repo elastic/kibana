@@ -8,10 +8,6 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddable-plugin/public';
-import {
-  getSavedObjectFinder,
-  SavedObjectFinderProps,
-} from '@kbn/saved-objects-finder-plugin/public';
 
 import { DashboardStartDependencies } from '../plugin';
 import { AddToLibraryAction } from './add_to_library_action';
@@ -21,7 +17,6 @@ import { ExpandPanelAction } from './expand_panel_action';
 import { ExportCSVAction } from './export_csv_action';
 import { FiltersNotificationAction } from './filters_notification_action';
 import { LibraryNotificationAction } from './library_notification_action';
-import { ReplacePanelAction } from './replace_panel_action';
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 
 interface BuildAllDashboardActionsProps {
@@ -30,28 +25,16 @@ interface BuildAllDashboardActionsProps {
   plugins: DashboardStartDependencies;
 }
 
-export type ReplacePanelSOFinder = (props: Omit<SavedObjectFinderProps, 'services'>) => JSX.Element;
-
 export const buildAllDashboardActions = async ({
   core,
   plugins,
   allowByValueEmbeddables,
 }: BuildAllDashboardActionsProps) => {
-  const { uiActions, share, savedObjectsTaggingOss, contentManagement } = plugins;
+  const { uiActions, share } = plugins;
 
   const clonePanelAction = new ClonePanelAction();
   uiActions.registerAction(clonePanelAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
-
-  const SavedObjectFinder = getSavedObjectFinder(
-    contentManagement.client,
-    core.uiSettings,
-    savedObjectsTaggingOss?.getTaggingApi()
-  );
-  const changeViewAction = new ReplacePanelAction(SavedObjectFinder as ReplacePanelSOFinder);
-  uiActions.registerAction(changeViewAction);
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
-
   const expandPanelAction = new ExpandPanelAction();
   uiActions.registerAction(expandPanelAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
