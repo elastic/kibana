@@ -20,7 +20,6 @@ import {
   SnapshotMetricType,
   SnapshotMetricTypeKeys,
 } from '@kbn/metrics-data-access-plugin/common';
-import { MetricThresholdAlert } from '../metric_threshold/metric_threshold_executor';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import {
   Comparator,
@@ -54,6 +53,7 @@ import {
   createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,
   FIRED_ACTIONS_ID,
+  InventoryMetricThresholdAlert,
   WARNING_ACTIONS,
 } from './inventory_metric_threshold_executor';
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
@@ -170,7 +170,7 @@ export async function registerInventoryThresholdRuleType(
     alerts: {
       ...MetricsRulesTypeAlertDefinition,
       shouldWrite: true,
-    } as IRuleTypeAlerts<MetricThresholdAlert>,
+    } as IRuleTypeAlerts<InventoryMetricThresholdAlert>,
     fieldsForAAD: O11Y_AAD_FIELDS,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
