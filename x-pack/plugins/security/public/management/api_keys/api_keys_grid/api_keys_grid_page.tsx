@@ -77,6 +77,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
   const authc = useAuthentication();
 
   const [query, setQuery] = useState<Query>(EuiSearchBar.Query.parse(''));
+  const [debouncedQuery, setDebouncedQuery] = useState<Query>(EuiSearchBar.Query.parse(''));
   const [from, setFrom] = useState<number>(0);
   const [pageSize, setPageSize] = useState(25);
 
@@ -109,8 +110,14 @@ export const APIKeysGridPage: FunctionComponent = () => {
     }
   };
 
+  const debouncedQueryChange = (args: EuiSearchBarOnChangeArgs) => {
+    if (!args.error) {
+      setDebouncedQuery(args.query);
+    }
+  };
+
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const debouncedOnSearchChange = useCallback(debounce(onSearchChange, 500), []);
+  const debouncedOnSearchChange = useCallback(debounce(debouncedQueryChange, 500), []);
 
   useEffect(() => {
     queryApiKeysAndAggregations();
@@ -297,6 +304,45 @@ export const APIKeysGridPage: FunctionComponent = () => {
                 />
               )}
             </InvalidateProvider>
+            <EuiText>
+              <p>
+                Debounced search query:{' '}
+                {JSON.stringify(EuiSearchBar.Query.toESQuery(debouncedQuery))}
+              </p>
+            </EuiText>
+            <InvalidateProvider
+              isAdmin={canManageApiKeys}
+              notifications={services.notifications}
+              apiKeysAPIClient={new APIKeysAPIClient(services.http)}
+            >
+              {(invalidateApiKeyPrompt) => (
+                <ApiKeysTable
+                  apiKeys={categorizedApiKeys}
+                  onClick={(apiKey) => setOpenedApiKey(apiKey)}
+                  onDelete={(apiKeysToDelete) =>
+                    invalidateApiKeyPrompt(
+                      apiKeysToDelete.map(({ name, id }) => ({ name, id })),
+                      queryApiKeysAndAggregations
+                    )
+                  }
+                  currentUser={currentUser}
+                  createdApiKey={createdApiKey}
+                  canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
+                  canManageApiKeys={canManageApiKeys}
+                  canManageOwnApiKeys={canManageOwnApiKeys}
+                  readOnly={readOnly}
+                  loading={state.loading}
+                  totalItemCount={totalKeys}
+                  pagination={pagination}
+                  onTableChange={onTableChange}
+                  onSearchChange={onSearchChange}
+                  aggregations={aggregations}
+                />
+              )}
+            </InvalidateProvider>
+            <EuiText>
+              <p>Regu;lar search query: {JSON.stringify(EuiSearchBar.Query.toESQuery(query))}</p>
+            </EuiText>
           </KibanaPageTemplate.Section>
         </>
       )}
@@ -568,7 +614,28 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
       ),
     });
   }
-
+  const expiryFilters = [
+    {
+      type: 'field_value_toggle_group',
+      field: 'expiration',
+      items: [
+        {
+          value: 'now+1m/m',
+          name: i18n.translate('xpack.security.management.apiKeys.table.activeFilter', {
+            defaultMessage: 'Active',
+          }),
+          operator: 'gt',
+        },
+        {
+          value: 'now',
+          name: i18n.translate('xpack.security.management.apiKeys.table.expiredFilter', {
+            defaultMessage: 'Expired',
+          }),
+          operator: 'lte',
+        },
+      ],
+    },
+  ];
   return (
     <>
       <EuiSearchBar
@@ -577,7 +644,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
           incremental: true,
           placeholder: 'Search...',
         }}
-        filters={filters}
+        filters={expiryFilters}
         onChange={onSearchChange}
         toolsLeft={
           selectedItems.length ? (
@@ -598,9 +665,10 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
           ) : undefined
         }
       />
+
       <EuiSpacer />
 
-      <EuiBasicTable
+      {/* <EuiBasicTable
         items={apiKeys}
         itemId="id"
         columns={columns}
@@ -616,7 +684,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
               }
         }
         isSelectable={canManageOwnApiKeys}
-      />
+      /> */}
     </>
   );
 };
