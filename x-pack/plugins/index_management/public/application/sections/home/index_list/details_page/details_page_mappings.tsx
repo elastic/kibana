@@ -14,7 +14,6 @@ import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { DetailsPageMappingsContent } from './details_page_mappings_content';
 import { Index } from '../../../../../../common';
 import { useLoadIndexMappings } from '../../../../services';
-import { extractMappingsDefinition } from '../../../../../application/components/mappings_editor/lib';
 
 export const DetailsPageMappings: FunctionComponent<{ index: Index }> = ({ index }) => {
   const { isLoading, data, error, resendRequest } = useLoadIndexMappings(index.name);
@@ -85,11 +84,5 @@ export const DetailsPageMappings: FunctionComponent<{ index: Index }> = ({ index
     );
   }
 
-  return (
-    <DetailsPageMappingsContent
-      index={index}
-      data={stringifiedData}
-      jsonData={extractMappingsDefinition(data)}
-    />
-  );
+  return <DetailsPageMappingsContent index={index} data={stringifiedData} jsonData={data} />;
 };

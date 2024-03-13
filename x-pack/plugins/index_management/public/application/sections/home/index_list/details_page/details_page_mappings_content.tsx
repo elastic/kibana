@@ -17,16 +17,23 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
+import { SearchResult } from '../../../../components/mappings_editor/components/document_fields/search_fields';
 
 import { Index } from '../../../../../../common';
 import { FieldsList } from '../../../../components/mappings_editor/components/document_fields/fields';
 import { extractMappingsDefinition } from '../../../../components/mappings_editor/lib';
 import { MappingsEditorParsedMetadata } from '../../../../components/mappings_editor/mappings_editor';
-import { useMappingsState } from '../../../../components/mappings_editor/mappings_state_context';
+import {
+  useMappingsState,
+  useDispatch,
+} from '../../../../components/mappings_editor/mappings_state_context';
 import { useMappingsStateListener } from '../../../../components/mappings_editor/use_state_listener';
 import { useAppContext } from '../../../../app_context';
 import { documentationService } from '../../../../services';
@@ -94,10 +101,21 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const {
     fields: { byId, rootLevelFields },
+    search,
+    documentFields,
   } = useMappingsState();
 
   const getField = useCallback((fieldId: string) => byId[fieldId], [byId]);
   const fields = useMemo(() => rootLevelFields.map(getField), [rootLevelFields, getField]);
+  const dispatch = useDispatch();
+  const onSearchChange = useCallback(
+    (value: string) => {
+      dispatch({ type: 'search:update', value });
+    },
+    [dispatch]
+  );
+
+  const searchTerm = search.term.trim();
 
   const jsonBlock = (
     <EuiCodeBlock
@@ -112,7 +130,44 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     </EuiCodeBlock>
   );
 
-  const treeViewBlock = <FieldsList fields={fields} />;
+  const treeViewBlock = (
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <EuiFieldSearch
+          style={{ minWidth: '350px' }}
+          placeholder={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.documentFields.searchFieldsPlaceholder',
+            {
+              defaultMessage: 'Search fields',
+            }
+          )}
+          value={search.term}
+          onChange={(e) => {
+            if (typeof e === 'string') {
+              onSearchChange(e);
+            } else {
+              onSearchChange(e.target.value);
+            }
+          }}
+          // ...
+
+          aria-label={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.documentFields.searchFieldsAriaLabel',
+            {
+              defaultMessage: 'Search mapped fields',
+            }
+          )}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {searchTerm !== '' ? (
+          <SearchResult result={search.result} documentFieldsState={documentFields} />
+        ) : (
+          <FieldsList fields={fields} />
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 
   return (
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
@@ -164,8 +219,8 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                 <FormattedMessage
                   id="xpack.idxMgmt.indexDetails.mappings.docsCardDescription"
                   defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type
-              (such as keyword, number, or date) and additional subfields. These index mappings determine the functions
-              available in your relevance tuning and search experience."
+                    (such as keyword, number, or date) and additional subfields. These index mappings determine the functions
+                    available in your relevance tuning and search experience."
                 />
               </p>
             </EuiText>
