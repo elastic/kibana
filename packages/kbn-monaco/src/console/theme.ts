@@ -10,9 +10,8 @@ import { darkMode, euiThemeVars } from '@kbn/ui-theme';
 
 import { themeRuleGroupBuilderFactory } from '../common/theme';
 import { monaco } from '../monaco_imports';
-import { CONSOLE_POSTFIX } from './constants';
 
-const buildRuleGroup = themeRuleGroupBuilderFactory(CONSOLE_POSTFIX);
+const buildRuleGroup = themeRuleGroupBuilderFactory();
 
 export const buildConsoleTheme = (): monaco.editor.IStandaloneThemeData => {
   return {

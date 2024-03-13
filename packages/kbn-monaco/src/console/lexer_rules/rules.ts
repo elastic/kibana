@@ -74,7 +74,6 @@ const addEOL = (
 
 export const lexerRules: monaco.languages.IMonarchLanguage = {
   defaultToken: 'invalid',
-  regex_end_of_line: /(\s*)$/,
   tokenizer: {
     root: [
       // warning comment
@@ -117,15 +116,15 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
     ],
     urlParams: [
       // param with variable template
-      matchTokens(['url.param', 'url.equal', 'variable.template'], /([^&=]+)(=)(\${\w+})/),
+      addEOL(['url.param', 'url.equal', 'variable.template'], /([^&=]+)(=)(\${\w+})/, 'root'),
       // param with value
-      matchTokens(['url.param', 'url.equal', 'url.value'], /([^&=]+)(=)([^&]*)/),
+      addEOL(['url.param', 'url.equal', 'url.value'], /([^&=]+)(=)([^&]*)/, 'root'),
       // param
-      matchToken('url.param', /([^&=]+)/),
+      addEOL('url.param', /([^&=]+)/, 'root'),
       // ampersand
-      matchToken('url.amp', /(&)/),
+      addEOL('url.amp', /(&)/, 'root'),
       // comment
-      matchTokens(['whitespace', 'comment.punctuation', 'comment.line'], /(\s+)(\/\/)(.*$)/),
+      addEOL(['whitespace', 'comment.punctuation', 'comment.line'], /(\s+)(\/\/)(.*$)/, 'root'),
     ],
     comments: [
       // line comment indicated by #
