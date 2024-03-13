@@ -303,9 +303,6 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`Creating time slider control`);
     await this.openControlsMenu();
     await this.testSubjects.click('controls-create-timeslider-button');
-    await this.retry.waitFor('time slider control to load', async () => {
-      return this.testSubjects.exists('timeSlider-popoverToggleButton');
-    });
   }
 
   public async hoverOverExistingControl(controlId: string) {

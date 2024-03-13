@@ -50,12 +50,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         fieldName: 'weightLbs',
         title: 'Animal Name',
       });
+      await dashboardControls.createTimeSliderControl();
+
+      // wait for all controls to finish loading before saving
       controlIds = await dashboardControls.getAllControlIds();
       await dashboardControls.optionsListWaitForLoading(controlIds[0]);
       await dashboardControls.rangeSliderWaitForLoading(controlIds[1]);
-
-      await dashboardControls.createTimeSliderControl();
-      controlIds = await dashboardControls.getAllControlIds();
 
       // save the dashboard
       await dashboard.saveDashboard('Test Control Group Apply Button', { exitFromEditMode: false });
