@@ -7712,7 +7712,7 @@
         "tags": [],
         "label": "EmbeddablePanel",
         "description": [
-          "\nLoads and renders a legacy embeddable."
+          "\nLoads and renders a legacy embeddable.\n\nAncestry chain must use 'key' attribute to reset DOM and state when embeddable changes\nFor example <Parent key={embeddableId}><EmbeddablePanel/></Parent>"
         ],
         "signature": [
           "(props: ",
