@@ -216,6 +216,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('#Single Host Flyout', () => {
       before(async () => {
         await setHostViewEnabled(true);
+        await setCustomDashboardsEnabled(true);
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
@@ -348,7 +349,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Dashboards Tab', () => {
           before(async () => {
-            await setCustomDashboardsEnabled(true);
             await pageObjects.assetDetails.clickDashboardsTab();
           });
 
