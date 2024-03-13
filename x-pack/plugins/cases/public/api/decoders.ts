@@ -22,7 +22,7 @@ import {
   CasesMetricsResponseRt,
 } from '../../common/types/api';
 import { createToasterPlainError } from '../containers/utils';
-import { throwErrors } from '../../common';
+import { throwErrors } from '../../common/api';
 
 export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
   pipe(CasesFindResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
