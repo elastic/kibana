@@ -12,6 +12,8 @@ import {
 } from '@elastic/eui';
 import { Services } from './types';
 import { lastValueFrom } from 'rxjs';
+import { Filter, TimeRange } from '@kbn/es-query';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 export const buildEmbeddable = async (
   state: object, 
@@ -33,7 +35,10 @@ export const buildEmbeddable = async (
 
   const dataView = await services.dataViews.getDefaultDataView();
 
-  async function search() {
+  async function search(
+    filters: Filter[], 
+    timeRange: TimeRange | undefined
+  ) {
     if (!dataView) {
       return;
     }
@@ -41,6 +46,14 @@ export const buildEmbeddable = async (
     searchSource.setField('index', dataView);
     searchSource.setField('size', 0);
     searchSource.setField('trackTotalHits', true);
+    const timeRangeFilter = timeRange 
+      ? services.data.query.timefilter.timefilter.createFilter(dataView, timeRange)
+      : undefined;
+    const allFilters = [...filters]
+    if (timeRangeFilter) {
+      allFilters.push(timeRangeFilter);
+    }
+    searchSource.setField('filter', allFilters);
     console.log('ES request', searchSource.getSearchRequestBody());
     // eslint-disable-next-line no-console
     const { rawResponse: resp } = await lastValueFrom(
@@ -58,11 +71,18 @@ export const buildEmbeddable = async (
     Component: () => {
       const [count, setCount] = useState<number>(0);
       const [error, setError] = useState<Error | undefined>();
+      const [filters, timeRange] = useBatchedPublishingSubjects(
+        api.parentApi.localFilters,
+        api.parentApi.localTimeRange,
+      );
       
       useEffect(() => {
         let ignore = false;
         setError(undefined);
-        search()
+        search(
+          filters ?? [],
+          timeRange
+        )
           .then((nextCount: number) => {
             if (ignore) {
               return;
@@ -78,7 +98,7 @@ export const buildEmbeddable = async (
         return () => {
           ignore = true;
         };
-      }, []);
+      }, [timeRange]);
 
       if (!dataView) {
         return (
