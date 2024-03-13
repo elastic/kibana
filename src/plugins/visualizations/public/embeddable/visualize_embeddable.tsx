@@ -105,9 +105,9 @@ export class VisualizeEmbeddable
 {
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
-  private timeRange?: TimeRange;
-  private query?: Query;
-  private filters?: Filter[];
+  private _timeRange?: TimeRange;
+  private _query?: Query;
+  private _filters?: Filter[];
   private searchSessionId?: string;
   private syncColors?: boolean;
   private syncTooltips?: boolean;
@@ -163,7 +163,7 @@ export class VisualizeEmbeddable
     this.syncTooltips = this.input.syncTooltips;
     this.syncCursor = this.input.syncCursor;
     this.searchSessionId = this.input.searchSessionId;
-    this.query = this.input.query;
+    this._query = this.input.query;
     this.embeddableTitle = this.getTitle();
 
     this.vis = vis;
@@ -290,20 +290,20 @@ export class VisualizeEmbeddable
             mode: 'absolute' as 'absolute',
           }
         : this.input.timeRange;
-    if (!_.isEqual(nextTimeRange, this.timeRange)) {
-      this.timeRange = _.cloneDeep(nextTimeRange);
+    if (!_.isEqual(nextTimeRange, this._timeRange)) {
+      this._timeRange = _.cloneDeep(nextTimeRange);
       dirty = true;
     }
 
     // Check if filters has changed
-    if (!onlyDisabledFiltersChanged(this.input.filters, this.filters)) {
-      this.filters = this.input.filters;
+    if (!onlyDisabledFiltersChanged(this.input.filters, this._filters)) {
+      this._filters = this.input.filters;
       dirty = true;
     }
 
     // Check if query has changed
-    if (!_.isEqual(this.input.query, this.query)) {
-      this.query = this.input.query;
+    if (!_.isEqual(this.input.query, this._query)) {
+      this._query = this.input.query;
       dirty = true;
     }
 
@@ -432,7 +432,7 @@ export class VisualizeEmbeddable
    * @param {Element} domNode
    */
   public async render(domNode: HTMLElement) {
-    this.timeRange = _.cloneDeep(this.input.timeRange);
+    this._timeRange = _.cloneDeep(this.input.timeRange);
 
     this.transferCustomizationsToUiState();
 
@@ -586,7 +586,7 @@ export class VisualizeEmbeddable
 
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
-        timeRange: this.timeRange,
+        timeRange: this._timeRange,
         query: this.input.query,
         filters: this.input.filters,
         disableWarningToasts: true,
@@ -613,7 +613,7 @@ export class VisualizeEmbeddable
     try {
       this.expression = await toExpressionAst(this.vis, {
         timefilter: this.timefilter,
-        timeRange: this.timeRange,
+        timeRange: this._timeRange,
         abortSignal: this.abortController!.signal,
       });
     } catch (e) {
