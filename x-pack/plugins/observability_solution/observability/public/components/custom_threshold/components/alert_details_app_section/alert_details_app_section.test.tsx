@@ -134,7 +134,7 @@ describe('AlertDetailsAppSection', () => {
             />
             <span>
               <a href="/view-in-app-url" target="_blank">
-                View logs
+                View related logs
               </a>
             </span>
           </React.Fragment>
