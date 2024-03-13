@@ -30,7 +30,7 @@ import type {
   EsAssetReference,
   ExperimentalDataStreamFeature,
 } from '../../../../types';
-import { loadDatastreamsFieldsFromYaml, processFields } from '../../fields/field';
+import { Fields, loadDatastreamsFieldsFromYaml, processFields } from '../../fields/field';
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import {
   FLEET_COMPONENT_TEMPLATES,
@@ -297,6 +297,7 @@ const FIELD_LIMIT_THRESHOLD = 500;
  * An explicit limit always overrides the default.
  */
 function getFieldsLimit(fieldCount: number | undefined, explicitLimit: number | undefined) {
+  console.log("XXXXX, fieldCount, explicitLimit", fieldCount, explicitLimit);
   if (explicitLimit) {
     return explicitLimit;
   }
@@ -521,6 +522,19 @@ export async function ensureAliasHasWriteIndex(opts: {
   }
 }
 
+function countFields(fields: Fields): number {
+  return fields.reduce((acc, field) => {
+    let subCount = 1;
+    if (field.fields) {
+      subCount += countFields(field.fields);
+    }
+    if (field.multi_fields) {
+      subCount += countFields(field.multi_fields);
+    }
+    return subCount + acc;
+  }, 0);
+}
+
 export function prepareTemplate({
   packageInstallContext,
   dataStream,
@@ -566,7 +580,7 @@ export function prepareTemplate({
     registryElasticsearch: dataStream.elasticsearch,
     experimentalDataStreamFeature,
     lifecycle: lifecyle,
-    fieldCount: validFields.length,
+    fieldCount: countFields(validFields),
   });
 
   const template = getTemplate({

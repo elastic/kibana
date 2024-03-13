@@ -338,9 +338,13 @@ describe('EPM index template install', () => {
     } as RegistryDataStream;
 
     mockedLoadFieldsFromYaml.mockReturnValue(
-      range(600).map((_, i) => ({
-        name: `test_field_${i}`,
-        type: 'keyword',
+      range(10).map((_, i) => ({
+        name: `test_group${i}`,
+        type: 'group',
+        fields: range(60).map((__, j) => ({
+          name: `test_field${i}_${j}`,
+          type: 'keyword',
+        })),
       }))
     );
 
