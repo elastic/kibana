@@ -8,6 +8,7 @@
 import { DataViewsService } from '@kbn/data-views-plugin/public';
 import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 import { DOC_TYPE } from '../../common/constants';
 import { createOpenInDiscoverAction } from './open_in_discover_action';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
@@ -15,6 +16,11 @@ import type { DiscoverAppLocator } from './open_in_discover_helpers';
 describe('open in discover action', () => {
   const compatibleEmbeddableApi = {
     type: DOC_TYPE,
+    panelTitle: 'some title',
+    hidePanelTitle: false,
+    localFilters: new BehaviorSubject([]),
+    localQuery: new BehaviorSubject({ query: 'test', language: 'kuery' }),
+    localTimeRange: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
     getSavedVis: jest.fn(() => undefined),
     canViewUnderlyingData: () => Promise.resolve(true),
     getViewUnderlyingDataArgs: jest.fn(() => ({
