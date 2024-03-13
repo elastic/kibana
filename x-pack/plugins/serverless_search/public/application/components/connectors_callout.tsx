@@ -29,16 +29,13 @@ const CONNECTOR_TYPES_DISPLAY = [
 ];
 
 export const ConnectorsCallout = () => {
-  const { data } = useConnectorTypes();
+  const allConnectorTypes = useConnectorTypes();
   const { createConnector, isLoading } = useCreateConnector();
 
-  const allConnectorTypes = data?.connectors;
-  const connectorTypes = allConnectorTypes
-    ? CONNECTOR_TYPES_DISPLAY.map(
-        (type) => allConnectorTypes.find((connType) => connType.serviceType === type)!
-      )
-    : undefined;
-  const showConnectors = connectorTypes && connectorTypes.length;
+  const connectorTypes = CONNECTOR_TYPES_DISPLAY.map(
+    (type) => allConnectorTypes.find((connType) => connType.serviceType === type)!
+  );
+  const showConnectors = connectorTypes.length;
   return (
     <EuiCallOut
       title={i18n.translate('xpack.serverlessSearch.selectClient.connectorsCallout.title', {
