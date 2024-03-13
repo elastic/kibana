@@ -18,7 +18,7 @@ import type { EndpointAppContext } from '../../types';
 
 export const COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE =
   'endpoint:complete-external-response-actions';
-export const COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION = `1.0.0';`;
+export const COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION = '1.0.0';
 export const COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TITLE =
   'Security Solution Complete External Response Actions';
 
@@ -122,7 +122,7 @@ export class CompleteExternalResponseActionsTask {
 
     try {
       await taskManager.ensureScheduled({
-        id: COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
+        id: this.taskId,
         taskType: COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
         scope: ['securitySolution'],
         schedule: {

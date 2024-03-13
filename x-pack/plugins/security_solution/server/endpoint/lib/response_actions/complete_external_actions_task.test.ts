@@ -9,6 +9,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
   COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TITLE,
   COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
+  COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION,
   CompleteExternalResponseActionsTask,
 } from './complete_external_actions_task';
 import { createMockEndpointAppContext } from '../../mocks';
@@ -96,7 +97,7 @@ describe('CompleteExternalActionsTask class', () => {
       });
 
       expect(taskManagerStartContractMock.ensureScheduled).toHaveBeenCalledWith({
-        id: COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
+        id: `${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}-${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION}`,
         taskType: COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
         scope: ['securitySolution'],
         schedule: {
@@ -133,7 +134,7 @@ describe('CompleteExternalActionsTask class', () => {
       });
 
       expect(taskManagerStartContractMock.ensureScheduled).toHaveBeenCalledWith({
-        id: COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
+        id: `${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}-${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION}`,
         taskType: COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
         scope: ['securitySolution'],
         schedule: {
