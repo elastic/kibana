@@ -5606,15 +5606,14 @@
       "  it('Prefer Cloud dashboard if both integration have findings')",
       "  it('Show CSPM installation prompt if CSPM is not installed and KSPM is installed ,NO AGENT')",
       "  it('Show KSPM installation prompt if KSPM is not installed and CSPM is installed , NO AGENT')",
-      "  it('should not select default tab is user has already selected one themselves')",
       "describe('getDefaultTab')",
       "  it('returns CSPM tab if only CSPM has findings')",
       "  it('returns CSPM tab if both CSPM and KSPM has findings')",
       "  it('returns KSPM tab if only KSPM has findings')",
       "  it('when no findings preffers CSPM tab unless not-installed or unprivileged')",
-      "  it('returns CSPM tab is plugin status and kspm status is not provided')",
-      "  it('returns KSPM tab is plugin status and csp status is not provided')",
-      "  it('returns CSPM tab when only plugins status data is provided')"
+      "  it('should returns undefined when plugin status and cspm stats is not provided')",
+      "  it('should return undefined is plugin status and csp status is not provided ')",
+      "  it('should return undefined when  plugins status or cspm stats data is not provided')"
     ],
     "testSuits": [
       {
@@ -5778,16 +5777,6 @@
         "isTodo": false
       },
       {
-        "id": "should-not-select-default-tab-is-user-has-already-selected-one-themselves",
-        "rawLine": "  it('should not select default tab is user has already selected one themselves', () => {",
-        "line": "  it('should not select default tab is user has already selected one themselves')",
-        "label": "should not select default tab is user has already selected one themselves",
-        "indent": 2,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
         "id": "getdefaulttab",
         "rawLine": "describe('getDefaultTab', () => {",
         "line": "describe('getDefaultTab')",
@@ -5838,30 +5827,30 @@
         "isTodo": false
       },
       {
-        "id": "returns-cspm-tab-is-plugin-status-and-kspm-status-is-not-provided",
-        "rawLine": "  it('returns CSPM tab is plugin status and kspm status is not provided', () => {",
-        "line": "  it('returns CSPM tab is plugin status and kspm status is not provided')",
-        "label": "returns CSPM tab is plugin status and kspm status is not provided",
+        "id": "should-returns-undefined-when-plugin-status-and-cspm-stats-is-not-provided",
+        "rawLine": "  it('should returns undefined when plugin status and cspm stats is not provided', () => {",
+        "line": "  it('should returns undefined when plugin status and cspm stats is not provided')",
+        "label": "should returns undefined when plugin status and cspm stats is not provided",
         "indent": 2,
         "type": "it",
         "isSkipped": false,
         "isTodo": false
       },
       {
-        "id": "returns-kspm-tab-is-plugin-status-and-csp-status-is-not-provided",
-        "rawLine": "  it('returns KSPM tab is plugin status and csp status is not provided', () => {",
-        "line": "  it('returns KSPM tab is plugin status and csp status is not provided')",
-        "label": "returns KSPM tab is plugin status and csp status is not provided",
+        "id": "should-return-undefined-is-plugin-status-and-csp-status-is-not-provided-",
+        "rawLine": "  it('should return undefined is plugin status and csp status is not provided ', () => {",
+        "line": "  it('should return undefined is plugin status and csp status is not provided ')",
+        "label": "should return undefined is plugin status and csp status is not provided ",
         "indent": 2,
         "type": "it",
         "isSkipped": false,
         "isTodo": false
       },
       {
-        "id": "returns-cspm-tab-when-only-plugins-status-data-is-provided",
-        "rawLine": "  it('returns CSPM tab when only plugins status data is provided', () => {",
-        "line": "  it('returns CSPM tab when only plugins status data is provided')",
-        "label": "returns CSPM tab when only plugins status data is provided",
+        "id": "should-return-undefined-when-plugins-status-or-cspm-stats-data-is-not-provided",
+        "rawLine": "  it('should return undefined when  plugins status or cspm stats data is not provided', () => {",
+        "line": "  it('should return undefined when  plugins status or cspm stats data is not provided')",
+        "label": "should return undefined when  plugins status or cspm stats data is not provided",
         "indent": 2,
         "type": "it",
         "isSkipped": false,
@@ -6028,16 +6017,6 @@
             "type": "it",
             "isSkipped": false,
             "isTodo": false
-          },
-          {
-            "id": "should-not-select-default-tab-is-user-has-already-selected-one-themselves",
-            "rawLine": "  it('should not select default tab is user has already selected one themselves', () => {",
-            "line": "  it('should not select default tab is user has already selected one themselves')",
-            "label": "should not select default tab is user has already selected one themselves",
-            "indent": 2,
-            "type": "it",
-            "isSkipped": false,
-            "isTodo": false
           }
         ]
       },
@@ -6092,30 +6071,30 @@
             "isTodo": false
           },
           {
-            "id": "returns-cspm-tab-is-plugin-status-and-kspm-status-is-not-provided",
-            "rawLine": "  it('returns CSPM tab is plugin status and kspm status is not provided', () => {",
-            "line": "  it('returns CSPM tab is plugin status and kspm status is not provided')",
-            "label": "returns CSPM tab is plugin status and kspm status is not provided",
+            "id": "should-returns-undefined-when-plugin-status-and-cspm-stats-is-not-provided",
+            "rawLine": "  it('should returns undefined when plugin status and cspm stats is not provided', () => {",
+            "line": "  it('should returns undefined when plugin status and cspm stats is not provided')",
+            "label": "should returns undefined when plugin status and cspm stats is not provided",
             "indent": 2,
             "type": "it",
             "isSkipped": false,
             "isTodo": false
           },
           {
-            "id": "returns-kspm-tab-is-plugin-status-and-csp-status-is-not-provided",
-            "rawLine": "  it('returns KSPM tab is plugin status and csp status is not provided', () => {",
-            "line": "  it('returns KSPM tab is plugin status and csp status is not provided')",
-            "label": "returns KSPM tab is plugin status and csp status is not provided",
+            "id": "should-return-undefined-is-plugin-status-and-csp-status-is-not-provided-",
+            "rawLine": "  it('should return undefined is plugin status and csp status is not provided ', () => {",
+            "line": "  it('should return undefined is plugin status and csp status is not provided ')",
+            "label": "should return undefined is plugin status and csp status is not provided ",
             "indent": 2,
             "type": "it",
             "isSkipped": false,
             "isTodo": false
           },
           {
-            "id": "returns-cspm-tab-when-only-plugins-status-data-is-provided",
-            "rawLine": "  it('returns CSPM tab when only plugins status data is provided', () => {",
-            "line": "  it('returns CSPM tab when only plugins status data is provided')",
-            "label": "returns CSPM tab when only plugins status data is provided",
+            "id": "should-return-undefined-when-plugins-status-or-cspm-stats-data-is-not-provided",
+            "rawLine": "  it('should return undefined when  plugins status or cspm stats data is not provided', () => {",
+            "line": "  it('should return undefined when  plugins status or cspm stats data is not provided')",
+            "label": "should return undefined when  plugins status or cspm stats data is not provided",
             "indent": 2,
             "type": "it",
             "isSkipped": false,
@@ -9837,16 +9816,941 @@
     ]
   },
   {
+    "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/benchmark/v1.ts",
+    "fileName": "v1.ts",
+    "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION"
+    ],
+    "lines": [
+      "  describe('GET /internal/cloud_security_posture/benchmark')",
+      "    it(`Should return non-empty array filled with Rules if user has CSP integrations`)",
+      "    it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`)",
+      "    it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`)",
+      "    it(`Should return empty array when we set page to be above the last page number`)"
+    ],
+    "testSuits": [
+      {
+        "id": "get-/internal/cloud_security_posture/benchmark",
+        "rawLine": "  describe('GET /internal/cloud_security_posture/benchmark', function () {",
+        "line": "  describe('GET /internal/cloud_security_posture/benchmark')",
+        "label": "GET /internal/cloud_security_posture/benchmark",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-non-empty-array-filled-with-rules-if-user-has-csp-integrations",
+        "rawLine": "    it(`Should return non-empty array filled with Rules if user has CSP integrations`, async () => {",
+        "line": "    it(`Should return non-empty array filled with Rules if user has CSP integrations`)",
+        "label": "Should return non-empty array filled with Rules if user has CSP integrations",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-array-size-2-when-we-set-per-page-to-be-only-2-(total-element-is-still-3)",
+        "rawLine": "    it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`, async () => {",
+        "line": "    it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`)",
+        "label": "Should return array size 2 when we set per page to be only 2 (total element is still 3)",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-array-size-2-when-we-set-per-page-to-be-only-2-(total-element-is-still-3)",
+        "rawLine": "    it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`, async () => {",
+        "line": "    it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`)",
+        "label": "Should return array size 2 when we set per page to be only 2 (total element is still 3)",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-empty-array-when-we-set-page-to-be-above-the-last-page-number",
+        "rawLine": "    it(`Should return empty array when we set page to be above the last page number`, async () => {",
+        "line": "    it(`Should return empty array when we set page to be above the last page number`)",
+        "label": "Should return empty array when we set page to be above the last page number",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "get-/internal/cloud_security_posture/benchmark",
+        "rawLine": "  describe('GET /internal/cloud_security_posture/benchmark', function () {",
+        "line": "  describe('GET /internal/cloud_security_posture/benchmark')",
+        "label": "GET /internal/cloud_security_posture/benchmark",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "should-return-non-empty-array-filled-with-rules-if-user-has-csp-integrations",
+            "rawLine": "    it(`Should return non-empty array filled with Rules if user has CSP integrations`, async () => {",
+            "line": "    it(`Should return non-empty array filled with Rules if user has CSP integrations`)",
+            "label": "Should return non-empty array filled with Rules if user has CSP integrations",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-return-array-size-2-when-we-set-per-page-to-be-only-2-(total-element-is-still-3)",
+            "rawLine": "    it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`, async () => {",
+            "line": "    it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`)",
+            "label": "Should return array size 2 when we set per page to be only 2 (total element is still 3)",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-return-array-size-2-when-we-set-per-page-to-be-only-2-(total-element-is-still-3)",
+            "rawLine": "    it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`, async () => {",
+            "line": "    it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`)",
+            "label": "Should return array size 2 when we set per page to be only 2 (total element is still 3)",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-return-empty-array-when-we-set-page-to-be-above-the-last-page-number",
+            "rawLine": "    it(`Should return empty array when we set page to be above the last page number`, async () => {",
+            "line": "    it(`Should return empty array when we set page to be above the last page number`)",
+            "label": "Should return empty array when we set page to be above the last page number",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/benchmark/v2.ts",
+    "fileName": "v2.ts",
+    "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION"
+    ],
+    "lines": [
+      "  describe('GET /internal/cloud_security_posture/benchmark')",
+      "    it(`Should return all benchmarks if user has CSP integrations`)"
+    ],
+    "testSuits": [
+      {
+        "id": "get-/internal/cloud_security_posture/benchmark",
+        "rawLine": "  describe('GET /internal/cloud_security_posture/benchmark', function () {",
+        "line": "  describe('GET /internal/cloud_security_posture/benchmark')",
+        "label": "GET /internal/cloud_security_posture/benchmark",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-all-benchmarks-if-user-has-csp-integrations",
+        "rawLine": "    it(`Should return all benchmarks if user has CSP integrations`, async () => {",
+        "line": "    it(`Should return all benchmarks if user has CSP integrations`)",
+        "label": "Should return all benchmarks if user has CSP integrations",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "get-/internal/cloud_security_posture/benchmark",
+        "rawLine": "  describe('GET /internal/cloud_security_posture/benchmark', function () {",
+        "line": "  describe('GET /internal/cloud_security_posture/benchmark')",
+        "label": "GET /internal/cloud_security_posture/benchmark",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "should-return-all-benchmarks-if-user-has-csp-integrations",
+            "rawLine": "    it(`Should return all benchmarks if user has CSP integrations`, async () => {",
+            "line": "    it(`Should return all benchmarks if user has CSP integrations`)",
+            "label": "Should return all benchmarks if user has CSP integrations",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/find_csp_benchmark_rule.ts",
+    "fileName": "find_csp_benchmark_rule.ts",
+    "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION"
+    ],
+    "lines": [
+      "  describe('GET internal/cloud_security_posture/rules/_find')",
+      "    it(`Should return 500 error code when not provide package policy id or benchmark id`)",
+      "    it(`Should return 500 error code when provide both package policy id and benchmark id`)",
+      "    it(`Should return 404 status code when the package policy ID does not exist`)",
+      "    it(`Should return 200 status code and filter rules by benchmarkId`)",
+      "    it(`Should return 200 status code, and only requested fields in the response`)",
+      "    it(`Should return 200 status code, items sorted by metadata.section field`)",
+      "    it(`Should return 200 status code and paginate rules with a limit of PerPage`)"
+    ],
+    "testSuits": [
+      {
+        "id": "get-internal/cloud_security_posture/rules/_find",
+        "rawLine": "  describe('GET internal/cloud_security_posture/rules/_find', function () {",
+        "line": "  describe('GET internal/cloud_security_posture/rules/_find')",
+        "label": "GET internal/cloud_security_posture/rules/_find",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-500-error-code-when-not-provide-package-policy-id-or-benchmark-id",
+        "rawLine": "    it(`Should return 500 error code when not provide package policy id or benchmark id`, async () => {",
+        "line": "    it(`Should return 500 error code when not provide package policy id or benchmark id`)",
+        "label": "Should return 500 error code when not provide package policy id or benchmark id",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-500-error-code-when-provide-both-package-policy-id-and-benchmark-id",
+        "rawLine": "    it(`Should return 500 error code when provide both package policy id and benchmark id`, async () => {",
+        "line": "    it(`Should return 500 error code when provide both package policy id and benchmark id`)",
+        "label": "Should return 500 error code when provide both package policy id and benchmark id",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-404-status-code-when-the-package-policy-id-does-not-exist",
+        "rawLine": "    it(`Should return 404 status code when the package policy ID does not exist`, async () => {",
+        "line": "    it(`Should return 404 status code when the package policy ID does not exist`)",
+        "label": "Should return 404 status code when the package policy ID does not exist",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-200-status-code-and-filter-rules-by-benchmarkid",
+        "rawLine": "    it(`Should return 200 status code and filter rules by benchmarkId`, async () => {",
+        "line": "    it(`Should return 200 status code and filter rules by benchmarkId`)",
+        "label": "Should return 200 status code and filter rules by benchmarkId",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-200-status-code,-and-only-requested-fields-in-the-response",
+        "rawLine": "    it(`Should return 200 status code, and only requested fields in the response`, async () => {",
+        "line": "    it(`Should return 200 status code, and only requested fields in the response`)",
+        "label": "Should return 200 status code, and only requested fields in the response",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-200-status-code,-items-sorted-by-metadata.section-field",
+        "rawLine": "    it(`Should return 200 status code, items sorted by metadata.section field`, async () => {",
+        "line": "    it(`Should return 200 status code, items sorted by metadata.section field`)",
+        "label": "Should return 200 status code, items sorted by metadata.section field",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-200-status-code-and-paginate-rules-with-a-limit-of-perpage",
+        "rawLine": "    it(`Should return 200 status code and paginate rules with a limit of PerPage`, async () => {",
+        "line": "    it(`Should return 200 status code and paginate rules with a limit of PerPage`)",
+        "label": "Should return 200 status code and paginate rules with a limit of PerPage",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "get-internal/cloud_security_posture/rules/_find",
+        "rawLine": "  describe('GET internal/cloud_security_posture/rules/_find', function () {",
+        "line": "  describe('GET internal/cloud_security_posture/rules/_find')",
+        "label": "GET internal/cloud_security_posture/rules/_find",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "should-return-500-error-code-when-not-provide-package-policy-id-or-benchmark-id",
+            "rawLine": "    it(`Should return 500 error code when not provide package policy id or benchmark id`, async () => {",
+            "line": "    it(`Should return 500 error code when not provide package policy id or benchmark id`)",
+            "label": "Should return 500 error code when not provide package policy id or benchmark id",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-return-500-error-code-when-provide-both-package-policy-id-and-benchmark-id",
+            "rawLine": "    it(`Should return 500 error code when provide both package policy id and benchmark id`, async () => {",
+            "line": "    it(`Should return 500 error code when provide both package policy id and benchmark id`)",
+            "label": "Should return 500 error code when provide both package policy id and benchmark id",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-return-404-status-code-when-the-package-policy-id-does-not-exist",
+            "rawLine": "    it(`Should return 404 status code when the package policy ID does not exist`, async () => {",
+            "line": "    it(`Should return 404 status code when the package policy ID does not exist`)",
+            "label": "Should return 404 status code when the package policy ID does not exist",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-return-200-status-code-and-filter-rules-by-benchmarkid",
+            "rawLine": "    it(`Should return 200 status code and filter rules by benchmarkId`, async () => {",
+            "line": "    it(`Should return 200 status code and filter rules by benchmarkId`)",
+            "label": "Should return 200 status code and filter rules by benchmarkId",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-return-200-status-code,-and-only-requested-fields-in-the-response",
+            "rawLine": "    it(`Should return 200 status code, and only requested fields in the response`, async () => {",
+            "line": "    it(`Should return 200 status code, and only requested fields in the response`)",
+            "label": "Should return 200 status code, and only requested fields in the response",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-return-200-status-code,-items-sorted-by-metadata.section-field",
+            "rawLine": "    it(`Should return 200 status code, items sorted by metadata.section field`, async () => {",
+            "line": "    it(`Should return 200 status code, items sorted by metadata.section field`)",
+            "label": "Should return 200 status code, items sorted by metadata.section field",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-return-200-status-code-and-paginate-rules-with-a-limit-of-perpage",
+            "rawLine": "    it(`Should return 200 status code and paginate rules with a limit of PerPage`, async () => {",
+            "line": "    it(`Should return 200 status code and paginate rules with a limit of PerPage`)",
+            "label": "Should return 200 status code and paginate rules with a limit of PerPage",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/index.ts",
+    "fileName": "index.ts",
+    "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION"
+    ],
+    "lines": [
+      "  describe('cloud_security_posture')"
+    ],
+    "testSuits": [
+      {
+        "id": "cloud_security_posture",
+        "rawLine": "  describe('cloud_security_posture', function () {",
+        "line": "  describe('cloud_security_posture')",
+        "label": "cloud_security_posture",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "cloud_security_posture",
+        "rawLine": "  describe('cloud_security_posture', function () {",
+        "line": "  describe('cloud_security_posture')",
+        "label": "cloud_security_posture",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts",
+    "fileName": "status_indexed.ts",
+    "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION"
+    ],
+    "lines": [
+      "  describe('GET /internal/cloud_security_posture/status')",
+      "    describe('STATUS = INDEXED TEST')",
+      "      it(`Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents`)",
+      "      it(`Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents`)",
+      "      it(`Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents`)"
+    ],
+    "testSuits": [
+      {
+        "id": "get-/internal/cloud_security_posture/status",
+        "rawLine": "  describe('GET /internal/cloud_security_posture/status', function () {",
+        "line": "  describe('GET /internal/cloud_security_posture/status')",
+        "label": "GET /internal/cloud_security_posture/status",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "status-=-indexed-test",
+        "rawLine": "    describe('STATUS = INDEXED TEST', () => {",
+        "line": "    describe('STATUS = INDEXED TEST')",
+        "label": "STATUS = INDEXED TEST",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "return-kspm-status-indexed-when-logs-cloud_security_posture.findings_latest-default-contains-new-kspm-documents",
+        "rawLine": "      it(`Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents`, async () => {",
+        "line": "      it(`Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents`)",
+        "label": "Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "return-cspm-status-indexed-when-logs-cloud_security_posture.findings_latest-default-contains-new-cspm-documents",
+        "rawLine": "      it(`Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents`, async () => {",
+        "line": "      it(`Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents`)",
+        "label": "Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "return-vuln-status-indexed-when-logs-cloud_security_posture.vulnerabilities_latest-default-contains-new-documents",
+        "rawLine": "      it(`Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents`, async () => {",
+        "line": "      it(`Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents`)",
+        "label": "Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "get-/internal/cloud_security_posture/status",
+        "rawLine": "  describe('GET /internal/cloud_security_posture/status', function () {",
+        "line": "  describe('GET /internal/cloud_security_posture/status')",
+        "label": "GET /internal/cloud_security_posture/status",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "status-=-indexed-test",
+            "rawLine": "    describe('STATUS = INDEXED TEST', () => {",
+            "line": "    describe('STATUS = INDEXED TEST')",
+            "label": "STATUS = INDEXED TEST",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "return-kspm-status-indexed-when-logs-cloud_security_posture.findings_latest-default-contains-new-kspm-documents",
+                "rawLine": "      it(`Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents`, async () => {",
+                "line": "      it(`Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents`)",
+                "label": "Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "return-cspm-status-indexed-when-logs-cloud_security_posture.findings_latest-default-contains-new-cspm-documents",
+                "rawLine": "      it(`Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents`, async () => {",
+                "line": "      it(`Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents`)",
+                "label": "Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "return-vuln-status-indexed-when-logs-cloud_security_posture.vulnerabilities_latest-default-contains-new-documents",
+                "rawLine": "      it(`Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents`, async () => {",
+                "line": "      it(`Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents`)",
+                "label": "Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexing.ts",
+    "fileName": "status_indexing.ts",
+    "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION"
+    ],
+    "lines": [
+      "  describe('GET /internal/cloud_security_posture/status')",
+      "    describe('STATUS = INDEXING TEST')",
+      "      it(`Return kspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new kspm documents, but has newly connected agents`)",
+      "      it(`Return cspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new cspm documents, but has newly connected agents  `)",
+      "      it(`Return vuln status indexing when logs-cloud_security_posture.vulnerabilities_latest-default doesn't contain vuln new documents, but has newly connected agents`)"
+    ],
+    "testSuits": [
+      {
+        "id": "get-/internal/cloud_security_posture/status",
+        "rawLine": "  describe('GET /internal/cloud_security_posture/status', function () {",
+        "line": "  describe('GET /internal/cloud_security_posture/status')",
+        "label": "GET /internal/cloud_security_posture/status",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "status-=-indexing-test",
+        "rawLine": "    describe('STATUS = INDEXING TEST', () => {",
+        "line": "    describe('STATUS = INDEXING TEST')",
+        "label": "STATUS = INDEXING TEST",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "return-kspm-status-indexing-when-logs-cloud_security_posture.findings_latest-default-doesn",
+        "rawLine": "      it(`Return kspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new kspm documents, but has newly connected agents`, async () => {",
+        "line": "      it(`Return kspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new kspm documents, but has newly connected agents`)",
+        "label": "Return kspm status indexing when logs-cloud_security_posture.findings_latest-default doesn",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "return-cspm-status-indexing-when-logs-cloud_security_posture.findings_latest-default-doesn",
+        "rawLine": "      it(`Return cspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new cspm documents, but has newly connected agents  `, async () => {",
+        "line": "      it(`Return cspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new cspm documents, but has newly connected agents  `)",
+        "label": "Return cspm status indexing when logs-cloud_security_posture.findings_latest-default doesn",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "return-vuln-status-indexing-when-logs-cloud_security_posture.vulnerabilities_latest-default-doesn",
+        "rawLine": "      it(`Return vuln status indexing when logs-cloud_security_posture.vulnerabilities_latest-default doesn't contain vuln new documents, but has newly connected agents`, async () => {",
+        "line": "      it(`Return vuln status indexing when logs-cloud_security_posture.vulnerabilities_latest-default doesn't contain vuln new documents, but has newly connected agents`)",
+        "label": "Return vuln status indexing when logs-cloud_security_posture.vulnerabilities_latest-default doesn",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "get-/internal/cloud_security_posture/status",
+        "rawLine": "  describe('GET /internal/cloud_security_posture/status', function () {",
+        "line": "  describe('GET /internal/cloud_security_posture/status')",
+        "label": "GET /internal/cloud_security_posture/status",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "status-=-indexing-test",
+            "rawLine": "    describe('STATUS = INDEXING TEST', () => {",
+            "line": "    describe('STATUS = INDEXING TEST')",
+            "label": "STATUS = INDEXING TEST",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "return-kspm-status-indexing-when-logs-cloud_security_posture.findings_latest-default-doesn",
+                "rawLine": "      it(`Return kspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new kspm documents, but has newly connected agents`, async () => {",
+                "line": "      it(`Return kspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new kspm documents, but has newly connected agents`)",
+                "label": "Return kspm status indexing when logs-cloud_security_posture.findings_latest-default doesn",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "return-cspm-status-indexing-when-logs-cloud_security_posture.findings_latest-default-doesn",
+                "rawLine": "      it(`Return cspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new cspm documents, but has newly connected agents  `, async () => {",
+                "line": "      it(`Return cspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new cspm documents, but has newly connected agents  `)",
+                "label": "Return cspm status indexing when logs-cloud_security_posture.findings_latest-default doesn",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "return-vuln-status-indexing-when-logs-cloud_security_posture.vulnerabilities_latest-default-doesn",
+                "rawLine": "      it(`Return vuln status indexing when logs-cloud_security_posture.vulnerabilities_latest-default doesn't contain vuln new documents, but has newly connected agents`, async () => {",
+                "line": "      it(`Return vuln status indexing when logs-cloud_security_posture.vulnerabilities_latest-default doesn't contain vuln new documents, but has newly connected agents`)",
+                "label": "Return vuln status indexing when logs-cloud_security_posture.vulnerabilities_latest-default doesn",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_not_deployed_not_installed.ts",
+    "fileName": "status_not_deployed_not_installed.ts",
+    "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION"
+    ],
+    "lines": [
+      "  describe('GET /internal/cloud_security_posture/status')",
+      "    describe('STATUS = NOT-DEPLOYED and STATUS = NOT-INSTALLED TEST')",
+      "      it(`Should return not-deployed when installed kspm, no findings on either indices and no healthy agents`)",
+      "      it(`Should return not-deployed when installed cspm, no findings on either indices and no healthy agents`)",
+      "      it(`Should return not-deployed when installed cnvm, no findings on either indices and no healthy agents`)"
+    ],
+    "testSuits": [
+      {
+        "id": "get-/internal/cloud_security_posture/status",
+        "rawLine": "  describe('GET /internal/cloud_security_posture/status', function () {",
+        "line": "  describe('GET /internal/cloud_security_posture/status')",
+        "label": "GET /internal/cloud_security_posture/status",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "status-=-not-deployed-and-status-=-not-installed-test",
+        "rawLine": "    describe('STATUS = NOT-DEPLOYED and STATUS = NOT-INSTALLED TEST', () => {",
+        "line": "    describe('STATUS = NOT-DEPLOYED and STATUS = NOT-INSTALLED TEST')",
+        "label": "STATUS = NOT-DEPLOYED and STATUS = NOT-INSTALLED TEST",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-not-deployed-when-installed-kspm,-no-findings-on-either-indices-and-no-healthy-agents",
+        "rawLine": "      it(`Should return not-deployed when installed kspm, no findings on either indices and no healthy agents`, async () => {",
+        "line": "      it(`Should return not-deployed when installed kspm, no findings on either indices and no healthy agents`)",
+        "label": "Should return not-deployed when installed kspm, no findings on either indices and no healthy agents",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-not-deployed-when-installed-cspm,-no-findings-on-either-indices-and-no-healthy-agents",
+        "rawLine": "      it(`Should return not-deployed when installed cspm, no findings on either indices and no healthy agents`, async () => {",
+        "line": "      it(`Should return not-deployed when installed cspm, no findings on either indices and no healthy agents`)",
+        "label": "Should return not-deployed when installed cspm, no findings on either indices and no healthy agents",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-not-deployed-when-installed-cnvm,-no-findings-on-either-indices-and-no-healthy-agents",
+        "rawLine": "      it(`Should return not-deployed when installed cnvm, no findings on either indices and no healthy agents`, async () => {",
+        "line": "      it(`Should return not-deployed when installed cnvm, no findings on either indices and no healthy agents`)",
+        "label": "Should return not-deployed when installed cnvm, no findings on either indices and no healthy agents",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "get-/internal/cloud_security_posture/status",
+        "rawLine": "  describe('GET /internal/cloud_security_posture/status', function () {",
+        "line": "  describe('GET /internal/cloud_security_posture/status')",
+        "label": "GET /internal/cloud_security_posture/status",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "status-=-not-deployed-and-status-=-not-installed-test",
+            "rawLine": "    describe('STATUS = NOT-DEPLOYED and STATUS = NOT-INSTALLED TEST', () => {",
+            "line": "    describe('STATUS = NOT-DEPLOYED and STATUS = NOT-INSTALLED TEST')",
+            "label": "STATUS = NOT-DEPLOYED and STATUS = NOT-INSTALLED TEST",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "should-return-not-deployed-when-installed-kspm,-no-findings-on-either-indices-and-no-healthy-agents",
+                "rawLine": "      it(`Should return not-deployed when installed kspm, no findings on either indices and no healthy agents`, async () => {",
+                "line": "      it(`Should return not-deployed when installed kspm, no findings on either indices and no healthy agents`)",
+                "label": "Should return not-deployed when installed kspm, no findings on either indices and no healthy agents",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "should-return-not-deployed-when-installed-cspm,-no-findings-on-either-indices-and-no-healthy-agents",
+                "rawLine": "      it(`Should return not-deployed when installed cspm, no findings on either indices and no healthy agents`, async () => {",
+                "line": "      it(`Should return not-deployed when installed cspm, no findings on either indices and no healthy agents`)",
+                "label": "Should return not-deployed when installed cspm, no findings on either indices and no healthy agents",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "should-return-not-deployed-when-installed-cnvm,-no-findings-on-either-indices-and-no-healthy-agents",
+                "rawLine": "      it(`Should return not-deployed when installed cnvm, no findings on either indices and no healthy agents`, async () => {",
+                "line": "      it(`Should return not-deployed when installed cnvm, no findings on either indices and no healthy agents`)",
+                "label": "Should return not-deployed when installed cnvm, no findings on either indices and no healthy agents",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/telemetry.ts",
+    "fileName": "telemetry.ts",
+    "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION"
+    ],
+    "lines": [
+      "  describe('Verify cloud_security_posture telemetry payloads')",
+      "    it('includes only KSPM findings')",
+      "    it('includes only CSPM findings')",
+      "    it('includes CSPM and KSPM findings')",
+      "    it(`'includes only KSPM findings without posture_type'`)",
+      "    it('includes KSPM findings without posture_type and CSPM findings as well')"
+    ],
+    "testSuits": [
+      {
+        "id": "verify-cloud_security_posture-telemetry-payloads",
+        "rawLine": "  describe('Verify cloud_security_posture telemetry payloads', function () {",
+        "line": "  describe('Verify cloud_security_posture telemetry payloads')",
+        "label": "Verify cloud_security_posture telemetry payloads",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "includes-only-kspm-findings",
+        "rawLine": "    it('includes only KSPM findings', async () => {",
+        "line": "    it('includes only KSPM findings')",
+        "label": "includes only KSPM findings",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "includes-only-cspm-findings",
+        "rawLine": "    it('includes only CSPM findings', async () => {",
+        "line": "    it('includes only CSPM findings')",
+        "label": "includes only CSPM findings",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "includes-cspm-and-kspm-findings",
+        "rawLine": "    it('includes CSPM and KSPM findings', async () => {",
+        "line": "    it('includes CSPM and KSPM findings')",
+        "label": "includes CSPM and KSPM findings",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "",
+        "rawLine": "    it(`'includes only KSPM findings without posture_type'`, async () => {",
+        "line": "    it(`'includes only KSPM findings without posture_type'`)",
+        "label": "",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "includes-kspm-findings-without-posture_type-and-cspm-findings-as-well",
+        "rawLine": "    it('includes KSPM findings without posture_type and CSPM findings as well', async () => {",
+        "line": "    it('includes KSPM findings without posture_type and CSPM findings as well')",
+        "label": "includes KSPM findings without posture_type and CSPM findings as well",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "verify-cloud_security_posture-telemetry-payloads",
+        "rawLine": "  describe('Verify cloud_security_posture telemetry payloads', function () {",
+        "line": "  describe('Verify cloud_security_posture telemetry payloads')",
+        "label": "Verify cloud_security_posture telemetry payloads",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "includes-only-kspm-findings",
+            "rawLine": "    it('includes only KSPM findings', async () => {",
+            "line": "    it('includes only KSPM findings')",
+            "label": "includes only KSPM findings",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "includes-only-cspm-findings",
+            "rawLine": "    it('includes only CSPM findings', async () => {",
+            "line": "    it('includes only CSPM findings')",
+            "label": "includes only CSPM findings",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "includes-cspm-and-kspm-findings",
+            "rawLine": "    it('includes CSPM and KSPM findings', async () => {",
+            "line": "    it('includes CSPM and KSPM findings')",
+            "label": "includes CSPM and KSPM findings",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "",
+            "rawLine": "    it(`'includes only KSPM findings without posture_type'`, async () => {",
+            "line": "    it(`'includes only KSPM findings without posture_type'`)",
+            "label": "",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "includes-kspm-findings-without-posture_type-and-cspm-findings-as-well",
+            "rawLine": "    it('includes KSPM findings without posture_type and CSPM findings as well', async () => {",
+            "line": "    it('includes KSPM findings without posture_type and CSPM findings as well')",
+            "label": "includes KSPM findings without posture_type and CSPM findings as well",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          }
+        ]
+      }
+    ]
+  },
+  {
     "filePath": "x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/compliance_dashboard.ts",
     "fileName": "compliance_dashboard.ts",
     "directory": "x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture",
     "tags": [
       "FTR",
-      "HAS SKIP"
+      "SERVERLESS"
     ],
     "lines": [
       "  describe('Cloud Posture Dashboard Page')",
-      "    describe.skip('Kubernetes Dashboard')",
+      "    describe('Kubernetes Dashboard')",
       "      it('displays accurate summary compliance score')"
     ],
     "testSuits": [
@@ -9862,12 +10766,12 @@
       },
       {
         "id": "kubernetes-dashboard",
-        "rawLine": "    describe.skip('Kubernetes Dashboard', () => {",
-        "line": "    describe.skip('Kubernetes Dashboard')",
+        "rawLine": "    describe('Kubernetes Dashboard', () => {",
+        "line": "    describe('Kubernetes Dashboard')",
         "label": "Kubernetes Dashboard",
         "indent": 4,
         "type": "describe",
-        "isSkipped": true,
+        "isSkipped": false,
         "isTodo": false
       },
       {
@@ -9894,12 +10798,12 @@
         "children": [
           {
             "id": "kubernetes-dashboard",
-            "rawLine": "    describe.skip('Kubernetes Dashboard', () => {",
-            "line": "    describe.skip('Kubernetes Dashboard')",
+            "rawLine": "    describe('Kubernetes Dashboard', () => {",
+            "line": "    describe('Kubernetes Dashboard')",
             "label": "Kubernetes Dashboard",
             "indent": 4,
             "type": "describe",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false,
             "children": [
               {
@@ -9909,7 +10813,7 @@
                 "label": "displays accurate summary compliance score",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": true,
+                "isSkipped": false,
                 "isTodo": false
               }
             ]
@@ -9923,7 +10827,8 @@
     "fileName": "index.ts",
     "directory": "x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture",
     "tags": [
-      "FTR"
+      "FTR",
+      "SERVERLESS"
     ],
     "lines": [
       "  describe('cloud_security_posture')"
@@ -11580,11 +12485,10 @@
     "directory": "x-pack/test/cloud_security_posture_api",
     "tags": [
       "FTR",
-      "API INTEGRATION",
-      "HAS SKIP"
+      "API INTEGRATION"
     ],
     "lines": [
-      "  describe.skip('Verify update csp rules states API')",
+      "  describe('Verify update csp rules states API')",
       "    it('mute benchmark rules successfully')",
       "    it('unmute rules successfully')",
       "    it('verify new rules are added and existing rules are set.')",
@@ -11596,12 +12500,12 @@
     "testSuits": [
       {
         "id": "verify-update-csp-rules-states-api",
-        "rawLine": "  describe.skip('Verify update csp rules states API', async () => {",
-        "line": "  describe.skip('Verify update csp rules states API')",
+        "rawLine": "  describe('Verify update csp rules states API', async () => {",
+        "line": "  describe('Verify update csp rules states API')",
         "label": "Verify update csp rules states API",
         "indent": 2,
         "type": "describe",
-        "isSkipped": true,
+        "isSkipped": false,
         "isTodo": false
       },
       {
@@ -11678,12 +12582,12 @@
     "tree": [
       {
         "id": "verify-update-csp-rules-states-api",
-        "rawLine": "  describe.skip('Verify update csp rules states API', async () => {",
-        "line": "  describe.skip('Verify update csp rules states API')",
+        "rawLine": "  describe('Verify update csp rules states API', async () => {",
+        "line": "  describe('Verify update csp rules states API')",
         "label": "Verify update csp rules states API",
         "indent": 2,
         "type": "describe",
-        "isSkipped": true,
+        "isSkipped": false,
         "isTodo": false,
         "children": [
           {
@@ -11693,7 +12597,7 @@
             "label": "mute benchmark rules successfully",
             "indent": 4,
             "type": "it",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false
           },
           {
@@ -11703,7 +12607,7 @@
             "label": "unmute rules successfully",
             "indent": 4,
             "type": "it",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false
           },
           {
@@ -11713,7 +12617,7 @@
             "label": "verify new rules are added and existing rules are set.",
             "indent": 4,
             "type": "it",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false
           },
           {
@@ -11723,7 +12627,7 @@
             "label": "mute detection rule successfully",
             "indent": 4,
             "type": "it",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false
           },
           {
@@ -11733,7 +12637,7 @@
             "label": "Expect to mute two benchmark rules and one detection rule",
             "indent": 4,
             "type": "it",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false
           },
           {
@@ -11743,7 +12647,7 @@
             "label": "Expect to save rules states when requesting to update empty object",
             "indent": 4,
             "type": "it",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false
           },
           {
@@ -11753,7 +12657,7 @@
             "label": "set wrong action input",
             "indent": 4,
             "type": "it",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false
           }
         ]
@@ -13670,11 +14574,10 @@
     "fileName": "findings_onboarding.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
     "tags": [
-      "FTR",
-      "HAS SKIP"
+      "FTR"
     ],
     "lines": [
-      "  describe.skip('Findings Page onboarding')",
+      "  describe('Findings Page onboarding')",
       "    it('clicking on the `No integrations installed` prompt action button - `install CNVM`: navigates to the CNVM integration installation page')",
       "    it('clicking on the `No integrations installed` prompt action button - `install cloud posture intergation`: navigates to the CSPM integration installation page')",
       "    it('clicking on the `No integrations installed` prompt action button - `install kubernetes posture intergation`: navigates to the KSPM integration installation page')"
@@ -13682,12 +14585,12 @@
     "testSuits": [
       {
         "id": "findings-page-onboarding",
-        "rawLine": "  describe.skip('Findings Page onboarding', function () {",
-        "line": "  describe.skip('Findings Page onboarding')",
+        "rawLine": "  describe('Findings Page onboarding', function () {",
+        "line": "  describe('Findings Page onboarding')",
         "label": "Findings Page onboarding",
         "indent": 2,
         "type": "describe",
-        "isSkipped": true,
+        "isSkipped": false,
         "isTodo": false
       },
       {
@@ -13724,12 +14627,12 @@
     "tree": [
       {
         "id": "findings-page-onboarding",
-        "rawLine": "  describe.skip('Findings Page onboarding', function () {",
-        "line": "  describe.skip('Findings Page onboarding')",
+        "rawLine": "  describe('Findings Page onboarding', function () {",
+        "line": "  describe('Findings Page onboarding')",
         "label": "Findings Page onboarding",
         "indent": 2,
         "type": "describe",
-        "isSkipped": true,
+        "isSkipped": false,
         "isTodo": false,
         "children": [
           {
@@ -13739,7 +14642,7 @@
             "label": "clicking on the ",
             "indent": 4,
             "type": "it",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false
           },
           {
@@ -13749,7 +14652,7 @@
             "label": "clicking on the ",
             "indent": 4,
             "type": "it",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false
           },
           {
@@ -13759,7 +14662,7 @@
             "label": "clicking on the ",
             "indent": 4,
             "type": "it",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false
           }
         ]
