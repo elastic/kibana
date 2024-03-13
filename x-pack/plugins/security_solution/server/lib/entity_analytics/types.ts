@@ -119,6 +119,9 @@ export interface RiskScoreBucket {
       notes: string[];
       category_1_score: number;
       category_1_count: number;
+      contributions: number[];
+      contributions_norm: number[];
+      inputs: unknown[];
     };
   };
   inputs: SearchResponse;

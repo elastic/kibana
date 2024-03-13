@@ -21,6 +21,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCode,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiCodeBlock,
 } from '@elastic/eui';
 import type { BoolQuery, TimeRange, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -45,6 +51,7 @@ interface IRiskScorePreviewPanel {
   isLoading: boolean;
   items: RiskScore[];
   type: RiskScoreEntity;
+  onSelect: (name: string) => void;
 }
 
 const getRiskiestScores = (scores: RiskScore[] = [], field: string) =>
@@ -111,6 +118,7 @@ const RiskScorePreviewPanel = ({
   hideMessage,
   isLoading,
   type,
+  onSelect,
 }: IRiskScorePreviewPanel) => {
   const [trigger, setTrigger] = useState<'closed' | 'open'>('open');
   const onToggle = (isOpen: boolean) => {
@@ -131,7 +139,7 @@ const RiskScorePreviewPanel = ({
       >
         <>
           <EuiSpacer size={'m'} />
-          <RiskScorePreviewTable items={items} type={type} />
+          <RiskScorePreviewTable items={items} type={type} onSelect={onSelect} />
         </>
       </EuiAccordion>
     </EuiPanel>
@@ -190,6 +198,7 @@ const RiskEnginePreview = () => {
     [addError, setDateRange, setFilters]
   );
 
+  const [selectedEntity, setSelectedEntity] = useState<string | undefined>(undefined);
   if (isError) {
     return (
       <EuiCallOut
@@ -209,6 +218,10 @@ const RiskEnginePreview = () => {
       </EuiCallOut>
     );
   }
+
+  const score =
+    hosts.find((host) => host.id_value === selectedEntity) ||
+    users.find((user) => user.id_value === selectedEntity);
 
   return (
     <>
@@ -239,6 +252,7 @@ const RiskEnginePreview = () => {
         hideMessage={i18n.HIDE_HOSTS_RISK_SCORE}
         isLoading={isLoading}
         type={RiskScoreEntity.host}
+        onSelect={setSelectedEntity}
       />
 
       <EuiSpacer />
@@ -249,7 +263,41 @@ const RiskEnginePreview = () => {
         hideMessage={i18n.HIDE_USERS_RISK_SCORE}
         isLoading={isLoading}
         type={RiskScoreEntity.user}
+        onSelect={setSelectedEntity}
       />
+      {selectedEntity && (
+        <EntityRiskContributionModal
+          contributions={score?.poc_contributions ?? []}
+          toggle={setSelectedEntity}
+        />
+      )}
     </>
+  );
+};
+
+const EntityRiskContributionModal = ({
+  contributions,
+  toggle,
+}: {
+  contributions: Array<{ score: number; norm_score: number; alert: unknown }>;
+  toggle: (next: string | undefined) => void;
+}) => {
+  return (
+    <EuiModal onClose={() => toggle(undefined)}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle title="Contributions" />
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiCodeBlock language="json" fontSize="m" paddingSize="m">
+          {JSON.stringify(contributions)}
+        </EuiCodeBlock>
+      </EuiModalBody>
+
+      <EuiModalFooter>
+        <EuiButton onClick={() => toggle(undefined)} fill>
+          {'Close'}
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 };

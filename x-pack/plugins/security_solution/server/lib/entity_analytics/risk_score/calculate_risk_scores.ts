@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, zipWith } from 'lodash';
 import type {
   AggregationsAggregationContainer,
   QueryDslQueryContainer,
@@ -106,6 +106,12 @@ const formatForResponse = ({
       risk_score: riskInput.fields?.[ALERT_RISK_SCORE]?.[0] ?? undefined,
       timestamp: riskInput.fields?.['@timestamp']?.[0] ?? undefined,
     })),
+    poc_contributions: zipWith(
+      bucket.risk_details.value.contributions,
+      bucket.risk_details.value.contributions_norm,
+      bucket.risk_details.value.inputs,
+      (score: number, normScore: number, input) => ({ score, norm_score: normScore, alert: input })
+    ),
     ...(includeNewFields ? newFields : {}),
   };
 };
@@ -122,11 +128,12 @@ const buildReduceScript = ({
   return `
     Map results = new HashMap();
     List inputs = [];
+
     for (state in states) {
       inputs.addAll(state.inputs)
     }
     Collections.sort(inputs, (a, b) -> b.get('weighted_score').compareTo(a.get('weighted_score')));
-
+    results['inputs'] = inputs;
     double num_inputs_to_score = Math.min(inputs.length, params.max_risk_inputs_per_identity);
     results['notes'] = [];
     if (num_inputs_to_score == params.max_risk_inputs_per_identity) {
@@ -137,18 +144,27 @@ const buildReduceScript = ({
     ${buildCategoryCountDeclarations()}
 
     double total_score = 0;
-    double current_score = 0;
+    double current_score = 0;    
+    List contributions = [];
+    List contributions_norm = [];
+    double sum_result = 0;
     for (int i = 0; i < num_inputs_to_score; i++) {
       current_score = inputs[i].weighted_score / Math.pow(i + 1, params.p);
-
+      contributions.add(current_score);
+      contributions_norm.add(100 * current_score / params.risk_cap);
       ${buildCategoryAssignment()}
       total_score += current_score;
+      sum_result += 100 * current_score / params.risk_cap
     }
 
     ${globalIdentifierTypeWeight != null ? `total_score *= ${globalIdentifierTypeWeight};` : ''}
     double score_norm = 100 * total_score / params.risk_cap;
+
     results['score'] = total_score;
     results['normalized_score'] = score_norm;
+    results['contributions'] = contributions;
+    results['contributions_norm'] = contributions_norm;
+    results['sum_result'] = sum_result;
 
     return results;
   `;

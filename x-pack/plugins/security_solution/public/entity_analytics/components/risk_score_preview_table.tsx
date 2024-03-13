@@ -25,9 +25,11 @@ type RiskScoreColumn = EuiBasicTableColumn<IRiskScore> & {
 export const RiskScorePreviewTable = ({
   items,
   type,
+  onSelect,
 }: {
   items: IRiskScore[];
   type: RiskScoreEntity;
+  onSelect: (name: string) => void;
 }) => {
   const columns: RiskScoreColumn[] = [
     {
@@ -89,6 +91,7 @@ export const RiskScorePreviewTable = ({
       items={items}
       columns={columns}
       loading={false}
+      rowProps={(item) => ({ onClick: () => onSelect(item.id_value) })}
     />
   );
 };

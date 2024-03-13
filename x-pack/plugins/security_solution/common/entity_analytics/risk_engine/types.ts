@@ -68,6 +68,7 @@ export interface RiskScore {
   category_2_count?: number;
   notes: string[];
   inputs: RiskInputs;
+  poc_contributions: Array<{ alert: unknown; score: number; norm_score: number }>;
 }
 
 export enum RiskLevels {
