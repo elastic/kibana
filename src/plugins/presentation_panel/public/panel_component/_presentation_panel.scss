@@ -147,15 +147,6 @@
 
 // EDITING MODE
 
-.embPanel__emptyTitleDragHandle {
-  position: absolute;
-  top: -16px;
-  display: none;
-  background: pink;
-  width:100px;
-  border: 1px solid $euiColorMediumShade;
-}
-
 .embPanel--editing {
   transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
   outline-width: $euiBorderWidthThin;
