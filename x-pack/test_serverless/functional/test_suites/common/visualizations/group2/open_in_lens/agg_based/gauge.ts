@@ -72,7 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
     });
 
-    it('should convert color ranges - nick', async () => {
+    it('should convert color ranges', async () => {
       const visPanel = await panelActions.getPanelHeading('Gauge - Color ranges');
       await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('gaugeChart');

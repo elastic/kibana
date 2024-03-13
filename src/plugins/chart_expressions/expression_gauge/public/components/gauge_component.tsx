@@ -196,17 +196,11 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
       bands: number[],
       percentageMode?: boolean
     ) => {
-      let stops = paletteConfig.params?.stops ?? [];
-
-      if (percentageMode) {
-        stops = bands.map((v) => v * 100);
-      }
-
-      const { min, max } = computeMinMax(paletteConfig, bands);
+      const stops = percentageMode ? bands.map((v) => v * 100) : paletteConfig.params?.stops ?? [];
 
       return paletteService
         .get(paletteConfig?.name ?? 'custom')
-        .getColorForValue?.(value, { ...paletteConfig.params, stops }, { min, max });
+        .getColorForValue?.(value, { ...paletteConfig.params, stops }, computeMinMax(paletteConfig, bands));
     },
     [paletteService]
   );
