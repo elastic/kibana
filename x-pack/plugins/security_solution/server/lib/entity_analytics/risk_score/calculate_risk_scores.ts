@@ -209,14 +209,14 @@ const buildIdentifierTypeAggregation = ({
   identifierType,
   pageSize,
   weights,
-  isAlertSamplingDisabled,
+  isAlertSamplingEnabled,
   alertSampleSizePerShard,
 }: {
   afterKeys: AfterKeys;
   identifierType: IdentifierType;
   pageSize: number;
   weights?: RiskWeights;
-  isAlertSamplingDisabled: boolean;
+  isAlertSamplingEnabled: boolean;
   alertSampleSizePerShard: number;
 }): AggregationsAggregationContainer => {
   const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType({ identifierType, weights });
@@ -228,12 +228,8 @@ const buildIdentifierTypeAggregation = ({
     globalIdentifierTypeWeight
   );
 
-  const aggs: Record<string, AggregationsAggregationContainer> = isAlertSamplingDisabled
+  const aggs: Record<string, AggregationsAggregationContainer> = isAlertSamplingEnabled
     ? {
-        inputs: riskInputsAggregation,
-        risk_details: riskDetailsAggregation,
-      }
-    : {
         top_n_per_shard: {
           sampler: {
             shard_size: alertSampleSizePerShard,
@@ -243,6 +239,10 @@ const buildIdentifierTypeAggregation = ({
             risk_details: riskDetailsAggregation,
           },
         },
+      }
+    : {
+        inputs: riskInputsAggregation,
+        risk_details: riskDetailsAggregation,
       };
 
   return {
@@ -323,7 +323,7 @@ export const calculateRiskScores = async ({
   range,
   runtimeMappings,
   weights,
-  isAlertSamplingDisabled = false,
+  isAlertSamplingEnabled = false,
   alertSampleSizePerShard = 10000,
 }: {
   assetCriticalityService: AssetCriticalityService;
@@ -343,13 +343,8 @@ export const calculateRiskScores = async ({
     }
     const identifierTypes: IdentifierType[] = identifierType ? [identifierType] : ['host', 'user'];
 
-    const query = isAlertSamplingDisabled
+    const query = isAlertSamplingEnabled
       ? {
-          bool: {
-            filter,
-          },
-        }
-      : {
           function_score: {
             query: {
               bool: {
@@ -365,6 +360,11 @@ export const calculateRiskScores = async ({
               field: 'kibana.alert.risk_score', // sort fields by risk score
             },
           },
+        }
+      : {
+          bool: {
+            filter,
+          },
         };
 
     const request = {
@@ -379,7 +379,7 @@ export const calculateRiskScores = async ({
           identifierType: _identifierType,
           pageSize,
           weights,
-          isAlertSamplingDisabled,
+          isAlertSamplingEnabled,
           alertSampleSizePerShard,
         });
         return aggs;

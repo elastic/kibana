@@ -32,7 +32,7 @@ export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] =
     pageSize: {
       type: 'integer',
     },
-    isAlertSamplingDisabled: {
+    isAlertSamplingEnabled: {
       type: 'boolean',
     },
     alertSampleSizePerShard: {
@@ -56,14 +56,14 @@ const version1: SavedObjectsModelVersion = {
     {
       type: 'mappings_addition',
       addedMappings: {
-        isAlertSamplingDisabled: { type: 'boolean' },
+        isAlertSamplingEnabled: { type: 'boolean' },
         alertSampleSizePerShard: { type: 'integer' },
       },
     },
     {
       type: 'data_backfill',
       backfillFn: () => {
-        return { attributes: { isAlertSamplingDisabled: false, alertSampleSizePerShard: 10_000 } };
+        return { attributes: { isAlertSamplingEnabled: false, alertSampleSizePerShard: 10_000 } };
       },
     },
   ],

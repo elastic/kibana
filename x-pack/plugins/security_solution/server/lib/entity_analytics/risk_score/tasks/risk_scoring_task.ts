@@ -234,7 +234,7 @@ export const runTask = async ({
       identifierType: configuredIdentifierType,
       range: configuredRange,
       pageSize,
-      isAlertSamplingDisabled,
+      isAlertSamplingEnabled,
       alertSampleSizePerShard,
     } = configuration;
     if (!enabled) {
@@ -263,7 +263,7 @@ export const runTask = async ({
           range,
           runtimeMappings,
           weights: [],
-          isAlertSamplingDisabled,
+          isAlertSamplingEnabled,
           alertSampleSizePerShard,
         });
 
