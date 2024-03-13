@@ -85,7 +85,7 @@ describe('fieldStatsUtilsTextBased', function () {
 
     it('should provide text examples', async () => {
       const searchHandler = jest.fn().mockResolvedValue({
-        values: [['a', 'b', 'c'], ['b'], ['a', 'b']],
+        values: [[['programming', 'cool']], ['elastic', 'cool'], [null]],
       });
       expect(
         await fetchAndCalculateFieldStats({
@@ -95,26 +95,26 @@ describe('fieldStatsUtilsTextBased', function () {
         })
       ).toMatchInlineSnapshot(`
         Object {
-          "sampledDocuments": 3,
-          "sampledValues": 6,
+          "sampledDocuments": 2,
+          "sampledValues": 4,
           "topValues": Object {
             "areExamples": true,
             "buckets": Array [
               Object {
-                "count": 3,
-                "key": "b",
-              },
-              Object {
                 "count": 2,
-                "key": "a",
+                "key": "cool",
               },
               Object {
                 "count": 1,
-                "key": "c",
+                "key": "elastic",
+              },
+              Object {
+                "count": 1,
+                "key": "programming",
               },
             ],
           },
-          "totalDocuments": 3,
+          "totalDocuments": 2,
         }
       `);
 

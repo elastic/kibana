@@ -118,9 +118,9 @@ export async function getSimpleTextExamples(
     | LIMIT ${SIMPLE_EXAMPLES_FETCH_SIZE}`;
 
   const result = await searchHandler({ query: esqlQuery });
-  const values = ((result?.values as Array<[string | string[]]>) || []).filter(
-    (value) => !(Array.isArray(value) && value.length === 1 && value[0] === null)
-  );
+  const values = ((result?.values as Array<[string | string[]]>) || [])
+    .map((value) => (Array.isArray(value) && value.length === 1 ? value[0] : value))
+    .filter((value) => value !== null);
 
   if (!values?.length) {
     return {};
