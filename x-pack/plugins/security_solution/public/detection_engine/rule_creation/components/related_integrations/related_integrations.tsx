@@ -58,9 +58,14 @@ export function RelatedIntegrations({ field }: RelatedIntegrationsProps): JSX.El
 function transformIntegrationToOption(
   integration: Integration
 ): EuiComboBoxOptionOption<RelatedIntegration> {
+  const label = [
+    integration.integration_title ?? integration.package_title,
+    integration.is_enabled ? '[Installed: enabled]' : integration.is_installed ? '[Installed]' : '',
+  ].join(' ');
+
   return {
     key: getKey(integration.package_name, integration.integration_name),
-    label: integration.integration_title ?? integration.package_title,
+    label,
     value: {
       package: integration.package_name,
       version: integration.installed_package_version
@@ -68,6 +73,7 @@ function transformIntegrationToOption(
         : `^${integration.latest_package_version}`,
       integration: integration.integration_name,
     },
+    color: integration.is_enabled ? 'success' : integration.is_installed ? 'primary' : undefined,
   };
 }
 
