@@ -8,7 +8,10 @@
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 
-import dataView from '../kbn_archives/large_arrays_data_view.json';
+// Linting doesn't allow importing from the kbnArchive file like this:
+// import dataView from '../kbn_archives/large_arrays_data_view.json';
+// So for now we're just copying over the data view id:
+const dataViewId = '69dc58dc-80f7-4c46-8fa1-eb29b0794c52';
 
 export const journey = new Journey({
   kbnArchives: ['x-pack/performance/kbn_archives/large_arrays_data_view'],
@@ -19,7 +22,7 @@ export const journey = new Journey({
     // the analysis directly on page load without any necessary user interactions.
     await page.goto(
       kbnUrl.get(
-        `app/ml/aiops/log_rate_analysis?index=${dataView.id}&_g=%28refreshInterval%3A%28pause%3A%21t%2Cvalue%3A60000%29%2Ctime%3A%28from%3A%272019-07-01T15%3A35%3A38.700Z%27%2Cto%3A%272019-07-05T15%3A35%3A38.700Z%27%29%29&_a=%28logRateAnalysis%3A%28filters%3A%21%28%29%2CsearchQuery%3A%28match_all%3A%28%29%29%2CsearchQueryLanguage%3Akuery%2CsearchString%3A%27%27%2Cwp%3A%28bMax%3A1562198400000%2CbMin%3A1562097600000%2CdMax%3A1562270400000%2CdMin%3A1562234400000%29%29%29`
+        `app/ml/aiops/log_rate_analysis?index=${dataViewId}&_g=%28refreshInterval%3A%28pause%3A%21t%2Cvalue%3A60000%29%2Ctime%3A%28from%3A%272019-07-01T15%3A35%3A38.700Z%27%2Cto%3A%272019-07-05T15%3A35%3A38.700Z%27%29%29&_a=%28logRateAnalysis%3A%28filters%3A%21%28%29%2CsearchQuery%3A%28match_all%3A%28%29%29%2CsearchQueryLanguage%3Akuery%2CsearchString%3A%27%27%2Cwp%3A%28bMax%3A1562198400000%2CbMin%3A1562097600000%2CdMax%3A1562270400000%2CdMin%3A1562234400000%29%29%29`
       )
     );
 
