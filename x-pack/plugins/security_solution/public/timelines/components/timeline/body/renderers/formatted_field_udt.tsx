@@ -34,7 +34,7 @@ export const getFormattedFields = ({
           return (
             <DefaultCellRenderer
               {...props}
-              isDraggable={true}
+              isDraggable={false}
               isTimeline={true}
               isDetails={false}
               isExpanded={false}

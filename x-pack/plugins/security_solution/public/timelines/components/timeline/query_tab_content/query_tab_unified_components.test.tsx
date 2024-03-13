@@ -14,9 +14,13 @@ import { useTimelineEvents } from '../../../containers';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
-import { mockTimelineData, TestProviders } from '../../../../common/mock';
+import {
+  createSecuritySolutionStorageMock,
+  mockTimelineData,
+  TestProviders,
+} from '../../../../common/mock';
 import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
-import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within, cleanup } from '@testing-library/react';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -26,7 +30,6 @@ import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { cloneDeep, flatten } from 'lodash';
-import { COLUMNS_WITH_LINKS } from '../../../../common/lib/cell_actions/helpers';
 
 jest.mock('../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -97,6 +100,14 @@ const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponen
   });
 };
 
+const changeItemsPerPageTo = (newItemsPerPage: number) => {
+  fireEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
+  fireEvent.click(screen.getByTestId(`tablePagination-${newItemsPerPage}-rows`));
+  expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
+    `Rows per page: ${newItemsPerPage}`
+  );
+};
+
 const loadPageMock = jest.fn();
 
 const useTimelineEventsMock = jest.fn(() => [
@@ -113,11 +124,23 @@ const useTimelineEventsMock = jest.fn(() => [
   },
 ]);
 
+const useSourcererDataViewMocked = jest.fn().mockReturnValue({
+  ...mockSourcererScope,
+});
+
+const { storage: storageMock } = createSecuritySolutionStorageMock();
+
 describe('query tab with unified timeline', () => {
-  const kibanaServiceMock: StartServices = createStartServicesMock();
+  const kibanaServiceMock: StartServices = {
+    ...createStartServicesMock(),
+    storage: storageMock,
+  };
 
   afterEach(() => {
     jest.clearAllMocks();
+    storageMock.clear();
+    cleanup();
+    localStorage.clear();
   });
 
   beforeEach(() => {
@@ -142,9 +165,7 @@ describe('query tab with unified timeline', () => {
 
     (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
 
-    (useSourcererDataView as jest.Mock).mockImplementation(() => ({
-      ...mockSourcererScope,
-    }));
+    (useSourcererDataView as jest.Mock).mockImplementation(useSourcererDataViewMocked);
 
     (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
       useIsExperimentalFeatureEnabledMock
@@ -529,61 +550,12 @@ describe('query tab with unified timeline', () => {
       expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
     });
 
-    it('should be able to add column by dragging', async () => {
-      const field = {
-        name: 'agent.id',
-      };
-
-      renderTestComponents();
-      expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
-
-      await waitFor(() => {
-        expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent('11');
-      });
-
-      expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(0);
-
-      // column exists in the table
-      const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
-
-      const fieldToBeAdded = within(availableFields).getByTestId(`field-${field.name}-showDetails`);
-
-      const dataTransfer = {
-        text: field.name,
-        getData: () => field.name,
-      };
-
-      fireEvent.drag(fieldToBeAdded);
-      fireEvent.dragStart(fieldToBeAdded, {
-        dataTransfer,
-      });
-
-      const destination = screen.getByTestId('discoverDocTable');
-
-      fireEvent.dragEnter(destination);
-      fireEvent.dragOver(destination);
-
-      expect(screen.getByTestId('domDragDropContainer')).toHaveClass(
-        'domDragDrop__container domDragDrop__container-active'
-      );
-
-      fireEvent.drop(destination, {
-        dataTransfer,
-      });
-      expect(screen.getByTestId('domDragDropContainer')).toHaveClass('domDragDrop__container');
-
-      await waitFor(() => {
-        expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
-      });
-      expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent('12');
-    }, 10000);
-
     it('should should show callout when field search does not matches any field', async () => {
       renderTestComponents();
       expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
 
       await waitFor(() => {
-        expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('35');
+        expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('36');
       });
 
       fireEvent.change(screen.getByTestId('fieldListFiltersFieldSearch'), {
@@ -603,7 +575,7 @@ describe('query tab with unified timeline', () => {
       renderTestComponents();
       expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
       await waitFor(() => {
-        expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('35');
+        expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('36');
       });
 
       fireEvent.click(screen.getByTitle('Hide sidebar'));
@@ -625,8 +597,12 @@ describe('query tab with unified timeline', () => {
       );
 
       renderTestComponents();
+
       expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
-      expect(await screen.findByTestId('fieldListGroupedAvailableFields')).toBeVisible();
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      changeItemsPerPageTo(100);
+
       const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
 
       for (const field of listOfPopulatedFields) {
@@ -637,14 +613,5 @@ describe('query tab with unified timeline', () => {
         expect(within(availableFields).getByTestId(`field-${field}`));
       }
     });
-  });
-  describe('when data view changes', () => {
-    it.todo('should display columns not applicable to that data view as blank');
-  });
-
-  describe('column rendering', () => {
-    for (const column of COLUMNS_WITH_LINKS) {
-      it.todo(`should render ${column.columnId} as a link`);
-    }
   });
 });

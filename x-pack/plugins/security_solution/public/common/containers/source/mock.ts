@@ -542,6 +542,20 @@ export const mockBrowserFields: BrowserFields = {
       },
     },
   },
+
+  process: {
+    fields: {
+      'process.args': {
+        name: 'process.args',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        format: '',
+      },
+    },
+  },
 };
 
 export const mockIndexFields = flatten(
