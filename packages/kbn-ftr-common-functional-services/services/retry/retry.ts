@@ -10,6 +10,12 @@ import { FtrService } from '../ftr_provider_context';
 import { retryForSuccess } from './retry_for_success';
 import { retryForTruthy } from './retry_for_truthy';
 
+interface TryWithAttemptsOptions {
+  retries?: number;
+  timeout?: number;
+  retryDelay?: number;
+}
+
 export class RetryService extends FtrService {
   private readonly config = this.ctx.getService('config');
   private readonly log = this.ctx.getService('log');
@@ -70,5 +76,39 @@ export class RetryService extends FtrService {
       block,
       onFailureBlock,
     });
+  }
+
+  public async tryWithRetries<T>(
+    block: () => Promise<T>,
+    options: TryWithAttemptsOptions = {}
+  ): Promise<T> {
+    const {
+      retries = 2,
+      timeout = this.config.get('timeouts.waitFor'),
+      retryDelay = 200,
+    } = options;
+    let retryAttempt = 0;
+    const result = await this.tryForTime(
+      timeout,
+      async () => {
+        if (retryAttempt > retries) {
+          // Log error message if we reached the maximum number of retries
+          // but don't throw an error, return it to break the retry loop.
+          return new Error(`Service reached the retries limit: ${retries}`);
+        }
+
+        retryAttempt = retryAttempt + 1;
+
+        return block();
+      },
+      undefined,
+      retryDelay
+    );
+
+    if (result instanceof Error) {
+      throw result;
+    }
+
+    return result;
   }
 }
