@@ -42,6 +42,7 @@ export const bulkCreateWithSuppression = async <
   suppressionWindow,
   alertTimestampOverride,
   isSuppressionPerRuleExecution,
+  maxAlerts,
 }: {
   alertWithSuppression: SuppressedAlertService;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
@@ -50,6 +51,7 @@ export const bulkCreateWithSuppression = async <
   suppressionWindow: string;
   alertTimestampOverride: Date | undefined;
   isSuppressionPerRuleExecution?: boolean;
+  maxAlerts?: number;
 }): Promise<GenericBulkCreateResponse<T>> => {
   if (wrappedDocs.length === 0) {
     return {
@@ -94,7 +96,8 @@ export const bulkCreateWithSuppression = async <
     suppressionWindow,
     enrichAlertsWrapper,
     alertTimestampOverride,
-    isSuppressionPerRuleExecution
+    isSuppressionPerRuleExecution,
+    maxAlerts
   );
 
   const end = performance.now();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isObject } from 'lodash';
+import { isObject, chunk } from 'lodash';
 
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
@@ -238,38 +238,51 @@ export const createNewTermsAlertType = (
             };
           });
 
-          if (isAlertSuppressionActive) {
-            const bulkCreateResult = await bulkCreateSuppressedAlertsInMemoryForNewTerms({
-              eventsAndTerms,
-              toReturn: result,
-              wrapHits,
-              bulkCreate,
-              services,
-              ruleExecutionLogger,
-              tuple,
-              alertSuppression: params.alertSuppression,
-              wrapSuppressedHits,
-              alertTimestampOverride,
-              alertWithSuppression,
-            });
+          let bulkCreateResult;
 
-            return bulkCreateResult;
-          } else {
-            const wrappedAlerts = wrapHits(eventsAndTerms);
+          // wrap and create alerts by chunks
+          // large number of matches, processed in possibly 10,000 size of events and terms
+          // can significantly affect Kibana performance
+          const eventAndTermsChunks = chunk(eventsAndTerms, params.maxSignals);
 
-            const bulkCreateResult = await bulkCreate(
-              wrappedAlerts,
-              params.maxSignals - result.createdSignalsCount,
-              createEnrichEventsFunction({
+          for (let i = 0; i < eventAndTermsChunks.length; i++) {
+            const eventAndTermsChunk = eventAndTermsChunks[i];
+
+            if (isAlertSuppressionActive) {
+              bulkCreateResult = await bulkCreateSuppressedAlertsInMemoryForNewTerms({
+                eventsAndTerms: eventAndTermsChunk,
+                toReturn: result,
+                wrapHits,
+                bulkCreate,
                 services,
-                logger: ruleExecutionLogger,
-              })
-            );
+                ruleExecutionLogger,
+                tuple,
+                alertSuppression: params.alertSuppression,
+                wrapSuppressedHits,
+                alertTimestampOverride,
+                alertWithSuppression,
+              });
+            } else {
+              const wrappedAlerts = wrapHits(eventAndTermsChunk);
 
-            addToSearchAfterReturn({ current: result, next: bulkCreateResult });
+              bulkCreateResult = await bulkCreate(
+                wrappedAlerts,
+                params.maxSignals - result.createdSignalsCount,
+                createEnrichEventsFunction({
+                  services,
+                  logger: ruleExecutionLogger,
+                })
+              );
 
-            return bulkCreateResult;
+              addToSearchAfterReturn({ current: result, next: bulkCreateResult });
+            }
+
+            if (bulkCreateResult.alertsWereTruncated) {
+              break;
+            }
           }
+
+          return bulkCreateResult;
         };
 
         // separate route for multiple new terms

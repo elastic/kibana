@@ -163,6 +163,7 @@ export const executeBulkCreateAlerts = async <
     suppressionWindow,
     alertTimestampOverride,
     isSuppressionPerRuleExecution: !suppressionDuration,
+    maxAlerts: tuple.maxSignals - toReturn.createdSignalsCount,
   });
 
   addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });

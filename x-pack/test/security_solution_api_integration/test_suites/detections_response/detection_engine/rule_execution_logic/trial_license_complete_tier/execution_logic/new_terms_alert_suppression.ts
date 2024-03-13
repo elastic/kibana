@@ -1821,7 +1821,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should not suppress more than limited number 9,999 for single new terms field', async () => {
+      it('should not suppress more than limited number 500 (max_signals * 5) for single new terms field', async () => {
         const id = uuidv4();
 
         await indexGeneratedDocuments({
@@ -1876,11 +1876,11 @@ export default ({ getService }: FtrProviderContext) => {
               value: ['agent-a'],
             },
           ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 9999,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 499,
         });
       });
 
-      it.skip('should generate up to max_signals alerts', async () => {
+      it('should generate up to max_signals alerts', async () => {
         const id = uuidv4();
         const firstTimestamp = '2020-10-28T06:05:00.000Z';
         const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -1925,10 +1925,9 @@ export default ({ getService }: FtrProviderContext) => {
           timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
           invocationCount: 1,
         });
-
-        // expect(logs[0].warnings).toEqual(
-        //   expect.arrayContaining([getSuppressionMaxAlertsWarning()])
-        // );
+        expect(logs[0].warnings).toEqual(
+          expect.arrayContaining([getSuppressionMaxAlertsWarning()])
+        );
 
         const previewAlerts = await getPreviewAlerts({
           es,
