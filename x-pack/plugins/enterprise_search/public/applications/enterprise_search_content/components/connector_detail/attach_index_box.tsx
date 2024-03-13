@@ -35,6 +35,20 @@ import { FetchAllIndicesAPILogic } from '../../api/index/fetch_all_indices_api_l
 
 import { AttachIndexLogic } from './attach_index_logic';
 
+const CREATE_NEW_INDEX_GROUP_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.attachIndexBox.optionsGroup.createNewIndex',
+  {
+    defaultMessage: 'Create new index',
+  }
+);
+
+const SELECT_EXISTING_INDEX_GROUP_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.attachIndexBox.optionsGroup.selectExistingIndex',
+  {
+    defaultMessage: 'Select existing index',
+  }
+);
+
 export interface AttachIndexBoxProps {
   connector: Connector;
 }
@@ -59,7 +73,11 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
       : undefined
   );
   const [selectedLanguage] = useState<string>();
-  const [query, setQuery] = useState<string>();
+  const [query, setQuery] = useState<{
+    hasMatchingOptions: boolean;
+    isFullMatch: boolean;
+    searchValue: string;
+  }>();
 
   const { makeRequest } = useActions(FetchAllIndicesAPILogic);
   const { data, status } = useValues(FetchAllIndicesAPILogic);
@@ -73,13 +91,33 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
     }
   };
 
-  const options: Array<EuiComboBoxOptionOption<{ label: string }>> = isLoading
+  const options: Array<EuiComboBoxOptionOption<string>> = isLoading
     ? []
     : data?.indices.map((index) => {
         return {
           label: index.name,
         };
       }) ?? [];
+
+  const shouldPrependUserInputAsOption =
+    !!query?.searchValue && query.hasMatchingOptions && !query.isFullMatch;
+
+  const groupedOptions: Array<EuiComboBoxOptionOption<string>> = shouldPrependUserInputAsOption
+    ? [
+        ...[
+          {
+            label: CREATE_NEW_INDEX_GROUP_LABEL,
+            options: [
+              {
+                label: query.searchValue,
+              },
+            ],
+          },
+        ],
+        ...[{ label: SELECT_EXISTING_INDEX_GROUP_LABEL, options }],
+      ]
+    : [{ label: SELECT_EXISTING_INDEX_GROUP_LABEL, options }];
+
   useEffect(() => {
     setConnector(connector);
     makeRequest({});
@@ -90,7 +128,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
 
   useEffect(() => {
     if (query) {
-      checkIndexExists({ indexName: query });
+      checkIndexExists({ indexName: query.searchValue });
     }
   }, [query]);
 
@@ -108,7 +146,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
   }, [hash]);
 
   const error =
-    !!query && indexExists[query]
+    !!query && indexExists[query.searchValue]
       ? i18n.translate(
           'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexErrorTextLabel',
           {
@@ -168,15 +206,30 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                 }
               )}
               isLoading={isLoading}
-              options={options}
+              options={groupedOptions}
+              onSearchChange={(searchValue, hasMatchingOptions) => {
+                setQuery({
+                  hasMatchingOptions: !!hasMatchingOptions,
+                  isFullMatch: options.some((option) => option.label === searchValue),
+                  searchValue,
+                });
+              }}
               onChange={(selection) => {
-                setSelectedIndex(selection[0] || undefined);
+                const currentSelection = selection[0] ?? undefined;
+                const selectedIndexOption = currentSelection
+                  ? {
+                      label: currentSelection.label,
+                      shouldCreate:
+                        shouldPrependUserInputAsOption &&
+                        !!(currentSelection?.label === query?.searchValue),
+                    }
+                  : undefined;
+                setSelectedIndex(selectedIndexOption);
               }}
               selectedOptions={selectedIndex ? [selectedIndex] : undefined}
               onCreateOption={(value) => {
                 setSelectedIndex({ label: value.trim(), shouldCreate: true });
               }}
-              onSearchChange={(value) => setQuery(value)}
               singleSelection
             />
           </EuiFormRow>

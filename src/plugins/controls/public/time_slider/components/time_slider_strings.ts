@@ -18,5 +18,25 @@ export const TimeSliderStrings = {
       i18n.translate('controls.timeSlider.settings.unpinStart', {
         defaultMessage: 'Unpin start',
       }),
+    getPlayButtonAriaLabel: (isPaused: boolean) =>
+      isPaused
+        ? i18n.translate('controls.timeSlider.playLabel', {
+            defaultMessage: 'Play',
+          })
+        : i18n.translate('controls.timeSlider.pauseLabel', {
+            defaultMessage: 'Pause',
+          }),
+    getPreviousButtonAriaLabel: () =>
+      i18n.translate('controls.timeSlider.previousLabel', {
+        defaultMessage: 'Previous time window',
+      }),
+    getNextButtonAriaLabel: () =>
+      i18n.translate('controls.timeSlider.nextLabel', {
+        defaultMessage: 'Next time window',
+      }),
+    getPlayButtonDisabledTooltip: () =>
+      i18n.translate('controls.timeSlider.playButtonTooltip.disabled', {
+        defaultMessage: '"Apply selections automatically" is disabled in Control Settings.',
+      }),
   },
 };
