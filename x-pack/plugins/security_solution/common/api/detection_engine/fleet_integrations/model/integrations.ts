@@ -67,6 +67,12 @@ export interface Integration {
   is_enabled: boolean;
 
   /**
+   * Version of the latest available package. Semver-compatible.
+   * @example '1.2.3'
+   */
+  latest_package_version: string;
+
+  /**
    * Version of the installed package. Semver-compatible.
    * @example '1.2.3'
    */

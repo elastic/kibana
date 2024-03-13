@@ -36,6 +36,7 @@ export function extractIntegrations(
       const integration: Integration = {
         package_name: packageName,
         package_title: packageTitle,
+        latest_package_version: fleetPackage.version,
         installed_package_version: installedPackageVersion,
         integration_name: packageName !== integrationName ? integrationName : undefined,
         integration_title: packageName !== integrationName ? integrationTitle : undefined,

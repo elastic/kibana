@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import type { Integration, RelatedIntegration } from '../../../../../common/api/detection_engine';
@@ -28,16 +28,20 @@ export function RelatedIntegrations({ field }: RelatedIntegrationsProps): JSX.El
     [field, options]
   );
 
-  const handleChange = (
-    changedSelectedOptions: Array<EuiComboBoxOptionOption<RelatedIntegration>>
-  ) => {
-    field.setValue(changedSelectedOptions.map((option) => option.value));
-  };
-  const handleSearchChange = (value: string) => {
-    if (value !== undefined) {
-      field.clearErrors(VALIDATION_TYPES.ARRAY_ITEM);
-    }
-  };
+  const handleChange = useCallback(
+    (changedSelectedOptions: Array<EuiComboBoxOptionOption<RelatedIntegration>>) => {
+      field.setValue(changedSelectedOptions.map((option) => option.value));
+    },
+    [field]
+  );
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      if (value !== undefined) {
+        field.clearErrors(VALIDATION_TYPES.ARRAY_ITEM);
+      }
+    },
+    [field]
+  );
 
   return (
     <EuiComboBox<RelatedIntegration>
@@ -59,7 +63,9 @@ function transformIntegrationToOption(
     label: integration.integration_title ?? integration.package_title,
     value: {
       package: integration.package_name,
-      version: `^${integration.installed_package_version}`,
+      version: integration.installed_package_version
+        ? `^${integration.installed_package_version}`
+        : `^${integration.latest_package_version}`,
       integration: integration.integration_name,
     },
   };
