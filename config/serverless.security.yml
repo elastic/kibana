@@ -69,3 +69,6 @@ xpack.ml.compatibleModuleType: 'security'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
+
+# Entity Analytics
+xpack.securitySolution.entityAnalytics.alertSampling.enabled: true
