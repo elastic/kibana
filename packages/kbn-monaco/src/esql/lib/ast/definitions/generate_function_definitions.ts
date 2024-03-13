@@ -1196,6 +1196,15 @@ const showFunctionsOutput = {
         ? ensureArray(value[columnIndices.optionalArgs]).length
         : undefined;
 
+    const getReturnType = () => {
+      const allReturnTypes = dedupe(
+        value[columnIndices.returnType].split('|').map(elasticsearchToKibanaType)
+      );
+
+      // our client-side parser doesn't currently support multiple return types
+      return allReturnTypes.length === 1 ? allReturnTypes[0] : 'any';
+    };
+
     const functionDefinition = {
       name: value[columnIndices.name],
       description: value[columnIndices.description],
@@ -1206,7 +1215,7 @@ const showFunctionsOutput = {
             type: kbnArgTypes[i],
             optional: ensureArray(value[columnIndices.optionalArgs])[i],
           })),
-          returnType: value[columnIndices.returnType],
+          returnType: getReturnType(),
           minParams: getMinParams(),
         },
       ],

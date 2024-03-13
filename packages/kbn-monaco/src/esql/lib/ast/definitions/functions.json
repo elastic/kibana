@@ -13,7 +13,7 @@
             "optional": false
           }
         ],
-        "returnType": "double|integer|long|unsigned_long"
+        "returnType": "number"
       }
     ]
   },
@@ -31,7 +31,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -49,7 +49,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -67,7 +67,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -92,7 +92,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -136,7 +136,7 @@
             "optional": false
           }
         ],
-        "returnType": "double|date"
+        "returnType": "any"
       }
     ]
   },
@@ -154,7 +154,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -186,7 +186,7 @@
             "optional": false
           }
         ],
-        "returnType": "boolean|cartesian_point|date|double|geo_point|integer|ip|keyword|long|text|unsigned_long|version",
+        "returnType": "any",
         "minParams": 2
       }
     ]
@@ -205,7 +205,7 @@
             "optional": false
           }
         ],
-        "returnType": "double|integer|long|unsigned_long"
+        "returnType": "number"
       }
     ]
   },
@@ -260,7 +260,7 @@
             "optional": false
           }
         ],
-        "returnType": "boolean|text|integer|keyword|long",
+        "returnType": "any",
         "minParams": 2
       }
     ]
@@ -286,7 +286,7 @@
             "optional": false
           }
         ],
-        "returnType": "keyword",
+        "returnType": "string",
         "minParams": 2
       }
     ]
@@ -305,7 +305,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -323,7 +323,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -348,7 +348,7 @@
             "optional": true
           }
         ],
-        "returnType": "long"
+        "returnType": "number"
       }
     ]
   },
@@ -380,7 +380,7 @@
             "optional": true
           }
         ],
-        "returnType": "long"
+        "returnType": "number"
       }
     ]
   },
@@ -412,7 +412,7 @@
             "optional": false
           }
         ],
-        "returnType": "integer"
+        "returnType": "number"
       }
     ]
   },
@@ -437,7 +437,7 @@
             "optional": false
           }
         ],
-        "returnType": "long"
+        "returnType": "number"
       }
     ]
   },
@@ -462,7 +462,7 @@
             "optional": false
           }
         ],
-        "returnType": "keyword"
+        "returnType": "string"
       }
     ]
   },
@@ -522,7 +522,7 @@
     "signatures": [
       {
         "params": [],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -565,7 +565,7 @@
             "optional": false
           }
         ],
-        "returnType": "double|integer|long|unsigned_long"
+        "returnType": "number"
       }
     ]
   },
@@ -598,7 +598,7 @@
             "optional": false
           }
         ],
-        "returnType": "integer|long|double|boolean|keyword|text|ip|version",
+        "returnType": "any",
         "minParams": 2
       }
     ]
@@ -632,7 +632,7 @@
             "optional": false
           }
         ],
-        "returnType": "integer|long|double|boolean|keyword|text|ip|version",
+        "returnType": "any",
         "minParams": 2
       }
     ]
@@ -658,7 +658,7 @@
             "optional": false
           }
         ],
-        "returnType": "keyword"
+        "returnType": "string"
       }
     ]
   },
@@ -676,7 +676,7 @@
             "optional": false
           }
         ],
-        "returnType": "integer"
+        "returnType": "number"
       }
     ]
   },
@@ -701,7 +701,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -719,7 +719,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -737,7 +737,7 @@
             "optional": false
           }
         ],
-        "returnType": "keyword|text"
+        "returnType": "string"
       }
     ]
   },
@@ -755,7 +755,7 @@
             "optional": false
           }
         ],
-        "returnType": "double|integer|long"
+        "returnType": "number"
       }
     ]
   },
@@ -773,7 +773,7 @@
             "optional": false
           }
         ],
-        "returnType": "double|integer|long"
+        "returnType": "number"
       }
     ]
   },
@@ -791,7 +791,7 @@
             "optional": false
           }
         ],
-        "returnType": "double|integer|long"
+        "returnType": "number"
       }
     ]
   },
@@ -809,7 +809,7 @@
             "optional": false
           }
         ],
-        "returnType": "double|integer|long"
+        "returnType": "number"
       }
     ]
   },
@@ -827,7 +827,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -852,7 +852,7 @@
             "optional": false
           }
         ],
-        "returnType": "keyword"
+        "returnType": "string"
       }
     ]
   },
@@ -879,7 +879,7 @@
             "optional": false
           }
         ],
-        "returnType": "integer"
+        "returnType": "number"
       }
     ]
   },
@@ -902,7 +902,7 @@
             "optional": false
           }
         ],
-        "returnType": "boolean|date|double|integer|ip|keyword|long|text|version"
+        "returnType": "any"
       }
     ]
   },
@@ -929,7 +929,7 @@
             "optional": false
           }
         ],
-        "returnType": "boolean|cartesian_point|cartesian_shape|date|double|geo_point|geo_shape|integer|ip|keyword|long|text|unsigned_long|version"
+        "returnType": "any"
       }
     ]
   },
@@ -956,7 +956,7 @@
             "optional": false
           }
         ],
-        "returnType": "boolean|cartesian_point|cartesian_shape|date|double|geo_point|geo_shape|integer|ip|keyword|long|text|unsigned_long|version"
+        "returnType": "any"
       }
     ]
   },
@@ -979,7 +979,7 @@
             "optional": false
           }
         ],
-        "returnType": "boolean|date|double|integer|ip|keyword|long|text|unsigned_long|version"
+        "returnType": "any"
       }
     ]
   },
@@ -997,7 +997,7 @@
             "optional": false
           }
         ],
-        "returnType": "double|integer|long|unsigned_long"
+        "returnType": "number"
       }
     ]
   },
@@ -1020,7 +1020,7 @@
             "optional": false
           }
         ],
-        "returnType": "boolean|date|double|integer|ip|keyword|long|text|unsigned_long|version"
+        "returnType": "any"
       }
     ]
   },
@@ -1038,7 +1038,7 @@
             "optional": false
           }
         ],
-        "returnType": "double|integer|long|unsigned_long"
+        "returnType": "number"
       }
     ]
   },
@@ -1073,7 +1073,7 @@
             "optional": false
           }
         ],
-        "returnType": "double|integer|long"
+        "returnType": "number"
       }
     ]
   },
@@ -1083,7 +1083,7 @@
     "signatures": [
       {
         "params": [],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -1108,7 +1108,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -1140,7 +1140,7 @@
             "optional": false
           }
         ],
-        "returnType": "keyword"
+        "returnType": "string"
       }
     ]
   },
@@ -1165,7 +1165,7 @@
             "optional": false
           }
         ],
-        "returnType": "keyword"
+        "returnType": "string"
       }
     ]
   },
@@ -1190,7 +1190,7 @@
             "optional": true
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -1208,7 +1208,7 @@
             "optional": false
           }
         ],
-        "returnType": "keyword|text"
+        "returnType": "string"
       }
     ]
   },
@@ -1226,7 +1226,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -1244,7 +1244,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -1269,7 +1269,7 @@
             "optional": false
           }
         ],
-        "returnType": "keyword"
+        "returnType": "string"
       }
     ]
   },
@@ -1287,7 +1287,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -1306,7 +1306,7 @@
             "optional": false
           }
         ],
-        "returnType": "geo_point|cartesian_point"
+        "returnType": "any"
       }
     ]
   },
@@ -1363,7 +1363,7 @@
             "optional": true
           }
         ],
-        "returnType": "keyword"
+        "returnType": "string"
       }
     ]
   },
@@ -1381,7 +1381,7 @@
             "optional": false
           }
         ],
-        "returnType": "long"
+        "returnType": "number"
       }
     ]
   },
@@ -1399,7 +1399,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -1417,7 +1417,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -1427,7 +1427,7 @@
     "signatures": [
       {
         "params": [],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -1547,7 +1547,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -1565,7 +1565,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -1586,7 +1586,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -1666,7 +1666,7 @@
             "optional": false
           }
         ],
-        "returnType": "integer"
+        "returnType": "number"
       }
     ]
   },
@@ -1687,7 +1687,7 @@
             "optional": false
           }
         ],
-        "returnType": "integer"
+        "returnType": "number"
       }
     ]
   },
@@ -1727,7 +1727,7 @@
             "optional": false
           }
         ],
-        "returnType": "long"
+        "returnType": "number"
       }
     ]
   },
@@ -1745,7 +1745,7 @@
             "optional": false
           }
         ],
-        "returnType": "keyword|text"
+        "returnType": "string"
       }
     ]
   },
@@ -1763,7 +1763,7 @@
             "optional": false
           }
         ],
-        "returnType": "double"
+        "returnType": "number"
       }
     ]
   },
@@ -1790,7 +1790,7 @@
             "optional": false
           }
         ],
-        "returnType": "keyword"
+        "returnType": "string"
       }
     ]
   },
@@ -1817,7 +1817,7 @@
             "optional": false
           }
         ],
-        "returnType": "keyword"
+        "returnType": "string"
       }
     ]
   },
@@ -1838,7 +1838,7 @@
             "optional": false
           }
         ],
-        "returnType": "unsigned_long"
+        "returnType": "number"
       }
     ]
   },
@@ -1859,7 +1859,7 @@
             "optional": false
           }
         ],
-        "returnType": "unsigned_long"
+        "returnType": "number"
       }
     ]
   },
@@ -1880,7 +1880,7 @@
             "optional": false
           }
         ],
-        "returnType": "unsigned_long"
+        "returnType": "number"
       }
     ]
   },
@@ -1898,7 +1898,7 @@
             "optional": false
           }
         ],
-        "returnType": "keyword|text"
+        "returnType": "string"
       }
     ]
   },
@@ -1954,7 +1954,7 @@
             "optional": false
           }
         ],
-        "returnType": "keyword|text"
+        "returnType": "string"
       }
     ]
   }
