@@ -14,6 +14,7 @@ import type {
   BulkUpdateTaskResult,
 } from '@kbn/task-manager-plugin/server';
 import { restApiKeySchema } from '@kbn/security-plugin-types-server';
+import { ROUTE_TAG_AUTH_FLOW } from '@kbn/security-plugin/server';
 import { PluginStartDependencies } from '.';
 
 export const SESSION_INDEX_CLEANUP_TASK_NAME = 'session_cleanup';
@@ -50,7 +51,7 @@ export function initRoutes(
             message: schema.maybe(schema.string()),
           }),
         },
-        options: { tags: isAuthFlow ? ['security:authFlow'] : [] },
+        options: { tags: isAuthFlow ? [ROUTE_TAG_AUTH_FLOW] : [], authRequired: !isAuthFlow },
       },
       (context, request, response) => {
         if (request.query.statusCode) {
