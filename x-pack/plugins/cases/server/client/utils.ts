@@ -34,7 +34,7 @@ import {
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesSearchParams } from './types';
 
-import { decodeWithExcessOrThrow } from '../../common/api';
+import { decodeWithExcessOrThrow } from '../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
   NO_ASSIGNEES_FILTERING_KEYWORD,

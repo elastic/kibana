@@ -11,7 +11,7 @@ import { validateMaxUserActions } from '../../../common/utils';
 import type { AttachmentRequest } from '../../../common/types/api';
 import { BulkCreateAttachmentsRequestRt } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
-import { decodeWithExcessOrThrow } from '../../../common/api';
+import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
