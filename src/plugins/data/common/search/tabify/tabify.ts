@@ -146,7 +146,7 @@ export function tabifyAggResponse(
   }
 
   const write = new TabbedAggResponseWriter(aggConfigs, respOpts || {});
-  // This is a very special case where
+  // Check whether there's a time shift for a count operation at root level
   const hasMultipleDocCountAtRootWithFilters = Object.keys(esResponse.aggregations ?? {}).some(
     (key) => /doc_count_/.test(key)
   );
@@ -155,12 +155,14 @@ export function tabifyAggResponse(
     ? esResponse.aggregations?.sampling
     : esResponse.aggregations;
   const topLevelBucket: AggResponseBucket = {
-    ...aggsRoot,
-    doc_count: aggsRoot?.doc_count,
+    ...(aggConfigs.isSamplingEnabled()
+      ? esResponse.aggregations?.sampling
+      : esResponse.aggregations),
+    doc_count: esResponse.aggregations?.doc_count,
   };
 
   // The fix itself is one line, but it's a bit hard to clear assess the full impact of it
-  // therefore here's a check to scope down the impact to the known scenario with the bug
+  // therefore here's a check to scope down the impact to the known scenario with the bug https://github.com/elastic/kibana/issues/178073
   // this can be lifted off once the full impact is assessed
   if (!topLevelBucket.doc_count) {
     if (!hasMultipleDocCountAtRootWithFilters) {
