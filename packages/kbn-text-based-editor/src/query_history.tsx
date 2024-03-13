@@ -22,9 +22,12 @@ import {
   CustomItemAction,
   EuiCopy,
   EuiToolTip,
+  euiScrollBarStyles,
 } from '@elastic/eui';
 import { css, Interpolation, Theme } from '@emotion/react';
 import { type QueryHistoryItem, getHistoryItems } from './history_localStorage';
+
+const CONTAINER_MAX_HEIGHT = 190;
 
 export function QueryHistoryAction({
   toggleHistory,
@@ -163,6 +166,9 @@ export function QueryHistory({
   containerWidth: number;
   onUpdateAndSubmit: (qs: string) => void;
 }) {
+  const theme = useEuiTheme();
+  const scrollBarStyles = euiScrollBarStyles(theme);
+
   const actions: Array<CustomItemAction<QueryHistoryItem>> = useMemo(() => {
     return [
       {
@@ -238,8 +244,7 @@ export function QueryHistory({
     enableAllColumns: false,
     readOnly: false,
   };
-
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme } = theme;
   // get history items from local storage
   const items: QueryHistoryItem[] = getHistoryItems(sortDirection);
   return (
@@ -263,6 +268,9 @@ export function QueryHistory({
         onChange={onTableChange}
         css={css`
           width: ${containerWidth}px;
+          max-height: ${CONTAINER_MAX_HEIGHT}px;
+          overflow-y: auto;
+          ${scrollBarStyles}
           .euiTable {
             background-color: ${euiTheme.colors.lightestShade};
           }
