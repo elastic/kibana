@@ -92,7 +92,7 @@ export const serverless: Command = {
       string: ['projectType', 'tag', 'image', 'basePath', 'resources', 'host', 'kibanaUrl'],
       boolean: ['clean', 'ssl', 'kill', 'background', 'skipTeardown', 'waitForReady'],
 
-      default: defaults,
+      default: { ...defaults, kibanaUrl: 'https://localhost:5601/' },
     }) as unknown as ServerlessOptions;
 
     if (!options.projectType) {
