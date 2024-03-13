@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const monacoEditor = getService('monacoEditor');
+  const retry = getService('retry');
 
   describe('discover sidebar field stats popover', function describeIndexTests() {
     before(async function () {
@@ -43,6 +44,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await PageObjects.discover.addRuntimeField(
+          '_is_large',
+          'emit(doc["bytes"].value > 1024)',
+          'boolean'
+        );
+
+        await retry.waitFor('form to close', async () => {
+          return !(await testSubjects.exists('fieldEditor'));
+        });
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+      });
+
+      it('should show a top values popover for a boolean runtime field', async () => {
+        await PageObjects.unifiedFieldList.clickFieldListItem('_is_large');
+        await testSubjects.existOrFail('dscFieldStats-topValues');
+        expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.be('Top values');
+        const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
+        expect(topValuesRows.length).to.eql(2);
+        await testSubjects.missingOrFail('unifiedFieldStats-buttonGroup');
+        await testSubjects.missingOrFail('unifiedFieldStats-histogram');
+        expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
+          '14,004 records'
+        );
+        await PageObjects.unifiedFieldList.closeFieldPopover();
       });
 
       it('should show a histogram and top values popover for numeric field', async () => {
@@ -246,6 +274,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(topValuesRows.length).to.eql(3);
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
           '3 records'
+        );
+        await PageObjects.unifiedFieldList.closeFieldPopover();
+      });
+
+      it('should show a top values popover for a boolean field', async () => {
+        const testQuery = `row enabled = true`;
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        await PageObjects.unifiedFieldList.clickFieldListItem('enabled');
+        await testSubjects.existOrFail('dscFieldStats-topValues');
+        expect(await testSubjects.getVisibleText('dscFieldStats-title')).to.be('Top values');
+        const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
+        expect(topValuesRows.length).to.eql(1);
+        expect(await PageObjects.unifiedFieldList.getFieldStatsTopValueBucketsVisibleText()).to.be(
+          'true\n100%'
+        );
+        expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
+          '1 record'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
