@@ -5,5 +5,6 @@
 
 .lnsFieldItem__draggable {
   @include euiSlightShadow;
+  background: $euiColorEmptyShade;
   border-radius: $euiBorderRadius;
 }
