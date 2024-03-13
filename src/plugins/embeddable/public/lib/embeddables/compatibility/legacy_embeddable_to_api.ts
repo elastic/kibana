@@ -179,11 +179,12 @@ export const legacyEmbeddableToApi = (
    * so if the Embeddable is incapable of publishing unified search state (i.e. markdown) then it will just be ignored.
    */
   const timeRange = inputKeyToSubject<TimeRange | undefined>('timeRange', true);
-  const setTimeRange = (timeRange?: TimeRange) => embeddable.updateInput({ timeRange });
+  const setTimeRange = (nextTimeRange?: TimeRange) =>
+    embeddable.updateInput({ timeRange: nextTimeRange });
 
-  const filters: BehaviorSubject<Filter[] | undefined> = new BehaviorSubject<
-    Filter[] | undefined
-  >(undefined);
+  const filters: BehaviorSubject<Filter[] | undefined> = new BehaviorSubject<Filter[] | undefined>(
+    undefined
+  );
   const query: BehaviorSubject<Query | AggregateQuery | undefined> = new BehaviorSubject<
     Query | AggregateQuery | undefined
   >(undefined);

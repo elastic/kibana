@@ -67,7 +67,7 @@ export const CustomizePanelEditor = ({
   const [timeRange, setTimeRange] = useState(
     api.timeRange?.value ?? api.parentApi?.timeRange?.value
   );
-  
+
   const initialFocusRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -76,9 +76,7 @@ export const CustomizePanelEditor = ({
     }
   }, [initialFocusRef, focusOnTitle]);
 
-  const [hasOwnTimeRange, setHasOwnTimeRange] = useState<boolean>(
-    Boolean(api.timeRange?.value)
-  );
+  const [hasOwnTimeRange, setHasOwnTimeRange] = useState<boolean>(Boolean(api.timeRange?.value));
 
   const commonlyUsedRangesForDatePicker = useMemo(() => {
     const commonlyUsedRanges = core.uiSettings.get<TimePickerQuickRange[]>(
@@ -227,10 +225,7 @@ export const CustomizePanelEditor = ({
   };
 
   const renderCustomTimeRangeComponent = () => {
-    if (
-      !apiPublishesUnifiedSearch(api) ||
-      !(api.isCompatibleWithUnifiedSearch?.() ?? true)
-    )
+    if (!apiPublishesUnifiedSearch(api) || !(api.isCompatibleWithUnifiedSearch?.() ?? true))
       return null;
 
     return (

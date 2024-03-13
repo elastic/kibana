@@ -78,10 +78,7 @@ export abstract class AbstractExploreDataAction {
     }
 
     const parentParams: DiscoverAppLocatorParams = {};
-    if (
-      apiHasParentApi(embeddable) &&
-      apiPublishesPartialUnifiedSearch(embeddable.parentApi)
-    ) {
+    if (apiHasParentApi(embeddable) && apiPublishesPartialUnifiedSearch(embeddable.parentApi)) {
       parentParams.filters = embeddable.parentApi.filters?.getValue() ?? [];
       parentParams.query = embeddable.parentApi.query?.getValue();
       parentParams.timeRange = embeddable.parentApi.timeRange?.getValue();

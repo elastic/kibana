@@ -20,9 +20,7 @@ export type FilterableEmbeddableInput = EmbeddableInput & {
 
 export type EmbeddableHasTimeRange = Pick<
   PublishesWritableUnifiedSearch,
-  | 'timeRange'
-  | 'setTimeRange'
-  | 'isCompatibleWithUnifiedSearch'
+  'timeRange' | 'setTimeRange' | 'isCompatibleWithUnifiedSearch'
 >;
 
 /**

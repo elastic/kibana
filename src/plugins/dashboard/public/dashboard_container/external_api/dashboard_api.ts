@@ -21,10 +21,7 @@ import { DashboardContainer } from '../embeddable/dashboard_container';
 // TODO lock down DashboardAPI
 export type DashboardAPI = DashboardContainer &
   Partial<
-    HasType<'dashboard'> &
-      PublishesUnifiedSearch &
-      PublishesPanelTitle &
-      PublishesSavedObjectId
+    HasType<'dashboard'> & PublishesUnifiedSearch & PublishesPanelTitle & PublishesSavedObjectId
   >;
 export type AwaitingDashboardAPI = DashboardAPI | null;
 

@@ -102,8 +102,8 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
   ) {
     if (!isApiCompatible(embeddable)) return;
     return merge(
-      ...[embeddable.query, embeddable.filters, getViewModeSubject(embeddable)].filter(
-        (value) => Boolean(value)
+      ...[embeddable.query, embeddable.filters, getViewModeSubject(embeddable)].filter((value) =>
+        Boolean(value)
       )
     ).subscribe(() => onChange(compatibilityCheck(embeddable), this));
   }

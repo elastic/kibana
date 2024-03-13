@@ -25,9 +25,7 @@ import { createExtract, createInject } from '../../../../common';
 import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
 
 export type Context = ApplyGlobalFilterActionContext & {
-  embeddable: Partial<
-  PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>
-  >;
+  embeddable: Partial<PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>>;
 };
 export type Params = AbstractDashboardDrilldownParams;
 
