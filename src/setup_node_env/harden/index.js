@@ -33,6 +33,7 @@ new ritm.Hook(
       }
       case 'lodash/fp/template': {
         lodashPatch.createFpProxy(module);
+        return module;
       }
     }
     return module;
