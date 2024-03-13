@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_ALLOWED_DATA_VIEWS } from '../../constants';
+import { DEFAULT_ALLOWED_LOGS_DATA_VIEWS } from '../../constants';
 import { DataViewSpecWithId } from '../../data_source_selection';
 import { DataViewDescriptorType } from '../types';
 import { buildIndexPatternRegExp } from '../utils';
@@ -13,7 +13,7 @@ import { buildIndexPatternRegExp } from '../utils';
 type AllowedList = Array<string | RegExp>;
 
 const LOGS_ALLOWED_LIST: AllowedList = [
-  buildIndexPatternRegExp(DEFAULT_ALLOWED_DATA_VIEWS),
+  buildIndexPatternRegExp(DEFAULT_ALLOWED_LOGS_DATA_VIEWS),
   // Add more strings or regex patterns as needed
 ];
 
