@@ -147,7 +147,6 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
     <JobDetails
       createADJob={createADJob}
       createADJobInWizard={createADJobInWizard}
-      embeddable={undefined}
       timeRange={timeRange}
       layer={undefined}
       layerIndex={0}
