@@ -5774,11 +5774,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-response-warnings@link:packages/kbn-search-response-warnings":
+"@kbn/search-playground@link:x-pack/plugins/search_playground":
   version "0.0.0"
   uid ""
 
-"@kbn/search_playground@link:x-pack/plugins/search_playground":
+"@kbn/search-response-warnings@link:packages/kbn-search-response-warnings":
   version "0.0.0"
   uid ""
 
