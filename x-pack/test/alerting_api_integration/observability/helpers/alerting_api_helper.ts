@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import type { SuperTest, Test } from 'supertest';
 import { ToolingLog } from '@kbn/tooling-log';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { refreshSavedObjectIndices } from '../../../security_solution_api_integration/test_suites/detections_response/utils';
 
 export async function createIndexConnector({
   supertest,
@@ -47,6 +49,7 @@ export async function createRule<Params = ThresholdParams>({
   schedule,
   consumer,
   logger,
+  esClient,
 }: {
   supertest: SuperTest<Test>;
   ruleTypeId: string;
@@ -57,6 +60,7 @@ export async function createRule<Params = ThresholdParams>({
   schedule?: { interval: string };
   consumer: string;
   logger: ToolingLog;
+  esClient: Client;
 }) {
   const { body } = await supertest
     .post(`/api/alerting/rule`)
@@ -74,6 +78,7 @@ export async function createRule<Params = ThresholdParams>({
     })
     .expect(200);
 
+  await refreshSavedObjectIndices(esClient);
   logger.debug(`Created rule id: ${body.id}`);
   return body;
 }

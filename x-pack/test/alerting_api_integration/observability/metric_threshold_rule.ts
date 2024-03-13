@@ -77,6 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
         const createdRule = await createRule<MetricThresholdParams>({
           supertest,
           logger,
+          esClient,
           ruleTypeId: InfraRuleType.MetricThreshold,
           consumer: 'infrastructure',
           tags: ['infrastructure'],
