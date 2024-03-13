@@ -7,38 +7,31 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import {
-  DefaultEmbeddableApi,
-  ReactEmbeddable,
-  ReactEmbeddableFactory,
-  ReactEmbeddableRegistration,
-} from './types';
+import { DefaultEmbeddableApi, ReactEmbeddableFactory } from './types';
 
 const registry: { [key: string]: ReactEmbeddableFactory<any, any> } = {};
 
 export const registerReactEmbeddableFactory = <
-  StateType extends unknown = unknown,
-  APIType extends DefaultEmbeddableApi = DefaultEmbeddableApi
+  StateType extends object = object,
+  APIType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
 >(
-  key: string,
   factory: ReactEmbeddableFactory<StateType, APIType>
 ) => {
-  if (registry[key] !== undefined)
+  if (registry[factory.type] !== undefined)
     throw new Error(
       i18n.translate('embeddableApi.reactEmbeddable.factoryAlreadyExistsError', {
         defaultMessage: 'An embeddable factory for for type: {key} is already registered.',
-        values: { key },
+        values: { key: factory.type },
       })
     );
-  registry[key] = factory;
+  registry[factory.type] = factory;
 };
 
 export const reactEmbeddableRegistryHasKey = (key: string) => registry[key] !== undefined;
 
 export const getReactEmbeddableFactory = <
-  StateType extends unknown = unknown,
-  ApiType extends DefaultEmbeddableApi = DefaultEmbeddableApi
+  StateType extends object = object,
+  ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
 >(
   key: string
 ): ReactEmbeddableFactory<StateType, ApiType> => {
@@ -51,11 +44,3 @@ export const getReactEmbeddableFactory = <
     );
   return registry[key];
 };
-
-/**
- * A helper function which transforms a component into an Embeddable component by forwarding a ref which
- * should be used with `useEmbeddableApiHandle` to expose an API for your component.
- */
-export const RegisterReactEmbeddable: <ApiType extends DefaultEmbeddableApi = DefaultEmbeddableApi>(
-  component: ReactEmbeddableRegistration<ApiType>
-) => ReactEmbeddable<ApiType> = (component) => React.forwardRef((_, apiRef) => component(apiRef));

@@ -233,6 +233,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         advanced: { enabled: false },
         basic: { enabled: true },
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.azureBlobStorage.name', {
       defaultMessage: 'Azure Blob Storage',
@@ -568,6 +571,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
         enabled: true,
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.confluence.name', {
       defaultMessage: 'Confluence',
@@ -687,6 +693,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: true },
         basic: { enabled: true },
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
       },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.dropbox.name', {
@@ -934,7 +943,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     name: i18n.translate('searchConnectors.nativeConnectors.github.name', {
       defaultMessage: 'Github',
     }),
-    features: {},
+    features: {
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
     serviceType: 'github',
   },
   gmail: {
@@ -1058,6 +1071,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
         enabled: true,
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.gmail.name', {
       defaultMessage: 'Gmail',
@@ -1065,7 +1081,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     serviceType: 'gmail',
   },
   google_cloud_storage: {
-    features: {},
+    features: {
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
     configuration: {
       buckets: {
         default_value: null,
@@ -1358,6 +1378,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     },
     features: {
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
     },
@@ -1684,6 +1707,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         basic: { enabled: true },
       },
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
     },
@@ -2405,6 +2431,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         advanced: { enabled: false },
         basic: { enabled: true },
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.networkDrive.name', {
       defaultMessage: 'Network drive',
@@ -2531,6 +2560,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     }),
     features: {
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
     },
@@ -3072,6 +3104,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         advanced: { enabled: false },
         basic: { enabled: true },
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.outlook.name', {
       defaultMessage: 'Outlook',
@@ -3424,7 +3459,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     serviceType: 's3',
   },
   salesforce: {
-    features: {},
+    features: {
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
     configuration: {
       domain: {
         default_value: null,
@@ -3663,6 +3702,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: true },
         basic: { enabled: true },
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
       },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.servicenow.name', {
