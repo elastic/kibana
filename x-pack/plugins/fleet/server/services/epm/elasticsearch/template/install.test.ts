@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { range } from 'lodash';
+
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
 import { loadDatastreamsFieldsFromYaml } from '../../fields/field';
@@ -321,6 +323,40 @@ describe('EPM index template install', () => {
 
     expect(packageTemplate.settings?.index?.mapping?.total_fields).toEqual(
       expect.objectContaining({ limit: 1000 })
+    );
+  });
+
+  it('test prepareTemplate with extended total_fields.limit in settings due to more than 500 fields', () => {
+    const dataStream = {
+      type: 'logs',
+      dataset: 'package.dataset',
+      title: 'test data stream',
+      release: 'experimental',
+      package: 'package',
+      path: 'path',
+      ingest_pipeline: 'default',
+    } as RegistryDataStream;
+
+    mockedLoadFieldsFromYaml.mockReturnValue(
+      range(600).map((_, i) => ({
+        name: `test_field_${i}`,
+        type: 'keyword',
+      }))
+    );
+
+    const { componentTemplates } = prepareTemplate({
+      packageInstallContext,
+      dataStream,
+    });
+
+    const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
+
+    if (!('settings' in packageTemplate)) {
+      throw new Error('no settings on package template');
+    }
+
+    expect(packageTemplate.settings?.index?.mapping?.total_fields).toEqual(
+      expect.objectContaining({ limit: 10000 })
     );
   });
 

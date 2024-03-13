@@ -288,6 +288,24 @@ function putComponentTemplate(
   };
 }
 
+const DEFAULT_FIELD_LIMIT = 1000;
+const MAX_FIELD_LIMIT = 10000;
+const FIELD_LIMIT_THRESHOLD = 500;
+
+/**
+ * The total field limit is set to 1000 by default, but can be increased to 10000 if the field count is higher than 500.
+ * An explicit limit always overrides the default.
+ */
+function getFieldsLimit(fieldCount: number | undefined, explicitLimit: number | undefined) {
+  if (explicitLimit) {
+    return explicitLimit;
+  }
+  if (typeof fieldCount !== 'undefined' && fieldCount > FIELD_LIMIT_THRESHOLD) {
+    return MAX_FIELD_LIMIT;
+  }
+  return DEFAULT_FIELD_LIMIT;
+}
+
 export function buildComponentTemplates(params: {
   mappings: IndexTemplateMappings;
   templateName: string;
@@ -297,6 +315,7 @@ export function buildComponentTemplates(params: {
   defaultSettings: IndexTemplate['template']['settings'];
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
   lifecycle?: IndexTemplate['template']['lifecycle'];
+  fieldCount?: number;
 }) {
   const {
     templateName,
@@ -307,6 +326,7 @@ export function buildComponentTemplates(params: {
     pipelineName,
     experimentalDataStreamFeature,
     lifecycle,
+    fieldCount,
   } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
@@ -365,9 +385,10 @@ export function buildComponentTemplates(params: {
           mapping: {
             ...templateSettings.index?.mapping,
             total_fields: {
-              limit: templateSettings.index?.mapping?.total_fields?.limit
-                ? templateSettings.index?.mapping?.total_fields?.limit
-                : 1000,
+              limit: getFieldsLimit(
+                fieldCount,
+                templateSettings.index?.mapping?.total_fields?.limit
+              ),
             },
           },
         },
@@ -545,6 +566,7 @@ export function prepareTemplate({
     registryElasticsearch: dataStream.elasticsearch,
     experimentalDataStreamFeature,
     lifecycle: lifecyle,
+    fieldCount: validFields.length,
   });
 
   const template = getTemplate({
