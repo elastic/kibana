@@ -4,6 +4,15 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+# By default, all steps should set up these things to get a full environment before running
+# It can be skipped for pipeline upload steps though, to make job start time a little faster
+if [[ "${SKIP_CI_SETUP:-}" != "true" ]]; then
+  if [[ -d .buildkite/scripts && "${BUILDKITE_COMMAND:-}" != "buildkite-agent pipeline upload"* ]]; then
+    source .buildkite/scripts/common/env.sh
+    source .buildkite/scripts/common/setup_node.sh
+  fi
+fi
+
 BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
 export BUILDKITE_TOKEN
 
@@ -64,10 +73,10 @@ EOF
 {
   CI_STATS_BUILD_ID="$(buildkite-agent meta-data get ci_stats_build_id --default '')"
   export CI_STATS_BUILD_ID
-  
+
   CI_STATS_TOKEN="$(retry 5 5 vault read -field=api_token secret/kibana-issues/dev/kibana_ci_stats)"
   export CI_STATS_TOKEN
-  
+
   CI_STATS_HOST="$(retry 5 5 vault read -field=api_host secret/kibana-issues/dev/kibana_ci_stats)"
   export CI_STATS_HOST
 
@@ -117,15 +126,6 @@ retry 5 5 vault read -field=service_account_json secret/kibana-issues/dev/kibana
   TEST_FAILURES_ES_PASSWORD=$(retry 5 5 vault read -field=password secret/kibana-issues/dev/failed_tests_reporter_es)
   export TEST_FAILURES_ES_PASSWORD
 }
-
-# By default, all steps should set up these things to get a full environment before running
-# It can be skipped for pipeline upload steps though, to make job start time a little faster
-if [[ "${SKIP_CI_SETUP:-}" != "true" ]]; then
-  if [[ -d .buildkite/scripts && "${BUILDKITE_COMMAND:-}" != "buildkite-agent pipeline upload"* ]]; then
-    source .buildkite/scripts/common/env.sh
-    source .buildkite/scripts/common/setup_node.sh
-  fi
-fi
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then
