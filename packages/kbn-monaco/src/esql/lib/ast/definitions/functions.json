@@ -3199,44 +3199,11 @@
     ]
   },
   {
-    "name": "to_bool",
-    "description": "Converts an input value to a boolean value.",
-    "signatures": [
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "boolean"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "boolean"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "number",
-            "optional": false
-          }
-        ],
-        "returnType": "boolean"
-      }
-    ]
-  },
-  {
     "name": "to_boolean",
     "description": "Converts an input value to a boolean value.",
+    "alias": [
+      "to_bool"
+    ],
     "signatures": [
       {
         "params": [
@@ -3335,6 +3302,9 @@
   {
     "name": "to_datetime",
     "description": "Converts an input value to a date value.",
+    "alias": [
+      "to_dt"
+    ],
     "signatures": [
       {
         "params": [
@@ -3365,52 +3335,6 @@
           }
         ],
         "returnType": "date"
-      }
-    ]
-  },
-  {
-    "name": "to_dbl",
-    "description": "Converts an input value to a double value.",
-    "signatures": [
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "number"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "date",
-            "optional": false
-          }
-        ],
-        "returnType": "number"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "number"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "number",
-            "optional": false
-          }
-        ],
-        "returnType": "number"
       }
     ]
   },
@@ -3433,6 +3357,9 @@
   {
     "name": "to_double",
     "description": "Converts an input value to a double value.",
+    "alias": [
+      "to_dbl"
+    ],
     "signatures": [
       {
         "params": [
@@ -3473,42 +3400,6 @@
           }
         ],
         "returnType": "number"
-      }
-    ]
-  },
-  {
-    "name": "to_dt",
-    "description": "Converts an input value to a date value.",
-    "signatures": [
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "date",
-            "optional": false
-          }
-        ],
-        "returnType": "date"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "date"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "number",
-            "optional": false
-          }
-        ],
-        "returnType": "date"
       }
     ]
   },
@@ -3575,54 +3466,11 @@
     ]
   },
   {
-    "name": "to_int",
-    "description": "Converts an input value to an integer value.",
-    "signatures": [
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "number"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "date",
-            "optional": false
-          }
-        ],
-        "returnType": "number"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "number"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "number",
-            "optional": false
-          }
-        ],
-        "returnType": "number"
-      }
-    ]
-  },
-  {
     "name": "to_integer",
     "description": "Converts an input value to an integer value.",
+    "alias": [
+      "to_int"
+    ],
     "signatures": [
       {
         "params": [
@@ -3771,114 +3619,11 @@
     ]
   },
   {
-    "name": "to_str",
-    "description": "Converts a field into a string.",
-    "signatures": [
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "string"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "cartesian_point",
-            "optional": false
-          }
-        ],
-        "returnType": "string"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "cartesian_shape",
-            "optional": false
-          }
-        ],
-        "returnType": "string"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "date",
-            "optional": false
-          }
-        ],
-        "returnType": "string"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "number",
-            "optional": false
-          }
-        ],
-        "returnType": "string"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "geo_point",
-            "optional": false
-          }
-        ],
-        "returnType": "string"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "geo_shape",
-            "optional": false
-          }
-        ],
-        "returnType": "string"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "ip",
-            "optional": false
-          }
-        ],
-        "returnType": "string"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "string"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "version",
-            "optional": false
-          }
-        ],
-        "returnType": "string"
-      }
-    ]
-  },
-  {
     "name": "to_string",
     "description": "Converts a field into a string.",
+    "alias": [
+      "to_str"
+    ],
     "signatures": [
       {
         "params": [
@@ -3979,104 +3724,16 @@
           }
         ],
         "returnType": "string"
-      }
-    ]
-  },
-  {
-    "name": "to_ul",
-    "description": "Converts an input value to an unsigned long value.",
-    "signatures": [
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "number"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "date",
-            "optional": false
-          }
-        ],
-        "returnType": "number"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "number"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "number",
-            "optional": false
-          }
-        ],
-        "returnType": "number"
-      }
-    ]
-  },
-  {
-    "name": "to_ulong",
-    "description": "Converts an input value to an unsigned long value.",
-    "signatures": [
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "boolean",
-            "optional": false
-          }
-        ],
-        "returnType": "number"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "date",
-            "optional": false
-          }
-        ],
-        "returnType": "number"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "number"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "number",
-            "optional": false
-          }
-        ],
-        "returnType": "number"
       }
     ]
   },
   {
     "name": "to_unsigned_long",
     "description": "Converts an input value to an unsigned long value.",
+    "alias": [
+      "to_ul",
+      "to_ulong"
+    ],
     "signatures": [
       {
         "params": [
@@ -4137,34 +3794,11 @@
     ]
   },
   {
-    "name": "to_ver",
-    "description": "Converts an input string to a version value.",
-    "signatures": [
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "string",
-            "optional": false
-          }
-        ],
-        "returnType": "version"
-      },
-      {
-        "params": [
-          {
-            "name": "v",
-            "type": "version",
-            "optional": false
-          }
-        ],
-        "returnType": "version"
-      }
-    ]
-  },
-  {
     "name": "to_version",
     "description": "Converts an input string to a version value.",
+    "alias": [
+      "to_ver"
+    ],
     "signatures": [
       {
         "params": [

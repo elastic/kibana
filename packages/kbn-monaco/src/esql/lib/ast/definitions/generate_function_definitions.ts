@@ -1149,6 +1149,17 @@ const showFunctionsOutput = {
   ],
 };
 
+const aliasTable = {
+  to_version: ['to_ver'],
+  to_unsigned_long: ['to_ul', 'to_ulong'],
+  to_boolean: ['to_bool'],
+  to_string: ['to_str'],
+  to_datetime: ['to_dt'],
+  to_double: ['to_dbl'],
+  to_integer: ['to_int'],
+};
+const aliases = new Set(Object.values(aliasTable).flat());
+
 /**
  * Report the possible combinations of parameter types for a function
  *
@@ -1222,6 +1233,9 @@ const elasticsearchToKibanaType = (elasticsearchType) => {
 
   const functionDefinitions = [];
   for (const value of showFunctionsOutput.values) {
+    if (aliases.has(value[columnIndices.name])) {
+      continue;
+    }
     // console.log(value[columnIndices.name]);
     // console.log(value[columnIndices.argNames]);
     console.log(value[columnIndices.name]);
@@ -1266,6 +1280,7 @@ const elasticsearchToKibanaType = (elasticsearchType) => {
     const functionDefinition = {
       name: value[columnIndices.name],
       description: value[columnIndices.description],
+      alias: aliasTable[value[columnIndices.name]],
       signatures,
     };
 
