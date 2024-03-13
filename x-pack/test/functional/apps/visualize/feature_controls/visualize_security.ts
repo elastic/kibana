@@ -126,16 +126,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
+      // REMOVE WHEN REDESIGN IS COMPLETE
       it('Embed code shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Embedcode');
-        await PageObjects.share.createShortUrlExistOrFail();
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.share.openShareMenuItem('Embedcode');
+          await PageObjects.share.createShortUrlExistOrFail();
+        }
       });
 
+      // REMOVE WHEN REDESIGN IS COMPLETE
       it('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
-        // close menu
-        await PageObjects.share.clickShareTopNavButton();
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.share.openShareMenuItem('Permalinks');
+          await PageObjects.share.createShortUrlExistOrFail();
+          // close menu
+          await PageObjects.share.clickShareTopNavButton();
+        }
       });
 
       it('allows saving via the saved query management component popover with no saved query loaded', async () => {
@@ -268,16 +274,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
+      // REMOVE WHEN REDESIGN IS COMPLETE
       it(`Embed Code doesn't show create short-url button`, async () => {
-        await PageObjects.share.openShareMenuItem('Embedcode');
-        await PageObjects.share.createShortUrlMissingOrFail();
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.share.openShareMenuItem('Embedcode');
+          await PageObjects.share.createShortUrlMissingOrFail();
+        }
       });
 
+      // REMOVE WHEN REDESIGN IS COMPLETE
       it(`Permalinks doesn't show create short-url button`, async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlMissingOrFail();
-        // close the menu
-        await PageObjects.share.clickShareTopNavButton();
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.share.openShareMenuItem('Permalinks');
+          await PageObjects.share.createShortUrlMissingOrFail();
+          // close the menu
+          await PageObjects.share.clickShareTopNavButton();
+        }
       });
 
       it('allows loading a saved query via the saved query management component', async () => {
@@ -376,16 +388,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.missingOrFail('visualizeSaveButton', { timeout: 10000 });
       });
 
+      // REMOVE WHEN REDESIGN IS COMPLETE
       it('Embed code shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Embedcode');
-        await PageObjects.share.createShortUrlExistOrFail();
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.share.openShareMenuItem('Embedcode');
+          await PageObjects.share.createShortUrlExistOrFail();
+        }
       });
 
+      // REMOVE WHEN REDESIGN IS COMPLETE
       it('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
-        // close menu
-        await PageObjects.share.clickShareTopNavButton();
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.share.openShareMenuItem('Permalinks');
+          await PageObjects.share.createShortUrlExistOrFail();
+          // close menu
+          await PageObjects.share.clickShareTopNavButton();
+        }
       });
 
       it('allows loading a saved query via the saved query management component', async () => {

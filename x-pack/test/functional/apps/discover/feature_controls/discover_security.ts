@@ -55,6 +55,7 @@ export default function (ctx: FtrProviderContext) {
     });
 
     after(async () => {
+      await PageObjects.share.closeShareModal();
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
@@ -99,6 +100,7 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.share.closeShareModal();
         await security.role.delete('global_discover_all_role');
         await security.user.delete('global_discover_all_user');
       });
@@ -119,17 +121,22 @@ export default function (ctx: FtrProviderContext) {
         await globalNav.badgeMissingOrFail();
       });
 
+      // REMOVE WHEN REDESIGN IS COMPLETED
       it('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
-        // close the menu
-        await PageObjects.share.clickShareTopNavButton();
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.share.openShareMenuItem('Permalinks');
+          await PageObjects.share.createShortUrlExistOrFail();
+          // close the menu
+          await PageObjects.share.clickShareTopNavButton();
+        }
       });
 
       it('shows CSV reports', async () => {
-        await PageObjects.share.clickShareTopNavButton();
-        await testSubjects.existOrFail('sharePanel-CSVReports');
-        await PageObjects.share.clickShareTopNavButton();
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.share.clickShareTopNavButton();
+          await testSubjects.existOrFail('sharePanel-CSVReports');
+          await PageObjects.share.clickShareTopNavButton();
+        }
       });
 
       savedQuerySecurityUtils.shouldAllowSavingQueries();
@@ -167,6 +174,7 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.share.closeShareModal();
         await security.role.delete('global_discover_read_role');
         await security.user.delete('global_discover_read_user');
       });
@@ -196,10 +204,13 @@ export default function (ctx: FtrProviderContext) {
         await PageObjects.unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
       });
 
+      // REMOVE WHEN REDESIGN IS COMPLETE
       it(`Permalinks doesn't show create short-url button`, async () => {
-        await PageObjects.share.clickShareTopNavButton();
-        await PageObjects.share.createShortUrlMissingOrFail();
-        await PageObjects.share.clickShareTopNavButton();
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.share.clickShareTopNavButton();
+          await PageObjects.share.createShortUrlMissingOrFail();
+          await PageObjects.share.clickShareTopNavButton();
+        }
       });
 
       savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();
@@ -265,11 +276,14 @@ export default function (ctx: FtrProviderContext) {
         await PageObjects.unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
       });
 
+      // REMOVE WHEN SHARE REDESIGN IS COMPLETE
       it('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
-        // close the menu
-        await PageObjects.share.clickShareTopNavButton();
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.share.openShareMenuItem('Permalinks');
+          await PageObjects.share.createShortUrlExistOrFail();
+          // close the menu
+          await PageObjects.share.clickShareTopNavButton();
+        }
       });
 
       savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();

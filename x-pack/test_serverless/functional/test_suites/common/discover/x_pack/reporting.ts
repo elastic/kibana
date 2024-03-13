@@ -83,14 +83,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('is available if new', async () => {
-        await PageObjects.reporting.openCsvReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.reporting.openCsvReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        }
       });
 
       it('becomes available when saved', async () => {
         await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
-        await PageObjects.reporting.openCsvReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.reporting.openCsvReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        }
       });
     });
 
@@ -110,6 +114,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('ecommerce');
+        if (!(await PageObjects.share.checkOldVersion())) {
+          return;
+        }
       });
 
       it('generates a report with single timefilter', async () => {
@@ -269,6 +276,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.loadSavedSearch('Sparse Columns');
+        if (!(await PageObjects.share.checkOldVersion())) {
+          return;
+        }
       });
 
       after(async () => {
@@ -312,6 +322,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reportingAPI.initEcommerce();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('ecommerce');
+        if (!(await PageObjects.share.checkOldVersion())) {
+          return;
+        }
       });
 
       after(async () => {

@@ -67,14 +67,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('is available if new', async () => {
-        await PageObjects.reporting.openCsvReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.reporting.openCsvReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        }
       });
 
       it('becomes available when saved', async () => {
-        await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
-        await PageObjects.reporting.openCsvReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
+          await PageObjects.reporting.openCsvReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        }
       });
     });
 
@@ -103,106 +107,117 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('generates a report with single timefilter', async () => {
-        await PageObjects.discover.clickNewSearchButton();
-        await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
-        await PageObjects.discover.saveSearch('single-timefilter-search');
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.discover.clickNewSearchButton();
+          await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
+          await PageObjects.discover.saveSearch('single-timefilter-search');
 
-        // get shared URL value
-        const sharedURL = await browser.getCurrentUrl();
+          // get shared URL value
+          const sharedURL = await browser.getCurrentUrl();
 
-        // click 'Copy POST URL'
-        await PageObjects.share.clickShareTopNavButton();
-        await PageObjects.reporting.openCsvReportingPanel();
-        const advOpt = await find.byXPath(`//button[descendant::*[text()='Advanced options']]`);
-        await advOpt.click();
-        const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
-        await postUrl.click();
+          // click 'Copy POST URL'
+          await PageObjects.share.clickShareTopNavButton();
+          await PageObjects.reporting.openCsvReportingPanel();
+          const advOpt = await find.byXPath(`//button[descendant::*[text()='Advanced options']]`);
+          await advOpt.click();
+          const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
+          await postUrl.click();
 
-        // get clipboard value using field search input, since
-        // 'browser.getClipboardValue()' doesn't work, due to permissions
-        const textInput = await testSubjects.find('fieldListFiltersFieldSearch');
-        await textInput.click();
-        await browser.getActions().keyDown(Key.CONTROL).perform();
-        await browser.getActions().keyDown('v').perform();
+          // get clipboard value using field search input, since
+          // 'browser.getClipboardValue()' doesn't work, due to permissions
+          const textInput = await testSubjects.find('fieldListFiltersFieldSearch');
+          await textInput.click();
+          await browser.getActions().keyDown(Key.CONTROL).perform();
+          await browser.getActions().keyDown('v').perform();
 
-        const reportURL = decodeURIComponent(await textInput.getAttribute('value'));
+          const reportURL = decodeURIComponent(await textInput.getAttribute('value'));
 
-        // get number of filters in URLs
-        const timeFiltersNumberInReportURL =
-          reportURL.split('query:(range:(order_date:(format:strict_date_optional_time').length - 1;
-        const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
+          // get number of filters in URLs
+          const timeFiltersNumberInReportURL =
+            reportURL.split('query:(range:(order_date:(format:strict_date_optional_time').length -
+            1;
+          const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
 
-        expect(timeFiltersNumberInSharedURL).to.be(1);
-        expect(sharedURL.includes('time:(from:now-24h%2Fh,to:now))')).to.be(true);
+          expect(timeFiltersNumberInSharedURL).to.be(1);
+          expect(sharedURL.includes('time:(from:now-24h%2Fh,to:now))')).to.be(true);
 
-        expect(timeFiltersNumberInReportURL).to.be(1);
-        expect(
-          reportURL.includes(
-            'query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))'
-          )
-        ).to.be(true);
+          expect(timeFiltersNumberInReportURL).to.be(1);
+          expect(
+            reportURL.includes(
+              'query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))'
+            )
+          ).to.be(true);
 
-        // return keyboard state
-        await browser.getActions().keyUp(Key.CONTROL).perform();
-        await browser.getActions().keyUp('v').perform();
+          // return keyboard state
+          await browser.getActions().keyUp(Key.CONTROL).perform();
+          await browser.getActions().keyUp('v').perform();
 
-        //  return field search input state
-        await textInput.clearValue();
+          //  return field search input state
+          await textInput.clearValue();
+        }
       });
 
       it('generates a report from a new search with data: default', async () => {
-        await PageObjects.discover.clickNewSearchButton();
-        await PageObjects.reporting.setTimepickerInEcommerceDataRange();
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.discover.clickNewSearchButton();
+          await PageObjects.reporting.setTimepickerInEcommerceDataRange();
 
-        await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
+          await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
 
-        const res = await getReport();
-        expect(res.status).to.equal(200);
-        expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
+          const res = await getReport();
+          expect(res.status).to.equal(200);
+          expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
 
-        const csvFile = res.text;
-        expectSnapshot(csvFile).toMatch();
+          const csvFile = res.text;
+          expectSnapshot(csvFile).toMatch();
+        }
       });
 
       it('generates a report with no data', async () => {
-        await PageObjects.reporting.setTimepickerInEcommerceNoDataRange();
-        await PageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.reporting.setTimepickerInEcommerceNoDataRange();
+          await PageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
 
-        const res = await getReport();
-        expect(res.text).to.be(`\n`);
+          const res = await getReport();
+          expect(res.text).to.be(`\n`);
+        }
       });
 
       it('generates a large export', async () => {
-        const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
-        const toTime = 'Aug 23, 2019 @ 16:18:51.821';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.discover.clickNewSearchButton();
-        await retry.try(async () => {
-          expect(await PageObjects.discover.getHitCount()).to.equal('4,675');
-        });
-        await PageObjects.discover.saveSearch('large export');
+        if (await PageObjects.share.checkOldVersion()) {
+          const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
+          const toTime = 'Aug 23, 2019 @ 16:18:51.821';
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+          await PageObjects.discover.clickNewSearchButton();
+          await retry.try(async () => {
+            expect(await PageObjects.discover.getHitCount()).to.equal('4,675');
+          });
+          await PageObjects.discover.saveSearch('large export');
 
-        // match file length, the beginning and the end of the csv file contents
-        const { text: csvFile } = await getReport();
-        expect(csvFile.length).to.be(4826973);
-        expectSnapshot(csvFile.slice(0, 5000)).toMatch();
-        expectSnapshot(csvFile.slice(-5000)).toMatch();
+          // match file length, the beginning and the end of the csv file contents
+          const { text: csvFile } = await getReport();
+          expect(csvFile.length).to.be(4826973);
+          expectSnapshot(csvFile.slice(0, 5000)).toMatch();
+          expectSnapshot(csvFile.slice(-5000)).toMatch();
+        }
       });
 
       it('generate a report using ES|QL', async () => {
-        await PageObjects.discover.selectTextBaseLang();
-        const testQuery = `from ecommerce | STATS total_sales = SUM(taxful_total_price) BY day_of_week |  SORT total_sales DESC`;
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.discover.selectTextBaseLang();
+          const testQuery = `from ecommerce | STATS total_sales = SUM(taxful_total_price) BY day_of_week |  SORT total_sales DESC`;
 
-        await monacoEditor.setCodeEditorValue(testQuery);
-        await testSubjects.click('querySubmitButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+          await monacoEditor.setCodeEditorValue(testQuery);
+          await testSubjects.click('querySubmitButton');
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const res = await getReport();
-        expect(res.status).to.equal(200);
-        expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
+          const res = await getReport();
+          expect(res.status).to.equal(200);
+          expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
 
-        const csvFile = res.text;
-        expectSnapshot(csvFile).toMatch();
+          const csvFile = res.text;
+          expectSnapshot(csvFile).toMatch();
+        }
       });
     });
 
@@ -278,12 +293,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it(`handles field formatting for a field that doesn't exist initially`, async () => {
-        const res = await getReport();
-        expect(res.status).to.equal(200);
-        expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
+        if (await PageObjects.share.checkOldVersion()) {
+          const res = await getReport();
+          expect(res.status).to.equal(200);
+          expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
 
-        const csvFile = res.text;
-        expectSnapshot(csvFile).toMatch();
+          const csvFile = res.text;
+          expectSnapshot(csvFile).toMatch();
+        }
       });
     });
 
@@ -313,44 +330,50 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('generates a report with data', async () => {
-        await PageObjects.discover.loadSavedSearch('Ecommerce Data');
-        await retry.try(async () => {
-          expect(await PageObjects.discover.getHitCount()).to.equal('740');
-        });
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.discover.loadSavedSearch('Ecommerce Data');
+          await retry.try(async () => {
+            expect(await PageObjects.discover.getHitCount()).to.equal('740');
+          });
 
-        const { text: csvFile } = await getReport();
-        expectSnapshot(csvFile).toMatch();
+          const { text: csvFile } = await getReport();
+          expectSnapshot(csvFile).toMatch();
+        }
       });
 
       it('generates a report with filtered data', async () => {
-        await PageObjects.discover.loadSavedSearch('Ecommerce Data');
-        await retry.try(async () => {
-          expect(await PageObjects.discover.getHitCount()).to.equal('740');
-        });
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.discover.loadSavedSearch('Ecommerce Data');
+          await retry.try(async () => {
+            expect(await PageObjects.discover.getHitCount()).to.equal('740');
+          });
 
-        // filter
-        await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
-        await retry.try(async () => {
-          expect(await PageObjects.discover.getHitCount()).to.equal('154');
-        });
+          // filter
+          await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
+          await retry.try(async () => {
+            expect(await PageObjects.discover.getHitCount()).to.equal('154');
+          });
 
-        const { text: csvFile } = await getReport();
-        expectSnapshot(csvFile).toMatch();
+          const { text: csvFile } = await getReport();
+          expectSnapshot(csvFile).toMatch();
+        }
       });
 
       it('generates a report with discover:searchFieldsFromSource = true', async () => {
-        await PageObjects.discover.loadSavedSearch('Ecommerce Data');
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.discover.loadSavedSearch('Ecommerce Data');
 
-        await retry.try(async () => {
-          expect(await PageObjects.discover.getHitCount()).to.equal('740');
-        });
+          await retry.try(async () => {
+            expect(await PageObjects.discover.getHitCount()).to.equal('740');
+          });
 
-        await setFieldsFromSource(true);
+          await setFieldsFromSource(true);
 
-        const { text: csvFile } = await getReport();
-        expectSnapshot(csvFile).toMatch();
+          const { text: csvFile } = await getReport();
+          expectSnapshot(csvFile).toMatch();
 
-        await setFieldsFromSource(false);
+          await setFieldsFromSource(false);
+        }
       });
     });
   });

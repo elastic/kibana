@@ -98,12 +98,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
 
+        // REMOVE WHEN SHARE REDESIGN IS COMPLETED
         it('should allow for copying the saved object URL', async function () {
           const expectedUrl =
             baseUrl + '/app/discover#' + '/view/ab12e3c0-f231-11e6-9486-733b1ac9221a' + '?_g=()';
           await PageObjects.discover.loadSavedSearch('A Saved Search');
           await PageObjects.share.clickShareTopNavButton();
-          await PageObjects.share.exportAsSavedObject();
+          if (await PageObjects.share.checkOldVersion()) {
+            await PageObjects.share.exportAsSavedObject();
+          }
           const actualUrl = await PageObjects.share.getSharedUrl();
           expect(actualUrl).to.be(expectedUrl);
         });

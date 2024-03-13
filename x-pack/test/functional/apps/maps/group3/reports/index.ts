@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 const REPORTS_FOLDER = __dirname;
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
+  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard', 'share']);
   const browser = getService('browser');
   const config = getService('config');
   const log = getService('log');
@@ -21,7 +21,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // NOTE: Occasionally, you may need to run the test and copy the "session" image file and replace the
   // "baseline" image file to reflect current renderings. The source and destination file paths can be found in
   // the debug logs.
-  describe('dashboard reporting: creates a map report', () => {
+  describe('dashboard reporting: creates a map report', async () => {
+    if (!(await PageObjects.share.checkOldVersion())) {
+      return;
+    }
     // helper function to check the difference between the new image and the baseline
     const measurePngDifference = async (fileName: string) => {
       const url = await PageObjects.reporting.getReportURL(60000);

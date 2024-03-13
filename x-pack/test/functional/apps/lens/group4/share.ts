@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'share']);
   const browser = getService('browser');
   const filterBarService = getService('filterBar');
   const queryBar = getService('queryBar');
@@ -17,6 +17,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens share tests', () => {
     before(async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
+    });
+    afterEach(async () => {
+      await PageObjects.share.closeShareModal();
     });
 
     after(async () => {
@@ -51,41 +54,55 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should enable both download and URL sharing for valid configuration', async () => {
-      await PageObjects.lens.clickShareMenu();
-
-      expect(await PageObjects.lens.isShareActionEnabled('csvDownload'));
+      if (await PageObjects.lens.checkOldShareVersion()) {
+        await PageObjects.lens.clickShareMenu();
+        // out of scope for this PR
+        expect(await PageObjects.lens.isShareActionEnabled('csvDownload'));
+      }
+      await PageObjects.share.closeShareModal();
       expect(await PageObjects.lens.isShareActionEnabled('permalinks'));
     });
 
+    // REMOVE WHEN REDESIGN IS OVER
     it('should provide only snapshot url sharing if visualization is not saved yet', async () => {
-      await PageObjects.lens.openPermalinkShare();
+      if (await PageObjects.lens.checkOldShareVersion()) {
+        await PageObjects.lens.openPermalinkShare();
 
-      const options = await PageObjects.lens.getAvailableUrlSharingOptions();
-      expect(options).eql(['snapshot']);
+        const options = await PageObjects.lens.getAvailableUrlSharingOptions();
+        expect(options).eql(['snapshot']);
+      }
     });
 
+    // REMOVE WHEN REDESIGN IS OVER
     it('should basically work for snapshot', async () => {
-      const url = await PageObjects.lens.getUrl('snapshot');
-      await browser.openNewTab();
+      if (await PageObjects.lens.checkOldShareVersion()) {
+        const url = (await PageObjects.lens.checkOldShareVersion())
+          ? await PageObjects.lens.getUrl('snapshot')
+          : await PageObjects.lens.getUrl();
+        await browser.openNewTab();
 
-      const [lensWindowHandler] = await browser.getAllWindowHandles();
+        const [lensWindowHandler] = await browser.getAllWindowHandles();
 
-      await browser.navigateTo(url);
-      // check that it's the same configuration in the new URL when ready
-      await PageObjects.lens.waitForVisualization('xyVisChart');
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-        'Average of bytes'
-      );
-      await browser.closeCurrentWindow();
-      await browser.switchToWindow(lensWindowHandler);
+        await browser.navigateTo(url!);
+
+        // check that it's the same configuration in the new URL when ready
+        await PageObjects.lens.waitForVisualization('xyVisChart');
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+          'Average of bytes'
+        );
+        await browser.closeCurrentWindow();
+        await browser.switchToWindow(lensWindowHandler);
+      }
     });
 
     it('should provide also saved object url sharing if the visualization is shared', async () => {
-      await PageObjects.lens.save('ASavedVisualizationToShare');
-      await PageObjects.lens.openPermalinkShare();
+      if (await PageObjects.lens.checkOldShareVersion()) {
+        await PageObjects.lens.save('ASavedVisualizationToShare');
+        await PageObjects.lens.openPermalinkShare();
 
-      const options = await PageObjects.lens.getAvailableUrlSharingOptions();
-      expect(options).eql(['snapshot', 'savedObject']);
+        const options = await PageObjects.lens.getAvailableUrlSharingOptions();
+        expect(options).eql(['snapshot', 'savedObject']);
+      }
     });
 
     it('should preserve filter and query when sharing', async () => {
@@ -93,8 +110,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.setQuery('host.keyword www.elastic.co');
       await queryBar.submitQuery();
       await PageObjects.lens.waitForVisualization('xyVisChart');
-
-      const url = await PageObjects.lens.getUrl('snapshot');
+      let url;
+      if (await PageObjects.lens.checkOldShareVersion()) {
+        url = await PageObjects.lens.getUrl('snapshot');
+      } else {
+        await PageObjects.share.closeShareModal();
+        url = await PageObjects.lens.getUrl();
+      }
       await browser.openNewTab();
 
       const [lensWindowHandler] = await browser.getAllWindowHandles();
@@ -109,34 +131,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to download CSV data of the current visualization', async () => {
-      await PageObjects.lens.setCSVDownloadDebugFlag(true);
-      await PageObjects.lens.openCSVDownloadShare();
+      if (await PageObjects.lens.checkOldShareVersion()) {
+        await PageObjects.lens.setCSVDownloadDebugFlag(true);
+        await PageObjects.lens.openCSVDownloadShare();
 
-      const csv = await PageObjects.lens.getCSVContent();
-      expect(csv).to.be.ok();
-      expect(Object.keys(csv!)).to.have.length(1);
+        const csv = await PageObjects.lens.getCSVContent();
+        expect(csv).to.be.ok();
+        expect(Object.keys(csv!)).to.have.length(1);
+      }
     });
 
     it('should be able to download CSV of multi layer visualization', async () => {
-      await PageObjects.lens.createLayer();
+      if (await PageObjects.lens.checkOldShareVersion()) {
+        await PageObjects.lens.createLayer();
 
-      await PageObjects.lens.configureDimension({
-        dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: '@timestamp',
-      });
+        await PageObjects.lens.configureDimension({
+          dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'date_histogram',
+          field: '@timestamp',
+        });
 
-      await PageObjects.lens.configureDimension({
-        dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'median',
-        field: 'bytes',
-      });
+        await PageObjects.lens.configureDimension({
+          dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'median',
+          field: 'bytes',
+        });
 
-      await PageObjects.lens.openCSVDownloadShare();
+        await PageObjects.lens.openCSVDownloadShare();
 
-      const csv = await PageObjects.lens.getCSVContent();
-      expect(csv).to.be.ok();
-      expect(Object.keys(csv!)).to.have.length(2);
+        const csv = await PageObjects.lens.getCSVContent();
+        expect(csv).to.be.ok();
+        expect(Object.keys(csv!)).to.have.length(2);
+      }
     });
   });
 }

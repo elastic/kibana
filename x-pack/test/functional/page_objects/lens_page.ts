@@ -44,6 +44,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     'dashboard',
     'timeToVisualize',
     'unifiedSearch',
+    'share',
   ]);
 
   return logWrapper('lensPage', log, {
@@ -1815,18 +1816,49 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsApp_shareButton');
     },
 
+    async checkOldShareVersion() {
+      this.clickShareMenu();
+      const oldVersion: boolean = await testSubjects.exists('sharePanel-CSVDownload');
+      await find.clickByCssSelector('[data-test-subj="shareContextModal"] .euiModal__closeIcon');
+      return oldVersion;
+    },
+
     async isShareable() {
       return await testSubjects.isEnabled('lnsApp_shareButton');
     },
 
-    async isShareActionEnabled(action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports') {
+    async isShareActionEnabled(
+      action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports' | 'export'
+    ) {
+      // REMOVE WHEN REDESIGN IS COMPLETE
+      if (await this.checkOldShareVersion()) {
+        switch (action) {
+          case 'csvDownload':
+            return await testSubjects.isEnabled('sharePanel-CSVDownload');
+          case 'permalinks':
+            return await testSubjects.isEnabled('sharePanel-Permalinks');
+          default:
+            return await testSubjects.isEnabled(`sharePanel-${action}`);
+        }
+      }
+      await PageObjects.share.closeShareModal();
       switch (action) {
-        case 'csvDownload':
-          return await testSubjects.isEnabled('sharePanel-CSVDownload');
+        case 'export':
+          return await testSubjects.isEnabled('export');
         case 'permalinks':
-          return await testSubjects.isEnabled('sharePanel-Permalinks');
+          return await testSubjects.isEnabled('Permalinks');
         default:
-          return await testSubjects.isEnabled(`sharePanel-${action}`);
+          return await testSubjects.isEnabled(action);
+      }
+    },
+
+    async ensureShareModalIsOpen(action: 'export' | 'permalinks') {
+      await this.clickShareMenu();
+      if (!(await testSubjects.exists('shareContextModal'))) {
+        await this.clickShareMenu();
+      }
+      if (!(await this.isShareActionEnabled(action))) {
+        throw new Error(`${action} sharing feature is disabled`);
       }
     },
 
@@ -1845,38 +1877,50 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async openPermalinkShare() {
       await this.ensureShareMenuIsOpen('permalinks');
-      await testSubjects.click('sharePanel-Permalinks');
+      if (await this.checkOldShareVersion()) {
+        await testSubjects.click('sharePanel-Permalinks');
+      } else {
+        await testSubjects.click('Permalinks');
+      }
     },
 
+    // REMOVE WHEN REDESIGN IS COMPLETE
     async getAvailableUrlSharingOptions() {
-      if (!(await testSubjects.exists('shareUrlForm'))) {
-        await this.openPermalinkShare();
+      if (await this.checkOldShareVersion()) {
+        if (!(await testSubjects.exists('shareUrlForm'))) {
+          await this.openPermalinkShare();
+        }
+        const el = await testSubjects.find('shareUrlForm');
+        const available = await el.findAllByCssSelector('input:not([disabled])');
+        const ids = await Promise.all(available.map((node) => node.getAttribute('id')));
+        return ids;
       }
-      const el = await testSubjects.find('shareUrlForm');
-      const available = await el.findAllByCssSelector('input:not([disabled])');
-      const ids = await Promise.all(available.map((node) => node.getAttribute('id')));
-      return ids;
     },
 
+    // REMOVE WHEN REDESIGN IS COMPLETE
     async getUrl(type: 'snapshot' | 'savedObject' = 'snapshot') {
-      if (!(await testSubjects.exists('shareUrlForm'))) {
-        await this.openPermalinkShare();
+      if (await this.checkOldShareVersion()) {
+        if (!(await testSubjects.exists('shareUrlForm'))) {
+          await this.openPermalinkShare();
+        }
+
+        const options = await this.getAvailableUrlSharingOptions();
+        const optionIndex = options!.findIndex((option: string) => option === type);
+        if (optionIndex < 0) {
+          throw Error(`Sharing URL of type ${type} is not available`);
+        }
+        const testSubFrom = `exportAs${type[0].toUpperCase()}${type.substring(1)}`;
+        await testSubjects.click(testSubFrom);
       }
-      const options = await this.getAvailableUrlSharingOptions();
-      const optionIndex = options.findIndex((option) => option === type);
-      if (optionIndex < 0) {
-        throw Error(`Sharing URL of type ${type} is not available`);
-      }
-      const testSubFrom = `exportAs${type[0].toUpperCase()}${type.substring(1)}`;
-      await testSubjects.click(testSubFrom);
       const copyButton = await testSubjects.find('copyShareUrlButton');
-      const url = await copyButton.getAttribute('data-share-url');
-      return url;
+      return await copyButton.getAttribute('data-share-url');
     },
 
     async openCSVDownloadShare() {
-      await this.ensureShareMenuIsOpen('csvDownload');
-      await testSubjects.click('sharePanel-CSVDownload');
+      if (await this.checkOldShareVersion()) {
+        await this.ensureShareMenuIsOpen('csvDownload');
+        await testSubjects.click('sharePanel-CSVDownload');
+      }
     },
 
     async setCSVDownloadDebugFlag(value: boolean = true) {
@@ -1886,8 +1930,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openReportingShare(type: 'PNG' | 'PDF') {
-      await this.ensureShareMenuIsOpen(`${type}Reports`);
-      await testSubjects.click(`sharePanel-${type}Reports`);
+      if (await this.checkOldShareVersion()) {
+        await this.ensureShareMenuIsOpen(`${type}Reports`);
+        await testSubjects.click(`sharePanel-${type}Reports`);
+      }
     },
 
     async getCSVContent() {

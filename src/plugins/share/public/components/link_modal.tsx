@@ -150,14 +150,14 @@ export const LinkModal = ({
 
   const createShortUrl = useCallback(
     async (tempUrl: string) => {
-      if (!isMounted) return;
+      if (!isMounted || shortUrlCache) return;
       const shortUrl = shareableUrlLocatorParams
         ? await urlService.shortUrls.get(null).createWithLocator(shareableUrlLocatorParams)
         : (await urlService.shortUrls.get(null).createFromLongUrl(tempUrl)).url;
       setShortUrlCache(shortUrl as string);
       setUrl(shortUrl as string);
     },
-    [isMounted, shareableUrlLocatorParams, urlService.shortUrls]
+    [isMounted, shareableUrlLocatorParams, urlService.shortUrls, shortUrlCache]
   );
 
   const setUrlHelper = useCallback(() => {
@@ -180,7 +180,12 @@ export const LinkModal = ({
       !isNotSaved() ? (
         <EuiCopy textToCopy={shortUrlCache ?? url}>
           {(copy) => (
-            <EuiButton fill data-test-subj="copyShareUrlButton" onClick={copy}>
+            <EuiButton
+              fill
+              data-test-subj="copyShareUrlButton"
+              data-share-url={shortUrlCache ?? url}
+              onClick={copy}
+            >
               <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
             </EuiButton>
           )}
@@ -203,7 +208,12 @@ export const LinkModal = ({
     ) : (
       <EuiCopy textToCopy={shortUrlCache ?? url}>
         {(copy) => (
-          <EuiButton fill data-test-subj="copyShareUrlButton" onClick={copy}>
+          <EuiButton
+            fill
+            data-test-subj="copyShareUrlButton"
+            data-share-url={shortUrlCache ?? url}
+            onClick={copy}
+          >
             <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
           </EuiButton>
         )}

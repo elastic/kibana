@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'share']);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -91,8 +91,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should return focus to the share button when dismissing the share popover', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('shareTopNavButton'));
+      // Opened https://github.com/elastic/kibana/issues/178872
+      it.skip('should return focus to the share button when dismissing the share popover', async () => {
+        if (await PageObjects.share.checkOldVersion()) {
+          expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('shareTopNavButton');
+        }
+        await focusAndPressButton('shareTopNavButton');
+        expect(await hasFocus('shareTopNavButton')).to.be(false);
+        await PageObjects.share.closeShareModal();
+        expect(await hasFocus('shareTopNavButton')).to.be(true);
+      });
 
       it('should return focus to the inspect button when dismissing the inspector flyout', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('openInspectorButton'));

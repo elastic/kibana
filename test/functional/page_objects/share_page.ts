@@ -13,12 +13,33 @@ export class SharePageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly log = this.ctx.getService('log');
 
+  async closeShareModal() {
+    if (await this.isShareModalOpen()) {
+      await this.find.clickByCssSelector(
+        '[data-test-subj="shareContextModal"] .euiModal__closeIcon'
+      );
+    }
+  }
+
   async isShareMenuOpen() {
     return await this.testSubjects.exists('shareContextMenu');
   }
 
+  async isShareModalOpen() {
+    return await this.testSubjects.exists('shareContextModal');
+  }
+
   async clickShareTopNavButton() {
     return this.testSubjects.click('shareTopNavButton');
+  }
+
+  async openShareModalItem(itemTitle: string) {
+    this.log.debug(`openShareModalItem title: ${itemTitle}`);
+    const isShareModalOpen = await this.isShareModalOpen();
+    if (!isShareModalOpen) {
+      await this.clickShareTopNavButton();
+    }
+    await this.testSubjects.click(itemTitle);
   }
 
   async openShareMenuItem(itemTitle: string) {
@@ -44,13 +65,26 @@ export class SharePageObject extends FtrService {
    * with xpack features enabled, where there's also a csv sharing option
    * in a pure OSS environment, the permalinks sharing panel is displayed initially
    */
+
+  // REMOVE WHEN REDESIGN IS COMPLETED
   async openPermaLinks() {
     if (await this.testSubjects.exists('sharePanel-Permalinks')) {
       await this.testSubjects.click(`sharePanel-Permalinks`);
     }
   }
 
+  async checkOldVersion() {
+    await this.clickShareTopNavButton();
+    if (await this.testSubjects.find('shareContextModal')) {
+      this.log.debug('This is the new share context modal');
+      await this.closeShareModal();
+      return false;
+    }
+    return true;
+  }
+
   async getSharedUrl() {
+    // REMOVE THIS LINE WHEN REDESIGN IS COMPLETED
     await this.openPermaLinks();
     return await this.testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
   }
@@ -70,6 +104,7 @@ export class SharePageObject extends FtrService {
     await shareForm.waitForDeletedByCssSelector('.euiLoadingSpinner');
   }
 
+  // REMOVE WHEN REDESIGN IS COMPLETED
   async exportAsSavedObject() {
     await this.openPermaLinks();
     return await this.testSubjects.click('exportAsSavedObject');

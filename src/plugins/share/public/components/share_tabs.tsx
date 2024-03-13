@@ -74,7 +74,7 @@ export const ShareMenuTabs = ({
         defaultMessage: 'Links',
       }),
       // do not break functional tests
-      'data-test-subj': 'Permalinks',
+      dataTestSubj: 'Permalinks',
       content: (
         <LinkModal
           objectType={objectType}
@@ -90,6 +90,7 @@ export const ShareMenuTabs = ({
     shareMenuItems.map(({ shareMenuItem, panel }) => {
       tabs.push({
         ...shareMenuItem,
+        dataTestSubj: 'export',
         id: panel.id,
       });
     });
@@ -100,6 +101,7 @@ export const ShareMenuTabs = ({
         name: i18n.translate('share.contextMenu.embedCodeTab', {
           defaultMessage: 'Embed',
         }),
+        dataTestSubj: 'Embed',
         content: (
           <EmbedModal
             objectType={objectType}

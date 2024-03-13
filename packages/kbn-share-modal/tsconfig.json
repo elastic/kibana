@@ -12,6 +12,7 @@
     "**/*.ts*",
   ],
   "kbn_references": [
+    "@kbn/i18n-react",
   ],
   "exclude": [
     "target/**/*",

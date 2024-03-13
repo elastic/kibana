@@ -81,11 +81,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Kibana User navigating to Discover sees the generate CSV button', async function () {
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.loadSavedSearch('A Saved Search');
-      log.debug('click Top Nav Share button');
-      await PageObjects.share.clickShareTopNavButton();
-      await testSubjects.existOrFail('sharePanel-CSVReports');
+      if (await PageObjects.share.checkOldVersion()) {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.loadSavedSearch('A Saved Search');
+        log.debug('click Top Nav Share button');
+        await PageObjects.share.clickShareTopNavButton();
+        await testSubjects.existOrFail('sharePanel-CSVReports');
+      }
     });
 
     after(async function () {

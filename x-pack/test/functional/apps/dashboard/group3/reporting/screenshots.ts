@@ -16,7 +16,7 @@ export default function ({
   getService,
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
-  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
+  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard', 'share']);
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const browser = getService('browser');
@@ -85,16 +85,20 @@ export default function ({
     describe('Print PDF button', () => {
       it('is available if new', async () => {
         await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.reporting.openPdfReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.dashboard.clickNewDashboard();
+          await PageObjects.reporting.openPdfReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+          await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
+        }
       });
 
       it('is available when saved', async () => {
-        await PageObjects.dashboard.saveDashboard('My PDF Dashboard');
-        await PageObjects.reporting.openPdfReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.dashboard.saveDashboard('My PDF Dashboard');
+          await PageObjects.reporting.openPdfReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        }
       });
     });
 
@@ -111,16 +115,18 @@ export default function ({
         // function is taking about 15 seconds per comparison in jenkins.
         this.timeout(300000);
         await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
-        await PageObjects.reporting.openPdfReportingPanel();
-        await PageObjects.reporting.checkUsePrintLayout();
-        await PageObjects.reporting.clickGenerateReportButton();
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
+          await PageObjects.reporting.openPdfReportingPanel();
+          await PageObjects.reporting.checkUsePrintLayout();
+          await PageObjects.reporting.clickGenerateReportButton();
 
-        const url = await PageObjects.reporting.getReportURL(60000);
-        const res = await PageObjects.reporting.getResponse(url);
+          const url = await PageObjects.reporting.getReportURL(60000);
+          const res = await PageObjects.reporting.getResponse(url);
 
-        expect(res.status).to.equal(200);
-        expect(res.get('content-type')).to.equal('application/pdf');
+          expect(res.status).to.equal(200);
+          expect(res.get('content-type')).to.equal('application/pdf');
+        }
       });
     });
 
@@ -134,16 +140,20 @@ export default function ({
 
       it('is available if new', async () => {
         await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.reporting.openPngReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.dashboard.clickNewDashboard();
+          await PageObjects.reporting.openPngReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+          await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
+        }
       });
 
       it('is available when saved', async () => {
         await PageObjects.dashboard.saveDashboard('My PNG Dash');
-        await PageObjects.reporting.openPngReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.reporting.openPngReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        }
       });
     });
 
@@ -159,16 +169,18 @@ export default function ({
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
         this.timeout(300000);
         await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
-        await PageObjects.reporting.openPdfReportingPanel();
-        await PageObjects.reporting.clickGenerateReportButton();
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
+          await PageObjects.reporting.openPdfReportingPanel();
+          await PageObjects.reporting.clickGenerateReportButton();
 
-        const url = await PageObjects.reporting.getReportURL(60000);
-        const res = await PageObjects.reporting.getResponse(url);
+          const url = await PageObjects.reporting.getReportURL(60000);
+          const res = await PageObjects.reporting.getResponse(url);
 
-        expect(res.status).to.equal(200);
-        expect(res.get('content-type')).to.equal('application/pdf');
-        await kibanaServer.uiSettings.replace({});
+          expect(res.status).to.equal(200);
+          expect(res.get('content-type')).to.equal('application/pdf');
+          await kibanaServer.uiSettings.replace({});
+        }
       });
     });
 
@@ -218,15 +230,17 @@ export default function ({
       });
 
       it('PNG file matches the baseline image', async function () {
-        this.timeout(300000);
-        const percentDiff = await png.compareAgainstBaseline(
-          sessionReportPath,
-          baselinePath,
-          REPORTS_FOLDER,
-          updateBaselines
-        );
+        if (await PageObjects.share.checkOldVersion()) {
+          this.timeout(300000);
+          const percentDiff = await png.compareAgainstBaseline(
+            sessionReportPath,
+            baselinePath,
+            REPORTS_FOLDER,
+            updateBaselines
+          );
 
-        expect(percentDiff).to.be.lessThan(0.035);
+          expect(percentDiff).to.be.lessThan(0.035);
+        }
       });
     });
   });

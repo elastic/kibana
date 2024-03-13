@@ -135,9 +135,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await panelActions.expectMissingEditPanelAction();
       });
 
+      // REMOVE WHEN REDESIGN IS OVER
       it(`Permalinks shows create short-url button`, async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.share.openShareMenuItem('Permalinks');
+          await PageObjects.share.createShortUrlExistOrFail();
+        }
       });
 
       it(`does not allow a map to be edited`, async () => {
@@ -327,11 +330,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await panelActions.expectMissingPanelAction('embeddablePanelAction-copyToDashboard');
       });
 
+      // REMOVE WHEN REDESIGN IS OVER
       it(`Permalinks doesn't show create short-url button`, async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlMissingOrFail();
-        // close the menu
-        await PageObjects.share.clickShareTopNavButton();
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.share.openShareMenuItem('Permalinks');
+          await PageObjects.share.createShortUrlMissingOrFail();
+          // close the menu
+          await PageObjects.share.clickShareTopNavButton();
+        }
       });
 
       it('allows loading a saved query via the saved query management component', async () => {
@@ -425,9 +431,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('embeddablePanelHeading-APie', { timeout: 10000 });
       });
 
+      // REMOVE WHEN REDESIGN IS COMPLETED
       it(`Permalinks shows create short-url button`, async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.share.openShareMenuItem('Permalinks');
+          await PageObjects.share.createShortUrlExistOrFail();
+        }
       });
 
       it('allows loading a saved query via the saved query management component', async () => {

@@ -12,8 +12,9 @@ const SAVEDSEARCH_TITLE = 'Ecommerce Data';
 const VIS_TITLE = 'e-commerce pie chart';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const reportingFunctional = getService('reportingFunctional');
+  const PageObjects = getPageObjects(['share']);
 
   describe('Security with `reporting_user` built-in role', () => {
     before(async () => {
@@ -25,57 +26,73 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Dashboard: Download CSV file', () => {
       it('does not allow user that does not have reporting_user role', async () => {
-        await reportingFunctional.loginDataAnalyst();
-        await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
-        await reportingFunctional.tryDashboardDownloadCsvFail('Ecommerce Data');
+        if (await PageObjects.share.checkOldVersion()) {
+          await reportingFunctional.loginDataAnalyst();
+          await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
+          await reportingFunctional.tryDashboardDownloadCsvFail('Ecommerce Data');
+        }
       });
 
       it('does allow user with reporting_user role', async () => {
-        await reportingFunctional.loginDataAnalyst();
-        await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
-        await reportingFunctional.tryDashboardDownloadCsvSuccess('Ecommerce Data');
+        if (await PageObjects.share.checkOldVersion()) {
+          await reportingFunctional.loginDataAnalyst();
+          await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
+          await reportingFunctional.tryDashboardDownloadCsvSuccess('Ecommerce Data');
+        }
       });
     });
 
     describe('Dashboard: Generate Screenshot', () => {
       it('does not allow user that does not have reporting_user role', async () => {
-        await reportingFunctional.loginDataAnalyst();
-        await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
-        await reportingFunctional.tryGeneratePdfFail();
+        if (await PageObjects.share.checkOldVersion()) {
+          await reportingFunctional.loginDataAnalyst();
+          await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
+          await reportingFunctional.tryGeneratePdfFail();
+        }
       });
 
       it('does allow user with reporting_user role', async () => {
-        await reportingFunctional.loginReportingUser();
-        await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
-        await reportingFunctional.tryGeneratePdfSuccess();
+        if (await PageObjects.share.checkOldVersion()) {
+          await reportingFunctional.loginReportingUser();
+          await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
+          await reportingFunctional.tryGeneratePdfSuccess();
+        }
       });
     });
 
     describe('Discover: Generate CSV', () => {
       it('does not allow user that does not have reporting_user role', async () => {
-        await reportingFunctional.loginDataAnalyst();
-        await reportingFunctional.openSavedSearch(SAVEDSEARCH_TITLE);
-        await reportingFunctional.tryDiscoverCsvFail();
+        if (await PageObjects.share.checkOldVersion()) {
+          await reportingFunctional.loginDataAnalyst();
+          await reportingFunctional.openSavedSearch(SAVEDSEARCH_TITLE);
+          await reportingFunctional.tryDiscoverCsvFail();
+        }
       });
 
       it('does allow user with reporting_user role', async () => {
-        await reportingFunctional.loginReportingUser();
-        await reportingFunctional.openSavedSearch(SAVEDSEARCH_TITLE);
-        await reportingFunctional.tryDiscoverCsvSuccess();
+        if (await PageObjects.share.checkOldVersion()) {
+          await reportingFunctional.loginReportingUser();
+          await reportingFunctional.openSavedSearch(SAVEDSEARCH_TITLE);
+          await reportingFunctional.tryDiscoverCsvSuccess();
+        }
       });
     });
 
     describe('Visualize Editor: Generate Screenshot', () => {
       it('does not allow user that does not have reporting_user role', async () => {
-        await reportingFunctional.loginDataAnalyst();
-        await reportingFunctional.openSavedVisualization(VIS_TITLE);
-        await reportingFunctional.tryGeneratePdfFail();
+        if (await PageObjects.share.checkOldVersion()) {
+          await reportingFunctional.loginDataAnalyst();
+          await reportingFunctional.openSavedVisualization(VIS_TITLE);
+          await reportingFunctional.tryGeneratePdfFail();
+        }
       });
 
       it('does allow user with reporting_user role', async () => {
-        await reportingFunctional.loginReportingUser();
-        await reportingFunctional.openSavedVisualization(VIS_TITLE);
-        await reportingFunctional.tryGeneratePdfSuccess();
+        if (await PageObjects.share.checkOldVersion()) {
+          await reportingFunctional.loginReportingUser();
+          await reportingFunctional.openSavedVisualization(VIS_TITLE);
+          await reportingFunctional.tryGeneratePdfSuccess();
+        }
       });
     });
   });

@@ -21,13 +21,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 export interface ModalProps {
   objectType: string;
   onClose: () => void;
-  tabs: Array<{ id: string; name: string; content: ReactElement }>;
+  tabs: Array<{ id: string; name: string; content: ReactElement; dataTestSubj: string }>;
 }
 
 export const ShareModal = ({ onClose, objectType, tabs }: ModalProps) => {
   const [selectedTabId, setSelectedTabId] = useState('link');
 
-  useMemo(() => {
+  // @ts-ignore
+  const { dataTestSubj } = useMemo(() => {
     return tabs.find(({ id }) => id === selectedTabId);
   }, [selectedTabId, tabs]);
 
@@ -41,6 +42,7 @@ export const ShareModal = ({ onClose, objectType, tabs }: ModalProps) => {
         key={index}
         onClick={() => onSelectedTabChanged(tab.id)}
         isSelected={tab.id === selectedTabId}
+        data-test-subj={dataTestSubj}
       >
         {tab.name}
       </EuiTab>
@@ -57,7 +59,7 @@ export const ShareModal = ({ onClose, objectType, tabs }: ModalProps) => {
 
   return (
     // @ts-ignore css prop in EuiModal
-    <EuiModal css={{ width: '500px' }} onClose={onClose}>
+    <EuiModal css={{ width: '500px' }} onClose={onClose} data-test-subj="shareContextModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>{renderTitle()}</EuiModalHeaderTitle>
       </EuiModalHeader>

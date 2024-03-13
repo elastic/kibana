@@ -732,6 +732,7 @@ test/plugin_functional/plugins/session_notifications @elastic/kibana-core
 x-pack/plugins/session_view @elastic/kibana-cloud-security-posture
 packages/kbn-set-map @elastic/kibana-operations
 examples/share_examples @elastic/appex-sharedux
+packages/kbn-share-modal @elastic/appex-sharedux
 src/plugins/share @elastic/appex-sharedux
 packages/kbn-shared-svg @elastic/obs-ux-infra_services-team
 packages/shared-ux/avatar/solution @elastic/appex-sharedux

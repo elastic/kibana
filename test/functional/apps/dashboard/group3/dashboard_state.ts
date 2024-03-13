@@ -74,6 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard state', function () {
     before(async function () {
+      await PageObjects.share.closeShareModal();
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
 
@@ -81,7 +82,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
+      await PageObjects.share.closeShareModal();
       await PageObjects.dashboard.gotoDashboardLandingPage();
+    });
+    this.afterEach(async () => {
+      await PageObjects.share.closeShareModal();
     });
 
     it('Overriding colors on an area chart is preserved', async () => {
@@ -118,6 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Saved search with no changes will update when the saved object changes', async () => {
+      await PageObjects.share.closeShareModal();
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.header.clickDiscover();
@@ -181,7 +187,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           };
         }
       );
-
+      await PageObjects.share.closeShareModal();
       // We need to add a timestamp to the URL because URL changes now only work with a hard refresh.
       await browser.get(newUrl.toString());
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -193,6 +199,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const getUrlFromShare = async () => {
       log.debug(`getUrlFromShare`);
+      if (await PageObjects.share.isShareModalOpen()) {
+        await PageObjects.share.closeShareModal();
+      }
       await PageObjects.share.clickShareTopNavButton();
       const sharedUrl = await PageObjects.share.getSharedUrl();
       await PageObjects.share.clickShareTopNavButton();
@@ -219,6 +228,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const changeQuery = async (useHardRefresh: boolean, newQuery: string) => {
         await queryBar.clickQuerySubmitButton();
         const currentUrl = await getUrlFromShare();
+        await PageObjects.share.closeShareModal();
         const newUrl = updateAppStateQueryParam(
           currentUrl,
           (appState: Partial<SharedDashboardState>) => {
@@ -252,6 +262,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('for panel size parameters', async function () {
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
         const currentUrl = await getUrlFromShare();
+        await PageObjects.share.closeShareModal();
         const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
         const newUrl = updateAppStateQueryParam(
           currentUrl,
@@ -296,6 +307,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('when removing a panel', async function () {
         await PageObjects.dashboard.waitForRenderComplete();
         const currentUrl = await getUrlFromShare();
+        await PageObjects.share.closeShareModal();
         const newUrl = updateAppStateQueryParam(
           currentUrl,
           (appState: Partial<SharedDashboardState>) => {
@@ -329,6 +341,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           await PageObjects.visChart.selectNewLegendColorChoice('#F9D9F9');
           const currentUrl = await getUrlFromShare();
+          await PageObjects.share.closeShareModal();
           const newUrl = updateAppStateQueryParam(
             currentUrl,
             (appState: Partial<SharedDashboardState>) => {
@@ -375,6 +388,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('resets a pie slice color to the original when removed', async function () {
           const currentUrl = await getUrlFromShare();
+          await PageObjects.share.closeShareModal();
           const newUrl = updateAppStateQueryParam(
             currentUrl,
             (appState: Partial<SharedDashboardState>) => {

@@ -170,20 +170,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(metricData[0].title).to.eql('Average of bytes');
     });
 
+    // REMOVE WHEN REDESIGN IS COMPLETE
     it('should be possible to share a URL of a visualization with adhoc dataViews', async () => {
-      const url = await PageObjects.lens.getUrl('snapshot');
-      await browser.openNewTab();
+      if (await PageObjects.lens.checkOldShareVersion()) {
+        const url = await PageObjects.lens.getUrl('snapshot');
+        await browser.openNewTab();
 
-      const [lensWindowHandler] = await browser.getAllWindowHandles();
+        const [lensWindowHandler] = await browser.getAllWindowHandles();
 
-      await browser.navigateTo(url);
-      // check that it's the same configuration in the new URL when ready
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(
-        await PageObjects.lens.getDimensionTriggerText('lnsMetric_primaryMetricDimensionPanel')
-      ).to.eql('Average of bytes');
-      await browser.closeCurrentWindow();
-      await browser.switchToWindow(lensWindowHandler);
+        await browser.navigateTo(url!);
+        // check that it's the same configuration in the new URL when ready
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(
+          await PageObjects.lens.getDimensionTriggerText('lnsMetric_primaryMetricDimensionPanel')
+        ).to.eql('Average of bytes');
+        await browser.closeCurrentWindow();
+        await browser.switchToWindow(lensWindowHandler);
+      }
     });
 
     it('should be possible to download a visualization with adhoc dataViews', async () => {
