@@ -23,6 +23,7 @@ const deploymentAgnosticFunctionalServices = _.pick(functionalServices, [
   'canvasElement',
   'cases',
   'comboBox',
+  'selectable',
   'dashboardAddPanel',
   'dashboardBadgeActions',
   'dashboardCustomizePanel',
