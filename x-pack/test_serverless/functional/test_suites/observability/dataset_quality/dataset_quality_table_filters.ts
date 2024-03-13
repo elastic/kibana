@@ -144,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const namespaceColCellTexts = await namespaceCol.getCellTexts();
       expect(namespaceColCellTexts).to.contain(defaultNamespace);
 
-      // Filter for integration
+      // Filter for prod namespace
       await PageObjects.datasetQuality.filterForNamespaces([datasetNamespace]);
 
       const colsAfterFilter = await PageObjects.datasetQuality.parseDatasetTable();
