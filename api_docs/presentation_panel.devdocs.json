@@ -606,7 +606,7 @@
           },
           "<",
           "PanelCompatibleComponent",
-          "<ApiType, PropsType>>; }"
+          "<ApiType, PropsType> | null>; }"
         ],
         "path": "src/plugins/presentation_panel/public/panel_component/types.ts",
         "deprecated": false,

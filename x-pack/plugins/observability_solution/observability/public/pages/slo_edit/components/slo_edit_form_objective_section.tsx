@@ -186,6 +186,20 @@ export function SloEditFormObjectiveSection() {
         </EuiFlexItem>
       )}
 
+      {indicator === 'sli.synthetics.availability' && (
+        <EuiFlexItem>
+          <EuiCallOut color="warning">
+            <p>
+              <FormattedMessage
+                id="xpack.observability.slo.sloEdit.sliType.syntheticAvailability.objectiveMessage"
+                defaultMessage="The Synthetics availability indicator requires the budgeting method to be set to 'Occurances'."
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="l" />
+        </EuiFlexItem>
+      )}
+
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
           <EuiFormRow
@@ -214,7 +228,10 @@ export function SloEditFormObjectiveSection() {
               render={({ field: { ref, ...field } }) => (
                 <EuiSelect
                   {...field}
-                  disabled={indicator === 'sli.metric.timeslice'}
+                  disabled={
+                    indicator === 'sli.metric.timeslice' ||
+                    indicator === 'sli.synthetics.availability'
+                  }
                   required
                   id={budgetingSelect}
                   data-test-subj="sloFormBudgetingMethodSelect"
