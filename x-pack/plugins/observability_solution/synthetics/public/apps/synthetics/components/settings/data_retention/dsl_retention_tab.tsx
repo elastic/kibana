@@ -105,7 +105,7 @@ const ErrorEmptyPrompt = ({ error }: { error?: string }) => (
       error ?? (
         <FormattedMessage
           tagName="p"
-          id="pack.synthetics.dslRetention.emptyErrorPrompt"
+          id="xpack.synthetics.dslRetention.emptyErrorPrompt"
           defaultMessage="No further error information available"
         />
       )
