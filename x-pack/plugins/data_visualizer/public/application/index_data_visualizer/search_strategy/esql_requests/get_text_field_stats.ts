@@ -45,9 +45,9 @@ export const getESQLExampleFieldValues = async ({
 
       if (textFieldsResp) {
         return textFields.map((textField, idx) => {
-          const examples = (textFieldsResp.rawResponse.values as unknown[][]).map(
-            (row) => row[idx]
-          );
+          const examples = [
+            ...new Set((textFieldsResp.rawResponse.values as unknown[][]).map((row) => row[idx])),
+          ];
 
           return {
             fieldName: textField.name,
