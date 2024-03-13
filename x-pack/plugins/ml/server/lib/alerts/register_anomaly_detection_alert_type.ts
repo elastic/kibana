@@ -269,7 +269,7 @@ export function registerAnomalyDetectionAlertType({
       const executionResult = await alertingService.execute(
         params,
         spaceId,
-        fieldFormatCache.get(rule.id)!
+        fieldFormatCache.get(rule.id)
       );
 
       if (!executionResult) return { state: {} };
@@ -334,7 +334,7 @@ export function registerAnomalyDetectionAlertType({
         }
       }
 
-      return { state: stateUpdate };
+      return { state: {} };
     },
     alerts: ANOMALY_DETECTION_AAD_CONFIG,
   });

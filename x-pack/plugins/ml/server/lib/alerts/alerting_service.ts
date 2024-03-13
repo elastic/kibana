@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
 import type { Duration } from 'moment/moment';
-import { capitalize, get, isEmpty, memoize, pick } from 'lodash';
+import { capitalize, get, memoize, pick } from 'lodash';
 import {
   FIELD_FORMAT_IDS,
   type IFieldFormat,
@@ -27,6 +27,7 @@ import {
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getAnomalyDescription } from '../../../common/util/anomaly_description';
 import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
 import type { MlClient } from '../ml_client';
@@ -976,7 +977,7 @@ export function alertingServiceProvider(
     execute: async (
       params: MlAnomalyDetectionAlertParams,
       spaceId: string,
-      state: AnomalyDetectionRuleState
+      state?: AnomalyDetectionRuleState
     ): Promise<
       | {
           payload: AnomalyDetectionAlertPayload;
@@ -995,8 +996,8 @@ export function alertingServiceProvider(
 
       const result = await fetchResult(queryParams);
 
-      if (!isEmpty(state?.contextFieldFormatters)) {
-        contextFieldFormatters = state.contextFieldFormatters;
+      if (!isPopulatedObject(state?.contextFieldFormatters)) {
+        contextFieldFormatters = state!.contextFieldFormatters;
       }
 
       const formattedResult = result
