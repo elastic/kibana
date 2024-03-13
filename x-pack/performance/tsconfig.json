@@ -17,7 +17,5 @@
     "@kbn/dev-utils",
     "@kbn/apm-synthtrace",
     "@kbn/apm-synthtrace-client",
-    "@kbn/data-views-plugin",
-    "@kbn/aiops-test-utils",
   ]
 }
