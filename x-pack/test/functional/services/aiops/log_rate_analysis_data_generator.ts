@@ -322,7 +322,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           break;
 
         case 'large_arrays':
-          await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/large_arrays');
+          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/large_arrays');
           break;
 
         default:
@@ -360,7 +360,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           break;
 
         case 'large_arrays':
-          await esArchiver.unload('test/functional/fixtures/es_archiver/large_arrays');
+          await esArchiver.unload('x-pack/test/functional/es_archives/large_arrays');
           break;
 
         default:

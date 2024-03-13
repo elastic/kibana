@@ -8,11 +8,11 @@
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 
-import dataView from '../../../test/functional/fixtures/kbn_archiver/large_arrays_data_view.json';
+import dataView from '../kbn_archives/large_arrays_data_view.json';
 
 export const journey = new Journey({
-  kbnArchives: ['test/functional/fixtures/kbn_archiver/large_arrays_data_view'],
-  esArchives: ['test/functional/fixtures/es_archiver/large_arrays'],
+  kbnArchives: ['x-pack/performance/kbn_archives/large_arrays_data_view'],
+  esArchives: ['x-pack/test/functional/es_archives/large_arrays'],
 })
   .step('Go to AIOps Log Rate Analysis', async ({ page, kbnUrl }) => {
     // Navigate to Log Rate Analysis with a prepopulated url state that runs
