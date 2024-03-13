@@ -38,7 +38,7 @@ import { EditDashboard, GotoDashboard, LinkDashboard, UnlinkDashboard } from './
 import { useCustomDashboard } from '../../hooks/use_custom_dashboards';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { useDashboardFetcher } from '../../hooks/use_dashboards_fetcher';
+import { FETCH_STATUS, useDashboardFetcher } from '../../hooks/use_dashboards_fetcher';
 import { useDataViewsContext } from '../../hooks/use_data_views';
 import { DashboardSelector } from './dashboard_selector';
 import { ContextMenu } from './context_menu';
@@ -70,9 +70,9 @@ export function Dashboards() {
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
   const [customDashboards, setCustomDashboards] = useState<DashboardItemWithTitle[]>([]);
   const [currentDashboard, setCurrentDashboard] = useState<DashboardItemWithTitle>();
-  const { data: allAvailableDashboards } = useDashboardFetcher();
+  const { data: allAvailableDashboards, status } = useDashboardFetcher();
   const { metrics } = useDataViewsContext();
-  const [urlState] = useAssetDetailsUrlState();
+  const [urlState, setUrlState] = useAssetDetailsUrlState();
 
   const { dashboards, loading, reload } = useCustomDashboard({ assetType: asset.type });
 
@@ -91,7 +91,17 @@ export function Dashboards() {
       []
     );
     setCustomDashboards(filteredCustomDashboards);
-  }, [allAvailableDashboards, dashboards]);
+    // set a default dashboard if there is no selected dashboard
+    if (!urlState?.dashboardId) {
+      setUrlState({ dashboardId: currentDashboard?.id ?? filteredCustomDashboards[0]?.id });
+    }
+  }, [
+    allAvailableDashboards,
+    currentDashboard?.id,
+    dashboards,
+    setUrlState,
+    urlState?.dashboardId,
+  ]);
 
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const getInitialInput = () => ({
@@ -123,7 +133,7 @@ export function Dashboards() {
 
   return (
     <EuiPanel hasBorder>
-      {loading ? (
+      {loading || status === FETCH_STATUS.LOADING ? (
         <EuiEmptyPrompt
           icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
           title={

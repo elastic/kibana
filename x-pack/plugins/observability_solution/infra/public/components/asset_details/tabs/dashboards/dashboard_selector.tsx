@@ -29,7 +29,7 @@ export function DashboardSelector({
 
   useMount(() => {
     if (!currentDashboardId) {
-      setUrlState({ dashboardId: customDashboards[0].id });
+      setUrlState({ dashboardId: customDashboards[0]?.id });
     }
   });
 
