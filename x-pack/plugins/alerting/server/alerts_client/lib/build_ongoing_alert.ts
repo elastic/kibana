@@ -9,6 +9,7 @@ import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
@@ -93,6 +94,8 @@ export const buildOngoingAlert = <
     [ALERT_FLAPPING_HISTORY]: legacyAlert.getFlappingHistory(),
     // Set latest maintenance window IDs
     [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
+    // Set latest match count
+    [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     // Set the time range
     ...(legacyAlert.getState().start
       ? {

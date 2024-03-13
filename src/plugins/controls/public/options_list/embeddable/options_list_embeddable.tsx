@@ -35,6 +35,7 @@ import {
   OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
 } from '../..';
+import { ControlFilterOutput } from '../../control_group/types';
 import { pluginServices } from '../../services';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
@@ -145,7 +146,14 @@ export class OptionsListEmbeddable
   private initialize = async () => {
     const { selectedOptions: initialSelectedOptions } = this.getInput();
     if (initialSelectedOptions) {
-      const filters = await this.buildFilter();
+      const {
+        explicitInput: { existsSelected, exclude },
+      } = this.getState();
+      const { filters } = await this.selectionsToFilters({
+        existsSelected,
+        exclude,
+        selectedOptions: initialSelectedOptions,
+      });
       this.dispatch.publishFilters(filters);
     }
     this.setInitializationFinished();
@@ -231,7 +239,7 @@ export class OptionsListEmbeddable
             }
           }),
           switchMap(async () => {
-            const newFilters = await this.buildFilter();
+            const { filters: newFilters } = await this.buildFilter();
             this.dispatch.publishFilters(newFilters);
           })
         )
@@ -389,15 +397,17 @@ export class OptionsListEmbeddable
     });
   };
 
-  private buildFilter = async () => {
-    const { existsSelected, selectedOptions } = this.getState().explicitInput ?? {};
-    const { exclude } = this.getInput();
+  public selectionsToFilters = async (
+    input: Partial<OptionsListEmbeddableInput>
+  ): Promise<ControlFilterOutput> => {
+    const { existsSelected, exclude, selectedOptions } = input;
 
     if ((!selectedOptions || isEmpty(selectedOptions)) && !existsSelected) {
-      return [];
+      return { filters: [] };
     }
+
     const { dataView, field } = await this.getCurrentDataViewAndField();
-    if (!dataView || !field) return;
+    if (!dataView || !field) return { filters: [] };
 
     let newFilter: Filter | undefined;
     if (existsSelected) {
@@ -410,11 +420,23 @@ export class OptionsListEmbeddable
       }
     }
 
-    if (!newFilter) return [];
-
+    if (!newFilter) return { filters: [] };
     newFilter.meta.key = field?.name;
     if (exclude) newFilter.meta.negate = true;
-    return [newFilter];
+    return { filters: [newFilter] };
+  };
+
+  private buildFilter = async (): Promise<ControlFilterOutput> => {
+    const {
+      componentState: { validSelections },
+      explicitInput: { existsSelected, exclude },
+    } = this.getState();
+
+    return await this.selectionsToFilters({
+      existsSelected,
+      exclude,
+      selectedOptions: validSelections,
+    });
   };
 
   public clearSelections() {

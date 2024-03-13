@@ -70,6 +70,10 @@ const expectedTransformResult = [
     name: 'alert.flapping',
   },
   {
+    description: 'The number of consecutive runs that meet the rule conditions.',
+    name: 'alert.consecutiveMatches',
+  },
+  {
     description: 'The configured server.publicBaseUrl value or empty string if not configured.',
     name: 'kibanaBaseUrl',
   },
