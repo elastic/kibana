@@ -248,7 +248,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('Case & alerts', () => {
+      describe('Cases & alerts', () => {
         it('should create a case correctly', async () => {
           await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
 
@@ -456,6 +456,40 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
       });
 
+      it('should add more alerts to the same case', async () => {
+        const alerts = Array.from(Array(5).keys()).map((index) => ({
+          _id: `alert-id-new-${index}`,
+          _index: 'alert-index-0',
+        }));
+
+        await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
+
+        const cases = await findCases({ supertest });
+        expect(cases.total).to.be(1);
+
+        await executeConnectorAndVerifyCorrectness({
+          supertest,
+          connectorId,
+          req: getRequest({ alerts }),
+        });
+
+        const theCase = cases.cases[0];
+
+        const attachments = await getAllComments({ supertest, caseId: theCase.id });
+
+        verifyAlertsAttachedToCase({
+          caseAttachments: attachments,
+          expectedAlertIdsToBeAttachedToCase: new Set([
+            ...req.params.subActionParams.alerts.map((alert) => alert._id),
+            ...alerts.map((alert) => alert._id),
+          ]),
+          rule: {
+            id: req.params.subActionParams.rule.id,
+            name: req.params.subActionParams.rule.name,
+          },
+        });
+      });
+
       describe('With grouping', () => {
         const reqWithGrouping = getRequest({ groupingBy: ['host.name'] });
 
@@ -495,7 +529,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        describe('Case creation', () => {
+        describe('Cases & alerts', () => {
           it('should create cases correctly', async () => {
             await executeConnectorAndVerifyCorrectness({
               supertest,
@@ -621,9 +655,7 @@ export default ({ getService }: FtrProviderContext): void => {
             const cases = await findCases({ supertest });
             expect(cases.total).to.be(1);
           });
-        });
 
-        describe('Alerts', () => {
           it('should attach the alerts to the correct cases', async () => {
             await executeConnectorAndVerifyCorrectness({
               supertest,
@@ -675,6 +707,130 @@ export default ({ getService }: FtrProviderContext): void => {
             verifyAlertsAttachedToCase({
               caseAttachments: secondCaseAttachments,
               expectedAlertIdsToBeAttachedToCase: new Set(['alert-id-1', 'alert-id-3']),
+              rule: {
+                id: req.params.subActionParams.rule.id,
+                name: req.params.subActionParams.rule.name,
+              },
+            });
+          });
+
+          it('should add more alerts to the same case', async () => {
+            const hostAAlerts = Array.from(Array(3).keys()).map((index) => ({
+              _id: `alert-id-host-A-${index}`,
+              _index: 'alert-index-0',
+              'host.name': 'A',
+            }));
+
+            const hostBAlerts = Array.from(Array(3).keys()).map((index) => ({
+              _id: `alert-id-host-B-${index}`,
+              _index: 'alert-index-0',
+              'host.name': 'B',
+            }));
+
+            const totalAlerts = [...hostAAlerts, ...hostBAlerts];
+
+            await executeConnectorAndVerifyCorrectness({
+              supertest,
+              connectorId,
+              req: getRequest({
+                alerts: reqWithGrouping.params.subActionParams.alerts,
+                groupingBy: reqWithGrouping.params.subActionParams.groupingBy,
+              }),
+            });
+
+            const cases = await findCases({ supertest });
+            expect(cases.total).to.be(2);
+
+            await executeConnectorAndVerifyCorrectness({
+              supertest,
+              connectorId,
+              req: getRequest({
+                alerts: totalAlerts,
+                groupingBy: reqWithGrouping.params.subActionParams.groupingBy,
+              }),
+            });
+
+            const firstCaseId = generateCaseId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { 'host.name': 'A' },
+            });
+
+            const secondCaseId = generateCaseId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { 'host.name': 'B' },
+            });
+
+            const firstCase = removeServerGeneratedData(
+              cases.cases.find((theCase) => theCase.id === firstCaseId)!
+            );
+
+            const secondCase = removeServerGeneratedData(
+              cases.cases.find((theCase) => theCase.id === secondCaseId)!
+            );
+
+            const firstCaseAttachments = await getAllComments({
+              supertest,
+              caseId: firstCase.id,
+            });
+
+            const secondCaseAttachments = await getAllComments({
+              supertest,
+              caseId: secondCase.id,
+            });
+
+            verifyAlertsAttachedToCase({
+              caseAttachments: firstCaseAttachments,
+              expectedAlertIdsToBeAttachedToCase: new Set([
+                ...['alert-id-0', 'alert-id-2', 'alert-id-4'],
+                ...hostAAlerts.map((alert) => alert._id),
+              ]),
+              rule: {
+                id: req.params.subActionParams.rule.id,
+                name: req.params.subActionParams.rule.name,
+              },
+            });
+
+            verifyAlertsAttachedToCase({
+              caseAttachments: secondCaseAttachments,
+              expectedAlertIdsToBeAttachedToCase: new Set([
+                ...['alert-id-1', 'alert-id-3'],
+                ...hostBAlerts.map((alert) => alert._id),
+              ]),
+              rule: {
+                id: req.params.subActionParams.rule.id,
+                name: req.params.subActionParams.rule.name,
+              },
+            });
+          });
+
+          it('should not attach alerts that do not belong to any grouping', async () => {
+            const alerts = [
+              { _id: `alert-id-0`, _index: 'alert-index-0' },
+              { _id: `alert-id-1`, _index: 'alert-index-0', 'host.name': 'A' },
+            ];
+
+            await executeConnectorAndVerifyCorrectness({
+              supertest,
+              connectorId,
+              req: getRequest({
+                alerts,
+                groupingBy: reqWithGrouping.params.subActionParams.groupingBy,
+              }),
+            });
+
+            const cases = await findCases({ supertest });
+
+            expect(cases.total).to.be(1);
+            const theCase = cases.cases[0];
+
+            const attachments = await getAllComments({
+              supertest,
+              caseId: theCase.id,
+            });
+
+            verifyAlertsAttachedToCase({
+              caseAttachments: attachments,
+              expectedAlertIdsToBeAttachedToCase: new Set(['alert-id-1']),
               rule: {
                 id: req.params.subActionParams.rule.id,
                 name: req.params.subActionParams.rule.name,
@@ -893,7 +1049,7 @@ const removeServerGeneratedData = (
   return restCase;
 };
 
-const verifyAlertsAttachedToCase = async ({
+const verifyAlertsAttachedToCase = ({
   expectedAlertIdsToBeAttachedToCase,
   caseAttachments,
   rule,
