@@ -11,7 +11,7 @@ import { CanDuplicatePanels, CanExpandPanels, TracksOverlays } from '@kbn/presen
 import {
   HasType,
   HasTypeDisplayName,
-  PublishesLocalUnifiedSearch,
+  PublishesUnifiedSearch,
   PublishesPanelTitle,
   PublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
@@ -22,7 +22,7 @@ import { DashboardContainer } from '../embeddable/dashboard_container';
 export type DashboardAPI = DashboardContainer &
   Partial<
     HasType<'dashboard'> &
-      PublishesLocalUnifiedSearch &
+      PublishesUnifiedSearch &
       PublishesPanelTitle &
       PublishesSavedObjectId
   >;
