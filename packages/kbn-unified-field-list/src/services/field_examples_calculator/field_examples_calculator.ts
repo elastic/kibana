@@ -18,7 +18,7 @@ import { DEFAULT_SIMPLE_EXAMPLES_SIZE } from '../../constants';
 
 type FieldHitValue = any;
 
-interface FieldValueCountsParams {
+export interface FieldValueCountsParams {
   values: FieldHitValue[];
   field: DataViewField;
   count?: number;
@@ -56,6 +56,9 @@ export function getFieldValues(
   field: DataViewField,
   dataView: DataView
 ): FieldHitValue[] {
+  if (!field?.name) {
+    return [];
+  }
   return map(hits, function (hit) {
     return flattenHit(hit, dataView, { includeIgnoredValues: true })[field.name];
   });

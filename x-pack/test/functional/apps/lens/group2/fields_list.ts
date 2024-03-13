@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // check for top values chart
           await testSubjects.existOrFail('lnsFieldListPanel-topValues');
           const topValuesRows = await testSubjects.findAll('lnsFieldListPanel-topValues-bucket');
-          expect(topValuesRows.length).to.eql(10);
+          expect(topValuesRows.length).to.eql(11);
         });
 
         it('should show stats for a numeric runtime field', async () => {
