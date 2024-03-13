@@ -17,7 +17,7 @@ import { LibraryNotificationPopover } from './library_notification_popover';
 import {
   UnlinkFromLibraryAction,
   UnlinkPanelFromLibraryActionApi,
-} from './legacy_unlink_from_library_action';
+} from './unlink_from_library_action';
 
 const mockUnlinkFromLibraryAction = {
   execute: jest.fn(),

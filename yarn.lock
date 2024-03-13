@@ -5456,6 +5456,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/presentation-library@link:packages/presentation/presentation_library":
+  version "0.0.0"
+  uid ""
+
 "@kbn/presentation-panel-plugin@link:src/plugins/presentation_panel":
   version "0.0.0"
   uid ""

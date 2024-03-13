@@ -14,7 +14,7 @@ import {
 } from '@kbn/saved-objects-finder-plugin/public';
 
 import { DashboardStartDependencies } from '../plugin';
-import { LegacyAddToLibraryAction } from './legacy_add_to_library_action';
+import { AddToLibraryAction } from './add_to_library_action';
 import { ClonePanelAction } from './clone_panel_action';
 import { CopyToDashboardAction } from './copy_to_dashboard_action';
 import { ExpandPanelAction } from './expand_panel_action';
@@ -22,7 +22,7 @@ import { ExportCSVAction } from './export_csv_action';
 import { FiltersNotificationAction } from './filters_notification_action';
 import { LibraryNotificationAction } from './library_notification_action';
 import { ReplacePanelAction } from './replace_panel_action';
-import { LegacyUnlinkFromLibraryAction } from './legacy_unlink_from_library_action';
+import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 
 interface BuildAllDashboardActionsProps {
   core: CoreStart;
@@ -66,15 +66,15 @@ export const buildAllDashboardActions = async ({
   }
 
   if (allowByValueEmbeddables) {
-    const legacyAddToLibraryAction = new LegacyAddToLibraryAction();
-    uiActions.registerAction(legacyAddToLibraryAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, legacyAddToLibraryAction.id);
+    const addToLibraryAction = new AddToLibraryAction();
+    uiActions.registerAction(addToLibraryAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
 
-    const legacyUnlinkFromLibraryAction = new LegacyUnlinkFromLibraryAction();
-    uiActions.registerAction(legacyUnlinkFromLibraryAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, legacyUnlinkFromLibraryAction.id);
+    const unlinkFromLibraryAction = new UnlinkFromLibraryAction();
+    uiActions.registerAction(unlinkFromLibraryAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
 
-    const libraryNotificationAction = new LibraryNotificationAction(legacyUnlinkFromLibraryAction);
+    const libraryNotificationAction = new LibraryNotificationAction(unlinkFromLibraryAction);
     uiActions.registerAction(libraryNotificationAction);
     uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
 

@@ -7,6 +7,7 @@
  */
 
 import { ErrorLike } from '@kbn/expressions-plugin/common';
+import { CanLinkToLibrary, CanUnlinkFromLibrary } from '@kbn/presentation-library';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   HasEditCapabilities,
@@ -24,7 +25,6 @@ import {
   PublishesWritablePanelTitle,
   PublishesPhaseEvents,
   PublishesSavedObjectId,
-  HasLegacyLibraryTransforms,
 } from '@kbn/presentation-publishing';
 import { Observable } from 'rxjs';
 import { EmbeddableInput } from '../../../common/types';
@@ -53,7 +53,7 @@ export type LegacyEmbeddableAPI = HasType &
   PublishesDisabledActionIds &
   PublishesWritablePanelTitle &
   PublishesWritablePanelDescription &
-  Partial<HasLegacyLibraryTransforms> &
+  Partial<CanLinkToLibrary & CanUnlinkFromLibrary> &
   HasParentApi<DefaultPresentationPanelApi['parentApi']> &
   EmbeddableHasTimeRange &
   PublishesSavedObjectId;

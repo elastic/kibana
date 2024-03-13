@@ -21,7 +21,7 @@ import {
 import {
   UnlinkFromLibraryAction,
   UnlinkPanelFromLibraryActionApi,
-} from './legacy_unlink_from_library_action';
+} from './unlink_from_library_action';
 import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
 
 export interface LibraryNotificationProps {

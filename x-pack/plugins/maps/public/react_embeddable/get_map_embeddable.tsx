@@ -30,7 +30,7 @@ import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_
 import { getSpacesApi } from '../kibana_services';
 import { MapContainer } from '../connected_components/map_container';
 import { initReduxStateSync } from './init_redux_state_sync';
-import { getLibraryTransforms } from './get_library_transforms';
+import { getLibraryInterface } from './get_library_interface';
 
 export async function getMapEmbeddable(
   factory: ReactEmbeddableFactory<MapEmbeddableInput, MapApi>,
@@ -69,7 +69,7 @@ export async function getMapEmbeddable(
         ...titlesApi,
         type: MAP_SAVED_OBJECT_TYPE,
         defaultPanelTitle: new BehaviorSubject<string | undefined>(savedMap.getAttributes().title),
-        ...getLibraryTransforms(savedMap),
+        ...getLibraryInterface(savedMap),
         localTimeRange: timeRange,
         setLocalTimeRange: (timeRange: TimeRange | undefined) => {
           timeRange.next(timeRange);

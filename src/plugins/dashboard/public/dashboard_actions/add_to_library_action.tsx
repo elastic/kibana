@@ -6,32 +6,31 @@
  * Side Public License, v 1.
  */
 
+import { apiCanLinkToLibrary, CanLinkToLibrary } from '@kbn/presentation-library';
 import {
   apiCanAccessViewMode,
-  apiHasLegacyLibraryTransforms,
   EmbeddableApiContext,
   getPanelTitle,
   PublishesPanelTitle,
   CanAccessViewMode,
   getInheritedViewMode,
-  HasLegacyLibraryTransforms,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';
 
-export const ACTION_LEGACY_ADD_TO_LIBRARY = 'legacySaveToLibrary';
+export const ACTION_ADD_TO_LIBRARY = 'saveToLibrary';
 
-export type LegacyAddPanelToLibraryActionApi = CanAccessViewMode &
-HasLegacyLibraryTransforms &
+export type AddPanelToLibraryActionApi = CanAccessViewMode &
+  CanLinkToLibrary &
   Partial<PublishesPanelTitle>;
 
-const isApiCompatible = (api: unknown | null): api is LegacyAddPanelToLibraryActionApi =>
-  Boolean(apiCanAccessViewMode(api) && apiHasLegacyLibraryTransforms(api));
+const isApiCompatible = (api: unknown | null): api is AddPanelToLibraryActionApi =>
+  Boolean(apiCanAccessViewMode(api) && apiCanLinkToLibrary(api));
 
-export class LegacyAddToLibraryAction implements Action<EmbeddableApiContext> {
-  public readonly type = ACTION_LEGACY_ADD_TO_LIBRARY;
-  public readonly id = ACTION_LEGACY_ADD_TO_LIBRARY;
+export class AddToLibraryAction implements Action<EmbeddableApiContext> {
+  public readonly type = ACTION_ADD_TO_LIBRARY;
+  public readonly id = ACTION_ADD_TO_LIBRARY;
   public order = 15;
 
   private toastsService;

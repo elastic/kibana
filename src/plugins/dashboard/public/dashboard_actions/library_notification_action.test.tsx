@@ -13,7 +13,7 @@ import { LibraryNotificationAction } from './library_notification_action';
 import {
   UnlinkFromLibraryAction,
   UnlinkPanelFromLibraryActionApi,
-} from './legacy_unlink_from_library_action';
+} from './unlink_from_library_action';
 
 describe('library notification action', () => {
   let action: LibraryNotificationAction;

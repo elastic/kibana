@@ -1194,6 +1194,8 @@
       "@kbn/preboot-example-plugin/*": ["examples/preboot_example/*"],
       "@kbn/presentation-containers": ["packages/presentation/presentation_containers"],
       "@kbn/presentation-containers/*": ["packages/presentation/presentation_containers/*"],
+      "@kbn/presentation-library": ["packages/presentation/presentation_library"],
+      "@kbn/presentation-library/*": ["packages/presentation/presentation_library/*"],
       "@kbn/presentation-panel-plugin": ["src/plugins/presentation_panel"],
       "@kbn/presentation-panel-plugin/*": ["src/plugins/presentation_panel/*"],
       "@kbn/presentation-publishing": ["packages/presentation/presentation_publishing"],

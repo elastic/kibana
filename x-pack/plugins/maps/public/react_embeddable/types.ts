@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { HasLibraryTransforms, PublishesWritableLocalUnifiedSearch } from '@kbn/presentation-publishing';
+import type { PublishesWritableLocalUnifiedSearch } from '@kbn/presentation-publishing';
 import type {
   DefaultEmbeddableApi,
 } from '@kbn/embeddable-plugin/public';
-import type { MapEmbeddableInput } from '../embeddable/types';
+import { CanLinkToLibrary, CanUnlinkFromLibrary } from '@kbn/presentation-library';
 
 export type MapApi = DefaultEmbeddableApi & 
-HasLibraryTransforms<MapEmbeddableInput> &
+  CanLinkToLibrary &
+  CanUnlinkFromLibrary &
   Pick<PublishesWritableLocalUnifiedSearch, 'localTimeRange' | 'setLocalTimeRange'>;
