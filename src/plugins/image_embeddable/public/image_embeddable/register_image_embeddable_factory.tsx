@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 
@@ -21,7 +21,7 @@ import {
   useReactEmbeddableUnsavedChanges,
 } from '@kbn/embeddable-plugin/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { usePublishingSubject, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { FileImageMetadata } from '@kbn/shared-ux-file-types';
 
 import { imageClickTrigger } from '../actions';
@@ -55,10 +55,14 @@ export const registerImageEmbeddableFactory = () => {
       const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.imageConfig);
 
       return RegisterReactEmbeddable<ImageEmbeddableApi>((apiRef) => {
+        const [loading, setLoading] = useState(true);
+        const [error, setError] = useState<Error | undefined>(undefined);
+        const [hasTriggerActions, setHasTriggerActions] = useState(false);
+
         const parentApi = useReactEmbeddableParentApi();
         const imageConfig = useStateFromPublishingSubject(imageConfig$);
-
-        const [hasTriggerActions, setHasTriggerActions] = useState(false);
+        const dataLoading = usePublishingSubject<boolean | undefined>(loading);
+        const blockingError = usePublishingSubject<Error | undefined>(error);
 
         useLayoutEffect(() => {
           import('./image_embeddable_lazy');
@@ -82,6 +86,8 @@ export const registerImageEmbeddableFactory = () => {
             ...titlesApi,
             unsavedChanges,
             resetUnsavedChanges,
+            dataLoading,
+            blockingError,
             onEdit: async () => {
               const newImageConfig = await openImageEditor(imageConfig);
 
@@ -139,12 +145,13 @@ export const registerImageEmbeddableFactory = () => {
               className="imageEmbeddableImage"
               imageConfig={imageConfig}
               isScreenshotMode={screenshotModeService?.isScreenshotMode()}
-              // onLoad={() => {
-              //   this.renderComplete.dispatchComplete();
-              // }}
-              // onError={() => {
-              //   this.renderComplete.dispatchError();
-              // }}
+              onLoad={() => {
+                setLoading(false);
+              }}
+              onError={() => {
+                setLoading(false);
+                setError(new Error(ImageEmbeddableStrings.getErrorMessage()));
+              }}
               onClick={
                 // note: passing onClick enables the cursor pointer style, so we only pass it if there are compatible actions
                 hasTriggerActions

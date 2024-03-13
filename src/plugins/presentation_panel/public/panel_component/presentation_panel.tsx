@@ -27,7 +27,7 @@ export const PresentationPanel = <
   const { Component, ...passThroughProps } = props;
   const { loading, value, error } = useAsync(async () => {
     const startServicesPromise = untilPluginStartServicesReady();
-    const modulePromise = await import('./presentation_panel_internal');
+    const modulePromise = import('./presentation_panel_internal');
     const componentPromise = isPromise(Component) ? Component : Promise.resolve(Component);
     const [, unwrappedComponent, panelModule] = await Promise.all([
       startServicesPromise,

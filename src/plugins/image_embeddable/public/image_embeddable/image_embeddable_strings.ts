@@ -17,4 +17,8 @@ export const ImageEmbeddableStrings = {
     i18n.translate('imageEmbeddable.imageEmbeddableFactory.displayName.edit', {
       defaultMessage: 'image',
     }),
+  getErrorMessage: () =>
+    i18n.translate('imageEmbeddable.imageEmbeddableFactory.error', {
+      defaultMessage: 'Error loading image.',
+    }),
 };

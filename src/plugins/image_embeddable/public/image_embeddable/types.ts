@@ -10,13 +10,20 @@ import {
   DefaultEmbeddableApi,
   SerializedReactEmbeddableTitles,
 } from '@kbn/embeddable-plugin/public';
-import { HasEditCapabilities } from '@kbn/presentation-publishing';
+import {
+  HasEditCapabilities,
+  PublishesBlockingError,
+  PublishesDataLoading,
+} from '@kbn/presentation-publishing';
 
 export type ImageEmbeddableSerializedState = SerializedReactEmbeddableTitles & {
   imageConfig: ImageConfig;
 };
 
-export type ImageEmbeddableApi = DefaultEmbeddableApi & HasEditCapabilities;
+export type ImageEmbeddableApi = DefaultEmbeddableApi &
+  HasEditCapabilities &
+  PublishesDataLoading &
+  PublishesBlockingError;
 
 export type ImageSizing = 'fill' | 'contain' | 'cover' | 'none';
 
