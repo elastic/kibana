@@ -7550,6 +7550,20 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.GetFieldsOptions.fieldTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "fieldTypes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.GetFieldsOptions.includeEmptyFields",
             "type": "CompoundType",
             "tags": [],
@@ -15372,7 +15386,7 @@
             "signature": [
               "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; indexFilter?: ",
               "QueryDslQueryContainer",
-              " | undefined; fields?: string[] | undefined; allowHidden?: boolean | undefined; includeEmptyFields?: boolean | undefined; }) => Promise<{ fields: ",
+              " | undefined; fields?: string[] | undefined; allowHidden?: boolean | undefined; fieldTypes?: string[] | undefined; includeEmptyFields?: boolean | undefined; }) => Promise<{ fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -15505,6 +15519,20 @@
                     "description": [],
                     "signature": [
                       "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.fieldTypes",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "fieldTypes",
+                    "description": [],
+                    "signature": [
+                      "string[] | undefined"
                     ],
                     "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
                     "deprecated": false,
@@ -23889,6 +23917,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.GetFieldsOptions.fieldTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "fieldTypes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,

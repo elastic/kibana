@@ -488,6 +488,7 @@ src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/kibana_utils @elastic/appex-sharedux
 x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 packages/kbn-language-documentation-popover @elastic/kibana-visualizations
+x-pack/examples/lens_config_builder_example @elastic/kibana-visualizations
 packages/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team @elastic/kibana-visualizations
 packages/kbn-lens-formula-docs @elastic/kibana-visualizations
 x-pack/examples/lens_embeddable_inline_editing_example @elastic/kibana-visualizations
@@ -569,6 +570,7 @@ test/common/plugins/newsfeed @elastic/kibana-core
 src/plugins/no_data_page @elastic/appex-sharedux
 x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
+x-pack/plugins/observability_solution/observability_ai_assistant_app @elastic/obs-knowledge-team
 x-pack/plugins/observability_solution/observability_ai_assistant @elastic/obs-knowledge-team
 x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
 x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
@@ -1055,7 +1057,6 @@ x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-
 /x-pack/test/functional/apps/monitoring @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
 /x-pack/test/api_integration/apis/monitoring @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
 /x-pack/test/api_integration/apis/monitoring_collection @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
-/x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer @elastic/obs-ux-logs-team
 
 # Fleet
 /fleet_packages.json @elastic/fleet
@@ -1086,7 +1087,11 @@ x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-
 
 # Logs
 /x-pack/test/api_integration/apis/logs_ui @elastic/obs-ux-logs-team
+/x-pack/test/dataset_quality_api_integration @elastic/obs-ux-logs-team
 /x-pack/test/functional/apps/observability_logs_explorer @elastic/obs-ux-logs-team
+/x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer @elastic/obs-ux-logs-team
+/x-pack/test/functional/apps/dataset_quality @elastic/obs-ux-logs-team
+/x-pack/test_serverless/functional/test_suites/observability/dataset_quality @elastic/obs-ux-logs-team
 
 # Observability onboarding tour
 /x-pack/plugins/observability_solution/observability_shared/public/components/tour @elastic/platform-onboarding
@@ -1583,6 +1588,18 @@ packages/react @elastic/appex-sharedux
 # Plugin manifests
 /src/plugins/**/kibana.jsonc @elastic/kibana-core
 /x-pack/plugins/**/kibana.jsonc @elastic/kibana-core
+
+# Temporary Encrypted Saved Objects (ESO) guarding
+# This additional code-ownership is meant to be a temporary precaution to notify the Kibana platform security team
+# when an encrypted saved object is changed. Very careful review is necessary to ensure any changes are compatible
+# with serverless zero downtime upgrades (ZDT). This section should be removed only when proper guidance for
+# maintaining ESOs has been documented and consuming teams have acclimated to ZDT changes.
+x-pack/plugins/actions/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
+x-pack/plugins/alerting/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
+x-pack/plugins/fleet/server/saved_objects/index.ts @elastic/fleet @elastic/kibana-security
+x-pack/plugins/observability_solution/synthetics/server/saved_objects/saved_objects.ts @elastic/obs-ux-infra_services-team @elastic/kibana-security
+x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_monitor.ts @elastic/obs-ux-infra_services-team @elastic/kibana-security
+x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_param.ts @elastic/obs-ux-infra_services-team @elastic/kibana-security
 
 ####
 ## These rules are always last so they take ultimate priority over everything else

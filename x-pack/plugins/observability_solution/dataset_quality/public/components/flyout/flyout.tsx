@@ -30,10 +30,15 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
     useDatasetQualityFlyout();
 
   return (
-    <EuiFlyout onClose={closeFlyout} ownFocus={false} data-component-name={'datasetQualityFlyout'}>
+    <EuiFlyout
+      onClose={closeFlyout}
+      ownFocus={false}
+      data-component-name={'datasetQualityFlyout'}
+      data-test-subj="datasetQualityFlyout"
+    >
       <>
         <Header dataStreamStat={dataset} />
-        <EuiFlyoutBody>
+        <EuiFlyoutBody data-test-subj="datasetQualityFlyoutBody">
           <DegradedDocs dataStream={dataStreamStat?.rawName} timeRange={timeRange} />
 
           <EuiSpacer />

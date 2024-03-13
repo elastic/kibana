@@ -8,9 +8,7 @@ import {
   AnnotationDomainType,
   AreaSeries,
   Axis,
-  BarSeries,
   Chart,
-  ElementClickListener,
   LineAnnotation,
   Position,
   RectAnnotation,
@@ -18,7 +16,6 @@ import {
   Settings,
   Tooltip,
   TooltipType,
-  XYChartElementEvent,
 } from '@elastic/charts';
 import {
   EuiFlexGroup,
@@ -42,7 +39,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useGetPreviewData } from '../../../hooks/slo/use_get_preview_data';
 import { useKibana } from '../../../utils/kibana_react';
 import { COMPARATOR_MAPPING } from '../../slo_edit/constants';
-import { openInDiscover, getDiscoverLink } from '../../../utils/slo/get_discover_link';
+import { GoodBadEventsChart } from '../../slos/components/common/good_bad_events_chart';
+import { getDiscoverLink } from '../../../utils/slo/get_discover_link';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -112,11 +110,6 @@ export function EventsChartPanel({ slo, range }: Props) {
       threshold != null && maxValue != null && threshold > maxValue ? threshold : maxValue || NaN,
   };
 
-  const intervalInMilliseconds =
-    data && data.length > 2
-      ? moment(data[1].date).valueOf() - moment(data[0].date).valueOf()
-      : 10 * 60000;
-
   const annotation =
     slo.indicator.type === 'sli.metric.timeslice' && threshold ? (
       <>
@@ -151,29 +144,6 @@ export function EventsChartPanel({ slo, range }: Props) {
         />
       </>
     ) : null;
-
-  const goodEventId = i18n.translate(
-    'xpack.observability.slo.sloDetails.eventsChartPanel.goodEventsLabel',
-    { defaultMessage: 'Good events' }
-  );
-
-  const badEventId = i18n.translate(
-    'xpack.observability.slo.sloDetails.eventsChartPanel.badEventsLabel',
-    { defaultMessage: 'Bad events' }
-  );
-
-  const barClickHandler = (params: XYChartElementEvent[]) => {
-    if (slo.indicator.type === 'sli.kql.custom') {
-      const [datanum, eventDetail] = params[0];
-      const isBad = eventDetail.specId === badEventId;
-      const timeRange = {
-        from: moment(datanum.x).toISOString(),
-        to: moment(datanum.x).add(intervalInMilliseconds, 'ms').toISOString(),
-        mode: 'absolute' as const,
-      };
-      openInDiscover(discover, slo, isBad, !isBad, timeRange);
-    }
-  };
 
   const showViewEventsLink = ![
     'sli.apm.transactionErrorRate',
@@ -216,99 +186,66 @@ export function EventsChartPanel({ slo, range }: Props) {
         </EuiFlexGroup>
 
         <EuiFlexItem>
-          {isLoading && <EuiLoadingChart size="m" mono data-test-subj="sliEventsChartLoading" />}
-
-          {!isLoading && (
-            <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
-              <Tooltip type={TooltipType.VerticalCursor} />
-              <Settings
-                baseTheme={baseTheme}
-                showLegend={slo.indicator.type !== 'sli.metric.timeslice'}
-                showLegendExtra={false}
-                legendPosition={Position.Left}
-                noResults={
-                  <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
-                }
-                onPointerUpdate={handleCursorUpdate}
-                externalPointerEvents={{
-                  tooltip: { visible: true },
-                }}
-                pointerUpdateDebounce={0}
-                pointerUpdateTrigger={'x'}
-                locale={i18n.getLocale()}
-                onElementClick={barClickHandler as ElementClickListener}
-              />
-              {annotation}
-
-              <Axis
-                id="bottom"
-                position={Position.Bottom}
-                showOverlappingTicks
-                tickFormat={(d) => moment(d).format(dateFormat)}
-              />
-              <Axis
-                id="left"
-                position={Position.Left}
-                tickFormat={(d) => numeral(d).format(yAxisNumberFormat)}
-                domain={domain}
-              />
-
-              {slo.indicator.type !== 'sli.metric.timeslice' ? (
-                <>
-                  <BarSeries
-                    id={goodEventId}
-                    color={euiTheme.colors.success}
-                    barSeriesStyle={{
-                      rect: { fill: euiTheme.colors.success },
-                      displayValue: { fill: euiTheme.colors.success },
-                    }}
-                    xScaleType={ScaleType.Time}
-                    yScaleType={ScaleType.Linear}
-                    xAccessor="key"
-                    yAccessors={['value']}
-                    stackAccessors={[0]}
-                    data={
-                      data?.map((datum) => ({
-                        key: new Date(datum.date).getTime(),
-                        value: datum.events?.good,
-                      })) ?? []
-                    }
-                  />
-
-                  <BarSeries
-                    id={badEventId}
-                    color={euiTheme.colors.danger}
-                    barSeriesStyle={{
-                      rect: { fill: euiTheme.colors.danger },
-                      displayValue: { fill: euiTheme.colors.danger },
-                    }}
-                    xScaleType={ScaleType.Time}
-                    yScaleType={ScaleType.Linear}
-                    xAccessor="key"
-                    yAccessors={['value']}
-                    stackAccessors={[0]}
-                    data={
-                      data?.map((datum) => ({
-                        key: new Date(datum.date).getTime(),
-                        value: datum.events?.bad,
-                      })) ?? []
-                    }
-                  />
-                </>
-              ) : (
-                <AreaSeries
-                  id="Metric"
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  xAccessor="date"
-                  yAccessors={['value']}
-                  data={(data ?? []).map((datum) => ({
-                    date: new Date(datum.date).getTime(),
-                    value: datum.sliValue >= 0 ? datum.sliValue : null,
-                  }))}
-                />
+          {slo.indicator.type !== 'sli.metric.timeslice' ? (
+            <GoodBadEventsChart
+              isLoading={isLoading}
+              data={data || []}
+              annotation={annotation}
+              slo={slo}
+            />
+          ) : (
+            <>
+              {isLoading && (
+                <EuiLoadingChart size="m" mono data-test-subj="sliEventsChartLoading" />
               )}
-            </Chart>
+
+              {!isLoading && (
+                <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
+                  <Tooltip type={TooltipType.VerticalCursor} />
+                  <Settings
+                    baseTheme={baseTheme}
+                    showLegend={slo.indicator.type !== 'sli.metric.timeslice'}
+                    showLegendExtra={false}
+                    legendPosition={Position.Left}
+                    noResults={
+                      <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
+                    }
+                    onPointerUpdate={handleCursorUpdate}
+                    externalPointerEvents={{
+                      tooltip: { visible: true },
+                    }}
+                    pointerUpdateDebounce={0}
+                    pointerUpdateTrigger={'x'}
+                    locale={i18n.getLocale()}
+                  />
+                  {annotation}
+
+                  <Axis
+                    id="bottom"
+                    position={Position.Bottom}
+                    showOverlappingTicks
+                    tickFormat={(d) => moment(d).format(dateFormat)}
+                  />
+                  <Axis
+                    id="left"
+                    position={Position.Left}
+                    tickFormat={(d) => numeral(d).format(yAxisNumberFormat)}
+                    domain={domain}
+                  />
+                  <AreaSeries
+                    id="Metric"
+                    xScaleType={ScaleType.Time}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor="date"
+                    yAccessors={['value']}
+                    data={(data ?? []).map((datum) => ({
+                      date: new Date(datum.date).getTime(),
+                      value: datum.sliValue >= 0 ? datum.sliValue : null,
+                    }))}
+                  />
+                </Chart>
+              )}
+            </>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

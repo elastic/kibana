@@ -20,14 +20,12 @@ import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
-import { ConnectorDetailRouter } from './components/connector_detail/connector_detail_router';
 import { ConnectorsRouter } from './components/connectors/connectors_router';
 import { CrawlersRouter } from './components/connectors/crawlers_router';
 import { NotFound } from './components/not_found';
 import { SearchIndicesRouter } from './components/search_indices';
 import {
   CONNECTORS_PATH,
-  CONNECTOR_DETAIL_PATH,
   CRAWLERS_PATH,
   ERROR_STATE_PATH,
   ROOT_PATH,
@@ -80,9 +78,6 @@ export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData
       </Route>
       <Route path={CONNECTORS_PATH}>
         <ConnectorsRouter />
-      </Route>
-      <Route path={CONNECTOR_DETAIL_PATH}>
-        <ConnectorDetailRouter />
       </Route>
       <Route path={CRAWLERS_PATH}>
         <CrawlersRouter />
