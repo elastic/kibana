@@ -54,6 +54,9 @@ export function updateSavedSearch({
       .setField('query', state.query ?? undefined)
       .setField('filter', [...globalFilters, ...appFilters]);
   }
+  if (savedSearch.timeRestore) {
+    savedSearch.timeRange = services.timefilter.getTime();
+  }
   if (state) {
     savedSearch.columns = state.columns || [];
     savedSearch.sort = (state.sort as SortOrder[]) || [];
