@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import { Services } from './types';
 import { lastValueFrom } from 'rxjs';
-import { Filter, TimeRange } from '@kbn/es-query';
+import { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 export const buildEmbeddable = async (
@@ -37,10 +37,11 @@ export const buildEmbeddable = async (
 
   async function search(
     filters: Filter[], 
+    query: Query | AggregateQuery | undefined,
     timeRange: TimeRange | undefined
   ) {
     if (!dataView) {
-      return;
+      return 0;
     }
     const searchSource = await services.data.search.searchSource.create();
     searchSource.setField('index', dataView);
@@ -54,6 +55,9 @@ export const buildEmbeddable = async (
       allFilters.push(timeRangeFilter);
     }
     searchSource.setField('filter', allFilters);
+    if (query) {
+      searchSource.setField('query', query);
+    }
     console.log('ES request', searchSource.getSearchRequestBody());
     // eslint-disable-next-line no-console
     const { rawResponse: resp } = await lastValueFrom(
@@ -71,8 +75,9 @@ export const buildEmbeddable = async (
     Component: () => {
       const [count, setCount] = useState<number>(0);
       const [error, setError] = useState<Error | undefined>();
-      const [filters, timeRange] = useBatchedPublishingSubjects(
+      const [filters, query, timeRange] = useBatchedPublishingSubjects(
         api.parentApi.localFilters,
+        api.parentApi.localQuery,
         api.parentApi.localTimeRange,
       );
       
@@ -81,6 +86,7 @@ export const buildEmbeddable = async (
         setError(undefined);
         search(
           filters ?? [],
+          query,
           timeRange
         )
           .then((nextCount: number) => {
@@ -98,7 +104,7 @@ export const buildEmbeddable = async (
         return () => {
           ignore = true;
         };
-      }, [timeRange]);
+      }, [filters, query, timeRange]);
 
       if (!dataView) {
         return (
