@@ -44,7 +44,7 @@ export async function loadActionTypes({
   includeSystemActions?: boolean;
 }): Promise<ActionType[]> {
   const path = includeSystemActions
-    ? `${INTERNAL_BASE_ACTION_API_PATH}/connector_types_with_system`
+    ? `${INTERNAL_BASE_ACTION_API_PATH}/connector_types`
     : `${BASE_ACTION_API_PATH}/connector_types`;
 
   const res = featureId

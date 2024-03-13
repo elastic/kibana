@@ -72,9 +72,7 @@ describe('useLoadConnectors', () => {
       const { waitForNextUpdate } = renderHook(() => useLoadConnectors(defaultProps));
       await waitForNextUpdate();
 
-      expect(defaultProps.http.get).toHaveBeenCalledWith(
-        '/internal/actions/connectors_with_system'
-      );
+      expect(defaultProps.http.get).toHaveBeenCalledWith('/internal/actions/connectors');
       expect(toasts.addError).not.toHaveBeenCalled();
     });
   });

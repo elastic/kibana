@@ -19,7 +19,7 @@ export const getAllSystemConnectorsRoute = (
 ) => {
   router.get(
     {
-      path: `${INTERNAL_BASE_ACTION_API_PATH}/connectors_with_system`,
+      path: `${INTERNAL_BASE_ACTION_API_PATH}/connectors`,
       validate: {},
     },
     router.handleLegacyErrors(

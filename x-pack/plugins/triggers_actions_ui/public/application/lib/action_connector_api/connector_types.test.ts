@@ -46,7 +46,7 @@ describe('loadActionTypes', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/actions/connector_types",
+        "/internal/actions/connector_types",
         Object {},
       ]
     `);
@@ -84,7 +84,7 @@ describe('loadActionTypes', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/actions/connector_types",
+        "/internal/actions/connector_types",
         Object {
           "query": Object {
             "feature_id": "alerting",

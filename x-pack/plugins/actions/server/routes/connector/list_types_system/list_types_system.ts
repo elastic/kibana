@@ -23,7 +23,7 @@ export const listTypesSystemRoute = (
 ) => {
   router.get(
     {
-      path: `${INTERNAL_BASE_ACTION_API_PATH}/connector_types_with_system`,
+      path: `${INTERNAL_BASE_ACTION_API_PATH}/connector_types`,
       validate: {
         query: connectorTypesQuerySchemaV1,
       },

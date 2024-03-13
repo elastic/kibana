@@ -45,7 +45,7 @@ export async function loadAllActions({ http }: { http: HttpSetup }): Promise<Act
   // This is necessary to load UI elements that require system action connectors, even if they're not selectable and
   // editable from the connector selection UI like a normal action connector.
   const res = await http.get<Parameters<typeof rewriteResponseRes>[0]>(
-    `${INTERNAL_BASE_ACTION_API_PATH}/connectors_with_system`
+    `${INTERNAL_BASE_ACTION_API_PATH}/connectors`
   );
 
   return rewriteResponseRes(res) as ActionConnector[];
