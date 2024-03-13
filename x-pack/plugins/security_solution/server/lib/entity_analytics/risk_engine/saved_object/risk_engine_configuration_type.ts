@@ -60,12 +60,6 @@ const version1: SavedObjectsModelVersion = {
         alertSampleSizePerShard: { type: 'integer' },
       },
     },
-    {
-      type: 'data_backfill',
-      backfillFn: () => {
-        return { attributes: { isAlertSamplingEnabled: false, alertSampleSizePerShard: 10_000 } };
-      },
-    },
   ],
 };
 

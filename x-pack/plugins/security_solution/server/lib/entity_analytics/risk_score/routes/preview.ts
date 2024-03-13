@@ -45,7 +45,7 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
         const riskEngineDataClient = securityContext.getRiskEngineDataClient();
         const riskScoreDataClient = securityContext.getRiskScoreDataClient();
         const assetCriticalityDataClient = securityContext.getAssetCriticalityDataClient();
-
+        const config = await securityContext.getConfig();
         const assetCriticalityService = assetCriticalityServiceFactory({
           assetCriticalityDataClient,
           uiSettingsClient: coreContext.uiSettings.client,
@@ -92,6 +92,7 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
             range,
             runtimeMappings,
             weights,
+            entityAnalyticsConfig: config.entityAnalytics,
           });
 
           return response.ok({ body: result });

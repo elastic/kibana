@@ -323,15 +323,25 @@ export const calculateRiskScores = async ({
   range,
   runtimeMappings,
   weights,
-  isAlertSamplingEnabled = false,
-  alertSampleSizePerShard = 10000,
+  entityAnalyticsConfig,
+  isAlertSamplingEnabled: isAlertSamplingEnabledParam,
+  alertSampleSizePerShard: alertSampleSizePerShardParam,
 }: {
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
   logger: Logger;
 } & CalculateScoresParams): Promise<CalculateScoresResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
+    const isAlertSamplingEnabled =
+      isAlertSamplingEnabledParam ?? entityAnalyticsConfig.alertSampling.enabled ?? false;
+    const alertSampleSizePerShard =
+      alertSampleSizePerShardParam ?? entityAnalyticsConfig.alertSampling.sampleSizePerShard;
     const now = new Date().toISOString();
+
+    console.log('calculateRiskScores', {
+      isAlertSamplingEnabled,
+      alertSampleSizePerShard,
+    });
 
     const filter = [
       filterFromRange(range),

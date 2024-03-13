@@ -18,6 +18,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { ConfigType } from '../../../..';
 import {
   type AfterKeys,
   type IdentifierType,
@@ -62,12 +63,14 @@ export const registerRiskScoringTask = ({
   logger,
   taskManager,
   telemetry,
+  entityAnalyticsConfig,
 }: {
   getStartServices: StartServicesAccessor<StartPlugins>;
   kibanaVersion: string;
   logger: Logger;
   taskManager: TaskManagerSetupContract | undefined;
   telemetry: AnalyticsServiceSetup;
+  entityAnalyticsConfig: ConfigType['entityAnalytics'];
 }): void => {
   if (!taskManager) {
     logger.info('Task Manager is unavailable; skipping risk engine task registration.');
@@ -120,7 +123,12 @@ export const registerRiskScoringTask = ({
       title: 'Entity Analytics Risk Engine - Risk Scoring Task',
       timeout: TIMEOUT,
       stateSchemaByVersion,
-      createTaskRunner: createTaskRunnerFactory({ logger, getRiskScoreService, telemetry }),
+      createTaskRunner: createTaskRunnerFactory({
+        logger,
+        getRiskScoreService,
+        telemetry,
+        entityAnalyticsConfig,
+      }),
     },
   });
 };
@@ -184,12 +192,14 @@ export const runTask = async ({
   logger,
   taskInstance,
   telemetry,
+  entityAnalyticsConfig,
 }: {
   logger: Logger;
   isCancelled: () => boolean;
   getRiskScoreService: GetRiskScoreService;
   taskInstance: ConcreteTaskInstance;
   telemetry: AnalyticsServiceSetup;
+  entityAnalyticsConfig: ConfigType['entityAnalytics'];
 }): Promise<{
   state: RiskScoringTaskState;
 }> => {
@@ -265,6 +275,7 @@ export const runTask = async ({
           weights: [],
           isAlertSamplingEnabled,
           alertSampleSizePerShard,
+          entityAnalyticsConfig,
         });
 
         isWorkComplete = isRiskScoreCalculationComplete(result) || isCancelled();
@@ -307,17 +318,26 @@ const createTaskRunnerFactory =
     logger,
     getRiskScoreService,
     telemetry,
+    entityAnalyticsConfig,
   }: {
     logger: Logger;
     getRiskScoreService: GetRiskScoreService;
     telemetry: AnalyticsServiceSetup;
+    entityAnalyticsConfig: ConfigType['entityAnalytics'];
   }) =>
   ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
     let cancelled = false;
     const isCancelled = () => cancelled;
     return {
       run: async () =>
-        runTask({ getRiskScoreService, isCancelled, logger, taskInstance, telemetry }),
+        runTask({
+          getRiskScoreService,
+          isCancelled,
+          logger,
+          taskInstance,
+          telemetry,
+          entityAnalyticsConfig,
+        }),
       cancel: async () => {
         cancelled = true;
       },

@@ -29,6 +29,12 @@ describe('calculateRiskScores()', () => {
       pageSize: 500,
       range: { start: 'now - 15d', end: 'now' },
       runtimeMappings: {},
+      entityAnalyticsConfig: {
+        alertSampling: {
+          enabled: false,
+          sampleSizePerShard: 10_000,
+        },
+      },
     };
   });
 

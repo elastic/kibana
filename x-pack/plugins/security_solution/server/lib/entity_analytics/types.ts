@@ -6,6 +6,7 @@
  */
 
 import type { MappingRuntimeFields, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ConfigType } from '../../config';
 import type {
   AfterKey,
   AfterKeys,
@@ -28,6 +29,7 @@ export interface CalculateScoresParams {
   weights?: RiskWeights;
   isAlertSamplingEnabled?: boolean;
   alertSampleSizePerShard?: number;
+  entityAnalyticsConfig: ConfigType['entityAnalytics'];
 }
 
 export interface CalculateAndPersistScoresParams {
@@ -42,6 +44,7 @@ export interface CalculateAndPersistScoresParams {
   weights?: RiskWeights;
   isAlertSamplingEnabled?: boolean;
   alertSampleSizePerShard?: number;
+  entityAnalyticsConfig: ConfigType['entityAnalytics'];
 }
 
 export interface CalculateAndPersistScoresResponse {
@@ -154,6 +157,6 @@ export interface RiskEngineConfiguration {
   interval: string;
   pageSize: number;
   range: Range;
-  isAlertSamplingEnabled: boolean;
-  alertSampleSizePerShard: number;
+  isAlertSamplingEnabled?: boolean;
+  alertSampleSizePerShard?: number;
 }
