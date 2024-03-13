@@ -59,8 +59,10 @@ export function Groups({ groups, timeRange }: { groups: GroupItem[]; timeRange: 
   };
 
   const generateInfraSourceLink = ({ field, value }: GroupItem) => {
+    const alertTimeRange = `assetDetails=(dateRange:(from:'${timeRange.from}',to:'${timeRange.to}'))`;
+
     return (
-      <a href={`${infraSourceLinks[field]}/${value}`} target="_blank">
+      <a href={`${infraSourceLinks[field]}/${value}?${alertTimeRange}`} target="_blank">
         {value}
       </a>
     );
