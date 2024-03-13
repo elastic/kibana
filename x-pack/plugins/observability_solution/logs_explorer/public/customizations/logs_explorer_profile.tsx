@@ -13,8 +13,6 @@ import type { CustomizationCallback } from '@kbn/discover-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { waitFor } from 'xstate/lib/waitFor';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import type { LogsExplorerController } from '../controller';
 import { LogsExplorerControllerProvider } from '../controller/provider';
 import type { LogsExplorerStartDeps } from '../types';
@@ -23,18 +21,11 @@ import { createCustomSearchBar } from './custom_search_bar';
 import { createCustomCellRenderer } from './custom_cell_renderer';
 import { createCustomGridColumnsConfiguration } from './custom_column';
 import { smartFields } from './custom_field_list';
+import { createCustomUnifiedHistogram } from './custom_unified_histogram';
 
 const LazyCustomDataSourceFilters = dynamic(() => import('./custom_data_source_filters'));
 const LazyCustomDataSourceSelector = dynamic(() => import('./custom_data_source_selector'));
 const LazyCustomFlyoutContent = dynamic(() => import('./custom_flyout_content'));
-
-export type WithPreventableEvent<T> = T & {
-  preventDefault(): void;
-};
-
-export type ClickTriggerEventData = ClickTriggerEvent['data'] | MultiClickTriggerEvent['data'];
-
-type CustomClickTriggerEvent = WithPreventableEvent<ClickTriggerEventData>;
 
 export interface CreateLogsExplorerProfileCustomizationsDeps {
   core: CoreStart;
@@ -109,50 +100,8 @@ export const createLogsExplorerProfileCustomizations =
       },
     });
 
-    const isClickTriggerEvent = (
-      e: CustomClickTriggerEvent
-    ): e is WithPreventableEvent<ClickTriggerEvent['data']> => {
-      return Array.isArray(e.data) && 'column' in e.data[0];
-    };
-
-    const isMultiValueTriggerEvent = (
-      e: CustomClickTriggerEvent
-    ): e is WithPreventableEvent<MultiClickTriggerEvent['data']> => {
-      return Array.isArray(e.data) && 'cells' in e.data[0];
-    };
-
     // Fix bug where filtering on histogram does not work
-    customizations.set({
-      id: 'unified_histogram',
-      onFilter: async (eventData) => {
-        eventData.preventDefault();
-        let filters;
-        if (isClickTriggerEvent(eventData)) {
-          filters = await discoverServices.data.actions.createFiltersFromValueClickAction(
-            eventData
-          );
-        } else if (isMultiValueTriggerEvent(eventData)) {
-          filters = await discoverServices.data.actions.createFiltersFromMultiValueClickAction(
-            eventData
-          );
-        }
-        if (filters && filters.length > 0) {
-          data.query.filterManager.addFilters(filters);
-        }
-      },
-      onBrushEnd: (eventData) => {
-        eventData.preventDefault();
-
-        const [from, to] = eventData.range;
-        discoverServices.data.query.timefilter.timefilter.setTime({
-          from: new Date(from).toISOString(),
-          to: new Date(to).toISOString(),
-          mode: 'absolute',
-        });
-      },
-      withDefaultActions: false,
-      disabledActions: [ACTION_GLOBAL_APPLY_FILTER],
-    });
+    customizations.set(createCustomUnifiedHistogram(data));
 
     /**
      * Hide New, Open and Save settings to prevent working with saved views.
