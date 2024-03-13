@@ -23,11 +23,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
 
 import { Index } from '../../../../../../common';
-import { FieldsList } from '../../../../../application/components/mappings_editor/components/document_fields/fields';
-import { extractMappingsDefinition } from '../../../../../application/components/mappings_editor/lib';
-import { MappingsEditorParsedMetadata } from '../../../../../application/components/mappings_editor/mappings_editor';
-import { useMappingsState } from '../../../../../application/components/mappings_editor/mappings_state_context';
-import { useMappingsStateListener } from '../../../../../application/components/mappings_editor/use_state_listener';
+import { FieldsList } from '../../../../components/mappings_editor/components/document_fields/fields';
+import { extractMappingsDefinition } from '../../../../components/mappings_editor/lib';
+import { MappingsEditorParsedMetadata } from '../../../../components/mappings_editor/mappings_editor';
+import { useMappingsState } from '../../../../components/mappings_editor/mappings_state_context';
+import { useMappingsStateListener } from '../../../../components/mappings_editor/use_state_listener';
 import { useAppContext } from '../../../../app_context';
 import { documentationService } from '../../../../services';
 
@@ -44,7 +44,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const [toggleOn, setToggleOn] = useState(true);
   const onToggleChange = () => {
-    setToggleOn((prevValue) => !prevValue);
+    setToggleOn(!toggleOn);
   };
   const { parsedDefaultValue } = useMemo<MappingsEditorParsedMetadata>(() => {
     const mappingsDefinition = extractMappingsDefinition(jsonData);
@@ -118,7 +118,16 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
     <>
       <EuiFlexGroup style={{ marginBottom: euiTheme.size.l }}>
-        <EuiButton onClick={onToggleChange}>{!toggleOn ? 'JSON' : 'Table View'}</EuiButton>
+        <EuiButton onClick={onToggleChange}>
+          {!toggleOn ? (
+            <FormattedMessage id="xpack.idxMgmt.indexDetails.mappings.json" defaultMessage="JSON" />
+          ) : (
+            <FormattedMessage
+              id="xpack.idxMgmt.indexDetails.mappings.tableView"
+              defaultMessage="Table View"
+            />
+          )}
+        </EuiButton>
       </EuiFlexGroup>
       <EuiFlexGroup
         wrap
