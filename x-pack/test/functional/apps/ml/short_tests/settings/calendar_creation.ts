@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.settingsCalendar.assertCalendarRowExists(calendarId);
     });
 
-    it('calendars connected by job groups should only be connected to jobs applied during creation', async () => {
+    it('calendars connected by job groups should only be automatically connected to job groups applied during creation and can be applied to job groups after creation', async () => {
       await ml.testExecution.logTestStep(
         'Create 2 jobs that will not be applied to the calendar during creation'
       );
@@ -140,6 +140,11 @@ export default function ({ getService }: FtrProviderContext) {
         'Assert that the calendar is only connected to jobs applied during creation'
       );
       await ml.settingsCalendar.assertOnlyConnectedToJobsAppliedDuringCreation();
+
+      await ml.testExecution.logTestStep(
+        'Assert that the calendar can connect to jobs applied during creation'
+      );
+      await ml.settingsCalendar.assertConnectedToJobsAppliedAfterCreation();
     });
 
     async function assignJobToCalendar(
