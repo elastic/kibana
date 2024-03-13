@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { FC } from 'react';
 import React from 'react';
 
@@ -28,6 +30,13 @@ interface Props {
   hasPermissionToImport: boolean;
 }
 
+const aboutPanelContentStyle = css({
+  '.euiFilePicker__icon': {
+    width: euiThemeVars.euiSizeXXL,
+    height: euiThemeVars.euiSizeXXL,
+  },
+});
+
 export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImport }) => {
   return (
     <EuiPageTemplate.Section alignment="center" data-test-subj="dataVisualizerPageFileUpload">
@@ -40,6 +49,7 @@ export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImpor
           <div css={{ textAlign: 'center' }}>
             <EuiFilePicker
               id="filePicker"
+              fullWidth
               initialPromptText={i18n.translate(
                 'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
                 {
@@ -47,7 +57,7 @@ export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImpor
                 }
               )}
               onChange={(files) => onFilePickerChange(files)}
-              className="file-datavisualizer-file-picker"
+              css={aboutPanelContentStyle}
             />
           </div>
           <EuiSpacer size="l" />
@@ -59,11 +69,7 @@ export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImpor
 
 export const LoadingPanel: FC = () => {
   return (
-    <EuiPageTemplate.Section
-      alignment="center"
-      data-test-subj="dataVisualizerPageFileLoading"
-      className="file-datavisualizer-about-panel__content"
-    >
+    <EuiPageTemplate.Section alignment="center" data-test-subj="dataVisualizerPageFileLoading">
       <EuiPageTemplate.EmptyPrompt
         title={
           <EuiTitle size="s">
