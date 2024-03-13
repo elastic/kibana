@@ -1673,7 +1673,7 @@
     "table": "^6.8.1",
     "tape": "^5.0.1",
     "tempy": "^0.3.0",
-    "terser": "^5.26.0",
+    "terser": "^5.29.1",
     "terser-webpack-plugin": "^4.2.3",
     "tough-cookie": "^4.1.3",
     "tree-kill": "^1.2.2",
