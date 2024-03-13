@@ -344,20 +344,8 @@ export const createLogsExplorerControllerStateMachine = ({
   query,
   toasts,
   uiSettings,
-}: LogsExplorerControllerStateMachineDependencies) => {
-  const isDataViewAllowed: ConditionPredicate<
-    LogsExplorerControllerContext,
-    LogsExplorerControllerEvent
-  > = (_context, event) => {
-    if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
-      return event.data.selection.dataView.testAgainstAllowedList(
-        uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
-      );
-    }
-    return false;
-  };
-
-  return createPureLogsExplorerControllerStateMachine(initialContext).withConfig({
+}: LogsExplorerControllerStateMachineDependencies) =>
+  createPureLogsExplorerControllerStateMachine(initialContext).withConfig({
     actions: {
       notifyCreateDataViewFailed: createCreateDataViewFailedNotifier(toasts),
       notifyDatasetSelectionRestoreFailed: createDatasetSelectionRestoreFailedNotifier(toasts),
@@ -376,11 +364,24 @@ export const createLogsExplorerControllerStateMachine = ({
       timefilterService: subscribeToTimefilterService(query),
     },
     guards: {
-      isDataViewAllowed,
-      isDataViewNotAllowed: negate(isDataViewAllowed),
+      isDataViewAllowed: (_context, event) => {
+        if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
+          return event.data.selection.dataView.testAgainstAllowedList(
+            uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
+          );
+        }
+        return false;
+      },
+      isDataViewNotAllowed: (_context, event) => {
+        if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
+          return !event.data.selection.dataView.testAgainstAllowedList(
+            uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
+          );
+        }
+        return false;
+      },
     },
   });
-};
 
 export const initializeLogsExplorerControllerStateService = (
   deps: LogsExplorerControllerStateMachineDependencies
