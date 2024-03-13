@@ -95,7 +95,7 @@ export type LogThresholdAlertReporter = (
   reason: string,
   value: number,
   threshold: number,
-  actions?: Array<{ actionGroup: LogThresholdActionGroups; context: LogThresholdAlertContext }>,
+  actions?: Array<{ actionGroup: LogThresholdActionGroups; context: AlertContext }>,
   rootLevelContext?: AdditionalContext
 ) => void;
 

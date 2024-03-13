@@ -20,7 +20,7 @@ export const LogsRulesTypeAlertDefinition: IRuleTypeAlerts = {
   mappings: { fieldMap: legacyExperimentalFieldMap },
   useEcs: true,
   useLegacyAlerts: true,
-  shouldWrite: true,
+  shouldWrite: false,
 };
 
 export const METRICS_RULES_ALERT_CONTEXT = 'observability.metrics';

@@ -7,11 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
+import {
+  GetViewInAppRelativeUrlFnOpts,
+  PluginSetupContract,
+  IRuleTypeAlerts,
+} from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
-import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
+import {
+  createLogThresholdExecutor,
+  FIRED_ACTIONS,
+  LogThresholdAlert,
+} from './log_threshold_executor';
 import { extractReferences, injectReferences } from './log_threshold_references_manager';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
@@ -173,7 +181,10 @@ export async function registerLogThresholdRuleType(
       extractReferences,
       injectReferences,
     },
-    alerts: LogsRulesTypeAlertDefinition,
+    alerts: {
+      ...LogsRulesTypeAlertDefinition,
+      shouldWrite: true,
+    } as IRuleTypeAlerts<LogThresholdAlert>,
     fieldsForAAD: O11Y_AAD_FIELDS,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
