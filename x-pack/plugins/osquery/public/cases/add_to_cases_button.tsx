@@ -10,6 +10,8 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { getRuleIdFromEvent } from '@kbn/cases-plugin/public/client/helpers/get_rule_id_from_event';
+import { useCasesAddToExistingCaseModal } from '@kbn/cases-plugin/public/components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useKibana } from '../common/lib/kibana';
 import { AlertAttachmentContext } from '../common/contexts';
 
@@ -46,7 +48,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
             {
               alertId: ecsData?._id ?? '',
               index: ecsData?._index ?? '',
-              rule: cases.helpers.getRuleIdFromEvent({
+              rule: getRuleIdFromEvent({
                 ecs: ecsData,
                 data: [],
               }),
@@ -54,13 +56,13 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
             },
           ]
         : [],
-    [cases.helpers, ecsData]
+    [ecsData]
   );
 
   const casePermissions = cases.helpers.canUseCases();
   const hasCasesPermissions =
     casePermissions.read && casePermissions.update && casePermissions.push;
-  const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
+  const selectCaseModal = useCasesAddToExistingCaseModal();
 
   const handleClick = useCallback(() => {
     const attachments: CaseAttachmentsWithoutOwner = [

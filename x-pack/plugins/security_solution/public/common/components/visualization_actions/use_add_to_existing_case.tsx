@@ -9,6 +9,7 @@ import { AttachmentType, LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 
 import type { LensProps } from '@kbn/cases-plugin/public/types';
+import { useCasesAddToExistingCaseModal } from '@kbn/cases-plugin/public/components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { APP_ID } from '../../../../common';
 import { useKibana } from '../../lib/kibana';
 import { ADD_TO_CASE_SUCCESS } from './translations';
@@ -24,8 +25,12 @@ export const useAddToExistingCase = ({
   timeRange: LensProps['timeRange'] | null;
   lensMetadata: LensProps['metadata'];
 }) => {
-  const { cases } = useKibana().services;
-  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+  const {
+    cases: {
+      helpers: { canUseCases },
+    },
+  } = useKibana().services;
+  const userCasesPermissions = canUseCases([APP_ID]);
   const attachments = useMemo(() => {
     return [
       {
@@ -40,7 +45,7 @@ export const useAddToExistingCase = ({
     ] as CaseAttachmentsWithoutOwner;
   }, [lensAttributes, lensMetadata, timeRange]);
 
-  const { open: openSelectCaseModal } = cases.hooks.useCasesAddToExistingCaseModal({
+  const { open: openSelectCaseModal } = useCasesAddToExistingCaseModal({
     onClose: onAddToCaseClicked,
     successToaster: {
       title: ADD_TO_CASE_SUCCESS,

@@ -28,43 +28,18 @@ const uiMock: jest.Mocked<CasesPublicStart['ui']> = {
 export const openAddToExistingCaseModalMock = jest.fn();
 export const openAddToNewCaseFlyoutMock = jest.fn();
 
-const hooksMock: jest.Mocked<CasesPublicStart['hooks']> = {
-  useCasesAddToNewCaseFlyout: jest.fn().mockImplementation(() => ({
-    open: openAddToNewCaseFlyoutMock,
-  })),
-  useCasesAddToExistingCaseModal: jest.fn().mockImplementation(() => ({
-    open: openAddToExistingCaseModalMock,
-  })),
-};
-
-const helpersMock: jest.Mocked<CasesPublicStart['helpers']> = {
-  canUseCases: jest.fn(),
-  getUICapabilities: jest.fn().mockReturnValue({
-    all: false,
-    create: false,
-    read: false,
-    update: false,
-    delete: false,
-    push: false,
-    connectors: false,
-    settings: false,
-  }),
-  getRuleIdFromEvent: jest.fn(),
-  groupAlertsByRule: jest.fn(),
-};
-
 export interface CaseUiClientMock {
   api: jest.Mocked<CasesPublicStart['api']>;
   ui: jest.Mocked<CasesPublicStart['ui']>;
-  hooks: jest.Mocked<CasesPublicStart['hooks']>;
   helpers: jest.Mocked<CasesPublicStart['helpers']>;
 }
 
 export const mockCasesContract = (): CaseUiClientMock => ({
   api: apiMock,
   ui: uiMock,
-  hooks: hooksMock,
-  helpers: helpersMock,
+  helpers: {
+    canUseCases: jest.fn(),
+  },
 });
 
 export const casesPluginMock = {

@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { stringHash } from '@kbn/ml-string-hash';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import { useMlKibana } from './kibana_context';
+import { useCasesAddToExistingCaseModal } from '@kbn/cases-plugin/public/components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { MappedEmbeddableTypeOf, MlEmbeddableTypes } from '../../../embeddables';
 
 /**
@@ -17,11 +17,7 @@ import type { MappedEmbeddableTypeOf, MlEmbeddableTypes } from '../../../embedda
 export const useCasesModal = <EmbeddableType extends MlEmbeddableTypes>(
   embeddableType: EmbeddableType
 ) => {
-  const {
-    services: { cases },
-  } = useMlKibana();
-
-  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
+  const selectCaseModal = useCasesAddToExistingCaseModal();
 
   return useCallback(
     (persistableState: Partial<Omit<MappedEmbeddableTypeOf<EmbeddableType>, 'id'>>) => {

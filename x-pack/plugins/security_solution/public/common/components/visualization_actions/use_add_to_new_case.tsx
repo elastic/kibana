@@ -9,6 +9,7 @@ import { AttachmentType, LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 
 import type { LensProps } from '@kbn/cases-plugin/public/types';
+import { useCasesAddToNewCaseFlyout } from '@kbn/cases-plugin/public/components/create/flyout/use_cases_add_to_new_case_flyout';
 import { APP_ID } from '../../../../common';
 import { useKibana } from '../../lib/kibana';
 import { ADD_TO_CASE_SUCCESS } from './translations';
@@ -43,7 +44,7 @@ export const useAddToNewCase = ({
     ] as CaseAttachmentsWithoutOwner;
   }, [lensAttributes, lensMetadata, timeRange]);
 
-  const { open: openCreateCaseFlyout } = cases.hooks.useCasesAddToNewCaseFlyout({
+  const { open: openCreateCaseFlyout } = useCasesAddToNewCaseFlyout({
     toastContent: ADD_TO_CASE_SUCCESS,
   });
 

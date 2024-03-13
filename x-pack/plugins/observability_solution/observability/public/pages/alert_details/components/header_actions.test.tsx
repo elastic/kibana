@@ -17,7 +17,6 @@ import { alertWithTags, mockAlertUuid, untrackedAlert } from '../mock/alert';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 
 import { HeaderActions } from './header_actions';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { AlertStatus, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { OBSERVABILITY_BASE_PATH, RULES_PATH } from '../../../../common/locators/paths';
 
@@ -97,15 +96,7 @@ describe('Header Actions', () => {
 
     describe('when clicking the actions button', () => {
       it('should offer an "Add to case" button which opens the add to case modal', async () => {
-        let attachments: any[] = [];
-
-        const useCasesAddToExistingCaseModalMock: any = jest.fn().mockImplementation(() => ({
-          open: ({ getAttachments }: { getAttachments: () => any[] }) => {
-            attachments = getAttachments();
-          },
-        })) as CasesPublicStart['hooks']['useCasesAddToExistingCaseModal'];
-
-        mockCases.hooks.useCasesAddToExistingCaseModal = useCasesAddToExistingCaseModalMock;
+        const attachments: any[] = [];
 
         const { getByTestId, findByTestId } = render(
           <HeaderActions

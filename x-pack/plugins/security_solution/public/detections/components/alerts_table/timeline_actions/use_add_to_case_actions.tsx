@@ -9,6 +9,9 @@ import React, { useCallback, useMemo } from 'react';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useCasesAddToNewCaseFlyout } from '@kbn/cases-plugin/public/components/create/flyout/use_cases_add_to_new_case_flyout';
+import { useCasesAddToExistingCaseModal } from '@kbn/cases-plugin/public/components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { getRuleIdFromEvent } from '@kbn/cases-plugin/public/client/helpers/get_rule_id_from_event';
 import { APP_ID } from '../../../../../common';
 import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
 import {
@@ -57,11 +60,11 @@ export const useAddToCaseActions = ({
             alertId: ecsData?._id ?? '',
             index: ecsData?._index ?? '',
             type: AttachmentType.alert,
-            rule: casesUi.helpers.getRuleIdFromEvent({ ecs: ecsData, data: nonEcsData ?? [] }),
+            rule: getRuleIdFromEvent({ ecs: ecsData, data: nonEcsData ?? [] }),
           },
         ]
       : [];
-  }, [casesUi.helpers, ecsData, nonEcsData]);
+  }, [ecsData, nonEcsData]);
 
   const { activeStep, incrementStep, setStep, isTourShown } = useTourContext();
 
@@ -92,14 +95,14 @@ export const useAddToCaseActions = ({
     [activeStep, isTourShown]
   );
 
-  const createCaseFlyout = casesUi.hooks.useCasesAddToNewCaseFlyout({
+  const createCaseFlyout = useCasesAddToNewCaseFlyout({
     onClose: onMenuItemClick,
     onSuccess: onCaseSuccess,
     afterCaseCreated,
     ...prefillCasesValue,
   });
 
-  const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal({
+  const selectCaseModal = useCasesAddToExistingCaseModal({
     onClose: onMenuItemClick,
     onSuccess: onCaseSuccess,
   });

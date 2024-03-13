@@ -10,12 +10,39 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
-import type { CasesService } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/types';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { useRiskInputActions } from './use_risk_input_actions';
 import type { AlertRawData } from '../tabs/risk_inputs/risk_inputs_tab';
+
+type UseCasesAddToNewCaseFlyout = (props?: Record<string, unknown>) => {
+  open: ({ attachments }: { attachments: unknown[] }) => void;
+  close: () => void;
+};
+
+type UseCasesAddToExistingCaseModal = (props?: Record<string, unknown>) => {
+  open: ({
+    getAttachments,
+  }: {
+    getAttachments: ({ theCase }: { theCase?: { id: string } }) => unknown[];
+  }) => void;
+  close: () => void;
+};
+
+interface CasesService {
+  ui: {
+    getCasesContext: () => React.FC<unknown>;
+  };
+  hooks: {
+    useCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
+    useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
+  };
+  helpers: {
+    groupAlertsByRule: (items?: unknown[]) => unknown[];
+    canUseCases: (owners: string[]) => Record<string, unknown>;
+  };
+}
 
 export const useRiskInputActionsPanels = (alerts: AlertRawData[], closePopover: () => void) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;

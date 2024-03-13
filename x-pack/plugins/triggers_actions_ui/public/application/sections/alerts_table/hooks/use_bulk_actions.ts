@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useContext, useEffect, useMemo } from 'react';
+import { useCallback, useContext, useEffect } from 'react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ALERT_CASE_IDS, ValidFeatureId } from '@kbn/rule-data-utils';
+import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { AlertsTableContext } from '../contexts/alerts_table_context';
 import {
   Alerts,
@@ -22,14 +22,7 @@ import {
   getLeadingControlColumn as getBulkActionsLeadingControlColumn,
   GetLeadingControlColumn,
 } from '../bulk_actions/get_leading_control_column';
-import { CasesService } from '../types';
-import {
-  ADD_TO_EXISTING_CASE,
-  ADD_TO_NEW_CASE,
-  ALERTS_ALREADY_ATTACHED_TO_CASE,
-  MARK_AS_UNTRACKED,
-  NO_ALERTS_ADDED_TO_CASE,
-} from './translations';
+import { MARK_AS_UNTRACKED } from './translations';
 import { TimelineItem } from '../bulk_actions/components/toolbar';
 import { useBulkUntrackAlerts } from './use_bulk_untrack_alerts';
 import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query';
@@ -52,34 +45,10 @@ export interface UseBulkActions {
   clearSelection: () => void;
 }
 
-type UseBulkAddToCaseActionsProps = Pick<BulkActionsProps, 'casesConfig' | 'refresh'> &
-  Pick<UseBulkActions, 'clearSelection'>;
-
 type UseBulkUntrackActionsProps = Pick<BulkActionsProps, 'refresh' | 'query' | 'featureIds'> &
   Pick<UseBulkActions, 'clearSelection' | 'setIsBulkActionsLoading'> & {
     isAllSelected: boolean;
   };
-
-const filterAlertsAlreadyAttachedToCase = (alerts: TimelineItem[], caseId: string) =>
-  alerts.filter(
-    (alert) =>
-      !alert.data.some(
-        (field) => field.field === ALERT_CASE_IDS && field.value?.some((id) => id === caseId)
-      )
-  );
-
-const getCaseAttachments = ({
-  alerts,
-  caseId,
-  groupAlertsByRule,
-}: {
-  caseId: string;
-  groupAlertsByRule?: CasesService['helpers']['groupAlertsByRule'];
-  alerts?: TimelineItem[];
-}) => {
-  const filteredAlerts = filterAlertsAlreadyAttachedToCase(alerts ?? [], caseId);
-  return groupAlertsByRule?.(filteredAlerts) ?? [];
-};
 
 const addItemsToInitialPanel = ({
   panels,
@@ -96,88 +65,6 @@ const addItemsToInitialPanel = ({
   } else {
     return [{ id: 0, items }];
   }
-};
-
-export const useBulkAddToCaseActions = ({
-  casesConfig,
-  refresh,
-  clearSelection,
-}: UseBulkAddToCaseActionsProps): BulkActionsConfig[] => {
-  const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
-
-  const userCasesPermissions = casesService?.helpers.canUseCases(casesConfig?.owner ?? []);
-  const CasesContext = casesService?.ui.getCasesContext();
-  const isCasesContextAvailable = Boolean(casesService && CasesContext);
-
-  const onSuccess = useCallback(() => {
-    refresh();
-    clearSelection();
-  }, [clearSelection, refresh]);
-
-  const createCaseFlyout = casesService?.hooks.useCasesAddToNewCaseFlyout({ onSuccess });
-  const selectCaseModal = casesService?.hooks.useCasesAddToExistingCaseModal({
-    onSuccess,
-    noAttachmentsToaster: {
-      title: NO_ALERTS_ADDED_TO_CASE,
-      content: ALERTS_ALREADY_ATTACHED_TO_CASE,
-    },
-  });
-
-  return useMemo(() => {
-    return isCasesContextAvailable &&
-      createCaseFlyout &&
-      selectCaseModal &&
-      userCasesPermissions?.create &&
-      userCasesPermissions?.read
-      ? [
-          {
-            label: ADD_TO_NEW_CASE,
-            key: 'attach-new-case',
-            'data-test-subj': 'attach-new-case',
-            disableOnQuery: true,
-            disabledLabel: ADD_TO_NEW_CASE,
-            onClick: (alerts?: TimelineItem[]) => {
-              const caseAttachments = alerts
-                ? casesService?.helpers.groupAlertsByRule(alerts) ?? []
-                : [];
-
-              createCaseFlyout.open({
-                attachments: caseAttachments,
-              });
-            },
-          },
-          {
-            label: ADD_TO_EXISTING_CASE,
-            key: 'attach-existing-case',
-            disableOnQuery: true,
-            disabledLabel: ADD_TO_EXISTING_CASE,
-            'data-test-subj': 'attach-existing-case',
-            onClick: (alerts?: TimelineItem[]) => {
-              selectCaseModal.open({
-                getAttachments: ({ theCase }) => {
-                  if (theCase == null) {
-                    return alerts ? casesService?.helpers.groupAlertsByRule(alerts) ?? [] : [];
-                  }
-
-                  return getCaseAttachments({
-                    alerts,
-                    caseId: theCase.id,
-                    groupAlertsByRule: casesService?.helpers.groupAlertsByRule,
-                  });
-                },
-              });
-            },
-          },
-        ]
-      : [];
-  }, [
-    casesService?.helpers,
-    createCaseFlyout,
-    isCasesContextAvailable,
-    selectCaseModal,
-    userCasesPermissions?.create,
-    userCasesPermissions?.read,
-  ]);
 };
 
 export const useBulkUntrackActions = ({
@@ -245,7 +132,6 @@ export const useBulkUntrackActions = ({
 
 export function useBulkActions({
   alerts,
-  casesConfig,
   query,
   refresh,
   useBulkActionsConfig = () => [],
@@ -262,7 +148,6 @@ export function useBulkActions({
   const setIsBulkActionsLoading = (isLoading: boolean = true) => {
     updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
   };
-  const caseBulkActions = useBulkAddToCaseActions({ casesConfig, refresh, clearSelection });
   const untrackBulkActions = useBulkUntrackActions({
     setIsBulkActionsLoading,
     refresh,
@@ -273,7 +158,6 @@ export function useBulkActions({
   });
 
   const initialItems = [
-    ...caseBulkActions,
     // SECURITY SOLUTION WORKAROUND: Disable untrack action for SIEM
     ...(featureIds?.includes('siem') ? [] : untrackBulkActions),
   ];

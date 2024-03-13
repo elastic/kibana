@@ -34,7 +34,6 @@ import { DefaultSort } from './hooks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getCasesMockMap } from './cases/index.mock';
-import { createCasesServiceMock } from './index.mock';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
 import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
@@ -47,7 +46,6 @@ jest.mock('./hooks/use_bulk_get_maintenance_windows');
 jest.mock('@kbn/kibana-utils-plugin/public');
 
 const mockCurrentAppId$ = new BehaviorSubject<string>('testAppId');
-const mockCaseService = createCasesServiceMock();
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
@@ -65,7 +63,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
         },
         currentAppId$: mockCurrentAppId$,
       },
-      cases: mockCaseService,
       notifications: {
         toasts: {
           addDanger: () => {},
@@ -363,199 +360,6 @@ describe('AlertsTableState', () => {
     useBulkGetMaintenanceWindowsMock.mockReturnValue({
       data: maintenanceWindowsMap,
       isFetching: false,
-    });
-  });
-
-  describe('Cases', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
-    });
-
-    afterAll(() => {
-      mockCaseService.ui.getCasesContext = jest.fn().mockImplementation(() => null);
-    });
-
-    it('should show the cases column', async () => {
-      render(<AlertsTableWithLocale {...tableProps} />);
-      expect(await screen.findByText('Cases')).toBeInTheDocument();
-    });
-
-    it('should show the cases titles correctly', async () => {
-      render(<AlertsTableWithLocale {...tableProps} />);
-      expect(await screen.findByText('Test case')).toBeInTheDocument();
-      expect(await screen.findByText('Test case 2')).toBeInTheDocument();
-    });
-
-    it('should show the loading skeleton when fetching cases', async () => {
-      useBulkGetCasesMock.mockReturnValue({ data: casesMap, isFetching: true });
-
-      render(<AlertsTableWithLocale {...tableProps} />);
-      expect((await screen.findAllByTestId('cases-cell-loading')).length).toBe(3);
-    });
-
-    it('should pass the correct case ids to useBulkGetCases', async () => {
-      render(<AlertsTableWithLocale {...tableProps} />);
-
-      await waitFor(() => {
-        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id', 'test-id-2'], true);
-      });
-    });
-
-    it('remove duplicated case ids', async () => {
-      hookUseFetchAlerts.mockReturnValue([
-        false,
-        {
-          ...fetchAlertsResponse,
-          alerts: [...fetchAlertsResponse.alerts, ...fetchAlertsResponse.alerts],
-        },
-      ]);
-
-      render(<AlertsTableWithLocale {...tableProps} />);
-
-      await waitFor(() => {
-        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id', 'test-id-2'], true);
-      });
-    });
-
-    it('skips alerts with empty case ids', async () => {
-      hookUseFetchAlerts.mockReturnValue([
-        false,
-        {
-          ...fetchAlertsResponse,
-          alerts: [
-            { ...fetchAlertsResponse.alerts[0], 'kibana.alert.case_ids': [] },
-            fetchAlertsResponse.alerts[1],
-          ],
-        },
-      ]);
-
-      render(<AlertsTableWithLocale {...tableProps} />);
-
-      await waitFor(() => {
-        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id-2'], true);
-      });
-    });
-
-    it('should not fetch cases if the user does not have permissions', async () => {
-      mockCaseService.helpers.canUseCases = jest
-        .fn()
-        .mockReturnValue({ create: false, read: false });
-
-      render(<AlertsTableWithLocale {...tableProps} />);
-
-      await waitFor(() => {
-        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id-2'], false);
-      });
-    });
-
-    it('should not fetch cases if the column is not visible', async () => {
-      mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
-
-      const props = mockCustomProps({
-        cases: { featureId: 'test-feature-id', owner: ['test-owner'] },
-        columns: [
-          {
-            id: AlertsField.name,
-            displayAsText: 'Name',
-          },
-        ],
-      });
-
-      render(<AlertsTableWithLocale {...props} />);
-      await waitFor(() => {
-        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id-2'], false);
-      });
-    });
-
-    it('calls canUseCases with an empty array if the case configuration is not defined', async () => {
-      render(<AlertsTableWithLocale {...tableProps} />);
-      expect(mockCaseService.helpers.canUseCases).toHaveBeenCalledWith([]);
-    });
-
-    it('calls canUseCases with the case owner if defined', async () => {
-      const props = mockCustomProps({
-        cases: { featureId: 'test-feature-id', owner: ['test-owner'] },
-      });
-
-      render(<AlertsTableWithLocale {...props} />);
-      expect(mockCaseService.helpers.canUseCases).toHaveBeenCalledWith(['test-owner']);
-    });
-
-    it('should call the cases context with the correct props', async () => {
-      const props = mockCustomProps({
-        cases: { featureId: 'test-feature-id', owner: ['test-owner'] },
-      });
-
-      const CasesContextMock = jest.fn().mockReturnValue(null);
-      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
-
-      render(<AlertsTableWithLocale {...props} />);
-
-      expect(CasesContextMock).toHaveBeenCalledWith(
-        {
-          children: expect.anything(),
-          owner: ['test-owner'],
-          permissions: { create: true, read: true },
-          features: { alerts: { sync: false } },
-        },
-        {}
-      );
-    });
-
-    it('should call the cases context with the empty owner if the case config is not defined', async () => {
-      const CasesContextMock = jest.fn().mockReturnValue(null);
-      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
-
-      render(<AlertsTableWithLocale {...tableProps} />);
-      expect(CasesContextMock).toHaveBeenCalledWith(
-        {
-          children: expect.anything(),
-          owner: [],
-          permissions: { create: true, read: true },
-          features: { alerts: { sync: false } },
-        },
-        {}
-      );
-    });
-
-    it('should call the cases context with correct permissions', async () => {
-      const CasesContextMock = jest.fn().mockReturnValue(null);
-      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
-      mockCaseService.helpers.canUseCases = jest
-        .fn()
-        .mockReturnValue({ create: false, read: false });
-
-      render(<AlertsTableWithLocale {...tableProps} />);
-      expect(CasesContextMock).toHaveBeenCalledWith(
-        {
-          children: expect.anything(),
-          owner: [],
-          permissions: { create: false, read: false },
-          features: { alerts: { sync: false } },
-        },
-        {}
-      );
-    });
-
-    it('should call the cases context with sync alerts turned on if defined in the cases config', async () => {
-      const props = mockCustomProps({
-        cases: { featureId: 'test-feature-id', owner: ['test-owner'], syncAlerts: true },
-      });
-
-      const CasesContextMock = jest.fn().mockReturnValue(null);
-      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
-
-      render(<AlertsTableWithLocale {...props} />);
-      expect(CasesContextMock).toHaveBeenCalledWith(
-        {
-          children: expect.anything(),
-          owner: ['test-owner'],
-          permissions: { create: true, read: true },
-          features: { alerts: { sync: true } },
-        },
-        {}
-      );
     });
   });
 

@@ -27,6 +27,7 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 
+import { useCasesAddToExistingCaseModal } from '@kbn/cases-plugin/public/components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';
@@ -41,9 +42,6 @@ export interface HeaderActionsProps {
 
 export function HeaderActions({ alert, alertStatus, onUntrackAlert }: HeaderActionsProps) {
   const {
-    cases: {
-      hooks: { useCasesAddToExistingCaseModal },
-    },
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
     http,
   } = useKibana().services;

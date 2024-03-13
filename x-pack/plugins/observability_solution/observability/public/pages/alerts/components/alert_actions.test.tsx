@@ -27,21 +27,8 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 
 const refresh = jest.fn();
-const caseHooksReturnedValue = {
-  open: () => {
-    refresh();
-  },
-  close: jest.fn(),
-};
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
-mockUseKibanaReturnValue.services.cases.hooks.useCasesAddToNewCaseFlyout.mockReturnValue(
-  caseHooksReturnedValue
-);
-
-mockUseKibanaReturnValue.services.cases.hooks.useCasesAddToExistingCaseModal.mockReturnValue(
-  caseHooksReturnedValue
-);
 
 mockUseKibanaReturnValue.services.cases.helpers.canUseCases.mockReturnValue(allCasesPermissions());
 

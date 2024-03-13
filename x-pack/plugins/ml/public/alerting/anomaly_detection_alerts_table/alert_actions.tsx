@@ -15,13 +15,15 @@ import {
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType, APP_ID as CASE_APP_ID } from '@kbn/cases-plugin/common';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { PLUGIN_ID } from '../../../common/constants/app';
+import { useCasesAddToNewCaseFlyout } from '@kbn/cases-plugin/public/components/create/flyout/use_cases_add_to_new_case_flyout';
+import { useCasesAddToExistingCaseModal } from '@kbn/cases-plugin/public/components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useMlKibana } from '../../application/contexts/kibana';
+import { PLUGIN_ID } from '../../../common/constants/app';
 
 export function AlertActions(props: AlertActionsProps) {
   const { alert, refresh } = props;
@@ -62,8 +64,8 @@ export function AlertActions(props: AlertActionsProps) {
     refresh();
   }, [refresh]);
 
-  const createCaseFlyout = cases?.hooks?.useCasesAddToNewCaseFlyout({ onSuccess });
-  const selectCaseModal = cases?.hooks?.useCasesAddToExistingCaseModal({ onSuccess });
+  const createCaseFlyout = useCasesAddToNewCaseFlyout({ onSuccess });
+  const selectCaseModal = useCasesAddToExistingCaseModal({ onSuccess });
 
   const closeActionsPopover = () => {
     setIsPopoverOpen(false);

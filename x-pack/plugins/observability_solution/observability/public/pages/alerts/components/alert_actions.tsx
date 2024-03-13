@@ -22,6 +22,9 @@ import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useRouteMatch } from 'react-router-dom';
+import { useCasesAddToNewCaseFlyout } from '@kbn/cases-plugin/public/components/create/flyout/use_cases_add_to_new_case_flyout';
+import { useCasesAddToExistingCaseModal } from '@kbn/cases-plugin/public/components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { getRuleIdFromEvent } from '@kbn/cases-plugin/public/client/helpers/get_rule_id_from_event';
 import { SLO_ALERTS_TABLE_ID } from '../../slo_details/components/slo_detail_alerts';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../../common/locators/paths';
@@ -48,8 +51,7 @@ export function AlertActions({
   const isInApp = Boolean(id === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
   const {
     cases: {
-      helpers: { getRuleIdFromEvent, canUseCases },
-      hooks: { useCasesAddToNewCaseFlyout, useCasesAddToExistingCaseModal },
+      helpers: { canUseCases },
     },
     http: {
       basePath: { prepend },
@@ -105,7 +107,7 @@ export function AlertActions({
           },
         ]
       : [];
-  }, [ecsData, getRuleIdFromEvent, data]);
+  }, [ecsData, data]);
 
   const onSuccess = useCallback(() => {
     refresh();

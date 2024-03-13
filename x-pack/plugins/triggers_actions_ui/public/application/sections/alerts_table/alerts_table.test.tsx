@@ -33,12 +33,9 @@ import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getCasesMockMap } from './cases/index.mock';
 import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
 import { createAppMockRenderer, getJsDomPerformanceFix } from '../test_utils';
-import { createCasesServiceMock } from './index.mock';
 import { useCaseViewNavigation } from './cases/use_case_view_navigation';
 import { act } from 'react-dom/test-utils';
 import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
-
-const mockCaseService = createCasesServiceMock();
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -52,7 +49,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     ...original,
     useKibana: () => ({
       services: {
-        cases: mockCaseService,
         notifications: {
           toasts: {
             addDanger: jest.fn(),

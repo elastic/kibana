@@ -12,7 +12,8 @@ import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
-import { useBasePath, useKibana, useToasts } from '../../common/lib/kibana';
+import { useCasesAddToExistingCaseModal } from '@kbn/cases-plugin/public/components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { useBasePath, useToasts } from '../../common/lib/kibana';
 import type { Note } from '../../common/lib/note';
 import { appActions } from '../../common/store/actions';
 import { TimelineId } from '../../../common/types';
@@ -28,7 +29,6 @@ interface Props {
 const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   const toasts = useToasts();
   const basePath = useBasePath();
-  const { cases } = useKibana().services;
   const dispatch = useDispatch();
   const isModelEvaluationEnabled = useIsExperimentalFeatureEnabled('assistantModelEvaluation');
 
@@ -59,7 +59,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   }, [associateNote, content, toasts, updateNote]);
 
   // Attach to case support
-  const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal({
+  const selectCaseModal = useCasesAddToExistingCaseModal({
     onClose: () => {},
     onSuccess: () => {},
   });

@@ -72,6 +72,7 @@
       "guidedOnboarding"
     ],
     "requiredBundles": [
+      "cases",
       "esUiShared",
       "fleet",
       "kibanaUtils",

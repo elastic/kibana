@@ -14,17 +14,12 @@ import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
 import { APP_ID, APP_PATH } from '../common/constants';
 import { APP_TITLE, APP_DESC } from './common/translations';
-import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
-import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import { createClientAPI } from './client/api';
 import { canUseCases } from './client/helpers/can_use_cases';
-import { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
 import { getAllCasesSelectorModalLazy } from './client/ui/get_all_cases_selector_modal';
 import { getCasesLazy } from './client/ui/get_cases';
 import { getCasesContextLazy } from './client/ui/get_cases_context';
 import { getRecentCasesLazy } from './client/ui/get_recent_cases';
-import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
-import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import { registerCaseFileKinds } from './files';
@@ -74,6 +69,7 @@ export class CasesUiPlugin
 
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     registerCaseFileKinds(config.files, plugins.files);
+
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
         id: APP_ID,
@@ -184,15 +180,8 @@ export class CasesUiPlugin
             getFilesClient: plugins.files.filesClientFactory.asScoped,
           }),
       },
-      hooks: {
-        useCasesAddToNewCaseFlyout,
-        useCasesAddToExistingCaseModal,
-      },
       helpers: {
         canUseCases: canUseCases(core.application.capabilities),
-        getUICapabilities,
-        getRuleIdFromEvent,
-        groupAlertsByRule,
       },
     };
   }

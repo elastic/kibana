@@ -40,6 +40,7 @@ import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import { useCasesAddToExistingCaseModal } from '@kbn/cases-plugin/public/components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
@@ -100,7 +101,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const globalTimeRange = useTimeRangeUpdates(true);
 
-    const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
+    const selectCaseModal = useCasesAddToExistingCaseModal();
 
     const { anomalyExplorerCommonStateService, anomalyTimelineStateService } =
       useAnomalyExplorerContext();

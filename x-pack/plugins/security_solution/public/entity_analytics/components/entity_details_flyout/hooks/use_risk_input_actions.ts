@@ -11,6 +11,8 @@ import { get, noop } from 'lodash/fp';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { useCasesAddToNewCaseFlyout } from '@kbn/cases-plugin/public/components/create/flyout/use_cases_add_to_new_case_flyout';
+import { useCasesAddToExistingCaseModal } from '@kbn/cases-plugin/public/components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useAddBulkToTimelineAction } from '../../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
@@ -30,9 +32,9 @@ export const useRiskInputActions = (alerts: AlertRawData[], closePopover: () => 
     tableId: TableId.riskInputs,
   });
 
-  const { cases: casesService, telemetry } = useKibana().services;
-  const createCaseFlyout = casesService?.hooks.useCasesAddToNewCaseFlyout({ onSuccess: noop });
-  const selectCaseModal = casesService?.hooks.useCasesAddToExistingCaseModal();
+  const { telemetry } = useKibana().services;
+  const createCaseFlyout = useCasesAddToNewCaseFlyout({ onSuccess: noop });
+  const selectCaseModal = useCasesAddToExistingCaseModal();
 
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(
     () =>

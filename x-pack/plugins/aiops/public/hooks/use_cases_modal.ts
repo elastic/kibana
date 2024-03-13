@@ -8,9 +8,9 @@
 import { useCallback } from 'react';
 import { stringHash } from '@kbn/ml-string-hash';
 import { AttachmentType } from '@kbn/cases-plugin/common';
+import { useCasesAddToExistingCaseModal } from '@kbn/cases-plugin/public/components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { EmbeddableChangePointChartInput } from '../embeddable/embeddable_change_point_chart';
 import type { EmbeddableChangePointChartType } from '../embeddable/embeddable_change_point_chart_factory';
-import { useAiopsAppContext } from './use_aiops_app_context';
 
 /**
  * Returns a callback for opening the cases modal with provided attachment state.
@@ -18,9 +18,7 @@ import { useAiopsAppContext } from './use_aiops_app_context';
 export const useCasesModal = <EmbeddableType extends EmbeddableChangePointChartType>(
   embeddableType: EmbeddableType
 ) => {
-  const { cases } = useAiopsAppContext();
-
-  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
+  const selectCaseModal = useCasesAddToExistingCaseModal();
 
   return useCallback(
     (persistableState: Partial<Omit<EmbeddableChangePointChartInput, 'id'>>) => {

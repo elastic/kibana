@@ -53,6 +53,7 @@
       "guidedOnboarding"
     ],
     "requiredBundles": [
+      "cases",
       "data",
       "kibanaReact",
       "kibanaUtils",

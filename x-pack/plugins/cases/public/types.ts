@@ -27,17 +27,12 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 
-import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
-import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import type { canUseCases } from './client/helpers/can_use_cases';
-import type { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
 import type { GetCasesContextProps } from './client/ui/get_cases_context';
 import type { GetCasesProps } from './client/ui/get_cases';
 import type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
 import type { GetRecentCasesProps } from './client/ui/get_recent_cases';
 import type { CasesStatus, CasesMetrics, CasesFindResponseUI } from '../common/ui';
-import type { GroupAlertsByRule } from './client/helpers/group_alerts_by_rule';
-import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
@@ -147,10 +142,6 @@ export interface CasesPublicStart {
      */
     getRecentCases: (props: GetRecentCasesProps) => ReactElement<GetRecentCasesProps>;
   };
-  hooks: {
-    useCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
-    useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
-  };
   helpers: {
     /**
      * Returns an object denoting the current user's ability to read and crud cases.
@@ -161,9 +152,6 @@ export interface CasesPublicStart {
      * @returns An object denoting the case permissions of the current user
      */
     canUseCases: ReturnType<typeof canUseCases>;
-    getUICapabilities: typeof getUICapabilities;
-    getRuleIdFromEvent: typeof getRuleIdFromEvent;
-    groupAlertsByRule: GroupAlertsByRule;
   };
 }
 

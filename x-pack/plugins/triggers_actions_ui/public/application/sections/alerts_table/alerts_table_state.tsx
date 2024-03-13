@@ -30,7 +30,6 @@ import type {
   RuleRegistrySearchRequestPagination,
 } from '@kbn/rule-registry-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   QueryDslQueryContainer,
   SortCombinations,
@@ -62,7 +61,6 @@ import { InspectButtonContainer } from './toolbar/components/inspect';
 import { alertsTableQueryClient } from './query_client';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
-import { CasesService } from './types';
 import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
 import { ErrorBoundary, FallbackComponent } from '../common/components/error_boundary';
 
@@ -134,9 +132,6 @@ const getMaintenanceWindowIdsFromAlerts = (alerts: Alerts): Set<string> =>
       .flat()
   );
 
-const isCasesColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
-  columns.some(({ id }) => id === ALERT_CASE_IDS);
-
 const isMaintenanceWindowColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
   columns.some(({ id }) => id === ALERT_MAINTENANCE_WINDOW_IDS);
 
@@ -197,7 +192,6 @@ const AlertsTableStateWithQueryProvider = ({
   dynamicRowHeight,
   lastReloadRequestTime,
 }: AlertsTableStateProps) => {
-  const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
 
@@ -324,17 +318,11 @@ const AlertsTableStateWithQueryProvider = ({
   const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
   const maintenanceWindowIds = useMemo(() => getMaintenanceWindowIdsFromAlerts(alerts), [alerts]);
 
-  const casesPermissions = casesService?.helpers.canUseCases(
-    alertsTableConfiguration?.cases?.owner ?? []
-  );
-
-  const hasCaseReadPermissions = Boolean(casesPermissions?.read);
-  const fetchCases = isCasesColumnEnabled(columns) && hasCaseReadPermissions;
   const fetchMaintenanceWindows = isMaintenanceWindowColumnEnabled(columns);
 
   const { data: cases, isFetching: isLoadingCases } = useBulkGetCases(
     Array.from(caseIds.values()),
-    fetchCases
+    false
   );
 
   const { data: maintenanceWindows, isFetching: isLoadingMaintenanceWindows } =
@@ -402,9 +390,6 @@ const AlertsTableStateWithQueryProvider = ({
     sort,
     updatedAt,
   ]);
-
-  const CasesContext = casesService?.ui.getCasesContext();
-  const isCasesContextAvailable = casesService && CasesContext;
 
   const memoizedCases = useMemo(
     () => ({
@@ -517,16 +502,8 @@ const AlertsTableStateWithQueryProvider = ({
       {(isLoading || isBrowserFieldDataLoading) && (
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}
-      {alertsCount !== 0 && isCasesContextAvailable && (
-        <CasesContext
-          owner={alertsTableConfiguration.cases?.owner ?? []}
-          permissions={casesPermissions}
-          features={{ alerts: { sync: alertsTableConfiguration.cases?.syncAlerts ?? false } }}
-        >
-          <AlertsTable {...tableProps} />
-        </CasesContext>
-      )}
-      {alertsCount !== 0 && !isCasesContextAvailable && <AlertsTable {...tableProps} />}
+
+      {alertsCount !== 0 && <AlertsTable {...tableProps} />}
     </AlertsTableContext.Provider>
   );
 };

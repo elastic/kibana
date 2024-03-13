@@ -57,9 +57,6 @@ export const getMockedKibanaConfig = (permissionType: unknown) =>
         ui: {
           getCasesContext: jest.fn().mockImplementation(() => mockCasesContext),
         },
-        hooks: {
-          useCasesAddToExistingCaseModal: jest.fn(),
-        },
       },
       data: {
         dataViews: {

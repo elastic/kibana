@@ -7,7 +7,10 @@
     "id": "ml",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "ml"],
+    "configPath": [
+      "xpack",
+      "ml"
+    ],
     "requiredPlugins": [
       "aiops",
       "charts",
@@ -55,8 +58,11 @@
       "lens",
       "maps",
       "savedObjectsFinder",
-      "usageCollection"
+      "usageCollection",
+      "cases",
     ],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

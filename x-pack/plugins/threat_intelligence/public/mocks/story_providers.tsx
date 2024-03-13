@@ -71,10 +71,6 @@ const defaultServices = {
     get: () => {},
   },
   cases: {
-    hooks: {
-      useCasesAddToNewCaseFlyout: () => {},
-      useCasesAddToExistingCaseModal: () => {},
-    },
     helpers: {
       canUseCases: () => ({
         create: true,

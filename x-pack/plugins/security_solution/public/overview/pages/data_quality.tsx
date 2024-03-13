@@ -30,6 +30,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import { useCasesAddToNewCaseFlyout } from '@kbn/cases-plugin/public/components/create/flyout/use_cases_add_to_new_case_flyout';
 import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
 import { SecurityPageName } from '../../app/types';
 import { getGroupByFieldsOnClick } from '../../common/components/alerts_treemap/lib/helpers';
@@ -202,7 +203,7 @@ const DataQualityComponent: React.FC = () => {
     [userCasesPermissions.create, userCasesPermissions.read]
   );
 
-  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout({
+  const createCaseFlyout = useCasesAddToNewCaseFlyout({
     toastContent: i18n.ADD_TO_CASE_SUCCESS,
   });
   const openCreateCaseFlyout = useCallback(

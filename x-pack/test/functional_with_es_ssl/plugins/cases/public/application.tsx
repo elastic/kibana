@@ -24,6 +24,8 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { useCasesAddToNewCaseFlyout } from '@kbn/cases-plugin/public/components/create/flyout/use_cases_add_to_new_case_flyout';
+import { useCasesAddToExistingCaseModal } from '@kbn/cases-plugin/public/components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 
 export interface RenderAppProps {
   mountParams: AppMountParameters;
@@ -48,11 +50,9 @@ const permissions = {
 
 const attachments = [{ type: AttachmentType.user as const, comment: 'test' }];
 
-const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
-  const { cases } = props;
-
-  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout();
-  const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
+const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = () => {
+  const createCaseFlyout = useCasesAddToNewCaseFlyout();
+  const selectCaseModal = useCasesAddToExistingCaseModal();
 
   return (
     <EuiPageTemplate template="empty">

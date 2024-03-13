@@ -9,13 +9,13 @@ import React, { VFC } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { useCasesAddToNewCaseFlyout } from '@kbn/cases-plugin/public/components/create/flyout/use_cases_add_to_new_case_flyout';
 import { useCaseDisabled } from '../hooks/use_case_permission';
 import {
   AttachmentMetadata,
   generateAttachmentsMetadata,
   generateAttachmentsWithoutOwner,
 } from '../utils/attachments';
-import { useKibana } from '../../../hooks/use_kibana';
 import { Indicator } from '../../../../common/types/indicator';
 
 export interface AddToNewCaseProps {
@@ -47,8 +47,7 @@ export const AddToNewCase: VFC<AddToNewCaseProps> = ({
   onClick,
   'data-test-subj': dataTestSubj,
 }) => {
-  const { cases } = useKibana().services;
-  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout();
+  const createCaseFlyout = useCasesAddToNewCaseFlyout();
 
   const id: string = indicator._id as string;
   const attachmentMetadata: AttachmentMetadata = generateAttachmentsMetadata(indicator);
