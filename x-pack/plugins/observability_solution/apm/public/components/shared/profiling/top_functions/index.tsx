@@ -7,16 +7,16 @@
 import { EuiSpacer } from '@elastic/eui';
 import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
-import { isPending, useFetcher } from '../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { ProfilingTopNFunctionsLink } from '../../shared/profiling/top_functions/top_functions_link';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { ProfilingTopNFunctionsLink } from './top_functions_link';
 
 interface Props {
   serviceName: string;
   rangeFrom: string;
   rangeTo: string;
   kuery: string;
-  transactionName: string;
+  transactionName?: string;
   transactionType?: string;
   environment: string;
 }
@@ -34,27 +34,26 @@ export function ProfilingTopNFunctions({
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (!transactionType) {
-        return;
-      }
-      return callApmApi(
-        'GET /internal/apm/services/{serviceName}/transactions/functions',
-        {
-          params: {
-            path: { serviceName },
-            query: {
-              start,
-              end,
-              kuery,
-              transactionName,
-              startIndex: 0,
-              endIndex: 10,
-              transactionType,
-              environment,
+      if (transactionType) {
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/profiling/functions',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                start,
+                end,
+                kuery,
+                transactionName,
+                startIndex: 0,
+                endIndex: 10,
+                transactionType,
+                environment,
+              },
             },
-          },
-        }
-      );
+          }
+        );
+      }
     },
     [
       serviceName,

@@ -192,7 +192,17 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       }
 
       if (allowAutoCreate) {
-        form.toggleEuiSwitch('allowAutoCreateField.input');
+        let optionIndex = 0;
+        if (allowAutoCreate === 'TRUE') {
+          optionIndex = 1;
+        }
+        if (allowAutoCreate === 'FALSE') {
+          optionIndex = 2;
+        }
+        const radioGroup = find('allowAutoCreateField.input');
+        const radioOption = radioGroup.childAt(optionIndex).find('input');
+        radioOption.simulate('change', { target: { checked: true } });
+        component.update();
       }
     });
     component.update();
