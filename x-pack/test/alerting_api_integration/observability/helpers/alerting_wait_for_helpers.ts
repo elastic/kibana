@@ -78,7 +78,7 @@ export async function waitForDocumentInIndex<T>({
       logger.debug(`Returned document: ${JSON.stringify(response.hits.hits[0])}`);
       return response;
     },
-    utilityName: 'fetching rule',
+    utilityName: `waiting for documents in ${indexName} index`,
     logger,
     retryService,
     timeout: TIMEOUT,
@@ -117,7 +117,7 @@ export async function waitForAlertInIndex<T>({
       }
       return response;
     },
-    utilityName: 'fetching rule',
+    utilityName: `waiting for alerting document in the alerting index (${indexName})`,
     logger,
     retryService,
     timeout: TIMEOUT,

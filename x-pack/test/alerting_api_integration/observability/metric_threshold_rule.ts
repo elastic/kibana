@@ -50,10 +50,24 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'Default',
         });
         dataForgeConfig = {
-          schedule: [{ template: 'good', start: 'now-15m', end: 'now' }],
+          schedule: [
+            {
+              template: 'good',
+              start: 'now-10m',
+              end: 'now+5m',
+              metrics: [{ name: 'system.cpu.user.pct', method: 'linear', start: 0.9, end: 0.9 }],
+            },
+          ],
           indexing: { dataset: 'fake_hosts' as Dataset },
         };
         dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
+        await waitForDocumentInIndex({
+          esClient,
+          indexName: dataForgeIndices.join(','),
+          docCountTarget: 45,
+          retryService,
+          logger,
+        });
         actionId = await createIndexConnector({
           supertest,
           name: 'Index Connector: Metric threshold API test',
@@ -91,6 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
                   {
                     ruleType: '{{rule.type}}',
                     alertDetailsUrl: '{{context.alertDetailsUrl}}',
+                    reason: '{{context.reason}}',
                   },
                 ],
               },
@@ -205,6 +220,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source?.ruleType).eql('metrics.alert.threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+        );
+        expect(resp.hits.hits[0]._source?.reason).eql(
+          `system.cpu.user.pct is 90% in the last 5 mins. Alert when > 50%.`
         );
       });
     });

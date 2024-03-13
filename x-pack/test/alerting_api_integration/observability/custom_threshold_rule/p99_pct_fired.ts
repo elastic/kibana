@@ -61,8 +61,8 @@ export default function ({ getService }: FtrProviderContext) {
         schedule: [
           {
             template: 'good',
-            start: 'now-15m',
-            end: 'now',
+            start: 'now-10m',
+            end: 'now+5m',
             metrics: [{ name: 'system.cpu.user.pct', method: 'linear', start: 2.5, end: 2.5 }],
           },
         ],
