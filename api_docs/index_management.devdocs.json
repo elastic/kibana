@@ -2786,13 +2786,10 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-common.TemplateDeserialized.allowAutoCreate",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "allowAutoCreate",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
             "path": "x-pack/plugins/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
