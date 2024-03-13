@@ -75,6 +75,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'outputSecretsStorage',
           'agentTamperProtectionEnabled',
           'enableStrictKQLValidation',
+          'subfeaturePrivileges',
         ])}`,
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xPackAPITestsConfig.get('kbnTestServer.serverArgs')),
