@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  Plugin,
-  CoreStart,
-  AppMountParameters,
-  DEFAULT_APP_CATEGORIES,
-} from '@kbn/core/public';
+import { CoreSetup, Plugin, CoreStart, AppMountParameters } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { PlaygroundToolbar, PlaygroundProvider, Playground } from './embedable';
 import {
@@ -24,10 +18,11 @@ export class SearchPlaygroundPlugin
   implements Plugin<SearchPlaygroundPluginSetup, SearchPlaygroundPluginStart>
 {
   public setup(core: CoreSetup): SearchPlaygroundPluginSetup {
+    return {};
+
     core.application.register({
       id: PLUGIN_ID,
       appRoute: '/app/search_playground',
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       title: PLUGIN_NAME,
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
