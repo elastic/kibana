@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { Replacement } from '../../schemas';
+
 /** This mock returns the reverse of `value` */
 export const mockGetAnonymizedValue = ({
   currentReplacements,
   rawValue,
 }: {
-  currentReplacements: Record<string, string> | undefined;
+  currentReplacements: Replacement[] | undefined;
   rawValue: string;
-}): string => rawValue.split('').reverse().join('');
+}): Replacement => ({ uuid: rawValue.split('').reverse().join(''), value: rawValue });

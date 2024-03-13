@@ -187,7 +187,7 @@ describe('postActionsConnectorExecuteRoute', () => {
                 body: {
                   connector_id: 'mock-connector-id',
                   data: mockActionResponse,
-                  replacements: {},
+                  replacements: [],
                   status: 'ok',
                 },
               });
@@ -263,7 +263,7 @@ describe('postActionsConnectorExecuteRoute', () => {
         ...mockRequest.body,
         allow: ['@timestamp'],
         allowReplacement: ['host.name'],
-        replacements: {},
+        replacements: [],
         isEnabledRAGAlerts: true,
       },
     };
@@ -299,7 +299,7 @@ describe('postActionsConnectorExecuteRoute', () => {
         isEnabledKnowledgeBase: false,
         allow: ['@timestamp'],
         allowReplacement: ['host.name'],
-        replacements: {},
+        replacements: [],
         isEnabledRAGAlerts: true,
       },
     };
@@ -432,7 +432,7 @@ describe('postActionsConnectorExecuteRoute', () => {
         isEnabledKnowledgeBase: false,
         allow: ['@timestamp'],
         allowReplacement: ['host.name'],
-        replacements: {},
+        replacements: [],
         isEnabledRAGAlerts: true,
       },
     };

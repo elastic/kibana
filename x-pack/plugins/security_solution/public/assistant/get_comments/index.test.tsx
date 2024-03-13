@@ -16,7 +16,7 @@ const currentConversation = {
     connectorTypeTitle: 'OpenAI',
     provider: OpenAiProviderType.OpenAi,
   },
-  replacements: {},
+  replacements: [],
   category: 'assistant',
   id: '1',
   title: '1',
@@ -52,7 +52,7 @@ describe('getComments', () => {
           connectorTypeTitle: 'OpenAI',
           provider: OpenAiProviderType.OpenAi,
         },
-        replacements: {},
+        replacements: [],
         id: '1',
         title: '1',
         messages: [

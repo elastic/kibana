@@ -50,7 +50,9 @@ export const requestHasRequiredAnonymizationParams = (
 
   const replacementsIsValid =
     typeof replacements === 'object' &&
-    Object.keys(replacements).every((key) => typeof replacements[key] === 'string');
+    replacements.every(
+      (replacement) => typeof replacement === 'object' && typeof replacement.value === 'string'
+    );
 
   return allowIsValid && allowReplacementIsValid && replacementsIsValid;
 };

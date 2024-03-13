@@ -76,8 +76,7 @@ export const getConversationResponseMock = (
   },
   excludeFromLastConversationStorage: false,
   messages: [],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  replacements: {} as any,
+  replacements: [],
   createdAt: timestamp,
   namespace: 'default',
   isDefault: false,

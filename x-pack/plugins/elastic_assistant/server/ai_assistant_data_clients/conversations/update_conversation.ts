@@ -44,7 +44,7 @@ export interface UpdateConversationSchema {
   };
   summary?: ConversationSummary;
   exclude_from_last_conversation_storage?: boolean;
-  replacements?: Replacement;
+  replacements?: Replacement[];
   updated_at?: string;
 }
 

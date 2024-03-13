@@ -182,7 +182,7 @@ export const useChatSend = ({
       http,
       // do not send any new messages, the previous conversation is already stored
       conversationId: currentConversation.id,
-      replacements: {},
+      replacements: [],
     });
 
     const responseMessage: Message = getMessageFromRawResponse(rawResponse);

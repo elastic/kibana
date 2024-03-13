@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Replacement } from '../../schemas';
 import { isAllowed } from '../helpers';
 import type { AnonymizedData, GetAnonymizedValues } from '../types';
 
@@ -18,14 +19,14 @@ export const getAnonymizedData = ({
 }: {
   allow: string[];
   allowReplacement: string[];
-  currentReplacements: Record<string, string> | undefined;
+  currentReplacements: Replacement[] | undefined;
   getAnonymizedValue: ({
     currentReplacements,
     rawValue,
   }: {
-    currentReplacements: Record<string, string> | undefined;
+    currentReplacements: Replacement[] | undefined;
     rawValue: string;
-  }) => string;
+  }) => Replacement;
   getAnonymizedValues: GetAnonymizedValues;
   rawData: Record<string, unknown[]>;
 }): AnonymizedData =>
@@ -49,10 +50,7 @@ export const getAnonymizedData = ({
             ...acc.anonymizedData,
             [field]: anonymizedValues,
           },
-          replacements: {
-            ...acc.replacements,
-            ...replacements,
-          },
+          replacements: [...acc.replacements, ...replacements],
         };
       } else {
         return acc;
@@ -60,6 +58,6 @@ export const getAnonymizedData = ({
     },
     {
       anonymizedData: {},
-      replacements: {},
+      replacements: [],
     }
   );

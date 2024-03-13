@@ -26,7 +26,11 @@ import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/ser
 import { Tool } from 'langchain/dist/tools/base';
 import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { AssistantFeatures, ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import {
+  AssistantFeatures,
+  ExecuteConnectorRequestBody,
+  Replacement,
+} from '@kbn/elastic-assistant-common';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
@@ -200,8 +204,8 @@ export interface AssistantToolParams {
   chain: RetrievalQAChain;
   esClient: ElasticsearchClient;
   modelExists: boolean;
-  onNewReplacements?: (newReplacements: Record<string, string>) => void;
-  replacements?: Record<string, string>;
+  onNewReplacements?: (newReplacements: Replacement[]) => void;
+  replacements?: Replacement[];
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   size?: number;
 }

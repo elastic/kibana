@@ -97,6 +97,21 @@ export const conversationsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
+  replacements: {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'replacements.value': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'replacements.uuid': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   summary: {
     type: 'object',
     array: false,

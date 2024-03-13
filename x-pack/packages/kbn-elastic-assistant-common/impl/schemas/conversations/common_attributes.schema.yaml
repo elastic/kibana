@@ -41,7 +41,16 @@ components:
 
     Replacement:
       type: object
-      additionalProperties: true
+      required:
+        - 'value'
+        - 'uuid'
+      description: Replacements object used to anonymize/deanomymize messsages
+      properties:
+        value:
+          type: string
+          description: Actual value was anonymized.
+        uuid:
+          $ref: '#/components/schemas/UUID'
 
     Reader:
       type: object
@@ -193,7 +202,9 @@ components:
           description: The last time conversation was updated.
           type: string
         replacements:
-          $ref: '#/components/schemas/Replacement'
+          type: array
+          items:
+            $ref: '#/components/schemas/Replacement'
         users:
           type: array
           items:
@@ -245,7 +256,9 @@ components:
           description: excludeFromLastConversationStorage.
           type: boolean
         replacements:
-          $ref: '#/components/schemas/Replacement'
+          type: array
+          items:
+            $ref: '#/components/schemas/Replacement'
 
     ConversationCreateProps:
       type: object
@@ -273,7 +286,9 @@ components:
           description: excludeFromLastConversationStorage.
           type: boolean
         replacements:
-          $ref: '#/components/schemas/Replacement'
+          type: array
+          items:
+            $ref: '#/components/schemas/Replacement'
 
     ConversationMessageCreateProps:
       type: object

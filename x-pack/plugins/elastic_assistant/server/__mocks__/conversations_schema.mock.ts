@@ -46,7 +46,7 @@ export const getConversationSearchEsMock = () => {
             exclude_from_last_conversation_storage: true,
             is_default: false,
             messages: [],
-            replacements: {},
+            replacements: [],
             users: [
               {
                 name: 'elastic',
@@ -133,7 +133,7 @@ export const getConversationMock = (
     defaultSystemPromptId: 'Default',
     connectorTypeTitle: 'OpenAI',
   },
-  replacements: {},
+  replacements: [],
   title: 'test',
   ...params,
   createdAt: '2019-12-13T16:40:33.400Z',

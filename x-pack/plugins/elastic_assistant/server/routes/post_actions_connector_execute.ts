@@ -13,6 +13,7 @@ import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   ExecuteConnectorRequestBody,
   Message,
+  Replacement,
   replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
@@ -72,9 +73,9 @@ export const postActionsConnectorExecuteRoute = (
           }
           const dataClient = await assistantContext.getAIAssistantConversationsDataClient();
 
-          let latestReplacements = { ...request.body.replacements };
-          const onNewReplacements = (newReplacements: Record<string, string>) => {
-            latestReplacements = { ...latestReplacements, ...newReplacements };
+          const latestReplacements = request.body.replacements;
+          const onNewReplacements = (newReplacements: Replacement[]) => {
+            latestReplacements.push(...latestReplacements, ...newReplacements);
           };
 
           let onLlmResponse;
@@ -159,7 +160,7 @@ export const postActionsConnectorExecuteRoute = (
                   ],
                 });
               }
-              if (Object.keys(latestReplacements).length > 0) {
+              if (latestReplacements.length > 0) {
                 await dataClient?.updateConversation({
                   conversationUpdateProps: {
                     id: conversationId,

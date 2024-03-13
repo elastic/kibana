@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Replacement } from '../../schemas';
+
 export const getIsDataAnonymizable = (rawData: string | Record<string, string[]>): boolean =>
   typeof rawData !== 'string';
 
@@ -27,26 +29,25 @@ export const replaceAnonymizedValuesWithOriginalValues = ({
   replacements,
 }: {
   messageContent: string;
-  replacements: Record<string, string>;
+  replacements: Replacement[];
 }): string =>
   replacements != null
-    ? Object.keys(replacements).reduce((acc, uuid) => {
-        const value = replacements[uuid];
-        return acc.replaceAll(uuid, value);
+    ? replacements.reduce((acc, replacement) => {
+        const value = replacement.value;
+        return replacement.uuid && value ? acc.replaceAll(replacement.uuid, value) : acc;
       }, messageContent)
     : messageContent;
 
-// TODO: Improve with anonimized fields work by usage proper transformRawData instead
 export const replaceOriginalValuesWithUuidValues = ({
   messageContent,
   replacements,
 }: {
   messageContent: string;
-  replacements: Record<string, string>;
+  replacements: Replacement[];
 }): string =>
   replacements != null
-    ? Object.keys(replacements).reduce((acc, uuid) => {
-        const value = replacements[uuid];
-        return acc.replaceAll(value, uuid);
+    ? replacements.reduce((acc, replacement) => {
+        const value = replacement.value;
+        return replacement.uuid && value ? acc.replaceAll(value, replacement.uuid) : acc;
       }, messageContent)
     : messageContent;

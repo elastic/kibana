@@ -38,8 +38,7 @@ export const getCreateConversationMock = (): ConversationCreateProps => ({
   excludeFromLastConversationStorage: false,
   isDefault: false,
   messages: [],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  replacements: {} as any,
+  replacements: [],
   category: 'assistant',
 });
 
@@ -55,8 +54,7 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   },
   excludeFromLastConversationStorage: false,
   messages: [],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  replacements: {} as any,
+  replacements: [],
   createdAt: '2024-01-28T04:20:02.394Z',
   namespace: 'test',
   isDefault: false,

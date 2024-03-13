@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApiConfig } from '@kbn/elastic-assistant-common';
+import { ApiConfig, Replacement } from '@kbn/elastic-assistant-common';
 
 export type ConversationRole = 'system' | 'user' | 'assistant';
 
@@ -17,7 +17,7 @@ export interface MessagePresentation {
 export interface Message {
   role: ConversationRole;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
-  replacements?: Record<string, string>;
+  replacements?: Replacement[];
   content?: string;
   timestamp: string;
   isError?: boolean;
@@ -62,7 +62,7 @@ export interface Conversation {
   messages: Message[];
   updatedAt?: Date;
   createdAt?: Date;
-  replacements: Record<string, string>;
+  replacements: Replacement[];
   isDefault?: boolean;
   excludeFromLastConversationStorage?: boolean;
 }

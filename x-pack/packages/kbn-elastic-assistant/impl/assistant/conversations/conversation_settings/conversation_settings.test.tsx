@@ -200,7 +200,7 @@ describe('ConversationSettings', () => {
       id: '',
       title: 'Cool new conversation',
       messages: [],
-      replacements: {},
+      replacements: [],
     };
     expect(setConversationSettings).toHaveBeenLastCalledWith({
       ...mockConvos,

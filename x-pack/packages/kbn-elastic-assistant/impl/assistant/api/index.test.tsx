@@ -39,7 +39,7 @@ const fetchConnectorArgs: FetchConnectorExecuteAction = {
   http: mockHttp,
   message: 'This is a test',
   conversationId: 'test',
-  replacements: {},
+  replacements: [],
 };
 describe('API tests', () => {
   beforeEach(() => {
@@ -53,7 +53,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":{},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false,"llmType":"openai"}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":[],"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false,"llmType":"openai"}',
           headers: { 'Content-Type': 'application/json' },
           method: 'POST',
           signal: undefined,
@@ -73,7 +73,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeStream","conversationId":"test","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false,"llmType":"openai"}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeStream","conversationId":"test","replacements":[],"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false,"llmType":"openai"}',
           method: 'POST',
           asResponse: true,
           rawResponse: true,
@@ -90,7 +90,7 @@ describe('API tests', () => {
         alertsIndexPattern: '.alerts-security.alerts-default',
         allow: ['a', 'b', 'c'],
         allowReplacement: ['b', 'c'],
-        replacements: { auuid: 'real.hostname' },
+        replacements: [{ uuid: 'auuid', value: 'real.hostname' }],
         size: 30,
       };
 
@@ -99,7 +99,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":{"auuid":"real.hostname"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"llmType":"openai","alertsIndexPattern":".alerts-security.alerts-default","allow":["a","b","c"],"allowReplacement":["b","c"],"size":30}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":[{"uuid":"auuid","value":"real.hostname"}],"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"llmType":"openai","alertsIndexPattern":".alerts-security.alerts-default","allow":["a","b","c"],"allowReplacement":["b","c"],"size":30}',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -122,7 +122,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false,"llmType":"openai"}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":[],"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false,"llmType":"openai"}',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -145,7 +145,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true,"llmType":"openai"}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":[],"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true,"llmType":"openai"}',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

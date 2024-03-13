@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import { invert } from 'lodash/fp';
 import { v4 } from 'uuid';
+import { Replacement } from '../../schemas';
 
 export const getAnonymizedValue = ({
   currentReplacements,
   rawValue,
 }: {
-  currentReplacements: Record<string, string> | undefined;
+  currentReplacements: Replacement[] | undefined;
   rawValue: string;
-}): string => {
-  if (currentReplacements != null) {
-    const rawValueToReplacement: Record<string, string> = invert(currentReplacements);
-    const existingReplacement: string | undefined = rawValueToReplacement[rawValue];
+}): Replacement => {
+  const uuid = v4().toString();
 
-    return existingReplacement != null ? existingReplacement : v4();
+  if (currentReplacements != null) {
+    const rawValueToReplacement = currentReplacements.find((r) => r.value === rawValue);
+    const existingReplacement: Replacement | undefined = rawValueToReplacement;
+
+    return existingReplacement != null ? existingReplacement : { uuid, value: rawValue };
   }
 
-  return v4();
+  return { uuid, value: rawValue };
 };

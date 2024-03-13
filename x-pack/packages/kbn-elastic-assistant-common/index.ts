@@ -23,7 +23,7 @@ export {
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
 export {
   replaceAnonymizedValuesWithOriginalValues,
-  replaceOriginalValuesWithUuidValues, // TODO: replace with transformRawData
+  replaceOriginalValuesWithUuidValues,
 } from './impl/data_anonymization/helpers';
 
 export * from './constants';

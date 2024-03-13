@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { transformRawData } from '@kbn/elastic-assistant-common';
+import { Replacement, transformRawData } from '@kbn/elastic-assistant-common';
 import { getAnonymizedValue as defaultGetAnonymizedValue } from '../get_anonymized_value';
 import type { Message } from '../../assistant_context/types';
 import type { SelectedPromptContext } from '../prompt_context/types';
@@ -40,22 +40,22 @@ export function getCombinedMessage({
   selectedPromptContexts,
   selectedSystemPrompt,
 }: {
-  currentReplacements: Record<string, string> | undefined;
+  currentReplacements: Replacement[] | undefined;
   getAnonymizedValue?: ({
     currentReplacements,
     rawValue,
   }: {
-    currentReplacements: Record<string, string> | undefined;
+    currentReplacements: Replacement[] | undefined;
     rawValue: string;
-  }) => string;
+  }) => Replacement;
   isNewChat: boolean;
   promptText: string;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   selectedSystemPrompt: Prompt | undefined;
 }): Message {
-  let replacements: Record<string, string> = {};
-  const onNewReplacements = (newReplacements: Record<string, string>) => {
-    replacements = { ...(currentReplacements ?? {}), ...newReplacements };
+  const replacements: Replacement[] = currentReplacements ?? [];
+  const onNewReplacements = (newReplacements: Replacement[]) => {
+    replacements.push(...newReplacements);
   };
 
   const promptContextsContent = Object.keys(selectedPromptContexts)

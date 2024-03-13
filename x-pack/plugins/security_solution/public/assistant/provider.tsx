@@ -70,15 +70,26 @@ export const AssistantProvider: React.FC = ({ children }) => {
         conversations &&
         Object.keys(conversations).length > 0
       ) {
-        const conversationsToCreate = Object.values(
-          conversations as Record<string, Conversation>
-        ).filter((c) => c.messages && c.messages.length > 0);
+        const conversationsToCreate = Object.values(conversations).filter(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (c: any) => c.messages && c.messages.length > 0
+        );
         // post bulk create
         const bulkResult = await bulkChangeConversations(
           http,
           {
-            create: conversationsToCreate.reduce((res: Record<string, Conversation>, c) => {
-              res[c.id] = { ...c, title: c.id };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            create: conversationsToCreate.reduce((res: Record<string, Conversation>, c: any) => {
+              res[c.id] = {
+                ...c,
+                title: c.id,
+                replacements: c.replacements
+                  ? Object.keys(c.replacements).map((uuid) => ({
+                      uuid,
+                      value: c.replacements[uuid],
+                    }))
+                  : [],
+              };
               return res;
             }, {}),
           },

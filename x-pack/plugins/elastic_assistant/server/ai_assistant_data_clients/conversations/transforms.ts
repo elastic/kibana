@@ -53,7 +53,7 @@ export const transformESToConversations = (
             // always return anonymized data from the client
             content: replaceOriginalValuesWithUuidValues({
               messageContent: message.content,
-              replacements: (conversationSchema.replacements ?? {}) as Record<string, string>,
+              replacements: conversationSchema.replacements ?? [],
             }),
             ...(message.is_error ? { isError: message.is_error } : {}),
             ...(message.reader ? { reader: message.reader } : {}),
@@ -68,7 +68,7 @@ export const transformESToConversations = (
               : {}),
           })) ?? [],
         updatedAt: conversationSchema.updated_at,
-        replacements: conversationSchema.replacements as Replacement,
+        replacements: conversationSchema.replacements as Replacement[],
         namespace: conversationSchema.namespace,
         id: hit._id,
       };

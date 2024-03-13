@@ -78,7 +78,7 @@ describe('ConnectorSelectorInline', () => {
       category: 'assistant',
       messages: [],
       apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
-      replacements: {},
+      replacements: [],
       title: 'conversation_id',
     };
     const { getByText } = render(
@@ -99,7 +99,7 @@ describe('ConnectorSelectorInline', () => {
       category: 'assistant',
       messages: [],
       apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
-      replacements: {},
+      replacements: [],
       title: 'conversation_id',
     };
     const { getByTestId, queryByTestId } = render(
@@ -123,7 +123,7 @@ describe('ConnectorSelectorInline', () => {
       category: 'assistant',
       messages: [],
       apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
-      replacements: {},
+      replacements: [],
       title: 'conversation_id',
     };
     const { getByTestId, queryByTestId } = render(
@@ -149,7 +149,7 @@ describe('ConnectorSelectorInline', () => {
       },
       conversation: {
         apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
-        replacements: {},
+        replacements: [],
         category: 'assistant',
         id: 'conversation_id',
         messages: [],
@@ -163,7 +163,7 @@ describe('ConnectorSelectorInline', () => {
       category: 'assistant',
       messages: [],
       apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
-      replacements: {},
+      replacements: [],
       title: 'conversation_id',
     };
     const { getByTestId } = render(

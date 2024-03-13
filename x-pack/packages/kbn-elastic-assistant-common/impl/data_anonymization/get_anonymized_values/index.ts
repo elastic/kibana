@@ -23,24 +23,21 @@ export const getAnonymizedValues: GetAnonymizedValues = ({
       const stringValue = `${rawValue}`;
 
       if (isAllowed({ allowSet, field }) && isAnonymized({ allowReplacementSet, field })) {
-        const anonymizedValue = `${getAnonymizedValue({
+        const anonymizedValue = getAnonymizedValue({
           currentReplacements,
           rawValue: stringValue,
-        })}`;
+        });
 
         return {
-          anonymizedValues: [...acc.anonymizedValues, anonymizedValue],
-          replacements: {
-            ...acc.replacements,
-            [anonymizedValue]: stringValue,
-          },
+          anonymizedValues: [...acc.anonymizedValues, anonymizedValue.uuid],
+          replacements: [...acc.replacements, anonymizedValue],
         };
       } else if (isAllowed({ allowSet, field })) {
         return {
           anonymizedValues: [...acc.anonymizedValues, stringValue], // no anonymization for this value
-          replacements: {
+          replacements: [
             ...acc.replacements, // no additional replacements
-          },
+          ],
         };
       } else {
         return acc;
@@ -48,7 +45,7 @@ export const getAnonymizedValues: GetAnonymizedValues = ({
     },
     {
       anonymizedValues: [],
-      replacements: {},
+      replacements: [],
     }
   );
 };

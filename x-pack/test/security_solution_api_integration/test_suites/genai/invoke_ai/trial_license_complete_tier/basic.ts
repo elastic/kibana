@@ -20,7 +20,7 @@ const mockRequest = {
   isEnabledKnowledgeBase: false,
   isEnabledRAGAlerts: false,
   llmType: 'bedrock',
-  replacements: {},
+  replacements: [],
 };
 
 export default ({ getService }: FtrProviderContext) => {

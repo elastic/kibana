@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { invert } from 'lodash/fp';
+import { Replacement } from '@kbn/elastic-assistant-common';
 import { v4 } from 'uuid';
 
 export const getAnonymizedValue = ({
   currentReplacements,
   rawValue,
 }: {
-  currentReplacements: Record<string, string> | undefined;
+  currentReplacements: Replacement[] | undefined;
   rawValue: string;
-}): string => {
+}): Replacement => {
+  const uuid = v4().toString();
   if (currentReplacements != null) {
-    const rawValueToReplacement: Record<string, string> = invert(currentReplacements);
-    const existingReplacement: string | undefined = rawValueToReplacement[rawValue];
+    const rawValueToReplacement = currentReplacements.find((r) => r.value === rawValue);
+    const existingReplacement: Replacement | undefined = rawValueToReplacement;
 
-    return existingReplacement != null ? existingReplacement : v4();
+    return existingReplacement != null ? existingReplacement : { uuid, value: rawValue };
   }
 
-  return v4();
+  return { uuid, value: rawValue };
 };
