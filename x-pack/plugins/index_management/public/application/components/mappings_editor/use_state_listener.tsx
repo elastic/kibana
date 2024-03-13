@@ -165,5 +165,5 @@ export const useMappingsStateListener = ({ onChange, value, status }: Args) => {
         runtimeFields: parsedRuntimeFieldsDefaultValue,
       },
     });
-  }, [value, parsedFieldsDefaultValue, dispatch, parsedRuntimeFieldsDefaultValue]);
+  }, [value, parsedFieldsDefaultValue, dispatch, status, parsedRuntimeFieldsDefaultValue]);
 };
