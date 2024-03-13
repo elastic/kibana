@@ -139,7 +139,6 @@ describe('updateRuleRoute', () => {
                 "params": Object {
                   "baz": true,
                 },
-                "type": "default",
                 "uuid": "1234-5678",
               },
             ],
@@ -154,6 +153,7 @@ describe('updateRuleRoute', () => {
             "schedule": Object {
               "interval": "12s",
             },
+            "systemActions": Array [],
             "tags": Array [
               "foo",
             ],

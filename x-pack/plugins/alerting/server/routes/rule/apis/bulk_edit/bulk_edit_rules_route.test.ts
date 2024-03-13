@@ -266,7 +266,6 @@ describe('bulkEditRulesRoute', () => {
                   "params": Object {
                     "foo": true,
                   },
-                  "type": "default",
                   "uuid": "123-456",
                 },
                 Object {
@@ -274,7 +273,6 @@ describe('bulkEditRulesRoute', () => {
                   "params": Object {
                     "foo": true,
                   },
-                  "type": "system",
                   "uuid": "123-456",
                 },
               ],
@@ -336,6 +334,7 @@ describe('bulkEditRulesRoute', () => {
           foo: true,
         },
         uuid: '123-456',
+        type: 'hello',
       };
 
       const licenseState = licenseStateMock.create();

@@ -124,14 +124,16 @@ describe('transformRuleAttributesToRuleDomain', () => {
           "group": "default",
           "id": "default-action-id",
           "params": Object {},
-          "type": "default",
           "uuid": "1",
         },
+      ]
+    `);
+    expect(res.systemActions).toMatchInlineSnapshot(`
+      Array [
         Object {
           "actionTypeId": ".test-system-action",
           "id": "my-system-action-id",
           "params": Object {},
-          "type": "system",
           "uuid": "123",
         },
       ]

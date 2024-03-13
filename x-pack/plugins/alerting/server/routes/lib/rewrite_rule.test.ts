@@ -89,6 +89,32 @@ describe('rewriteRule', () => {
   });
   it('should rewrite actions correctly', () => {
     const rewritten = rewriteRule(sampleRule);
-    expect(rewritten.actions).toMatchInlineSnapshot();
+    expect(rewritten.actions).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "alerts_filter": Object {
+            "query": Object {
+              "filters": Array [],
+              "kql": "test:1",
+            },
+          },
+          "connector_type_id": "bbb",
+          "frequency": Object {
+            "notify_when": "onThrottleInterval",
+            "summary": false,
+            "throttle": "1m",
+          },
+          "group": "default",
+          "id": "aaa",
+          "params": Object {},
+        },
+        Object {
+          "connector_type_id": "ddd",
+          "id": "ccc",
+          "params": Object {},
+          "use_alert_data_for_template": true,
+        },
+      ]
+    `);
   });
 });

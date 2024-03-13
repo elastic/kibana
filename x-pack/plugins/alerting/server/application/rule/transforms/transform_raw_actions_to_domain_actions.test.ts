@@ -6,7 +6,10 @@
  */
 
 import { RuleActionAttributes } from '../../../data/rule/types';
-import { transformRawActionsToDomainActions } from './transform_raw_actions_to_domain_actions';
+import {
+  transformRawActionsToDomainActions,
+  transformRawActionsToDomainSystemActions,
+} from './transform_raw_actions_to_domain_actions';
 
 const defaultAction: RuleActionAttributes = {
   group: 'default',
@@ -34,12 +37,9 @@ const isSystemAction = (id: string) => id === 'my-system-action-id';
 describe('transformRawActionsToDomainActions', () => {
   it('transforms the actions correctly', () => {
     const res = transformRawActionsToDomainActions({
-      actions: [defaultAction, systemAction],
+      actions: [defaultAction],
       ruleId: 'test-rule',
-      references: [
-        { name: 'system_action:my-system-action-id', id: 'my-system-action-id', type: 'action' },
-        { name: 'default-action-ref', id: 'default-action-id', type: 'action' },
-      ],
+      references: [{ name: 'default-action-ref', id: 'default-action-id', type: 'action' }],
       isSystemAction,
     });
 
@@ -61,14 +61,30 @@ describe('transformRawActionsToDomainActions', () => {
           "group": "default",
           "id": "default-action-id",
           "params": Object {},
-          "type": "default",
           "uuid": "1",
         },
+      ]
+    `);
+  });
+});
+
+describe('transformRawActionsToDomainSystemActions', () => {
+  it('transforms the system actions correctly', () => {
+    const res = transformRawActionsToDomainSystemActions({
+      actions: [systemAction],
+      ruleId: 'test-rule',
+      references: [
+        { name: 'system_action:my-system-action-id', id: 'my-system-action-id', type: 'action' },
+      ],
+      isSystemAction,
+    });
+
+    expect(res).toMatchInlineSnapshot(`
+      Array [
         Object {
           "actionTypeId": ".test-system-action",
           "id": "my-system-action-id",
           "params": Object {},
-          "type": "system",
           "uuid": "123",
         },
       ]

@@ -110,7 +110,6 @@ describe('loadRule', () => {
             "params": Object {
               "message": "alert 37: {{context.message}}",
             },
-            "type": "default",
             "uuid": "123-456",
           },
         ],

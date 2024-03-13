@@ -70,7 +70,7 @@ const rewriteBodyReq = (
   result: RuleUpdateOptionsResult,
   isSystemAction: (connectorId: string) => boolean
 ): UpdateOptions<RuleTypeParams> => {
-  const { notify_when: notifyWhen, alert_delay: alertDelay, actions, ...rest } = result.data;
+  const { notify_when: notifyWhen, alert_delay: alertDelay, actions = [], ...rest } = result.data;
   return {
     ...result,
     data: {

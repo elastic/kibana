@@ -44,7 +44,16 @@ export const transformRuleActions = (
 ): RuleResponseV1['actions'] => {
   return [
     ...actions.map((action) => {
-      const { group, id, actionTypeId, params, frequency, uuid, alertsFilter } = action;
+      const {
+        group,
+        id,
+        actionTypeId,
+        params,
+        frequency,
+        uuid,
+        alertsFilter,
+        useAlertDataForTemplate,
+      } = action;
 
       return {
         group,
@@ -62,15 +71,21 @@ export const transformRuleActions = (
           : {}),
         ...(uuid && { uuid }),
         ...(alertsFilter && { alerts_filter: alertsFilter }),
+        ...(useAlertDataForTemplate !== undefined && {
+          use_alert_data_for_template: useAlertDataForTemplate,
+        }),
       };
     }),
     ...systemActions.map((sActions) => {
-      const { id, actionTypeId, params, uuid } = sActions;
+      const { id, actionTypeId, params, uuid, useAlertDataForTemplate } = sActions;
       return {
         id,
         params,
         uuid,
         connector_type_id: actionTypeId,
+        ...(useAlertDataForTemplate !== undefined && {
+          use_alert_data_for_template: useAlertDataForTemplate,
+        }),
       };
     }),
   ];

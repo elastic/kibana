@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rewriteActionsReq } from './rewrite_actions';
+import { rewriteActionsReq, rewriteSystemActionsReq } from './rewrite_actions';
 
 describe('rewriteActionsReq', () => {
   it('should rewrite actions correctly', () => {
@@ -72,17 +72,11 @@ describe('rewriteActionsReq', () => {
 describe('rewriteSystemActionsReq', () => {
   it('should rewrite system actions correctly', () => {
     expect(
-      rewriteActionsReq([
+      rewriteSystemActionsReq([
         {
           uuid: '111',
-          group: 'default',
           id: 'system-1',
           params: { foo: 'bar' },
-          frequency: {
-            summary: true,
-            notify_when: 'onThrottleInterval',
-            throttle: '1h',
-          },
         },
       ])
     ).toEqual([
