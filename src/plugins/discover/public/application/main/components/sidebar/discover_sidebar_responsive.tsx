@@ -31,7 +31,6 @@ import {
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { FetchStatus, SidebarToggleState } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
-import { getUiActions } from '../../../../kibana_services';
 import {
   discoverSidebarReducer,
   getInitialState,
@@ -331,14 +330,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [canEditDataView, dataViewEditor, setDataViewEditorRef, onDataViewCreated, closeFieldListFlyout]
   );
 
-  const fieldListSidebarServices: UnifiedFieldListSidebarContainerProps['services'] = useMemo(
-    () => ({
-      ...services,
-      uiActions: getUiActions(),
-    }),
-    [services]
-  );
-
   const searchBarCustomization = useDiscoverCustomization('search_bar');
   const fieldListCustomization = useDiscoverCustomization('field_list');
   const CustomDataViewPicker = searchBarCustomization?.CustomDataViewPicker;
@@ -405,7 +396,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             ref={initializeUnifiedFieldListSidebarContainerApi}
             variant={fieldListVariant}
             getCreationOptions={getCreationOptions}
-            services={fieldListSidebarServices}
+            services={services}
             dataView={selectedDataView}
             trackUiMetric={trackUiMetric}
             allFields={sidebarState.allFields}
