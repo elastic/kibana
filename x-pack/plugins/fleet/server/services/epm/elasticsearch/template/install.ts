@@ -297,7 +297,6 @@ const FIELD_LIMIT_THRESHOLD = 500;
  * An explicit limit always overrides the default.
  */
 function getFieldsLimit(fieldCount: number | undefined, explicitLimit: number | undefined) {
-  console.log("XXXXX, fieldCount, explicitLimit", fieldCount, explicitLimit);
   if (explicitLimit) {
     return explicitLimit;
   }
