@@ -65,7 +65,6 @@ export function QueryHistoryAction({
             onClick={toggleHistory}
             css={css`
               padding-inline: 0;
-              margin-right: ${euiTheme.size.s};
             `}
             iconType="clock"
           >

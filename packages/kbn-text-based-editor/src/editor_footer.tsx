@@ -10,7 +10,6 @@ import React, { memo, useState, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
-  EuiCode,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -245,23 +244,6 @@ export const EditorFooter = memo(function EditorFooter({
                   toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
                   isHistoryOpen={isHistoryOpen}
                 />
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-run-query">
-                    <p>
-                      {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
-                        defaultMessage: 'Run query',
-                      })}
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiCode
-                    transparentBackground
-                    css={css`
-                      font-size: 12px;
-                    `}
-                  >{`${COMMAND_KEY} + Enter`}</EuiCode>
-                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           )}
