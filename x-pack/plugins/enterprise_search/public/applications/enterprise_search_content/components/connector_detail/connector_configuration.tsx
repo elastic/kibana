@@ -38,7 +38,6 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo, EuiLinkTo } from '../../../shared/react_router_helpers';
 import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
-import { ConnectorConfigurationApiLogic } from '../../api/connector/update_connector_configuration_api_logic';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import { SyncsContextMenu } from '../search_index/components/header_actions/syncs_context_menu';
 import { ApiKeyConfig } from '../search_index/connector/api_key_configuration';
@@ -52,18 +51,19 @@ import { NativeConnectorConfiguration } from './native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
-  const { fetchConnector } = useActions(ConnectorViewLogic);
-  const { index, isLoading, connector } = useValues(ConnectorViewLogic);
+  const { index, isLoading, connector, updateConnectorConfigurationStatus } =
+    useValues(ConnectorViewLogic);
   const cloudContext = useCloudDetails();
   const { hasPlatinumLicense } = useValues(LicensingLogic);
-  const { status } = useValues(ConnectorConfigurationApiLogic);
-  const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
   const { errorConnectingMessage, http } = useValues(HttpLogic);
+
   const { connectorTypes } = useValues(KibanaLogic);
   const BETA_CONNECTORS = useMemo(
     () => connectorTypes.filter(({ isBeta }) => isBeta),
     [connectorTypes]
   );
+
+  const { fetchConnector, updateConnectorConfiguration } = useActions(ConnectorViewLogic);
 
   if (!connector) {
     return <></>;
@@ -198,9 +198,9 @@ export const ConnectorConfiguration: React.FC = () => {
                     <ConnectorConfigurationComponent
                       connector={connector}
                       hasPlatinumLicense={hasPlatinumLicense}
-                      isLoading={status === Status.LOADING}
+                      isLoading={updateConnectorConfigurationStatus === Status.LOADING}
                       saveConfig={(configuration) =>
-                        makeRequest({
+                        updateConnectorConfiguration({
                           configuration,
                           connectorId: connector.id,
                         })
