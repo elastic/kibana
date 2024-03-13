@@ -348,12 +348,14 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async expectUnsavedChangesBadge() {
+    this.log.debug('Expect unsaved changes badge to be present');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
     });
   }
 
   public async expectMissingUnsavedChangesBadge() {
+    this.log.debug('Expect there to be no unsaved changes badge');
     await this.retry.try(async () => {
       await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
     });
