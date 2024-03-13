@@ -17,6 +17,7 @@ import {
   EuiButton,
   EuiCode,
   EuiCopy,
+  EuiDataGridControlColumn,
 } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
@@ -175,6 +176,8 @@ const AlertsTableState = (props: AlertsTableStateProps) => {
   );
 };
 
+const DEFAULT_LEADING_CONTROL_COLUMNS: EuiDataGridControlColumn[] = [];
+
 const AlertsTableStateWithQueryProvider = ({
   alertsTableConfigurationRegistry,
   configurationId,
@@ -182,7 +185,7 @@ const AlertsTableStateWithQueryProvider = ({
   featureIds,
   query,
   pageSize,
-  leadingControlColumns,
+  leadingControlColumns = DEFAULT_LEADING_CONTROL_COLUMNS,
   rowHeightsOptions,
   renderCellValue,
   columns: propColumns,
@@ -434,7 +437,7 @@ const AlertsTableStateWithQueryProvider = ({
       pageSize: pagination.pageSize,
       pageSizeOptions: [10, 20, 50, 100],
       id,
-      leadingControlColumns: leadingControlColumns ?? [],
+      leadingControlColumns,
       showAlertStatusWithFlapping,
       trailingControlColumns: [],
       useFetchAlertsData,
