@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 
 import {
   EuiLink,
@@ -73,13 +73,7 @@ interface ExceptionsListCardProps {
   }) => () => Promise<void>;
   readOnly: boolean;
 }
-const buttonCss = css`
-  z-index: 100;
-  .euiAccordion__buttonContent {
-    cursor: pointer;
-    width: 100%;
-  }
-`;
+
 const ExceptionPanel = styled(EuiPanel)`
   margin: -${euiThemeVars.euiSizeS} ${euiThemeVars.euiSizeM} 0 ${euiThemeVars.euiSizeM};
 `;
@@ -101,6 +95,23 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
     } = useListDetailsView(exceptionsList.list_id);
     const { euiTheme } = useEuiTheme();
     const panelShadow = useEuiShadow();
+
+    const euiAccordionStyles = useMemo(
+      () => css`
+        z-index: 100;
+        .euiAccordion__buttonContent {
+          cursor: pointer;
+          width: 100%;
+        }
+        .euiAccordion__triggerWrapper {
+          border-radius: ${euiTheme.border.radius.medium};
+          padding: ${euiTheme.size.base};
+          margin: ${euiTheme.size.xs} 0;
+          ${panelShadow}
+        }
+      `,
+      [euiTheme.border.radius.medium, euiTheme.size.base, euiTheme.size.xs, panelShadow]
+    );
 
     const {
       listId,
@@ -149,22 +160,13 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
             // Note: this uses `className` instead of the `css` prop, because a plugin
             // cannot be set up for styled-components and `@emotion/react` at the same time
             // @see https://github.com/elastic/eui/discussions/6828#discussioncomment-6076157
-            buttonProps={{ className: buttonCss }}
+            className={euiAccordionStyles}
             id={openAccordionId}
-            arrowDisplay="none"
             buttonElement="div"
             onToggle={() => setToggleAccordion(!toggleAccordion)}
-            css={css`
-              .euiAccordion__triggerWrapper {
-                border-radius: ${euiTheme.border.radius.medium};
-                padding: ${euiTheme.size.base};
-                margin-top: ${euiTheme.size.l};
-                ${panelShadow}
-              }
-            `}
             buttonContent={
               <ListHeaderContainer gutterSize="m" alignItems="flexStart">
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiFlexGroup
                     direction="column"
                     key={listId}
@@ -187,27 +189,27 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                 </EuiFlexItem>
 
                 <EuiFlexItem>
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem>
+                  <EuiFlexGroup alignItems="center" justifyContent="flexEnd" wrap>
+                    <EuiFlexItem grow={false}>
                       <TitleBadge title={i18n.DATE_CREATED} badgeString={createdAt} />
                     </EuiFlexItem>
-                    <EuiFlexItem>
+                    <EuiFlexItem grow={false}>
                       <TitleBadge title={i18n.CREATED_BY} badgeString={createdBy} />
                     </EuiFlexItem>
-                    <EuiFlexItem>
+                    <EuiFlexItem grow={false}>
                       <TitleBadge title={i18n.EXCEPTIONS} badgeString={exceptionItemsCount} />
                     </EuiFlexItem>
-                    <EuiFlexItem data-test-subj="exceptionListCardLinkedRulesBadge">
+                    <EuiFlexItem data-test-subj="exceptionListCardLinkedRulesBadge" grow={false}>
                       <TitleBadge title={i18n.RULES} badgeString={linkedRules.length.toString()} />
                     </EuiFlexItem>
-                    <EuiFlexItem>
-                      <HeaderMenu
-                        disableActions={readOnly}
-                        dataTestSubj="sharedListOverflowCard"
-                        actions={menuActionItems}
-                      />
-                    </EuiFlexItem>
                   </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <HeaderMenu
+                    disableActions={readOnly}
+                    dataTestSubj="sharedListOverflowCard"
+                    actions={menuActionItems}
+                  />
                 </EuiFlexItem>
               </ListHeaderContainer>
             }
