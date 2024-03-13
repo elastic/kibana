@@ -45,7 +45,7 @@ mockUseKibanaReturnValue.services.cases.hooks.useCasesAddToExistingCaseModal.moc
 
 mockUseKibanaReturnValue.services.cases.helpers.canUseCases.mockReturnValue(allCasesPermissions());
 
-const { ObservabilityAIAssistantActionMenuItem, ObservabilityAIAssistantContextualInsight } =
+const { ObservabilityAIAssistantContextualInsight } =
   observabilityAIAssistantPluginMock.createStartContract();
 
 jest.mock('../../../utils/kibana_react', () => ({
@@ -78,7 +78,6 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   plugins: {} as ObservabilityPublicPluginsStart,
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
-  ObservabilityAIAssistantActionMenuItem,
   ObservabilityAIAssistantContextualInsight,
 }));
 

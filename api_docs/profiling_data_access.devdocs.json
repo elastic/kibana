@@ -55,7 +55,7 @@
           "CloudSetupStateType",
           " | ",
           "SetupStateType",
-          ">; fetchFunction: ({ core, esClient, startIndex, endIndex, indices, stacktraceIdsField, query, totalSeconds, }: ",
+          ">; fetchFunctions: ({ core, esClient, startIndex, endIndex, indices, stacktraceIdsField, query, totalSeconds, }: ",
           "FetchFunctionsParams",
           ") => Promise<",
           {
