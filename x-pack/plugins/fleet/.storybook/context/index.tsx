@@ -101,7 +101,14 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
           all: true,
           setup: true,
           readEnrollmentTokens: true,
+
+          // subfeatures
+          allAgents: true,
+          readAgents: true,
+          allSettings: true,
+          readSettings: true,
           readAgentPolicies: true,
+          allAgentPolicies: true,
         },
         integrations: {
           readPackageInfo: true,

@@ -789,6 +789,37 @@ describe('transformActionParams', () => {
           }
       `);
   });
+
+  test('consecutive matches is passed to templates', () => {
+    const actionParams = {
+      message: 'Value "{{alert.consecutiveMatches}}" exists',
+    };
+    const result = transformActionParams({
+      actionsPlugin,
+      actionTypeId,
+      actionParams,
+      state: {},
+      context: {},
+      alertId: '1',
+      alertType: 'rule-type-id',
+      actionId: 'action-id',
+      alertName: 'alert-name',
+      tags: ['tag-A', 'tag-B'],
+      spaceId: 'spaceId-A',
+      alertInstanceId: '2',
+      alertUuid: 'uuid-1',
+      alertActionGroup: 'action-group',
+      alertActionGroupName: 'Action Group',
+      alertParams: {},
+      flapping: true,
+      consecutiveMatches: 4,
+    });
+    expect(result).toMatchInlineSnapshot(`
+          Object {
+            "message": "Value \\"4\\" exists",
+          }
+      `);
+  });
 });
 
 describe('transformSummaryActionParams', () => {
