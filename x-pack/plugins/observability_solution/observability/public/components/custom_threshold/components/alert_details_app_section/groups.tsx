@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiLink } from '@elastic/eui';
 import { ENVIRONMENT_ALL } from '@kbn/exploratory-view-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
 import React, { useMemo } from 'react';
@@ -100,9 +101,9 @@ export function Groups({ groups, timeRange }: { groups: GroupItem[]; timeRange: 
         : `${infraSourceLinks[field]}/${value}?${infraTimeRange}`;
 
     return (
-      <a href={link} target="_blank">
+      <EuiLink data-test-subj="o11yGenerateInfraSourceLinkLink" href={link} target="_blank">
         {value}
-      </a>
+      </EuiLink>
     );
   };
 
@@ -135,9 +136,13 @@ export function Groups({ groups, timeRange }: { groups: GroupItem[]; timeRange: 
     }
 
     return (
-      <a href={apmLocator?.getRedirectUrl(apmLocatorPayload)} target="_blank">
+      <EuiLink
+        data-test-subj="o11yGenerateApmSourceLinkLink"
+        href={apmLocator?.getRedirectUrl(apmLocatorPayload)}
+        target="_blank"
+      >
         {value}
-      </a>
+      </EuiLink>
     );
   };
 
@@ -146,11 +151,13 @@ export function Groups({ groups, timeRange }: { groups: GroupItem[]; timeRange: 
   };
 
   const generateSourceLink = ({ field, value }: GroupItem) => {
-    return infraSources.includes(field)
-      ? generateInfraSourceLink({ field, value })
-      : apmSources.includes(field)
-      ? generateApmSourceLink({ field, value })
-      : generateNoSourceLink({ field, value });
+    if (infraSources.includes(field)) {
+      return generateInfraSourceLink({ field, value });
+    } else if (apmSources.includes(field)) {
+      return generateApmSourceLink({ field, value });
+    } else {
+      return generateNoSourceLink({ field, value });
+    }
   };
 
   return (

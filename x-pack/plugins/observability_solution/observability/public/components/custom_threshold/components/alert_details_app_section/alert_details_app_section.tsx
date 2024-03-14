@@ -198,14 +198,18 @@ export default function AlertDetailsAppSection({
           <>
             <Groups groups={groups} timeRange={timeRange} />
             <span>
-              <a href={viewInAppUrl} target="_blank">
+              <EuiLink
+                data-test-subj="o11yAlertDetailsAppSectionViewRelatedLogsLink"
+                href={viewInAppUrl}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.observability.alertDetailsAppSection.a.viewRelatedLogsLabel',
                   {
                     defaultMessage: 'View related logs',
                   }
                 )}
-              </a>
+              </EuiLink>
             </span>
           </>
         ),
