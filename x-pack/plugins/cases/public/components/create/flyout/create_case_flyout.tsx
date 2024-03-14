@@ -62,7 +62,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
 
               && .euiFlyoutBody__overflowContent {
                 display: block;
-                padding: ${euiTheme.size.l} ${euiTheme.size.l} 70px;
+                padding: ${euiTheme.size.l} ${euiTheme.size.l} ${euiTheme.size.xxxxl};
                 height: auto;
               }
             `}

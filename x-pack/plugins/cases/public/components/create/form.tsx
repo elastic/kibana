@@ -14,6 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiSteps,
   useEuiTheme,
+  logicalCSS,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -51,10 +52,10 @@ import { CustomFields } from './custom_fields';
 const containerCss = (euiTheme: EuiThemeComputed<{}>, big?: boolean) =>
   big
     ? css`
-        margin-top: ${euiTheme.size.xl ?? '32px'};
+        ${logicalCSS('margin-top', euiTheme.size.xl)};
       `
     : css`
-        margin-top: ${euiTheme.size.base ?? '16px'};
+        ${logicalCSS('margin-top', euiTheme.size.base)};
       `;
 
 export interface CreateCaseFormFieldsProps {

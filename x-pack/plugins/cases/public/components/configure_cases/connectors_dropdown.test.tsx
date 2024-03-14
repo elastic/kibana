@@ -97,10 +97,10 @@ describe('ConnectorsDropdown', () => {
                 css={
                   Object {
                     "map": undefined,
-                    "name": "u5hcrb",
+                    "name": "13a1e3t",
                     "next": undefined,
                     "styles": "
-                            margin-right: 13px;
+                            margin-right: 12px;
                             margin-bottom: 0 !important;
                           ",
                     "toString": [Function],
@@ -134,10 +134,10 @@ describe('ConnectorsDropdown', () => {
                 css={
                   Object {
                     "map": undefined,
-                    "name": "u5hcrb",
+                    "name": "13a1e3t",
                     "next": undefined,
                     "styles": "
-                            margin-right: 13px;
+                            margin-right: 12px;
                             margin-bottom: 0 !important;
                           ",
                     "toString": [Function],
@@ -171,10 +171,10 @@ describe('ConnectorsDropdown', () => {
                 css={
                   Object {
                     "map": undefined,
-                    "name": "u5hcrb",
+                    "name": "13a1e3t",
                     "next": undefined,
                     "styles": "
-                            margin-right: 13px;
+                            margin-right: 12px;
                             margin-bottom: 0 !important;
                           ",
                     "toString": [Function],
@@ -208,10 +208,10 @@ describe('ConnectorsDropdown', () => {
                 css={
                   Object {
                     "map": undefined,
-                    "name": "u5hcrb",
+                    "name": "13a1e3t",
                     "next": undefined,
                     "styles": "
-                            margin-right: 13px;
+                            margin-right: 12px;
                             margin-bottom: 0 !important;
                           ",
                     "toString": [Function],
@@ -245,10 +245,10 @@ describe('ConnectorsDropdown', () => {
                 css={
                   Object {
                     "map": undefined,
-                    "name": "u5hcrb",
+                    "name": "13a1e3t",
                     "next": undefined,
                     "styles": "
-                            margin-right: 13px;
+                            margin-right: 12px;
                             margin-bottom: 0 !important;
                           ",
                     "toString": [Function],

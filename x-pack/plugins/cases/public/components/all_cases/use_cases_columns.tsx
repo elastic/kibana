@@ -48,6 +48,16 @@ type CasesColumns =
   | EuiTableComputedColumnType<CaseUI>
   | EuiTableFieldDataColumnType<CaseUI>;
 
+const LINE_CLAMP = 3;
+const getLineClampedCss = css`
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: ${LINE_CLAMP};
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: normal;
+`;
+
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyCellValue();
 
@@ -126,18 +136,21 @@ export const useCasesColumns = ({
         render: (tags: CaseUI['tags']) => {
           if (tags != null && tags.length > 0) {
             const clampedBadges = (
-              <EuiBadgeGroup data-test-subj="case-table-column-tags">
+              <EuiBadgeGroup
+                data-test-subj="case-table-column-tags"
+                css={getLineClampedCss}
+                gutterSize="xs"
+              >
                 {tags.map((tag: string, i: number) => (
                   <EuiBadge
                     css={css`
                       max-width: 100px;
-                      margin-right: 5px;
                     `}
                     color="hollow"
                     key={`${tag}-${i}`}
                     data-test-subj={`case-table-column-tags-${tag}`}
                   >
-                    <TruncatedText text={tag} />
+                    {tag}
                   </EuiBadge>
                 ))}
               </EuiBadgeGroup>

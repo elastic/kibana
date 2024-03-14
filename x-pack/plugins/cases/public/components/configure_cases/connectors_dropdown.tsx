@@ -99,7 +99,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   <EuiIcon
                     css={css`
-                      margin-right: 13px;
+                      margin-right: ${euiTheme.size.m};
                       margin-bottom: 0 !important;
                     `}
                     type={getConnectorIcon(triggersActionsUi, connector.actionTypeId)}

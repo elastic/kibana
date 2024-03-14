@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, useEuiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { FieldMappingRowStatic } from './field_mapping_row_static';
@@ -25,6 +25,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
   isLoading,
   mappings,
 }) => {
+  const sFontSize = useEuiFontSize('s').fontSize;
   return mappings.length ? (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -46,7 +47,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
           data-test-subj="case-configure-field-mappings-row-wrapper"
           css={css`
             margin: 10px 0;
-            font-size: 14px;
+            font-size: ${sFontSize};
           `}
         >
           {mappings.map((item) => (

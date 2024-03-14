@@ -59,7 +59,7 @@ export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
   const { history } = mountParams;
 
   return (
-    <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
+    <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider
         services={{
           kibanaVersion,

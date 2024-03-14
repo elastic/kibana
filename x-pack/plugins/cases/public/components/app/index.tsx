@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
+import { EuiFlexGroup } from '@elastic/eui';
 
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
@@ -33,13 +33,7 @@ const CasesAppComponent: React.FC<CasesAppProps> = ({
   const userCapabilities = useApplicationCapabilities();
 
   return (
-    <div
-      css={css`
-        display: flex;
-        flex-direction: column;
-      `}
-      data-test-subj="cases-app"
-    >
+    <EuiFlexGroup direction="column" data-test-subj="cases-app">
       {getCasesLazy({
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
@@ -50,7 +44,7 @@ const CasesAppComponent: React.FC<CasesAppProps> = ({
         basePath: '/',
         features: { alerts: { enabled: true, sync: false } },
       })}
-    </div>
+    </EuiFlexGroup>
   );
 };
 

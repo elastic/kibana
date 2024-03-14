@@ -56,7 +56,7 @@ const getFlexGroupCss = ({
       `
     : css`
         background: ${euiTheme.colors.lightestShade};
-        border-radius: 6px;
+        border-radius: ${euiTheme.border.radius.medium};
         ${hasUnsavedChanges
           ? css`
               border-bottom-left-radius: 0;
@@ -164,13 +164,7 @@ export const Description = ({
       ref={descriptionMarkdownRef}
     />
   ) : (
-    <EuiPanel
-      css={css`
-        padding: 0;
-      `}
-      hasBorder
-      data-test-subj="description"
-    >
+    <EuiPanel paddingSize="none" hasBorder data-test-subj="description">
       <EuiFlexGroup direction="column" gutterSize={isCollapsed ? 'none' : 'm'}>
         <EuiFlexItem>
           <EuiFlexGroup

@@ -191,7 +191,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           css={
             isLoading || isLoadingCases || isLoadingColumns
               ? css`
-                  top: 2px;
+                  top: ${euiTheme.size.xxs};
                   border-radius: ${euiTheme.border.radius};
                   z-index: ${euiTheme.levels.header};
                 `

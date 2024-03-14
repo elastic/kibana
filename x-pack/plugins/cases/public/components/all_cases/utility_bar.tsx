@@ -111,7 +111,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
             color="default"
             size="m"
             css={css`
-              margin-top: 4px;
+              margin-top: ${euiTheme.size.xs};
             `}
           >
             {i18n.MAX_CASES(MAX_DOCS_PER_PAGE)}

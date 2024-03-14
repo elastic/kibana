@@ -6,7 +6,7 @@
  */
 
 import type { ErrorToastOptions } from '@kbn/core/public';
-import { EuiButtonEmpty, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText, logicalCSS, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -193,7 +193,7 @@ export const CaseToastSuccessContent = ({
         <EuiText
           size="s"
           css={css`
-            margin-bottom: ${euiTheme.size.s ?? 8}px;
+            ${logicalCSS('margin-bottom', euiTheme.size.s)};
           `}
           data-test-subj="toaster-content-sync-text"
         >

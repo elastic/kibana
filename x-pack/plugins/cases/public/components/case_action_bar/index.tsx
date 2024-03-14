@@ -72,13 +72,11 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
       <EuiFlexItem
         grow={false}
         css={css`
-          & {
-            padding-right: ${euiTheme.size.l};
-            border-right: ${euiTheme.border.thin};
-            @media only screen and (max-width: ${euiTheme.breakpoint.m}) {
-              padding-right: 0;
-              border-right: 0;
-            }
+          padding-right: ${euiTheme.size.l};
+          border-right: ${euiTheme.border.thin};
+          @media only screen and (max-width: ${euiTheme.breakpoint.m}) {
+            padding-right: 0;
+            border-right: 0;
           }
         `}
       >

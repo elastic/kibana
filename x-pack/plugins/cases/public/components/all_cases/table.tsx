@@ -71,7 +71,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   return (isCasesLoading && isDataEmpty) || isLoadingColumns ? (
     <div
       css={css`
-        ${euiTheme.size.m}
+        margin-top: ${euiTheme.size.m};
       `}
     >
       <EuiSkeletonText data-test-subj="initialLoadingPanelAllCases" lines={10} />

@@ -35,7 +35,7 @@ export const ShowMoreButton = React.memo<ShowMoreButtonProps>(
           z-index: ${euiTheme.levels.menu};
           border-top: ${euiTheme.size.base} solid ${euiTheme.colors.emptyShade};
           border-bottom: ${euiTheme.size.base} solid ${euiTheme.colors.emptyShade};
-          border-radius: 16px;
+          border-radius: ${euiTheme.size.base};
         `}
       >
         <EuiButton
