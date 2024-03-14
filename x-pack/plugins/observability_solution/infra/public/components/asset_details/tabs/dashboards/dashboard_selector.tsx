@@ -67,8 +67,8 @@ export function DashboardSelector({
         selectedDashboard
           ? [
               {
-                value: selectedDashboard?.id,
-                label: selectedDashboard?.title,
+                value: selectedDashboard.id,
+                label: selectedDashboard.title,
               },
             ]
           : []

@@ -6,23 +6,16 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import { useBoolean } from '../../../../hooks/use_boolean';
 
 interface Props {
   items: React.ReactNode[];
 }
 
 export function ContextMenu({ items }: Props) {
-  const [isPopoverOpen, setPopover] = useState(false);
-
-  const onButtonClick = () => {
-    setPopover(!isPopoverOpen);
-  };
-
-  const closePopover = () => {
-    setPopover(false);
-  };
+  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
   return (
     <EuiPopover
@@ -35,7 +28,7 @@ export function ContextMenu({ items }: Props) {
           aria-label={i18n.translate('xpack.infra.assetDetails.dashboards.contextMenu.moreLabel', {
             defaultMessage: 'More',
           })}
-          onClick={onButtonClick}
+          onClick={togglePopover}
         />
       }
       isOpen={isPopoverOpen}
@@ -45,8 +38,11 @@ export function ContextMenu({ items }: Props) {
     >
       <EuiContextMenuPanel
         size="s"
-        items={items.map((item: React.ReactNode) => (
-          <EuiContextMenuItem size="s"> {item}</EuiContextMenuItem>
+        items={items.map((item, index) => (
+          <EuiContextMenuItem key={index} size="s">
+            {' '}
+            {item}
+          </EuiContextMenuItem>
         ))}
       />
     </EuiPopover>

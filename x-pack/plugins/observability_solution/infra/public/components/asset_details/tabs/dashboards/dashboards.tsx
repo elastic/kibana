@@ -77,19 +77,22 @@ export function Dashboards() {
   const { dashboards, loading, reload } = useCustomDashboard({ assetType: asset.type });
 
   useEffect(() => {
-    const filteredCustomDashboards = (dashboards?.dashboardIdList ?? []).reduce(
-      (result: DashboardItemWithTitle[], customDashboard: DashboardIdItem) => {
-        const matchedDashboard = allAvailableDashboards.find(({ id }) => id === customDashboard.id);
-        if (matchedDashboard) {
-          result.push({
-            title: matchedDashboard.attributes.title,
-            ...customDashboard,
-          });
-        }
-        return result;
-      },
-      []
-    );
+    const filteredCustomDashboards =
+      dashboards?.dashboardIdList?.reduce<DashboardItemWithTitle[]>(
+        (result: DashboardItemWithTitle[], customDashboard: DashboardIdItem) => {
+          const matchedDashboard = allAvailableDashboards.find(
+            ({ id }) => id === customDashboard.id
+          );
+          if (matchedDashboard) {
+            result.push({
+              title: matchedDashboard.attributes.title,
+              ...customDashboard,
+            });
+          }
+          return result;
+        },
+        []
+      ) ?? [];
     setCustomDashboards(filteredCustomDashboards);
     // set a default dashboard if there is no selected dashboard
     if (!urlState?.dashboardId) {
@@ -113,7 +116,6 @@ export function Dashboards() {
 
   useEffect(() => {
     if (!dashboard) return;
-
     dashboard.updateInput({
       filters:
         metrics.dataView && currentDashboard?.hostNameFilterEnabled
@@ -127,7 +129,7 @@ export function Dashboards() {
     dashboard,
     dateRange.from,
     dateRange.to,
-    currentDashboard?.hostNameFilterEnabled,
+    currentDashboard,
     asset.type,
   ]);
 
@@ -144,7 +146,7 @@ export function Dashboards() {
             </h4>
           }
         />
-      ) : (dashboards?.dashboardIdList ?? []).length > 0 ? (
+      ) : !!dashboards?.dashboardIdList?.length ? (
         <>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs" alignItems="center">
             <EuiFlexItem grow>

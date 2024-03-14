@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiModal,
@@ -78,20 +78,23 @@ export function SaveDashboardModal({
     onRefresh();
   }, [onRefresh]);
 
-  const options = allAvailableDashboards?.map((dashboardItem: DashboardItem) => ({
-    label: dashboardItem.attributes.title,
-    value: dashboardItem.id,
-    disabled: customDashboards?.some(({ id }) => dashboardItem.id === id) ?? false,
-  }));
+  const options = useMemo(
+    () =>
+      allAvailableDashboards?.map((dashboardItem: DashboardItem) => ({
+        label: dashboardItem.attributes.title,
+        value: dashboardItem.id,
+        disabled: customDashboards?.some(({ id }) => dashboardItem.id === id) ?? false,
+      })),
+    [allAvailableDashboards, customDashboards]
+  );
 
   const onClickSave = useCallback(
     async function () {
       const [newDashboard] = selectedDashboard;
       try {
         if (newDashboard.value && !savedObjectDashboardsLoading) {
-          const dashboardList = (dashboards?.dashboardIdList ?? []).filter(
-            ({ id }) => id !== newDashboard.value
-          );
+          const dashboardList =
+            dashboards?.dashboardIdList?.filter(({ id }) => id !== newDashboard.value) || [];
           const result = await updateCustomDashboard({
             assetType,
             dashboardIdList: [

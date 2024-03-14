@@ -21,7 +21,7 @@ export interface SearchDashboardsResult {
   status: FETCH_STATUS;
 }
 
-export function useDashboardFetcher(query?: string): SearchDashboardsResult {
+export function useDashboardFetcher(query = ''): SearchDashboardsResult {
   const {
     services: { dashboard },
   } = useKibanaContextForPlugin();
@@ -40,7 +40,7 @@ export function useDashboardFetcher(query?: string): SearchDashboardsResult {
       try {
         const findDashboardsService = await dashboard?.findDashboardsService();
         const data = await findDashboardsService.search({
-          search: query ?? '',
+          search: query,
           size: 1000,
         });
 

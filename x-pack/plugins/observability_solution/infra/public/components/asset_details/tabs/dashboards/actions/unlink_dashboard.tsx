@@ -35,9 +35,8 @@ export function UnlinkDashboard({
   const onConfirm = useCallback(
     async function () {
       try {
-        const dashboardList = (dashboards?.dashboardIdList ?? []).filter(
-          ({ id }) => id !== currentDashboard.id
-        );
+        const dashboardList =
+          dashboards?.dashboardIdList?.filter(({ id }) => id !== currentDashboard.id) || [];
         await updateCustomDashboard({
           assetType,
           dashboardIdList: [...dashboardList],
