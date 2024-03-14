@@ -14,6 +14,7 @@ import type {
   HasParentApi,
   HasType,
   PublishesLocalUnifiedSearch,
+  PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiHasType, apiIsOfType } from '@kbn/presentation-publishing';
 import { createAction } from '@kbn/ui-actions-plugin/public';
@@ -39,10 +40,10 @@ export interface AnomalyChartsFieldSelectionApi {
 
 export interface SwimLaneDrilldownApi {
   // Props from embeddable input
-  viewBy: string;
+  viewBy: PublishingSubject<string>;
   // Props from embeddable output
-  perPage: number;
-  fromPage: number;
+  perPage: PublishingSubject<number>;
+  fromPage: PublishingSubject<number>;
 }
 
 export interface OpenInAnomalyExplorerSwimLaneActionContext extends EmbeddableApiContext {
@@ -124,9 +125,9 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
             jobIds,
             timeRange: localTimeRange?.getValue(),
             mlExplorerSwimlane: {
-              viewByFromPage: fromPage,
-              viewByPerPage: perPage,
-              viewByFieldName: viewBy,
+              viewByFromPage: fromPage.getValue(),
+              viewByPerPage: perPage.getValue(),
+              viewByFieldName: viewBy.getValue(),
               ...(data
                 ? {
                     selectedType: data.type,
