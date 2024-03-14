@@ -7,6 +7,7 @@
 
 import React, { useContext, useMemo, useRef } from 'react';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { EuiSpacer } from '@elastic/eui';
 import { AnomaliesTable } from '../../../ml/anomaly_detection/anomalies_table/anomalies_table';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
@@ -37,6 +38,7 @@ export const Anomalies = () => {
         hideDatePicker
         request$={request$}
       />
+      <EuiSpacer size="m" />
       <div style={{ textAlign: 'right' }}>
         <FeatureFeedbackButton
           data-test-subj="infraMLHostFlyoutFeedbackLink"
@@ -44,7 +46,7 @@ export const Anomalies = () => {
           kibanaVersion={kibanaVersion}
           isCloudEnv={isCloudEnv}
           isServerlessEnv={isServerlessEnv}
-          nodeType="host"
+          nodeType={'host'}
         />
       </div>
     </div>
