@@ -11,11 +11,11 @@ export function generateHostsData({
   to,
   count = 1,
 }: {
-  from: string;
-  to: string;
+  from: Date;
+  to: Date;
   count?: number;
 }) {
-  const range = timerange(from, to);
+  const range = timerange(from.toISOString(), to.toISOString());
 
   const hosts = Array(count)
     .fill(0)

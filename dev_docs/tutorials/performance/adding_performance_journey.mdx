@@ -50,10 +50,10 @@ Alternative to archives is to use Synthtrace ES client:
 export const journey = new Journey({
   synthtrace: {
     type: 'apm',
-    generator: (options: SynthtraceOptions) => generateData(options),
+    generator: generateApmData,
     options: {
-      from: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-      to: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+      from: new Date(Date.now() - 1000 * 60 * 15),
+      to: new Date(Date.now() + 1000 * 60 * 15),
     },
   },
 })

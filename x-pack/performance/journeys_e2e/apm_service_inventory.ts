@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { Journey, SynthtraceOptions } from '@kbn/journeys';
+import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
-import { generateData } from '../synthtrace_data/apm_data';
+import { generateApmData } from '../synthtrace_data/apm_data';
 
 export const journey = new Journey({
   synthtrace: {
     type: 'apm',
-    generator: (options: SynthtraceOptions) => generateData(options),
+    generator: generateApmData,
     options: {
-      from: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-      to: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+      from: new Date(Date.now() - 1000 * 60 * 15),
+      to: new Date(Date.now() + 1000 * 60 * 15),
     },
   },
 

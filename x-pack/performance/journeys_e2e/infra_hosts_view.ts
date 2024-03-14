@@ -7,16 +7,15 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
-import type { SynthtraceOptions } from '@kbn/journeys';
 import { generateHostsData } from '../synthtrace_data/hosts_data';
 
 export const journey = new Journey({
   synthtrace: {
     type: 'infra',
-    generator: (options: SynthtraceOptions) => generateHostsData(options),
+    generator: generateHostsData,
     options: {
-      from: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
-      to: new Date().toISOString(),
+      from: new Date(Date.now() - 1000 * 60 * 10),
+      to: new Date(),
       count: 1000,
     },
   },

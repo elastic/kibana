@@ -7,8 +7,8 @@
 import { apm, httpExitSpan, timerange } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'stream';
 
-export function generateData({ from, to }: { from: string; to: string }) {
-  const range = timerange(from, to);
+export function generateApmData({ from, to }: { from: Date; to: Date }) {
+  const range = timerange(from.toISOString(), to.toISOString());
   const transactionName = '240rpm/75% 1000ms';
 
   const synthRum = apm

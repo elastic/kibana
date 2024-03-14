@@ -16,8 +16,8 @@ import { BaseStepCtx } from './journey';
 import { SynthtraceClientType } from '../services/synthtrace';
 
 export interface SynthtraceOptions {
-  from: string;
-  to: string;
+  from: Date;
+  to: Date;
   count?: number;
 }
 
@@ -139,7 +139,7 @@ export interface JourneyConfigOptions<CtxExt extends { '@timestamp'?: number | u
    *
    * synthtrace: {
    *   type: 'infra',
-   *   generator: (options: SynthtraceOptions) => generateHostsData(options),
+   *   generator: generateHostsData,
    *   options: {
    *      from: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
    *      to: new Date().toISOString(),

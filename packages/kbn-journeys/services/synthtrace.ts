@@ -28,10 +28,10 @@ export type SynthtraceClient = InfraSynthtraceEsClient | ApmSynthtraceEsClient;
 export type SynthtraceClientType = 'infra' | 'apm';
 
 export async function getSynthtraceClient(
-  alias: SynthtraceClientType,
+  type: SynthtraceClientType,
   options: SynthtraceClientOptions
 ): Promise<SynthtraceClient> {
-  if (alias === 'infra') {
+  if (type === 'infra') {
     return initInfraSynthtraceClient(options);
   } else {
     return initApmSynthtraceClient(options);
@@ -60,9 +60,12 @@ class LoggerAdapter implements Logger {
   }
 
   perf<T>(name: string, cb: () => T): T {
-    console.time(name);
+    const startTime = Date.now();
     const result = cb();
-    console.timeEnd(name);
+    const duration = Date.now() - startTime;
+    const durationInSeconds = duration / 1000;
+    const formattedTime = durationInSeconds.toFixed(3) + 's';
+    this.log.info(`${name} took ${formattedTime}.`);
     return result;
   }
 }
