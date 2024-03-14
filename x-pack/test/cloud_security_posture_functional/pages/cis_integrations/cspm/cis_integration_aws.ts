@@ -52,6 +52,7 @@ export default function (providerContext: FtrProviderContext) {
       it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.clickSaveButton();
+        pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationAws.getPostInstallCloudFormationModal()) !== undefined).to.be(
           true
         );
