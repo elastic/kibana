@@ -33,10 +33,9 @@ import { isResourceNotFoundException } from '@kbn/search-connectors/utils/identi
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
 import { startSync } from '../../lib/connectors/start_sync';
-import { fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
-import { fetchConnectorIndices } from '../../lib/indices/fetch_connector_indices';
 import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
+import { fetchUnattachedIndices } from '../../lib/indices/fetch_unattached_indices';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
@@ -714,23 +713,16 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       const { from, size, search_query: searchQuery } = request.query;
       const { client } = (await context.core).elasticsearch;
 
-      const { indexNames, indices, totalResults } = await fetchConnectorIndices(
+      const { indexNames, totalResults } = await fetchUnattachedIndices(
         client,
         searchQuery,
         from,
         size
       );
-      const connectors = await fetchConnectors(client.asCurrentUser, indexNames);
-      const crawlers = await fetchCrawlers(client, indexNames);
-      const enrichedIndices = indices.map((index) => ({
-        ...index,
-        connector: connectors.find((connector) => connector.index_name === index.name),
-        crawler: crawlers.find((crawler) => crawler.index_name === index.name),
-      }));
 
       return response.ok({
         body: {
-          indices: enrichedIndices,
+          indexNames,
           meta: {
             page: {
               from,

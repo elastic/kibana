@@ -92,18 +92,20 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
 
   const options: Array<EuiComboBoxOptionOption<string>> = isLoading
     ? []
-    : data?.indices.map((index) => {
+    : data?.indexNames.map((name) => {
         return {
-          label: index.name,
+          label: name,
         };
       }) ?? [];
 
   const hasMatchingOptions =
-    data?.indices.some((index) =>
-      index.name.toLocaleLowerCase().includes(query?.searchValue ?? '')
+    data?.indexNames.some((name) =>
+      name.toLocaleLowerCase().includes(query?.searchValue.toLocaleLowerCase() ?? '')
     ) ?? false;
   const isFullMatch =
-    data?.indices.some((index) => index.name.toLocaleLowerCase() === query?.searchValue) ?? false;
+    data?.indexNames.some(
+      (name) => name.toLocaleLowerCase() === query?.searchValue.toLocaleLowerCase()
+    ) ?? false;
 
   const shouldPrependUserInputAsOption = !!query?.searchValue && hasMatchingOptions && !isFullMatch;
 

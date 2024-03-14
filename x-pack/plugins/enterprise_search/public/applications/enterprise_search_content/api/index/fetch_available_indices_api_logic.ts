@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 import { Meta } from '../../../../../common/types/pagination';
 
 import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
@@ -16,7 +15,7 @@ export interface FetchAvailabeIndicesApiParams {
   searchQuery?: string;
 }
 export interface FetchAvailableIndicesApiResponse {
-  indices: ElasticsearchIndexWithIngestion[];
+  indexNames: string[];
   meta: Meta;
 }
 
