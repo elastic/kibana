@@ -163,10 +163,6 @@ export default function ({ getService }: FtrProviderContext) {
     async function createSingleGroupJobs() {
       const automatedConfig = createJobConfig('test_calendar_ad_3');
       const mulitMetricConfig = createJobConfig('test_calendar_ad_4');
-      // @ts-ignore
-      delete automatedConfig.groups;
-      // @ts-ignore
-      delete mulitMetricConfig.groups;
       automatedConfig.groups = ['automated'];
       mulitMetricConfig.groups = ['multi-metric'];
 
