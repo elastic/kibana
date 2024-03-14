@@ -28,6 +28,7 @@ function uploadTriggerStep(commitSha: string) {
       env: {
         SERVICE_COMMIT_HASH: commitSha.slice(0, 12),
         REMOTE_SERVICE_CONFIG,
+        ...(IS_DRY_RUN ? { DRY_RUN: 'true' } : {}),
       },
     },
   };
