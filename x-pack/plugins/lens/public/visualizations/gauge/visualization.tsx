@@ -375,6 +375,12 @@ export const getGaugeVisualization = ({
     };
   },
 
+  getDisplayOptions() {
+    return {
+      noPadding: true,
+    };
+  },
+
   setDimension({ prevState, layerId, columnId, groupId, previousColumn }) {
     const update: Partial<GaugeVisualizationState> = {};
     if (groupId === GROUP_ID.MIN) {
