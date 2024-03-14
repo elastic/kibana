@@ -246,6 +246,7 @@
     "controlGroupInput.controlStyle",
     "controlGroupInput.ignoreParentSettingsJSON",
     "controlGroupInput.panelsJSON",
+    "controlGroupInput.showApplySelections",
     "description",
     "hits",
     "kibanaSavedObjectMeta",

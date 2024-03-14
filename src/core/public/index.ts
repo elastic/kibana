@@ -199,6 +199,18 @@ export type {
 export type { IHttpFetchError } from '@kbn/core-http-browser';
 
 export type {
+  AuthenticatedUser,
+  User,
+  AuthenticationProvider,
+  UserRealm,
+} from '@kbn/core-security-common';
+export type {
+  SecurityServiceSetup,
+  SecurityServiceStart,
+  CoreAuthenticationService,
+} from '@kbn/core-security-browser';
+
+export type {
   OverlayStart,
   OverlayBannersStart,
   OverlayFlyoutStart,

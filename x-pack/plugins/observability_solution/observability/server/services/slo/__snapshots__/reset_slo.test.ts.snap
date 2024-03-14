@@ -331,6 +331,39 @@ exports[`ResetSLO resets all associated resources 8`] = `
               "value": "some-space",
             },
           },
+          Object {
+            "set": Object {
+              "field": "slo.indicator.params",
+              "ignore_failure": true,
+              "value": Object {
+                "environment": "irrelevant",
+                "index": "metrics-apm*",
+                "service": "irrelevant",
+                "threshold": 500,
+                "transactionName": "irrelevant",
+                "transactionType": "irrelevant",
+              },
+            },
+          },
+          Object {
+            "set": Object {
+              "field": "slo.createdAt",
+              "value": 2023-01-01T00:00:00.000Z,
+            },
+          },
+          Object {
+            "set": Object {
+              "field": "slo.updatedAt",
+              "value": 2023-01-01T00:00:00.000Z,
+            },
+          },
+          Object {
+            "set": Object {
+              "field": "kibanaUrl",
+              "ignore_failure": true,
+              "value": "http://myhost.com/mock-server-basepath",
+            },
+          },
         ],
       },
     ],
