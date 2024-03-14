@@ -35,7 +35,7 @@ import type { JobId } from '../shared';
 
 export interface AnomalyChartsFieldSelectionApi {
   // Props from embeddable output
-  entityFields: MlEntityField[];
+  entityFields: PublishingSubject<MlEntityField[] | undefined>;
 }
 
 export interface SwimLaneDrilldownApi {
@@ -143,12 +143,13 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
         const { jobIds, localTimeRange, entityFields } = embeddable;
 
         let mlExplorerFilter: ExplorerAppState['mlExplorerFilter'] | undefined;
+        const entityFieldsValue = entityFields.getValue();
         if (
-          Array.isArray(entityFields) &&
-          entityFields.length === 1 &&
-          entityFields[0].operation === ML_ENTITY_FIELD_OPERATIONS.ADD
+          Array.isArray(entityFieldsValue) &&
+          entityFieldsValue.length === 1 &&
+          entityFieldsValue[0].operation === ML_ENTITY_FIELD_OPERATIONS.ADD
         ) {
-          const { fieldName, fieldValue } = entityFields[0];
+          const { fieldName, fieldValue } = entityFieldsValue[0];
           if (fieldName !== undefined && fieldValue !== undefined) {
             const influencersFilterQuery = {
               bool: {
