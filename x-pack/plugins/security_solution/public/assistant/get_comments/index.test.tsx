@@ -5,13 +5,21 @@
  * 2.0.
  */
 
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { getComments } from '.';
 import type { ConversationRole } from '@kbn/elastic-assistant/impl/assistant_context/types';
 
 const user: ConversationRole = 'user';
 const currentConversation = {
-  apiConfig: {},
+  apiConfig: {
+    connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
+    connectorTypeTitle: 'OpenAI',
+    provider: OpenAiProviderType.OpenAi,
+  },
+  replacements: [],
+  category: 'assistant',
   id: '1',
+  title: '1',
   messages: [
     {
       role: user,
@@ -23,7 +31,7 @@ const currentConversation = {
 };
 const showAnonymizedValues = false;
 const testProps = {
-  amendMessage: jest.fn(),
+  refetchCurrentConversation: jest.fn(),
   regenerateMessage: jest.fn(),
   isFetchingResponse: false,
   currentConversation,
@@ -38,8 +46,15 @@ describe('getComments', () => {
     const result = getComments({
       ...testProps,
       currentConversation: {
-        apiConfig: {},
+        category: 'assistant',
+        apiConfig: {
+          connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
+          connectorTypeTitle: 'OpenAI',
+          provider: OpenAiProviderType.OpenAi,
+        },
+        replacements: [],
         id: '1',
+        title: '1',
         messages: [
           {
             role: user,

@@ -359,7 +359,8 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('aggregated or scripted job', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/178562
+  describe.skip('aggregated or scripted job', function () {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');

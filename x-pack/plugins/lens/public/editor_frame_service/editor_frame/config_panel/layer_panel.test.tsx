@@ -241,6 +241,38 @@ describe('LayerPanel', () => {
       expect(screen.getByText('Requires field')).toBeInTheDocument();
     });
 
+    it('should not render the required warning when the chart is empty', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            ...defaultGroup,
+            groupLabel: 'B',
+            groupId: 'b',
+            requiredMinDimensionCount: 1,
+          },
+        ],
+      });
+
+      renderLayerPanel();
+      expect(screen.queryByText('Requires field')).not.toBeInTheDocument();
+    });
+
+    it('should render the required warning when the chart is empty but isInlineEditing', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            ...defaultGroup,
+            groupLabel: 'B',
+            groupId: 'b',
+            requiredMinDimensionCount: 1,
+          },
+        ],
+      });
+
+      renderLayerPanel({ setIsInlineFlyoutVisible: jest.fn() });
+      expect(screen.queryByText('Requires field')).toBeInTheDocument();
+    });
+
     it('should tell the user to remove the correct number of dimensions', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
