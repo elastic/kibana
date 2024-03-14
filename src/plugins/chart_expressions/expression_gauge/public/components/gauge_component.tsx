@@ -14,7 +14,7 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
-import { isVisDimension } from '@kbn/visualizations-plugin/common/utils';
+import { findAccessor, isVisDimension } from '@kbn/visualizations-plugin/common/utils';
 import { i18n } from '@kbn/i18n';
 import {
   GaugeRenderProps,
@@ -261,6 +261,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
   const row = chartData?.[0];
 
   const metricValue = args.metric ? getValueFromAccessor(metricAccessor, row) : undefined;
+  const metricName = findAccessor(metricAccessor, data.columns)?.name;
 
   const icon = getGaugeIconByType(gaugeType);
 
@@ -375,6 +376,19 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
           id="bullet"
           subtype={getSubtypeByGaugeType(gaugeType)}
           colorBands={getColorConfig()}
+          valueLabels={{
+            active: i18n.translate('expressionGauge.tooltip.valueLabel.active', {
+              defaultMessage: 'Current',
+            }),
+            value:
+              metricName ||
+              i18n.translate('expressionGauge.tooltip.valueLabel.value', {
+                defaultMessage: 'Metric',
+              }),
+            target: i18n.translate('expressionGauge.tooltip.valueLabel.target', {
+              defaultMessage: 'Goal',
+            }),
+          }}
           data={[
             [
               {
