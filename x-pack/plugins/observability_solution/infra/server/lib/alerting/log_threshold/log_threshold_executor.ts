@@ -199,8 +199,6 @@ export const createLogThresholdExecutor =
           });
         });
       }
-
-      return alert;
     };
 
     const [, { logsShared }] = await libs.getStartServices();
