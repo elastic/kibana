@@ -78,14 +78,14 @@ describe('fieldStatsUtilsTextBased', function () {
       expect(searchHandler).toHaveBeenCalledWith(
         expect.objectContaining({
           query:
-            'from logs* | limit 1000| STATS `message_terms` = count(`message`) BY `message`\n    | LIMIT 10\n    | SORT `message_terms` DESC',
+            'from logs* | limit 1000| WHERE `message` IS NOT NULL\n    | STATS `message_terms` = count(`message`) BY `message`\n    | LIMIT 10\n    | SORT `message_terms` DESC',
         })
       );
     });
 
     it('should provide text examples', async () => {
       const searchHandler = jest.fn().mockResolvedValue({
-        values: [[['programming', 'cool']], ['elastic', 'cool'], [null]],
+        values: [[['programming', 'cool']], ['elastic', 'cool']],
       });
       expect(
         await fetchAndCalculateFieldStats({
@@ -120,7 +120,8 @@ describe('fieldStatsUtilsTextBased', function () {
 
       expect(searchHandler).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: 'from logs* | limit 1000| KEEP `message`\n    | LIMIT 100',
+          query:
+            'from logs* | limit 1000| WHERE `message` IS NOT NULL\n    | KEEP `message`\n    | LIMIT 100',
         })
       );
     });

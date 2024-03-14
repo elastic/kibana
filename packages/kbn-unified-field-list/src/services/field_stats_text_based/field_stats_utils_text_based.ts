@@ -76,7 +76,8 @@ export async function getStringTopValues(
   const { searchHandler, field, esqlBaseQuery } = params;
   const esqlQuery =
     esqlBaseQuery +
-    `| STATS ${getSafeESQLFieldName(`${field.name}_terms`)} = count(${getSafeESQLFieldName(
+    `| WHERE ${getSafeESQLFieldName(field.name)} IS NOT NULL
+    | STATS ${getSafeESQLFieldName(`${field.name}_terms`)} = count(${getSafeESQLFieldName(
       field.name
     )}) BY ${getSafeESQLFieldName(field.name)}
     | LIMIT ${size}
@@ -92,12 +93,10 @@ export async function getStringTopValues(
   const sampledDocuments = values?.reduce((acc: number, row) => acc + row[0], 0);
 
   const topValues = {
-    buckets: values
-      .map((value) => ({
-        count: value[0],
-        key: value[1],
-      }))
-      .filter(({ count, key }) => !(count === 0 && key === null)),
+    buckets: values.map((value) => ({
+      count: value[0],
+      key: value[1],
+    })),
   };
 
   return {
@@ -114,13 +113,14 @@ export async function getSimpleTextExamples(
   const { searchHandler, field, esqlBaseQuery } = params;
   const esqlQuery =
     esqlBaseQuery +
-    `| KEEP ${getSafeESQLFieldName(field.name)}
+    `| WHERE ${getSafeESQLFieldName(field.name)} IS NOT NULL
+    | KEEP ${getSafeESQLFieldName(field.name)}
     | LIMIT ${SIMPLE_EXAMPLES_FETCH_SIZE}`;
 
   const result = await searchHandler({ query: esqlQuery });
-  const values = ((result?.values as Array<[string | string[]]>) || [])
-    .map((value) => (Array.isArray(value) && value.length === 1 ? value[0] : value))
-    .filter((value) => value !== null);
+  const values = ((result?.values as Array<[string | string[]]>) || []).map((value) =>
+    Array.isArray(value) && value.length === 1 ? value[0] : value
+  );
 
   if (!values?.length) {
     return {};
