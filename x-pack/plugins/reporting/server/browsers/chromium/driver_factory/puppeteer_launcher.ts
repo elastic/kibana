@@ -37,7 +37,7 @@ export async function launch({
     env: {
       TZ: browserTimezone,
     },
-    headless: 'new',
+    headless: true,
     protocolTimeout,
   });
 }
