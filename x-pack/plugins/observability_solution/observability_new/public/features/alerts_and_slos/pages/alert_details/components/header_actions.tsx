@@ -27,10 +27,10 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 
+import { useObservabilityRouter } from '../../../../../hooks/use_router';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';
-import { paths } from '../../../../../../common/features/alerts_and_slos/locators/paths';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 
 export interface HeaderActionsProps {
@@ -45,8 +45,8 @@ export function HeaderActions({ alert, alertStatus, onUntrackAlert }: HeaderActi
       hooks: { useCasesAddToExistingCaseModal },
     },
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
-    http,
   } = useKibana().services;
+  const { link } = useObservabilityRouter();
 
   const { rule, refetch } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
@@ -195,7 +195,7 @@ export function HeaderActions({ alert, alertStatus, onUntrackAlert }: HeaderActi
                   iconType="link"
                   disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
                   data-test-subj="view-rule-details-button"
-                  href={rule ? http.basePath.prepend(paths.observability.ruleDetails(rule.id)) : ''}
+                  href={rule ? link('/alerts/rules/{ruleId}', { path: { ruleId: rule.id } }) : ''}
                   target="_blank"
                 >
                   <EuiText size="s">

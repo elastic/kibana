@@ -13,6 +13,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { observabilityRouter } from './route_config';
 import type {
   ConfigSchema,
@@ -23,6 +24,7 @@ import { ObservabilityAIAssistantProvider } from './features/ai_assistant/contex
 import { ObservabilityAIAssistantService } from './features/ai_assistant/types';
 import { PluginContext } from './features/alerts_and_slos/context/plugin_context/plugin_context';
 import { createObservabilityRuleTypeRegistry } from './features/alerts_and_slos/rules/create_observability_rule_type_registry';
+import { useKibanaEnvironmentContextProvider } from './features/apm/context/kibana_environment_context/use_kibana_environment_context';
 
 export function Application({
   appMountParameters,
@@ -41,6 +43,9 @@ export function Application({
   pluginsStart: ObservabilityPluginStartDependencies;
   service: ObservabilityAIAssistantService;
 }) {
+  const KibanaEnvironmentContextProvider = useKibanaEnvironmentContextProvider(kibanaEnvironment);
+  const queryClient = new QueryClient();
+
   const isDarkMode = coreStart.theme.getTheme().darkMode;
 
   const ApplicationUsageTrackingProvider =
@@ -55,37 +60,47 @@ export function Application({
         <ApplicationUsageTrackingProvider>
           <CloudProvider>
             <KibanaThemeProvider {...{ theme: { theme$: appMountParameters.theme$ }, isDarkMode }}>
-              <KibanaContextProvider
-                services={{
-                  ...coreStart,
-                  ...pluginsStart,
-                  plugins: {
-                    start: pluginsStart,
-                  },
+              <KibanaEnvironmentContextProvider
+                kibanaEnvironment={{
+                  isCloudEnv,
+                  isServerlessEnv,
+                  kibanaVersion: this.kibanaVersion,
                 }}
               >
-                <PluginContext.Provider
-                  value={{
-                    appMountParameters,
-                    config,
-                    coreStart,
-                    observabilityRuleTypeRegistry,
+                <KibanaContextProvider
+                  services={{
+                    ...coreStart,
+                    ...pluginsStart,
+                    plugins: {
+                      start: pluginsStart,
+                    },
                   }}
                 >
-                  <ObservabilityAIAssistantProvider value={service}>
-                    <RedirectAppLinks coreStart={coreStart}>
-                      <coreStart.i18n.Context>
-                        <RouterProvider
-                          history={appMountParameters.history}
-                          router={observabilityRouter as any}
-                        >
-                          <RouteRenderer />
-                        </RouterProvider>
-                      </coreStart.i18n.Context>
-                    </RedirectAppLinks>
-                  </ObservabilityAIAssistantProvider>
-                </PluginContext.Provider>
-              </KibanaContextProvider>
+                  <PluginContext.Provider
+                    value={{
+                      appMountParameters,
+                      config,
+                      coreStart,
+                      observabilityRuleTypeRegistry,
+                    }}
+                  >
+                    <ObservabilityAIAssistantProvider value={service}>
+                      <RedirectAppLinks coreStart={coreStart}>
+                        <QueryClientProvider client={queryClient}>
+                          <coreStart.i18n.Context>
+                            <RouterProvider
+                              history={appMountParameters.history}
+                              router={observabilityRouter as any}
+                            >
+                              <RouteRenderer />
+                            </RouterProvider>
+                          </coreStart.i18n.Context>
+                        </QueryClientProvider>
+                      </RedirectAppLinks>
+                    </ObservabilityAIAssistantProvider>
+                  </PluginContext.Provider>
+                </KibanaContextProvider>
+              </KibanaEnvironmentContextProvider>
             </KibanaThemeProvider>
           </CloudProvider>
         </ApplicationUsageTrackingProvider>
@@ -93,3 +108,58 @@ export function Application({
     </PresentationContextProvider>
   );
 }
+
+/*
+
+    <div className={APP_WRAPPER_CLASS} data-test-subj="apmMainContainer" role="main">
+      <RedirectAppLinks
+        coreStart={{
+          application: core.application,
+        }}
+      >
+        <ApmPluginContext.Provider value={apmPluginContextValue}>
+          <KibanaContextProvider services={{ ...core, ...pluginsStart, storage, ...apmServices }}>
+            <KibanaEnvironmentContextProvider kibanaEnvironment={kibanaEnvironment}>
+              <i18nCore.Context>
+                <TimeRangeIdContextProvider>
+                  <RouterProvider history={history} router={apmRouter as any}>
+                    <ApmErrorBoundary>
+                      <RedirectDependenciesToDependenciesInventory>
+                        <RedirectWithDefaultEnvironment>
+                          <RedirectWithDefaultDateRange>
+                            <RedirectWithOffset>
+                              <TrackPageview>
+                                <UpdateExecutionContextOnRouteChange>
+                                  <BreadcrumbsContextProvider>
+                                    <UrlParamsProvider>
+                                      <LicenseProvider>
+                                        <AnomalyDetectionJobsContextProvider>
+                                          <InspectorContextProvider>
+                                            <ApmThemeProvider>
+                                              <MountApmHeaderActionMenu />
+
+                                              <Route component={ScrollToTopOnPathChange} />
+                                              <RouteRenderer />
+                                            </ApmThemeProvider>
+                                          </InspectorContextProvider>
+                                        </AnomalyDetectionJobsContextProvider>
+                                      </LicenseProvider>
+                                    </UrlParamsProvider>
+                                  </BreadcrumbsContextProvider>
+                                </UpdateExecutionContextOnRouteChange>
+                              </TrackPageview>
+                            </RedirectWithOffset>
+                          </RedirectWithDefaultDateRange>
+                        </RedirectWithDefaultEnvironment>
+                      </RedirectDependenciesToDependenciesInventory>
+                    </ApmErrorBoundary>
+                  </RouterProvider>
+                </TimeRangeIdContextProvider>
+              </i18nCore.Context>
+            </KibanaEnvironmentContextProvider>
+          </KibanaContextProvider>
+        </ApmPluginContext.Provider>
+      </RedirectAppLinks>
+    </div>
+
+*/

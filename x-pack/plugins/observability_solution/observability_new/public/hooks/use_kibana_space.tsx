@@ -5,20 +5,19 @@
  * 2.0.
  */
 import type { Space } from '@kbn/spaces-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from './use_kibana';
 import { useFetcher } from './use_fetcher';
-import { ObservabilitySharedStart } from '../plugin';
 
 export const useKibanaSpace = () => {
-  const { services } = useKibana<ObservabilitySharedStart>();
+  const { spaces } = useKibana().services;
 
   const {
     data: space,
     loading,
     error,
   } = useFetcher<Promise<Space> | undefined>(() => {
-    return services.spaces?.getActiveSpace();
-  }, [services.spaces]);
+    return spaces?.getActiveSpace();
+  }, [spaces]);
 
   return {
     space,

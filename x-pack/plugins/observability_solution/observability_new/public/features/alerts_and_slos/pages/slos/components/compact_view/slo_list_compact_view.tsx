@@ -18,11 +18,11 @@ import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
+import { useObservabilityRouter } from '../../../../../../hooks/use_router';
 import { SloTagsList } from '../common/slo_tags_list';
 import { useCloneSlo } from '../../../../hooks/slo/use_clone_slo';
 import { rulesLocatorID, sloFeatureId } from '../../../../../../../common/features/alerts_and_slos';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../../../../common/features/alerts_and_slos/constants';
-import { paths } from '../../../../../../../common/features/alerts_and_slos/locators/paths';
 import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
@@ -51,14 +51,13 @@ export interface Props {
 
 export function SloListCompactView({ sloList, loading, error }: Props) {
   const {
-    application: { navigateToUrl },
-    http: { basePath },
     uiSettings,
     share: {
       url: { locators },
     },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
+  const { push, link } = useObservabilityRouter();
 
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const sloIdsAndInstanceIds = sloList.map(
@@ -111,13 +110,15 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         defaultMessage: 'Details',
       }),
       onClick: (slo: SLOWithSummaryResponse) => {
-        const sloDetailsUrl = basePath.prepend(
-          paths.observability.sloDetails(
-            slo.id,
-            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
-          )
-        );
-        navigateToUrl(sloDetailsUrl);
+        push('/slos/{sloId}', {
+          path: { sloId: slo.id },
+          query: {
+            instanceId:
+              ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId
+                ? slo.instanceId
+                : undefined,
+          },
+        });
       },
     },
     {
@@ -132,7 +133,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       'data-test-subj': 'sloActionsEdit',
       enabled: (_) => hasWriteCapabilities,
       onClick: (slo: SLOWithSummaryResponse) => {
-        navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
+        push('/slos/edit/{sloId}', { path: { sloId: slo.id }, query: '' });
       },
     },
     {
@@ -238,12 +239,14 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       truncateText: { lines: 2 },
       'data-test-subj': 'sloItem',
       render: (_, slo: SLOWithSummaryResponse) => {
-        const sloDetailsUrl = basePath.prepend(
-          paths.observability.sloDetails(
-            slo.id,
-            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
-          )
-        );
+        const sloDetailsUrl = link('/slos/{sloId}', {
+          path: { sloId: slo.id },
+          query: {
+            instanceId:
+              ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : '',
+          },
+        });
+
         return (
           <EuiToolTip position="top" content={slo.name} display="block">
             <EuiText size="s">

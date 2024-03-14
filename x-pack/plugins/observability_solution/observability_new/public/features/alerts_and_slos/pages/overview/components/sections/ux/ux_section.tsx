@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 // import { AllSeries } from '@kbn/exploratory-view-plugin/public';
-import { FETCH_STATUS, useFetcher } from '../../../../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../../../apm/hooks/use_fetcher';
 import { SectionContainer } from '../section_container';
 import { getDataHandler } from '../../../../../context/has_data_context/data_handler';
 import { useHasData } from '../../../../../hooks/use_has_data';
@@ -21,12 +21,11 @@ interface Props {
 }
 
 export function UXSection({ bucketSize }: Props) {
-  const { forceUpdate, hasDataMap } = useHasData();
+  const { hasDataMap } = useHasData();
 
   // const { ExploratoryViewEmbeddable } = services.exploratoryView;
 
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
-    useDatePickerContext();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useDatePickerContext();
   const uxHasDataResponse = hasDataMap.ux;
   const serviceName = uxHasDataResponse?.serviceName as string;
 
@@ -103,9 +102,9 @@ export function UXSection({ bucketSize }: Props) {
   );
 }
 
-const PAGE_LOAD_DISTRIBUTION_TITLE = i18n.translate(
-  'xpack.observability.overview.ux.pageLoadDistribution.title',
-  {
-    defaultMessage: 'Page load distribution',
-  }
-);
+// const PAGE_LOAD_DISTRIBUTION_TITLE = i18n.translate(
+//   'xpack.observability.overview.ux.pageLoadDistribution.title',
+//   {
+//     defaultMessage: 'Page load distribution',
+//   }
+// );

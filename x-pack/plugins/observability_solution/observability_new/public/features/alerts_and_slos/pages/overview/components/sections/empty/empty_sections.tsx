@@ -10,10 +10,13 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core/public';
 
-import { useTheme } from '../../../../../../../hooks/use_theme';
-import { FETCH_STATUS } from '../../../../../../../hooks/use_fetcher';
+import {
+  useObservabilityRouter,
+  StatefulObservabilityRouter,
+} from '../../../../../../../hooks/use_router';
+import { useTheme } from '../../../../../../apm/hooks/use_theme';
+import { FETCH_STATUS } from '../../../../../../apm/hooks/use_fetcher';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
-import { paths } from '../../../../../../../../common/features/alerts_and_slos/locators/paths';
 import { useHasData } from '../../../../../hooks/use_has_data';
 import { EmptySection, Section } from './empty_section';
 
@@ -21,14 +24,16 @@ export function EmptySections() {
   const { http } = useKibana().services;
   const theme = useTheme();
   const { hasDataMap } = useHasData();
+  const { link } = useObservabilityRouter();
 
-  const appEmptySections = getEmptySections({ http }).filter(({ id }) => {
+  const appEmptySections = getEmptySections({ http, link }).filter(({ id }) => {
     const app = hasDataMap[id];
     if (app) {
       return app.status === FETCH_STATUS.FAILURE || !app.hasData;
     }
     return false;
   });
+
   return (
     <EuiFlexItem>
       <EuiSpacer size="s" />
@@ -57,7 +62,13 @@ export function EmptySections() {
   );
 }
 
-const getEmptySections = ({ http }: { http: HttpSetup }): Section[] => {
+const getEmptySections = ({
+  http,
+  link,
+}: {
+  http: HttpSetup;
+  link: StatefulObservabilityRouter['link'];
+}): Section[] => {
   return [
     {
       id: 'infra_logs',
@@ -145,7 +156,7 @@ const getEmptySections = ({ http }: { http: HttpSetup }): Section[] => {
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.alert.link', {
         defaultMessage: 'Create rule',
       }),
-      href: http.basePath.prepend(paths.observability.rules),
+      href: link('/alerts/rules'),
     },
     {
       id: 'universal_profiling',

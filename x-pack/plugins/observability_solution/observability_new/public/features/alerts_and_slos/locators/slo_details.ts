@@ -8,7 +8,6 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { sloDetailsLocatorID } from '../../../../common/features/alerts_and_slos';
-import { SLOS_PATH } from '../../../../common/features/alerts_and_slos/locators/paths';
 
 export interface SloDetailsLocatorParams extends SerializableRecord {
   sloId?: string;
@@ -21,7 +20,7 @@ export class SloDetailsLocatorDefinition implements LocatorDefinition<SloDetails
   public readonly getLocation = async ({ sloId, instanceId }: SloDetailsLocatorParams) => {
     const queryParams =
       !!instanceId && instanceId !== '*' ? `?instanceId=${encodeURI(instanceId)}` : '';
-    const path = !!sloId ? `${SLOS_PATH}/${encodeURI(sloId)}${queryParams}` : SLOS_PATH;
+    const path = !!sloId ? `/slos/${encodeURI(sloId)}${queryParams}` : '/slos';
 
     return {
       app: 'observability',

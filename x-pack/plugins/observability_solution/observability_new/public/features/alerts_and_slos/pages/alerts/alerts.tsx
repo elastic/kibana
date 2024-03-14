@@ -15,6 +15,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
+import { useObservabilityRouter } from '../../../../hooks/use_router';
 import ObservabilityPageTemplate from '../../../../components/page_template/page_template';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { rulesLocatorID } from '../../../../../common/features/alerts_and_slos';
@@ -68,7 +69,7 @@ function InternalAlertsPage() {
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
-
+  const { link } = useObservabilityRouter();
   const filteredRuleTypes = useGetFilteredRuleTypes();
 
   const onBrushEnd: BrushEndListener = (brushEvent) => {
@@ -167,7 +168,7 @@ function InternalAlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
+  const manageRulesHref = link('/alerts/rules');
 
   return (
     <Provider value={alertSearchBarStateContainer}>

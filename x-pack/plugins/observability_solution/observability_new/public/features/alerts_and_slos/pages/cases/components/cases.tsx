@@ -7,15 +7,12 @@
 
 import React, { lazy, Suspense, useState } from 'react';
 import { CasesPermissions } from '@kbn/cases-plugin/common';
+import { useObservabilityRouter } from '../../../../../hooks/use_router';
 import { observabilityFeatureId } from '../../../../../../common/features/alerts_and_slos';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { usePluginContext } from '../../../../../hooks/use_plugin_context';
 import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 import { useFetchAlertData } from '../../../hooks/use_fetch_alert_data';
-import {
-  CASES_PATH,
-  paths,
-} from '../../../../../../common/features/alerts_and_slos/locators/paths';
 
 export const LazyAlertsFlyout = lazy(
   () => import('../../../components/alerts_flyout/alerts_flyout')
@@ -31,10 +28,8 @@ export function Cases({ permissions }: CasesProps) {
     cases: {
       ui: { getCases: CasesList },
     },
-    http: {
-      basePath: { prepend },
-    },
   } = useKibana().services;
+  const { link } = useObservabilityRouter();
 
   const { observabilityRuleTypeRegistry } = usePluginContext();
 
@@ -51,14 +46,14 @@ export function Cases({ permissions }: CasesProps) {
   return (
     <>
       <CasesList
-        basePath={CASES_PATH}
+        basePath={link('/cases')}
         features={{ alerts: { sync: false, isExperimental: false } }}
         owner={[observabilityFeatureId]}
         permissions={permissions}
         ruleDetailsNavigation={{
-          href: (ruleId) => prepend(paths.observability.ruleDetails(ruleId || '')),
+          href: (ruleId) => link('/alerts/rules/{ruleId}', { path: { ruleId: ruleId || '' } }),
           onClick: (ruleId, ev) => {
-            const ruleLink = prepend(paths.observability.ruleDetails(ruleId || ''));
+            const ruleLink = link('/alerts/rules/{ruleId}', { path: { ruleId: ruleId || '' } });
 
             if (ev != null) {
               ev.preventDefault();

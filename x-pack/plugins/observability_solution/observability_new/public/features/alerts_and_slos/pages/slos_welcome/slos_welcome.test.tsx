@@ -9,7 +9,6 @@ import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assist
 import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import Router from 'react-router-dom';
-import { paths } from '../../../../../common/features/alerts_and_slos/locators/paths';
 import { emptySloList, sloList } from '../../data/slo/slo';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
@@ -150,7 +149,7 @@ describe('SLOs Welcome Page', () => {
         createNewSloButton?.click();
 
         await waitFor(() => {
-          expect(mockNavigate).toBeCalledWith(paths.observability.sloCreate);
+          expect(mockNavigate).toBeCalledWith('/slos/create');
         });
       });
     });
@@ -171,7 +170,7 @@ describe('SLOs Welcome Page', () => {
       it('should navigate to the SLO List page', async () => {
         render(<SlosWelcomePage />);
         await waitFor(() => {
-          expect(mockNavigate).toBeCalledWith(paths.observability.slos);
+          expect(mockNavigate).toBeCalledWith('/slos');
         });
       });
     });

@@ -11,6 +11,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreTheme } from '@kbn/core-theme-browser';
 import { MemoryRouter } from 'react-router-dom';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { casesFeatureId, sloFeatureId } from '../../../../common/features/alerts_and_slos';
 import { PluginContext } from '../context/plugin_context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';

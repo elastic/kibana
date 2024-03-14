@@ -8,15 +8,14 @@
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { useCallback, useState } from 'react';
-import { rulesLocatorID, sloFeatureId } from '../../../../../../common/features/alerts_and_slos';
+import React, { useState } from 'react';
+import { useObservabilityRouter } from '../../../../../hooks/use_router';
+import { sloFeatureId } from '../../../../../../common/features/alerts_and_slos';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../../../common/features/alerts_and_slos/constants';
-import { paths } from '../../../../../../common/features/alerts_and_slos/locators/paths';
 import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
 import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
-import type { RulesParams } from '../../../locators/rules';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
@@ -30,11 +29,11 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const {
     application: { navigateToUrl, capabilities },
     http: { basePath },
-    share: {
-      url: { locators },
-    },
+
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
+  const { push } = useObservabilityRouter();
+
   const hasApmReadCapabilities = capabilities.apm.show;
   const { hasWriteCapabilities } = useCapabilities();
 
@@ -49,7 +48,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
 
   const handleEdit = () => {
     if (slo) {
-      navigate(basePath.prepend(paths.observability.sloEdit(slo.id)));
+      push('/slos/edit/{sloId}', { path: { sloId: slo.id }, query: '' });
     }
   };
 
@@ -63,10 +62,8 @@ export function HeaderControl({ isLoading, slo }: Props) {
   };
 
   const handleNavigateToRules = async () => {
-    const locator = locators.get<RulesParams>(rulesLocatorID);
-
-    if (slo?.id && locator) {
-      locator.navigate({ params: { sloId: slo.id } }, { replace: false });
+    if (slo?.id) {
+      push('/alerts/rules', { path: '', query: { sloId: slo.id } });
     }
   };
 
@@ -102,14 +99,9 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const handleDeleteConfirm = async () => {
     if (slo) {
       deleteSlo({ id: slo.id, name: slo.name });
-      navigate(basePath.prepend(paths.observability.slos));
+      push('/slos', { path: '', query: '' });
     }
   };
-
-  const navigate = useCallback(
-    (url: string) => setTimeout(() => navigateToUrl(url)),
-    [navigateToUrl]
-  );
 
   return (
     <>

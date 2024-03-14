@@ -6,7 +6,8 @@
  */
 
 import { RulesLocatorDefinition } from './rules';
-import { RULES_PATH } from '../../../../common/features/alerts_and_slos/locators/paths';
+
+const RULES_PATH = '/alerts/rules';
 
 describe('RulesLocator', () => {
   const locator = new RulesLocatorDefinition();

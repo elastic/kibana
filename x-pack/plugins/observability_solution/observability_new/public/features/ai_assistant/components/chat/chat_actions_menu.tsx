@@ -8,8 +8,8 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { useObservabilityRouter } from '../../../../hooks/use_router';
 import { useKibana } from '../../hooks/use_kibana';
-import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { getSettingsHref } from '../../utils/get_settings_href';
 import { getSettingsKnowledgeBaseHref } from '../../utils/get_settings_kb_href';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
@@ -34,7 +34,7 @@ export function ChatActionsMenu({
   } = useKibana().services;
   const [isOpen, setIsOpen] = useState(false);
 
-  const router = useObservabilityAIAssistantRouter();
+  const router = useObservabilityRouter();
 
   const toggleActionsMenu = () => {
     setIsOpen(!isOpen);

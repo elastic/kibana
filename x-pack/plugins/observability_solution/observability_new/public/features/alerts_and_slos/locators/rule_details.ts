@@ -9,7 +9,6 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { ruleDetailsLocatorID } from '../../../../common/features/alerts_and_slos';
-import { RULES_PATH } from '../../../../common/features/alerts_and_slos/locators/paths';
 import { ALL_ALERTS } from '../components/alert_search_bar/constants';
 import {
   RULE_DETAILS_ALERTS_TAB,
@@ -29,7 +28,7 @@ export interface RuleDetailsLocatorParams extends SerializableRecord {
 }
 
 export const getRuleDetailsPath = (ruleId: string) => {
-  return `${RULES_PATH}/${encodeURI(ruleId)}`;
+  return `/alerts/rules/${encodeURI(ruleId)}`;
 };
 
 export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetailsLocatorParams> {

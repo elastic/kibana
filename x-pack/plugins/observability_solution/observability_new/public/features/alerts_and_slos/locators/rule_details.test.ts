@@ -11,7 +11,8 @@ import {
   RULE_DETAILS_ALERTS_TAB,
 } from '../pages/rule_details/constants';
 import { getRuleDetailsPath, RuleDetailsLocatorDefinition } from './rule_details';
-import { RULES_PATH } from '../../../../common/features/alerts_and_slos/locators/paths';
+
+const RULES_PATH = '/alerts/rules';
 
 describe('RuleDetailsLocator', () => {
   const locator = new RuleDetailsLocatorDefinition();

@@ -30,7 +30,7 @@ import {
 import { GetSLOResponse } from '@kbn/slo-schema';
 import React, { ReactNode, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useFetcher } from '../../../../../../hooks/use_fetcher';
+import { useFetcher } from '../../../../../apm/hooks/use_fetcher';
 import { enableInspectEsQueries } from '../../../../../../../common/features/alerts_and_slos';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { useFetchSloInspect } from '../../../../hooks/slo/use_fetch_slo_inspect';

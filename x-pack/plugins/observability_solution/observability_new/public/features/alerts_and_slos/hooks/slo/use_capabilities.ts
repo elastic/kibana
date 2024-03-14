@@ -13,7 +13,7 @@ export function useCapabilities() {
   } = useKibana().services;
 
   return {
-    hasReadCapabilities: !!capabilities[sloFeatureId].read ?? false,
-    hasWriteCapabilities: !!capabilities[sloFeatureId].write ?? false,
+    hasReadCapabilities: !!capabilities[sloFeatureId]?.read ?? false,
+    hasWriteCapabilities: !!capabilities[sloFeatureId]?.write ?? false,
   };
 }

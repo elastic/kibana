@@ -10,11 +10,11 @@ import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useObservabilityRouter } from '../../../../hooks/use_router';
 import ObservabilityPageTemplate from '../../../../components/page_template/page_template';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useFetcher } from '../../../apm/hooks/use_fetcher';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { observabilityAlertFeatureIds } from '../../../../../common/features/alerts_and_slos/constants';
-import { paths } from '../../../../../common/features/alerts_and_slos/locators/paths';
 import { LoadingObservability } from '../../components/loading_observability';
 import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../../constants';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
@@ -49,6 +49,7 @@ export function OverviewPage() {
     },
     kibanaVersion,
   } = useKibana().services;
+  const { link } = useObservabilityRouter();
 
   useBreadcrumbs([
     {
@@ -174,7 +175,7 @@ export function OverviewPage() {
               defaultMessage: 'Alerts',
             })}
             appLink={{
-              href: paths.observability.alerts,
+              href: link('/alerts'),
               label: i18n.translate('xpack.observability.overview.alerts.appLink', {
                 defaultMessage: 'Show alerts',
               }),

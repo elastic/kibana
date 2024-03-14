@@ -8,10 +8,10 @@
 import React, { useState, useEffect } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useObservabilityRouter } from '../../../../hooks/use_router';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
-import { paths } from '../../../../../common/features/alerts_and_slos/locators/paths';
 import type { TopAlert } from '../../typings/alerts';
 
 interface FlyoutProps {
@@ -26,6 +26,8 @@ export function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { isInApp: 
     },
   } = useKibana().services;
   const { config } = usePluginContext();
+  const { link } = useObservabilityRouter();
+
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
 
   useEffect(() => {
@@ -54,10 +56,9 @@ export function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { isInApp: 
             <EuiButton
               data-test-subj="alertsFlyoutAlertDetailsButton"
               fill
-              href={
-                prepend &&
-                prepend(paths.observability.alertDetails(alert.fields['kibana.alert.uuid']))
-              }
+              href={link('/alerts/{alertId}', {
+                path: { alertId: alert.fields['kibana.alert.uuid'] },
+              })}
             >
               {i18n.translate('xpack.observability.alertsFlyout.alertsDetailsButtonText', {
                 defaultMessage: 'Alert details',

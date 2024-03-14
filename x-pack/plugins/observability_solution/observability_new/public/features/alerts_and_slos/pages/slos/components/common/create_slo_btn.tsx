@@ -8,21 +8,18 @@
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '../../../../../../hooks/use_kibana';
-import { paths } from '../../../../../../../common/features/alerts_and_slos/locators/paths';
+import { useObservabilityRouter } from '../../../../../../hooks/use_router';
 import { useCapabilities } from '../../../../hooks/slo/use_capabilities';
 
 export function CreateSloBtn() {
-  const {
-    application: { navigateToUrl },
-    http: { basePath },
-  } = useKibana().services;
+  const { push } = useObservabilityRouter();
 
   const { hasWriteCapabilities } = useCapabilities();
 
   const handleClickCreateSlo = () => {
-    navigateToUrl(basePath.prepend(paths.observability.sloCreate));
+    push('/slos/create', { path: '', query: {} });
   };
+
   return (
     <EuiButton
       color="primary"

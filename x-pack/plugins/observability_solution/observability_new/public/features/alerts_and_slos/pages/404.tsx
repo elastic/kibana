@@ -8,11 +8,9 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
+import ObservabilityPageTemplate from '../../../components/page_template/page_template';
 
 function PageNotFound() {
-  const { ObservabilityPageTemplate } = usePluginContext();
-
   return (
     <ObservabilityPageTemplate data-test-subj="pageNotFound">
       <EuiCallOut

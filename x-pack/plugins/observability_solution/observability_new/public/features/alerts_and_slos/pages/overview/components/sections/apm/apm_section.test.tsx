@@ -16,7 +16,7 @@ import * as pluginContext from '../../../../../../../hooks/use_plugin_context';
 import { HasDataContextValue } from '../../../../../context/has_data_context/has_data_context';
 import { AppMountParameters } from '@kbn/core/public';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../../rules/observability_rule_type_registry_mock';
-import * as fetcherHook from '../../../../../../../hooks/use_fetcher';
+import * as fetcherHook from '../../../../../../apm/hooks/use_fetcher';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({

@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
-import { App, AppDeepLink, ApplicationStart, AppUpdater } from '@kbn/core/public';
-import { casesFeatureId, sloFeatureId } from '../../common';
+import { AppDeepLink, ApplicationStart } from '@kbn/core/public';
 import { updateGlobalNavigation } from './update_global_navigation';
-
-// Used in updater callback
-const app = {} as unknown as App;
+import { casesFeatureId, sloFeatureId } from '../../common/features/alerts_and_slos';
 
 describe('updateGlobalNavigation', () => {
   describe('when no observability apps are enabled', () => {
@@ -21,11 +17,8 @@ describe('updateGlobalNavigation', () => {
       } as unknown as ApplicationStart['capabilities'];
       const deepLinks: AppDeepLink[] = [];
       const callback = jest.fn();
-      const updater$ = {
-        next: (cb: AppUpdater) => callback(cb(app)),
-      } as unknown as Subject<AppUpdater>;
 
-      updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+      updateGlobalNavigation({ capabilities, deepLinks });
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
@@ -41,11 +34,8 @@ describe('updateGlobalNavigation', () => {
       } as unknown as ApplicationStart['capabilities'];
       const deepLinks: AppDeepLink[] = [];
       const callback = jest.fn();
-      const updater$ = {
-        next: (cb: AppUpdater) => callback(cb(app)),
-      } as unknown as Subject<AppUpdater>;
 
-      updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+      updateGlobalNavigation({ capabilities, deepLinks });
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
@@ -71,11 +61,8 @@ describe('updateGlobalNavigation', () => {
         const deepLinks = [caseRoute];
 
         const callback = jest.fn();
-        const updater$ = {
-          next: (cb: AppUpdater) => callback(cb(app)),
-        } as unknown as Subject<AppUpdater>;
 
-        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+        updateGlobalNavigation({ capabilities, deepLinks });
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [
@@ -107,11 +94,8 @@ describe('updateGlobalNavigation', () => {
         const deepLinks = [caseRoute];
 
         const callback = jest.fn();
-        const updater$ = {
-          next: (cb: AppUpdater) => callback(cb(app)),
-        } as unknown as Subject<AppUpdater>;
 
-        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+        updateGlobalNavigation({ capabilities, deepLinks });
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [], // Deeplink has been filtered out
@@ -137,11 +121,8 @@ describe('updateGlobalNavigation', () => {
           },
         ];
         const callback = jest.fn();
-        const updater$ = {
-          next: (cb: AppUpdater) => callback(cb(app)),
-        } as unknown as Subject<AppUpdater>;
 
-        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+        updateGlobalNavigation({ capabilities, deepLinks });
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [
@@ -174,11 +155,8 @@ describe('updateGlobalNavigation', () => {
       const deepLinks = [sloRoute];
 
       const callback = jest.fn();
-      const updater$ = {
-        next: (cb: AppUpdater) => callback(cb(app)),
-      } as unknown as Subject<AppUpdater>;
 
-      updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+      updateGlobalNavigation({ capabilities, deepLinks });
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks: [], // Deeplink has been filtered out
@@ -205,11 +183,8 @@ describe('updateGlobalNavigation', () => {
         const deepLinks = [sloRoute];
 
         const callback = jest.fn();
-        const updater$ = {
-          next: (cb: AppUpdater) => callback(cb(app)),
-        } as unknown as Subject<AppUpdater>;
 
-        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+        updateGlobalNavigation({ capabilities, deepLinks });
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [

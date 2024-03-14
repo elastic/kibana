@@ -17,13 +17,12 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import { useObservabilityRouter } from '../../../../hooks/use_router';
+import ObservabilityPageTemplate from '../../../../components/page_template/page_template';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
-import { paths } from '../../../../../common/features/alerts_and_slos/locators/paths';
 import illustration from './assets/illustration.svg';
 import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
@@ -36,7 +35,7 @@ export function SlosWelcomePage() {
   } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
   const { data: globalDiagnosis } = useFetchSloGlobalDiagnosis();
-  const { ObservabilityPageTemplate } = usePluginContext();
+  const { push } = useObservabilityRouter();
 
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
@@ -48,7 +47,7 @@ export function SlosWelcomePage() {
   const hasRequiredReadPrivileges = !!globalDiagnosis?.userPrivileges.read.has_all_requested;
 
   const handleClickCreateSlo = () => {
-    navigateToUrl(basePath.prepend(paths.observability.sloCreate));
+    push('/slos/create', { path: '', query: {} });
   };
 
   const hasSlosAndHasPermissions =
@@ -56,9 +55,9 @@ export function SlosWelcomePage() {
 
   useEffect(() => {
     if (hasSlosAndHasPermissions) {
-      navigateToUrl(basePath.prepend(paths.observability.slos));
+      push('/slos', { path: '', query: '' });
     }
-  }, [basePath, hasSlosAndHasPermissions, navigateToUrl]);
+  }, [basePath, hasSlosAndHasPermissions, navigateToUrl, push]);
 
   return hasSlosAndHasPermissions || isLoading ? null : (
     <ObservabilityPageTemplate data-test-subj="slosPageWelcomePrompt">

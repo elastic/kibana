@@ -7,15 +7,14 @@
 
 import React from 'react';
 
+import ObservabilityPageTemplate from '../../../../components/page_template/page_template';
 import { observabilityFeatureId } from '../../../../../common/features/alerts_and_slos';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { Cases } from './components/cases';
 import { CaseFeatureNoPermissions } from './components/feature_no_permissions';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { useKibana } from '../../../../hooks/use_kibana';
 
 export function CasesPage() {
-  const { ObservabilityPageTemplate } = usePluginContext();
   const { canUseCases } = useKibana().services.cases.helpers;
   const userCasesPermissions = canUseCases([observabilityFeatureId]);
 

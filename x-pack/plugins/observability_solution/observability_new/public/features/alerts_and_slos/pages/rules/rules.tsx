@@ -12,16 +12,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useLoadRuleTypesQuery } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { lazy, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import ObservabilityPageTemplate from '../../../../components/page_template/page_template';
 import { observabilityRuleCreationValidConsumers } from '../../../../../common/features/alerts_and_slos/constants';
-import {
-  RULES_LOGS_PATH,
-  RULES_PATH,
-} from '../../../../../common/features/alerts_and_slos/locators/paths';
-import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
+import ObservabilityPageTemplate from '../../../../components/page_template/page_template';
+import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useObservabilityRouter } from '../../../../hooks/use_router';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { RulesTab } from './rules_tab';
 
@@ -34,12 +30,11 @@ interface RulesPageProps {
 }
 export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
   const {
-    http,
     docLinks,
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout, getRulesSettingsLink: RulesSettingsLink },
   } = useKibana().services;
+  const { link, push } = useObservabilityRouter();
 
-  const history = useHistory();
   const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
   const [stateRefresh, setRefresh] = useState(new Date());
 
@@ -48,8 +43,8 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
       text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
         defaultMessage: 'Alerts',
       }),
-      href: http.basePath.prepend('/app/observability/alerts'),
-      deepLinkId: 'observability-overview:alerts',
+      href: link('/alerts'),
+      deepLinkId: 'observability-new:alerts',
     },
     {
       text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
@@ -76,7 +71,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
       label: (
         <FormattedMessage id="xpack.observability.rulePage.rulesTabTitle" defaultMessage="Rules" />
       ),
-      onClick: () => history.push(RULES_PATH),
+      onClick: () => push('/alerts/rules', { path: '', query: '' }),
       isSelected: activeTab === RULES_TAB_NAME,
     },
     {
@@ -84,7 +79,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
       label: (
         <FormattedMessage id="xpack.observability.rulePage.logsTabTitle" defaultMessage="Logs" />
       ),
-      onClick: () => history.push(RULES_LOGS_PATH),
+      onClick: () => push('/alerts/rules/logs', { path: '', query: '' }),
       ['data-test-subj']: 'ruleLogsTab',
       isSelected: activeTab !== RULES_TAB_NAME,
     },

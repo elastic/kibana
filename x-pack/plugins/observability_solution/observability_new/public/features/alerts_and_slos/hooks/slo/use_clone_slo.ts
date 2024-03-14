@@ -8,25 +8,20 @@
 import { encode } from '@kbn/rison';
 import { useCallback } from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { paths } from '../../../../../common/features/alerts_and_slos/locators/paths';
-import { useKibana } from '../../../../hooks/use_kibana';
+import { useObservabilityRouter } from '../../../../hooks/use_router';
 
 export function useCloneSlo() {
-  const {
-    http: { basePath },
-    application: { navigateToUrl },
-  } = useKibana().services;
+  const { push } = useObservabilityRouter();
 
   return useCallback(
     (slo: SLOWithSummaryResponse) => {
-      navigateToUrl(
-        basePath.prepend(
-          paths.observability.sloCreateWithEncodedForm(
-            encode({ ...slo, name: `[Copy] ${slo.name}`, id: undefined })
-          )
-        )
-      );
+      push('/slos/create', {
+        path: '',
+        query: {
+          _a: `${encode({ ...slo, name: `[Copy] ${slo.name}`, id: undefined })}`,
+        },
+      });
     },
-    [navigateToUrl, basePath]
+    [push]
   );
 }

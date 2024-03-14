@@ -12,6 +12,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RecursivePartial } from '@kbn/utility-types';
+import { usePluginContext } from '../../../../../hooks/use_plugin_context';
 import { CreateSLOForm } from '../types';
 import { PluginContext } from '../../../context/plugin_context/plugin_context';
 import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
@@ -43,6 +44,8 @@ export const getCreateSLOFlyoutLazy = ({
     initialValues?: RecursivePartial<CreateSLOForm>;
   }) => {
     const queryClient = new QueryClient();
+    const { coreStart, appMountParameters } = usePluginContext();
+
     return (
       <KibanaContextProvider
         services={{
@@ -56,6 +59,8 @@ export const getCreateSLOFlyoutLazy = ({
       >
         <PluginContext.Provider
           value={{
+            appMountParameters,
+            coreStart,
             isDev,
             config,
             observabilityRuleTypeRegistry,

@@ -1,0 +1,88 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UpdateSLO when error happens during the update restores the previous SLO definition in the repository 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "slo-summary-original-id-2",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`;
+
+exports[`UpdateSLO when error happens during the update restores the previous SLO definition in the repository 2`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "slo-summary-original-id-2",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`;
+
+exports[`UpdateSLO when error happens during the update restores the previous SLO definition in the repository 3`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "slo-original-id-2",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`;
+
+exports[`UpdateSLO when error happens during the update restores the previous SLO definition in the repository 4`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "slo-original-id-2",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`;
+
+exports[`UpdateSLO when error happens during the update restores the previous SLO definition in the repository 5`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "id": ".slo-observability.summary.pipeline-original-id-2",
+      },
+      Object {
+        "ignore": Array [
+          404,
+        ],
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;

@@ -11,10 +11,6 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import type { CreateSLOForm } from '../pages/slo_edit/types';
 import { sloEditLocatorID } from '../../../../common/features/alerts_and_slos';
-import {
-  SLO_CREATE_PATH,
-  SLOS_PATH,
-} from '../../../../common/features/alerts_and_slos/locators/paths';
 
 export type SloEditParams = RecursivePartial<CreateSLOForm>;
 
@@ -32,7 +28,7 @@ export class SloEditLocatorDefinition implements LocatorDefinition<SloEditLocato
           ...slo,
         },
         { useHash: false, storeInHashQuery: false },
-        slo.id ? `${SLOS_PATH}/edit/${encodeURI(String(slo.id))}` : SLO_CREATE_PATH
+        slo.id ? `/slos/edit/${encodeURI(String(slo.id))}` : '/slos/create'
       ),
       state: {},
     };

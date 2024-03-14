@@ -19,10 +19,6 @@ import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import { HeaderActions } from './header_actions';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { AlertStatus, ALERT_STATUS } from '@kbn/rule-data-utils';
-import {
-  OBSERVABILITY_BASE_PATH,
-  RULES_PATH,
-} from '../../../../../../common/features/alerts_and_slos/locators/paths';
 
 jest.mock('../../../../../hooks/use_kibana');
 jest.mock('../../../hooks/use_fetch_rule');
@@ -174,7 +170,7 @@ describe('Header Actions', () => {
         fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
         expect(queryByTestId('view-rule-details-button')).toHaveProperty(
           'href',
-          `http://localhost/wow${OBSERVABILITY_BASE_PATH}${RULES_PATH}/${encodeURI(mockRuleId)}`
+          `http://localhost/wow/observability/alerts/rules}/${encodeURI(mockRuleId)}`
         );
         expect(queryByTestId('view-rule-details-button')).toHaveProperty('target', '_blank');
       });

@@ -21,15 +21,13 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useRouteMatch } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { useObservabilityRouter } from '../../../../../hooks/use_router';
 import { observabilityFeatureId } from '../../../../../../common/features/alerts_and_slos';
 import { ConfigSchema } from '../../../../../types';
 import { SLO_ALERTS_TABLE_ID } from '../../slo_details/components/slo_detail_alerts';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
-import {
-  paths,
-  SLO_DETAIL_PATH,
-} from '../../../../../../common/features/alerts_and_slos/locators/paths';
+
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { parseAlert } from '../helpers/parse_alert';
@@ -47,7 +45,11 @@ export function AlertActions({
   ...customActionsProps
 }: ObservabilityAlertActionsProps) {
   const { alert, refresh, id } = customActionsProps;
-  const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
+  const location = useLocation();
+  const { link, matchRoutes } = useObservabilityRouter();
+
+  const match = matchRoutes(location);
+  const isSLODetailsPage = match.some((route) => route.route.path === '/slos/{sloId}');
 
   const isInApp = Boolean(id === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
   const {
@@ -143,14 +145,16 @@ export function AlertActions({
         onActionExecuted: closeActionsPopover,
         isAlertDetailsEnabled: isAlertDetailsEnabledPerApp(observabilityAlert, config),
         resolveRulePagePath: (ruleId, currentPageId) =>
-          currentPageId !== RULE_DETAILS_PAGE_ID ? paths.observability.ruleDetails(ruleId) : null,
+          currentPageId !== RULE_DETAILS_PAGE_ID
+            ? link('/alerts/rules/{ruleId}', { path: { ruleId } })
+            : null,
         resolveAlertPagePath: (alertId, currentPageId) =>
           currentPageId !== ALERT_DETAILS_PAGE_ID
-            ? paths.observability.alertDetails(alertId)
+            ? link('/alerts/{alertId}', { path: { alertId } })
             : null,
         ...customActionsProps,
       }),
-    [config, customActionsProps, observabilityAlert, triggersActionsUi]
+    [config, customActionsProps, link, observabilityAlert, triggersActionsUi]
   );
 
   const actionsMenuItems = [

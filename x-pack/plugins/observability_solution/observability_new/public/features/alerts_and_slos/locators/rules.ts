@@ -10,7 +10,6 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import type { RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
 import { rulesLocatorID } from '../../../../common/features/alerts_and_slos';
-import { RULES_PATH } from '../../../../common/features/alerts_and_slos/locators/paths';
 
 export interface RulesParams extends SerializableRecord {
   lastResponse?: string[];
@@ -44,7 +43,7 @@ export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorPar
           type,
         },
         { useHash: false, storeInHashQuery: false },
-        RULES_PATH
+        '/alerts/rules'
       ),
       state: {},
     };

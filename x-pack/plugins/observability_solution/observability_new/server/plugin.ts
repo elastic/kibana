@@ -7,151 +7,111 @@
 
 import {
   CoreSetup,
-  DEFAULT_APP_CATEGORIES,
+  CoreStart,
   Logger,
   Plugin,
   PluginInitializerContext,
+  SavedObjectsClient,
 } from '@kbn/core/server';
-import { mapValues, once } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { SloOrphanSummaryCleanupTask } from './features/alerts_and_slos/services/slo/tasks/orphan_summary_cleanup_task';
 import {
-  CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-  ACTION_SAVED_OBJECT_TYPE,
-  ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-} from '@kbn/actions-plugin/server/constants/saved_objects';
-import { firstValueFrom } from 'rxjs';
-import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/features/ai_assistant/feature';
-import type { ObservabilityAIAssistantConfig } from './config';
-import { registerServerRoutes } from './features/ai_assistant/routes/register_routes';
-import { ObservabilityAIAssistantRouteHandlerResources } from './features/ai_assistant/routes/types';
-import { ObservabilityAIAssistantService } from './features/ai_assistant/service';
+  AnnotationsAPI,
+  bootstrapAnnotations,
+  ScopedAnnotationsClientFactory,
+} from './features/alerts_and_slos/lib/annotations/bootstrap_annotations';
+import type { ObservabilityConfig } from '.';
+
 import {
-  ObservabilityPluginSetup,
-  ObservabilityPluginStart,
+  kubernetesGuideConfig,
+  kubernetesGuideId,
+} from '../common/features/alerts_and_slos/guided_onboarding/kubernetes_guide_config';
+import { setupAlertsAndSlosFeature } from './features/alerts_and_slos/setup_alerts_and_slos_feature';
+import { setupCasesFeature } from './features/cases/setup_cases_feature';
+import {
   ObservabilityPluginSetupDependencies,
   ObservabilityPluginStartDependencies,
 } from './types';
-import { addLensDocsToKb } from './features/ai_assistant/service/knowledge_base_service/kb_docs/lens';
-import { registerFunctions } from './features/ai_assistant/functions';
+import { uiSettings } from './ui_settings';
+import { setupAIAssistantFeature } from './features/ai_assistant/setup_ai_assistant_feature';
+import { ObservabilityAIAssistantService } from './features/ai_assistant/service';
+export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
-export class ObservabilityAIAssistantPlugin
-  implements
-    Plugin<
-      ObservabilityPluginSetup,
-      ObservabilityPluginStart,
-      ObservabilityPluginSetupDependencies,
-      ObservabilityPluginStartDependencies
-    >
-{
-  logger: Logger;
+export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
+  private logger: Logger;
+  private sloOrphanCleanupTask?: SloOrphanSummaryCleanupTask;
+
   service: ObservabilityAIAssistantService | undefined;
 
-  constructor(context: PluginInitializerContext<ObservabilityAIAssistantConfig>) {
-    this.logger = context.logger.get();
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.initContext = initContext;
+    this.logger = initContext.logger.get();
   }
+
   public setup(
-    core: CoreSetup<ObservabilityPluginStartDependencies, ObservabilityPluginStart>,
+    core: CoreSetup<ObservabilityPluginStartDependencies>,
     plugins: ObservabilityPluginSetupDependencies
-  ): ObservabilityPluginSetup {
-    plugins.features.registerKibanaFeature({
-      id: OBSERVABILITY_AI_ASSISTANT_FEATURE_ID,
-      name: i18n.translate('xpack.observabilityAiAssistant.featureRegistry.featureName', {
-        defaultMessage: 'Observability AI Assistant',
-      }),
-      order: 8600,
-      category: DEFAULT_APP_CATEGORIES.observability,
-      app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
-      catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
-      minimumLicense: 'enterprise',
-      // see x-pack/plugins/features/common/feature_kibana_privileges.ts
-      privileges: {
-        all: {
-          app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
-          api: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'ai_assistant'],
-          catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
-          savedObject: {
-            all: [
-              ACTION_SAVED_OBJECT_TYPE,
-              ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-              CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-            ],
-            read: [],
-          },
-          ui: ['show'],
-        },
-        read: {
-          disabled: true,
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        },
-      },
-    });
+  ) {
+    const config = this.initContext.config.get<ObservabilityConfig>();
 
-    const routeHandlerPlugins = mapValues(plugins, (value, key) => {
-      return {
-        setup: value,
-        start: () =>
-          core.getStartServices().then((services) => {
-            const [, pluginsStartContracts] = services;
-            return pluginsStartContracts[key as keyof ObservabilityPluginStartDependencies];
-          }),
-      };
-    }) as ObservabilityAIAssistantRouteHandlerResources['plugins'];
-
-    const getModelId = once(async () => {
-      // Using once to make sure the same model ID is used during service init and Knowledge base setup
-
-      try {
-        // Wait for the ML plugin's dependency on the internal saved objects client to be ready
-        const [_, pluginsStart] = await core.getStartServices();
-
-        // Wait for the license to be available so the ML plugin's guards pass once we ask for ELSER stats
-        await firstValueFrom(pluginsStart.licensing.license$);
-
-        const elserModelDefinition = await plugins.ml
-          .trainedModelsProvider({} as any, {} as any) // request, savedObjectsClient (but we fake it to use the internal user)
-          .getELSER();
-
-        return elserModelDefinition.model_id;
-      } catch (error) {
-        this.logger.error(`Failed to resolve ELSER model definition: ${error}`);
-
-        // Fallback to ELSER v2
-        return '.elser_model_2';
-      }
-    });
-
-    const service = (this.service = new ObservabilityAIAssistantService({
-      logger: this.logger.get('service'),
+    setupCasesFeature({ plugins });
+    const { alertsLocator } = setupAlertsAndSlosFeature({
+      plugins,
       core,
-      taskManager: plugins.taskManager,
-      getModelId,
-    }));
-
-    service.register(registerFunctions);
-
-    addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
-
-    registerServerRoutes({
-      core,
+      config,
       logger: this.logger,
-      dependencies: {
-        plugins: routeHandlerPlugins,
-        service: this.service,
-      },
     });
+    const { service } = setupAIAssistantFeature({ plugins, core, logger: this.logger });
+
+    let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
+
+    core.uiSettings.register(uiSettings);
+
+    if (config.annotations.enabled) {
+      annotationsApiPromise = bootstrapAnnotations({
+        core,
+        index: config.annotations.index,
+        context: this.initContext,
+      }).catch((err) => {
+        const logger = this.initContext.logger.get('annotations');
+        logger.warn(err);
+        throw err;
+      });
+    }
+
+    /**
+     * Register a config for the observability guide
+     */
+    plugins.guidedOnboarding?.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
+
+    this.sloOrphanCleanupTask = new SloOrphanSummaryCleanupTask(
+      plugins.taskManager,
+      this.logger,
+      config
+    );
 
     return {
       service,
+      getAlertDetailsConfig() {
+        return config.unsafe.alertDetails;
+      },
+      getScopedAnnotationsClient: async (...args: Parameters<ScopedAnnotationsClientFactory>) => {
+        const api = await annotationsApiPromise;
+        return api?.getScopedAnnotationsClient(...args);
+      },
+      alertsLocator,
     };
   }
 
-  public start(): ObservabilityPluginStart {
+  public start(core: CoreStart, plugins: ObservabilityPluginStartDependencies) {
+    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    const internalEsClient = core.elasticsearch.client.asInternalUser;
+
+    this.sloOrphanCleanupTask?.start(plugins.taskManager, internalSoClient, internalEsClient);
+
     return {
       service: this.service!,
     };
   }
+
+  public stop() {}
 }

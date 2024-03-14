@@ -32,7 +32,7 @@ import { ApplicationStart } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import type { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public/types';
-import { observabilityAppId } from '../../../common/constants';
+import { observabilityAppId } from '../../../common/features/alerts_and_slos';
 import { tourStepsConfig } from './steps_config';
 
 const minWidth: EuiTourStepProps['minWidth'] = 360;

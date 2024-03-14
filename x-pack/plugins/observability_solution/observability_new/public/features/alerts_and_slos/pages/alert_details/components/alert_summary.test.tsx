@@ -17,7 +17,7 @@ jest.mock('react-router-dom', () => ({
   useParams: jest.fn(),
 }));
 
-jest.mock('../../../utils/kibana_react');
+jest.mock('../../../../../hooks/use_kibana');
 
 describe('Alert summary', () => {
   jest

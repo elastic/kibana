@@ -11,6 +11,7 @@ import { css } from '@emotion/css';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import usePrevious from 'react-use/lib/usePrevious';
+import { useObservabilityRouter } from '../../../../hooks/use_router';
 import { ChatBody } from '../../components/chat/chat_body';
 import { ConversationList } from '../../components/chat/conversation_list';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
@@ -21,7 +22,6 @@ import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantParams } from '../../hooks/use_observability_ai_assistant_params';
-import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { ChatInlineEditingContent } from '../../components/chat/chat_inline_edit';
 
 const SECOND_SLOT_CONTAINER_WIDTH = 400;
@@ -37,7 +37,7 @@ export function ConversationView() {
 
   const knowledgeBase = useKnowledgeBase();
 
-  const observabilityAIAssistantRouter = useObservabilityAIAssistantRouter();
+  const observabilityAIAssistantRouter = useObservabilityRouter();
 
   const { path } = useObservabilityAIAssistantParams('/conversations/*');
 

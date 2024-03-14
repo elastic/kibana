@@ -67,8 +67,17 @@ export class ObservabilityPlugin
     coreSetup: CoreSetup,
     pluginsSetup: ObservabilityPluginSetupDependencies
   ): ObservabilityPluginSetup {
+    const logsExplorerLocator =
+      pluginsSetup.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
+
     this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
+    );
+
+    registerObservabilityRuleTypes(
+      this.observabilityRuleTypeRegistry,
+      coreSetup.uiSettings,
+      logsExplorerLocator
     );
 
     coreSetup.application.register({
@@ -96,13 +105,23 @@ export class ObservabilityPlugin
           coreSetup.getStartServices(),
         ]);
 
+        const { ruleTypeRegistry, actionTypeRegistry } = (
+          pluginsStart as ObservabilityPluginStartDependencies
+        ).triggersActionsUi;
+
         ReactDOM.render(
           <Application
             appMountParameters={appMountParameters}
             config={this.config}
             coreStart={coreStart}
             observabilityRuleTypeRegistry={this.observabilityRuleTypeRegistry!}
-            pluginsStart={pluginsStart as ObservabilityPluginStartDependencies}
+            pluginsStart={
+              {
+                ...pluginsStart,
+                ruleTypeRegistry,
+                actionTypeRegistry,
+              } as unknown as ObservabilityPluginStartDependencies
+            }
             pluginsSetup={pluginsSetup}
             service={this.service!}
           />,
@@ -114,15 +133,6 @@ export class ObservabilityPlugin
         };
       },
     });
-
-    const logsExplorerLocator =
-      pluginsSetup.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
-
-    registerObservabilityRuleTypes(
-      this.observabilityRuleTypeRegistry,
-      coreSetup.uiSettings,
-      logsExplorerLocator
-    );
 
     /*
     const category = DEFAULT_APP_CATEGORIES.observability;

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { encode } from '@kbn/rison';
 import type { FindSLOResponse, UpdateSLOInput, UpdateSLOResponse } from '@kbn/slo-schema';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
-import { paths } from '../../../../../common/features/alerts_and_slos/locators/paths';
+import { useObservabilityRouter } from '../../../../hooks/use_router';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { sloKeys } from './query_key_factory';
 
@@ -18,10 +18,12 @@ type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useUpdateSlo() {
   const {
-    application: { navigateToUrl },
     http,
     notifications: { toasts },
   } = useKibana().services;
+
+  const { push } = useObservabilityRouter();
+
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -54,9 +56,14 @@ export function useUpdateSlo() {
           }),
         });
 
-        navigateToUrl(
-          http.basePath.prepend(paths.observability.sloEditWithEncodedForm(sloId, encode(slo)))
-        );
+        push('/slos/edit/{sloId}', {
+          path: {
+            sloId,
+          },
+          query: {
+            _a: `${encode(slo)}`,
+          },
+        });
       },
     }
   );

@@ -15,12 +15,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import styled from 'styled-components';
+import { useObservabilityRouter } from '../../../../../hooks/use_router';
 import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { paths } from '../../../../../../common/features/alerts_and_slos/locators/paths';
 import { RulesParams } from '../../../locators/rules';
 import { rulesLocatorID } from '../../../../../../common/features/alerts_and_slos';
 
@@ -64,31 +64,23 @@ export function SloItemActions({
   btnProps,
 }: Props) {
   const {
-    application: { navigateToUrl },
-    http: { basePath },
     share: {
       url: { locators },
     },
   } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
-
-  const sloDetailsUrl = basePath.prepend(
-    paths.observability.sloDetails(
-      slo.id,
-      ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
-    )
-  );
+  const { push } = useObservabilityRouter();
 
   const handleClickActions = () => {
     setIsActionsPopoverOpen(!isActionsPopoverOpen);
   };
 
   const handleViewDetails = () => {
-    navigateToUrl(sloDetailsUrl);
+    push('/slos/{sloId}', { path: { sloId: slo.id }, query: {} });
   };
 
   const handleEdit = () => {
-    navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
+    push('/slos/edit/{sloId}', { path: { sloId: slo.id }, query: '' });
   };
 
   const navigateToClone = useCloneSlo();

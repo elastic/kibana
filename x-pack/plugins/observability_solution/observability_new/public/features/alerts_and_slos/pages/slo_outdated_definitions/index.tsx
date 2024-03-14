@@ -9,33 +9,30 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination, EuiText } from '@elastic/eui';
+import { useObservabilityRouter } from '../../../../hooks/use_router';
 import ObservabilityPageTemplate from '../../../../components/page_template/page_template';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { useFetchSloDefinitions } from '../../hooks/slo/use_fetch_slo_definitions';
-import { paths } from '../../../../../common/features/alerts_and_slos/locators/paths';
 import { SloListEmpty } from '../slos/components/slo_list_empty';
 import { OutdatedSlo } from './outdated_slo';
 import { OutdatedSloSearchBar } from './outdated_slo_search_bar';
 
 export function SlosOutdatedDefinitions() {
-  const {
-    http: { basePath },
-  } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
   const { data: globalDiagnosis } = useFetchSloGlobalDiagnosis();
+  const { link } = useObservabilityRouter();
 
   useBreadcrumbs([
     {
-      href: basePath.prepend(paths.observability.slos),
+      href: link('/slos'),
       text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
         defaultMessage: 'SLOs',
       }),
-      deepLinkId: 'observability-overview:slos',
+      deepLinkId: 'observability-new:slos',
     },
     {
       text: i18n.translate('xpack.observability.breadcrumbs.slosOutdatedDefinitions', {

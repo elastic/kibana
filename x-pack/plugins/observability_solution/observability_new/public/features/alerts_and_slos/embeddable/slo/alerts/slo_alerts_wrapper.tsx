@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
@@ -13,7 +14,7 @@ import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { IEmbeddable, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { Subject } from 'rxjs';
-import styled from 'styled-components';
+import { useObservabilityRouter } from '../../../../../hooks/use_router';
 import { SloIncludedCount } from './components/slo_included_count';
 import { SloAlertsSummary } from './components/slo_alerts_summary';
 import { SloAlertsTable } from './components/slo_alerts_table';
@@ -21,7 +22,6 @@ import type { SloItem } from './types';
 import { SloEmbeddableDeps } from './slo_alerts_embeddable';
 import { SloAlertsEmbeddableInput } from './types';
 import { EDIT_SLO_ALERTS_ACTION } from '../../../ui_actions/edit_slo_alerts_panel';
-import { paths } from '../../../../../../common/features/alerts_and_slos/locators/paths';
 
 interface Props {
   deps: SloEmbeddableDeps;
@@ -42,10 +42,7 @@ export function SloAlertsWrapper({
   reloadSubject,
   showAllGroupByInstances: initialShowAllGroupByInstances,
 }: Props) {
-  const {
-    application: { navigateToUrl },
-    http: { basePath },
-  } = deps;
+  const { push } = useObservabilityRouter();
 
   const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
   const [slos, setSlos] = useState<SloItem[]>(initialSlos);
@@ -80,11 +77,13 @@ export function SloAlertsWrapper({
 
   const [isSummaryLoaded, setIsSummaryLoaded] = useState(false);
   const [isTableLoaded, setIsTableLoaded] = useState(false);
+
   useEffect(() => {
     if (isSummaryLoaded && isTableLoaded && onRenderComplete) {
       onRenderComplete();
     }
   }, [isSummaryLoaded, isTableLoaded, onRenderComplete]);
+
   const handleGoToAlertsClick = () => {
     let kuery = '';
     slos.map((slo, index) => {
@@ -94,11 +93,11 @@ export function SloAlertsWrapper({
         kuery += ' or ';
       }
     });
-    navigateToUrl(
-      `${basePath.prepend(paths.observability.alerts)}?_a=(kuery:'${kuery}',rangeFrom:${
-        timeRange.from
-      },rangeTo:${timeRange.to})`
-    );
+
+    push('/alerts', {
+      path: '',
+      query: `_a=(kuery:'${kuery}',rangeFrom:${timeRange.from},rangeTo:${timeRange.to})`,
+    });
   };
 
   return (

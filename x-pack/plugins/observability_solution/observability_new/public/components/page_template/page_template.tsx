@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { EuiSideNavItemType, EuiPageSectionProps } from '@elastic/eui';
+import { EuiPageSectionProps } from '@elastic/eui';
 import { _EuiPageBottomBarProps } from '@elastic/eui/src/components/page_template/bottom_bar/page_bottom_bar';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
-import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import {
   KibanaPageTemplate,
@@ -19,19 +17,13 @@ import {
 } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { CasesDeepLinkId, getCasesDeepLinks } from '@kbn/cases-plugin/public';
-import {
-  ALERTS_PATH,
-  CASES_PATH,
-  RULES_PATH,
-  SLOS_PATH,
-} from '../../../common/features/alerts_and_slos/locators/paths';
+
 import { SearchBarPortal } from './search_bar_portal';
 import { ObservabilityTour } from '../tour';
-import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
-import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { updateGlobalNavigation } from '../../services/update_global_navigation';
+import { useObservabilityRouter } from '../../hooks/use_router';
+import { ObservabilityRoutes } from '../../route_config';
 
 export type WrappedPageTemplateProps = Pick<
   KibanaPageTemplateProps,
@@ -94,142 +86,113 @@ export function ObservabilityPageTemplate({
   const { coreStart } = usePluginContext();
   const { guidedOnboarding } = useKibana().services;
 
-  const currentAppId$ = new Observable<string | undefined>();
-
-  const getUrlForApp = coreStart.application.getUrlForApp;
   const navigateToApp = coreStart.application.navigateToApp;
   const guidedOnboardingApi = guidedOnboarding?.guidedOnboardingApi;
   const getPageTemplateServices = () => ({ coreStart });
 
-  const initSections = useMemo(
-    () => [
-      {
-        id: 'alerts',
-        title: i18n.translate('xpack.observability.alertsLinkTitle', {
-          defaultMessage: 'Alerts',
-        }),
-        order: 8001,
-        path: ALERTS_PATH,
-        label: '',
-        visibleIn: [],
-        deepLinks: [
-          {
-            id: 'rules',
-            title: i18n.translate('xpack.observability.rulesLinkTitle', {
-              defaultMessage: 'Rules',
-            }),
-            path: RULES_PATH,
-            label: '',
-            visibleIn: [],
-          },
-        ],
-      },
-      {
-        id: 'slos',
-        title: i18n.translate('xpack.observability.slosLinkTitle', {
-          defaultMessage: 'SLOs',
-        }),
-        visibleIn: [],
-        order: 8002,
-        path: SLOS_PATH,
-        label: '',
-      },
-      getCasesDeepLinks({
-        basePath: CASES_PATH,
-        extend: {
-          [CasesDeepLinkId.cases]: {
-            order: 8003,
-            visibleIn: [],
-          },
-          [CasesDeepLinkId.casesCreate]: {
-            visibleIn: [],
-          },
-          [CasesDeepLinkId.casesConfigure]: {
-            visibleIn: [],
-          },
-        },
-      }),
-    ],
-    []
-  );
+  const { link } = useObservabilityRouter();
 
-  const sections = updateGlobalNavigation(initSections);
-  const currentAppId = useObservable(currentAppId$, undefined);
+  const sections = [
+    {
+      name: '',
+      id: 'observability',
+      entries: [
+        {
+          id: 'overview',
+          title: i18n.translate('xpack.observability.overviewLinkTitle', {
+            defaultMessage: 'Overview',
+          }),
+          order: 8000,
+          path: '/overview',
+          label: '',
+          visibleIn: [],
+        },
+        {
+          id: 'alerts',
+          title: i18n.translate('xpack.observability.alertsLinkTitle', {
+            defaultMessage: 'Alerts',
+          }),
+          order: 8001,
+          path: '/alerts',
+          label: '',
+          visibleIn: [],
+          deepLinks: [
+            {
+              id: 'rules',
+              title: i18n.translate('xpack.observability.rulesLinkTitle', {
+                defaultMessage: 'Rules',
+              }),
+              path: '/alerts/rules',
+              label: '',
+              visibleIn: [],
+            },
+          ],
+        },
+        {
+          id: 'slos',
+          title: i18n.translate('xpack.observability.slosLinkTitle', {
+            defaultMessage: 'SLOs',
+          }),
+          visibleIn: [],
+          order: 8002,
+          path: '/slos',
+          label: '',
+        },
+        getCasesDeepLinks({
+          basePath: '/cases',
+          extend: {
+            [CasesDeepLinkId.cases]: {
+              order: 8003,
+              visibleIn: [],
+            },
+            [CasesDeepLinkId.casesCreate]: {
+              visibleIn: [],
+            },
+            [CasesDeepLinkId.casesConfigure]: {
+              visibleIn: [],
+            },
+          },
+        }),
+        {
+          id: 'ai_assistant',
+          title: i18n.translate('xpack.observability.aiAssistantLinkTitle', {
+            defaultMessage: 'AI Assistant',
+          }),
+          visibleIn: [],
+          order: 8004,
+          path: '/conversations',
+          label: '',
+        },
+      ],
+    },
+    {
+      name: 'APM',
+      id: 'apm',
+      entries: [],
+    },
+  ];
+
   const { pathname: currentPath } = useLocation();
 
   const { services } = useKibana();
 
-  const sideNavItems = useMemo<Array<EuiSideNavItemType<unknown>>>(
-    () =>
-      sections.map(({ label, entries, isBetaFeature }, sectionIndex) => ({
-        id: `${sectionIndex}`,
-        name: isBetaFeature ? <NavNameWithBetaBadge label={label} /> : label,
-        items: entries.map((entry, entryIndex) => {
-          const href = getUrlForApp(entry.app, {
+  const sideNavItems = sections.map(({ name, id, entries }) => {
+    return {
+      id,
+      name,
+      items: entries?.map((entry) => {
+        return {
+          name: entry.title,
+          id: entry.id,
+          href: link(entry.path as keyof ObservabilityRoutes),
+          isSelected: matchPath(currentPath, {
             path: entry.path,
-          });
-
-          const isSelected =
-            entry.app === currentAppId &&
-            (entry.matchPath
-              ? entry.matchPath(currentPath)
-              : matchPath(currentPath, {
-                  path: entry.path,
-                  exact: !!entry.matchFullPath,
-                  strict: !entry.ignoreTrailingSlash,
-                }) != null);
-          const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
-          const navId = entry.label.toLowerCase().split(' ').join('_');
-          return {
-            id: `${sectionIndex}.${entryIndex}`,
-            name: entry.isBetaFeature ? (
-              <NavNameWithBetaBadge label={entry.label} />
-            ) : entry.isNewFeature ? (
-              <NavNameWithBadge label={entry.label} localStorageId={badgeLocalStorageId} />
-            ) : entry.isTechnicalPreview ? (
-              <NavNameWithBetaBadge
-                label={entry.label}
-                iconType="beaker"
-                isTechnicalPreview={true}
-              />
-            ) : (
-              entry.label
-            ),
-            href,
-            isSelected,
-            'data-nav-id': navId,
-            'data-test-subj': `observability-nav-${entry.app}-${navId}`,
-            onClick: (event) => {
-              if (entry.onClick) {
-                entry.onClick(event);
-              }
-
-              // Hides NEW badge when the item is clicked
-              if (entry.isNewFeature) {
-                hideBadge(badgeLocalStorageId);
-              }
-
-              if (
-                event.button !== 0 ||
-                event.defaultPrevented ||
-                event.metaKey ||
-                event.altKey ||
-                event.ctrlKey ||
-                event.shiftKey
-              ) {
-                return;
-              }
-
-              event.preventDefault();
-              navigateToApp(entry.app, {
-                path: entry.path,
-              });
-            },
-          };
-        }),
-      })),
-    [currentAppId, currentPath, getUrlForApp, navigateToApp, sections]
-  );
+            exact: true,
+          }),
+        };
+      }),
+    };
+  });
 
   return (
     <KibanaPageTemplateKibanaProvider {...getPageTemplateServices?.()}>

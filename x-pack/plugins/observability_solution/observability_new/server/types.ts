@@ -4,26 +4,51 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  PluginStartContract as FeaturesPluginStart,
-  PluginSetupContract as FeaturesPluginSetup,
-} from '@kbn/features-plugin/server';
+import * as rt from 'io-ts';
 import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
+  AlertingApiRequestHandlerContext,
+  PluginSetupContract,
+  PluginStartContract,
+} from '@kbn/alerting-plugin/server';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+import type {
+  CoreRequestHandlerContext,
+  CustomRequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
 import type {
   DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
 } from '@kbn/data-views-plugin/server';
+import type {
+  PluginSetupContract as FeaturesPluginSetup,
+  PluginStartContract as FeaturesPluginStart,
+} from '@kbn/features-plugin/server';
+
+import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+import type {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginSetup,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
+
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
-import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+
+import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+
+import { SharePluginSetup } from '@kbn/share-plugin/server';
+import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { isoToEpochRt, nonEmptyStringRt } from '@kbn/io-ts-utils';
 import type { ObservabilityAIAssistantService } from './features/ai_assistant/service';
 
 export interface ObservabilityPluginSetup {
@@ -42,21 +67,69 @@ export interface ObservabilityPluginStart {
 
 export interface ObservabilityPluginSetupDependencies {
   actions: ActionsPluginSetup;
-  security: SecurityPluginSetup;
-  features: FeaturesPluginSetup;
-  taskManager: TaskManagerSetupContract;
-  dataViews: DataViewsServerPluginSetup;
-  ml: MlPluginSetup;
-  licensing: LicensingPluginSetup;
+
+  alerting: PluginSetupContract;
   cloud?: CloudSetup;
+
+  dataViews: DataViewsServerPluginSetup;
+
+  features: FeaturesPluginSetup;
+
+  guidedOnboarding?: GuidedOnboardingPluginSetup;
+  licensing: LicensingPluginSetup;
+
+  ml: MlPluginSetup;
+
+  ruleRegistry: RuleRegistryPluginSetupContract;
+  security: SecurityPluginSetup;
+
+  share: SharePluginSetup;
+  spaces?: SpacesPluginSetup;
+  taskManager: TaskManagerSetupContract;
+
+  usageCollection?: UsageCollectionSetup;
 }
+
 export interface ObservabilityPluginStartDependencies {
   actions: ActionsPluginStart;
-  security: SecurityPluginStart;
-  features: FeaturesPluginStart;
-  taskManager: TaskManagerStartContract;
-  dataViews: DataViewsServerPluginStart;
-  ml: MlPluginStart;
-  licensing: LicensingPluginStart;
+
+  alerting: PluginStartContract;
   cloud?: CloudStart;
+
+  dataViews: DataViewsServerPluginStart;
+
+  features: FeaturesPluginStart;
+
+  licensing: LicensingPluginStart;
+
+  ml: MlPluginStart;
+
+  security: SecurityPluginStart;
+
+  spaces?: SpacesPluginStart;
+  taskManager: TaskManagerStartContract;
 }
+
+export type ObservabilityRequestHandlerContext = CustomRequestHandlerContext<{
+  licensing: LicensingApiRequestHandlerContext;
+  alerting: AlertingApiRequestHandlerContext;
+  core: Promise<CoreRequestHandlerContext>;
+}>;
+
+export const metricsExplorerViewSavedObjectAttributesRT = rt.intersection([
+  rt.strict({
+    name: nonEmptyStringRt,
+  }),
+  rt.UnknownRecord,
+]);
+
+export const metricsExplorerViewSavedObjectRT = rt.intersection([
+  rt.type({
+    id: rt.string,
+    attributes: metricsExplorerViewSavedObjectAttributesRT,
+  }),
+  rt.partial({
+    version: rt.string,
+    updated_at: isoToEpochRt,
+  }),
+]);

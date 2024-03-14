@@ -20,6 +20,7 @@ import {
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 
 // import dedent from 'dedent';
+import { useObservabilityRouter } from '../../../../hooks/use_router';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import ObservabilityPageTemplate from '../../../../components/page_template/page_template';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -34,7 +35,6 @@ import PageNotFound from '../404';
 import { getTimeZone } from '../../utils/get_time_zone';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
 import { observabilityFeatureId } from '../../../../../common/features/alerts_and_slos';
-import { paths } from '../../../../../common/features/alerts_and_slos/locators/paths';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 interface AlertDetailsPathParams {
@@ -56,14 +56,13 @@ export function AlertDetails() {
       helpers: { canUseCases },
       ui: { getCasesContext },
     },
-    http,
     triggersActionsUi: { ruleTypeRegistry },
     // observabilityAIAssistant: {
     //   service: { setScreenContext },
     // },
     uiSettings,
   } = useKibana().services;
-
+  const { link } = useObservabilityRouter();
   const { config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
   const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
@@ -118,11 +117,11 @@ export function AlertDetails() {
 
   useBreadcrumbs([
     {
-      href: http.basePath.prepend(paths.observability.alerts),
+      href: link('/alerts'),
       text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
         defaultMessage: 'Alerts',
       }),
-      deepLinkId: 'observability-overview:alerts',
+      deepLinkId: 'observability-new:alerts',
     },
     {
       text: alertDetail
@@ -206,7 +205,7 @@ export function AlertDetails() {
           rule={rule}
           timeZone={timeZone}
           setAlertSummaryFields={setSummaryFields}
-          ruleLink={http.basePath.prepend(paths.observability.ruleDetails(rule.id))}
+          ruleLink={link('/alerts/rules/{ruleId}', { path: { ruleId: rule.id } })}
         />
       )}
     </ObservabilityPageTemplate>

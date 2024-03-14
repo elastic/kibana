@@ -7,25 +7,25 @@
 
 import numeral from '@elastic/numeral';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { IBasePath } from '@kbn/core-http-browser';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { paths } from '../../../../../../common/features/alerts_and_slos/locators/paths';
+import {
+  StatefulObservabilityRouter,
+  useObservabilityRouter,
+} from '../../../../../hooks/use_router';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/features/alerts_and_slos/i18n';
 
 export const useSloFormattedSummary = (slo: SLOWithSummaryResponse) => {
-  const {
-    http: { basePath },
-    uiSettings,
-  } = useKibana().services;
+  const { uiSettings } = useKibana().services;
+  const { link } = useObservabilityRouter();
 
-  return getSloFormattedSummary(slo, uiSettings, basePath);
+  return getSloFormattedSummary(slo, uiSettings, link);
 };
 
 export const getSloFormattedSummary = (
   slo: SLOWithSummaryResponse,
   uiSettings: IUiSettingsClient,
-  basePath: IBasePath
+  link: StatefulObservabilityRouter['link']
 ) => {
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
@@ -45,12 +45,15 @@ export const getSloFormattedSummary = (
       ? NOT_AVAILABLE_LABEL
       : numeral(errorBudgetRemaining).format(percentFormat);
 
-  const sloDetailsUrl = basePath.prepend(
-    paths.observability.sloDetails(
-      slo.id,
-      ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
-    )
-  );
+  const sloDetailsUrl = link('/slos/{sloId}', {
+    path: {
+      sloId: slo.id,
+    },
+    query: {
+      instanceId:
+        ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined,
+    },
+  });
 
   return {
     sloDetailsUrl,

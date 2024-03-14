@@ -10,8 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-import { paths } from '../../../../../../common/features/alerts_and_slos/locators/paths';
-import { useKibana } from '../../../../../hooks/use_kibana';
+import { useObservabilityRouter } from '../../../../../hooks/use_router';
 
 export interface Props {
   viewMode?: 'compact' | 'default';
@@ -20,21 +19,17 @@ export interface Props {
 }
 
 export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }: Props) {
-  const {
-    application: { navigateToUrl },
-    http: { basePath },
-  } = useKibana().services;
+  const { push } = useObservabilityRouter();
 
   const handleActiveAlertsClick = () => {
     if (activeAlerts) {
       const kuery = encodeURIComponent(
         `'slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}"'`
       );
-      navigateToUrl(
-        `${basePath.prepend(
-          paths.observability.alerts
-        )}?_a=(kuery:${kuery},rangeFrom:now-15m,rangeTo:now,status:active)`
-      );
+      push('/alerts', {
+        path: '',
+        query: `_a=(kuery:${kuery},rangeFrom:now-15m,rangeTo:now,status:active)`,
+      });
     }
   };
 

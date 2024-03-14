@@ -21,7 +21,7 @@ import { ExpressionChart } from './expression_chart';
 
 const mockStartServices = mockCoreMock.createStart();
 
-jest.mock('../../../utils/kibana_react', () => ({
+jest.mock('../../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       ...mockStartServices,

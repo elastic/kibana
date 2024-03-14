@@ -1,0 +1,39 @@
+# @kbn-doc-linker partial
+
+properties:
+  sloId:
+    description: The SLO identifier used by the rule
+    type: string
+    example: 8853df00-ae2e-11ed-90af-09bb6422b258
+  burnRateThreshold:
+    description: The burn rate threshold used to trigger the alert
+    type: number
+    example: 14.4
+  maxBurnRateThreshold:
+    description: The maximum burn rate threshold value defined by the SLO error budget
+    type: number
+    example: 168
+  longWindow:
+    description: The duration of the long window used to compute the burn rate
+    type: object
+    properties:
+      value:
+        description: The duration value
+        type: number
+        example: 6
+      unit:
+        description: The duration unit
+        type: string
+        example: 'h'
+  shortWindow:
+    description: The duration of the short window used to compute the burn rate
+    type: object
+    properties:
+      value:
+        description: The duration value
+        type: number
+        example: 30
+      unit:
+        description: The duration unit
+        type: string
+        example: 'm'

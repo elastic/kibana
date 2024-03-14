@@ -15,7 +15,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { paths } from '../../../../../common/features/alerts_and_slos/locators/paths';
+import { useObservabilityRouter } from '../../../../hooks/use_router';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { sloKeys } from './query_key_factory';
 
@@ -25,10 +25,11 @@ export function useCreateSlo() {
   const {
     i18n: i18nStart,
     theme,
-    application: { navigateToUrl },
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const { push, link } = useObservabilityRouter();
+
   const services = useKibana().services;
   const queryClient = useQueryClient();
 
@@ -47,7 +48,11 @@ export function useCreateSlo() {
       onSuccess: (data, { slo }) => {
         queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
 
-        const sloEditUrl = http.basePath.prepend(paths.observability.sloEdit(data.id));
+        const sloEditUrl = link('/slos/edit/{sloId}', {
+          path: {
+            sloId: data.id,
+          },
+        });
 
         toasts.addSuccess(
           {
@@ -87,9 +92,12 @@ export function useCreateSlo() {
           }),
         });
 
-        navigateToUrl(
-          http.basePath.prepend(paths.observability.sloCreateWithEncodedForm(encode(slo)))
-        );
+        push('/slos/create', {
+          path: '',
+          query: {
+            _a: `${encode(slo)}`,
+          },
+        });
       },
     }
   );

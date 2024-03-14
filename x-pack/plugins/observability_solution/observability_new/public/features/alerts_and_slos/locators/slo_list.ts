@@ -10,7 +10,6 @@ import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import deepmerge from 'deepmerge';
 import { sloListLocatorID } from '../../../../common/features/alerts_and_slos';
-import { SLOS_PATH } from '../../../../common/features/alerts_and_slos/locators/paths';
 import {
   DEFAULT_STATE,
   SearchState,
@@ -20,6 +19,8 @@ import {
 export interface SloListLocatorParams extends SerializableRecord {
   kqlQuery?: string;
 }
+
+const SLOS_PATH = '/slos';
 
 export class SloListLocatorDefinition implements LocatorDefinition<SloListLocatorParams> {
   public readonly id = sloListLocatorID;

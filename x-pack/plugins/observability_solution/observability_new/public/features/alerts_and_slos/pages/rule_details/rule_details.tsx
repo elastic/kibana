@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
 import type { AlertConsumers } from '@kbn/rule-data-utils';
+import { useObservabilityRouter } from '../../../../hooks/use_router';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import ObservabilityPageTemplate from '../../../../components/page_template/page_template';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -33,7 +34,6 @@ import {
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_TAB_URL_STORAGE_KEY,
 } from './constants';
-import { paths } from '../../../../../common/features/alerts_and_slos/locators/paths';
 import {
   defaultTimeRange,
   getDefaultAlertSummaryTimeRange,
@@ -48,11 +48,10 @@ interface RuleDetailsPathParams {
 }
 export function RuleDetailsPage() {
   const {
-    application: { capabilities, navigateToUrl },
+    application: { capabilities },
     charts: {
       theme: { useChartsBaseTheme },
     },
-    http: { basePath },
     share: {
       url: { locators },
     },
@@ -68,6 +67,7 @@ export function RuleDetailsPage() {
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { search } = useLocation();
+  const { link, push } = useObservabilityRouter();
 
   const baseTheme = useChartsBaseTheme();
 
@@ -82,11 +82,11 @@ export function RuleDetailsPage() {
       text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
         defaultMessage: 'Alerts',
       }),
-      href: basePath.prepend(paths.observability.alerts),
-      deepLinkId: 'observability-overview:alerts',
+      href: link('/alerts'),
+      deepLinkId: 'observability-new:alerts',
     },
     {
-      href: basePath.prepend(paths.observability.rules),
+      href: link('/alerts/rules'),
       text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
         defaultMessage: 'Rules',
       }),
@@ -177,7 +177,7 @@ export function RuleDetailsPage() {
   const handleIsRuleDeleted = () => {
     setRuleToDelete(undefined);
     setIsRuleDeleting(false);
-    navigateToUrl(basePath.prepend(paths.observability.rules));
+    push('/alerts/rules', { path: '', query: '' });
   };
 
   const ruleType = ruleTypes?.find((type) => type.id === rule?.ruleTypeId);

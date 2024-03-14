@@ -10,14 +10,13 @@ import { useLocation, useParams } from 'react-router-dom';
 import { useIsMutating } from '@tanstack/react-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { IBasePath } from '@kbn/core-http-browser';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 // import dedent from 'dedent';
+import { StatefulObservabilityRouter, useObservabilityRouter } from '../../../../hooks/use_router';
 import ObservabilityPageTemplate from '../../../../components/page_template/page_template';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import PageNotFound from '../404';
@@ -30,7 +29,6 @@ import {
 } from './components/slo_details';
 import { HeaderTitle } from './components/header_title';
 import { HeaderControl } from './components/header_control';
-import { paths } from '../../../../../common/features/alerts_and_slos/locators/paths';
 import type { SloDetailsPathParams } from './types';
 import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
 import { useGetInstanceIdQueryParam } from './hooks/use_get_instance_id_query_param';
@@ -38,17 +36,16 @@ import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 export function SloDetailsPage() {
-  const {
-    application: { navigateToUrl },
-    http: { basePath },
-    // observabilityAIAssistant: {
-    //   service: { setScreenContext },
-    // },
-  } = useKibana().services;
+  // const {
+  //   // observabilityAIAssistant: {
+  //   //   service: { setScreenContext },
+  //   // },
+  // } = useKibana().services;
 
   const { search } = useLocation();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
+  const { link, push } = useObservabilityRouter();
 
   const { sloId } = useParams<SloDetailsPathParams>();
   const sloInstanceId = useGetInstanceIdQueryParam();
@@ -73,7 +70,7 @@ export function SloDetailsPage() {
     setSelectedTabId(newTabId);
   };
 
-  useBreadcrumbs(getBreadcrumbs(basePath, slo));
+  useBreadcrumbs(getBreadcrumbs(link, slo));
 
   // useEffect(() => {
   //   if (!slo) {
@@ -106,7 +103,7 @@ export function SloDetailsPage() {
   }
 
   if (hasRightLicense === false) {
-    navigateToUrl(basePath.prepend(paths.observability.slos));
+    push('/slos', { path: '', query: '' });
   }
 
   const isPerformingAction = isLoading || isDeleting;
@@ -147,16 +144,16 @@ export function SloDetailsPage() {
 }
 
 function getBreadcrumbs(
-  basePath: IBasePath,
+  link: StatefulObservabilityRouter['link'],
   slo: SLOWithSummaryResponse | undefined
 ): ChromeBreadcrumb[] {
   return [
     {
-      href: basePath.prepend(paths.observability.slos),
+      href: link('/slos'),
       text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
         defaultMessage: 'SLOs',
       }),
-      deepLinkId: 'observability-overview:slos',
+      deepLinkId: 'observability-new:slos',
     },
     {
       text:

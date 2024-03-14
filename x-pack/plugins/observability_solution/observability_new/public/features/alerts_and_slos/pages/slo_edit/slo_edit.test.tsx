@@ -13,7 +13,6 @@ import { createBrowserHistory } from 'history';
 import React from 'react';
 import Router from 'react-router-dom';
 import { BehaviorSubject } from 'rxjs';
-import { paths } from '../../../../../common/features/alerts_and_slos/locators/paths';
 import { buildSlo } from '../../data/slo/slo';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useCreateSlo } from '../../hooks/slo/use_create_slo';
@@ -203,7 +202,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
+      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend('/slos'));
     });
   });
 
@@ -226,7 +225,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).not.toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
+      expect(mockNavigate).not.toBeCalledWith(mockBasePathPrepend('/slos'));
     });
   });
 
@@ -257,7 +256,7 @@ describe('SLO Edit Page', () => {
 
         render(<SloEditPage />);
 
-        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
+        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend('/slos'));
       });
     });
 
@@ -422,7 +421,7 @@ describe('SLO Edit Page', () => {
           fireEvent.click(getByTestId('sloFormSubmitButton'));
         });
         await waitFor(() => {
-          expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
+          expect(mockNavigate).toBeCalledWith(mockBasePathPrepend('/slos'));
         });
       });
     });

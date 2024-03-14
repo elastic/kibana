@@ -8,24 +8,20 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { useObservabilityRouter } from '../../../../hooks/use_router';
 import ObservabilityPageTemplate from '../../../../components/page_template/page_template';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { paths } from '../../../../../common/features/alerts_and_slos/locators/paths';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { SloEditForm } from './components/slo_edit_form';
 
 export function SloEditPage() {
-  const {
-    application: { navigateToUrl },
-    http: { basePath },
-  } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
   const { isError: hasErrorInGlobalDiagnosis } = useFetchSloGlobalDiagnosis();
+  const { link, push } = useObservabilityRouter();
 
   const { sloId } = useParams<{ sloId: string | undefined }>();
   const { hasAtLeast } = useLicense();
@@ -34,16 +30,16 @@ export function SloEditPage() {
 
   useBreadcrumbs([
     {
-      href: basePath.prepend(paths.observability.slos),
+      href: link('/slos'),
       text: i18n.translate('xpack.observability.breadcrumbs.sloLabel', {
         defaultMessage: 'SLOs',
       }),
-      deepLinkId: 'observability-overview:slos',
+      deepLinkId: 'observability-new:slos',
     },
     ...(!!slo
       ? [
           {
-            href: basePath.prepend(paths.observability.sloDetails(slo!.id)),
+            href: link('/slos/{sloId}', { path: { sloId: slo!.id }, query: {} }),
             text: slo!.name,
           },
         ]
@@ -60,7 +56,7 @@ export function SloEditPage() {
   ]);
 
   if (hasRightLicense === false || !hasWriteCapabilities || hasErrorInGlobalDiagnosis) {
-    navigateToUrl(basePath.prepend(paths.observability.slos));
+    push('/slos', { path: '', query: '' });
   }
 
   return (

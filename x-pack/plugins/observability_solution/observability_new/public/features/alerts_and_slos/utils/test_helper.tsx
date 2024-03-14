@@ -70,6 +70,7 @@ export const render = (component: React.ReactNode, config: Subset<ConfigSchema> 
             appMountParameters,
             config: merge(defaultConfig, config),
             observabilityRuleTypeRegistry,
+            coreStart: core,
           }}
         >
           <QueryClientProvider client={queryClient}>

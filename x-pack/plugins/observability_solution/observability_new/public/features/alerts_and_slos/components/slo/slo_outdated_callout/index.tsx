@@ -8,18 +8,14 @@ import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useObservabilityRouter } from '../../../../../hooks/use_router';
 import { useFetchSloDefinitions } from '../../../hooks/slo/use_fetch_slo_definitions';
-import { useKibana } from '../../../../../hooks/use_kibana';
-import { paths } from '../../../../../../common/features/alerts_and_slos/locators/paths';
 
 export function SloOutdatedCallout() {
-  const {
-    application: { navigateToUrl },
-    http: { basePath },
-  } = useKibana().services;
+  const { push } = useObservabilityRouter();
 
   const handleClick = () => {
-    navigateToUrl(basePath.prepend(paths.observability.slosOutdatedDefinitions));
+    push('/slos/outdated-definitions', { path: '', query: '' });
   };
 
   const { isLoading, data } = useFetchSloDefinitions({ includeOutdatedOnly: true });

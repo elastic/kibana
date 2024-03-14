@@ -23,9 +23,7 @@ import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useState } from 'react';
 import { GroupSummary } from '@kbn/slo-schema';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { paths } from '../../../../../../../common/features/alerts_and_slos/locators/paths';
+import { useObservabilityRouter } from '../../../../../../hooks/use_router';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 import { SLI_OPTIONS } from '../../../slo_edit/constants';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
@@ -68,10 +66,6 @@ export function GroupListView({
   };
   const isAccordionOpen = accordionState === 'open';
 
-  const {
-    http: { basePath },
-  } = useKibana<CoreStart>().services;
-
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const {
     isLoading,
@@ -88,6 +82,8 @@ export function GroupListView({
     disabled: !isAccordionOpen,
   });
   const { results = [], total = 0 } = sloList ?? {};
+
+  const { link } = useObservabilityRouter();
 
   const handlePageClick = (pageNumber: number) => {
     setPage(pageNumber);
@@ -170,12 +166,10 @@ export function GroupListView({
                     >
                       <EuiLink
                         data-test-subj="o11yGroupListViewLink"
-                        href={basePath.prepend(
-                          paths.observability.sloDetails(
-                            summary.worst.slo?.id,
-                            summary.worst.slo?.instanceId
-                          )
-                        )}
+                        href={link('/slos/{sloId}', {
+                          path: { sloId: summary.worst.slo?.id },
+                          query: { instanceId: summary.worst.slo?.instanceId },
+                        })}
                       >
                         {i18n.translate('xpack.observability.slo.group.worstPerforming', {
                           defaultMessage: 'Worst performing: ',

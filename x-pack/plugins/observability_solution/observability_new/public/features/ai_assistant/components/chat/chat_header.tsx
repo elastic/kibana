@@ -19,11 +19,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
+import { useObservabilityRouter } from '../../../../hooks/use_router';
 import { AssistantAvatar } from '../assistant_avatar';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import type { FlyoutWidthMode } from './chat_flyout';
-import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 
 // needed to prevent InlineTextEdit component from expanding container
 const minWidthClassName = css`
@@ -66,7 +66,7 @@ export function ChatHeader({
   const theme = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
 
-  const router = useObservabilityAIAssistantRouter();
+  const router = useObservabilityRouter();
 
   const [newTitle, setNewTitle] = useState(title);
 

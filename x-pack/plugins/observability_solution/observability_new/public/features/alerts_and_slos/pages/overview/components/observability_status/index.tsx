@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useObservabilityRouter } from '../../../../../../hooks/use_router';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { ObservabilityStatusBoxes } from './observability_status_boxes';
@@ -14,8 +15,9 @@ import { getContent } from './content';
 export function ObservabilityStatus() {
   const { http, docLinks } = useKibana().services;
   const { hasDataMap } = useHasData();
+  const { link } = useObservabilityRouter();
 
-  const content = getContent(http, docLinks);
+  const content = getContent(http, docLinks, link);
 
   const boxes = content.map((app) => {
     return {

@@ -8,26 +8,22 @@
 import React, { useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { useObservabilityRouter } from '../../../../hooks/use_router';
 import ObservabilityPageTemplate from '../../../../components/page_template/page_template';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { FeedbackButton } from './components/common/feedback_button';
 import { CreateSloBtn } from './components/common/create_slo_btn';
 import { SloListSearchBar } from './components/slo_list_search_bar';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
-import { paths } from '../../../../../common/features/alerts_and_slos/locators/paths';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 
 export const SLO_PAGE_ID = 'slo-page-container';
 
 export function SlosPage() {
-  const {
-    application: { navigateToUrl },
-    http: { basePath },
-  } = useKibana().services;
+  const { link, push } = useObservabilityRouter();
 
   const { hasAtLeast } = useLicense();
 
@@ -42,19 +38,19 @@ export function SlosPage() {
 
   useBreadcrumbs([
     {
-      href: basePath.prepend(paths.observability.slos),
+      href: link('/slos'),
       text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
         defaultMessage: 'SLOs',
       }),
-      deepLinkId: 'observability-overview:slos',
+      deepLinkId: 'observability-new:slos',
     },
   ]);
 
   useEffect(() => {
     if ((!isLoading && total === 0) || hasAtLeast('platinum') === false || isError) {
-      navigateToUrl(basePath.prepend(paths.observability.slosWelcome));
+      push('/slos/welcome', { path: '', query: '' });
     }
-  }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total]);
+  }, [hasAtLeast, isError, isLoading, push, total]);
 
   return (
     <ObservabilityPageTemplate

@@ -24,7 +24,7 @@ import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
 
-import { FETCH_STATUS, useFetcher } from '../../../../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../../../apm/hooks/use_fetcher';
 import { SectionContainer } from '../section_container';
 import { getDataHandler } from '../../../../../context/has_data_context/data_handler';
 import { useHasData } from '../../../../../hooks/use_has_data';

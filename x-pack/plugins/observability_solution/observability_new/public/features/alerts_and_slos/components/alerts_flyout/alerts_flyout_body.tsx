@@ -36,9 +36,8 @@ import {
 import moment from 'moment-timezone';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { useKibana } from '../../../../hooks/use_kibana';
+import { useObservabilityRouter } from '../../../../hooks/use_router';
 import { asDuration } from '../../../../../common/features/alerts_and_slos/utils/formatters';
-import { paths } from '../../../../../common/features/alerts_and_slos/locators/paths';
 import { formatAlertEvaluationValue } from '../../utils/format_alert_evaluation_value';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import type { TopAlert } from '../../typings/alerts';
@@ -52,18 +51,13 @@ interface FlyoutProps {
 type TabId = 'overview' | 'table';
 
 export function AlertsFlyoutBody({ alert, rawAlert, id: pageId }: FlyoutProps) {
-  const {
-    http: {
-      basePath: { prepend },
-    },
-  } = useKibana().services;
-
+  const { link } = useObservabilityRouter();
   const dateFormat = useUiSetting<string>('dateFormat');
 
   const ruleId = get(alert.fields, ALERT_RULE_UUID) ?? null;
   const linkToRule =
-    pageId !== RULE_DETAILS_PAGE_ID && ruleId && prepend
-      ? prepend(paths.observability.ruleDetails(ruleId))
+    pageId !== RULE_DETAILS_PAGE_ID && ruleId
+      ? link('/alerts/rules/{ruleId}', { path: { ruleId } })
       : null;
 
   const overviewTab = useMemo(() => {

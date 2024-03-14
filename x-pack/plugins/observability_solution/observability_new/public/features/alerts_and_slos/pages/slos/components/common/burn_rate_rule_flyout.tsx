@@ -8,7 +8,7 @@
 import React from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
-import { paths } from '../../../../../../../common/features/alerts_and_slos/locators/paths';
+import { useObservabilityRouter } from '../../../../../../hooks/use_router';
 import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule_types';
 import { sloKeys } from '../../../../hooks/slo/query_key_factory';
 import { useKibana } from '../../../../../../hooks/use_kibana';
@@ -27,10 +27,9 @@ export function BurnRateRuleFlyout({
   setIsAddRuleFlyoutOpen?: (value: boolean) => void;
 }) {
   const {
-    application: { navigateToUrl },
-    http: { basePath },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
+  const { push } = useObservabilityRouter();
 
   const filteredRuleTypes = useGetFilteredRuleTypes();
 
@@ -40,7 +39,7 @@ export function BurnRateRuleFlyout({
     if (setIsAddRuleFlyoutOpen) {
       queryClient.invalidateQueries({ queryKey: sloKeys.rules(), exact: false });
     } else {
-      navigateToUrl(basePath.prepend(paths.observability.slos));
+      push('/slos', { path: '', query: '' });
     }
   };
 
@@ -48,7 +47,7 @@ export function BurnRateRuleFlyout({
     if (setIsAddRuleFlyoutOpen) {
       setIsAddRuleFlyoutOpen(false);
     } else {
-      navigateToUrl(basePath.prepend(paths.observability.slos));
+      push('/slos', { path: '', query: '' });
     }
   };
 

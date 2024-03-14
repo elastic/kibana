@@ -53,7 +53,7 @@ jest.mock('../rule_condition_chart/rule_condition_chart', () => ({
   RuleConditionChart: jest.fn(() => <div data-test-subj="RuleConditionChart" />),
 }));
 
-jest.mock('../../../../utils/kibana_react', () => ({
+jest.mock('../../../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       ...mockCoreMock.createStart(),

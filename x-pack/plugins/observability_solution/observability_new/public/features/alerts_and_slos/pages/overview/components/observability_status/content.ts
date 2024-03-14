@@ -6,8 +6,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, DocLinksStart } from '@kbn/core/public';
+import { StatefulObservabilityRouter } from '../../../../../../hooks/use_router';
 import { ObservabilityFetchDataPlugins } from '../../../../typings/fetch_overview_data';
-import { paths } from '../../../../../../../common/features/alerts_and_slos/locators/paths';
 
 export interface ObservabilityStatusContent {
   id: ObservabilityFetchDataPlugins | 'alert';
@@ -23,7 +23,8 @@ export interface ObservabilityStatusContent {
 
 export const getContent = (
   http: HttpSetup,
-  docLinks: DocLinksStart
+  docLinks: DocLinksStart,
+  link: StatefulObservabilityRouter['link']
 ): ObservabilityStatusContent[] => {
   return [
     {
@@ -136,12 +137,12 @@ export const getContent = (
       addTitle: i18n.translate('xpack.observability.statusVisualization.alert.link', {
         defaultMessage: 'Create rules',
       }),
-      addLink: http.basePath.prepend(paths.observability.rules),
+      addLink: link('/alerts/rules'),
       learnMoreLink: docLinks.links.observability.createAlerts,
       goToAppTitle: i18n.translate('xpack.observability.statusVisualization.alert.goToAppTitle', {
         defaultMessage: 'Show alerts',
       }),
-      goToAppLink: http.basePath.prepend('/app/observability/alerts'),
+      goToAppLink: link('/alerts'),
       weight: 6,
     },
   ];

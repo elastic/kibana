@@ -10,7 +10,6 @@ import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/publ
 
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '../../pages/slo_details/components/slo_detail_alerts';
-import { SLO_DETAIL_PATH } from '../../../../../common/features/alerts_and_slos/locators/paths';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
 import { AlertsFlyoutHeader } from './alerts_flyout_header';
 import { AlertsFlyoutBody } from './alerts_flyout_body';
@@ -22,7 +21,8 @@ export { AlertsFlyout } from './alerts_flyout';
 export const useGetAlertFlyoutComponents = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
 ) => {
-  const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
+  const isSLODetailsPage = useRouteMatch('/slo/:sloId');
+
   const body = useCallback(
     (props: AlertsTableFlyoutBaseProps) => {
       const alert = parseAlert(observabilityRuleTypeRegistry)(props.alert);

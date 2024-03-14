@@ -1,0 +1,82 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { ProcessorEvent } from '../../../../../common/features/alerts_and_slos';
+import {
+  AGENT_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+} from '../../../../../common/features/apm/es_fields/apm';
+import { environmentQuery } from '../../../../../common/features/apm/utils/environment_query';
+import { ENVIRONMENT_ALL } from '../../../../../common/features/apm/environment_filter_values';
+import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
+import { IEnvOptions } from './get_service_map';
+import { kqlQuery, rangeQuery, termsQuery } from '../../../alerts_and_slos/utils/queries';
+
+export async function getServiceStats({
+  environment,
+  apmEventClient,
+  searchAggregatedTransactions,
+  start,
+  end,
+  maxNumberOfServices,
+  serviceGroupKuery,
+  serviceName,
+  kuery,
+}: IEnvOptions & { maxNumberOfServices: number }) {
+  const params = {
+    apm: {
+      events: [
+        getProcessorEventForTransactions(searchAggregatedTransactions),
+        ProcessorEvent.metric as const,
+        ProcessorEvent.error as const,
+      ],
+    },
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...termsQuery(SERVICE_NAME, serviceName),
+            ...kqlQuery(serviceGroupKuery),
+            ...kqlQuery(kuery),
+          ],
+        },
+      },
+      aggs: {
+        services: {
+          terms: {
+            field: SERVICE_NAME,
+            size: maxNumberOfServices,
+          },
+          aggs: {
+            agent_name: {
+              terms: {
+                field: AGENT_NAME,
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
+  const response = await apmEventClient.search('get_service_stats_for_service_map', params);
+
+  return (
+    response.aggregations?.services.buckets.map((bucket) => {
+      return {
+        [SERVICE_NAME]: bucket.key as string,
+        [AGENT_NAME]: (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
+        [SERVICE_ENVIRONMENT]: environment === ENVIRONMENT_ALL.value ? null : environment,
+      };
+    }) || []
+  );
+}

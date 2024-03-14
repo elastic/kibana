@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { relativePaths } from '../../../../../common/features/alerts_and_slos/locators/paths';
+import { useObservabilityRouter } from '../../../../hooks/use_router';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { useKibana } from '../../../../hooks/use_kibana';
 
@@ -14,12 +14,13 @@ export function GlobalLogsTab() {
     triggersActionsUi: { getGlobalRuleEventLogList: GlobalRuleEventLogList },
   } = useKibana().services;
   const filteredRuleTypes = useGetFilteredRuleTypes();
+  const { link } = useObservabilityRouter();
 
   return (
     <GlobalRuleEventLogList
       filteredRuleTypes={filteredRuleTypes}
       localStorageKey="observability:global-rule-event-log-list"
-      getRuleDetailsRoute={relativePaths.observability.ruleDetails}
+      getRuleDetailsRoute={(ruleId) => link('/alerts/rules/{ruleId}', { path: { ruleId } })}
     />
   );
 }

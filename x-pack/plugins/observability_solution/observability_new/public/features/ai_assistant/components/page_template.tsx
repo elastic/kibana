@@ -6,40 +6,28 @@
  */
 import { css } from '@emotion/css';
 import React from 'react';
-import { useKibana } from '../hooks/use_kibana';
-
-const pageSectionContentClassName = css`
-  width: 100%;
-  display: flex;
-  flex-grow: 1;
-  padding-top: 0;
-  padding-bottom: 0;
-  max-block-size: calc(100vh - 96px);
-`;
+import ObservabilityPageTemplate from '../../../components/page_template/page_template';
 
 export function ObservabilityAIAssistantPageTemplate({ children }: { children: React.ReactNode }) {
-  const {
-    services: {
-      plugins: {
-        start: { observabilityShared },
-      },
-    },
-  } = useKibana();
-
-  const PageTemplate = observabilityShared.navigation.PageTemplate;
-
   return (
-    <PageTemplate
+    <ObservabilityPageTemplate
       pageSectionProps={{
         alignment: 'horizontalCenter',
         restrictWidth: true,
         contentProps: {
-          className: pageSectionContentClassName,
+          className: css`
+            width: 100%;
+            display: flex;
+            flex-grow: 1;
+            padding-top: 0;
+            padding-bottom: 0;
+            max-block-size: calc(100vh - 96px);
+          `,
         },
         paddingSize: 'none',
       }}
     >
       {children}
-    </PageTemplate>
+    </ObservabilityPageTemplate>
   );
 }

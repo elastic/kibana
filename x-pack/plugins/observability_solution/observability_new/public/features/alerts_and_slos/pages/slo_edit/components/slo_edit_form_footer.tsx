@@ -11,13 +11,12 @@ import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useCallback, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { InPortal } from 'react-reverse-portal';
+import { useObservabilityRouter } from '../../../../../hooks/use_router';
 import { sloEditFormFooterPortal } from '../shared_flyout/slo_add_form_flyout';
-import { paths } from '../../../../../../common/features/alerts_and_slos/locators/paths';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
 import { useCreateRule } from '../../../hooks/use_create_rule';
 import { BurnRateRuleParams } from '../../../typings';
-import { useKibana } from '../../../../../hooks/use_kibana';
 import { createBurnRateRuleRequestBody } from '../helpers/create_burn_rate_rule_request_body';
 import {
   transformCreateSLOFormToCreateSLOInput,
@@ -35,10 +34,7 @@ export interface Props {
 export const maxWidth = 775;
 
 export function SloEditFormFooter({ slo, onSave }: Props) {
-  const {
-    application: { navigateToUrl },
-    http: { basePath },
-  } = useKibana().services;
+  const { push } = useObservabilityRouter();
   const isEditMode = slo !== undefined;
 
   const { getValues, trigger } = useFormContext<CreateSLOForm>();
@@ -47,11 +43,6 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
   const { mutateAsync: updateSlo, isLoading: isUpdateSloLoading } = useUpdateSlo();
   const { mutateAsync: createBurnRateRule, isLoading: isCreateBurnRateRuleLoading } =
     useCreateRule<BurnRateRuleParams>();
-
-  const navigate = useCallback(
-    (url: string) => setTimeout(() => navigateToUrl(url)),
-    [navigateToUrl]
-  );
 
   const isFlyout = Boolean(onSave);
 
@@ -66,7 +57,7 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
     if (isEditMode) {
       const processedValues = transformValuesToUpdateSLOInput(values);
       await updateSlo({ sloId: slo.id, slo: processedValues });
-      navigate(basePath.prepend(paths.observability.slos));
+      push('/slos', { path: '', query: '' });
     } else {
       const processedValues = transformCreateSLOFormToCreateSLOInput(values);
       const resp = await createSlo({ slo: processedValues });
@@ -76,17 +67,16 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
       if (onSave) {
         onSave();
       } else {
-        navigate(basePath.prepend(paths.observability.slos));
+        push('/slos', { path: '', query: '' });
       }
     }
   }, [
-    basePath,
     createBurnRateRule,
     createSlo,
     getValues,
     isEditMode,
-    navigate,
     onSave,
+    push,
     slo?.id,
     trigger,
     updateSlo,
@@ -117,11 +107,7 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
             color="primary"
             data-test-subj="sloFormCancelButton"
             disabled={isCreateSloLoading || isUpdateSloLoading || isCreateBurnRateRuleLoading}
-            onClick={
-              onSave
-                ? () => onSave()
-                : () => navigateToUrl(basePath.prepend(paths.observability.slos))
-            }
+            onClick={onSave ? () => onSave() : () => push('/slos', { path: '', query: '' })}
           >
             {i18n.translate('xpack.observability.slo.sloEdit.cancelButton', {
               defaultMessage: 'Cancel',
@@ -157,8 +143,7 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
       onSave,
       isFlyout,
       slo,
-      navigateToUrl,
-      basePath,
+      push,
     ]
   );
 

@@ -8,7 +8,6 @@
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
-import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { ConfigSchema } from '../../../../types';
 import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
@@ -45,8 +44,6 @@ const ruleType: RuleTypeModel = {
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 const useKibanaMock = useKibana as jest.Mock;
-
-const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
