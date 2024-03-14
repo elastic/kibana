@@ -71,6 +71,8 @@
     "@kbn/core-node-server",
     "@kbn/core-user-settings-server-internal",
     "@kbn/core-user-settings-server-mocks",
+    "@kbn/core-security-server-mocks",
+    "@kbn/core-security-server-internal",
   ],
   "exclude": [
     "target/**/*",
