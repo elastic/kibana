@@ -24,9 +24,8 @@ import {
 const ISO_8601_PATTERN = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
 const entityAnalyticsConfig = {
-  alertSampling: {
-    enabled: false,
-    sampleSizePerShard: 10_000,
+  riskEngine: {
+    alertSampleSizePerShard: 10_000,
   },
 };
 describe('Risk Scoring Task', () => {
@@ -202,7 +201,6 @@ describe('Risk Scoring Task', () => {
         interval: '1h',
         pageSize: 10_000,
         range: { start: 'now-30d', end: 'now' },
-        isAlertSamplingEnabled: false,
         alertSampleSizePerShard: 10_000,
       });
       mockIsCancelled = jest.fn().mockReturnValue(false);
@@ -283,7 +281,6 @@ describe('Risk Scoring Task', () => {
           interval: '2h',
           pageSize: 11_111,
           range: { start: 'now-30d', end: 'now' },
-          isAlertSamplingEnabled: false,
           alertSampleSizePerShard: 10_000,
         });
         await runTask({
@@ -320,7 +317,6 @@ describe('Risk Scoring Task', () => {
             interval: '1h',
             pageSize: 10_000,
             range: { start: 'now-30d', end: 'now' },
-            isAlertSamplingEnabled: false,
             alertSampleSizePerShard: 10_000,
           });
           // add additional mock responses for the additional identifier calls
@@ -393,7 +389,6 @@ describe('Risk Scoring Task', () => {
             interval: '2h',
             pageSize: 11_111,
             range: { start: 'now-30d', end: 'now' },
-            isAlertSamplingEnabled: false,
             alertSampleSizePerShard: 10_000,
           });
           await runTask({

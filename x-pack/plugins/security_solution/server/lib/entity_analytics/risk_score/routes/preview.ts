@@ -76,7 +76,6 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
           securityConfig.entityAnalytics
         );
 
-        const isAlertSamplingEnabled = entityAnalyticsConfig?.isAlertSamplingEnabled ?? false;
         const alertSampleSizePerShard = entityAnalyticsConfig?.alertSampleSizePerShard;
 
         try {
@@ -100,7 +99,6 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
             range,
             runtimeMappings,
             weights,
-            isAlertSamplingEnabled,
             alertSampleSizePerShard,
           });
 

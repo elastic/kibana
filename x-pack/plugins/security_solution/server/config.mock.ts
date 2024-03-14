@@ -35,9 +35,8 @@ export const createMockConfig = (): ConfigType => {
     enabled: true,
     enableUiSettingsValidations: false,
     entityAnalytics: {
-      alertSampling: {
-        enabled: false,
-        sampleSizePerShard: 10_000,
+      riskEngine: {
+        alertSampleSizePerShard: 10_000,
       },
     },
   };

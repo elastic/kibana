@@ -83,7 +83,6 @@ export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, 
             securityConfig.entityAnalytics
           );
 
-          const isAlertSamplingEnabled = entityAnalyticsConfig?.isAlertSamplingEnabled ?? false;
           const alertSampleSizePerShard = entityAnalyticsConfig?.alertSampleSizePerShard;
 
           const result = await riskScoreService.calculateAndPersistScores({
@@ -96,7 +95,6 @@ export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, 
             range,
             runtimeMappings,
             weights,
-            isAlertSamplingEnabled,
             alertSampleSizePerShard,
           });
 

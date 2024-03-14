@@ -24,7 +24,6 @@ import { scheduleLatestTransformNow } from '../utils/transforms';
 
 type RiskEngineConfigurationWithDefaults = RiskEngineConfiguration & {
   alertSampleSizePerShard: number;
-  isAlertSamplingEnabled: boolean;
 };
 export interface RiskScoreService {
   calculateScores: (params: CalculateScoresParams) => Promise<CalculateScoresResponse>;
@@ -73,16 +72,13 @@ export const riskScoreServiceFactory = ({
       return null;
     }
 
-    const isAlertSamplingEnabled =
-      savedObjectConfig.isAlertSamplingEnabled ?? entityAnalyticsConfig.alertSampling.enabled;
     const alertSampleSizePerShard =
       savedObjectConfig.alertSampleSizePerShard ??
-      entityAnalyticsConfig.alertSampling.sampleSizePerShard;
+      entityAnalyticsConfig.riskEngine.alertSampleSizePerShard;
 
     return {
       ...savedObjectConfig,
       alertSampleSizePerShard,
-      isAlertSamplingEnabled,
     };
   },
   getRiskInputsIndex: async (params) => riskScoreDataClient.getRiskInputsIndex(params),

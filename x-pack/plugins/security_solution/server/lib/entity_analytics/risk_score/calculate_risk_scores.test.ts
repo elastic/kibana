@@ -29,7 +29,6 @@ describe('calculateRiskScores()', () => {
       pageSize: 500,
       range: { start: 'now - 15d', end: 'now' },
       runtimeMappings: {},
-      isAlertSamplingEnabled: false,
     };
   });
 
@@ -37,28 +36,14 @@ describe('calculateRiskScores()', () => {
     it('builds a filter on @timestamp based on the provided range', async () => {
       await calculateRiskScores(params);
 
-      // expect(
-      //   (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
-      // ).toEqual(
-      //   expect.arrayContaining([
-      //     {
-      //       range: { '@timestamp': { gte: 'now - 15d', lt: 'now' } },
-      //     },
-      //   ])
-      // );
-
-      expect(esClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: {
-            bool: {
-              filter: expect.arrayContaining([
-                {
-                  range: { '@timestamp': { gte: 'now - 15d', lt: 'now' } },
-                },
-              ]),
-            },
+      expect(
+        (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
+      ).toEqual(
+        expect.arrayContaining([
+          {
+            range: { '@timestamp': { gte: 'now - 15d', lt: 'now' } },
           },
-        })
+        ])
       );
     });
 
@@ -66,38 +51,18 @@ describe('calculateRiskScores()', () => {
       params.filter = {};
       await calculateRiskScores(params);
 
-      // expect(
-      //   (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
-      // ).toEqual(expect.not.arrayContaining([{}]));
-
-      expect(esClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: {
-            bool: {
-              filter: expect.not.arrayContaining([{}]),
-            },
-          },
-        })
-      );
+      expect(
+        (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
+      ).toEqual(expect.not.arrayContaining([{}]));
     });
 
     it('drops an empty array filter if specified by the caller', async () => {
       params.filter = [];
       await calculateRiskScores(params);
 
-      // expect(
-      //   (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
-      // ).toEqual(expect.not.arrayContaining([[]]));
-
-      expect(esClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: {
-            bool: {
-              filter: expect.not.arrayContaining([[]]),
-            },
-          },
-        })
-      );
+      expect(
+        (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
+      ).toEqual(expect.not.arrayContaining([[]]));
     });
 
     describe('identifierType', () => {

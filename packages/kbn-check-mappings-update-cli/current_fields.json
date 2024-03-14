@@ -733,7 +733,6 @@
     "filter",
     "identifierType",
     "interval",
-    "isAlertSamplingEnabled",
     "pageSize",
     "range",
     "range.end",

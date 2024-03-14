@@ -28,7 +28,6 @@ export interface CalculateScoresParams {
   range: { start: string; end: string };
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
-  isAlertSamplingEnabled: boolean;
   alertSampleSizePerShard?: number;
 }
 
@@ -42,7 +41,6 @@ export interface CalculateAndPersistScoresParams {
   range: Range;
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
-  isAlertSamplingEnabled: boolean;
   alertSampleSizePerShard?: number;
 }
 
@@ -118,22 +116,7 @@ export interface CalculateRiskScoreAggregations {
 export interface RiskScoreBucket {
   key: { [identifierField: string]: string };
   doc_count: number;
-  risk_details: {
-    value: {
-      score: number;
-      normalized_score: number;
-      notes: string[];
-      category_1_score: number;
-      category_1_count: number;
-    };
-  };
-  inputs: SearchResponse;
-}
-
-export interface RiskScoreSamplingBucket {
-  key: { [identifierField: string]: string };
-  doc_count: number;
-  top_n_per_shard: {
+  top_inputs: {
     doc_count: number;
     risk_details: {
       value: {
@@ -156,6 +139,5 @@ export interface RiskEngineConfiguration {
   interval: string;
   pageSize: number;
   range: Range;
-  isAlertSamplingEnabled?: boolean;
   alertSampleSizePerShard?: number;
 }

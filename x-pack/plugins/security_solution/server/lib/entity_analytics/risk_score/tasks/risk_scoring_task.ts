@@ -246,7 +246,6 @@ export const runTask = async ({
       identifierType: configuredIdentifierType,
       range: configuredRange,
       pageSize,
-      isAlertSamplingEnabled,
       alertSampleSizePerShard,
     } = configuration;
     if (!enabled) {
@@ -282,7 +281,6 @@ export const runTask = async ({
           range,
           runtimeMappings,
           weights: [],
-          isAlertSamplingEnabled,
           alertSampleSizePerShard,
         });
         const tookMs = Date.now() - now;
@@ -307,7 +305,6 @@ export const runTask = async ({
       scoresWritten,
       taskDurationInSeconds,
       interval: taskInstance?.schedule?.interval,
-      isAlertSamplingEnabled,
       alertSampleSizePerShard,
     };
     telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCCESS_EVENT.eventType, telemetryEvent);

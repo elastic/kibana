@@ -46,19 +46,12 @@ import type {
   CalculateScoresParams,
   CalculateScoresResponse,
   RiskScoreBucket,
-  RiskScoreSamplingBucket,
 } from '../types';
 import {
   RISK_SCORING_INPUTS_COUNT_MAX,
   RISK_SCORING_SUM_MAX,
   RISK_SCORING_SUM_VALUE,
 } from './constants';
-
-function isSamplingBucket(
-  bucket: RiskScoreBucket | RiskScoreSamplingBucket
-): bucket is RiskScoreSamplingBucket {
-  return (bucket as RiskScoreSamplingBucket).top_n_per_shard !== undefined;
-}
 
 const formatForResponse = ({
   bucket,
@@ -67,16 +60,15 @@ const formatForResponse = ({
   identifierField,
   includeNewFields,
 }: {
-  bucket: RiskScoreBucket | RiskScoreSamplingBucket;
+  bucket: RiskScoreBucket;
   criticality?: AssetCriticalityRecord;
   now: string;
   identifierField: string;
   includeNewFields: boolean;
 }): RiskScore => {
-  const riskDetails = isSamplingBucket(bucket)
-    ? bucket.top_n_per_shard.risk_details
-    : bucket.risk_details;
-  const inputs = isSamplingBucket(bucket) ? bucket.top_n_per_shard.inputs : bucket.inputs;
+  const riskDetails = bucket.top_inputs.risk_details;
+  const inputs = bucket.top_inputs.inputs;
+  console.log('riskDetails', riskDetails);
 
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
   const normalizedScoreWithCriticality = applyCriticalityToScore({
@@ -165,37 +157,6 @@ const buildReduceScript = ({
   `;
 };
 
-const buildCalculateRiskScoreAggregation = (
-  identifierType: IdentifierType,
-  weights?: RiskWeights,
-  globalIdentifierTypeWeight?: number
-) => ({
-  scripted_metric: {
-    init_script: 'state.inputs = []',
-    map_script: `
-      Map fields = new HashMap();
-      String category = doc['${EVENT_KIND}'].value;
-      double score = doc['${ALERT_RISK_SCORE}'].value;
-      double weighted_score = 0.0;
-
-      fields.put('time', doc['@timestamp'].value);
-      fields.put('category', category);
-      fields.put('score', score);
-      ${buildWeightingOfScoreByCategory({ userWeights: weights, identifierType })}
-      fields.put('weighted_score', weighted_score);
-
-      state.inputs.add(fields);
-    `,
-    combine_script: 'return state;',
-    params: {
-      max_risk_inputs_per_identity: RISK_SCORING_INPUTS_COUNT_MAX,
-      p: RISK_SCORING_SUM_VALUE,
-      risk_cap: RISK_SCORING_SUM_MAX,
-    },
-    reduce_script: buildReduceScript({ globalIdentifierTypeWeight }),
-  },
-});
-
 const riskInputsAggregation = {
   top_hits: {
     size: 5,
@@ -209,41 +170,16 @@ const buildIdentifierTypeAggregation = ({
   identifierType,
   pageSize,
   weights,
-  isAlertSamplingEnabled,
   alertSampleSizePerShard,
 }: {
   afterKeys: AfterKeys;
   identifierType: IdentifierType;
   pageSize: number;
   weights?: RiskWeights;
-  isAlertSamplingEnabled: boolean;
   alertSampleSizePerShard: number;
 }): AggregationsAggregationContainer => {
   const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType({ identifierType, weights });
   const identifierField = getFieldForIdentifierAgg(identifierType);
-
-  const riskDetailsAggregation = buildCalculateRiskScoreAggregation(
-    identifierType,
-    weights,
-    globalIdentifierTypeWeight
-  );
-
-  const aggs: Record<string, AggregationsAggregationContainer> = isAlertSamplingEnabled
-    ? {
-        top_n_per_shard: {
-          sampler: {
-            shard_size: alertSampleSizePerShard,
-          },
-          aggs: {
-            inputs: riskInputsAggregation,
-            risk_details: riskDetailsAggregation,
-          },
-        },
-      }
-    : {
-        inputs: riskInputsAggregation,
-        risk_details: riskDetailsAggregation,
-      };
 
   return {
     composite: {
@@ -259,7 +195,42 @@ const buildIdentifierTypeAggregation = ({
       ],
       after: getAfterKeyForIdentifierType({ identifierType, afterKeys }),
     },
-    aggs,
+    aggs: {
+      top_inputs: {
+        sampler: {
+          shard_size: alertSampleSizePerShard,
+        },
+        aggs: {
+          inputs: riskInputsAggregation,
+          risk_details: {
+            scripted_metric: {
+              init_script: 'state.inputs = []',
+              map_script: `
+                Map fields = new HashMap();
+                String category = doc['${EVENT_KIND}'].value;
+                double score = doc['${ALERT_RISK_SCORE}'].value;
+                double weighted_score = 0.0;
+          
+                fields.put('time', doc['@timestamp'].value);
+                fields.put('category', category);
+                fields.put('score', score);
+                ${buildWeightingOfScoreByCategory({ userWeights: weights, identifierType })}
+                fields.put('weighted_score', weighted_score);
+          
+                state.inputs.add(fields);
+              `,
+              combine_script: 'return state;',
+              params: {
+                max_risk_inputs_per_identity: RISK_SCORING_INPUTS_COUNT_MAX,
+                p: RISK_SCORING_SUM_VALUE,
+                risk_cap: RISK_SCORING_SUM_MAX,
+              },
+              reduce_script: buildReduceScript({ globalIdentifierTypeWeight }),
+            },
+          },
+        },
+      },
+    },
   };
 };
 
@@ -323,7 +294,6 @@ export const calculateRiskScores = async ({
   range,
   runtimeMappings,
   weights,
-  isAlertSamplingEnabled = false,
   alertSampleSizePerShard = 10000,
 }: {
   assetCriticalityService: AssetCriticalityService;
@@ -342,43 +312,34 @@ export const calculateRiskScores = async ({
     }
     const identifierTypes: IdentifierType[] = identifierType ? [identifierType] : ['host', 'user'];
 
-    const query = isAlertSamplingEnabled
-      ? {
-          function_score: {
-            query: {
-              bool: {
-                filter,
-                should: [
-                  {
-                    match_all: {}, // This forces ES to calculate score
-                  },
-                ],
-              },
-            },
-            field_value_factor: {
-              field: 'kibana.alert.risk_score', // sort fields by risk score
-            },
-          },
-        }
-      : {
-          bool: {
-            filter,
-          },
-        };
-
     const request = {
       size: 0,
       _source: false,
       index,
       runtime_mappings: runtimeMappings,
-      query,
+      query: {
+        function_score: {
+          query: {
+            bool: {
+              filter,
+              should: [
+                {
+                  match_all: {}, // This forces ES to calculate score
+                },
+              ],
+            },
+          },
+          field_value_factor: {
+            field: 'kibana.alert.risk_score', // sort fields by risk score
+          },
+        },
+      },
       aggs: identifierTypes.reduce((aggs, _identifierType) => {
         aggs[_identifierType] = buildIdentifierTypeAggregation({
           afterKeys: userAfterKeys,
           identifierType: _identifierType,
           pageSize,
           weights,
-          isAlertSamplingEnabled,
           alertSampleSizePerShard,
         });
         return aggs;
