@@ -17,6 +17,7 @@ import type {
 } from '@kbn/data-plugin/common';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { getProcessedFields } from '@kbn/ml-data-grid';
+import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import type {
   AggregatableFieldOverallStats,
@@ -110,8 +111,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       });
 
       const {
-        aggregatableFields,
-        nonAggregatableFields,
+        aggregatableFields: originalAggregatableFields,
+        nonAggregatableFields: originalNonAggregatableFields,
         index,
         searchQuery,
         timeFieldName,
@@ -128,7 +129,29 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         sessionId,
         ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
       };
+      const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliest, latest, searchQuery);
 
+      // Getting non-empty fields for the index pattern
+      // because then we can absolutely exclude these from checks
+      const nonEmptyFields = await data.dataViews.getFieldsForWildcard({
+        pattern: index,
+        indexFilter: {
+          bool: {
+            filter: filterCriteria,
+          },
+        },
+        includeEmptyFields: false,
+      });
+      const populatedFieldsInIndex = new Set(nonEmptyFields.map((field) => field.name));
+
+      const aggregatableFields = originalAggregatableFields.filter((field) =>
+        populatedFieldsInIndex.has(field.name)
+      );
+      const nonAggregatableFields = originalNonAggregatableFields.filter((field) =>
+        populatedFieldsInIndex.has(field.name)
+      );
+
+      // data.dataViews.getFieldsForIndexPattern
       const documentCountStats = await getDocumentCountStats(
         data.search,
         searchStrategyParams,
@@ -157,6 +180,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
             return resp as IKibanaSearchResponse;
           })
         );
+
       const nonAggregatableFieldsObs = nonAggregatableFields.map((fieldName: string) =>
         data.search
           .search<IKibanaSearchRequest, IKibanaSearchResponse>(
@@ -255,7 +279,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
           const aggregatableOverallStats = processAggregatableFieldsExistResponse(
             aggregatableOverallStatsResp,
-            aggregatableFields
+            originalAggregatableFields,
+            populatedFieldsInIndex
           );
 
           const nonAggregatableFieldsCount: number[] = new Array(nonAggregatableFields.length).fill(
@@ -276,7 +301,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           }
           const nonAggregatableOverallStats = processNonAggregatableFieldsExistResponse(
             nonAggregatableOverallStatsResp,
-            nonAggregatableFields,
+            originalNonAggregatableFields,
             nonAggregatableFieldsCount,
             nonAggregatableFieldsUniqueCount
           );
@@ -308,7 +333,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         displayError(toasts, searchStrategyParams!.index, extractErrorProperties(error));
       }
     }
-  }, [data.search, searchStrategyParams, toasts, lastRefresh, probability]);
+  }, [data, searchStrategyParams, toasts, lastRefresh, probability]);
 
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();

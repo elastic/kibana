@@ -188,6 +188,8 @@ export const useDataVisualizerGridData = (
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
   const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
 
+  const [nonEmptyFields, setNonEmptyFields] = useState(defaults.nonMetricConfigs);
+
   /** Search strategy **/
   const fieldStatsRequest: OverallStatsSearchStrategyParams | undefined = useMemo(
     () => {

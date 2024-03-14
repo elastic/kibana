@@ -126,6 +126,7 @@ export function isNonAggregatableSampledDocs(
 export const processAggregatableFieldsExistResponse = (
   responses: AggregatableFieldOverallStats[] | undefined,
   aggregatableFields: OverallStatsSearchStrategyParams['aggregatableFields'],
+  populatedFieldsInIndex: Set<string>,
   datafeedConfig?: estypes.MlDatafeed
 ) => {
   const stats = {
@@ -135,11 +136,20 @@ export const processAggregatableFieldsExistResponse = (
 
   if (!responses || aggregatableFields.length === 0) return stats;
 
+  aggregatableFields.forEach((field) => {
+    if (!populatedFieldsInIndex.has(field.name)) {
+      stats.aggregatableNotExistsFields.push({
+        fieldName: field.name,
+        existsInDocs: false,
+        stats: {},
+      });
+    }
+  });
   responses.forEach(({ rawResponse: body, aggregatableFields: aggregatableFieldsChunk }) => {
     const aggregations = body.aggregations;
 
     const aggsPath = ['sample'];
-    const sampleCount = aggregations.sample.doc_count;
+    const sampleCount = aggregations.sample?.doc_count;
     aggregatableFieldsChunk.forEach(({ name: field, supportedAggs }, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
       // Sampler agg will yield doc_count that's bigger than the actual # of sampled records
@@ -282,6 +292,15 @@ export const processNonAggregatableFieldsExistResponse = (
   nonAggregatableFields.forEach((fieldName, fieldIdx) => {
     const foundField = results.find((r) => r.rawResponse.fieldName === fieldName);
     const existsInDocs = foundField !== undefined && foundField.rawResponse.hits.total > 0;
+
+    if (existsInDocs !== true) {
+      stats.nonAggregatableNotExistsFields.push({
+        fieldName,
+        existsInDocs,
+        stats: {},
+      });
+      return;
+    }
     const fieldData: NonAggregatableField = {
       fieldName,
       existsInDocs,
@@ -291,11 +310,7 @@ export const processNonAggregatableFieldsExistResponse = (
         sampleCount: DEFAULT_DOCS_SAMPLE_OF_TEXT_FIELDS_SIZE,
       },
     };
-    if (existsInDocs === true) {
-      stats.nonAggregatableExistsFields.push(fieldData);
-    } else {
-      stats.nonAggregatableNotExistsFields.push(fieldData);
-    }
+    stats.nonAggregatableExistsFields.push(fieldData);
   });
   return stats;
 };
