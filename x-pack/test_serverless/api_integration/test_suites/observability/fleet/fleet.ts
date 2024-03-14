@@ -17,6 +17,27 @@ export default function (ctx: FtrProviderContext) {
   const supertest = ctx.getService('supertest');
 
   describe('fleet', function () {
+    let defaultFleetServerHostUrl: string = '';
+    let defaultEsOutputUrl: string = '';
+    before(async () => {
+      const { body, status } = await supertest
+        .get('/api/fleet/fleet_server_hosts')
+        .set(svlCommonApi.getInternalRequestHeader());
+
+      expect(status).toBe(200);
+
+      defaultFleetServerHostUrl = body.items.find((item) => item.is_default)?.host_urls?.[0] ?? '';
+      expect(defaultFleetServerHostUrl).not.toBe('');
+    });
+    before(async () => {
+      const { body, status } = await supertest
+        .get('/api/fleet/outputs')
+        .set(svlCommonApi.getInternalRequestHeader());
+
+      expect(status).toBe(200);
+      defaultEsOutputUrl = body.items.find((item) => item.is_default)?.hosts?.[0] ?? '';
+      expect(defaultEsOutputUrl).not.toBe('');
+    });
     it('rejects request to create a new fleet server hosts if host url is different from default', async () => {
       await expectDefaultFleetServer(ctx);
 
@@ -32,7 +53,7 @@ export default function (ctx: FtrProviderContext) {
       expect(body).toEqual({
         statusCode: 403,
         error: 'Forbidden',
-        message: 'Fleet server host must have default URL in serverless: https://localhost:8220',
+        message: `Fleet server host must have default URL in serverless: ${defaultFleetServerHostUrl}`,
       });
       expect(status).toBe(403);
     });
@@ -45,13 +66,13 @@ export default function (ctx: FtrProviderContext) {
         .set(svlCommonApi.getInternalRequestHeader())
         .send({
           name: 'Test Fleet server host',
-          host_urls: ['https://localhost:8220'],
+          host_urls: [defaultFleetServerHostUrl],
         });
 
       expect(body).toEqual({
         item: expect.objectContaining({
           name: 'Test Fleet server host',
-          host_urls: ['https://localhost:8220'],
+          host_urls: [defaultFleetServerHostUrl],
         }),
       });
       expect(status).toBe(200);
@@ -68,13 +89,11 @@ export default function (ctx: FtrProviderContext) {
           type: 'elasticsearch',
           hosts: ['https://localhost:9201'],
         });
-
       // in a non-serverless environment this would succeed with a 200
       expect(body).toEqual({
         statusCode: 400,
         error: 'Bad Request',
-        message:
-          'Elasticsearch output host must have default URL in serverless: https://localhost:9200',
+        message: `Elasticsearch output host must have default URL in serverless: ${defaultEsOutputUrl}`,
       });
       expect(status).toBe(400);
     });
@@ -88,13 +107,13 @@ export default function (ctx: FtrProviderContext) {
         .send({
           name: 'Test output',
           type: 'elasticsearch',
-          hosts: ['https://localhost:9200'],
+          hosts: [defaultEsOutputUrl],
         });
 
       expect(body).toEqual({
         item: expect.objectContaining({
           name: 'Test output',
-          hosts: ['https://localhost:9200'],
+          hosts: [defaultEsOutputUrl],
         }),
       });
       expect(status).toBe(200);
