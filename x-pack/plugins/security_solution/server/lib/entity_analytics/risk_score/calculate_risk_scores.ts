@@ -68,7 +68,6 @@ const formatForResponse = ({
 }): RiskScore => {
   const riskDetails = bucket.top_inputs.risk_details;
   const inputs = bucket.top_inputs.inputs;
-  console.log('riskDetails', riskDetails);
 
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
   const normalizedScoreWithCriticality = applyCriticalityToScore({
