@@ -32,10 +32,7 @@ describe('unified_manifest_client', () => {
     ...(id && { id }),
     type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
     ...(attachAttributes && {
-      attributes: {
-        ...mockUnifiedManifestAttributes(),
-        ...(attachCreated && { created: expect.any(Number) }),
-      },
+      attributes: mockUnifiedManifestAttributes(),
     }),
     ...(version && { version }),
   });
@@ -116,7 +113,7 @@ describe('unified_manifest_client', () => {
           return {
             ...mockUnifiedManifestAttributes({ policyId: `policy-${i}` }),
             id: `id-${i}`,
-            created: 1,
+            created: '1',
           };
         })
       );

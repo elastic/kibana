@@ -7,19 +7,21 @@
 
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
-  InternalUnifiedManifestCreateSchema,
+  InternalUnifiedManifestBaseSchema,
   InternalUnifiedManifestSchema,
 } from '../../schemas';
 
 export const mapUnifiedManifestSavedObjectToUnifiedManifest = ({
   id,
-  attributes: { artifactIds, policyId, semanticVersion, created },
-}: SavedObject<InternalUnifiedManifestCreateSchema>): InternalUnifiedManifestSchema => {
+  attributes: { artifactIds, policyId, semanticVersion },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  created_at,
+}: SavedObject<InternalUnifiedManifestBaseSchema>): InternalUnifiedManifestSchema => {
   return {
     id,
     policyId,
     semanticVersion,
-    created,
+    created: created_at,
     artifactIds,
   };
 };

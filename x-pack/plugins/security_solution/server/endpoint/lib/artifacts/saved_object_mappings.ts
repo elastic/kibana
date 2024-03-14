@@ -41,16 +41,13 @@ export const unifiedManifestSavedObjectMappings: SavedObjectsType['mappings'] = 
   dynamic: false,
   properties: {
     artifactIds: {
-      type: 'text',
+      type: 'keyword',
     },
     policyId: {
       type: 'keyword',
     },
     semanticVersion: {
-      type: 'text',
-    },
-    created: {
-      type: 'date',
+      type: 'keyword',
     },
   },
 };

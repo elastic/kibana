@@ -91,17 +91,6 @@ const internalUnifiedManifestBaseSchema = t.exact(
 );
 export type InternalUnifiedManifestBaseSchema = t.TypeOf<typeof internalUnifiedManifestBaseSchema>;
 
-const internalUnifiedManifestCreateSchema = t.intersection([
-  internalUnifiedManifestBaseSchema,
-  t.type({
-    created,
-  }),
-]);
-
-export type InternalUnifiedManifestCreateSchema = t.TypeOf<
-  typeof internalUnifiedManifestCreateSchema
->;
-
 const internalUnifiedManifestUpdateSchema = t.intersection([
   internalUnifiedManifestBaseSchema,
   t.exact(
@@ -119,7 +108,7 @@ export const internalUnifiedManifestSchema = t.intersection([
   t.exact(
     t.type({
       id: identifier,
-      created,
+      created: t.union([t.string, t.undefined]),
     })
   ),
 ]);
