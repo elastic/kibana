@@ -20,7 +20,7 @@ if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-performance-data-set-extraction" ]; t
 else
   # pipeline should use bare metal static worker
   echo "--- Running performance tests"
-  node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+  node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey-path x-pack/performance/journeys/tsdb_logs_data_visualizer.ts
 fi
 
 echo "--- Upload journey step screenshots"
