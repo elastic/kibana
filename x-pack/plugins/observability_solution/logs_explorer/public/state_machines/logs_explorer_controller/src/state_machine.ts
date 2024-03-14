@@ -7,17 +7,9 @@
 
 import { IToasts, IUiSettingsClient } from '@kbn/core/public';
 import { QueryStart } from '@kbn/data-plugin/public';
-import {
-  actions,
-  ConditionPredicate,
-  createMachine,
-  interpret,
-  InterpreterFrom,
-  raise,
-} from 'xstate';
+import { actions, createMachine, interpret, InterpreterFrom, raise } from 'xstate';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
-import { negate } from 'lodash';
 import { LogsExplorerCustomizations } from '../../../controller';
 import { ControlPanelRT } from '../../../../common/control_panels';
 import {
