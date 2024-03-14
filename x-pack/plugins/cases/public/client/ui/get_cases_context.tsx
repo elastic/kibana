@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, EuiThemeProvider } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { lazy, Suspense } from 'react';
-import { useIsDarkTheme } from '../../common/use_is_dark_theme';
 import type { CasesContextProps } from '../../components/cases_context';
 
 export type GetCasesContextPropsInternal = CasesContextProps;
@@ -32,29 +31,23 @@ const CasesProviderLazyWrapper = ({
   children,
   releasePhase,
   getFilesClient,
-}: GetCasesContextPropsInternal & { children: ReactNode }) => {
-  const isDarkTheme = useIsDarkTheme();
-
-  return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
-      <EuiThemeProvider colorMode={isDarkTheme ? 'dark' : 'light'}>
-        <CasesProviderLazy
-          value={{
-            externalReferenceAttachmentTypeRegistry,
-            persistableStateAttachmentTypeRegistry,
-            owner,
-            permissions,
-            features,
-            releasePhase,
-            getFilesClient,
-          }}
-        >
-          {children}
-        </CasesProviderLazy>
-      </EuiThemeProvider>
-    </Suspense>
-  );
-};
+}: GetCasesContextPropsInternal & { children: ReactNode }) => (
+  <Suspense fallback={<EuiLoadingSpinner />}>
+    <CasesProviderLazy
+      value={{
+        externalReferenceAttachmentTypeRegistry,
+        persistableStateAttachmentTypeRegistry,
+        owner,
+        permissions,
+        features,
+        releasePhase,
+        getFilesClient,
+      }}
+    >
+      {children}
+    </CasesProviderLazy>
+  </Suspense>
+);
 
 CasesProviderLazyWrapper.displayName = 'CasesProviderLazyWrapper';
 

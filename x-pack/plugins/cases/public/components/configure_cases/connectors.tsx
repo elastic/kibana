@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 
 import { ConnectorsDropdown } from './connectors_dropdown';
 import * as i18n from './translations';

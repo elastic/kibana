@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
 import { CasesDeepLinkId } from '../../common/navigation';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { CaseCallouts } from '../callouts/case_callouts';
@@ -22,15 +21,11 @@ export const AllCases: React.FC = () => {
   const actionsErrors = useMemo(() => getActionLicenseError(actionLicense), [actionLicense]);
 
   return (
-    <div
-      css={css`
-        min-height: 85vh;
-      `}
-    >
+    <>
       <CaseCallouts />
       <CasesTableHeader actionsErrors={actionsErrors} />
       <AllCasesList />
-    </div>
+    </>
   );
 };
 AllCases.displayName = 'AllCases';

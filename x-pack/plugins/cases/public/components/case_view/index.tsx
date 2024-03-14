@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import { useGetCase } from '../../containers/use_get_case';
@@ -72,32 +71,24 @@ export const CaseView = React.memo(
       return null;
     }, [basePath, data, spacesApi]);
 
-    return (
-      <div
-        css={css`
-          min-height: 85vh;
-        `}
-      >
-        {isError ? (
-          <DoesNotExist caseId={caseId} />
-        ) : isLoading ? (
-          <CaseViewLoading />
-        ) : data ? (
-          <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-            {getLegacyUrlConflictCallout()}
-            <CaseViewPage
-              caseData={data.case}
-              fetchCase={refetch}
-              actionsNavigation={actionsNavigation}
-              ruleDetailsNavigation={ruleDetailsNavigation}
-              showAlertDetails={showAlertDetails}
-              useFetchAlertData={useFetchAlertData}
-              refreshRef={refreshRef}
-            />
-          </CasesTimelineIntegrationProvider>
-        ) : null}
-      </div>
-    );
+    return isError ? (
+      <DoesNotExist caseId={caseId} />
+    ) : isLoading ? (
+      <CaseViewLoading />
+    ) : data ? (
+      <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
+        {getLegacyUrlConflictCallout()}
+        <CaseViewPage
+          caseData={data.case}
+          fetchCase={refetch}
+          actionsNavigation={actionsNavigation}
+          ruleDetailsNavigation={ruleDetailsNavigation}
+          showAlertDetails={showAlertDetails}
+          useFetchAlertData={useFetchAlertData}
+          refreshRef={refreshRef}
+        />
+      </CasesTimelineIntegrationProvider>
+    ) : null;
   }
 );
 

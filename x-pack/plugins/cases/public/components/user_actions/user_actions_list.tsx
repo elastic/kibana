@@ -19,7 +19,6 @@ import { builderMap } from './builder';
 import { useCaseViewParams } from '../../common/navigation';
 import { useUserActionsHandler } from './use_user_actions_handler';
 
-// chunku check outline
 const getCommentListCss = (euiTheme: EuiThemeComputed<{}>) => css`
   & .userAction__comment.outlined .euiCommentEvent {
     outline: solid 5px ${euiTheme.colors.lightShade};

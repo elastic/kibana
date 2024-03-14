@@ -332,12 +332,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   ) : null;
 
   return (
-    <EuiPageSection
-      restrictWidth={true}
-      css={css`
-        min-height: 85vh;
-      `}
-    >
+    <EuiPageSection restrictWidth={true}>
       <HeaderPage
         showBackButton={true}
         data-test-subj="case-configure-title"
