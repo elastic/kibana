@@ -1,39 +1,40 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
-import { useMutation } from '@tanstack/react-query';
+import type { ToastsStart, HttpStart } from '@kbn/core/public';
+import { useMutation, ContextOptions } from '@tanstack/react-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
 import { ValidFeatureId, ALERT_UUID } from '@kbn/rule-data-utils';
-import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
-import { useKibana } from '../../../../common';
+
+export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
 
 const BULK_UNTRACK_SUCCESS_MESSAGE = (uuidsCount: number) =>
-  i18n.translate('xpack.triggersActionsUI.alertsTable.untrack.successMessage', {
+  i18n.translate('alertsUIShared.hooks.untrack.successMessage', {
     defaultMessage: 'Untracked {uuidsCount, plural, one {alert} other {alerts}}',
     values: { uuidsCount },
   });
 
 const BULK_UNTRACK_ERROR_MESSAGE = (uuidsCount: number) =>
-  i18n.translate('xpack.triggersActionsUI.alertsTable.untrack.failedMessage', {
+  i18n.translate('alertsUIShared.hooks.untrack.failedMessage', {
     defaultMessage: 'Failed to untrack {uuidsCount, plural, one {alert} other {alerts}}',
     values: { uuidsCount },
   });
 
 const BULK_UNTRACK_ALL_SUCCESS_MESSAGE = i18n.translate(
-  'xpack.triggersActionsUI.alertsTable.untrackAll.successMessage',
+  'alertsUIShared.hooks.untrackAll.successMessage',
   {
     defaultMessage: 'Untracked alerts',
   }
 );
 
 const BULK_UNTRACK_ALL_ERROR_MESSAGE = i18n.translate(
-  'xpack.triggersActionsUI.alertsTable.untrackAll.failedMessage',
+  'alertsUIShared.hooks.untrackAll.failedMessage',
   {
     defaultMessage: 'Failed to untrack alerts by query',
   }
@@ -63,11 +64,14 @@ const getQuery = ({
   return arrayifiedQuery.filter((q) => q);
 };
 
-export const useBulkUntrackAlerts = () => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+interface UseBulkUntrackAlerts {
+  http: HttpStart;
+  toasts: ToastsStart;
+  context?: ContextOptions['context'];
+}
+
+export const useBulkUntrackAlerts = (options: UseBulkUntrackAlerts) => {
+  const { context, http, toasts } = options || {};
 
   const untrackAlerts = useMutation<
     string,
@@ -93,7 +97,7 @@ export const useBulkUntrackAlerts = () => {
       }
     },
     {
-      context: AlertsTableQueryContext,
+      context,
       onError: (_err, params) => {
         if (params.alertUuids) {
           toasts.addDanger(BULK_UNTRACK_ERROR_MESSAGE(params.alertUuids.length));

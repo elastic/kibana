@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { isEmpty } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
@@ -137,7 +138,7 @@ const ensureAuthorizedToUntrack = async (params: SetAlertsToUntrackedParamsWithD
   });
   const ruleTypeIdBuckets = response.aggregations?.ruleTypeIds.buckets;
   if (!ruleTypeIdBuckets) {
-    throw new Error('Unable to fetch ruleTypeIds for authorization');
+    throw Boom.internal('Unable to fetch ruleTypeIds for authorization');
   }
   for (const {
     key: ruleTypeId,
@@ -146,7 +147,7 @@ const ensureAuthorizedToUntrack = async (params: SetAlertsToUntrackedParamsWithD
     const consumers = consumerBuckets.map((b) => b.key);
     for (const consumer of consumers) {
       if (consumer === 'siem') {
-        throw new Error('Untracking Security alerts is not permitted');
+        throw Boom.badRequest('Untracking Security alerts is not permitted');
       }
       await ensureAuthorized({ ruleTypeId, consumer });
     }
@@ -172,7 +173,7 @@ const getAuthorizedAlertsIndices = async ({
   } catch (error) {
     const errMessage = `Failed to get authorized rule types to untrack alerts by query: ${error}`;
     logger.error(errMessage);
-    throw new Error(errMessage);
+    throw Boom.unauthorized(errMessage);
   }
 };
 
@@ -192,12 +193,12 @@ export async function setAlertsToUntracked(
 
   if (query) {
     if (query.length === 0) {
-      throw new Error('Query must not be empty if defined');
+      throw Boom.badRequest('Query must not be empty if defined');
     }
     indices = (await getAuthorizedAlertsIndices(params)) || [];
   } else {
     if (isEmpty(ruleIds) && isEmpty(alertUuids)) {
-      throw new Error('Must provide either ruleIds or alertUuids');
+      throw Boom.badRequest('Must provide either ruleIds or alertUuids');
     }
     indices = params.indices || [];
   }
@@ -226,7 +227,7 @@ export async function setAlertsToUntracked(
       });
 
       if (total === 0 && response.total === 0) {
-        throw new Error('No active alerts matched the query');
+        throw Boom.notFound('No active alerts matched the query');
       }
       if (response.total) {
         total = response.total;

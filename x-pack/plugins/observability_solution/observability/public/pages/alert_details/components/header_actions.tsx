@@ -29,12 +29,12 @@ import {
   ALERT_RULE_PRODUCER,
   ALERT_RULE_CONSUMER,
 } from '@kbn/rule-data-utils';
+import { useBulkUntrackAlerts } from '@kbn/alerts-ui-shared';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';
 import { paths } from '../../../../common/locators/paths';
-import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 import { observabilityFeatureId } from '../../../../common';
 
 export interface HeaderActionsProps {
@@ -60,6 +60,7 @@ export function HeaderActions({ alert, alertStatus, onUntrackAlert }: HeaderActi
     },
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
     http,
+    notifications: { toasts },
   } = useKibana().services;
 
   const { rule, refetch } = useFetchRule({
@@ -72,7 +73,10 @@ export function HeaderActions({ alert, alertStatus, onUntrackAlert }: HeaderActi
 
   const selectCaseModal = useCasesAddToExistingCaseModal();
 
-  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts({
+    http,
+    toasts,
+  });
 
   const handleUntrackAlert = useCallback(async () => {
     if (alert) {

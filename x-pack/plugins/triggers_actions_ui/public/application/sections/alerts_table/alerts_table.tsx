@@ -344,6 +344,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     isBulkActionsColumnActive,
     props.id,
     props.leadingControlColumns,
+    props.featureIds,
     renderCustomActionsRow,
     getSetIsActionLoadingCallback,
     refresh,
