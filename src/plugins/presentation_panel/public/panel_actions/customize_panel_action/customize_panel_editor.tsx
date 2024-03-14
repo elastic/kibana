@@ -65,7 +65,7 @@ export const CustomizePanelEditor = ({
   );
   const [panelTitle, setPanelTitle] = useState(getPanelTitle(api));
   const [timeRange, setTimeRange] = useState(
-    api.timeRange?.value ?? api.parentApi?.timeRange?.value
+    api.timeRange$?.value ?? api.parentApi?.timeRange$?.value
   );
 
   const initialFocusRef = useRef<HTMLInputElement | null>(null);
@@ -76,7 +76,7 @@ export const CustomizePanelEditor = ({
     }
   }, [initialFocusRef, focusOnTitle]);
 
-  const [hasOwnTimeRange, setHasOwnTimeRange] = useState<boolean>(Boolean(api.timeRange?.value));
+  const [hasOwnTimeRange, setHasOwnTimeRange] = useState<boolean>(Boolean(api.timeRange$?.value));
 
   const commonlyUsedRangesForDatePicker = useMemo(() => {
     const commonlyUsedRanges = core.uiSettings.get<TimePickerQuickRange[]>(
@@ -103,7 +103,7 @@ export const CustomizePanelEditor = ({
       api.setPanelDescription?.(panelDescription);
 
     const newTimeRange = hasOwnTimeRange ? timeRange : undefined;
-    if (newTimeRange !== api.timeRange?.value) {
+    if (newTimeRange !== api.timeRange$?.value) {
       api.setTimeRange?.(newTimeRange);
     }
 
