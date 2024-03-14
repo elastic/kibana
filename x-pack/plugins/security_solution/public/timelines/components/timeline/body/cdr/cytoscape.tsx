@@ -119,59 +119,85 @@ export const Cytoscape = memo(CytoscapeComponent, (prevProps, nextProps) => {
 export function convertToCytoscapeElements(data: TimelineItem[]): cytoscape.ElementDefinition[] {
   const elements: cytoscape.ElementDefinition[] = [];
 
-  data.forEach((item) => {
-    const alertNode = {
-      data: {
-        id: `alert-${item._id}`,
-        // label: item.ecs.kibana?.alert.rule.name[0] || 'Unknown Alert',
-        // label: item.ecs.event?.action[0] || 'Unknown Action',
-        label: 'Resource Name',
-      },
-    };
-    elements.push(alertNode);
-
-    let userNodeId = '';
-    if (item.ecs.user?.name) {
-      const userNode = {
-        data: {
-          id: `user-${item.ecs.user.name[0]}`,
-          label: `User: ${item.ecs.user.name[0]}`,
-        },
-      };
-      elements.push(userNode);
-
-      // Edge from alert to user
-      elements.push({
-        data: {
-          source: userNode.data.id,
-          target: alertNode.data.id,
-          label: item.ecs.event?.action[0] || 'Unknown Action',
-        },
+  // remove duplicated data
+  data
+    .reduce((acc, event) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const existing = acc.find((n: any) => {
+        return n?.ecs.event.action[0] === event?.ecs?.event?.action?.[0];
       });
 
-      userNodeId = userNode.data.id;
-    }
+      if (!existing) {
+        event.occurrences = 0;
+        event.alertNodes = [
+          {
+            data: {
+              id: `alert-${event._id}`,
+              label: 'Resource Name',
+            },
+          },
+        ];
+        acc.push(event);
+      } else {
+        existing.occurrences += 1;
+        existing.alertNodes.push({
+          data: {
+            id: `alert-${event._id}`,
+            label: 'Resource Name',
+          },
+        });
+      }
+      return acc;
+    }, [])
+    .forEach((item) => {
+      let userNodeId = '';
+      if (item.ecs.user?.name) {
+        const userNode = {
+          data: {
+            id: `user-${item.ecs.user.name[0]}`,
+            label: `User: ${item.ecs.user.name[0]}`,
+          },
+        };
+        elements.push(userNode);
 
-    if (item.ecs.source?.ip) {
-      const sourceIpNode = {
-        data: {
-          id: `source-ip-${item.ecs.source.ip[0]}`,
-          label: `Source IP: ${item.ecs.source.ip[0]}`,
-        },
-      };
-      elements.push(sourceIpNode);
+        // Todo: Figure out how to add the alert edge
+        // item.alertNodes.forEach((alertNode) => {
+        //   elements.push(alertNode);
+        // });
+        elements.push(item.alertNodes[0]);
+        // Edge from alert to user
+        // TODO: Figure out how to link the edges
+        elements.push({
+          data: {
+            source: userNode.data.id,
+            target: item.alertNodes[0].data.id,
+            label: `${item.ecs.event?.action[0]} x ${item.occurrences}` || 'Unknown Action',
+          },
+        });
 
-      const targetId = userNodeId || alertNode.data.id;
-      // Edge from alert to source IP
-      elements.push({
-        data: {
-          source: sourceIpNode.data.id,
-          target: targetId,
-          label: 'Authenticated as',
-        },
-      });
-    }
-  });
+        userNodeId = userNode.data.id;
+      }
+
+      if (item.ecs.source?.ip) {
+        const sourceIpNode = {
+          data: {
+            id: `source-ip-${item.ecs.source.ip[0]}`,
+            label: `Source IP: ${item.ecs.source.ip[0]}`,
+          },
+        };
+        elements.push(sourceIpNode);
+
+        const targetId = userNodeId || alertNode.data.id;
+        // Edge from alert to source IP
+        elements.push({
+          data: {
+            source: sourceIpNode.data.id,
+            target: targetId,
+            label: 'Authenticated as',
+          },
+        });
+      }
+    });
 
   return elements;
 }
