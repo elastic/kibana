@@ -31,7 +31,8 @@ export default function ({ getService }: FtrProviderContext) {
       const toTime = '2019-06-24T00:00:00.000Z';
 
       const { text: reportApiJson, status } = await reportingAPI.generateCsv({
-        browserTimezone: 'America/Phoenix',
+        title: 'CSV Report',
+        browserTimezone: 'UTC',
         columns: [
           'order_date',
           'category',
@@ -83,7 +84,6 @@ export default function ({ getService }: FtrProviderContext) {
           sort: [{ order_date: 'desc' }],
           trackTotalHits: true,
         },
-        title: 'Ecommerce Data',
         version: '7.17.19',
       } as unknown as JobParamsCSV);
       expect(status).to.be(200);
