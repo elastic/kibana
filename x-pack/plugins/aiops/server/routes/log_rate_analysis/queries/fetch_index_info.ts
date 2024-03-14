@@ -85,7 +85,7 @@ export const fetchIndexInfo = async (
     }
   );
 
-  // Get the total doc count for the baseline time range
+  // Get the total doc count for the deviation time range
   const respDeviationTotalDocCount = await esClient.search(
     getTotalDocCountRequest({ ...params, start: params.deviationMin, end: params.deviationMax }),
     {
