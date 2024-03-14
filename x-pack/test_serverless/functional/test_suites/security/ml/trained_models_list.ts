@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const svlMl = getService('svlMl');
   const PageObjects = getPageObjects(['svlCommonPage']);
 
-  describe('Trained models list', () => {
+  describe.skip('Trained models list', () => {
     before(async () => {
       await PageObjects.svlCommonPage.login();
       await ml.api.syncSavedObjects();

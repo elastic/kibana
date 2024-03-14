@@ -399,8 +399,8 @@ export class ElasticsearchStore extends VectorStore {
         model_id: modelId ?? this.model,
       });
 
-      console.log('modelId', modelId);
-      console.log('getResponse', JSON.stringify(getResponse, null, 2));
+      this.logger(`modelId: ${modelId}`);
+      this.logger(`getResponse: ${JSON.stringify(getResponse, null, 2)}`);
 
       const isReadyESS = (stats: MlTrainedModelStats) =>
         stats.deployment_stats?.state === 'started' &&

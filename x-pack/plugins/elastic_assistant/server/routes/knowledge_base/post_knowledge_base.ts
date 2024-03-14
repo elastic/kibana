@@ -74,6 +74,27 @@ export const postKnowledgeBaseRoute = (
             kbResource
           );
 
+          logger('postKnowledgeBaseRoute');
+          logger(`elserId: ${elserId}`);
+
+          // GET _inference/sparse_embedding/my-elser-model
+          // PUT _inference/sparse_embedding/my-elser-model
+          // {
+          //   "service": "elser",
+          //   "service_settings": {
+          //     "model_id": ".elser_model_2",
+          //     "num_allocations": 1,
+          //     "num_threads": 1
+          //   },
+          //   "task_settings": {}
+          // }
+
+          const elserResponse = await esClient.inference.getModel({
+            task_type: 'sparse_embedding',
+            model_id: elserId,
+          });
+          logger(`elser response:\n: ${JSON.stringify(elserResponse, null, 2)}`);
+
           // Pre-check on index/pipeline
           let indexExists = await esStore.indexExists();
           let pipelineExists = await esStore.pipelineExists();
