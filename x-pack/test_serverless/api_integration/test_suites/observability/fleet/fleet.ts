@@ -26,7 +26,8 @@ export default function (ctx: FtrProviderContext) {
 
       expect(status).toBe(200);
 
-      defaultFleetServerHostUrl = body.items.find((item) => item.is_default)?.host_urls?.[0] ?? '';
+      defaultFleetServerHostUrl =
+        body.items.find((item: any) => item.is_default)?.host_urls?.[0] ?? '';
       expect(defaultFleetServerHostUrl).not.toBe('');
     });
     before(async () => {
@@ -35,7 +36,7 @@ export default function (ctx: FtrProviderContext) {
         .set(svlCommonApi.getInternalRequestHeader());
 
       expect(status).toBe(200);
-      defaultEsOutputUrl = body.items.find((item) => item.is_default)?.hosts?.[0] ?? '';
+      defaultEsOutputUrl = body.items.find((item: any) => item.is_default)?.hosts?.[0] ?? '';
       expect(defaultEsOutputUrl).not.toBe('');
     });
     it('rejects request to create a new fleet server hosts if host url is different from default', async () => {
