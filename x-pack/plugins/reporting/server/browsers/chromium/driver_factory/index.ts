@@ -14,6 +14,7 @@ import path from 'path';
 import * as Rx from 'rxjs';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
+import type { Page, PageEvents } from 'puppeteer';
 import { getChromiumDisconnectedError } from '../';
 import { ReportingCore } from '../../..';
 import { DEFAULT_VIEWPORT } from '../../../../common/constants';
@@ -209,8 +210,18 @@ export class HeadlessChromiumDriverFactory {
     });
   }
 
+  private getPageEventAsObservable<E extends keyof PageEvents>(
+    page: Page,
+    pageEvent: E
+  ): Rx.Observable<PageEvents[E]> {
+    return Rx.fromEventPattern<PageEvents[E]>(
+      (handler) => page.on(pageEvent, handler),
+      (handler) => page.off(pageEvent, handler)
+    );
+  }
+
   getBrowserLogger(page: any, logger: LevelLogger): Rx.Observable<void> {
-    const consoleMessages$ = Rx.fromEvent<any>(page, 'console').pipe(
+    const consoleMessages$ = this.getPageEventAsObservable(page, 'console').pipe(
       map((line) => {
         const formatLine = () => `{ text: "${line.text()?.trim()}", url: ${line.location()?.url} }`;
 
@@ -224,7 +235,7 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page, 'pageerror').pipe(
+    const uncaughtExceptionPageError$ = this.getPageEventAsObservable(page, 'pageerror').pipe(
       map((err) => {
         logger.warning(
           i18n.translate('xpack.reporting.browsers.chromium.pageErrorDetected', {
@@ -235,7 +246,7 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const pageRequestFailed$ = Rx.fromEvent<any>(page, 'requestfailed').pipe(
+    const pageRequestFailed$ = this.getPageEventAsObservable(page, 'requestfailed').pipe(
       map((req) => {
         const failure = req.failure && req.failure();
         if (failure) {
@@ -270,7 +281,7 @@ export class HeadlessChromiumDriverFactory {
   }
 
   getPageExit(browser: any, page: any) {
-    const pageError$ = Rx.fromEvent<Error>(page, 'error').pipe(
+    const pageError$ = this.getPageEventAsObservable(page, 'error').pipe(
       mergeMap((err) => {
         return Rx.throwError(
           i18n.translate('xpack.reporting.browsers.chromium.errorDetected', {
