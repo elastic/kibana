@@ -1,3 +1,4 @@
+# * This file is auto-updated by running fix-location-collection.ts * #
 apiVersion: backstage.io/v1alpha1
 kind: Location
 metadata:
@@ -6,4 +7,4 @@ metadata:
 spec:
   type: url
   targets:
-    - 'https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-migration-staging.yml'
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-migration-staging.yml
