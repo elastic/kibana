@@ -42,6 +42,7 @@ import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,
   isSourceDataChartableForDetector,
+  isTimeSeriesViewJob,
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
 
@@ -69,10 +70,7 @@ import {
   TIME_FIELD_NAME,
 } from './timeseriesexplorer_constants';
 import { timeSeriesSearchServiceFactory } from './timeseriesexplorer_utils/time_series_search_service';
-import {
-  createTimeSeriesJobData,
-  getTimeseriesexplorerDefaultState,
-} from './timeseriesexplorer_utils';
+import { getTimeseriesexplorerDefaultState } from './timeseriesexplorer_utils';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { getControlsForDetector } from './get_controls_for_detector';
 import { SeriesControls } from './components/series_controls';
@@ -984,7 +982,7 @@ export class TimeSeriesExplorer extends React.Component {
       zoomToFocusLoaded,
       autoZoomDuration,
     };
-    const jobs = createTimeSeriesJobData(mlJobService.jobs);
+    const jobs = mlJobService.jobs.filter(isTimeSeriesViewJob);
 
     if (selectedDetectorIndex === undefined || mlJobService.getJob(selectedJobId) === undefined) {
       return (
