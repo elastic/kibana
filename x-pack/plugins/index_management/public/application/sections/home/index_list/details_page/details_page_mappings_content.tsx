@@ -47,9 +47,9 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   } = useAppContext();
   const { euiTheme } = useEuiTheme();
 
-  const [toggleOn, setToggleOn] = useState(true);
+  const [isJSONVisible, setToggleOn] = useState(true);
   const onToggleChange = () => {
-    setToggleOn(!toggleOn);
+    setToggleOn(!isJSONVisible);
   };
   const { parsedDefaultValue } = useMemo<MappingsEditorParsedMetadata>(() => {
     const mappingsDefinition = extractMappingsDefinition(jsonData);
@@ -130,7 +130,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const treeViewBlock = (
     <EuiFlexGroup direction="column">
-      <DocumentFieldsSearch searchValue={search.term} onSearchChange={onSearchChange} />
       <EuiFlexItem>
         {searchTerm !== '' ? (
           <SearchResult result={search.result} documentFieldsState={documentFields} />
@@ -145,14 +144,19 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
     <>
       <EuiFlexGroup style={{ marginBottom: euiTheme.size.l }}>
+        <DocumentFieldsSearch
+          searchValue={search.term}
+          onSearchChange={onSearchChange}
+          disabled={isJSONVisible}
+        />
         <EuiButton data-test-subj="indexDetailsMappingsToggleViewButton" onClick={onToggleChange}>
-          {!toggleOn ? (
-            <FormattedMessage id="xpack.idxMgmt.indexDetails.mappings.json" defaultMessage="JSON" />
-          ) : (
+          {isJSONVisible ? (
             <FormattedMessage
               id="xpack.idxMgmt.indexDetails.mappings.tableView"
-              defaultMessage="Table View"
+              defaultMessage="List"
             />
+          ) : (
+            <FormattedMessage id="xpack.idxMgmt.indexDetails.mappings.json" defaultMessage="JSON" />
           )}
         </EuiButton>
       </EuiFlexGroup>
@@ -223,7 +227,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             min-width: 600px;
           `}
         >
-          <EuiPanel>{toggleOn ? jsonBlock : treeViewBlock}</EuiPanel>
+          <EuiPanel>{isJSONVisible ? jsonBlock : treeViewBlock}</EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
