@@ -7,12 +7,14 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import type { ClusterDetails } from '@kbn/es-types';
 import { EuiSearchBar, type Query } from '@elastic/eui';
 import { Request } from '../../../../../../common/adapters/request/types';
 import { getLocalClusterDetails, LOCAL_CLUSTER_KEY } from './local_cluster';
 
-export function findClusters(request: Request, query?: Query): Record<string, ClusterDetails> {
+export function findClusters(
+  request: Request,
+  query?: Query
+): Record<string, estypes.ClusterDetails> {
   const rawResponse = (request.response?.json as { rawResponse?: estypes.SearchResponse })
     ?.rawResponse;
   if (!rawResponse) {
@@ -22,7 +24,7 @@ export function findClusters(request: Request, query?: Query): Record<string, Cl
   const clusters = rawResponse._clusters
     ? (
         rawResponse._clusters as estypes.ClusterStatistics & {
-          details: Record<string, ClusterDetails>;
+          details: Record<string, estypes.ClusterDetails>;
         }
       ).details
     : {
@@ -44,7 +46,7 @@ export function findClusters(request: Request, query?: Query): Record<string, Cl
     defaultFields: ['name'],
   });
 
-  const narrowedClusers: Record<string, ClusterDetails> = {};
+  const narrowedClusers: Record<string, estypes.ClusterDetails> = {};
   narrowedClusterItems.forEach(({ name }) => {
     narrowedClusers[name] = clusters[name];
   });
