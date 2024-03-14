@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
 import { resetSLOResponseSchema } from '@kbn/slo-schema';
 import {
   getSLOSummaryPipelineId,
@@ -29,7 +29,8 @@ export class ResetSLO {
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private logger: Logger,
-    private spaceId: string
+    private spaceId: string,
+    private basePath: IBasePath
   ) {}
 
   public async execute(sloId: string) {
@@ -49,7 +50,10 @@ export class ResetSLO {
       await this.transformManager.install(slo);
       await this.transformManager.start(rollupTransformId);
       await retryTransientEsErrors(
-        () => this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(slo, this.spaceId)),
+        () =>
+          this.esClient.ingest.putPipeline(
+            getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
+          ),
         { logger: this.logger }
       );
 

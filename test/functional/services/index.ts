@@ -17,6 +17,7 @@ import {
   SnapshotsService,
 } from './common';
 import { ComboBoxService } from './combo_box';
+import { SelectableService } from './selectable';
 import {
   DashboardAddPanelService,
   DashboardReplacePanelService,
@@ -76,6 +77,7 @@ export const services = {
   dashboardSettings: DashboardSettingsProvider,
   flyout: FlyoutService,
   comboBox: ComboBoxService,
+  selectable: SelectableService,
   dataGrid: DataGridService,
   embedding: EmbeddingService,
   renderable: RenderableService,

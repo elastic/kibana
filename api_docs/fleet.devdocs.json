@@ -5311,6 +5311,144 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.AgentPolicyServiceInterface.fetchAllAgentPolicyIds",
+            "type": "Function",
+            "tags": [],
+            "label": "fetchAllAgentPolicyIds",
+            "description": [],
+            "signature": [
+              "(soClient: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
+              ", { perPage, kuery }?: ",
+              "FetchAllAgentPolicyIdsOptions",
+              ") => AsyncIterable<string[]>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.AgentPolicyServiceInterface.fetchAllAgentPolicyIds.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "soClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
+                ],
+                "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.AgentPolicyServiceInterface.fetchAllAgentPolicyIds.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "__1",
+                "description": [],
+                "signature": [
+                  "{ perPage?: number | undefined; kuery?: string | undefined; }"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.AgentPolicyServiceInterface.fetchAllAgentPolicies",
+            "type": "Function",
+            "tags": [],
+            "label": "fetchAllAgentPolicies",
+            "description": [],
+            "signature": [
+              "(soClient: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
+              ", { perPage, kuery, sortOrder, sortField, fields, }?: ",
+              "FetchAllAgentPoliciesOptions",
+              ") => AsyncIterable<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.AgentPolicy",
+                "text": "AgentPolicy"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.AgentPolicyServiceInterface.fetchAllAgentPolicies.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "soClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
+                ],
+                "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.AgentPolicyServiceInterface.fetchAllAgentPolicies.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "__1",
+                "description": [],
+                "signature": [
+                  "Pick<",
+                  {
+                    "pluginId": "fleet",
+                    "scope": "common",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-common.ListWithKuery",
+                    "text": "ListWithKuery"
+                  },
+                  ", \"perPage\" | \"kuery\" | \"sortField\" | \"sortOrder\"> & { fields?: string[] | undefined; }"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -19014,7 +19152,7 @@
             "label": "fleet",
             "description": [],
             "signature": [
-              "{ all: boolean; setup: boolean; readEnrollmentTokens: boolean; readAgentPolicies: boolean; }"
+              "{ all: boolean; setup: boolean; readEnrollmentTokens: boolean; readAgentPolicies: boolean; allAgentPolicies: boolean; readAgents: boolean; allAgents: boolean; readSettings: boolean; allSettings: boolean; }"
             ],
             "path": "x-pack/plugins/fleet/common/authz.ts",
             "deprecated": false,

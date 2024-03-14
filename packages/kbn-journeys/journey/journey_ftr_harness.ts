@@ -58,6 +58,10 @@ export class JourneyFtrHarness {
 
   private apm: apmNode.Agent | null = null;
 
+  // journey can be run to collect EBT/APM metrics or just as a functional test
+  // TEST_PERFORMANCE_PHASE is defined via scripts/run_perfomance.js run only
+  private readonly isPerformanceRun = process.env.TEST_PERFORMANCE_PHASE || false;
+
   // Update the Telemetry and APM global labels to link traces with journey
   private async updateTelemetryAndAPMLabels(labels: { [k: string]: string }) {
     this.log.info(`Updating telemetry & APM labels: ${JSON.stringify(labels)}`);
@@ -162,7 +166,12 @@ export class JourneyFtrHarness {
     // Loading test data
     await Promise.all([
       asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
-        await this.esArchiver.load(esArchive);
+        if (this.isPerformanceRun) {
+          // we start Elasticsearch only once and keep ES data persisitent.
+          await this.esArchiver.loadIfNeeded(esArchive);
+        } else {
+          await this.esArchiver.load(esArchive);
+        }
       }),
       asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
         await this.kibanaServer.importExport.load(kbnArchive);
@@ -233,7 +242,10 @@ export class JourneyFtrHarness {
     await this.teardownApm();
     await Promise.all([
       asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
-        await this.esArchiver.unload(esArchive);
+        // Keep ES data when journey is run twice (avoid unload after "Warmup" phase)
+        if (!this.isPerformanceRun) {
+          await this.esArchiver.unload(esArchive);
+        }
       }),
       asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
         await this.kibanaServer.importExport.unload(kbnArchive);
