@@ -69,7 +69,11 @@ export class TaskPool {
    * Gets how many workers are currently in use.
    */
   public get occupiedWorkers() {
-    return this.tasksInPool.size;
+    let count = 0;
+    for (const [, runner] of Array.from(this.tasksInPool)) {
+      count += runner.definition.workerCost;
+    }
+    return count;
   }
 
   /**
@@ -112,13 +116,13 @@ export class TaskPool {
     // Note `this.availableWorkers` is a getter with side effects, so we just want
     // to call it once for this bit of the code.
     const availableWorkers = this.availableWorkers;
-    const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, availableWorkers);
+    // const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, availableWorkers);
 
     if (attempt > MAX_RUN_ATTEMPTS) {
       const stats = [
         `availableWorkers: ${availableWorkers}`,
-        `tasksToRun: ${tasksToRun.length}`,
-        `leftOverTasks: ${leftOverTasks.length}`,
+        `tasksToRun: ${tasks.length}`,
+        `leftOverTasks: ${tasks.length}`,
         `maxWorkers: ${this.maxWorkers}`,
         `occupiedWorkers: ${this.occupiedWorkers}`,
         `workerLoad: ${this.workerLoad}`,
@@ -129,9 +133,9 @@ export class TaskPool {
       return TaskPoolRunResult.RanOutOfCapacity;
     }
 
-    if (tasksToRun.length) {
+    if (tasks.length) {
       await Promise.all(
-        tasksToRun
+        tasks
           .filter(
             (taskRunner) =>
               !Array.from(this.tasksInPool.keys()).some((executionId: string) =>
@@ -162,12 +166,7 @@ export class TaskPool {
       );
     }
 
-    if (leftOverTasks.length) {
-      if (this.availableWorkers) {
-        return this.run(leftOverTasks, attempt + 1);
-      }
-      return TaskPoolRunResult.RanOutOfCapacity;
-    } else if (!this.availableWorkers) {
+    if (!this.availableWorkers) {
       return TaskPoolRunResult.RunningAtCapacity;
     }
     return TaskPoolRunResult.RunningAllClaimedTasks;
@@ -236,11 +235,6 @@ export class TaskPool {
       this.logger.error(`Failed to cancel task ${task.toString()}: ${err}`);
     }
   }
-}
-
-function partitionListByCount<T>(list: T[], count: number): [T[], T[]] {
-  const listInCount = list.splice(0, count);
-  return [listInCount, list];
 }
 
 function durationAsString(duration: Duration): string {

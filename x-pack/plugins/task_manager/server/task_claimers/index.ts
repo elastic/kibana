@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subject, Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { TaskStore } from '../task_store';
 import { TaskClaim, TaskTiming } from '../task_events';
@@ -37,7 +37,7 @@ export interface ClaimOwnershipResult {
   timing?: TaskTiming;
 }
 
-export type TaskClaimerFn = (opts: TaskClaimerOpts) => Observable<ClaimOwnershipResult>;
+export type TaskClaimerFn = (opts: TaskClaimerOpts) => Promise<ClaimOwnershipResult>;
 
 export function getTaskClaimer(strategy: string): TaskClaimerFn {
   switch (strategy) {

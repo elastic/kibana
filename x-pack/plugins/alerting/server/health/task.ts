@@ -10,6 +10,7 @@ import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  TaskPriority,
 } from '@kbn/task-manager-plugin/server';
 import { AlertingConfig } from '../config';
 import { AlertingPluginsStart } from '../plugin';
@@ -40,7 +41,7 @@ export async function scheduleAlertingHealthCheck(
       id: HEALTH_TASK_ID,
       taskType: HEALTH_TASK_TYPE,
       schedule: {
-        interval,
+        interval: '1s',
       },
       state: emptyState,
       params: {},
@@ -59,6 +60,7 @@ function registerAlertingHealthCheckTask(
     [HEALTH_TASK_TYPE]: {
       title: 'Alerting framework health check task',
       stateSchemaByVersion,
+      priority: TaskPriority.Critical,
       createTaskRunner: healthCheckTaskRunner(logger, coreStartServices),
     },
   });
@@ -72,6 +74,7 @@ export function healthCheckTaskRunner(
     const state = taskInstance.state as LatestTaskStateSchema;
     return {
       async run() {
+        console.log('***', new Date(), 'Running health check');
         try {
           const result = await getAlertingHealthStatus(
             (

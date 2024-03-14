@@ -336,18 +336,21 @@ export function getRuleType(
       };
       const actionContext = addMessages(name, baseContext, params);
 
-      alertsClient.report({
-        id: alertId,
-        actionGroup: ActionGroupId,
-        state: {},
-        context: actionContext,
-        payload: {
-          [ALERT_REASON]: actionContext.message,
-          [ALERT_TITLE]: actionContext.title,
-          [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
-          [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
-        },
-      });
+      // TODO: Undo this change
+      for (let i = 0; i < 1000; i++) {
+        alertsClient.report({
+          id: `${alertId}-${i}`,
+          actionGroup: ActionGroupId,
+          state: {},
+          context: actionContext,
+          payload: {
+            [ALERT_REASON]: actionContext.message,
+            [ALERT_TITLE]: actionContext.title,
+            [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
+            [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
+          },
+        });
+      }
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
 

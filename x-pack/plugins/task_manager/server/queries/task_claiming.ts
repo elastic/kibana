@@ -8,9 +8,10 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
-import { Subject, Observable, of } from 'rxjs';
+import { Subject, Observable, of, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { groupBy, isPlainObject } from 'lodash';
+import { isPlainObject } from 'lodash';
+import minimatch from 'minimatch';
 
 import { Logger } from '@kbn/core/server';
 
@@ -63,18 +64,10 @@ export function isClaimOwnershipResult(result: unknown): result is ClaimOwnershi
   );
 }
 
-export enum BatchConcurrency {
-  Unlimited,
-  Limited,
-}
-
-export type TaskClaimingBatches = Array<UnlimitedBatch | LimitedBatch>;
-export interface TaskClaimingBatch<Concurrency extends BatchConcurrency, TaskType> {
-  concurrency: Concurrency;
-  tasksTypes: TaskType;
-}
-export type UnlimitedBatch = TaskClaimingBatch<BatchConcurrency.Unlimited, Set<string>>;
-export type LimitedBatch = TaskClaimingBatch<BatchConcurrency.Limited, string>;
+export type TaskClaimingBatches = Array<{
+  size: () => number;
+  types: string[];
+}>;
 
 export const TASK_MANAGER_MARK_AS_CLAIMED = 'mark-available-tasks-as-claimed';
 
@@ -87,7 +80,7 @@ export class TaskClaiming {
   private taskStore: TaskStore;
   private getCapacity: (taskType?: string) => number;
   private logger: Logger;
-  private readonly taskClaimingBatchesByType: TaskClaimingBatches;
+  private readonly taskClaimingBatches: TaskClaimingBatches;
   private readonly taskMaxAttempts: Record<string, number>;
   private readonly excludedTaskTypes: string[];
   private readonly unusedTypes: string[];
@@ -105,38 +98,46 @@ export class TaskClaiming {
     this.taskStore = opts.taskStore;
     this.getCapacity = opts.getCapacity;
     this.logger = opts.logger.get('taskClaiming');
-    this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
     this.excludedTaskTypes = opts.excludedTaskTypes;
     this.unusedTypes = opts.unusedTypes;
     this.taskClaimer = getTaskClaimer(opts.strategy);
     this.events$ = new Subject<TaskClaim>();
+    this.taskClaimingBatches = this.partitionIntoClaimingBatches(this.definitions);
   }
 
   private partitionIntoClaimingBatches(definitions: TaskTypeDictionary): TaskClaimingBatches {
-    const { limitedConcurrency, unlimitedConcurrency, skippedTypes } = groupBy(
-      definitions.getAllDefinitions(),
-      (definition) =>
-        definition.maxConcurrency
-          ? 'limitedConcurrency'
-          : definition.maxConcurrency === 0
-          ? 'skippedTypes'
-          : 'unlimitedConcurrency'
-    );
-
-    if (skippedTypes?.length) {
-      this.logger.info(
-        `Task Manager will never claim tasks of the following types as their "maxConcurrency" is set to 0: ${skippedTypes
-          .map(({ type }) => type)
-          .join(', ')}`
-      );
+    const result: TaskClaimingBatches = [];
+    const typesByCost: Record<number, string[]> = {
+      // Add unrecognized tasks to the default cost (1)
+      1: this.unusedTypes,
+    };
+    for (const taskTypeDef of definitions.getAllDefinitions()) {
+      if (typeof taskTypeDef.maxConcurrency === 'number') {
+        // A Kibana instance should only run a given task type X at a time
+        result.push({
+          size: () => this.getCapacity(taskTypeDef.type),
+          types: [taskTypeDef.type],
+        });
+      } else if (!isTaskTypeExcluded(this.excludedTaskTypes, taskTypeDef.type)) {
+        const cost = taskTypeDef.workerCost;
+        if (!typesByCost[cost]) {
+          typesByCost[cost] = [];
+        }
+        typesByCost[cost].push(taskTypeDef.type);
+      }
     }
-    return [
-      ...(unlimitedConcurrency
-        ? [asUnlimited(new Set(unlimitedConcurrency.map(({ type }) => type)))]
-        : []),
-      ...(limitedConcurrency ? limitedConcurrency.map(({ type }) => asLimited(type)) : []),
-    ];
+
+    for (const cost of Object.keys(typesByCost)
+      .map((c) => parseFloat(c))
+      .sort()) {
+      result.push({
+        size: () => Math.floor(this.getCapacity() / cost),
+        types: typesByCost[cost],
+      });
+    }
+
+    return result;
   }
 
   private normalizeMaxAttempts(definitions: TaskTypeDictionary) {
@@ -149,11 +150,11 @@ export class TaskClaiming {
   private getClaimingBatches() {
     // return all batches, starting at index and cycling back to where we began
     const batch = [
-      ...this.taskClaimingBatchesByType.slice(this.claimingBatchIndex),
-      ...this.taskClaimingBatchesByType.slice(0, this.claimingBatchIndex),
+      ...this.taskClaimingBatches.slice(this.claimingBatchIndex),
+      ...this.taskClaimingBatches.slice(0, this.claimingBatchIndex),
     ];
     // shift claimingBatchIndex by one so that next cycle begins at the next index
-    this.claimingBatchIndex = (this.claimingBatchIndex + 1) % this.taskClaimingBatchesByType.length;
+    this.claimingBatchIndex = (this.claimingBatchIndex + 1) % this.taskClaimingBatches.length;
     return batch;
   }
 
@@ -164,7 +165,7 @@ export class TaskClaiming {
   public claimAvailableTasksIfCapacityIsAvailable(
     claimingOptions: Omit<OwnershipClaimingOpts, 'size' | 'taskTypes'>
   ): Observable<Result<ClaimOwnershipResult, FillPoolResult>> {
-    if (this.getCapacity()) {
+    if (this.getCapacity() > 0) {
       const opts: TaskClaimerOpts = {
         batches: this.getClaimingBatches(),
         claimOwnershipUntil: claimingOptions.claimOwnershipUntil,
@@ -176,7 +177,7 @@ export class TaskClaiming {
         taskMaxAttempts: this.taskMaxAttempts,
         excludedTaskTypes: this.excludedTaskTypes,
       };
-      return this.taskClaimer(opts).pipe(map((claimResult) => asOk(claimResult)));
+      return from(this.taskClaimer(opts)).pipe(map((claimResult) => asOk(claimResult)));
     }
     this.logger.debug(
       `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers.`
@@ -185,22 +186,12 @@ export class TaskClaiming {
   }
 }
 
-export function isLimited(
-  batch: TaskClaimingBatch<BatchConcurrency.Limited | BatchConcurrency.Unlimited, unknown>
-): batch is LimitedBatch {
-  return batch.concurrency === BatchConcurrency.Limited;
-}
+function isTaskTypeExcluded(excludedTaskTypes: string[], taskType: string) {
+  for (const excludedType of excludedTaskTypes) {
+    if (minimatch(taskType, excludedType)) {
+      return true;
+    }
+  }
 
-function asLimited(tasksType: string): LimitedBatch {
-  return {
-    concurrency: BatchConcurrency.Limited,
-    tasksTypes: tasksType,
-  };
-}
-
-function asUnlimited(tasksTypes: Set<string>): UnlimitedBatch {
-  return {
-    concurrency: BatchConcurrency.Unlimited,
-    tasksTypes,
-  };
+  return false;
 }

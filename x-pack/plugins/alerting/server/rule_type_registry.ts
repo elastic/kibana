@@ -12,7 +12,11 @@ import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import {
+  RunContext,
+  TaskManagerSetupContract,
+  TaskPriority,
+} from '@kbn/task-manager-plugin/server';
 import { stateSchemaByVersion } from '@kbn/alerting-state-types';
 import { TaskRunnerFactory } from './task_runner';
 import {
@@ -299,6 +303,10 @@ export class RuleTypeRegistry {
         title: ruleType.name,
         timeout: ruleType.ruleTaskTimeout,
         stateSchemaByVersion,
+        priority: ['.es-query', '.index-threshold'].includes(ruleType.id)
+          ? TaskPriority.LightweightAlertingRulesAndActions
+          : TaskPriority.AlertingRulesAndActions,
+        workerCost: ['.es-query', '.index-threshold'].includes(ruleType.id) ? 0.1 : 1,
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,

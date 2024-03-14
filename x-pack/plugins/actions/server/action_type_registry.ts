@@ -7,7 +7,11 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import {
+  RunContext,
+  TaskManagerSetupContract,
+  TaskPriority,
+} from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { rawConnectorSchema } from './raw_connector_schema';
 import { ActionType as CommonActionType, areValidFeatures } from '../common';
@@ -184,6 +188,11 @@ export class ActionTypeRegistry {
       [`actions:${actionType.id}`]: {
         title: actionType.name,
         maxAttempts,
+        priority:
+          actionType.id === '.server-log'
+            ? TaskPriority.LightweightAlertingRulesAndActions
+            : TaskPriority.AlertingRulesAndActions,
+        workerCost: actionType.id === '.server-log' ? 0.1 : 1,
         createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
         indirectParamsSchema: rawConnectorSchema,
       },

@@ -12,8 +12,14 @@ import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/interval
 import { DecoratedError } from './task_running';
 
 export enum TaskPriority {
-  Low = 1,
-  Normal = 50,
+  LongRunning = 1,
+  Low = 10,
+  Normal = 20,
+  LightweightNormal = 30,
+  AlertingRulesAndActions = 40,
+  LightweightAlertingRulesAndActions = 50,
+  Reporting = 60,
+  Critical = 70,
 }
 
 /*
@@ -171,9 +177,14 @@ export const taskDefinitionSchema = schema.object(
      */
     maxConcurrency: schema.maybe(
       schema.number({
-        min: 0,
+        min: 1,
       })
     ),
+    workerCost: schema.number({
+      min: 0.1,
+      max: 1,
+      defaultValue: 1,
+    }),
     stateSchemaByVersion: schema.maybe(
       schema.recordOf(
         schema.string(),

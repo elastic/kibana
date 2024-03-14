@@ -35,7 +35,7 @@ import type {
   TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
-import { throwRetryableError } from '@kbn/task-manager-plugin/server';
+import { throwRetryableError, TaskPriority } from '@kbn/task-manager-plugin/server';
 
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import {
@@ -576,6 +576,7 @@ export class ExecuteReportTask implements ReportingTask {
       maxAttempts: maxAttempts + 1, // Add 1 so we get an extra attempt in case of failure during a Kibana restart
       timeout: queueTimeout,
       maxConcurrency,
+      priority: TaskPriority.Reporting,
     };
   }
 
