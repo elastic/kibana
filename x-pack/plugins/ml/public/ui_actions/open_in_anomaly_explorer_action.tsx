@@ -6,29 +6,41 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
-import type { MlCoreSetup } from '../plugin';
+import type { EmbeddableApiContext, HasParentApi, HasType } from '@kbn/presentation-publishing';
+import { apiIsOfType } from '@kbn/presentation-publishing';
+import { apiHasType } from '@kbn/presentation-publishing';
+import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { ML_APP_LOCATOR } from '../../common/constants/locator';
-import type { AnomalyChartsFieldSelectionContext, SwimLaneDrilldownContext } from '../embeddables';
+import type { ExplorerAppState } from '../../common/types/locator';
+import type {
+  AnomalyExplorerChartsEmbeddableType,
+  AnomalySwimLaneEmbeddableType,
+} from '../embeddables';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
   isAnomalyExplorerEmbeddable,
   isSwimLaneEmbeddable,
 } from '../embeddables';
-import type { ExplorerAppState } from '../../common/types/locator';
+import type { MlCoreSetup } from '../plugin';
+
+export type OpenInAnomalyExplorerActionApi = HasType<
+  AnomalySwimLaneEmbeddableType | AnomalyExplorerChartsEmbeddableType
+> &
+  Partial<HasParentApi<HasType>>;
 
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
 
-export function createOpenInExplorerAction(
-  getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<SwimLaneDrilldownContext | AnomalyChartsFieldSelectionContext> {
-  return {
+export const isApiCompatible = (api: unknown | null): api is OpenInAnomalyExplorerActionApi =>
+  Boolean(apiHasType(api));
+
+export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getStartServices']) {
+  return createAction<EmbeddableApiContext>({
     id: 'open-in-anomaly-explorer',
     type: OPEN_IN_ANOMALY_EXPLORER_ACTION,
-    getIconType(context): string {
+    getIconType(): string {
       return 'visTable';
     },
     getDisplayName() {
@@ -122,13 +134,12 @@ export function createOpenInExplorerAction(
         await application.navigateToUrl(anomalyExplorerUrl!);
       }
     },
-    async isCompatible({
-      embeddable,
-    }: SwimLaneDrilldownContext | AnomalyChartsFieldSelectionContext) {
+    async isCompatible({ embeddable }: EmbeddableApiContext) {
+      if (!isApiCompatible(embeddable)) return false;
       return (
-        embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE ||
-        embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE
+        apiIsOfType(embeddable, ANOMALY_SWIMLANE_EMBEDDABLE_TYPE) ||
+        apiIsOfType(embeddable, ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE)
       );
     },
-  };
+  });
 }
