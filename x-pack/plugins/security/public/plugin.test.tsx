@@ -36,6 +36,7 @@ describe('Security Plugin', () => {
         )
       ).toEqual({
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
+        authz: { isRoleManagementEnabled: expect.any(Function) },
         license: {
           isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
@@ -75,6 +76,7 @@ describe('Security Plugin', () => {
         management: managementSetupMock,
         fatalErrors: coreSetupMock.fatalErrors,
         getStartServices: coreSetupMock.getStartServices,
+        buildFlavor: expect.stringMatching(new RegExp('^serverless|traditional$')),
       });
     });
   });
@@ -97,6 +99,9 @@ describe('Security Plugin', () => {
           "authc": Object {
             "areAPIKeysEnabled": [Function],
             "getCurrentUser": [Function],
+          },
+          "authz": Object {
+            "isRoleManagementEnabled": [Function],
           },
           "navControlService": Object {
             "addUserMenuLinks": [Function],
