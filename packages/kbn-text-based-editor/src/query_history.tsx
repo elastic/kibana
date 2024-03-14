@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { css, Interpolation, Theme } from '@emotion/react';
 import { type QueryHistoryItem, getHistoryItems } from './history_localStorage';
-import { getReducedSpaceStyling } from './query_history_helpers';
+import { getReducedSpaceStyling, swapArrayElements } from './query_history_helpers';
 
 const CONTAINER_MAX_HEIGHT = 190;
 
@@ -88,7 +88,7 @@ export const getTableColumns = (
   isOnReducedSpaceLayout: boolean,
   actions: Array<CustomItemAction<QueryHistoryItem>>
 ): Array<EuiBasicTableColumn<QueryHistoryItem>> => {
-  return [
+  const columnsArray = [
     {
       field: 'status',
       name: '',
@@ -101,6 +101,8 @@ export const getTableColumns = (
             return <EuiIcon type="checkInCircleFilled" color="success" size="s" />;
           case 'error':
             return <EuiIcon type="error" color="danger" size="s" />;
+          case 'warning':
+            return <EuiIcon type="warning" color="warning" size="s" />;
         }
       },
       width: isOnReducedSpaceLayout ? 'auto' : '40px',
@@ -124,18 +126,18 @@ export const getTableColumns = (
       ),
     },
     {
-      field: 'timeRun',
+      field: 'timeRan',
       'data-test-subj': 'timeRan',
-      name: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.timeRunColumnLabel', {
-        defaultMessage: 'Time run',
+      name: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.timeRanColumnLabel', {
+        defaultMessage: 'Time ran',
       }),
       sortable: true,
-      render: (timeRun: QueryHistoryItem['timeRun']) => timeRun,
+      render: (timeRan: QueryHistoryItem['timeRan']) => timeRan,
       width: isOnReducedSpaceLayout ? 'auto' : '240px',
     },
     {
       field: 'duration',
-      'data-test-subj': 'duration',
+      'data-test-subj': 'lastDuration',
       name: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.lastDurationColumnLabel',
         {
@@ -148,9 +150,13 @@ export const getTableColumns = (
     {
       name: '',
       actions,
+      'data-test-subj': 'actions',
       width: isOnReducedSpaceLayout ? 'auto' : '40px',
     },
   ];
+
+  // I need to swap the elements here to get the desired design
+  return isOnReducedSpaceLayout ? swapArrayElements(columnsArray, 1, 2) : columnsArray;
 };
 
 export function QueryHistory({
@@ -235,7 +241,7 @@ export function QueryHistory({
 
   const sorting = {
     sort: {
-      field: 'timeRun',
+      field: 'timeRan',
       direction: sortDirection,
     },
   };

@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { QueryHistoryItem } from './history_localStorage';
 
 export const getReducedSpaceStyling = () => {
   return `
@@ -52,4 +54,16 @@ export const getReducedSpaceStyling = () => {
           border-bottom: 0;
         }
   `;
+};
+
+export const swapArrayElements = (
+  array: Array<EuiBasicTableColumn<QueryHistoryItem>>,
+  index1: number,
+  index2: number
+) => {
+  const temp = array[index1];
+  array[index1] = array[index2];
+  array[index2] = temp;
+
+  return array;
 };

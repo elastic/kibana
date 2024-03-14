@@ -240,10 +240,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     } else {
       updateCachedQueries({
         queryString,
-        status: serverErrors?.length ? 'error' : 'success',
+        status: serverErrors?.length ? 'error' : serverWarning ? 'warning' : 'success',
       });
     }
-  }, [isQueryLoading, queryString, serverErrors?.length, uiSettings]);
+  }, [isQueryLoading, queryString, serverErrors?.length, serverWarning, uiSettings]);
 
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();

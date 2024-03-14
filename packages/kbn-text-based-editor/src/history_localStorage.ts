@@ -13,9 +13,9 @@ const QUERY_HISTORY_ITEM_KEY = 'QUERY_HISTORY_ITEM_KEY';
  */
 
 export interface QueryHistoryItem {
-  status?: 'success' | 'error';
+  status?: 'success' | 'error' | 'warning';
   queryString: string;
-  timeRun?: string;
+  timeRan?: string;
   timeZone?: string;
   duration?: string;
 }
@@ -39,8 +39,8 @@ export const getHistoryItems = (sortDirection: 'desc' | 'asc'): QueryHistoryItem
   const historyItems: QueryHistoryItem[] = JSON.parse(localStorageString);
   const sortedByDate = historyItems.sort((a, b) => {
     return sortDirection === 'desc'
-      ? sortDates(b?.timeRun, a?.timeRun)
-      : sortDates(a?.timeRun, b?.timeRun);
+      ? sortDates(b?.timeRan, a?.timeRan)
+      : sortDates(a?.timeRan, b?.timeRan);
   });
   return sortedByDate;
 };
@@ -64,7 +64,7 @@ export const addQueriesToCache = (item: QueryHistoryItem) => {
     const tz = getMomentTimeZone(item.timeZone);
     cachedQueries.set(trimmedQueryString, {
       ...item,
-      timeRun: moment().tz(tz).format('MMM. D, YY HH:mm:ss.SSS'),
+      timeRan: moment().tz(tz).format('MMM. D, YY HH:mm:ss.SSS'),
     });
   }
 };
@@ -76,10 +76,10 @@ export const updateCachedQueries = (item: QueryHistoryItem) => {
   if (query) {
     const tz = getMomentTimeZone(query?.timeZone);
     const now = moment().tz(tz).format('MMM. D, YY HH:mm:ss.SSS');
-    const duration = moment(now).diff(moment(query?.timeRun));
+    const duration = moment(now).diff(moment(query?.timeRan));
     cachedQueries.set(trimmedQueryString, {
       ...query,
-      timeRun: moment(query?.timeRun).format('MMM. D, YY HH:mm:ss'),
+      timeRan: moment(query?.timeRan).format('MMM. D, YY HH:mm:ss'),
       duration: `${duration}ms`,
       status: item.status,
     });
