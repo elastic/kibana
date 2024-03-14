@@ -128,13 +128,14 @@ const FieldNameFieldComponent = ({
                 noSuggestions={false}
                 options={optionsAsComboBoxOptions}
                 fullWidth
+                isClearable={false}
                 selectedOptions={value && valueInList ? [{ value, label: value }] : undefined}
                 onChange={(newValue) => {
                   if (newValue.length === 0) {
-                    // Don't allow clearing the type. One must always be selected
-                    return;
+                    setValue('');
+                  } else {
+                    setValue(newValue[0].label);
                   }
-                  setValue(newValue[0].label);
                 }}
                 data-test-subj="config-custom-field-name"
               />
