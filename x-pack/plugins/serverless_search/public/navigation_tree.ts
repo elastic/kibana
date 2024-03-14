@@ -88,11 +88,11 @@ export const navigationTree: NavigationTreeDefinition = {
           title: CONNECTORS_LABEL,
           link: 'serverlessConnectors',
         },
-        // {
-        //   link: 'management:api_keys',
-        //   breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
-        //   spaceBefore: 'm',
-        // },
+        {
+          link: 'management:api_keys',
+          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
+          spaceBefore: 'm',
+        },
       ],
     },
   ],

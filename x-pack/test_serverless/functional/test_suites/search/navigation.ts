@@ -79,6 +79,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:ingest_pipelines' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Ingest Pipelines']);
+
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:api_keys' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['API keys']);
     });
 
     it('navigate management', async () => {
