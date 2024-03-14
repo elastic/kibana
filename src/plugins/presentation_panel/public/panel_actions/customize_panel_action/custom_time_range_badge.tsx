@@ -26,8 +26,7 @@ const isApiCompatable = (
   unknownApi: null | unknown
 ): unknownApi is Pick<PublishesLocalUnifiedSearch, 'localTimeRange'> => {
   return Boolean(
-    unknownApi &&
-      (unknownApi as PublishesLocalUnifiedSearch)?.localTimeRange !== undefined
+    unknownApi && (unknownApi as PublishesLocalUnifiedSearch)?.localTimeRange !== undefined
   );
 };
 
