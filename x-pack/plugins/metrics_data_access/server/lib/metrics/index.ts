@@ -42,7 +42,7 @@ export const query = async (
   const filter: Array<Record<string, any>> = [
     {
       range: {
-        [options.timerange.timeFieldName || TIMESTAMP_FIELD]: {
+        [TIMESTAMP_FIELD]: {
           gte: options.timerange.from,
           lte: options.timerange.to,
           format: 'epoch_millis',

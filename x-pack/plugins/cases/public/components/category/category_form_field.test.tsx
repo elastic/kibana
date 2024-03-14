@@ -16,17 +16,7 @@ import { categories } from '../../containers/mock';
 import { MAX_CATEGORY_LENGTH } from '../../../common/constants';
 import { FormTestComponent } from '../../common/test_utils';
 
-// FLAKY: https://github.com/elastic/kibana/issues/177791
-// FLAKY: https://github.com/elastic/kibana/issues/177792
-// FLAKY: https://github.com/elastic/kibana/issues/177793
-// FLAKY: https://github.com/elastic/kibana/issues/177794
-// FLAKY: https://github.com/elastic/kibana/issues/177795
-// FLAKY: https://github.com/elastic/kibana/issues/177796
-// FLAKY: https://github.com/elastic/kibana/issues/171605
-// FLAKY: https://github.com/elastic/kibana/issues/171606
-// FLAKY: https://github.com/elastic/kibana/issues/171607
-// FLAKY: https://github.com/elastic/kibana/issues/171608
-describe.skip('Category', () => {
+describe('Category', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
 
