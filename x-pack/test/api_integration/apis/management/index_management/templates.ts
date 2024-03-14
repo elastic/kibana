@@ -376,6 +376,7 @@ export default function ({ getService }: FtrProviderContext) {
           indexPatterns: [getRandomString()],
           template: {},
           deprecated: true,
+          allowAutoCreate: 'TRUE',
         };
 
         await createTemplate(indexTemplate).expect(200);
