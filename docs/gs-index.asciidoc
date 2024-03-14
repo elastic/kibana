@@ -9,10 +9,6 @@ release-state can be: released | prerelease | unreleased
 :major-version:  5.4
 :branch:         5.4
 
-:docker-image:   docker.elastic.co/kibana/kibana:{version}
-:es-ref:         https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/
-:security:       https://www.elastic.co/community/security/
-
 include::{docs-root}/shared/attributes.asciidoc[]
 
 include::introduction.asciidoc[]
