@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { transformRawData } from '@kbn/elastic-assistant-common';
-
-import type { Message } from '../../assistant_context/types';
-import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../content/prompts/system/translations';
+import { Replacement, transformRawData } from '@kbn/elastic-assistant-common';
 import { getAnonymizedValue as defaultGetAnonymizedValue } from '../get_anonymized_value';
+import type { Message } from '../../assistant_context/types';
 import type { SelectedPromptContext } from '../prompt_context/types';
 import type { Prompt } from '../types';
+import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../content/prompts/system/translations';
 
 export const getSystemMessages = ({
   isNewChat,
@@ -33,16 +32,15 @@ export const getSystemMessages = ({
   return [message];
 };
 
-export async function getCombinedMessage({
+export function getCombinedMessage({
   currentReplacements,
   getAnonymizedValue = defaultGetAnonymizedValue,
   isNewChat,
-  onNewReplacements,
   promptText,
   selectedPromptContexts,
   selectedSystemPrompt,
 }: {
-  currentReplacements: Record<string, string> | undefined;
+  currentReplacements: Replacement[] | undefined;
   getAnonymizedValue?: ({
     currentReplacements,
     rawValue,
@@ -51,15 +49,19 @@ export async function getCombinedMessage({
     rawValue: string;
   }) => string;
   isNewChat: boolean;
-  onNewReplacements: (newReplacements: Record<string, string>) => void;
   promptText: string;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   selectedSystemPrompt: Prompt | undefined;
-}): Promise<Message> {
+}): Message {
+  const replacements: Replacement[] = currentReplacements ?? [];
+  const onNewReplacements = (newReplacements: Replacement[]) => {
+    replacements.push(...newReplacements);
+  };
+
   const promptContextsContent = Object.keys(selectedPromptContexts)
     .sort()
     .map((id) => {
-      const promptContext = transformRawData({
+      const promptContextData = transformRawData({
         allow: selectedPromptContexts[id].allow,
         allowReplacement: selectedPromptContexts[id].allowReplacement,
         currentReplacements,
@@ -68,16 +70,15 @@ export async function getCombinedMessage({
         rawData: selectedPromptContexts[id].rawData,
       });
 
-      return `${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContext)}`;
+      return `${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContextData)}`;
     });
 
   return {
     content: `${
       isNewChat ? `${selectedSystemPrompt?.content ?? ''}\n\n` : ''
-    }${promptContextsContent}
-
-${promptText}`,
+    }${promptContextsContent}\n\n${promptText}`,
     role: 'user', // we are combining the system and user messages into one message
     timestamp: new Date().toLocaleString(),
+    replacements,
   };
 }

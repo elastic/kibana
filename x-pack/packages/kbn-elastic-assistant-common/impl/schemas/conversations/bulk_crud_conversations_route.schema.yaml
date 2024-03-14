@@ -1,0 +1,183 @@
+openapi: 3.0.0
+info:
+  title: Bulk Actions API endpoint
+  version: '2023-10-31'
+paths:
+  /api/elastic_assistant/conversations/_bulk_action:
+    post:
+      operationId: PerformBulkAction
+      x-codegen-enabled: true
+      summary: Applies a bulk action to multiple conversations
+      description: The bulk action is applied to all conversations that match the filter or to the list of conversations by their IDs.
+      tags:
+        - Bulk API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                delete:
+                  $ref: '#/components/schemas/BulkActionBase'
+                create:
+                  type: array
+                  items:
+                    $ref: './common_attributes.schema.yaml#/components/schemas/ConversationCreateProps'
+                update:
+                  type: array
+                  items:
+                    $ref: './common_attributes.schema.yaml#/components/schemas/ConversationUpdateProps'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkCrudActionResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+components:
+  schemas:
+    BulkActionSkipReason:
+      type: string
+      enum:
+        - CONVERSATION_NOT_MODIFIED
+
+    BulkActionSkipResult:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        skip_reason:
+          $ref: '#/components/schemas/BulkActionSkipReason'
+      required:
+        - id
+        - skip_reason
+
+    ConversationDetailsInError:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+
+    NormalizedConversationError:
+      type: object
+      properties:
+        message:
+          type: string
+        status_code:
+          type: integer
+        err_code:
+          type: string
+        conversations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationDetailsInError'
+      required:
+        - message
+        - status_code
+        - conversations
+
+    BulkCrudActionResults:
+      type: object
+      properties:
+        updated:
+          type: array
+          items:
+            $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+        created:
+          type: array
+          items:
+            $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+        deleted:
+          type: array
+          items:
+            type: string
+        skipped:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkActionSkipResult'
+      required:
+        - updated
+        - created
+        - deleted
+        - skipped
+
+    BulkCrudActionSummary:
+      type: object
+      properties:
+        failed:
+          type: integer
+        skipped:
+          type: integer
+        succeeded:
+          type: integer
+        total:
+          type: integer
+      required:
+        - failed
+        - skipped
+        - succeeded
+        - total
+
+    BulkCrudActionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status_code:
+          type: integer
+        message:
+          type: string
+        conversations_count:
+          type: integer
+        attributes:
+          type: object
+          properties:
+            results:
+              $ref: '#/components/schemas/BulkCrudActionResults'
+            summary:
+              $ref: '#/components/schemas/BulkCrudActionSummary'
+            errors:
+              type: array
+              items:
+                $ref: '#/components/schemas/NormalizedConversationError'
+          required:
+            - results
+            - summary
+      required:
+        - attributes
+
+
+    BulkActionBase:
+      x-inline: true
+      type: object
+      properties:
+        query:
+          type: string
+          description: Query to filter conversations
+        ids:
+          type: array
+          description: Array of conversation IDs
+          minItems: 1
+          items:
+            type: string
+    
