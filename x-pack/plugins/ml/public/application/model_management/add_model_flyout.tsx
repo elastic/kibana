@@ -40,7 +40,6 @@ export interface AddModelFlyoutProps {
   modelDownloads: ModelItem[];
   onClose: () => void;
   onSubmit: (modelId: string) => void;
-  'data-test-subj'?: string;
 }
 
 export type AddModelFlyoutTabId = 'clickToDownload' | 'manualDownload';
@@ -48,12 +47,7 @@ export type AddModelFlyoutTabId = 'clickToDownload' | 'manualDownload';
 /**
  * Flyout for downloading elastic curated models and showing instructions for importing third-party models.
  */
-export const AddModelFlyout: FC<AddModelFlyoutProps> = ({
-  onClose,
-  onSubmit,
-  modelDownloads,
-  'data-test-subj': dataTestSubj,
-}) => {
+export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, modelDownloads }) => {
   const canCreateTrainedModels = usePermissionCheck('canCreateTrainedModels');
   const isClickToDownloadTabVisible = canCreateTrainedModels && modelDownloads.length > 0;
 
