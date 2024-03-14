@@ -4179,6 +4179,34 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-security-browser-internal@link:packages/core/security/core-security-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-security-browser-mocks@link:packages/core/security/core-security-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-security-browser@link:packages/core/security/core-security-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-security-common@link:packages/core/security/core-security-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-security-server-internal@link:packages/core/security/core-security-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-security-server-mocks@link:packages/core/security/core-security-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-security-server@link:packages/core/security/core-security-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-status-common-internal@link:packages/core/status/core-status-common-internal":
   version "0.0.0"
   uid ""
