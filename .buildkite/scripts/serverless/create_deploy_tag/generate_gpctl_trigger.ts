@@ -20,7 +20,7 @@ async function main() {
 
 function uploadTriggerStep(commitSha: string) {
   const triggerStep: BuildkiteTriggerStep = {
-    label: ':releasethekaken: Trigger GPCTL / Release Kibana',
+    label: ':ship: Trigger GPCTL / Release Kibana',
     trigger: 'gpctl-promote',
     async: true,
     build: {
