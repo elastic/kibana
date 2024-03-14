@@ -44,3 +44,7 @@ export const getReactEmbeddableFactory = <
     );
   return registry[key];
 };
+
+export const getReactEmbeddableFactories = () => {
+  return Object.values(registry);
+};
