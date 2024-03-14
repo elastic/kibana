@@ -16,7 +16,7 @@ interface Props {
 export function ErrorBudgetActions({ setDashboardAttachmentReady }: Props) {
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
-  const handleAttachToDashboard = () => {
+  const handleAddToDashboard = () => {
     setIsActionsPopoverOpen(false);
     if (setDashboardAttachmentReady) {
       setDashboardAttachmentReady(true);
@@ -38,12 +38,12 @@ export function ErrorBudgetActions({ setDashboardAttachmentReady }: Props) {
       <EuiContextMenuPanel>
         <EuiContextMenuItem
           icon="dashboardApp"
-          key="attachToDashboard"
-          onClick={handleAttachToDashboard}
-          data-test-subj="sloActinsAttachToDashboard"
+          key="addToDashboard"
+          onClick={handleAddToDashboard}
+          data-test-subj="sloActionsAddToDashboard"
         >
-          {i18n.translate('xpack.observability.slo.item.actions.attachToDashboard', {
-            defaultMessage: 'Attach to Dashboard',
+          {i18n.translate('xpack.observability.slo.item.actions.addToDashboard', {
+            defaultMessage: 'Add to Dashboard',
           })}
         </EuiContextMenuItem>
       </EuiContextMenuPanel>
