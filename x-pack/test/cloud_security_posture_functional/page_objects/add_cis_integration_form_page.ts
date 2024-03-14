@@ -86,6 +86,15 @@ export function AddCisIntegrationFormPageProvider({
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
+  const navigateToAddIntegrationKspmPage = async () => {
+    await PageObjects.common.navigateToUrl(
+      'fleet', // Defined in Security Solution plugin
+      'integrations/cloud_security_posture/add-integration/kspm',
+      { shouldUseHashForSubUrl: false }
+    );
+    await PageObjects.header.waitUntilLoadingHasFinished();
+  };
+
   const navigateToIntegrationCspList = async () => {
     await PageObjects.common.navigateToActualUrl(
       'integrations', // Defined in Security Solution plugin
@@ -205,12 +214,18 @@ export function AddCisIntegrationFormPageProvider({
     return fieldValue;
   };
 
+  const isOptionChecked = async (testId: string, id: string) => {
+    const checkBox = await testSubjects.find(testId);
+    return await (await checkBox.findByCssSelector(`input[id='${id}']`)).getAttribute('checked');
+  };
+
   return {
     cisAzure,
     cisAws,
     cisGcp,
     navigateToAddIntegrationCspmPage,
     navigateToAddIntegrationCnvmPage,
+    navigateToAddIntegrationKspmPage,
     navigateToIntegrationCspList,
     getUrlOnPostInstallModal,
     isRadioButtonChecked,
@@ -234,5 +249,6 @@ export function AddCisIntegrationFormPageProvider({
     getFieldValueInAddAgentFlyout,
     selectValue,
     getValueInEditPage,
+    isOptionChecked,
   };
 }
