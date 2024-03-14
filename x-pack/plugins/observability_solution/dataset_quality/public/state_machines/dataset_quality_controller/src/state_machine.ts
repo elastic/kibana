@@ -474,6 +474,9 @@ export const createDatasetQualityControllerStateMachine = ({
         }
 
         const { type, name: dataset, namespace } = context.flyout.dataset;
+        const { startDate: start, endDate: end } = getDateISORange(
+          context.flyout.insightsTimeRange
+        );
 
         return dataStreamDetailsClient.getDataStreamDetails({
           dataStream: dataStreamPartsToIndexName({
@@ -481,6 +484,8 @@ export const createDatasetQualityControllerStateMachine = ({
             dataset,
             namespace,
           }),
+          start,
+          end,
         });
       },
       loadIntegrationDashboards: (context) => {

@@ -79,6 +79,11 @@ export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
 export const dataStreamDetailsRt = rt.partial({
   createdOn: rt.number,
   lastActivity: rt.number,
+  degradedDocsCount: rt.number,
+  docsCount: rt.number,
+  sizeBytes: rt.number,
+  services: rt.record(rt.string, rt.array(rt.string)),
+  hosts: rt.record(rt.string, rt.array(rt.string)),
 });
 
 export type DataStreamDetails = rt.TypeOf<typeof dataStreamDetailsRt>;

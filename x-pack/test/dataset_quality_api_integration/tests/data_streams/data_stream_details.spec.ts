@@ -22,6 +22,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const type = 'logs';
   const dataset = 'nginx.access';
   const namespace = 'default';
+  const serviceName = 'my-service';
+  const hostName = 'synth-host';
 
   async function callApiAs(user: DatasetQualityApiClientKey, dataStream: string) {
     return await datasetQualityApiClient[user]({
@@ -29,6 +31,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       params: {
         path: {
           dataStream,
+        },
+        query: {
+          start,
+          end,
         },
       },
     });
@@ -50,6 +56,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .namespace(namespace)
                 .defaults({
                   'log.file.path': '/my-service.log',
+                  'service.name': serviceName,
+                  'host.name': hostName,
                 })
             ),
         ]);
@@ -71,13 +79,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(resp.body).empty();
       });
 
-      it('returns data stream details correctly', async () => {
+      it('returns "createdOn" correctly', async () => {
         const dataStreamSettings = await getDataStreamSettingsOfFirstIndex(
           esClient,
           `logs-${dataset}-${namespace}`
         );
         const resp = await callApiAs('datasetQualityLogsUser', `${type}-${dataset}-${namespace}`);
         expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
+      });
+
+      it('returns "sizeBytes" correctly', async () => {
+        const resp = await callApiAs('datasetQualityLogsUser', `${type}-${dataset}-${namespace}`);
+        expect(isNaN(resp.body.sizeBytes)).to.be(false);
+        expect(resp.body.sizeBytes).to.be.greaterThan(0);
+      });
+
+      it('returns service.name and host.name correctly', async () => {
+        const resp = await callApiAs('datasetQualityLogsUser', `${type}-${dataset}-${namespace}`);
+        expect(isNaN(resp.body.sizeBytes)).to.be(false);
+        expect(resp.body.services).to.eql({ ['service.name']: [serviceName] });
+        expect(resp.body.hosts['host.name']).to.eql([hostName]);
       });
 
       after(async () => {

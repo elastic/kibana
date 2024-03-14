@@ -7,13 +7,13 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
-import { DataStreamType } from '../../../common/types';
 import {
   DataStreamDetails,
   DataStreamsEstimatedDataInBytes,
   DataStreamStat,
   DegradedDocs,
 } from '../../../common/api_types';
+import { indexNameToDataStreamParts } from '../../../common/utils';
 import { rangeRt, typeRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { getDataStreamDetails } from './get_data_stream_details';
@@ -100,6 +100,7 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     path: t.type({
       dataStream: t.string,
     }),
+    query: rangeRt,
   }),
   options: {
     tags: [],
@@ -107,24 +108,30 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
   async handler(resources): Promise<DataStreamDetails> {
     const { context, params } = resources;
     const { dataStream } = params.path;
+    const { start, end } = params.query;
     const coreContext = await context.core;
 
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    const [type, ...datasetQuery] = dataStream.split('-');
+    const { type, dataset, namespace } = indexNameToDataStreamParts(dataStream);
 
     const [dataStreamsStats, dataStreamDetails] = await Promise.all([
       getDataStreamsStats({
         esClient,
-        type: type as DataStreamType,
-        datasetQuery: datasetQuery.join('-'),
+        type,
+        datasetQuery: `${dataset}-${namespace}`,
       }),
-      getDataStreamDetails({ esClient, dataStream }),
+      getDataStreamDetails({ esClient, dataStream, start, end }),
     ]);
 
     return {
       createdOn: dataStreamDetails?.createdOn,
+      docsCount: dataStreamDetails?.docsCount,
+      degradedDocsCount: dataStreamDetails?.degradedDocsCount,
+      services: dataStreamDetails?.services,
+      hosts: dataStreamDetails?.hosts,
+      sizeBytes: dataStreamDetails?.sizeBytes,
       lastActivity: dataStreamsStats.items?.[0]?.lastActivity,
     };
   },
