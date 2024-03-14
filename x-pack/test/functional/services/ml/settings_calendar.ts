@@ -19,68 +19,6 @@ export function MachineLearningSettingsCalendarProvider(
   const comboBox = getService('comboBox');
 
   return {
-    async assertOnlyConnectedToJobsAppliedDuringCreation() {
-      // Assert that the Calendar Management view shows that the calendar is only connected to the jobs
-      // applied at creation
-      const groupsJustAfterCreationVisibleText = await testSubjects.getVisibleText(
-        'mlCalendarListColumnJobs'
-      );
-      expect(groupsJustAfterCreationVisibleText).to.match(/test_calendar_ad_1, test_calendar_ad_2/);
-
-      await testSubjects.click('mlMainTab anomalyDetection');
-
-      const [testCalendarAdOne, testCalendarAdTwo] = await testSubjects.findAll(
-        'mlJobListRowDetailsToggle'
-      );
-
-      // assert that the created calendar IS applied to test_calendar_ad_1 and test_calendar_ad_2
-      await testCalendarAdOne.click();
-      await testSubjects.existOrFail('mlJobRowDetailsSection-calendars');
-      await testCalendarAdOne.click();
-      await testCalendarAdTwo.click();
-      await testSubjects.existOrFail('mlJobRowDetailsSection-calendars');
-      await testCalendarAdTwo.click();
-
-      const [, , testCalendarAdThree, testCalendarAdFour] = await testSubjects.findAll(
-        'mlJobListRowDetailsToggle'
-      );
-      // assert that the created calendar is NOT applied to test_calendar_ad_3 and test_calendar_ad_4
-      await testCalendarAdThree.click();
-      await testSubjects.missingOrFail('mlJobRowDetailsSection-calendars');
-      await testCalendarAdThree.click();
-      await testCalendarAdFour.click();
-      await testSubjects.missingOrFail('mlJobRowDetailsSection-calendars');
-      await testCalendarAdFour.click();
-    },
-
-    async assertConnectedToJobsAppliedAfterCreation() {
-      await testSubjects.click('mlMainTab settings');
-      await testSubjects.click('mlCalendarsMngButton');
-      await testSubjects.click('mlEditCalendarLink');
-      await this.selectJobGroup('multi-metric');
-      await this.saveCalendar();
-
-      const groupsAfterAddingMultiMetricsVisibleText = await testSubjects.getVisibleText(
-        'mlCalendarListColumnJobs'
-      );
-      expect(groupsAfterAddingMultiMetricsVisibleText).to.match(/multi-metric/);
-      // Go back to the Anomaly Detection Jobs view
-      await testSubjects.click('mlMainTab anomalyDetection');
-
-      const [, , testCalendarAdThree, testCalendarAdFour] = await testSubjects.findAll(
-        'mlJobListRowDetailsToggle'
-      );
-
-      // Assert that the calendar is now connected to the multimetric job group
-      await testCalendarAdFour.click();
-      await testSubjects.existOrFail('mlJobRowDetailsSection-calendars');
-      await testCalendarAdFour.click();
-      // Assert that the calendar is still not connected to the automated job group
-      await testCalendarAdThree.click();
-      await testSubjects.missingOrFail('mlJobRowDetailsSection-calendars');
-      await testCalendarAdThree.click();
-    },
-
     async parseCalendarTable() {
       const table = await testSubjects.find('~mlCalendarTable');
       const $ = await table.parseDomContent();

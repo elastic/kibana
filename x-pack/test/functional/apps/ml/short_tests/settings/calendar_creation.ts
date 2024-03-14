@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach, createJobConfig } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const esArchiver = getService('esArchiver');
+  const testSubjects = getService('testSubjects');
 
   const calendarId = 'test_calendar_id';
   const jobConfigs = [createJobConfig('test_calendar_ad_1'), createJobConfig('test_calendar_ad_2')];
@@ -139,12 +141,12 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         'Assert that the calendar is only connected to jobs applied during creation'
       );
-      await ml.settingsCalendar.assertOnlyConnectedToJobsAppliedDuringCreation();
+      await assertOnlyConnectedToJobsAppliedDuringCreation();
 
       await ml.testExecution.logTestStep(
         'Assert that the calendar can connect to jobs applied after creation'
       );
-      await ml.settingsCalendar.assertConnectedToJobsAppliedAfterCreation();
+      await assertConnectedToJobsAppliedAfterCreation();
     });
 
     async function assignJobToCalendar(
@@ -161,6 +163,68 @@ export default function ({ getService }: FtrProviderContext) {
 
       // @ts-expect-error not full interface
       await asyncForEach([automatedConfig, multiMetricConfig], ml.api.createAnomalyDetectionJob);
+    }
+
+    async function assertOnlyConnectedToJobsAppliedDuringCreation() {
+      // Assert that the Calendar Management view shows that the calendar is only connected to the jobs
+      // applied at creation
+      const groupsJustAfterCreationVisibleText = await testSubjects.getVisibleText(
+        'mlCalendarListColumnJobs'
+      );
+      expect(groupsJustAfterCreationVisibleText).to.match(/test_calendar_ad_1, test_calendar_ad_2/);
+
+      await testSubjects.click('mlMainTab anomalyDetection');
+
+      const [testCalendarAdOne, testCalendarAdTwo] = await testSubjects.findAll(
+        'mlJobListRowDetailsToggle'
+      );
+
+      // assert that the created calendar IS applied to test_calendar_ad_1 and test_calendar_ad_2
+      await testCalendarAdOne.click();
+      await testSubjects.existOrFail('mlJobRowDetailsSection-calendars');
+      await testCalendarAdOne.click();
+      await testCalendarAdTwo.click();
+      await testSubjects.existOrFail('mlJobRowDetailsSection-calendars');
+      await testCalendarAdTwo.click();
+
+      const [, , testCalendarAdThree, testCalendarAdFour] = await testSubjects.findAll(
+        'mlJobListRowDetailsToggle'
+      );
+      // assert that the created calendar is NOT applied to test_calendar_ad_3 and test_calendar_ad_4
+      await testCalendarAdThree.click();
+      await testSubjects.missingOrFail('mlJobRowDetailsSection-calendars');
+      await testCalendarAdThree.click();
+      await testCalendarAdFour.click();
+      await testSubjects.missingOrFail('mlJobRowDetailsSection-calendars');
+      await testCalendarAdFour.click();
+    }
+
+    async function assertConnectedToJobsAppliedAfterCreation() {
+      await testSubjects.click('mlMainTab settings');
+      await testSubjects.click('mlCalendarsMngButton');
+      await testSubjects.click('mlEditCalendarLink');
+      await ml.settingsCalendar.selectJobGroup('multi-metric');
+      await ml.settingsCalendar.saveCalendar();
+
+      const groupsAfterAddingMultiMetricsVisibleText = await testSubjects.getVisibleText(
+        'mlCalendarListColumnJobs'
+      );
+      expect(groupsAfterAddingMultiMetricsVisibleText).to.match(/multi-metric/);
+      // Go back to the Anomaly Detection Jobs view
+      await testSubjects.click('mlMainTab anomalyDetection');
+
+      const [, , testCalendarAdThree, testCalendarAdFour] = await testSubjects.findAll(
+        'mlJobListRowDetailsToggle'
+      );
+
+      // Assert that the calendar is now connected to the multimetric job group
+      await testCalendarAdFour.click();
+      await testSubjects.existOrFail('mlJobRowDetailsSection-calendars');
+      await testCalendarAdFour.click();
+      // Assert that the calendar is still not connected to the automated job group
+      await testCalendarAdThree.click();
+      await testSubjects.missingOrFail('mlJobRowDetailsSection-calendars');
+      await testCalendarAdThree.click();
     }
   });
 }
