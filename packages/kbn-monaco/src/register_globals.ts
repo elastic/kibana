@@ -41,15 +41,33 @@ registerTheme(ESQL_THEME_ID, buildESQlTheme());
 
 const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
 
+const workerURLMap = new Map<string, string>();
+
 window.MonacoEnvironment = {
   // @ts-expect-error needed for functional tests so that we can get value from 'editor'
   monaco,
   getWorkerUrl: monacoBundleDir
     ? (_: string, languageId: string) => {
+        if (workerURLMap.has(languageId)) {
+          return workerURLMap.get(languageId)!;
+        }
         const workerId = langSpecificWorkerIds.includes(languageId)
           ? languageId
           : DEFAULT_WORKER_ID;
-        return `${monacoBundleDir}${workerId}.editor.worker.js`;
+        /**
+         * Worker URLs must adhere to the same-origin policy.
+         * See https://developer.mozilla.org/en-US/docs/Web/API/Worker/Worker.
+         *
+         * To satisfy the policy we construct a `blob:` URL and use the worker global `importScripts`
+         * function to load the worker code via JS APIs instead.
+         */
+        const workerURL = window.URL.createObjectURL(
+          new Blob([`importScripts("${monacoBundleDir}${workerId}.editor.worker.js")`], {
+            type: 'application/javascript',
+          })
+        );
+        workerURLMap.set(languageId, workerURL);
+        return workerURL;
       }
     : () => '',
 };
