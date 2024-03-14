@@ -20,6 +20,7 @@ export type { PluginSetup, PluginStart } from './plugin';
 
 const configSchema = schema.object({
   sloOrphanSummaryCleanUpTaskEnabled: schema.boolean({ defaultValue: true }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 export const config = {
