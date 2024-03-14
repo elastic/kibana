@@ -98,20 +98,19 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
 
     const euiAccordionStyles = useMemo(
       () => css`
-        z-index: 100;
-        margin: ${euiTheme.size.m} 0;
         .euiAccordion__buttonContent {
+          flex: 1 1 auto;
           cursor: pointer;
-          width: 100%;
         }
         .euiAccordion__triggerWrapper {
+          z-index: 100;
+          position: relative;
           border-radius: ${euiTheme.border.radius.medium};
           padding: ${euiTheme.size.base};
-
           ${panelShadow}
         }
       `,
-      [euiTheme.border.radius.medium, euiTheme.size.base, euiTheme.size.m, panelShadow]
+      [euiTheme.border.radius.medium, euiTheme.size.base, panelShadow]
     );
 
     const {
@@ -155,88 +154,86 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
     });
 
     return (
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <EuiAccordion
-            // Note: this uses `className` instead of the `css` prop, because a plugin
-            // cannot be set up for styled-components and `@emotion/react` at the same time
-            // @see https://github.com/elastic/eui/discussions/6828#discussioncomment-6076157
-            className={euiAccordionStyles}
-            id={openAccordionId}
-            buttonElement="div"
-            onToggle={() => setToggleAccordion(!toggleAccordion)}
-            buttonContent={
-              <ListHeaderContainer gutterSize="m" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup
-                    direction="column"
-                    key={listId}
-                    alignItems="flexStart"
-                    gutterSize="none"
-                  >
-                    <EuiFlexItem grow>
-                      <EuiText size="m">
-                        <EuiLink data-test-subj="exception-list-name" onClick={goToExceptionDetail}>
-                          {listName}
-                        </EuiLink>
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow>
-                      <EuiText size="xs">
-                        <EuiTextColor color="subdued">{listDescription}</EuiTextColor>
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
+      <>
+        <EuiAccordion
+          // Note: this uses `className` instead of the `css` prop, because a plugin
+          // cannot be set up for styled-components and `@emotion/react` at the same time
+          // @see https://github.com/elastic/eui/discussions/6828#discussioncomment-6076157
+          className={euiAccordionStyles}
+          id={openAccordionId}
+          buttonElement="div"
+          onToggle={() => setToggleAccordion(!toggleAccordion)}
+          buttonContent={
+            <ListHeaderContainer gutterSize="m" alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup
+                  direction="column"
+                  key={listId}
+                  alignItems="flexStart"
+                  gutterSize="none"
+                >
+                  <EuiFlexItem grow>
+                    <EuiText size="m">
+                      <EuiLink data-test-subj="exception-list-name" onClick={goToExceptionDetail}>
+                        {listName}
+                      </EuiLink>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow>
+                    <EuiText size="xs">
+                      <EuiTextColor color="subdued">{listDescription}</EuiTextColor>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
 
-                <EuiFlexItem>
-                  <EuiFlexGroup alignItems="center" justifyContent="flexEnd" wrap>
-                    <EuiFlexItem grow={false}>
-                      <TitleBadge title={i18n.DATE_CREATED} badgeString={createdAt} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <TitleBadge title={i18n.CREATED_BY} badgeString={createdBy} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <TitleBadge title={i18n.EXCEPTIONS} badgeString={exceptionItemsCount} />
-                    </EuiFlexItem>
-                    <EuiFlexItem data-test-subj="exceptionListCardLinkedRulesBadge" grow={false}>
-                      <TitleBadge title={i18n.RULES} badgeString={linkedRules.length.toString()} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <HeaderMenu
-                    disableActions={readOnly}
-                    dataTestSubj="sharedListOverflowCard"
-                    actions={menuActionItems}
-                  />
-                </EuiFlexItem>
-              </ListHeaderContainer>
-            }
-            data-test-subj={`exceptionsManagementListCard-${listId}`}
-          >
-            <ExceptionPanel hasBorder>
-              <ListExceptionItems
-                isReadOnly={readOnly}
-                exceptions={exceptions}
-                listType={exceptionsList.type as ExceptionListTypeEnum}
-                pagination={pagination}
-                hideUtility
-                viewerStatus={exceptionViewerStatus}
-                ruleReferences={ruleReferences}
-                onDeleteException={onDeleteException}
-                onEditExceptionItem={onEditExceptionItem}
-                onPaginationChange={onPaginationChange}
-                onCreateExceptionListItem={onAddExceptionClick}
-                lastUpdated={null}
-                emptyViewerTitle={emptyViewerTitle}
-                emptyViewerBody={emptyViewerBody}
-                emptyViewerButtonText={emptyViewerButtonText}
-              />
-            </ExceptionPanel>
-          </EuiAccordion>
-        </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup alignItems="center" justifyContent="flexEnd" wrap responsive>
+                  <EuiFlexItem grow={false}>
+                    <TitleBadge title={i18n.DATE_CREATED} badgeString={createdAt} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <TitleBadge title={i18n.CREATED_BY} badgeString={createdBy} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <TitleBadge title={i18n.EXCEPTIONS} badgeString={exceptionItemsCount} />
+                  </EuiFlexItem>
+                  <EuiFlexItem data-test-subj="exceptionListCardLinkedRulesBadge" grow={false}>
+                    <TitleBadge title={i18n.RULES} badgeString={linkedRules.length.toString()} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <HeaderMenu
+                  disableActions={readOnly}
+                  dataTestSubj="sharedListOverflowCard"
+                  actions={menuActionItems}
+                />
+              </EuiFlexItem>
+            </ListHeaderContainer>
+          }
+          data-test-subj={`exceptionsManagementListCard-${listId}`}
+        >
+          <ExceptionPanel hasBorder>
+            <ListExceptionItems
+              isReadOnly={readOnly}
+              exceptions={exceptions}
+              listType={exceptionsList.type as ExceptionListTypeEnum}
+              pagination={pagination}
+              hideUtility
+              viewerStatus={exceptionViewerStatus}
+              ruleReferences={ruleReferences}
+              onDeleteException={onDeleteException}
+              onEditExceptionItem={onEditExceptionItem}
+              onPaginationChange={onPaginationChange}
+              onCreateExceptionListItem={onAddExceptionClick}
+              lastUpdated={null}
+              emptyViewerTitle={emptyViewerTitle}
+              emptyViewerBody={emptyViewerBody}
+              emptyViewerButtonText={emptyViewerButtonText}
+            />
+          </ExceptionPanel>
+        </EuiAccordion>
         {showAddExceptionFlyout ? (
           <AddExceptionFlyout
             rules={null}
@@ -277,7 +274,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
             action={showIncludeExpiredExceptionsModal}
           />
         ) : null}
-      </EuiFlexGroup>
+      </>
     );
   }
 );
