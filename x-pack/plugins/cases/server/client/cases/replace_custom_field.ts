@@ -12,12 +12,12 @@ import type { CustomFieldPutRequest } from '../../../common/types/api';
 import { CustomFieldPutRequestRt, CaseRequestCustomFieldsRt } from '../../../common/types/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
-import { validateMaxUserActions } from '../../../common/utils/validators';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import type { CaseCustomField } from '../../../common/types/domain';
 import { CaseCustomFieldRt } from '../../../common/types/domain';
 import { validateCustomFieldTypesInRequest } from './validators';
 import type { UserActionEvent } from '../../services/user_actions/types';
+import { validateMaxUserActions } from '../../common/validators';
 
 export interface ReplaceCustomFieldArgs {
   /**

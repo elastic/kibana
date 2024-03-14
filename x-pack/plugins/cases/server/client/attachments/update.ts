@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 
-import { validateMaxUserActions } from '../../../common/utils/validators';
 import { AttachmentPatchRequestRt } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
@@ -19,6 +18,7 @@ import type { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
 import type { UpdateArgs } from './types';
+import { validateMaxUserActions } from '../../common/validators';
 
 /**
  * Update an attachment.
