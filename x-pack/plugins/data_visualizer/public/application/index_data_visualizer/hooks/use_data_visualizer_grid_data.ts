@@ -119,19 +119,18 @@ export const useDataVisualizerGridData = (
 
   const { visibleFieldNames, fieldsToFetch } = useMemo(() => {
     const _fieldsToFetch =
-      input?.visibleFieldNames.length === 0
+      Array.isArray(input?.visibleFieldNames) && input.visibleFieldNames.length === 0
         ? input.fieldsToFetch
         : [
             ...dataViewFields
               .filter((field) => {
-                if (input?.visibleFieldNames.includes(field.name)) {
+                const visibleNames = input?.visibleFieldNames ?? [];
+                if (visibleNames.includes(field.name)) {
                   return true;
                 }
 
-                const parent = field.spec.subType?.multi?.parent;
-                const matchesParent = parent
-                  ? input?.visibleFieldNames.indexOf(parent) > -1
-                  : false;
+                const parent = field.getSubtypeMulti()?.multi?.parent;
+                const matchesParent = parent ? visibleNames.indexOf(parent) > -1 : false;
                 if (matchesParent) {
                   return true;
                 }

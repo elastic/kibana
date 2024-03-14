@@ -102,6 +102,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     function updatePopulatedFields() {
       let unmounted = false;
 
+      if (!searchStrategyParams) return;
+
       const { index, searchQuery, timeFieldName, earliest, latest } = searchStrategyParams;
 
       const fetchPopulatedFields = async () => {
@@ -143,11 +145,11 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       data.dataViews,
-      searchStrategyParams.timeFieldName,
-      searchStrategyParams.earliest,
-      searchStrategyParams.latest,
-      searchStrategyParams.searchQuery,
-      searchStrategyParams.index,
+      searchStrategyParams?.timeFieldName,
+      searchStrategyParams?.earliest,
+      searchStrategyParams?.latest,
+      searchStrategyParams?.searchQuery,
+      searchStrategyParams?.index,
     ]
   );
   const startFetch = useCallback(async () => {
@@ -189,8 +191,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       const aggregatableFields = originalAggregatableFields.filter((field) =>
         populatedFieldsInIndex.has(field.name)
       );
-      const nonAggregatableFields = originalNonAggregatableFields.filter((field) =>
-        populatedFieldsInIndex.has(field.name)
+      const nonAggregatableFields = originalNonAggregatableFields.filter((fieldName) =>
+        populatedFieldsInIndex.has(fieldName)
       );
 
       const documentCountStats = await getDocumentCountStats(
