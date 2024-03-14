@@ -46,8 +46,9 @@ import {
   getCase,
   getConfigurationRequest,
   createConfiguration,
+  createComment,
 } from '../../../../../common/lib/api';
-import { getPostCaseRequest } from '../../../../../common/lib/mock';
+import { getPostCaseRequest, postCommentAlertReq } from '../../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { roles as api_int_roles } from '../../../../../../api_integration/apis/cases/common/roles';
 import {
@@ -175,9 +176,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('execution', () => {
-      const req = getRequest();
+      describe('Without grouping', () => {
+        const req = getRequest();
 
-      describe('Oracle', () => {
         it('should create an oracle record correctly', async () => {
           await executeConnectorAndVerifyCorrectness({
             supertest,
@@ -194,7 +195,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(oracleRecord.rules[0]).to.eql({ id: req.params.subActionParams.rule.id });
         });
 
-        it('should increase the counter when the case is closed', async () => {
+        it('should increase the oracle counter when the case is closed', async () => {
           const reqClosedCase = getRequest({ reopenClosedCases: false });
 
           const theCase = await createCaseWithId({
@@ -231,7 +232,11 @@ export default ({ getService }: FtrProviderContext): void => {
           const reqTimeWindow = getRequest({ timeWindow: '7d' });
           const oracleId = generateOracleId({ ruleId: req.params.subActionParams.rule.id });
 
-          await createOracleRecord({ es, oracleId });
+          await createOracleRecord({
+            es,
+            oracleId,
+            attributes: { date: '2024-02-10T11:00:00.000Z' },
+          });
 
           await executeConnectorAndVerifyCorrectness({
             supertest,
@@ -246,9 +251,32 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(oracleRecord.counter).to.be(2);
         });
-      });
 
-      describe('Cases & alerts', () => {
+        it('should not create another oracle record if it exists', async () => {
+          const oracleId = generateOracleId({ ruleId: req.params.subActionParams.rule.id });
+
+          await executeConnectorAndVerifyCorrectness({
+            supertest,
+            connectorId,
+            req,
+          });
+
+          await executeConnectorAndVerifyCorrectness({
+            supertest,
+            connectorId,
+            req,
+          });
+
+          const records = await getAllOracleRecords({
+            kibanaServer,
+          });
+
+          expect(records.total).to.be(1);
+          expect(records.records[0].id).to.eql(oracleId);
+
+          return true;
+        });
+
         it('should create a case correctly', async () => {
           await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
 
@@ -349,7 +377,11 @@ export default ({ getService }: FtrProviderContext): void => {
           const reqTimeWindow = getRequest({ timeWindow: '7d' });
           const oracleId = generateOracleId({ ruleId: req.params.subActionParams.rule.id });
 
-          await createOracleRecord({ es, oracleId });
+          await createOracleRecord({
+            es,
+            oracleId,
+            attributes: { date: '2024-02-10T11:00:00.000Z' },
+          });
 
           const theCase = await createCaseWithId({
             kibanaServer,
@@ -400,105 +432,184 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
         });
-      });
 
-      it('should attach the correct number of alerts', async () => {
-        await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
-        const cases = await findCases({ supertest });
-        expect(cases.total).to.be(1);
+        it('should not create a new case if it exists', async () => {
+          const theCase = await createCaseWithId({
+            kibanaServer,
+            caseId: generateCaseId({ ruleId: req.params.subActionParams.rule.id }),
+          });
 
-        const theCase = cases.cases[0];
+          await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
 
-        expect(theCase.totalAlerts).to.be(req.params.subActionParams.alerts.length);
-      });
+          const cases = await findCases({ supertest });
+          expect(cases.total).to.be(1);
 
-      it('should attach the correct alerts', async () => {
-        await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
-        const cases = await findCases({ supertest });
-        expect(cases.total).to.be(1);
-
-        const theCase = cases.cases[0];
-
-        const attachments = await getAllComments({ supertest, caseId: theCase.id });
-
-        verifyAlertsAttachedToCase({
-          caseAttachments: attachments,
-          expectedAlertIdsToBeAttachedToCase: new Set(
-            req.params.subActionParams.alerts.map((alert) => alert._id)
-          ),
-          rule: {
-            id: req.params.subActionParams.rule.id,
-            name: req.params.subActionParams.rule.name,
-          },
-        });
-      });
-
-      it('create case with custom fields correctly', async () => {
-        const customFields = {
-          customFields: [
-            { key: 'text_1', label: 'text 1', type: CustomFieldTypes.TEXT, required: true },
-          ],
-        };
-
-        await createConfiguration(
-          supertest,
-          getConfigurationRequest({
-            overrides: customFields,
-          })
-        );
-
-        await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
-
-        const cases = await findCases({ supertest });
-        expect(cases.total).to.be(1);
-        expect(cases.cases[0].customFields).to.eql([
-          { key: 'text_1', type: CustomFieldTypes.TEXT, value: 'N/A' },
-        ]);
-      });
-
-      it('should add more alerts to the same case', async () => {
-        const alerts = Array.from(Array(5).keys()).map((index) => ({
-          _id: `alert-id-new-${index}`,
-          _index: 'alert-index-0',
-        }));
-
-        await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
-
-        const cases = await findCases({ supertest });
-        expect(cases.total).to.be(1);
-
-        await executeConnectorAndVerifyCorrectness({
-          supertest,
-          connectorId,
-          req: getRequest({ alerts }),
+          expect(theCase.id).to.be(cases.cases[0].id);
         });
 
-        const theCase = cases.cases[0];
+        it('should create the correct case if the oracle record exists', async () => {
+          const oracleId = generateOracleId({
+            ruleId: req.params.subActionParams.rule.id,
+          });
 
-        const attachments = await getAllComments({ supertest, caseId: theCase.id });
+          await createOracleRecord({ es, oracleId, attributes: { counter: 3 } });
+          const caseId = generateCaseId({ ruleId: req.params.subActionParams.rule.id, counter: 3 });
 
-        verifyAlertsAttachedToCase({
-          caseAttachments: attachments,
-          expectedAlertIdsToBeAttachedToCase: new Set([
-            ...req.params.subActionParams.alerts.map((alert) => alert._id),
-            ...alerts.map((alert) => alert._id),
-          ]),
-          rule: {
-            id: req.params.subActionParams.rule.id,
-            name: req.params.subActionParams.rule.name,
-          },
+          await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
+
+          const cases = await findCases({ supertest });
+          expect(cases.total).to.be(1);
+
+          expect(caseId).to.be(cases.cases[0].id);
+        });
+
+        it('should attach the correct number of alerts', async () => {
+          await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
+          const cases = await findCases({ supertest });
+          expect(cases.total).to.be(1);
+
+          const theCase = cases.cases[0];
+
+          expect(theCase.totalAlerts).to.be(req.params.subActionParams.alerts.length);
+        });
+
+        it('should attach the correct alerts', async () => {
+          await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
+          const cases = await findCases({ supertest });
+          expect(cases.total).to.be(1);
+
+          const theCase = cases.cases[0];
+
+          const attachments = await getAllComments({ supertest, caseId: theCase.id });
+
+          verifyAlertsAttachedToCase({
+            caseAttachments: attachments,
+            expectedAlertIdsToBeAttachedToCase: new Set(
+              req.params.subActionParams.alerts.map((alert) => alert._id)
+            ),
+            rule: {
+              id: req.params.subActionParams.rule.id,
+              name: req.params.subActionParams.rule.name,
+            },
+          });
+        });
+
+        it('create case with custom fields correctly', async () => {
+          const customFields = {
+            customFields: [
+              { key: 'text_1', label: 'text 1', type: CustomFieldTypes.TEXT, required: true },
+            ],
+          };
+
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: customFields,
+            })
+          );
+
+          await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
+
+          const cases = await findCases({ supertest });
+          expect(cases.total).to.be(1);
+          expect(cases.cases[0].customFields).to.eql([
+            { key: 'text_1', type: CustomFieldTypes.TEXT, value: 'N/A' },
+          ]);
+        });
+
+        it('should add more alerts to the same case', async () => {
+          const alerts = Array.from(Array(5).keys()).map((index) => ({
+            _id: `alert-id-new-${index}`,
+            _index: 'alert-index-0',
+          }));
+
+          await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
+
+          const cases = await findCases({ supertest });
+          expect(cases.total).to.be(1);
+
+          await executeConnectorAndVerifyCorrectness({
+            supertest,
+            connectorId,
+            req: getRequest({ alerts }),
+          });
+
+          const theCase = cases.cases[0];
+
+          const attachments = await getAllComments({ supertest, caseId: theCase.id });
+
+          verifyAlertsAttachedToCase({
+            caseAttachments: attachments,
+            expectedAlertIdsToBeAttachedToCase: new Set([
+              ...req.params.subActionParams.alerts.map((alert) => alert._id),
+              ...alerts.map((alert) => alert._id),
+            ]),
+            rule: {
+              id: req.params.subActionParams.rule.id,
+              name: req.params.subActionParams.rule.name,
+            },
+          });
+        });
+
+        it('should attach the alerts to an existing case', async () => {
+          const theCase = await createCaseWithId({
+            kibanaServer,
+            caseId: generateCaseId({ ruleId: req.params.subActionParams.rule.id }),
+          });
+
+          await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
+
+          const cases = await findCases({ supertest });
+          expect(cases.total).to.be(1);
+
+          const attachments = await getAllComments({ supertest, caseId: theCase.id });
+
+          verifyAlertsAttachedToCase({
+            caseAttachments: attachments,
+            expectedAlertIdsToBeAttachedToCase: new Set([
+              ...req.params.subActionParams.alerts.map((alert) => alert._id),
+            ]),
+            rule: {
+              id: req.params.subActionParams.rule.id,
+              name: req.params.subActionParams.rule.name,
+            },
+          });
+        });
+
+        it('should not attach alerts to a case with more that 1K alerts and should not throw', async () => {
+          const alerts = [...Array(1000).keys()].map((num) => `test-${num}`);
+
+          const theCase = await createCaseWithId({
+            kibanaServer,
+            caseId: generateCaseId({ ruleId: req.params.subActionParams.rule.id }),
+          });
+
+          await createComment({
+            supertest,
+            caseId: theCase.id,
+            params: { ...postCommentAlertReq, alertId: alerts, index: alerts },
+          });
+
+          await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req });
+
+          const cases = await findCases({ supertest });
+          expect(cases.total).to.be(1);
+
+          const attachments = await getAllComments({ supertest, caseId: theCase.id });
+          expect(attachments.length).to.be(1);
+          expect((attachments[0] as AlertAttachment).alertId.length).to.be(1000);
         });
       });
 
       describe('With grouping', () => {
-        const reqWithGrouping = getRequest({ groupingBy: ['host.name'] });
+        const req = getRequest({ groupingBy: ['host.name'] });
 
         describe('Oracle', () => {
           it('should create the oracle records correctly with grouping', async () => {
             await executeConnectorAndVerifyCorrectness({
               supertest,
               connectorId,
-              req: reqWithGrouping,
+              req,
             });
 
             const firstOracleId = generateOracleId({
@@ -522,10 +633,14 @@ export default ({ getService }: FtrProviderContext): void => {
             });
 
             expect(firstOracleRecord.counter).to.be(1);
-            expect(firstOracleRecord.rules[0]).to.eql({ id: req.params.subActionParams.rule.id });
+            expect(firstOracleRecord.rules[0]).to.eql({
+              id: req.params.subActionParams.rule.id,
+            });
 
             expect(secondOracleRecord.counter).to.be(1);
-            expect(secondOracleRecord.rules[0]).to.eql({ id: req.params.subActionParams.rule.id });
+            expect(secondOracleRecord.rules[0]).to.eql({
+              id: req.params.subActionParams.rule.id,
+            });
           });
         });
 
@@ -534,7 +649,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await executeConnectorAndVerifyCorrectness({
               supertest,
               connectorId,
-              req: reqWithGrouping,
+              req,
             });
 
             const cases = await findCases({ supertest });
@@ -660,7 +775,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await executeConnectorAndVerifyCorrectness({
               supertest,
               connectorId,
-              req: reqWithGrouping,
+              req,
             });
 
             const cases = await findCases({ supertest });
@@ -733,8 +848,8 @@ export default ({ getService }: FtrProviderContext): void => {
               supertest,
               connectorId,
               req: getRequest({
-                alerts: reqWithGrouping.params.subActionParams.alerts,
-                groupingBy: reqWithGrouping.params.subActionParams.groupingBy,
+                alerts: req.params.subActionParams.alerts,
+                groupingBy: req.params.subActionParams.groupingBy,
               }),
             });
 
@@ -746,7 +861,7 @@ export default ({ getService }: FtrProviderContext): void => {
               connectorId,
               req: getRequest({
                 alerts: totalAlerts,
-                groupingBy: reqWithGrouping.params.subActionParams.groupingBy,
+                groupingBy: req.params.subActionParams.groupingBy,
               }),
             });
 
@@ -814,7 +929,7 @@ export default ({ getService }: FtrProviderContext): void => {
               connectorId,
               req: getRequest({
                 alerts,
-                groupingBy: reqWithGrouping.params.subActionParams.groupingBy,
+                groupingBy: req.params.subActionParams.groupingBy,
               }),
             });
 
@@ -1013,7 +1128,6 @@ const generateOracleId = ({
 }: {
   ruleId: string;
   grouping?: Record<string, unknown>;
-  counter?: number;
   spaceId?: string;
   owner?: string;
 }) => {
@@ -1062,10 +1176,15 @@ const verifyAlertsAttachedToCase = ({
     (attachment): attachment is AlertAttachment => attachment.type === AttachmentType.alert
   );
 
-  expect(alertsAttachedToCase.length).to.be(expectedAlertIdsToBeAttachedToCase.size);
+  const alertIdsAttachedToCase = new Set(alertsAttachedToCase.map((alert) => alert.alertId).flat());
+
+  expect(alertIdsAttachedToCase.size).to.be(expectedAlertIdsToBeAttachedToCase.size);
 
   for (const alert of alertsAttachedToCase) {
-    expect(expectedAlertIdsToBeAttachedToCase.has(alert.alertId[0])).to.be(true);
+    const alertIdAsArray = Array.isArray(alert.alertId) ? alert.alertId : [alert.alertId];
+    expect(
+      alertIdAsArray.every((alertId) => expectedAlertIdsToBeAttachedToCase.has(alertId))
+    ).to.be(true);
     expect(alert.rule.id).to.be(rule.id);
     expect(alert.rule.name).to.be(rule.name);
   }
@@ -1128,6 +1247,17 @@ const getOracleRecord = async ({
   return { id: res.id, version: res.version, ...res.attributes };
 };
 
+const getAllOracleRecords = async ({ kibanaServer }: { kibanaServer: KbnClient }) => {
+  const res = await kibanaServer.savedObjects.find<OracleRecordAttributes>({
+    type: 'cases-oracle',
+  });
+
+  return {
+    total: res.total,
+    records: res.saved_objects.map((so) => ({ id: so.id, version: so.version, ...so.attributes })),
+  };
+};
+
 const clearOracleRecords = async (es: Client, kibanaServer: KbnClient) => {
   await kibanaServer.savedObjects.clean({ types: ['cases-oracle'] });
   await es.deleteByQuery({
@@ -1156,26 +1286,36 @@ const executeConnectorAndVerifyCorrectness = async ({
   return res;
 };
 
-const createOracleRecord = async ({ es, oracleId }: { es: Client; oracleId: string }) => {
+const createOracleRecord = async ({
+  es,
+  oracleId,
+  attributes: { counter, date } = {},
+}: {
+  es: Client;
+  oracleId: string;
+  attributes?: { counter?: number; date?: string };
+}) => {
+  const creationDate = date ?? new Date().toISOString();
+
   await es.create({
     id: `cases-oracle:${oracleId}`,
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     document: {
       'cases-oracle': {
-        createdAt: '2024-02-10T11:00:00.000Z',
-        updatedAt: '2024-02-10T11:00:00.000Z',
+        createdAt: creationDate,
+        updatedAt: null,
         cases: [],
         grouping: {},
         rules: [{ id: 'rule-test-id' }],
-        counter: 1,
+        counter: counter ?? 1,
       },
       coreMigrationVersion: '8.8.0',
-      created_at: '2024-02-10T11:00:00.000Z',
+      created_at: creationDate,
       managed: false,
       namespaces: ['default'],
       type: 'cases-oracle',
       typeMigrationVersion: '10.1.0',
-      updated_at: '2024-02-10T11:00:00.000Z',
+      references: [],
     },
   });
 };
