@@ -152,7 +152,7 @@ export const useDiscoverHistogram = ({
         const { recordRawType, result: totalHitsResult } = savedSearchData$.totalHits$.getValue();
 
         if (recordRawType === RecordRawType.PLAIN) {
-          // ignore histogram's total hits updates for plain records as Discover manages them during docs fetching
+          // ignore histogram's total hits updates for text-based records as Discover manages them during docs fetching
           return;
         }
 
