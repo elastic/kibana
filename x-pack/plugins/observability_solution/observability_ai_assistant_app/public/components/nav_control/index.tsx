@@ -77,6 +77,7 @@ export function NavControl({}: {}) {
   return (
     <>
       <EuiButton
+        data-test-subj="observabilityAiAssistantAppNavControlButton"
         css={buttonCss}
         onClick={() => {
           service.conversations.openNewConversation({
