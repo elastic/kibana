@@ -46,5 +46,6 @@ export async function getCount(
   );
   // eslint-disable-next-line no-console
   console.log('ES response', resp);
-  return resp.hits.total?.value ?? 0;
+  const total = resp.hits.total as { value: number };
+  return total?.value ?? 0;
 }

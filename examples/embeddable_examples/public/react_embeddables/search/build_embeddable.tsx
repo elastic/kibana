@@ -29,7 +29,7 @@ export const buildEmbeddable = async (
   services: Services
 ) => {
   const defaultDataView = await services.dataViews.getDefaultDataView();
-  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
+  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(state.timeRange);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
     defaultDataView ? [defaultDataView] : undefined
   );
@@ -67,9 +67,9 @@ export const buildEmbeddable = async (
       const [count, setCount] = useState<number>(0);
       const [error, setError] = useState<Error | undefined>();
       const [filters, query, parentTimeRange, timeRange] = useBatchedPublishingSubjects(
-        api.parentApi.localFilters,
-        api.parentApi.localQuery,
-        api.parentApi.localTimeRange,
+        api.parentApi?.localFilters,
+        api.parentApi?.localQuery,
+        api.parentApi?.localTimeRange,
         timeRange$
       );
 

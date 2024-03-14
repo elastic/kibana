@@ -24,7 +24,7 @@ export interface State {
 export type Api = DefaultEmbeddableApi<State> &
   PublishesDataViews &
   Pick<PublishesWritableLocalUnifiedSearch, 'localTimeRange' | 'setLocalTimeRange'> &
-  HasParentApi<PublishesLocalUnifiedSearch>;
+  Partial<HasParentApi<PublishesLocalUnifiedSearch>>;
 
 export interface Services {
   data: DataPublicPluginStart;
