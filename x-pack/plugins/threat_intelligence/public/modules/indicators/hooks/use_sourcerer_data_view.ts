@@ -25,24 +25,24 @@ const indicatorNameField = {
 } as const;
 
 export const useSourcererDataView = () => {
-  const { sourcererDataView } = useSecurityContext();
+  const { selectedDataView } = useSecurityContext();
 
   const updatedPattern = useMemo(() => {
-    const fields = [...sourcererDataView.indexPattern.fields, indicatorNameField];
+    const fields = selectedDataView.sourcererDataView.fields;
 
     return {
-      ...sourcererDataView.indexPattern,
+      ...selectedDataView.indexPattern,
       fields,
     } as SecuritySolutionDataViewBase;
-  }, [sourcererDataView.indexPattern]);
+  }, [selectedDataView.indexPattern, selectedDataView.sourcererDataView.fields]);
 
   const indexPatterns = useMemo(() => [updatedPattern], [updatedPattern]);
 
   const browserFields = useMemo(() => {
-    const { threat = { fields: {} } } = sourcererDataView.browserFields;
+    const { threat = { fields: {} } } = selectedDataView.browserFields;
 
     return {
-      ...sourcererDataView.browserFields,
+      ...selectedDataView.browserFields,
       threat: {
         fields: {
           ...threat.fields,
@@ -50,15 +50,15 @@ export const useSourcererDataView = () => {
         },
       },
     };
-  }, [sourcererDataView.browserFields]);
+  }, [selectedDataView.browserFields]);
 
   return useMemo(
     () => ({
-      sourcererDataView,
+      sourcererDataView: selectedDataView,
       indexPatterns,
       indexPattern: updatedPattern,
       browserFields,
     }),
-    [browserFields, indexPatterns, sourcererDataView, updatedPattern]
+    [browserFields, indexPatterns, selectedDataView, updatedPattern]
   );
 };

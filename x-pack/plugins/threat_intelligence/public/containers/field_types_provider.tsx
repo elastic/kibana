@@ -21,7 +21,7 @@ export const FieldTypesProvider: FC = ({ children }) => {
   // field name to field type map to allow the cell_renderer to format dates
   const fieldTypes: FieldTypesContextValue = useMemo(
     () =>
-      indexPattern.fields.reduce((acc, field) => {
+      Object.values(indexPattern.fields).reduce((acc, field) => {
         acc[field.name] = field.type;
         return acc;
       }, {} as FieldTypesContextValue),
