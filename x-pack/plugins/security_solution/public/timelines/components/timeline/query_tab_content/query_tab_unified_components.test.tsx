@@ -217,7 +217,6 @@ describe('query tab with unified timeline', () => {
       // Go to last page
       fireEvent.click(screen.getByTestId('pagination-button-6'));
       await waitFor(() => {
-        // screen.debug(undefined, 10000000);
         expect(screen.getByTestId('dscGridSampleSizeFetchMoreLink')).toBeVisible();
       });
       fireEvent.click(screen.getByTestId('dscGridSampleSizeFetchMoreLink'));

@@ -12,26 +12,22 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-plugin/common';
 import { flattenHit } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { UnifiedDataTableSettingsColumn } from '@kbn/unified-data-table';
-import {
-  UnifiedDataTable,
-  useColumns as useUnifiedTableColumns,
-  DataLoadingState,
+import type {
+  UnifiedDataTableSettingsColumn,
+  UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import memoizeOne from 'memoize-one';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../../../../common/types';
-import type { BrowserFields, TimelineItem } from '../../../../../../common/search_strategy';
+import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type {
   ColumnHeaderOptions,
   OnChangePage,
   RowRenderer,
-  SortColumnTimeline,
   ToggleDetailPanel,
 } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
@@ -41,7 +37,6 @@ import { useSourcererDataView } from '../../../../../common/containers/sourcerer
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../../side_panel';
 import { SecurityCellActionsTrigger } from '../../../../../actions/constants';
-import { getColumnHeader, getColumnHeaders } from '../../body/column_headers/helpers';
 import { getFormattedFields } from '../../body/renderers/formatted_field_udt';
 import { timelineBodySelector } from '../../body/selectors';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
@@ -49,18 +44,16 @@ import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from '../styles';
 import { timelineDefaults } from '../../../../store/defaults';
 import { timelineActions } from '../../../../store';
 import { useGetScopedSourcererDataView } from '../../../../../common/components/sourcerer/use_get_sourcerer_data_view';
-import { defaultUdtHeaders } from '../default_headers';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
-interface CommonDataTableProps {
+type CommonDataTableProps = {
   columns: ColumnHeaderOptions[];
   rowRenderers: RowRenderer[];
   timelineId: string;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
-  sort: SortColumnTimeline[];
   events: TimelineItem[];
   refetch: inputsModel.Refetch;
   onFieldEdited: () => void;
@@ -73,17 +66,11 @@ interface CommonDataTableProps {
   dataLoadingState: DataLoadingState;
   updatedAt: number;
   isTextBasedQuery?: boolean;
-}
+} & Pick<UnifiedDataTableProps, 'onSort' | 'onSetColumns' | 'sort'>;
 
 interface DataTableProps extends CommonDataTableProps {
   dataView: DataView;
 }
-
-const memoizedGetColumnHeaders: (
-  headers: ColumnHeaderOptions[],
-  browserFields: BrowserFields,
-  isEventRenderedView: boolean
-) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
 /* eslint-disable react/display-name */
 export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
@@ -107,6 +94,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     onChangePage,
     updatedAt,
     isTextBasedQuery = false,
+    onSetColumns,
+    onSort,
   }) => {
     const dispatch = useDispatch();
 
@@ -229,57 +218,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [tableRows, handleOnEventDetailPanelOpened, handleOnPanelClosed]
     );
 
-    // ////////////// START SORTING ////////////////
-
-    const sortingColumns: SortOrder[] = useMemo(() => {
-      return sort ? sort.map((sortingCol) => [sortingCol.columnId, sortingCol.sortDirection]) : [];
-    }, [sort]);
-
-    const onSort = useCallback(
-      (nextSort: string[][]) => {
-        dispatch(
-          timelineActions.updateSort({
-            id: timelineId,
-            sort: nextSort.map(([id, direction]) => {
-              const currentColumn = columns.find((column) => column.id === id);
-              const columnType = currentColumn ? currentColumn.type : 'keyword';
-              return {
-                columnId: id,
-                columnType,
-                sortDirection: direction,
-              } as SortColumnTimeline;
-            }),
-          })
-        );
-      },
-      [dispatch, timelineId, columns]
-    );
-
-    const setAppState = useCallback(
-      (newState: { columns: string[]; sort?: string[][] }) => {
-        if (newState.sort) {
-          onSort(newState.sort);
-        } else {
-          const columnsStates = newState.columns.map((columnId) =>
-            getColumnHeader(columnId, defaultUdtHeaders)
-          );
-          dispatch(timelineActions.updateColumns({ id: timelineId, columns: columnsStates }));
-        }
-      },
-      [dispatch, onSort, timelineId]
-    );
-
-    // Columns management
-    const { onSetColumns } = useUnifiedTableColumns({
-      capabilities,
-      dataView,
-      dataViews,
-      setAppState,
-      useNewFieldsApi: true,
-      columns: defaultColumnIds,
-      sort: sortingColumns,
-    });
-
     const onColumnResize = useCallback(
       ({ columnId, width }: { columnId: string; width: number }) => {
         dispatch(
@@ -326,16 +264,14 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [dispatch, timelineId]
     );
 
-    const augumentedColumnHeaders = memoizedGetColumnHeaders(columns, browserFields, false);
-
     const customColumnRenderers = useMemo(
       () =>
         getFormattedFields({
           dataTableRows: tableRows,
           scopeId: 'timeline',
-          headers: augumentedColumnHeaders,
+          headers: columns,
         }),
-      [augumentedColumnHeaders, tableRows]
+      [columns, tableRows]
     );
 
     const handleFetchMoreRecords = useCallback(() => {
@@ -419,7 +355,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             settings={tableSettings}
             showTimeCol={showTimeCol}
             isSortEnabled={true}
-            sort={sortingColumns}
+            sort={sort}
             rowHeightState={rowHeight}
             isPlainRecord={isTextBasedQuery}
             rowsPerPageState={itemsPerPage}

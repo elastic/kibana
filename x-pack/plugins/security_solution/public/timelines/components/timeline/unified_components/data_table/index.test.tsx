@@ -71,7 +71,6 @@ describe('unified data table', () => {
 
   it('should display unified data table', () => {
     render(<TestComponent />);
-    screen.debug(undefined, 100000);
     expect(screen.getByTestId('discoverDocTable')).toBeVisible();
   });
 

@@ -65,6 +65,12 @@ import { HeaderActions } from '../../../../common/components/header_actions/head
 import { defaultUdtHeaders } from '../unified_components/default_headers';
 import { UnifiedTimelineBody } from '../body/unified_timeline_body';
 
+const memoizedGetColumnHeaders: (
+  headers: ColumnHeaderOptions[],
+  browserFields: BrowserFields,
+  isEventRenderedView: boolean
+) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
+
 const QueryTabHeaderContainer = styled.div`
   width: 100%;
 `;
@@ -256,9 +262,20 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [combinedQueries, end, loadingSourcerer, start]
   );
 
+  const defaultColumns = useMemo(
+    () => (unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders),
+    [unifiedComponentsInTimelineEnabled]
+  );
+
+  const localColumns = useMemo(
+    () => (isEmpty(columns) ? defaultColumns : columns),
+    [columns, defaultColumns]
+  );
+
+  const augumentedColumnHeaders = memoizedGetColumnHeaders(localColumns, browserFields, false);
+
   const getTimelineQueryFields = () => {
-    const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-    const columnFields = columnsHeader.map((c) => c.id);
+    const columnFields = augumentedColumnHeaders.map((c) => c.id);
 
     return [...columnFields, ...requiredFieldsForActions];
   };
@@ -274,10 +291,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     dispatch(
       timelineActions.initializeTimelineSettings({
         id: timelineId,
-        defaultColumns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
+        defaultColumns,
       })
     );
-  }, [dispatch, timelineId, unifiedComponentsInTimelineEnabled]);
+  }, [dispatch, timelineId, defaultColumns]);
 
   const [
     dataLoadingState,
@@ -388,7 +405,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     return (
       <UnifiedTimelineBody
         header={header}
-        columns={columns}
+        columns={augumentedColumnHeaders}
         rowRenderers={rowRenderers}
         timelineId={timelineId}
         itemsPerPage={itemsPerPage}

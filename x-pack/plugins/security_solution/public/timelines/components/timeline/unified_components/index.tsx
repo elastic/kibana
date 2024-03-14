@@ -47,6 +47,7 @@ import { TimelineResizableLayout } from './resizable_layout';
 import TimelineDataTable from './data_table';
 import { timelineActions } from '../../../store';
 import { getFieldsListCreationOptions } from './get_fields_list_creation_options';
+import { defaultUdtHeaders } from './default_headers';
 
 const TimelineBodyContainer = styled.div.attrs(({ className = '' }) => ({
   className: `${className}`,
@@ -135,7 +136,6 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
-  const renderId = useRef(1);
 
   const {
     services: {
@@ -183,7 +183,7 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
   const [sidebarContainer, setSidebarContainer] = useState<HTMLDivElement | null>(null);
   const [, setMainContainer] = useState<HTMLDivElement | null>(null);
 
-  const defaultColumns = useMemo(() => {
+  const columnIds = useMemo(() => {
     return columns.map((c) => c.id);
   }, [columns]);
 
@@ -191,7 +191,6 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
     sourcererScope: SourcererScopeName.timeline,
   });
 
-  // Sorting
   const sortingColumns = useMemo(() => {
     return (
       (sort?.map((sortingCol) => [
@@ -200,42 +199,49 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
       ]) as SortOrder[]) || []
     );
   }, [sort]);
+
   const onSort = useCallback(
     (nextSort: string[][]) => {
       dispatch(
         timelineActions.updateSort({
           id: timelineId,
-          sort: nextSort.map(
-            ([id, direction]) =>
-              ({
-                columnId: id,
-                columnType: 'keyword',
-                sortDirection: direction,
-              } as SortColumnTimeline)
-          ),
+          sort: nextSort.map(([id, direction]) => {
+            const currentColumn = columns.find((column) => column.id === id);
+            const columnType = currentColumn ? currentColumn.type : 'keyword';
+            return {
+              columnId: id,
+              columnType,
+              sortDirection: direction,
+            } as SortColumnTimeline;
+          }),
         })
       );
     },
-    [dispatch, timelineId]
+    [dispatch, timelineId, columns]
   );
 
-  const { onAddColumn, onRemoveColumn } = useColumns({
-    capabilities,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    dataView: dataView!,
-    dataViews,
-    setAppState: (newState: { columns: string[]; sort?: string[][] }) => {
+  const setAppState = useCallback(
+    (newState: { columns: string[]; sort?: string[][] }) => {
       if (newState.sort) {
         onSort(newState.sort);
       } else {
         const columnsStates = newState.columns.map((columnId) =>
-          getColumnHeader(columnId, defaultHeaders)
+          getColumnHeader(columnId, defaultUdtHeaders)
         );
         dispatch(timelineActions.updateColumns({ id: timelineId, columns: columnsStates }));
       }
     },
+    [dispatch, onSort, timelineId]
+  );
+
+  const { onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
+    capabilities,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    dataView: dataView!,
+    dataViews,
+    setAppState,
     useNewFieldsApi: true,
-    columns: defaultColumns,
+    columns: columnIds,
     sort: sortingColumns,
   });
 
@@ -274,11 +280,11 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
   );
 
   const isDropAllowed = useMemo(() => {
-    if (!draggingFieldName || defaultColumns.includes(draggingFieldName)) {
+    if (!draggingFieldName || columnIds.includes(draggingFieldName)) {
       return false;
     }
     return true;
-  }, [draggingFieldName, defaultColumns]);
+  }, [draggingFieldName, columnIds]);
 
   const onDropFieldToTable = useCallback(() => {
     if (draggingFieldName) {
@@ -312,7 +318,6 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
 
   const onFieldEdited = useCallback(() => {
     refetch();
-    renderId.current += 1;
   }, [refetch]);
 
   const wrappedOnFieldEdited = useCallback(async () => {
@@ -341,7 +346,7 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
                   dataView={dataView}
                   fullWidth
                   allFields={dataView.fields}
-                  workspaceSelectedFieldNames={defaultColumns}
+                  workspaceSelectedFieldNames={columnIds}
                   onAddFieldToWorkspace={onAddFieldToWorkspace}
                   onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
                   onAddFilter={onAddFilter}
@@ -380,7 +385,9 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
                       timelineId={timelineId}
                       itemsPerPage={itemsPerPage}
                       itemsPerPageOptions={itemsPerPageOptions}
-                      sort={sort}
+                      sort={sortingColumns}
+                      onSort={onSort}
+                      onSetColumns={onSetColumns}
                       events={events}
                       refetch={refetch}
                       onFieldEdited={onFieldEdited}

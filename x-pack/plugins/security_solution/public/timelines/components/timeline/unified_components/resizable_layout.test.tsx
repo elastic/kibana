@@ -41,7 +41,6 @@ describe('ResizableLayout', () => {
     render(<TestComponent />);
 
     await waitFor(() => {
-      screen.debug(undefined, 100000);
       expect(screen.getByTestId('sidebar__panel')).toBeVisible();
     });
   });
