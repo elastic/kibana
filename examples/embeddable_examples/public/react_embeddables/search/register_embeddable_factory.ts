@@ -10,16 +10,13 @@ import {
   ReactEmbeddableFactory,
   registerReactEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
-import { Api, Services } from './types';
+import { Api, Services, State } from './types';
 
 export const registerEmbeddableFactory = (services: Services) => {
-  const factory: ReactEmbeddableFactory<
-    {},
-    Api,
-  > = {
+  const factory: ReactEmbeddableFactory<State, Api> = {
     type: 'SEARCH_REACT_EMBEDDABLE',
     deserializeState: (state) => {
-      return state.rawState;
+      return state.rawState as State;
     },
     /**
      * The buildEmbeddable function is async so you can async import the component or load a saved
@@ -32,4 +29,4 @@ export const registerEmbeddableFactory = (services: Services) => {
   };
 
   registerReactEmbeddableFactory(factory);
-}
+};

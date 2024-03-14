@@ -122,7 +122,7 @@ export class EmbeddableExamplesPlugin
 
     registerSearchEmbeddableFactory({
       data: deps.data,
-      dataViews: deps.dataViews
+      dataViews: deps.dataViews,
     });
     registerCreateSearchEmbeddableAction(deps.uiActions);
 

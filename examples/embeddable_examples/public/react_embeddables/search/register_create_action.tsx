@@ -14,7 +14,8 @@ export const registerCreateAction = (uiActions: UiActionsStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: 'CREATE_SEARCH_REACT_EMBEDDABLE',
     getDisplayName: () => 'Unified search example',
-    getDisplayNameTooltip: () => 'Demonstrates how to use filter, time range, and query state in an embeddable',
+    getDisplayNameTooltip: () =>
+      'Demonstrates how to use filter, time range, and query state in an embeddable',
     getIconType: () => 'search',
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);
@@ -30,5 +31,5 @@ export const registerCreateAction = (uiActions: UiActionsStart) => {
       );
     },
   });
-  uiActions.attachAction('ADD_PANEL_TRIGGER',  'CREATE_SEARCH_REACT_EMBEDDABLE');
+  uiActions.attachAction('ADD_PANEL_TRIGGER', 'CREATE_SEARCH_REACT_EMBEDDABLE');
 };

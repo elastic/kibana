@@ -7,88 +7,59 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import {
-  EuiCallOut,
-} from '@elastic/eui';
-import { Services } from './types';
-import { lastValueFrom } from 'rxjs';
-import { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
+import { EuiCallOut } from '@elastic/eui';
+import { BehaviorSubject } from 'rxjs';
+import { TimeRange } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-plugin/common';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { Services } from './types';
+import { getCount } from './get_count';
 
-export const buildEmbeddable = async (
-  state: object, 
-  buildApi: unknown,
-  services: Services
-) => {
-  const api = buildApi(
-    {
-      serializeState: () => {
-        return {
-          rawState: {},
-          references: []
-        };
-      }
-    },
-    // embeddable has no state so no comparitors are needed
-    {}
+export const buildEmbeddable = async (state: object, buildApi: unknown, services: Services) => {
+  const defaultDataView = await services.dataViews.getDefaultDataView();
+  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
+  const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+    defaultDataView ? [defaultDataView] : undefined
   );
 
-  const dataView = await services.dataViews.getDefaultDataView();
-
-  async function search(
-    filters: Filter[], 
-    query: Query | AggregateQuery | undefined,
-    timeRange: TimeRange | undefined
-  ) {
-    if (!dataView) {
-      return 0;
-    }
-    const searchSource = await services.data.search.searchSource.create();
-    searchSource.setField('index', dataView);
-    searchSource.setField('size', 0);
-    searchSource.setField('trackTotalHits', true);
-    const timeRangeFilter = timeRange 
-      ? services.data.query.timefilter.timefilter.createFilter(dataView, timeRange)
-      : undefined;
-    const allFilters = [...filters]
-    if (timeRangeFilter) {
-      allFilters.push(timeRangeFilter);
-    }
-    searchSource.setField('filter', allFilters);
-    if (query) {
-      searchSource.setField('query', query);
-    }
-    console.log('ES request', searchSource.getSearchRequestBody());
-    // eslint-disable-next-line no-console
-    const { rawResponse: resp } = await lastValueFrom(
-      searchSource.fetch$({
-        legacyHitsTotal: false,
-      })
-    );
-    // eslint-disable-next-line no-console
-    console.log('ES response', resp);
-    return resp.hits.total?.value ?? 0;
-  }
+  const api = buildApi(
+    {
+      dataViews: dataViews$,
+      localTimeRange: timeRange$,
+      setLocalTimeRange: (nextTimeRange: TimeRange | undefined) => {
+        timeRange$.next(nextTimeRange);
+      },
+      serializeState: () => {
+        return {
+          rawState: {
+            timeRange: timeRange$.value,
+          },
+          references: [],
+        };
+      },
+    },
+    {}
+  );
 
   return {
     api,
     Component: () => {
       const [count, setCount] = useState<number>(0);
       const [error, setError] = useState<Error | undefined>();
-      const [filters, query, timeRange] = useBatchedPublishingSubjects(
+      const [filters, query, parentTimeRange, timeRange] = useBatchedPublishingSubjects(
         api.parentApi.localFilters,
         api.parentApi.localQuery,
         api.parentApi.localTimeRange,
+        timeRange$
       );
-      
+
       useEffect(() => {
         let ignore = false;
         setError(undefined);
-        search(
-          filters ?? [],
-          query,
-          timeRange
-        )
+        if (!defaultDataView) {
+          return;
+        }
+        getCount(defaultDataView, services.data, filters ?? [], query, timeRange ?? parentTimeRange)
           .then((nextCount: number) => {
             if (ignore) {
               return;
@@ -104,14 +75,12 @@ export const buildEmbeddable = async (
         return () => {
           ignore = true;
         };
-      }, [filters, query, timeRange]);
+      }, [filters, query, parentTimeRange, timeRange]);
 
-      if (!dataView) {
+      if (!defaultDataView) {
         return (
           <EuiCallOut title="Default data view not found" color="warning" iconType="warning">
-            <p>
-              Please install sample data set to run the full example.
-            </p>
+            <p>Please install sample data set to run the full example.</p>
           </EuiCallOut>
         );
       }
@@ -119,18 +88,16 @@ export const buildEmbeddable = async (
       if (error) {
         return (
           <EuiCallOut title="Search error" color="warning" iconType="warning">
-            <p>
-              {error.message}
-            </p>
+            <p>{error.message}</p>
           </EuiCallOut>
         );
       }
 
       return (
         <p>
-         Found <strong>{count}</strong> from {dataView.name} 
+          Found <strong>{count}</strong> from {defaultDataView.name}
         </p>
       );
     },
   };
-}
+};
