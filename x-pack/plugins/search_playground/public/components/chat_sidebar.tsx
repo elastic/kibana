@@ -55,7 +55,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ selectedIndicesCount }
   const [openAccordionId, setOpenAccordionId] = useState(accordions[0].id);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup direction="column" className="eui-yScroll" gutterSize="none">
       {accordions.map(({ id, title, extraAction, children }, index) => (
         <EuiFlexItem
           key={id}

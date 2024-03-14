@@ -16,8 +16,12 @@ export const App: React.FC = () => {
       alignment="top"
       restrictWidth={false}
       grow
-      contentProps={{ css: { display: 'flex', flexGrow: 1 } }}
+      css={{
+        position: 'relative',
+      }}
+      contentProps={{ css: { display: 'flex', flexGrow: 1, position: 'absolute', inset: 0 } }}
       paddingSize="none"
+      className="eui-fullHeight"
     >
       <Chat />
     </KibanaPageTemplate.Section>
