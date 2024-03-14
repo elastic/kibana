@@ -194,6 +194,10 @@ export class JourneyFtrHarness {
   private async onSetup() {
     // We start browser and init page in the first place
     await this.setupBrowserAndPage();
+
+    // We allow opt-in beforeSteps hook to manage Kibana/ES after start, install integrations, etc.
+    await this.journeyConfig.getBeforeStepsFn(this.getCtx());
+
     /**
      * Loading test data, optionally but following the order:
      * 1. Synthtrace client
@@ -223,9 +227,6 @@ export class JourneyFtrHarness {
         await this.kibanaServer.importExport.load(kbnArchive);
       }),
     ]);
-
-    // We allow opt-in beforeSteps hook to manage Kibana/ES state
-    await this.journeyConfig.getBeforeStepsFn(this.getCtx());
 
     // It is important that we start the APM transaction after we open the browser and all the test data is loaded
     // so that the scalability data extractor can focus on just the APM data produced by Kibana running under test.

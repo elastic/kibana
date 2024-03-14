@@ -131,7 +131,7 @@ export interface JourneyConfigOptions<CtxExt extends { '@timestamp'?: number | u
   extendContext?: (ctx: BaseStepCtx) => CtxExt;
   /**
    * Use this to define actions that will be executed after Kibana & ES were started,
-   * but before archives are loaded. APM traces are not collected for this hook.
+   * but before archives are loaded or synthtrace is run. APM traces are not collected for this hook.
    */
   beforeSteps?: (ctx: BaseStepCtx & CtxExt) => Promise<void>;
   /**
