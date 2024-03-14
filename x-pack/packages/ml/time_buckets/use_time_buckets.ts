@@ -7,12 +7,11 @@
 
 import { useMemo } from 'react';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { TimeBuckets } from '@kbn/ml-time-buckets';
-import { useAiopsAppContext } from './use_aiops_app_context';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
-export const useTimeBuckets = () => {
-  const { uiSettings } = useAiopsAppContext();
+import { TimeBuckets } from './time_buckets';
 
+export const useTimeBuckets = (uiSettings: IUiSettingsClient) => {
   return useMemo(() => {
     return new TimeBuckets({
       [UI_SETTINGS.HISTOGRAM_MAX_BARS]: uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),

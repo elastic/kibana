@@ -15,6 +15,7 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { TimeBuckets, TimeBucketsInterval } from '@kbn/ml-time-buckets';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
 import {
@@ -23,7 +24,6 @@ import {
 } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
-import { useTimeBuckets } from '../../hooks/use_time_buckets';
 
 export interface ChangePointDetectionPageUrlState {
   pageKey: 'changePoint';
@@ -146,7 +146,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   }, [dataView, savedSearch, uiSettings, filterManager]);
 
   const timefilter = useTimefilter();
-  const timeBuckets = useTimeBuckets();
+  const timeBuckets = useTimeBuckets(uiSettings);
 
   const { searchBounds } = useFilterQueryUpdates();
 
