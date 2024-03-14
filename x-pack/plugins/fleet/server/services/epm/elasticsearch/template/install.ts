@@ -528,9 +528,6 @@ export function prepareTemplate({
   const pipelineName = getPipelineNameForDatastream({ dataStream, packageVersion });
 
   const defaultSettings = buildDefaultSettings({
-    templateName,
-    packageName,
-    fields: validFields,
     type: dataStream.type,
     ilmPolicy: dataStream.ilm_policy,
   });
