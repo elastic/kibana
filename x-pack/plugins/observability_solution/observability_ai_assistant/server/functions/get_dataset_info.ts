@@ -8,15 +8,16 @@
 import { chunk, groupBy, uniq } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { FunctionRegistrationParameters } from '.';
-import { FunctionVisibility, MessageRole } from '../../common/types';
+import { FunctionVisibility } from '../../common/functions/types';
+import { MessageRole } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 
 export function registerGetDatasetInfoFunction({
   client,
   resources,
-  registerFunction,
+  functions,
 }: FunctionRegistrationParameters) {
-  registerFunction(
+  functions.registerFunction(
     {
       name: 'get_dataset_info',
       contexts: ['core'],

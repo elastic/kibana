@@ -5,35 +5,36 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import dedent from 'dedent';
-import { useLocation, useParams } from 'react-router-dom';
-import { useIsMutating } from '@tanstack/react-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { IBasePath } from '@kbn/core-http-browser';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { IBasePath } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { useKibana } from '../../utils/kibana_react';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { useIsMutating } from '@tanstack/react-query';
+import dedent from 'dedent';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
+import { paths } from '../../../common/locators/paths';
+import { ObservabilityAppPageTemplate } from '../../components/observability_app_page_template';
+import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
+import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
-import { ObservabilityAppPageTemplate } from '../../components/observability_app_page_template';
+import { useKibana } from '../../utils/kibana_react';
 import PageNotFound from '../404';
+import { HeaderControl } from './components/header_control';
+import { HeaderTitle } from './components/header_title';
 import {
   ALERTS_TAB_ID,
   OVERVIEW_TAB_ID,
   SloDetails,
-  TAB_ID_URL_PARAM,
   SloTabId,
+  TAB_ID_URL_PARAM,
 } from './components/slo_details';
-import { HeaderTitle } from './components/header_title';
-import { HeaderControl } from './components/header_control';
-import { paths } from '../../../common/locators/paths';
-import type { SloDetailsPathParams } from './types';
-import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
 import { useGetInstanceIdQueryParam } from './hooks/use_get_instance_id_query_param';
-import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
+import { useSloDetailsTabs } from './hooks/use_slo_details_tabs';
+import type { SloDetailsPathParams } from './types';
 
 export function SloDetailsPage() {
   const {
@@ -66,9 +67,12 @@ export function SloDetailsPage() {
       : OVERVIEW_TAB_ID;
   });
 
-  const handleSelectedTab = (newTabId: SloTabId) => {
-    setSelectedTabId(newTabId);
-  };
+  const { tabs } = useSloDetailsTabs({
+    slo,
+    isAutoRefreshing,
+    selectedTabId,
+    setSelectedTabId,
+  });
 
   useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
@@ -83,6 +87,7 @@ export function SloDetailsPage() {
 
         Name: ${slo.name}.
         Id: ${slo.id}
+        Instance Id: ${slo.instanceId}
         Description: ${slo.description}
         Observed value: ${slo.summary.sliValue}
         Status: ${slo.summary.status}
@@ -125,18 +130,13 @@ export function SloDetailsPage() {
             onClick={handleToggleAutoRefresh}
           />,
         ],
-        bottomBorder: false,
+        tabs,
       }}
       data-test-subj="sloDetailsPage"
     >
       {isLoading && <EuiLoadingSpinner data-test-subj="sloDetailsLoading" />}
       {!isLoading && (
-        <SloDetails
-          slo={slo!}
-          isAutoRefreshing={isAutoRefreshing}
-          selectedTabId={selectedTabId}
-          handleSelectedTab={handleSelectedTab}
-        />
+        <SloDetails slo={slo!} isAutoRefreshing={isAutoRefreshing} selectedTabId={selectedTabId} />
       )}
     </ObservabilityAppPageTemplate>
   );

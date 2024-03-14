@@ -26,51 +26,11 @@ interface Props {
   logsDataView?: DataView;
 }
 
-export const MetricsSection = ({ assetName, metricsDataView, logsDataView, dateRange }: Props) => {
-  const model = findInventoryModel('host');
-
-  const { value } = useAsync(() => {
-    return model.metrics.getDashboards();
-  });
-
-  const dashboards = useMemo(
-    () => ({
-      hosts: value?.assetDetails.get({
-        metricsDataViewId: metricsDataView?.id,
-        logsDataViewId: logsDataView?.id,
-      }),
-      kubernetes: value?.assetDetailsKubernetesNode.get({
-        metricsDataViewId: metricsDataView?.id,
-      }),
-    }),
-
-    [logsDataView?.id, metricsDataView?.id, value?.assetDetails, value?.assetDetailsKubernetesNode]
-  );
-
+export const MetricsSection = (props: Props) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <Section title={MetricsSectionTitle} collapsible>
-        <MetricsGrid
-          assetName={assetName}
-          dateRange={dateRange}
-          data-test-subj="infraAssetDetailsHostMetricsChart"
-          charts={dashboards.hosts?.charts ?? []}
-          filterFieldName={model.fields.name}
-        />
-      </Section>
-      <Section
-        dependsOn={dashboards?.kubernetes?.dependsOn}
-        title={KubernetesMetricsSectionTitle}
-        collapsible
-      >
-        <MetricsGrid
-          assetName={assetName}
-          dateRange={dateRange}
-          data-test-subj="infraAssetDetailsKubernetesMetricsChart"
-          charts={dashboards.kubernetes?.charts ?? []}
-          filterFieldName={model.fields.name}
-        />
-      </Section>
+      <HostMetricsSection {...props} />
+      <KubenetesMetricsSection {...props} />
     </EuiFlexGroup>
   );
 };
@@ -82,18 +42,34 @@ export const MetricsSectionCompact = ({
   dateRange,
 }: Props) => {
   const model = findInventoryModel('host');
-  const { value } = useAsync(() => {
-    return model.metrics.getDashboards();
-  });
 
-  const charts = useMemo(
-    () =>
-      value?.assetDetailsFlyout.get({
-        metricsDataViewId: metricsDataView?.id,
-        logsDataViewId: logsDataView?.id,
-      }).charts ?? [],
-    [logsDataView?.id, metricsDataView?.id, value?.assetDetailsFlyout]
-  );
+  const { value: charts = [] } = useAsync(async () => {
+    const { cpu, disk, memory, network, logs } = await model.metrics.getCharts();
+
+    return [
+      cpu.xy.cpuUsage,
+      memory.xy.memoryUsage,
+      cpu.xy.normalizedLoad1m,
+      logs.xy.logRate,
+      disk.xy.diskSpaceUsageAvailable,
+      disk.xy.diskUsageByMountPoint,
+      disk.xy.diskThroughputReadWrite,
+      disk.xy.diskIOReadWrite,
+      network.xy.rxTx,
+    ].map((chart) => {
+      const dataViewId = chart.id === 'logRate' ? logsDataView?.id : metricsDataView?.id;
+      return {
+        ...chart,
+        ...(dataViewId
+          ? {
+              dataset: {
+                index: dataViewId,
+              },
+            }
+          : {}),
+      };
+    });
+  }, [metricsDataView?.id, logsDataView?.id]);
 
   return (
     <Section title={MetricsSectionTitle} collapsible>
@@ -103,6 +79,95 @@ export const MetricsSectionCompact = ({
         filterFieldName={model.fields.name}
         charts={charts}
         data-test-subj="infraAssetDetailsHostMetricsChart"
+      />
+    </Section>
+  );
+};
+
+const HostMetricsSection = ({ assetName, metricsDataView, logsDataView, dateRange }: Props) => {
+  const model = findInventoryModel('host');
+
+  const { value: charts = [] } = useAsync(async () => {
+    const { cpu, disk, memory, network, logs } = await model.metrics.getCharts();
+
+    return [
+      cpu.xy.cpuUsage,
+      cpu.xy.cpuUsageBreakdown,
+      memory.xy.memoryUsage,
+      memory.xy.memoryUsageBreakdown,
+      cpu.xy.normalizedLoad1m,
+      cpu.xy.loadBreakdown,
+      logs.xy.logRate,
+      disk.xy.diskSpaceUsageAvailable,
+      disk.xy.diskUsageByMountPoint,
+      disk.xy.diskThroughputReadWrite,
+      disk.xy.diskIOReadWrite,
+      network.xy.rxTx,
+    ].map((chart) => {
+      const dataViewId = chart.id === 'logRate' ? logsDataView?.id : metricsDataView?.id;
+      return {
+        ...chart,
+        ...(dataViewId
+          ? {
+              dataset: {
+                index: dataViewId,
+              },
+            }
+          : {}),
+      };
+    });
+  }, [metricsDataView?.id, logsDataView?.id]);
+
+  return (
+    <Section title={MetricsSectionTitle} collapsible>
+      <MetricsGrid
+        assetName={assetName}
+        dateRange={dateRange}
+        data-test-subj="infraAssetDetailsHostMetricsChart"
+        charts={charts}
+        filterFieldName={model.fields.name}
+      />
+    </Section>
+  );
+};
+
+const KubenetesMetricsSection = ({
+  assetName,
+  metricsDataView,
+  dateRange,
+}: Omit<Props, 'logsDataView'>) => {
+  const model = findInventoryModel('host');
+
+  const { value: charts = [] } = useAsync(async () => {
+    const { kibernetesNode } = await model.metrics.getCharts();
+
+    return [
+      kibernetesNode.xy.nodeCpuCapacity,
+      kibernetesNode.xy.nodeMemoryCapacity,
+      kibernetesNode.xy.nodeDiskCapacity,
+      kibernetesNode.xy.nodePodCapacity,
+    ].map((chart) => {
+      return {
+        ...chart,
+        ...(metricsDataView?.id
+          ? {
+              dataset: {
+                index: metricsDataView.id,
+              },
+            }
+          : {}),
+      };
+    });
+  }, [metricsDataView?.id]);
+
+  return (
+    <Section dependsOn={['kubernetes.node']} title={KubernetesMetricsSectionTitle} collapsible>
+      <MetricsGrid
+        assetName={assetName}
+        dateRange={dateRange}
+        data-test-subj="infraAssetDetailsKubernetesMetricsChart"
+        charts={charts}
+        filterFieldName={model.fields.name}
       />
     </Section>
   );

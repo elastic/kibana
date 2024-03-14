@@ -85,27 +85,6 @@ export const runQuery = <T>(
     );
 };
 
-export const systemMetricsFilter = {
-  must: [
-    {
-      bool: {
-        should: [
-          {
-            term: {
-              'event.module': 'system',
-            },
-          },
-          {
-            term: {
-              'metricset.module': 'system', // Needed for hosts where metricbeat version < 8
-            },
-          },
-        ],
-      },
-    },
-  ],
-};
-
 export const getInventoryModelAggregations = (
   metrics: InfraAssetMetricType[]
 ): Record<string, estypes.AggregationsAggregationContainer> => {

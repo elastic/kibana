@@ -7,9 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NOT_AVAILABLE_LABEL = i18n.translate(
-  'xpack.infra.assetDetailsEmbeddable.notApplicableLabel',
-  {
-    defaultMessage: 'N/A',
-  }
-);
+export const NOT_AVAILABLE_LABEL = i18n.translate('xpack.infra.assetDetails.notApplicableLabel', {
+  defaultMessage: 'N/A',
+});

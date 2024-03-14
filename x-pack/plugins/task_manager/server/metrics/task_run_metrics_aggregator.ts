@@ -29,6 +29,7 @@ enum TaskRunKeys {
   SUCCESS = 'success',
   NOT_TIMED_OUT = 'not_timed_out',
   TOTAL = 'total',
+  TOTAL_ERRORS = 'total_errors',
   USER_ERRORS = 'user_errors',
   FRAMEWORK_ERRORS = 'framework_errors',
 }
@@ -105,6 +106,9 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
     if (success) {
       this.incrementCounters(TaskRunKeys.SUCCESS, taskType, taskTypeGroup);
     } else {
+      // increment total error counts
+      this.incrementCounters(TaskRunKeys.TOTAL_ERRORS, taskType, taskTypeGroup);
+
       if (isUserError((taskRunResult as ErroredTask).error)) {
         // increment the user error counters
         this.incrementCounters(TaskRunKeys.USER_ERRORS, taskType, taskTypeGroup);

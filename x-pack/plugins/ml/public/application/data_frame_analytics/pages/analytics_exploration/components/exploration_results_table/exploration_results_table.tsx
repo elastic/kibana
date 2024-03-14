@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
@@ -16,7 +17,7 @@ import type {
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
-import { ResultsSearchQuery } from '../../../../common/analytics';
+import type { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSectionResults } from '../expandable_section';
 

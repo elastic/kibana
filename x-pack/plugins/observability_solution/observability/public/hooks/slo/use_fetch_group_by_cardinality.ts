@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { useCallback, useEffect, useState } from 'react';
+import { debounce } from 'lodash';
+import { ALL_VALUE, QuerySchema } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { useKibana } from '../../utils/kibana_react';
+import { getElasticsearchQueryOrThrow } from '../../../common/utils/parse_kuery';
 
-export interface UseFetchIndexPatternFieldsResponse {
+export interface UseFetchGroupByCardinalityResponse {
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
@@ -19,15 +21,39 @@ export interface UseFetchIndexPatternFieldsResponse {
 
 const HIGH_CARDINALITY_THRESHOLD = 1000;
 
+const buildInstanceId = (groupBy: string | string[]): string => {
+  const groups = [groupBy].flat().filter((value) => !!value);
+  const groupings = groups.map((group) => `'${group}:'+doc['${group}'].value`).join(`+'|'+`);
+
+  const hasAllGroupings = groups.map((group) => `doc['${group}'].size() > 0`).join(' && ');
+  return `if (${hasAllGroupings}) { emit(${groupings}) }`;
+};
+
 export function useFetchGroupByCardinality(
   indexPattern: string,
-  timestampField: string,
-  groupBy: string
-): UseFetchIndexPatternFieldsResponse {
+  timestampField: string = '@timestamp',
+  groupBy: string | string[],
+  filters?: QuerySchema
+): UseFetchGroupByCardinalityResponse {
   const { data: dataService } = useKibana().services;
 
+  const serializedFilters = JSON.stringify(filters);
+  const [filtersState, setFiltersState] = useState<string>(serializedFilters);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const store = useCallback(
+    debounce((value: string) => setFiltersState(value), 800),
+    []
+  );
+
+  useEffect(() => {
+    if (filtersState !== serializedFilters) {
+      store(serializedFilters);
+    }
+  }, [filtersState, serializedFilters, store]);
+
   const { isLoading, isError, isSuccess, data } = useQuery({
-    queryKey: ['fetchGroupByCardinality', indexPattern, timestampField, groupBy],
+    queryKey: ['fetchGroupByCardinality', indexPattern, timestampField, groupBy, filters],
     queryFn: async ({ signal }) => {
       try {
         const result = await lastValueFrom(
@@ -37,13 +63,22 @@ export function useFetchGroupByCardinality(
               body: {
                 query: {
                   bool: {
-                    filter: [{ range: { [timestampField]: { gte: 'now-24h' } } }],
+                    filter: [
+                      { range: { [timestampField]: { gte: 'now-24h' } } },
+                      getElasticsearchQueryOrThrow(filters),
+                    ],
+                  },
+                },
+                runtime_mappings: {
+                  group_combinations: {
+                    type: 'keyword',
+                    script: buildInstanceId(groupBy),
                   },
                 },
                 aggs: {
                   groupByCardinality: {
                     cardinality: {
-                      field: groupBy,
+                      field: 'group_combinations',
                     },
                   },
                 },
@@ -62,7 +97,10 @@ export function useFetchGroupByCardinality(
     retry: false,
     refetchOnWindowFocus: false,
     enabled:
-      Boolean(indexPattern) && Boolean(timestampField) && Boolean(groupBy) && groupBy !== ALL_VALUE,
+      Boolean(indexPattern) &&
+      Boolean(timestampField) &&
+      Boolean(groupBy) &&
+      ![groupBy].flat().includes(ALL_VALUE),
   });
 
   return { isLoading, isError, isSuccess, data };

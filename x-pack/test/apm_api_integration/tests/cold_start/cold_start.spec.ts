@@ -67,142 +67,138 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/177113
-  registry.when.skip(
-    'Cold start rate when data is generated',
-    { config: 'basic', archives: [] },
-    () => {
-      describe('without comparison', () => {
-        let body: ColdStartRate;
-        let status: number;
+  registry.when('Cold start rate when data is generated', { config: 'basic', archives: [] }, () => {
+    describe('without comparison', () => {
+      let body: ColdStartRate;
+      let status: number;
 
-        before(async () => {
-          await generateData({
-            synthtraceEsClient,
-            start,
-            end,
-            coldStartRate: 10,
-            warmStartRate: 30,
-          });
-          const response = await callApi();
-          body = response.body;
-          status = response.status;
+      before(async () => {
+        await generateData({
+          synthtraceEsClient,
+          start,
+          end,
+          coldStartRate: 10,
+          warmStartRate: 30,
         });
-
-        after(() => synthtraceEsClient.clean());
-
-        it('returns correct HTTP status', () => {
-          expect(status).to.be(200);
-        });
-
-        it('returns an array of transaction cold start rates', () => {
-          expect(body).to.have.property('currentPeriod');
-          expect(body.currentPeriod.transactionColdstartRate).to.have.length(15);
-          expect(body.currentPeriod.transactionColdstartRate.every(({ y }) => y === 0.25)).to.be(
-            true
-          );
-        });
-
-        it('returns correct average rate', () => {
-          expect(body.currentPeriod.average).to.be(0.25);
-        });
-
-        it("doesn't have data for the previous period", () => {
-          expect(body).to.have.property('previousPeriod');
-          expect(body.previousPeriod.transactionColdstartRate).to.have.length(0);
-          expect(body.previousPeriod.average).to.be(null);
-        });
+        const response = await callApi();
+        body = response.body;
+        status = response.status;
       });
 
-      describe('with comparison', () => {
-        let body: ColdStartRate;
-        let status: number;
+      after(() => synthtraceEsClient.clean());
 
-        before(async () => {
-          const startDate = moment(start).add(6, 'minutes');
-          const endDate = moment(start).add(9, 'minutes');
-          const comparisonStartDate = new Date(start);
-          const comparisonEndDate = moment(start).add(3, 'minutes');
-
-          await generateData({
-            synthtraceEsClient,
-            start: startDate.valueOf(),
-            end: endDate.valueOf(),
-            coldStartRate: 10,
-            warmStartRate: 30,
-          });
-          await generateData({
-            synthtraceEsClient,
-            start: comparisonStartDate.getTime(),
-            end: comparisonEndDate.valueOf(),
-            coldStartRate: 20,
-            warmStartRate: 20,
-          });
-
-          const response = await callApi({
-            query: {
-              start: startDate.toISOString(),
-              end: endDate.subtract(1, 'seconds').toISOString(),
-              offset: '6m',
-            },
-          });
-          body = response.body;
-          status = response.status;
-        });
-
-        after(() => synthtraceEsClient.clean());
-
-        it('returns correct HTTP status', () => {
-          expect(status).to.be(200);
-        });
-
-        it('returns some data', () => {
-          expect(body.currentPeriod.average).not.to.be(null);
-          expect(body.currentPeriod.transactionColdstartRate.length).to.be.greaterThan(0);
-          const hasCurrentPeriodData = body.currentPeriod.transactionColdstartRate.some(({ y }) =>
-            isFiniteNumber(y)
-          );
-          expect(hasCurrentPeriodData).to.equal(true);
-
-          expect(body.previousPeriod.average).not.to.be(null);
-          expect(body.previousPeriod.transactionColdstartRate.length).to.be.greaterThan(0);
-          const hasPreviousPeriodData = body.previousPeriod.transactionColdstartRate.some(({ y }) =>
-            isFiniteNumber(y)
-          );
-          expect(hasPreviousPeriodData).to.equal(true);
-        });
-
-        it('has same start time for both periods', () => {
-          expect(first(body.currentPeriod.transactionColdstartRate)?.x).to.equal(
-            first(body.previousPeriod.transactionColdstartRate)?.x
-          );
-        });
-
-        it('has same end time for both periods', () => {
-          expect(last(body.currentPeriod.transactionColdstartRate)?.x).to.equal(
-            last(body.previousPeriod.transactionColdstartRate)?.x
-          );
-        });
-
-        it('returns an array of transaction cold start rates', () => {
-          const currentValuesUnique = uniq(
-            body.currentPeriod.transactionColdstartRate.map(({ y }) => y)
-          );
-          const prevValuesUnique = uniq(
-            body.previousPeriod.transactionColdstartRate.map(({ y }) => y)
-          );
-
-          expect(currentValuesUnique).to.eql([0.25]);
-          expect(body.currentPeriod.transactionColdstartRate).to.have.length(3);
-
-          expect(prevValuesUnique).to.eql([0.5]);
-          expect(body.previousPeriod.transactionColdstartRate).to.have.length(3);
-        });
-
-        it('has same average value for both periods', () => {
-          expect(body.currentPeriod.average).to.be(0.25);
-          expect(body.previousPeriod.average).to.be(0.5);
-        });
+      it('returns correct HTTP status', () => {
+        expect(status).to.be(200);
       });
-    }
-  );
+
+      it('returns an array of transaction cold start rates', () => {
+        expect(body).to.have.property('currentPeriod');
+        expect(body.currentPeriod.transactionColdstartRate).to.have.length(15);
+        expect(body.currentPeriod.transactionColdstartRate.every(({ y }) => y === 0.25)).to.be(
+          true
+        );
+      });
+
+      it('returns correct average rate', () => {
+        expect(body.currentPeriod.average).to.be(0.25);
+      });
+
+      it("doesn't have data for the previous period", () => {
+        expect(body).to.have.property('previousPeriod');
+        expect(body.previousPeriod.transactionColdstartRate).to.have.length(0);
+        expect(body.previousPeriod.average).to.be(null);
+      });
+    });
+
+    describe('with comparison', () => {
+      let body: ColdStartRate;
+      let status: number;
+
+      before(async () => {
+        const startDate = moment(start).add(6, 'minutes');
+        const endDate = moment(start).add(9, 'minutes');
+        const comparisonStartDate = new Date(start);
+        const comparisonEndDate = moment(start).add(3, 'minutes');
+
+        await generateData({
+          synthtraceEsClient,
+          start: startDate.valueOf(),
+          end: endDate.valueOf(),
+          coldStartRate: 10,
+          warmStartRate: 30,
+        });
+        await generateData({
+          synthtraceEsClient,
+          start: comparisonStartDate.getTime(),
+          end: comparisonEndDate.valueOf(),
+          coldStartRate: 20,
+          warmStartRate: 20,
+        });
+
+        const response = await callApi({
+          query: {
+            start: startDate.toISOString(),
+            end: endDate.subtract(1, 'seconds').toISOString(),
+            offset: '6m',
+          },
+        });
+        body = response.body;
+        status = response.status;
+      });
+
+      after(() => synthtraceEsClient.clean());
+
+      it('returns correct HTTP status', () => {
+        expect(status).to.be(200);
+      });
+
+      it('returns some data', () => {
+        expect(body.currentPeriod.average).not.to.be(null);
+        expect(body.currentPeriod.transactionColdstartRate.length).to.be.greaterThan(0);
+        const hasCurrentPeriodData = body.currentPeriod.transactionColdstartRate.some(({ y }) =>
+          isFiniteNumber(y)
+        );
+        expect(hasCurrentPeriodData).to.equal(true);
+
+        expect(body.previousPeriod.average).not.to.be(null);
+        expect(body.previousPeriod.transactionColdstartRate.length).to.be.greaterThan(0);
+        const hasPreviousPeriodData = body.previousPeriod.transactionColdstartRate.some(({ y }) =>
+          isFiniteNumber(y)
+        );
+        expect(hasPreviousPeriodData).to.equal(true);
+      });
+
+      it('has same start time for both periods', () => {
+        expect(first(body.currentPeriod.transactionColdstartRate)?.x).to.equal(
+          first(body.previousPeriod.transactionColdstartRate)?.x
+        );
+      });
+
+      it('has same end time for both periods', () => {
+        expect(last(body.currentPeriod.transactionColdstartRate)?.x).to.equal(
+          last(body.previousPeriod.transactionColdstartRate)?.x
+        );
+      });
+
+      it('returns an array of transaction cold start rates', () => {
+        const currentValuesUnique = uniq(
+          body.currentPeriod.transactionColdstartRate.map(({ y }) => y)
+        );
+        const prevValuesUnique = uniq(
+          body.previousPeriod.transactionColdstartRate.map(({ y }) => y)
+        );
+
+        expect(currentValuesUnique).to.eql([0.25]);
+        expect(body.currentPeriod.transactionColdstartRate).to.have.length(3);
+
+        expect(prevValuesUnique).to.eql([0.5]);
+        expect(body.previousPeriod.transactionColdstartRate).to.have.length(3);
+      });
+
+      it('has same average value for both periods', () => {
+        expect(body.currentPeriod.average).to.be(0.25);
+        expect(body.previousPeriod.average).to.be(0.5);
+      });
+    });
+  });
 }

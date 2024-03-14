@@ -7,7 +7,8 @@
 
 import './expandable_section.scss';
 
-import React, { FC, ReactNode, useCallback, useMemo } from 'react';
+import type { FC, ReactNode } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import {
   EuiBadge,
@@ -22,7 +23,7 @@ import {
   getDefaultExplorationPageUrlState,
   useExplorationUrlState,
 } from '../../hooks/use_exploration_url_state';
-import { ExpandablePanels } from '../../../../../../../common/types/locator';
+import type { ExpandablePanels } from '../../../../../../../common/types/locator';
 
 interface HeaderItem {
   // id is used as the React key and to construct a data-test-subj

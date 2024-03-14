@@ -6,7 +6,8 @@
  */
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import type { FlyoutPositionMode } from '../components/chat/chat_flyout';
+
+type FlyoutPositionMode = 'push' | 'overlay';
 
 interface FlyoutState {
   conversationId: string;

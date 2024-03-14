@@ -231,4 +231,6 @@ const convertMetricValue = (metric: SnapshotMetricType, value: number) => {
 const converters: Record<string, (n: number) => number> = {
   cpu: (n) => Number(n) / 100,
   memory: (n) => Number(n) / 100,
+  tx: (n) => Number(n) / 8,
+  rx: (n) => Number(n) / 8,
 };
