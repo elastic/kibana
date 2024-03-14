@@ -10,7 +10,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ChatForm } from '../types';
 
-interface PlaygroundProviderProps {
+export interface PlaygroundProviderProps {
   navigateToIndexPage: () => void;
 }
 
