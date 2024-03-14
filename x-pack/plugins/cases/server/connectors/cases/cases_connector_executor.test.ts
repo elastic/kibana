@@ -1030,18 +1030,8 @@ describe('CasesConnectorExecutor', () => {
             caseId: 'mock-id-1',
             attachments: [
               {
-                alertId: 'alert-id-0',
-                index: 'alert-index-0',
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
-                },
-                type: 'alert',
-              },
-              {
-                alertId: 'alert-id-2',
-                index: 'alert-index-2',
+                alertId: ['alert-id-0', 'alert-id-2'],
+                index: ['alert-index-0', 'alert-index-2'],
                 owner: 'securitySolution',
                 rule: {
                   id: 'rule-test-id',
@@ -1074,18 +1064,8 @@ describe('CasesConnectorExecutor', () => {
             caseId: 'mock-id-4',
             attachments: [
               {
-                alertId: 'alert-id-0',
-                index: 'alert-index-0',
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
-                },
-                type: 'alert',
-              },
-              {
-                alertId: 'alert-id-2',
-                index: 'alert-index-2',
+                alertId: ['alert-id-0', 'alert-id-2'],
+                index: ['alert-index-0', 'alert-index-2'],
                 owner: 'securitySolution',
                 rule: {
                   id: 'rule-test-id',
@@ -1495,16 +1475,18 @@ describe('CasesConnectorExecutor', () => {
 
         expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
           caseId: 'mock-id-1',
-          attachments: alerts.map((alert) => ({
-            alertId: alert._id,
-            index: alert._index,
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+          attachments: [
+            {
+              alertId: alerts.map((alert) => alert._id),
+              index: alerts.map((alert) => alert._index),
+              owner: 'securitySolution',
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
+              type: 'alert',
             },
-            type: 'alert',
-          })),
+          ],
         });
       });
     });
@@ -1732,8 +1714,8 @@ describe('CasesConnectorExecutor', () => {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: 'alert-id-1',
-            index: 'alert-index-1',
+            alertId: ['alert-id-1'],
+            index: ['alert-index-1'],
             owner: 'securitySolution',
             rule: {
               id: 'rule-test-id',
@@ -1748,18 +1730,8 @@ describe('CasesConnectorExecutor', () => {
         caseId: 'mock-id-4',
         attachments: [
           {
-            alertId: 'alert-id-0',
-            index: 'alert-index-0',
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
-            },
-            type: 'alert',
-          },
-          {
-            alertId: 'alert-id-2',
-            index: 'alert-index-2',
+            alertId: ['alert-id-0', 'alert-id-2'],
+            index: ['alert-index-0', 'alert-index-2'],
             owner: 'securitySolution',
             rule: {
               id: 'rule-test-id',
@@ -1854,18 +1826,8 @@ describe('CasesConnectorExecutor', () => {
         caseId: 'mock-id-1',
         attachments: [
           {
-            alertId: 'alert-id-0',
-            index: 'alert-index-0',
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
-            },
-            type: 'alert',
-          },
-          {
-            alertId: 'alert-id-2',
-            index: 'alert-index-2',
+            alertId: ['alert-id-0', 'alert-id-2'],
+            index: ['alert-index-0', 'alert-index-2'],
             owner: 'securitySolution',
             rule: {
               id: 'rule-test-id',
@@ -1880,8 +1842,8 @@ describe('CasesConnectorExecutor', () => {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: 'alert-id-1',
-            index: 'alert-index-1',
+            alertId: ['alert-id-1'],
+            index: ['alert-index-1'],
             owner: 'securitySolution',
             rule: {
               id: 'rule-test-id',
@@ -1945,18 +1907,8 @@ describe('CasesConnectorExecutor', () => {
         caseId: 'mock-id-4',
         attachments: [
           {
-            alertId: 'alert-id-0',
-            index: 'alert-index-0',
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
-            },
-            type: 'alert',
-          },
-          {
-            alertId: 'alert-id-2',
-            index: 'alert-index-2',
+            alertId: ['alert-id-0', 'alert-id-2'],
+            index: ['alert-index-0', 'alert-index-2'],
             owner: 'securitySolution',
             rule: {
               id: 'rule-test-id',
@@ -1971,8 +1923,8 @@ describe('CasesConnectorExecutor', () => {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: 'alert-id-1',
-            index: 'alert-index-1',
+            alertId: ['alert-id-1'],
+            index: ['alert-index-1'],
             owner: 'securitySolution',
             rule: {
               id: 'rule-test-id',
@@ -2031,18 +1983,8 @@ describe('CasesConnectorExecutor', () => {
         caseId: 'mock-id-4',
         attachments: [
           {
-            alertId: 'alert-id-0',
-            index: 'alert-index-0',
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
-            },
-            type: 'alert',
-          },
-          {
-            alertId: 'alert-id-2',
-            index: 'alert-index-2',
+            alertId: ['alert-id-0', 'alert-id-2'],
+            index: ['alert-index-0', 'alert-index-2'],
             owner: 'securitySolution',
             rule: {
               id: 'rule-test-id',
@@ -2057,8 +1999,8 @@ describe('CasesConnectorExecutor', () => {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: 'alert-id-1',
-            index: 'alert-index-1',
+            alertId: ['alert-id-1'],
+            index: ['alert-index-1'],
             owner: 'securitySolution',
             rule: {
               id: 'rule-test-id',
@@ -2095,18 +2037,8 @@ describe('CasesConnectorExecutor', () => {
         caseId: 'mock-id-1',
         attachments: [
           {
-            alertId: 'alert-id-0',
-            index: 'alert-index-0',
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
-            },
-            type: 'alert',
-          },
-          {
-            alertId: 'alert-id-2',
-            index: 'alert-index-2',
+            alertId: ['alert-id-0', 'alert-id-2'],
+            index: ['alert-index-0', 'alert-index-2'],
             owner: 'securitySolution',
             rule: {
               id: 'rule-test-id',
@@ -2121,18 +2053,8 @@ describe('CasesConnectorExecutor', () => {
         caseId: 'mock-id-1',
         attachments: [
           {
-            alertId: 'alert-id-0',
-            index: 'alert-index-0',
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
-            },
-            type: 'alert',
-          },
-          {
-            alertId: 'alert-id-2',
-            index: 'alert-index-2',
+            alertId: ['alert-id-0', 'alert-id-2'],
+            index: ['alert-index-0', 'alert-index-2'],
             owner: 'securitySolution',
             rule: {
               id: 'rule-test-id',
@@ -2147,8 +2069,8 @@ describe('CasesConnectorExecutor', () => {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: 'alert-id-1',
-            index: 'alert-index-1',
+            alertId: ['alert-id-1'],
+            index: ['alert-index-1'],
             owner: 'securitySolution',
             rule: {
               id: 'rule-test-id',
@@ -2163,8 +2085,8 @@ describe('CasesConnectorExecutor', () => {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: 'alert-id-1',
-            index: 'alert-index-1',
+            alertId: ['alert-id-1'],
+            index: ['alert-index-1'],
             owner: 'securitySolution',
             rule: {
               id: 'rule-test-id',
@@ -2179,8 +2101,8 @@ describe('CasesConnectorExecutor', () => {
         caseId: 'mock-id-3',
         attachments: [
           {
-            alertId: 'alert-id-3',
-            index: 'alert-index-3',
+            alertId: ['alert-id-3'],
+            index: ['alert-index-3'],
             owner: 'securitySolution',
             rule: {
               id: 'rule-test-id',
@@ -2195,8 +2117,8 @@ describe('CasesConnectorExecutor', () => {
         caseId: 'mock-id-3',
         attachments: [
           {
-            alertId: 'alert-id-3',
-            index: 'alert-index-3',
+            alertId: ['alert-id-3'],
+            index: ['alert-index-3'],
             owner: 'securitySolution',
             rule: {
               id: 'rule-test-id',
@@ -2282,29 +2204,8 @@ describe('CasesConnectorExecutor', () => {
           attachments: [
             {
               type: 'alert',
-              alertId: 'alert-id-0',
-              index: 'alert-index-0',
-              rule: { id: 'rule-test-id', name: 'Test rule' },
-              owner: 'securitySolution',
-            },
-            {
-              type: 'alert',
-              alertId: 'alert-id-2',
-              index: 'alert-index-2',
-              rule: { id: 'rule-test-id', name: 'Test rule' },
-              owner: 'securitySolution',
-            },
-            {
-              type: 'alert',
-              alertId: 'alert-id-1',
-              index: 'alert-index-1',
-              rule: { id: 'rule-test-id', name: 'Test rule' },
-              owner: 'securitySolution',
-            },
-            {
-              type: 'alert',
-              alertId: 'alert-id-3',
-              index: 'alert-index-3',
+              alertId: ['alert-id-0', 'alert-id-2', 'alert-id-1', 'alert-id-3'],
+              index: ['alert-index-0', 'alert-index-2', 'alert-index-1', 'alert-index-3'],
               rule: { id: 'rule-test-id', name: 'Test rule' },
               owner: 'securitySolution',
             },
@@ -2381,13 +2282,18 @@ describe('CasesConnectorExecutor', () => {
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
         expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
           caseId: 'mock-id-1',
-          attachments: allAlerts.map((alert) => ({
-            alertId: alert._id,
-            index: alert._index,
-            rule: { id: 'rule-test-id', name: 'Test rule' },
-            owner: 'securitySolution',
-            type: 'alert',
-          })),
+          attachments: [
+            {
+              alertId: allAlerts.map((alert) => alert._id),
+              index: allAlerts.map((alert) => alert._index),
+              owner: 'securitySolution',
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
+              type: 'alert',
+            },
+          ],
         });
       });
 
@@ -2467,8 +2373,8 @@ describe('CasesConnectorExecutor', () => {
         attachments: [
           {
             type: 'alert',
-            alertId: 'test-id',
-            index: 'test-index',
+            alertId: ['test-id'],
+            index: ['test-index'],
             rule: { id: 'rule-test-id', name: 'Test rule' },
             owner: 'securitySolution',
           },
@@ -2480,8 +2386,8 @@ describe('CasesConnectorExecutor', () => {
         attachments: [
           {
             type: 'alert',
-            alertId: 'test-id',
-            index: 'test-index',
+            alertId: ['test-id'],
+            index: ['test-index'],
             rule: { id: 'rule-test-id', name: 'Test rule' },
             owner: 'securitySolution',
           },
@@ -2493,8 +2399,8 @@ describe('CasesConnectorExecutor', () => {
         attachments: [
           {
             type: 'alert',
-            alertId: 'test-id',
-            index: 'test-index',
+            alertId: ['test-id'],
+            index: ['test-index'],
             rule: { id: 'rule-test-id', name: 'Test rule' },
             owner: 'securitySolution',
           },
@@ -2567,8 +2473,8 @@ describe('CasesConnectorExecutor', () => {
         attachments: [
           {
             type: 'alert',
-            alertId: 'test-id',
-            index: 'test-index',
+            alertId: ['test-id'],
+            index: ['test-index'],
             rule: { id: 'rule-test-id', name: 'Test rule' },
             owner: 'securitySolution',
           },
@@ -2580,8 +2486,8 @@ describe('CasesConnectorExecutor', () => {
         attachments: [
           {
             type: 'alert',
-            alertId: 'test-id',
-            index: 'test-index',
+            alertId: ['test-id'],
+            index: ['test-index'],
             rule: { id: 'rule-test-id', name: 'Test rule' },
             owner: 'securitySolution',
           },
@@ -2593,8 +2499,8 @@ describe('CasesConnectorExecutor', () => {
         attachments: [
           {
             type: 'alert',
-            alertId: 'test-id',
-            index: 'test-index',
+            alertId: ['test-id'],
+            index: ['test-index'],
             rule: { id: 'rule-test-id', name: 'Test rule' },
             owner: 'securitySolution',
           },
@@ -2664,8 +2570,8 @@ describe('CasesConnectorExecutor', () => {
         attachments: [
           {
             type: 'alert',
-            alertId: 'test-id',
-            index: 'test-index',
+            alertId: ['test-id'],
+            index: ['test-index'],
             rule: { id: 'rule-test-id', name: 'Test rule' },
             owner: 'securitySolution',
           },
