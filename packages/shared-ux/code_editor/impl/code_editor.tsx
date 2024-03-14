@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent, FC } from 'react';
 import ReactMonacoEditor, {
   type MonacoEditorProps as ReactMonacoEditorProps,
 } from 'react-monaco-editor';
@@ -178,9 +178,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }),
   fitToContent,
 }) => {
-  const [$codeWrapper, setCodeWrapper] = React.useState<HTMLElement | null>(null);
-  const onCodeWrapperChange = React.useCallback(setCodeWrapper, [setCodeWrapper]);
-
   const { colorMode, euiTheme } = useEuiTheme();
   const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
 
@@ -482,22 +479,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const theme = options?.theme ?? (transparentBackground ? 'euiColorsTransparent' : 'euiColors');
 
-  useEffect(() => {
-    const rebroadcastEvent = (event: MouseEvent) => {
-      // rebroadcast mouse event to accommodate integration with other parts of the codebase
-      // especially that the monaco it self does prevent default for mouse events
-      if ($codeWrapper?.contains(event.target as Node) && event.defaultPrevented) {
-        $codeWrapper.dispatchEvent(new MouseEvent(event.type, event));
-      }
-    };
-
-    if ($codeWrapper) {
-      $codeWrapper.addEventListener('mousedown', rebroadcastEvent);
-
-      return () => $codeWrapper.removeEventListener('mousedown', rebroadcastEvent);
-    }
-  }, [$codeWrapper, _editor]);
-
   return (
     <div
       css={styles.container}
@@ -526,7 +507,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             </EuiFlexGroup>
           </div>
         ) : null}
-        <div ref={onCodeWrapperChange} style={{ display: 'contents' }}>
+        <UseBug177756ReBroadcastMouseDown>
           <MonacoEditor
             theme={theme}
             language={languageId}
@@ -563,7 +544,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               ...options,
             }}
           />
-        </div>
+        </UseBug177756ReBroadcastMouseDown>
       </FullScreenDisplay>
     </div>
   );
@@ -715,4 +696,30 @@ const useBug175684OnChange = (onChange: CodeEditorProps['onChange']) => {
   }, []);
 
   return onChangeWrapper;
+};
+
+const UseBug177756ReBroadcastMouseDown: FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [$codeWrapper, setCodeWrapper] = React.useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const rebroadcastEvent = (event: MouseEvent) => {
+      // rebroadcast mouse event to accommodate integration with other parts of the codebase
+      // especially that the monaco it self does prevent default for mouse events
+      if ($codeWrapper?.contains(event.target as Node) && event.defaultPrevented) {
+        $codeWrapper.dispatchEvent(new MouseEvent(event.type, event));
+      }
+    };
+
+    if ($codeWrapper) {
+      $codeWrapper.addEventListener('mousedown', rebroadcastEvent);
+
+      return () => $codeWrapper.removeEventListener('mousedown', rebroadcastEvent);
+    }
+  }, [$codeWrapper]);
+
+  return (
+    <div ref={setCodeWrapper} style={{ display: 'contents' }}>
+      {children}
+    </div>
+  );
 };
