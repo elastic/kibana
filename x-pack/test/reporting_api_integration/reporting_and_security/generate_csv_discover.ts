@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { JobParamsCSV, ReportApiJSON } from '../../../plugins/reporting/common/types';
+import { SearchSourceFields } from 'src/plugins/data/common';
+import { ReportApiJSON } from '../../../plugins/reporting/common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -44,7 +45,10 @@ export default function ({ getService }: FtrProviderContext) {
           'sku',
         ],
         objectType: 'search',
+        version: '7.17.19',
         searchSource: {
+          index: '5193f870-d861-11e9-a311-0fa548c5f953',
+          sort: [{ order_date: 'desc' }],
           fields: [
             'order_date',
             'category',
@@ -73,7 +77,6 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           ],
-          index: '5193f870-d861-11e9-a311-0fa548c5f953',
           parent: {
             filter: [],
             highlightAll: true,
@@ -81,11 +84,9 @@ export default function ({ getService }: FtrProviderContext) {
             query: { language: 'kuery', query: '' },
             version: true,
           },
-          sort: [{ order_date: 'desc' }],
           trackTotalHits: true,
-        },
-        version: '7.17.19',
-      } as unknown as JobParamsCSV);
+        } as unknown as SearchSourceFields,
+      });
       expect(status).to.be(200);
 
       const { job: report, path: downloadPath } = JSON.parse(reportApiJson) as {
