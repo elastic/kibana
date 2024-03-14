@@ -227,6 +227,7 @@ export const AlertsPopover = () => {
       <EuiPopover
         button={
           <EuiButtonEmpty
+            data-test-subj="observabilityLogsExplorerAlertsPopoverAlertsButton"
             onClick={togglePopover}
             iconType="arrowDown"
             iconSide="right"

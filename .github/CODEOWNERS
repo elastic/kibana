@@ -277,6 +277,13 @@ packages/core/saved-objects/core-saved-objects-server @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-server-internal @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-server-mocks @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-utils-server @elastic/kibana-core
+packages/core/security/core-security-browser @elastic/kibana-core
+packages/core/security/core-security-browser-internal @elastic/kibana-core
+packages/core/security/core-security-browser-mocks @elastic/kibana-core
+packages/core/security/core-security-common @elastic/kibana-core @elastic/kibana-security
+packages/core/security/core-security-server @elastic/kibana-core
+packages/core/security/core-security-server-internal @elastic/kibana-core
+packages/core/security/core-security-server-mocks @elastic/kibana-core
 packages/core/status/core-status-common @elastic/kibana-core
 packages/core/status/core-status-common-internal @elastic/kibana-core
 packages/core/status/core-status-server @elastic/kibana-core
@@ -1544,8 +1551,6 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 **/*.scss @elastic/kibana-design
 
 # Observability design
-/x-pack/plugins/observability_solution/apm/**/*.scss @elastic/observability-design
-/x-pack/plugins/observability_solution/infra/**/*.scss @elastic/observability-design
 /x-pack/plugins/fleet/**/*.scss @elastic/observability-design
 /x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
 
@@ -1557,7 +1562,6 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 /x-pack/plugins/security_solution/**/*.scss @elastic/security-design
 /x-pack/plugins/security_solution_ess/**/*.scss @elastic/security-design
 /x-pack/plugins/security_solution_serverless/**/*.scss @elastic/security-design
-/x-pack/plugins/observability_solution/logs_explorer/**/*.scss @elastic/observability-design
 
 # Logstash
 #CC# /x-pack/plugins/logstash/ @elastic/logstash

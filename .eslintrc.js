@@ -913,20 +913,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/aiops/**/*.tsx',
-        'x-pack/plugins/infra/**/*.tsx',
-        'x-pack/plugins/observability_solution/apm/**/*.tsx',
-        'x-pack/plugins/observability_solution/dataset_quality/**/*.tsx',
-        'x-pack/plugins/observability_solution/exploratory_view/**/*.tsx',
-        'x-pack/plugins/observability_solution/infra/**/*.tsx',
-        'x-pack/plugins/observability_solution/observability/**/*.tsx',
-        'x-pack/plugins/observability_solution/observability_ai_assistant/**/*.tsx',
-        'x-pack/plugins/observability_solution/observability_onboarding/**/*.tsx',
-        'x-pack/plugins/observability_solution/observability_shared/**/*.tsx',
-        'x-pack/plugins/observability_solution/profiling/**/*.tsx',
-        'x-pack/plugins/observability_solution/slo/**/*.tsx',
-        'x-pack/plugins/observability_solution/synthetics/**/*.tsx',
-        'x-pack/plugins/observability_solution/uptime/**/*.tsx',
-        'x-pack/plugins/observability_solution/ux/**/*.tsx',
+        'x-pack/plugins/observability_solution/**/*.tsx',
         'src/plugins/ai_assistant_management/**/*.tsx',
       ],
       rules: {
@@ -935,17 +922,7 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/observability_solution/apm/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/observability_solution/exploratory_view/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/observability_solution/infra/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/observability_solution/observability/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/observability_solution/observability_ai_assistant/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/observability_solution/observability_onboarding/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/observability_solution/observability_shared/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/observability_solution/profiling/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/observability_solution/slo/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/observability_solution/synthetics/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/observability_solution/ux/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/observability_solution/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {

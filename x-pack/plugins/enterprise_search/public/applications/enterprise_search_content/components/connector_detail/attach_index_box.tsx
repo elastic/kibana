@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -236,34 +237,6 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
       </EuiFlexGroup>
       <EuiSpacer />
       <EuiFlexGroup>
-        {!connector.index_name && (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              fill
-              onClick={() => {
-                createIndex({ indexName: connector.name, language: null });
-              }}
-              isLoading={isSaveLoading || isExistLoading}
-              disabled={indexExists[connector.name]}
-            >
-              {i18n.translate('xpack.enterpriseSearch.attachIndexBox.createSameIndexButtonLabel', {
-                defaultMessage: 'Create and attach an index named {indexName}',
-                values: { indexName: connector.name },
-              })}
-            </EuiButton>
-            {indexExists[connector.name] ? (
-              <EuiText size="xs">
-                {i18n.translate('xpack.enterpriseSearch.attachIndexBox.indexNameExistsError', {
-                  defaultMessage: 'Index with name {indexName} already exists',
-                  values: { indexName: connector.name },
-                })}
-              </EuiText>
-            ) : (
-              <></>
-            )}
-          </EuiFlexItem>
-        )}
         <EuiFlexItem grow={false}>
           <EuiButton
             onClick={() => onSave()}
@@ -276,6 +249,61 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {!connector.index_name && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup responsive={false} justifyContent="center" alignItems="center">
+            <EuiFlexItem>
+              <EuiHorizontalRule size="full" />
+            </EuiFlexItem>
+            <EuiText>
+              <p>
+                {i18n.translate('xpack.enterpriseSearch.attachIndexBox.orPanelLabel', {
+                  defaultMessage: 'OR',
+                })}
+              </p>
+            </EuiText>
+            <EuiFlexItem>
+              <EuiHorizontalRule size="full" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="sparkles"
+                color="primary"
+                fill
+                onClick={() => {
+                  createIndex({ indexName: connector.name, language: null });
+                  setSelectedIndex({ label: connector.name });
+                }}
+                isLoading={isSaveLoading || isExistLoading}
+                disabled={indexExists[connector.name]}
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.attachIndexBox.createSameIndexButtonLabel',
+                  {
+                    defaultMessage: 'Create and attach an index named {indexName}',
+                    values: { indexName: connector.name },
+                  }
+                )}
+              </EuiButton>
+              {indexExists[connector.name] ? (
+                <EuiText size="xs">
+                  {i18n.translate('xpack.enterpriseSearch.attachIndexBox.indexNameExistsError', {
+                    defaultMessage: 'Index with name {indexName} already exists',
+                    values: { indexName: connector.name },
+                  })}
+                </EuiText>
+              ) : (
+                <></>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </EuiPanel>
   );
 };
