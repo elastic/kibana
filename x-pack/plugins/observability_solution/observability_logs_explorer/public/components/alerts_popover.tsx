@@ -187,7 +187,12 @@ export const AlertsPopover = () => {
 
   if (canCreateRuleState.value) {
     items.push(
-      <EuiContextMenuItem key="createRule" icon="bell" onClick={openAddRuleFlyout}>
+      <EuiContextMenuItem
+        key="createRule"
+        icon="bell"
+        onClick={openAddRuleFlyout}
+        data-test-subj="logsExplorerCreateRuleMenuItem"
+      >
         <FormattedMessage
           id="xpack.observabilityLogsExplorer.alertsPopover.createRuleMenuItem"
           defaultMessage="Create rule"
@@ -198,7 +203,12 @@ export const AlertsPopover = () => {
 
   if (canCreateSLOs) {
     items.push(
-      <EuiContextMenuItem key="createSLO" icon="visGauge" onClick={openCreateSLOFlyout}>
+      <EuiContextMenuItem
+        key="createSLO"
+        icon="visGauge"
+        onClick={openCreateSLOFlyout}
+        data-test-subj="logsExplorerCreateSLOMenuItem"
+      >
         <FormattedMessage
           id="xpack.observabilityLogsExplorer.alertsPopover.createSLOMenuItem"
           defaultMessage="Create SLO"
@@ -212,7 +222,12 @@ export const AlertsPopover = () => {
   }
 
   items.push(
-    <EuiContextMenuItem key="manageRules" icon="tableOfContents" {...manageRulesLinkProps}>
+    <EuiContextMenuItem
+      key="manageRules"
+      icon="tableOfContents"
+      {...manageRulesLinkProps}
+      data-test-subj="logsExplorerManageRulesMenuItem"
+    >
       <FormattedMessage
         id="xpack.observabilityLogsExplorer.alertsPopover.manageRulesMenuItem"
         defaultMessage="{canCreateRule, select, true{Manage} other{View}} rules"
@@ -232,6 +247,7 @@ export const AlertsPopover = () => {
             iconType="arrowDown"
             iconSide="right"
             isLoading={canCreateRuleState.loading}
+            data-test-subj="logsExplorerToggleAlertsPopoverButton"
           >
             <FormattedMessage
               id="xpack.observabilityLogsExplorer.alertsPopover.buttonLabel"
