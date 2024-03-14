@@ -68,7 +68,9 @@ export const esArchiver = (
       } else if (type === 'ftr') {
         ftrEsArchiverInstance.load(archiveName, options);
       } else {
-        throw new Error(`Unable to load the specified archive: ${JSON.stringify({ archiveName, type, options })}`);
+        throw new Error(
+          `Unable to load the specified archive: ${JSON.stringify({ archiveName, type, options })}`
+        );
       }
       return null;
     },
