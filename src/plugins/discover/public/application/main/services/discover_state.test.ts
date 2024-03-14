@@ -12,7 +12,7 @@ import {
   createSearchSessionRestorationDataProvider,
 } from './discover_state';
 import { createBrowserHistory, createMemoryHistory, History } from 'history';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   savedSearchAdHoc,
@@ -521,6 +521,43 @@ describe('Test discover state actions', () => {
       `"/#?_a=(columns:!(message),index:the-data-view-id,interval:month,sort:!())&_g=()"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
+    unsubscribe();
+  });
+
+  test('loadSavedSearch given a URL with different time range than the stored one showing as changed', async () => {
+    const url = '/#_g=(time:(from:now-24h%2Fh,to:now))';
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: createSearchSourceMock({ index: dataViewMock, filter: [] }),
+      timeRestore: true,
+      timeRange: { from: 'now-666m', to: 'now' },
+    };
+    const { state } = await getState(url, {
+      savedSearch,
+      isEmptyUrl: false,
+    });
+    await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
+    const unsubscribe = state.actions.initializeAndSync();
+    await new Promise(process.nextTick);
+    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
+    unsubscribe();
+  });
+
+  test('loadSavedSearch given a URL with different time range than without timeRestore not showing as changed', async () => {
+    const url = '/#?_g=(time:(from:now-24h%2Fh,to:now))';
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: createSearchSourceMock({ index: dataViewMock, filter: [] }),
+      timeRestore: false,
+    };
+    const { state } = await getState(url, {
+      savedSearch,
+      isEmptyUrl: false,
+    });
+    await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
+    const unsubscribe = state.actions.initializeAndSync();
+    await new Promise(process.nextTick);
+    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
     unsubscribe();
   });
 
