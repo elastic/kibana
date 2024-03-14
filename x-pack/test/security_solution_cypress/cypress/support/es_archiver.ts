@@ -58,7 +58,7 @@ export const esArchiver = (
     log,
     client,
     kbnClient,
-    baseDir: '../../functional/es_archives',
+    baseDir: '../../functional/es_archives/security_solution',
   });
 
   on('task', {
