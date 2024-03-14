@@ -5,16 +5,22 @@
  * 2.0.
  */
 import { useContext } from 'react';
-import { ObservabilityAIAssistantChatServiceContext } from '../context/observability_ai_assistant_chat_service_provider';
+import { ObservabilityAIAssistantChatServiceContext } from '../context/observability_ai_assistant_chat_service_context';
+import type { ObservabilityAIAssistantChatService } from '../types';
 
 export function useObservabilityAIAssistantChatService() {
-  const services = useContext(ObservabilityAIAssistantChatServiceContext);
-
-  if (!services) {
+  const service = useContext(ObservabilityAIAssistantChatServiceContext);
+  if (!service) {
     throw new Error(
-      'ObservabilityAIAssistantChatServiceContext not set. Did you wrap your component in `<ObservabilityAIAssistantChatServiceProvider/>`?'
+      'ObservabilityAIAssistantChatServiceContext not set. Did you wrap your component in `<ObservabilityAIAssistantChatServiceContext.Provider/>`?'
     );
   }
 
-  return services;
+  return useObservabilityAIAssistantChatServiceWithService(service);
+}
+
+function useObservabilityAIAssistantChatServiceWithService(
+  service: ObservabilityAIAssistantChatService
+) {
+  return service;
 }
