@@ -20,4 +20,4 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   schema: configSchema,
 };
 
-export type ServerlessSearchConfig = TypeOf<typeof configSchema>;
+export type SearchConnectorsConfig = TypeOf<typeof configSchema>;
