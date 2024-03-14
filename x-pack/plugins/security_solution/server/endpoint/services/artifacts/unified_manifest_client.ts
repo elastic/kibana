@@ -20,6 +20,7 @@ import type {
   InternalUnifiedManifestUpdateSchema,
 } from '../../schemas';
 import { ManifestConstants } from '../../lib/artifacts';
+import { normalizeKuery } from '../../utils/normalize_kuery';
 
 interface FetchAllUnifiedManifestsOptions {
   perPage?: number;
@@ -49,10 +50,10 @@ export class UnifiedManifestClient {
   }
 
   public createUnifiedManifests(
-    manifest: InternalUnifiedManifestBaseSchema[]
+    manifests: InternalUnifiedManifestBaseSchema[]
   ): Promise<SavedObjectsBulkResponse<InternalUnifiedManifestBaseSchema>> {
     return this.savedObjectsClient.bulkCreate<InternalUnifiedManifestBaseSchema>(
-      manifest.map((attributes) => ({
+      manifests.map((attributes) => ({
         type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
         attributes,
       })),
@@ -166,12 +167,6 @@ export class UnifiedManifestClient {
       sortField = 'created',
     }: FetchAllUnifiedManifestsOptions = {}
   ): AsyncIterable<InternalUnifiedManifestSchema[]> {
-    const normalizeKuery = (savedObjectType: string, kueryInput: string): string => {
-      return kueryInput.replace(
-        new RegExp(`${savedObjectType}\\.(?!attributes\\.)`, 'g'),
-        `${savedObjectType}.attributes.`
-      );
-    };
     return createSoFindIterable<InternalUnifiedManifestBaseSchema>({
       soClient,
       findRequest: {
