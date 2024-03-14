@@ -51,7 +51,7 @@ if [ $? -ne 0 ]; then
   echo "Changes committed. Creating pull request."
 
   # Create a PR
-  gh pr create --draft --title "[ES|QL] Update lexer grammar" --body "This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch." \ 
+  gh pr create -d --title "[ES|QL] Update lexer grammar" --body "This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch." \ 
   --base main --head "$BRANCH_NAME" --label "release_note:skip" || exit
 
 else
