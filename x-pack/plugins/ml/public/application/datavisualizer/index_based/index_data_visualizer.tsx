@@ -51,10 +51,19 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
   );
 
   useEffect(() => {
+    let unmounted = false;
     if (dataVisualizer !== undefined) {
       const { getIndexDataVisualizerComponent } = dataVisualizer;
-      getIndexDataVisualizerComponent().then(setIndexDataVisualizer);
+      getIndexDataVisualizerComponent().then((component) => {
+        if (!unmounted) {
+          setIndexDataVisualizer(component);
+        }
+      });
     }
+
+    return () => {
+      unmounted = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
