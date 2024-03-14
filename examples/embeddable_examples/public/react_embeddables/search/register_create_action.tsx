@@ -15,7 +15,7 @@ export const registerCreateAction = (uiActions: UiActionsStart) => {
     id: 'CREATE_SEARCH_REACT_EMBEDDABLE',
     getDisplayName: () => 'Unified search example',
     getDisplayNameTooltip: () =>
-      'Demonstrates how to use filter, time range, and query state in an embeddable',
+      'Demonstrates how to use global filters, global time range, panel time range, and global query state in an embeddable',
     getIconType: () => 'search',
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);

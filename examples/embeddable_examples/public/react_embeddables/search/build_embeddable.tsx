@@ -100,7 +100,7 @@ export const buildEmbeddable = async (
       if (!defaultDataView) {
         return (
           <EuiCallOut title="Default data view not found" color="warning" iconType="warning">
-            <p>Please install sample data set to run the full example.</p>
+            <p>Please install a sample data set to run example.</p>
           </EuiCallOut>
         );
       }

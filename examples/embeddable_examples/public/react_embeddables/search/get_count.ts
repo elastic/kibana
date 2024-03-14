@@ -18,9 +18,6 @@ export async function getCount(
   query: Query | AggregateQuery | undefined,
   timeRange: TimeRange | undefined
 ) {
-  if (!dataView) {
-    return 0;
-  }
   const searchSource = await dataService.search.searchSource.create();
   searchSource.setField('index', dataView);
   searchSource.setField('size', 0);
