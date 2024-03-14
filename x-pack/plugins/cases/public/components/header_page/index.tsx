@@ -70,7 +70,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem
           css={css`
-            overflow: 'hidden';
+            overflow: hidden;
             display: block;
           `}
         >

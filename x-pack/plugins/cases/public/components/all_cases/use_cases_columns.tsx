@@ -48,23 +48,6 @@ type CasesColumns =
   | EuiTableComputedColumnType<CaseUI>
   | EuiTableFieldDataColumnType<CaseUI>;
 
-const LINE_CLAMP = 3;
-const getLineClampedCss = css`
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: ${LINE_CLAMP};
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  word-break: normal;
-`;
-
-// margin-right is required here because -webkit-box-orient: vertical;
-// in the EuiBadgeGroup prevents us from defining gutterSize.
-// const StyledEuiBadge = euiStyled(EuiBadge)`
-//   max-width: 100px;
-//   margin-right: 5px;
-// `; // to allow for ellipsis
-
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyCellValue();
 
@@ -143,7 +126,7 @@ export const useCasesColumns = ({
         render: (tags: CaseUI['tags']) => {
           if (tags != null && tags.length > 0) {
             const clampedBadges = (
-              <EuiBadgeGroup data-test-subj="case-table-column-tags" css={getLineClampedCss}>
+              <EuiBadgeGroup data-test-subj="case-table-column-tags">
                 {tags.map((tag: string, i: number) => (
                   <EuiBadge
                     css={css`
@@ -154,7 +137,7 @@ export const useCasesColumns = ({
                     key={`${tag}-${i}`}
                     data-test-subj={`case-table-column-tags-${tag}`}
                   >
-                    {tag}
+                    <TruncatedText text={tag} />
                   </EuiBadge>
                 ))}
               </EuiBadgeGroup>

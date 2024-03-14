@@ -24,16 +24,7 @@ import {
 } from './translations';
 import { OWNER_INFO } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
-
-const LINE_CLAMP = 3;
-const titleCss = css`
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: ${LINE_CLAMP};
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  word-break: break-word;
-`;
+import { TruncatedText } from '../components/truncated_text';
 
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   let alertsCount = 0;
@@ -156,7 +147,7 @@ export const useCasesToast = () => {
         return toasts.addSuccess({
           color: 'success',
           iconType: 'check',
-          title: toMountPoint(<span css={titleCss}>{renderTitle}</span>),
+          title: toMountPoint(<TruncatedText text={renderTitle} />),
           text: toMountPoint(
             <CaseToastSuccessContent
               content={renderContent}
