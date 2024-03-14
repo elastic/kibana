@@ -39,7 +39,7 @@ export function SloEditPage() {
       text: i18n.translate('xpack.slo.breadcrumbs.sloLabel', {
         defaultMessage: 'SLOs',
       }),
-      deepLinkId: 'observability-overview:slos',
+      deepLinkId: 'slo',
     },
     ...(!!slo
       ? [
