@@ -13,7 +13,8 @@ xpack.slo.enabled: true
 ## Cloud settings
 xpack.cloud.serverless.project_type: observability
 
-## Enable the Serverless 
+## Enable the Serverless Observability plugin
+xpack.serverless.observability.enabled: true 
 
 ## Configure plugins
 
