@@ -22,10 +22,15 @@ import type {
   ProcessPendingActionsMethodOptions,
 } from '../../..';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
-import type { SentinelOneConnectorExecuteOptions } from './types';
+import type { SentinelOneConnectorExecuteOptions, SentinelOneIsolationRequestMeta } from './types';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
-import type { ActionDetails, LogsEndpointAction } from '../../../../../../common/endpoint/types';
+import type {
+  ActionDetails,
+  LogsEndpointAction,
+  EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
+} from '../../../../../../common/endpoint/types';
 import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
@@ -79,13 +84,17 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     });
   }
 
-  protected async writeActionRequestToEndpointIndex(
+  protected async writeActionRequestToEndpointIndex<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
     actionRequest: Omit<ResponseActionsClientWriteActionRequestToEndpointIndexOptions, 'hosts'>
-  ): Promise<LogsEndpointAction> {
+  ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
     const agentId = actionRequest.endpoint_ids[0];
     const agentDetails = await this.getAgentDetails(agentId);
 
-    return super.writeActionRequestToEndpointIndex({
+    return super.writeActionRequestToEndpointIndex<TParameters, TOutputContent, TMeta>({
       ...actionRequest,
       hosts: {
         [agentId]: { name: agentDetails.computerName },
@@ -191,10 +200,17 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionRequest: IsolationRouteRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails> {
-    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      undefined,
+      {},
+      SentinelOneIsolationRequestMeta
+    > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
       command: 'isolate',
+      meta: {
+        sentAt: new Date().toISOString(),
+      },
     };
 
     if (!reqIndexOptions.error) {
@@ -249,10 +265,17 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionRequest: IsolationRouteRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails> {
-    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      undefined,
+      {},
+      SentinelOneIsolationRequestMeta
+    > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
       command: 'unisolate',
+      meta: {
+        sentAt: new Date().toISOString(),
+      },
     };
 
     if (!reqIndexOptions.error) {

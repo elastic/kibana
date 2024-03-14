@@ -24,3 +24,11 @@ export type SentinelOneConnectorExecuteOptions<
 > = Omit<ConnectorActionsExecuteOptions, 'params'> & {
   params: SentinelOneConnectorExecuteParams<P> & Record<string, unknown>;
 };
+
+/**
+ * Metadata capture for the isolation actions (`isolate` and `release`)
+ */
+export interface SentinelOneIsolationRequestMeta {
+  /** The ISO date string when the request was sent to SentinelOne for delivery to their agent */
+  sentAt: string;
+}

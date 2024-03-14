@@ -111,12 +111,16 @@ export interface ResponseActionsClientUpdateCasesOptions {
   actionId: string;
 }
 
-export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
-  ResponseActionsRequestBody &
-    Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> & {
-      command: ResponseActionsApiCommandNames;
-      actionId?: string;
-    };
+export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> = ResponseActionsRequestBody &
+  Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> &
+  Pick<LogsEndpointAction<TParameters, TOutputContent, TMeta>, 'meta'> & {
+    command: ResponseActionsApiCommandNames;
+    actionId?: string;
+  };
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
@@ -327,9 +331,13 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
    * Creates a Response Action request document in the Endpoint index (`.logs-endpoint.actions-default`)
    * @protected
    */
-  protected async writeActionRequestToEndpointIndex(
+  protected async writeActionRequestToEndpointIndex<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
-  ): Promise<LogsEndpointAction> {
+  ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
     let errorMsg = String(actionRequest.error ?? '').trim();
 
     if (!errorMsg) {
@@ -346,7 +354,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     this.notifyUsage(actionRequest.command);
 
-    const doc: LogsEndpointAction = {
+    const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
       '@timestamp': new Date().toISOString(),
       agent: {
         id: actionRequest.endpoint_ids,
