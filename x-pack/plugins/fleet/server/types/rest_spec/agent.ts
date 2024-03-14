@@ -137,6 +137,7 @@ export const PostBulkAgentUpgradeRequestSchema = {
       })
     ),
     batchSize: schema.maybe(schema.number()),
+    includeInactive: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -189,6 +190,7 @@ export const PostBulkAgentReassignRequestSchema = {
     policy_id: schema.string(),
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     batchSize: schema.maybe(schema.number()),
+    includeInactive: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -214,6 +216,7 @@ export const PostBulkUpdateAgentTagsRequestSchema = {
     tagsToAdd: schema.maybe(schema.arrayOf(schema.string())),
     tagsToRemove: schema.maybe(schema.arrayOf(schema.string())),
     batchSize: schema.maybe(schema.number()),
+    includeInactive: schema.boolean({ defaultValue: false }),
   }),
 };
 

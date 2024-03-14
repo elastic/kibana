@@ -988,7 +988,7 @@ describe('myIntegrationTest', () => {
   afterEach(async () => {
     if(testkit) {
       // delete the indices between each tests to perform a migration again
-      await testkit.tearsDown();
+      await testkit.tearDown();
     }
   });
 
