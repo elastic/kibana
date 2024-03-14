@@ -26,7 +26,7 @@ import {
 import { BuildkitePipelineManifest } from './pipelineBackstageDefinitions';
 
 const DRY_RUN = process.argv.includes('--dry-run');
-const DEFAULT_OUTPUT_PATH = path.resolve(REPO_ROOT, '.buildkite/pipeline-resource-definitions');
+const DEFAULT_OUTPUT_PATH = path.resolve(REPO_ROOT, '.buildkite', 'pipeline-resource-definitions');
 const DEFAULT_LOCATION_FILE_NAME = 'locations.yml';
 const REPO_FILES_PREFIX = 'https://github.com/elastic/kibana/blob/main';
 const TMP_DIR = fs.mkdtempSync(path.resolve(os.tmpdir(), 'buildkite-migration'));
@@ -79,7 +79,7 @@ export const runMigration = () =>
 
       // Generate YAML files for each pipeline definition
       const unprocessedFiles: string[] = [];
-      const definitionFileNames: string[] = await Promise.all(
+      await Promise.all(
         paths.map(async (tfFilePath) => {
           const fullTfFilePath = path.resolve(pathToPipelines, tfFilePath);
           const catalogFilePath = generateCatalogFile({
@@ -98,7 +98,6 @@ export const runMigration = () =>
 
       // Generate a location file that points to all generated YAML files
       const catalogLocationFilePath = compileLocationFile({
-        catalogFileNames: definitionFileNames,
         locationFilePath,
         log,
       });
@@ -415,38 +414,44 @@ function extractOrGeneratePipelineFile(
 }
 
 function compileLocationFile({
-  catalogFileNames,
   locationFilePath,
   log,
 }: {
-  catalogFileNames: string[];
   locationFilePath: string;
   log: ToolingLog;
 }): string {
-  const locationFileContent = yaml.safeDump(
-    {
-      apiVersion: 'backstage.io/v1alpha1',
-      kind: 'Location',
-      metadata: {
-        name: 'kibana-buildkite-pipelines-list',
-        description: 'This file points to individual buildkite pipeline definition files',
+  if (!fs.existsSync(locationFilePath)) {
+    const locationFileContent = yaml.safeDump(
+      {
+        apiVersion: 'backstage.io/v1alpha1',
+        kind: 'Location',
+        metadata: {
+          name: 'kibana-buildkite-pipelines-list',
+          description: 'This file points to individual buildkite pipeline definition files',
+        },
+        spec: {
+          type: 'url',
+          targets: [],
+        },
       },
-      spec: {
-        type: 'url',
-        targets: catalogFileNames.map((fileName) => `${REPO_FILES_PREFIX}/${fileName}`),
-      },
-    },
-    DUMP_OPTIONS
-  );
+      DUMP_OPTIONS
+    );
 
-  if (DRY_RUN) {
-    const tempLocationPath = path.resolve(TMP_DIR, 'locations.yml');
-    fs.writeFileSync(tempLocationPath, locationFileContent);
-    log.info(`Written: ${tempLocationPath}`);
-  } else {
-    fs.writeFileSync(locationFilePath, locationFileContent);
-    log.info(`Written: ${locationFilePath}`);
+    if (DRY_RUN) {
+      const tempLocationPath = path.resolve(TMP_DIR, 'locations.yml');
+      fs.writeFileSync(tempLocationPath, locationFileContent);
+      log.info(`Written: ${tempLocationPath}`);
+    } else {
+      fs.writeFileSync(locationFilePath, locationFileContent);
+      log.info(`Written: ${locationFilePath}`);
+    }
   }
+
+  const regenerationScript = path.resolve(
+    path.dirname(locationFilePath),
+    'fix-location-collection.ts'
+  );
+  execSync(`ts-node ${regenerationScript}`, { stdio: 'inherit' });
 
   return path.relative(REPO_ROOT, locationFilePath);
 }

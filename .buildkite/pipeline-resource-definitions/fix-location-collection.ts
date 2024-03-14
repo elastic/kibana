@@ -43,7 +43,7 @@ async function main() {
     (fileName) => `${resourceDefinitionsBaseUrl}/${fileName}`
   );
 
-  const locationYaml = jsYaml.dump(locationObj, { lineWidth: 120 });
+  const locationYaml = jsYaml.dump(locationObj, { lineWidth: 180 });
 
   fs.writeFileSync(locationFile, `${preamble.join('\n')}\n${locationYaml}`);
 
