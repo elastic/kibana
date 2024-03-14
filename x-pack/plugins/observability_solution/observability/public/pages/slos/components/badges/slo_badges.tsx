@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiSkeletonRectangle } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-
-import { SloTagsList } from '../common/slo_tags_list';
-import { SloIndicatorTypeBadge } from './slo_indicator_type_badge';
+import React from 'react';
 import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
-import { SloTimeWindowBadge } from './slo_time_window_badge';
+import { BurnRateRuleParams } from '../../../../typings';
+import { SloTagsList } from '../common/slo_tags_list';
+import { SloIndicatorTypeBadge } from './slo_indicator_type_badge';
 import { SloRulesBadge } from './slo_rules_badge';
-import type { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
-import { SloGroupByBadge } from '../../../../components/slo/slo_status_badge/slo_group_by_badge';
+import { SloTimeWindowBadge } from './slo_time_window_badge';
+
 export type ViewMode = 'default' | 'compact';
 
 export interface SloBadgesProps {
   activeAlerts?: number;
   isLoading: boolean;
-  rules: Array<Rule<SloRule>> | undefined;
+  rules: Array<Rule<BurnRateRuleParams>> | undefined;
   slo: SLOWithSummaryResponse;
   onClickRuleBadge: () => void;
 }
@@ -43,7 +42,6 @@ export function SloBadges({
         <>
           <SloStatusBadge slo={slo} />
           <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} />
-          <SloGroupByBadge slo={slo} />
           <SloIndicatorTypeBadge slo={slo} />
           <SloTimeWindowBadge slo={slo} />
           <SloRulesBadge rules={rules} onClick={onClickRuleBadge} />

@@ -9,9 +9,11 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO } from '../../../../domain/models/slo';
 
 export const getGroupBy = (slo: SLO) => {
+  const groups = [slo.groupBy].flat().filter((group) => !!group);
+
   const groupings =
-    slo.groupBy !== '' && slo.groupBy !== ALL_VALUE
-      ? [slo.groupBy].flat().reduce((acc, field) => {
+    !groups.includes(ALL_VALUE) && groups.length
+      ? groups.reduce((acc, field) => {
           return {
             ...acc,
             [`slo.groupings.${field}`]: {

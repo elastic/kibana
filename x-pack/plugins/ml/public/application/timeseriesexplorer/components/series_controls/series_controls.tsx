@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectProps } from '@elastic/eui';
+import type { EuiSelectProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { useStorage } from '@kbn/ml-local-storage';
 import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
-import { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { EntityControl } from '../entity_control';
 import { mlJobService } from '../../../services/job_service';
-import { CombinedJob, Detector, JobId } from '../../../../../common/types/anomaly_detection_jobs';
+import type {
+  CombinedJob,
+  Detector,
+  JobId,
+} from '../../../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../../../contexts/kibana';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer_constants';
-import {
-  ComboBoxOption,
-  EMPTY_FIELD_VALUE_LABEL,
-  EntityControlProps,
-} from '../entity_control/entity_control';
+import type { ComboBoxOption, EntityControlProps } from '../entity_control/entity_control';
+import { EMPTY_FIELD_VALUE_LABEL } from '../entity_control/entity_control';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import {
   ML_ENTITY_FIELDS_CONFIG,
@@ -31,7 +34,7 @@ import {
   type MlStorageKey,
   type TMlStorageMapped,
 } from '../../../../../common/types/storage';
-import { FieldDefinition } from '../../../services/results_service/result_service_rx';
+import type { FieldDefinition } from '../../../services/results_service/result_service_rx';
 import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';
 import { PlotByFunctionControls } from '../plot_function_controls';
 

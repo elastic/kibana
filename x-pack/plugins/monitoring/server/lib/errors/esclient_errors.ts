@@ -37,7 +37,7 @@ const mapTypeMessage: { [key: string]: string } = {
   }),
 };
 
-export function isESClientError(err: ErrorTypes) {
+export function isESClientError(err: ErrorTypes): err is errors.ElasticsearchClientError {
   if (err instanceof errors.ElasticsearchClientError === false) return false;
   const knownTypes = Object.keys(mapTypeMessage);
   return knownTypes.includes(err.constructor.name);

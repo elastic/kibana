@@ -27,7 +27,7 @@ export const criteriaMultipleConditions: CustomMetricExpressionParams[] = [
     ],
     timeUnit: 'm',
     timeSize: 1,
-    threshold: [1, 2],
+    threshold: [1],
     comparator: Comparator.GT,
   },
   {
@@ -45,7 +45,46 @@ export const criteriaMultipleConditions: CustomMetricExpressionParams[] = [
     ],
     timeUnit: 'm',
     timeSize: 1,
-    threshold: [4, 5],
+    threshold: [4],
+    comparator: Comparator.GT,
+  },
+];
+
+export const criteriaMultipleConditionsWithIsBetween: CustomMetricExpressionParams[] = [
+  {
+    metrics: [
+      {
+        name: 'A',
+        aggType: Aggregators.AVERAGE,
+        field: 'system.is.a.good.puppy.dog',
+      },
+      {
+        name: 'B',
+        aggType: Aggregators.AVERAGE,
+        field: 'system.is.a.bad.kitty',
+      },
+    ],
+    timeUnit: 'm',
+    timeSize: 1,
+    threshold: [1, 2],
+    comparator: Comparator.BETWEEN,
+  },
+  {
+    metrics: [
+      {
+        name: 'A',
+        aggType: Aggregators.AVERAGE,
+        field: 'system.is.a.good.puppy.dog',
+      },
+      {
+        name: 'B',
+        aggType: Aggregators.AVERAGE,
+        field: 'system.is.a.bad.kitty',
+      },
+    ],
+    timeUnit: 'm',
+    timeSize: 1,
+    threshold: [4],
     comparator: Comparator.GT,
   },
 ];

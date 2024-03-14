@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CasesUiSetup } from '@kbn/cases-plugin/public';
+import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE } from '../../common/constants/cases';
 import { getEmbeddableComponent } from '../embeddables';
@@ -16,7 +16,7 @@ import type { MlStartDependencies } from '../plugin';
 import { PLUGIN_ICON } from '../../common/constants/app';
 
 export function registerAnomalySwimLaneCasesAttachment(
-  cases: CasesUiSetup,
+  cases: CasesPublicSetup,
   coreStart: CoreStart,
   pluginStart: MlStartDependencies
 ) {

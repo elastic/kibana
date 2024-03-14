@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFetchSloBurnRates } from '../../../hooks/slo/use_fetch_slo_burn_rates';
 import { ErrorRateChart } from '../error_rate_chart';
 import { BurnRate } from './burn_rate';
@@ -47,6 +47,12 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
     windows: getWindowsFromOptions(burnRateOptions),
   });
 
+  useEffect(() => {
+    if (burnRateOptions.length) {
+      setBurnRateOption(burnRateOptions[0]);
+    }
+  }, [burnRateOptions]);
+
   const onBurnRateOptionChange = (optionId: string) => {
     const selected = burnRateOptions.find((opt) => opt.id === optionId) ?? burnRateOptions[0];
     setBurnRateOption(selected);
@@ -56,6 +62,7 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
     from: moment().subtract(burnRateOption.duration, 'hour').toDate(),
     to: new Date(),
   };
+
   const threshold = burnRateOption.threshold;
   const burnRate = data?.burnRates.find(
     (curr) => curr.name === burnRateOption.windowName

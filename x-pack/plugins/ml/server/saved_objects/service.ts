@@ -7,7 +7,7 @@
 
 import RE2 from 're2';
 import { memoize } from 'lodash';
-import {
+import type {
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,

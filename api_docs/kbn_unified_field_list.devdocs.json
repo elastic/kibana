@@ -1494,7 +1494,7 @@
         "label": "useGroupedFields",
         "description": [],
         "signature": [
-          "({\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  getNewFieldsBySpec,\n}: ",
+          "({\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  getNewFieldsBySpec,\n  additionalFieldGroups,\n}: ",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "common",
@@ -1521,7 +1521,7 @@
             "id": "def-common.useGroupedFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  getNewFieldsBySpec,\n}",
+            "label": "{\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  getNewFieldsBySpec,\n  additionalFieldGroups,\n}",
             "description": [],
             "signature": [
               {
@@ -2945,6 +2945,8 @@
               "<T> | undefined; MetaFields?: ",
               "FieldsGroup",
               "<T> | undefined; UnmappedFields?: ",
+              "FieldsGroup",
+              "<T> | undefined; SmartFields?: ",
               "FieldsGroup",
               "<T> | undefined; }"
             ],
@@ -4700,6 +4702,20 @@
             "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-common.GroupedFieldsParams.additionalFieldGroups",
+            "type": "Object",
+            "tags": [],
+            "label": "additionalFieldGroups",
+            "description": [],
+            "signature": [
+              "{ smartFields?: T[] | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5411,6 +5427,8 @@
           "<T> | undefined; MetaFields?: ",
           "FieldsGroup",
           "<T> | undefined; UnmappedFields?: ",
+          "FieldsGroup",
+          "<T> | undefined; SmartFields?: ",
           "FieldsGroup",
           "<T> | undefined; }"
         ],

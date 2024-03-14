@@ -288,7 +288,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
       if (usageCollection) {
         registerESTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
-        registerCNTelemetryUsageCollector(usageCollection);
+        registerCNTelemetryUsageCollector(usageCollection, this.logger);
         if (config.canDeployEntSearch) {
           registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
           registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
@@ -299,7 +299,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     /*
      * Register logs source configuration, used by LogStream components
-     * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/logs_shared/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
+     * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability_solution/logs_shared/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
      */
     logsShared.logViews.defineInternalLogView(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
       logIndices: {
@@ -343,7 +343,7 @@ export class EnterpriseSearchPlugin implements Plugin {
      */
 
     if (globalSearch) {
-      globalSearch.registerResultProvider(getSearchResultProvider(http.basePath, config));
+      globalSearch.registerResultProvider(getSearchResultProvider(http.basePath, config, isCloud));
       globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.basePath));
     }
   }

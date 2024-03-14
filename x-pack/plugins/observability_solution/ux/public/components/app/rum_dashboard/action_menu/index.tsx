@@ -44,11 +44,7 @@ export function UXActionMenu({
   appMountParameters: AppMountParameters;
   isDev: boolean;
 }) {
-  const {
-    http,
-    application,
-    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
-  } = useKibanaServices();
+  const { http, application } = useKibanaServices();
 
   const { urlParams } = useLegacyUrlParams();
   const { rangeTo, rangeFrom, serviceName } = urlParams;
@@ -102,11 +98,6 @@ export function UXActionMenu({
             <UxInspectorHeaderLink isDev={isDev} />
           </EuiHeaderLinks>
         </EuiFlexItem>
-        {ObservabilityAIAssistantActionMenuItem ? (
-          <EuiFlexItem>
-            <ObservabilityAIAssistantActionMenuItem />
-          </EuiFlexItem>
-        ) : null}
       </EuiFlexGroup>
     </HeaderMenuPortal>
   );

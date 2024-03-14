@@ -41,47 +41,55 @@ export function IndexFieldSelector({
     setOptions(createOptionsFromFields(indexFields));
   }, [indexFields]);
 
+  const getSelectedItems = (value: string | string[], fields: FieldSpec[]) => {
+    const values = [value].flat();
+    const selectedItems: Array<EuiComboBoxOptionOption<string>> = [];
+    fields.forEach((field) => {
+      if (values.includes(field.name)) {
+        selectedItems.push({ value: field.name, label: field.name });
+      }
+    });
+    return selectedItems;
+  };
+
   return (
     <EuiFlexItem>
       <EuiFormRow label={label} isInvalid={getFieldState(name).invalid} labelAppend={labelAppend}>
         <Controller
-          defaultValue={defaultValue}
+          defaultValue={[defaultValue].flat()}
           name={name}
           control={control}
           rules={{ required: isRequired && !isDisabled }}
-          render={({ field, fieldState }) => (
-            <EuiComboBox<string>
-              {...field}
-              async
-              placeholder={placeholder}
-              aria-label={placeholder}
-              isClearable
-              isDisabled={isLoading || isDisabled}
-              isInvalid={fieldState.invalid}
-              isLoading={isLoading}
-              onChange={(selected: EuiComboBoxOptionOption[]) => {
-                if (selected.length) {
-                  return field.onChange(selected[0].value);
-                }
+          render={({ field, fieldState }) => {
+            return (
+              <EuiComboBox<string>
+                {...field}
+                async
+                placeholder={placeholder}
+                aria-label={placeholder}
+                isClearable
+                isDisabled={isLoading || isDisabled}
+                isInvalid={fieldState.invalid}
+                isLoading={isLoading}
+                onChange={(selected: EuiComboBoxOptionOption[]) => {
+                  if (selected.length) {
+                    return field.onChange(selected.map((selection) => selection.value));
+                  }
 
-                field.onChange(defaultValue);
-              }}
-              options={options}
-              onSearchChange={(searchValue: string) => {
-                setOptions(
-                  createOptionsFromFields(indexFields, ({ value }) => value.includes(searchValue))
-                );
-              }}
-              selectedOptions={
-                !!indexFields &&
-                !!field.value &&
-                indexFields.some((indexField) => indexField.name === field.value)
-                  ? [{ value: field.value, label: field.value }]
-                  : []
-              }
-              singleSelection
-            />
-          )}
+                  field.onChange(defaultValue);
+                }}
+                options={options}
+                onSearchChange={(searchValue: string) => {
+                  setOptions(
+                    createOptionsFromFields(indexFields, ({ value }) => value.includes(searchValue))
+                  );
+                }}
+                selectedOptions={
+                  !!indexFields && !!field.value ? getSelectedItems(field.value, indexFields) : []
+                }
+              />
+            );
+          }}
         />
       </EuiFormRow>
     </EuiFlexItem>

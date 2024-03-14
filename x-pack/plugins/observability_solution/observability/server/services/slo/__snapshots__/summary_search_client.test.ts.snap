@@ -36,6 +36,7 @@ Object {
   "perPage": 20,
   "results": Array [
     Object {
+      "groupings": Object {},
       "id": "slo-one",
       "instanceId": "*",
       "summary": Object {
@@ -50,6 +51,7 @@ Object {
       },
     },
     Object {
+      "groupings": Object {},
       "id": "slo_two",
       "instanceId": "*",
       "summary": Object {
@@ -64,6 +66,7 @@ Object {
       },
     },
     Object {
+      "groupings": Object {},
       "id": "slo-three",
       "instanceId": "*",
       "summary": Object {
@@ -78,6 +81,7 @@ Object {
       },
     },
     Object {
+      "groupings": Object {},
       "id": "slo-five",
       "instanceId": "*",
       "summary": Object {
@@ -92,6 +96,7 @@ Object {
       },
     },
     Object {
+      "groupings": Object {},
       "id": "slo-four",
       "instanceId": "*",
       "summary": Object {

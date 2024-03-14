@@ -9,6 +9,7 @@ import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
+import { getGroupKeysProse } from '../../../utils/slo/groupings';
 
 export interface SloDeleteConfirmationModalProps {
   slo: SLOWithSummaryResponse | SLOResponse;
@@ -44,8 +45,8 @@ export function SloDeleteConfirmationModal({
       {groupBy !== ALL_VALUE
         ? i18n.translate('xpack.observability.slo.deleteConfirmationModal.groupByDisclaimerText', {
             defaultMessage:
-              'This SLO has been generated with a group key on "{groupKey}". Deleting this SLO definition will result in all instances being deleted.',
-            values: { groupKey: groupBy },
+              'This SLO has been generated with a group key on {groupKey}. Deleting this SLO definition will result in all instances being deleted.',
+            values: { groupKey: getGroupKeysProse(slo.groupBy) },
           })
         : i18n.translate('xpack.observability.slo.deleteConfirmationModal.descriptionText', {
             defaultMessage: "You can't recover this SLO after deleting it.",

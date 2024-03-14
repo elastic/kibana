@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { ContentTabIds } from '../../../../../components/asset_details/types';
-import AssetDetails from '../../../../../components/asset_details/asset_details';
+import { AssetDetails } from '../../../../../components/asset_details';
 import { useSourceContext } from '../../../../../containers/metrics_source';
 import { commonFlyoutTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
 

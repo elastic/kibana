@@ -5,23 +5,16 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiNotificationBadge,
-  EuiSpacer,
-  EuiTabbedContent,
-  EuiTabbedContentTab,
-  htmlIdGenerator,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
-import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
-import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { BurnRateOption, BurnRates } from '../../../components/slo/burn_rate/burn_rates';
+
+import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
+import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
+import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
 import { EventsChartPanel } from './events_chart_panel';
 import { Overview } from './overview/overview';
@@ -33,7 +26,7 @@ export const OVERVIEW_TAB_ID = 'overview';
 export const ALERTS_TAB_ID = 'alerts';
 const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 
-const BURN_RATE_OPTIONS: BurnRateOption[] = [
+const DEFAULT_BURN_RATE_OPTIONS: BurnRateOption[] = [
   {
     id: htmlIdGenerator()(),
     label: i18n.translate('xpack.observability.slo.burnRates.fromRange.label', {
@@ -82,14 +75,22 @@ export interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing: boolean;
   selectedTabId: SloTabId;
-  handleSelectedTab: (tabId: SloTabId) => void;
 }
-export function SloDetails({ slo, isAutoRefreshing, selectedTabId, handleSelectedTab }: Props) {
-  const { data: activeAlerts } = useFetchActiveAlerts({
-    sloIdsAndInstanceIds: [[slo.id, slo.instanceId ?? ALL_VALUE]],
-    shouldRefetch: isAutoRefreshing,
-  });
-  const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
+export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
+  const { data: rules } = useFetchRulesForSlo({ sloIds: [slo.id] });
+  const burnRateOptions =
+    rules?.[slo.id]?.[0]?.params?.windows?.map((window) => ({
+      id: htmlIdGenerator()(),
+      label: i18n.translate('xpack.observability.slo.burnRates.fromRange.label', {
+        defaultMessage: '{duration}h',
+        values: { duration: window.longWindow.value },
+      }),
+      windowName: window.actionGroup,
+      threshold: window.burnRateThreshold,
+      duration: window.longWindow.value,
+    })) ?? DEFAULT_BURN_RATE_OPTIONS;
+
+  const { data: historicalSummaries = [], isLoading: historicalSummaryLoading } =
     useFetchHistoricalSummary({
       list: [{ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE }],
       shouldRefetch: isAutoRefreshing,
@@ -123,71 +124,35 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId, handleSelecte
   );
   const historicalSliData = formatHistoricalData(sloHistoricalSummary?.data, 'sli_value');
 
-  const tabs: EuiTabbedContentTab[] = [
-    {
-      id: OVERVIEW_TAB_ID,
-      name: i18n.translate('xpack.observability.slo.sloDetails.tab.overviewLabel', {
-        defaultMessage: 'Overview',
-      }),
-      'data-test-subj': 'overviewTab',
-      content: (
-        <Fragment>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup direction="column" gutterSize="xl">
-            <EuiFlexItem>
-              <Overview slo={slo} />
-            </EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="l">
-              <EuiFlexItem>
-                <BurnRates
-                  slo={slo}
-                  isAutoRefreshing={isAutoRefreshing}
-                  burnRateOptions={BURN_RATE_OPTIONS}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <SliChartPanel
-                  data={historicalSliData}
-                  isLoading={historicalSummaryLoading}
-                  slo={slo}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ErrorBudgetChartPanel
-                  data={errorBudgetBurnDownData}
-                  isLoading={historicalSummaryLoading}
-                  slo={slo}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EventsChartPanel slo={slo} range={range} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexGroup>
-        </Fragment>
-      ),
-    },
-    {
-      id: ALERTS_TAB_ID,
-      name: i18n.translate('xpack.observability.slo.sloDetails.tab.alertsLabel', {
-        defaultMessage: 'Alerts',
-      }),
-      'data-test-subj': 'alertsTab',
-      append: (
-        <EuiNotificationBadge className="eui-alignCenter" size="m">
-          {(activeAlerts && activeAlerts.get(slo)) ?? 0}
-        </EuiNotificationBadge>
-      ),
-      content: <SloDetailsAlerts slo={slo} />,
-    },
-  ];
-
-  return (
-    <EuiTabbedContent
-      data-test-subj="sloDetailsTabbedContent"
-      tabs={tabs}
-      selectedTab={tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0]}
-      onTabClick={(tab) => handleSelectedTab(tab.id as SloTabId)}
-    />
+  return selectedTabId === OVERVIEW_TAB_ID ? (
+    <EuiFlexGroup direction="column" gutterSize="xl">
+      <EuiFlexItem>
+        <Overview slo={slo} />
+      </EuiFlexItem>
+      <EuiFlexGroup direction="column" gutterSize="l">
+        <EuiFlexItem>
+          <BurnRates
+            slo={slo}
+            isAutoRefreshing={isAutoRefreshing}
+            burnRateOptions={burnRateOptions}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <SliChartPanel data={historicalSliData} isLoading={historicalSummaryLoading} slo={slo} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ErrorBudgetChartPanel
+            data={errorBudgetBurnDownData}
+            isLoading={historicalSummaryLoading}
+            slo={slo}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EventsChartPanel slo={slo} range={range} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexGroup>
+  ) : (
+    <SloDetailsAlerts slo={slo} />
   );
 }

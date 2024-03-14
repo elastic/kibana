@@ -35,7 +35,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
@@ -44,7 +44,7 @@ import {
 } from '@kbn/logs-shared-plugin/public';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
+import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -85,7 +85,7 @@ export interface InfraClientSetupDeps {
 }
 
 export interface InfraClientStartDeps {
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -96,7 +96,7 @@ export interface InfraClientStartDeps {
   ml: MlPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   osquery?: unknown; // OsqueryPluginStart - can't be imported due to cyclic dependency;
   share: SharePluginStart;
   spaces: SpacesPluginStart;

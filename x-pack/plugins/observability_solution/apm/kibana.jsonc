@@ -35,7 +35,6 @@
     "optionalPlugins": [
       "actions",
       "alerting",
-      "cases",
       "charts",
       "cloud",
       "discover",
@@ -49,7 +48,8 @@
       "usageCollection",
       "customIntegrations", // Move this to requiredPlugins after completely migrating from the Tutorials Home App
       "licenseManagement",
-      "profilingDataAccess"
+      "profilingDataAccess",
+      "cases"
     ],
     "requiredBundles": [
       "fleet",
@@ -57,8 +57,7 @@
       "kibanaUtils",
       "ml",
       "observability",
-      "maps",
-      "observabilityAIAssistant"
+      "maps"
     ]
   }
 }

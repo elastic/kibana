@@ -151,7 +151,11 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
               : undefined,
             PageBodyComponent: () => (
               <>
-                <OfflineCallout endpointId={props.agentId} />
+                <OfflineCallout
+                  endpointId={props.agentId}
+                  agentType={agentType}
+                  hostName={hostName}
+                />
                 <MissingEncryptionKeyCallout />
               </>
             ),

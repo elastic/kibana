@@ -5,13 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiBadge, EuiText } from '@elastic/eui';
 import { AgentIcon } from '@kbn/custom-icons';
 import { AgentName } from '@kbn/elastic-agent-utils';
 import { i18n } from '@kbn/i18n';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export interface LinkToApmServiceProps {
   serviceName: string;
@@ -20,8 +18,6 @@ export interface LinkToApmServiceProps {
 }
 
 export const LinkToApmService = ({ serviceName, agentName, dateRange }: LinkToApmServiceProps) => {
-  const { services } = useKibanaContextForPlugin();
-
   const linkProps = useLinkProps({
     app: 'apm',
     pathname: `/services/${serviceName}/overview`,
@@ -31,24 +27,22 @@ export const LinkToApmService = ({ serviceName, agentName, dateRange }: LinkToAp
     },
   });
   return (
-    <RedirectAppLinks coreStart={services}>
-      <EuiText>
-        <EuiBadge
-          data-test-subj="serviceLink"
-          color="hollow"
-          css={{ padding: '4px' }}
-          href={linkProps.href as string}
-          title={i18n.translate('xpack.infra.assetDetails.services.serviceButtonTitle', {
-            defaultMessage: '{serviceName} last reported by {agentName}',
-            values: { serviceName, agentName },
-          })}
-        >
-          {agentName ? (
-            <AgentIcon agentName={agentName as AgentName} size="m" css={{ marginRight: '4px' }} />
-          ) : null}
-          <span data-test-subj={`serviceNameText-${serviceName}`}>{serviceName}</span>
-        </EuiBadge>
-      </EuiText>
-    </RedirectAppLinks>
+    <EuiText>
+      <EuiBadge
+        data-test-subj="serviceLink"
+        color="hollow"
+        css={{ padding: '4px' }}
+        href={linkProps.href as string}
+        title={i18n.translate('xpack.infra.assetDetails.services.serviceButtonTitle', {
+          defaultMessage: '{serviceName} last reported by {agentName}',
+          values: { serviceName, agentName },
+        })}
+      >
+        {agentName ? (
+          <AgentIcon agentName={agentName as AgentName} size="m" css={{ marginRight: '4px' }} />
+        ) : null}
+        <span data-test-subj={`serviceNameText-${serviceName}`}>{serviceName}</span>
+      </EuiBadge>
+    </EuiText>
   );
 };

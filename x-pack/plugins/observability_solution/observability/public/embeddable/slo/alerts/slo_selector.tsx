@@ -27,8 +27,7 @@ const SLO_REQUIRED = i18n.translate('xpack.observability.sloEmbeddable.config.er
 export function SloSelector({ initialSlos, onSelected, hasError, singleSelection }: Props) {
   const mapSlosToOptions = (slos: SloItem[] | SLOWithSummaryResponse[] | undefined) =>
     slos?.map((slo) => ({
-      label:
-        slo.instanceId !== ALL_VALUE ? `${slo.name} (${slo.groupBy}: ${slo.instanceId})` : slo.name,
+      label: slo.instanceId !== ALL_VALUE ? `${slo.name} (${slo.instanceId})` : slo.name,
       value: `${slo.id}-${slo.instanceId}`,
     })) ?? [];
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);

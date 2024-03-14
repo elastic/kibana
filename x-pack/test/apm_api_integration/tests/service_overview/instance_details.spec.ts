@@ -48,93 +48,89 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/177494
-  registry.when.skip(
-    'Instance details when data is loaded',
-    { config: 'basic', archives: [] },
-    () => {
-      const range = timerange(new Date(start).getTime(), new Date(end).getTime());
+  registry.when('Instance details when data is loaded', { config: 'basic', archives: [] }, () => {
+    const range = timerange(new Date(start).getTime(), new Date(end).getTime());
 
-      const serviceInstance = apm
-        .service({ name: 'service1', environment: 'production', agentName: 'go' })
-        .instance('multiple-env-service-production');
+    const serviceInstance = apm
+      .service({ name: 'service1', environment: 'production', agentName: 'go' })
+      .instance('multiple-env-service-production');
 
-      const metricOnlyInstance = apm
-        .service({ name: 'service1', environment: 'production', agentName: 'java' })
-        .instance('multiple-env-service-production');
+    const metricOnlyInstance = apm
+      .service({ name: 'service1', environment: 'production', agentName: 'java' })
+      .instance('multiple-env-service-production');
+
+    before(async () => {
+      return synthtrace.index([
+        range
+          .interval('1s')
+          .rate(4)
+          .generator((timestamp) =>
+            serviceInstance
+              .transaction({ transactionName: 'GET /api' })
+              .timestamp(timestamp)
+              .duration(1000)
+              .success()
+          ),
+        range
+          .interval('30s')
+          .rate(1)
+          .generator((timestamp) =>
+            metricOnlyInstance
+              .containerId('123')
+              .podId('234')
+              .appMetrics({
+                'system.memory.actual.free': 1,
+                'system.cpu.total.norm.pct': 1,
+                'system.memory.total': 1,
+                'system.process.cpu.total.norm.pct': 1,
+              })
+              .timestamp(timestamp)
+          ),
+      ]);
+    });
+
+    after(() => {
+      return synthtrace.clean();
+    });
+
+    describe('fetch instance details', () => {
+      let response: {
+        status: number;
+        body: ServiceOverviewInstanceDetails;
+      };
+
+      let serviceNodeIds: string[];
 
       before(async () => {
-        return synthtrace.index([
-          range
-            .interval('1s')
-            .rate(4)
-            .generator((timestamp) =>
-              serviceInstance
-                .transaction({ transactionName: 'GET /api' })
-                .timestamp(timestamp)
-                .duration(1000)
-                .success()
-            ),
-          range
-            .interval('30s')
-            .rate(1)
-            .generator((timestamp) =>
-              metricOnlyInstance
-                .containerId('123')
-                .podId('234')
-                .appMetrics({
-                  'system.memory.actual.free': 1,
-                  'system.cpu.total.norm.pct': 1,
-                  'system.memory.total': 1,
-                  'system.process.cpu.total.norm.pct': 1,
-                })
-                .timestamp(timestamp)
-            ),
-        ]);
-      });
+        serviceNodeIds = await getServiceNodeIds({
+          apmApiClient,
+          start,
+          end,
+          serviceName: 'service1',
+        });
 
-      after(() => {
-        return synthtrace.clean();
-      });
-
-      describe('fetch instance details', () => {
-        let response: {
-          status: number;
-          body: ServiceOverviewInstanceDetails;
-        };
-
-        let serviceNodeIds: string[];
-
-        before(async () => {
-          serviceNodeIds = await getServiceNodeIds({
-            apmApiClient,
-            start,
-            end,
-            serviceName: 'service1',
-          });
-
-          response = await apmApiClient.readUser({
-            endpoint:
-              'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
-            params: {
-              path: { serviceName: 'service1', serviceNodeName: serviceNodeIds[0] },
-              query: {
-                start,
-                end,
-              },
+        response = await apmApiClient.readUser({
+          endpoint:
+            'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
+          params: {
+            path: { serviceName: 'service1', serviceNodeName: serviceNodeIds[0] },
+            query: {
+              start,
+              end,
             },
-          });
-        });
-
-        it('returns the instance details', () => {
-          expect(response.body).to.not.eql({});
-        });
-
-        it('return the correct data', () => {
-          expectSnapshot(omit(response.body, '@timestamp')).toMatch();
+          },
         });
       });
-    }
-  );
+
+      it('returns the instance details', () => {
+        expect(response.body).to.not.eql({});
+      });
+
+      it('return the correct data', () => {
+        expectSnapshot(omit(response.body, '@timestamp')).toMatch();
+      });
+    });
+  });
 
   registry.when(
     'Instance details when data is loaded but details not found',

@@ -63,12 +63,14 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
     },
   },
   groupBy: ALL_VALUE,
+  groupings: {},
   instanceId: ALL_VALUE,
   tags: ['k8s', 'production', 'critical'],
   enabled: true,
   createdAt: now,
   updatedAt: now,
   version: 2,
+  meta: {},
 };
 
 export const sloList: FindSLOResponse = {

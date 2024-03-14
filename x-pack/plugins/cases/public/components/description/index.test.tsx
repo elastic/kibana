@@ -20,7 +20,7 @@ jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
 const defaultProps = {
-  appId: 'testAppId',
+  appId: 'securitySolution',
   caseData: {
     ...basicCase,
   },
@@ -140,7 +140,7 @@ describe('Description', () => {
   });
 
   describe('draft message', () => {
-    const draftStorageKey = `cases.testAppId.basic-case-id.description.markdownEditor`;
+    const draftStorageKey = `cases.securitySolution.basic-case-id.description.markdownEditor`;
 
     beforeEach(() => {
       sessionStorage.setItem(draftStorageKey, 'value set in storage');

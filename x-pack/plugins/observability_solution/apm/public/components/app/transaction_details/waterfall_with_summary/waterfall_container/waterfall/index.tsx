@@ -67,7 +67,11 @@ function getWaterfallMaxLevel(waterfall: IWaterfall) {
     const children = waterfall.childrenByParentId[id] || [];
     if (children.length) {
       children.forEach((child) => {
-        countLevels(child.id, currentLevel + 1);
+        // Skip processing when a child node has the same ID as its parent
+        // to prevent infinite loop
+        if (child.id !== id) {
+          countLevels(child.id, currentLevel + 1);
+        }
       });
     } else {
       if (maxLevel < currentLevel) {

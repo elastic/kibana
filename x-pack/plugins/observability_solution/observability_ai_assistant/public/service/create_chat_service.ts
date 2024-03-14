@@ -17,13 +17,14 @@ import {
   type StreamingChatResponseEvent,
 } from '../../common/conversation_complete';
 import {
+  FunctionRegistry,
+  FunctionResponse,
   FunctionVisibility,
-  type FunctionRegistry,
-  type FunctionResponse,
-  type Message,
-} from '../../common/types';
+} from '../../common/functions/types';
+import { type Message } from '../../common/types';
 import { filterFunctionDefinitions } from '../../common/utils/filter_function_definitions';
 import { throwSerializedChatCompletionErrors } from '../../common/utils/throw_serialized_chat_completion_errors';
+import { sendEvent } from '../analytics';
 import type { ObservabilityAIAssistantAPIClient } from '../api';
 import type {
   ChatRegistrationRenderFunction,
@@ -117,7 +118,9 @@ export async function createChatService({
   };
 
   return {
-    analytics,
+    sendAnalyticsEvent: (event) => {
+      sendEvent(analytics, event);
+    },
     renderFunction: (name, args, response, onActionClick) => {
       const fn = renderFunctionRegistry.get(name);
 
@@ -146,7 +149,15 @@ export async function createChatService({
     hasRenderFunction: (name: string) => {
       return renderFunctionRegistry.has(name);
     },
-    complete({ screenContexts, connectorId, conversationId, messages, persist, signal }) {
+    complete({
+      screenContexts,
+      connectorId,
+      conversationId,
+      messages,
+      persist,
+      signal,
+      responseLanguage,
+    }) {
       return new Observable<StreamingChatResponseEventWithoutError>((subscriber) => {
         client('POST /internal/observability_ai_assistant/chat/complete', {
           params: {
@@ -156,6 +167,7 @@ export async function createChatService({
               screenContexts,
               messages,
               persist,
+              responseLanguage,
             },
           },
           signal,

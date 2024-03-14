@@ -6,7 +6,8 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
@@ -15,14 +16,14 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { ML_PAGES } from '../../../locator';
 import { getViewableDetectors } from '../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
+import type { NavigateToPath } from '../../contexts/kibana';
 import {
-  NavigateToPath,
   useMlApiContext,
   useMlKibana,
   useNotifications,
   useUiSettings,
 } from '../../contexts/kibana';
-import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
 import { mlJobService } from '../../services/job_service';
@@ -37,7 +38,8 @@ import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplo
 import { TimeseriesexplorerNoJobsFound } from '../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
 import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
-import { createPath, MlRoute, PageLoader, PageProps } from '../router';
+import type { MlRoute, PageProps } from '../router';
+import { createPath, PageLoader } from '../router';
 import { useRouteResolver } from '../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useToastNotificationService } from '../../services/toast_notification_service';

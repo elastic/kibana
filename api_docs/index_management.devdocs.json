@@ -1154,20 +1154,6 @@
           },
           {
             "parentPluginId": "indexManagement",
-            "id": "def-common.ComponentTemplateDeserialized.isDeprecated",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isDeprecated",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "indexManagement",
             "id": "def-common.ComponentTemplateDeserialized._kbnMeta",
             "type": "Object",
             "tags": [],
@@ -1369,7 +1355,7 @@
                 "text": "Mappings"
               },
               " | undefined; lifecycle?: (",
-              "IndicesDataLifecycleWithRollover",
+              "IndicesDataStreamLifecycleWithRollover",
               " & { enabled?: boolean | undefined; }) | undefined; }"
             ],
             "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
@@ -1719,7 +1705,7 @@
             "description": [],
             "signature": [
               "(",
-              "IndicesDataLifecycleWithRollover",
+              "IndicesDataStreamLifecycleWithRollover",
               " & { enabled?: boolean | undefined; }) | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
@@ -1860,20 +1846,9 @@
             "label": "indices",
             "description": [],
             "signature": [
-              "DataStreamIndexFromEs",
+              "IndicesDataStreamIndex",
               "[]"
             ],
-            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "indexManagement",
-            "id": "def-common.EnhancedDataStreamFromEs.next_generation_managed_by",
-            "type": "string",
-            "tags": [],
-            "label": "next_generation_managed_by",
-            "description": [],
             "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2811,13 +2786,10 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-common.TemplateDeserialized.allowAutoCreate",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "allowAutoCreate",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
             "path": "x-pack/plugins/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3202,7 +3174,7 @@
                 "text": "Mappings"
               },
               " | undefined; lifecycle?: (",
-              "IndicesDataLifecycleWithRollover",
+              "IndicesDataStreamLifecycleWithRollover",
               " & { enabled?: boolean | undefined; }) | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/templates.ts",
