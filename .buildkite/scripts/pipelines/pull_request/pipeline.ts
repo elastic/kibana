@@ -233,7 +233,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
         /^x-pack\/packages\/security-solution/,
         /^x-pack\/packages\/kbn-elastic-assistant/,
         /^x-pack\/packages\/kbn-elastic-assistant-common/,
-        /^x-pack\/test\/functional\/es_archives/,
+        /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/test\/security_solution_cypress/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
@@ -272,7 +272,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
         /^x-pack\/packages\/security-solution/,
         /^x-pack\/packages\/kbn-elastic-assistant/,
         /^x-pack\/packages\/kbn-elastic-assistant-common/,
-        /^x-pack\/test\/functional\/es_archives/,
+        /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/test\/security_solution_cypress/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
