@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import 'remote-web-worker';
 import { XJsonLang } from './xjson';
 import { PainlessLang } from './painless';
 import { SQLLang } from './sql';

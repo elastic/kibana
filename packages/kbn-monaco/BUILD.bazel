@@ -30,6 +30,7 @@ SHARED_DEPS = [
   "@npm//monaco-editor",
   "@npm//monaco-yaml",
   "@npm//js-levenshtein",
+  "@npm//remote-web-worker",
 ]
 
 webpack_cli(
