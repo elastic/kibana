@@ -28,6 +28,9 @@ git diff --exit-code --quiet "$destination_file"
 if [ $? -ne 0 ]; then
   echo "Differences found. Building ANTLR stuff."
 
+  # Bootstrap Kibana
+  yarn kbn bootstrap || exit
+
   # Built ANTLR stuff
   cd ./packages/kbn-monaco/src || exit 
   yarn build:antlr4:esql || exit
