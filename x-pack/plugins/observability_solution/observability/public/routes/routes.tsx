@@ -43,7 +43,10 @@ function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: str
   const { search, hash } = useLocation();
 
   if (redirectToApp) {
-    navigateToApp(redirectToApp, { path: `/${search}${hash}`, replace: true });
+    navigateToApp(redirectToApp, {
+      path: `/${to}${search ? `?${search}` : ''}${hash}`,
+      replace: true,
+    });
   } else if (to) {
     history.replace(to);
   }
@@ -147,7 +150,7 @@ export const routes = {
   },
   [OLD_SLOS_OUTDATED_DEFINITIONS_PATH]: {
     handler: () => {
-      return <SimpleRedirect to="/outdated-definition" redirectToApp="slo" />;
+      return <SimpleRedirect to="/outdated-definitions" redirectToApp="slo" />;
     },
     params: {},
     exact: true,
