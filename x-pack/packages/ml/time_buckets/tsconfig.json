@@ -17,5 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/datemath",
+    "@kbn/data-plugin",
+    "@kbn/core-ui-settings-browser",
   ]
 }
