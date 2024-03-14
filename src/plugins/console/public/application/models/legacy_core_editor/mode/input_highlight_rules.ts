@@ -48,18 +48,18 @@ export class InputHighlightRules extends TextHighlightRules {
           { token: 'warning', regex: '#!.*$' },
           // done
           { include: 'comments' },
-          // TODO
+          // done
           { token: 'paren.lparen', regex: '{', next: 'json', push: true },
         ],
         // done
         addEOL(['method'], /([a-zA-Z]+)/, 'start', 'method_sep'),
         [
-          // TODO
+          // done
           {
             token: 'whitespace',
             regex: '\\s+',
           },
-          // TODO
+          // done
           {
             token: 'text',
             regex: '.+?',

@@ -13,7 +13,7 @@ import './language';
 
 import type { LangModuleType } from '../types';
 import { CONSOLE_LANG_ID } from './constants';
-import { lexerRules, languageConfiguration } from './lexer_rules/rules';
+import { lexerRules, languageConfiguration } from './lexer_rules';
 
 export { CONSOLE_LANG_ID, CONSOLE_THEME_ID } from './constants';
 

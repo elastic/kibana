@@ -8,7 +8,7 @@
 
 import { monaco } from '../../monaco_imports';
 
-import { globals } from './shared';
+import { globals } from '../../common/lexer_rules';
 
 export const buildXjsonRules = (root: string = 'root') => {
   return {
