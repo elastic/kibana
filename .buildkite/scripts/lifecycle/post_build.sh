@@ -9,7 +9,10 @@ if [[ "${GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
   "$(dirname "${0}")/commit_status_complete.sh"
 fi
 
-ts-node "$(dirname "${0}")/ci_stats_complete.ts"
+# Skip indexing the same metrics twice
+if [[ "${BUILDKITE_RETRY_COUNT:-0}" == "0" ]]; then
+  ts-node "$(dirname "${0}")/ci_stats_complete.ts"
+fi
 
 if [[ "${GITHUB_PR_NUMBER:-}" ]]; then
   DOCS_CHANGES_URL="https://kibana_bk_$GITHUB_PR_NUMBER}.docs-preview.app.elstc.co/diff"
