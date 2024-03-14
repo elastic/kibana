@@ -256,7 +256,7 @@ export const createNewTermsAlertType = (
           // wrap and create alerts by chunks
           // large number of matches, processed in possibly 10,000 size of events and terms
           // can significantly affect Kibana performance
-          const eventAndTermsChunks = chunk(eventsAndTerms, params.maxSignals);
+          const eventAndTermsChunks = chunk(eventsAndTerms, 5 * params.maxSignals);
 
           for (let i = 0; i < eventAndTermsChunks.length; i++) {
             const eventAndTermsChunk = eventAndTermsChunks[i];
@@ -301,7 +301,7 @@ export const createNewTermsAlertType = (
         // separate route for multiple new terms
         // it uses paging through composite aggregation
         if (params.newTermsFields.length > 1) {
-          await multiTermsComposite({
+          const bulkCreateResult = await multiTermsComposite({
             filterArgs,
             buckets: bucketsForField,
             params,
@@ -313,7 +313,12 @@ export const createNewTermsAlertType = (
             runOpts: execOptions.runOpts,
             afterKey,
             createAlertsHook,
+            isAlertSuppressionActive,
           });
+
+          if (bulkCreateResult?.alertsWereTruncated) {
+            break;
+          }
         } else {
           // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
           // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the

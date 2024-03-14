@@ -1880,7 +1880,66 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should generate up to max_signals alerts', async () => {
+      it('should not suppress more than limited number 500 (max_signals * 5) for multiple new terms field', async () => {
+        const id = uuidv4();
+
+        await indexGeneratedDocuments({
+          docsCount: 12000,
+          seed: (index) => ({
+            id,
+            '@timestamp': `2020-10-28T06:50:00.${index}Z`,
+            host: {
+              name: `host-${index}`,
+            },
+            agent: { name: 'agent-a' },
+          }),
+        });
+
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          new_terms_fields: ['host.name', 'agent.name'],
+          query: `id: "${id}"`,
+          index: ['ecs_compliant'],
+          history_window_start: historicalWindowStart,
+          alert_suppression: {
+            group_by: ['agent.name'],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId, logs } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+
+        expect(logs[0].warnings).toEqual(
+          expect.arrayContaining([getSuppressionMaxAlertsWarning()])
+        );
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['agent.name', ALERT_ORIGINAL_TIME],
+          size: 1000,
+        });
+        expect(previewAlerts.length).toEqual(1);
+        expect(previewAlerts[0]._source).toEqual({
+          ...previewAlerts[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'agent.name',
+              value: ['agent-a'],
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 499,
+        });
+      });
+
+      it('should generate up to max_signals alerts for single new terms field', async () => {
         const id = uuidv4();
         const firstTimestamp = '2020-10-28T06:05:00.000Z';
         const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -1904,6 +1963,64 @@ export default ({ getService }: FtrProviderContext) => {
         const rule: NewTermsRuleCreateProps = {
           ...getCreateNewTermsRulesSchemaMock('rule-1', true),
           new_terms_fields: ['host.name'],
+          query: `id: "${id}"`,
+          index: ['ecs_compliant'],
+          history_window_start: historicalWindowStart,
+          alert_suppression: {
+            group_by: ['agent.name'],
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId, logs } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          invocationCount: 1,
+        });
+        expect(logs[0].warnings).toEqual(
+          expect.arrayContaining([getSuppressionMaxAlertsWarning()])
+        );
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 1000,
+          sort: ['agent.name', ALERT_ORIGINAL_TIME],
+        });
+        expect(previewAlerts.length).toEqual(100);
+      });
+
+      it('should generate up to max_signals alerts for multiple new terms fields', async () => {
+        const id = uuidv4();
+        const firstTimestamp = '2020-10-28T06:05:00.000Z';
+        const secondTimestamp = '2020-10-28T06:10:00.000Z';
+
+        await Promise.all(
+          [firstTimestamp, secondTimestamp].map((t) =>
+            indexGeneratedDocuments({
+              docsCount: 20000,
+              seed: (index) => ({
+                id,
+                '@timestamp': t,
+                host: {
+                  name: `host-${index}`,
+                },
+                'agent.name': `agent-${index % 10000}`,
+              }),
+            })
+          )
+        );
+
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          new_terms_fields: ['host.name', 'agent.name'],
           query: `id: "${id}"`,
           index: ['ecs_compliant'],
           history_window_start: historicalWindowStart,
