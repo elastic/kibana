@@ -4,9 +4,7 @@ In order to make ongoing maintenance of log collection easy we want to introduce
 
 ## Development
 
-### Tests
-
-#### Unit tests
+### Unit Tests
 
 Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends a preset provided by the `@kbn/test` package. The following command runs all Dataset quality unit tests:
 
@@ -50,4 +48,39 @@ node x-pack/plugins/observability_solution/dataset_quality/scripts/api --server
 
 # run tests
 node x-pack/plugins/observability_solution/dataset_quality/scripts/api --runner --grep-files=error_group_list
+```
+
+
+### Functional Tests
+
+### Stateful
+#### FTR Server
+```
+yarn test:ftr:server --config ./x-pack/test/functional/apps/dataset_quality/config.ts
+```
+
+#### FTR Runner
+```
+yarn test:ftr:runner --config ./x-pack/test/functional/apps/dataset_quality/config.ts --include ./x-pack/test/functional/apps/dataset_quality/index.ts
+```
+
+#### Running Individual Tests
+```
+yarn test:ftr:runner --config ./x-pack/test/functional/apps/dataset_quality/config.ts --include ./x-pack/test/functional/apps/dataset_quality/$1
+```
+
+### Serverless
+
+#### Server
+```
+yarn test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
+```
+
+#### Runner
+```
+yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/index.ts
+```
+#### Running Individual Tests
+```
+yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/$1
 ```

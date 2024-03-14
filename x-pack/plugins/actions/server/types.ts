@@ -17,6 +17,8 @@ import {
   Logger,
 } from '@kbn/core/server';
 import { AnySchema } from 'joi';
+import { SubActionConnector } from './sub_action_framework/sub_action_connector';
+import { ServiceParams } from './sub_action_framework/types';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
@@ -159,6 +161,7 @@ export interface ActionType<
   getKibanaPrivileges?: (args?: { params?: Params }) => string[];
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
+  getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
 }
 
 export interface RawAction extends Record<string, unknown> {

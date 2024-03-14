@@ -20,7 +20,7 @@ async function main() {
 
 function uploadTriggerStep(commitSha: string) {
   const triggerStep: BuildkiteTriggerStep = {
-    label: ':releasethekaken: Trigger GPCTL / Release Kibana',
+    label: ':ship: Trigger GPCTL / Release Kibana',
     trigger: 'gpctl-promote',
     async: true,
     build: {
@@ -28,6 +28,7 @@ function uploadTriggerStep(commitSha: string) {
       env: {
         SERVICE_COMMIT_HASH: commitSha.slice(0, 12),
         REMOTE_SERVICE_CONFIG,
+        ...(IS_DRY_RUN ? { DRY_RUN: 'true' } : {}),
       },
     },
   };

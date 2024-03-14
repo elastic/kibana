@@ -15,23 +15,18 @@ import {
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
 import type { SecurityAppStore } from '../../../common/store';
-import { timelineSelectors } from '../../../timelines/store';
 import { fieldHasCellActions } from '../../utils';
-import { TimelineId } from '../../../../common/types';
 import { isTimelineScope } from '../../../helpers';
 import { SecurityCellActionType } from '../../constants';
 import type { StartServices } from '../../../types';
 import type { SecurityCellAction } from '../../types';
 
 export const createFilterInCellActionFactory = ({
-  store,
   services,
 }: {
   store: SecurityAppStore;
   services: StartServices;
 }) => {
-  const getTimelineById = timelineSelectors.getTimelineByIdSelector();
-
   const { filterManager } = services.data.query;
   const { notifications } = services;
   const genericFilterInActionFactory = createFilterInActionFactory({
@@ -70,12 +65,7 @@ export const createFilterInCellActionFactory = ({
       const addFilter = metadata?.negateFilters === true ? addFilterOut : addFilterIn;
 
       if (metadata?.scopeId && isTimelineScope(metadata.scopeId)) {
-        const timelineFilterManager = getTimelineById(
-          store.getState(),
-          TimelineId.active
-        )?.filterManager;
-
-        addFilter({ filterManager: timelineFilterManager, fieldName, value, dataViewId });
+        addFilter({ filterManager: services.timelineFilterManager, fieldName, value, dataViewId });
       } else {
         addFilter({ filterManager, fieldName, value, dataViewId });
       }
