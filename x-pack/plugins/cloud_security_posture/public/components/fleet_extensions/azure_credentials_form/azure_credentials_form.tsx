@@ -33,6 +33,7 @@ import { AzureCredentialsType } from '../../../../common/types_old';
 import { SetupFormat, useAzureCredentialsForm } from './hooks';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import { CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS } from '../../test_subjects';
 
 interface AzureSetupInfoContentProps {
   integrationLink: string;
@@ -78,12 +79,14 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
   {
     id: AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE,
     label: 'ARM Template',
+    testId: CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE,
   },
   {
     id: AZURE_MANUAL_CREDENTIAL_TYPE,
     label: i18n.translate('xpack.csp.azureIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
+    testId: CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL,
   },
 ];
 
@@ -266,6 +269,7 @@ export const AzureInputVarFields = ({
               fullWidth
               value={field.value || ''}
               onChange={(event) => onChange(field.id, event.target.value)}
+              data-test-subj={field.testSubj}
             />
           )}
           {field.type === 'text' && (
@@ -274,6 +278,7 @@ export const AzureInputVarFields = ({
               fullWidth
               value={field.value || ''}
               onChange={(event) => onChange(field.id, event.target.value)}
+              data-test-subj={field.testSubj}
             />
           )}
         </>
