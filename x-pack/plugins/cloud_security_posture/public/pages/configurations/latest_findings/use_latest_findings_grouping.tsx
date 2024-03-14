@@ -27,7 +27,13 @@ import {
   FindingsRootGroupingAggregation,
   useGroupedFindings,
 } from './use_grouped_findings';
-import { FINDINGS_UNIT, groupingTitle, defaultGroupingOptions, getDefaultQuery } from './constants';
+import {
+  FINDINGS_UNIT,
+  groupingTitle,
+  defaultGroupingOptions,
+  getDefaultQuery,
+  MISCONFIGURATIONS_GROUPS_UNIT,
+} from './constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { getFilters } from '../utils/get_filters';
 import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
@@ -161,6 +167,7 @@ export const useLatestFindingsGrouping = ({
     groupStatsRenderer,
     groupingLocalStorageKey: LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
     groupingLevel,
+    groupsUnit: MISCONFIGURATIONS_GROUPS_UNIT,
   });
 
   const additionalFilters = buildEsQuery(dataView, [], groupFilters);

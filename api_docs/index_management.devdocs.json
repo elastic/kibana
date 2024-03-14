@@ -1154,20 +1154,6 @@
           },
           {
             "parentPluginId": "indexManagement",
-            "id": "def-common.ComponentTemplateDeserialized.isDeprecated",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isDeprecated",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "indexManagement",
             "id": "def-common.ComponentTemplateDeserialized._kbnMeta",
             "type": "Object",
             "tags": [],
@@ -2800,13 +2786,10 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-common.TemplateDeserialized.allowAutoCreate",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "allowAutoCreate",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
             "path": "x-pack/plugins/index_management/common/types/templates.ts",
             "deprecated": false,
             "trackAdoption": false
