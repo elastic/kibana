@@ -8,7 +8,8 @@
 import React from 'react';
 
 import { css } from '@emotion/react';
-import { EuiMarkdownFormat, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiMarkdownFormat, useEuiTheme } from '@elastic/eui';
 import type { IExternalReferenceMetaDataProps } from './types';
 
 export const getContentWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
