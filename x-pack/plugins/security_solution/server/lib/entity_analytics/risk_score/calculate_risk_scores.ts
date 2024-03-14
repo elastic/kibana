@@ -156,14 +156,6 @@ const buildReduceScript = ({
   `;
 };
 
-const riskInputsAggregation = {
-  top_hits: {
-    size: 5,
-    _source: false,
-    docvalue_fields: ['@timestamp', ALERT_RISK_SCORE, ALERT_RULE_NAME],
-  },
-};
-
 const buildIdentifierTypeAggregation = ({
   afterKeys,
   identifierType,
@@ -200,7 +192,13 @@ const buildIdentifierTypeAggregation = ({
           shard_size: alertSampleSizePerShard,
         },
         aggs: {
-          inputs: riskInputsAggregation,
+          inputs: {
+            top_hits: {
+              size: 5,
+              _source: false,
+              docvalue_fields: ['@timestamp', ALERT_RISK_SCORE, ALERT_RULE_NAME],
+            },
+          },
           risk_details: {
             scripted_metric: {
               init_script: 'state.inputs = []',
@@ -293,7 +291,7 @@ export const calculateRiskScores = async ({
   range,
   runtimeMappings,
   weights,
-  alertSampleSizePerShard = 10000,
+  alertSampleSizePerShard = 10_000,
 }: {
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
@@ -329,7 +327,7 @@ export const calculateRiskScores = async ({
             },
           },
           field_value_factor: {
-            field: 'kibana.alert.risk_score', // sort fields by risk score
+            field: 'kibana.alert.risk_score', // sort by risk score
           },
         },
       },

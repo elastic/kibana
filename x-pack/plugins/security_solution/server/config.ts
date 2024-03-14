@@ -167,7 +167,7 @@ export const configSchema = schema.object({
   }),
   entityAnalytics: schema.object({
     riskEngine: schema.object({
-      alertSampleSizePerShard: schema.number({ defaultValue: 10000 }),
+      alertSampleSizePerShard: schema.number({ defaultValue: 10_000 }),
     }),
   }),
 });
