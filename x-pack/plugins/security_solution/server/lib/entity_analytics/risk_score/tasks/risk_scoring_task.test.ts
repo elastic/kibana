@@ -194,7 +194,7 @@ describe('Risk Scoring Task', () => {
         index: 'index',
         runtimeMappings: {},
       });
-      mockRiskScoreService.getConfiguration.mockResolvedValue({
+      mockRiskScoreService.getConfigurationWithDefaults.mockResolvedValue({
         dataViewId: 'data_view_id',
         enabled: true,
         filter: {},
@@ -216,10 +216,6 @@ describe('Risk Scoring Task', () => {
           after_keys: {},
           scores_written: 0,
           errors: [],
-          config: {
-            isAlertSamplingEnabled: false,
-            alertSampleSizePerShard: 10_000,
-          },
         });
       });
 
@@ -243,19 +239,11 @@ describe('Risk Scoring Task', () => {
             after_keys: { host: { 'host.name': 'value' } },
             scores_written: 5,
             errors: [],
-            config: {
-              isAlertSamplingEnabled: false,
-              alertSampleSizePerShard: 10_000,
-            },
           })
           .mockResolvedValueOnce({
             after_keys: {},
             scores_written: 5,
             errors: [],
-            config: {
-              isAlertSamplingEnabled: false,
-              alertSampleSizePerShard: 10_000,
-            },
           });
       });
 
@@ -269,7 +257,7 @@ describe('Risk Scoring Task', () => {
           entityAnalyticsConfig,
         });
 
-        expect(mockRiskScoreService.getConfiguration).toHaveBeenCalledTimes(1);
+        expect(mockRiskScoreService.getConfigurationWithDefaults).toHaveBeenCalledTimes(1);
       });
 
       it('invokes the risk score service once for each page of scores', async () => {
@@ -285,7 +273,7 @@ describe('Risk Scoring Task', () => {
       });
 
       it('invokes the risk score service with the persisted configuration', async () => {
-        mockRiskScoreService.getConfiguration.mockResolvedValueOnce({
+        mockRiskScoreService.getConfigurationWithDefaults.mockResolvedValueOnce({
           dataViewId: 'data_view_id',
           enabled: true,
           filter: {
@@ -324,7 +312,7 @@ describe('Risk Scoring Task', () => {
 
       describe('when no identifier type is configured', () => {
         beforeEach(() => {
-          mockRiskScoreService.getConfiguration.mockResolvedValue({
+          mockRiskScoreService.getConfigurationWithDefaults.mockResolvedValue({
             dataViewId: 'data_view_id',
             enabled: true,
             filter: {},
@@ -341,19 +329,11 @@ describe('Risk Scoring Task', () => {
               after_keys: { host: { 'user.name': 'value' } },
               scores_written: 5,
               errors: [],
-              config: {
-                isAlertSamplingEnabled: false,
-                alertSampleSizePerShard: 10_000,
-              },
             })
             .mockResolvedValueOnce({
               after_keys: {},
               scores_written: 5,
               errors: [],
-              config: {
-                isAlertSamplingEnabled: false,
-                alertSampleSizePerShard: 10_000,
-              },
             });
         });
 
@@ -403,7 +383,7 @@ describe('Risk Scoring Task', () => {
 
       describe('short-circuiting', () => {
         it('does not execute if the risk engine is not enabled', async () => {
-          mockRiskScoreService.getConfiguration.mockResolvedValueOnce({
+          mockRiskScoreService.getConfigurationWithDefaults.mockResolvedValueOnce({
             dataViewId: 'data_view_id',
             enabled: false,
             filter: {
@@ -430,7 +410,7 @@ describe('Risk Scoring Task', () => {
         });
 
         it('does not execute if the configuration is not found', async () => {
-          mockRiskScoreService.getConfiguration.mockResolvedValueOnce(null);
+          mockRiskScoreService.getConfigurationWithDefaults.mockResolvedValueOnce(null);
           await runTask({
             getRiskScoreService,
             logger: mockLogger,

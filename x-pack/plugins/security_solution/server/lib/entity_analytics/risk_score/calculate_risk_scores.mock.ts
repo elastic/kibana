@@ -81,8 +81,6 @@ const buildAggregationResponseMock = (
 const buildResponseMock = (
   overrides: Partial<CalculateScoresResponse> = {}
 ): CalculateScoresResponse => ({
-  isAlertSamplingEnabled: false,
-  alertSampleSizePerShard: 10000,
   after_keys: { host: { 'host.name': 'hostname' } },
   scores: {
     host: [

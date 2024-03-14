@@ -6,7 +6,6 @@
  */
 
 import type { MappingRuntimeFields, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { ConfigType } from '../../config';
 import type {
   AfterKey,
   AfterKeys,
@@ -16,6 +15,7 @@ import type {
   RiskEngineStatus,
   RiskScore,
 } from '../../../common/entity_analytics/risk_engine';
+import type { ConfigType } from '../../config';
 export type EntityAnalyticsConfig = ConfigType['entityAnalytics'];
 
 export interface CalculateScoresParams {
@@ -28,9 +28,8 @@ export interface CalculateScoresParams {
   range: { start: string; end: string };
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
-  isAlertSamplingEnabled?: boolean;
+  isAlertSamplingEnabled: boolean;
   alertSampleSizePerShard?: number;
-  entityAnalyticsConfig: EntityAnalyticsConfig;
 }
 
 export interface CalculateAndPersistScoresParams {
@@ -43,19 +42,14 @@ export interface CalculateAndPersistScoresParams {
   range: Range;
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
-  isAlertSamplingEnabled?: boolean;
+  isAlertSamplingEnabled: boolean;
   alertSampleSizePerShard?: number;
-  entityAnalyticsConfig: EntityAnalyticsConfig;
 }
 
 export interface CalculateAndPersistScoresResponse {
   after_keys: AfterKeys;
   errors: string[];
   scores_written: number;
-  config: {
-    isAlertSamplingEnabled: boolean;
-    alertSampleSizePerShard: number;
-  };
 }
 
 export interface CalculateScoresResponse {
@@ -68,8 +62,6 @@ export interface CalculateScoresResponse {
     host?: RiskScore[];
     user?: RiskScore[];
   };
-  isAlertSamplingEnabled: boolean;
-  alertSampleSizePerShard: number;
 }
 
 export interface GetRiskEngineStatusResponse {

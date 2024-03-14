@@ -45,7 +45,8 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
         const riskEngineDataClient = securityContext.getRiskEngineDataClient();
         const riskScoreDataClient = securityContext.getRiskScoreDataClient();
         const assetCriticalityDataClient = securityContext.getAssetCriticalityDataClient();
-        const config = await securityContext.getConfig();
+        const securityConfig = await securityContext.getConfig();
+
         const assetCriticalityService = assetCriticalityServiceFactory({
           assetCriticalityDataClient,
           uiSettingsClient: coreContext.uiSettings.client,
@@ -71,6 +72,13 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
           weights,
         } = request.body;
 
+        const entityAnalyticsConfig = await riskScoreService.getConfigurationWithDefaults(
+          securityConfig.entityAnalytics
+        );
+
+        const isAlertSamplingEnabled = entityAnalyticsConfig?.isAlertSamplingEnabled ?? false;
+        const alertSampleSizePerShard = entityAnalyticsConfig?.alertSampleSizePerShard;
+
         try {
           const { index, runtimeMappings } = await getRiskInputsIndex({
             dataViewId,
@@ -92,7 +100,8 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
             range,
             runtimeMappings,
             weights,
-            entityAnalyticsConfig: config.entityAnalytics,
+            isAlertSamplingEnabled,
+            alertSampleSizePerShard,
           });
 
           return response.ok({ body: result });

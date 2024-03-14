@@ -10,6 +10,8 @@ export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
   taskDurationInSeconds: number;
   interval: string;
+  isAlertSamplingEnabled: boolean;
+  alertSampleSizePerShard: number;
 }> = {
   eventType: 'risk_score_execution_success',
   schema: {
@@ -29,6 +31,18 @@ export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: `Configured interval for the current risk scoring task`,
+      },
+    },
+    isAlertSamplingEnabled: {
+      type: 'boolean',
+      _meta: {
+        description: `Indicates if alert sampling is enabled for the current risk scoring task`,
+      },
+    },
+    alertSampleSizePerShard: {
+      type: 'long',
+      _meta: {
+        description: `Number of alerts to sample per shard for the current risk scoring task`,
       },
     },
   },

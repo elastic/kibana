@@ -44,7 +44,7 @@ import {
   AssetCriticalityDataClient,
   assetCriticalityServiceFactory,
 } from '../../asset_criticality';
-import type { CalculateAndPersistScoresResponse, EntityAnalyticsConfig } from '../../types';
+import type { EntityAnalyticsConfig } from '../../types';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -229,7 +229,9 @@ export const runTask = async ({
       return { state: updatedState };
     }
 
-    const configuration = await riskScoreService.getConfiguration();
+    const configuration = await riskScoreService.getConfigurationWithDefaults(
+      entityAnalyticsConfig
+    );
     if (configuration == null) {
       log(
         'Risk engine configuration not found; exiting task. Please reinitialize the risk engine and try again'
@@ -265,7 +267,6 @@ export const runTask = async ({
       identifierType: IdentifierType;
       scoresWritten: number;
       tookMs: number;
-      config: CalculateAndPersistScoresResponse['config'];
     }> = [];
     await asyncForEach(identifierTypes, async (identifierType) => {
       let isWorkComplete = isCancelled();
@@ -283,7 +284,6 @@ export const runTask = async ({
           weights: [],
           isAlertSamplingEnabled,
           alertSampleSizePerShard,
-          entityAnalyticsConfig,
         });
         const tookMs = Date.now() - now;
 
@@ -291,7 +291,6 @@ export const runTask = async ({
           identifierType,
           scoresWritten: result.scores_written,
           tookMs,
-          config: result.config,
         });
 
         isWorkComplete = isRiskScoreCalculationComplete(result) || isCancelled();
@@ -308,6 +307,8 @@ export const runTask = async ({
       scoresWritten,
       taskDurationInSeconds,
       interval: taskInstance?.schedule?.interval,
+      isAlertSamplingEnabled,
+      alertSampleSizePerShard,
     };
     telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCCESS_EVENT.eventType, telemetryEvent);
 
