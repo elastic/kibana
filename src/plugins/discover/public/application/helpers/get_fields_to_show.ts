@@ -15,7 +15,11 @@ import { IndexPattern, getFieldSubtypeMulti } from '../../../../data/common';
  * @param dataView
  * @param showMultiFields
  */
-export const getFieldsToShow = (fields: string[], dataView: IndexPattern, showMultiFields: boolean) => {
+export const getFieldsToShow = (
+  fields: string[], 
+  dataView: IndexPattern, 
+  showMultiFields: boolean
+) => {
   if (showMultiFields) {
     return fields;
   }
