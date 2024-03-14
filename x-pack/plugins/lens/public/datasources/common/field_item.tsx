@@ -207,7 +207,6 @@ export function InnerFieldItem(props: FieldItemProps) {
         container={document.querySelector<HTMLElement>('.application') || undefined}
         button={
           <Draggable
-            className="lnsFieldItem__draggable"
             dragType="copy"
             value={value}
             order={order}

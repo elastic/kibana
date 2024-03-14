@@ -26,10 +26,30 @@
 }
 
 .unifiedFieldListSidebar__list {
-  padding: $euiSizeS $euiSizeS 0;
+  padding: $euiSizeS $euiSizeS 0 $euiSizeXS;
+
+  > *, .euiAccordion__triggerWrapper {
+    padding-left: $euiSizeXS;
+  }
+  
+  .unifiedFieldListSidebar__accordionContainer {
+    padding-left: 0;
+  }
+
+  .unifiedFieldListItemButton {
+    padding-left: $euiSizeXS;
+    padding-right: $euiSizeXS;
+  }
 
   @include euiBreakpoint('xs', 's') {
     padding: $euiSizeS 0 0 0;
+    > *, .euiAccordion__triggerWrapper, .unifiedFieldListSidebar__accordionContainer {
+      padding-left: 0;
+    }
+    .unifiedFieldListItemButton {
+      padding-left: 0;
+      padding-right: 0;
+    }
   }
 }
 
@@ -54,16 +74,11 @@
 .unifiedFieldListSidebar .unifiedFieldListItemButton {
   &.kbnFieldButton {
     margin-bottom: calc($euiSizeXS / 2);
-    padding: 0;
+    background: none;
+    box-shadow: none;
   }
 }
 
-.unifiedFieldListItemButton__draggable {
-  background: $euiColorEmptyShade;
-}
-
 .unifiedFieldListItemButton__dragging {
-  padding: 0 $euiSizeXS;
-  border-radius: $euiBorderRadius;
-  background-color: $euiColorEmptyShade;
+  background: $euiColorEmptyShade;
 }

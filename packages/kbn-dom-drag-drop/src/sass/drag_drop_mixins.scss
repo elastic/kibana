@@ -12,6 +12,7 @@ $domDragDropZLevel3: 3;
   transition: $euiAnimSpeedFast ease-in-out;
   transition-property: background-color, border-color, opacity;
   z-index: $domDragDropZLevel1;
+  border-radius: $euiBorderRadius;
 }
 
 // Hovering state for drag item and drop area

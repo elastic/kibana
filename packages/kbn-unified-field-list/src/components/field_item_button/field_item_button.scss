@@ -42,6 +42,9 @@
 
 .unifiedFieldListItemButton {
   width: 100%;
+  @include euiSlightShadow;
+  background: $euiColorEmptyShade;
+  border-radius: $euiBorderRadius;
   &.kbnFieldButton {
     &:focus-within,
     &-isActive {
