@@ -52,11 +52,7 @@ export const buildEmbeddable = async (
       },
     },
     {
-      timeRange: [
-        timeRange$,
-        setTimeRange,
-        fastIsEqual,
-      ],
+      timeRange: [timeRange$, setTimeRange, fastIsEqual],
     }
   );
 
