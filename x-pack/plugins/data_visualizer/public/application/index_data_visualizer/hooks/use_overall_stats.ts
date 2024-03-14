@@ -129,7 +129,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           },
           includeEmptyFields: false,
         });
-
         if (!unmounted) {
           setPopulatedFieldsInIndex(new Set(nonEmptyFields.map((field) => field.name)));
         }
@@ -356,7 +355,10 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           });
         },
         error: (error) => {
-          displayError(toasts, searchStrategyParams.index, extractErrorProperties(error));
+          if (error.name !== 'AbortError') {
+            displayError(toasts, searchStrategyParams.index, extractErrorProperties(error));
+          }
+
           setFetchState({
             isRunning: false,
             error,

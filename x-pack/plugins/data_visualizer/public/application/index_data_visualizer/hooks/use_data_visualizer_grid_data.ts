@@ -103,27 +103,47 @@ export const useDataVisualizerGridData = (
     return seed;
   }, [security]);
 
-  const {
-    currentSavedSearch,
-    currentDataView,
-    currentQuery,
-    currentFilters,
-    visibleFieldNames,
-    fieldsToFetch,
-    samplingOption,
-  } = useMemo(
-    () => ({
-      currentSavedSearch: input?.savedSearch,
-      currentDataView: input.dataView,
-      currentQuery: input?.query,
-      visibleFieldNames: input?.visibleFieldNames ?? [],
-      currentFilters: input?.filters,
-      fieldsToFetch: input?.fieldsToFetch,
-      /** By default, use random sampling **/
-      samplingOption: input?.samplingOption ?? DEFAULT_SAMPLING_OPTION,
-    }),
-    [input]
-  );
+  const { currentSavedSearch, currentDataView, currentQuery, currentFilters, samplingOption } =
+    useMemo(
+      () => ({
+        currentSavedSearch: input?.savedSearch,
+        currentDataView: input.dataView,
+        currentQuery: input?.query,
+        currentFilters: input?.filters,
+        /** By default, use random sampling **/
+        samplingOption: input?.samplingOption ?? DEFAULT_SAMPLING_OPTION,
+      }),
+      [input]
+    );
+  const dataViewFields: DataViewField[] = useMemo(() => currentDataView.fields, [currentDataView]);
+
+  const { visibleFieldNames, fieldsToFetch } = useMemo(() => {
+    const _fieldsToFetch =
+      input?.visibleFieldNames.length === 0
+        ? input.fieldsToFetch
+        : [
+            ...dataViewFields
+              .filter((field) => {
+                if (input?.visibleFieldNames.includes(field.name)) {
+                  return true;
+                }
+
+                const parent = field.spec.subType?.multi?.parent;
+                const matchesParent = parent
+                  ? input?.visibleFieldNames.indexOf(parent) > -1
+                  : false;
+                if (matchesParent) {
+                  return true;
+                }
+                return false;
+              })
+              .map((f) => f.name),
+          ];
+    return {
+      visibleFieldNames: _fieldsToFetch,
+      fieldsToFetch: _fieldsToFetch,
+    };
+  }, [input, dataViewFields]);
 
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery, queryOrAggregateQuery } = useMemo(() => {
@@ -240,7 +260,6 @@ export const useDataVisualizerGridData = (
           }
         }
       });
-
       return {
         earliest,
         latest,
@@ -282,7 +301,6 @@ export const useDataVisualizerGridData = (
     lastRefresh,
     dataVisualizerListState.probability
   );
-
   const configsWithoutStats = useMemo(() => {
     if (overallStatsProgress.loaded < 100) return;
     const existMetricFields = metricConfigs
@@ -347,8 +365,6 @@ export const useDataVisualizerGridData = (
       timeUpdateSubscription.unsubscribe();
     };
   });
-
-  const dataViewFields: DataViewField[] = useMemo(() => currentDataView.fields, [currentDataView]);
 
   const createMetricCards = useCallback(() => {
     const configs: FieldVisConfig[] = [];
