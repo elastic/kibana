@@ -26662,11 +26662,6 @@ remark-stringify@^8.0.3:
     unherit "^1.0.4"
     xtend "^4.0.1"
 
-remote-web-worker@^0.0.9:
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/remote-web-worker/-/remote-web-worker-0.0.9.tgz#3a96a84063e6c1a5fa3792abe0fd97eb7a97aab3"
-  integrity sha512-TguJhQVWeeL2zWqLQpTfq/uIOpXRHHq7SI6fw6xTIJfSN/ojiKUqV16oAhPD8zH71MFy3FHqSoQEx2cks5gcAA==
-
 remove-accents@0.4.2:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/remove-accents/-/remove-accents-0.4.2.tgz#0a43d3aaae1e80db919e07ae254b285d9e1c7bb5"
