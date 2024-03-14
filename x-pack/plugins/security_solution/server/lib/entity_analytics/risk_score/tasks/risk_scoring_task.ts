@@ -261,12 +261,12 @@ export const runTask = async ({
       ? [configuredIdentifierType]
       : [RiskScoreEntity.host, RiskScoreEntity.user];
 
-    // TODO: Not sure we want to keep this?
     const runs: Array<{
       identifierType: IdentifierType;
       scoresWritten: number;
       tookMs: number;
     }> = [];
+
     await asyncForEach(identifierTypes, async (identifierType) => {
       let isWorkComplete = isCancelled();
       let afterKeys: AfterKeys = {};
