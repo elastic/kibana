@@ -106,30 +106,43 @@ function processResultFromSearches(
   // Calculate capacity again in case more capacity opened up since the search queries started
   let availableCapacity = getCapacity();
   const docsToUpdate: ConcreteTaskInstance[] = [];
-  for (const result of results) {
-    for (const doc of result) {
-      if (availableCapacity - definitions.get(doc.taskType).workerCost >= 0) {
-        const updates: Partial<ConcreteTaskInstance> = {};
-        if (unusedTypes.includes(doc.taskType)) {
-          updates.status = TaskStatus.Unrecognized;
-        } else {
-          if (doc.retryAt && doc.retryAt < new Date()) {
-            updates.scheduledAt = doc.retryAt || undefined;
-          } else {
-            updates.scheduledAt = doc.runAt;
-          }
 
-          // TODO: We should be able to set them directly to running at this point
-          updates.status = TaskStatus.Claiming;
-          updates.ownerId = taskStore.taskManagerId;
-          updates.retryAt = claimOwnershipUntil;
+  const sortedResults = ([] as ConcreteTaskInstance[]).concat(...results).sort((a, b) => {
+    const aTaskDef = definitions.get(a.taskType);
+    const bTaskDef = definitions.get(b.taskType);
+    const aPriority =
+      typeof aTaskDef.priority === 'number' ? aTaskDef.priority : TaskPriority.Normal;
+    const bPriority =
+      typeof bTaskDef.priority === 'number' ? bTaskDef.priority : TaskPriority.Normal;
+    if (aPriority === bPriority) {
+      return aTaskDef.workerCost - bTaskDef.workerCost;
+    }
+    return bPriority - aPriority;
+  });
+
+  for (const doc of sortedResults) {
+    if (availableCapacity - definitions.get(doc.taskType).workerCost >= 0) {
+      const updates: Partial<ConcreteTaskInstance> = {};
+      if (unusedTypes.includes(doc.taskType)) {
+        updates.status = TaskStatus.Unrecognized;
+      } else {
+        if (doc.retryAt && doc.retryAt < new Date()) {
+          updates.scheduledAt = doc.retryAt || undefined;
+        } else {
+          updates.scheduledAt = doc.runAt;
         }
 
-        docsToUpdate.push({ ...doc, ...updates });
-        availableCapacity -= definitions.get(doc.taskType).workerCost;
+        // TODO: We should be able to set them directly to running at this point
+        updates.status = TaskStatus.Claiming;
+        updates.ownerId = taskStore.taskManagerId;
+        updates.retryAt = claimOwnershipUntil;
       }
+
+      docsToUpdate.push({ ...doc, ...updates });
+      availableCapacity -= definitions.get(doc.taskType).workerCost;
     }
   }
+
   return docsToUpdate;
 }
 
