@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import { ENVIRONMENT_ALL } from '@kbn/exploratory-view-plugin/public';
+import { SerializableRecord } from '@kbn/utility-types';
+import React, { useMemo } from 'react';
 import { useKibana } from '../../../../utils/kibana_react';
 import { TimeRange } from '../../types';
 
@@ -22,7 +24,6 @@ const TRANSACTION_TYPE = 'transaction.type';
 const TRANSACTION_NAME = 'transaction.name';
 
 const METRICS_DETAILS_PATH = '/app/metrics/detail';
-const APM_PATH = '/app/apm/services';
 
 const infraSources = [
   HOST_NAME,
@@ -36,6 +37,22 @@ const infraSources = [
 
 const apmSources = [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME];
 
+const APM_APP_LOCATOR_ID = 'APM_LOCATOR';
+
+const getApmLocatorParams = (params: SerializableRecord) => {
+  return {
+    serviceName: params.serviceName,
+    serviceOverviewTab: params.serviceOverviewTab,
+    query: {
+      environment: params.environment,
+      transactionType: params.transactionType,
+      transactionName: params.transactionName,
+      rangeFrom: params.rangeFrom,
+      rangeTo: params.rangeTo,
+    },
+  };
+};
+
 interface GroupItem {
   field: string;
   value: string;
@@ -46,7 +63,22 @@ export function Groups({ groups, timeRange }: { groups: GroupItem[]; timeRange: 
     http: {
       basePath: { prepend },
     },
+    share: {
+      url: { locators },
+    },
   } = useKibana().services;
+
+  const apmLocator = useMemo(() => {
+    const baseLocator = locators.get(APM_APP_LOCATOR_ID);
+    if (!baseLocator) return;
+
+    return {
+      ...baseLocator,
+      getRedirectUrl: (params: SerializableRecord) =>
+        baseLocator.getRedirectUrl(getApmLocatorParams(params)),
+      navigate: (params: SerializableRecord) => baseLocator.navigate(getApmLocatorParams(params)),
+    };
+  }, [locators]);
 
   const infraSourceLinks: Record<string, string> = {
     [HOST_NAME]: prepend(`${METRICS_DETAILS_PATH}/host`),
@@ -58,7 +90,6 @@ export function Groups({ groups, timeRange }: { groups: GroupItem[]; timeRange: 
     [AWS_SQS_QUEUE]: prepend(`${METRICS_DETAILS_PATH}/awsSQS`),
   };
 
-  const apmTimeRange = `rangeFrom=${timeRange.from}&rangeTo=${timeRange.to}`;
   const hostTimeRange = `assetDetails=(dateRange:(from:'${timeRange.from}',to:'${timeRange.to}'))`;
   const infraTimeRange = `_a=(time:(from:'${timeRange.from}',to:'${timeRange.to}',interval:>=1m))`;
 
@@ -77,19 +108,34 @@ export function Groups({ groups, timeRange }: { groups: GroupItem[]; timeRange: 
 
   const generateApmSourceLink = ({ field, value }: GroupItem) => {
     const serviceName = groups.find((group) => group.field === SERVICE_NAME)?.value;
-    const apmServiceView = `${prepend(APM_PATH)}/${serviceName}`;
 
-    const link =
-      field === TRANSACTION_NAME
-        ? `${apmServiceView}/transactions/view?transactionName=${value}&${apmTimeRange}`
-        : field === TRANSACTION_TYPE
-        ? `${apmServiceView}?transactionType=${value}&${apmTimeRange}`
-        : field === SERVICE_ENVIRONMENT
-        ? `${apmServiceView}?environment=${value}&${apmTimeRange}`
-        : `${apmServiceView}?${apmTimeRange}`;
+    let apmLocatorPayload: SerializableRecord = {
+      serviceName,
+      environment: ENVIRONMENT_ALL,
+      rangeFrom: timeRange.from,
+      rangeTo: timeRange.to,
+    };
+
+    if (field === TRANSACTION_NAME) {
+      apmLocatorPayload = {
+        ...apmLocatorPayload,
+        serviceOverviewTab: 'transactions',
+        transactionName: value,
+      };
+    } else if (field === TRANSACTION_TYPE) {
+      apmLocatorPayload = {
+        ...apmLocatorPayload,
+        transactionType: value,
+      };
+    } else if (field === SERVICE_ENVIRONMENT) {
+      apmLocatorPayload = {
+        ...apmLocatorPayload,
+        environment: value,
+      };
+    }
 
     return (
-      <a href={link} target="_blank">
+      <a href={apmLocator?.getRedirectUrl(apmLocatorPayload)} target="_blank">
         {value}
       </a>
     );
