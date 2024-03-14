@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { makeHighContrastColor } from '@elastic/eui';
 import { darkMode, euiThemeVars } from '@kbn/ui-theme';
 
 import { themeRuleGroupBuilderFactory } from '../common/theme';
@@ -13,22 +14,32 @@ import { monaco } from '../monaco_imports';
 
 const buildRuleGroup = themeRuleGroupBuilderFactory();
 
+const background = euiThemeVars.euiColorLightestShade;
+const methodTextColor = '#DD0A73';
+const urlTextColor = '#00A69B';
+const stringTextColor = '#009926';
+const commentTextColor = '#4C886B';
+const variableTextColor = '#0079A5';
+const booleanTextColor = '#585CF6';
+const numericTextColor = variableTextColor;
 export const buildConsoleTheme = (): monaco.editor.IStandaloneThemeData => {
   return {
     base: darkMode ? 'vs-dark' : 'vs',
     inherit: true,
     rules: [
-      // method
-      ...buildRuleGroup(['method'], euiThemeVars.euiColorAccentText),
-      // url
-      ...buildRuleGroup(['url'], euiThemeVars.euiColorSuccessText),
-      // variable
-      ...buildRuleGroup(['variable'], euiThemeVars.euiColorPrimaryText),
-      // comment
-      ...buildRuleGroup(['comment'], euiThemeVars.euiColorMediumShade),
+      ...buildRuleGroup(['method'], makeHighContrastColor(methodTextColor)(background)),
+      ...buildRuleGroup(['url'], makeHighContrastColor(urlTextColor)(background)),
+      ...buildRuleGroup(
+        ['string', 'string-literal', 'multi-string', 'punctuation.end-triple-quote'],
+        makeHighContrastColor(stringTextColor)(background)
+      ),
+      ...buildRuleGroup(['comment'], makeHighContrastColor(commentTextColor)(background)),
+      ...buildRuleGroup(['variable'], makeHighContrastColor(variableTextColor)(background)),
+      ...buildRuleGroup(['constant.language.boolean'], makeHighContrastColor(booleanTextColor)(background)),
+      ...buildRuleGroup(['constant.numeric'], makeHighContrastColor(numericTextColor)(background)),
     ],
     colors: {
-      'editor.background': euiThemeVars.euiColorLightestShade,
+      'editor.background': background,
       // color of the line numbers
       'editorLineNumber.foreground': euiThemeVars.euiColorDarkShade,
       // color of the active line number

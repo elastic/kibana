@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { buildXjsonRules } from '../../xjson/lexer_rules/xjson';
 import { monaco } from '../../monaco_imports';
 
 export const languageConfiguration: monaco.languages.LanguageConfiguration = {};
@@ -72,14 +73,32 @@ const addEOL = (
   };
 };
 
+const xjsonRules = { ...buildXjsonRules('json_root') };
+// @ts-expect-error
+xjsonRules.json_root = [{ include: '@comments' }, ...xjsonRules.json_root];
+xjsonRules.json_root = [
+  // @ts-expect-error
+  { regex: /("\${\w+}")/, action: { token: 'variable.template' } },
+  ...xjsonRules.json_root,
+];
+
 export const lexerRules: monaco.languages.IMonarchLanguage = {
   defaultToken: 'invalid',
+  escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
+  // @ts-expect-error
   tokenizer: {
     root: [
       // warning comment
       matchToken('warning', '#!.*$'),
       // comments
       { include: '@comments' },
+      {
+        regex: '{',
+        action: {
+          token: 'paren.lparen',
+          next: 'json_root',
+        },
+      },
       // method
       addEOL('method', /([a-zA-Z]+)/, 'root', 'method_sep'),
     ],
@@ -138,9 +157,10 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       // match everything on a single line inside the comment except for chars / and *
       matchToken('comment', /[^\/*]+/),
       // end block comment
-      matchToken('comment.punctuation', /\*\//, 'root'),
+      matchToken('comment.punctuation', /\*\//, '@pop'),
       // match individual chars inside a multi-line comment
       matchToken('comment', /[\/*]/),
     ],
+    ...xjsonRules,
   },
 };
