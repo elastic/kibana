@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { SecuritySolutionPluginContext } from '@kbn/threat-intelligence-plugin/public';
 import { THREAT_INTELLIGENCE_BASE_PATH } from '@kbn/threat-intelligence-plugin/public';
 import type { SourcererDataView } from '@kbn/threat-intelligence-plugin/public/types';
@@ -40,49 +40,54 @@ const ThreatIntelligence = memo(() => {
 
   const securitySolutionStore = getStore() as Store;
 
-  const securitySolutionContext: SecuritySolutionPluginContext = {
-    securitySolutionStore,
+  const canWriteBlocklist = useUserPrivileges().endpointPrivileges.canWriteBlocklist;
 
-    getFiltersGlobalComponent: () => FiltersGlobal,
-    getPageWrapper: () => SecuritySolutionPageWrapper,
-    licenseService,
-    sourcererDataView: sourcererDataView as unknown as SourcererDataView,
-    getUseInvestigateInTimeline: useInvestigateInTimeline,
+  const securitySolutionContext: SecuritySolutionPluginContext = useMemo(
+    () => ({
+      securitySolutionStore,
 
-    blockList: {
-      canWriteBlocklist: useUserPrivileges().endpointPrivileges.canWriteBlocklist,
-      exceptionListApiClient: BlocklistsApiClient.getInstance(http),
-      useSetUrlParams,
-      // @ts-ignore
-      getFlyoutComponent: () => ArtifactFlyout,
-      // @ts-ignore
-      getFormComponent: () => BlockListForm,
-    },
+      getFiltersGlobalComponent: () => FiltersGlobal,
+      getPageWrapper: () => SecuritySolutionPageWrapper,
+      licenseService,
+      sourcererDataView: sourcererDataView as unknown as SourcererDataView,
+      getUseInvestigateInTimeline: useInvestigateInTimeline,
 
-    useQuery: () => useSelector(inputsSelectors.globalQuerySelector()),
-    useFilters: () => useSelector(inputsSelectors.globalFiltersQuerySelector()),
-    useGlobalTime,
+      blockList: {
+        canWriteBlocklist,
+        exceptionListApiClient: BlocklistsApiClient.getInstance(http),
+        useSetUrlParams,
+        // @ts-ignore
+        getFlyoutComponent: () => ArtifactFlyout,
+        // @ts-ignore
+        getFormComponent: () => BlockListForm,
+      } as unknown as SecuritySolutionPluginContext['blockList'],
 
-    registerQuery: (query) =>
-      securitySolutionStore.dispatch(
-        setQuery({
-          inputId: InputsModelId.global,
-          id: query.id,
-          refetch: query.refetch,
-          inspect: null,
-          loading: query.loading,
-        })
-      ),
-    deregisterQuery: (query) =>
-      securitySolutionStore.dispatch(
-        deleteOneQuery({
-          inputId: InputsModelId.global,
-          id: query.id,
-        })
-      ),
+      useQuery: () => useSelector(inputsSelectors.globalQuerySelector()),
+      useFilters: () => useSelector(inputsSelectors.globalFiltersQuerySelector()),
+      useGlobalTime,
 
-    SiemSearchBar,
-  };
+      registerQuery: (query) =>
+        securitySolutionStore.dispatch(
+          setQuery({
+            inputId: InputsModelId.global,
+            id: query.id,
+            refetch: query.refetch,
+            inspect: null,
+            loading: query.loading,
+          })
+        ),
+      deregisterQuery: (query) =>
+        securitySolutionStore.dispatch(
+          deleteOneQuery({
+            inputId: InputsModelId.global,
+            id: query.id,
+          })
+        ),
+
+      SiemSearchBar,
+    }),
+    [canWriteBlocklist, http, securitySolutionStore, sourcererDataView]
+  );
 
   return (
     <SecurityRoutePageWrapper pageName={SecurityPageName.threatIntelligence}>

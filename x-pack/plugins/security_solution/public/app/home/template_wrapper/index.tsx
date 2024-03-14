@@ -61,6 +61,10 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
     // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
     const { euiTheme, colorMode: globalColorMode } = useEuiTheme();
 
+    // There is some logic in the StyledKibanaPageTemplate that checks for children presence, and we dont even need to render the children
+    // here if isEmptyState is set
+    const isNotEmpty = !rest.isEmptyState;
+
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
      * and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop,
@@ -77,25 +81,29 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
           restrictWidth={false}
           {...rest}
         >
-          <GlobalKQLHeader />
-          <KibanaPageTemplate.Section
-            className="securityPageWrapper"
-            data-test-subj="pageContainer"
-            paddingSize={rest.paddingSize ?? 'l'}
-            alignment="top"
-            component="div"
-            grow={true}
-          >
-            {children}
-          </KibanaPageTemplate.Section>
-          {isTimelineBottomBarVisible && (
-            <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">
-              <EuiThemeProvider colorMode={globalColorMode}>
-                <Timeline />
-              </EuiThemeProvider>
-            </KibanaPageTemplate.BottomBar>
+          {isNotEmpty && (
+            <>
+              <GlobalKQLHeader />
+              <KibanaPageTemplate.Section
+                className="securityPageWrapper"
+                data-test-subj="pageContainer"
+                paddingSize={rest.paddingSize ?? 'l'}
+                alignment="top"
+                component="div"
+                grow={true}
+              >
+                {children}
+              </KibanaPageTemplate.Section>
+              {isTimelineBottomBarVisible && (
+                <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">
+                  <EuiThemeProvider colorMode={globalColorMode}>
+                    <Timeline />
+                  </EuiThemeProvider>
+                </KibanaPageTemplate.BottomBar>
+              )}
+              <SecuritySolutionFlyout />
+            </>
           )}
-          <SecuritySolutionFlyout />
         </StyledKibanaPageTemplate>
       </ExpandableFlyoutProvider>
     );
