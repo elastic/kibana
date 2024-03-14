@@ -81,7 +81,7 @@ function createDiscoverLocator(
         alias: i18n.translate('xpack.observability.slo.sloDetails.totalFilterLabel', {
           defaultMessage: 'Total events',
         }),
-        value: JSON.stringify(customBadFilter),
+        value: JSON.stringify(customTotalFilter),
         index: indexId,
       },
       query: customTotalFilter as Record<string, any>,

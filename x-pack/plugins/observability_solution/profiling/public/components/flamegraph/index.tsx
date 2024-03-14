@@ -194,7 +194,7 @@ export function FlameGraph({
                             primaryFlamegraph.TotalAnnualCostsUSDItems[valueIndex]
                           }
                           baselineScaleFactor={baseline}
-                          comparisonAnnualCO2KgsInclusive={comparisonNode.TotalAnnualCO2Kgs}
+                          comparisonAnnualCO2KgsInclusive={comparisonNode?.TotalAnnualCO2Kgs}
                           comparisonAnnualCostsUSDInclusive={comparisonNode?.TotalAnnualCostUSD}
                           comparisonCountExclusive={comparisonNode?.CountExclusive}
                           comparisonCountInclusive={comparisonNode?.CountInclusive}
