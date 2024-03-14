@@ -13,8 +13,8 @@ import { TimeRange } from '@kbn/es-query';
 import {
   HasParentApi,
   PublishesDataViews,
-  PublishesLocalUnifiedSearch,
-  PublishesWritableLocalUnifiedSearch,
+  PublishesUnifiedSearch,
+  PublishesWritableUnifiedSearch,
 } from '@kbn/presentation-publishing';
 
 export interface State {
@@ -23,8 +23,8 @@ export interface State {
 
 export type Api = DefaultEmbeddableApi<State> &
   PublishesDataViews &
-  Pick<PublishesWritableLocalUnifiedSearch, 'localTimeRange' | 'setLocalTimeRange'> &
-  Partial<HasParentApi<PublishesLocalUnifiedSearch>>;
+  Pick<PublishesWritableUnifiedSearch, 'timeRange$' | 'setTimeRange'> &
+  Partial<HasParentApi<PublishesUnifiedSearch>>;
 
 export interface Services {
   data: DataPublicPluginStart;

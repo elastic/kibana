@@ -37,8 +37,8 @@ export const buildEmbeddable = async (
   const api = buildApi(
     {
       dataViews: dataViews$,
-      localTimeRange: timeRange$,
-      setLocalTimeRange: (nextTimeRange: TimeRange | undefined) => {
+      timeRange$,
+      setTimeRange: (nextTimeRange: TimeRange | undefined) => {
         timeRange$.next(nextTimeRange);
       },
       serializeState: () => {
@@ -67,9 +67,9 @@ export const buildEmbeddable = async (
       const [count, setCount] = useState<number>(0);
       const [error, setError] = useState<Error | undefined>();
       const [filters, query, parentTimeRange, timeRange] = useBatchedPublishingSubjects(
-        api.parentApi?.localFilters,
-        api.parentApi?.localQuery,
-        api.parentApi?.localTimeRange,
+        api.parentApi?.filters$,
+        api.parentApi?.query$,
+        api.parentApi?.timeRange$,
         timeRange$
       );
 
