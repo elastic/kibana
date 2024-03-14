@@ -24,7 +24,6 @@ import {
   getInputVarsFields,
 } from './get_azure_credentials_form_options';
 
-// TODO: create ticket to update copy in AzureSetupInfoContent and for GCP as well
 export const AzureCredentialsFormAgentless = ({
   input,
   newPolicy,
