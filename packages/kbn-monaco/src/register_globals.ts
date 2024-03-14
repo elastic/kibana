@@ -14,6 +14,7 @@ import { ESQL_THEME_ID, ESQLLang, buildESQlTheme } from './esql';
 import { YAML_LANG_ID } from './yaml';
 import { registerLanguage, registerTheme } from './helpers';
 import { ConsoleLang } from './console';
+import { prepareWorkerURL } from './prepare_worker_url';
 
 export const DEFAULT_WORKER_ID = 'default';
 const langSpecificWorkerIds = [
@@ -54,18 +55,7 @@ window.MonacoEnvironment = {
         const workerId = langSpecificWorkerIds.includes(languageId)
           ? languageId
           : DEFAULT_WORKER_ID;
-        /**
-         * Worker URLs must adhere to the same-origin policy.
-         * See https://developer.mozilla.org/en-US/docs/Web/API/Worker/Worker.
-         *
-         * To satisfy the policy we construct a `blob:` URL and use the worker global `importScripts`
-         * function to load the worker code via JS APIs instead.
-         */
-        const workerURL = window.URL.createObjectURL(
-          new Blob([`importScripts("${monacoBundleDir}${workerId}.editor.worker.js")`], {
-            type: 'application/javascript',
-          })
-        );
+        const workerURL = prepareWorkerURL(`${monacoBundleDir}${workerId}.editor.worker.js`);
         workerURLMap.set(languageId, workerURL);
         return workerURL;
       }
