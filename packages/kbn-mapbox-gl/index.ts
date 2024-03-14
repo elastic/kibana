@@ -39,7 +39,17 @@ import mbWorkerUrl from '!!file-loader!maplibre-gl/dist/maplibre-gl-csp-worker';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 const maplibregl: any = maplibreglDist;
-maplibregl.workerUrl = mbWorkerUrl;
+
+/**
+ * Worker URLs must adhere to the same-origin policy.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/Worker/Worker.
+ *
+ * To satisfy the policy we construct a `blob:` URL and use the worker global `importScripts`
+ * function to load the worker code via JS APIs instead.
+ */
+maplibregl.workerUrl = URL.createObjectURL(
+  new Blob([`importScripts("${mbWorkerUrl}");`], { type: 'text/javascript' })
+);
 maplibregl.setRTLTextPlugin(mbRtlPlugin);
 
 export { maplibregl };
