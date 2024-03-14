@@ -148,6 +148,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           searchValue={search.term}
           onSearchChange={onSearchChange}
           disabled={isJSONVisible}
+          data-test-subj="indexDetailsMappingsDocumentFieldsSearch"
         />
         <EuiButton data-test-subj="indexDetailsMappingsToggleViewButton" onClick={onToggleChange}>
           {isJSONVisible ? (

@@ -45,6 +45,7 @@ export const DocumentFieldsSearch = React.memo(
               defaultMessage: 'Search mapped fields',
             }
           )}
+          data-test-subj="DocumentFieldsSearch"
         />
       </EuiFlexItem>
     );

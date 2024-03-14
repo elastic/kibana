@@ -45,6 +45,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
       clickErrorReloadButton: () => Promise<void>;
       getTreeViewContent: () => string;
       clickToggleViewButton: () => Promise<void>;
+      isSearchBarDisabled: () => boolean;
     };
     settings: {
       getCodeBlockContent: () => string;
@@ -205,6 +206,9 @@ export const setup = async ({
         find('indexDetailsMappingsToggleViewButton').simulate('click');
       });
       component.update();
+    },
+    isSearchBarDisabled: () => {
+      return find('DocumentFieldsSearch').prop('disabled');
     },
   };
 
