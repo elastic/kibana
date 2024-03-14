@@ -1,0 +1,232 @@
+diff --git a/x-pack/plugins/features/server/oss_features.ts b/x-pack/plugins/features/server/oss_features.ts
+index 21eb4a25560..f7ec7d241f7 100644
+--- a/x-pack/plugins/features/server/oss_features.ts
++++ b/x-pack/plugins/features/server/oss_features.ts
+@@ -29,7 +29,7 @@ export const buildOSSFeatures = ({
+         ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
+       },
+       order: 100,
+-      category: DEFAULT_APP_CATEGORIES.kibana,
++      category: DEFAULT_APP_CATEGORIES.observability,
+       app: ['discover', 'kibana'],
+       catalogue: ['discover'],
+       privileges: {
+@@ -124,7 +124,7 @@ export const buildOSSFeatures = ({
+         ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
+       },
+       order: 700,
+-      category: DEFAULT_APP_CATEGORIES.kibana,
++      category: DEFAULT_APP_CATEGORIES.observability,
+       app: ['visualize', 'lens', 'kibana'],
+       catalogue: ['visualize'],
+       privileges: {
+@@ -188,7 +188,7 @@ export const buildOSSFeatures = ({
+         ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
+       },
+       order: 200,
+-      category: DEFAULT_APP_CATEGORIES.kibana,
++      category: DEFAULT_APP_CATEGORIES.observability,
+       app: ['dashboards', 'kibana'],
+       catalogue: ['dashboard'],
+       privileges: {
+diff --git a/x-pack/plugins/ml/server/plugin.ts b/x-pack/plugins/ml/server/plugin.ts
+index c268cd33832..f76c1c2bea6 100644
+--- a/x-pack/plugins/ml/server/plugin.ts
++++ b/x-pack/plugins/ml/server/plugin.ts
+@@ -128,7 +128,7 @@ export class MlServerPlugin
+         defaultMessage: 'Machine Learning',
+       }),
+       order: 500,
+-      category: DEFAULT_APP_CATEGORIES.kibana,
++      category: DEFAULT_APP_CATEGORIES.observability,
+       app: [PLUGIN_ID, 'kibana'],
+       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
+       management: {
+diff --git a/x-pack/plugins/monitoring/server/plugin.ts b/x-pack/plugins/monitoring/server/plugin.ts
+index 17478551129..975fc109b6e 100644
+--- a/x-pack/plugins/monitoring/server/plugin.ts
++++ b/x-pack/plugins/monitoring/server/plugin.ts
+@@ -266,44 +266,44 @@ export class MonitoringPlugin
+   }
+ 
+   registerPluginInUI(plugins: PluginsSetup) {
+-    plugins.features.registerKibanaFeature({
+-      id: 'monitoring',
+-      name: i18n.translate('xpack.monitoring.featureRegistry.monitoringFeatureName', {
+-        defaultMessage: 'Stack Monitoring',
+-      }),
+-      category: DEFAULT_APP_CATEGORIES.management,
+-      app: ['monitoring', 'kibana'],
+-      catalogue: ['monitoring'],
+-      privileges: null,
+-      alerting: RULES,
+-      reserved: {
+-        description: i18n.translate('xpack.monitoring.feature.reserved.description', {
+-          defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
+-        }),
+-        privileges: [
+-          {
+-            id: 'monitoring',
+-            privilege: {
+-              app: ['monitoring', 'kibana'],
+-              catalogue: ['monitoring'],
+-              savedObject: {
+-                all: [],
+-                read: [],
+-              },
+-              alerting: {
+-                rule: {
+-                  all: RULES,
+-                },
+-                alert: {
+-                  all: RULES,
+-                },
+-              },
+-              ui: [],
+-            },
+-          },
+-        ],
+-      },
+-    });
++    // plugins.features.registerKibanaFeature({
++    //   id: 'monitoring',
++    //   name: i18n.translate('xpack.monitoring.featureRegistry.monitoringFeatureName', {
++    //     defaultMessage: 'Stack Monitoring',
++    //   }),
++    //   category: DEFAULT_APP_CATEGORIES.management,
++    //   app: ['monitoring', 'kibana'],
++    //   catalogue: ['monitoring'],
++    //   privileges: null,
++    //   alerting: RULES,
++    //   reserved: {
++    //     description: i18n.translate('xpack.monitoring.feature.reserved.description', {
++    //       defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
++    //     }),
++    //     privileges: [
++    //       {
++    //         id: 'monitoring',
++    //         privilege: {
++    //           app: ['monitoring', 'kibana'],
++    //           catalogue: ['monitoring'],
++    //           savedObject: {
++    //             all: [],
++    //             read: [],
++    //           },
++    //           alerting: {
++    //             rule: {
++    //               all: RULES,
++    //             },
++    //             alert: {
++    //               all: RULES,
++    //             },
++    //           },
++    //           ui: [],
++    //         },
++    //       },
++    //     ],
++    //   },
++    // });
+   }
+ 
+   getLegacyShim(
+diff --git a/x-pack/plugins/security/public/management/roles/edit_role/privileges/kibana/feature_table/feature_table.tsx b/x-pack/plugins/security/public/management/roles/edit_role/privileges/kibana/feature_table/feature_table.tsx
+index 7734d415bf3..999f9c37d1d 100644
+--- a/x-pack/plugins/security/public/management/roles/edit_role/privileges/kibana/feature_table/feature_table.tsx
++++ b/x-pack/plugins/security/public/management/roles/edit_role/privileges/kibana/feature_table/feature_table.tsx
+@@ -70,11 +70,13 @@ export class FeatureTable extends Component<Props, State> {
+       .getSecuredFeatures()
+       .filter((feature) => feature.privileges != null || feature.reserved != null)
+       .forEach((feature) => {
+-        if (!this.featureCategories.has(feature.category.id)) {
++        const hackCategory =
++          feature.category.id === 'management' ? 'observability' : feature.category.id;
++        if (!this.featureCategories.has(hackCategory)) {
+           this.featureCategories.set(feature.category.id, []);
+         }
+ 
+-        this.featureCategories.get(feature.category.id)!.push(feature);
++        this.featureCategories.get(hackCategory)!.push(feature);
+       });
+ 
+     this.state = { expandedPrivilegeControls: new Set() };
+@@ -140,17 +142,44 @@ export class FeatureTable extends Component<Props, State> {
+ 
+       const helpText = this.getCategoryHelpText(category);
+ 
+-      const accordion = (
+-        <EuiAccordion
+-          id={`featureCategory_${category.id}`}
+-          data-test-subj={`featureCategory_${category.id}`}
+-          key={category.id}
+-          arrowDisplay={canExpandCategory ? 'left' : 'none'}
+-          forceState={canExpandCategory ? undefined : 'closed'}
+-          buttonContent={buttonContent}
+-          extraAction={canExpandCategory ? extraAction : undefined}
+-        >
++      let accordion: any;
++
++      if (category.id === 'management') {
++        accordion = (
++          <EuiAccordion
++            id={`featureCategory_${category.id}`}
++            data-test-subj={`featureCategory_${category.id}`}
++            key={category.id}
++            arrowDisplay={canExpandCategory ? 'left' : 'none'}
++            forceState={canExpandCategory ? undefined : 'closed'}
++            buttonContent={buttonContent}
++            extraAction={canExpandCategory ? extraAction : undefined}
++          >
++            <div>
++              <EuiSpacer size="s" />
++              {helpText && (
++                <>
++                  <EuiCallOut iconType="iInCircle" size="s">
++                    {helpText}
++                  </EuiCallOut>
++                  <EuiSpacer size="s" />
++                </>
++              )}
++              <EuiFlexGroup direction="column" gutterSize="s">
++                {featuresInCategory.map((feature) => (
++                  <EuiFlexItem key={feature.id}>
++                    {this.renderPrivilegeControlsForFeature(feature)}
++                  </EuiFlexItem>
++                ))}
++              </EuiFlexGroup>
++            </div>
++          </EuiAccordion>
++        );
++      } else if (category.id === 'observability') {
++        accordion = (
+           <div>
++            <EuiSpacer size="s" />
++            {buttonContent}
+             <EuiSpacer size="s" />
+             {helpText && (
+               <>
+@@ -168,8 +197,10 @@ export class FeatureTable extends Component<Props, State> {
+               ))}
+             </EuiFlexGroup>
+           </div>
+-        </EuiAccordion>
+-      );
++        );
++      } else {
++        return;
++      }
+ 
+       accordions.push({
+         order: category.order ?? Number.MAX_SAFE_INTEGER,
+diff --git a/x-pack/plugins/stack_alerts/server/plugin.ts b/x-pack/plugins/stack_alerts/server/plugin.ts
+index f8ea52d1dcf..68d3e293839 100644
+--- a/x-pack/plugins/stack_alerts/server/plugin.ts
++++ b/x-pack/plugins/stack_alerts/server/plugin.ts
+@@ -21,7 +21,7 @@ export class AlertingBuiltinsPlugin
+   }
+ 
+   public setup(core: CoreSetup<StackAlertsStartDeps>, { alerting, features }: StackAlertsDeps) {
+-    features.registerKibanaFeature(BUILT_IN_ALERTS_FEATURE);
++    // features.registerKibanaFeature(BUILT_IN_ALERTS_FEATURE);
+     registerBuiltInRuleTypes({
+       logger: this.logger,
+       data: core
