@@ -20,6 +20,7 @@ if [[ -d ~/.kibana/node_modules && "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/
   mv ~/.kibana/node_modules ./
 fi
 
+export DEBUG=cypress:*
 if ! yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"; then
   echo "bootstrap failed, trying again in 15 seconds"
   sleep 15
