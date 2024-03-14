@@ -1096,7 +1096,6 @@
     "remark-gfm": "1.0.0",
     "remark-parse-no-trim": "^8.0.4",
     "remark-stringify": "^8.0.3",
-    "remote-web-worker": "^0.0.9",
     "require-in-the-middle": "^7.2.1",
     "reselect": "^4.1.8",
     "resize-observer-polyfill": "1.5.1",
