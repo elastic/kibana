@@ -7,6 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
+import type { RecursivePartial } from '@kbn/utility-types';
+
 import { isLiteralItem } from '../shared/helpers';
 import { ESQLFunction } from '../types';
 import { FunctionDefinition } from './types';
@@ -34,6 +37,66 @@ const validateLogFunctions = (fnDef: ESQLFunction) => {
 };
 
 import * as rawFunctionDefinitions from './eval_functions.json';
+
+/**
+ * Overrides for function definitions
+ *
+ * This is the place to put information that is not reported by the `show functions` command
+ * and, hence, won't be present in the JSON file.
+ */
+const functionOverrides: Record<string, RecursivePartial<FunctionDefinition>> = {
+  log10: {
+    validate: validateLogFunctions,
+  },
+  log: {
+    validate: validateLogFunctions,
+  },
+  date_extract: {
+    signatures: [
+      {
+        // override the first param as type chrono_literal
+        params: [{ type: 'chrono_literal' }],
+      },
+    ],
+  },
+  date_trunc: {
+    signatures: [
+      {
+        // override the first param to be of type time_literal
+        params: [{ type: 'time_literal' }],
+      },
+    ],
+  },
+  auto_bucket: {
+    signatures: new Array(18).fill({
+      params: [{}, {}, { literalOnly: true }, { literalOnly: true }],
+    }),
+  },
+};
+
+const usedOverrides = new Set<string>();
+
+rawFunctionDefinitions.forEach((def) => {
+  if (functionOverrides[def.name]) {
+    usedOverrides.add(def.name);
+    _.merge(def, functionOverrides[def.name]);
+  }
+});
+
+if (usedOverrides.size !== Object.keys(functionOverrides).length) {
+  const unusedOverrides = Object.keys(functionOverrides).filter((name) => !usedOverrides.has(name));
+  throw new Error(`Unused function overrides: ${unusedOverrides.join(', ')}`);
+}
+
+if (
+  rawFunctionDefinitions.some(
+    (def) => !def.signatures.some((sig) => sig.params.some((p) => !p.name))
+  )
+) {
+  throw new Error(
+    'Some function signatures have unnamed parameters... make sure the overrides match up with the JSON definitions.'
+  );
+}
 
 const evalFunctionDefinitions: FunctionDefinition[] = rawFunctionDefinitions
   .sort(({ name: a }, { name: b }) => a.localeCompare(b))
