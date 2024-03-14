@@ -88,6 +88,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
   } = useDataVisualizerKibana();
 
   const [stats, setOverallStats] = useState<OverallStats>(getDefaultPageState().overallStats);
+  const [populatedFieldsInIndex, setPopulatedFieldsInIndex] = useState<Set<string> | undefined>();
+
   const [fetchState, setFetchState] = useReducer(
     getReducer<DataStatsFetchProgress>(),
     getInitialProgress()
@@ -96,13 +98,68 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
 
+  useEffect(
+    function updatePopulatedFields() {
+      let unmounted = false;
+
+      const { index, searchQuery, timeFieldName, earliest, latest } = searchStrategyParams;
+
+      const fetchPopulatedFields = async () => {
+        // Trick to avoid duplicate getFieldsForWildcard requests
+        // as earliest & latest timestamps will trigger another update
+        if (timeFieldName !== undefined && (earliest === undefined || latest === undefined)) {
+          return;
+        }
+
+        const filterCriteria = buildBaseFilterCriteria(
+          timeFieldName,
+          earliest,
+          latest,
+          searchQuery
+        );
+
+        // Getting non-empty fields for the index pattern
+        // because then we can absolutely exclude these from subsequent requests
+        const nonEmptyFields = await data.dataViews.getFieldsForWildcard({
+          pattern: index,
+          indexFilter: {
+            bool: {
+              filter: filterCriteria,
+            },
+          },
+          includeEmptyFields: false,
+        });
+
+        if (!unmounted) {
+          setPopulatedFieldsInIndex(new Set(nonEmptyFields.map((field) => field.name)));
+        }
+      };
+
+      fetchPopulatedFields();
+
+      return () => {
+        unmounted = true;
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      data.dataViews,
+      searchStrategyParams.timeFieldName,
+      searchStrategyParams.earliest,
+      searchStrategyParams.latest,
+      searchStrategyParams.searchQuery,
+      searchStrategyParams.index,
+    ]
+  );
   const startFetch = useCallback(async () => {
     try {
       searchSubscription$.current?.unsubscribe();
       abortCtrl.current.abort();
       abortCtrl.current = new AbortController();
 
-      if (!searchStrategyParams || lastRefresh === 0) return;
+      if (!searchStrategyParams || lastRefresh === 0 || populatedFieldsInIndex === undefined) {
+        return;
+      }
 
       setFetchState({
         ...getInitialProgress(),
@@ -129,20 +186,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         sessionId,
         ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
       };
-      const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliest, latest, searchQuery);
-
-      // Getting non-empty fields for the index pattern
-      // because then we can absolutely exclude these from checks
-      const nonEmptyFields = await data.dataViews.getFieldsForWildcard({
-        pattern: index,
-        indexFilter: {
-          bool: {
-            filter: filterCriteria,
-          },
-        },
-        includeEmptyFields: false,
-      });
-      const populatedFieldsInIndex = new Set(nonEmptyFields.map((field) => field.name));
 
       const aggregatableFields = originalAggregatableFields.filter((field) =>
         populatedFieldsInIndex.has(field.name)
@@ -151,7 +194,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         populatedFieldsInIndex.has(field.name)
       );
 
-      // data.dataViews.getFieldsForIndexPattern
       const documentCountStats = await getDocumentCountStats(
         data.search,
         searchStrategyParams,
@@ -333,7 +375,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         displayError(toasts, searchStrategyParams!.index, extractErrorProperties(error));
       }
     }
-  }, [data, searchStrategyParams, toasts, lastRefresh, probability]);
+  }, [data, searchStrategyParams, toasts, lastRefresh, probability, populatedFieldsInIndex]);
 
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
