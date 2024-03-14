@@ -10,7 +10,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { type AggregateQuery } from '@kbn/es-query';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { getBoundsRoundedToInterval } from '../../common/time_buckets';
+import { getBoundsRoundedToInterval } from '@kbn/ml-time-buckets';
 import { useTimeBuckets } from './use_time_buckets';
 import { useAiopsAppContext } from './use_aiops_app_context';
 import { useReload } from './use_reload';

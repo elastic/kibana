@@ -5327,6 +5327,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-time-buckets@link:x-pack/packages/ml/time_buckets":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-trained-models-utils@link:x-pack/packages/ml/trained_models_utils":
   version "0.0.0"
   uid ""

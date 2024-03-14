@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { TimeBuckets } from '../../common/time_buckets';
+import { TimeBuckets } from '@kbn/ml-time-buckets';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 export const useTimeBuckets = () => {

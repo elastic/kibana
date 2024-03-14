@@ -14,6 +14,7 @@ import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { TimeBuckets, TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
 import {
@@ -21,8 +22,6 @@ import {
   getEsQueryFromSavedSearch,
 } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import type { TimeBucketsInterval } from '../../../common/time_buckets';
-import { type TimeBuckets } from '../../../common/time_buckets';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 
