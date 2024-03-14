@@ -9,7 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { SuperTest, Test } from 'supertest';
 import { ToolingLog } from '@kbn/tooling-log';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { refreshSavedObjectIndices } from '../../../security_solution_api_integration/test_suites/detections_response/utils';
+import { refreshSavedObjectIndices } from './refresh_index';
 
 export async function createIndexConnector({
   supertest,

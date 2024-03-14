@@ -211,7 +211,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should set correct action parameter: ruleType', async () => {
         const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
-        const resp = await waitForDocumentInIndex<{ ruleType: string; alertDetailsUrl: string }>({
+        const resp = await waitForDocumentInIndex<{
+          ruleType: string;
+          alertDetailsUrl: string;
+          reason: string;
+        }>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
           retryService,
