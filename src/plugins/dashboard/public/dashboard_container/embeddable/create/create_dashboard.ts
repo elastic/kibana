@@ -472,7 +472,7 @@ export const initializeDashboard = async ({
   );
 
   // --------------------------------------------------------------------------------------
-  // Set parentApi.filters to include dashboardContainer filters and control group filters
+  // Set parentApi.filters$ to include dashboardContainer filters and control group filters
   // --------------------------------------------------------------------------------------
   untilDashboardReady().then((dashboardContainer) => {
     if (!dashboardContainer.controlGroup) {
@@ -486,8 +486,8 @@ export const initializeDashboard = async ({
       );
     }
 
-    const filters = new BehaviorSubject<Filter[] | undefined>(getCombinedFilters());
-    dashboardContainer.filters$ = filters;
+    const filters$ = new BehaviorSubject<Filter[] | undefined>(getCombinedFilters());
+    dashboardContainer.filters$ = filters$;
 
     const inputFilters$ = dashboardContainer.getInput$().pipe(
       startWith(dashboardContainer.getInput()),
@@ -505,7 +505,7 @@ export const initializeDashboard = async ({
 
     dashboardContainer.integrationSubscriptions.add(
       combineLatest([inputFilters$, controlGroupFilters$]).subscribe(() => {
-        filters.next(getCombinedFilters());
+        filters$.next(getCombinedFilters());
       })
     );
   });
