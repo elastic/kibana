@@ -284,7 +284,7 @@ const SaveSearchObjectModal: React.FC<{
         managed
           ? i18n.translate('discover.localMenu.mustCopyOnSave', {
               defaultMessage:
-                'This saved search is managed by Elastic. Changes here must be saved to a new saved search.',
+                'Elastic manages this saved search. Save any changes to a new saved search.',
             })
           : undefined
       }
