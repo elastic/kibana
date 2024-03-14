@@ -16,11 +16,20 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { apiPublishesLocalUnifiedSearch, EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { EmbeddableApiContext, PublishesLocalUnifiedSearch } from '@kbn/presentation-publishing';
 import { core } from '../../kibana_services';
 import { customizePanelAction } from '../panel_actions';
 
 export const CUSTOM_TIME_RANGE_BADGE = 'CUSTOM_TIME_RANGE_BADGE';
+
+const isApiCompatable = (
+  unknownApi: null | unknown
+): unknownApi is Pick<PublishesLocalUnifiedSearch, 'localTimeRange'> => {
+  return Boolean(
+    unknownApi &&
+      (unknownApi as PublishesLocalUnifiedSearch)?.localTimeRange !== undefined
+  );
+};
 
 export class CustomTimeRangeBadge
   implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>
@@ -30,7 +39,7 @@ export class CustomTimeRangeBadge
   public order = 7;
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
-    if (!apiPublishesLocalUnifiedSearch(embeddable)) throw new IncompatibleActionError();
+    if (!isApiCompatable(embeddable)) throw new IncompatibleActionError();
     const timeRange = embeddable.localTimeRange.value;
     if (!timeRange) return '';
     return renderToString(
@@ -43,14 +52,14 @@ export class CustomTimeRangeBadge
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
-    return apiPublishesLocalUnifiedSearch(embeddable);
+    return isApiCompatable(embeddable);
   }
 
   public subscribeToCompatibilityChanges(
     { embeddable }: EmbeddableApiContext,
     onChange: (isCompatible: boolean, action: CustomTimeRangeBadge) => void
   ) {
-    if (!apiPublishesLocalUnifiedSearch(embeddable)) return;
+    if (!isApiCompatable(embeddable)) return;
     return embeddable.localTimeRange.subscribe((localTimeRange) => {
       onChange(Boolean(localTimeRange), this);
     });
@@ -65,7 +74,7 @@ export class CustomTimeRangeBadge
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    if (apiPublishesLocalUnifiedSearch(embeddable)) {
+    if (isApiCompatable(embeddable)) {
       const timeRange = embeddable.localTimeRange.value;
       return Boolean(timeRange);
     }

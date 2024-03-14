@@ -227,7 +227,7 @@ export const CustomizePanelEditor = ({
 
   const renderCustomTimeRangeComponent = () => {
     if (
-      !apiPublishesLocalUnifiedSearch(api) ||
+     api.localTimeRange === undefined ||
       !(api.isCompatibleWithLocalUnifiedSearch?.() ?? true)
     )
       return null;
