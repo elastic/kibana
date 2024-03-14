@@ -153,20 +153,14 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.settingsCalendar.selectJob(jobConfig.job_id);
     }
 
-    async function createAnomalyDetectionJob(
-      jobConfig: ReturnType<typeof createJobConfig>
-    ): Promise<void> {
-      // @ts-expect-error not full interface
-      await ml.api.createAnomalyDetectionJob(jobConfig);
-    }
-
     async function createSingleGroupJobs() {
       const automatedConfig = createJobConfig('test_calendar_ad_3');
       const mulitMetricConfig = createJobConfig('test_calendar_ad_4');
       automatedConfig.groups = ['automated'];
       mulitMetricConfig.groups = ['multi-metric'];
 
-      await asyncForEach([automatedConfig, mulitMetricConfig], createAnomalyDetectionJob);
+      // @ts-expect-error not full interface
+      await asyncForEach([automatedConfig, mulitMetricConfig], ml.api.createAnomalyDetectionJob);
     }
   });
 }
