@@ -7,15 +7,27 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import fastIsEqual from 'fast-deep-equal';
 import { EuiCallOut } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-plugin/common';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { Services } from './types';
+import {
+  EmbeddableStateComparators,
+  ReactEmbeddableApiRegistration,
+} from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
+import { Api, State, Services } from './types';
 import { getCount } from './get_count';
 
-export const buildEmbeddable = async (state: object, buildApi: unknown, services: Services) => {
+export const buildEmbeddable = async (
+  state: State,
+  buildApi: (
+    apiRegistration: ReactEmbeddableApiRegistration<State, Api>,
+    comparators: EmbeddableStateComparators<State>
+  ) => Api,
+  services: Services
+) => {
   const defaultDataView = await services.dataViews.getDefaultDataView();
   const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
@@ -38,7 +50,15 @@ export const buildEmbeddable = async (state: object, buildApi: unknown, services
         };
       },
     },
-    {}
+    {
+      timeRange: [
+        timeRange$,
+        (nextTimeRange: TimeRange | undefined) => {
+          timeRange$.next(nextTimeRange);
+        },
+        fastIsEqual,
+      ],
+    }
   );
 
   return {

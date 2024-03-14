@@ -18,10 +18,6 @@ export const registerEmbeddableFactory = (services: Services) => {
     deserializeState: (state) => {
       return state.rawState as State;
     },
-    /**
-     * The buildEmbeddable function is async so you can async import the component or load a saved
-     * object here. The loading will be handed gracefully by the Presentation Container.
-     */
     buildEmbeddable: async (state, buildApi) => {
       const { buildEmbeddable } = await import('./build_embeddable');
       return buildEmbeddable(state, buildApi, services);

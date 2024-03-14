@@ -10,14 +10,21 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import { PublishesDataViews } from '@kbn/presentation-publishing';
+import {
+  HasParentApi,
+  PublishesDataViews,
+  PublishesLocalUnifiedSearch,
+  PublishesWritableLocalUnifiedSearch,
+} from '@kbn/presentation-publishing';
 
-// TODO here
 export interface State {
   timeRange: TimeRange | undefined;
 }
 
-export type Api = DefaultEmbeddableApi & PublishesDataViews;
+export type Api = DefaultEmbeddableApi<State> &
+  PublishesDataViews &
+  Pick<PublishesWritableLocalUnifiedSearch, 'localTimeRange' | 'setLocalTimeRange'> &
+  HasParentApi<PublishesLocalUnifiedSearch>;
 
 export interface Services {
   data: DataPublicPluginStart;
