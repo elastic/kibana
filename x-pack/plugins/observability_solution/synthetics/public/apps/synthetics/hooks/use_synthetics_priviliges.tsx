@@ -16,6 +16,7 @@ import {
   EuiMarkdownFormat,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { selectOverviewStatus } from '../state/overview_status';
@@ -27,6 +28,7 @@ import {
   SYNTHETICS_INDEX_PATTERN,
 } from '../../../../common/constants';
 import { useSyntheticsSettingsContext } from '../contexts';
+import { ClientPluginsStart } from '../../../plugin';
 
 export const useSyntheticsPrivileges = () => {
   const { canRead: canReadSyntheticsIndex, loading: isCanReadLoading } =
@@ -107,7 +109,11 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
 );
 
 const LicenseExpired = () => {
+  const plugins = useKibana<ClientPluginsStart>();
+
+  const licenseManagementEnabled = plugins.services.licenseManagement?.enabled;
   const { basePath } = useSyntheticsSettingsContext();
+
   return (
     <EuiEmptyPrompt
       data-test-subj="syntheticsUnprivileged"
@@ -132,6 +138,7 @@ const LicenseExpired = () => {
       actions={[
         <EuiButton
           data-test-subj="apmInvalidLicenseNotificationManageYourLicenseButton"
+          isDisabled={!licenseManagementEnabled}
           href={basePath + '/app/management/stack/license_management'}
         >
           {i18n.translate('xpack.synthetics.invalidLicense.licenseManagementLink', {
