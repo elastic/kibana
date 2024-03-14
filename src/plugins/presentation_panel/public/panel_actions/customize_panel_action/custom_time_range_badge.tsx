@@ -25,9 +25,7 @@ export const CUSTOM_TIME_RANGE_BADGE = 'CUSTOM_TIME_RANGE_BADGE';
 const isApiCompatable = (
   unknownApi: null | unknown
 ): unknownApi is Pick<PublishesUnifiedSearch, 'timeRange$'> => {
-  return Boolean(
-    unknownApi && (unknownApi as PublishesUnifiedSearch)?.timeRange$ !== undefined
-  );
+  return Boolean(unknownApi && (unknownApi as PublishesUnifiedSearch)?.timeRange$ !== undefined);
 };
 
 export class CustomTimeRangeBadge
