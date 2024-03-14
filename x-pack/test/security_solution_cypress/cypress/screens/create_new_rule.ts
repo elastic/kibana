@@ -60,6 +60,9 @@ export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
 export const CUSTOM_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleQueryBar"]';
 
+export const QUERY_BAR_ADD_FILTER =
+  '[data-test-subj="detectionEngineStepDefineRuleQueryBar"] [data-test-subj="addFilter"]';
+
 export const THREAT_MAPPING_COMBO_BOX_INPUT =
   '[data-test-subj="threatMatchInput"] [data-test-subj="fieldAutocompleteComboBox"]';
 
