@@ -21,7 +21,6 @@ import type { PackageInstallContext } from '../../../../common/types';
 import { getNormalizedDataStreams } from '../../../../common/services';
 
 import {
-  MAX_TIME_COMPLETE_INSTALL,
   ASSETS_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
@@ -45,12 +44,12 @@ import { installTransforms } from '../elasticsearch/transform/install';
 import { installMlModel } from '../elasticsearch/ml_model';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntriesFromAssetsMap } from '../archive/storage';
-import { ConcurrentInstallOperationError, PackageSavedObjectConflictError } from '../../../errors';
+import { PackageSavedObjectConflictError } from '../../../errors';
 import { appContextService, packagePolicyService } from '../..';
 
 import { auditLoggingService } from '../../audit_logging';
 
-import { createInstallation, restartInstallation } from './install';
+import { createRestartInstallation } from './install';
 import { withPackageSpan } from './utils';
 import { clearLatestFailedAttempts } from './install_errors_helpers';
 import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
@@ -97,61 +96,18 @@ export async function _installPackage({
   const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
 
   try {
-    // if some installation already exists
-    if (installedPkg) {
-      const isStatusInstalling = installedPkg.attributes.install_status === 'installing';
-      const hasExceededTimeout =
-        Date.now() - Date.parse(installedPkg.attributes.install_started_at) <
-        MAX_TIME_COMPLETE_INSTALL;
-      logger.debug(`Package install - Install status ${installedPkg.attributes.install_status}`);
-
-      // if the installation is currently running, don't try to install
-      // instead, only return already installed assets
-      if (isStatusInstalling && hasExceededTimeout) {
-        // If this is a forced installation, ignore the timeout and restart the installation anyway
-        logger.debug(`Package install - Installation is running and has exceeded timeout`);
-
-        if (force) {
-          logger.debug(`Package install - Forced installation, restarting`);
-          await restartInstallation({
-            savedObjectsClient,
-            pkgName,
-            pkgVersion,
-            installSource,
-            verificationResult,
-          });
-        } else {
-          throw new ConcurrentInstallOperationError(
-            `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
-              pkgVersion || 'unknown'
-            } detected, aborting.`
-          );
-        }
-      } else {
-        // if no installation is running, or the installation has been running longer than MAX_TIME_COMPLETE_INSTALL
-        // (it might be stuck) update the saved object and proceed
-        logger.debug(
-          `Package install - no installation running or the installation has been running longer than ${MAX_TIME_COMPLETE_INSTALL}, restarting`
-        );
-        await restartInstallation({
-          savedObjectsClient,
-          pkgName,
-          pkgVersion,
-          installSource,
-          verificationResult,
-        });
-      }
-    } else {
-      logger.debug(`Package install - Create installation`);
-      await createInstallation({
-        savedObjectsClient,
-        packageInfo,
-        installSource,
-        spaceId,
-        verificationResult,
-      });
-    }
+    await createRestartInstallation({
+      savedObjectsClient,
+      logger,
+      packageInfo,
+      installSource,
+      spaceId,
+      force,
+      verificationResult,
+      installedPkg,
+    });
     logger.debug(`Package install - Installing Kibana assets`);
+    // step install_kibana_assets
     const kibanaAssetPromise = withPackageSpan('Install Kibana assets', () =>
       installKibanaAssetsAndReferences({
         savedObjectsClient,
@@ -197,7 +153,7 @@ export async function _installPackage({
         )
       ));
     }
-
+    // step install_ml_model
     // installs ml models
     logger.debug(`Package install - installing ML models`);
     esReferences = await withPackageSpan('Install ML models', () =>
@@ -206,6 +162,8 @@ export async function _installPackage({
 
     let indexTemplates: IndexTemplateEntry[] = [];
 
+    // step install_index_template_pipelines
+    // it should contain the case for integration and the one for inputs
     if (packageInfo.type === 'integration') {
       logger.debug(
         `Package install - Installing index templates and pipelines, packageInfo.type ${packageInfo.type}`
@@ -255,7 +213,7 @@ export async function _installPackage({
         indexTemplates = installedTemplates;
       }
     }
-
+    // step remove_legacy_templates
     try {
       logger.debug(`Package install - Removing legacy templates`);
       await removeLegacyTemplates({ packageInfo, esClient, logger });
@@ -263,6 +221,7 @@ export async function _installPackage({
       logger.warn(`Error removing legacy templates: ${e.message}`);
     }
 
+    // step update_current_write_indices
     // update current backing indices of each data stream
     logger.debug(`Package install - Updating backing indices of each data stream`);
     await withPackageSpan('Update write indices', () =>
@@ -272,6 +231,7 @@ export async function _installPackage({
       })
     );
     logger.debug(`Package install - Installing transforms`);
+    // steps install_transforms
     ({ esReferences } = await withPackageSpan('Install transforms', () =>
       installTransforms({
         packageInstallContext,
@@ -287,6 +247,7 @@ export async function _installPackage({
     // If this is an update or retrying an update, delete the previous version's pipelines
     // Top-level pipeline assets will not be removed on upgrade as of ml model package addition which requires previous
     // assets to remain installed. This is a temporary solution - more robust solution tracked here https://github.com/elastic/kibana/issues/115035
+    // steps delete_previous_pipelines - should contain the two ifs
     if (
       paths.filter((path) => isTopLevelPipeline(path)).length === 0 &&
       (installType === 'update' || installType === 'reupdate') &&
@@ -322,6 +283,7 @@ export async function _installPackage({
     }
 
     const installedKibanaAssetsRefs = await kibanaAssetPromise;
+    // step save_archive_entries_from_assets_map
     logger.debug(`Package install - Updating archive entries`);
     const packageAssetResults = await withPackageSpan('Update archive entries', () =>
       saveArchiveEntriesFromAssetsMap({
@@ -344,6 +306,7 @@ export async function _installPackage({
       id: pkgName,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
+    // step update_SO
     logger.debug(`Package install - Updating install status`);
     await withPackageSpan('Update install status', () =>
       savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {

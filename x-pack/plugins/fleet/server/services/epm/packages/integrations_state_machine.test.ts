@@ -10,19 +10,22 @@ import { appContextService } from '../..';
 
 import { handleStateMachine } from './integrations_state_machine';
 
-const getTestStates = (mockEvent1: any, mockEvent2: any, mockEvent3: any) => {
+const getTestDefinition = (mockEvent1: any, mockEvent2: any, mockEvent3: any, context?: any) => {
   return {
-    state1: {
-      onTransitionTo: mockEvent1,
-      nextState: 'state2',
-    },
-    state2: {
-      onTransitionTo: mockEvent2,
-      nextState: 'state3',
-    },
-    state3: {
-      onTransitionTo: mockEvent3,
-      nextState: 'end',
+    context,
+    states: {
+      state1: {
+        onTransitionTo: mockEvent1,
+        nextState: 'state2',
+      },
+      state2: {
+        onTransitionTo: mockEvent2,
+        nextState: 'state3',
+      },
+      state3: {
+        onTransitionTo: mockEvent3,
+        nextState: 'end',
+      },
     },
   };
 };
@@ -43,9 +46,9 @@ describe('handleStateMachine', () => {
     const mockEventState1 = jest.fn();
     const mockEventState2 = jest.fn();
     const mockEventState3 = jest.fn();
-    const testStates = getTestStates(mockEventState1, mockEventState2, mockEventState3);
+    const testDefinition = getTestDefinition(mockEventState1, mockEventState2, mockEventState3);
 
-    await handleStateMachine('state1', testStates, undefined);
+    await handleStateMachine('state1', testDefinition);
     expect(mockEventState1).toHaveBeenCalledTimes(1);
     expect(mockEventState2).toHaveBeenCalledTimes(1);
     expect(mockEventState3).toHaveBeenCalledTimes(1);
@@ -64,8 +67,8 @@ describe('handleStateMachine', () => {
     const mockEventState1 = jest.fn();
     const mockEventState2 = jest.fn();
     const mockEventState3 = jest.fn();
-    const testStates = getTestStates(mockEventState1, mockEventState2, mockEventState3);
-    await handleStateMachine('state2', testStates, undefined);
+    const testDefinition = getTestDefinition(mockEventState1, mockEventState2, mockEventState3);
+    await handleStateMachine('state2', testDefinition);
 
     expect(mockEventState1).toHaveBeenCalledTimes(0);
     expect(mockEventState2).toHaveBeenCalledTimes(1);
@@ -77,14 +80,42 @@ describe('handleStateMachine', () => {
     const mockEventState1 = jest.fn().mockRejectedValue(error);
     const mockEventState2 = jest.fn();
     const mockEventState3 = jest.fn();
-    const testStates = getTestStates(mockEventState1, mockEventState2, mockEventState3);
-    await handleStateMachine('state1', testStates, undefined);
+    const testDefinition = getTestDefinition(mockEventState1, mockEventState2, mockEventState3);
+    await handleStateMachine('state1', testDefinition);
 
     expect(mockEventState1).toHaveBeenCalledTimes(1);
     expect(mockEventState2).toHaveBeenCalledTimes(0);
     expect(mockEventState3).toHaveBeenCalledTimes(0);
     expect(mockContract.logger?.warn).toHaveBeenCalledWith(
       'Error during execution of state "state1" with status "failed": Installation failed'
+    );
+  });
+
+  it('should call the onTransition function with the provided data', async () => {
+    const mockEventState1 = jest.fn();
+    const mockEventState2 = jest.fn();
+    const mockEventState3 = jest.fn();
+    const contextData = { testData: 'test' };
+    const testDefinition = getTestDefinition(
+      mockEventState1,
+      mockEventState2,
+      mockEventState3,
+      contextData
+    );
+
+    await handleStateMachine('state1', testDefinition);
+    expect(mockEventState1).toHaveBeenCalledWith({ testData: 'test' });
+    expect(mockEventState2).toHaveBeenCalledWith({ testData: 'test' });
+    expect(mockEventState3).toHaveBeenCalledWith({ testData: 'test' });
+
+    expect(mockContract.logger?.debug).toHaveBeenCalledWith(
+      'state: state1 - status success - stateResult: undefined - nextState: state2'
+    );
+    expect(mockContract.logger?.debug).toHaveBeenCalledWith(
+      'state: state2 - status success - stateResult: undefined - nextState: state3'
+    );
+    expect(mockContract.logger?.debug).toHaveBeenCalledWith(
+      'state: state3 - status success - stateResult: undefined - nextState: end'
     );
   });
 });
