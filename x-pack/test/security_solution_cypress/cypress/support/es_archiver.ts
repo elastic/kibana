@@ -78,7 +78,7 @@ export const esArchiver = (
       } else if (type === 'ftr') {
         ftrEsArchiverInstance.unload(archiveName);
       } else {
-        throw new Error('It is not possible to load the archive.');
+        throw new Error('It is not possible to unload the archive.');
       }
       return null;
     },
