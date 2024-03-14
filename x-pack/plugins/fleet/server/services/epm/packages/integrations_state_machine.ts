@@ -7,7 +7,7 @@
 import { appContextService } from '../../app_context';
 
 export interface State {
-  event: any;
+  onTransitionTo: any;
   nextState?: string;
   currentStatus?: string;
 }
@@ -34,42 +34,42 @@ type StateMachineStates<T extends string> = Record<T, State>;
 const installStates: StateMachineStates<StateNames> = {
   create_restart_installation: {
     nextState: 'install_kibana_assets',
-    event: () => undefined,
+    onTransitionTo: () => undefined,
   },
   install_kibana_assets: {
-    event: () => undefined,
+    onTransitionTo: () => undefined,
     nextState: 'install_ml_model',
   },
   install_ml_model: {
-    event: () => undefined,
+    onTransitionTo: () => undefined,
     nextState: 'install_index_template_pipelines',
   },
   install_index_template_pipelines: {
-    event: () => undefined,
+    onTransitionTo: () => undefined,
     nextState: 'remove_legacy_templates',
   },
   remove_legacy_templates: {
-    event: () => undefined,
+    onTransitionTo: () => undefined,
     nextState: 'update_current_write_indices',
   },
   update_current_write_indices: {
-    event: () => undefined,
+    onTransitionTo: () => undefined,
     nextState: 'install_transforms',
   },
   install_transforms: {
-    event: () => undefined,
+    onTransitionTo: () => undefined,
     nextState: 'delete_previous_pipelines',
   },
   delete_previous_pipelines: {
-    event: () => undefined,
+    onTransitionTo: () => undefined,
     nextState: 'save_archive_entries_from_assets_map',
   },
   save_archive_entries_from_assets_map: {
-    event: () => undefined,
+    onTransitionTo: () => undefined,
     nextState: 'update_so',
   },
   update_so: {
-    event: () => undefined,
+    onTransitionTo: () => undefined,
     nextState: 'end',
   },
 };
@@ -77,24 +77,26 @@ const installStates: StateMachineStates<StateNames> = {
 export async function handleStateMachine(
   startState: string,
   states: StateMachineStates<string>,
-  data: any
+  context: any // TODO: find better type for this
 ) {
-  await handleTransition(startState, states, data);
+  await handleState(startState, states, context);
 }
 
-async function handleTransition(
+async function handleState(
   currentStateName: string,
   states: StateMachineStates<string>,
-  stateData?: any
+  context?: any
 ) {
   const logger = appContextService.getLogger();
   const currentState = states[currentStateName];
   let currentStatus = 'pending';
   let stateResult;
 
-  if (typeof currentState.event === 'function') {
+  if (typeof currentState.onTransitionTo === 'function') {
     try {
-      stateResult = stateData ? await currentState.event(...stateData) : await currentState.event();
+      stateResult = context
+        ? await currentState.onTransitionTo(...context)
+        : await currentState.onTransitionTo();
       currentStatus = 'success';
     } catch (error) {
       currentStatus = 'failed';
@@ -106,11 +108,11 @@ async function handleTransition(
     currentStatus = 'failed';
   }
   // update SO with current state data
-  logger.info(
+  logger.debug(
     `state: ${currentStateName} - status ${currentStatus} - stateResult: ${stateResult} - nextState: ${currentState.nextState}`
   );
   if (currentStatus === 'success' && currentState?.nextState && currentState?.nextState !== 'end') {
-    handleTransition(currentState.nextState, states, stateData);
+    handleState(currentState.nextState, states, context);
   } else {
     return;
   }

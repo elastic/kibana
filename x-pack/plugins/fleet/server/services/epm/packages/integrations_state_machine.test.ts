@@ -13,15 +13,15 @@ import { handleStateMachine } from './integrations_state_machine';
 const getTestStates = (mockEvent1: any, mockEvent2: any, mockEvent3: any) => {
   return {
     state1: {
-      event: mockEvent1,
+      onTransitionTo: mockEvent1,
       nextState: 'state2',
     },
     state2: {
-      event: mockEvent2,
+      onTransitionTo: mockEvent2,
       nextState: 'state3',
     },
     state3: {
-      event: mockEvent3,
+      onTransitionTo: mockEvent3,
       nextState: 'end',
     },
   };
@@ -49,13 +49,13 @@ describe('handleStateMachine', () => {
     expect(mockEventState1).toHaveBeenCalledTimes(1);
     expect(mockEventState2).toHaveBeenCalledTimes(1);
     expect(mockEventState3).toHaveBeenCalledTimes(1);
-    expect(mockContract.logger?.info).toHaveBeenCalledWith(
+    expect(mockContract.logger?.debug).toHaveBeenCalledWith(
       'state: state1 - status success - stateResult: undefined - nextState: state2'
     );
-    expect(mockContract.logger?.info).toHaveBeenCalledWith(
+    expect(mockContract.logger?.debug).toHaveBeenCalledWith(
       'state: state2 - status success - stateResult: undefined - nextState: state3'
     );
-    expect(mockContract.logger?.info).toHaveBeenCalledWith(
+    expect(mockContract.logger?.debug).toHaveBeenCalledWith(
       'state: state3 - status success - stateResult: undefined - nextState: end'
     );
   });
