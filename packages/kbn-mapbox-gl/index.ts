@@ -43,13 +43,6 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 const maplibregl: any = maplibreglDist;
 
-/**
- * Worker URLs must adhere to the same-origin policy.
- * See https://developer.mozilla.org/en-US/docs/Web/API/Worker/Worker.
- *
- * To satisfy the policy we construct a `blob:` URL and use the worker global `importScripts`
- * function to load the worker code via JS APIs instead.
- */
 maplibregl.workerUrl = prepareWorkerURL(mbWorkerUrl);
 maplibregl.setRTLTextPlugin(mbRtlPlugin);
 
