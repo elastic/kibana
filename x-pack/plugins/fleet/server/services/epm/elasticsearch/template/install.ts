@@ -296,6 +296,8 @@ const FIELD_LIMIT_THRESHOLD = 500;
 /**
  * The total field limit is set to 1000 by default, but can be increased to 10000 if the field count is higher than 500.
  * An explicit limit always overrides the default.
+ *
+ * This can be replaced by a static limit of 1000 once a new major version of the package spec is released which clearly documents the field limit.
  */
 function getFieldsLimit(fieldCount: number | undefined, explicitLimit: number | undefined) {
   if (explicitLimit) {
