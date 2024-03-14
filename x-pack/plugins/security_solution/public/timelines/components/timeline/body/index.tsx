@@ -218,37 +218,6 @@ export const StatefulBody = React.memo<Props>(
 
     const graphStyle = getCytoscapeDivStyle(useContext(ThemeContext));
 
-    const graphData = useMemo(() => {
-      // remove duplicated data
-      return data
-        .reduce((acc, event) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const existing = acc.find((n: any) => {
-            return n?.ecs.event.action[0] === event?.ecs?.event?.action?.[0];
-          });
-
-          if (!existing) {
-            event.occurrences = 0;
-            acc.push(event);
-          } else {
-            existing.occurrences += 1;
-          }
-          return acc;
-        }, [])
-        .map((event) => {
-          return {
-            ...event,
-            ecs: {
-              ...event.ecs,
-              event: {
-                ...event.ecs.event,
-                action: [`${event.ecs.event.action} x ${event.occurrences}`],
-              },
-            },
-          };
-        });
-    }, [data]);
-
     return (
       <>
         <TimelineBody data-test-subj="timeline-body" ref={containerRef}>
@@ -309,7 +278,7 @@ export const StatefulBody = React.memo<Props>(
                 <EuiResizableButton />
                 <EuiResizablePanel mode="main" initialSize={400} minSize="20%" tabIndex={-1}>
                   <Cytoscape
-                    elements={convertToCytoscapeElements(graphData)}
+                    elements={convertToCytoscapeElements(data)}
                     height={600}
                     serviceName={'serviceName'}
                     style={graphStyle}
