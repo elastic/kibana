@@ -35,8 +35,9 @@ import styled from '@emotion/styled';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
-import { AlertsTableProps, FetchAlertData } from '../../../types';
+import { AlertsTableProps, FetchAlertData, GetRenderCellPopover } from '../../../types';
 import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
 
 import './alerts_table.scss';
@@ -133,6 +134,35 @@ const CustomGridBody = memo(
       </>
     );
   }
+);
+
+const ViewError = ({ error }: { error: Error }) => (
+  <>
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      css={css`
+        height: 1lh;
+      `}
+    >
+      <EuiIcon type="error" color="danger" />
+      <EuiText
+        color="subdued"
+        size="xs"
+        css={css`
+          line-height: unset;
+          font-weight: ${euiThemeVars.euiFontWeightSemiBold};
+        `}
+      >
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.alertTable.viewError"
+          defaultMessage="An error occurred"
+        />
+      </EuiText>
+    </EuiFlexGroup>
+    <EuiSpacer />
+    <EuiCodeBlock isCopyable>{error.stack}</EuiCodeBlock>
+  </>
 );
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
@@ -428,27 +458,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         }
         return null;
       } catch (e) {
-        return (
-          <>
-            <EuiFlexGroup
-              gutterSize="s"
-              alignItems="center"
-              css={css`
-                height: 1lh;
-              `}
-            >
-              <EuiIcon type="error" color="danger" />
-              <EuiText color="danger" size="xs">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertTable.cellErrorTitle"
-                  defaultMessage="Error while rendering cell"
-                />
-              </EuiText>
-            </EuiFlexGroup>
-            <EuiSpacer />
-            <EuiCodeBlock isCopyable>{e.stack}</EuiCodeBlock>
-          </>
-        );
+        return <ViewError error={e} />;
       }
     },
     [
@@ -467,31 +477,35 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     ]
   );
 
-  const renderCellPopover = useCallback(
+  const renderCellPopover = useMemo(
     () =>
       props.alertsTableConfiguration?.getRenderCellPopover
         ? props.alertsTableConfiguration?.getRenderCellPopover({
             context: renderCellContext,
           })
-        : undefined,
-    [props.alertsTableConfiguration, renderCellContext]
-  )();
+        : (props.renderCellPopover as ReturnType<GetRenderCellPopover>),
+    [props.alertsTableConfiguration, props.renderCellPopover, renderCellContext]
+  );
 
-  const handleRenderCellPopover = useCallback(
-    (_props: EuiDataGridCellPopoverElementProps) => {
-      if (!renderCellPopover) {
-        return undefined;
-      }
-      const idx = _props.rowIndex - pagination.pageSize * pagination.pageIndex;
-      const alert = alerts[idx];
-      if (alert) {
-        return renderCellPopover({
-          ..._props,
-          alert,
-        });
-      }
-      return null;
-    },
+  const handleRenderCellPopover = useMemo(
+    () =>
+      renderCellPopover
+        ? (_props: EuiDataGridCellPopoverElementProps) => {
+            try {
+              const idx = _props.rowIndex - pagination.pageSize * pagination.pageIndex;
+              const alert = alerts[idx];
+              if (alert) {
+                return renderCellPopover({
+                  ..._props,
+                  alert,
+                });
+              }
+              return null;
+            } catch (e) {
+              return <ViewError error={e} />;
+            }
+          }
+        : undefined,
     [alerts, pagination.pageIndex, pagination.pageSize, renderCellPopover]
   );
 
