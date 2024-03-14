@@ -11,7 +11,7 @@
  * See https://developer.mozilla.org/en-US/docs/Web/API/Worker/Worker.
  *
  * To satisfy the policy we construct a `blob:` URL and use the worker global `importScripts`
- * IF we have a full URL to load the worker code via JS APIs instead.
+ * So IF we have a full URL to load the worker code via JS APIs instead.
  */
 export const prepareWorkerURL = (url: string) => {
   let isFullURL = false;
