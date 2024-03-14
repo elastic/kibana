@@ -15,19 +15,15 @@ import {
   EuiContextMenu,
   EuiButtonIcon,
   EuiPanel,
-  EuiSwitchEvent,
   EuiConfirmModal,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Conversation, useAssistantContext } from '../../..';
+import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
-import { useLoadConnectors } from '../../connectorland/use_load_connectors';
-import { INLINE_CONNECTOR_PLACEHOLDER } from '../../connectorland/translations';
 import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
 import { AssistantSettingsButton } from '../settings/assistant_settings_button';
 import * as i18n from './translations';
@@ -39,7 +35,7 @@ interface OwnProps {
   docLinks: Omit<DocLinksStart, 'links'>;
   isDisabled: boolean;
   isSettingsModalVisible: boolean;
-  onToggleShowAnonymizedValues: (e: EuiSwitchEvent) => void;
+  onToggleShowAnonymizedValues: () => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
   showAnonymizedValues: boolean;
@@ -73,10 +69,6 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
   setChatHistoryVisible,
   onCloseFlyout,
 }) => {
-  const { http } = useAssistantContext();
-
-  const { data: connectors } = useLoadConnectors({ http });
-
   const showAnonymizedValuesChecked = useMemo(
     () =>
       currentConversation.replacements != null &&
@@ -88,12 +80,6 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
   const selectedConnectorId = useMemo(
     () => currentConversation?.apiConfig?.connectorId,
     [currentConversation?.apiConfig?.connectorId]
-  );
-
-  const selectedConnectorName = useMemo(
-    () =>
-      connectors?.find((c) => c.id === selectedConnectorId)?.name ?? INLINE_CONNECTOR_PLACEHOLDER,
-    [connectors, selectedConnectorId]
   );
 
   const [isPopoverOpen, setPopover] = useState(false);
@@ -121,16 +107,6 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
             panel: 2,
           },
           {
-            name: (
-              <FormattedMessage
-                id="xpack.elasticAssistant.assistant.settings.connectorName"
-                defaultMessage="Connector {connectorName}"
-                values={{ connectorName: <strong>{selectedConnectorName}</strong> }}
-              />
-            ),
-            panel: 1,
-          },
-          {
             name: i18n.RESET_CONVERSATION,
             css: css`
               color: ${euiThemeVars.euiColorDanger};
@@ -139,21 +115,6 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
             icon: 'refresh',
           },
         ],
-      },
-      {
-        id: 1,
-        title: i18n.CONNECTOR_TITLE,
-        width: 500,
-        content: (
-          <EuiPanel hasShadow={false}>
-            <ConnectorSelectorInline
-              isDisabled={isDisabled || currentConversation === undefined}
-              selectedConnectorId={selectedConnectorId}
-              selectedConversation={currentConversation}
-              isFlyoutMode={true}
-            />
-          </EuiPanel>
-        ),
       },
       {
         id: 2,
@@ -177,10 +138,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
 
     [
       currentConversation,
-      isDisabled,
       onToggleShowAnonymizedValues,
-      selectedConnectorId,
-      selectedConnectorName,
       showAnonymizedValuesChecked,
       showDestroyModal,
     ]
@@ -195,6 +153,15 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
     <>
       <FlyoutNavigation isExpanded={chatHistoryVisible} setIsExpanded={setChatHistoryVisible}>
         <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              data-test-subj="showAnonymizedValues"
+              title={showAnonymizedValuesChecked ? 'Play' : 'Pause'}
+              aria-label={showAnonymizedValuesChecked ? 'Play' : 'Pause'}
+              iconType={showAnonymizedValuesChecked ? 'eye' : 'eyeClosed'}
+              onClick={onToggleShowAnonymizedValues}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AssistantSettingsButton
               defaultConnectorId={defaultConnectorId}
@@ -245,17 +212,33 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
-                <EuiButtonIcon aria-label="test" iconType="boxesVertical" onClick={onButtonClick} />
-              }
-              isOpen={isPopoverOpen}
-              closePopover={closePopover}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-            >
-              <EuiContextMenu initialPanelId={0} panels={panels} />
-            </EuiPopover>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <ConnectorSelectorInline
+                  isDisabled={isDisabled || currentConversation === undefined}
+                  selectedConnectorId={selectedConnectorId}
+                  selectedConversation={currentConversation}
+                  isFlyoutMode={true}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiPopover
+                button={
+                  <EuiButtonIcon
+                    aria-label="test"
+                    iconType="boxesVertical"
+                    onClick={onButtonClick}
+                  />
+                }
+                isOpen={isPopoverOpen}
+                closePopover={closePopover}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+              >
+                <EuiContextMenu initialPanelId={0} panels={panels} />
+              </EuiPopover>
+            </EuiFlexItem>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

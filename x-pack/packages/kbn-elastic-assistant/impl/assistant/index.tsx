@@ -290,14 +290,9 @@ const AssistantComponent: React.FC<Props> = ({
   codeBlockContainers.forEach((e) => (e.style.minHeight = '75px'));
   ////
 
-  const onToggleShowAnonymizedValues = useCallback(
-    (e: EuiSwitchEvent) => {
-      if (setShowAnonymizedValues != null) {
-        setShowAnonymizedValues(e.target.checked);
-      }
-    },
-    [setShowAnonymizedValues]
-  );
+  const onToggleShowAnonymizedValues = useCallback(() => {
+    setShowAnonymizedValues((prevValue) => !prevValue);
+  }, [setShowAnonymizedValues]);
 
   const isNewConversation = useMemo(
     () => currentConversation.messages.length === 0,
@@ -533,25 +528,23 @@ const AssistantComponent: React.FC<Props> = ({
                 `}
               >
                 <EuiFlyoutHeader hasBorder>
-                  {showTitle && (
-                    <AssistantHeaderFlyout
-                      currentConversation={currentConversation}
-                      defaultConnectorId={defaultConnectorId}
-                      defaultProvider={defaultProvider}
-                      docLinks={docLinks}
-                      isDisabled={isDisabled}
-                      isSettingsModalVisible={isSettingsModalVisible}
-                      onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
-                      setIsSettingsModalVisible={setIsSettingsModalVisible}
-                      setSelectedConversationId={setSelectedConversationId}
-                      showAnonymizedValues={showAnonymizedValues}
-                      title={currentTitle}
-                      onCloseFlyout={onCloseFlyout}
-                      onChatCleared={handleOnChatCleared}
-                      chatHistoryVisible={chatHistoryVisible}
-                      setChatHistoryVisible={setChatHistoryVisible}
-                    />
-                  )}
+                  <AssistantHeaderFlyout
+                    currentConversation={currentConversation}
+                    defaultConnectorId={defaultConnectorId}
+                    defaultProvider={defaultProvider}
+                    docLinks={docLinks}
+                    isDisabled={isDisabled}
+                    isSettingsModalVisible={isSettingsModalVisible}
+                    onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
+                    setIsSettingsModalVisible={setIsSettingsModalVisible}
+                    setSelectedConversationId={setSelectedConversationId}
+                    showAnonymizedValues={showAnonymizedValues}
+                    title={currentTitle}
+                    onCloseFlyout={onCloseFlyout}
+                    onChatCleared={handleOnChatCleared}
+                    chatHistoryVisible={chatHistoryVisible}
+                    setChatHistoryVisible={setChatHistoryVisible}
+                  />
 
                   {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
                   {createCodeBlockPortals()}

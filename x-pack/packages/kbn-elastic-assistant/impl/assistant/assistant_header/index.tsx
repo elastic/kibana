@@ -12,7 +12,6 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -32,7 +31,7 @@ interface OwnProps {
   isDisabled: boolean;
   isSettingsModalVisible: boolean;
   onConversationSelected: (cId: string) => void;
-  onToggleShowAnonymizedValues: (e: EuiSwitchEvent) => void;
+  onToggleShowAnonymizedValues: () => void;
   selectedConversationId: string;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;

@@ -19,17 +19,20 @@ import { SelectedPromptContext } from '../assistant/prompt_context/types';
 const Strong = styled.strong<{ showRealValues: boolean }>`
   color: ${(props) =>
     props.showRealValues ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorAccent};
+  cursor: pointer;
 `;
 
 export interface Props {
   selectedPromptContext: SelectedPromptContext;
   showRealValues: boolean;
   currentReplacements: AnonymizedData['replacements'] | undefined;
+  onToggleShowAnonymizedValues: () => void;
 }
 const SelectedPromptContextPreviewComponent = ({
   selectedPromptContext,
   currentReplacements,
   showRealValues,
+  onToggleShowAnonymizedValues,
 }: Props) => {
   const data = useMemo(
     () =>
@@ -65,7 +68,7 @@ const SelectedPromptContextPreviewComponent = ({
               {`${key},`}
 
               {data.replacements[value[0]] ? (
-                <Strong showRealValues={showRealValues}>
+                <Strong showRealValues={showRealValues} onClick={onToggleShowAnonymizedValues}>
                   {showRealValues ? data.replacements[value[0]] : value}
                 </Strong>
               ) : (

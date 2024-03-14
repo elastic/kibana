@@ -42,6 +42,10 @@ const ContextEditorFlyoutComponent: React.FC<ContextEditorFlyoutComponentProps> 
     [selectedPromptContext]
   );
 
+  const handleToggleShowRealValues = useCallback(() => {
+    setShowRealValues((prevValue) => !prevValue);
+  }, []);
+
   return (
     <>
       <EuiFlexGroup
@@ -71,8 +75,8 @@ const ContextEditorFlyoutComponent: React.FC<ContextEditorFlyoutComponentProps> 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="xs"
-                iconType={showRealValues ? 'eye' : 'eyeClose'}
-                onClick={() => setShowRealValues(!showRealValues)}
+                iconType={showRealValues ? 'eye' : 'eyeClosed'}
+                onClick={handleToggleShowRealValues}
               >
                 {I18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.hideRealValues', {
                   defaultMessage: 'Show anonymized',
@@ -96,6 +100,7 @@ const ContextEditorFlyoutComponent: React.FC<ContextEditorFlyoutComponentProps> 
         showRealValues={showRealValues}
         selectedPromptContext={selectedPromptContext}
         currentReplacements={currentReplacements}
+        onToggleShowAnonymizedValues={handleToggleShowRealValues}
       />
       {editModalVisible && (
         <SelectedPromptContextEditorModal
