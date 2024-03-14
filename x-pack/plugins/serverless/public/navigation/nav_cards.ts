@@ -13,13 +13,13 @@ export const manageOrgMembersNavCardName = 'organization_members';
 export function generateManageOrgMembersNavCard(cloudOrgUrl?: string): CardNavExtensionDefinition {
   return {
     category: appCategories.ACCESS,
-    description: i18n.translate('management.landing.withCardNavigation.membersDescription', {
+    description: i18n.translate('xpack.serverless.nav.manageOrgMembersDescription', {
       defaultMessage: 'Invite team members and assign them roles to access this project.',
     }),
     icon: 'users',
     skipValidation: true,
     href: cloudOrgUrl ?? '',
-    title: i18n.translate('management.landing.withCardNavigation.membersTitle', {
+    title: i18n.translate('xpack.serverless.nav.manageOrgMembersTitle', {
       defaultMessage: 'Manage organization members',
     }),
   };
