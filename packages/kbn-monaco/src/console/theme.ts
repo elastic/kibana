@@ -35,7 +35,10 @@ export const buildConsoleTheme = (): monaco.editor.IStandaloneThemeData => {
       ),
       ...buildRuleGroup(['comment'], makeHighContrastColor(commentTextColor)(background)),
       ...buildRuleGroup(['variable'], makeHighContrastColor(variableTextColor)(background)),
-      ...buildRuleGroup(['constant.language.boolean'], makeHighContrastColor(booleanTextColor)(background)),
+      ...buildRuleGroup(
+        ['constant.language.boolean'],
+        makeHighContrastColor(booleanTextColor)(background)
+      ),
       ...buildRuleGroup(['constant.numeric'], makeHighContrastColor(numericTextColor)(background)),
     ],
     colors: {
