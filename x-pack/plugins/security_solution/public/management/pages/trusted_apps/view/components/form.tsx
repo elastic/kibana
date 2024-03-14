@@ -29,6 +29,7 @@ import {
 } from '@kbn/securitysolution-utils';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
+import { fieldSupportsMatches } from '@kbn/securitysolution-list-utils/src/helpers';
 import type {
   TrustedAppConditionEntry,
   NewTrustedApp,
@@ -171,13 +172,22 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
           value: (entry as TrustedAppConditionEntry).value,
         })
       ) {
-        extraWarning = true;
-        addResultToValidation(
-          validation,
-          'entries',
-          'warnings',
-          INPUT_ERRORS.wildcardWithWrongOperatorWarning(index)
-        );
+        if (fieldSupportsMatches(entry.field)) {
+          extraWarning = true;
+          addResultToValidation(
+            validation,
+            'entries',
+            'warnings',
+            INPUT_ERRORS.wildcardWithWrongOperatorWarning(index)
+          );
+        } else {
+          addResultToValidation(
+            validation,
+            'entries',
+            'warnings',
+            INPUT_ERRORS.wildcardWithWrongField(index)
+          );
+        }
       }
 
       if (!entry.field || !(entry as TrustedAppConditionEntry).value.trim()) {

@@ -536,8 +536,17 @@ describe('Trusted apps form', () => {
     it('shows callout warning and help text warning', () => {
       setTextFieldValue(getConditionValue(getCondition()), 'somewildcard*');
       rerenderWithLatestProps();
+      // expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeTruthy();
+      expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongField(0)));
+    });
+
+    it('shows something esel', () => {
+      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+        entries: [createEntry(ConditionEntryField.PATH, 'match', 'asdf*')],
+      };
+      formProps.item = { ...formProps.item, ...propsItem };
+      render();
       expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeTruthy();
-      expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongOperatorWarning(0)));
     });
   });
 
