@@ -8,7 +8,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-browser-internal';
-import type { CoreInternalSecurityContract } from '@kbn/core-security-browser';
+import type { CoreSecurityContract } from '@kbn/core-security-browser';
 import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
@@ -19,7 +19,7 @@ export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
 {
   private readonly log: Logger;
-  private securityApi?: CoreInternalSecurityContract;
+  private securityApi?: CoreSecurityContract;
 
   constructor(coreContext: CoreContext) {
     this.log = coreContext.logger.get('security-service');

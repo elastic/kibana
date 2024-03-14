@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { CoreInternalSecurityContract } from '@kbn/core-security-server';
+import type { CoreSecurityContract } from '@kbn/core-security-server';
 
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { buildSecurityApi } from './build_security_api';
@@ -14,7 +14,7 @@ import { securityMock } from './mocks';
 
 describe('buildSecurityApi', () => {
   let authc: ReturnType<typeof authenticationServiceMock.createStart>;
-  let api: CoreInternalSecurityContract;
+  let api: CoreSecurityContract;
 
   beforeEach(() => {
     authc = authenticationServiceMock.createStart();

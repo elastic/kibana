@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CoreInternalSecurityContract } from '@kbn/core-security-browser';
+import type { CoreSecurityContract } from '@kbn/core-security-browser';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 
 export const buildSecurityApi = ({
   authc,
 }: {
   authc: AuthenticationServiceSetup;
-}): CoreInternalSecurityContract => {
+}): CoreSecurityContract => {
   return {
     authc: {
       getCurrentUser: () => authc.getCurrentUser(),

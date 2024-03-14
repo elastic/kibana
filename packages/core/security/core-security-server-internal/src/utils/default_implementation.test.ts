@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { CoreInternalSecurityContract } from '@kbn/core-security-server';
+import type { CoreSecurityContract } from '@kbn/core-security-server';
 import { getDefaultSecurityImplementation } from './default_implementation';
 
 describe('getDefaultSecurityImplementation', () => {
-  let implementation: CoreInternalSecurityContract;
+  let implementation: CoreSecurityContract;
 
   beforeEach(() => {
     implementation = getDefaultSecurityImplementation();

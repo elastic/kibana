@@ -13,11 +13,11 @@ import {
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
-import type { CoreInternalSecurityContract } from '@kbn/core-security-browser';
+import type { CoreSecurityContract } from '@kbn/core-security-browser';
 import { SecurityService } from './security_service';
 
-const createStubInternalContract = (): CoreInternalSecurityContract => {
-  return Symbol('stubContract') as unknown as CoreInternalSecurityContract;
+const createStubInternalContract = (): CoreSecurityContract => {
+  return Symbol('stubContract') as unknown as CoreSecurityContract;
 };
 
 describe('SecurityService', () => {

@@ -9,16 +9,16 @@
 import type { CoreAuthenticationService } from './authc';
 
 /**
- * The internal contract exposed by the security provider for Core to
+ * The contract exposed by the security provider for Core to
  * consume and re-expose via its security service.
  *
  * @public
  */
-export interface CoreInternalSecurityContract {
-  authc: InternalAuthenticationServiceContract;
+export interface CoreSecurityContract {
+  authc: AuthenticationServiceContract;
 }
 
 /**
  * @public
  */
-export type InternalAuthenticationServiceContract = CoreAuthenticationService;
+export type AuthenticationServiceContract = CoreAuthenticationService;

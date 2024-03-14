@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreInternalSecurityContract } from '@kbn/core-security-browser';
+import type { CoreSecurityContract } from '@kbn/core-security-browser';
 
 import { authenticationMock } from './authentication/index.mock';
 import { buildSecurityApi } from './build_security_api';
@@ -13,7 +13,7 @@ import { securityMock } from './mocks';
 
 describe('buildSecurityApi', () => {
   let authc: ReturnType<typeof authenticationMock.createSetup>;
-  let api: CoreInternalSecurityContract;
+  let api: CoreSecurityContract;
 
   beforeEach(() => {
     authc = authenticationMock.createSetup();

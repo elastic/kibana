@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { CoreInternalSecurityContract } from '@kbn/core-security-server';
+import type { CoreSecurityContract } from '@kbn/core-security-server';
 import type { InternalSecurityServiceStart } from '../internal_contracts';
 
 export const convertSecurityApi = (
-  privateApi: CoreInternalSecurityContract
+  privateApi: CoreSecurityContract
 ): InternalSecurityServiceStart => {
   // shapes are the same for now given we only have one API exposed.
   return privateApi;
