@@ -11,7 +11,8 @@ import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import { AssistantAvatar } from '@kbn/elastic-assistant';
-import { getMessageContentWithReplacements } from '../helpers';
+import type { Replacement } from '@kbn/elastic-assistant-common';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
@@ -28,45 +29,37 @@ const transformMessageWithReplacements = ({
   message: Message;
   content: string;
   showAnonymizedValues: boolean;
-  replacements?: Record<string, string>;
+  replacements: Replacement[];
 }): ContentMessage => {
   return {
     ...message,
-    content:
-      showAnonymizedValues || !replacements
-        ? content
-        : getMessageContentWithReplacements({
-            messageContent: content,
-            replacements,
-          }),
+    content: showAnonymizedValues
+      ? content
+      : replaceAnonymizedValuesWithOriginalValues({
+          messageContent: content,
+          replacements,
+        }),
   };
 };
 
 export const getComments = ({
-  amendMessage,
   currentConversation,
   isFetchingResponse,
+  refetchCurrentConversation,
   regenerateMessage,
   showAnonymizedValues,
 }: {
-  amendMessage: ({ conversationId, content }: { conversationId: string; content: string }) => void;
   currentConversation: Conversation;
   isFetchingResponse: boolean;
+  refetchCurrentConversation: () => void;
   regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
 }): EuiCommentProps[] => {
-  const amendMessageOfConversation = (content: string) => {
-    amendMessage({
-      conversationId: currentConversation.id,
-      content,
-    });
-  };
-
   const regenerateMessageOfConversation = () => {
     regenerateMessage(currentConversation.id);
   };
 
-  const connectorTypeTitle = currentConversation.apiConfig.connectorTypeTitle ?? '';
+  const connectorTypeTitle = currentConversation.apiConfig?.connectorTypeTitle ?? '';
 
   const extraLoadingComment = isFetchingResponse
     ? [
@@ -76,11 +69,10 @@ export const getComments = ({
           timestamp: '...',
           children: (
             <StreamComment
-              amendMessage={amendMessageOfConversation}
               connectorTypeTitle={connectorTypeTitle}
               content=""
+              refetchCurrentConversation={refetchCurrentConversation}
               regenerateMessage={regenerateMessageOfConversation}
-              isLastComment
               transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
               isFetching
               // we never need to append to a code block in the loading comment, which is what this index is used for
@@ -110,6 +102,8 @@ export const getComments = ({
         eventColor: message.isError ? 'danger' : undefined,
       };
 
+      const isControlsEnabled = isLastComment && !isUser;
+
       const transformMessage = (content: string) =>
         transformMessageWithReplacements({
           message,
@@ -124,12 +118,12 @@ export const getComments = ({
           ...messageProps,
           children: (
             <StreamComment
-              amendMessage={amendMessageOfConversation}
               connectorTypeTitle={connectorTypeTitle}
               index={index}
-              isLastComment={isLastComment}
+              isControlsEnabled={isControlsEnabled}
               isError={message.isError}
               reader={message.reader}
+              refetchCurrentConversation={refetchCurrentConversation}
               regenerateMessage={regenerateMessageOfConversation}
               transformMessage={transformMessage}
             />
@@ -145,14 +139,13 @@ export const getComments = ({
         actions: <CommentActions message={transformedMessage} />,
         children: (
           <StreamComment
-            amendMessage={amendMessageOfConversation}
             connectorTypeTitle={connectorTypeTitle}
             content={transformedMessage.content}
             index={index}
-            isLastComment={isLastComment}
-            // reader is used to determine if streaming controls are shown
+            isControlsEnabled={isControlsEnabled}
             reader={transformedMessage.reader}
             regenerateMessage={regenerateMessageOfConversation}
+            refetchCurrentConversation={refetchCurrentConversation}
             transformMessage={transformMessage}
           />
         ),
