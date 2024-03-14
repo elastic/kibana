@@ -109,9 +109,9 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
 );
 
 const LicenseExpired = () => {
-  const plugins = useKibana<ClientPluginsStart>();
+  const { services } = useKibana<ClientPluginsStart>();
+  const licenseManagementEnabled = services.licenseManagement?.enabled;
 
-  const licenseManagementEnabled = plugins.services.licenseManagement?.enabled;
   const { basePath } = useSyntheticsSettingsContext();
 
   return (
