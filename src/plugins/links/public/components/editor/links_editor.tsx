@@ -91,7 +91,7 @@ const LinksEditor = ({
   );
   const [isSaving, setIsSaving] = useState(false);
   const [orderedLinks, setOrderedLinks] = useState<Link[]>([]);
-  const [saveByReference, setSaveByReference] = useState(!initialLinks ? true : isByReference);
+  const [saveByReference, setSaveByReference] = useState(!initialLinks ? false : isByReference);
 
   const isEditingExisting = initialLinks || isByReference;
 
