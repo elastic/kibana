@@ -29,9 +29,8 @@ if [ $? -ne 0 ]; then
   echo "Differences found. Building ANTLR stuff."
 
   # Built ANTLR stuff
-  sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  cd ./packages/kbn-monaco/src 
-  yarn build:antlr4
+  cd ./packages/kbn-monaco/src || exit 
+  yarn build:antlr4:esql || exit
 
   # Make a commit
   BRANCH_NAME="esql_grammar_sync_$(date +%s)"
@@ -41,7 +40,7 @@ if [ $? -ne 0 ]; then
 
   git checkout -b "$BRANCH_NAME"
 
-  git add "$destination_file"
+  git add -A
   git commit -m "updating ES|QL lexer grammar"
 
   git push --set-upstream origin "$BRANCH_NAME"
@@ -49,7 +48,7 @@ if [ $? -ne 0 ]; then
   echo "Changes committed. Creating pull request."
 
   # Create a PR
-  gh pr create --title "[ES|QL] Update lexer grammar" --body "This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch." \ 
+  gh pr create --draft --title "[ES|QL] Update lexer grammar" --body "This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch." \ 
   --base main --head "$BRANCH_NAME" --label "release_note:skip" || exit
 
 else
