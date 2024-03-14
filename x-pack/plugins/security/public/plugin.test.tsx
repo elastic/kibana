@@ -79,6 +79,18 @@ describe('Security Plugin', () => {
         buildFlavor: expect.stringMatching(new RegExp('^serverless|traditional$')),
       });
     });
+
+    it('calls core.security.registerSecurityApi', () => {
+      const coreSetupMock = coreMock.createSetup({ basePath: '/some-base-path' });
+
+      const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
+
+      plugin.setup(coreSetupMock, {
+        licensing: licensingMock.createSetup(),
+      });
+
+      expect(coreSetupMock.security.registerSecurityApi).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('#start', () => {
