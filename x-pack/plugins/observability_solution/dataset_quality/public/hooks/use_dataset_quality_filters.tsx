@@ -91,8 +91,9 @@ export const useDatasetQualityFilters = () => {
   );
 
   const namespaceItems: NamespaceItem[] = useMemo(() => {
-    const uniquNamespaces = [...new Set(namespaces)];
-    return uniquNamespaces.map((namespace) => ({
+    const uniqueNamespaces = [...new Set(namespaces)];
+
+    return uniqueNamespaces.map((namespace) => ({
       label: namespace,
       checked: selectedNamespaces.includes(namespace) ? 'on' : undefined,
     }));
