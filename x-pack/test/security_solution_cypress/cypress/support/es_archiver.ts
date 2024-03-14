@@ -72,8 +72,7 @@ export const esArchiver = (
       }
       return null;
     },
-    esArchiverUnload: async (archiveName, type = 'cypress') => {
-      esArchiverInstance.unload(archiveName);
+    esArchiverUnload: async ({ archiveName, type = 'cypress' }) => {
       if (type === 'cypress') {
         esArchiverInstance.unload(archiveName);
       } else if (type === 'ftr') {

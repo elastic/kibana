@@ -31,7 +31,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_hosts');
+      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
     });
 
     it('renders risk tab', () => {
@@ -70,7 +70,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_scores_new_complete_data');
+      cy.task('esArchiverUnload', { archiveName: 'risk_scores_new_complete_data' });
       deleteAlertsAndRules(); // esArchiverUnload doesn't work properly when using with `useCreate` and `docsOnly` flags
       deleteRiskEngineConfiguration();
     });
