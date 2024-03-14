@@ -33,14 +33,15 @@ export const buildEmbeddable = async (
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
     defaultDataView ? [defaultDataView] : undefined
   );
+  function setTimeRange(nextTimeRange: TimeRange | undefined) {
+    timeRange$.next(nextTimeRange);
+  }
 
   const api = buildApi(
     {
       dataViews: dataViews$,
       timeRange$,
-      setTimeRange: (nextTimeRange: TimeRange | undefined) => {
-        timeRange$.next(nextTimeRange);
-      },
+      setTimeRange,
       serializeState: () => {
         return {
           rawState: {
@@ -53,9 +54,7 @@ export const buildEmbeddable = async (
     {
       timeRange: [
         timeRange$,
-        (nextTimeRange: TimeRange | undefined) => {
-          timeRange$.next(nextTimeRange);
-        },
+        setTimeRange,
         fastIsEqual,
       ],
     }
