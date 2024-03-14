@@ -7,10 +7,10 @@
 
 import type { EventTypeOpts } from '@kbn/analytics-client';
 import type { Message } from '../../../common';
+import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_type';
 import { messageSchema } from './common';
 
-export const eventType = 'observability_ai_assistant_user_sent_prompt_in_chat';
 export const userSentPromptEventSchema: EventTypeOpts<Message> = {
-  eventType,
+  eventType: ObservabilityAIAssistantTelemetryEventType.UserSentPromptInChat,
   schema: messageSchema,
 };

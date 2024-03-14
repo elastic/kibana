@@ -28,7 +28,8 @@ export class DefaultTransformManager implements TransformManager {
   constructor(
     private generators: Record<IndicatorTypes, TransformGenerator>,
     private esClient: ElasticsearchClient,
-    private logger: Logger
+    private logger: Logger,
+    private spaceId: string
   ) {}
 
   async install(slo: SLO): Promise<TransformId> {
@@ -38,7 +39,7 @@ export class DefaultTransformManager implements TransformManager {
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
     }
 
-    const transformParams = generator.getTransformParams(slo);
+    const transformParams = generator.getTransformParams(slo, this.spaceId);
     try {
       await retryTransientEsErrors(() => this.esClient.transform.putTransform(transformParams), {
         logger: this.logger,
@@ -62,7 +63,7 @@ export class DefaultTransformManager implements TransformManager {
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
     }
 
-    return generator.getTransformParams(slo);
+    return generator.getTransformParams(slo, this.spaceId);
   }
 
   async preview(transformId: string): Promise<void> {
