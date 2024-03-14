@@ -10,6 +10,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
+    "@kbn/core-security-common"
   ]
 }
