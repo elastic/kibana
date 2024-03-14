@@ -26,6 +26,7 @@ import {
   SPACE_IDS,
   ALERT_FLAPPING,
   TAGS,
+  ALERT_CONSECUTIVE_MATCHES,
 } from '../../common/technical_rule_data_field_names';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleExecutor } from './create_lifecycle_executor';
@@ -1925,6 +1926,473 @@ describe('createLifecycleExecutor', () => {
               [EVENT_ACTION]: 'close',
               [EVENT_KIND]: 'signal',
               [ALERT_FLAPPING]: false,
+            }),
+          ]),
+        })
+      );
+    });
+  });
+
+  describe('set consecutive matches on the document', () => {
+    it('updates documents with consecutive matches for active alerts', async () => {
+      const logger = loggerMock.create();
+      const ruleDataClientMock = createRuleDataClientMock();
+      ruleDataClientMock.getReader().search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '',
+                [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
+                [ALERT_UUID]: 'ALERT_0_UUID',
+                [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+                [ALERT_RULE_CONSUMER]: 'CONSUMER',
+                [ALERT_RULE_NAME]: 'NAME',
+                [ALERT_RULE_PRODUCER]: 'PRODUCER',
+                [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+                [ALERT_RULE_UUID]: 'RULE_UUID',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [ALERT_WORKFLOW_STATUS]: 'closed',
+                [SPACE_IDS]: ['fake-space-id'],
+              },
+              _index: '.alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
+            },
+            {
+              _source: {
+                '@timestamp': '',
+                [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
+                [ALERT_UUID]: 'ALERT_1_UUID',
+                [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+                [ALERT_RULE_CONSUMER]: 'CONSUMER',
+                [ALERT_RULE_NAME]: 'NAME',
+                [ALERT_RULE_PRODUCER]: 'PRODUCER',
+                [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+                [ALERT_RULE_UUID]: 'RULE_UUID',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [ALERT_WORKFLOW_STATUS]: 'open',
+                [SPACE_IDS]: ['fake-space-id'],
+              },
+              _index: '.alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
+            },
+            {
+              _source: {
+                '@timestamp': '',
+                [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
+                [ALERT_UUID]: 'ALERT_2_UUID',
+                [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+                [ALERT_RULE_CONSUMER]: 'CONSUMER',
+                [ALERT_RULE_NAME]: 'NAME',
+                [ALERT_RULE_PRODUCER]: 'PRODUCER',
+                [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+                [ALERT_RULE_UUID]: 'RULE_UUID',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [ALERT_WORKFLOW_STATUS]: 'open',
+                [SPACE_IDS]: ['fake-space-id'],
+              },
+              _index: '.alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
+            },
+            {
+              _source: {
+                '@timestamp': '',
+                [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
+                [ALERT_UUID]: 'ALERT_3_UUID',
+                [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+                [ALERT_RULE_CONSUMER]: 'CONSUMER',
+                [ALERT_RULE_NAME]: 'NAME',
+                [ALERT_RULE_PRODUCER]: 'PRODUCER',
+                [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+                [ALERT_RULE_UUID]: 'RULE_UUID',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [ALERT_WORKFLOW_STATUS]: 'open',
+                [SPACE_IDS]: ['fake-space-id'],
+              },
+              _index: '.alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
+            },
+          ],
+        },
+      } as any);
+      const executor = createLifecycleExecutor(
+        logger,
+        ruleDataClientMock
+      )<{}, TestRuleState, never, never, never>(async ({ services, state }) => {
+        services.alertWithLifecycle({
+          id: 'TEST_ALERT_0',
+          fields: {},
+        });
+        services.alertWithLifecycle({
+          id: 'TEST_ALERT_1',
+          fields: {},
+        });
+        services.alertWithLifecycle({
+          id: 'TEST_ALERT_2',
+          fields: {},
+        });
+        services.alertWithLifecycle({
+          id: 'TEST_ALERT_3',
+          fields: {},
+        });
+
+        return { state };
+      });
+
+      const serializedAlerts = await executor(
+        createDefaultAlertExecutorOptions({
+          alertId: 'TEST_ALERT_0',
+          params: {},
+          state: {
+            wrapped: initialRuleState,
+            trackedAlerts: {
+              TEST_ALERT_0: {
+                alertId: 'TEST_ALERT_0',
+                alertUuid: 'TEST_ALERT_0_UUID',
+                started: '2020-01-01T12:00:00.000Z',
+                flappingHistory: [],
+                flapping: false,
+                pendingRecoveredCount: 0,
+                activeCount: 0,
+              },
+              TEST_ALERT_1: {
+                alertId: 'TEST_ALERT_1',
+                alertUuid: 'TEST_ALERT_1_UUID',
+                started: '2020-01-02T12:00:00.000Z',
+                flappingHistory: [],
+                flapping: false,
+                pendingRecoveredCount: 0,
+                activeCount: 0,
+              },
+              TEST_ALERT_2: {
+                alertId: 'TEST_ALERT_2',
+                alertUuid: 'TEST_ALERT_2_UUID',
+                started: '2020-01-01T12:00:00.000Z',
+                flappingHistory: [],
+                flapping: false,
+                pendingRecoveredCount: 0,
+                activeCount: 0,
+              },
+              TEST_ALERT_3: {
+                alertId: 'TEST_ALERT_3',
+                alertUuid: 'TEST_ALERT_3_UUID',
+                started: '2020-01-02T12:00:00.000Z',
+                flappingHistory: [],
+                flapping: false,
+                pendingRecoveredCount: 0,
+                activeCount: 0,
+              },
+            },
+            trackedAlertsRecovered: {},
+          },
+          logger,
+        })
+      );
+
+      expect(serializedAlerts.state.trackedAlerts).toEqual({
+        TEST_ALERT_0: {
+          activeCount: 1,
+          alertId: 'TEST_ALERT_0',
+          alertUuid: 'TEST_ALERT_0_UUID',
+          flapping: false,
+          flappingHistory: [false],
+          pendingRecoveredCount: 0,
+          started: '2020-01-01T12:00:00.000Z',
+        },
+        TEST_ALERT_1: {
+          activeCount: 1,
+          alertId: 'TEST_ALERT_1',
+          alertUuid: 'TEST_ALERT_1_UUID',
+          flapping: false,
+          flappingHistory: [false],
+          pendingRecoveredCount: 0,
+          started: '2020-01-02T12:00:00.000Z',
+        },
+        TEST_ALERT_2: {
+          activeCount: 1,
+          alertId: 'TEST_ALERT_2',
+          alertUuid: 'TEST_ALERT_2_UUID',
+          flapping: false,
+          flappingHistory: [false],
+          pendingRecoveredCount: 0,
+          started: '2020-01-01T12:00:00.000Z',
+        },
+        TEST_ALERT_3: {
+          activeCount: 1,
+          alertId: 'TEST_ALERT_3',
+          alertUuid: 'TEST_ALERT_3_UUID',
+          flapping: false,
+          flappingHistory: [false],
+          pendingRecoveredCount: 0,
+          started: '2020-01-02T12:00:00.000Z',
+        },
+      });
+
+      expect(serializedAlerts.state.trackedAlertsRecovered).toEqual({});
+
+      expect((await ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: [
+            // alert document
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_0_UUID' }) },
+            expect.objectContaining({
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
+              [ALERT_WORKFLOW_STATUS]: 'closed',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [ALERT_CONSECUTIVE_MATCHES]: 1,
+              [EVENT_ACTION]: 'active',
+              [EVENT_KIND]: 'signal',
+            }),
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_1_UUID' }) },
+            expect.objectContaining({
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
+              [ALERT_WORKFLOW_STATUS]: 'open',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [EVENT_ACTION]: 'active',
+              [EVENT_KIND]: 'signal',
+              [ALERT_CONSECUTIVE_MATCHES]: 1,
+            }),
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_2_UUID' }) },
+            expect.objectContaining({
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
+              [ALERT_WORKFLOW_STATUS]: 'open',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [EVENT_ACTION]: 'active',
+              [EVENT_KIND]: 'signal',
+              [ALERT_CONSECUTIVE_MATCHES]: 1,
+            }),
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_3_UUID' }) },
+            expect.objectContaining({
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
+              [ALERT_WORKFLOW_STATUS]: 'open',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [EVENT_ACTION]: 'active',
+              [EVENT_KIND]: 'signal',
+              [ALERT_CONSECUTIVE_MATCHES]: 1,
+            }),
+          ],
+        })
+      );
+    });
+
+    it('updates existing documents for recovered alerts', async () => {
+      const logger = loggerMock.create();
+      const ruleDataClientMock = createRuleDataClientMock();
+      ruleDataClientMock.getReader().search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '',
+                [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
+                [ALERT_UUID]: 'ALERT_0_UUID',
+                [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+                [ALERT_RULE_CONSUMER]: 'CONSUMER',
+                [ALERT_RULE_NAME]: 'NAME',
+                [ALERT_RULE_PRODUCER]: 'PRODUCER',
+                [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+                [ALERT_RULE_UUID]: 'RULE_UUID',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [SPACE_IDS]: ['fake-space-id'],
+              },
+              _index: '.alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
+            },
+            {
+              _source: {
+                '@timestamp': '',
+                [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
+                [ALERT_UUID]: 'ALERT_1_UUID',
+                [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+                [ALERT_RULE_CONSUMER]: 'CONSUMER',
+                [ALERT_RULE_NAME]: 'NAME',
+                [ALERT_RULE_PRODUCER]: 'PRODUCER',
+                [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+                [ALERT_RULE_UUID]: 'RULE_UUID',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [SPACE_IDS]: ['fake-space-id'],
+              },
+              _index: '.alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
+            },
+            {
+              _source: {
+                '@timestamp': '',
+                [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
+                [ALERT_UUID]: 'ALERT_2_UUID',
+                [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+                [ALERT_RULE_CONSUMER]: 'CONSUMER',
+                [ALERT_RULE_NAME]: 'NAME',
+                [ALERT_RULE_PRODUCER]: 'PRODUCER',
+                [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+                [ALERT_RULE_UUID]: 'RULE_UUID',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [SPACE_IDS]: ['fake-space-id'],
+              },
+              _index: '.alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
+            },
+            {
+              _source: {
+                '@timestamp': '',
+                [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
+                [ALERT_UUID]: 'ALERT_3_UUID',
+                [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+                [ALERT_RULE_CONSUMER]: 'CONSUMER',
+                [ALERT_RULE_NAME]: 'NAME',
+                [ALERT_RULE_PRODUCER]: 'PRODUCER',
+                [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+                [ALERT_RULE_UUID]: 'RULE_UUID',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [SPACE_IDS]: ['fake-space-id'],
+              },
+              _index: '.alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
+            },
+          ],
+        },
+      } as any);
+      const executor = createLifecycleExecutor(
+        logger,
+        ruleDataClientMock
+      )<{}, TestRuleState, never, never, never>(async ({ services, state }) => {
+        return { state };
+      });
+
+      const serializedAlerts = await executor(
+        createDefaultAlertExecutorOptions({
+          alertId: 'TEST_ALERT_0',
+          params: {},
+          state: {
+            wrapped: initialRuleState,
+            trackedAlerts: {
+              TEST_ALERT_0: {
+                alertId: 'TEST_ALERT_0',
+                alertUuid: 'TEST_ALERT_0_UUID',
+                started: '2020-01-01T12:00:00.000Z',
+                flappingHistory: [],
+                flapping: false,
+                pendingRecoveredCount: 0,
+                activeCount: 0,
+              },
+              TEST_ALERT_1: {
+                alertId: 'TEST_ALERT_1',
+                alertUuid: 'TEST_ALERT_1_UUID',
+                started: '2020-01-02T12:00:00.000Z',
+                flappingHistory: [],
+                flapping: false,
+                pendingRecoveredCount: 0,
+                activeCount: 0,
+              },
+              TEST_ALERT_2: {
+                alertId: 'TEST_ALERT_2',
+                alertUuid: 'TEST_ALERT_2_UUID',
+                started: '2020-01-02T12:00:00.000Z',
+                flappingHistory: [],
+                flapping: false,
+                pendingRecoveredCount: 0,
+                activeCount: 0,
+              },
+              TEST_ALERT_3: {
+                alertId: 'TEST_ALERT_3',
+                alertUuid: 'TEST_ALERT_3_UUID',
+                started: '2020-01-02T12:00:00.000Z',
+                flappingHistory: [],
+                flapping: false,
+                pendingRecoveredCount: 0,
+                activeCount: 0,
+              },
+            },
+            trackedAlertsRecovered: {},
+          },
+          logger,
+        })
+      );
+
+      expect(serializedAlerts.state.trackedAlerts).toEqual({});
+
+      expect(serializedAlerts.state.trackedAlertsRecovered).toEqual({
+        TEST_ALERT_0: {
+          activeCount: 0,
+          alertId: 'TEST_ALERT_0',
+          alertUuid: 'TEST_ALERT_0_UUID',
+          flapping: false,
+          flappingHistory: [true],
+          pendingRecoveredCount: 0,
+          started: '2020-01-01T12:00:00.000Z',
+        },
+        TEST_ALERT_1: {
+          activeCount: 0,
+          alertId: 'TEST_ALERT_1',
+          alertUuid: 'TEST_ALERT_1_UUID',
+          flapping: false,
+          flappingHistory: [true],
+          pendingRecoveredCount: 0,
+          started: '2020-01-02T12:00:00.000Z',
+        },
+        TEST_ALERT_2: {
+          activeCount: 0,
+          alertId: 'TEST_ALERT_2',
+          alertUuid: 'TEST_ALERT_2_UUID',
+          flapping: false,
+          flappingHistory: [true],
+          pendingRecoveredCount: 0,
+          started: '2020-01-02T12:00:00.000Z',
+        },
+        TEST_ALERT_3: {
+          activeCount: 0,
+          alertId: 'TEST_ALERT_3',
+          alertUuid: 'TEST_ALERT_3_UUID',
+          flapping: false,
+          flappingHistory: [true],
+          pendingRecoveredCount: 0,
+          started: '2020-01-02T12:00:00.000Z',
+        },
+      });
+
+      expect((await ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.arrayContaining([
+            // alert document
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_0_UUID' }) },
+            expect.objectContaining({
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
+              [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+              [EVENT_ACTION]: 'close',
+              [EVENT_KIND]: 'signal',
+              [ALERT_CONSECUTIVE_MATCHES]: 0,
+            }),
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_1_UUID' }) },
+            expect.objectContaining({
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
+              [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+              [EVENT_ACTION]: 'close',
+              [EVENT_KIND]: 'signal',
+              [ALERT_CONSECUTIVE_MATCHES]: 0,
+            }),
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_2_UUID' }) },
+            expect.objectContaining({
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
+              [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+              [EVENT_ACTION]: 'close',
+              [EVENT_KIND]: 'signal',
+              [ALERT_CONSECUTIVE_MATCHES]: 0,
+            }),
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_3_UUID' }) },
+            expect.objectContaining({
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
+              [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+              [EVENT_ACTION]: 'close',
+              [EVENT_KIND]: 'signal',
+              [ALERT_CONSECUTIVE_MATCHES]: 0,
             }),
           ]),
         })

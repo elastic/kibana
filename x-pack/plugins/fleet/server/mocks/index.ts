@@ -178,6 +178,8 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
     getFullAgentPolicy: jest.fn(),
     getByIds: jest.fn(),
     turnOffAgentTamperProtections: jest.fn(),
+    fetchAllAgentPolicies: jest.fn(),
+    fetchAllAgentPolicyIds: jest.fn(),
   };
 };
 

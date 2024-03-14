@@ -52,6 +52,20 @@ deploy() {
     -XGET &>> $DEPLOY_LOGS
 
   PROJECT_ID=$(jq -r --slurp '[.[0].items[] | select(.name == "'$PROJECT_NAME'")] | .[0].id' $DEPLOY_LOGS)
+  if is_pr_with_label "ci:project-redeploy"; then
+    if [ -z "${PROJECT_ID}" ]; then
+      echo "No project to remove"
+    else
+      echo "Shutting down previous project..."
+      curl -s \
+        -H "Authorization: ApiKey $PROJECT_API_KEY" \
+        -H "Content-Type: application/json" \
+        "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}" \
+        -XDELETE > /dev/null
+      PROJECT_ID='null'
+    fi
+  fi
+
   if [ -z "${PROJECT_ID}" ] || [ "$PROJECT_ID" = 'null' ]; then
     echo "Creating project..."
     curl -s \
