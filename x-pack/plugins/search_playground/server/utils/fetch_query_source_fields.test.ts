@@ -17,34 +17,16 @@ describe('fetch_query_source_fields', () => {
       expect(
         parseFieldsCapabilities(ELSER_PASSAGE_CHUNKED_TWO_INDICES, [
           {
-            index: 'workplace_index2',
+            index: 'workplace_index',
             doc: ELSER_PASSAGE_CHUNKED_TWO_INDICES_DOCS[0],
           },
           {
-            index: 'workplace_index',
+            index: 'workplace_index2',
             doc: ELSER_PASSAGE_CHUNKED_TWO_INDICES_DOCS[1],
           },
         ])
       ).toEqual({
         workplace_index: {
-          elser_query_fields: [
-            {
-              field: 'content_vector.tokens',
-              model_id: '.elser_model_2',
-              nested: false,
-            },
-          ],
-          dense_vector_query_fields: [],
-          bm25_query_fields: [],
-          source_fields: [
-            'metadata.summary',
-            'content',
-            'metadata.rolePermissions',
-            'content_vector.model_id',
-            'metadata.name',
-          ],
-        },
-        workplace_index2: {
           elser_query_fields: [
             {
               field: 'vector.tokens',
@@ -53,12 +35,42 @@ describe('fetch_query_source_fields', () => {
             },
           ],
           dense_vector_query_fields: [],
-          bm25_query_fields: [],
+          bm25_query_fields: [
+            'metadata.summary',
+            'vector.model_id',
+            'metadata.rolePermissions',
+            'text',
+            'metadata.name',
+          ],
           source_fields: [
             'metadata.summary',
             'vector.model_id',
             'metadata.rolePermissions',
             'text',
+            'metadata.name',
+          ],
+        },
+        workplace_index2: {
+          elser_query_fields: [
+            {
+              field: 'content_vector.tokens',
+              model_id: '.elser_model_2',
+              nested: false,
+            },
+          ],
+          dense_vector_query_fields: [],
+          bm25_query_fields: [
+            'metadata.summary',
+            'content',
+            'metadata.rolePermissions',
+            'content_vector.model_id',
+            'metadata.name',
+          ],
+          source_fields: [
+            'metadata.summary',
+            'content',
+            'metadata.rolePermissions',
+            'content_vector.model_id',
             'metadata.name',
           ],
         },
