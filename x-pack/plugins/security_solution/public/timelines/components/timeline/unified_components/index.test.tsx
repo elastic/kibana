@@ -141,14 +141,6 @@ const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponen
   });
 };
 
-const changeItemsPerPageTo = (newItemsPerPage: number) => {
-  fireEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
-  fireEvent.click(screen.getByTestId(`tablePagination-${newItemsPerPage}-rows`));
-  expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
-    `Rows per page: ${newItemsPerPage}`
-  );
-};
-
 const loadPageMock = jest.fn();
 
 const useTimelineEventsMock = jest.fn(() => [

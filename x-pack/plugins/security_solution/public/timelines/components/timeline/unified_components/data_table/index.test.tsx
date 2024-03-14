@@ -37,14 +37,7 @@ const TestComponent = (props: Partial<ComponentProps<typeof TimelineDataTableCom
         itemsPerPage={100}
         itemsPerPageOptions={[10, 25, 50, 100]}
         rowRenderers={[]}
-        sort={[
-          {
-            columnId: '@timestamp',
-            columnType: 'date',
-            esTypes: ['date'],
-            sortDirection: 'desc',
-          },
-        ]}
+        sort={[['@timestamp', 'desc']]}
         events={mockTimelineData}
         onFieldEdited={onFieldEditedMock}
         refetch={refetchMock}
@@ -55,6 +48,7 @@ const TestComponent = (props: Partial<ComponentProps<typeof TimelineDataTableCom
         expandedDetail={{}}
         onChangePage={onChangePageMock}
         updatedAt={Date.now()}
+        onSetColumns={jest.fn()}
         {...props}
       />
     </TestProviders>

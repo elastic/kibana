@@ -24,6 +24,8 @@ import { InPortal } from 'react-reverse-portal';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
+import type { BrowserFields, ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
+import memoizeOne from 'memoize-one';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { ControlColumnProps } from '../../../../../common/types';
@@ -64,6 +66,7 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 import { defaultUdtHeaders } from '../unified_components/default_headers';
 import { UnifiedTimelineBody } from '../body/unified_timeline_body';
+import { getColumnHeaders } from '../body/column_headers/helpers';
 
 const memoizedGetColumnHeaders: (
   headers: ColumnHeaderOptions[],
