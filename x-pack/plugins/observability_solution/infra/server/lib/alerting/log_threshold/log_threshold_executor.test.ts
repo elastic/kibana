@@ -10,7 +10,6 @@ import {
   processUngroupedResults,
   processGroupByResults,
   LogThresholdAlertReporter,
-  LogThresholdAlertLimit,
   getUngroupedESQuery,
 } from './log_threshold_executor';
 import {
@@ -438,9 +437,12 @@ describe('Log threshold executor', () => {
     describe('for ungrouped results', () => {
       it('handles the ALERT state correctly', () => {
         const alertReporterMock: jest.MockedFunction<LogThresholdAlertReporter> = jest.fn();
-        const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
-          getValue: jest.fn().mockReturnValue(10),
-          setLimitReached: jest.fn(),
+        const alertsClientMock = {
+          report: jest.fn(),
+          getAlertLimitValue: jest.fn().mockReturnValue(10),
+          setAlertLimitReached: jest.fn(),
+          getRecoveredAlerts: jest.fn(),
+          setAlertData: jest.fn(),
         };
 
         const ruleParams = {
@@ -455,7 +457,7 @@ describe('Log threshold executor', () => {
           },
         } as UngroupedSearchQueryResponse;
 
-        processUngroupedResults(results, ruleParams, alertReporterMock, alertLimitMock);
+        processUngroupedResults(results, ruleParams, alertReporterMock, alertsClientMock);
 
         // first call, fifth argument
         expect(alertReporterMock.mock.calls[0][4]).toEqual([
@@ -474,9 +476,12 @@ describe('Log threshold executor', () => {
 
       it('reports reaching a low limit when alerting', () => {
         const alertReporterMock: jest.MockedFunction<LogThresholdAlertReporter> = jest.fn();
-        const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
-          getValue: jest.fn().mockReturnValue(1),
-          setLimitReached: jest.fn(),
+        const alertsClientMock = {
+          report: jest.fn(),
+          getAlertLimitValue: jest.fn().mockReturnValue(1),
+          setAlertLimitReached: jest.fn(),
+          getRecoveredAlerts: jest.fn(),
+          setAlertData: jest.fn(),
         };
 
         const ruleParams = {
@@ -491,17 +496,20 @@ describe('Log threshold executor', () => {
           },
         } as UngroupedSearchQueryResponse;
 
-        processUngroupedResults(results, ruleParams, alertReporterMock, alertLimitMock);
+        processUngroupedResults(results, ruleParams, alertReporterMock, alertsClientMock);
 
         expect(alertReporterMock).toBeCalledTimes(1);
-        expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(true);
+        expect(alertsClientMock.setAlertLimitReached).toHaveBeenCalledWith(true);
       });
 
       it('reports not reaching a higher limit when alerting', () => {
         const alertReporterMock: jest.MockedFunction<LogThresholdAlertReporter> = jest.fn();
-        const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
-          getValue: jest.fn().mockReturnValue(10),
-          setLimitReached: jest.fn(),
+        const alertsClientMock = {
+          report: jest.fn(),
+          getAlertLimitValue: jest.fn().mockReturnValue(10),
+          setAlertLimitReached: jest.fn(),
+          getRecoveredAlerts: jest.fn(),
+          setAlertData: jest.fn(),
         };
 
         const ruleParams = {
@@ -516,17 +524,20 @@ describe('Log threshold executor', () => {
           },
         } as UngroupedSearchQueryResponse;
 
-        processUngroupedResults(results, ruleParams, alertReporterMock, alertLimitMock);
+        processUngroupedResults(results, ruleParams, alertReporterMock, alertsClientMock);
 
         expect(alertReporterMock).toBeCalledTimes(1);
-        expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(false);
+        expect(alertsClientMock.setAlertLimitReached).toHaveBeenCalledWith(false);
       });
 
       it('reports not reaching the limit without any alerts', () => {
         const alertReporterMock: jest.MockedFunction<LogThresholdAlertReporter> = jest.fn();
-        const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
-          getValue: jest.fn().mockReturnValue(0),
-          setLimitReached: jest.fn(),
+        const alertsClientMock = {
+          report: jest.fn(),
+          getAlertLimitValue: jest.fn().mockReturnValue(0),
+          setAlertLimitReached: jest.fn(),
+          getRecoveredAlerts: jest.fn(),
+          setAlertData: jest.fn(),
         };
 
         const ruleParams = {
@@ -541,19 +552,22 @@ describe('Log threshold executor', () => {
           },
         } as UngroupedSearchQueryResponse;
 
-        processUngroupedResults(results, ruleParams, alertReporterMock, alertLimitMock);
+        processUngroupedResults(results, ruleParams, alertReporterMock, alertsClientMock);
 
         expect(alertReporterMock).not.toHaveBeenCalled();
-        expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(false);
+        expect(alertsClientMock.setAlertLimitReached).toHaveBeenCalledWith(false);
       });
     });
 
     describe('for grouped results', () => {
       it('handles the ALERT state correctly', () => {
         const alertReporterMock: jest.MockedFunction<LogThresholdAlertReporter> = jest.fn();
-        const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
-          getValue: jest.fn().mockReturnValue(2),
-          setLimitReached: jest.fn(),
+        const alertsClientMock = {
+          report: jest.fn(),
+          getAlertLimitValue: jest.fn().mockReturnValue(2),
+          setAlertLimitReached: jest.fn(),
+          getRecoveredAlerts: jest.fn(),
+          setAlertData: jest.fn(),
         };
 
         const ruleParams = {
@@ -628,7 +642,7 @@ describe('Log threshold executor', () => {
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
 
-        processGroupByResults(results, ruleParams, alertReporterMock, alertLimitMock);
+        processGroupByResults(results, ruleParams, alertReporterMock, alertsClientMock);
         expect(alertReporterMock.mock.calls.length).toBe(2);
 
         // First call, fifth argument
@@ -686,9 +700,12 @@ describe('Log threshold executor', () => {
 
       it('respects and reports reaching a low limit when alerting', () => {
         const alertReporterMock: jest.MockedFunction<LogThresholdAlertReporter> = jest.fn();
-        const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
-          getValue: jest.fn().mockReturnValue(1),
-          setLimitReached: jest.fn(),
+        const alertsClientMock = {
+          report: jest.fn(),
+          getAlertLimitValue: jest.fn().mockReturnValue(1),
+          setAlertLimitReached: jest.fn(),
+          getRecoveredAlerts: jest.fn(),
+          setAlertData: jest.fn(),
         };
 
         const ruleParams = {
@@ -763,17 +780,20 @@ describe('Log threshold executor', () => {
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
 
-        processGroupByResults(results, ruleParams, alertReporterMock, alertLimitMock);
+        processGroupByResults(results, ruleParams, alertReporterMock, alertsClientMock);
 
         expect(alertReporterMock).toHaveBeenCalledTimes(1);
-        expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(true);
+        expect(alertsClientMock.setAlertLimitReached).toHaveBeenCalledWith(true);
       });
 
       it('reports not reaching a higher limit when alerting', () => {
         const alertReporterMock: jest.MockedFunction<LogThresholdAlertReporter> = jest.fn();
-        const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
-          getValue: jest.fn().mockReturnValue(10),
-          setLimitReached: jest.fn(),
+        const alertsClientMock = {
+          report: jest.fn(),
+          getAlertLimitValue: jest.fn().mockReturnValue(10),
+          setAlertLimitReached: jest.fn(),
+          getRecoveredAlerts: jest.fn(),
+          setAlertData: jest.fn(),
         };
 
         const ruleParams = {
@@ -848,10 +868,10 @@ describe('Log threshold executor', () => {
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
 
-        processGroupByResults(results, ruleParams, alertReporterMock, alertLimitMock);
+        processGroupByResults(results, ruleParams, alertReporterMock, alertsClientMock);
 
         expect(alertReporterMock).toHaveBeenCalledTimes(2);
-        expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(false);
+        expect(alertsClientMock.setAlertLimitReached).toHaveBeenCalledWith(false);
       });
     });
   });

@@ -21,7 +21,6 @@ import {
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
-  RuleExecutorServices,
   RuleTypeState,
   RuleExecutorOptions,
   AlertsClientError,
@@ -29,7 +28,10 @@ import {
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
-import { RecoveredAlertData } from '@kbn/alerting-plugin/server/alerts_client/types';
+import {
+  PublicAlertsClient,
+  RecoveredAlertData,
+} from '@kbn/alerting-plugin/server/alerts_client/types';
 
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
@@ -99,12 +101,6 @@ export type LogThresholdAlertReporter = (
   rootLevelContext?: AdditionalContext
 ) => void;
 
-export type LogThresholdAlertLimit = RuleExecutorServices<
-  LogThresholdAlertState,
-  LogThresholdAlertContext,
-  LogThresholdActionGroups
->['alertFactory']['alertLimit'];
-
 const COMPOSITE_GROUP_SIZE = 2000;
 
 const checkValueAgainstComparatorMap: {
@@ -134,12 +130,7 @@ export const createLogThresholdExecutor =
   ) => {
     const { services, params, spaceId, startedAt } = options;
     const { basePath } = libs;
-    const {
-      alertFactory: { alertLimit },
-      alertsClient,
-      savedObjectsClient,
-      scopedClusterClient,
-    } = services;
+    const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
     if (!alertsClient) {
       throw new AlertsClientError();
     }
@@ -218,7 +209,7 @@ export const createLogThresholdExecutor =
           runtimeMappings,
           scopedClusterClient.asCurrentUser,
           alertReporter,
-          alertLimit,
+          alertsClient,
           startedAt.valueOf()
         );
       } else {
@@ -229,7 +220,7 @@ export const createLogThresholdExecutor =
           runtimeMappings,
           scopedClusterClient.asCurrentUser,
           alertReporter,
-          alertLimit,
+          alertsClient,
           startedAt.valueOf()
         );
       }
@@ -256,7 +247,12 @@ export async function executeAlert(
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
   alertReporter: LogThresholdAlertReporter,
-  alertLimit: LogThresholdAlertLimit,
+  alertsClient: PublicAlertsClient<
+    LogThresholdAlert,
+    AlertState,
+    AlertContext,
+    LogThresholdActionGroups
+  >,
   executionTimestamp: number
 ) {
   const query = getESQuery(
@@ -276,14 +272,14 @@ export async function executeAlert(
       await getGroupedResults(query, esClient),
       ruleParams,
       alertReporter,
-      alertLimit
+      alertsClient
     );
   } else {
     processUngroupedResults(
       await getUngroupedResults(query, esClient),
       ruleParams,
       alertReporter,
-      alertLimit
+      alertsClient
     );
   }
 }
@@ -295,7 +291,12 @@ export async function executeRatioAlert(
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
   alertReporter: LogThresholdAlertReporter,
-  alertLimit: LogThresholdAlertLimit,
+  alertsClient: PublicAlertsClient<
+    LogThresholdAlert,
+    AlertState,
+    AlertContext,
+    LogThresholdActionGroups
+  >,
   executionTimestamp: number
 ) {
   // Ratio alert params are separated out into two standard sets of alert params
@@ -338,7 +339,7 @@ export async function executeRatioAlert(
       denominatorGroupedResults,
       ruleParams,
       alertReporter,
-      alertLimit
+      alertsClient
     );
   } else {
     const [numeratorUngroupedResults, denominatorUngroupedResults] = await Promise.all([
@@ -350,7 +351,7 @@ export async function executeRatioAlert(
       denominatorUngroupedResults,
       ruleParams,
       alertReporter,
-      alertLimit
+      alertsClient
     );
   }
 }
@@ -386,7 +387,12 @@ export const processUngroupedResults = (
   results: UngroupedSearchQueryResponse,
   params: CountRuleParams,
   alertReporter: LogThresholdAlertReporter,
-  alertLimit: LogThresholdAlertLimit
+  alertsClient: PublicAlertsClient<
+    LogThresholdAlert,
+    AlertState,
+    AlertContext,
+    LogThresholdActionGroups
+  >
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
   const documentCount = results.hits.total.value;
@@ -422,9 +428,9 @@ export const processUngroupedResults = (
       actions,
       additionalContext
     );
-    alertLimit.setLimitReached(alertLimit.getValue() <= 1);
+    alertsClient.setAlertLimitReached(alertsClient.getAlertLimitValue() <= 1);
   } else {
-    alertLimit.setLimitReached(false);
+    alertsClient.setAlertLimitReached(false);
   }
 };
 
@@ -433,7 +439,12 @@ export const processUngroupedRatioResults = (
   denominatorResults: UngroupedSearchQueryResponse,
   params: RatioRuleParams,
   alertReporter: LogThresholdAlertReporter,
-  alertLimit: LogThresholdAlertLimit
+  alertsClient: PublicAlertsClient<
+    LogThresholdAlert,
+    AlertState,
+    AlertContext,
+    LogThresholdActionGroups
+  >
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
@@ -473,9 +484,9 @@ export const processUngroupedRatioResults = (
       actions,
       additionalContext
     );
-    alertLimit.setLimitReached(alertLimit.getValue() <= 1);
+    alertsClient.setAlertLimitReached(alertsClient.getAlertLimitValue() <= 1);
   } else {
-    alertLimit.setLimitReached(false);
+    alertsClient.setAlertLimitReached(false);
   }
 };
 
@@ -530,13 +541,18 @@ export const processGroupByResults = (
   results: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   params: CountRuleParams,
   alertReporter: LogThresholdAlertReporter,
-  alertLimit: LogThresholdAlertLimit
+  alertsClient: PublicAlertsClient<
+    LogThresholdAlert,
+    AlertState,
+    AlertContext,
+    LogThresholdActionGroups
+  >
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
   const groupResults = getReducedGroupByResults(results);
 
-  let remainingAlertCount = alertLimit.getValue();
+  let remainingAlertCount = alertsClient.getAlertLimitValue();
 
   for (const group of groupResults) {
     if (remainingAlertCount <= 0) {
@@ -579,7 +595,7 @@ export const processGroupByResults = (
     }
   }
 
-  alertLimit.setLimitReached(remainingAlertCount <= 0);
+  alertsClient.setAlertLimitReached(remainingAlertCount <= 0);
 };
 
 export const processGroupByRatioResults = (
@@ -587,14 +603,19 @@ export const processGroupByRatioResults = (
   denominatorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   params: RatioRuleParams,
   alertReporter: LogThresholdAlertReporter,
-  alertLimit: LogThresholdAlertLimit
+  alertsClient: PublicAlertsClient<
+    LogThresholdAlert,
+    AlertState,
+    AlertContext,
+    LogThresholdActionGroups
+  >
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
   const numeratorGroupResults = getReducedGroupByResults(numeratorResults);
   const denominatorGroupResults = getReducedGroupByResults(denominatorResults);
 
-  let remainingAlertCount = alertLimit.getValue();
+  let remainingAlertCount = alertsClient.getAlertLimitValue();
 
   for (const numeratorGroup of numeratorGroupResults) {
     if (remainingAlertCount <= 0) {
@@ -654,7 +675,7 @@ export const processGroupByRatioResults = (
     }
   }
 
-  alertLimit.setLimitReached(remainingAlertCount <= 0);
+  alertsClient.setAlertLimitReached(remainingAlertCount <= 0);
 };
 
 export const getGroupedESQuery = (
