@@ -246,20 +246,21 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
   );
 
   const accessors = getAccessorsFromArgs(args, data.columns);
+  const metricAccessor = accessors?.metric;
 
-  if (!accessors || !accessors.metric) {
+  if (!metricAccessor) {
     // Chart is not ready
     return null;
   }
 
-  const metricColumn = data.columns.find((col) => col.id === accessors.metric);
+  const metricColumn = data.columns.find((col) => col.id === metricAccessor);
 
   const chartData = data.rows.filter(
-    (v) => typeof v[accessors.metric!] === 'number' || Array.isArray(v[accessors.metric!])
+    (v) => typeof v[metricAccessor] === 'number' || Array.isArray(v[metricAccessor])
   );
   const row = chartData?.[0];
 
-  const metricValue = args.metric ? getValueFromAccessor(accessors.metric, row) : undefined;
+  const metricValue = args.metric ? getValueFromAccessor(metricAccessor, row) : undefined;
 
   const icon = getGaugeIconByType(gaugeType);
 
