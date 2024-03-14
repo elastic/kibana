@@ -44,9 +44,9 @@ const isApiCompatible = (api: unknown | null): api is FiltersNotificationActionA
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
   if (!isApiCompatible(api) || getInheritedViewMode(api) !== 'edit') return false;
-  const query = api.query?.value;
+  const query = api.query$?.value;
   return (
-    (api.filters?.value ?? []).length > 0 ||
+    (api.filters$?.value ?? []).length > 0 ||
     (isOfQueryType(query) && query.query !== '') ||
     isOfAggregateQueryType(query)
   );
@@ -102,7 +102,7 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
   ) {
     if (!isApiCompatible(embeddable)) return;
     return merge(
-      ...[embeddable.query, embeddable.filters, getViewModeSubject(embeddable)].filter((value) =>
+      ...[embeddable.query$, embeddable.filters$, getViewModeSubject(embeddable)].filter((value) =>
         Boolean(value)
       )
     ).subscribe(() => onChange(compatibilityCheck(embeddable), this));

@@ -487,7 +487,7 @@ export const initializeDashboard = async ({
     }
 
     const filters = new BehaviorSubject<Filter[] | undefined>(getCombinedFilters());
-    dashboardContainer.filters = filters;
+    dashboardContainer.filters$ = filters;
 
     const inputFilters$ = dashboardContainer.getInput$().pipe(
       startWith(dashboardContainer.getInput()),

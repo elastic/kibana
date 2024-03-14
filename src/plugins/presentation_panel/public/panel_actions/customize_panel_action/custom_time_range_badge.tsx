@@ -31,7 +31,7 @@ export class CustomTimeRangeBadge
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!apiPublishesUnifiedSearch(embeddable)) throw new IncompatibleActionError();
-    const timeRange = embeddable.timeRange.value;
+    const timeRange = embeddable.timeRange$.value;
     if (!timeRange) return '';
     return renderToString(
       <PrettyDuration
@@ -51,7 +51,7 @@ export class CustomTimeRangeBadge
     onChange: (isCompatible: boolean, action: CustomTimeRangeBadge) => void
   ) {
     if (!apiPublishesUnifiedSearch(embeddable)) return;
-    return embeddable.timeRange.subscribe((timeRange) => {
+    return embeddable.timeRange$.subscribe((timeRange) => {
       onChange(Boolean(timeRange), this);
     });
   }
@@ -66,7 +66,7 @@ export class CustomTimeRangeBadge
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (apiPublishesUnifiedSearch(embeddable)) {
-      const timeRange = embeddable.timeRange.value;
+      const timeRange = embeddable.timeRange$.value;
       return Boolean(timeRange);
     }
     return false;

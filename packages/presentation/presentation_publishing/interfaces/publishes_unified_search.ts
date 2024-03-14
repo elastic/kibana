@@ -11,9 +11,9 @@ import { PublishingSubject } from '../publishing_subject';
 
 export interface PublishesUnifiedSearch {
   isCompatibleWithUnifiedSearch?: () => boolean;
-  timeRange: PublishingSubject<TimeRange | undefined>;
-  filters: PublishingSubject<Filter[] | undefined>;
-  query: PublishingSubject<Query | AggregateQuery | undefined>;
+  timeRange$: PublishingSubject<TimeRange | undefined>;
+  filters$: PublishingSubject<Filter[] | undefined>;
+  query$: PublishingSubject<Query | AggregateQuery | undefined>;
 }
 
 export type PublishesWritableUnifiedSearch = PublishesUnifiedSearch & {
@@ -27,9 +27,9 @@ export const apiPublishesUnifiedSearch = (
 ): unknownApi is PublishesUnifiedSearch => {
   return Boolean(
     unknownApi &&
-      (unknownApi as PublishesUnifiedSearch)?.timeRange !== undefined &&
-      (unknownApi as PublishesUnifiedSearch)?.filters !== undefined &&
-      (unknownApi as PublishesUnifiedSearch)?.query !== undefined
+      (unknownApi as PublishesUnifiedSearch)?.timeRange$ !== undefined &&
+      (unknownApi as PublishesUnifiedSearch)?.filters$ !== undefined &&
+      (unknownApi as PublishesUnifiedSearch)?.query$ !== undefined
   );
 };
 
@@ -37,9 +37,9 @@ export const apiPublishesPartialUnifiedSearch = (
   unknownApi: null | unknown
 ): unknownApi is Partial<PublishesUnifiedSearch> => {
   return Boolean(
-    (unknownApi && (unknownApi as PublishesUnifiedSearch)?.timeRange !== undefined) ||
-      (unknownApi as PublishesUnifiedSearch)?.filters !== undefined ||
-      (unknownApi as PublishesUnifiedSearch)?.query !== undefined
+    (unknownApi && (unknownApi as PublishesUnifiedSearch)?.timeRange$ !== undefined) ||
+      (unknownApi as PublishesUnifiedSearch)?.filters$ !== undefined ||
+      (unknownApi as PublishesUnifiedSearch)?.query$ !== undefined
   );
 };
 

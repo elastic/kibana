@@ -34,9 +34,9 @@ describe('custom time range badge action', () => {
     action = new CustomTimeRangeBadge();
     context = {
       embeddable: {
-        timeRange: timeRangeSubject,
-        filters: new BehaviorSubject<Filter[] | undefined>(undefined),
-        query: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
+        timeRange$: timeRangeSubject,
+        filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
+        query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
       },
     };
   });

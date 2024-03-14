@@ -178,29 +178,29 @@ export const legacyEmbeddableToApi = (
    * to tell when given a legacy embeddable what it's input could contain. All existing actions treat these as optional
    * so if the Embeddable is incapable of publishing unified search state (i.e. markdown) then it will just be ignored.
    */
-  const timeRange = inputKeyToSubject<TimeRange | undefined>('timeRange', true);
+  const timeRange$ = inputKeyToSubject<TimeRange | undefined>('timeRange', true);
   const setTimeRange = (nextTimeRange?: TimeRange) =>
     embeddable.updateInput({ timeRange: nextTimeRange });
 
-  const filters: BehaviorSubject<Filter[] | undefined> = new BehaviorSubject<Filter[] | undefined>(
+  const filters$: BehaviorSubject<Filter[] | undefined> = new BehaviorSubject<Filter[] | undefined>(
     undefined
   );
-  const query: BehaviorSubject<Query | AggregateQuery | undefined> = new BehaviorSubject<
+  const query$: BehaviorSubject<Query | AggregateQuery | undefined> = new BehaviorSubject<
     Query | AggregateQuery | undefined
   >(undefined);
   // if this embeddable is a legacy filterable embeddable, publish changes to those filters to the panelFilters subject.
   if (isFilterableEmbeddable(embeddable)) {
     embeddable.untilInitializationFinished().then(() => {
-      filters.next(embeddable.getFilters());
-      query.next(embeddable.getQuery());
+      filters$.next(embeddable.getFilters());
+      query$.next(embeddable.getQuery());
 
       subscriptions.add(
         embeddable.getInput$().subscribe(() => {
-          if (!compareFilters(embeddable.filters.getValue() ?? [], embeddable.getFilters())) {
-            filters.next(embeddable.getFilters());
+          if (!compareFilters(embeddable.filters$.getValue() ?? [], embeddable.getFilters())) {
+            filters$.next(embeddable.getFilters());
           }
-          if (!deepEqual(embeddable.query.getValue() ?? [], embeddable.getQuery())) {
-            query.next(embeddable.getQuery());
+          if (!deepEqual(embeddable.query$.getValue() ?? [], embeddable.getQuery())) {
+            query$.next(embeddable.getQuery());
           }
         })
       );
@@ -238,10 +238,10 @@ export const legacyEmbeddableToApi = (
       isEditingEnabled,
       getTypeDisplayName,
 
-      timeRange,
+      timeRange$,
       setTimeRange,
-      filters,
-      query,
+      filters$,
+      query$,
       isCompatibleWithUnifiedSearch,
 
       dataViews,

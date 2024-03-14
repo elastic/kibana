@@ -34,11 +34,11 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
 
   const editPanelAction = getEditPanelAction();
 
-  const filters = useMemo(() => api.filters?.value, [api]);
+  const filters = useMemo(() => api.filters$?.value, [api]);
   const displayName = dashboardFilterNotificationActionStrings.getDisplayName();
 
   const { queryString, queryLanguage } = useMemo(() => {
-    const query = api.query?.value;
+    const query = api.query$?.value;
     if (!query) return {};
     if (isOfQueryType(query)) {
       if (typeof query.query === 'string') {

@@ -105,7 +105,7 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
     const searchFilters = parentSearchSource?.getField('filter') ?? visFilters;
     const searchQuery = parentSearchSource?.getField('query') ?? visQuery;
     const title = vis.title || embeddable.panelTitle?.getValue();
-    const panelTimeRange = embeddable.timeRange?.getValue();
+    const panelTimeRange = embeddable.timeRange$?.getValue();
     const updatedWithMeta = {
       ...navigateToLensConfig,
       title,

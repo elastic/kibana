@@ -77,7 +77,7 @@ const setup = (
         id: 'index-ptr-foo',
       },
     ]),
-    filters: new BehaviorSubject([]),
+    filters$: new BehaviorSubject([]),
     parentApi: {
       viewMode: new BehaviorSubject(ViewMode.VIEW),
     },

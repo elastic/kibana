@@ -79,16 +79,16 @@ export abstract class AbstractExploreDataAction {
 
     const parentParams: DiscoverAppLocatorParams = {};
     if (apiHasParentApi(embeddable) && apiPublishesPartialUnifiedSearch(embeddable.parentApi)) {
-      parentParams.filters = embeddable.parentApi.filters?.getValue() ?? [];
-      parentParams.query = embeddable.parentApi.query?.getValue();
-      parentParams.timeRange = embeddable.parentApi.timeRange?.getValue();
+      parentParams.filters = embeddable.parentApi.filters$?.getValue() ?? [];
+      parentParams.query = embeddable.parentApi.query$?.getValue();
+      parentParams.timeRange = embeddable.parentApi.timeRange$?.getValue();
     }
 
     const childParams: DiscoverAppLocatorParams = {};
     if (apiPublishesPartialUnifiedSearch(embeddable)) {
-      childParams.filters = embeddable.filters?.getValue() ?? [];
-      childParams.query = embeddable.query?.getValue();
-      childParams.timeRange = embeddable.timeRange?.getValue();
+      childParams.filters = embeddable.filters$?.getValue() ?? [];
+      childParams.query = embeddable.query$?.getValue();
+      childParams.timeRange = embeddable.timeRange$?.getValue();
     }
 
     const params: DiscoverAppLocatorParams = {

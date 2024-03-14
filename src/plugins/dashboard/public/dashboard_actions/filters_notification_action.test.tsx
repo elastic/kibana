@@ -61,8 +61,8 @@ describe('filters notification action', () => {
           getAllDataViews: jest.fn(),
           getDashboardPanelFromId: jest.fn(),
         },
-        filters: filtersSubject,
-        query: querySubject,
+        filters$: filtersSubject,
+        query$: querySubject,
       },
     };
   });

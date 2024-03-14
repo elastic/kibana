@@ -39,13 +39,13 @@ export function FiltersDetails({ editMode, api }: FiltersDetailsProps) {
   const [queryLanguage, setQueryLanguage] = useState<'sql' | 'esql' | undefined>();
   const dataViews = api.dataViews?.value ?? [];
 
-  const filters = useMemo(() => api.filters?.value ?? [], [api]);
+  const filters = useMemo(() => api.filters$?.value ?? [], [api]);
 
   const [incompatibleQueryLanguage, setIncompatibleQueryLanguage] = useState(false);
   const showEditButton = hasEditCapabilities(api) && editMode && !incompatibleQueryLanguage;
 
   useMount(() => {
-    const localQuery = api.query?.value;
+    const localQuery = api.query$?.value;
     if (localQuery) {
       if (isOfQueryType(localQuery)) {
         if (typeof localQuery.query === 'string') {

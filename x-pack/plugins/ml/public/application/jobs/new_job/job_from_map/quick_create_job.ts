@@ -80,8 +80,8 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
     } = await getJobsItemsFromEmbeddable(embeddable);
 
     // Map level stuff
-    const embeddableQuery = (embeddable.query?.value as Query) ?? getDefaultQuery();
-    const embeddableFilters = embeddable.filters?.value ?? [];
+    const embeddableQuery = (embeddable.query$?.value as Query) ?? getDefaultQuery();
+    const embeddableFilters = embeddable.filters$?.value ?? [];
 
     if (dashboardQuery === undefined || dashboardFilters === undefined) {
       throw new Error('Cannot create job, query and filters are undefined');
