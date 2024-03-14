@@ -10,11 +10,11 @@ import type {
   HasType,
   PublishesDataViews,
   PublishesPanelTitle,
-  PublishesLocalUnifiedSearch,
+  PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import {
   apiIsOfType,
-  apiPublishesLocalUnifiedSearch,
+  apiPublishesUnifiedSearch,
   apiPublishesPanelTitle,
 } from '@kbn/presentation-publishing';
 import type { ILayer } from '../classes/layers/layer';
@@ -23,7 +23,7 @@ export type MapApi = HasType<'map'> & {
   getLayerList: () => ILayer[];
 } & PublishesDataViews &
   PublishesPanelTitle &
-  PublishesLocalUnifiedSearch &
+  PublishesUnifiedSearch &
   Partial<HasParentApi<unknown>>;
 
 export const isMapApi = (api: unknown): api is MapApi => {
@@ -32,6 +32,6 @@ export const isMapApi = (api: unknown): api is MapApi => {
       apiIsOfType(api, 'map') &&
       typeof (api as MapApi).getLayerList === 'function' &&
       apiPublishesPanelTitle(api) &&
-      apiPublishesLocalUnifiedSearch(api)
+      apiPublishesUnifiedSearch(api)
   );
 };
