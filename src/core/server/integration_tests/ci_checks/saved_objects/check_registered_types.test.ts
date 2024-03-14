@@ -151,7 +151,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "synthetics-param": "3ebb744e5571de678b1312d5c418c8188002cf5e",
         "synthetics-privates-locations": "f53d799d5c9bc8454aaa32c6abc99a899b025d5c",
         "tag": "e2544392fe6563e215bb677abc8b01c2601ef2dc",
-        "task": "04f30bd7bae923f3a53c31ab3b9745a93872fc02",
+        "task": "d17f2fc0bf6759a070c2221ec2787ad785c680fe",
         "telemetry": "7b00bcf1c7b4f6db1192bb7405a6a63e78b699fd",
         "threshold-explorer-view": "175306806f9fc8e13fcc1c8953ec4ba89bda1b70",
         "ui-metric": "d227284528fd19904e9d972aea0a13716fc5fe24",

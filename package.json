@@ -1176,7 +1176,6 @@
     "@bazel/typescript": "4.6.2",
     "@cypress/code-coverage": "^3.12.18",
     "@cypress/grep": "^4.0.1",
-    "@cypress/snapshot": "^2.1.7",
     "@cypress/webpack-preprocessor": "^6.0.1",
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/makelogs": "^6.1.1",

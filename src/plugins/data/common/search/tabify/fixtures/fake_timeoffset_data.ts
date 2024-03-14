@@ -6,20 +6,14 @@
  * Side Public License, v 1.
  */
 
-export type {
-  AggregationOptionsByType,
-  ESSearchOptions,
-  SearchHit,
-  ESSearchResponse,
-  ESSearchRequest,
-  ESSourceOptions,
-  InferSearchResponseOf,
-  AggregationResultOf,
-  AggregationResultOfMap,
-  ESFilter,
-  MaybeReadonlyArray,
-  ESQLColumn,
-  ESQLRow,
-  ESQLSearchReponse,
-  ESQLSearchParams,
-} from './src';
+export const timeOffsetFiltersWithZeroDocCountResponse = {
+  hits: {
+    total: 474,
+    max_score: 0,
+    hits: [],
+  },
+  aggregations: {
+    doc_count: 0,
+    doc_count_86400000: 234,
+  },
+};
