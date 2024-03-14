@@ -7,11 +7,15 @@
  */
 
 import { CharStreams } from 'antlr4';
+import {
+  getAstAndSyntaxErrors,
+  getParser,
+  ROOT_STATEMENT,
+  ESQLErrorListener,
+} from '@kbn/esql-ast-core';
 import type { monaco } from '../../monaco_imports';
 import type { BaseWorkerDefinition } from '../../types';
-import { getParser, ROOT_STATEMENT } from '../lib/antlr_facade';
-import { AstListener } from '../lib/ast/ast_factory';
-import { ESQLErrorListener } from '../lib/monaco/esql_error_listener';
+import { wrapAsMonacoMessages } from '../lib/editor_conversion_utils';
 
 export class ESQLWorker implements BaseWorkerDefinition {
   private readonly _ctx: monaco.worker.IWorkerContext;
@@ -38,26 +42,16 @@ export class ESQLWorker implements BaseWorkerDefinition {
 
       parser[ROOT_STATEMENT]();
 
-      return errorListener.getErrors();
+      return wrapAsMonacoMessages(inputStream.toString(), errorListener.getErrors());
     }
     return [];
   }
 
   async getAst(text: string | undefined) {
-    if (!text) {
-      return { ast: [], errors: [] };
-    }
-    const inputStream = CharStreams.fromString(text);
-    const errorListener = new ESQLErrorListener();
-    const parserListener = new AstListener();
-    const parser = getParser(inputStream, errorListener, parserListener);
-
-    parser[ROOT_STATEMENT]();
-
-    const { ast } = parserListener.getAst();
+    const rawAst = await getAstAndSyntaxErrors(text);
     return {
-      ast,
-      errors: errorListener.getErrors(),
+      ast: rawAst.ast,
+      errors: wrapAsMonacoMessages(text || '', rawAst.errors),
     };
   }
 }

@@ -19,9 +19,8 @@ function getConfigPath() {
   return Path.resolve(
     REPO_ROOT,
     'packages',
-    'kbn-monaco',
+    'kbn-esql-ast-core',
     'src',
-    'esql',
     'lib',
     'ast',
     'validation'

@@ -4588,6 +4588,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-ast-core@link:packages/kbn-esql-ast-core":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-utils@link:packages/kbn-esql-utils":
   version "0.0.0"
   uid ""
