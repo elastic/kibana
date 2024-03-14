@@ -137,6 +137,9 @@ const LicenseExpired = () => {
       }
       actions={[
         <EuiButton
+          aria-label={i18n.translate('xpack.synthetics.invalidLicense.manageYourLicenseButton', {
+            defaultMessage: 'Navigate to license management',
+          })}
           data-test-subj="apmInvalidLicenseNotificationManageYourLicenseButton"
           isDisabled={!licenseManagementEnabled}
           href={basePath + '/app/management/stack/license_management'}
