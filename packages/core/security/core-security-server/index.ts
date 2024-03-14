@@ -8,10 +8,7 @@
 
 export type { SecurityServiceSetup, SecurityServiceStart } from './src/contracts';
 export type { CoreAuthenticationService } from './src/authc';
-export type {
-  CoreSecurityContract,
-  AuthenticationServiceContract,
-} from './src/api_provider';
+export type { CoreSecurityContract, AuthenticationServiceContract } from './src/api_provider';
 export type {
   SecurityRequestHandlerContext,
   AuthcRequestHandlerContext,
