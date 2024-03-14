@@ -21,7 +21,6 @@ import {
   GaugeLabelMajorMode,
   GaugeLabelMajorModes,
   GaugeColorModes,
-  GaugeShapes,
   GaugeTicksPositions,
 } from '../../common';
 import {
@@ -200,7 +199,11 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
 
       return paletteService
         .get(paletteConfig?.name ?? 'custom')
-        .getColorForValue?.(value, { ...paletteConfig.params, stops }, computeMinMax(paletteConfig, bands));
+        .getColorForValue?.(
+          value,
+          { ...paletteConfig.params, stops },
+          computeMinMax(paletteConfig, bands)
+        );
     },
     [paletteService]
   );
@@ -242,17 +245,16 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
     [renderComplete]
   );
 
-  const table = data;
-  const accessors = getAccessorsFromArgs(args, table.columns);
+  const accessors = getAccessorsFromArgs(args, data.columns);
 
   if (!accessors || !accessors.metric) {
     // Chart is not ready
     return null;
   }
 
-  const metricColumn = table.columns.find((col) => col.id === accessors.metric);
+  const metricColumn = data.columns.find((col) => col.id === accessors.metric);
 
-  const chartData = table.rows.filter(
+  const chartData = data.rows.filter(
     (v) => typeof v[accessors.metric!] === 'number' || Array.isArray(v[accessors.metric!])
   );
   const row = chartData?.[0];
@@ -317,22 +319,14 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
   let bands: number[] = (palette?.params as CustomPaletteState)
     ? normalizeBands(palette?.params as CustomPaletteState, { min, max })
     : [min, max];
-
-  // TODO: format in charts
-  let actualValue = Math.round(Math.min(Math.max(metricValue, min), max) * 1000) / 1000;
+  let actualValue = metricValue;
 
   if (args.percentageMode && palette?.params && palette?.params.stops?.length) {
     bands = normalizeBandsLegacy(palette?.params as CustomPaletteState, actualValue);
     actualValue = actualValueToPercentsLegacy(palette?.params as CustomPaletteState, actualValue);
   }
 
-  const totalTicks = getTicks(ticksPosition, bands);
-  // remove last tick on circle gauge. See https://github.com/elastic/elastic-charts/issues/2200
-  const ticks =
-    totalTicks && gaugeType === GaugeShapes.CIRCLE
-      ? totalTicks.slice(0, totalTicks.length - 1)
-      : totalTicks;
-
+  const ticks = getTicks(ticksPosition, bands);
   const labelMajorTitle = getTitle(labelMajorMode, labelMajor, metricColumn?.name);
 
   const colorFn = (val: number) => {
