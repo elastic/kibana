@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('index pattern filter', function describeIndexTests() {
     // https://github.com/elastic/kibana/issues/178733
-    this.tags('skipOnMKI');
+    this.tags('failsOnMKI');
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
