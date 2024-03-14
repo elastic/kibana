@@ -378,11 +378,7 @@ export function getDiscoverStateContainer({
     // This needs to be the first thing that's wired up because initAndSync is pulling the current state from the URL which
     // might change the time filter and thus needs to re-check whether the saved search has changed.
     const timefilerUnsubscribe = services.timefilter.getTimeUpdate$().subscribe(() => {
-      savedSearchContainer.update({
-        nextDataView: internalStateContainer.getState().dataView,
-        nextState: appStateContainer.getState(),
-        useFilterAndQueryServices: true,
-      });
+      savedSearchContainer.updateTimeRange();
     });
 
     // initialize app state container, syncing with _g and _a part of the URL

@@ -112,6 +112,10 @@ export interface DiscoverSavedSearchContainer {
    */
   update: (params: UpdateParams) => SavedSearch;
   /**
+   * Updates the current state of the saved search with new time range
+   */
+  updateTimeRange: () => void;
+  /**
    * Passes filter manager filters to saved search filters
    * @param params
    */
@@ -218,6 +222,21 @@ export function getSavedSearchContainer({
     return nextSavedSearch;
   };
 
+  const updateTimeRange = () => {
+    const previousSavedSearch = getState();
+    if (!previousSavedSearch.timeRestore) {
+      return;
+    }
+    const nextSavedSearch: SavedSearch = {
+      ...previousSavedSearch,
+      timeRange: services.timefilter.getTime(),
+    };
+
+    assignNextSavedSearch({ nextSavedSearch });
+
+    addLog('[savedSearch] updateWithTimeRange done', nextSavedSearch);
+  };
+
   const load = async (id: string, dataView: DataView | undefined): Promise<SavedSearch> => {
     addLog('[savedSearch] load', { id, dataView });
 
@@ -245,6 +264,7 @@ export function getSavedSearchContainer({
     persist,
     set,
     update,
+    updateTimeRange,
     updateWithFilterManagerFilters,
   };
 }
