@@ -1543,8 +1543,6 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 **/*.scss @elastic/kibana-design
 
 # Observability design
-/x-pack/plugins/observability_solution/apm/**/*.scss @elastic/observability-design
-/x-pack/plugins/observability_solution/infra/**/*.scss @elastic/observability-design
 /x-pack/plugins/fleet/**/*.scss @elastic/observability-design
 /x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
 
@@ -1556,7 +1554,6 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 /x-pack/plugins/security_solution/**/*.scss @elastic/security-design
 /x-pack/plugins/security_solution_ess/**/*.scss @elastic/security-design
 /x-pack/plugins/security_solution_serverless/**/*.scss @elastic/security-design
-/x-pack/plugins/observability_solution/logs_explorer/**/*.scss @elastic/observability-design
 
 # Logstash
 #CC# /x-pack/plugins/logstash/ @elastic/logstash
