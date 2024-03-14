@@ -199,7 +199,7 @@ export default function AlertDetailsAppSection({
             <Groups groups={groups} timeRange={timeRange} />
             <span>
               <EuiLink
-                data-test-subj="o11yAlertDetailsAppSectionViewRelatedLogsLink"
+                data-test-subj="o11yCustomThresholdAlertDetailsViewRelatedLogs"
                 href={viewInAppUrl}
                 target="_blank"
               >

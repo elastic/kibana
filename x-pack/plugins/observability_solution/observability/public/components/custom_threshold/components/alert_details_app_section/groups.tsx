@@ -101,7 +101,11 @@ export function Groups({ groups, timeRange }: { groups: GroupItem[]; timeRange: 
         : `${infraSourceLinks[field]}/${value}?${infraTimeRange}`;
 
     return (
-      <EuiLink data-test-subj="o11yGenerateInfraSourceLinkLink" href={link} target="_blank">
+      <EuiLink
+        data-test-subj="o11yCustomThresholdAlertDetailsInfraSourceLink"
+        href={link}
+        target="_blank"
+      >
         {value}
       </EuiLink>
     );
@@ -137,7 +141,7 @@ export function Groups({ groups, timeRange }: { groups: GroupItem[]; timeRange: 
 
     return (
       <EuiLink
-        data-test-subj="o11yGenerateApmSourceLinkLink"
+        data-test-subj="o11yCustomThresholdAlertDetailsApmSourceLink"
         href={apmLocator?.getRedirectUrl(apmLocatorPayload)}
         target="_blank"
       >
