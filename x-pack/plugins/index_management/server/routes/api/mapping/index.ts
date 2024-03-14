@@ -6,3 +6,4 @@
  */
 
 export { registerMappingRoute } from './register_mapping_route';
+export { registerUpdateMappingRoute } from './register_update_mapping_route';

@@ -6,21 +6,21 @@
  */
 
 import React, { useMemo, useCallback, useEffect } from 'react';
-import { EuiSpacer } from '@elastic/eui';
 
 import { GlobalFlyout } from '../../shared_imports';
 import { useMappingsState, useDispatch } from '../../mappings_state_context';
 import { deNormalize } from '../../lib';
 import { EditFieldContainer, EditFieldContainerProps, defaultFlyoutProps } from './fields';
-import { DocumentFieldsHeader } from './document_fields_header';
 import { DocumentFieldsJsonEditor } from './fields_json_editor';
 import { DocumentFieldsTreeEditor } from './fields_tree_editor';
-import { SearchResult } from './search_fields';
 
 const { useGlobalFlyout } = GlobalFlyout;
-
-export const DocumentFields = React.memo(() => {
-  const { fields, search, documentFields } = useMappingsState();
+interface Props {
+  searchComponent?: React.ReactElement;
+  searchTerm?: React.ReactElement;
+}
+export const DocumentFields = React.memo(({ searchComponent, searchTerm }: Props) => {
+  const { fields, documentFields } = useMappingsState();
   const dispatch = useDispatch();
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
@@ -40,13 +40,6 @@ export const DocumentFields = React.memo(() => {
     ) : (
       <DocumentFieldsTreeEditor />
     );
-
-  const onSearchChange = useCallback(
-    (value: string) => {
-      dispatch({ type: 'search:update', value });
-    },
-    [dispatch]
-  );
 
   const exitEdit = useCallback(() => {
     dispatch({ type: 'documentField.changeStatus', value: 'idle' });
@@ -80,17 +73,10 @@ export const DocumentFields = React.memo(() => {
     };
   }, [isEditing, exitEdit]);
 
-  const searchTerm = search.term.trim();
-
   return (
     <div data-test-subj="documentFields">
-      <DocumentFieldsHeader searchValue={search.term} onSearchChange={onSearchChange} />
-      <EuiSpacer size="m" />
-      {searchTerm !== '' ? (
-        <SearchResult result={search.result} documentFieldsState={documentFields} />
-      ) : (
-        editor
-      )}
+      {searchComponent}
+      {searchTerm ? searchTerm : editor}
     </div>
   );
 });

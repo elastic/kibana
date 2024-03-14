@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import React, { FunctionComponent, useMemo, useState, useCallback } from 'react';
 import {
+  EuiAccordion,
   EuiButton,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
   EuiEmptyPrompt,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import { Index } from '../../../../../../common';
 import { useAppContext } from '../../../../app_context';
 import { DocumentFieldsSearch } from '../../../../components/mappings_editor/components/document_fields/document_fields_search';
@@ -36,22 +39,33 @@ import {
 } from '../../../../components/mappings_editor/mappings_state_context';
 import { useMappingsStateListener } from '../../../../components/mappings_editor/use_state_listener';
 import { documentationService } from '../../../../services';
-
+import { DocumentFields } from '../../../../components/mappings_editor/components';
+import { deNormalize } from '../../../../components/mappings_editor/lib';
+import { updateIndexMappings } from '../../../../services/api';
+import { notificationService } from '../../../../services/notification';
+import { i18n } from '@kbn/i18n';
 export const DetailsPageMappingsContent: FunctionComponent<{
   index: Index;
   data: string;
   jsonData: any;
-}> = ({ index, data, jsonData }) => {
+  refetchMapping: () => void;
+}> = ({ index, data, jsonData, refetchMapping }) => {
   const {
     services: { extensionsService },
     core: { getUrlForApp },
   } = useAppContext();
   const { euiTheme } = useEuiTheme();
+  const state = useMappingsState();
 
+  const indexName = index.name;
   const [isJSONVisible, setIsJSONVisible] = useState(true);
   const onToggleChange = () => {
     setIsJSONVisible(!isJSONVisible);
   };
+  const newFieldsLength = useMemo(() => {
+    return Object.keys(state.fields.byId).length;
+  }, [state.fields.byId]);
+
   const mappingsDefinition = extractMappingsDefinition(jsonData);
 
   const { parsedDefaultValue } = useMemo<MappingsEditorParsedMetadata>(() => {
@@ -97,6 +111,22 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   }, [mappingsDefinition]);
 
   useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
+  const [addFieldComponent, hideAddFieldComponent] = useState<boolean>(false);
+  const updateMappings = async () => {
+    const { error } = await updateIndexMappings(indexName, deNormalize(state.fields));
+    if (!error) {
+      notificationService.showSuccessToast(
+        i18n.translate('xpack.idxMgmt.indexDetails.mappings.successfullyUpdatedIndexMappings', {
+          defaultMessage: 'Index Mapping was successfully updated',
+          values: { indexName },
+        })
+      );
+      refetchMapping();
+    }
+  };
+  const pendingFieldListId = useGeneratedHtmlId({
+    prefix: 'pendingFieldListId',
+  });
 
   const {
     fields: { byId, rootLevelFields },
@@ -159,6 +189,149 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           <FieldsList fields={fields} />
         )}
       </EuiFlexItem>
+      <EuiFlexItem
+        grow={1}
+        css={css`
+          min-width: 400px;
+        `}
+      >
+        <EuiPanel grow={false} paddingSize="l">
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="iInCircle" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h2>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexDetails.mappings.docsCardTitle"
+                    defaultMessage="About index mappings"
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.idxMgmt.indexDetails.mappings.docsCardDescription"
+                defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type
+              (such as keyword, number, or date) and additional subfields. These index mappings determine the functions
+              available in your relevance tuning and search experience."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiLink
+            data-test-subj="indexDetailsMappingsDocsLink"
+            href={documentationService.getMappingDocumentationLink()}
+            target="_blank"
+            external
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.indexDetails.mappings.docsCardLink"
+              defaultMessage="Learn more about mappings"
+            />
+          </EuiLink>
+        </EuiPanel>
+        {extensionsService.indexMappingsContent && (
+          <>
+            <EuiSpacer />
+            {extensionsService.indexMappingsContent.renderContent({ index, getUrlForApp })}
+          </>
+        )}
+      </EuiFlexItem>
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem
+          grow={1}
+          css={css`
+            min-width: 600px;
+          `}
+        >
+          <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd">
+            {!addFieldComponent ? (
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={() => hideAddFieldComponent(!addFieldComponent)}>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexDetails.mappings.addFieldButton"
+                    defaultMessage="Add field"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={updateMappings}
+                  color="success"
+                  fill
+                  disabled={newFieldsLength === 0 ?? true}
+                >
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexDetails.mappings.saveMappingsButton"
+                    defaultMessage="Save mappings"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexItem
+            grow={1}
+            css={css`
+              min-width: 400px;
+            `}
+          >
+            {addFieldComponent && (
+              <EuiAccordion
+                id={pendingFieldListId}
+                buttonContent={
+                  <EuiFlexGroup gutterSize="s" alignItems="baseline">
+                    <EuiFlexItem grow={6}>
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexDetails.mappings.addMappingPendingBlock"
+                        defaultMessage="Pending fields"
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiNotificationBadge
+                        color={newFieldsLength > 0 ? 'accent' : 'subdued'}
+                        size="s"
+                      >
+                        {newFieldsLength}
+                      </EuiNotificationBadge>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                }
+                borders="all"
+              >
+                <EuiPanel>
+                  <DocumentFields />
+                </EuiPanel>
+              </EuiAccordion>
+            )}
+          </EuiFlexItem>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={3}
+          css={css`
+            min-width: 600px;
+          `}
+        >
+          <EuiPanel>
+            <EuiCodeBlock
+              language="json"
+              isCopyable
+              data-test-subj="indexDetailsMappingsCodeBlock"
+              css={css`
+                height: 100%;
+              `}
+            >
+              {data}
+            </EuiCodeBlock>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 
