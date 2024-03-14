@@ -10,7 +10,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import { type DeleteTransformsRequestSchema } from '../../../../common/api_schemas/delete_transforms';
 
 import type { TransformRequestHandlerContext } from '../../../services/license';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 import { wrapError, wrapEsError } from '../../utils/error_utils';
 

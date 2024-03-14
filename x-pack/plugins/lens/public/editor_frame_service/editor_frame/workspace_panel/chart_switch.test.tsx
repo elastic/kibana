@@ -64,6 +64,7 @@ describe('chart_switch', () => {
    *  - Never switches to subvisC2
    *  - Allows a switch to subvisC3
    *  - Allows a switch to subvisC1
+   * visD: is not visible because hideFromChartSwitch returns true
    */
   function mockVisualizationMap() {
     return {
@@ -113,6 +114,10 @@ describe('chart_switch', () => {
             },
           ];
         }),
+      },
+      visD: {
+        ...generateVisualization('visD'),
+        hideFromChartSwitch: () => true,
       },
     };
   }
@@ -545,7 +550,7 @@ describe('chart_switch', () => {
     });
   });
 
-  it('should show all visualization types', async () => {
+  it('should show all visualization types and subtypes except from one that are hidden (D)', async () => {
     const { openChartSwitch, getMenuItem } = renderChartSwitch();
     openChartSwitch();
     const allDisplayed = ['visA', 'visB', 'subvisC1', 'subvisC2', 'subvisC3'].every((subType) =>

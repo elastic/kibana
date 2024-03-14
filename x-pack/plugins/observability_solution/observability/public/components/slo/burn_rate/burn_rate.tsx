@@ -98,7 +98,7 @@ export function BurnRate({ threshold, burnRate, slo, isLoading }: BurnRateParams
                   <span>
                     {i18n.translate('xpack.observability.slo.burnRate.threshold', {
                       defaultMessage: 'Threshold is {threshold}x',
-                      values: { threshold },
+                      values: { threshold: numeral(threshold).format('0.[00]') },
                     })}
                   </span>
                 </EuiTextColor>

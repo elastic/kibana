@@ -17,6 +17,7 @@ import {
   getSupportedUrlParams,
 } from '../utils/url_params/get_supported_url_params';
 import { makeBaseBreadcrumb, useBreadcrumbs } from './use_breadcrumbs';
+import { SyntheticsSettingsContext } from '../contexts';
 
 describe('useBreadcrumbs', () => {
   it('sets the given breadcrumbs', () => {
@@ -49,7 +50,20 @@ describe('useBreadcrumbs', () => {
     render(
       <KibanaContextProvider services={{ ...core }}>
         <Route path={OVERVIEW_ROUTE}>
-          <Component />
+          <SyntheticsSettingsContext.Provider
+            value={{
+              basePath: '/app/synthetics',
+              canSave: true,
+              dateRangeStart: '',
+              dateRangeEnd: '',
+              isApmAvailable: true,
+              setBreadcrumbs: core.chrome.setBreadcrumbs,
+              isInfraAvailable: false,
+              isLogsAvailable: false,
+            }}
+          >
+            <Component />
+          </SyntheticsSettingsContext.Provider>
         </Route>
       </KibanaContextProvider>
     );
@@ -57,7 +71,7 @@ describe('useBreadcrumbs', () => {
     const urlParams: SyntheticsUrlParams = getSupportedUrlParams({});
     expect(JSON.stringify(getBreadcrumbs())).toEqual(
       JSON.stringify(
-        makeBaseBreadcrumb('/app/synthetics', '/app/observability', urlParams).concat(
+        makeBaseBreadcrumb('/app/synthetics', '/app/observability', urlParams, false).concat(
           expectedCrumbs
         )
       )

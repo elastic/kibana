@@ -14,6 +14,10 @@ import {
   cpuUsageSteal,
   cpuUsageSystem,
   cpuUsageUser,
+  load1m,
+  load15m,
+  load5m,
+  normalizedLoad1m,
 } from './cpu';
 
 import {
@@ -28,7 +32,6 @@ import {
 
 import { hostCount } from './host_count';
 import { logRate } from './log_rate';
-import { load1m, load15m, load5m, normalizedLoad1m } from './load';
 import {
   memoryUsage,
   memoryCache,
@@ -67,7 +70,6 @@ export const formulas = {
   memoryCache,
   rx,
   tx,
-};
+} as const;
 
 export type HostFormulas = typeof formulas;
-export type HostFormulaNames = keyof HostFormulas;

@@ -9,20 +9,19 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useState } from 'react';
-
 import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { useSloFormattedSummary } from '../hooks/use_slo_summary';
 import { BurnRateRuleFlyout } from './common/burn_rate_rule_flyout';
 import { useSloListActions } from '../hooks/use_slo_list_actions';
 import { SloItemActions } from './slo_item_actions';
-import type { SloRule } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { SloBadges } from './badges/slo_badges';
 import { SloSummary } from './slo_summary';
+import { BurnRateRuleParams } from '../../../typings';
 import { SLOGroupings } from './common/slo_groupings';
 
 export interface SloListItemProps {
   slo: SLOWithSummaryResponse;
-  rules: Array<Rule<SloRule>> | undefined;
+  rules: Array<Rule<BurnRateRuleParams>> | undefined;
   historicalSummary?: HistoricalSummaryResponse[];
   historicalSummaryLoading: boolean;
   activeAlerts?: number;

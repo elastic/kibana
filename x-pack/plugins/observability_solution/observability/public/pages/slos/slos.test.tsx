@@ -133,6 +133,9 @@ describe('SLOs Page', () => {
     jest
       .spyOn(Router, 'useLocation')
       .mockReturnValue({ pathname: '/slos', search: '', state: '', hash: '' });
+    jest
+      .spyOn(Router, 'useRouteMatch')
+      .mockReturnValue({ url: '/slos', path: '/slos', isExact: true, params: {} });
   });
 
   describe('when the incorrect license is found', () => {

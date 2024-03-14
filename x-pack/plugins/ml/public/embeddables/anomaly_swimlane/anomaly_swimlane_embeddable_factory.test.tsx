@@ -9,7 +9,7 @@ import { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane_embeddable_
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { AnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
-import { AnomalySwimlaneEmbeddableInput } from '..';
+import type { AnomalySwimlaneEmbeddableInput } from '..';
 
 jest.mock('./anomaly_swimlane_embeddable', () => ({
   AnomalySwimlaneEmbeddable: jest.fn(),

@@ -13,11 +13,12 @@ import { i18n } from '@kbn/i18n';
 
 import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
 import { missingTransformStats } from '../../../../common/transform_list';
-import { TransformCapabilities } from '../../../../../../common/types/capabilities';
-import { TransformState, TRANSFORM_STATE } from '../../../../../../common/constants';
+import type { TransformCapabilities } from '../../../../../../common/types/capabilities';
+import type { TransformState } from '../../../../../../common/constants';
+import { TRANSFORM_STATE } from '../../../../../../common/constants';
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 
-import { TransformListRow } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
 
 export const resetActionNameText = i18n.translate(
   'xpack.transform.transformList.resetActionNameText',

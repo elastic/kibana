@@ -8,11 +8,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiBadge,
+import type {
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
+} from '@elastic/eui';
+import {
+  EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,14 +29,12 @@ import {
 
 import { useTransformCapabilities } from '../../../../hooks';
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
-import {
-  isLatestTransform,
-  isPivotTransform,
-  TransformId,
-} from '../../../../../../common/types/transform';
+import type { TransformId } from '../../../../../../common/types/transform';
+import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import { getTransformProgress, TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
+import { getTransformProgress, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useActions } from './use_actions';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 

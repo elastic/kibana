@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
 
-  describe('lens workspace size', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/176882
+  describe.skip('lens workspace size', () => {
     let originalWindowSize: {
       height: number;
       width: number;

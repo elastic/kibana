@@ -16,6 +16,7 @@ import type {
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
   CloudURLs,
+  SolutionNavigationDefinitions,
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
 
@@ -102,5 +103,22 @@ export interface InternalChromeStart extends ChromeStart {
       breadcrumbs: ChromeProjectBreadcrumb[] | ChromeProjectBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
+
+    /**
+     * Update the solution navigation definitions.
+     *
+     * @param solutionNavs The solution navigation definitions to update.
+     * @param replace Flag to indicate if the previous solution navigation definitions should be replaced.
+     * If `false`, the new solution navigation definitions will be merged with the existing ones.
+     */
+    updateSolutionNavigations(solutionNavs: SolutionNavigationDefinitions, replace?: boolean): void;
+
+    /**
+     * Change the active solution navigation.
+     *
+     * @param id The id of the active solution navigation. If `null` is provided, the solution navigation
+     * will be replaced with the legacy Kibana navigation.
+     */
+    changeActiveSolutionNavigation(id: string | null, options?: { onlyIfNotSet?: boolean }): void;
   };
 }

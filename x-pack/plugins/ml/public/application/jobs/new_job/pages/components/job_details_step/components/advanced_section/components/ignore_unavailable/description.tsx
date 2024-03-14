@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, FC } from 'react';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';

@@ -20,31 +20,28 @@ export default function environmentsAPITests({ getService }: FtrProviderContext)
   const synthtraceEsClient = getService('synthtraceEsClient');
 
   // FLAKY: https://github.com/elastic/kibana/issues/177305
-  registry.when.skip(
-    'environments when data is loaded',
-    { config: 'basic', archives: [] },
-    async () => {
-      before(async () => {
-        await generateData({
-          synthtraceEsClient,
-          start: startNumber,
-          end: endNumber,
-        });
+  registry.when('environments when data is loaded', { config: 'basic', archives: [] }, async () => {
+    before(async () => {
+      await generateData({
+        synthtraceEsClient,
+        start: startNumber,
+        end: endNumber,
       });
+    });
 
-      after(() => synthtraceEsClient.clean());
+    after(() => synthtraceEsClient.clean());
 
-      describe('get environments', () => {
-        describe('when service name is not specified', () => {
-          it('returns all environments', async () => {
-            const { body } = await apmApiClient.readUser({
-              endpoint: 'GET /internal/apm/environments',
-              params: {
-                query: { start, end },
-              },
-            });
-            expect(body.environments.length).to.be.equal(4);
-            expectSnapshot(body.environments).toMatchInline(`
+    describe('get environments', () => {
+      describe('when service name is not specified', () => {
+        it('returns all environments', async () => {
+          const { body } = await apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/environments',
+            params: {
+              query: { start, end },
+            },
+          });
+          expect(body.environments.length).to.be.equal(4);
+          expectSnapshot(body.environments).toMatchInline(`
             Array [
               "development",
               "production",
@@ -52,20 +49,20 @@ export default function environmentsAPITests({ getService }: FtrProviderContext)
               "custom-go-environment",
             ]
           `);
-          });
         });
+      });
 
-        describe('when service name is specified', () => {
-          it('returns service specific environments for go', async () => {
-            const { body } = await apmApiClient.readUser({
-              endpoint: 'GET /internal/apm/environments',
-              params: {
-                query: { start, end, serviceName: 'go' },
-              },
-            });
+      describe('when service name is specified', () => {
+        it('returns service specific environments for go', async () => {
+          const { body } = await apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/environments',
+            params: {
+              query: { start, end, serviceName: 'go' },
+            },
+          });
 
-            expect(body.environments.length).to.be.equal(4);
-            expectSnapshot(body.environments).toMatchInline(`
+          expect(body.environments.length).to.be.equal(4);
+          expectSnapshot(body.environments).toMatchInline(`
             Array [
               "custom-go-environment",
               "development",
@@ -73,27 +70,26 @@ export default function environmentsAPITests({ getService }: FtrProviderContext)
               "staging",
             ]
           `);
+        });
+
+        it('returns service specific environments for java', async () => {
+          const { body } = await apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/environments',
+            params: {
+              query: { start, end, serviceName: 'java' },
+            },
           });
 
-          it('returns service specific environments for java', async () => {
-            const { body } = await apmApiClient.readUser({
-              endpoint: 'GET /internal/apm/environments',
-              params: {
-                query: { start, end, serviceName: 'java' },
-              },
-            });
-
-            expect(body.environments.length).to.be.equal(3);
-            expectSnapshot(body.environments).toMatchInline(`
+          expect(body.environments.length).to.be.equal(3);
+          expectSnapshot(body.environments).toMatchInline(`
             Array [
               "development",
               "production",
               "staging",
             ]
           `);
-          });
         });
       });
-    }
-  );
+    });
+  });
 }
