@@ -173,7 +173,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       expect(groupsJustAfterCreationVisibleText).to.match(/test_calendar_ad_1, test_calendar_ad_2/);
 
-      await testSubjects.click('mlMainTab anomalyDetection');
+      await ml.navigation.navigateToAnomalyDetection();
 
       const [testCalendarAdOne, testCalendarAdTwo] = await testSubjects.findAll(
         'mlJobListRowDetailsToggle'
@@ -211,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       expect(groupsAfterAddingMultiMetricsVisibleText).to.match(/multi-metric/);
       // Go back to the Anomaly Detection Jobs view
-      await testSubjects.click('mlMainTab anomalyDetection');
+      await ml.navigation.navigateToAnomalyDetection();
 
       const [, , testCalendarAdThree, testCalendarAdFour] = await testSubjects.findAll(
         'mlJobListRowDetailsToggle'
