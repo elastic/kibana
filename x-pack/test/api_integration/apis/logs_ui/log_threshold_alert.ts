@@ -10,7 +10,7 @@ import sinon from 'sinon';
 import {
   executeAlert,
   executeRatioAlert,
-  LogThresholdAlertFactory,
+  LogThresholdAlertReporter,
   LogThresholdAlertLimit,
 } from '@kbn/infra-plugin/server/lib/alerting/log_threshold/log_threshold_executor';
 import {
@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('without group by', () => {
         it('should trigger alerts below the alert limit', async () => {
           const timestamp = new Date(DATES['alert-test-data'].gauge.max);
-          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
+          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertReporter>;
           const alertLimit = {
             getValue: sinon.fake.returns(10),
             setLimitReached: sinon.fake(),
@@ -96,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('with group by', () => {
         it('should trigger alerts up to the alert limit when group by env', async () => {
           const timestamp = new Date(DATES['alert-test-data'].gauge.max);
-          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
+          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertReporter>;
           const alertLimit = {
             getValue: sinon.fake.returns(2),
             setLimitReached: sinon.fake(),
@@ -161,7 +161,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should trigger alerts up to the alert limit when group by host.name', async () => {
           const timestamp = new Date(DATES['alert-test-data'].gauge.max);
-          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
+          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertReporter>;
           const alertLimit = {
             getValue: sinon.fake.returns(1),
             setLimitReached: sinon.fake(),
@@ -235,7 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('alert context should not have excluded fields when group by host.name', async () => {
           const timestamp = new Date(DATES['alert-test-data'].gauge.max);
-          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
+          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertReporter>;
           const alertLimit = {
             getValue: sinon.fake.returns(1),
             setLimitReached: sinon.fake(),
@@ -280,7 +280,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should limit alerts to the alert limit', async () => {
           const timestamp = new Date(DATES['alert-test-data'].gauge.max);
-          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
+          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertReporter>;
           const alertLimit = {
             getValue: sinon.fake.returns(1),
             setLimitReached: sinon.fake(),
@@ -352,7 +352,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('without group by', () => {
         it('should trigger alerts below the alert limit', async () => {
           const timestamp = new Date(DATES.ten_thousand_plus.max);
-          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
+          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertReporter>;
           const alertLimit = {
             getValue: sinon.fake.returns(2),
             setLimitReached: sinon.fake(),
@@ -413,7 +413,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('with group by', () => {
         it('should trigger alerts below the alert limit', async () => {
           const timestamp = new Date(DATES.ten_thousand_plus.max);
-          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
+          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertReporter>;
           const alertLimit = {
             getValue: sinon.fake.returns(2),
             setLimitReached: sinon.fake(),
