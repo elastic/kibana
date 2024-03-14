@@ -280,7 +280,7 @@ packages/core/saved-objects/core-saved-objects-utils-server @elastic/kibana-core
 packages/core/security/core-security-browser @elastic/kibana-core
 packages/core/security/core-security-browser-internal @elastic/kibana-core
 packages/core/security/core-security-browser-mocks @elastic/kibana-core
-packages/core/security/core-security-common @elastic/kibana-core
+packages/core/security/core-security-common @elastic/kibana-core @elastic/kibana-security
 packages/core/security/core-security-server @elastic/kibana-core
 packages/core/security/core-security-server-internal @elastic/kibana-core
 packages/core/security/core-security-server-mocks @elastic/kibana-core
