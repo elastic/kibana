@@ -20,7 +20,11 @@ export {
   type PresentationContainer,
 } from './interfaces/presentation_container';
 export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';
-export { type SerializedPanelState } from './interfaces/serialized_state';
+export {
+  type SerializedPanelState,
+  type HasSerializableState,
+  apiHasSerializableState,
+} from './interfaces/serialized_state';
 export {
   type PublishesLastSavedState,
   apiPublishesLastSavedState,

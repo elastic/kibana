@@ -59,7 +59,7 @@ export const createLogsExplorerControllerFactory =
     });
     const discoverServices: LogsExplorerDiscoverServices = {
       data: customData,
-      history: () => customMemoryHistory,
+      history: customMemoryHistory,
       uiSettings: customUiSettings,
       filterManager: customData.query.filterManager,
       timefilter: customData.query.timefilter.timefilter,

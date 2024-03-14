@@ -10,14 +10,13 @@ import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import dedent from 'dedent';
 import { compact, keyBy } from 'lodash';
 import {
-  ContextDefinition,
-  ContextRegistry,
-  FunctionResponse,
+  type ContextRegistry,
   FunctionVisibility,
-  Message,
-  ObservabilityAIAssistantScreenContext,
-  RegisterContextDefinition,
-} from '../../../common/types';
+  type RegisterContextDefinition,
+  type ContextDefinition,
+  type FunctionResponse,
+} from '../../../common/functions/types';
+import type { Message, ObservabilityAIAssistantScreenContext } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
 import type { FunctionHandler, FunctionHandlerRegistry, RegisterFunction } from '../types';
 

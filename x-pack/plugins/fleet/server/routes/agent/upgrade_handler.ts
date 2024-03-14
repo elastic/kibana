@@ -28,9 +28,8 @@ import {
   isAgentUpgradeableToVersion,
   differsOnlyInPatch,
 } from '../../../common/services';
-import { getMaxVersion } from '../../../common/services/get_min_max_version';
+import { checkFleetServerVersion } from '../../../common/services/check_fleet_server_versions';
 import { getAgentById } from '../../services/agents';
-import type { Agent } from '../../types';
 
 import { getAllFleetServerAgents } from '../../collectors/get_all_fleet_server_agents';
 import { getLatestAvailableVersion } from '../../services/agents/versions';
@@ -173,7 +172,9 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   }
 
   try {
-    const agentOptions = Array.isArray(agents) ? { agentIds: agents } : { kuery: agents };
+    const agentOptions = Array.isArray(agents)
+      ? { agentIds: agents }
+      : { kuery: agents, showInactive: request.body.includeInactive };
     const upgradeOptions = {
       ...agentOptions,
       sourceUri,
@@ -220,46 +221,6 @@ export const checkKibanaVersion = (version: string, kibanaVersion: string, force
   if (force && !(kibanaMajorGt || kibanaMajorEqMinorGte)) {
     throw new AgentRequestInvalidError(
       `Cannot force upgrade agent to ${versionToUpgradeNumber} because it does not satisfy the major and minor of the installed kibana version ${kibanaVersionNumber}`
-    );
-  }
-};
-
-// Check the installed fleet server version
-export const checkFleetServerVersion = (
-  versionToUpgradeNumber: string,
-  fleetServerAgents: Agent[],
-  force = false
-) => {
-  const fleetServerVersions = fleetServerAgents.map(
-    (agent) => agent.local_metadata.elastic.agent.version
-  ) as string[];
-
-  const maxFleetServerVersion = getMaxVersion(fleetServerVersions);
-
-  if (!maxFleetServerVersion) {
-    return;
-  }
-
-  if (
-    !force &&
-    semverGt(versionToUpgradeNumber, maxFleetServerVersion) &&
-    !differsOnlyInPatch(versionToUpgradeNumber, maxFleetServerVersion)
-  ) {
-    throw new Error(
-      `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the latest fleet server version ${maxFleetServerVersion}`
-    );
-  }
-
-  const fleetServerMajorGt =
-    semverMajor(maxFleetServerVersion) > semverMajor(versionToUpgradeNumber);
-  const fleetServerMajorEqMinorGte =
-    semverMajor(maxFleetServerVersion) === semverMajor(versionToUpgradeNumber) &&
-    semverMinor(maxFleetServerVersion) >= semverMinor(versionToUpgradeNumber);
-
-  // When force is enabled, only the major and minor versions are checked
-  if (force && !(fleetServerMajorGt || fleetServerMajorEqMinorGte)) {
-    throw new AgentRequestInvalidError(
-      `Cannot force upgrade agent to ${versionToUpgradeNumber} because it does not satisfy the major and minor of the latest fleet server version ${maxFleetServerVersion}`
     );
   }
 };
