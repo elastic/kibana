@@ -64,25 +64,23 @@ export const esArchiver = (
   on('task', {
     esArchiverLoad: async ({ archiveName, type = 'cypress', ...options }) => {
       if (type === 'cypress') {
-        esArchiverInstance.load(archiveName, options);
+        return esArchiverInstance.load(archiveName, options);
       } else if (type === 'ftr') {
-        ftrEsArchiverInstance.load(archiveName, options);
+        return ftrEsArchiverInstance.load(archiveName, options);
       } else {
         throw new Error(
           `Unable to load the specified archive: ${JSON.stringify({ archiveName, type, options })}`
         );
       }
-      return null;
     },
     esArchiverUnload: async ({ archiveName, type = 'cypress' }) => {
       if (type === 'cypress') {
-        esArchiverInstance.unload(archiveName);
+        return esArchiverInstance.unload(archiveName);
       } else if (type === 'ftr') {
-        ftrEsArchiverInstance.unload(archiveName);
+        return ftrEsArchiverInstance.unload(archiveName);
       } else {
         throw new Error('It is not possible to unload the archive.');
       }
-      return null;
     },
   });
 
