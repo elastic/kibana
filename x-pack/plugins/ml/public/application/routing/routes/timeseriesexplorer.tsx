@@ -27,7 +27,7 @@ import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detect
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
 import { mlJobService } from '../../services/job_service';
-import { useForecastService } from '../../services/forecast_service_provider';
+import { useForecastService } from '../../services/forecast_service';
 import { useTimeSeriesExplorerService } from '../../util/time_series_explorer_service';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer/timeseriesexplorer_constants';
 import {

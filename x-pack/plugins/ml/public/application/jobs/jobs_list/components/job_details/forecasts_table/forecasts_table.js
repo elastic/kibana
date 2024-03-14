@@ -26,7 +26,7 @@ import { timeFormatter } from '@kbn/ml-date-utils';
 
 import { FORECAST_REQUEST_STATE } from '../../../../../../../common/constants/states';
 import { addItemToRecentlyAccessed } from '../../../../../util/recently_accessed';
-import { forecastServiceProvider } from '../../../../../services/forecast_service_provider';
+import { forecastServiceFactory } from '../../../../../services/forecast_service';
 import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
@@ -54,9 +54,7 @@ export class ForecastsTableUI extends Component {
   static contextType = context;
 
   componentDidMount() {
-    this.mlForecastService = forecastServiceProvider(
-      this.context.services.mlServices.mlApiServices
-    );
+    this.mlForecastService = forecastServiceFactory(this.context.services.mlServices.mlApiServices);
     const dataCounts = this.props.job.data_counts;
     if (dataCounts.processed_record_count > 0) {
       // Get the list of all the forecasts with results at or later than the specified 'from' time.

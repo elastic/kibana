@@ -18,7 +18,7 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { withKibana, context } from '@kbn/kibana-react-plugin/public';
+import { context } from '@kbn/kibana-react-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../../../common/constants/states';
@@ -29,7 +29,7 @@ import { Modal } from './modal';
 import { PROGRESS_STATES } from './progress_states';
 import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';
-import { forecastServiceProvider } from '../../../services/forecast_service_provider';
+import { forecastServiceFactory } from '../../../services/forecast_service';
 
 export const FORECAST_DURATION_MAX_DAYS = 3650; // Max forecast duration allowed by analytics.
 
@@ -80,9 +80,7 @@ export class ForecastingModalUI extends Component {
   static contextType = context;
 
   componentDidMount() {
-    this.mlForecastService = forecastServiceProvider(
-      this.context.services.mlServices.mlApiServices
-    );
+    this.mlForecastService = forecastServiceFactory(this.context.services.mlServices.mlApiServices);
   }
 
   addMessage = (message, status, clearFirst = false) => {
@@ -393,7 +391,7 @@ export class ForecastingModalUI extends Component {
 
     if (typeof job === 'object') {
       // Get the list of all the finished forecasts for this job with results at or later than the dashboard 'from' time.
-      const { timefilter } = this.props.kibana.services.data.query.timefilter;
+      const { timefilter } = this.context.services.data.query.timefilter;
       const bounds = timefilter.getActiveBounds();
       const statusFinishedQuery = {
         term: {
@@ -559,4 +557,4 @@ export class ForecastingModalUI extends Component {
   }
 }
 
-export const ForecastingModal = withKibana(ForecastingModalUI);
+export const ForecastingModal = ForecastingModalUI;

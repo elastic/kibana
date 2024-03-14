@@ -56,7 +56,7 @@ import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_n
 import { TimeSeriesExplorerPage } from './timeseriesexplorer_page';
 
 import { ml } from '../services/ml_api_service';
-import { forecastServiceProvider } from '../services/forecast_service_provider';
+import { forecastServiceFactory } from '../services/forecast_service';
 import { timeSeriesExplorerServiceFactory } from '../util/time_series_explorer_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsServiceProvider } from '../services/results_service';
@@ -722,7 +722,7 @@ export class TimeSeriesExplorer extends React.Component {
       this.mlResultsService
     );
     this.mlIndexUtils = indexServiceFactory(this.context.services.data.dataViews);
-    this.mlForecastService = forecastServiceProvider(mlApiServices);
+    this.mlForecastService = forecastServiceFactory(mlApiServices);
     // if timeRange used in the url is incorrect
     // perhaps due to user's advanced setting using incorrect date-maths
     const { invalidTimeRangeError } = this.props;

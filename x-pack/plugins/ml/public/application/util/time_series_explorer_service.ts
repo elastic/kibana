@@ -32,7 +32,7 @@ import {
 } from '../timeseriesexplorer/timeseriesexplorer_constants';
 import type { MlApiServices } from '../services/ml_api_service';
 import { mlResultsServiceProvider, type MlResultsService } from '../services/results_service';
-import { forecastServiceProvider } from '../services/forecast_service_provider';
+import { forecastServiceFactory } from '../services/forecast_service';
 import { timeSeriesSearchServiceFactory } from '../timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 import { useMlKibana } from '../contexts/kibana';
 
@@ -66,7 +66,7 @@ export function timeSeriesExplorerServiceFactory(
   mlResultsService: MlResultsService
 ) {
   const timeBuckets = timeBucketsServiceFactory(uiSettings);
-  const mlForecastService = forecastServiceProvider(mlApiServices);
+  const mlForecastService = forecastServiceFactory(mlApiServices);
   const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(mlResultsService, mlApiServices);
 
   function getAutoZoomDuration(selectedJob: Job) {

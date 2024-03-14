@@ -21,10 +21,7 @@ export interface AggType {
   min: string;
 }
 
-// TODO Consolidate with legacy code in
-// `x-pack/plugins/ml/public/application/services/forecast_service.js` and
-// `x-pack/plugins/ml/public/application/services/forecast_service.d.ts`.
-export function forecastServiceProvider(mlApiServices: MlApiServices) {
+export function forecastServiceFactory(mlApiServices: MlApiServices) {
   // Gets a basic summary of the most recently run forecasts for the specified
   // job, with results at or later than the supplied timestamp.
   // Extra query object can be supplied, or pass null if no additional query.
@@ -403,7 +400,7 @@ export function forecastServiceProvider(mlApiServices: MlApiServices) {
   };
 }
 
-export type MlForecastService = ReturnType<typeof forecastServiceProvider>;
+export type MlForecastService = ReturnType<typeof forecastServiceFactory>;
 
 export function useForecastService(): MlForecastService {
   const {
@@ -412,6 +409,6 @@ export function useForecastService(): MlForecastService {
     },
   } = useMlKibana();
 
-  const mlForecastService = useMemo(() => forecastServiceProvider(mlApiServices), [mlApiServices]);
+  const mlForecastService = useMemo(() => forecastServiceFactory(mlApiServices), [mlApiServices]);
   return mlForecastService;
 }
