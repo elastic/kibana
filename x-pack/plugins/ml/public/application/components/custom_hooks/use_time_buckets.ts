@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { TimeBuckets } from '@kbn/ml-time-buckets';
 import { useUiSettings } from '../../contexts/kibana';
-import { TimeBuckets } from '../../util/time_buckets';
 
 export const useTimeBuckets = () => {
   const uiSettings = useUiSettings();

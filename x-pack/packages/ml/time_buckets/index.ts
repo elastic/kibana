@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { TimeBucketsInterval } from './time_buckets';
+export type { TimeBucketsInterval, TimeRangeBounds } from './time_buckets';
 export { getBoundsRoundedToInterval, TimeBuckets } from './time_buckets';

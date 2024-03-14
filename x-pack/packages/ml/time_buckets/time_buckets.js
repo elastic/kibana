@@ -402,6 +402,39 @@ TimeBuckets.prototype.getIntervalToNearestMultiple = function (divisorSecs) {
 };
 
 /**
+ * Returns an interval which in the last step of calculation is rounded to
+ * the closest multiple of the supplied divisor (in seconds).
+ *
+ * @return {moment.duration|undefined}
+ */
+TimeBuckets.prototype.getIntervalToNearestMultiple = function (divisorSecs) {
+  const interval = this.getInterval();
+  const intervalSecs = interval.asSeconds();
+
+  const remainder = intervalSecs % divisorSecs;
+  if (remainder === 0) {
+    return interval;
+  }
+
+  // Create a new interval which is a multiple of the supplied divisor (not zero).
+  let nearestMultiple =
+    remainder > divisorSecs / 2 ? intervalSecs + divisorSecs - remainder : intervalSecs - remainder;
+  nearestMultiple = nearestMultiple === 0 ? divisorSecs : nearestMultiple;
+  const nearestMultipleInt = moment.duration(nearestMultiple, 'seconds');
+  decorateInterval(nearestMultipleInt, this.getDuration());
+
+  // Check to see if the new interval is scaled compared to the original.
+  const preScaled = interval.preScaled;
+  if (preScaled !== undefined && preScaled < nearestMultipleInt) {
+    nearestMultipleInt.preScaled = preScaled;
+    nearestMultipleInt.scale = preScaled / nearestMultipleInt;
+    nearestMultipleInt.scaled = true;
+  }
+
+  return nearestMultipleInt;
+};
+
+/**
  * Get a date format string that will represent dates that
  * progress at our interval.
  *
