@@ -26,11 +26,12 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
       return true;
     },
   },
-  sourcererDataView: {
+  selectedDataView: {
     browserFields: {},
-    selectedPatterns: [],
     indexPattern: { fields: [], title: '' },
     loading: false,
+    indicesExist: true,
+    sourcererDataView: {},
   },
   securitySolutionStore: {
     // @ts-ignore
