@@ -162,7 +162,10 @@ export default function ({ getService }: FtrProviderContext) {
       multiMetricConfig.groups = ['multi-metric'];
 
       // @ts-expect-error not full interface
-      await asyncForEach([automatedConfig, multiMetricConfig], ml.api.createAnomalyDetectionJob);
+      await asyncForEach(
+        [automatedConfig, multiMetricConfig],
+        async (config) => await ml.api.createAnomalyDetectionJob(config)
+      );
     }
 
     async function assertOnlyConnectedToJobsAppliedDuringCreation() {
@@ -221,6 +224,13 @@ export default function ({ getService }: FtrProviderContext) {
       await testCalendarAdFour.click();
       await testSubjects.existOrFail('mlJobRowDetailsSection-calendars');
       await testCalendarAdFour.click();
+
+      // // withDetailsOpen will open up the details of the specific job, and then collapse the details section afterwards
+      //
+      // await ml.jobTable.withDetailsOpen(jobId, async () => {
+      //   await testSubjects.existOrFail(ml.jobTable.detailsSelector(jobId, 'mlJobRowDetailsSection-calendars'), { timeout: 1000 })
+      // }
+
       // Assert that the calendar is still not connected to the automated job group
       await testCalendarAdThree.click();
       await testSubjects.missingOrFail('mlJobRowDetailsSection-calendars');
