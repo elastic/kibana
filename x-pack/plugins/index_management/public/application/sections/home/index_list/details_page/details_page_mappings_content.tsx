@@ -47,13 +47,13 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   } = useAppContext();
   const { euiTheme } = useEuiTheme();
 
-  const [isJSONVisible, setToggleOn] = useState(true);
+  const [isJSONVisible, setIsJSONVisible] = useState(true);
   const onToggleChange = () => {
-    setToggleOn(!isJSONVisible);
+    setIsJSONVisible(!isJSONVisible);
   };
-  const { parsedDefaultValue } = useMemo<MappingsEditorParsedMetadata>(() => {
-    const mappingsDefinition = extractMappingsDefinition(jsonData);
+  const mappingsDefinition = extractMappingsDefinition(jsonData);
 
+  const { parsedDefaultValue } = useMemo<MappingsEditorParsedMetadata>(() => {
     if (mappingsDefinition === null) {
       return { multipleMappingsDeclared: true };
     }
@@ -93,7 +93,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     };
 
     return { parsedDefaultValue: parsed, multipleMappingsDeclared: false };
-  }, [jsonData]);
+  }, [mappingsDefinition]);
 
   useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
 
@@ -131,7 +131,9 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const treeViewBlock = (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        {searchTerm !== '' ? (
+        {mappingsDefinition === null ? (
+          <div>Error: Mapping contains invalid keys</div>
+        ) : searchTerm !== '' ? (
           <SearchResult result={search.result} documentFieldsState={documentFields} />
         ) : (
           <FieldsList fields={fields} />
@@ -148,7 +150,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           searchValue={search.term}
           onSearchChange={onSearchChange}
           disabled={isJSONVisible}
-          data-test-subj="indexDetailsMappingsDocumentFieldsSearch"
         />
         <EuiButton data-test-subj="indexDetailsMappingsToggleViewButton" onClick={onToggleChange}>
           {isJSONVisible ? (
