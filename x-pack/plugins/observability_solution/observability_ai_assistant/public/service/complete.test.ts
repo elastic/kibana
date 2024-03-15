@@ -277,16 +277,22 @@ describe('complete', () => {
 
         const nextMessages = requestCallback.mock.lastCall![0].params.body.messages;
 
-        expect(nextMessages[nextMessages.length - 1]).toEqual({
+        const errorMessage = nextMessages[nextMessages.length - 1];
+
+        expect(errorMessage).toEqual({
           '@timestamp': expect.any(String),
           message: {
-            content: JSON.stringify({
-              error: {},
-              message: 'foo',
-            }),
+            content: expect.any(String),
             name: 'my_action',
             role: MessageRole.User,
           },
+        });
+
+        expect(JSON.parse(errorMessage.message.content ?? '{}')).toEqual({
+          error: expect.objectContaining({
+            message: 'foo',
+          }),
+          message: 'foo',
         });
       });
     });
