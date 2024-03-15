@@ -132,7 +132,14 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         {mappingsDefinition === null ? (
-          <div>Error: Mapping contains invalid keys</div>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.idxMgmt.indexDetails.mappings.invaluMappingKeysErrorMessage"
+                defaultMessage="Error: Mapping contains invalid keys"
+              />
+            </p>
+          </EuiText>
         ) : searchTerm !== '' ? (
           <SearchResult result={search.result} documentFieldsState={documentFields} />
         ) : (
