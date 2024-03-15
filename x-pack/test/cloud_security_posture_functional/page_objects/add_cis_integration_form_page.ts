@@ -151,6 +151,7 @@ export function AddCisIntegrationFormPageProvider({
 
   const clickOptionButton = async (text: string) => {
     const optionToBeClicked = await findOptionInPage(text);
+    await optionToBeClicked.scrollIntoViewIfNecessary();
     await optionToBeClicked.click();
   };
 
