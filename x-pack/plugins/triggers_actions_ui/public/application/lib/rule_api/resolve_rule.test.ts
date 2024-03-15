@@ -97,7 +97,6 @@ describe('resolveRule', () => {
       actions: [
         {
           group: 'threshold met',
-          type: 'default',
           id: '1',
           params: { documents: [{ dsfsdf: 1212 }] },
           actionTypeId: '.index',

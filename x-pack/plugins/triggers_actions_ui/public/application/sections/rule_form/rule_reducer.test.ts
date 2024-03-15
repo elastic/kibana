@@ -6,12 +6,17 @@
  */
 
 import { getRuleReducer } from './rule_reducer';
-import { Rule } from '../../../types';
+import { ActionTypeModel, Rule } from '../../../types';
 import { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
-
+const actionType = {
+  id: 'test',
+  name: 'Test',
+  isSystemActionType: false,
+} as unknown as ActionTypeModel;
+actionTypeRegistry.get.mockReturnValue(actionType);
 describe('rule reducer', () => {
   const ruleReducer = getRuleReducer(actionTypeRegistry);
   let initialRule: Rule;

@@ -16,6 +16,7 @@ import {
 } from './rule_errors';
 import { Rule, RuleTypeModel } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+import { ActionTypeModel } from '../../..';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const config = { isUsingSecurity: true, minimumScheduleInterval: { value: '1m', enforce: false } };
@@ -131,6 +132,12 @@ describe('rule_errors', () => {
           },
         },
       ];
+      const actionType = {
+        id: 'test',
+        name: 'Test',
+        isSystemActionType: false,
+      } as unknown as ActionTypeModel;
+      actionTypeRegistry.get.mockReturnValue(actionType);
       const result = validateBaseProperties(rule, config, actionTypeRegistry);
       expect(result.errors).toStrictEqual({
         name: [],

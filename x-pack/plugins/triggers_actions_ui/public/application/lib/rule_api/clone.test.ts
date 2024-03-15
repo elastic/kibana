@@ -75,7 +75,6 @@ describe('cloneRule', () => {
               "level": "info",
               "message": "alert ",
             },
-            "type": "default",
             "uuid": "123456",
           },
         ],

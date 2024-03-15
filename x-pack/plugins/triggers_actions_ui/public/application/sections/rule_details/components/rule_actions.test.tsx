@@ -14,6 +14,12 @@ import { ActionConnector, ActionTypeModel } from '../../../../types';
 import * as useFetchRuleActionConnectorsHook from '../../../hooks/use_fetch_rule_action_connectors';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
+const actionType = {
+  id: 'test',
+  name: 'Test',
+  isSystemActionType: false,
+} as unknown as ActionTypeModel;
+actionTypeRegistry.get.mockReturnValue(actionType);
 const mockedUseFetchRuleActionConnectorsHook = jest.spyOn(
   useFetchRuleActionConnectorsHook,
   'useFetchRuleActionConnectors'
