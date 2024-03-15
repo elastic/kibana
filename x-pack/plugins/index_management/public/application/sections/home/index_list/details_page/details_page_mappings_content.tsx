@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useMemo, useState, useCallback } from 'react';
+import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiButton,
@@ -44,6 +44,7 @@ import { deNormalize } from '../../../../components/mappings_editor/lib';
 import { updateIndexMappings } from '../../../../services/api';
 import { notificationService } from '../../../../services/notification';
 import { i18n } from '@kbn/i18n';
+import { NormalizedFields } from '../../../../components/mappings_editor/types';
 export const DetailsPageMappingsContent: FunctionComponent<{
   index: Index;
   data: string;
@@ -55,8 +56,9 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     core: { getUrlForApp },
   } = useAppContext();
   const { euiTheme } = useEuiTheme();
+  const [addFieldComponent, hideAddFieldComponent] = useState<boolean>(false);
   const state = useMappingsState();
-
+  const dispatch = useDispatch();
   const indexName = index.name;
   const [isJSONVisible, setIsJSONVisible] = useState(true);
   const onToggleChange = () => {
@@ -111,7 +113,22 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   }, [mappingsDefinition]);
 
   useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
-  const [addFieldComponent, hideAddFieldComponent] = useState<boolean>(false);
+
+  const addFieldButtonOnClick = useCallback(() => {
+    hideAddFieldComponent(!addFieldComponent);
+    // reset unsaved mappings and change status to create field
+    dispatch({
+      type: 'editor.replaceMappings',
+      value: {
+        ...state,
+        fields: { ...state.fields, byId: {}, rootLevelFields: [] } as NormalizedFields,
+        documentFields: {
+          status: 'creatingField',
+          editor: 'default',
+        },
+      },
+    });
+  }, [dispatch]);
   const updateMappings = async () => {
     const { error } = await updateIndexMappings(indexName, deNormalize(state.fields));
     if (!error) {
@@ -136,7 +153,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const getField = useCallback((fieldId: string) => byId[fieldId], [byId]);
   const fields = useMemo(() => rootLevelFields.map(getField), [rootLevelFields, getField]);
-  const dispatch = useDispatch();
   const onSearchChange = useCallback(
     (value: string) => {
       dispatch({ type: 'search:update', value });
@@ -242,40 +258,45 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           </>
         )}
       </EuiFlexItem>
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" wrap>
         <EuiFlexItem
-          grow={1}
+          grow={false}
           css={css`
-            min-width: 600px;
+            min-width: 400px;
           `}
         >
           <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd">
-            {!addFieldComponent ? (
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => hideAddFieldComponent(!addFieldComponent)}>
+            <EuiFlexItem grow={false}>
+              {!addFieldComponent ? (
+                <EuiButton
+                  onClick={addFieldButtonOnClick}
+                  iconType="plusInCircle"
+                  color="text"
+                  size="m"
+                  data-test-subj="indexDetailsMappingsAddField"
+                >
                   <FormattedMessage
-                    id="xpack.idxMgmt.indexDetails.mappings.addFieldButton"
+                    id="xpack.idxMgmt.indexDetails.mappings.addField"
                     defaultMessage="Add field"
                   />
                 </EuiButton>
-              </EuiFlexItem>
-            ) : (
-              <EuiFlexItem grow={false}>
+              ) : (
                 <EuiButton
                   onClick={updateMappings}
                   color="success"
                   fill
                   disabled={newFieldsLength === 0 ?? true}
+                  data-test-subj="indexDetailsMappingsSaveMappings"
                 >
                   <FormattedMessage
-                    id="xpack.idxMgmt.indexDetails.mappings.saveMappingsButton"
+                    id="xpack.idxMgmt.indexDetails.mappings.saveMappings"
                     defaultMessage="Save mappings"
                   />
                 </EuiButton>
-              </EuiFlexItem>
-            )}
+              )}
+            </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
+
           <EuiFlexItem
             grow={1}
             css={css`
@@ -283,32 +304,39 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             `}
           >
             {addFieldComponent && (
-              <EuiAccordion
-                id={pendingFieldListId}
-                buttonContent={
-                  <EuiFlexGroup gutterSize="s" alignItems="baseline">
-                    <EuiFlexItem grow={6}>
-                      <FormattedMessage
-                        id="xpack.idxMgmt.indexDetails.mappings.addMappingPendingBlock"
-                        defaultMessage="Pending fields"
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiNotificationBadge
-                        color={newFieldsLength > 0 ? 'accent' : 'subdued'}
-                        size="s"
-                      >
-                        {newFieldsLength}
-                      </EuiNotificationBadge>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                }
-                borders="all"
-              >
-                <EuiPanel>
-                  <DocumentFields />
-                </EuiPanel>
-              </EuiAccordion>
+              <>
+                <EuiSpacer size="m" />
+                <EuiAccordion
+                  id={pendingFieldListId}
+                  buttonContent={
+                    <EuiPanel paddingSize="s" hasShadow={false}>
+                      <EuiFlexGroup gutterSize="s" alignItems="baseline">
+                        <EuiFlexItem grow={6}>
+                          <EuiText size="m">
+                            <FormattedMessage
+                              id="xpack.idxMgmt.indexDetails.mappings.addMappingPendingBlock"
+                              defaultMessage="Pending fields"
+                            />
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiNotificationBadge
+                            color={newFieldsLength > 0 ? 'accent' : 'subdued'}
+                            size="m"
+                          >
+                            {newFieldsLength}
+                          </EuiNotificationBadge>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiPanel>
+                  }
+                  borders="all"
+                >
+                  <EuiPanel>
+                    <DocumentFields />
+                  </EuiPanel>
+                </EuiAccordion>
+              </>
             )}
           </EuiFlexItem>
         </EuiFlexItem>

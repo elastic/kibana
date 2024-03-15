@@ -17,9 +17,9 @@ import { DocumentFieldsTreeEditor } from './fields_tree_editor';
 const { useGlobalFlyout } = GlobalFlyout;
 interface Props {
   searchComponent?: React.ReactElement;
-  searchTerm?: React.ReactElement;
+  searchResultComponent?: React.ReactElement;
 }
-export const DocumentFields = React.memo(({ searchComponent, searchTerm }: Props) => {
+export const DocumentFields = React.memo(({ searchComponent, searchResultComponent }: Props) => {
   const { fields, documentFields } = useMappingsState();
   const dispatch = useDispatch();
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
@@ -76,7 +76,7 @@ export const DocumentFields = React.memo(({ searchComponent, searchTerm }: Props
   return (
     <div data-test-subj="documentFields">
       {searchComponent}
-      {searchTerm ? searchTerm : editor}
+      {searchResultComponent ? searchResultComponent : editor}
     </div>
   );
 });

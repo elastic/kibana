@@ -172,7 +172,7 @@ export const MappingsEditor = React.memo(
               <EuiSpacer size="m" />
             </>
           }
-          searchTerm={
+          searchResultComponent={
             state.search.term.trim() !== '' ? (
               <SearchResult
                 result={state.search.result}
