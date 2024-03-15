@@ -4082,6 +4082,10 @@
               },
               {
                 "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_multiple_schedules.ts"
               },
               {
