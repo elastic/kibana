@@ -186,11 +186,11 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('with source data requiring EQL overrides', () => {
     before(() => {
-      cy.task('esArchiverLoad', { archiveName: 'no_at_timestamp_field' });
+      cy.task('esArchiverLoad', { archiveName: 'no_at_timestamp_field', type: 'ftr' });
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'no_at_timestamp_field');
+      cy.task('esArchiverUnload', { archiveName: 'no_at_timestamp_field', type: 'ftr' });
     });
 
     it('includes EQL options in query validation', () => {
