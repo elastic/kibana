@@ -40,7 +40,7 @@ const geti18nTexts = (): {
       'indexPatternFieldEditor.editor.form.customDescriptionDescription',
       {
         defaultMessage:
-          'Add a description for the field. It will be displayed next to the field on Discover, Lens, and Data View Management pages.',
+          'Add a description to the field. It's displayed next to the field on the Discover, Lens, and Data View Management pages.',
       }
     ),
   },
