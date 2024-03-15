@@ -60,6 +60,7 @@ export default function (providerContext: FtrProviderContext) {
         const directAccessKeyId = 'directAccessKeyIdTest';
         const directAccessSecretKey = 'directAccessSecretKeyTest';
         await cisIntegration.clickOptionButton(CIS_EKS_OPTION_TEST_ID);
+        pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(EKS_DIRECT_ACCESS_TEST_ID);
         pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(DIRECT_ACCESS_KEY_ID_TEST_ID, directAccessKeyId);
@@ -84,6 +85,7 @@ export default function (providerContext: FtrProviderContext) {
         const accessKeySecretKey = 'accessKeySecretKeyTest';
         const tempAccessSessionToken = 'tempAccessSessionTokenTest';
         await cisIntegration.clickOptionButton(CIS_EKS_OPTION_TEST_ID);
+        pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(EKS_TEMPORARY_KEYS_TEST_ID);
         pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(TEMP_ACCESS_KEY_ID_TEST_ID, accessKeyId);
@@ -115,6 +117,7 @@ export default function (providerContext: FtrProviderContext) {
         const sharedCredentialFile = 'sharedCredentialFileTest';
         const sharedCredentialProfileName = 'sharedCredentialProfileNameTest';
         await cisIntegration.clickOptionButton(CIS_EKS_OPTION_TEST_ID);
+        pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(EKS_SHARED_CREDENTIAL_TEST_ID);
         pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(SHARED_CREDENTIALS_FILE_TEST_ID, sharedCredentialFile);
