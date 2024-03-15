@@ -133,9 +133,13 @@ describe('AlertDetailsAppSection', () => {
               }}
             />
             <span>
-              <a href="/view-in-app-url" target="_blank">
+              <EuiLink
+                data-test-subj="o11yCustomThresholdAlertDetailsViewRelatedLogs"
+                href="/view-in-app-url"
+                target="_blank"
+              >
                 View related logs
-              </a>
+              </EuiLink>
             </span>
           </React.Fragment>
         ),
