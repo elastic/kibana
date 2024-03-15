@@ -25,9 +25,9 @@ export const getSolutionNavSwitcherBreadCrumb = ({
   onChange: (id: string, options?: { redirect?: boolean }) => void;
   cloudLinks: CloudLinks;
 }): ChromeProjectBreadcrumb => {
-  const title = Object.values(definitions).find(({ id }) => id === activeId)?.title;
+  const text = Object.values(definitions).find(({ id }) => id === activeId)?.title;
   return {
-    text: title,
+    text,
     'data-test-subj': 'solutionNavSwitcher',
     popoverContent: (
       <>
