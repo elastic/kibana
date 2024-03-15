@@ -157,7 +157,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'auditbeat_multiple');
+      cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
     });
 
     it('Creates and enables a new EQL rule with a sequence', function () {
