@@ -300,7 +300,6 @@ export class ExecutionHandler<
         const hasConnectorAdapter = this.taskRunnerContext.connectorAdapterRegistry.has(
           action.actionTypeId
         );
-
         /**
          * System actions without an adapter
          * cannot be executed
@@ -808,41 +807,43 @@ export class ExecutionHandler<
     }
 
     for (const systemAction of this.rule?.systemActions ?? []) {
-      const alertsArray = Object.entries(alerts);
-      const summarizedAlerts = await this.getSummarizedAlerts({
-        action: systemAction,
-        spaceId: this.taskInstance.params.spaceId,
-        ruleId: this.taskInstance.params.alertId,
-      });
+      if (this.canGetSummarizedAlerts()) {
+        const alertsArray = Object.entries(alerts);
+        const summarizedAlerts = await this.getSummarizedAlerts({
+          action: systemAction,
+          spaceId: this.taskInstance.params.spaceId,
+          ruleId: this.taskInstance.params.alertId,
+        });
 
-      if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
-        executables.push({ action: systemAction, summarizedAlerts });
-      }
+        if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
+          executables.push({ action: systemAction, summarizedAlerts });
+        }
 
-      for (const [alertId, alert] of alertsArray) {
-        const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
-        if (alertMaintenanceWindowIds.length !== 0) {
-          this.logger.debug(
-            `no scheduling of summary actions "${systemAction.id}" for rule "${
-              this.taskInstance.params.alertId
-            }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
+        for (const [alertId, alert] of alertsArray) {
+          const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
+          if (alertMaintenanceWindowIds.length !== 0) {
+            this.logger.debug(
+              `no scheduling of summary actions "${systemAction.id}" for rule "${
+                this.taskInstance.params.alertId
+              }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
+            );
+            continue;
+          }
+
+          if (alert.isFilteredOut(summarizedAlerts)) {
+            continue;
+          }
+
+          const alertAsData = summarizedAlerts.all.data.find(
+            (alertHit: AlertHit) => alertHit._id === alert.getUuid()
           );
-          continue;
-        }
+          if (alertAsData) {
+            alert.setAlertAsData(alertAsData);
+          }
 
-        if (alert.isFilteredOut(summarizedAlerts)) {
-          continue;
-        }
-
-        const alertAsData = summarizedAlerts.all.data.find(
-          (alertHit: AlertHit) => alertHit._id === alert.getUuid()
-        );
-        if (alertAsData) {
-          alert.setAlertAsData(alertAsData);
-        }
-
-        if (!this.isAlertMuted(alertId) && alert.hasScheduledActions()) {
-          executables.push({ action: systemAction, alert });
+          if (!this.isAlertMuted(alertId) && alert.hasScheduledActions()) {
+            executables.push({ action: systemAction, alert });
+          }
         }
       }
     }

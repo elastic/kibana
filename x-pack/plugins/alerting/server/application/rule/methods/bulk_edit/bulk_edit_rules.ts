@@ -58,6 +58,7 @@ import {
   RuleBulkOperationAggregation,
   RulesClientContext,
   NormalizedAlertActionWithGeneratedValues,
+  NormalizedAlertAction,
 } from '../../../../rules_client/types';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
 import {
@@ -82,6 +83,10 @@ import {
 import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { bulkEditOperationsSchema } from './schemas';
 import { denormalizeActions } from '../../../../rules_client/lib/denormalize_actions';
+import {
+  bulkEditDefaultActionsSchema,
+  bulkEditSystemActionsSchema,
+} from './schemas/bulk_edit_rules_option_schemas';
 
 const isValidInterval = (interval: string | undefined): interval is string => {
   return interval !== undefined;
@@ -373,7 +378,6 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
       skipped: [],
     };
   }
-
   const { result, apiKeysToInvalidate } =
     rules.length > 0
       ? await saveBulkUpdatedRules({
@@ -661,9 +665,24 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
         const systemActions = operation.value.filter((action): action is RuleSystemAction =>
           actionsClient.isSystemAction(action.id)
         );
+        if (systemActions.length > 0) {
+          try {
+            bulkEditSystemActionsSchema.validate(systemActions);
+          } catch (error) {
+            throw Boom.badRequest(`Error validating bulk edit rules operations - ${error.message}`);
+          }
+        }
+
         const defaultActions = operation.value.filter(
           (action): action is RuleAction => !actionsClient.isSystemAction(action.id)
         );
+        if (defaultActions.length > 0) {
+          try {
+            bulkEditDefaultActionsSchema.validate(defaultActions);
+          } catch (error) {
+            throw Boom.badRequest(`Error validating bulk edit rules operations - ${error.message}`);
+          }
+        }
 
         const { actions: genActions, systemActions: genSystemActions } =
           await addGeneratedActionValues(defaultActions, systemActions, context);
@@ -682,13 +701,14 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
           await validateActions(context, ruleType, {
             ...updatedRule,
             actions: genActions,
+            systemActions: genSystemActions,
           });
         } catch (e) {
           // If validateActions fails on the first attempt, it may be because of legacy rule-level frequency params
           updatedRule = await attemptToMigrateLegacyFrequency(
             context,
             operation.field,
-            defaultActions,
+            genActions,
             updatedRule,
             ruleType
           );
@@ -973,7 +993,7 @@ async function saveBulkUpdatedRules({
 async function attemptToMigrateLegacyFrequency<Params extends RuleParams>(
   context: RulesClientContext,
   operationField: BulkEditOperation['field'],
-  actions: RuleAction[],
+  actions: NormalizedAlertAction[],
   rule: RuleDomain<Params>,
   ruleType: RuleType
 ) {

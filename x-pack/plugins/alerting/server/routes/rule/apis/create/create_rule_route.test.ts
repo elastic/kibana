@@ -803,7 +803,7 @@ describe('createRuleRoute', () => {
     });
 
     it('fails if the action contains a type in the request', async () => {
-      const actionToValidate: RuleAction = {
+      const actionToValidate = {
         actionTypeId: 'test',
         group: 'default',
         id: '2',
@@ -811,7 +811,8 @@ describe('createRuleRoute', () => {
           foo: true,
         },
         uuid: '123-456',
-      };
+        type: 'default',
+      } as RuleAction;
 
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();

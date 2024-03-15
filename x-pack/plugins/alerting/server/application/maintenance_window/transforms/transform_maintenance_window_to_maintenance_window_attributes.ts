@@ -26,13 +26,15 @@ export const transformMaintenanceWindowToMaintenanceWindowAttributes = (
       ? { categoryIds: maintenanceWindow.categoryIds }
       : {}),
     ...(maintenanceWindow.scopedQuery !== undefined
-      ? {
-          scopedQuery: {
-            filters: maintenanceWindow?.scopedQuery?.filters ?? [],
-            kql: maintenanceWindow?.scopedQuery?.kql ?? '',
-            dsl: maintenanceWindow?.scopedQuery?.dsl ?? '',
-          },
-        }
+      ? maintenanceWindow?.scopedQuery == null
+        ? { scopedQuery: maintenanceWindow?.scopedQuery }
+        : {
+            scopedQuery: {
+              filters: maintenanceWindow?.scopedQuery?.filters ?? [],
+              kql: maintenanceWindow?.scopedQuery?.kql ?? '',
+              dsl: maintenanceWindow?.scopedQuery?.dsl ?? '',
+            },
+          }
       : {}),
   };
 };

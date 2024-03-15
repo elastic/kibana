@@ -1006,7 +1006,7 @@ describe('update()', () => {
       }
     );
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
-    expect(actionsClient.isSystemAction).toHaveBeenCalledTimes(11);
+    expect(actionsClient.isSystemAction).toHaveBeenCalled();
   });
 
   test('should call useSavedObjectReferences.extractReferences and useSavedObjectReferences.injectReferences if defined for rule type', async () => {

@@ -8,7 +8,7 @@
 import { validateActions, ValidateActionsData } from './validate_actions';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { AlertsFilter, RecoveredActionGroup, RuleAction, RuleNotifyWhen } from '../../../common';
-import { NormalizedAlertAction, RulesClientContext } from '..';
+import { NormalizedAlertAction, NormalizedSystemAction, RulesClientContext } from '..';
 
 describe('validateActions', () => {
   const loggerErrorMock = jest.fn();
@@ -52,11 +52,11 @@ describe('validateActions', () => {
     },
   };
 
-  // const systemAction: NormalizedSystemAction = {
-  //   uuid: '111',
-  //   id: '1',
-  //   params: {},
-  // };
+  const systemAction: NormalizedSystemAction = {
+    uuid: '111',
+    id: '1',
+    params: {},
+  };
 
   const data = {
     schedule: { interval: '1m' },
@@ -97,7 +97,6 @@ describe('validateActions', () => {
     );
   });
 
-  // Christos do we still need a validation across UUID between system and default
   it('should return error message if actions have duplicated uuid and there is a system action', async () => {
     await expect(
       validateActions(
@@ -106,7 +105,7 @@ describe('validateActions', () => {
         {
           ...data,
           actions: [defaultAction],
-          // systemActions: [systemAction],
+          systemActions: [systemAction],
         },
         false
       )

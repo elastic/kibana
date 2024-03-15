@@ -2393,6 +2393,7 @@ describe('Execution Handler', () => {
   describe('System actions', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+      mockActionsPlugin.isSystemActionConnector.mockReturnValue(true);
     });
 
     test('triggers system actions with summarization per rule run', async () => {
@@ -2616,9 +2617,6 @@ describe('Execution Handler', () => {
       expect(actionsClient.ephemeralEnqueuedExecution).not.toHaveBeenCalled();
       expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
       expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
-      expect(executorParams.logger.error).toHaveBeenCalledWith(
-        'Skipping action "action-id" for rule "1" because the rule type "Test" does not support alert-as-data.'
-      );
     });
   });
 });

@@ -336,10 +336,10 @@ describe('rule_action_helper', () => {
 
   // Christos, I need to understand something here
   describe('getSummarySystemActionTimeBounds', () => {
-    test('returns undefined start and end action is a system action', () => {
+    test('should return start and end action is a system action', () => {
       expect(getSummarySystemActionTimeBounds(mockSystemAction, { interval: '1m' }, null)).toEqual({
-        start: undefined,
-        end: undefined,
+        start: 1620909157000,
+        end: 1620909217000,
       });
     });
   });

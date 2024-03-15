@@ -703,6 +703,7 @@ describe('bulkEdit()', () => {
           { ...existingAction, actionTypeId: 'test-0' },
           { ...newAction, uuid: '222', actionTypeId: 'test-1' },
         ],
+        systemActions: [],
         id: existingRule.id,
         snoozeSchedule: [],
       });
@@ -935,6 +936,7 @@ describe('bulkEdit()', () => {
         ],
         id: existingRule.id,
         snoozeSchedule: [],
+        systemActions: [],
       });
     });
 
@@ -1076,10 +1078,8 @@ describe('bulkEdit()', () => {
           ...existingRule.attributes.executionStatus,
           lastExecutionDate: new Date(existingRule.attributes.executionStatus.lastExecutionDate),
         },
-        actions: [
-          { ...defaultAction, actionTypeId: 'test-1', uuid: '222' },
-          { ...systemAction, actionTypeId: 'test-2', uuid: '222' },
-        ],
+        actions: [{ ...defaultAction, actionTypeId: 'test-1', uuid: '222' }],
+        systemActions: [{ ...systemAction, actionTypeId: 'test-2', uuid: '222' }],
         id: existingRule.id,
         snoozeSchedule: [],
       });
@@ -1291,11 +1291,13 @@ describe('bulkEdit()', () => {
 
       expect(result.rules[0].actions).toEqual([
         { ...defaultAction, actionTypeId: 'test-1', uuid: '222' },
+      ]);
+      expect(result.rules[0].systemActions).toEqual([
         { ...systemAction, actionTypeId: 'test-2', uuid: '222' },
       ]);
     });
 
-    it('should return an error if the system action does not exist', async () => {
+    it('should return an error if the action does not have the right attributes', async () => {
       const action = {
         id: 'system_action-id',
         uuid: '123',
@@ -1331,7 +1333,7 @@ describe('bulkEdit()', () => {
         Object {
           "errors": Array [
             Object {
-              "message": "Action system_action-id is not a system action",
+              "message": "Error validating bulk edit rules operations - [0.group]: expected value of type [string] but got [undefined]",
               "rule": Object {
                 "id": "1",
                 "name": "my rule name",
@@ -1343,11 +1345,6 @@ describe('bulkEdit()', () => {
           "total": 1,
         }
       `);
-
-      expect(actionsClient.getBulk).toBeCalledWith({
-        ids: ['system_action-id'],
-        throwIfSystemAction: false,
-      });
     });
 
     it('should throw an error if the system action contains the frequency', async () => {
@@ -1471,18 +1468,21 @@ describe('bulkEdit()', () => {
             },
           ],
         })
-      ).rejects.toMatchInlineSnapshot(`
-        [Error: Error validating bulk edit rules operations - [0]: types that failed validation:
-        - [0.0.field]: expected value to equal [tags]
-        - [0.1.value.0]: types that failed validation:
-         - [0.value.0.0.group]: expected value of type [string] but got [undefined]
-         - [0.value.0.1.type]: expected value to equal [system]
-        - [0.2.operation]: expected value to equal [set]
-        - [0.3.operation]: expected value to equal [set]
-        - [0.4.operation]: expected value to equal [set]
-        - [0.5.operation]: expected value to equal [set]
-        - [0.6.operation]: expected value to equal [delete]
-        - [0.7.operation]: expected value to equal [set]]
+      ).resolves.toMatchInlineSnapshot(`
+        Object {
+          "errors": Array [
+            Object {
+              "message": "Error validating bulk edit rules operations - [0.group]: expected value of type [string] but got [undefined]",
+              "rule": Object {
+                "id": "1",
+                "name": "my rule name",
+              },
+            },
+          ],
+          "rules": Array [],
+          "skipped": Array [],
+          "total": 1,
+        }
       `);
     });
   });

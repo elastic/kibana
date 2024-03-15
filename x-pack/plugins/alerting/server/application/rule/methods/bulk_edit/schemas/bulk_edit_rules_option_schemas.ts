@@ -41,11 +41,15 @@ const bulkEditDefaultActionSchema = schema.object({
   alertsFilter: schema.maybe(actionAlertsFilterSchema),
 });
 
+export const bulkEditDefaultActionsSchema = schema.arrayOf(bulkEditDefaultActionSchema);
+
 export const bulkEditSystemActionSchema = schema.object({
   id: schema.string(),
   params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
   uuid: schema.maybe(schema.string()),
 });
+
+export const bulkEditSystemActionsSchema = schema.arrayOf(bulkEditSystemActionSchema);
 
 const bulkEditTagSchema = schema.object({
   operation: schema.oneOf([schema.literal('add'), schema.literal('delete'), schema.literal('set')]),
