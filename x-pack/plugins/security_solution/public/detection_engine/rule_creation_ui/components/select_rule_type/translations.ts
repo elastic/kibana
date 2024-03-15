@@ -40,7 +40,7 @@ export const ESQL_TYPE_DESCRIPTION = i18n.translate(
 export const QUERY_TYPE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.queryTypeTitle',
   {
-    defaultMessage: 'Custom query HELLO',
+    defaultMessage: 'Custom query',
   }
 );
 

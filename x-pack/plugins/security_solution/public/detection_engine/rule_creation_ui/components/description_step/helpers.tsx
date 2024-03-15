@@ -69,17 +69,7 @@ const Query = styled.div`
   white-space: pre-wrap;
 `;
 
-export const getQueryLabel = (
-  ruleType:
-    | 'query'
-    | 'eql'
-    | 'saved_query'
-    | 'threshold'
-    | 'threat_match'
-    | 'new_terms'
-    | 'esql'
-    | undefined
-): string => {
+export const getQueryLabel = (ruleType: Type | undefined): string => {
   switch (ruleType) {
     case 'query':
       return i18n.QUERY_LABEL;
@@ -96,7 +86,7 @@ export const getQueryLabel = (
     case 'esql':
       return i18n.ESQL_QUERY_LABEL;
     default:
-      return 'hello world';
+      return i18n.QUERY_LABEL;
   }
 };
 
@@ -147,7 +137,6 @@ export const buildQueryBarDescription = ({
     ];
   }
   if (!isEmpty(query)) {
-    console.error('WHAT IS THE QUERYLABEL', queryLabel);
     items = [
       ...items,
       {

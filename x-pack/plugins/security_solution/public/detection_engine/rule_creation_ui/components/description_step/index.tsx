@@ -197,12 +197,11 @@ export const getDescriptionItem = (
   indexPatterns?: DataViewBase
 ): ListItems[] => {
   if (field === 'queryBar') {
-    console.error(data);
     const filters = addFilterStateIfNotThere(get('queryBar.filters', data) ?? []);
     const query = get('queryBar.query.query', data);
     const savedId = get('queryBar.saved_id', data);
     const savedQueryName = get('queryBar.title', data);
-    const ruleType = get('ruleType', data);
+    const ruleType: Type = get('ruleType', data);
     const queryLabel = getQueryLabel(ruleType);
     return buildQueryBarDescription({
       field,

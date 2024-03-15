@@ -17,7 +17,7 @@ export const FILTERS_LABEL = i18n.translate(
 export const QUERY_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.queryLabel',
   {
-    defaultMessage: 'Custom query WORLD',
+    defaultMessage: 'Custom query',
   }
 );
 
