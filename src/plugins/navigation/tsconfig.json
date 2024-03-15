@@ -26,6 +26,7 @@
     "@kbn/i18n",
     "@kbn/solution-nav-es",
     "@kbn/solution-nav-oblt",
+    "@kbn/config",
   ],
   "exclude": [
     "target/**/*",
