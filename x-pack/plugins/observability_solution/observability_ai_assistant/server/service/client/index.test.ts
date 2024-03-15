@@ -25,7 +25,7 @@ import {
 } from '../../../common/conversation_complete';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import type { CreateChatCompletionResponseChunk } from '../../../common/utils/process_openai_stream';
-import type { ChatFunctionClient } from '../chat_function_client';
+import { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { observableIntoStream } from '../util/observable_into_stream';
 
@@ -1473,5 +1473,124 @@ describe('Observability AI Assistant client', () => {
     expect(chatSpy.mock.calls[0][1].messages[0].message.content).toEqual(
       'You MUST respond in the users preferred language which is: Orcish. This is a system message'
     );
+  });
+
+  describe('when executing an action', () => {
+    let completePromise: Promise<Message[]>;
+
+    beforeEach(async () => {
+      client = createClient();
+
+      llmSimulator = createLlmSimulator();
+
+      actionsClientMock.execute.mockImplementation(async () => {
+        llmSimulator = createLlmSimulator();
+        return {
+          actionId: '',
+          status: 'ok',
+          data: llmSimulator.stream,
+        };
+      });
+
+      const complete$ = await client.complete({
+        connectorId: 'foo',
+        messages: [
+          system('This is a system message'),
+          user('Can you call the my_action function?'),
+        ],
+        functionClient: new ChatFunctionClient([
+          {
+            actions: [
+              {
+                name: 'my_action',
+                description: 'My action description',
+                parameters: {
+                  type: 'object',
+                  properties: {
+                    foo: {
+                      type: 'string',
+                    },
+                  },
+                  required: ['foo'],
+                },
+              },
+            ],
+          },
+        ]),
+        signal: new AbortController().signal,
+        title: 'My predefined title',
+        persist: false,
+      });
+
+      const messages: Message[] = [];
+
+      completePromise = new Promise<Message[]>((resolve, reject) => {
+        complete$.subscribe({
+          next: (event) => {
+            if (event.type === StreamingChatResponseEventType.MessageAdd) {
+              messages.push(event.message);
+            }
+          },
+          complete: () => resolve(messages),
+        });
+      });
+    });
+
+    describe('and validation succeeds', () => {
+      beforeEach(async () => {
+        await llmSimulator.next({
+          function_call: { name: 'my_action', arguments: JSON.stringify({ foo: 'bar' }) },
+        });
+        await llmSimulator.complete();
+      });
+
+      it('completes the observable function request being the last event', async () => {
+        const messages = await completePromise;
+        expect(messages.length).toBe(1);
+
+        expect(messages[0].message.function_call).toEqual({
+          name: 'my_action',
+          arguments: JSON.stringify({ foo: 'bar' }),
+          trigger: MessageRole.Assistant,
+        });
+      });
+    });
+
+    describe('and validation fails', () => {
+      beforeEach(async () => {
+        await llmSimulator.next({
+          function_call: { name: 'my_action', arguments: JSON.stringify({ bar: 'foo' }) },
+        });
+
+        await llmSimulator.complete();
+
+        await waitFor(() =>
+          actionsClientMock.execute.mock.calls.length === 2
+            ? Promise.resolve()
+            : Promise.reject(new Error('Waiting until execute is called again'))
+        );
+
+        await nextTick();
+
+        await llmSimulator.next({
+          content: 'Looks like the function call failed',
+        });
+
+        await llmSimulator.complete();
+      });
+
+      it('appends a function response error and sends it back to the LLM', async () => {
+        const messages = await completePromise;
+        expect(messages.length).toBe(3);
+
+        expect(messages[0].message.function_call?.name).toBe('my_action');
+
+        expect(messages[1].message.name).toBe('my_action');
+
+        expect(JSON.parse(messages[1].message.content ?? '{}')).toHaveProperty('error');
+
+        expect(messages[2].message.content).toBe('Looks like the function call failed');
+      });
+    });
   });
 });

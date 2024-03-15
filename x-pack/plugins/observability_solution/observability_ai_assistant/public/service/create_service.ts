@@ -57,6 +57,7 @@ export function createService({
     navigate: async (cb) => {
       cb();
 
+      // wait for at least 1s of no network activity
       await lastValueFrom(
         coreStart.http.getLoadingCount$().pipe(
           filter((count) => count === 0),

@@ -45,6 +45,7 @@ export const createOpenAiAdapter: LlmApiAdapterFactory = ({
       );
 
       const functionsForOpenAI = functions?.map((fn) => ({
+        ...fn,
         parameters: merge(
           {
             type: 'object',
@@ -52,7 +53,6 @@ export const createOpenAiAdapter: LlmApiAdapterFactory = ({
           },
           fn.parameters
         ),
-        ...fn,
       }));
 
       const request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string } = {

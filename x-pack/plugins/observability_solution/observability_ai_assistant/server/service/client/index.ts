@@ -48,6 +48,7 @@ import {
   type Message,
 } from '../../../common/types';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
+import { createFunctionResponseError } from '../../../common/utils/create_function_response_error';
 import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
 import type { ChatFunctionClient } from '../chat_function_client';
 import {
@@ -261,10 +262,25 @@ export class ObservabilityAIAssistantClient {
             if (functionClient.hasAction(functionCallName)) {
               this.dependencies.logger.debug(`Executing client-side action: ${functionCallName}`);
 
-              functionClient.validate(
-                functionCallName,
-                JSON.parse(lastMessage.message.function_call!.arguments || '{}')
-              );
+              // if validation fails, return the error to the LLM.
+              // otherwise, close the stream.
+
+              try {
+                functionClient.validate(
+                  functionCallName,
+                  JSON.parse(lastMessage.message.function_call!.arguments || '{}')
+                );
+              } catch (error) {
+                const functionResponseMessage = createFunctionResponseError({
+                  name: functionCallName,
+                  error,
+                });
+                nextMessages = nextMessages.concat(functionResponseMessage.message);
+
+                subscriber.next(functionResponseMessage);
+
+                return await next(nextMessages);
+              }
 
               subscriber.complete();
 

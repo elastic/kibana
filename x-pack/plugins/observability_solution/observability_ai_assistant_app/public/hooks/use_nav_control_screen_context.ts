@@ -8,7 +8,6 @@
 import { useEffect, useState } from 'react';
 import datemath from '@elastic/datemath';
 import moment from 'moment';
-import { createScreenContextAction } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from './use_kibana';
 import { useObservabilityAIAssistantAppService } from './use_observability_ai_assistant_app_service';
 
@@ -31,22 +30,32 @@ export function useNavControlScreenContext() {
     const originalPushState = window.history.pushState.bind(window.history);
     const originalReplaceState = window.history.replaceState.bind(window.history);
 
+    let unmounted: boolean = false;
+
+    function updateHref() {
+      if (!unmounted) {
+        setHref(window.location.href);
+      }
+    }
+
     window.history.pushState = (...args: Parameters<typeof originalPushState>) => {
       originalPushState(...args);
-      setHref(window.location.href);
+      updateHref();
     };
 
     window.history.replaceState = (...args: Parameters<typeof originalReplaceState>) => {
       originalReplaceState(...args);
-      setHref(window.location.href);
+      updateHref();
     };
-    window.addEventListener('popstate', () => {
-      setHref(window.location.href);
-    });
+    window.addEventListener('popstate', updateHref);
 
-    window.addEventListener('hashchange', () => {
-      setHref(window.location.href);
-    });
+    window.addEventListener('hashchange', updateHref);
+
+    return () => {
+      unmounted = true;
+      window.removeEventListener('popstate', updateHref);
+      window.removeEventListener('hashchange', updateHref);
+    };
   }, []);
 
   useEffect(() => {
@@ -55,27 +64,6 @@ export function useNavControlScreenContext() {
 
     return service.setScreenContext({
       screenDescription: `The user is looking at ${href}. The current time range is ${start} - ${end}.`,
-      actions: [
-        createScreenContextAction(
-          {
-            name: 'foo',
-            description: 'foo',
-            parameters: {
-              type: 'object',
-              properties: {
-                foo: {
-                  type: 'string',
-                },
-              },
-            },
-          },
-          async ({}) => {
-            return {
-              content: 'Action succesfully executed',
-            };
-          }
-        ),
-      ],
     });
   }, [service, from, to, href]);
 }

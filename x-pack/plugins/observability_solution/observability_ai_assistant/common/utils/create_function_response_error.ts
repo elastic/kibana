@@ -19,7 +19,13 @@ export function createFunctionResponseError({
   return createFunctionResponseMessage({
     name,
     content: {
-      error,
+      error: {
+        ...error,
+        name: error.name,
+        message: error.message,
+        cause: error.cause,
+        stack: error.stack,
+      },
       message: message || error.message,
     },
   });
