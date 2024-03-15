@@ -8,15 +8,17 @@ import React, { type FC } from 'react';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 
 interface RulesTableEmptyColumnNameProps {
-  name?: string;
+  name: string;
 }
 
-export const RulesTableEmptyColumn: FC<RulesTableEmptyColumnNameProps> = React.memo(({ name }) => {
-  return (
-    <EuiScreenReaderOnly>
-      <p>{name}</p>
-    </EuiScreenReaderOnly>
-  );
-});
+export const RulesTableEmptyColumnName: FC<RulesTableEmptyColumnNameProps> = React.memo(
+  ({ name }) => {
+    return (
+      <EuiScreenReaderOnly>
+        <p>{name}</p>
+      </EuiScreenReaderOnly>
+    );
+  }
+);
 
-RulesTableEmptyColumn.displayName = 'RulesTableEmptyColumn';
+RulesTableEmptyColumnName.displayName = 'RulesTableEmptyColumnName';
