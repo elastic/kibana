@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const CIS_EKS_OPTION_TEST_ID = 'cisEksTestId';
-const EKS_ASSUME_ROLE_TEST_ID = 'assumeRoleTestId';
 const EKS_DIRECT_ACCESS_TEST_ID = 'directAccessKeyTestId';
 const EKS_TEMPORARY_KEYS_TEST_ID = 'temporaryKeyTestId';
 const EKS_SHARED_CREDENTIAL_TEST_ID = 'sharedCredentialsTestId';
@@ -45,7 +44,6 @@ export default function (providerContext: FtrProviderContext) {
       it('KSPM EKS Assume Role workflow', async () => {
         const roleArn = 'RoleArnTestValue';
         await cisIntegration.clickOptionButton(CIS_EKS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(EKS_ASSUME_ROLE_TEST_ID);
         await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
         await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
