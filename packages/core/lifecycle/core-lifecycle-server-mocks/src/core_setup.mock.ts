@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { CoreSetup, StartServicesAccessor } from '@kbn/core-lifecycle-server';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import type { CoreSetup, StartServicesAccessor } from '@kbn/core-lifecycle-server';
-import type { MockedKeys } from '@kbn/utility-types-jest';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
@@ -25,8 +25,9 @@ import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
-import { createCoreStartMock } from './core_start.mock';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { createCoreStartMock } from './core_start.mock';
 
 type CoreSetupMockType = MockedKeys<CoreSetup> & {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createSetup>;
@@ -67,6 +68,7 @@ export function createCoreSetupMock({
     metrics: metricsServiceMock.createSetupContract(),
     deprecations: deprecationsServiceMock.createSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
+    security: securityServiceMock.createSetup(),
     coreUsageData: {
       registerUsageCounter: coreUsageDataServiceMock.createSetupContract().registerUsageCounter,
     },
