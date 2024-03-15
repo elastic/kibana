@@ -10,9 +10,13 @@ import { useQuery } from '@tanstack/react-query';
 import type { ServerError } from '@kbn/cases-plugin/public/types';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
+import { useMemo } from 'react';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { AIConnector } from '../connector_selector';
+import { getActionTypeTitle } from '../helpers';
 import * as i18n from '../translations';
 
 /**
@@ -22,21 +26,62 @@ import * as i18n from '../translations';
 const QUERY_KEY = ['elastic-assistant, load-connectors'];
 
 export interface Props {
+  actionTypeRegistry: ActionTypeRegistryContract;
   http: HttpSetup;
   toasts?: IToasts;
 }
 
+const actionTypeKey = {
+  bedrock: '.bedrock',
+  openai: '.gen-ai',
+};
+
 export const useLoadConnectors = ({
+  actionTypeRegistry,
   http,
   toasts,
-}: Props): UseQueryResult<ActionConnector[], IHttpFetchError> => {
+}: Props): UseQueryResult<AIConnector[], IHttpFetchError> => {
+  const connectorDetails = useMemo(
+    () =>
+      actionTypeRegistry
+        ? {
+            [actionTypeKey.bedrock]: getActionTypeTitle(
+              actionTypeRegistry.get(actionTypeKey.bedrock)
+            ),
+            [actionTypeKey.openai]: getActionTypeTitle(
+              actionTypeRegistry.get(actionTypeKey.openai)
+            ),
+          }
+        : {
+            [actionTypeKey.bedrock]: 'Amazon Bedrock',
+            [actionTypeKey.openai]: 'OpenAI',
+          },
+    [actionTypeRegistry]
+  );
   return useQuery(
     QUERY_KEY,
     async () => {
       const queryResult = await loadConnectors({ http });
-      return queryResult.filter(
-        (connector) =>
-          !connector.isMissingSecrets && ['.bedrock', '.gen-ai'].includes(connector.actionTypeId)
+      return queryResult.reduce(
+        (acc: AIConnector[], connector) => [
+          ...acc,
+          ...(!connector.isMissingSecrets &&
+          [actionTypeKey.bedrock, actionTypeKey.openai].includes(connector.actionTypeId)
+            ? [
+                {
+                  ...connector,
+                  connectorTypeTitle: connectorDetails[connector.actionTypeId],
+                  apiProvider:
+                    !connector.isPreconfigured &&
+                    !connector.isSystemAction &&
+                    connector?.config?.apiProvider
+                      ? (connector?.config?.apiProvider as OpenAiProviderType)
+                      : undefined,
+                },
+              ]
+            : []),
+        ],
+        []
       );
     },
     {
