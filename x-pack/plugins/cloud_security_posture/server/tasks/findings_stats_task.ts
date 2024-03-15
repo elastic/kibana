@@ -288,7 +288,7 @@ const getFindingsScoresDocIndexingPromises = (
     // creating score per cluster id objects
     const clustersStats = Object.fromEntries(
       policyTemplateTrend.score_by_cluster_id.buckets.map((clusterStats) => {
-        const clusterId = clusterStats.key;
+        const clusterId = clusterStats?.key || 'unknown';
 
         return [
           clusterId,
