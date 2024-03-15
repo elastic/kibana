@@ -337,7 +337,7 @@ _meta:
                   number_of_shards: 1,
                   number_of_routing_shards: 30,
                   hidden: true,
-                  mapping: { total_fields: { limit: '10000' } },
+                  mapping: { total_fields: { limit: 1000 } },
                 },
               },
               mappings: {
@@ -626,7 +626,7 @@ _meta:
                   number_of_shards: 1,
                   number_of_routing_shards: 30,
                   hidden: true,
-                  mapping: { total_fields: { limit: '10000' } },
+                  mapping: { total_fields: { limit: 1000 } },
                 },
               },
               mappings: {
@@ -898,7 +898,7 @@ _meta:
           name: 'logs-endpoint.metadata_current-template@package',
           body: {
             template: {
-              settings: { index: { mapping: { total_fields: { limit: '10000' } } } },
+              settings: { index: { mapping: { total_fields: { limit: 1000 } } } },
               mappings: {
                 properties: {
                   '@timestamp': {

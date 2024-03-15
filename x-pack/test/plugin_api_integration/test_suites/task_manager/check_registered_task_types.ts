@@ -33,9 +33,6 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTask',
     'timedTaskWithLimitedConcurrency',
     'timedTaskWithSingleConcurrency',
-    'sampleRecurringTaskWithInvalidIndirectParam',
-    'sampleOneTimeTaskWithInvalidIndirectParam',
-    'sampleTaskWithParamsSchema',
     'taskToDisable',
   ];
 
