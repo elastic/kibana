@@ -504,6 +504,7 @@ const prepareDefinitionSectionListItems = (
   }
 
   if ('query' in rule && rule.query) {
+    console.error('RULE.TYPE: ', rule.type);
     if (rule.type === 'eql') {
       definitionSectionListItems.push({
         title: (
