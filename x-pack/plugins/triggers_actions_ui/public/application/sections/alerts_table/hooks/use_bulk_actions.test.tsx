@@ -305,6 +305,12 @@ describe('bulk action hooks', () => {
       mockKibana.mockImplementation(() => ({
         services: {
           application: { capabilities: {} },
+          notifications: {
+            toasts: {
+              addDanger: jest.fn(),
+              addSuccess: jest.fn(),
+            },
+          },
         },
       }));
       const { result } = renderHook(
@@ -340,6 +346,12 @@ describe('bulk action hooks', () => {
         services: {
           cases: mockCaseService,
           application: { capabilities: { infrastructure: { show: true } } },
+          notifications: {
+            toasts: {
+              addDanger: jest.fn(),
+              addSuccess: jest.fn(),
+            },
+          },
         },
       }));
       mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
