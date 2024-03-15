@@ -7,7 +7,7 @@
 
 import './chart_switch.scss';
 import React, { ReactNode } from 'react';
-import { EuiFlexItem, EuiIconTip, EuiBetaBadge, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiIconTip, EuiBetaBadge, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
@@ -55,16 +55,22 @@ const DataLossWarning = ({ content, id }: { content: ReactNode; id: string }) =>
 export const ExperimentalBadge = () => {
   return (
     <EuiFlexItem grow={false}>
-      <EuiBetaBadge
-        css={css`
-          vertical-align: middle;
-        `}
-        iconType="beaker"
-        label={i18n.translate('xpack.lens.chartSwitch.experimentalLabel', {
+      <EuiToolTip
+        content={i18n.translate('xpack.lens.chartSwitch.experimentalLabel', {
           defaultMessage: 'Technical preview',
         })}
-        size="s"
-      />
+      >
+        <EuiBetaBadge
+          css={css`
+            vertical-align: middle;
+          `}
+          iconType="beaker"
+          label={i18n.translate('xpack.lens.chartSwitch.experimentalLabel', {
+            defaultMessage: 'Technical preview',
+          })}
+          size="s"
+        />
+      </EuiToolTip>
     </EuiFlexItem>
   );
 };
