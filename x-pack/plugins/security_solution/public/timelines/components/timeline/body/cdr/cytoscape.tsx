@@ -23,7 +23,7 @@ import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { ThemeContext } from 'styled-components';
 // import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
-import { EuiBasicTable, EuiPopover } from '@elastic/eui';
+import { EuiBasicTable, EuiPopover, EuiSearchBar } from '@elastic/eui';
 
 import { getFlattenedObject } from '@kbn/std';
 import { addProvider } from '../../../../store/actions';
@@ -77,7 +77,11 @@ const Popover = ({
   closePopover,
   items,
   timelineId,
+  setPopoverSearchTerm,
+  searchTerm,
 }: {
+  searchTerm: string;
+  setPopoverSearchTerm(term: string): void;
   isPopoverOpen: boolean;
   closePopover: () => void;
   items: Array<{
@@ -87,6 +91,13 @@ const Popover = ({
   timelineId: string;
 }) => {
   const dispatch = useDispatch();
+  const [searchValue, setSearchValue] = useState('');
+
+  const data = React.useMemo(
+    () =>
+      items.filter((item) => item.field.includes(searchTerm) || item.value.includes(searchTerm)),
+    [items, searchTerm]
+  );
 
   return (
     <EuiPopover
@@ -97,9 +108,15 @@ const Popover = ({
       repositionOnScroll
       hasArrow={false}
     >
+      <EuiSearchBar
+        box={{
+          incremental: true,
+        }}
+        onChange={(v) => setPopoverSearchTerm(v.queryText)}
+      />
       <EuiBasicTable
         style={{ width: '500px', height: '300px', overflow: 'auto' }}
-        items={items}
+        items={data}
         rowHeader="firstName"
         columns={[
           {
@@ -152,8 +169,13 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
       value: string;
     }>
   >([]);
+  const [popoverSearchTerm, setPopoverSearchTerm] = useState<string>('');
 
-  const closePopover = () => setIsPopoverOpen(false);
+  const closePopover = () => {
+    setPopoverSearchTerm('');
+    setPopoverItems([]);
+    setIsPopoverOpen(false);
+  };
 
   const elements = useMemo(() => convertToCytoscapeElements(data), [data]);
 
@@ -325,6 +347,8 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
           isPopoverOpen={isPopoverOpen}
           closePopover={closePopover}
           items={popoverItems}
+          setPopoverSearchTerm={setPopoverSearchTerm}
+          searchTerm={popoverSearchTerm}
         />
         {children}
       </div>
