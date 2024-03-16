@@ -104,6 +104,7 @@ export class PluginWrapper<
   public async init() {
     this.log.debug('Initializing plugin');
 
+    this.definition = this.getPluginDefinition();
     this.instance = await this.createPluginInstance();
   }
 
@@ -117,24 +118,23 @@ export class PluginWrapper<
   public setup(
     setupContext: CoreSetup<TPluginsStart> | CorePreboot,
     plugins: TPluginsSetup
-  ): TSetup | Promise<TSetup> {
-    if (!this.instance) {
+  ): undefined | TSetup | Promise<TSetup> {
+    if (!this.definition) {
       throw new Error('The plugin is not initialized. Call the init method first.');
     }
 
-    if (this.isPrebootPluginInstance(this.instance)) {
+    if (this.instance && this.isPrebootPluginInstance(this.instance)) {
       return this.instance.setup(setupContext as CorePreboot, plugins);
     }
 
-    const module = this.getPluginModule();
-    if (module) {
+    if (this.definition.module) {
       const { injection } = setupContext as CoreSetup;
-      injection.load(module);
+      injection.load(this.definition.module);
       injection.load(createPluginInitializerModule(this.initializerContext));
       injection.load(createPluginSetupModule(setupContext as CoreSetup));
     }
 
-    return this.instance.setup(setupContext as CoreSetup, plugins);
+    return this.instance?.setup(setupContext as CoreSetup, plugins);
   }
 
   /**
@@ -144,13 +144,20 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `start` function.
    */
-  public start(startContext: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart> {
-    if (this.instance === undefined) {
+  public start(
+    startContext: CoreStart,
+    plugins: TPluginsStart
+  ): undefined | TStart | Promise<TStart> {
+    if (!this.definition) {
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    if (this.isPrebootPluginInstance(this.instance)) {
+    if (this.instance && this.isPrebootPluginInstance(this.instance)) {
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
+    }
+
+    if (!this.instance) {
+      return;
     }
 
     const startContract = this.instance.start(startContext, plugins);
@@ -169,11 +176,11 @@ export class PluginWrapper<
    * Calls optional `stop` function exposed by the plugin initializer.
    */
   public async stop() {
-    if (this.instance === undefined) {
+    if (!this.definition) {
       throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
 
-    if (typeof this.instance.stop === 'function') {
+    if (typeof this.instance?.stop === 'function') {
       await this.instance.stop();
     }
 
@@ -185,7 +192,7 @@ export class PluginWrapper<
       return null;
     }
     const definition = this.getPluginDefinition();
-    if (!definition?.config) {
+    if (!definition.config) {
       this.log.debug(`Plugin "${this.name}" does not export "config" (${this.path}).`);
       return null;
     }
@@ -197,30 +204,16 @@ export class PluginWrapper<
     return config;
   }
 
-  protected getPluginDefinition():
-    | PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart>
-    | undefined {
-    if (!this.definition) {
-      this.definition = require(join(this.path, 'server'));
-    }
-
-    return this.definition;
-  }
-
-  protected getPluginModule(): interfaces.ContainerModule | undefined {
-    const definition = this.getPluginDefinition();
-
-    return definition?.module;
+  protected getPluginDefinition(): PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart> {
+    return require(join(this.path, 'server')) ?? {};
   }
 
   protected async createPluginInstance() {
-    const definition = this.getPluginDefinition();
-
-    if (!definition?.plugin) {
-      throw new Error(`Plugin "${this.name}" does not export "plugin" definition (${this.path}).`);
+    if (!this.definition?.plugin) {
+      return;
     }
 
-    const { plugin: initializer } = definition;
+    const { plugin: initializer } = this.definition;
     if (!initializer || typeof initializer !== 'function') {
       throw new Error(`Definition of plugin "${this.name}" should be a function (${this.path}).`);
     }
