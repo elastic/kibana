@@ -6,10 +6,8 @@
  */
 
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { TASK_NAME } from './constants';
 import { BidirectionalSyncTaskFactory } from './task_factory';
-
-// Should we have one per connector type?
-const TASK_NAME = 'cases-connectors-bidi-sync';
 
 export const registerBidirectionalSyncTask = ({
   taskManager,
@@ -17,10 +15,11 @@ export const registerBidirectionalSyncTask = ({
   taskManager: TaskManagerSetupContract;
 }) => {
   taskManager.registerTaskDefinitions({
+    // Should we have one per connector type?
     [TASK_NAME]: {
       title: 'Connectors bidirectional synchronization task for Cases',
       createTaskRunner: (context: RunContext) => {
-        return new BidirectionalSyncTaskFactory().create();
+        return new BidirectionalSyncTaskFactory().create(context);
       },
     },
   });

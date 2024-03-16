@@ -202,6 +202,7 @@ export class CasePlugin
       notifications: plugins.notifications,
       ruleRegistry: plugins.ruleRegistry,
       filesPluginStart: plugins.files,
+      taskManager: plugins.taskManager,
     });
 
     const client = core.elasticsearch.client;

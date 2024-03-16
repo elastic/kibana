@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { BidirectionalSyncTaskRunner } from './task_runner';
 
 export class BidirectionalSyncTaskFactory {
-  public create() {
-    return new BidirectionalSyncTaskRunner();
+  public create(context: RunContext) {
+    return new BidirectionalSyncTaskRunner({ taskInstance: context.taskInstance });
   }
 }

@@ -34,6 +34,7 @@ import type {
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { FilesStart } from '@kbn/files-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -53,6 +54,7 @@ import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_fram
 import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
+import { BidirectionalSyncClient } from '../connectors/bidirectional_sync/client';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
@@ -68,6 +70,7 @@ interface CasesClientFactoryArgs {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
   filesPluginStart: FilesStart;
+  taskManager: TaskManagerStartContract;
 }
 
 /**
@@ -162,6 +165,9 @@ export class CasesClientFactory {
         this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
       savedObjectsSerializer,
       fileService,
+      bidirectionalSyncClient: new BidirectionalSyncClient({
+        taskManager: this.options.taskManager,
+      }),
     });
   }
 
