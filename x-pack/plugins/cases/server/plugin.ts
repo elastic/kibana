@@ -49,6 +49,7 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
 import { registerInternalAttachments } from './internal_attachments';
 import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
+import { registerBidirectionalSyncTask } from './connectors/bidirectional_sync';
 
 export class CasePlugin
   implements
@@ -146,6 +147,11 @@ export class CasePlugin
     });
 
     plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
+
+    /**
+     * Connectors bidirectional sync
+     */
+    registerBidirectionalSyncTask({ taskManager: plugins.taskManager });
 
     return {
       attachmentFramework: {

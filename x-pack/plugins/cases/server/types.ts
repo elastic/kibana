@@ -44,7 +44,7 @@ export interface CasesServerSetupDependencies {
   files: FilesSetup;
   security: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
-  taskManager?: TaskManagerSetupContract;
+  taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -53,7 +53,7 @@ export interface CasesServerStartDependencies {
   features: FeaturesPluginStart;
   files: FilesStart;
   licensing: LicensingPluginStart;
-  taskManager?: TaskManagerStartContract;
+  taskManager: TaskManagerStartContract;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   notifications: NotificationsPluginStart;
