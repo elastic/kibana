@@ -38,7 +38,7 @@ import { ColumnHeaders } from './column_headers';
 import { Events } from './events';
 import { timelineBodySelector } from './selectors';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { convertToCytoscapeElements, Cytoscape } from './cdr/cytoscape';
+import { Cytoscape } from './cdr/cytoscape';
 import { getCytoscapeDivStyle } from './cdr/cytoscape_options';
 
 export interface Props {
@@ -221,10 +221,30 @@ export const StatefulBody = React.memo<Props>(
     return (
       <>
         <TimelineBody data-test-subj="timeline-body" ref={containerRef}>
-          <EuiResizableContainer style={{ height: '400px' }} direction="vertical">
+          <EuiResizableContainer direction="vertical">
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
-                <EuiResizablePanel mode="collapsible" initialSize={60} minSize="20%" tabIndex={0}>
+                <EuiResizablePanel mode="main" minSize="20%" initialSize={70} tabIndex={-1}>
+                  <Cytoscape
+                    id={id}
+                    data={data}
+                    height={600}
+                    serviceName={'serviceName'}
+                    style={graphStyle}
+                  />
+                </EuiResizablePanel>
+                <EuiResizableButton alignIndicator="center" />
+                <EuiResizablePanel
+                  mode={[
+                    'collapsible',
+                    {
+                      className: 'panel-toggle',
+                    },
+                  ]}
+                  minSize="10%"
+                  initialSize={30}
+                  tabIndex={0}
+                >
                   <EventsTable
                     $activePage={activePage}
                     $columnCount={columnCount}
@@ -274,15 +294,6 @@ export const StatefulBody = React.memo<Props>(
                       tabType={tabType}
                     />
                   </EventsTable>
-                </EuiResizablePanel>
-                <EuiResizableButton />
-                <EuiResizablePanel mode="main" initialSize={400} minSize="20%" tabIndex={-1}>
-                  <Cytoscape
-                    elements={convertToCytoscapeElements(data)}
-                    height={600}
-                    serviceName={'serviceName'}
-                    style={graphStyle}
-                  />
                 </EuiResizablePanel>
               </>
             )}

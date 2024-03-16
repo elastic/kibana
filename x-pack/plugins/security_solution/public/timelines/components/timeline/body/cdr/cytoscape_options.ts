@@ -196,6 +196,36 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
       },
     },
     {
+      selector: 'node.event-node-border',
+      style: {
+        ghost: 'no',
+        shape: 'rectangle',
+        'background-color': '#FFF9E8',
+        'border-color': '#FEC514',
+        'border-width': 2,
+        'background-image': 'none',
+        width: '160px',
+        // padding: '10px', // Adjust as needed for visual appearance
+      },
+    },
+    {
+      selector: 'node.event-node',
+      style: {
+        'background-image': 'none',
+        'background-color': 'data(backgroundColor)', // Use this to control visibility dynamically
+        'border-width': 0,
+        'text-valign': 'center',
+        'text-halign': 'center',
+        color: '#1A1C21',
+        'font-size': '8px',
+        width: '140px',
+        'text-wrap': 'wrap',
+        'text-max-width': '140px',
+        'background-opacity': 0, // Ensure any specified background is fully transparent
+        // Ensure no shape is visually rendered. Since 'shape: none' is not valid, focus on making it invisible.
+      },
+    },
+    {
       selector: 'edge',
       style: {
         'curve-style': 'unbundled-bezier',
@@ -259,6 +289,12 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
       selector: 'node.hover',
       style: {
         'border-width': getBorderWidth,
+      },
+    },
+    {
+      selector: 'node.event-node.hover',
+      style: {
+        'border-width': 0,
       },
     },
     {
