@@ -29,6 +29,7 @@ import {
   testIndexSettings,
   testIndexStats,
 } from './mocks';
+import { MappingField } from '../index_template_wizard/template_form.helpers';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
@@ -231,6 +232,7 @@ describe('<IndexDetailsPage />', () => {
   it('changes the tab when its header is clicked', async () => {
     await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
     expect(testBed.exists('indexDetailsMappingsCodeBlock')).toBe(true);
+    expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
     await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
     expect(testBed.exists('indexDetailsSettingsCodeBlock')).toBe(true);
   });
@@ -501,6 +503,68 @@ describe('<IndexDetailsPage />', () => {
       expect(docsLinkHref).toEqual(
         'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/mapping.html'
       );
+    });
+    describe('Add field button', () => {
+      const mockIndexMappingResponse: any = {
+        ...testIndexMappings.mappings,
+        properties: {
+          ...testIndexMappings.mappings.properties,
+          name: {
+            type: 'text',
+          },
+        },
+      };
+
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setUpdateIndexMappingsResponse(testIndexName, {
+          acknowledged: true,
+        });
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+          mappings: mockIndexMappingResponse,
+        });
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      });
+
+      it('add field button exists', async () => {
+        expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+      });
+
+      it('add field button opens pending block and save mappings is disabled by default', async () => {
+        await testBed.actions.mappings.clickAddFieldButton();
+        expect(testBed.exists('indexDetailsMappingsPendingBlock')).toBe(true);
+        expect(testBed.find('indexDetailsMappingsSaveMappings').props().disabled);
+      });
+
+      it('Can add new fields and can save mappings', async () => {
+        await testBed.actions.mappings.clickAddFieldButton();
+        await testBed.actions.mappings.addNewMappingFieldNameAndType([
+          { name: 'name', type: 'text' },
+        ]);
+        await testBed.actions.mappings.clickSaveMappingsButton();
+
+        //Add field button is available again
+        expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+
+        expect(httpSetup.put).toHaveBeenCalledWith(`${API_BASE_PATH}/mapping/${testIndexName}`, {
+          body: '{"name":{"type":"text"}}',
+        });
+
+        expect(httpSetup.get).toHaveBeenCalledTimes(4);
+        expect(httpSetup.get).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/mapping/${testIndexName}`,
+          requestOptions
+        );
+
+        //refresh mappings api calls
+        expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+        const tabContent = testBed.actions.mappings.getCodeBlockContent();
+        expect(tabContent).toEqual(JSON.stringify({ mappings: mockIndexMappingResponse }, null, 2));
+      });
     });
 
     describe('error loading mappings', () => {

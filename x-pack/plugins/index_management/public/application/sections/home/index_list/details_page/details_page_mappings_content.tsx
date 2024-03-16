@@ -129,7 +129,8 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       },
     });
   }, [dispatch]);
-  const updateMappings = async () => {
+
+  const updateMappings = useCallback(async () => {
     const { error } = await updateIndexMappings(indexName, deNormalize(state.fields));
     if (!error) {
       notificationService.showSuccessToast(
@@ -140,7 +141,8 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       );
       refetchMapping();
     }
-  };
+  }, [state.fields]);
+
   const pendingFieldListId = useGeneratedHtmlId({
     prefix: 'pendingFieldListId',
   });
@@ -276,7 +278,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                   data-test-subj="indexDetailsMappingsAddField"
                 >
                   <FormattedMessage
-                    id="xpack.idxMgmt.indexDetails.mappings.addField"
+                    id="xpack.idxMgmt.indexDetails.mappings.addNewField"
                     defaultMessage="Add field"
                   />
                 </EuiButton>
@@ -308,9 +310,14 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                 <EuiSpacer size="m" />
                 <EuiAccordion
                   id={pendingFieldListId}
+                  initialIsOpen
                   buttonContent={
                     <EuiPanel paddingSize="s" hasShadow={false}>
-                      <EuiFlexGroup gutterSize="s" alignItems="baseline">
+                      <EuiFlexGroup
+                        gutterSize="s"
+                        alignItems="baseline"
+                        data-test-subj="indexDetailsMappingsPendingBlock"
+                      >
                         <EuiFlexItem grow={6}>
                           <EuiText size="m">
                             <FormattedMessage
