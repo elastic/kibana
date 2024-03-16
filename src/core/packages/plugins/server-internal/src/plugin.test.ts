@@ -181,7 +181,7 @@ test('`setup` fails if the plugin has not been initialized', () => {
   );
 });
 
-test('`init` fails if `plugin` initializer is not exported', async () => {
+test('`init` fails if no `plugin` initializer nor `module` is exported', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
   const plugin = new PluginWrapper({
@@ -198,7 +198,7 @@ test('`init` fails if `plugin` initializer is not exported', async () => {
   });
 
   await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Plugin \\"some-plugin-id\\" does not export \\"plugin\\" definition (plugin-without-initializer-path)."`
+    `"Plugin \\"some-plugin-id\\" does not export the \\"plugin\\" definition or \\"module\\" (plugin-without-initializer-path)."`
   );
 });
 
