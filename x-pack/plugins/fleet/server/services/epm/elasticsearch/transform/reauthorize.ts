@@ -127,7 +127,7 @@ export async function handleTransformReauthorizeAndStart({
             {
               transform_id: transformId,
             },
-            { ...(secondaryAuth ? secondaryAuth : {}) }
+            { ...(secondaryAuth ? secondaryAuth : {}), ignore: [404] }
           ),
         { logger, additionalResponseStatuses: [400] }
       )
@@ -136,6 +136,7 @@ export async function handleTransformReauthorizeAndStart({
 
   const transformsMetadata: FleetTransformMetadata[] = transformInfos
     .flat()
+    .filter((t) => t.transforms !== undefined)
     .map<FleetTransformMetadata>((t) => {
       const transform = t.transforms?.[0];
       return { ...transform._meta, transformId: transform?.id };
