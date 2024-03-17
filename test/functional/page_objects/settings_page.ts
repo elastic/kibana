@@ -871,13 +871,6 @@ export class SettingsPageObject extends FtrService {
   }
 
   async setFieldType(type: string) {
-    /*
-    this.log.debug('set type = ' + type);
-    await this.testSubjects.setValue('typeField', type);
-    await new Promise((r) => setTimeout(r, 1000 * 2));
-    await this.browser.pressKeys(this.browser.keys.ENTER);
-    await new Promise((r) => setTimeout(r, 1000 * 2));
-    */
     this.log.debug('set type = ' + type);
     await this.comboBox.set('typeField', type);
   }

@@ -64,12 +64,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.existOrFail('flyoutTitle');
         });
         await PageObjects.settings.setFieldType('Long');
-        // await testSubjects.find('sdfsdfdsfsdfdsf');
-        await new Promise((r) => setTimeout(r, 1000 * 2));
         await PageObjects.settings.setFieldScriptWithoutToggle('emit(6);');
-
         await PageObjects.settings.toggleRow('formatRow');
-        // await new Promise((r) => setTimeout(r, 1000 * 10));
         await PageObjects.settings.setFieldFormat('bytes');
         await testSubjects.find('changeWarning');
         await PageObjects.settings.clickSaveField();
