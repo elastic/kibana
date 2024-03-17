@@ -24,6 +24,8 @@ import {
   IndexExistsApiLogicActions,
 } from '../../api/index/index_exists_api_logic';
 
+import { ConnectorViewActions, ConnectorViewLogic } from './connector_view_logic';
+
 export interface AttachIndexActions {
   attachIndex: AttachIndexApiLogicActions['makeRequest'];
   attachIndexApiError: AttachIndexApiLogicActions['apiError'];
@@ -35,6 +37,7 @@ export interface AttachIndexActions {
   createIndex: CreateApiIndexApiLogicActions['makeRequest'];
   createIndexApiError: CreateApiIndexApiLogicActions['apiError'];
   createIndexApiSuccess: CreateApiIndexApiLogicActions['apiSuccess'];
+  fetchConnector: ConnectorViewActions['fetchConnector'];
   setConnector(connector: Connector): Connector;
 }
 
@@ -77,6 +80,8 @@ export const AttachIndexLogic = kea<MakeLogicType<AttachIndexValues, AttachIndex
         'apiSuccess as checkIndexExistsApiSuccess',
         'apiError as checkIndexExistsApiError',
       ],
+      ConnectorViewLogic,
+      ['fetchConnector'],
     ],
     values: [
       AttachIndexApiLogic,
@@ -88,6 +93,11 @@ export const AttachIndexLogic = kea<MakeLogicType<AttachIndexValues, AttachIndex
     ],
   },
   listeners: ({ actions, values }) => ({
+    attachIndexApiSuccess: () => {
+      if (values.connector) {
+        actions.fetchConnector({ connectorId: values.connector.id });
+      }
+    },
     checkIndexExists: async ({ indexName }, breakpoint) => {
       await breakpoint(200);
       actions.callCheckIndexExists({ indexName });
