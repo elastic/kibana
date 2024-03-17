@@ -895,7 +895,7 @@ export class SettingsPageObject extends FtrService {
     this.log.debug('set script without toggle = ' + script);
     await this.monacoEditor.waitCodeEditorReady('valueRow');
     await this.monacoEditor.setCodeEditorValue(script);
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   }
 
   async setCompositeScript(script: string) {
