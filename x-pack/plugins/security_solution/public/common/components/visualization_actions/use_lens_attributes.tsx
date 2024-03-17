@@ -24,6 +24,7 @@ import {
 
 export const useLensAttributes = ({
   applyGlobalQueriesAndFilters = true,
+  applyPageAndTabsFilters = true,
   extraOptions,
   getLensAttributes,
   lensAttributes,
@@ -95,8 +96,8 @@ export const useLensAttributes = ({
         ...(applyGlobalQueriesAndFilters ? { query } : {}),
         filters: [
           ...attrs.state.filters,
-          ...pageFilters,
-          ...tabsFilters,
+          ...(applyPageAndTabsFilters ? pageFilters : []),
+          ...(applyPageAndTabsFilters ? tabsFilters : []),
           ...indexFilters,
           ...(applyGlobalQueriesAndFilters ? filters : []),
         ],
@@ -108,6 +109,7 @@ export const useLensAttributes = ({
     } as LensAttributes;
   }, [
     applyGlobalQueriesAndFilters,
+    applyPageAndTabsFilters,
     attrs,
     dataViewId,
     filters,

@@ -7,19 +7,20 @@
 
 import { css } from '@emotion/react';
 import { flatten } from 'lodash';
-import React, { FC, Fragment, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useEuiBreakpoint, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useUrlState } from '@kbn/ml-url-state';
 import { isDefined } from '@kbn/ml-is-defined';
 
-import { LinkCardProps } from '../../../common/components/link_card/link_card';
+import type { LinkCardProps } from '../../../common/components/link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { LinkCard } from '../../../common/components/link_card';
-import { GetAdditionalLinks } from '../../../common/components/results_links';
+import type { GetAdditionalLinks } from '../../../common/components/results_links';
 
 interface Props {
   dataView: DataView;

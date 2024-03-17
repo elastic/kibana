@@ -46,6 +46,7 @@ const toDataViewListItem = (dataView: DataView): DataViewListItemEnhanced => {
     id: dataView.id!,
     title: dataView.title,
     name: dataView.name,
+    type: dataView.type,
     isAdhoc: !dataView.isPersisted(),
   };
 };

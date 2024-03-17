@@ -12,6 +12,7 @@ import type {
 } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import { isSOError } from '../../../common/error';
 import { decodeOrThrow } from '../../../../common/api';
 import type {
   AttachmentPersistedAttributes,
@@ -42,7 +43,6 @@ import {
 import { partitionByCaseAssociation } from '../../../common/partitioning';
 import type { AttachmentSavedObject } from '../../../common/types';
 import { getCaseReferenceId } from '../../../common/references';
-import { isSOError } from '../../../common/utils';
 
 export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}

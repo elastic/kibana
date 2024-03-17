@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { JOB_STATUS } from '@kbn/reporting-common/constants';
 
-import type { Job } from '../../lib/job';
+import { Job } from '@kbn/reporting-public';
 import { jobHasIssues } from '../utils';
 
 interface Props {

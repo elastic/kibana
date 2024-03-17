@@ -593,7 +593,8 @@ export type AggregateOf<
 
 export type AggregateOfMap<TAggregationMap extends AggregationMap | undefined, TDocument> = {
   [TAggregationName in keyof TAggregationMap]: Required<TAggregationMap>[TAggregationName] extends AggregationsAggregationContainer
-    ? AggregateOf<TAggregationMap[TAggregationName], TDocument>
+    ? // @ts-expect-error not sure how to fix this, anything I've tried causes errors upstream - Dario
+      AggregateOf<TAggregationMap[TAggregationName], TDocument>
     : never; // using never means we effectively ignore optional keys, using {} creates a union type of { ... } | {}
 };
 
@@ -644,15 +645,6 @@ export type InferSearchResponseOf<
         >;
       };
   };
-
-export interface ClusterDetails {
-  status: 'running' | 'successful' | 'partial' | 'skipped' | 'failed';
-  indices: string;
-  took?: number;
-  timed_out: boolean;
-  _shards?: estypes.ShardStatistics;
-  failures?: estypes.ShardFailure[];
-}
 
 export interface ESQLColumn {
   name: string;

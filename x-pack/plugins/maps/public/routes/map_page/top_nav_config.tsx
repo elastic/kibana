@@ -243,8 +243,7 @@ export function getTopNavConfig({
               mustCopyOnSaveMessage={
                 savedMap.isManaged()
                   ? i18n.translate('xpack.maps.topNav.mustCopyOnSaveMessage', {
-                      defaultMessage:
-                        'This map is managed by Elastic. Changes here must be saved to a new map.',
+                      defaultMessage: 'Elastic manages this map. Save any changes to a new map.',
                     })
                   : undefined
               }

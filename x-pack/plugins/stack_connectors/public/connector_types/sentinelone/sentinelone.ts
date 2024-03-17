@@ -11,16 +11,15 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
 import {
   SENTINELONE_CONNECTOR_ID,
   SENTINELONE_TITLE,
   SUB_ACTION,
 } from '../../../common/sentinelone/constants';
 import type {
-  SentinelOneActionParams,
   SentinelOneConfig,
   SentinelOneSecrets,
+  SentinelOneActionParams,
 } from '../../../common/sentinelone/types';
 
 interface ValidationErrors {
@@ -32,16 +31,11 @@ export function getConnectorType(): ConnectorTypeModel<
   SentinelOneSecrets,
   SentinelOneActionParams
 > {
-  const isSentinelOneBetaBadgeEnabled = getIsExperimentalFeatureEnabled(
-    'sentinelOneConnectorOnBeta'
-  );
-
   return {
     id: SENTINELONE_CONNECTOR_ID,
     actionTypeTitle: SENTINELONE_TITLE,
     iconClass: lazy(() => import('./logo')),
-    isBeta: isSentinelOneBetaBadgeEnabled ? true : undefined,
-    isExperimental: isSentinelOneBetaBadgeEnabled ? undefined : true,
+    isExperimental: true,
     selectMessage: i18n.translate(
       'xpack.stackConnectors.security.sentinelone.config.selectMessageText',
       {

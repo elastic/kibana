@@ -25,12 +25,12 @@ describe('generateConnectorApiKeyApiLogic', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve('result');
       http.post.mockReturnValue(promise);
-      const result = generateApiKey({ indexName: 'indexName', isNative: false, secretId: null });
+      const result = generateApiKey({ indexName: 'indexName', isNative: false });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
         '/internal/enterprise_search/indices/indexName/api_key',
         {
-          body: '{"is_native":false,"secret_id":null}',
+          body: '{"is_native":false}',
         }
       );
       await expect(result).resolves.toEqual('result');
@@ -41,12 +41,12 @@ describe('generateConnectorApiKeyApiLogic', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve('result');
       http.post.mockReturnValue(promise);
-      const result = generateApiKey({ indexName: 'indexName', isNative: true, secretId: '1234' });
+      const result = generateApiKey({ indexName: 'indexName', isNative: true });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
         '/internal/enterprise_search/indices/indexName/api_key',
         {
-          body: '{"is_native":true,"secret_id":"1234"}',
+          body: '{"is_native":true}',
         }
       );
       await expect(result).resolves.toEqual('result');

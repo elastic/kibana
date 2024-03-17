@@ -19,7 +19,7 @@ const { startDate, endDate } = getDateRange({ from: 'now-24h', to: 'now' });
 This function return an ISO string for `startDate` and `endDate` of a given date range.
 
 ```tsx
-import { getDateRange } from '@kbn/timerange';
+import { getDateISORange } from '@kbn/timerange';
 
 const { startDate, endDate } = getDateISORange({ from: 'now-24h', to: 'now' });
 ```

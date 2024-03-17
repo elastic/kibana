@@ -75,6 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177397
   registry.when('when samples data is loaded', { config: 'basic', archives: [] }, () => {
     const { bananaTransaction } = config;
     describe('error group id', () => {
@@ -103,6 +104,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177383
   registry.when('when error sample data is loaded', { config: 'basic', archives: [] }, () => {
     describe('error sample id', () => {
       before(async () => {
