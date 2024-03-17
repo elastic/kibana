@@ -1588,7 +1588,7 @@
             "section": "def-common.ESSearchResponse",
             "text": "ESSearchResponse"
           },
-          "<DocumentSource, TParams, { restTotalHitsAsInt: false; }>; loading: boolean; }"
+          "<DocumentSource, TParams, { restTotalHitsAsInt: false; }>; loading: boolean; error?: Error | undefined; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_es_search.ts",
         "deprecated": false,

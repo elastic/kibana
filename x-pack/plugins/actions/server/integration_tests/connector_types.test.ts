@@ -9,6 +9,9 @@ import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-hel
 import { ActionTypeRegistry } from '../action_type_registry';
 import { setupTestServers } from './lib';
 import { connectorTypes } from './mocks/connector_types';
+import { actionsConfigMock } from '../actions_config.mock';
+import { loggerMock } from '@kbn/logging-mocks';
+import { Services } from '../types';
 
 jest.mock('../action_type_registry', () => {
   const actual = jest.requireActual('../action_type_registry');
@@ -50,11 +53,34 @@ describe('Connector type config checks', () => {
 
   for (const connectorTypeId of connectorTypes) {
     test(`detect connector type changes for: ${connectorTypeId}`, async () => {
-      const connectorType = actionTypeRegistry.get(connectorTypeId);
+      const {
+        getService,
+        validate: { config, params, secrets },
+      } = actionTypeRegistry.get(connectorTypeId);
 
-      expect(connectorType?.validate.config.schema.getSchema!().describe()).toMatchSnapshot();
-      expect(connectorType.validate.secrets.schema.getSchema!().describe()).toMatchSnapshot();
-      expect(connectorType.validate.params.schema.getSchema!().describe()).toMatchSnapshot();
+      // SubActionConnector
+      if (getService) {
+        const subActions = getService({
+          config: {},
+          configurationUtilities: actionsConfigMock.create(),
+          connector: { id: 'foo', type: 'bar' },
+          logger: loggerMock.create(),
+          secrets: {},
+          services: {} as Services,
+        }).getSubActions();
+
+        subActions.forEach((subAction) => {
+          // @ts-ignore
+          if (subAction.schema?.getSchema) {
+            // @ts-ignore
+            expect(subAction.schema.getSchema().describe()).toMatchSnapshot();
+          }
+        });
+      }
+
+      expect(config.schema.getSchema!().describe()).toMatchSnapshot();
+      expect(secrets.schema.getSchema!().describe()).toMatchSnapshot();
+      expect(params.schema.getSchema!().describe()).toMatchSnapshot();
     });
   }
 });

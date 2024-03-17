@@ -23,7 +23,7 @@ import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { ThemeContext } from 'styled-components';
 // import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
-import { EuiBasicTable, EuiPopover } from '@elastic/eui';
+import { EuiBasicTable, EuiPopover, EuiSearchBar } from '@elastic/eui';
 
 import { getFlattenedObject } from '@kbn/std';
 import { addProvider } from '../../../../store/actions';
@@ -31,7 +31,7 @@ import { getCytoscapeOptions } from './cytoscape_options';
 import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 import type { DataProvider } from '../../data_providers/data_provider';
 import { IS_OPERATOR } from '../../data_providers/data_provider';
-
+import { useKibana } from '../../../../../common/lib/kibana/kibana_react';
 cytoscape.use(dagre);
 
 export function useTheme(): EuiTheme {
@@ -77,7 +77,11 @@ const Popover = ({
   closePopover,
   items,
   timelineId,
+  setPopoverSearchTerm,
+  searchTerm,
 }: {
+  searchTerm: string;
+  setPopoverSearchTerm(term: string): void;
   isPopoverOpen: boolean;
   closePopover: () => void;
   items: Array<{
@@ -87,6 +91,21 @@ const Popover = ({
   timelineId: string;
 }) => {
   const dispatch = useDispatch();
+  const [searchValue, setSearchValue] = useState('');
+
+  console.log({ items });
+  const data = React.useMemo(
+    () =>
+      items.filter((item) => {
+        return (
+          item.field.toLowerCase().includes(searchTerm) ||
+          (typeof item.value === 'string'
+            ? item.value.toLowerCase().includes(searchTerm.toLowerCase())
+            : false)
+        );
+      }),
+    [items, searchTerm]
+  );
 
   return (
     <EuiPopover
@@ -97,9 +116,15 @@ const Popover = ({
       repositionOnScroll
       hasArrow={false}
     >
+      <EuiSearchBar
+        box={{
+          incremental: true,
+        }}
+        onChange={(v) => setPopoverSearchTerm(v.queryText?.toLowerCase?.())}
+      />
       <EuiBasicTable
         style={{ width: '500px', height: '300px', overflow: 'auto' }}
-        items={items}
+        items={data}
         rowHeader="firstName"
         columns={[
           {
@@ -145,6 +170,10 @@ const Popover = ({
 };
 
 function CytoscapeComponent({ children, data, height, serviceName, style, id }: CytoscapeProps) {
+  const {
+    services: { data: dataService },
+  } = useKibana();
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [popoverItems, setPopoverItems] = useState<
     Array<{
@@ -152,10 +181,30 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
       value: string;
     }>
   >([]);
+  const [popoverSearchTerm, setPopoverSearchTerm] = useState<string>('');
+  const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([]);
 
-  const closePopover = () => setIsPopoverOpen(false);
+  const getDocument = React.useCallback(
+    async (index: string, docId: string, source?: string[]) => {
+      try {
+        const body = { query: { terms: { _id: [docId] } } };
+        if (source) {
+          body._source = source;
+        }
+        return (await dataService.search.search({ params: { index, body } }).toPromise())
+          .rawResponse.hits.hits[0]._source;
+      } catch (e) {
+        console.error('failed to get document', e);
+      }
+    },
+    [dataService.search]
+  );
 
-  const elements = useMemo(() => convertToCytoscapeElements(data), [data]);
+  const closePopover = () => {
+    setPopoverSearchTerm('');
+    setPopoverItems([]);
+    setIsPopoverOpen(false);
+  };
 
   const theme = useTheme();
   const isTraceExplorerEnabled = false;
@@ -166,6 +215,12 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
   });
   useCytoscapeEventHandlers({ cy, serviceName, theme });
 
+  useEffect(() => {
+    async function getElements() {
+      setElements(await Promise.all(await convertToCytoscapeElements(data, getDocument)));
+    }
+    getElements();
+  }, [data, getDocument]);
   // Add items from the elements prop to the cytoscape collection and remove
   // items that no longer are in the list, then trigger an event to notify
   // the handlers that data has changed.
@@ -187,6 +242,17 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
           element.data(newElement?.data ?? element.data());
         }
       });
+      cy.elements().on('click', async function (event) {
+        const node = event.target;
+        if (node.id().startsWith('alert')) {
+          console.log(node.data(), 'element data');
+          const doc = getFlattenedObject(node.data().document);
+          const elems = Object.keys(doc).map((k) => ({ field: k, value: doc[k] }));
+          setPopoverItems(elems);
+          setIsPopoverOpen(true);
+        }
+      });
+
       cy.elements('node.user-node').on('click', function (event) {
         const node = event.target; // The node that was clicked
         const eventId = node.data('eventId');
@@ -247,6 +313,7 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
         // or trigger other changes in your application based on the node clicked
       });
       cy.elements('node.event-node').on('click', function (event) {
+        console.log('event-node', { event });
         const node = event.target; // The node that was clicked
         const eventId = node.data('id').split('-')[1];
         const eventData = data.find((d) => d._id === eventId);
@@ -304,6 +371,19 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
         }
       });
       cy.trigger('custom:data', [fit]);
+
+      setTimeout(() => {
+        // Set 'Source IP as first element if present'
+        const userElement = cy.$('[id^="user"]')[0];
+        const sourceIpElement = cy.$('[id^="source-ip"]')[0];
+        if (userElement && sourceIpElement) {
+          sourceIpElement.position({
+            x: userElement.position().x - 400,
+            y: userElement.position().y,
+          });
+        }
+        // position is reset somewhere else, so we need to set it again
+      }, 250);
     }
 
     return () => {
@@ -325,6 +405,8 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
           isPopoverOpen={isPopoverOpen}
           closePopover={closePopover}
           items={popoverItems}
+          setPopoverSearchTerm={setPopoverSearchTerm}
+          searchTerm={popoverSearchTerm}
         />
         {children}
       </div>
@@ -355,120 +437,144 @@ interface Event extends TimelineItem {
   }>;
 }
 
-export function convertToCytoscapeElements(data: TimelineItem[]): cytoscape.ElementDefinition[] {
+const getResourceName = (event: TimelineItem, document: any) => {
+  const action = event?.ecs?.event?.action?.[0];
+
+  switch (action) {
+    case 'ModifyInstanceAttribute':
+      return `Instance ID: ${document.aws.cloudtrail.flattened.request_parameters.instanceId}`;
+    case 'RevokeSecurityGroupIngress':
+    case 'AuthorizeSecurityGroupEgress':
+    case 'RevokeSecurityGroupEgress':
+      return `Group ID: ${document?.aws.cloudtrail.flattened.request_parameters.groupId}`;
+    case 'CreateSecurityGroup':
+      return `Group Name: ${document?.aws.cloudtrail.flattened.request_parameters.groupName}`;
+  }
+
+  return 'Resource Name';
+};
+
+export async function convertToCytoscapeElements(
+  data: TimelineItem[],
+  getDocument: (index: string, docId: string, source?: string[]) => Promise<any>
+): Promise<cytoscape.ElementDefinition[]> {
   const elements: cytoscape.ElementDefinition[] = [];
 
   // remove duplicated data
-  data
-    .reduce((acc: Event[], timelineItem) => {
-      const event: Event = {
-        ...timelineItem,
-        occurrences: 0,
-        alertNodes: [],
-      };
+  const items: Event[] = [];
+  for (const timelineItem of data) {
+    const event: Event = {
+      ...timelineItem,
+      occurrences: 0,
+      alertNodes: [],
+    };
+    const existing = items.find((n) => {
+      return n?.ecs?.event?.action?.[0] === event?.ecs?.event?.action?.[0];
+    });
 
-      const existing = acc.find((n) => {
-        return n?.ecs?.event?.action?.[0] === event?.ecs?.event?.action?.[0];
-      });
-
-      if (!existing) {
-        event.occurrences = 1;
-        event.alertNodes = [
-          {
-            data: {
-              id: `alert-${event._id}`,
-              label: 'Resource Name',
-            },
-          },
-        ];
-        acc.push(event);
-      } else {
-        existing.occurrences += 1;
-        existing.alertNodes.push({
+    // assumes we're working with AWS docs only
+    const document = await getDocument(event._index, event._id, ['aws.*']);
+    const label = getResourceName(event, document);
+    if (!existing) {
+      event.occurrences = 1;
+      event.alertNodes = [
+        {
           data: {
             id: `alert-${event._id}`,
-            label: 'Resource Name',
+            label,
+            document,
           },
-        });
-      }
-      return acc;
-    }, [])
-    .forEach((event) => {
-      let userNodeId = '';
-      const userName = event.ecs.user?.name?.[0];
-      if (event.ecs.user?.name) {
-        const userNode = {
-          data: {
-            id: `user-${userName}`,
-            label: `User: ${userName}`,
-            eventId: event._id,
-          },
-          classes: 'user-node',
-        };
-        elements.push(userNode);
+        },
+      ];
+      items.push(event);
+    } else {
+      existing.occurrences += 1;
+      existing.alertNodes.push({
+        data: {
+          id: `alert-${event._id}`,
+          label,
+          document,
+        },
+      });
+    }
+  }
 
-        const eventName = event.ecs.event?.action?.[0];
-        const eventNodeWrapper = {
-          data: {
-            id: `event-${eventName}`,
-            eventId: event._id,
-          },
-          classes: 'event-node-border',
-        };
-        const eventNode = {
-          data: {
-            id: `event-${event._id}-inner`,
-            parent: `event-${eventName}`,
-            label: `${eventName} x ${event.occurrences}`,
-            eventId: event._id,
-          },
-          classes: 'event-node',
-        };
-        elements.push(eventNodeWrapper);
-        elements.push(eventNode);
+  items.forEach((event) => {
+    let userNodeId = '';
+    const userName = event.ecs.user?.name?.[0];
+    if (event.ecs.user?.name) {
+      const userNode = {
+        data: {
+          id: `user-${userName}`,
+          label: `User: ${userName}`,
+          eventId: event._id,
+        },
+        classes: 'user-node',
+      };
+      elements.push(userNode);
 
-        // Edge from user to alert
+      const eventName = event.ecs.event?.action?.[0];
+      const eventNodeWrapper = {
+        data: {
+          id: `event-${eventName}`,
+          eventId: event._id,
+        },
+        classes: 'event-node-border',
+      };
+      const eventNode = {
+        data: {
+          id: `event-${event._id}-inner`,
+          parent: `event-${eventName}`,
+          label: `${eventName} x ${event.occurrences}`,
+          eventId: event._id,
+        },
+        classes: 'event-node',
+      };
+      elements.push(eventNodeWrapper);
+      elements.push(eventNode);
+
+      // Edge from user to alert
+      elements.push({
+        data: {
+          source: userNode.data.id,
+          target: eventNode.data.id,
+          label: '',
+        },
+      });
+
+      event.alertNodes.forEach((alertNode) => {
+        elements.push(alertNode);
         elements.push({
           data: {
-            source: userNode.data.id,
-            target: eventNode.data.id,
-            label: 'Event Action',
+            source: eventNode.data.id,
+            target: alertNode.data.id,
           },
         });
+      });
 
-        event.alertNodes.forEach((alertNode) => {
-          elements.push(alertNode);
-          elements.push({
-            data: {
-              source: eventNode.data.id,
-              target: alertNode.data.id,
-            },
-          });
-        });
+      userNodeId = userNode.data.id;
+    }
 
-        userNodeId = userNode.data.id;
-      }
+    if (event.ecs.source?.ip) {
+      const sourceIpNode = {
+        data: {
+          id: `source-ip-${event.ecs.source.ip[0]}`,
+          label: `Source IP: ${event.ecs.source.ip[0]}`,
+        },
+      };
+      elements.push(sourceIpNode);
 
-      if (event.ecs.source?.ip) {
-        const sourceIpNode = {
-          data: {
-            id: `source-ip-${event.ecs.source.ip[0]}`,
-            label: `Source IP: ${event.ecs.source.ip[0]}`,
-          },
-        };
-        elements.push(sourceIpNode);
-
-        const targetId = userNodeId;
-        // Edge from alert to source IP
-        elements.push({
-          data: {
-            source: sourceIpNode.data.id,
-            target: targetId,
-            label: 'Authenticated as',
-          },
-        });
-      }
-    });
+      const targetId = userNodeId;
+      // Edge from alert to source IP
+      elements.push({
+        data: {
+          source: sourceIpNode.data.id,
+          target: targetId,
+          label: 'Authenticated as',
+        },
+      });
+    }
+  });
 
   return elements;
 }

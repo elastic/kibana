@@ -16,7 +16,7 @@ import {
 } from '@kbn/slo-schema';
 import moment from 'moment';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
-import { DateRange, SLO, Summary, Groupings } from '../../domain/models';
+import { DateRange, SLO, Summary, Groupings, Meta } from '../../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../../domain/services';
 import { toDateRange } from '../../domain/services/date_range';
 import { getFlattenedGroupings } from './utils';
@@ -26,7 +26,7 @@ export interface SummaryClient {
     slo: SLO,
     groupings?: string,
     instanceId?: string
-  ): Promise<{ summary: Summary; groupings: Groupings }>;
+  ): Promise<{ summary: Summary; groupings: Groupings; meta: Meta }>;
 }
 
 export class DefaultSummaryClient implements SummaryClient {
@@ -35,7 +35,7 @@ export class DefaultSummaryClient implements SummaryClient {
   async computeSummary(
     slo: SLO,
     instanceId: string = ALL_VALUE
-  ): Promise<{ summary: Summary; groupings: Groupings }> {
+  ): Promise<{ summary: Summary; groupings: Groupings; meta: Meta }> {
     const dateRange = toDateRange(slo.timeWindow);
     const isDefinedWithGroupBy = ![slo.groupBy].flat().includes(ALL_VALUE);
     const hasInstanceId = instanceId !== ALL_VALUE;
@@ -54,7 +54,7 @@ export class DefaultSummaryClient implements SummaryClient {
             },
           ],
           _source: {
-            includes: ['slo.groupings'],
+            includes: ['slo.groupings', 'monitor', 'observer', 'config_id'],
           },
           size: 1,
         },
@@ -101,7 +101,8 @@ export class DefaultSummaryClient implements SummaryClient {
     // @ts-ignore value is not type correctly
     const total = result.aggregations?.total?.value ?? 0;
     // @ts-expect-error AggregationsAggregationContainer needs to be updated with top_hits
-    const groupings = result.aggregations?.last_doc?.hits?.hits?.[0]?._source?.slo?.groupings;
+    const source = result.aggregations?.last_doc?.hits?.hits?.[0]?._source;
+    const groupings = source?.slo?.groupings;
 
     const sliValue = computeSLI(good, total);
     const initialErrorBudget = 1 - slo.objective.target;
@@ -135,6 +136,7 @@ export class DefaultSummaryClient implements SummaryClient {
         status: computeSummaryStatus(slo, sliValue, errorBudget),
       },
       groupings: groupings ? getFlattenedGroupings({ groupBy: slo.groupBy, groupings }) : {},
+      meta: getMetaFields(slo, source || {}),
     };
   }
 }
@@ -145,4 +147,25 @@ function computeTotalSlicesFromDateRange(dateRange: DateRange, timesliceWindow: 
     toMomentUnitOfTime(timesliceWindow.unit)
   );
   return Math.ceil(dateRangeDurationInUnit / timesliceWindow!.value);
+}
+
+export function getMetaFields(
+  slo: SLO,
+  source: { monitor?: { id?: string }; config_id?: string; observer?: { name?: string } }
+): Meta {
+  const {
+    indicator: { type },
+  } = slo;
+  switch (type) {
+    case 'sli.synthetics.availability':
+      return {
+        synthetics: {
+          monitorId: source.monitor?.id || '',
+          locationId: source.observer?.name || '',
+          configId: source.config_id || '',
+        },
+      };
+    default:
+      return {};
+  }
 }
