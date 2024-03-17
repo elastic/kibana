@@ -371,6 +371,19 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
         }
       });
       cy.trigger('custom:data', [fit]);
+
+      setTimeout(() => {
+        // Set 'Source IP as first element if present'
+        const userElement = cy.$('[id^="user"]')[0];
+        const sourceIpElement = cy.$('[id^="source-ip"]')[0];
+        if (userElement && sourceIpElement) {
+          sourceIpElement.position({
+            x: userElement.position().x - 400,
+            y: userElement.position().y,
+          });
+        }
+        // position is reset somewhere else, so we need to set it again
+      }, 250);
     }
 
     return () => {

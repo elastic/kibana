@@ -14,7 +14,8 @@ import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 // import { getAgentIcon } from '@kbn/custom-icons';
 // import { getSpanIcon } from '@kbn/apm-plugin/public/components/shared/span_icon/get_span_icon';
 // import { iconForNode } from './icons';
-import defaultIcon from './default.svg';
+import ipIcon from './ip.svg';
+import userIcon from './user.svg';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -32,14 +33,14 @@ export enum ServiceHealthStatus {
   unknown = 'unknown',
 }
 export function iconForNode(node: cytoscape.NodeSingular) {
-  return defaultIcon;
-  // const agentName = node.data(AGENT_NAME);
-  // const subtype = node.data(SPAN_SUBTYPE);
-  // const type = node.data(SPAN_TYPE);
-  //
-  // return agentName
-  //   ? getAgentIcon(agentName, false)
-  //   : getSpanIcon(type, subtype);
+  const id = node.data('id');
+  if (id.startsWith('source-ip-')) {
+    return ipIcon;
+  }
+  if (id.startsWith('user')) {
+    return userIcon;
+  }
+  return undefined;
 }
 
 export function getServiceHealthStatusColor(theme: EuiTheme, status: ServiceHealthStatus) {
