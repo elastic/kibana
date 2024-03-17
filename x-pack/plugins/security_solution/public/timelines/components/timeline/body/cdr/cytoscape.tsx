@@ -10,15 +10,7 @@ import dagre from 'cytoscape-dagre';
 import { useDispatch } from 'react-redux';
 import { isEqual } from 'lodash';
 import type { CSSProperties, ReactNode } from 'react';
-import React, {
-  useMemo,
-  useContext,
-  createContext,
-  memo,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useContext, createContext, memo, useEffect, useRef, useState } from 'react';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { ThemeContext } from 'styled-components';
 // import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
@@ -93,7 +85,6 @@ const Popover = ({
   const dispatch = useDispatch();
   const [searchValue, setSearchValue] = useState('');
 
-  console.log({ items });
   const data = React.useMemo(
     () =>
       items.filter((item) => {
@@ -187,13 +178,12 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
   const getDocument = React.useCallback(
     async (index: string, docId: string, source?: string[]) => {
       try {
-        const body = { query: { terms: { _id: [docId] } } };
-        if (source) {
-          body._source = source;
-        }
+        const body = { query: { terms: { _id: [docId] } }, _source: source ? source : [] };
+
         return (await dataService.search.search({ params: { index, body } }).toPromise())
-          .rawResponse.hits.hits[0]._source;
+          ?.rawResponse.hits.hits[0]._source;
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.error('failed to get document', e);
       }
     },
@@ -245,7 +235,7 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
       cy.elements().on('click', async function (event) {
         const node = event.target;
         if (node.id().startsWith('alert')) {
-          console.log(node.data(), 'element data');
+          // console.log(node.data(), 'element data');
           const doc = getFlattenedObject(node.data().document);
           const elems = Object.keys(doc).map((k) => ({ field: k, value: doc[k] }));
           setPopoverItems(elems);
@@ -313,7 +303,7 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
         // or trigger other changes in your application based on the node clicked
       });
       cy.elements('node.event-node').on('click', function (event) {
-        console.log('event-node', { event });
+        // console.log('event-node', { event });
         const node = event.target; // The node that was clicked
         const eventId = node.data('id').split('-')[1];
         const eventData = data.find((d) => d._id === eventId);
@@ -433,10 +423,14 @@ interface Event extends TimelineItem {
     data: {
       id: string;
       label: string;
+      eventId: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      document: any;
     };
   }>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getResourceName = (event: TimelineItem, document: any) => {
   const action = event?.ecs?.event?.action?.[0];
 
@@ -456,6 +450,7 @@ const getResourceName = (event: TimelineItem, document: any) => {
 
 export async function convertToCytoscapeElements(
   data: TimelineItem[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getDocument: (index: string, docId: string, source?: string[]) => Promise<any>
 ): Promise<cytoscape.ElementDefinition[]> {
   const elements: cytoscape.ElementDefinition[] = [];
@@ -473,7 +468,7 @@ export async function convertToCytoscapeElements(
     });
 
     // assumes we're working with AWS docs only
-    const document = await getDocument(event._index, event._id, ['aws.*']);
+    const document = await getDocument(event._index as string, event._id, ['aws.*']);
     const label = getResourceName(event, document);
     if (!existing) {
       event.occurrences = 1;
@@ -482,6 +477,7 @@ export async function convertToCytoscapeElements(
           data: {
             id: `alert-${event._id}`,
             label,
+            eventId: event._id,
             document,
           },
         },
@@ -493,6 +489,7 @@ export async function convertToCytoscapeElements(
         data: {
           id: `alert-${event._id}`,
           label,
+          eventId: event._id,
           document,
         },
       });
