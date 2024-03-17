@@ -441,8 +441,10 @@ const getResourceName = (event: TimelineItem, document: any) => {
   const action = event?.ecs?.event?.action?.[0];
 
   switch (action) {
+    case 'ModifyInstanceAttribute':
+      return `Instance ID: ${document.aws.cloudtrail.flattened.request_parameters.instanceId}`;
+    case 'RevokeSecurityGroupIngress':
     case 'AuthorizeSecurityGroupEgress':
-      return `Group ID: ${document?.aws.cloudtrail.flattened.request_parameters.groupId}`;
     case 'RevokeSecurityGroupEgress':
       return `Group ID: ${document?.aws.cloudtrail.flattened.request_parameters.groupId}`;
     case 'CreateSecurityGroup':
@@ -536,7 +538,7 @@ export async function convertToCytoscapeElements(
         data: {
           source: userNode.data.id,
           target: eventNode.data.id,
-          label: 'Event Action',
+          label: '',
         },
       });
 

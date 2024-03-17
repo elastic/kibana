@@ -182,7 +182,7 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
         'min-zoomed-font-size': parseInt(theme.eui.euiSizeS, 10),
         'overlay-opacity': 0,
         shape: (el: cytoscape.NodeSingular) =>
-          isService(el) ? (isIE11 ? 'rectangle' : 'ellipse') : 'diamond',
+          isService(el) ? (isIE11 ? 'rectangle' : 'ellipse') : 'roundrectangle',
         'text-background-color': theme.eui.euiColorPrimary,
         'text-background-opacity': (el: cytoscape.NodeSingular) =>
           el.hasClass('primary') || el.selected() ? 0.1 : 0,
@@ -210,15 +210,22 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
       },
     },
     {
+      selector: ':parent',
+      style: {
+        'z-compound-depth': 'top',
+      },
+    },
+    {
       selector: 'node.event-node',
       style: {
+        'z-compound-depth': 'top',
         'background-image': 'none',
         'background-color': 'data(backgroundColor)', // Use this to control visibility dynamically
         'border-width': 0,
         'text-valign': 'center',
         'text-halign': 'center',
         color: '#1A1C21',
-        'font-size': '8px',
+        'font-size': '12px',
         width: '140px',
         'text-wrap': 'wrap',
         'text-max-width': '140px',
@@ -243,6 +250,14 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
         'source-arrow-shape': 'none',
         'z-index': zIndexEdge,
         label: 'data(label)', // maps to data.label
+        'text-border-opacity': 1,
+        'text-border-color': '#fec515',
+        'text-border-style': 'solid',
+        'text-border-width': '1px',
+        'text-background-color': '#fff9e8',
+        'text-background-opacity': 1,
+        'text-background-padding': '15px',
+        'font-size': '12px',
       },
     },
     {
