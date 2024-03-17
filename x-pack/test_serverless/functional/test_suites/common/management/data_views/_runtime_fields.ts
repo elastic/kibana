@@ -16,7 +16,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common']);
   const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/173558
   describe('runtime fields', function () {
     before(async function () {
       await browser.setWindowSize(1200, 800);
