@@ -265,6 +265,7 @@ export const getSampleOfDocumentsForNonAggregatableFields = (
     index,
     body: {
       fields: nonAggregatableFields.map((fieldName) => fieldName),
+      // _source: false,
       query: {
         bool: {
           filter: filterCriteria,
@@ -280,7 +281,8 @@ export const processNonAggregatableFieldsExistResponse = (
   results: IKibanaSearchResponse[] | undefined,
   nonAggregatableFields: string[],
   nonAggregatableFieldsCount: number[],
-  nonAggregatableFieldsUniqueCount: Array<Set<string>>
+  nonAggregatableFieldsUniqueCount: Array<Set<string>>,
+  populatedNonAggregatableFields: string[]
 ) => {
   const stats = {
     nonAggregatableExistsFields: [] as NonAggregatableField[],
@@ -290,23 +292,25 @@ export const processNonAggregatableFieldsExistResponse = (
   if (!results || nonAggregatableFields.length === 0) return stats;
 
   nonAggregatableFields.forEach((fieldName, fieldIdx) => {
-    const foundField = results.find((r) => r.rawResponse.fieldName === fieldName);
-    const existsInDocs = foundField !== undefined && foundField.rawResponse.hits.total > 0;
+    const idx = populatedNonAggregatableFields.indexOf(fieldName);
 
-    if (existsInDocs !== true) {
+    if (idx === -1) {
       stats.nonAggregatableNotExistsFields.push({
         fieldName,
-        existsInDocs,
+        existsInDocs: false,
         stats: {},
       });
       return;
     }
+    const foundField = results.find((r) => r.rawResponse.fieldName === fieldName);
+    const existsInDocs = foundField !== undefined && foundField.rawResponse.hits.total > 0;
+
     const fieldData: NonAggregatableField = {
       fieldName,
       existsInDocs,
       stats: {
-        count: nonAggregatableFieldsCount[fieldIdx],
-        cardinality: nonAggregatableFieldsUniqueCount[fieldIdx].size,
+        count: nonAggregatableFieldsCount[idx] ?? 0,
+        cardinality: nonAggregatableFieldsUniqueCount[idx]?.size ?? 0,
         sampleCount: DEFAULT_DOCS_SAMPLE_OF_TEXT_FIELDS_SIZE,
       },
     };
