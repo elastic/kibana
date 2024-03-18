@@ -24,7 +24,7 @@ import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-dro
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { LayerActions } from './layer_actions';
 import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
-import { LayerSettings } from './layer_settings';
+import { LayerHeader } from './layer_header';
 import { LayerPanelProps } from './types';
 import { DimensionContainer } from './dimension_container';
 import { EmptyDimensionButton } from './buttons/empty_dimension_button';
@@ -73,7 +73,7 @@ export function LayerPanel(props: LayerPanelProps) {
     core,
     onDropToDimension,
     setIsInlineFlyoutVisible,
-    shouldDisplayChartSwitch,
+    onlyAllowSwitchToSubtypes,
   } = props;
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
@@ -368,7 +368,7 @@ export function LayerPanel(props: LayerPanelProps) {
           <header className="lnsLayerPanel__layerHeader">
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
               <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
-                <LayerSettings
+                <LayerHeader
                   layerConfigProps={{
                     ...layerVisualizationConfigProps,
                     setState: props.updateVisualization,
@@ -382,7 +382,7 @@ export function LayerPanel(props: LayerPanelProps) {
                   activeVisualization={activeVisualization}
                   visualizationMap={visualizationMap}
                   datasourceMap={datasourceMap}
-                  shouldDisplayChartSwitch={shouldDisplayChartSwitch}
+                  onlyAllowSwitchToSubtypes={onlyAllowSwitchToSubtypes}
                 />
               </EuiFlexItem>
               {props.displayLayerSettings && (

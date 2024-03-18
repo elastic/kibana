@@ -27,7 +27,7 @@ export function LayerConfiguration({
   hasPadding,
   setIsInlineFlyoutVisible,
   getUserMessages,
-  shouldDisplayChartSwitch,
+  onlyAllowSwitchToSubtypes,
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
@@ -59,7 +59,7 @@ export function LayerConfiguration({
     uiActions: startDependencies.uiActions,
     hideLayerHeader: datasourceId === 'textBased',
     // TODO: remove this prop once we display the chart switch in Discover
-    shouldDisplayChartSwitch,
+    onlyAllowSwitchToSubtypes,
     indexPatternService,
     setIsInlineFlyoutVisible,
     getUserMessages,

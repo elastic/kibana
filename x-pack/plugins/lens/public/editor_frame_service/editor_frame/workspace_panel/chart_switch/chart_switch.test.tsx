@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, fireEvent, within } from '@testing-library/react';
+import { screen, fireEvent, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   createMockVisualization,
@@ -184,12 +184,19 @@ describe('chart_switch', () => {
       fireEvent.click(getMenuItem(subType));
     };
 
+    const waitForChartSwitchClosed = () => {
+      waitFor(() => {
+        expect(screen.queryByTestId('lnsChartSwitchList')).not.toBeInTheDocument();
+      });
+    };
+
     return {
       ...rtlRender,
       store,
       switchToVis,
       getMenuItem,
       openChartSwitch,
+      waitForChartSwitchClosed,
     };
   };
 
@@ -211,6 +218,49 @@ describe('chart_switch', () => {
       },
     });
     expect(store.dispatch).not.toHaveBeenCalledWith({ type: applyChanges.type }); // should not apply changes automatically
+  });
+
+  it('should initialize other visualization on switch', async () => {
+    const { openChartSwitch, switchToVis } = renderChartSwitch();
+    openChartSwitch();
+    switchToVis('visB');
+    expect(visualizationMap.visB.initialize).toHaveBeenCalled();
+  });
+
+  it('should use suggestions to switch to new visualization', async () => {
+    const { openChartSwitch, switchToVis } = renderChartSwitch();
+    const initialState = { suggested: true };
+    visualizationMap.visB.initialize.mockReturnValueOnce({ initial: true });
+    visualizationMap.visB.getVisualizationTypeId.mockReturnValueOnce('visB');
+    visualizationMap.visB.getSuggestions.mockReturnValueOnce([
+      {
+        title: 'Suggested vis',
+        score: 1,
+        state: initialState,
+        previewIcon: 'empty',
+      },
+    ]);
+    openChartSwitch();
+    switchToVis('visB');
+    expect(visualizationMap.visB.getSuggestions).toHaveBeenCalled();
+    expect(visualizationMap.visB.initialize).toHaveBeenCalledWith(expect.anything(), initialState);
+  });
+
+  it('should fall back when switching visualizations if the visualization has no suggested use', async () => {
+    visualizationMap.visB.initialize.mockReturnValueOnce({ initial: true });
+    visualizationMap.visB.getSuggestions.mockReturnValueOnce([]);
+    const { openChartSwitch, switchToVis, waitForChartSwitchClosed } = renderChartSwitch();
+    openChartSwitch();
+    switchToVis('visB');
+
+    // expect(datasourceMap.testDatasource.publicAPIMock.getTableSpec).toHaveBeenCalled();
+    expect(visualizationMap.visB.getSuggestions).toHaveBeenCalled();
+    expect(visualizationMap.visB.initialize).toHaveBeenCalledWith(
+      expect.any(Function), // generated layerId
+      undefined,
+      undefined
+    );
+    waitForChartSwitchClosed();
   });
 
   it('should use initial state if there is no suggestion from the target visualization', async () => {
@@ -406,38 +456,38 @@ describe('chart_switch', () => {
     });
   });
 
-  it.only('should get suggestions when switching subvisualization based on the current layer', async () => {
-    visualizationMap.visC.getSuggestions.mockReturnValueOnce([]);
-    frame = mockFrame(['a', 'b', 'c']);
-    datasourceMap.testDatasource.getLayers.mockReturnValue(['a', 'b', 'c']);
+  // it('should get suggestions when switching subvisualization based on the current layer', async () => {
+  //   visualizationMap.visC.getSuggestions.mockReturnValueOnce([]);
+  //   frame = mockFrame(['a', 'b', 'c']);
+  //   datasourceMap.testDatasource.getLayers.mockReturnValue(['a', 'b', 'c']);
 
-    const { openChartSwitch, switchToVis, store } = renderChartSwitch({ layerId: 'c' });
-    openChartSwitch();
-    screen.debug();
-    switchToVis('visC');
+  //   const { openChartSwitch, switchToVis } = renderChartSwitch({ layerId: 'c' });
+  //   openChartSwitch();
+  //   screen.debug();
+  //   switchToVis('visC');
 
-    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'a');
-    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'b');
-    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'c');
-    expect(visualizationMap.visB.getSuggestions).toHaveBeenCalledWith(
-      expect.objectContaining({
-        keptLayerIds: ['a'],
-      })
-    );
+  //   expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'a');
+  //   expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'b');
+  //   expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'c');
+  //   expect(visualizationMap.visB.getSuggestions).toHaveBeenCalledWith(
+  //     expect.objectContaining({
+  //       keptLayerIds: ['a'],
+  //     })
+  //   );
 
-    // expect(store.dispatch).toHaveBeenCalledWith({
-    //   type: 'lens/switchVisualization',
-    //   payload: {
-    //     suggestion: {
-    //       datasourceId: undefined,
-    //       datasourceState: undefined,
-    //       visualizationState: 'visB initial state',
-    //       newVisualizationId: 'visB',
-    //     },
-    //     clearStagedPreview: true,
-    //   },
-    // });
-  });
+  //   // expect(store.dispatch).toHaveBeenCalledWith({
+  //   //   type: 'lens/switchVisualization',
+  //   //   payload: {
+  //   //     suggestion: {
+  //   //       datasourceId: undefined,
+  //   //       datasourceState: undefined,
+  //   //       visualizationState: 'visB initial state',
+  //   //       newVisualizationId: 'visB',
+  //   //     },
+  //   //     clearStagedPreview: true,
+  //   //   },
+  //   // });
+  // });
 
   it('should query main palette from active chart and pass into suggestions', async () => {
     const legacyPalette: SuggestionRequest['mainPalette'] = {

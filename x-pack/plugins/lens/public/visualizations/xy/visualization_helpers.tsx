@@ -221,7 +221,7 @@ export function getVisualizationType(state: State, layerId?: string): Visualizat
     const dataLayerSeries = layerId
       ? dataLayers.find((d) => d.layerId === layerId)?.seriesType
       : dataLayers[0].seriesType;
-    return visualizationTypes.find((t) => t.id === dataLayerSeries);
+    return visualizationTypes.find((t) => t.id === dataLayerSeries) || 'mixed';
   }
   const visualizationType = visualizationTypes.find((t) => t.id === dataLayers[0].seriesType);
   const seriesTypes = uniq(dataLayers.map((l) => l.seriesType));

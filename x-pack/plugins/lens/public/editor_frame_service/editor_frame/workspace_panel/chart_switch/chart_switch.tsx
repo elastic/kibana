@@ -94,7 +94,7 @@ function getCurrentVisualizationId(
 
 export const ChartSwitch = memo(function ChartSwitch({
   framePublicAPI,
-  visualizationMap: completeVisualizationMap,
+  visualizationMap,
   datasourceMap,
   layerId,
 }: ChartSwitchProps) {
@@ -103,13 +103,6 @@ export const ChartSwitch = memo(function ChartSwitch({
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const visualization = useLensSelector(selectVisualization);
   const datasourceStates = useLensSelector(selectDatasourceStates);
-
-  const visualizationMap = { ...completeVisualizationMap };
-  Object.keys(visualizationMap).forEach((key) => {
-    if (completeVisualizationMap[key]?.hideFromChartSwitch?.(framePublicAPI)) {
-      delete visualizationMap[key];
-    }
-  });
 
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);

@@ -22,7 +22,6 @@ import {
   Visualization,
 } from '../../../types';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
-import { ChartSwitch } from './chart_switch';
 import { MessageList } from './message_list';
 import {
   useLensDispatch,
