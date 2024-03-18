@@ -63,7 +63,6 @@ export default function (ctx: FtrProviderContext) {
       const { body, status } = await supertest
         .post('/api/fleet/outputs')
         .set(svlCommonApi.getInternalRequestHeader())
-
         .send({
           name: 'Test output',
           type: 'elasticsearch',
