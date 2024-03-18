@@ -1547,9 +1547,25 @@ For all of the endpoints that allow for modifying a prebuilt rule, the five endp
 
 This means, specifically: **do any of the rule's resulting fields differ from the base version of the rule?**
 
-In order to determine this, each time a user attempts to customize a prebuilt rule, we will need to pull its corresponding version of the `security-rule` asset, and compare the end result of the customization with the assets field's. If any of them are different, the `rule_source.is_customized` field should be set to `true`. Otherwise, it should be set to `false`. 
+In order to determine this, each time a user attempts to customize a prebuilt rule, we will need to pull its corresponding version of the `security-rule` asset, and compare the end result of the customization with the assets field's. If any of them are different, the `rule_source.is_customized` field should be set to `true`. Otherwise, it should be set to `false`.
 
 Notice that this can therefore result in a two-way operation: a prebuilt rule that is non-customized can end up as being customized (`is_customized: true`), while a rule that is customized at the beggining of the operation can result in a non-customized rule after the modification (if the changes made by the user make the rule match its base version).
+
+The rule's fields that should be taken into account to determine if the rule has been customized are any of the fields in `BaseRequiredFields`, `BaseOptionalFields` or `BaseDefaultableFields` from the rule schema with the exception of:
+
+- exceptions
+- actions (not part of `security-rule` asset for now anyways)
+- `author` and `license` (which shouldn't be customizable anyways)
+- `output_index` and `namespace` (deprecated)
+- `meta` (to be deprecated)
+
+In the case of exceptions, all type of changes related to rule exceptions should be ignored during the calculation of `is_customized`:
+
+- a new shared exception list is added to the rule
+- a shared exception list is removed from the rule
+- an exception item is added to the rule's shared exception list
+- a default exception list is created for the rule and an exception is added to it
+- an exception item is removed from the rule's default exception list
 
 The following use cases should be covered in the calculation of `is_customized`:
 
@@ -1833,7 +1849,7 @@ Once done editing the rule, the user clicks on the "Save Changes" button, which 
 **Expected behaviour for customizing prebuilt rules**
 
 - All four tabs of the Rule Edit page should be enabled, and all the fields within each tab should be editable, as they currently are for custom rules.
-- The only field in the UI that should not be customizable is **Rule Type**, that should continue to be read-only.
+- The only fields in the UI that should not be customizable are: **Rule Type**, **Author** and **License**, which should continue to be read-only.
 - **Definition** should be the default open tab when opening the edit rule page for a prebuilt rule (current default is **Actions**)
 - Field validation should continue to work as it does for custom rules.
 - No fields should return a validation error for the values that come from the `security_detection_engine` package prebuilt rules. This means that a user should be able to successfully save the prebuilt rule with no changes. See **List of issues to fix** below.
