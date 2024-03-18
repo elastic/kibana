@@ -8,11 +8,15 @@
 import React from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { RiskSeverity } from '../../../common/search_strategy';
-import { RiskScoreLevel } from '../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from './severity/common';
 
 import { HostDetailsLink, UserDetailsLink } from '../../common/components/links';
-import { RiskScoreEntity, type RiskScore as IRiskScore } from '../../../common/risk_engine';
+import {
+  RiskScoreEntity,
+  type RiskScore as IRiskScore,
+} from '../../../common/entity_analytics/risk_engine';
 
 type RiskScoreColumn = EuiBasicTableColumn<IRiskScore> & {
   field: keyof IRiskScore;
@@ -28,7 +32,12 @@ export const RiskScorePreviewTable = ({
   const columns: RiskScoreColumn[] = [
     {
       field: 'id_value',
-      name: 'Name',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.riskScore.previewTable.nameColumnTitle"
+          defaultMessage="Name"
+        />
+      ),
       render: (itemName: string) => {
         return type === RiskScoreEntity.host ? (
           <HostDetailsLink hostName={itemName} />
@@ -39,7 +48,13 @@ export const RiskScorePreviewTable = ({
     },
     {
       field: 'calculated_level',
-      name: 'Level',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.riskScore.previewTable.levelColumnTitle"
+          defaultMessage="Level"
+        />
+      ),
+
       render: (risk: RiskSeverity | null) => {
         if (risk != null) {
           return <RiskScoreLevel severity={risk} />;
@@ -50,8 +65,12 @@ export const RiskScorePreviewTable = ({
     },
     {
       field: 'calculated_score_norm',
-      // align: 'right',
-      name: 'Score norm',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.riskScore.previewTable.scoreNormColumnTitle"
+          defaultMessage="Score norm"
+        />
+      ),
       render: (scoreNorm: number | null) => {
         if (scoreNorm != null) {
           return Math.round(scoreNorm * 100) / 100;

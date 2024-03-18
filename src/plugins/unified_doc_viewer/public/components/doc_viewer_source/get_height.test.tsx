@@ -12,13 +12,13 @@ import { getHeight } from './get_height';
 describe('getHeight', () => {
   Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 500 });
 
-  const getMonacoMock = (lineCount: number) => {
+  const getMonacoMock = (lineCount: number, top: number = 200) => {
     return {
       getDomNode: jest.fn(() => {
         return {
           getBoundingClientRect: jest.fn(() => {
             return {
-              top: 200,
+              top,
             };
           }),
         };
@@ -29,10 +29,17 @@ describe('getHeight', () => {
     } as unknown as monaco.editor.IStandaloneCodeEditor;
   };
   test('when using document explorer, returning the available height in the flyout', () => {
+    const monacoMock = getMonacoMock(500, 0);
+
+    const height = getHeight(monacoMock, true);
+    expect(height).toBe(475);
+  });
+
+  test('when using document explorer, returning the available height in the flyout has a minimun guarenteed height', () => {
     const monacoMock = getMonacoMock(500);
 
     const height = getHeight(monacoMock, true);
-    expect(height).toBe(275);
+    expect(height).toBe(400);
   });
 
   test('when using classic table, its displayed inline without scrolling', () => {

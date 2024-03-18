@@ -48,6 +48,7 @@ export function PackageCard({
   isUnverified,
   isUpdateAvailable,
   showLabels = true,
+  extraLabelsBadges,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
 
@@ -63,7 +64,6 @@ export function PackageCard({
   }
 
   let verifiedBadge: React.ReactNode | null = null;
-
   if (isUnverified && showLabels) {
     verifiedBadge = (
       <EuiFlexItem grow={false}>
@@ -106,7 +106,7 @@ export function PackageCard({
       <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
         <span>
-          <EuiBadge color="warning">
+          <EuiBadge color="hollow" iconType="sortUp">
             <FormattedMessage
               id="xpack.fleet.packageCard.updateAvailableLabel"
               defaultMessage="Update available"
@@ -161,6 +161,7 @@ export function PackageCard({
           onClick={onCardClick}
         >
           <EuiFlexGroup gutterSize="xs" wrap={true}>
+            {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
             {verifiedBadge}
             {updateAvailableBadge}
             {releaseBadge}

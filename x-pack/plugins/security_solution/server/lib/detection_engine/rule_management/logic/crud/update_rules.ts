@@ -19,18 +19,21 @@ export interface UpdateRulesOptions {
   rulesClient: RulesClient;
   existingRule: RuleAlertType | null | undefined;
   ruleUpdate: RuleUpdateProps;
+  allowMissingConnectorSecrets?: boolean;
 }
 
 export const updateRules = async ({
   rulesClient,
   existingRule,
   ruleUpdate,
+  allowMissingConnectorSecrets,
 }: UpdateRulesOptions): Promise<PartialRule<RuleParams> | null> => {
   if (existingRule == null) {
     return null;
   }
 
-  const alertActions = ruleUpdate.actions?.map(transformRuleToAlertAction) ?? [];
+  const alertActions =
+    ruleUpdate.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];
   const actions = transformToActionFrequency(alertActions, ruleUpdate.throttle);
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
@@ -80,6 +83,7 @@ export const updateRules = async ({
   const update = await rulesClient.update({
     id: existingRule.id,
     data: newInternalRule,
+    allowMissingConnectorSecrets,
   });
 
   if (existingRule.enabled && enabled === false) {

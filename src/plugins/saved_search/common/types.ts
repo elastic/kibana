@@ -9,13 +9,14 @@
 import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { VIEW_MODE } from '.';
 
-export interface DiscoverGridSettings {
+export interface DiscoverGridSettings extends SerializableRecord {
   columns?: Record<string, DiscoverGridSettingsColumn>;
 }
 
-export interface DiscoverGridSettingsColumn {
+export interface DiscoverGridSettingsColumn extends SerializableRecord {
   width?: number;
 }
 
@@ -25,9 +26,7 @@ export interface SavedSearchAttributes {
   sort: Array<[string, string]>;
   columns: string[];
   description: string;
-  grid: {
-    columns?: Record<string, DiscoverGridSettingsColumn>;
-  };
+  grid: DiscoverGridSettings;
   hideChart: boolean;
   isTextBasedQuery: boolean;
   usesAdHocDataView?: boolean;
@@ -37,12 +36,14 @@ export interface SavedSearchAttributes {
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
+  headerRowHeight?: number;
 
   timeRestore?: boolean;
   timeRange?: Pick<TimeRange, 'from' | 'to'>;
   refreshInterval?: RefreshInterval;
 
   rowsPerPage?: number;
+  sampleSize?: number;
   breakdownField?: string;
 }
 
@@ -58,13 +59,12 @@ export interface SavedSearch {
   columns?: string[];
   description?: string;
   tags?: string[] | undefined;
-  grid?: {
-    columns?: Record<string, DiscoverGridSettingsColumn>;
-  };
+  grid?: DiscoverGridSettings;
   hideChart?: boolean;
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
+  headerRowHeight?: number;
   isTextBasedQuery?: boolean;
   usesAdHocDataView?: boolean;
 
@@ -74,7 +74,10 @@ export interface SavedSearch {
   refreshInterval?: RefreshInterval;
 
   rowsPerPage?: number;
+  sampleSize?: number;
   breakdownField?: string;
+  // Whether or not this saved search is managed by the system
+  managed: boolean;
   references?: SavedObjectReference[];
   sharingSavedObjectProps?: {
     outcome?: SavedObjectsResolveResponse['outcome'];

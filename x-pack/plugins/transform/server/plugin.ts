@@ -6,13 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import { registerCollector } from './usage';
 import { setupCapabilities } from './capabilities';
-import { PluginSetupDependencies, PluginStartDependencies } from './types';
+import type { PluginSetupDependencies, PluginStartDependencies } from './types';
 import { registerRoutes } from './routes';
 import { License } from './services';
 import { registerTransformHealthRuleType } from './lib/alerting';

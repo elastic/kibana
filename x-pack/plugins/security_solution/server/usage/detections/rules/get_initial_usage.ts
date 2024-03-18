@@ -26,6 +26,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     legacy_notifications_disabled: 0,
     notifications_enabled: 0,
     notifications_disabled: 0,
+    legacy_investigation_fields: 0,
   },
   threshold: {
     enabled: 0,
@@ -36,6 +37,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     legacy_notifications_disabled: 0,
     notifications_enabled: 0,
     notifications_disabled: 0,
+    legacy_investigation_fields: 0,
   },
   eql: {
     enabled: 0,
@@ -46,6 +48,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     legacy_notifications_disabled: 0,
     notifications_enabled: 0,
     notifications_disabled: 0,
+    legacy_investigation_fields: 0,
   },
   machine_learning: {
     enabled: 0,
@@ -56,6 +59,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     legacy_notifications_disabled: 0,
     notifications_enabled: 0,
     notifications_disabled: 0,
+    legacy_investigation_fields: 0,
   },
   threat_match: {
     enabled: 0,
@@ -66,6 +70,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     legacy_notifications_disabled: 0,
     notifications_enabled: 0,
     notifications_disabled: 0,
+    legacy_investigation_fields: 0,
   },
   new_terms: {
     enabled: 0,
@@ -76,6 +81,18 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     legacy_notifications_disabled: 0,
     notifications_enabled: 0,
     notifications_disabled: 0,
+    legacy_investigation_fields: 0,
+  },
+  esql: {
+    enabled: 0,
+    disabled: 0,
+    alerts: 0,
+    cases: 0,
+    legacy_notifications_enabled: 0,
+    legacy_notifications_disabled: 0,
+    notifications_enabled: 0,
+    notifications_disabled: 0,
+    legacy_investigation_fields: 0,
   },
   elastic_total: {
     enabled: 0,
@@ -86,6 +103,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     legacy_notifications_disabled: 0,
     notifications_enabled: 0,
     notifications_disabled: 0,
+    legacy_investigation_fields: 0,
   },
   custom_total: {
     enabled: 0,
@@ -96,6 +114,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     legacy_notifications_disabled: 0,
     notifications_enabled: 0,
     notifications_disabled: 0,
+    legacy_investigation_fields: 0,
   },
 });
 

@@ -5,136 +5,139 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { InferSearchResponseOf } from '@kbn/es-types';
-import { CCS_REMOTE_PATTERN } from '../../../common/constants';
-import { AlertCpuUsageNodeStats } from '../../../common/types/alerts';
-import { MonitoringConfig } from '../../config';
-import { getElasticsearchDataset, getIndexPatterns } from '../cluster/get_index_patterns';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { get } from 'lodash';
+import moment from 'moment';
+import { NORMALIZED_DERIVATIVE_UNIT } from '../../../common/constants';
+import { AlertCluster, AlertCpuUsageNodeStats } from '../../../common/types/alerts';
 import { createDatasetFilter } from './create_dataset_query_filter';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 
-interface Options {
-  esClient: ElasticsearchClient;
-  clusterUuids: string[];
-  startMs: number;
-  endMs: number;
-  filterQuery?: QueryDslQueryContainer;
-  logger: Logger;
+interface NodeBucketESResponse {
+  key: string;
+  average_cpu: { value: number };
+}
+
+interface ClusterBucketESResponse {
+  key: string;
+  nodes: {
+    buckets: NodeBucketESResponse[];
+  };
 }
 
 export async function fetchCpuUsageNodeStats(
-  options: Options,
-  config: MonitoringConfig
+  esClient: ElasticsearchClient,
+  clusters: AlertCluster[],
+  startMs: number,
+  endMs: number,
+  size: number,
+  filterQuery?: string
 ): Promise<AlertCpuUsageNodeStats[]> {
-  if (config.ui.container.elasticsearch.enabled) {
-    options.logger.debug('CPU usage rule: Computing usage for containerized clusters');
-    return fetchContainerStats(options, config);
-  }
+  // Using pure MS didn't seem to work well with the date_histogram interval
+  // but minutes does
+  const intervalInMinutes = moment.duration(endMs - startMs).asMinutes();
 
-  options.logger.debug('CPU usage rule: Computing usage for non-containerized clusters');
-  return fetchNonContainerStats(options, config);
-}
-
-async function fetchContainerStats(
-  { esClient, startMs, endMs, clusterUuids, filterQuery }: Options,
-  config: MonitoringConfig
-) {
   const indexPatterns = getIndexPatterns({
-    config,
+    config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'node_stats',
     ccs: CCS_REMOTE_PATTERN,
   });
-
   const params = {
     index: indexPatterns,
     filter_path: ['aggregations'],
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
-          {
-            terms: {
-              cluster_uuid: clusterUuids,
-            },
-          },
-          {
-            range: {
-              timestamp: {
-                format: 'epoch_millis',
-                gte: startMs,
-                lte: endMs,
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-          },
-        ],
-      },
-    },
-    aggs: {
-      clusters: {
-        terms: {
-          field: 'cluster_uuid',
-          size: config.ui.max_bucket_size,
+            createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
+            {
+              range: {
+                timestamp: {
+                  format: 'epoch_millis',
+                  gte: startMs,
+                  lte: endMs,
+                },
+              },
+            },
+          ],
         },
-        aggs: {
-          nodes: {
-            terms: {
-              field: 'node_stats.node_id',
-              size: config.ui.max_bucket_size,
-            },
-            aggs: {
-              name: {
-                terms: {
-                  field: 'source_node.name',
-                  size: 1,
-                },
+      },
+      aggs: {
+        clusters: {
+          terms: {
+            field: 'cluster_uuid',
+            size,
+            include: clusters.map((cluster) => cluster.clusterUuid),
+          },
+          aggs: {
+            nodes: {
+              terms: {
+                field: 'node_stats.node_id',
+                size,
               },
-              // Used to check for CCS and get the remote cluster name
-              index: {
-                terms: {
-                  field: '_index',
-                  size: 1,
+              aggs: {
+                index: {
+                  terms: {
+                    field: '_index',
+                    size: 1,
+                  },
                 },
-              },
-              // Fallback value in case container limits are not specified
-              average_cpu_usage_percent: {
-                avg: {
-                  field: 'node_stats.process.cpu.percent',
+                average_cpu: {
+                  avg: {
+                    field: 'node_stats.process.cpu.percent',
+                  },
                 },
-              },
-              // Container limit min and max, to calculate usage and detect config changes
-              quota_micros_max: {
-                max: {
-                  field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
+                average_quota: {
+                  avg: {
+                    field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
+                  },
                 },
-              },
-              quota_micros_min: {
-                min: {
-                  field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
+                name: {
+                  terms: {
+                    field: 'source_node.name',
+                    size: 1,
+                  },
                 },
-              },
-              // Usage to calculate delta
-              max_usage_nanos: {
-                max: {
-                  field: 'node_stats.os.cgroup.cpuacct.usage_nanos',
-                },
-              },
-              min_usage_nanos: {
-                min: {
-                  field: 'node_stats.os.cgroup.cpuacct.usage_nanos',
-                },
-              },
-              // Periods to calculate delta
-              max_periods: {
-                max: {
-                  field: 'node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods',
-                },
-              },
-              min_periods: {
-                min: {
-                  field: 'node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods',
+                histo: {
+                  date_histogram: {
+                    field: 'timestamp',
+                    fixed_interval: `${intervalInMinutes}m`,
+                  },
+                  aggs: {
+                    average_periods: {
+                      max: {
+                        field: 'node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods',
+                      },
+                    },
+                    average_usage: {
+                      max: {
+                        field: 'node_stats.os.cgroup.cpuacct.usage_nanos',
+                      },
+                    },
+                    usage_deriv: {
+                      derivative: {
+                        buckets_path: 'average_usage',
+                        gap_policy: 'skip' as const,
+                        unit: NORMALIZED_DERIVATIVE_UNIT,
+                      },
+                    },
+                    periods_deriv: {
+                      derivative: {
+                        buckets_path: 'average_periods',
+                        gap_policy: 'skip' as const,
+                        unit: NORMALIZED_DERIVATIVE_UNIT,
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -144,211 +147,38 @@ async function fetchContainerStats(
     },
   };
 
-  if (filterQuery) {
-    (params.query!.bool!.filter! as QueryDslQueryContainer[]).push(filterQuery);
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
   }
 
-  const response = (await esClient.search<unknown>(params)) as unknown as InferSearchResponseOf<
-    unknown,
-    typeof params
-  >;
-
-  if (!response.aggregations) {
-    throw new Error('Failed to resolve needed aggregations for CPU Usage Rule');
-  }
-
-  return response.aggregations.clusters.buckets.flatMap((cluster) => {
-    return cluster.nodes.buckets.map((node): AlertCpuUsageNodeStats => {
-      let nodeName;
-      if (node.name.buckets.length) {
-        nodeName = node.name.buckets[0].key as string;
-      }
-
-      let ccs;
-      if (node.index.buckets.length) {
-        const index = node.index.buckets[0].key as string;
-        ccs = index.includes(':') ? index.split(':')[0] : undefined;
-      }
-
-      const nodeStats = {
-        clusterUuid: cluster.key as string,
-        nodeId: node.key as string,
-        nodeName,
-        ccs,
+  const response = await esClient.search(params);
+  const stats: AlertCpuUsageNodeStats[] = [];
+  const clusterBuckets = get(
+    response,
+    'aggregations.clusters.buckets',
+    []
+  ) as ClusterBucketESResponse[];
+  for (const clusterBucket of clusterBuckets) {
+    for (const node of clusterBucket.nodes.buckets) {
+      const lastBucket = get(node, 'histo.buckets[1]', {});
+      const indexName = get(node, 'index.buckets[0].key', '');
+      const stat = {
+        clusterUuid: clusterBucket.key,
+        nodeId: node.key,
+        nodeName: get(node, 'name.buckets[0].key'),
+        cpuUsage: get(node, 'average_cpu.value'),
+        containerUsage: get(lastBucket, 'usage_deriv.normalized_value'),
+        containerPeriods: get(lastBucket, 'periods_deriv.normalized_value'),
+        containerQuota: get(node, 'average_quota.value'),
+        ccs: indexName.includes(':') ? indexName.split(':')[0] : null,
       };
-
-      const limitsNotSet = node.quota_micros_max.value === -1 && node.quota_micros_min.value === -1;
-
-      if (
-        limitsNotSet ||
-        node.max_usage_nanos.value === null ||
-        node.min_usage_nanos.value === null ||
-        node.max_periods.value === null ||
-        node.min_periods.value === null ||
-        node.quota_micros_max.value === null
-      ) {
-        return {
-          ...nodeStats,
-          cpuUsage: node.average_cpu_usage_percent.value ?? undefined,
-        };
-      }
-
-      if (node.quota_micros_min.value !== node.quota_micros_max.value) {
-        return {
-          ...nodeStats,
-          limitsChanged: true,
-          cpuUsage: undefined,
-        };
-      }
-
-      const usageDeltaNanos = node.max_usage_nanos.value - node.min_usage_nanos.value;
-      const periodsDelta = node.max_periods.value - node.min_periods.value;
-
-      const cpuUsage = computeCfsPercentCpuUsage(
-        usageDeltaNanos,
-        node.quota_micros_max.value,
-        periodsDelta
-      );
-
-      return {
-        ...nodeStats,
-        cpuUsage: Math.round(cpuUsage * 100) / 100,
-      };
-    });
-  });
-}
-
-function computeCfsPercentCpuUsage(usageNanos: number, quotaMicros: number, periods: number) {
-  // See https://github.com/elastic/kibana/pull/159351 for an explanation of this formula
-  const quotaNanos = quotaMicros * 1000;
-  const limitNanos = quotaNanos * periods;
-  const usageAsFactor = usageNanos / limitNanos;
-  return usageAsFactor * 100;
-}
-
-async function fetchNonContainerStats(
-  { esClient, startMs, endMs, clusterUuids, filterQuery }: Options,
-  config: MonitoringConfig
-) {
-  const indexPatterns = getIndexPatterns({
-    config,
-    moduleType: 'elasticsearch',
-    dataset: 'node_stats',
-    ccs: CCS_REMOTE_PATTERN,
-  });
-
-  const params = {
-    index: indexPatterns,
-    filter_path: ['aggregations'],
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
-          {
-            terms: {
-              cluster_uuid: clusterUuids,
-            },
-          },
-          {
-            range: {
-              timestamp: {
-                format: 'epoch_millis',
-                gte: startMs,
-                lte: endMs,
-              },
-            },
-          },
-        ],
-      },
-    },
-    aggs: {
-      clusters: {
-        terms: {
-          field: 'cluster_uuid',
-          size: config.ui.max_bucket_size,
-        },
-        aggs: {
-          nodes: {
-            terms: {
-              field: 'node_stats.node_id',
-              size: config.ui.max_bucket_size,
-            },
-            aggs: {
-              name: {
-                terms: {
-                  field: 'source_node.name',
-                  size: 1,
-                },
-              },
-              // Used to check for CCS and get the remote cluster name
-              index: {
-                terms: {
-                  field: '_index',
-                  size: 1,
-                },
-              },
-              average_cpu: {
-                avg: {
-                  field: 'node_stats.process.cpu.percent',
-                },
-              },
-              // Container limit min and max, to detect possible config errors
-              quota_micros_max: {
-                max: {
-                  field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
-                },
-              },
-              quota_micros_min: {
-                min: {
-                  field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  };
-
-  if (filterQuery) {
-    (params.query!.bool!.filter! as QueryDslQueryContainer[]).push(filterQuery);
+      stats.push(stat);
+    }
   }
-
-  const response = (await esClient.search<unknown>(params)) as unknown as InferSearchResponseOf<
-    unknown,
-    typeof params
-  >;
-
-  if (!response.aggregations) {
-    throw new Error('Failed to resolve needed aggregations for CPU Usage Rule');
-  }
-
-  return response.aggregations.clusters.buckets.flatMap((cluster) => {
-    return cluster.nodes.buckets.map((node): AlertCpuUsageNodeStats => {
-      let nodeName;
-      if (node.name.buckets.length) {
-        nodeName = node.name.buckets[0].key as string;
-      }
-
-      let ccs;
-      if (node.index.buckets.length) {
-        const index = node.index.buckets[0].key as string;
-        ccs = index.includes(':') ? index.split(':')[0] : undefined;
-      }
-
-      const runningInAContainerWithLimits =
-        (node.quota_micros_min.value !== null && node.quota_micros_min.value !== -1) ||
-        (node.quota_micros_max.value !== null && node.quota_micros_max.value !== -1);
-
-      return {
-        clusterUuid: cluster.key as string,
-        nodeId: node.key as string,
-        cpuUsage: node.average_cpu.value ?? undefined,
-        nodeName,
-        ccs,
-        unexpectedLimits: runningInAContainerWithLimits,
-      };
-    });
-  });
+  return stats;
 }

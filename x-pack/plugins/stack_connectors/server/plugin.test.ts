@@ -138,7 +138,7 @@ describe('Stack Connectors Plugin', () => {
           name: 'Torq',
         })
       );
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(5);
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(6);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -164,7 +164,7 @@ describe('Stack Connectors Plugin', () => {
         4,
         expect.objectContaining({
           id: '.bedrock',
-          name: 'AWS Bedrock',
+          name: 'Amazon Bedrock',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(

@@ -7,11 +7,12 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 
 import { CodeEditorInput, CodeEditorInputProps } from './code_editor_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { CodeEditorProps } from '../code_editor';
+import { wrap } from '../mocks';
 
 const name = 'Some markdown field';
 const id = 'some:markdown:field';
@@ -55,23 +56,26 @@ describe('MarkdownEditorInput', () => {
   });
 
   it('renders without errors', () => {
-    const { container } = render(<CodeEditorInput {...defaultProps} />);
+    const { container } = render(wrap(<CodeEditorInput {...defaultProps} />));
     expect(container).toBeInTheDocument();
   });
 
   it('renders the value prop', () => {
-    const { getByTestId } = render(<CodeEditorInput {...defaultProps} />);
+    const { getByTestId } = render(wrap(<CodeEditorInput {...defaultProps} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     expect(input).toHaveValue(initialValue);
   });
 
-  it('calls the onInputChange prop when the value changes', () => {
-    const { getByTestId } = render(<CodeEditorInput {...defaultProps} />);
+  it('calls the onInputChange prop when the value changes', async () => {
+    const { getByTestId } = render(wrap(<CodeEditorInput {...defaultProps} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     fireEvent.change(input, { target: { value: '# New Markdown Title' } });
-    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
-      type: 'markdown',
-      unsavedValue: '# New Markdown Title',
-    });
+
+    await waitFor(() =>
+      expect(defaultProps.onInputChange).toHaveBeenCalledWith({
+        type: 'markdown',
+        unsavedValue: '# New Markdown Title',
+      })
+    );
   });
 });

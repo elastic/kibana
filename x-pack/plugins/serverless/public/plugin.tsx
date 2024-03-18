@@ -15,6 +15,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
 import { ServerlessConfig } from './config';
+import { SideNavComponent } from './navigation';
 import {
   ServerlessPluginSetup,
   ServerlessPluginSetupDependencies,
@@ -63,21 +64,37 @@ export class ServerlessPlugin
 
     // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
     const { project } = core.chrome as InternalChromeStart;
-    if (dependencies.cloud.projectsUrl) {
-      project.setProjectsUrl(dependencies.cloud.projectsUrl);
+    const { cloud } = dependencies;
+
+    if (cloud.serverless.projectName) {
+      project.setProjectName(cloud.serverless.projectName);
     }
-    if (dependencies.cloud.serverless.projectName) {
-      project.setProjectName(dependencies.cloud.serverless.projectName);
-    }
+    project.setCloudUrls(cloud);
+
+    const activeNavigationNodes$ = project.getActiveNavigationNodes$();
+    const navigationTreeUi$ = project.getNavigationTreeUi$();
 
     return {
-      setSideNavComponent: (sideNavigationComponent) =>
+      setSideNavComponentDeprecated: (sideNavigationComponent) =>
         project.setSideNavComponent(sideNavigationComponent),
-      setNavigation: (projectNavigation) => project.setNavigation(projectNavigation),
+      initNavigation: (navigationTree$, { panelContentProvider, dataTestSubj } = {}) => {
+        project.initNavigation(navigationTree$);
+        project.setSideNavComponent(() => (
+          <SideNavComponent
+            navProps={{
+              navigationTree$: navigationTreeUi$,
+              dataTestSubj,
+              panelContentProvider,
+            }}
+            deps={{
+              core,
+              activeNodes$: activeNavigationNodes$,
+            }}
+          />
+        ));
+      },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       setProjectHome: (homeHref: string) => project.setHome(homeHref),
-      getActiveNavigationNodes$: () =>
-        (core.chrome as InternalChromeStart).project.getActiveNavigationNodes$(),
     };
   }
 

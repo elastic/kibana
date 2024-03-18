@@ -22,6 +22,7 @@ const configSchema = schema.object({
   apm: schema.maybe(apmConfigSchema),
   base_url: schema.maybe(schema.string()),
   cname: schema.maybe(schema.string()),
+  deployments_url: schema.string({ defaultValue: '/deployments' }),
   deployment_url: schema.maybe(schema.string()),
   id: schema.maybe(schema.string()),
   billing_url: schema.maybe(schema.string()),
@@ -35,8 +36,9 @@ const configSchema = schema.object({
   serverless: schema.maybe(
     schema.object(
       {
-        project_id: schema.string(),
+        project_id: schema.maybe(schema.string()),
         project_name: schema.maybe(schema.string()),
+        project_type: schema.maybe(schema.string()),
       },
       // avoid future chicken-and-egg situation with the component populating the config
       { unknowns: 'ignore' }
@@ -50,6 +52,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
   exposeToBrowser: {
     base_url: true,
     cname: true,
+    deployments_url: true,
     deployment_url: true,
     id: true,
     billing_url: true,
@@ -63,6 +66,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     serverless: {
       project_id: true,
       project_name: true,
+      project_type: true,
     },
   },
   schema: configSchema,

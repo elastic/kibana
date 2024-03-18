@@ -72,6 +72,7 @@ describe('test fetchAll', () => {
       getAppState: () => ({}),
       getInternalState: () => ({
         dataView: undefined,
+        isDataViewLoading: false,
         savedDataViews: [],
         adHocDataViews: [],
         expandedDoc: undefined,
@@ -269,6 +270,7 @@ describe('test fetchAll', () => {
       getAppState: () => ({ query }),
       getInternalState: () => ({
         dataView: undefined,
+        isDataViewLoading: false,
         savedDataViews: [],
         adHocDataViews: [],
         expandedDoc: undefined,
@@ -296,11 +298,7 @@ describe('test fetchAll', () => {
     const initialRecords = [records[0], records[1]];
     const moreRecords = [records[2], records[3]];
 
-    const interceptedWarnings = [
-      {
-        originalWarning: searchResponseIncompleteWarningLocalCluster,
-      },
-    ];
+    const interceptedWarnings = [searchResponseIncompleteWarningLocalCluster];
 
     test('should add more records', async () => {
       const collectDocuments = subjectCollector(subjects.documents$);
@@ -398,6 +396,7 @@ describe('test fetchAll', () => {
         getAppState: () => ({ query }),
         getInternalState: () => ({
           dataView: undefined,
+          isDataViewLoading: false,
           savedDataViews: [],
           adHocDataViews: [],
           expandedDoc: undefined,

@@ -18,6 +18,7 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { AuthenticationResult } from './authentication_result';
@@ -38,7 +39,6 @@ import {
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { userProfileMock } from '../../common/model/user_profile.mock';
-import type { AuditLogger } from '../audit';
 import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
@@ -376,13 +376,6 @@ describe('Authenticator', () => {
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
-    });
-
-    it('fails if request is not provided.', async () => {
-      await expect(authenticator.login(undefined as any, undefined as any)).rejects.toThrowError(
-        'Request should be a valid "KibanaRequest" instance, was [undefined].'
-      );
-      expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
     it('fails if login attempt is not provided or invalid.', async () => {
@@ -1383,13 +1376,6 @@ describe('Authenticator', () => {
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
-    });
-
-    it('fails if request is not provided.', async () => {
-      await expect(authenticator.authenticate(undefined as any)).rejects.toThrowError(
-        'Request should be a valid "KibanaRequest" instance, was [undefined].'
-      );
-      expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
     it('fails if an authentication provider fails.', async () => {
@@ -2418,12 +2404,6 @@ describe('Authenticator', () => {
       authenticator = new Authenticator(mockOptions);
     });
 
-    it('fails if request is not provided.', async () => {
-      await expect(authenticator.reauthenticate(undefined as any)).rejects.toThrowError(
-        'Request should be a valid "KibanaRequest" instance, was [undefined].'
-      );
-    });
-
     it('does not try to reauthenticate request if session is not available.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
@@ -2463,6 +2443,7 @@ describe('Authenticator', () => {
 
     it('does not clear session if provider cannot handle authentication', async () => {
       const request = httpServerMock.createKibanaRequest();
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
@@ -2492,6 +2473,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(failureReason)
       );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.reauthenticate(request)).resolves.toEqual(
@@ -2512,6 +2494,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user)
       );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.reauthenticate(request)).resolves.toEqual(
@@ -2534,6 +2517,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user, { state: newState })
       );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.reauthenticate(request)).resolves.toEqual(
@@ -2560,6 +2544,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(failureReason)
       );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.reauthenticate(request)).resolves.toEqual(
@@ -2585,13 +2570,6 @@ describe('Authenticator', () => {
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
-    });
-
-    it('fails if request is not provided.', async () => {
-      await expect(authenticator.logout(undefined as any)).rejects.toThrowError(
-        'Request should be a valid "KibanaRequest" instance, was [undefined].'
-      );
-      expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
     it('redirects to login form if session does not exist.', async () => {

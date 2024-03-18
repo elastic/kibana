@@ -7,17 +7,11 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { CellActionsMode } from '@kbn/cell-actions';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { getSourcererScopeId } from '../../../../helpers';
-import { SecurityCellActions } from '../../../../common/components/cell_actions';
-import { SecurityCellActionsTrigger } from '../../../../actions/constants';
+import { CellActions } from './cell_actions';
 import { useRightPanelContext } from '../context';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
-import { SEVERITY_TITLE_TEST_ID } from './test_ids';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
 
 const isSeverity = (x: unknown): x is Severity =>
   x === 'low' || x === 'medium' || x === 'high' || x === 'critical';
@@ -26,7 +20,7 @@ const isSeverity = (x: unknown): x is Severity =>
  * Document details severity displayed in flyout right section header
  */
 export const DocumentSeverity: FC = memo(() => {
-  const { getFieldsData, scopeId } = useRightPanelContext();
+  const { getFieldsData } = useRightPanelContext();
   const fieldsData = getFieldsData(ALERT_SEVERITY);
 
   if (!fieldsData) {
@@ -43,33 +37,9 @@ export const DocumentSeverity: FC = memo(() => {
   }
 
   return (
-    <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xxs" data-test-subj={SEVERITY_TITLE_TEST_ID}>
-          <h3>
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.header.severityTitle"
-              defaultMessage="Severity:"
-            />
-          </h3>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SecurityCellActions
-          data={{
-            field: ALERT_SEVERITY,
-            value: alertSeverity,
-          }}
-          mode={CellActionsMode.HOVER_RIGHT}
-          triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
-          visibleCellActions={6}
-          sourcererScopeId={getSourcererScopeId(scopeId)}
-          metadata={{ scopeId }}
-        >
-          <SeverityBadge value={alertSeverity} />
-        </SecurityCellActions>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <CellActions field={ALERT_SEVERITY} value={alertSeverity}>
+      <SeverityBadge value={alertSeverity} />
+    </CellActions>
   );
 });
 

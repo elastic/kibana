@@ -2865,6 +2865,12 @@
                 "description": "Total number of services utilizing the opentelemetry/swift agent within the last day"
               }
             },
+            "opentelemetry/android": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/android agent within the last day"
+              }
+            },
             "opentelemetry/webjs": {
               "type": "long",
               "_meta": {
@@ -6994,6 +7000,86 @@
                       "type": "long"
                     }
                   }
+                },
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "sec": {
+              "properties": {
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "obs": {
+              "properties": {
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "main": {
+              "properties": {
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -7025,6 +7111,12 @@
           "type": "keyword",
           "_meta": {
             "description": "The Serverless Project ID"
+          }
+        },
+        "projectType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Serverless Project type"
           }
         }
       }
@@ -7608,6 +7700,9 @@
               "agent_count": {
                 "type": "long"
               },
+              "is_agentless": {
+                "type": "boolean"
+              },
               "account_type": {
                 "type": "keyword"
               },
@@ -7686,6 +7781,25 @@
                   }
                 }
               },
+              "posture_management_stats_enabled_rules": {
+                "properties": {
+                  "posture_score": {
+                    "type": "long"
+                  },
+                  "benchmark_name": {
+                    "type": "keyword"
+                  },
+                  "benchmark_version": {
+                    "type": "keyword"
+                  },
+                  "passed_findings_count": {
+                    "type": "long"
+                  },
+                  "failed_findings_count": {
+                    "type": "long"
+                  }
+                }
+              },
               "kspm_stats": {
                 "properties": {
                   "kubernetes_version": {
@@ -7699,6 +7813,1621 @@
                   },
                   "pods_count": {
                     "type": "short"
+                  }
+                }
+              },
+              "has_muted_rules": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "muted_rules_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "section": {
+                "type": "keyword"
+              },
+              "benchmark_id": {
+                "type": "keyword"
+              },
+              "benchmark_name": {
+                "type": "keyword"
+              },
+              "benchmark_version": {
+                "type": "keyword"
+              },
+              "rule_number": {
+                "type": "keyword"
+              },
+              "posture_type": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      }
+    },
+    "connectors": {
+      "properties": {
+        "connectors": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "serviceType": {
+                "type": "keyword"
+              },
+              "isNative": {
+                "type": "boolean"
+              },
+              "isDeleted": {
+                "type": "boolean"
+              },
+              "status": {
+                "type": "keyword"
+              },
+              "indexName": {
+                "type": "keyword"
+              },
+              "dlsEnabled": {
+                "type": "boolean"
+              },
+              "sslEnabled": {
+                "type": "boolean"
+              },
+              "fetchSelectively": {
+                "type": "boolean"
+              },
+              "textExtractionServiceEnabled": {
+                "type": "boolean"
+              },
+              "documents": {
+                "properties": {
+                  "total": {
+                    "type": "long"
+                  },
+                  "volume": {
+                    "type": "long"
+                  },
+                  "inLastSync": {
+                    "type": "long"
+                  }
+                }
+              },
+              "dataSourceSpecific": {
+                "properties": {
+                  "confluence": {
+                    "properties": {
+                      "dataSourceType": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "github": {
+                    "properties": {
+                      "isCloud": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "jira": {
+                    "properties": {
+                      "dataSourceType": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "mongodb": {
+                    "properties": {
+                      "directConnect": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "mssql": {
+                    "properties": {
+                      "validateHost": {
+                        "type": "boolean"
+                      },
+                      "tables": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "mysql": {
+                    "properties": {
+                      "tables": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "oracle": {
+                    "properties": {
+                      "tables": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "postgresql": {
+                    "properties": {
+                      "tables": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "slack": {
+                    "properties": {
+                      "autoJoinChannelsEnabled": {
+                        "type": "boolean"
+                      },
+                      "syncUsersEnabled": {
+                        "type": "boolean"
+                      },
+                      "fetchLastNDays": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "zoom": {
+                    "properties": {
+                      "recordingAge": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              },
+              "scheduling": {
+                "properties": {
+                  "accessControl": {
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "interval": {
+                        "type": "text"
+                      }
+                    }
+                  },
+                  "full": {
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "interval": {
+                        "type": "text"
+                      }
+                    }
+                  },
+                  "incremental": {
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "interval": {
+                        "type": "text"
+                      }
+                    }
+                  }
+                }
+              },
+              "syncRules": {
+                "properties": {
+                  "active": {
+                    "properties": {
+                      "withBasicRules": {
+                        "type": "boolean"
+                      },
+                      "withAdvancedRules": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "draft": {
+                    "properties": {
+                      "withBasicRules": {
+                        "type": "boolean"
+                      },
+                      "withAdvancedRules": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              },
+              "ingestPipeline": {
+                "properties": {
+                  "name": {
+                    "type": "keyword"
+                  },
+                  "extractBinaryContent": {
+                    "type": "boolean"
+                  },
+                  "reduceWhitespace": {
+                    "type": "boolean"
+                  },
+                  "runMLInference": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "syncJobs": {
+                "properties": {
+                  "overall": {
+                    "properties": {
+                      "total": {
+                        "type": "long"
+                      },
+                      "last30Days": {
+                        "properties": {
+                          "overall": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "accessControl": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "full": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "incremental": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "last7Days": {
+                        "properties": {
+                          "overall": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "accessControl": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "full": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "incremental": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "withTextExtractionServiceEnabled": {
+                    "properties": {
+                      "total": {
+                        "type": "long"
+                      },
+                      "last30Days": {
+                        "properties": {
+                          "overall": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "accessControl": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "full": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "incremental": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "last7Days": {
+                        "properties": {
+                          "overall": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "accessControl": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "full": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "incremental": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "connectors_serverless": {
+      "properties": {
+        "connectors": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "serviceType": {
+                "type": "keyword"
+              },
+              "isNative": {
+                "type": "boolean"
+              },
+              "isDeleted": {
+                "type": "boolean"
+              },
+              "status": {
+                "type": "keyword"
+              },
+              "indexName": {
+                "type": "keyword"
+              },
+              "dlsEnabled": {
+                "type": "boolean"
+              },
+              "sslEnabled": {
+                "type": "boolean"
+              },
+              "fetchSelectively": {
+                "type": "boolean"
+              },
+              "textExtractionServiceEnabled": {
+                "type": "boolean"
+              },
+              "documents": {
+                "properties": {
+                  "total": {
+                    "type": "long"
+                  },
+                  "volume": {
+                    "type": "long"
+                  },
+                  "inLastSync": {
+                    "type": "long"
+                  }
+                }
+              },
+              "dataSourceSpecific": {
+                "properties": {
+                  "confluence": {
+                    "properties": {
+                      "dataSourceType": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "github": {
+                    "properties": {
+                      "isCloud": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "jira": {
+                    "properties": {
+                      "dataSourceType": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "mongodb": {
+                    "properties": {
+                      "directConnect": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "mssql": {
+                    "properties": {
+                      "validateHost": {
+                        "type": "boolean"
+                      },
+                      "tables": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "mysql": {
+                    "properties": {
+                      "tables": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "oracle": {
+                    "properties": {
+                      "tables": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "postgresql": {
+                    "properties": {
+                      "tables": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "slack": {
+                    "properties": {
+                      "autoJoinChannelsEnabled": {
+                        "type": "boolean"
+                      },
+                      "syncUsersEnabled": {
+                        "type": "boolean"
+                      },
+                      "fetchLastNDays": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "zoom": {
+                    "properties": {
+                      "recordingAge": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              },
+              "scheduling": {
+                "properties": {
+                  "accessControl": {
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "interval": {
+                        "type": "text"
+                      }
+                    }
+                  },
+                  "full": {
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "interval": {
+                        "type": "text"
+                      }
+                    }
+                  },
+                  "incremental": {
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "interval": {
+                        "type": "text"
+                      }
+                    }
+                  }
+                }
+              },
+              "syncRules": {
+                "properties": {
+                  "active": {
+                    "properties": {
+                      "withBasicRules": {
+                        "type": "boolean"
+                      },
+                      "withAdvancedRules": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "draft": {
+                    "properties": {
+                      "withBasicRules": {
+                        "type": "boolean"
+                      },
+                      "withAdvancedRules": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              },
+              "ingestPipeline": {
+                "properties": {
+                  "name": {
+                    "type": "keyword"
+                  },
+                  "extractBinaryContent": {
+                    "type": "boolean"
+                  },
+                  "reduceWhitespace": {
+                    "type": "boolean"
+                  },
+                  "runMLInference": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "syncJobs": {
+                "properties": {
+                  "overall": {
+                    "properties": {
+                      "total": {
+                        "type": "long"
+                      },
+                      "last30Days": {
+                        "properties": {
+                          "overall": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "accessControl": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "full": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "incremental": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "last7Days": {
+                        "properties": {
+                          "overall": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "accessControl": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "full": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "incremental": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "withTextExtractionServiceEnabled": {
+                    "properties": {
+                      "total": {
+                        "type": "long"
+                      },
+                      "last30Days": {
+                        "properties": {
+                          "overall": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "accessControl": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "full": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "incremental": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "last7Days": {
+                        "properties": {
+                          "overall": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "accessControl": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "full": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "incremental": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -8170,6 +9899,34 @@
                   "type": "long",
                   "_meta": {
                     "description": "total number of es machine learning anomaly layers in cluster"
+                  }
+                }
+              }
+            },
+            "esql": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ES|QL layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ES|QL layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ES|QL layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ES|QL layers in cluster"
                   }
                 }
               }
@@ -12388,6 +14145,12 @@
                           "_meta": {
                             "description": "Number of notifications enabled"
                           }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
                         }
                       }
                     },
@@ -12439,6 +14202,12 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of notifications enabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
                           }
                         }
                       }
@@ -12492,6 +14261,12 @@
                           "_meta": {
                             "description": "Number of notifications enabled"
                           }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
                         }
                       }
                     },
@@ -12543,6 +14318,12 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of notifications enabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
                           }
                         }
                       }
@@ -12596,6 +14377,12 @@
                           "_meta": {
                             "description": "Number of notifications enabled"
                           }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
                         }
                       }
                     },
@@ -12647,6 +14434,70 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of notifications enabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
+                        }
+                      }
+                    },
+                    "esql": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of esql rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of esql rules disabled"
+                          }
+                        },
+                        "alerts": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of alerts generated by esql rules"
+                          }
+                        },
+                        "cases": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases attached to esql detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
                           }
                         }
                       }
@@ -12700,6 +14551,12 @@
                           "_meta": {
                             "description": "Number of notifications enabled"
                           }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
                         }
                       }
                     },
@@ -12751,6 +14608,12 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of notifications enabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
                           }
                         }
                       }

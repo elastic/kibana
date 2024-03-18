@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import {
-  createApmRule,
-  deleteRuleById,
-  deleteApmAlerts,
-} from '../../alerts/helpers/alerting_api_helper';
+import { createApmRule } from '../../alerts/helpers/alerting_api_helper';
+import { cleanupRuleAndAlertState } from '../../alerts/helpers/cleanup_rule_and_alert_state';
 import { waitForActiveApmAlert } from '../../alerts/helpers/wait_for_active_apm_alerts';
 import {
   createServiceGroupApi,
@@ -47,6 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177655
   registry.when('Service group counts', { config: 'basic', archives: [] }, () => {
     let synthbeansServiceGroupId: string;
     let opbeansServiceGroupId: string;
@@ -92,8 +91,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await deleteRuleById({ supertest, ruleId });
-        await deleteApmAlerts(es);
+        await cleanupRuleAndAlertState({ es, supertest, logger: log });
       });
 
       it('returns the correct number of alerts', async () => {

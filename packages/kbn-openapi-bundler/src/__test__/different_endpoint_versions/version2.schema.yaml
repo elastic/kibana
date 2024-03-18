@@ -1,0 +1,20 @@
+openapi: 3.0.3
+info:
+  title: Test endpoint GET
+  version: '2023-11-11'
+paths:
+  /api/some_api:
+    get:
+      operationId: TestEndpointGet
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  field1:
+                    type: integer
+                  field2:
+                    type: string

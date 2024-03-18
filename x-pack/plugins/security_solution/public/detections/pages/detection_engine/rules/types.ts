@@ -17,13 +17,12 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase, Filter } from '@kbn/es-query';
-import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleAction as AlertingRuleAction } from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
-import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
-import type { FieldValueTimeline } from '../../../components/rules/pick_timeline';
-import type { FieldValueThreshold } from '../../../components/rules/threshold_input';
+import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
+import type { FieldValueTimeline } from '../../../../detection_engine/rule_creation/components/pick_timeline';
+import type { FieldValueThreshold } from '../../../../detection_engine/rule_creation_ui/components/threshold_input';
 import type {
   BuildingBlockType,
   RelatedIntegrationArray,
@@ -33,8 +32,11 @@ import type {
   RuleNameOverride,
   SetupGuide,
   TimestampOverride,
-  AlertSuppressionMissingFields,
+  AlertSuppressionMissingFieldsStrategy,
   InvestigationFields,
+  RuleAction,
+  AlertSuppression,
+  ThresholdAlertSuppression,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../common/api/detection_engine';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -157,7 +159,8 @@ export interface DefineStepRule {
   groupByFields: string[];
   groupByRadioSelection: GroupByOptions;
   groupByDuration: Duration;
-  suppressionMissingFields?: AlertSuppressionMissingFields;
+  suppressionMissingFields?: AlertSuppressionMissingFieldsStrategy;
+  enableThresholdSuppression: boolean;
 }
 
 export interface QueryDefineStep {
@@ -174,7 +177,7 @@ export interface QueryDefineStep {
 
 export interface Duration {
   value: number;
-  unit: string;
+  unit: 's' | 'm' | 'h';
 }
 
 export interface ScheduleStepRule {
@@ -184,7 +187,7 @@ export interface ScheduleStepRule {
 }
 
 export interface ActionsStepRule {
-  actions: RuleAction[];
+  actions: AlertingRuleAction[];
   responseActions?: RuleResponseAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;
@@ -218,6 +221,7 @@ export interface DefineStepRuleJson {
   timestamp_field?: string;
   event_category_override?: string;
   tiebreaker_field?: string;
+  alert_suppression?: AlertSuppression | ThresholdAlertSuppression;
 }
 
 export interface AboutStepRuleJson {
@@ -251,7 +255,7 @@ export interface ScheduleStepRuleJson {
 }
 
 export interface ActionsStepRuleJson {
-  actions: RuleAlertAction[];
+  actions: RuleAction[];
   response_actions?: ResponseAction[];
   enabled: boolean;
   throttle?: string | null;

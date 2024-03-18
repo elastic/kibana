@@ -5,9 +5,21 @@
  * 2.0.
  */
 
-import { TransformMessage } from '../types/messages';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+
+import type { TransformMessage } from '../types/messages';
 
 export interface GetTransformsAuditMessagesResponseSchema {
   messages: TransformMessage[];
   total: number;
 }
+
+export const getTransformAuditMessagesQuerySchema = schema.object({
+  sortField: schema.string(),
+  sortDirection: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+});
+
+export type GetTransformAuditMessagesQuerySchema = TypeOf<
+  typeof getTransformAuditMessagesQuerySchema
+>;

@@ -7,5 +7,4 @@
  */
 
 export { FieldPicker } from './field_picker';
-export { TruncatedLabel } from './truncated_label';
 export type { FieldOptionValue, FieldOption, DataType } from './types';

@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/profiling-utils",
-  "owner": "@elastic/profiling-ui"
+  "owner": "@elastic/obs-ux-infra_services-team"
 }

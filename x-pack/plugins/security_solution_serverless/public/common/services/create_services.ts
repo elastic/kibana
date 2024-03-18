@@ -21,12 +21,7 @@ export const createServices = (
   experimentalFeatures: ExperimentalFeatures
 ): Services => {
   const { securitySolution, cloud } = pluginsStart;
-  const projectNavLinks$ = createProjectNavLinks$(
-    securitySolution.getNavLinks$(),
-    core,
-    cloud,
-    experimentalFeatures
-  );
+  const projectNavLinks$ = createProjectNavLinks$(securitySolution.getNavLinks$(), core, cloud);
   return {
     ...core,
     ...pluginsStart,

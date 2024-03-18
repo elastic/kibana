@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonPage.login();
 
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_ihp_outlier', '@timestamp');
 
       await ml.api.createDataFrameAnalyticsJob(
         ml.commonConfig.getDFAIhpOutlierDetectionJobConfig(dfaJobId)

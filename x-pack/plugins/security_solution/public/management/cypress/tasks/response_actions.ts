@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { inputConsoleCommand, submitCommand } from './response_console';
 import type { UserAuthzAccessLevel } from '../screens';
 import { loadPage, request } from './common';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
@@ -24,17 +25,25 @@ import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint
 import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 export const validateAvailableCommands = () => {
-  cy.get('[data-test-subj^="command-type"]').should(
-    'have.length',
-    ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.length
-  );
-  ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.forEach((command) => {
+  // TODO: TC- use ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS when we go GA with automated process actions
+  const config = Cypress.config();
+  const automatedActionsPAttern = /automatedProcessActionsEnabled/;
+  const automatedProcessActionsEnabled =
+    config.env.ftrConfig.kbnServerArgs[0].match(automatedActionsPAttern);
+
+  const enabledActions = [
+    ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
+    ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
+  ];
+
+  cy.get('[data-test-subj^="command-type"]').should('have.length', enabledActions.length);
+  enabledActions.forEach((command) => {
     cy.getByTestSubj(`command-type-${command}`);
   });
 };
 export const addEndpointResponseAction = () => {
   cy.getByTestSubj('response-actions-wrapper').within(() => {
-    cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').click();
+    cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').click();
   });
 };
 export const focusAndOpenCommandDropdown = (number = 0) => {
@@ -66,14 +75,34 @@ export const visitRuleActions = (ruleId: string) => {
   cy.getByTestSubj('stepPanelProgress').should('not.exist');
 };
 
+export const getRunningProcesses = (command: string): Cypress.Chainable<number> => {
+  inputConsoleCommand('processes');
+  submitCommand();
+  cy.contains('Action pending.').should('exist');
+
+  // on success
+  // find pid of process
+  // traverse back from last column to the second column that has pid
+  return cy
+    .getByTestSubj('getProcessListTable', { timeout: 120000 })
+    .findByTestSubj('process_list_command')
+    .contains(command)
+    .parents('td')
+    .siblings('td')
+    .eq(1)
+    .find('span')
+    .then((span) => {
+      // get pid
+      return Number(span.text());
+    });
+};
+
 export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
   cy.getByTestSubj('response-actions-wrapper').within(() => {
-    cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
-      'be.disabled'
-    );
+    cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').should('be.disabled');
   });
   // Try adding new action, should not add list item.
-  cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').click({
+  cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').click({
     force: true,
   });
   cy.getByTestSubj(`response-actions-list-item-${itemNumber}`).should('not.exist');
@@ -105,11 +134,43 @@ export const waitForActionToComplete = (
           return false;
         });
       },
-      { timeout }
+      { timeout, interval: 2000 }
     )
     .then(() => {
       if (!action) {
         throw new Error(`Failed to retrieve completed action`);
+      }
+
+      return action;
+    });
+};
+
+export const waitForActionToSucceed = (
+  actionId: string,
+  timeout = 180000
+): Cypress.Chainable<ActionDetails> => {
+  let action: ActionDetails | undefined;
+
+  return cy
+    .waitUntil(
+      () => {
+        return request<ActionDetailsApiResponse>({
+          method: 'GET',
+          url: resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId || 'undefined' }),
+        }).then((response) => {
+          if (response.body.data.isCompleted && response.body.data.status === 'successful') {
+            action = response.body.data;
+            return true;
+          }
+
+          return false;
+        });
+      },
+      { timeout, interval: 2000 }
+    )
+    .then(() => {
+      if (!action) {
+        throw new Error('Failed to retrieve successful action');
       }
 
       return action;

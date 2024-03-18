@@ -6,7 +6,10 @@
  */
 
 import { mergeWith } from 'lodash';
+import type { ToolingLogTextWriterConfig } from '@kbn/tooling-log';
 import { ToolingLog } from '@kbn/tooling-log';
+import type { Flags } from '@kbn/dev-cli-runner';
+import moment from 'moment/moment';
 
 export const RETRYABLE_TRANSIENT_ERRORS: Readonly<Array<string | RegExp>> = [
   'no_shard_available_action_exception',
@@ -53,7 +56,7 @@ export const retryOnError = async <T>(
   tryCount: number = 5,
   interval: number = 10000
 ): Promise<T> => {
-  const log = logger ?? new ToolingLog({ writeTo: { write(_: string) {} }, level: 'silent' });
+  const log = logger ?? createToolingLogger('silent');
   const msg = (message: string): string => `retryOnError(): ${message}`;
   const isRetryableError = (err: Error): boolean => {
     return errors.some((retryMessage) => {
@@ -74,18 +77,18 @@ export const retryOnError = async <T>(
     const thisAttempt = attempt;
     attempt++;
 
-    log.info(msg(`attempt ${thisAttempt} started at: ${new Date().toISOString()}`));
+    log.debug(msg(`attempt ${thisAttempt} started at: ${new Date().toISOString()}`));
 
     try {
       responsePromise = callback(); // store promise so that if it fails and no more attempts, we return the last failure
       const result = await responsePromise;
 
-      log.info(msg(`attempt ${thisAttempt} was successful. Exiting retry`));
+      log.debug(msg(`attempt ${thisAttempt} was successful. Exiting retry`));
       log.indent(-4);
 
       return result;
     } catch (err) {
-      log.info(msg(`attempt ${thisAttempt} failed with: ${err.message}`), err);
+      log.warning(msg(`attempt ${thisAttempt} failed with: ${err.message}`), err);
 
       // If not an error that is retryable, then end loop here and return that error;
       if (!isRetryableError(err)) {
@@ -105,4 +108,76 @@ export const retryOnError = async <T>(
   // Last resort: return the last rejected Promise.
   // @ts-expect-error TS2454: Variable 'responsePromise' is used before being assigned.
   return responsePromise;
+};
+
+interface CreateLoggerInterface {
+  (level?: Partial<ToolingLogTextWriterConfig>['level']): ToolingLog;
+
+  /**
+   * The default log level if one is not provided to the `createToolingLogger()` utility.
+   * Can be used to globally set the log level to calls made to this utility with no `level` set
+   * on input.
+   */
+  defaultLogLevel: ToolingLogTextWriterConfig['level'];
+
+  /**
+   * Set the default logging level based on the flag arguments provide to a CLI script that runs
+   * via `@kbn/dev-cli-runner`
+   * @param flags
+   */
+  setDefaultLogLevelFromCliFlags: (flags: Flags) => void;
+}
+
+/**
+ * Creates an instance of `ToolingLog` that outputs to `stdout`.
+ * The default log `level` for all instances can be set by setting the function's `defaultLogLevel`
+ * property. Default logging level can also be set from CLI scripts that use the `@kbn/dev-cli-runner`
+ * by calling the `setDefaultLogLevelFromCliFlags(flags)` and passing in the `flags` property.
+ *
+ * @param level
+ *
+ * @example
+ * // Set default log level - example: from cypress for CI jobs
+ * createLogger.defaultLogLevel = 'verbose'
+ */
+export const createToolingLogger: CreateLoggerInterface = (level): ToolingLog => {
+  return new ToolingLog({
+    level: level || createToolingLogger.defaultLogLevel,
+    writeTo: process.stdout,
+  });
+};
+createToolingLogger.defaultLogLevel = 'info';
+createToolingLogger.setDefaultLogLevelFromCliFlags = (flags) => {
+  createToolingLogger.defaultLogLevel = flags.verbose
+    ? 'verbose'
+    : flags.debug
+    ? 'debug'
+    : flags.silent
+    ? 'silent'
+    : flags.quiet
+    ? 'error'
+    : 'info';
+};
+
+/**
+ * Get human readable string of time elapsed between to dates. Return value will be in the format
+ * of `hh:mm:ss.ms`
+ * @param startDate
+ * @param endTime
+ */
+export const getElapsedTime = (
+  startDate: string | Date,
+  endTime: string | Date = new Date()
+): string => {
+  const durationObj = moment.duration(moment(endTime).diff(startDate));
+  const pad = (num: number, max = 2): string => {
+    return String(num).padStart(max, '0');
+  };
+
+  const hours = pad(durationObj.hours());
+  const minutes = pad(durationObj.minutes());
+  const seconds = pad(durationObj.seconds());
+  const milliseconds = pad(durationObj.milliseconds(), 3);
+
+  return `${hours}:${minutes}:${seconds}.${milliseconds}`;
 };

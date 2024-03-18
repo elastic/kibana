@@ -11,10 +11,10 @@ import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
@@ -55,6 +55,7 @@ export const EsQueryExpression: React.FC<
     termSize,
     termField,
     excludeHitsFromPreviousRun,
+    sourceFields,
   } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<EsQueryRuleParams<SearchType.esQuery>>(
@@ -72,6 +73,7 @@ export const EsQueryExpression: React.FC<
       searchType: SearchType.esQuery,
       excludeHitsFromPreviousRun:
         excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
+      sourceFields,
     }
   );
 
@@ -193,59 +195,49 @@ export const EsQueryExpression: React.FC<
 
   return (
     <Fragment>
-      <EuiTitle size="xs">
-        <h5>
+      <EuiFormRow
+        fullWidth
+        label={
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectIndexPrompt"
-            defaultMessage="Select an index and time field"
+            defaultMessage="Select indices"
           />
-        </h5>
-      </EuiTitle>
+        }
+      >
+        <IndexSelectPopover
+          index={index}
+          data-test-subj="indexSelectPopover"
+          esFields={esFields}
+          timeField={timeField}
+          errors={errors}
+          onIndexChange={async (indices: string[]) => {
+            setParam('index', indices);
 
-      <EuiSpacer size="s" />
-
-      <IndexSelectPopover
-        index={index}
-        data-test-subj="indexSelectPopover"
-        esFields={esFields}
-        timeField={timeField}
-        errors={errors}
-        onIndexChange={async (indices: string[]) => {
-          setParam('index', indices);
-
-          // reset expression fields if indices are deleted
-          if (indices.length === 0) {
-            setRuleProperty('params', {
-              timeField: ruleParams.timeField,
-              index: indices,
-              esQuery: DEFAULT_VALUES.QUERY,
-              size: DEFAULT_VALUES.SIZE,
-              thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-              timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
-              timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-              threshold: DEFAULT_VALUES.THRESHOLD,
-              aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-              groupBy: DEFAULT_VALUES.GROUP_BY,
-              termSize: DEFAULT_VALUES.TERM_SIZE,
-              searchType: SearchType.esQuery,
-              excludeHitsFromPreviousRun: DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
-            });
-          } else {
-            await refreshEsFields(indices);
-          }
-        }}
-        onTimeFieldChange={(updatedTimeField: string) => setParam('timeField', updatedTimeField)}
-      />
-      <EuiSpacer size="s" />
-
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.defineQueryPrompt"
-            defaultMessage="Define your query using Query DSL"
-          />
-        </h5>
-      </EuiTitle>
+            // reset expression fields if indices are deleted
+            if (indices.length === 0) {
+              setRuleProperty('params', {
+                timeField: ruleParams.timeField,
+                index: indices,
+                esQuery: DEFAULT_VALUES.QUERY,
+                size: DEFAULT_VALUES.SIZE,
+                thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+                timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
+                timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
+                threshold: DEFAULT_VALUES.THRESHOLD,
+                aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
+                groupBy: DEFAULT_VALUES.GROUP_BY,
+                termSize: DEFAULT_VALUES.TERM_SIZE,
+                searchType: SearchType.esQuery,
+                excludeHitsFromPreviousRun: DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
+                sourceFields: undefined,
+              });
+            } else {
+              await refreshEsFields(indices);
+            }
+          }}
+          onTimeFieldChange={(updatedTimeField: string) => setParam('timeField', updatedTimeField)}
+        />
+      </EuiFormRow>
       <EuiSpacer size="s" />
       <EuiFormRow
         id="queryEditor"
@@ -260,6 +252,12 @@ export const EsQueryExpression: React.FC<
               defaultMessage="Elasticsearch Query DSL documentation"
             />
           </EuiLink>
+        }
+        label={
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.defineQueryPrompt"
+            defaultMessage="Define your query using Query DSL"
+          />
         }
       >
         <CodeEditor
@@ -352,6 +350,11 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
+        onChangeSourceFields={useCallback(
+          (selectedSourceFields) => setParam('sourceFields', selectedSourceFields),
+          [setParam]
+        )}
+        sourceFields={sourceFields}
       />
 
       <EuiSpacer />

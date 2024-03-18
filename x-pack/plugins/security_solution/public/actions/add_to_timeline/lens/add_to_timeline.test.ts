@@ -14,7 +14,7 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../common/constants';
 import type { DataProvider } from '../../../../common/types';
 import { TimelineId, EXISTS_OPERATOR } from '../../../../common/types';
-import { addProvider } from '../../../timelines/store/timeline/actions';
+import { addProvider } from '../../../timelines/store/actions';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
 jest.mock('../../../common/lib/kibana');

@@ -8,11 +8,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiBadge,
+import type {
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
+} from '@elastic/eui';
+import {
+  EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,19 +29,19 @@ import {
 
 import { useTransformCapabilities } from '../../../../hooks';
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
-import {
-  isLatestTransform,
-  isPivotTransform,
-  TransformId,
-} from '../../../../../../common/types/transform';
+import type { TransformId } from '../../../../../../common/types/transform';
+import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import { getTransformProgress, TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
+import { getTransformProgress, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useActions } from './use_actions';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 import { TransformTaskStateBadge } from './transform_task_state_badge';
+
+const TRUNCATE_TEXT_LINES = 3;
 
 const TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG = i18n.translate(
   'xpack.transform.transformList.needsReauthorizationBadge.insufficientPermissions',
@@ -131,13 +133,22 @@ export const useColumns = (
       'data-test-subj': 'transformListColumnId',
       name: 'ID',
       sortable: true,
-      truncateText: true,
+      truncateText: { lines: TRUNCATE_TEXT_LINES },
       scope: 'row',
       render: (transformId, item) => {
-        if (!isManagedTransform(item)) return transformId;
+        if (!isManagedTransform(item)) return <span title={transformId}>{transformId}</span>;
         return (
           <>
-            {transformId}
+            <span
+              title={`${transformId} (${i18n.translate(
+                'xpack.transform.transformList.managedBadgeLabel',
+                {
+                  defaultMessage: 'Managed',
+                }
+              )})`}
+            >
+              {transformId}
+            </span>
             &nbsp;
             <EuiToolTip
               content={i18n.translate('xpack.transform.transformList.managedBadgeTooltip', {
@@ -222,19 +233,9 @@ export const useColumns = (
       'data-test-subj': 'transformListColumnDescription',
       name: i18n.translate('xpack.transform.description', { defaultMessage: 'Description' }),
       sortable: true,
+      truncateText: { lines: TRUNCATE_TEXT_LINES },
       render(text: string) {
-        return (
-          <EuiText
-            style={{
-              display: '-webkit-box',
-              WebkitBoxOrient: 'vertical',
-              WebkitLineClamp: 3,
-              overflow: 'hidden',
-            }}
-          >
-            {text}
-          </EuiText>
-        );
+        return <span title={text}>{text}</span>;
       },
     },
     {

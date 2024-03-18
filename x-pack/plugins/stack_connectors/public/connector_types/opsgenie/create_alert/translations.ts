@@ -26,7 +26,7 @@ export const LOADING_JSON_EDITOR = i18n.translate(
 export const MESSAGE_FIELD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.messageLabel',
   {
-    defaultMessage: 'Message (required)',
+    defaultMessage: 'Message',
   }
 );
 
@@ -105,5 +105,12 @@ export const RULE_TAGS_DESCRIPTION = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.ruleTagsDescription',
   {
     defaultMessage: 'The tags of the rule.',
+  }
+);
+
+export const REQUIRED_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.requiredLabel',
+  {
+    defaultMessage: 'Required',
   }
 );

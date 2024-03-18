@@ -16,6 +16,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 
 import {
   getSessionIndexSettings,
@@ -23,7 +24,6 @@ import {
   SessionIndex,
 } from './session_index';
 import { sessionIndexMock } from './session_index.mock';
-import type { AuditLogger } from '../audit';
 import { auditLoggerMock } from '../audit/mocks';
 import { AnonymousAuthenticationProvider } from '../authentication';
 import { ConfigSchema, createConfig } from '../config';

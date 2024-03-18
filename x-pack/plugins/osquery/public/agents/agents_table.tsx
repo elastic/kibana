@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { find } from 'lodash/fp';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { find, isEmpty } from 'lodash/fp';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import {
   EuiComboBox,
   EuiHealth,
@@ -22,7 +22,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../common/lib/kibana';
 import { useAllAgents } from './use_all_agents';
-import { useAgentGroups } from './use_agent_groups';
+
 import { AgentGrouper } from './agent_grouper';
 import {
   getNumAgentsInGrouping,
@@ -40,7 +40,7 @@ import {
   NO_AGENT_AVAILABLE_TITLE,
 } from './translations';
 
-import type { SelectedGroups, AgentOptionValue, GroupOption, AgentSelection } from './types';
+import type { GroupOption, AgentSelection } from './types';
 import { AGENT_GROUP_KEY } from './types';
 
 interface AgentsTableProps {
@@ -68,56 +68,47 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     [searchValue]
   );
 
-  // grouping related
-  const {
-    isLoading: groupsLoading,
-    data: agentGroupsData,
-    isFetched: groupsFetched,
-  } = useAgentGroups();
   const {
     isLoading: agentsLoading,
-    data: agents,
+    isRefetching: agentsRefetching,
+    data: agentList,
     isFetched: agentsFetched,
   } = useAllAgents(debouncedSearchValue, {
     perPage,
+    agentIds: agentSelection?.agents,
   });
 
   // option related
   const [options, setOptions] = useState<GroupOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<GroupOption[]>([]);
-  const [numAgentsSelected, setNumAgentsSelected] = useState<number>(0);
   const defaultValueInitialized = useRef(false);
+
+  const numAgentsSelected = useMemo(() => {
+    const { newAgentSelection, selectedAgents, selectedGroups } =
+      generateAgentSelection(selectedOptions);
+    if (newAgentSelection.allAgentsSelected) {
+      return agentList?.total ?? 0;
+    } else {
+      const checkAgent = generateAgentCheck(selectedGroups);
+
+      return (
+        // filter out all the agents counted by selected policies and platforms
+        selectedAgents.filter(checkAgent).length +
+        // add the number of agents added via policy and platform groups
+        getNumAgentsInGrouping(selectedGroups) -
+        // subtract the number of agents double counted by policy/platform selections
+        getNumOverlapped(selectedGroups, agentList?.groups?.overlap ?? {})
+      );
+    }
+  }, [agentList?.groups?.overlap, agentList?.total, selectedOptions]);
 
   const onSelection = useCallback(
     (selection: GroupOption[]) => {
-      // TODO?: optimize this by making the selection computation incremental
-      const {
-        newAgentSelection,
-        selectedAgents,
-        selectedGroups,
-      }: {
-        newAgentSelection: AgentSelection;
-        selectedAgents: AgentOptionValue[];
-        selectedGroups: SelectedGroups;
-      } = generateAgentSelection(selection);
-      if (newAgentSelection.allAgentsSelected) {
-        setNumAgentsSelected(agentGroupsData?.total ?? 0);
-      } else {
-        const checkAgent = generateAgentCheck(selectedGroups);
-        setNumAgentsSelected(
-          // filter out all the agents counted by selected policies and platforms
-          selectedAgents.filter(checkAgent).length +
-            // add the number of agents added via policy and platform groups
-            getNumAgentsInGrouping(selectedGroups) -
-            // subtract the number of agents double counted by policy/platform selections
-            getNumOverlapped(selectedGroups, agentGroupsData?.groups?.overlap ?? {})
-        );
-      }
-
+      const { newAgentSelection } = generateAgentSelection(selection);
       onChange(newAgentSelection);
       setSelectedOptions(selection);
     },
-    [agentGroupsData, onChange]
+    [onChange]
   );
 
   useEffect(() => {
@@ -138,7 +129,13 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
       }
     };
 
-    if (agentSelection && !defaultValueInitialized.current && options.length) {
+    if (
+      agentSelection &&
+      !isEmpty(agentSelection) &&
+      !defaultValueInitialized.current &&
+      options.length &&
+      !agentsRefetching
+    ) {
       if (agentSelection.allAgentsSelected) {
         const allAgentsOptions = find(['label', ALL_AGENTS_LABEL], options);
 
@@ -156,27 +153,26 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
         handleSelectedOptions(agentSelection.agents, AGENT_SELECTION_LABEL);
       }
     }
-  }, [agentSelection, onSelection, options, selectedOptions]);
+  }, [agentSelection, agentsFetched, agentsRefetching, onSelection, options, selectedOptions]);
 
   useEffect(() => {
-    if (agentsFetched && groupsFetched && agentGroupsData) {
+    if (agentsFetched && agentList?.groups) {
       // Cap policies to 10 on init dropdown
-      const policies = (agentGroupsData?.groups.policies || []).slice(
+      const policies = (agentList.groups?.policies || []).slice(
         0,
         searchValue === '' ? 10 : undefined
       );
 
       const grouper = new AgentGrouper();
       // update the groups when groups or agents have changed
-      grouper.setTotalAgents(agentGroupsData?.total);
-      grouper.updateGroup(AGENT_GROUP_KEY.Platform, agentGroupsData?.groups.platforms);
+      grouper.setTotalAgents(agentList.total);
+      grouper.updateGroup(AGENT_GROUP_KEY.Platform, agentList?.groups?.platforms ?? []);
       grouper.updateGroup(AGENT_GROUP_KEY.Policy, policies);
-      // @ts-expect-error update types
-      grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents);
+      grouper.updateGroup(AGENT_GROUP_KEY.Agent, agentList?.agents);
       const newOptions = grouper.generateOptions();
       setOptions((prevOptions) => (!deepEqual(prevOptions, newOptions) ? newOptions : prevOptions));
     }
-  }, [groupsLoading, agents, agentsFetched, groupsFetched, agentGroupsData, searchValue]);
+  }, [agentList?.agents, agentList?.groups, agentList?.total, agentsFetched, searchValue]);
 
   const renderOption = useCallback((option, searchVal, contentClassName) => {
     const { label, value } = option;
@@ -201,10 +197,9 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     setModifyingSearch(v !== '');
     setSearchValue(v);
   }, []);
-  const isFetched = groupsFetched && agentsFetched && agentGroupsData;
 
   const renderNoAgentAvailableWarning = () => {
-    if (isFetched && !options.length) {
+    if (agentsFetched && agentList?.groups && !options.length) {
       return (
         <>
           <EuiCallOut color="danger" size="s" iconType="warning" title={NO_AGENT_AVAILABLE_TITLE}>
@@ -243,7 +238,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
           <EuiComboBox
             data-test-subj="agentSelection"
             placeholder={SELECT_AGENT_LABEL}
-            isLoading={groupsLoading || agentsLoading || modifyingSearch}
+            isLoading={agentsLoading || modifyingSearch}
             options={options}
             isClearable={true}
             fullWidth={true}

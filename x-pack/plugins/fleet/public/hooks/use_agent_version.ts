@@ -8,6 +8,8 @@ import { useEffect, useState } from 'react';
 import semverRcompare from 'semver/functions/rcompare';
 import semverLt from 'semver/functions/lt';
 
+import { differsOnlyInPatch } from '../../common/services';
+
 import { useKibanaVersion } from './use_kibana_version';
 import { sendGetAgentsAvailableVersions } from './use_request';
 
@@ -25,15 +27,15 @@ export const useAgentVersion = (): string | undefined => {
         const availableVersions = res?.data?.items;
         let agentVersionToUse;
 
+        availableVersions?.sort(semverRcompare);
         if (
           availableVersions &&
           availableVersions.length > 0 &&
-          availableVersions.indexOf(kibanaVersion) === -1
+          availableVersions.indexOf(kibanaVersion) !== 0
         ) {
-          availableVersions.sort(semverRcompare);
           agentVersionToUse =
             availableVersions.find((version) => {
-              return semverLt(version, kibanaVersion);
+              return semverLt(version, kibanaVersion) || differsOnlyInPatch(version, kibanaVersion);
             }) || availableVersions[0];
         } else {
           agentVersionToUse = kibanaVersion;

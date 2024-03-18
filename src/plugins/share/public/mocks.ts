@@ -7,13 +7,13 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import { SharePluginSetup, SharePluginStart } from '.';
+import { SharePublicSetup, SharePublicStart } from './plugin';
 import { LocatorPublic, UrlService } from '../common/url_service';
 import { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 
-export type Setup = jest.Mocked<SharePluginSetup>;
-export type Start = jest.Mocked<SharePluginStart>;
+export type Setup = jest.Mocked<SharePublicSetup>;
+export type Start = jest.Mocked<SharePublicStart>;
 
 const url = new UrlService<BrowserShortUrlClientFactoryCreateParams, BrowserShortUrlClient>({
   navigate: async () => {},

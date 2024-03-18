@@ -1,0 +1,27 @@
+[[synthetics-apis]]
+== Synthetics APIs
+
+The following APIs are available for Synthetics.
+
+* <<get-parameters-api, Get Parameters API>> to get a parameter(s).
+
+* <<add-parameters-api, Create Parameter API>> to create a parameter.
+
+* <<edit-parameter-by-id-api, Edit Parameter API>> to edit a parameter.
+
+* <<delete-parameters-api, Delete Parameter API>> to delete a parameter.
+
+* <<create-private-location-api, Create Private Location API>> to create a private location
+
+* <<delete-private-location-api, Delete Private Location API>> to delete a private location
+
+* <<get-private-locations-api, Get Private Locations API>> to get a list of private locations
+
+include::params/add-param.asciidoc[leveloffset=+1]
+include::params/get-params.asciidoc[leveloffset=+1]
+include::params/edit-param.asciidoc[leveloffset=+1]
+include::params/delete-param.asciidoc[leveloffset=+1]
+include::private-locations/create-private-location.asciidoc[leveloffset=+1]
+include::private-locations/delete-private-location.asciidoc[leveloffset=+1]
+include::private-locations/get-private-locations.asciidoc[leveloffset=+1]
+

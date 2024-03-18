@@ -15,12 +15,13 @@ import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { I18nStart } from '@kbn/core-i18n-browser';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { ToastsStart } from '@kbn/core-notifications-browser';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 
 /**
  * Contextual services used by a {@link Form} component.
  */
 export interface Services {
-  saveChanges: (changes: Record<string, UnsavedFieldChange>) => void;
+  saveChanges: (changes: Record<string, UnsavedFieldChange>, scope: UiSettingsScope) => void;
   showError: (message: string) => void;
   showReloadPagePrompt: () => void;
 }
@@ -37,6 +38,7 @@ export type FormServices = FieldRowServices & Services;
 interface KibanaDependencies {
   settings: {
     client: Pick<IUiSettingsClient, 'set'>;
+    globalClient: Pick<IUiSettingsClient, 'set'>;
   };
   theme: ThemeServiceStart;
   i18n: I18nStart;

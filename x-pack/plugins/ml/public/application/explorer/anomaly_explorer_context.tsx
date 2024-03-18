@@ -16,28 +16,30 @@ import { useExplorerUrlState } from './hooks/use_explorer_url_state';
 import { AnomalyChartsStateService } from './anomaly_charts_state_service';
 import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
 import { useTableSeverity } from '../components/controls/select_severity';
+import { AnomalyDetectionAlertsStateService } from './alerts';
+import { explorerServiceFactory, type ExplorerService } from './explorer_dashboard_service';
 
-export type AnomalyExplorerContextValue =
-  | {
-      anomalyExplorerChartsService: AnomalyExplorerChartsService;
-      anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService;
-      anomalyTimelineService: AnomalyTimelineService;
-      anomalyTimelineStateService: AnomalyTimelineStateService;
-      chartsStateService: AnomalyChartsStateService;
-    }
-  | undefined;
+export interface AnomalyExplorerContextValue {
+  anomalyExplorerChartsService: AnomalyExplorerChartsService;
+  anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService;
+  anomalyTimelineService: AnomalyTimelineService;
+  anomalyTimelineStateService: AnomalyTimelineStateService;
+  chartsStateService: AnomalyChartsStateService;
+  anomalyDetectionAlertsStateService: AnomalyDetectionAlertsStateService;
+  explorerService: ExplorerService;
+}
 
 /**
  * Context of the Anomaly Explorer page.
  */
-export const AnomalyExplorerContext = React.createContext<AnomalyExplorerContextValue>(undefined);
+export const AnomalyExplorerContext = React.createContext<AnomalyExplorerContextValue | undefined>(
+  undefined
+);
 
 /**
  * Hook for consuming {@link AnomalyExplorerContext}.
  */
-export function useAnomalyExplorerContext():
-  | Exclude<AnomalyExplorerContextValue, undefined>
-  | never {
+export function useAnomalyExplorerContext() {
   const context = useContext(AnomalyExplorerContext);
 
   if (context === undefined) {
@@ -57,8 +59,9 @@ export const AnomalyExplorerContextProvider: FC = ({ children }) => {
 
   const {
     services: {
-      mlServices: { mlApiServices },
+      mlServices: { mlApiServices, mlFieldFormatService },
       uiSettings,
+      data,
     },
   } = useMlKibana();
 
@@ -67,10 +70,17 @@ export const AnomalyExplorerContextProvider: FC = ({ children }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const mlResultsService = useMemo(() => mlResultsServiceProvider(mlApiServices), []);
 
-  const [anomalyExplorerContextValue, setAnomalyExplorerContextValue] =
-    useState<AnomalyExplorerContextValue>(undefined);
+  const [anomalyExplorerContextValue, setAnomalyExplorerContextValue] = useState<
+    AnomalyExplorerContextValue | undefined
+  >(undefined);
 
+  // It might look tempting to refactor this into `useMemo()` and just return
+  // `anomalyExplorerContextValue`, but these services internally might call other state
+  // updates so using `useEffect` is the right thing to do here to not get errors
+  // related to React lifecycle methods.
   useEffect(() => {
+    const explorerService = explorerServiceFactory(mlFieldFormatService);
+
     const anomalyTimelineService = new AnomalyTimelineService(
       timefilter,
       uiSettings,
@@ -102,12 +112,20 @@ export const AnomalyExplorerContextProvider: FC = ({ children }) => {
       tableSeverityState
     );
 
+    const anomalyDetectionAlertsStateService = new AnomalyDetectionAlertsStateService(
+      anomalyTimelineStateService,
+      data,
+      timefilter
+    );
+
     setAnomalyExplorerContextValue({
       anomalyExplorerChartsService,
       anomalyExplorerCommonStateService,
       anomalyTimelineService,
       anomalyTimelineStateService,
       chartsStateService,
+      anomalyDetectionAlertsStateService,
+      explorerService,
     });
 
     return () => {
@@ -116,6 +134,7 @@ export const AnomalyExplorerContextProvider: FC = ({ children }) => {
       anomalyExplorerCommonStateService.destroy();
       anomalyTimelineStateService.destroy();
       chartsStateService.destroy();
+      anomalyDetectionAlertsStateService.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

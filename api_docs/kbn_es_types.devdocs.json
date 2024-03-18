@@ -22,10 +22,10 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/es-types",
-        "id": "def-common.ClusterDetails",
+        "id": "def-common.ESQLColumn",
         "type": "Interface",
         "tags": [],
-        "label": "ClusterDetails",
+        "label": "ESQLColumn",
         "description": [],
         "path": "packages/kbn-es-types/src/search.ts",
         "deprecated": false,
@@ -33,24 +33,10 @@
         "children": [
           {
             "parentPluginId": "@kbn/es-types",
-            "id": "def-common.ClusterDetails.status",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "status",
-            "description": [],
-            "signature": [
-              "\"running\" | \"failed\" | \"partial\" | \"skipped\" | \"successful\""
-            ],
-            "path": "packages/kbn-es-types/src/search.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/es-types",
-            "id": "def-common.ClusterDetails.indices",
+            "id": "def-common.ESQLColumn.name",
             "type": "string",
             "tags": [],
-            "label": "indices",
+            "label": "name",
             "description": [],
             "path": "packages/kbn-es-types/src/search.ts",
             "deprecated": false,
@@ -58,13 +44,49 @@
           },
           {
             "parentPluginId": "@kbn/es-types",
-            "id": "def-common.ClusterDetails.took",
-            "type": "number",
+            "id": "def-common.ESQLColumn.type",
+            "type": "string",
             "tags": [],
-            "label": "took",
+            "label": "type",
+            "description": [],
+            "path": "packages/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-types",
+        "id": "def-common.ESQLSearchParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLSearchParams",
+        "description": [],
+        "path": "packages/kbn-es-types/src/search.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchParams.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "path": "packages/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchParams.filter",
+            "type": "Unknown",
+            "tags": [],
+            "label": "filter",
             "description": [],
             "signature": [
-              "number | undefined"
+              "unknown"
             ],
             "path": "packages/kbn-es-types/src/search.ts",
             "deprecated": false,
@@ -72,25 +94,13 @@
           },
           {
             "parentPluginId": "@kbn/es-types",
-            "id": "def-common.ClusterDetails.timed_out",
-            "type": "boolean",
+            "id": "def-common.ESQLSearchParams.locale",
+            "type": "string",
             "tags": [],
-            "label": "timed_out",
-            "description": [],
-            "path": "packages/kbn-es-types/src/search.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/es-types",
-            "id": "def-common.ClusterDetails._shards",
-            "type": "Object",
-            "tags": [],
-            "label": "_shards",
+            "label": "locale",
             "description": [],
             "signature": [
-              "ShardStatistics",
-              " | undefined"
+              "string | undefined"
             ],
             "path": "packages/kbn-es-types/src/search.ts",
             "deprecated": false,
@@ -98,14 +108,90 @@
           },
           {
             "parentPluginId": "@kbn/es-types",
-            "id": "def-common.ClusterDetails.failures",
+            "id": "def-common.ESQLSearchParams.dropNullColumns",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dropNullColumns",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-types",
+        "id": "def-common.ESQLSearchReponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLSearchReponse",
+        "description": [],
+        "path": "packages/kbn-es-types/src/search.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchReponse.columns",
             "type": "Array",
             "tags": [],
-            "label": "failures",
+            "label": "columns",
             "description": [],
             "signature": [
-              "ShardFailure",
+              {
+                "pluginId": "@kbn/es-types",
+                "scope": "common",
+                "docId": "kibKbnEsTypesPluginApi",
+                "section": "def-common.ESQLColumn",
+                "text": "ESQLColumn"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchReponse.all_columns",
+            "type": "Array",
+            "tags": [],
+            "label": "all_columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-types",
+                "scope": "common",
+                "docId": "kibKbnEsTypesPluginApi",
+                "section": "def-common.ESQLColumn",
+                "text": "ESQLColumn"
+              },
               "[] | undefined"
+            ],
+            "path": "packages/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchReponse.values",
+            "type": "Array",
+            "tags": [],
+            "label": "values",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-types",
+                "scope": "common",
+                "docId": "kibKbnEsTypesPluginApi",
+                "section": "def-common.ESQLRow",
+                "text": "ESQLRow"
+              },
+              "[]"
             ],
             "path": "packages/kbn-es-types/src/search.ts",
             "deprecated": false,
@@ -386,6 +472,21 @@
           "QueryDslQueryContainer"
         ],
         "path": "packages/kbn-es-types/src/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-types",
+        "id": "def-common.ESQLRow",
+        "type": "Type",
+        "tags": [],
+        "label": "ESQLRow",
+        "description": [],
+        "signature": [
+          "unknown[]"
+        ],
+        "path": "packages/kbn-es-types/src/search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

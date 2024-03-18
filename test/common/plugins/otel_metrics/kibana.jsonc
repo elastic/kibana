@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/open-telemetry-instrumented-plugin",
-  "owner": "@elastic/infra-monitoring-ui",
+  "owner": "@elastic/obs-ux-infra_services-team",
   "plugin": {
     "id": "openTelemetryInstrumentedPlugin",
     "server": true,

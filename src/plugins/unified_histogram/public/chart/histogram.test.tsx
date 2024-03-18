@@ -250,8 +250,8 @@ describe('Histogram', () => {
       meta: { type: 'es_ql' },
       columns: [
         {
-          id: 'rows',
-          name: 'rows',
+          id: 'results',
+          name: 'results',
           meta: {
             type: 'number',
             dimensionName: 'Vertical axis',
@@ -260,10 +260,10 @@ describe('Histogram', () => {
       ],
       rows: [
         {
-          rows: 16,
+          results: 16,
         },
         {
-          rows: 4,
+          results: 4,
         },
       ],
     } as any;

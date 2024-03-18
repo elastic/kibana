@@ -10,7 +10,7 @@ import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { useDispatch } from 'react-redux';
 import { EuiLink, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/css/dist/emotion-css.cjs';
+import { css } from '@emotion/css';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { SessionPreview } from './session_preview';
 import { useSessionPreview } from '../hooks/use_session_preview';
@@ -20,7 +20,7 @@ import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-import { setActiveTabTimeline } from '../../../../timelines/store/timeline/actions';
+import { setActiveTabTimeline } from '../../../../timelines/store/actions';
 import { getScopedActions } from '../../../../helpers';
 
 const timelineId = 'timeline-1';
@@ -29,7 +29,7 @@ const timelineId = 'timeline-1';
  * Checks if the SessionView component is available, if so render it or else render an error message
  */
 export const SessionPreviewContainer: FC = () => {
-  const { dataAsNestedObject, getFieldsData } = useRightPanelContext();
+  const { dataAsNestedObject, getFieldsData, isPreview } = useRightPanelContext();
 
   // decide whether to show the session view or not
   const sessionViewConfig = useSessionPreview({ getFieldsData });
@@ -122,17 +122,18 @@ export const SessionPreviewContainer: FC = () => {
           />
         ),
         iconType: 'timeline',
-        ...(isEnabled && {
-          link: {
-            callback: goToSessionViewTab,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.sessionPreviewTooltip"
-                defaultMessage="Show session viewer"
-              />
-            ),
-          },
-        }),
+        ...(isEnabled &&
+          !isPreview && {
+            link: {
+              callback: goToSessionViewTab,
+              tooltip: (
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.sessionPreviewTooltip"
+                  defaultMessage="Show session viewer"
+                />
+              ),
+            },
+          }),
       }}
       data-test-subj={SESSION_PREVIEW_TEST_ID}
     >

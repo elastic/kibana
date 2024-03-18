@@ -106,7 +106,7 @@ export const executeUpdate = async <T>(
     preflightDocResult,
   });
 
-  const existingNamespaces = preflightDocNSResult?.savedObjectNamespaces ?? [];
+  const existingNamespaces = preflightDocNSResult.savedObjectNamespaces ?? [];
   const authorizationResult = await securityExtension?.authorizeUpdate({
     namespace,
     object: { type, id, existingNamespaces },
@@ -247,6 +247,7 @@ export const executeUpdate = async <T>(
     // therefor we can safely process with the "standard" update sequence.
 
     const updatedAttributes = mergeForUpdate({
+      // @ts-expect-error upgrade typescript v4.9.5
       targetAttributes: {
         ...migrated!.attributes,
       },

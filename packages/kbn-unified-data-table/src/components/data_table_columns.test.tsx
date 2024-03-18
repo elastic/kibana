@@ -7,10 +7,19 @@
  */
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { getEuiGridColumns, getVisibleColumns } from './data_table_columns';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import React from 'react';
+import {
+  deserializeHeaderRowHeight,
+  getEuiGridColumns,
+  getVisibleColumns,
+  canPrependTimeFieldColumn,
+} from './data_table_columns';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
+import { dataViewWithoutTimefieldMock } from '../../__mocks__/data_view_without_timefield';
 import { dataTableContextMock } from '../../__mocks__/table_context';
 import { servicesMock } from '../../__mocks__/services';
+import { ROWS_HEIGHT_OPTIONS } from '../constants';
 
 const columns = ['extension', 'message'];
 const columnsWithTimeCol = getVisibleColumns(
@@ -31,6 +40,7 @@ describe('Data table columns', function () {
         isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -52,6 +62,7 @@ describe('Data table columns', function () {
         isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -73,6 +84,7 @@ describe('Data table columns', function () {
         isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -110,6 +122,151 @@ describe('Data table columns', function () {
     });
   });
 
+  describe('canPrependTimeFieldColumn', () => {
+    function buildColumnTypes(dataView: DataView) {
+      const columnTypes: Record<string, string> = {};
+      for (const field of dataView.fields) {
+        columnTypes[field.name] = field.type;
+      }
+      return columnTypes;
+    }
+
+    describe('dataView with timeField', () => {
+      it('should forward showTimeCol if no _source columns is passed', () => {
+        for (const showTimeCol of [true, false]) {
+          expect(
+            canPrependTimeFieldColumn(
+              ['extension', 'message'],
+              dataViewWithTimefieldMock.timeFieldName,
+              buildColumnTypes(dataViewWithTimefieldMock),
+              showTimeCol,
+              false
+            )
+          ).toBe(showTimeCol);
+        }
+      });
+
+      it('should return false if no _source columns is passed, text-based datasource', () => {
+        for (const showTimeCol of [true, false]) {
+          expect(
+            canPrependTimeFieldColumn(
+              ['extension', 'message'],
+              dataViewWithTimefieldMock.timeFieldName,
+              buildColumnTypes(dataViewWithTimefieldMock),
+              showTimeCol,
+              true
+            )
+          ).toBe(false);
+        }
+      });
+
+      it('should forward showTimeCol if _source column is passed', () => {
+        for (const showTimeCol of [true, false]) {
+          expect(
+            canPrependTimeFieldColumn(
+              ['_source'],
+              dataViewWithTimefieldMock.timeFieldName,
+              buildColumnTypes(dataViewWithTimefieldMock),
+              showTimeCol,
+              false
+            )
+          ).toBe(showTimeCol);
+        }
+      });
+
+      it('should forward showTimeCol if _source column is passed, text-based datasource', () => {
+        for (const showTimeCol of [true, false]) {
+          expect(
+            canPrependTimeFieldColumn(
+              ['_source'],
+              dataViewWithTimefieldMock.timeFieldName,
+              buildColumnTypes(dataViewWithTimefieldMock),
+              showTimeCol,
+              true
+            )
+          ).toBe(showTimeCol);
+        }
+      });
+
+      it('should return false if _source column is passed but time field is not returned, text-based datasource', () => {
+        // ... | DROP @timestamp test case
+        const columnTypes = buildColumnTypes(dataViewWithTimefieldMock);
+        if (dataViewWithTimefieldMock.timeFieldName) {
+          delete columnTypes[dataViewWithTimefieldMock.timeFieldName];
+        }
+        for (const showTimeCol of [true, false]) {
+          expect(
+            canPrependTimeFieldColumn(
+              ['_source'],
+              dataViewWithTimefieldMock.timeFieldName,
+              columnTypes,
+              showTimeCol,
+              true
+            )
+          ).toBe(false);
+        }
+      });
+    });
+
+    describe('dataView without timeField', () => {
+      it('should return false if no _source columns is passed', () => {
+        for (const showTimeCol of [true, false]) {
+          expect(
+            canPrependTimeFieldColumn(
+              ['extension', 'message'],
+              dataViewWithoutTimefieldMock.timeFieldName,
+              buildColumnTypes(dataViewWithoutTimefieldMock),
+              showTimeCol,
+              false
+            )
+          ).toBe(false);
+        }
+      });
+
+      it('should return false if no _source columns is passed, text-based datasource', () => {
+        for (const showTimeCol of [true, false]) {
+          expect(
+            canPrependTimeFieldColumn(
+              ['extension', 'message'],
+              dataViewWithoutTimefieldMock.timeFieldName,
+              buildColumnTypes(dataViewWithoutTimefieldMock),
+              showTimeCol,
+              true
+            )
+          ).toBe(false);
+        }
+      });
+
+      it('should return false if _source column is passed', () => {
+        for (const showTimeCol of [true, false]) {
+          expect(
+            canPrependTimeFieldColumn(
+              ['_source'],
+              dataViewWithoutTimefieldMock.timeFieldName,
+              buildColumnTypes(dataViewWithoutTimefieldMock),
+              showTimeCol,
+              false
+            )
+          ).toBe(false);
+        }
+      });
+
+      it('should return false if _source column is passed, text-based datasource', () => {
+        for (const showTimeCol of [true, false]) {
+          expect(
+            canPrependTimeFieldColumn(
+              ['_source'],
+              dataViewWithoutTimefieldMock.timeFieldName,
+              buildColumnTypes(dataViewWithoutTimefieldMock),
+              showTimeCol,
+              true
+            )
+          ).toBe(false);
+        }
+      });
+    });
+  });
+
   describe('column tokens', () => {
     it('returns eui grid columns with tokens', async () => {
       const actual = getEuiGridColumns({
@@ -122,6 +279,7 @@ describe('Data table columns', function () {
         isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -148,6 +306,7 @@ describe('Data table columns', function () {
         isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -157,6 +316,131 @@ describe('Data table columns', function () {
         onFilter: () => {},
       });
       expect(actual).toMatchSnapshot();
+    });
+  });
+
+  describe('Textbased languages grid columns', () => {
+    it('returns eui grid with in memory sorting for text based languages and columns on the dataview', async () => {
+      const columnsNotInDataview = getVisibleColumns(
+        ['extension'],
+        dataViewWithTimefieldMock,
+        true
+      ) as string[];
+      const gridColumns = getEuiGridColumns({
+        columns: columnsNotInDataview,
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        columnTypes: {
+          var_test: 'number',
+        },
+      });
+      expect(gridColumns[1].schema).toBe('string');
+    });
+
+    it('returns eui grid with in memory sorting for text based languages and columns not on the columnTypes', async () => {
+      const columnsNotInDataview = getVisibleColumns(
+        ['var_test'],
+        dataViewWithTimefieldMock,
+        true
+      ) as string[];
+      const gridColumns = getEuiGridColumns({
+        columns: columnsNotInDataview,
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        columnTypes: {
+          var_test: 'number',
+        },
+      });
+      expect(gridColumns[1].schema).toBe('numeric');
+    });
+
+    it('returns columns in correct format when column customisation is provided', async () => {
+      const gridColumns = getEuiGridColumns({
+        columns,
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+      });
+
+      const extensionGridColumn = gridColumns[0];
+      extensionGridColumn.display = <span>test</span>;
+      const customGridColumnsConfiguration = {
+        extension: () => extensionGridColumn,
+      };
+
+      const customizedGridColumns = getEuiGridColumns({
+        columns,
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        customGridColumnsConfiguration,
+      });
+
+      expect(customizedGridColumns).toMatchSnapshot();
+    });
+  });
+
+  describe('deserializeHeaderRowHeight', () => {
+    it('returns undefined for auto', () => {
+      expect(deserializeHeaderRowHeight(ROWS_HEIGHT_OPTIONS.auto)).toBe(undefined);
+    });
+
+    it('returns 1 for single', () => {
+      expect(deserializeHeaderRowHeight(ROWS_HEIGHT_OPTIONS.single)).toBe(1);
+    });
+
+    it('returns the value for other values', () => {
+      expect(deserializeHeaderRowHeight(2)).toBe(2);
     });
   });
 });

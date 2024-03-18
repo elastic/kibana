@@ -6,6 +6,7 @@
  */
 
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { AADAlert } from '@kbn/alerts-as-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 import {
   RuleActionParams,
@@ -15,7 +16,7 @@ import {
   SanitizedRule,
 } from '../types';
 
-interface TransformActionParamsOptions {
+export interface TransformActionParamsOptions {
   actionsPlugin: ActionsPluginStartContract;
   alertId: string;
   alertType: string;
@@ -35,6 +36,8 @@ interface TransformActionParamsOptions {
   context: AlertInstanceContext;
   ruleUrl?: string;
   flapping: boolean;
+  aadAlert?: AADAlert;
+  consecutiveMatches?: number;
 }
 
 interface SummarizedAlertsWithAll {
@@ -76,6 +79,8 @@ export function transformActionParams({
   alertParams,
   ruleUrl,
   flapping,
+  aadAlert,
+  consecutiveMatches,
 }: TransformActionParamsOptions): RuleActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
@@ -108,8 +113,11 @@ export function transformActionParams({
       actionGroup: alertActionGroup,
       actionGroupName: alertActionGroupName,
       flapping,
+      consecutiveMatches,
     },
+    ...(aadAlert ? { ...aadAlert } : {}),
   };
+
   return actionsPlugin.renderActionParameterTemplates(
     actionTypeId,
     actionId,
@@ -156,6 +164,7 @@ export function transformSummaryActionParams({
       actionGroup: 'default',
       actionGroupName: 'Default',
       flapping: false,
+      consecutiveMatches: 0,
     },
     kibanaBaseUrl,
     date: new Date().toISOString(),

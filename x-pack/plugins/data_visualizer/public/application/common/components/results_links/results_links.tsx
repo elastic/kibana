@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import { RefreshInterval } from '@kbn/data-plugin/public';
-import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import { flatten } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
-import { LinkCardProps } from '../link_card/link_card';
+import type { LinkCardProps } from '../link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 type LinkType = 'file' | 'index';
@@ -209,6 +210,7 @@ export const ResultsLinks: FC<Props> = ({
       {createDataView && discoverLink && (
         <EuiFlexItem>
           <EuiCard
+            hasBorder
             icon={<EuiIcon size="xxl" type={`discoverApp`} />}
             title={
               <FormattedMessage
@@ -225,6 +227,7 @@ export const ResultsLinks: FC<Props> = ({
       {indexManagementLink && (
         <EuiFlexItem>
           <EuiCard
+            hasBorder
             icon={<EuiIcon size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
@@ -241,6 +244,7 @@ export const ResultsLinks: FC<Props> = ({
       {dataViewsManagementLink && (
         <EuiFlexItem>
           <EuiCard
+            hasBorder
             icon={<EuiIcon size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
@@ -255,6 +259,7 @@ export const ResultsLinks: FC<Props> = ({
       )}
       <EuiFlexItem>
         <EuiCard
+          hasBorder
           icon={<EuiIcon size="xxl" type={`filebeatApp`} />}
           data-test-subj="fileDataVisFilebeatConfigLink"
           title={
@@ -271,6 +276,7 @@ export const ResultsLinks: FC<Props> = ({
         asyncHrefCards.map((link) => (
           <EuiFlexItem key={link.title}>
             <EuiCard
+              hasBorder
               icon={<EuiIcon size="xxl" type={link.icon} />}
               data-test-subj="fileDataVisLink"
               title={link.title}

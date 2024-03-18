@@ -26,19 +26,17 @@ export const OverviewTab: FC = memo(() => {
       paddingSize="none"
       aria-label={i18n.translate(
         'xpack.securitySolution.flyout.right.overview.overviewContentAriaLabel',
-        {
-          defaultMessage: 'Alert overview',
-        }
+        { defaultMessage: 'Overview' }
       )}
     >
       <AboutSection />
-      <EuiHorizontalRule margin="l" />
+      <EuiHorizontalRule margin="m" />
       <InvestigationSection />
-      <EuiHorizontalRule margin="l" />
+      <EuiHorizontalRule margin="m" />
       <VisualizationsSection />
-      <EuiHorizontalRule margin="l" />
+      <EuiHorizontalRule margin="m" />
       <InsightsSection />
-      <EuiHorizontalRule margin="l" />
+      <EuiHorizontalRule margin="m" />
       <ResponseSection />
     </EuiPanel>
   );

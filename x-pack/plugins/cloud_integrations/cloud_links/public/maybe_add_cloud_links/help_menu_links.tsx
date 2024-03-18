@@ -13,7 +13,7 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { EndpointsModal } from './endpoints_modal';
+import { ConnectionDetailsModal } from './connection_details_modal';
 
 export const createHelpMenuLinks = ({
   docLinks,
@@ -50,15 +50,14 @@ export const createHelpMenuLinks = ({
       href: docLinks.links.kibana.feedback,
     },
     {
-      title: i18n.translate('xpack.cloudLinks.helpMenuLinks.endpoints', {
-        defaultMessage: 'Endpoints',
+      title: i18n.translate('xpack.cloudLinks.helpMenuLinks.connectionDetails', {
+        defaultMessage: 'Connection details',
       }),
-      iconType: 'console',
-      dataTestSubj: 'endpointsHelpLink',
+      dataTestSubj: 'connectionDetailsHelpLink',
       onClick: () => {
         const modal = overlays.openModal(
           toMountPoint(
-            <EndpointsModal
+            <ConnectionDetailsModal
               core={core}
               share={share}
               cloud={cloud}

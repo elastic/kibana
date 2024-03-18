@@ -16,6 +16,7 @@ import {
   AlertProvidedActionVariables,
   hasMustacheTokens,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { isPlainObject } from 'lodash';
 import {
   PagerDutyConfig,
   PagerDutySecrets,
@@ -50,6 +51,8 @@ export function getConnectorType(): ConnectorTypeModel<
         summary: new Array<string>(),
         timestamp: new Array<string>(),
         dedupKey: new Array<string>(),
+        links: new Array<string>(),
+        customDetails: new Array<string>(),
       };
       const validationResult = { errors };
       if (
@@ -77,6 +80,35 @@ export function getConnectorType(): ConnectorTypeModel<
               },
             })
           );
+        }
+      }
+      if (Array.isArray(actionParams.links)) {
+        actionParams.links.forEach(({ href, text }) => {
+          if ((!href || !text) && errors.links.length === 0) {
+            errors.links.push(
+              i18n.translate('xpack.stackConnectors.components.pagerDuty.error.invalidLink', {
+                defaultMessage: 'Link properties cannot be empty.',
+              })
+            );
+          }
+        });
+      }
+      if (actionParams.customDetails?.length) {
+        const errorMessage = i18n.translate(
+          'xpack.stackConnectors.components.pagerDuty.error.invalidCustomDetails',
+          {
+            defaultMessage: 'Custom details must be a valid JSON object.',
+          }
+        );
+
+        try {
+          const parsedJSON = JSON.parse(actionParams.customDetails);
+
+          if (!isPlainObject(parsedJSON)) {
+            errors.customDetails.push(errorMessage);
+          }
+        } catch {
+          errors.customDetails.push(errorMessage);
         }
       }
       return validationResult;

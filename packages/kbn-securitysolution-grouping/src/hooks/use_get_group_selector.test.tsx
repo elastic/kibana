@@ -157,6 +157,34 @@ describe('Group Selector Hooks', () => {
       });
     });
 
+    it('On group change when maxGroupingLevels is 1, remove previously selected group', () => {
+      const testGroup = {
+        [groupingId]: {
+          ...defaultGroup,
+          options: defaultGroupingOptions,
+          activeGroups: ['host.name'],
+        },
+      };
+      const { result } = renderHook((props) => useGetGroupSelector(props), {
+        initialProps: {
+          ...defaultArgs,
+          maxGroupingLevels: 1,
+          groupingState: {
+            groupById: testGroup,
+          },
+        },
+      });
+      act(() => result.current.props.onGroupChange('user.name'));
+
+      expect(dispatch).toHaveBeenCalledWith({
+        payload: {
+          id: groupingId,
+          activeGroups: ['user.name'],
+        },
+        type: ActionType.updateActiveGroups,
+      });
+    });
+
     it('On group change, resets active page, sets active group, and leaves options alone', () => {
       const testGroup = {
         [groupingId]: {
@@ -209,6 +237,26 @@ describe('Group Selector Hooks', () => {
       );
     });
 
+    it('On group change, unselected group, does not sends telemetry', () => {
+      const testGroup = {
+        [groupingId]: {
+          ...defaultGroup,
+          options: defaultGroupingOptions,
+          activeGroups: ['host.name', customField],
+        },
+      };
+      const { result } = renderHook((props) => useGetGroupSelector(props), {
+        initialProps: {
+          ...defaultArgs,
+          groupingState: {
+            groupById: testGroup,
+          },
+        },
+      });
+      act(() => result.current.props.onGroupChange(customField));
+      expect(defaultArgs.tracker).not.toHaveBeenCalled();
+    });
+
     it('On group change, executes callback', () => {
       const testGroup = {
         [groupingId]: {
@@ -230,6 +278,32 @@ describe('Group Selector Hooks', () => {
       expect(defaultArgs.onGroupChange).toHaveBeenCalledWith({
         tableId: groupingId,
         groupByField: customField,
+        groupByFields: ['host.name', customField],
+      });
+    });
+
+    it('On group change, unselected group, executes callback', () => {
+      const testGroup = {
+        [groupingId]: {
+          ...defaultGroup,
+          options: defaultGroupingOptions,
+          activeGroups: ['host.name', customField],
+        },
+      };
+      const { result } = renderHook((props) => useGetGroupSelector(props), {
+        initialProps: {
+          ...defaultArgs,
+          groupingState: {
+            groupById: testGroup,
+          },
+        },
+      });
+      act(() => result.current.props.onGroupChange(customField));
+      expect(defaultArgs.onGroupChange).toHaveBeenCalledTimes(1);
+      expect(defaultArgs.onGroupChange).toHaveBeenCalledWith({
+        tableId: groupingId,
+        groupByField: customField,
+        groupByFields: ['host.name'],
       });
     });
 

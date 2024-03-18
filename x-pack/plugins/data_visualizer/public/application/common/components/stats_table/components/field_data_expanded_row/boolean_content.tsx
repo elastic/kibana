@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { Axis, BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
+import { Axis, BarSeries, Chart, Settings, ScaleType, LEGACY_LIGHT_THEME } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { roundToDecimalPlace } from '@kbn/ml-number-utils';
@@ -74,7 +75,13 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
             tickFormat={(d: any) => getFormattedValue(d, count)}
           />
 
-          <Settings showLegend={false} theme={theme} locale={i18n.getLocale()} />
+          <Settings
+            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+            baseTheme={LEGACY_LIGHT_THEME}
+            showLegend={false}
+            theme={theme}
+            locale={i18n.getLocale()}
+          />
           <BarSeries
             id={config.fieldName || fieldFormat}
             data={[

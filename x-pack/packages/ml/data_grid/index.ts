@@ -10,7 +10,7 @@ export {
   getDataGridSchemaFromESFieldType,
   getDataGridSchemaFromKibanaFieldType,
   getFeatureImportance,
-  getFieldsFromKibanaIndexPattern,
+  getFieldsFromKibanaDataView,
   getNestedOrEscapedVal,
   getProcessedFields,
   getTopClasses,

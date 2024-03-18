@@ -158,6 +158,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           operatorsList={operatorsList}
                           allowCustomOptions={allowCustomOptions}
                           getExtendedFields={getExtendedFields}
+                          exceptionItemIndex={exceptionItemIndex}
                         />
                       </MyOverflowContainer>
                       <BuilderEntryDeleteButtonComponent

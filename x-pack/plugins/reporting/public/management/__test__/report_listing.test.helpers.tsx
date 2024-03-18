@@ -18,17 +18,18 @@ import {
   notificationServiceMock,
   coreMock,
 } from '@kbn/core/public/mocks';
-import type { LocatorPublic, SharePluginSetup } from '@kbn/share-plugin/public';
 
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { ILicense } from '@kbn/licensing-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
+import { InternalApiClientProvider, Job, ReportingAPIClient } from '@kbn/reporting-public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mockJobs } from '../../../common/test';
 
-import { KibanaContextProvider } from '../../shared_imports';
-
 import { IlmPolicyStatusContextProvider } from '../../lib/ilm_policy_status_context';
-import { InternalApiClientProvider, ReportingAPIClient } from '../../lib/reporting_api_client';
-import { Job } from '../../lib/job';
 
 import { ListingProps as Props, ReportListing } from '..';
 import { ReportDiagnostic } from '../components';
@@ -43,9 +44,17 @@ export interface TestDependencies {
   ilmLocator: LocatorPublic<SerializableRecord>;
   uiSettings: ReturnType<typeof coreMock.createSetup>['uiSettings'];
   reportDiagnostic: typeof ReportDiagnostic;
+  data: DataPublicPluginStart;
+  share: SharePluginStart;
 }
 
 export const mockConfig = {
+  csv: {
+    scroll: {
+      duration: '10m',
+      size: 500,
+    },
+  },
   poll: {
     jobCompletionNotifier: {
       interval: 5000,
@@ -95,10 +104,12 @@ export const createTestBed = registerTestBed(
     urlService,
     toasts,
     uiSettings,
+    data,
+    share,
     ...rest
   }: Partial<Props> & TestDependencies) => (
-    <KibanaContextProvider services={{ http, application, uiSettings }}>
-      <InternalApiClientProvider apiClient={reportingAPIClient}>
+    <KibanaContextProvider services={{ http, application, uiSettings, data, share }}>
+      <InternalApiClientProvider apiClient={reportingAPIClient} http={http}>
         <IlmPolicyStatusContextProvider>
           <ReportListing
             license$={l$}
@@ -107,6 +118,7 @@ export const createTestBed = registerTestBed(
             navigateToUrl={jest.fn()}
             urlService={urlService}
             toasts={toasts}
+            apiClient={reportingAPIClient}
             {...rest}
           />
         </IlmPolicyStatusContextProvider>
@@ -151,6 +163,8 @@ export const setup = async (props?: Partial<Props>) => {
       },
     } as unknown as SharePluginSetup['url'],
     reportDiagnostic,
+    data: dataPluginMock.createStartContract(),
+    share: sharePluginMock.createStartContract(),
   };
 
   const testBed = createTestBed({ ...testDependencies, ...props });

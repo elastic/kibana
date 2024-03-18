@@ -23,8 +23,8 @@ export const deleteIndices =
     }
     notificationService.showSuccessToast(
       i18n.translate('xpack.idxMgmt.deleteIndicesAction.successfullyDeletedIndicesMessage', {
-        defaultMessage: 'Successfully deleted: [{indexNames}]',
-        values: { indexNames: indexNames.join(', ') },
+        defaultMessage: 'Successfully deleted {count, plural, one {# index} other {# indices} }',
+        values: { count: indexNames.length },
       })
     );
     dispatch(deleteIndicesSuccess({ indexNames }));

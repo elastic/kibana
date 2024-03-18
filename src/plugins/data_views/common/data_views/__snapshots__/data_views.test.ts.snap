@@ -7,6 +7,7 @@ FldList [
     "conflictDescriptions": undefined,
     "count": 5,
     "customLabel": "A Runtime Field",
+    "defaultFormatter": undefined,
     "esTypes": Array [
       "keyword",
     ],
@@ -28,6 +29,7 @@ exports[`IndexPatterns delete will throw if insufficient access 1`] = `[DataView
 
 exports[`IndexPatterns savedObjectToSpec 1`] = `
 Object {
+  "allowHidden": undefined,
   "allowNoIndex": undefined,
   "fieldAttrs": Object {
     "aRuntimeField": Object {

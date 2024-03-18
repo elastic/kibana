@@ -8,4 +8,4 @@
 
 import { CorePluginExecutionContext } from './plugin';
 
-export const plugin = () => new CorePluginExecutionContext();
+export const plugin = async () => new CorePluginExecutionContext();

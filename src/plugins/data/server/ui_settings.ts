@@ -32,7 +32,8 @@ const requestPreferenceOptionLabels = {
 };
 
 export function getUiSettings(
-  docLinks: DocLinksServiceSetup
+  docLinks: DocLinksServiceSetup,
+  enableValidations: boolean
 ): Record<string, UiSettingsParams<unknown>> {
   return {
     [UI_SETTINGS.META_FIELDS]: {
@@ -167,12 +168,12 @@ export function getUiSettings(
       name: i18n.translate('data.advancedSettings.defaultIndexTitle', {
         defaultMessage: 'Default data view',
       }),
-      value: null,
+      value: '',
       type: 'string',
       description: i18n.translate('data.advancedSettings.defaultIndexText', {
         defaultMessage: 'Used by discover and visualizations when a data view is not set.',
       }),
-      schema: schema.nullable(schema.string()),
+      schema: schema.string(),
     },
     [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: {
       name: i18n.translate('data.advancedSettings.courier.ignoreFilterTitle', {
@@ -385,6 +386,13 @@ export function getUiSettings(
             }),
           },
           {
+            from: 'now-1m',
+            to: 'now',
+            display: i18n.translate('data.advancedSettings.timepicker.last1Minute', {
+              defaultMessage: 'Last 1 minute',
+            }),
+          },
+          {
             from: 'now-15m',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last15Minutes', {
@@ -463,13 +471,23 @@ export function getUiSettings(
             '</a>',
         },
       }),
-      schema: schema.arrayOf(
-        schema.object({
-          from: schema.string(),
-          to: schema.string(),
-          display: schema.string(),
-        })
-      ),
+      requiresPageReload: true,
+      schema: enableValidations
+        ? schema.arrayOf(
+            schema.object({
+              from: schema.string(),
+              to: schema.string(),
+              display: schema.string(),
+            }),
+            { maxSize: 12 }
+          )
+        : schema.arrayOf(
+            schema.object({
+              from: schema.string(),
+              to: schema.string(),
+              display: schema.string(),
+            })
+          ),
     },
     [UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT]: {
       name: i18n.translate('data.advancedSettings.pinFiltersTitle', {

@@ -15,23 +15,18 @@ import {
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
 import type { SecurityAppStore } from '../../../common/store';
-import { timelineSelectors } from '../../../timelines/store/timeline';
 import { fieldHasCellActions } from '../../utils';
-import { TimelineId } from '../../../../common/types';
 import { isTimelineScope } from '../../../helpers';
 import { SecurityCellActionType } from '../../constants';
 import type { StartServices } from '../../../types';
 import type { SecurityCellAction } from '../../types';
 
 export const createFilterInCellActionFactory = ({
-  store,
   services,
 }: {
   store: SecurityAppStore;
   services: StartServices;
 }) => {
-  const getTimelineById = timelineSelectors.getTimelineByIdSelector();
-
   const { filterManager } = services.data.query;
   const { notifications } = services;
   const genericFilterInActionFactory = createFilterInActionFactory({
@@ -51,8 +46,10 @@ export const createFilterInCellActionFactory = ({
       );
     },
     execute: async ({ data, metadata }) => {
-      const field = data[0]?.field;
+      const fieldName = data[0]?.field.name;
       const rawValue = data[0]?.value;
+      const dataViewId = metadata?.dataViewId;
+
       const value = filterOutNullableValues(valueToArray(rawValue));
 
       if (!isValueSupportedByDefaultActions(value)) {
@@ -62,28 +59,15 @@ export const createFilterInCellActionFactory = ({
         return;
       }
 
-      if (!field) return;
+      if (!fieldName) return;
 
       // if negateFilters is true we have to perform the opposite operation, we can just execute filterOut with the same params
       const addFilter = metadata?.negateFilters === true ? addFilterOut : addFilterIn;
 
       if (metadata?.scopeId && isTimelineScope(metadata.scopeId)) {
-        const timelineFilterManager = getTimelineById(
-          store.getState(),
-          TimelineId.active
-        )?.filterManager;
-
-        addFilter({
-          filterManager: timelineFilterManager,
-          fieldName: field.name,
-          value,
-        });
+        addFilter({ filterManager: services.timelineFilterManager, fieldName, value, dataViewId });
       } else {
-        addFilter({
-          filterManager,
-          fieldName: field.name,
-          value,
-        });
+        addFilter({ filterManager, fieldName, value, dataViewId });
       }
     },
   });

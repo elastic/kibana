@@ -204,6 +204,16 @@ export interface FeatureKibanaPrivileges {
      * ```
      */
     delete?: readonly string[];
+    /**
+     * List of case owners which users should have settings access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    settings: ['securitySolution']
+     *  }
+     * ```
+     */
+    settings?: readonly string[];
   };
 
   /**

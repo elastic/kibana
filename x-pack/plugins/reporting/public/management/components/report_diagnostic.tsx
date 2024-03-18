@@ -19,8 +19,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { ReportingAPIClient, DiagnoseResponse } from '../../lib/reporting_api_client';
-import { ClientConfigType } from '../../plugin';
+import { ClientConfigType, ReportingAPIClient } from '@kbn/reporting-public';
+import { DiagnoseResponse } from '@kbn/reporting-public/reporting_api_client';
 
 interface Props {
   apiClient: ReportingAPIClient;

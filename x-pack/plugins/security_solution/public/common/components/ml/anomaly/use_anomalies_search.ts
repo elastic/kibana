@@ -8,12 +8,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { has, sortBy } from 'lodash/fp';
 
+import { getAggregatedAnomaliesQuery } from '../../../../entity_analytics/components/entity_analytics_anomalies/query';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { anomaliesSearch } from '../api/anomalies_search';
-import { getAggregatedAnomaliesQuery } from '../../../../overview/components/entity_analytics/anomalies/query';
 import type { inputsModel } from '../../../store';
 import { useSecurityJobs } from '../../ml_popover/hooks/use_security_jobs';
 import type { SecurityJob } from '../../ml_popover/types';

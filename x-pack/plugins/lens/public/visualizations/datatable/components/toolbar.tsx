@@ -8,10 +8,10 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
+import { RowHeightSettings } from '@kbn/unified-data-table';
 import { ToolbarPopover } from '../../../shared_components';
 import type { VisualizationToolbarProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
-import { RowHeightSettings } from './row_height_settings';
 import { DEFAULT_PAGE_SIZE } from './table_basic';
 
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
@@ -72,6 +72,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
           }}
           data-test-subj="lnsHeaderHeightSettings"
           maxRowHeight={5}
+          compressed
         />
         <RowHeightSettings
           rowHeight={state.rowHeight}
@@ -84,6 +85,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
             onChangeHeightLines(lines, 'rowHeightLines');
           }}
           data-test-subj="lnsRowHeightSettings"
+          compressed
         />
         <EuiFormRow
           label={i18n.translate('xpack.lens.table.visualOptionsPaginateTable', {

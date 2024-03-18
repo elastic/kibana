@@ -8,11 +8,10 @@
 import moment from 'moment';
 import { Frequency } from '@kbn/rrule';
 import { has } from 'lodash';
-import { MaintenanceWindow } from '../types';
+import type { FormProps, RecurringScheduleFormProps } from '../components/schema';
+import type { RRuleParams, MaintenanceWindow } from '../../../../common';
 import { EndsOptions, MaintenanceWindowFrequency } from '../constants';
-import { FormProps, RecurringScheduleFormProps } from '../components/schema';
 import { getInitialByWeekday } from './get_initial_by_weekday';
-import { RRuleParams } from '../../../../common';
 
 export const convertFromMaintenanceWindowToForm = (
   maintenanceWindow: MaintenanceWindow
@@ -28,6 +27,7 @@ export const convertFromMaintenanceWindowToForm = (
     timezone: [maintenanceWindow.rRule.tzid],
     recurring,
     categoryIds: maintenanceWindow.categoryIds || [],
+    scopedQuery: maintenanceWindow.scopedQuery,
   };
   if (!recurring) return form;
 

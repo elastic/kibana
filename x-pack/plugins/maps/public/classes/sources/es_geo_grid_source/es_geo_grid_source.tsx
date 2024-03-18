@@ -14,12 +14,14 @@ import type {
   AggregationsCompositeAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ISearchSource } from '@kbn/data-plugin/common/search/search_source';
 import { DataView } from '@kbn/data-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
+import { type Filter, buildExistsFilter } from '@kbn/es-query';
 import { makeESBbox } from '../../../../common/elasticsearch_util';
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -43,7 +45,12 @@ import { DataRequestAbortError } from '../../util/data_request';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
-import { GetFeatureActionsArgs, GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
+import {
+  GetFeatureActionsArgs,
+  GeoJsonWithMeta,
+  IMvtVectorSource,
+  getLayerFeaturesRequestName,
+} from '../vector_source';
 import {
   DataFilters,
   ESGeoGridSourceDescriptor,
@@ -281,6 +288,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     bufferedExtent,
     inspectorAdapters,
     executionContext,
+    onWarning,
   }: {
     searchSource: ISearchSource;
     searchSessionId?: string;
@@ -293,6 +301,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     bufferedExtent: MapExtent;
     inspectorAdapters: Adapters;
     executionContext: KibanaExecutionContext;
+    onWarning: (warning: SearchResponseWarning) => void;
   }) {
     const gridsPerRequest: number = Math.floor(DEFAULT_MAX_BUCKETS_LIMIT / bucketsPerGrid);
     const aggs: any = {
@@ -352,34 +361,16 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         : this.getId();
       const esResponse: SearchResponse<unknown> = await this._runEsQuery({
         requestId,
-        requestName: i18n.translate('xpack.maps.source.esGrid.compositeInspector.requestName', {
-          defaultMessage: '{layerName} {bucketsName} composite request ({requestCount})',
-          values: {
-            bucketsName: this.getBucketsName(),
-            layerName,
-            requestCount,
-          },
-        }),
+        requestName: getLayerFeaturesRequestName(`${layerName} (${requestCount})`),
         searchSource,
         registerCancelCallback,
-        requestDescription: i18n.translate(
-          'xpack.maps.source.esGrid.compositeInspectorDescription',
-          {
-            defaultMessage:
-              'Get {bucketsName} from data view: {dataViewName}, geospatial field: {geoFieldName}',
-            values: {
-              bucketsName: this.getBucketsName(),
-              dataViewName: indexPattern.getName(),
-              geoFieldName: this._descriptor.geoField,
-            },
-          }
-        ),
         searchSessionId,
         executionContext: mergeExecutionContext(
           { description: 'es_geo_grid_source:cluster_composite' },
           executionContext
         ),
         requestsAdapter: inspectorAdapters.requests,
+        onWarning,
       });
 
       features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
@@ -406,6 +397,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     tooManyBuckets,
     inspectorAdapters,
     executionContext,
+    onWarning,
   }: {
     searchSource: ISearchSource;
     searchSessionId?: string;
@@ -417,6 +409,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     tooManyBuckets: boolean;
     inspectorAdapters: Adapters;
     executionContext: KibanaExecutionContext;
+    onWarning: (warning: SearchResponseWarning) => void;
   }): Promise<Feature[]> {
     const valueAggsDsl = tooManyBuckets
       ? this.getValueAggsDsl(indexPattern, (metric) => {
@@ -446,30 +439,16 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 
     const esResponse = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: i18n.translate('xpack.maps.source.esGrid.inspector.requestName', {
-        defaultMessage: '{layerName} {bucketsName} request',
-        values: {
-          bucketsName: this.getBucketsName(),
-          layerName,
-        },
-      }),
+      requestName: getLayerFeaturesRequestName(layerName),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.source.esGrid.inspector.requestDescription', {
-        defaultMessage:
-          'Get {bucketsName} from data view: {dataViewName}, geospatial field: {geoFieldName}',
-        values: {
-          bucketsName: this.getBucketsName(),
-          dataViewName: indexPattern.getName(),
-          geoFieldName: this._descriptor.geoField,
-        },
-      }),
       searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_geo_grid_source:cluster' },
         executionContext
       ),
       requestsAdapter: inspectorAdapters.requests,
+      onWarning,
     });
 
     return convertRegularRespToGeoJson(esResponse, this._descriptor.requestType);
@@ -516,6 +495,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     const supportsCompositeAgg = !(await this._isGeoShape());
 
     const precision = this.getGeoGridPrecision(requestMeta.zoom);
+    const warnings: SearchResponseWarning[] = [];
+    const onWarning = (warning: SearchResponseWarning) => {
+      warnings.push(warning);
+    };
     const features: Feature[] =
       supportsCompositeAgg && tooManyBuckets
         ? await this._compositeAggRequest({
@@ -530,6 +513,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
             bufferedExtent: requestMeta.buffer,
             inspectorAdapters,
             executionContext: requestMeta.executionContext,
+            onWarning,
           })
         : await this._nonCompositeAggRequest({
             searchSource,
@@ -542,6 +526,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
             tooManyBuckets,
             inspectorAdapters,
             executionContext: requestMeta.executionContext,
+            onWarning,
           });
 
     return {
@@ -551,6 +536,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       },
       meta: {
         areResultsTrimmed: false,
+        warnings,
       },
     } as GeoJsonWithMeta;
   }
@@ -568,6 +554,11 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     const dataView = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('aggs', this.getValueAggsDsl(dataView));
+    // Filter out documents without geo fields for broad index-pattern support
+    searchSource.setField('filter', [
+      ...(searchSource.getField('filter') as Filter[]),
+      buildExistsFilter({ name: this._descriptor.geoField, type: 'geo_point' }, dataView),
+    ]);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
       `${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
@@ -581,7 +572,6 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       buffer,
       requestBody: _.pick(searchSource.getSearchRequestBody(), [
         'aggs',
-        'fields',
         'query',
         'runtime_mappings',
       ]),

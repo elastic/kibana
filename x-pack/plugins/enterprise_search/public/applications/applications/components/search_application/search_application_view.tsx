@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useLayoutEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
@@ -13,8 +13,6 @@ import { useValues, useActions } from 'kea';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { Status } from '../../../../../common/types/api';
-
-import { KibanaLogic } from '../../../shared/kibana';
 import {
   SEARCH_APPLICATION_PATH,
   SEARCH_APPLICATION_CONTENT_PATH,
@@ -29,7 +27,6 @@ import { DeleteSearchApplicationModal } from '../search_applications/delete_sear
 
 import { SearchApplicationConnect } from './connect/search_application_connect';
 import { SearchApplicationDocsExplorer } from './docs_explorer/docs_explorer';
-import { SearchApplicationHeaderDocsAction } from './header_docs_action';
 import { SearchApplicationContent } from './search_application_content';
 import { SearchApplicationError } from './search_application_error';
 import { SearchApplicationViewLogic } from './search_application_view_logic';
@@ -48,15 +45,6 @@ export const SearchApplicationView: React.FC = () => {
   const { tabId = SearchApplicationViewTabs.DOCS_EXPLORER } = useParams<{
     tabId?: string;
   }>();
-  const { renderHeaderActions } = useValues(KibanaLogic);
-
-  useLayoutEffect(() => {
-    renderHeaderActions(SearchApplicationHeaderDocsAction);
-
-    return () => {
-      renderHeaderActions();
-    };
-  }, []);
 
   useEffect(() => {
     fetchSearchApplication({ name: searchApplicationName });

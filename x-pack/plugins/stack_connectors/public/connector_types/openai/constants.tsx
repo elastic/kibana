@@ -154,5 +154,3 @@ export const providerOptions = [
     label: i18n.AZURE_AI,
   },
 ];
-
-export const getDashboardId = (spaceId: string): string => `generative-ai-token-usage-${spaceId}`;

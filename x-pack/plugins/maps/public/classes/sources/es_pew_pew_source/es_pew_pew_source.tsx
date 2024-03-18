@@ -9,6 +9,7 @@ import React from 'react';
 import turfBbox from '@turf/bbox';
 import { multiPoint } from '@turf/helpers';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { type Filter, buildExistsFilter } from '@kbn/es-query';
 import { lastValueFrom } from 'rxjs';
 import type {
@@ -34,7 +35,7 @@ import {
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
+import { BoundsRequestMeta, GeoJsonWithMeta, getLayerFeaturesRequestName } from '../vector_source';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -188,29 +189,21 @@ export class ESPewPewSource extends AbstractESAggSource {
       buildExistsFilter({ name: this._descriptor.sourceGeoField, type: 'geo_point' }, indexPattern),
     ]);
 
+    const warnings: SearchResponseWarning[] = [];
     const esResponse = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: i18n.translate('xpack.maps.pewPew.requestName', {
-        defaultMessage: '{layerName} paths request',
-        values: { layerName },
-      }),
+      requestName: getLayerFeaturesRequestName(layerName),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
-        defaultMessage:
-          'Get paths from data view: {dataViewName}, source: {sourceFieldName}, destination: {destFieldName}',
-        values: {
-          dataViewName: indexPattern.getName(),
-          destFieldName: this._descriptor.destGeoField,
-          sourceFieldName: this._descriptor.sourceGeoField,
-        },
-      }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_pew_pew_source:connections' },
         requestMeta.executionContext
       ),
       requestsAdapter: inspectorAdapters.requests,
+      onWarning: (warning: SearchResponseWarning) => {
+        warnings.push(warning);
+      },
     });
 
     const { featureCollection } = convertToLines(esResponse);
@@ -219,6 +212,7 @@ export class ESPewPewSource extends AbstractESAggSource {
       data: featureCollection,
       meta: {
         areResultsTrimmed: false,
+        warnings,
       },
     };
   }

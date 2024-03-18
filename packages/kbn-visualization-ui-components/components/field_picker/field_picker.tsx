@@ -7,14 +7,12 @@
  */
 
 import './field_picker.scss';
-import React, { useRef } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { EuiComboBox, EuiComboBoxProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FieldIcon } from '@kbn/field-utils/src/components/field_icon';
 import classNames from 'classnames';
-import type { DataType } from './types';
-import { TruncatedLabel } from './truncated_label';
+import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
+import { FieldIcon } from '@kbn/field-utils/src/components/field_icon';
+import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import type { FieldOptionValue, FieldOption } from './types';
 
 export interface FieldPickerProps<T extends FieldOptionValue>
@@ -27,108 +25,86 @@ export interface FieldPickerProps<T extends FieldOptionValue>
   'data-test-subj'?: string;
 }
 
-const DEFAULT_COMBOBOX_WIDTH = 305;
-const COMBOBOX_PADDINGS = 90;
-const DEFAULT_FONT = '14px Inter';
+const MIDDLE_TRUNCATION_PROPS = { truncation: 'middle' as const };
+const SINGLE_SELECTION_AS_TEXT_PROPS = { asPlainText: true };
 
-export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
-  selectedOptions,
-  options,
-  onChoose,
-  onDelete,
-  fieldIsInvalid,
-  ['data-test-subj']: dataTestSub,
-  ...rest
-}: FieldPickerProps<T>) {
+export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
+  props: FieldPickerProps<T>
+) {
+  const {
+    selectedOptions,
+    options,
+    onChoose,
+    onDelete,
+    fieldIsInvalid,
+    ['data-test-subj']: dataTestSub,
+    ...rest
+  } = props;
+  let maxLabelLength = 0;
   const styledOptions = options?.map(({ compatible, exists, ...otherAttr }) => {
     if (otherAttr.options) {
       return {
         ...otherAttr,
-        options: otherAttr.options.map(({ exists: fieldOptionExists, ...fieldOption }) => ({
-          ...fieldOption,
-          className: classNames({
-            'lnFieldPicker__option--incompatible': !fieldOption.compatible,
-            'lnFieldPicker__option--nonExistant': !fieldOptionExists,
-          }),
-        })),
+        options: otherAttr.options.map(({ exists: fieldOptionExists, ...fieldOption }) => {
+          if (fieldOption.label.length > maxLabelLength) {
+            maxLabelLength = fieldOption.label.length;
+          }
+          return {
+            ...fieldOption,
+            prepend: fieldOption.value.dataType ? (
+              <FieldIcon
+                type={fieldOption.value.dataType}
+                fill="none"
+                className="eui-alignMiddle"
+              />
+            ) : null,
+            className: classNames({
+              'lnFieldPicker__option--incompatible': !fieldOption.compatible,
+              'lnFieldPicker__option--nonExistant': !fieldOptionExists,
+            }),
+          };
+        }),
       };
     }
     return {
       ...otherAttr,
       compatible,
+      prepend: otherAttr.value.dataType ? (
+        <FieldIcon type={otherAttr.value.dataType} fill="none" className="eui-alignMiddle" />
+      ) : null,
       className: classNames({
         'lnFieldPicker__option--incompatible': !compatible,
         'lnFieldPicker__option--nonExistant': !exists,
       }),
     };
   });
-  const comboBoxRef = useRef<HTMLInputElement>(null);
-  const [labelProps, setLabelProps] = React.useState<{
-    width: number;
-    font: string;
-  }>({
-    width: DEFAULT_COMBOBOX_WIDTH - COMBOBOX_PADDINGS,
-    font: DEFAULT_FONT,
-  });
-
-  const computeStyles = (_e: UIEvent | undefined, shouldRecomputeAll = false) => {
-    if (comboBoxRef.current) {
-      const current = {
-        ...labelProps,
-        width: comboBoxRef.current?.clientWidth - COMBOBOX_PADDINGS,
-      };
-      if (shouldRecomputeAll) {
-        current.font = window.getComputedStyle(comboBoxRef.current).font;
-      }
-      setLabelProps(current);
-    }
-  };
-
-  useEffectOnce(() => {
-    if (comboBoxRef.current) {
-      computeStyles(undefined, true);
-    }
-    window.addEventListener('resize', computeStyles);
-  });
 
   return (
-    <div ref={comboBoxRef}>
-      <EuiComboBox
-        fullWidth
-        compressed
-        isClearable={false}
-        data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
-        placeholder={i18n.translate('visualizationUiComponents.fieldPicker.fieldPlaceholder', {
-          defaultMessage: 'Select a field',
-        })}
-        options={styledOptions}
-        isInvalid={fieldIsInvalid}
-        selectedOptions={selectedOptions}
-        singleSelection={{ asPlainText: true }}
-        onChange={(choices) => {
-          if (choices.length === 0) {
-            onDelete?.();
-            return;
-          }
-          onChoose(choices[0].value);
-        }}
-        renderOption={(option, searchValue) => {
-          return (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={null}>
-                <FieldIcon
-                  type={(option.value as unknown as { dataType: DataType }).dataType}
-                  fill="none"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <TruncatedLabel {...labelProps} label={option.label} search={searchValue} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        }}
-        {...rest}
-      />
-    </div>
+    <EuiComboBox
+      fullWidth
+      compressed
+      isClearable={false}
+      data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
+      placeholder={i18n.translate('visualizationUiComponents.fieldPicker.fieldPlaceholder', {
+        defaultMessage: 'Select a field',
+      })}
+      options={styledOptions}
+      isInvalid={fieldIsInvalid}
+      selectedOptions={selectedOptions}
+      singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
+      truncationProps={MIDDLE_TRUNCATION_PROPS}
+      inputPopoverProps={{
+        panelMinWidth: calculateWidthFromCharCount(maxLabelLength),
+        anchorPosition: 'downRight',
+      }}
+      onChange={(choices) => {
+        if (choices.length === 0) {
+          onDelete?.();
+          return;
+        }
+        onChoose(choices[0].value);
+      }}
+      {...rest}
+    />
   );
 }

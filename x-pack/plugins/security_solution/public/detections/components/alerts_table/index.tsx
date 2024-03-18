@@ -71,13 +71,18 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
       }};
     }
   }
-  div .euiDataGridRowCell__contentByHeight {
-    height: auto;
-    align-self: center;
+  div .euiDataGridRowCell {
+    display: flex;
+    align-items: center;
   }
-  div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__contentByHeight {
-    flex-grow: 0;
+  div .euiDataGridRowCell > [data-focus-lock-disabled] {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
     width: 100%;
+  }
+  div .euiDataGridRowCell__content {
+    flex-grow: 1;
   }
   div .siemEventsTable__trSupplement--summary {
     display: block;
@@ -258,7 +263,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       id: `detection-engine-alert-table-${configId}-${tableView}`,
       featureIds: ['siem'],
       query: finalBoolQuery,
-      showExpandToDetails: false,
       gridStyle,
       shouldHighlightRow,
       rowHeightsOptions,
@@ -270,6 +274,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
         showColumnSelector: !isEventRenderedView,
         showSortSelector: !isEventRenderedView,
       },
+      dynamicRowHeight: isEventRenderedView,
     }),
     [
       triggersActionsUi.alertsTableConfigurationRegistry,

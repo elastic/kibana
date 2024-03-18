@@ -212,7 +212,7 @@ describe('index table', () => {
     perPageButton.simulate('click');
     rendered.update();
 
-    const fiftyButton = rendered.find('.euiContextMenuItem').at(1);
+    const fiftyButton = rendered.find('button.euiContextMenuItem').at(1);
     fiftyButton.simulate('click');
     rendered.update();
     expect(namesText(rendered).length).toBe(50);
@@ -277,7 +277,7 @@ describe('index table', () => {
     snapshot(indicesInTable);
 
     // Enable "Show hidden indices"
-    const switchControl = findTestSubject(rendered, 'indexTableIncludeHiddenIndicesToggle');
+    const switchControl = findTestSubject(rendered, 'checkboxToggles-includeHiddenIndices');
     switchControl.simulate('click');
 
     // We do expect now the `.admin1` and `.admin3` indices to be in the list

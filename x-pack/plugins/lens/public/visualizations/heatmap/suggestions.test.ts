@@ -305,6 +305,70 @@ describe('heatmap suggestions', () => {
         },
       ]);
     });
+
+    test('when no metric dimension but groups', () => {
+      expect(
+        getSuggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'date-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'date',
+                  scale: 'interval',
+                  label: 'Date',
+                },
+              },
+              {
+                columnId: 'string-column-01',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'string',
+                  label: 'Bucket 1',
+                },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+          } as HeatmapVisualizationState,
+          keptLayerIds: ['first'],
+        })
+      ).toEqual([
+        {
+          state: {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            shape: 'heatmap',
+            xAccessor: 'date-column',
+            yAccessor: 'string-column-01',
+            gridConfig: {
+              type: HEATMAP_GRID_FUNCTION,
+              isCellLabelVisible: false,
+              isYAxisLabelVisible: true,
+              isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
+            },
+            legend: {
+              isVisible: true,
+              position: Position.Right,
+              type: LEGEND_FUNCTION,
+            },
+          },
+          title: 'Heat map',
+          hide: true,
+          incomplete: true,
+          previewIcon: IconChartHeatmap,
+          score: 0,
+        },
+      ]);
+    });
     test('for tables with a single bucket dimension', () => {
       expect(
         getSuggestions({

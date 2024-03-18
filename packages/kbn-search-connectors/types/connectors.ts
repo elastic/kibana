@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ConnectorIndex, ElasticsearchViewIndexExtension } from './indices';
 export interface SelectOption {
   label: string;
   value: string;
@@ -68,7 +69,7 @@ export type ConnectorConfiguration = Record<
 > & {
   extract_full_html?: { label: string; value: boolean }; // This only exists for Crawler
   use_document_level_security?: ConnectorConfigProperties;
-  use_text_extraction_service?: ConnectorConfigProperties; // This only exists for SharePoint Online
+  use_text_extraction_service?: ConnectorConfigProperties;
 };
 
 export interface ConnectorScheduling {
@@ -111,20 +112,26 @@ export interface IngestPipelineParams {
   run_ml_inference: boolean;
 }
 
-export enum FilteringPolicy {
-  EXCLUDE = 'exclude',
-  INCLUDE = 'include',
-}
+export type FilteringPolicy = 'exclude' | 'include';
 
-export enum FilteringRuleRule {
-  CONTAINS = 'contains',
-  ENDS_WITH = 'ends_with',
-  EQUALS = 'equals',
-  GT = '>',
-  LT = '<',
-  REGEX = 'regex',
-  STARTS_WITH = 'starts_with',
-}
+export type FilteringRuleRule =
+  | 'contains'
+  | 'ends_with'
+  | 'equals'
+  | '>'
+  | '<'
+  | 'regex'
+  | 'starts_with';
+
+export const FilteringRuleRuleValues: FilteringRuleRule[] = [
+  'contains',
+  'ends_with',
+  'equals',
+  '>',
+  '<',
+  'regex',
+  'starts_with',
+];
 
 export interface FilteringRule {
   created_at: string;
@@ -209,6 +216,7 @@ export interface SchedulingConfiguraton {
 
 export interface Connector {
   api_key_id: string | null;
+  api_key_secret_id: string | null;
   configuration: ConnectorConfiguration;
   custom_scheduling: ConnectorCustomScheduling;
   description: string | null;
@@ -222,7 +230,9 @@ export interface Connector {
   last_access_control_sync_error: string | null;
   last_access_control_sync_scheduled_at: string | null;
   last_access_control_sync_status: SyncStatus | null;
+  last_deleted_document_count: number | null;
   last_incremental_sync_scheduled_at: string | null;
+  last_indexed_document_count: number | null;
   last_seen: string | null;
   last_sync_error: string | null;
   last_sync_scheduled_at: string | null;
@@ -275,3 +285,5 @@ export interface NativeConnector {
   name: string;
   serviceType: string;
 }
+
+export type ConnectorViewIndex = ConnectorIndex & ElasticsearchViewIndexExtension;

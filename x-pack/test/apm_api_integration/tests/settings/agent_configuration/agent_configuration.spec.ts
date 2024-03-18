@@ -12,9 +12,8 @@ import { omit, orderBy } from 'lodash';
 import { AgentConfigurationIntake } from '@kbn/apm-plugin/common/agent_configuration/configuration_types';
 import { AgentConfigSearchParams } from '@kbn/apm-plugin/server/routes/settings/agent_configuration/route';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import moment from 'moment';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { addAgentConfigMetrics } from './add_agent_config_metrics';
+import { addAgentConfigEtagMetric } from './add_agent_config_metrics';
 
 export default function agentConfigurationTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -388,6 +387,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177661
   registry.when('Agent configurations through fleet', { config: 'basic', archives: [] }, () => {
     const name = 'myservice';
     const environment = 'development';
@@ -396,9 +396,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       settings: { transaction_sample_rate: '0.9' },
     };
 
-    let agentConfiguration:
-      | APIReturnType<'GET /api/apm/settings/agent-configuration/view 2023-10-31'>
-      | undefined;
+    let agentConfiguration: APIReturnType<'GET /api/apm/settings/agent-configuration/view 2023-10-31'>;
 
     before(async () => {
       log.debug('creating agent configuration');
@@ -412,19 +410,15 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     });
 
     it(`should have 'applied_by_agent=false' when there are no agent config metrics for this etag`, async () => {
-      expect(agentConfiguration?.applied_by_agent).to.be(false);
+      expect(agentConfiguration.applied_by_agent).to.be(false);
     });
 
     describe('when there are agent config metrics for this etag', () => {
       before(async () => {
-        const start = new Date().getTime();
-        const end = moment(start).add(15, 'minutes').valueOf();
-
-        await addAgentConfigMetrics({
+        await addAgentConfigEtagMetric({
           synthtraceEsClient,
-          start,
-          end,
-          etag: agentConfiguration?.etag,
+          timestamp: Date.now(),
+          etag: agentConfiguration.etag,
         });
       });
 

@@ -69,18 +69,20 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const ObservabilityUptimeAlertRequired = rt.type({
 });
+// prettier-ignore
 const ObservabilityUptimeAlertOptional = rt.partial({
   'agent.name': schemaString,
   'anomaly.bucket_span.minutes': schemaString,
   'anomaly.start': schemaDate,
   'error.message': schemaString,
+  'kibana.alert.context': schemaUnknown,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
   'kibana.alert.evaluation.value': schemaStringOrNumber,
   'kibana.alert.evaluation.values': schemaStringOrNumberArray,
   'kibana.alert.group': rt.array(
     rt.partial({
-      field: schemaString,
-      value: schemaString,
+      field: schemaStringArray,
+      value: schemaStringArray,
     })
   ),
   'monitor.id': schemaString,

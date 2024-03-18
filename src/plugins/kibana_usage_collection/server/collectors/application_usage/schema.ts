@@ -155,6 +155,7 @@ export const applicationUsageSchema = {
   ml: commonSchema,
   monitoring: commonSchema,
   'observability-log-explorer': commonSchema,
+  'observability-logs-explorer': commonSchema,
   'observability-overview': commonSchema,
   observabilityOnboarding: commonSchema,
   observabilityAIAssistant: commonSchema,

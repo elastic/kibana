@@ -6,7 +6,7 @@
  */
 
 import { PrivilegeFormCalculator } from './privilege_form_calculator';
-import type { Role } from '../../../../../../../common/model';
+import type { Role } from '../../../../../../../common';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 
@@ -98,7 +98,11 @@ describe('PrivilegeFormCalculator', () => {
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
       expect(
-        calculator.getDisplayedPrimaryFeaturePrivilegeId('with_sub_features', 0)
+        calculator.getDisplayedPrimaryFeaturePrivilegeId(
+          'with_sub_features',
+          0,
+          /** allSpacesSelected **/ false
+        )
       ).toBeUndefined();
     });
 
@@ -115,9 +119,13 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.getDisplayedPrimaryFeaturePrivilegeId('with_sub_features', 0)).toEqual(
-        'all'
-      );
+      expect(
+        calculator.getDisplayedPrimaryFeaturePrivilegeId(
+          'with_sub_features',
+          0,
+          /** allSpacesSelected **/ false
+        )
+      ).toEqual('all');
     });
 
     it('returns the most permissive assigned primary feature privilege id', () => {
@@ -133,9 +141,13 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.getDisplayedPrimaryFeaturePrivilegeId('with_sub_features', 0)).toEqual(
-        'all'
-      );
+      expect(
+        calculator.getDisplayedPrimaryFeaturePrivilegeId(
+          'with_sub_features',
+          0,
+          /** allSpacesSelected **/ false
+        )
+      ).toEqual('all');
     });
 
     it('returns the primary version of the minimal privilege id when assigned', () => {
@@ -151,9 +163,13 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.getDisplayedPrimaryFeaturePrivilegeId('with_sub_features', 0)).toEqual(
-        'read'
-      );
+      expect(
+        calculator.getDisplayedPrimaryFeaturePrivilegeId(
+          'with_sub_features',
+          0,
+          /** allSpacesSelected **/ false
+        )
+      ).toEqual('read');
     });
   });
 
@@ -171,7 +187,13 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.hasCustomizedSubFeaturePrivileges('with_sub_features', 0)).toEqual(false);
+      expect(
+        calculator.hasCustomizedSubFeaturePrivileges(
+          'with_sub_features',
+          0,
+          /** allSpacesSelected **/ false
+        )
+      ).toEqual(false);
     });
 
     it('returns false when there are no sub-feature privileges assigned', () => {
@@ -187,7 +209,13 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.hasCustomizedSubFeaturePrivileges('with_sub_features', 0)).toEqual(false);
+      expect(
+        calculator.hasCustomizedSubFeaturePrivileges(
+          'with_sub_features',
+          0,
+          /** allSpacesSelected **/ false
+        )
+      ).toEqual(false);
     });
 
     it('returns false when the assigned sub-features are also granted by other assigned privileges', () => {
@@ -203,7 +231,13 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.hasCustomizedSubFeaturePrivileges('with_sub_features', 0)).toEqual(false);
+      expect(
+        calculator.hasCustomizedSubFeaturePrivileges(
+          'with_sub_features',
+          0,
+          /** allSpacesSelected **/ false
+        )
+      ).toEqual(false);
     });
 
     it('returns true when the assigned sub-features are not also granted by other assigned privileges', () => {
@@ -219,7 +253,13 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.hasCustomizedSubFeaturePrivileges('with_sub_features', 0)).toEqual(true);
+      expect(
+        calculator.hasCustomizedSubFeaturePrivileges(
+          'with_sub_features',
+          0,
+          /** allSpacesSelected **/ false
+        )
+      ).toEqual(true);
     });
 
     it('returns true when a minimal primary feature privilege is assigned, whose corresponding primary grants sub-feature privileges which are not assigned ', () => {
@@ -235,7 +275,13 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.hasCustomizedSubFeaturePrivileges('with_sub_features', 0)).toEqual(true);
+      expect(
+        calculator.hasCustomizedSubFeaturePrivileges(
+          'with_sub_features',
+          0,
+          /** allSpacesSelected **/ false
+        )
+      ).toEqual(true);
     });
 
     it('returns false when a minimal primary feature privilege is assigned, whose corresponding primary grants sub-feature privileges which are all assigned ', () => {
@@ -251,7 +297,13 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.hasCustomizedSubFeaturePrivileges('with_sub_features', 0)).toEqual(false);
+      expect(
+        calculator.hasCustomizedSubFeaturePrivileges(
+          'with_sub_features',
+          0,
+          /** allSpacesSelected **/ false
+        )
+      ).toEqual(false);
     });
 
     it('returns true when a minimal primary feature privilege is assigned, whose corresponding primary does not grant all assigned sub-feature privileges', () => {
@@ -272,7 +324,13 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.hasCustomizedSubFeaturePrivileges('with_sub_features', 0)).toEqual(true);
+      expect(
+        calculator.hasCustomizedSubFeaturePrivileges(
+          'with_sub_features',
+          0,
+          /** allSpacesSelected **/ false
+        )
+      ).toEqual(true);
     });
 
     it('returns false when a base privilege is assigned', () => {
@@ -288,7 +346,13 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.hasCustomizedSubFeaturePrivileges('with_sub_features', 0)).toEqual(false);
+      expect(
+        calculator.hasCustomizedSubFeaturePrivileges(
+          'with_sub_features',
+          0,
+          /** allSpacesSelected **/ false
+        )
+      ).toEqual(false);
     });
   });
 
@@ -670,11 +734,21 @@ describe('PrivilegeFormCalculator', () => {
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
 
       expect(
-        calculator.updateSelectedFeaturePrivilegesForCustomization('with_sub_features', 0, true)
+        calculator.updateSelectedFeaturePrivilegesForCustomization(
+          'with_sub_features',
+          0,
+          true,
+          /** allSpacesSelected **/ false
+        )
       ).toEqual(['some-privilege']);
 
       expect(
-        calculator.updateSelectedFeaturePrivilegesForCustomization('with_sub_features', 0, false)
+        calculator.updateSelectedFeaturePrivilegesForCustomization(
+          'with_sub_features',
+          0,
+          false,
+          /** allSpacesSelected **/ false
+        )
       ).toEqual(['some-privilege']);
     });
 
@@ -693,7 +767,12 @@ describe('PrivilegeFormCalculator', () => {
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
 
       expect(
-        calculator.updateSelectedFeaturePrivilegesForCustomization('with_sub_features', 0, true)
+        calculator.updateSelectedFeaturePrivilegesForCustomization(
+          'with_sub_features',
+          0,
+          true,
+          /** allSpacesSelected **/ false
+        )
       ).toEqual(['minimal_read', 'cool_read', 'cool_toggle_2']);
     });
 
@@ -712,7 +791,12 @@ describe('PrivilegeFormCalculator', () => {
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
 
       expect(
-        calculator.updateSelectedFeaturePrivilegesForCustomization('with_sub_features', 0, false)
+        calculator.updateSelectedFeaturePrivilegesForCustomization(
+          'with_sub_features',
+          0,
+          false,
+          /** allSpacesSelected **/ false
+        )
       ).toEqual(['read']);
     });
   });

@@ -13,18 +13,17 @@ export interface UseSubActionParams<P> {
   connectorId: string;
   subAction: string;
   subActionParams?: P;
-  disabled?: boolean;
 }
 
 export const useSubActionMutation = <P, R>({
   connectorId,
   subAction,
   subActionParams,
-  disabled = false,
 }: UseSubActionParams<P>) => {
   const { http } = useKibana().services;
 
   return useMutation({
+    mutationKey: ['executeSubAction', connectorId, subAction, subActionParams],
     mutationFn: () =>
       executeAction<R>({
         id: connectorId,

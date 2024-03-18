@@ -15,7 +15,7 @@ describe('upgrade handler', () => {
 
     it('should throw if upgrade version is higher than kibana version', () => {
       expect(() => checkKibanaVersion('8.5.0', '8.4.0')).toThrowError(
-        'cannot upgrade agent to 8.5.0 because it is higher than the installed kibana version 8.4.0'
+        'Cannot upgrade agent to 8.5.0 because it is higher than the installed kibana version 8.4.0'
       );
     });
 
@@ -26,6 +26,11 @@ describe('upgrade handler', () => {
     it('should not throw if force is specified and patch is newer', () => {
       expect(() => checkKibanaVersion('8.4.1', '8.4.0', true)).not.toThrowError();
       expect(() => checkKibanaVersion('8.4.1-SNAPSHOT', '8.4.0', true)).not.toThrowError();
+    });
+
+    it('should not throw if not force is specified and patch is newer', () => {
+      expect(() => checkKibanaVersion('8.4.1', '8.4.0', false)).not.toThrowError();
+      expect(() => checkKibanaVersion('8.4.1-SNAPSHOT', '8.4.0', false)).not.toThrowError();
     });
 
     it('should throw if force is specified and minor is newer', () => {

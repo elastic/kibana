@@ -7,21 +7,58 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps', 'header']);
+  const inspector = getService('inspector');
+  const testSubjects = getService('testSubjects');
+  const comboBox = getService('comboBox');
 
   describe('layer errors', () => {
     before(async () => {
       await PageObjects.maps.loadSavedMap('layer with errors');
     });
 
-    describe('ESSearchSource with missing index pattern id', () => {
-      const MISSING_INDEX_ID = 'idThatDoesNotExitForESSearchSource';
-      const LAYER_NAME = MISSING_INDEX_ID;
+    describe('Layer with invalid descriptor', () => {
+      const INVALID_LAYER_NAME = 'fff76ebb-57a6-4067-a373-1d191b9bd1a3';
 
-      it('should diplay error message in layer panel', async () => {
-        const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
-        expect(errorMsg).to.equal(`Unable to find data view \'${MISSING_INDEX_ID}\'`);
+      it('should diplay error icon in legend', async () => {
+        await PageObjects.maps.hasErrorIconExistsOrFail(INVALID_LAYER_NAME);
+      });
+
+      it('should allow deletion of layer', async () => {
+        await PageObjects.maps.removeLayer(INVALID_LAYER_NAME);
+        const exists = await PageObjects.maps.doesLayerExist(INVALID_LAYER_NAME);
+        expect(exists).to.be(false);
+      });
+    });
+
+    describe('Layer with EsError', () => {
+      after(async () => {
+        await inspector.close();
+      });
+
+      it('should diplay error icon in legend', async () => {
+        await PageObjects.maps.hasErrorIconExistsOrFail('connections');
+      });
+
+      it('should display "View details" button', async () => {
+        await testSubjects.existOrFail('viewEsErrorButton');
+      });
+
+      it('should open request in inspector', async () => {
+        await testSubjects.click('viewEsErrorButton');
+
+        expect(await comboBox.getComboBoxSelectedOptions('inspectorRequestChooser')).to.eql([
+          'load layer features (connections)',
+        ]);
+      });
+    });
+
+    describe('ESSearchSource with missing index pattern id', () => {
+      const LAYER_NAME = 'idThatDoesNotExitForESSearchSource';
+
+      it('should diplay error icon in legend', async () => {
+        await PageObjects.maps.hasErrorIconExistsOrFail(LAYER_NAME);
       });
 
       it('should allow deletion of layer', async () => {
@@ -31,15 +68,11 @@ export default function ({ getPageObjects }) {
       });
     });
 
-    //TODO, skipped because `ESGeoGridSource` show no results icon instead of error icon.
+    describe('ESGeoGridSource with missing index pattern id', () => {
+      const LAYER_NAME = 'idThatDoesNotExitForESGeoGridSource';
 
-    describe.skip('ESGeoGridSource with missing index pattern id', () => {
-      const MISSING_INDEX_ID = 'idThatDoesNotExitForESGeoGridSource';
-      const LAYER_NAME = MISSING_INDEX_ID;
-
-      it('should diplay error message in layer panel', async () => {
-        const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
-        expect(errorMsg).to.equal(`Unable to find Index pattern for id: ${MISSING_INDEX_ID}`);
+      it('should diplay error icon in legend', async () => {
+        await PageObjects.maps.hasErrorIconExistsOrFail(LAYER_NAME);
       });
 
       it('should allow deletion of layer', async () => {
@@ -50,12 +83,10 @@ export default function ({ getPageObjects }) {
     });
 
     describe('ESJoinSource with missing index pattern id', () => {
-      const MISSING_INDEX_ID = 'idThatDoesNotExitForESJoinSource';
       const LAYER_NAME = 'geo_shapes*';
 
-      it('should diplay error message in layer panel', async () => {
-        const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
-        expect(errorMsg).to.equal(`Join error: Unable to find data view \'${MISSING_INDEX_ID}\'`);
+      it('should diplay error icon in legend', async () => {
+        await PageObjects.maps.hasErrorIconExistsOrFail(LAYER_NAME);
       });
 
       it('should allow deletion of layer', async () => {
@@ -66,14 +97,10 @@ export default function ({ getPageObjects }) {
     });
 
     describe('EMSFileSource with missing EMS id', () => {
-      const MISSING_EMS_ID = 'idThatDoesNotExitForEMSFileSource';
       const LAYER_NAME = 'EMS_vector_shapes';
 
-      it('should diplay error message in layer panel', async () => {
-        const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
-        expect(errorMsg).to.equal(
-          `Unable to find EMS vector shapes for id: ${MISSING_EMS_ID}. Kibana is unable to access Elastic Maps Service. Contact your system administrator.`
-        );
+      it('should diplay error icon in legend', async () => {
+        await PageObjects.maps.hasErrorIconExistsOrFail(LAYER_NAME);
       });
 
       it('should allow deletion of layer', async () => {
@@ -84,14 +111,10 @@ export default function ({ getPageObjects }) {
     });
 
     describe('EMSTMSSource with missing EMS id', () => {
-      const MISSING_EMS_ID = 'idThatDoesNotExitForEMSTile';
       const LAYER_NAME = 'EMS_tiles';
 
-      it('should diplay error message in layer panel', async () => {
-        const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
-        expect(errorMsg).to.equal(
-          `Unable to find EMS tile configuration for id: ${MISSING_EMS_ID}. Kibana is unable to access Elastic Maps Service. Contact your system administrator.`
-        );
+      it('should diplay error icon in legend', async () => {
+        await PageObjects.maps.hasErrorIconExistsOrFail(LAYER_NAME);
       });
 
       it('should allow deletion of layer', async () => {
@@ -104,9 +127,8 @@ export default function ({ getPageObjects }) {
     describe('KibanaTilemapSource with missing map.tilemap.url configuration', () => {
       const LAYER_NAME = 'Custom_TMS';
 
-      it('should diplay error message in layer panel', async () => {
-        const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
-        expect(errorMsg).to.equal(`Unable to find map.tilemap.url configuration in the kibana.yml`);
+      it('should diplay error icon in legend', async () => {
+        await PageObjects.maps.hasErrorIconExistsOrFail(LAYER_NAME);
       });
 
       it('should allow deletion of layer', async () => {

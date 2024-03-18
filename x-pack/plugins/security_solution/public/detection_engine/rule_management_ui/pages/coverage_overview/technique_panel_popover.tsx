@@ -23,12 +23,12 @@ import { css, cx } from '@emotion/css';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useUserData } from '../../../../detections/components/user_info';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
-import { getNumOfCoveredSubtechniques } from './helpers';
 import { CoverageOverviewRuleListHeader } from './shared_components/popover_list_header';
 import { CoverageOverviewMitreTechniquePanel } from './technique_panel';
 import * as i18n from './translations';
 import { RuleLink } from '../../components/rules_table/use_columns';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
+import { getNumOfCoveredSubtechniques } from '../../../rule_management/model/coverage_overview/mitre_subtechnique';
 
 export interface CoverageOverviewMitreTechniquePanelPopoverProps {
   technique: CoverageOverviewMitreTechnique;
@@ -41,7 +41,6 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const coveredSubtechniques = useMemo(() => getNumOfCoveredSubtechniques(technique), [technique]);
   const isEnableButtonDisabled = useMemo(
     () => !canUserCRUD || technique.disabledRules.length === 0,
     [canUserCRUD, technique.disabledRules.length]
@@ -53,9 +52,17 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
   );
 
   const {
-    state: { showExpandedCells },
+    state: {
+      showExpandedCells,
+      filter: { activity },
+    },
     actions: { enableAllDisabled },
   } = useCoverageOverviewDashboardContext();
+
+  const coveredSubtechniques = useMemo(
+    () => getNumOfCoveredSubtechniques(technique, activity),
+    [activity, technique]
+  );
 
   const handleEnableAllDisabled = useCallback(async () => {
     setIsLoading(true);

@@ -76,8 +76,4 @@ export class UserProfilesPlugin implements Plugin<void, void, SetupDeps, StartDe
   start() {
     return {};
   }
-
-  stop() {
-    return {};
-  }
 }

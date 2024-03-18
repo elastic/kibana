@@ -7,7 +7,6 @@
 
 import { DOCUMENT_DETAILS_FLYOUT_BODY } from '../../screens/expandable_flyout/alert_details_right_panel';
 import {
-  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CLEAR_FILTER,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_FILTER,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ADD_TO_TIMELINE,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_IN,
@@ -22,14 +21,6 @@ import {
 export const filterTableTabTable = (filterValue: string) =>
   cy.get(DOCUMENT_DETAILS_FLYOUT_BODY).within(() => {
     cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_FILTER).type(filterValue);
-  });
-
-/**
- * Clear table filter under the Table tab in the alert details expandable flyout right section
- */
-export const clearFilterTableTabTable = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_BODY).within(() => {
-    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CLEAR_FILTER).click();
   });
 
 /**
@@ -65,11 +56,3 @@ export const toggleColumnTableTabTable = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL).first().realHover();
   cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_TOGGLE_COLUMN).click();
 };
-
-/**
- * Clear filters in the alert page KQL bar
- */
-export const clearFilters = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_BODY).within(() => {
-    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_OUT).first().click();
-  });

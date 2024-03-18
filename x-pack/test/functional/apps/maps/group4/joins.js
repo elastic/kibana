@@ -39,7 +39,7 @@ export default function ({ getPageObjects, getService }) {
 
     it('should re-fetch join with refresh timer', async () => {
       async function getRequestTimestamp() {
-        await PageObjects.maps.openInspectorRequest('geo_shapes* term join request');
+        await PageObjects.maps.openInspectorRequest('load join metrics (geo_shapes*)');
         const requestStats = await inspector.getTableData();
         const requestTimestamp = PageObjects.maps.getInspectorStatRowHit(
           requestStats,
@@ -122,7 +122,7 @@ export default function ({ getPageObjects, getService }) {
 
       it('should not apply query to source and apply query to join', async () => {
         const { rawResponse: joinResponse } = await PageObjects.maps.getResponse(
-          'geo_shapes* term join request'
+          'load join metrics (geo_shapes*)'
         );
         expect(joinResponse.aggregations.join.buckets.length).to.equal(2);
       });
@@ -139,7 +139,7 @@ export default function ({ getPageObjects, getService }) {
 
       it('should apply query to join request', async () => {
         const { rawResponse: joinResponse } = await PageObjects.maps.getResponse(
-          'geo_shapes* term join request'
+          'load join metrics (geo_shapes*)'
         );
         expect(joinResponse.aggregations.join.buckets.length).to.equal(1);
       });

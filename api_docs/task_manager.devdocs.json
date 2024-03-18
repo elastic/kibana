@@ -338,14 +338,28 @@
       },
       {
         "parentPluginId": "taskManager",
-        "id": "def-server.createSkipError",
+        "id": "def-server.createTaskRunError",
         "type": "Function",
         "tags": [],
-        "label": "createSkipError",
+        "label": "createTaskRunError",
         "description": [],
         "signature": [
-          "(error: Error) => ",
-          "DecoratedError"
+          "(error: Error, errorSource: ",
+          {
+            "pluginId": "taskManager",
+            "scope": "common",
+            "docId": "kibTaskManagerPluginApi",
+            "section": "def-common.TaskErrorSource",
+            "text": "TaskErrorSource"
+          },
+          ") => ",
+          {
+            "pluginId": "taskManager",
+            "scope": "server",
+            "docId": "kibTaskManagerPluginApi",
+            "section": "def-server.DecoratedError",
+            "text": "DecoratedError"
+          }
         ],
         "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
         "deprecated": false,
@@ -353,13 +367,34 @@
         "children": [
           {
             "parentPluginId": "taskManager",
-            "id": "def-server.createSkipError.$1",
+            "id": "def-server.createTaskRunError.$1",
             "type": "Object",
             "tags": [],
             "label": "error",
             "description": [],
             "signature": [
               "Error"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.createTaskRunError.$2",
+            "type": "Enum",
+            "tags": [],
+            "label": "errorSource",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "common",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-common.TaskErrorSource",
+                "text": "TaskErrorSource"
+              }
             ],
             "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
             "deprecated": false,
@@ -408,42 +443,6 @@
       },
       {
         "parentPluginId": "taskManager",
-        "id": "def-server.isSkipError",
-        "type": "Function",
-        "tags": [],
-        "label": "isSkipError",
-        "description": [],
-        "signature": [
-          "(error: Error | ",
-          "DecoratedError",
-          ") => boolean"
-        ],
-        "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "taskManager",
-            "id": "def-server.isSkipError.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "error",
-            "description": [],
-            "signature": [
-              "Error | ",
-              "DecoratedError"
-            ],
-            "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "taskManager",
         "id": "def-server.isUnrecoverableError",
         "type": "Function",
         "tags": [],
@@ -451,7 +450,13 @@
         "description": [],
         "signature": [
           "(error: Error | ",
-          "DecoratedError",
+          {
+            "pluginId": "taskManager",
+            "scope": "server",
+            "docId": "kibTaskManagerPluginApi",
+            "section": "def-server.DecoratedError",
+            "text": "DecoratedError"
+          },
           ") => boolean"
         ],
         "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
@@ -467,7 +472,13 @@
             "description": [],
             "signature": [
               "Error | ",
-              "DecoratedError"
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.DecoratedError",
+                "text": "DecoratedError"
+              }
             ],
             "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
             "deprecated": false,
@@ -686,6 +697,23 @@
           },
           {
             "parentPluginId": "taskManager",
+            "id": "def-server.ConcreteTaskInstance.numSkippedRuns",
+            "type": "number",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "numSkippedRuns",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": []
+          },
+          {
+            "parentPluginId": "taskManager",
             "id": "def-server.ConcreteTaskInstance.version",
             "type": "string",
             "tags": [],
@@ -828,6 +856,79 @@
               "string | null"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.DecoratedError",
+        "type": "Interface",
+        "tags": [],
+        "label": "DecoratedError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "taskManager",
+            "scope": "server",
+            "docId": "kibTaskManagerPluginApi",
+            "section": "def-server.DecoratedError",
+            "text": "DecoratedError"
+          },
+          " extends Error"
+        ],
+        "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.DecoratedError.code",
+            "type": "string",
+            "tags": [],
+            "label": "[code]",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.DecoratedError.retry",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[retry]",
+            "description": [],
+            "signature": [
+              "boolean | Date | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.DecoratedError.source",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[source]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "common",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-common.TaskErrorSource",
+                "text": "TaskErrorSource"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1193,15 +1294,13 @@
           },
           {
             "parentPluginId": "taskManager",
-            "id": "def-server.TaskInstance.numSkippedRuns",
-            "type": "number",
+            "id": "def-server.TaskInstance.timeoutOverride",
+            "type": "string",
             "tags": [],
-            "label": "numSkippedRuns",
-            "description": [
-              "\nIndicates the number of skipped executions."
-            ],
+            "label": "timeoutOverride",
+            "description": [],
             "signature": [
-              "number | undefined"
+              "string | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
@@ -1250,6 +1349,29 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskRegisterDefinition.priority",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "priority",
+            "description": [
+              "\nAn optional definition of task priority. Tasks will be sorted by priority prior to claiming\nso high priority tasks will always be claimed before normal priority, which will always be\nclaimed before low priority"
+            ],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskPriority",
+                "text": "TaskPriority"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
             "deprecated": false,
@@ -1429,6 +1551,30 @@
       }
     ],
     "enums": [
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.TaskErrorSource",
+        "type": "Enum",
+        "tags": [],
+        "label": "TaskErrorSource",
+        "description": [],
+        "path": "x-pack/plugins/task_manager/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.TaskPriority",
+        "type": "Enum",
+        "tags": [],
+        "label": "TaskPriority",
+        "description": [],
+        "path": "x-pack/plugins/task_manager/server/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "taskManager",
         "id": "def-server.TaskStatus",
@@ -1788,7 +1934,20 @@
     "classes": [],
     "functions": [],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-common.TaskErrorSource",
+        "type": "Enum",
+        "tags": [],
+        "label": "TaskErrorSource",
+        "description": [],
+        "path": "x-pack/plugins/task_manager/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [],
     "objects": []
   }

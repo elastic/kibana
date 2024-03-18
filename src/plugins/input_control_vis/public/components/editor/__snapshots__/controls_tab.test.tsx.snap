@@ -169,12 +169,10 @@ exports[`renders ControlsTab 1`] = `
         >
           <EuiButton
             aria-label="Add control"
-            color="primary"
             data-test-subj="inputControlEditorAddBtn"
             fill={true}
             iconType="plusInCircle"
             onClick={[Function]}
-            size="m"
           >
             <FormattedMessage
               defaultMessage="Add"

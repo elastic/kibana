@@ -5,9 +5,16 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { safeLoad } from 'js-yaml';
 import deepMerge from 'deepmerge';
+
+import {
+  getDefaultPresetForEsOutput,
+  outputTypeSupportPresets,
+} from '../../../common/services/output_helpers';
 
 import type {
   FullAgentPolicy,
@@ -30,6 +37,8 @@ import { DEFAULT_OUTPUT } from '../../constants';
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { appContextService } from '../app_context';
+
+import { getOutputSecretReferences } from '../secrets';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -103,13 +112,18 @@ export async function getFullAgentPolicy(
   const inputs = await storedPackagePoliciesToAgentInputs(
     agentPolicy.package_policies as PackagePolicy[],
     packageInfoCache,
-    getOutputIdForAgentPolicy(dataOutput)
+    getOutputIdForAgentPolicy(dataOutput),
+    agentPolicy.namespace
   );
   const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
     acc[name] = featureConfig;
     return acc;
   }, {} as NonNullable<FullAgentPolicy['agent']>['features']);
 
+  const outputSecretReferences = outputs.flatMap((output) => getOutputSecretReferences(output));
+  const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
+    (policy) => policy.secret_references || []
+  );
   const defaultMonitoringConfig: FullAgentPolicyMonitoring = {
     enabled: false,
     logs: false,
@@ -152,9 +166,7 @@ export async function getFullAgentPolicy(
       }, {}),
     },
     inputs,
-    secret_references: (agentPolicy?.package_policies || []).flatMap(
-      (policy) => policy.secret_references || []
-    ),
+    secret_references: [...outputSecretReferences, ...packagePolicySecretReferences],
     revision: agentPolicy.revision,
     agent: {
       download: {
@@ -178,6 +190,7 @@ export async function getFullAgentPolicy(
   const dataPermissions =
     (await storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
+      agentPolicy.namespace,
       agentPolicy.package_policies
     )) || {};
 
@@ -202,7 +215,10 @@ export async function getFullAgentPolicy(
     NonNullable<FullAgentPolicy['output_permissions']>
   >((outputPermissions, outputId) => {
     const output = fullAgentPolicy.outputs[outputId];
-    if (output && output.type === outputType.Elasticsearch) {
+    if (
+      output &&
+      (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
+    ) {
       const permissions: FullAgentPolicyOutputPermissions = {};
       if (outputId === getOutputIdForAgentPolicy(monitoringOutput)) {
         Object.assign(permissions, monitoringPermissions);
@@ -304,8 +320,17 @@ export function transformOutputToFullPolicyOutput(
   proxy?: FleetProxy,
   standalone = false
 ): FullAgentPolicyOutput {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, ssl, shipper } = output;
+  const {
+    config_yaml,
+    type,
+    hosts,
+    ca_sha256,
+    ca_trusted_fingerprint,
+    ssl,
+    shipper,
+    secrets,
+    preset,
+  } = output;
 
   const configJs = config_yaml ? safeLoad(config_yaml) : {};
 
@@ -316,7 +341,6 @@ export function transformOutputToFullPolicyOutput(
   let kafkaData = {};
 
   if (type === outputType.Kafka) {
-    /* eslint-disable @typescript-eslint/naming-convention */
     const {
       client_id,
       version,
@@ -330,12 +354,15 @@ export function transformOutputToFullPolicyOutput(
       random,
       round_robin,
       hash,
+      topic,
       topics,
       headers,
       timeout,
       broker_timeout,
       required_acks,
     } = output;
+
+    const kafkaTopic = topic ? topic : topics?.filter((t) => !t.when)?.[0]?.topic;
 
     const transformPartition = () => {
       if (!partition) return {};
@@ -373,26 +400,7 @@ export function transformOutputToFullPolicyOutput(
       ...(password ? { password } : {}),
       ...(sasl ? { sasl } : {}),
       partition: transformPartition(),
-      topics: (topics ?? []).map((topic) => {
-        const { topic: topicName, ...rest } = topic;
-        const whenKeys = Object.keys(rest);
-
-        if (whenKeys.length === 0) {
-          return { topic: topicName };
-        }
-        if (rest.when && rest.when.condition) {
-          const [keyName, value] = rest.when.condition.split(':');
-
-          return {
-            topic: topicName,
-            when: {
-              [rest.when.type as string]: {
-                [keyName.replace(/\s/g, '')]: value,
-              },
-            },
-          };
-        }
-      }),
+      topic: kafkaTopic,
       headers: (headers ?? []).filter((item) => item.key !== '' || item.value !== ''),
       timeout,
       broker_timeout,
@@ -432,6 +440,7 @@ export function transformOutputToFullPolicyOutput(
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ssl ? { ssl } : {}),
+    ...(secrets ? { secrets } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
   };
 
@@ -467,6 +476,14 @@ export function transformOutputToFullPolicyOutput(
   if (output.type === outputType.Elasticsearch && standalone) {
     newOutput.username = '${ES_USERNAME}';
     newOutput.password = '${ES_PASSWORD}';
+  }
+
+  if (output.type === outputType.RemoteElasticsearch) {
+    newOutput.service_token = output.service_token;
+  }
+
+  if (outputTypeSupportPresets(output.type)) {
+    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', safeLoad);
   }
 
   return newOutput;

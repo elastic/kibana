@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
-
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { sourcererActions } from '../../../../common/store/sourcerer';
 import {
@@ -19,8 +17,8 @@ import {
 import type { DataProvider, QueryOperator } from '../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineType } from '../../../../../common/api/timeline';
-import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
-import { updateProviders } from '../../../../timelines/store/timeline/actions';
+import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
+import { updateProviders } from '../../../../timelines/store/actions';
 import { sourcererSelectors } from '../../../../common/store';
 import type { TimeRange } from '../../../../common/store/inputs/model';
 
@@ -33,13 +31,8 @@ export interface Filter {
 export const useNavigateToTimeline = () => {
   const dispatch = useDispatch();
 
-  const getDataViewsSelector = useMemo(
-    () => sourcererSelectors.getSourcererDataViewsSelector(),
-    []
-  );
-  const { defaultDataView, signalIndexName } = useDeepEqualSelector((state) =>
-    getDataViewsSelector(state)
-  );
+  const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
+  const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
 
   const clearTimeline = useCreateTimeline({
     timelineId: TimelineId.active,

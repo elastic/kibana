@@ -18,6 +18,7 @@ import type {
   AssetsGroupedByServiceByType,
 } from '@kbn/fleet-plugin/common';
 import { agentPolicyStatuses } from '@kbn/fleet-plugin/common';
+import { clone } from 'lodash';
 import { EndpointMetadataGenerator } from './data_generators/endpoint_metadata_generator';
 import type {
   AlertEvent,
@@ -290,17 +291,17 @@ export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults
   };
 }
 
-const metadataDefaultDataStream = {
+const metadataDefaultDataStream = () => ({
   type: 'metrics',
   dataset: 'endpoint.metadata',
   namespace: 'default',
-};
+});
 
-const policyDefaultDataStream = {
+const policyDefaultDataStream = () => ({
   type: 'metrics',
   dataset: 'endpoint.policy',
   namespace: 'default',
-};
+});
 
 const eventsDefaultDataStream = {
   type: 'logs',
@@ -330,7 +331,14 @@ const alertsDefaultDataStream = {
  *        contain shared data structures.
  */
 export class EndpointDocGenerator extends BaseDataGenerator {
-  commonInfo: CommonHostInfo;
+  /**
+   * DO NOT ACCESS THIS PROPERTY DIRECTORY.
+   * Should only be accessed from the `getter/setter` property for `commonInfo` defined further
+   * below.
+   * @deprecated (just to ensure that its obvious not to access it directory)
+   */
+  _commonInfo: CommonHostInfo;
+
   sequence: number = 0;
 
   private readonly metadataGenerator: EndpointMetadataGenerator;
@@ -347,7 +355,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   ) {
     super(seed);
     this.metadataGenerator = new MetadataGenerator(seed);
-    this.commonInfo = this.createHostData();
+    this._commonInfo = this.createHostData();
   }
 
   /**
@@ -369,11 +377,21 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     };
   }
 
+  // Ensure that `this.commonInfo` is returned cloned data
+  protected get commonInfo() {
+    return clone(this._commonInfo);
+  }
+  protected set commonInfo(newInfo) {
+    this._commonInfo = newInfo;
+  }
+
   /**
    * Creates new random IP addresses for the host to simulate new DHCP assignment
    */
   public updateHostData() {
-    this.commonInfo.host.ip = this.randomArray(3, () => this.randomIP());
+    const newInfo = this.commonInfo;
+    newInfo.host.ip = this.randomArray(3, () => this.randomIP());
+    this.commonInfo = newInfo;
   }
 
   /**
@@ -381,8 +399,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    * of random choices and gives it a random policy response status.
    */
   public updateHostPolicyData() {
-    this.commonInfo.Endpoint.policy.applied = this.randomChoice(APPLIED_POLICIES);
-    this.commonInfo.Endpoint.policy.applied.status = this.randomChoice(POLICY_RESPONSE_STATUSES);
+    const newInfo = this.commonInfo;
+    newInfo.Endpoint.policy.applied = this.randomChoice(APPLIED_POLICIES);
+    newInfo.Endpoint.policy.applied.status = this.randomChoice(POLICY_RESPONSE_STATUSES);
+    this.commonInfo = newInfo;
   }
 
   /**
@@ -425,13 +445,15 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    */
   public generateHostMetadata(
     ts = new Date().getTime(),
-    metadataDataStream = metadataDefaultDataStream
+    metadataDataStream = metadataDefaultDataStream()
   ): HostMetadata {
-    return this.metadataGenerator.generate({
-      '@timestamp': ts,
-      data_stream: metadataDataStream,
-      ...this.commonInfo,
-    });
+    return clone(
+      this.metadataGenerator.generate({
+        '@timestamp': ts,
+        data_stream: metadataDataStream,
+        ...this.commonInfo,
+      })
+    );
   }
 
   /**
@@ -1634,6 +1656,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       path: '/package/endpoint/0.5.0',
       icons: [
         {
+          // @ts-expect-error upgrade typescript v4.9.5
           path: '/package/endpoint/0.5.0/img/logo-endpoint-64-color.svg',
           src: '/img/logo-endpoint-64-color.svg',
           size: '16x16',
@@ -1718,6 +1741,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       assets: {} as AssetsGroupedByServiceByType,
       icons: [
         {
+          // @ts-expect-error upgrade typescript v4.9.5
           path: '/package/endpoint/0.5.0/img/logo-endpoint-64-color.svg',
           src: '/img/logo-endpoint-64-color.svg',
           size: '16x16',
@@ -1790,7 +1814,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   public generatePolicyResponse({
     ts = new Date().getTime(),
     allStatus,
-    policyDataStream = policyDefaultDataStream,
+    policyDataStream = policyDefaultDataStream(),
   }: {
     ts?: number;
     allStatus?: HostPolicyResponseActionStatus;

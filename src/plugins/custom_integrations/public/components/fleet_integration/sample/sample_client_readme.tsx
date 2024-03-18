@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
-import cuid from 'cuid';
+import { createId } from '@paralleldrive/cuid2';
 
 import {
   EuiButton,
@@ -145,7 +145,7 @@ export const SampleClientReadme = () => {
 
                 <EuiFlexGroup alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiButton onClick={() => setApiKey(cuid())} disabled={!!apiKey}>
+                    <EuiButton onClick={() => setApiKey(createId())} disabled={!!apiKey}>
                       Generate API key
                     </EuiButton>
                   </EuiFlexItem>

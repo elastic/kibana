@@ -7,8 +7,13 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
-import { CoreSetup, CoreStart, HttpSetup, ChromeStart, CoreTheme } from '@kbn/core/public';
+import type {
+  CoreSetup,
+  CoreStart,
+  HttpSetup,
+  ChromeStart,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 
 import { createKibanaReactContext, KibanaThemeProvider } from '../shared_imports';
 
@@ -23,12 +28,12 @@ interface AppDependencies {
   settings: CoreStart['settings'];
   links: Links;
   chrome: ChromeStart;
-  theme$: Observable<CoreTheme>;
+  theme: ThemeServiceStart;
 }
 
 export function renderApp(
   element: HTMLElement | null,
-  { http, I18nContext, uiSettings, links, chrome, theme$, settings }: AppDependencies
+  { http, I18nContext, uiSettings, links, chrome, theme, settings }: AppDependencies
 ) {
   if (!element) {
     return () => undefined;
@@ -36,11 +41,11 @@ export function renderApp(
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
     settings,
-    theme: { theme$ },
+    theme,
   });
   render(
     <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
+      <KibanaThemeProvider theme$={theme.theme$}>
         <KibanaReactContextProvider>
           <AppContextProvider value={{ http, links, chrome }}>
             <Main />

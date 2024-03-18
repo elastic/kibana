@@ -7,6 +7,7 @@
 
 import { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
 import type { CoverageOverviewMitreSubTechnique } from './mitre_subtechnique';
+import type { CoverageOverviewMitreTactic } from './mitre_tactic';
 import type { CoverageOverviewRule } from './rule';
 
 export interface CoverageOverviewMitreTechnique {
@@ -38,3 +39,6 @@ export const getTotalRuleCount = (
   }
   return totalRuleCount;
 };
+
+export const getNumOfCoveredTechniques = (tactic: CoverageOverviewMitreTactic): number =>
+  tactic.techniques.filter((technique) => technique.enabledRules.length !== 0).length;

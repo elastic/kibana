@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import {
   InjectedMetadata,
   InjectedMetadataClusterInfo,
   InjectedMetadataExternalUrlPolicy,
   InjectedMetadataPlugin,
+  InjectedMetadataTheme,
 } from '@kbn/core-injected-metadata-common-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
@@ -29,6 +29,7 @@ export interface InternalInjectedMetadataSetup {
   getBasePath: () => string;
   getServerBasePath: () => string;
   getPublicBaseUrl: () => string | undefined;
+  getAssetsHrefBase: () => string;
   getKibanaBuildNumber: () => number;
   getKibanaBranch: () => string;
   getKibanaVersion: () => string;
@@ -38,10 +39,7 @@ export interface InternalInjectedMetadataSetup {
   getExternalUrlConfig: () => {
     policy: InjectedMetadataExternalUrlPolicy[];
   };
-  getTheme: () => {
-    darkMode: boolean;
-    version: ThemeVersion;
-  };
+  getTheme: () => InjectedMetadataTheme;
   getElasticsearchInfo: () => InjectedMetadataClusterInfo;
   /**
    * An array of frontend plugins in topological order.

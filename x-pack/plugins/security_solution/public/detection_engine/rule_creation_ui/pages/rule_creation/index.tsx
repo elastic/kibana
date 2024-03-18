@@ -40,24 +40,16 @@ import {
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
-import { AccordionTitle } from '../../../../detections/components/rules/accordion_title';
-import {
-  StepDefineRule,
-  StepDefineRuleReadOnly,
-} from '../../../../detections/components/rules/step_define_rule';
-import {
-  StepAboutRule,
-  StepAboutRuleReadOnly,
-} from '../../../../detections/components/rules/step_about_rule';
-import {
-  StepScheduleRule,
-  StepScheduleRuleReadOnly,
-} from '../../../../detections/components/rules/step_schedule_rule';
+import { AccordionTitle } from '../../components/accordion_title';
+import { StepDefineRule, StepDefineRuleReadOnly } from '../../components/step_define_rule';
+import { useExperimentalFeatureFieldsTransform } from '../../components/step_define_rule/use_experimental_feature_fields_transform';
+import { StepAboutRule, StepAboutRuleReadOnly } from '../../components/step_about_rule';
+import { StepScheduleRule, StepScheduleRuleReadOnly } from '../../components/step_schedule_rule';
 import {
   stepActionsDefaultValue,
   StepRuleActions,
   StepRuleActionsReadOnly,
-} from '../../../../detections/components/rules/step_rule_actions';
+} from '../../../rule_creation/components/step_rule_actions';
 import * as RuleI18n from '../../../../detections/pages/detection_engine/rules/translations';
 import {
   redirectToDetections,
@@ -84,10 +76,10 @@ import {
   DEFAULT_THREAT_INDEX_KEY,
 } from '../../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
-import { RulePreview } from '../../../../detections/components/rules/rule_preview';
-import { getIsRulePreviewDisabled } from '../../../../detections/components/rules/rule_preview/helpers';
+import { RulePreview } from '../../components/rule_preview';
+import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
-import { NextStep } from '../../../../detections/components/rules/next_step';
+import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 
@@ -228,6 +220,8 @@ const CreateRulePageComponent: React.FC = () => {
     [defineStepData.index, esqlIndex, isEsqlRuleValue]
   );
 
+  const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
+
   const isPreviewDisabled = getIsRulePreviewDisabled({
     ruleType,
     isQueryBarValid,
@@ -364,10 +358,10 @@ const CreateRulePageComponent: React.FC = () => {
       const valid = await validateStep(step);
 
       if (valid) {
-        const localDefineStepData: DefineStepRule = {
+        const localDefineStepData: DefineStepRule = defineFieldsTransform({
           ...defineStepForm.getFormData(),
           eqlOptions: eqlOptionsSelected,
-        };
+        });
         const localAboutStepData = aboutStepForm.getFormData();
         const localScheduleStepData = scheduleStepForm.getFormData();
         const localActionsStepData = actionsStepForm.getFormData();
@@ -412,6 +406,7 @@ const CreateRulePageComponent: React.FC = () => {
       navigateToApp,
       ruleType,
       startMlJobs,
+      defineFieldsTransform,
     ]
   );
 
@@ -523,6 +518,8 @@ const CreateRulePageComponent: React.FC = () => {
             shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
             queryBarTitle={defineStepData.queryBar.title}
             queryBarSavedId={defineStepData.queryBar.saved_id}
+            thresholdFields={defineStepData.threshold.field}
+            enableThresholdSuppression={defineStepData.enableThresholdSuppression}
           />
           <NextStep
             dataTestSubj="define-continue"
@@ -557,6 +554,8 @@ const CreateRulePageComponent: React.FC = () => {
       memoDefineStepReadOnly,
       setEqlOptionsSelected,
       threatIndicesConfig,
+      defineStepData.threshold.field,
+      defineStepData.enableThresholdSuppression,
     ]
   );
   const memoDefineStepExtraAction = useMemo(
@@ -601,7 +600,6 @@ const CreateRulePageComponent: React.FC = () => {
             dataViewId={defineStepData.dataViewId}
             timestampOverride={aboutStepData.timestampOverride}
             isLoading={isCreateRuleLoading || loading}
-            isActive={activeStep === RuleStep.aboutRule}
             form={aboutStepForm}
             esqlQuery={esqlQueryForAboutStep}
           />

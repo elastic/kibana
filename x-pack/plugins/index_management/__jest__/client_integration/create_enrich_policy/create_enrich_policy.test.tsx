@@ -13,8 +13,8 @@ import { getMatchingIndices, getFieldsFromIndices } from '../helpers/fixtures';
 import { CreateEnrichPoliciesTestBed, setup } from './create_enrich_policy.helpers';
 import { getESPolicyCreationApiCall } from '../../../common/lib';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -53,6 +53,10 @@ describe('Create enrich policy', () => {
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setGetMatchingIndices(getMatchingIndices());
+    httpRequestsMockHelpers.setGetPrivilegesResponse({
+      hasAllPrivileges: true,
+      missingPrivileges: { cluster: [] },
+    });
 
     await act(async () => {
       testBed = await setup(httpSetup);

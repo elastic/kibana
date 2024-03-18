@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { keyBy, memoize, partition } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { FIELD_FORMAT_IDS, FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { TransformStats } from '../../../../common/types/transform_stats';
-import { TransformHealthRuleParams } from './schema';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import type { TransformStats } from '../../../../common/types/transform_stats';
+import type { TransformHealthRuleParams } from './schema';
 import {
   ALL_TRANSFORMS_SELECTION,
   TRANSFORM_HEALTH_CHECK_NAMES,
+  TRANSFORM_NOTIFICATIONS_INDEX,
   TRANSFORM_RULE_TYPE,
   TRANSFORM_STATE,
 } from '../../../../common/constants';
@@ -27,7 +29,6 @@ import type {
 } from './register_transform_health_rule_type';
 import type { TransformHealthAlertRule } from '../../../../common/types/alerting';
 import { isContinuousTransform } from '../../../../common/types/transform';
-import { ML_DF_NOTIFICATION_INDEX_PATTERN } from '../../../routes/api/transforms_audit_messages';
 
 interface TestResult {
   isHealthy: boolean;
@@ -154,6 +155,7 @@ export function transformHealthServiceProvider({
     },
     /**
      * Returns report about transforms that contain error messages
+     * @deprecated This health check is no longer in use
      * @param transformIds
      */
     async getErrorMessagesReport(
@@ -169,7 +171,7 @@ export function transformHealthServiceProvider({
         unknown,
         Record<'by_transform', estypes.AggregationsMultiBucketAggregateBase<TransformErrorsBucket>>
       >({
-        index: ML_DF_NOTIFICATION_INDEX_PATTERN,
+        index: TRANSFORM_NOTIFICATIONS_INDEX,
         size: 0,
         query: {
           bool: {

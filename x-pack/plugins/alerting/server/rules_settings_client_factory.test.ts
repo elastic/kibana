@@ -15,7 +15,7 @@ import {
   savedObjectsServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../common';
@@ -30,6 +30,7 @@ const securityPluginStart = securityMock.createStart();
 const rulesSettingsClientFactoryParams: jest.Mocked<RulesSettingsClientFactoryOpts> = {
   logger: loggingSystemMock.create().get(),
   savedObjectsService,
+  isServerless: false,
 };
 
 beforeEach(() => {
@@ -58,6 +59,7 @@ test('creates a rules settings client with proper constructor arguments when sec
     logger: rulesSettingsClientFactoryParams.logger,
     savedObjectsClient,
     getUserName: expect.any(Function),
+    isServerless: false,
   });
 });
 
@@ -80,6 +82,7 @@ test('creates a rules settings client with proper constructor arguments', async 
     logger: rulesSettingsClientFactoryParams.logger,
     savedObjectsClient,
     getUserName: expect.any(Function),
+    isServerless: false,
   });
 });
 
@@ -106,6 +109,7 @@ test('creates an unauthorized rules settings client', async () => {
     logger: rulesSettingsClientFactoryParams.logger,
     savedObjectsClient,
     getUserName: expect.any(Function),
+    isServerless: false,
   });
 });
 

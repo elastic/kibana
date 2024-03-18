@@ -27,17 +27,25 @@ export const CORRELATIONS_TAB_ID = 'correlations-details';
  * Correlations displayed in the document details expandable flyout left section under the Insights tab
  */
 export const CorrelationsDetails: React.FC = () => {
-  const { dataAsNestedObject, dataFormattedForFieldBrowser, eventId, getFieldsData, scopeId } =
-    useLeftPanelContext();
+  const {
+    dataAsNestedObject,
+    dataFormattedForFieldBrowser,
+    eventId,
+    getFieldsData,
+    scopeId,
+    isPreview,
+  } = useLeftPanelContext();
 
   const {
     show: showAlertsByAncestry,
-    documentId,
     indices,
+    documentId,
   } = useShowRelatedAlertsByAncestry({
     getFieldsData,
     dataAsNestedObject,
     dataFormattedForFieldBrowser,
+    eventId,
+    isPreview,
   });
   const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
     getFieldsData,
@@ -89,10 +97,9 @@ export const CorrelationsDetails: React.FC = () => {
           {showAlertsByAncestry && documentId && indices && (
             <EuiFlexItem>
               <RelatedAlertsByAncestry
-                documentId={documentId}
                 indices={indices}
                 scopeId={scopeId}
-                eventId={eventId}
+                documentId={documentId}
               />
             </EuiFlexItem>
           )}

@@ -8,6 +8,7 @@
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
 
+import type { HttpSetup } from '@kbn/core/public';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { setup } from '@kbn/core-test-helpers-http-setup-browser';
 
@@ -30,7 +31,7 @@ const setupHttp = (basePath: string) => {
   const { http } = setup((injectedMetadata) => {
     injectedMetadata.getBasePath.mockReturnValue(basePath);
   });
-  return http;
+  return http as HttpSetup;
 };
 const tenant = '';
 const application = applicationServiceMock.createStartContract();

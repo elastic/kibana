@@ -19,7 +19,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { ExpandableFlyout } from '.';
-import { ExpandableFlyoutContext } from './context';
+import { TestProvider } from './test/provider';
+import { State } from './state';
 
 export default {
   component: ExpandableFlyout,
@@ -100,97 +101,82 @@ const registeredPanels = [
 ];
 
 export const Right: Story<void> = () => {
-  const context: ExpandableFlyoutContext = {
-    panels: {
-      right: {
-        id: 'right',
-      },
-      left: {},
-      preview: [],
+  const state = {
+    right: {
+      id: 'right',
     },
-    closeFlyout: () => window.alert('closeFlyout api'),
-  } as unknown as ExpandableFlyoutContext;
+    left: {},
+    preview: [],
+  } as unknown as State;
 
   return (
-    <ExpandableFlyoutContext.Provider value={context}>
+    <TestProvider state={state}>
       <ExpandableFlyout registeredPanels={registeredPanels} />
-    </ExpandableFlyoutContext.Provider>
+    </TestProvider>
   );
 };
 
 export const Left: Story<void> = () => {
-  const context: ExpandableFlyoutContext = {
-    panels: {
-      right: {
-        id: 'right',
-      },
-      left: {
-        id: 'left',
-      },
-      preview: [],
+  const state = {
+    right: {
+      id: 'right',
     },
-    closeFlyout: () => window.alert('closeFlyout api'),
-  } as unknown as ExpandableFlyoutContext;
+    left: {
+      id: 'left',
+    },
+    preview: [],
+  } as unknown as State;
 
   return (
-    <ExpandableFlyoutContext.Provider value={context}>
+    <TestProvider state={state}>
       <ExpandableFlyout registeredPanels={registeredPanels} />
-    </ExpandableFlyoutContext.Provider>
+    </TestProvider>
   );
 };
 
 export const Preview: Story<void> = () => {
-  const context: ExpandableFlyoutContext = {
-    panels: {
-      right: {
-        id: 'right',
-      },
-      left: {
-        id: 'left',
-      },
-      preview: [
-        {
-          id: 'preview1',
-        },
-      ],
+  const state = {
+    right: {
+      id: 'right',
     },
-    closePreviewPanel: () => window.alert('closePreviewPanel api'),
-    closeFlyout: () => window.alert('closeFlyout api'),
-  } as unknown as ExpandableFlyoutContext;
+    left: {
+      id: 'left',
+    },
+    preview: [
+      {
+        id: 'preview1',
+      },
+    ],
+  } as unknown as State;
 
   return (
-    <ExpandableFlyoutContext.Provider value={context}>
+    <TestProvider state={state}>
       <ExpandableFlyout registeredPanels={registeredPanels} />
-    </ExpandableFlyoutContext.Provider>
+    </TestProvider>
   );
 };
 
 export const MultiplePreviews: Story<void> = () => {
-  const context: ExpandableFlyoutContext = {
-    panels: {
-      right: {
-        id: 'right',
-      },
-      left: {
-        id: 'left',
-      },
-      preview: [
-        {
-          id: 'preview1',
-        },
-        {
-          id: 'preview2',
-        },
-      ],
+  const state = {
+    right: {
+      id: 'right',
     },
-    closePreviewPanel: () => window.alert('closePreviewPanel api'),
-    previousPreviewPanel: () => window.alert('previousPreviewPanel api'),
-    closeFlyout: () => window.alert('closeFlyout api'),
-  } as unknown as ExpandableFlyoutContext;
+    left: {
+      id: 'left',
+    },
+    preview: [
+      {
+        id: 'preview1',
+      },
+      {
+        id: 'preview2',
+      },
+    ],
+  } as unknown as State;
 
   return (
-    <ExpandableFlyoutContext.Provider value={context}>
+    <TestProvider state={state}>
       <ExpandableFlyout registeredPanels={registeredPanels} />
-    </ExpandableFlyoutContext.Provider>
+    </TestProvider>
   );
 };

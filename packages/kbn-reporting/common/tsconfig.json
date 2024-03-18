@@ -5,7 +5,6 @@
     "types": [
       "jest",
       "node",
-      "react"
     ]
   },
   "include": [
@@ -16,8 +15,10 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/i18n",
-    "@kbn/screenshotting-plugin",
     "@kbn/config-schema",
+    "@kbn/utility-types",
+    "@kbn/screenshotting-plugin",
+    "@kbn/i18n",
+    "@kbn/task-manager-plugin",
   ]
 }

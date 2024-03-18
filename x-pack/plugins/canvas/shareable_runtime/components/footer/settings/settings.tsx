@@ -26,7 +26,7 @@ export const SettingsComponent: FC<Props> = ({ refs }) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const button = (
     <EuiButtonIcon
-      color="ghost"
+      color="text"
       iconType="gear"
       aria-label="Settings"
       onClick={() => setPopoverOpen(!isPopoverOpen)}

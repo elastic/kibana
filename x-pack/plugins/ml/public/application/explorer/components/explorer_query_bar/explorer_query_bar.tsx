@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryErrorMessage } from '@kbn/ml-error-utils';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import { PLUGIN_ID } from '../../../../../common/constants/app';
 import { useAnomalyExplorerContext } from '../../anomaly_explorer_context';
 import { useMlKibana } from '../../../contexts/kibana';
 
@@ -110,15 +111,9 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   const { anomalyExplorerCommonStateService } = useAnomalyExplorerContext();
   const { services } = useMlKibana();
   const {
-    unifiedSearch,
-    data,
-    storage,
-    appName,
-    notifications,
-    http,
-    docLinks,
-    uiSettings,
-    dataViews: dataViewsService,
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
   } = services;
 
   // The internal state of the input query bar updated on every key stroke.
@@ -176,17 +171,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
           disableAutoFocus
           dataTestSubj="explorerQueryInput"
           languageSwitcherPopoverAnchorPosition="rightDown"
-          appName={appName}
-          deps={{
-            unifiedSearch,
-            notifications,
-            http,
-            docLinks,
-            uiSettings,
-            data,
-            storage,
-            dataViews: dataViewsService,
-          }}
+          appName={PLUGIN_ID}
         />
       }
       isOpen={queryErrorMessage?.query === searchInput.query && queryErrorMessage?.message !== ''}

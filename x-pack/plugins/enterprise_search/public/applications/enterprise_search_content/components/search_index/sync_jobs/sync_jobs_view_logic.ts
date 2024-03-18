@@ -9,11 +9,12 @@ import { kea, MakeLogicType } from 'kea';
 
 import moment from 'moment';
 
-import { ConnectorSyncJob } from '@kbn/search-connectors';
+import { Pagination } from '@elastic/eui';
+import { ConnectorSyncJob, pageToPagination } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../../common/types/api';
 
-import { Page, Paginate } from '../../../../../../common/types/pagination';
+import { Paginate } from '../../../../../../common/types/pagination';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import {
   FetchSyncJobsApiLogic,
@@ -38,7 +39,7 @@ export interface IndexViewValues {
   syncJobs: SyncJobView[];
   syncJobsData: Paginate<ConnectorSyncJob> | null;
   syncJobsLoading: boolean;
-  syncJobsPagination: Page;
+  syncJobsPagination: Pagination;
   syncJobsStatus: Status;
 }
 
@@ -84,14 +85,13 @@ export const SyncJobsViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAct
     ],
     syncJobsPagination: [
       () => [selectors.syncJobsData],
-      (data?: Paginate<ConnectorSyncJob>) =>
+      (data?: Paginate<ConnectorSyncJob>): Pagination =>
         data
-          ? data._meta.page
+          ? pageToPagination(data._meta.page)
           : {
-              from: 0,
-              has_more_hits_than_total: false,
-              size: 10,
-              total: 0,
+              pageIndex: 0,
+              pageSize: 10,
+              totalItemCount: 0,
             },
     ],
   }),

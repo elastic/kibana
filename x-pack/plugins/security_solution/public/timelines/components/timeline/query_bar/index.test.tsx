@@ -21,7 +21,7 @@ import { buildGlobalQuery } from '../helpers';
 
 import type { QueryBarTimelineComponentProps } from '.';
 import { QueryBarTimeline, getDataProviderFilter, TIMELINE_FILTER_DROP_AREA } from '.';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 

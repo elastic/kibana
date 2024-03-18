@@ -1,0 +1,32 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/reporting-common",
+    "@kbn/discover-plugin",
+    "@kbn/data-plugin",
+    "@kbn/generate-csv",
+    "@kbn/core-http-server",
+    "@kbn/reporting-server",
+    "@kbn/reporting-export-types-csv-common",
+    "@kbn/reporting-mocks-server",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/field-formats-plugin",
+    "@kbn/core-http-server-mocks",
+  ]
+}

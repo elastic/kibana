@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -31,18 +32,18 @@ import type { I18nStart, OverlayStart, ThemeServiceStart } from '@kbn/core/publi
 import { css } from '@emotion/react';
 import { numberValidator } from '@kbn/ml-agg-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { isCloudTrial } from '../services/ml_server_info';
+import { getNewJobLimits, isCloudTrial } from '../services/ml_server_info';
 import {
   composeValidators,
   dictionaryValidator,
   requiredValidator,
 } from '../../../common/util/validators';
-import { ModelItem } from './models_list';
+import type { ModelItem } from './models_list';
 
 interface DeploymentSetupProps {
   config: ThreadingParams;
   onConfigChange: (config: ThreadingParams) => void;
-  errors: Partial<Record<keyof ThreadingParams, object>>;
+  errors: Partial<Record<keyof ThreadingParams, Record<string, unknown>>>;
   isUpdate?: boolean;
   deploymentsParams?: Record<string, ThreadingParams>;
 }
@@ -66,6 +67,11 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
   isUpdate,
   deploymentsParams,
 }) => {
+  const {
+    total_ml_processors: totalMlProcessors,
+    max_single_ml_node_processors: maxSingleMlNodeProcessors,
+  } = getNewJobLimits();
+
   const numOfAllocation = config.numOfAllocations;
   const threadsPerAllocations = config.threadsPerAllocations;
 
@@ -76,17 +82,21 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
 
   const threadsPerAllocationsOptions = useMemo(
     () =>
-      new Array(THREADS_MAX_EXPONENT).fill(null).map((v, i) => {
-        const value = Math.pow(2, i);
-        const id = value.toString();
+      new Array(THREADS_MAX_EXPONENT)
+        .fill(null)
+        .map((v, i) => Math.pow(2, i))
+        .filter(maxSingleMlNodeProcessors ? (v) => v <= maxSingleMlNodeProcessors : (v) => true)
+        .map((value) => {
+          const id = value.toString();
 
-        return {
-          id,
-          label: id,
-          value,
-        };
-      }),
-    []
+          return {
+            id,
+            label: id,
+            value,
+            'data-test-subj': `mlModelsStartDeploymentModalThreadsPerAllocation_${id}`,
+          };
+        }),
+    [maxSingleMlNodeProcessors]
   );
 
   const disableThreadingControls = config.priority === 'low';
@@ -207,6 +217,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                       defaultMessage: 'low',
                     }
                   ),
+                  'data-test-subj': 'mlModelsStartDeploymentModalLowPriority',
                 },
                 {
                   id: 'normal',
@@ -217,6 +228,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                       defaultMessage: 'normal',
                     }
                   ),
+                  'data-test-subj': 'mlModelsStartDeploymentModalNormalPriority',
                 },
               ]}
               data-test-subj={'mlModelsStartDeploymentModalPriority'}
@@ -251,11 +263,28 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
           }
           hasChildLabel={false}
           isDisabled={disableThreadingControls}
+          isInvalid={!!errors.numOfAllocations}
+          error={
+            errors?.numOfAllocations?.min ? (
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsMinError"
+                defaultMessage="At least one allocation is required."
+              />
+            ) : errors?.numOfAllocations?.max ? (
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsMaxError"
+                defaultMessage="Cannot exceed {max} - the total number of ML processors."
+                values={{ max: totalMlProcessors }}
+              />
+            ) : null
+          }
         >
           <EuiFieldNumber
             disabled={disableThreadingControls}
+            isInvalid={!!errors.numOfAllocations}
             fullWidth
             min={1}
+            max={totalMlProcessors}
             step={1}
             name={'numOfAllocations'}
             value={disableThreadingControls ? 1 : numOfAllocation}
@@ -346,6 +375,8 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 }) => {
   const isUpdate = !!initialParams;
 
+  const { total_ml_processors: totalMlProcessors } = getNewJobLimits();
+
   const [config, setConfig] = useState<ThreadingParams>(
     initialParams ?? {
       numOfAllocations: 1,
@@ -373,7 +404,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 
   const numOfAllocationsValidator = composeValidators(
     requiredValidator(),
-    numberValidator({ min: 1, integerOnly: true })
+    numberValidator({ min: 1, max: totalMlProcessors, integerOnly: true })
   );
 
   const numOfAllocationsErrors = numOfAllocationsValidator(config.numOfAllocations);

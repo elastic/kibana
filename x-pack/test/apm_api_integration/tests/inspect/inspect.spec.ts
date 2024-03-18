@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 
-export default function customLinksTests({ getService }: FtrProviderContext) {
+export default function inspectFlagTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
 
@@ -64,7 +64,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('elasticsearch calls made with internal user are not return', () => {
+      describe('elasticsearch calls made with internal user should not leak internal queries', () => {
         it('for custom links', async () => {
           const { status, body } = await apmApiClient.readUser({
             endpoint: 'GET /internal/apm/settings/custom_links',
@@ -92,7 +92,9 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
           });
 
           expect(status).to.be(200);
-          expect(body._inspect).to.eql([]);
+          expect(body._inspect?.map((res) => res.stats?.indexPattern.value)).to.eql([
+            ['metrics-apm*', 'apm-*'],
+          ]);
         });
       });
     });

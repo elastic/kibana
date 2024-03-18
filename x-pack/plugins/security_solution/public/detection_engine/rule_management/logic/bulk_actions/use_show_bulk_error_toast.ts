@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import type { HTTPError } from '../../../../../common/detection_engine/types';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type { BulkActionType } from '../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import type { BulkActionType } from '../../../../../common/api/detection_engine/rule_management';
 import { explainBulkError, summarizeBulkError } from './translations';
 
 interface ShowBulkErrorToastProps {

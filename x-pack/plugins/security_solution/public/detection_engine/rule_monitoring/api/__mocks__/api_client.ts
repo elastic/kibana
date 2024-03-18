@@ -10,8 +10,8 @@ import type {
   GetRuleExecutionResultsResponse,
 } from '../../../../../common/api/detection_engine/rule_monitoring';
 import {
-  LogLevel,
-  RuleExecutionEventType,
+  LogLevelEnum,
+  RuleExecutionEventTypeEnum,
 } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 import type {
@@ -30,8 +30,8 @@ export const api: jest.Mocked<IRuleMonitoringApiClient> = {
         {
           timestamp: '2021-12-29T10:42:59.996Z',
           sequence: 0,
-          level: LogLevel.info,
-          type: RuleExecutionEventType['status-change'],
+          level: LogLevelEnum.info,
+          type: RuleExecutionEventTypeEnum['status-change'],
           execution_id: 'execution-id-1',
           message: 'Rule changed status to "succeeded". Rule execution completed without errors',
         },

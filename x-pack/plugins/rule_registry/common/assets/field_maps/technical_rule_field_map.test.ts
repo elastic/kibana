@@ -42,6 +42,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
+      "kibana.alert.consecutive_matches": Object {
+        "array": false,
+        "required": false,
+        "type": "long",
+      },
       "kibana.alert.duration.us": Object {
         "array": false,
         "required": false,
@@ -79,6 +84,13 @@ it('matches snapshot', () => {
       },
       "kibana.alert.reason": Object {
         "array": false,
+        "multi_fields": Array [
+          Object {
+            "flat_name": "kibana.alert.reason.text",
+            "name": "text",
+            "type": "match_only_text",
+          },
+        ],
         "required": false,
         "type": "keyword",
       },
@@ -286,6 +298,11 @@ it('matches snapshot', () => {
         "required": true,
         "type": "keyword",
       },
+      "kibana.alert.workflow_assignee_ids": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.workflow_reason": Object {
         "array": false,
         "required": false,
@@ -295,6 +312,11 @@ it('matches snapshot', () => {
         "array": false,
         "required": false,
         "type": "keyword",
+      },
+      "kibana.alert.workflow_status_updated_at": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
       },
       "kibana.alert.workflow_tags": Object {
         "array": true,

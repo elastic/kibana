@@ -10,10 +10,10 @@ import type { UnregisterCallback } from 'history';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
+import type { InternalHttpSetup, InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
-import { AppNavLinkStatus, type AppMountParameters } from '@kbn/core-application-browser';
+import { type AppMountParameters } from '@kbn/core-application-browser';
 import type {
   InternalApplicationSetup,
   InternalApplicationStart,
@@ -27,7 +27,7 @@ import { renderApp as renderStatusApp } from './status';
 
 export interface CoreAppsServiceSetupDeps {
   application: InternalApplicationSetup;
-  http: HttpSetup;
+  http: InternalHttpSetup;
   injectedMetadata: InternalInjectedMetadataSetup;
   notifications: NotificationsSetup;
 }
@@ -35,7 +35,7 @@ export interface CoreAppsServiceSetupDeps {
 export interface CoreAppsServiceStartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
-  http: HttpStart;
+  http: InternalHttpStart;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
 }
@@ -49,7 +49,7 @@ export class CoreAppsService {
     application.register(this.coreContext.coreId, {
       id: 'error',
       title: 'App Error',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount(params: AppMountParameters) {
         // Do not use an async import here in order to ensure that network failures
         // cannot prevent the error UI from displaying. This UI is tiny so an async
@@ -66,7 +66,7 @@ export class CoreAppsService {
       title: 'Server Status',
       appRoute: '/status',
       chromeless: true,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount(params: AppMountParameters) {
         return renderStatusApp(params, { http, notifications });
       },

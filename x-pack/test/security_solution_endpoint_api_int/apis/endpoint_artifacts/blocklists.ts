@@ -13,6 +13,7 @@ import {
   GLOBAL_ARTIFACT_TAG,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
+import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
@@ -24,7 +25,9 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('Endpoint artifacts (via lists plugin): Blocklists', () => {
+  describe('Endpoint artifacts (via lists plugin): Blocklists', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     before(async () => {
@@ -155,7 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             body.entries[0].field = 'some.invalid.field';
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.analyst_hunter, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -176,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.analyst_hunter, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -197,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.analyst_hunter, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -224,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.analyst_hunter, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -258,7 +261,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.analyst_hunter, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -272,7 +275,7 @@ export default function ({ getService }: FtrProviderContext) {
             body.os_types = ['linux', 'windows'];
 
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.analyst_hunter, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -297,7 +300,7 @@ export default function ({ getService }: FtrProviderContext) {
         for (const blocklistApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
           it(`should not error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.analyst_hunter, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(blocklistApiCall.getBody())
               .expect(200);
@@ -305,24 +308,23 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      describe('and user has authorization to read blocklist', () => {
+      describe('and user has authorization to read blocklist', function () {
+        targetTags(this, ['@skipInServerless']); // no such role in serverless
+
         for (const blocklistApiCall of [...blocklistApiCalls, ...needsWritePrivilege]) {
           it(`should error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.artifact_read_role, 'changeme')
+              .auth(ROLE.artifact_read_privileges, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(blocklistApiCall.getBody())
-              .expect(403, {
-                status_code: 403,
-                message: 'EndpointArtifactError: Endpoint authorization failure',
-              });
+              .expect(403);
           });
         }
 
         for (const blocklistApiCall of needsReadPrivilege) {
           it(`should not error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.artifact_read_role, 'changeme')
+              .auth(ROLE.artifact_read_privileges, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(blocklistApiCall.getBody())
               .expect(200);
@@ -341,10 +343,7 @@ export default function ({ getService }: FtrProviderContext) {
               .auth(ROLE.t1_analyst, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(blocklistApiCall.getBody())
-              .expect(403, {
-                status_code: 403,
-                message: 'EndpointArtifactError: Endpoint authorization failure',
-              });
+              .expect(403);
           });
         }
       });

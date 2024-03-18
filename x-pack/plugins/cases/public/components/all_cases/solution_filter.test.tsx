@@ -6,35 +6,20 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import type { Solution } from './types';
-import {
-  OWNER_INFO,
-  SECURITY_SOLUTION_OWNER,
-  OBSERVABILITY_OWNER,
-} from '../../../common/constants';
+import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/constants';
 
 import { SolutionFilter } from './solution_filter';
 import userEvent from '@testing-library/user-event';
 
 describe('SolutionFilter ', () => {
   let appMockRender: AppMockRenderer;
-  const onSelectedOptionsChanged = jest.fn();
-  const solutions: Solution[] = [
-    {
-      id: SECURITY_SOLUTION_OWNER,
-      label: OWNER_INFO[SECURITY_SOLUTION_OWNER].label,
-      iconType: OWNER_INFO[SECURITY_SOLUTION_OWNER].iconType,
-    },
-    {
-      id: OBSERVABILITY_OWNER,
-      label: OWNER_INFO[OBSERVABILITY_OWNER].label,
-      iconType: OWNER_INFO[OBSERVABILITY_OWNER].iconType,
-    },
-  ];
+  const onChange = jest.fn();
+  const solutions = [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER];
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
@@ -43,85 +28,148 @@ describe('SolutionFilter ', () => {
 
   it('renders button correctly', () => {
     const { getByTestId } = appMockRender.render(
-      <SolutionFilter
-        onSelectedOptionsChanged={onSelectedOptionsChanged}
-        selectedOptions={[]}
-        options={solutions}
-      />
+      <SolutionFilter onChange={onChange} selectedOptionKeys={[]} availableSolutions={solutions} />
     );
 
-    expect(getByTestId('solution-filter-popover-button')).toBeInTheDocument();
+    expect(getByTestId('options-filter-popover-button-owner')).toBeInTheDocument();
   });
 
-  it('renders empty label correctly', async () => {
-    const { getByTestId, getByText } = appMockRender.render(
-      <SolutionFilter
-        onSelectedOptionsChanged={onSelectedOptionsChanged}
-        selectedOptions={[]}
-        options={[]}
-        optionsEmptyLabel="No options available"
-      />
-    );
+  describe('when the owner is a single solution', () => {
+    beforeEach(() => {
+      // by default, the owner will be the same but we set it explicitly here to make it clear
+      appMockRender = createAppMockRenderer({ owner: [SECURITY_SOLUTION_OWNER] });
+      jest.clearAllMocks();
+    });
 
-    userEvent.click(getByTestId('solution-filter-popover-button'));
+    it('renders options correctly', async () => {
+      appMockRender.render(
+        <SolutionFilter
+          onChange={onChange}
+          selectedOptionKeys={[]}
+          availableSolutions={solutions}
+        />
+      );
 
-    await waitForEuiPopoverOpen();
+      expect(screen.getByTestId('options-filter-popover-button-owner')).toBeInTheDocument();
 
-    expect(getByText('No options available')).toBeInTheDocument();
+      userEvent.click(screen.getByTestId('options-filter-popover-button-owner'));
+
+      await waitForEuiPopoverOpen();
+
+      expect(screen.getByTestId(`options-filter-popover-item-${solutions[0]}`)).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`options-filter-popover-item-${solutions[1]}`)
+      ).not.toBeInTheDocument();
+    });
+
+    it('should call onChange with selected solution id when no option selected yet', async () => {
+      const { getByTestId } = appMockRender.render(
+        <SolutionFilter
+          onChange={onChange}
+          selectedOptionKeys={[]}
+          availableSolutions={solutions}
+        />
+      );
+
+      userEvent.click(getByTestId('options-filter-popover-button-owner'));
+
+      await waitForEuiPopoverOpen();
+
+      userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
+
+      expect(onChange).toHaveBeenCalledWith({
+        filterId: 'owner',
+        selectedOptionKeys: [solutions[0]],
+      });
+    });
+
+    it('should call onChange with [owner] when the last solution option selected is deselected', async () => {
+      const { getByTestId } = appMockRender.render(
+        <SolutionFilter
+          onChange={onChange}
+          selectedOptionKeys={[solutions[0]]}
+          availableSolutions={solutions}
+        />
+      );
+
+      userEvent.click(getByTestId('options-filter-popover-button-owner'));
+
+      await waitForEuiPopoverOpen();
+
+      userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
+
+      expect(onChange).toHaveBeenCalledWith({
+        filterId: 'owner',
+        selectedOptionKeys: [],
+      });
+    });
   });
 
-  it('renders options correctly', async () => {
-    const { getByTestId } = appMockRender.render(
-      <SolutionFilter
-        onSelectedOptionsChanged={onSelectedOptionsChanged}
-        selectedOptions={[]}
-        options={solutions}
-      />
-    );
+  describe('when no owner set', () => {
+    beforeEach(() => {
+      appMockRender = createAppMockRenderer({ owner: [] });
+      jest.clearAllMocks();
+    });
 
-    expect(getByTestId('solution-filter-popover-button')).toBeInTheDocument();
+    it('renders options correctly', async () => {
+      const { getByTestId } = appMockRender.render(
+        <SolutionFilter
+          onChange={onChange}
+          selectedOptionKeys={[]}
+          availableSolutions={solutions}
+        />
+      );
 
-    userEvent.click(getByTestId('solution-filter-popover-button'));
+      expect(getByTestId('options-filter-popover-button-owner')).toBeInTheDocument();
 
-    await waitForEuiPopoverOpen();
+      userEvent.click(getByTestId('options-filter-popover-button-owner'));
 
-    expect(getByTestId(`solution-filter-popover-item-${solutions[0].id}`)).toBeInTheDocument();
-    expect(getByTestId(`solution-filter-popover-item-${solutions[0].id}`)).toBeInTheDocument();
-  });
+      await waitForEuiPopoverOpen();
 
-  it('should call onSelectionChange with selected solution id', async () => {
-    const { getByTestId } = appMockRender.render(
-      <SolutionFilter
-        onSelectedOptionsChanged={onSelectedOptionsChanged}
-        selectedOptions={[]}
-        options={solutions}
-      />
-    );
+      expect(getByTestId(`options-filter-popover-item-${solutions[0]}`)).toBeInTheDocument();
+      expect(getByTestId(`options-filter-popover-item-${solutions[1]}`)).toBeInTheDocument();
+    });
 
-    userEvent.click(getByTestId('solution-filter-popover-button'));
+    it('should call onChange with selected solution id when no option selected yet', async () => {
+      const { getByTestId } = appMockRender.render(
+        <SolutionFilter
+          onChange={onChange}
+          selectedOptionKeys={[]}
+          availableSolutions={solutions}
+        />
+      );
 
-    await waitForEuiPopoverOpen();
+      userEvent.click(getByTestId('options-filter-popover-button-owner'));
 
-    userEvent.click(getByTestId(`solution-filter-popover-item-${solutions[0].id}`));
+      await waitForEuiPopoverOpen();
 
-    expect(onSelectedOptionsChanged).toHaveBeenCalledWith([solutions[0].id]);
-  });
+      userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
 
-  it('should call onSelectionChange with empty array when solution option is deselected', async () => {
-    const { getByTestId } = appMockRender.render(
-      <SolutionFilter
-        onSelectedOptionsChanged={onSelectedOptionsChanged}
-        selectedOptions={[solutions[1].id]}
-        options={solutions}
-      />
-    );
+      expect(onChange).toHaveBeenCalledWith({
+        filterId: 'owner',
+        selectedOptionKeys: [solutions[0]],
+      });
+    });
 
-    userEvent.click(getByTestId('solution-filter-popover-button'));
+    it('should call onChange with [all solutions] when the last solution option selected is deselected', async () => {
+      const { getByTestId } = appMockRender.render(
+        <SolutionFilter
+          onChange={onChange}
+          selectedOptionKeys={[solutions[0]]}
+          availableSolutions={solutions}
+        />
+      );
 
-    await waitForEuiPopoverOpen();
+      userEvent.click(getByTestId('options-filter-popover-button-owner'));
 
-    userEvent.click(getByTestId(`solution-filter-popover-item-${solutions[1].id}`));
+      await waitForEuiPopoverOpen();
 
-    expect(onSelectedOptionsChanged).toHaveBeenCalledWith([]);
+      userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
+
+      expect(onChange).toHaveBeenCalledWith({
+        filterId: 'owner',
+        selectedOptionKeys: [],
+      });
+    });
   });
 });

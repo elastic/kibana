@@ -5,22 +5,32 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { LLM } from 'langchain/llms/base';
 import { get } from 'lodash/fp';
 
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { getMessageContentAndRole } from '../helpers';
-import { RequestBody } from '../types';
 
 const LLM_TYPE = 'ActionsClientLlm';
+
+interface ActionsClientLlmParams {
+  actions: ActionsPluginStart;
+  connectorId: string;
+  llmType?: string;
+  logger: Logger;
+  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  traceId?: string;
+}
 
 export class ActionsClientLlm extends LLM {
   #actions: ActionsPluginStart;
   #connectorId: string;
   #logger: Logger;
-  #request: KibanaRequest<unknown, unknown, RequestBody>;
-  #actionResultData: string;
+  #request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  #traceId: string;
 
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
   // Not using getter as `this._llmType()` is called in the constructor via `super({})`
@@ -29,28 +39,19 @@ export class ActionsClientLlm extends LLM {
   constructor({
     actions,
     connectorId,
+    traceId = uuidv4(),
     llmType,
     logger,
     request,
-  }: {
-    actions: ActionsPluginStart;
-    connectorId: string;
-    llmType?: string;
-    logger: Logger;
-    request: KibanaRequest<unknown, unknown, RequestBody>;
-  }) {
+  }: ActionsClientLlmParams) {
     super({});
 
     this.#actions = actions;
     this.#connectorId = connectorId;
+    this.#traceId = traceId;
     this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
     this.#request = request;
-    this.#actionResultData = '';
-  }
-
-  getActionResultData(): string {
-    return this.#actionResultData;
   }
 
   _llmType() {
@@ -68,16 +69,21 @@ export class ActionsClientLlm extends LLM {
     // convert the Langchain prompt to an assistant message:
     const assistantMessage = getMessageContentAndRole(prompt);
     this.#logger.debug(
-      `ActionsClientLlm#_call assistantMessage:\n${JSON.stringify(assistantMessage)} `
+      `ActionsClientLlm#_call\ntraceId: ${this.#traceId}\nassistantMessage:\n${JSON.stringify(
+        assistantMessage
+      )} `
     );
     // create a new connector request body with the assistant message:
     const requestBody = {
       actionId: this.#connectorId,
       params: {
-        ...this.#request.body.params, // the original request body params
+        subAction: this.#request.body.subAction,
         subActionParams: {
-          ...this.#request.body.params.subActionParams, // the original request body params.subActionParams
+          model: this.#request.body.model,
           messages: [assistantMessage], // the assistant message
+          ...(this.#request.body.llmType === 'openai'
+            ? { n: 1, stop: null, temperature: 0.2 }
+            : {}),
         },
       },
     };
@@ -93,15 +99,13 @@ export class ActionsClientLlm extends LLM {
       );
     }
 
-    // TODO: handle errors from the connector
-    const content = get('data', actionResult);
+    const content = get('data.message', actionResult);
 
     if (typeof content !== 'string') {
       throw new Error(
         `${LLM_TYPE}: content should be a string, but it had an unexpected type: ${typeof content}`
       );
     }
-    this.#actionResultData = content; // save the raw response from the connector, because that's what the assistant expects
 
     return content; // per the contact of _call, return a string
   }

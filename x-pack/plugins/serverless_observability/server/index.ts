@@ -7,13 +7,13 @@
 
 import { PluginInitializerContext } from '@kbn/core/server';
 
-import { ServerlessObservabilityPlugin } from './plugin';
 export { config } from './config';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { ServerlessObservabilityPlugin } = await import('./plugin');
   return new ServerlessObservabilityPlugin(initializerContext);
 }
 

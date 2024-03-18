@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
 
-export const significantLogPatterns: SignificantTerm[] = [
+// Named significantLogPatterns since all these items are of type `log_pattern`.
+export const significantLogPatterns: SignificantItem[] = [
   {
     bg_count: 0,
     doc_count: 1266,

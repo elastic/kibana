@@ -1,0 +1,59 @@
+openapi: 3.0.0
+info:
+  title: Threat Match Rule Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    ThreatQuery:
+      type: string
+      description: Query to execute
+
+    ThreatMapping:
+      type: array
+      minItems: 1
+      items:
+        type: object
+        properties:
+          entries:
+            type: array
+            items:
+              type: object
+              properties:
+                field:
+                  $ref: '../../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+                type:
+                  type: string
+                  enum:
+                    - mapping
+                value:
+                  $ref: '../../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+              required:
+                - field
+                - type
+                - value
+        required:
+          - entries
+
+    ThreatIndex:
+      type: array
+      items:
+        type: string
+
+    ThreatFilters:
+      type: array
+      items:
+        description: Query and filter context array used to filter documents from the Elasticsearch index containing the threat values
+
+    ThreatIndicatorPath:
+      type: string
+      description: Defines the path to the threat indicator in the indicator documents (optional)
+
+    ConcurrentSearches:
+      type: integer
+      minimum: 1
+
+    ItemsPerSearch:
+      type: integer
+      minimum: 1

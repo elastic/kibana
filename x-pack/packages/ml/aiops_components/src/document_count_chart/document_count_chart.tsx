@@ -8,25 +8,20 @@
 import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
-import {
-  Axis,
+import type {
   BrushEndListener,
-  Chart,
   ElementClickListener,
-  HistogramBarSeries,
-  Position,
-  ScaleType,
-  Settings,
   XYChartElementEvent,
   XYBrushEvent,
 } from '@elastic/charts';
-import {
+import { Axis, Chart, HistogramBarSeries, Position, ScaleType, Settings } from '@elastic/charts';
+import type {
   BarStyleAccessor,
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
-
+import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   getLogRateAnalysisType,
   getSnappedWindowParameters,
@@ -146,16 +141,6 @@ enum VIEW_MODE {
   BRUSH = 'brush',
 }
 
-function getTimezone(uiSettings: IUiSettingsClient) {
-  if (uiSettings.isDefault('dateFormat:tz')) {
-    const detectedTimezone = moment.tz.guess();
-    if (detectedTimezone) return detectedTimezone;
-    else return moment().format('Z');
-  } else {
-    return uiSettings.get('dateFormat:tz', 'Browser');
-  }
-}
-
 function getBaselineBadgeOverflow(
   windowParametersAsPixels: WindowParameters,
   baselineBadgeWidth: number
@@ -200,7 +185,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
 
   const { data, uiSettings, fieldFormats, charts } = dependencies;
 
-  const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
@@ -297,7 +281,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     timefilterUpdateHandler({ from, to });
   };
 
-  const timeZone = getTimezone(uiSettings);
+  const timeZone = getTimeZone(uiSettings);
 
   const [originalWindowParameters, setOriginalWindowParameters] = useState<
     WindowParameters | undefined
@@ -484,7 +468,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
               setMlBrushMarginLeft(projection.left);
               setMlBrushWidth(projection.width);
             }}
-            theme={chartTheme}
             baseTheme={chartBaseTheme}
             debugState={window._echDebugStateFlag ?? false}
             showLegend={false}
@@ -509,6 +492,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
               yScaleType={ScaleType.Linear}
               xAccessor="time"
               yAccessors={['value']}
+              stackAccessors={['true']}
               data={adjustedChartPoints}
               timeZone={timeZone}
               color={barColor}
@@ -524,6 +508,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
               yScaleType={ScaleType.Linear}
               xAccessor="time"
               yAccessors={['value']}
+              stackAccessors={['true']}
               data={adjustedChartPointsSplit}
               timeZone={timeZone}
               color={barHighlightColor}

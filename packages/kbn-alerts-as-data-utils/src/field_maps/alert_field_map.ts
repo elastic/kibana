@@ -14,6 +14,7 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
@@ -32,6 +33,7 @@ import {
   ALERT_TIME_RANGE,
   ALERT_URL,
   ALERT_UUID,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
@@ -41,6 +43,7 @@ import {
   EVENT_KIND,
   TAGS,
 } from '@kbn/rule-data-utils';
+import { MultiField } from './types';
 
 export const alertFieldMap = {
   [ALERT_ACTION_GROUP]: {
@@ -78,6 +81,11 @@ export const alertFieldMap = {
     array: true,
     required: false,
   },
+  [ALERT_CONSECUTIVE_MATCHES]: {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   [ALERT_INSTANCE_ID]: {
     type: 'keyword',
     array: false,
@@ -92,6 +100,13 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: false,
+    multi_fields: [
+      {
+        flat_name: `${ALERT_REASON}.text`,
+        name: 'text',
+        type: 'match_only_text',
+      },
+    ] as MultiField[],
   },
   [ALERT_RULE_CATEGORY]: {
     type: 'keyword',
@@ -178,6 +193,11 @@ export const alertFieldMap = {
     required: false,
   },
   [ALERT_WORKFLOW_TAGS]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [ALERT_WORKFLOW_ASSIGNEE_IDS]: {
     type: 'keyword',
     array: true,
     required: false,

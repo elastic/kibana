@@ -68,11 +68,13 @@ export function ChartConfigPanel({
           updatePanelState={updateSuggestion}
           lensAdapters={lensAdapters}
           output$={lensEmbeddableOutput$}
+          displayFlyoutHeader
           closeFlyout={() => {
             setIsFlyoutVisible(false);
           }}
           wrapInFlyout
           datasourceId="textBased"
+          hidesSuggestions
         />
       );
       setEditLensConfigPanel(panel);

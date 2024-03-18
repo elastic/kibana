@@ -61,6 +61,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const dashboard = getPageObject('dashboard');
   const lens = getPageObject('lens');
   const listingTable = getService('listingTable');
+  const toasts = getService('toasts');
 
   const createAttachmentAndNavigate = async (attachment: AttachmentRequest) => {
     const caseData = await cases.api.createCase({
@@ -249,6 +250,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
              */
             await cases.create.createCase({ owner });
             await cases.common.expectToasterToContain('has been updated');
+            await toasts.dismissAllWithChecks();
           }
 
           const casesCreatedFromFlyout = await findCases({ supertest });
@@ -260,7 +262,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Modal', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/178690
+      describe.skip('Modal', () => {
         const createdCases = new Map<string, string>();
 
         const openModal = async () => {
@@ -286,7 +289,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('renders different solutions', async () => {
           await openModal();
 
-          await testSubjects.existOrFail('solution-filter-popover-button');
+          await testSubjects.existOrFail('options-filter-popover-button-owner');
 
           for (const [, currentCaseId] of createdCases.entries()) {
             await testSubjects.existOrFail(`cases-table-row-${currentCaseId}`);
@@ -316,6 +319,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           }
         });
 
+        it('filters with multiple selection', async () => {
+          await openModal();
+
+          let popupAlreadyOpen = false;
+          for (const [owner] of createdCases.entries()) {
+            await cases.casesTable.filterByOwner(owner, { popupAlreadyOpen });
+            popupAlreadyOpen = true;
+          }
+          await cases.casesTable.waitForTableToFinishLoading();
+
+          for (const caseId of createdCases.values()) {
+            await testSubjects.existOrFail(`cases-table-row-${caseId}`);
+          }
+          await closeModal();
+        });
+
         it('attaches correctly', async () => {
           for (const [owner, currentCaseId] of createdCases.entries()) {
             await openModal();
@@ -325,6 +344,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await testSubjects.click(`cases-table-row-select-${currentCaseId}`);
 
             await cases.common.expectToasterToContain('has been updated');
+            await toasts.dismissAllWithChecks();
             await ensureFirstCommentOwner(currentCaseId, owner);
           }
         });
@@ -387,6 +407,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
+        await toasts.dismissAllWithChecks();
 
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(caseTitle);
@@ -414,6 +435,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
+        await toasts.dismissAllWithChecks();
 
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(theCaseTitle);

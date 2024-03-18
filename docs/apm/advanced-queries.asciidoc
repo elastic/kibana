@@ -57,7 +57,7 @@ and *Discover* supports all of the example APM app queries shown on this page.
 [[discover-queries]]
 ==== Discover queries
 
-One example where you may want to make use of *Discover*,
+One example where you may want to make use of *Discover*
 is to view  _all_ transactions for an endpoint instead of just a sample.
 
 TIP: Starting in v7.6, you can view ten samples per bucket in the APM app, instead of just one.
@@ -77,7 +77,7 @@ that took between 13 and 14 milliseconds. Here's what Discover returns:
 image::apm/images/advanced-discover.png[View all transactions in bucket]
 
 You can now explore the data until you find a specific transaction that you're interested in.
-Copy that transaction's `transaction.id`, and paste it into the APM app to view the data in the context of the APM app:
+Copy that transaction's `transaction.id` and paste it into the APM app to view the data in the context of the APM app:
 
 [role="screenshot"]
 image::apm/images/specific-transaction-search.png[View specific transaction in apm app]

@@ -7,6 +7,8 @@
 
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
+import { GlobalConfigService } from '../services/global_config_service';
+
 import { checkAccess } from './check_access';
 
 jest.mock('./enterprise_search_config_api', () => ({
@@ -51,6 +53,7 @@ describe('checkAccess', () => {
       canDeployEntSearch: true,
       host: 'http://localhost:3002',
     },
+    globalConfigService: new GlobalConfigService(),
     security: mockSecurity,
     spaces: mockSpaces,
   } as any;

@@ -13,7 +13,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -129,7 +129,7 @@ export interface FleetStartDeps {
   share: SharePluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
@@ -140,7 +140,7 @@ export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, '
   discover?: DiscoverStart;
   spaces?: SpacesPluginStart;
   authz: FleetAuthz;
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
 }
 
 export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {
@@ -248,7 +248,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     core.application.register({
       id: 'ingestManager',
       category: DEFAULT_APP_CATEGORIES.management,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       title: i18n.translate('xpack.fleet.oldAppTitle', { defaultMessage: 'Ingest Manager' }),
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
@@ -324,7 +324,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
             all: capabilities.fleet.all as boolean,
             read: capabilities.fleet.read as boolean,
           },
-          isSuperuser: false,
+          subfeatureEnabled: this.experimentalFeatures.subfeaturePrivileges ?? false,
         }),
         packagePrivileges: calculatePackagePrivilegesFromCapabilities(capabilities),
         endpointExceptionsPrivileges:

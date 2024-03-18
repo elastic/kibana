@@ -5,25 +5,19 @@
  * 2.0.
  */
 
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-} from '../../../common/mock';
-import { createStore } from '../../../common/store';
+import { createMockStore, mockGlobalState } from '../../../common/mock';
 import { createFilterOutCellActionFactory } from './filter_out';
 import type { SecurityCellActionExecutionContext } from '../../types';
-import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { TimelineId } from '../../../../common/types';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
-const services = createStartServicesMock();
-const mockGlobalFilterManager = services.data.query.filterManager;
-const mockTimelineFilterManager = createFilterManagerMock();
-const mockWarningToast = services.notifications.toasts.addWarning;
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+
+const mockServices = createStartServicesMock();
+
+const mockGlobalFilterManager = mockServices.data.query.filterManager;
+const mockWarningToast = mockServices.notifications.toasts.addWarning;
 
 const mockState = {
   ...mockGlobalState,
@@ -33,17 +27,18 @@ const mockState = {
       ...mockGlobalState.timeline.timelineById,
       [TimelineId.active]: {
         ...mockGlobalState.timeline.timelineById[TimelineId.active],
-        filterManager: mockTimelineFilterManager,
       },
     },
   },
 };
 
-const { storage } = createSecuritySolutionStorageMock();
-const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const mockStore = createMockStore(mockState);
 
 describe('createFilterOutCellActionFactory', () => {
-  const filterOutActionFactory = createFilterOutCellActionFactory({ store: mockStore, services });
+  const filterOutActionFactory = createFilterOutCellActionFactory({
+    store: mockStore,
+    services: mockServices,
+  });
   const filterOutAction = filterOutActionFactory({ id: 'testAction' });
 
   beforeEach(() => {
@@ -110,7 +105,7 @@ describe('createFilterOutCellActionFactory', () => {
       it('should execute using generic filterManager', async () => {
         await filterOutAction.execute(dataTableContext);
         expect(mockGlobalFilterManager.addFilters).toHaveBeenCalled();
-        expect(mockTimelineFilterManager.addFilters).not.toHaveBeenCalled();
+        expect(mockServices.timelineFilterManager.addFilters).not.toHaveBeenCalled();
       });
 
       it('should show warning if value type is unsupported', async () => {
@@ -124,7 +119,7 @@ describe('createFilterOutCellActionFactory', () => {
           ],
         });
         expect(mockGlobalFilterManager.addFilters).not.toHaveBeenCalled();
-        expect(mockTimelineFilterManager.addFilters).not.toHaveBeenCalled();
+        expect(mockServices.timelineFilterManager.addFilters).not.toHaveBeenCalled();
         expect(mockWarningToast).toHaveBeenCalled();
       });
     });
@@ -137,7 +132,7 @@ describe('createFilterOutCellActionFactory', () => {
 
       it('should execute using timeline filterManager', async () => {
         await filterOutAction.execute(timelineContext);
-        expect(mockTimelineFilterManager.addFilters).toHaveBeenCalled();
+        expect(mockServices.timelineFilterManager.addFilters).toHaveBeenCalled();
         expect(mockGlobalFilterManager.addFilters).not.toHaveBeenCalled();
       });
     });

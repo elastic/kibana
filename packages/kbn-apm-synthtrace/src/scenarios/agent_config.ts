@@ -7,21 +7,25 @@
  */
 import { observer, AgentConfigFields } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
+import { withClient } from '../lib/utils/with_client';
 
 const scenario: Scenario<AgentConfigFields> = async ({ logger }) => {
   return {
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const agentConfig = observer().agentConfig();
 
-      return range
-        .interval('30s')
-        .rate(1)
-        .generator((timestamp) => {
-          const events = logger.perf('generating_agent_config_events', () => {
-            return agentConfig.etag('test-etag').timestamp(timestamp);
-          });
-          return events;
-        });
+      return withClient(
+        apmEsClient,
+        range
+          .interval('30s')
+          .rate(1)
+          .generator((timestamp) => {
+            const events = logger.perf('generating_agent_config_events', () => {
+              return agentConfig.etag('test-etag').timestamp(timestamp);
+            });
+            return events;
+          })
+      );
     },
   };
 };

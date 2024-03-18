@@ -10,10 +10,10 @@ import { useLocation } from 'react-router-dom';
 import { safeDecode, encode } from '@kbn/rison';
 import { useDeepEqualSelector } from './use_selector';
 import { TimelineId } from '../../../common/types/timeline';
-import { timelineSelectors } from '../../timelines/store/timeline';
-import { timelineDefaults } from '../../timelines/store/timeline/defaults';
+import { timelineSelectors } from '../../timelines/store';
+import { timelineDefaults } from '../../timelines/store/defaults';
 import { useKibana } from '../lib/kibana';
-import type { TimelineUrl } from '../../timelines/store/timeline/model';
+import type { TimelineUrl } from '../../timelines/store/model';
 import { URL_PARAM_KEY } from './use_url_state';
 
 /**

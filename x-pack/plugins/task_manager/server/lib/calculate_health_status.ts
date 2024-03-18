@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isString } from 'lodash';
+import { isEmpty, isString } from 'lodash';
 import { JsonValue } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
 import { HealthStatus, RawMonitoringStats } from '../monitoring';
@@ -18,6 +18,15 @@ export function calculateHealthStatus(
   logger: Logger
 ): { status: HealthStatus; reason?: string } {
   const now = Date.now();
+
+  // if stats are empty, return a warning
+  if (isEmpty(summarizedStats.stats)) {
+    if (!shouldRunTasks) {
+      return { status: HealthStatus.OK };
+    } else {
+      return { status: HealthStatus.Uninitialized, reason: `no health stats available` };
+    }
+  }
 
   // if "hot" health stats are any more stale than monitored_stats_required_freshness
   // times a multiplier, consider the system unhealthy

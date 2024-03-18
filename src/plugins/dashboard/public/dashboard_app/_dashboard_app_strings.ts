@@ -26,13 +26,9 @@ export const dashboardReadonlyBadge = {
 };
 
 export const dashboardManagedBadge = {
-  getText: () =>
-    i18n.translate('dashboard.badge.managed.text', {
-      defaultMessage: 'Managed',
-    }),
   getTooltip: () =>
     i18n.translate('dashboard.badge.managed.tooltip', {
-      defaultMessage: 'This dashboard is system managed. Clone this dashboard to make changes.',
+      defaultMessage: 'Elastic manages this dashboard. Clone it to make changes.',
     }),
 };
 
@@ -152,7 +148,7 @@ export const shareModalStrings = {
 */
 export const getDashboardBreadcrumb = () =>
   i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
-    defaultMessage: 'Dashboard',
+    defaultMessage: 'Dashboards',
   });
 
 export const topNavStrings = {

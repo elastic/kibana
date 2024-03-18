@@ -1,0 +1,24 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Asset Criticality Delete Record Schema
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /internal/asset_criticality:
+    delete:
+      operationId: AssetCriticalityDeleteRecord
+      summary: Delete Criticality Record
+      parameters:
+        - $ref: './common.schema.yaml#/components/parameters/id_value'
+        - $ref: './common.schema.yaml#/components/parameters/id_field'
+      responses:
+        '200':
+          description: Successful response
+        '400':
+          description: Invalid request

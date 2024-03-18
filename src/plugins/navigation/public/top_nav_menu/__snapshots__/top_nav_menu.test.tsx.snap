@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TopNavMenu when setMenuMountPoint is provided should render badges and search bar 1`] = `
+<div
+  class="euiBadgeGroup kbnTopNavMenu__badgeGroup emotion-euiBadgeGroup-xs"
+>
+  <span
+    class="euiBadge emotion-euiBadge-default"
+    tabindex="0"
+    title="badge1"
+  >
+    <span
+      class="euiBadge__content emotion-euiBadge__content"
+    >
+      <span
+        class="euiBadge__text emotion-euiBadge__text"
+      >
+        badge1
+      </span>
+    </span>
+  </span>
+  <span
+    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+  >
+    <span
+      class="euiBadge emotion-euiBadge-warning"
+      data-test-subj="test2"
+      tabindex="0"
+      title=""
+    >
+      <span
+        class="euiBadge__content emotion-euiBadge__content"
+      >
+        <span
+          class="euiBadge__text emotion-euiBadge__text"
+        >
+          badge2
+        </span>
+      </span>
+    </span>
+  </span>
+  <div
+    data-test-subj="test3"
+  >
+    badge3
+  </div>
+</div>
+`;

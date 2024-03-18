@@ -20,7 +20,12 @@ import { License } from '@kbn/license-api-guard-plugin/server';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
 import { Subscription } from 'rxjs';
 import { PLUGIN } from '../common/constants';
-import { Dependencies } from './types';
+import type {
+  CustomBrandingServerSetup,
+  CustomBrandingServerStart,
+  CustomBrandingServerStartDependencies,
+  CustomBrandingServerSetupDependencies,
+} from './types';
 import { registerUiSettings } from './ui_settings';
 
 const settingsKeys: Array<keyof CustomBranding> = [
@@ -31,7 +36,15 @@ const settingsKeys: Array<keyof CustomBranding> = [
   'pageTitle',
 ];
 
-export class CustomBrandingPlugin implements Plugin {
+export class CustomBrandingPlugin
+  implements
+    Plugin<
+      CustomBrandingServerSetup,
+      CustomBrandingServerStart,
+      CustomBrandingServerSetupDependencies,
+      CustomBrandingServerStartDependencies
+    >
+{
   private readonly license: License;
   private readonly logger: Logger;
   private licensingSubscription?: Subscription;
@@ -73,7 +86,7 @@ export class CustomBrandingPlugin implements Plugin {
     return {};
   }
 
-  public start(core: CoreStart, { licensing }: Dependencies) {
+  public start(_core: CoreStart, { licensing }: CustomBrandingServerStartDependencies) {
     this.logger.debug('customBranding: Started');
     this.license.start({
       pluginId: PLUGIN.ID,

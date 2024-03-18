@@ -69,6 +69,7 @@ export interface FindFileStructureResponse {
   joda_timestamp_formats?: string[];
   timestamp_field?: string;
   should_trim_fields?: boolean;
+  ecs_compatibility?: string;
 }
 
 export interface FindFileStructureErrorResponse {

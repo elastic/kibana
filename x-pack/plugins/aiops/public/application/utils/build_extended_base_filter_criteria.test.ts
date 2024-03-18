@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
 
 import type { GroupTableItem } from '../../components/log_rate_analysis_results_table/types';
 
 import { buildExtendedBaseFilterCriteria } from './build_extended_base_filter_criteria';
 
-const selectedSignificantTermMock: SignificantTerm = {
+const selectedSignificantItemMock: SignificantItem = {
   key: 'meta.cloud.instance_id.keyword:1234',
   type: 'keyword',
   doc_count: 53408,
@@ -119,17 +119,16 @@ describe('query_utils', () => {
             },
           },
         },
-        { match_all: {} },
       ]);
     });
 
-    it('includes a term filter when including a selectedSignificantTerm', () => {
+    it('includes a term filter when including a selectedSignificantItem', () => {
       const baseFilterCriteria = buildExtendedBaseFilterCriteria(
         '@timestamp',
         1640082000012,
         1640103600906,
         { match_all: {} },
-        selectedSignificantTermMock
+        selectedSignificantItemMock
       );
 
       expect(baseFilterCriteria).toEqual([
@@ -142,18 +141,17 @@ describe('query_utils', () => {
             },
           },
         },
-        { match_all: {} },
         { term: { 'meta.cloud.instance_id.keyword': '1234' } },
       ]);
     });
 
-    it('includes a term filter with must_not when excluding a selectedSignificantTerm', () => {
+    it('includes a term filter with must_not when excluding a selectedSignificantItem', () => {
       const baseFilterCriteria = buildExtendedBaseFilterCriteria(
         '@timestamp',
         1640082000012,
         1640103600906,
         { match_all: {} },
-        selectedSignificantTermMock,
+        selectedSignificantItemMock,
         false
       );
 
@@ -167,7 +165,6 @@ describe('query_utils', () => {
             },
           },
         },
-        { match_all: {} },
         { bool: { must_not: [{ term: { 'meta.cloud.instance_id.keyword': '1234' } }] } },
       ]);
     });
@@ -193,7 +190,6 @@ describe('query_utils', () => {
             },
           },
         },
-        { match_all: {} },
         {
           term: {
             'error.message': 'rate limit exceeded',
@@ -248,7 +244,6 @@ describe('query_utils', () => {
             },
           },
         },
-        { match_all: {} },
         {
           bool: {
             must_not: [

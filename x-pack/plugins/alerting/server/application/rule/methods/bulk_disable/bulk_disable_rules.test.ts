@@ -6,7 +6,11 @@
  */
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
-import { savedObjectsClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -35,14 +39,7 @@ import {
   siemRuleForBulkOps2,
 } from '../../../../rules_client/tests/test_helpers';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
-
-jest.mock('../../../../task_runner/alert_task_instance', () => ({
-  taskInstanceToAlertTaskInstance: jest.fn(),
-}));
-
-const { taskInstanceToAlertTaskInstance } = jest.requireMock(
-  '../../../../task_runner/alert_task_instance'
-);
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -57,6 +54,12 @@ jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actio
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
+
+jest.mock('../../../../rules_client/lib/untrack_rule_alerts', () => ({
+  untrackRuleAlerts: jest.fn(),
+}));
+
+const { untrackRuleAlerts } = jest.requireMock('../../../../rules_client/lib/untrack_rule_alerts');
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -95,6 +98,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 beforeEach(() => {
@@ -184,6 +188,76 @@ describe('bulkDisableRules', () => {
       rules: [returnedRuleForBulkDisable1, returnedRuleForBulkDisable2],
       total: 2,
     });
+  });
+
+  test('should call untrack alert if untrack is true', async () => {
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
+    });
+
+    const result = await rulesClient.bulkDisableRules({ filter: 'fake_filter', untrack: true });
+
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'id1',
+          attributes: expect.objectContaining({
+            enabled: false,
+          }),
+        }),
+        expect.objectContaining({
+          id: 'id2',
+          attributes: expect.objectContaining({
+            enabled: false,
+          }),
+        }),
+      ]),
+      { overwrite: true }
+    );
+
+    expect(result).toStrictEqual({
+      errors: [],
+      rules: [returnedRuleForBulkDisable1, returnedRuleForBulkDisable2],
+      total: 2,
+    });
+
+    expect(untrackRuleAlerts).toHaveBeenCalled();
+  });
+
+  test('should not call untrack alert if untrack is false', async () => {
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
+    });
+
+    const result = await rulesClient.bulkDisableRules({ filter: 'fake_filter', untrack: true });
+
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'id1',
+          attributes: expect.objectContaining({
+            enabled: false,
+          }),
+        }),
+        expect.objectContaining({
+          id: 'id2',
+          attributes: expect.objectContaining({
+            enabled: false,
+          }),
+        }),
+      ]),
+      { overwrite: true }
+    );
+
+    expect(result).toStrictEqual({
+      errors: [],
+      rules: [returnedRuleForBulkDisable1, returnedRuleForBulkDisable2],
+      total: 2,
+    });
+
+    expect(untrackRuleAlerts).toHaveBeenCalled();
   });
 
   test('should try to disable rules, one successful and one with 500 error', async () => {
@@ -428,8 +502,8 @@ describe('bulkDisableRules', () => {
 
       taskManager.bulkRemove.mockResolvedValue({
         statuses: [
-          { id: 'id1', type: 'alert', success: true },
-          { id: 'id2', type: 'alert', success: false },
+          { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          { id: 'id2', type: RULE_SAVED_OBJECT_TYPE, success: false },
         ],
       });
 
@@ -543,12 +617,12 @@ describe('bulkDisableRules', () => {
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_disable');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('unknown');
       expect(auditLogger.log.mock.calls[0][0]?.kibana).toEqual({
-        saved_object: { id: 'id1', type: 'alert' },
+        saved_object: { id: 'id1', type: RULE_SAVED_OBJECT_TYPE },
       });
       expect(auditLogger.log.mock.calls[1][0]?.event?.action).toEqual('rule_disable');
       expect(auditLogger.log.mock.calls[1][0]?.event?.outcome).toEqual('unknown');
       expect(auditLogger.log.mock.calls[1][0]?.kibana).toEqual({
-        saved_object: { id: 'id2', type: 'alert' },
+        saved_object: { id: 'id2', type: RULE_SAVED_OBJECT_TYPE },
       });
     });
 
@@ -576,51 +650,6 @@ describe('bulkDisableRules', () => {
 
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_disable');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('failure');
-    });
-  });
-
-  describe('recoverRuleAlerts', () => {
-    beforeEach(() => {
-      taskInstanceToAlertTaskInstance.mockImplementation(() => ({
-        state: {
-          alertInstances: {
-            '1': {
-              meta: {
-                lastScheduledActions: {
-                  group: 'default',
-                  date: new Date().toISOString(),
-                },
-              },
-              state: { bar: false },
-            },
-          },
-        },
-      }));
-    });
-    test('should call logEvent', async () => {
-      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
-      });
-
-      await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
-
-      expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
-    });
-
-    test('should call logger.warn', async () => {
-      eventLogger.logEvent.mockImplementation(() => {
-        throw new Error('UPS');
-      });
-      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
-      });
-
-      await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
-
-      expect(logger.warn).toHaveBeenCalledTimes(2);
-      expect(logger.warn).toHaveBeenLastCalledWith(
-        "rulesClient.disable('id2') - Could not write untrack events - UPS"
-      );
     });
   });
 

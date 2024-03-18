@@ -11,7 +11,14 @@ import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, RecursivePartial } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+  RecursivePartial,
+} from '@elastic/eui';
 import type {
   OpsgenieActionParams,
   OpsgenieCloseAlertParams,
@@ -112,8 +119,13 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
         fullWidth
         error={errors['subActionParams.alias']}
         isInvalid={isAliasInvalid}
-        label={i18n.ALIAS_REQUIRED_FIELD_LABEL}
+        label={i18n.ALIAS_FIELD_LABEL}
         helpText={i18n.OPSGENIE_ALIAS_HELP}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {i18n.REQUIRED_LABEL}
+          </EuiText>
+        }
       >
         <TextFieldWithMessageVariables
           index={index}

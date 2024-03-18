@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ScreenshottingPlugin } from './plugin';
+import { PluginInitializerContext } from '@kbn/core-plugins-server';
 
 /**
  * Screenshotting plugin entry point.
  */
-export function plugin(...args: ConstructorParameters<typeof ScreenshottingPlugin>) {
-  return new ScreenshottingPlugin(...args);
+export async function plugin(pluginInitializerContext: PluginInitializerContext) {
+  const { ScreenshottingPlugin } = await import('./plugin');
+  return new ScreenshottingPlugin(pluginInitializerContext);
 }
 
 export { config } from './config';

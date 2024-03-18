@@ -5,18 +5,12 @@
  * 2.0.
  */
 
+// FIXME: Reporting code does not consistently import from here. It would be
+// better to remove this file and do without indirect imports.
 export type { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/share-plugin/public';
-
-export { AppNavLinkStatus } from '@kbn/core/public';
 
 export type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 export { useRequest } from '@kbn/es-ui-shared-plugin/public';
-
-export { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-
-import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
-import type { KibanaContext } from './types';
-export const useKibana = () => _useKibana<KibanaContext>();
 
 export type { SerializableRecord } from '@kbn/utility-types';
 

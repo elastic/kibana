@@ -36,22 +36,26 @@ const initialState: TourContextValue = {
 const TourContext = createContext<TourContextValue>(initialState);
 
 export const RealTourContextProvider = ({ children }: { children: ReactChild }) => {
-  const { guidedOnboardingApi } = useKibana().services.guidedOnboarding;
+  const { guidedOnboarding } = useKibana().services;
 
   const isRulesTourActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$(siemGuideId, SecurityStepId.rules).pipe(
-      // if no result after 30s the observable will error, but the error handler will just emit false
-      timeout(30000),
-      catchError((error) => of(false))
-    ) ?? of(false),
+    guidedOnboarding?.guidedOnboardingApi
+      ?.isGuideStepActive$(siemGuideId, SecurityStepId.rules)
+      .pipe(
+        // if no result after 30s the observable will error, but the error handler will just emit false
+        timeout(30000),
+        catchError((error) => of(false))
+      ) ?? of(false),
     false
   );
   const isAlertsCasesTourActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$(siemGuideId, SecurityStepId.alertsCases).pipe(
-      // if no result after 30s the observable will error, but the error handler will just emit false
-      timeout(30000),
-      catchError((error) => of(false))
-    ) ?? of(false),
+    guidedOnboarding?.guidedOnboardingApi
+      ?.isGuideStepActive$(siemGuideId, SecurityStepId.alertsCases)
+      .pipe(
+        // if no result after 30s the observable will error, but the error handler will just emit false
+        timeout(30000),
+        catchError((error) => of(false))
+      ) ?? of(false),
     false
   );
 
@@ -79,12 +83,12 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
   const [completeStep, setCompleteStep] = useState<null | SecurityStepId>(null);
 
   useEffect(() => {
-    if (!completeStep || !guidedOnboardingApi) {
+    if (!completeStep || !guidedOnboarding?.guidedOnboardingApi) {
       return;
     }
     let ignore = false;
     const complete = async () => {
-      await guidedOnboardingApi.completeGuideStep(siemGuideId, completeStep);
+      await guidedOnboarding?.guidedOnboardingApi?.completeGuideStep(siemGuideId, completeStep);
       if (!ignore) {
         setCompleteStep(null);
         _setActiveStep(1);
@@ -94,7 +98,7 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
     return () => {
       ignore = true;
     };
-  }, [completeStep, guidedOnboardingApi]);
+  }, [completeStep, guidedOnboarding]);
 
   const endTourStep = useCallback((tourId: SecurityStepId) => {
     setCompleteStep(tourId);

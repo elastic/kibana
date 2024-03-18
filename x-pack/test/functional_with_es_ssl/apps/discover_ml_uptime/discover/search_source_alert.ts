@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             rule_id: { type: 'text' },
             rule_name: { type: 'text' },
             alert_id: { type: 'text' },
-            context_message: { type: 'text' },
+            context_link: { type: 'text' },
           },
         },
       },
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       "rule_id": "{{rule.id}}",
       "rule_name": "{{rule.name}}",
       "alert_id": "{{alert.id}}",
-      "context_message": "{{context.message}}"
+      "context_link": "{{context.link}}"
     }`);
   };
 
@@ -199,11 +199,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getResultsLink = async () => {
     // getting the link
     await dataGrid.clickRowToggle();
-    const contextMessageElement = await testSubjects.find('tableDocViewRow-context_message-value');
+    const contextMessageElement = await testSubjects.find('tableDocViewRow-context_link-value');
     const contextMessage = await contextMessageElement.getVisibleText();
-    const [, link] = contextMessage.split(`Link\: `);
 
-    return link;
+    return contextMessage;
   };
 
   const openAlertResults = async (value: string, type: 'id' | 'name' = 'name') => {
@@ -255,10 +254,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const checkInitialRuleParamsState = async (dataView: string, isViewInApp = false) => {
     if (isViewInApp) {
-      expect(await toasts.getToastCount()).to.be(0);
+      expect(await toasts.getCount()).to.be(0);
     } else {
-      expect(await toasts.getToastCount()).to.be(1);
-      expect((await toasts.getToastContent(1)).startsWith('Displayed documents may vary')).to.be(
+      expect(await toasts.getCount()).to.be(1);
+      expect((await toasts.getContentByIndex(1)).startsWith('Displayed documents may vary')).to.be(
         true
       );
     }
@@ -272,7 +271,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const checkUpdatedRuleParamsState = async () => {
-    expect(await toasts.getToastCount()).to.be(0);
+    expect(await toasts.getCount()).to.be(0);
     const queryString = await queryBar.getQueryString();
     const hasFilter = await filterBar.hasFilter('message.keyword', 'msg-1');
     expect(queryString).to.be.equal('message:msg-1');
@@ -400,6 +399,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should navigate to alert results via link provided in notification', async () => {
+      await PageObjects.settings.refreshDataViewFieldList(OUTPUT_DATA_VIEW);
       await openAlertResults(RULE_NAME);
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
     });
@@ -519,8 +519,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not display results after data view removal on clicking viewInApp link', async () => {
       await clickViewInApp(RULE_NAME);
 
-      expect(await toasts.getToastCount()).to.be.equal(1);
-      const content = await toasts.getToastContent(1);
+      expect(await toasts.getCount()).to.be.equal(1);
+      const content = await toasts.getContentByIndex(1);
       expect(content).to.equal(
         `Error fetching search source\nCould not locate that data view (id: ${sourceDataViewId}), click here to re-create it`
       );

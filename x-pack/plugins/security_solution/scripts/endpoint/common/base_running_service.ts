@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import moment from 'moment';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 
 /**
  * A base class for creating a service that runs on a interval
@@ -27,7 +28,7 @@ export class BaseRunningService {
   constructor(
     protected readonly esClient: Client,
     protected readonly kbnClient: KbnClient,
-    protected readonly logger: ToolingLog = new ToolingLog(),
+    protected readonly logger: ToolingLog = createToolingLogger(),
     protected readonly intervalMs: number = 30_000 // 30s
   ) {
     this.logPrefix = this.constructor.name ?? 'BaseRunningService';

@@ -6,7 +6,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { selectTimeline } from '../../../../store/timeline/selectors';
+import { selectTimeline } from '../../../../store/selectors';
 
 export const getEqlOptions = () =>
   createSelector(

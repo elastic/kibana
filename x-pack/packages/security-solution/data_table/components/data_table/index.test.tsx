@@ -57,6 +57,7 @@ window.matchMedia = jest.fn().mockImplementation((query) => {
     removeListener: jest.fn(),
   };
 });
+const dataViewId = 'security-solution-default';
 
 export const TestCellRenderer: React.FC<DeprecatedCellValueElementProps> = ({ columnId, data }) => (
   <>
@@ -149,7 +150,7 @@ describe('DataTable', () => {
         wrapper
           .find('[data-test-subj="dataGridRowCell"]')
           .at(0)
-          .find('.euiDataGridRowCell__truncate')
+          .find('.euiDataGridRowCell__content')
           .childAt(0)
           .text()
       ).toEqual(mockTimelineData[0].ecs.timestamp);
@@ -185,6 +186,7 @@ describe('DataTable', () => {
         fields: [timestampFieldSpec],
         getCellValue: expect.any(Function),
         metadata: {
+          dataViewId,
           scopeId: 'table-test',
         },
         dataGridRef: expect.any(Object),

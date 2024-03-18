@@ -12,12 +12,12 @@ import type { EuiDataGridColumn } from '@elastic/eui';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+import { buildBaseFilterCriteria, isDefaultQuery, matchAllQuery } from '@kbn/ml-query-utils';
 import {
   getFieldType,
   getDataGridSchemaFromKibanaFieldType,
   getDataGridSchemaFromESFieldType,
-  getFieldsFromKibanaIndexPattern,
+  getFieldsFromKibanaDataView,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
@@ -35,11 +35,11 @@ import {
 } from '../../../common/utils/field_utils';
 import { getErrorMessage } from '../../../common/utils/errors';
 
-import { isDefaultQuery, matchAllQuery, TransformConfigQuery } from '../common';
+import type { TransformConfigQuery } from '../common';
 import { useToastNotifications, useAppDependencies } from '../app_dependencies';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
 
-import { SearchItems } from './use_search_items';
+import type { SearchItems } from './use_search_items';
 import { useGetHistogramsForFields } from './use_get_histograms_for_fields';
 import { useDataSearch } from './use_data_search';
 
@@ -140,7 +140,7 @@ export const useIndexData = (
       allPopulatedFields = [...new Set(docs.map(Object.keys).flat(1))];
     }
 
-    const allDataViewFields = getFieldsFromKibanaIndexPattern(dataView);
+    const allDataViewFields = getFieldsFromKibanaDataView(dataView);
     return allPopulatedFields.filter((d) => allDataViewFields.includes(d)).sort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataViewFieldsData, populatedFields]);

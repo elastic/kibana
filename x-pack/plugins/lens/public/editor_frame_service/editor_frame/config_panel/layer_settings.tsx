@@ -6,21 +6,40 @@
  */
 
 import React from 'react';
-import { Visualization, VisualizationLayerWidgetProps } from '../../../types';
+import {
+  DatasourceMap,
+  Visualization,
+  VisualizationLayerWidgetProps,
+  VisualizationMap,
+} from '../../../types';
 import { StaticHeader } from '../../../shared_components';
+import { ChartSwitch } from '../workspace_panel/chart_switch';
 
 export function LayerSettings({
   activeVisualization,
   layerConfigProps,
+  visualizationMap,
+  datasourceMap,
+  shouldDisplayChartSwitch,
 }: {
+  visualizationMap: VisualizationMap;
+  datasourceMap: DatasourceMap;
   activeVisualization: Visualization;
   layerConfigProps: VisualizationLayerWidgetProps;
+  shouldDisplayChartSwitch?: boolean;
 }) {
+  if (shouldDisplayChartSwitch) {
+    return (
+      <ChartSwitch
+        datasourceMap={datasourceMap}
+        visualizationMap={visualizationMap}
+        framePublicAPI={layerConfigProps.frame}
+        size="s"
+      />
+    );
+  }
   if (!activeVisualization.LayerHeaderComponent) {
     const description = activeVisualization.getDescription(layerConfigProps.state);
-    if (!description) {
-      return null;
-    }
     return <StaticHeader label={description.label} icon={description.icon} />;
   }
 

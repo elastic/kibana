@@ -1,0 +1,30 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-plugins-browser",
+    "@kbn/core-plugins-server",
+    "@kbn/core-theme-browser",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/react-kibana-mount",
+    "@kbn/security-plugin-types-common",
+    "@kbn/mock-idp-utils",
+    "@kbn/cloud-plugin",
+    "@kbn/es",
+  ]
+}

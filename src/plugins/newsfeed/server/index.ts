@@ -7,7 +7,6 @@
  */
 
 import { PluginConfigDescriptor } from '@kbn/core/server';
-import { NewsfeedPlugin } from './plugin';
 import { configSchema, NewsfeedConfigType } from './config';
 
 export const config: PluginConfigDescriptor<NewsfeedConfigType> = {
@@ -19,6 +18,7 @@ export const config: PluginConfigDescriptor<NewsfeedConfigType> = {
   },
 };
 
-export function plugin() {
+export async function plugin() {
+  const { NewsfeedPlugin } = await import('./plugin');
   return new NewsfeedPlugin();
 }

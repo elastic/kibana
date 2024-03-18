@@ -184,6 +184,23 @@ describe('createManagedConfiguration()', () => {
       );
     });
 
+    test('should log a warning when an issue occurred in the calculating of the increased poll interval', async () => {
+      const { errors$ } = setupScenario(NaN);
+      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Poll interval configuration had an issue calculating the new poll interval: Math.min(Math.ceil(NaN * 1.2), Math.max(60000, NaN)) = NaN, will keep the poll interval unchanged (NaN)'
+      );
+    });
+
+    test('should log a warning when an issue occurred in the calculating of the decreased poll interval', async () => {
+      setupScenario(NaN);
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Poll interval configuration had an issue calculating the new poll interval: Math.max(NaN, Math.floor(NaN * 0.95)) = NaN, will keep the poll interval unchanged (NaN)'
+      );
+    });
+
     test('should decrease configuration back to normal incrementally after an error is emitted', async () => {
       const { subscription, errors$ } = setupScenario(100);
       errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
@@ -209,6 +226,41 @@ describe('createManagedConfiguration()', () => {
       expect(subscription).toHaveBeenNthCalledWith(3, 144);
       // 172.8 -> 173 from Math.ceil
       expect(subscription).toHaveBeenNthCalledWith(4, 173);
+    });
+
+    test('should limit the upper bound to 60s by default', async () => {
+      const { subscription, errors$ } = setupScenario(3000);
+      for (let i = 0; i < 18; i++) {
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      }
+      expect(subscription).toHaveBeenNthCalledWith(2, 3600);
+      expect(subscription).toHaveBeenNthCalledWith(3, 4320);
+      expect(subscription).toHaveBeenNthCalledWith(4, 5184);
+      expect(subscription).toHaveBeenNthCalledWith(5, 6221);
+      expect(subscription).toHaveBeenNthCalledWith(6, 7466);
+      expect(subscription).toHaveBeenNthCalledWith(7, 8960);
+      expect(subscription).toHaveBeenNthCalledWith(8, 10752);
+      expect(subscription).toHaveBeenNthCalledWith(9, 12903);
+      expect(subscription).toHaveBeenNthCalledWith(10, 15484);
+      expect(subscription).toHaveBeenNthCalledWith(11, 18581);
+      expect(subscription).toHaveBeenNthCalledWith(12, 22298);
+      expect(subscription).toHaveBeenNthCalledWith(13, 26758);
+      expect(subscription).toHaveBeenNthCalledWith(14, 32110);
+      expect(subscription).toHaveBeenNthCalledWith(15, 38532);
+      expect(subscription).toHaveBeenNthCalledWith(16, 46239);
+      expect(subscription).toHaveBeenNthCalledWith(17, 55487);
+      expect(subscription).toHaveBeenNthCalledWith(18, 60000);
+    });
+
+    test('should not adjust poll interval dynamically if initial value is > 60s', async () => {
+      const { subscription, errors$ } = setupScenario(65000);
+      for (let i = 0; i < 5; i++) {
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      }
+      expect(subscription).toHaveBeenCalledTimes(1);
+      expect(subscription).toHaveBeenNthCalledWith(1, 65000);
     });
   });
 });

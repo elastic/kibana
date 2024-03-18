@@ -6,7 +6,8 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { firstValueFrom, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import type { CapabilitiesSwitcher, CoreSetup, Logger } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import type { MlFeatures } from '../../../common/constants/app';
@@ -23,7 +24,9 @@ export const setupCapabilitiesSwitcher = (
   enabledFeatures: MlFeatures,
   logger: Logger
 ) => {
-  coreSetup.capabilities.registerSwitcher(getSwitcher(license$, logger, enabledFeatures));
+  coreSetup.capabilities.registerSwitcher(getSwitcher(license$, logger, enabledFeatures), {
+    capabilityPath: 'ml.*',
+  });
 };
 
 function getSwitcher(

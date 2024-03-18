@@ -7,6 +7,7 @@
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
+    "common/**/*"
   ],
   "kbn_references": [
     "@kbn/alerting-state-types",
@@ -20,7 +21,8 @@
     "@kbn/apm-utils",
     "@kbn/core-saved-objects-common",
     "@kbn/core-saved-objects-utils-server",
-    "@kbn/core-test-helpers-kbn-server"
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/core-saved-objects-server"
   ],
   "exclude": [
     "target/**/*",

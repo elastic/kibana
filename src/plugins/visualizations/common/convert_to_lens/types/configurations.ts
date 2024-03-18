@@ -166,6 +166,7 @@ export interface XYConfiguration {
   labelsOrientation?: LabelsOrientationConfig;
   curveType?: XYCurveType;
   fillOpacity?: number;
+  minBarHeight?: number;
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   showCurrentTimeMarker?: boolean;

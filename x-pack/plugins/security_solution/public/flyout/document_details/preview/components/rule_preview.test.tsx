@@ -10,11 +10,10 @@ import { act, render } from '@testing-library/react';
 import { RulePreview } from './rule_preview';
 import { PreviewPanelContext } from '../context';
 import { mockContextValue } from '../mocks/mock_context';
-import { mockFlyoutContextValue } from '../../shared/mocks/mock_flyout_context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../../../common/mock';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { getStepsData } from '../../../../detections/pages/detection_engine/rules/helpers';
 import {
@@ -58,11 +57,11 @@ const renderRulePreview = () =>
   render(
     <TestProviders>
       <ThemeProvider theme={mockTheme}>
-        <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
+        <TestProvider>
           <PreviewPanelContext.Provider value={contextValue}>
             <RulePreview />
           </PreviewPanelContext.Provider>
-        </ExpandableFlyoutContext.Provider>
+        </TestProvider>
       </ThemeProvider>
     </TestProviders>
   );
@@ -72,6 +71,7 @@ const NO_DATA_MESSAGE = 'There was an error displaying data.';
 describe('<RulePreview />', () => {
   afterEach(() => {
     jest.clearAllMocks();
+    mockUseGetSavedQuery.mockReturnValue({ isSavedQueryLoading: false, savedQueryBar: null });
   });
 
   it('should render rule preview and its sub sections', async () => {
@@ -84,7 +84,6 @@ describe('<RulePreview />', () => {
       scheduleRuleData: mockScheduleStepRule(),
       ruleActionsData: { actions: ['action'] },
     });
-    mockUseGetSavedQuery.mockReturnValue({ isSavedQueryLoading: false, savedQueryBar: null });
 
     const { getByTestId } = renderRulePreview();
 
@@ -124,6 +123,7 @@ describe('<RulePreview />', () => {
 
   it('should render loading spinner when rule is loading', async () => {
     mockUseRuleWithFallback.mockReturnValue({ loading: true, rule: null });
+    mockGetStepsData.mockReturnValue({});
     const { getByTestId } = renderRulePreview();
     await act(async () => {
       expect(getByTestId(RULE_PREVIEW_LOADING_TEST_ID)).toBeInTheDocument();
@@ -132,6 +132,7 @@ describe('<RulePreview />', () => {
 
   it('should not render rule preview when rule is null', async () => {
     mockUseRuleWithFallback.mockReturnValue({});
+    mockGetStepsData.mockReturnValue({});
     const { queryByTestId, getByText } = renderRulePreview();
     await act(async () => {
       expect(queryByTestId(RULE_PREVIEW_BODY_TEST_ID)).not.toBeInTheDocument();

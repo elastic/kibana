@@ -6,35 +6,44 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, ReactNode } from 'react';
-import type { ClusterDetails } from '@kbn/es-types';
+import React, { useMemo, useState, ReactNode } from 'react';
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, type EuiBasicTableColumn, EuiButtonIcon, EuiText } from '@elastic/eui';
+import {
+  Comparators,
+  EuiBasicTable,
+  type EuiBasicTableColumn,
+  EuiButtonIcon,
+  EuiText,
+  Criteria,
+} from '@elastic/eui';
 import { ClusterView } from './cluster_view';
 import { ClusterHealth } from '../clusters_health';
 import { LOCAL_CLUSTER_KEY } from '../local_cluster';
 
-function getInitialExpandedRow(clusters: Record<string, ClusterDetails>) {
+function getInitialExpandedRow(clusters: Record<string, estypes.ClusterDetails>) {
   const clusterNames = Object.keys(clusters);
   return clusterNames.length === 1
     ? { [clusterNames[0]]: <ClusterView clusterDetails={clusters[clusterNames[0]]} /> }
     : {};
 }
 
-interface ClusterColumn {
+interface ClusterItem {
   name: string;
   status: string;
   responseTime?: number;
 }
 
 interface Props {
-  clusters: Record<string, ClusterDetails>;
+  clusters: Record<string, estypes.ClusterDetails>;
 }
 
 export function ClustersTable({ clusters }: Props) {
   const [expandedRows, setExpandedRows] = useState<Record<string, ReactNode>>(
     getInitialExpandedRow(clusters)
   );
+  const [sortField, setSortField] = useState<undefined | keyof ClusterItem>();
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const toggleDetails = (name: string) => {
     const nextExpandedRows = { ...expandedRows };
@@ -46,7 +55,17 @@ export function ClustersTable({ clusters }: Props) {
     setExpandedRows(nextExpandedRows);
   };
 
-  const columns: Array<EuiBasicTableColumn<ClusterColumn>> = [
+  const items = useMemo(() => {
+    return Object.keys(clusters).map((key) => {
+      return {
+        name: key,
+        status: clusters[key].status,
+        responseTime: clusters[key].took,
+      };
+    });
+  }, [clusters]);
+
+  const columns: Array<EuiBasicTableColumn<ClusterItem>> = [
     {
       field: 'name',
       name: i18n.translate('inspector.requests.clusters.table.nameLabel', {
@@ -78,6 +97,7 @@ export function ClustersTable({ clusters }: Props) {
           </>
         );
       },
+      sortable: items.length > 1,
       width: '60%',
     },
     {
@@ -88,6 +108,7 @@ export function ClustersTable({ clusters }: Props) {
       render: (status: string) => {
         return <ClusterHealth status={status} />;
       },
+      sortable: items.length > 1,
     },
     {
       align: 'right' as 'right',
@@ -105,22 +126,38 @@ export function ClustersTable({ clusters }: Props) {
             : null}
         </EuiText>
       ),
+      sortable: items.length > 1,
     },
   ];
 
   return (
     <EuiBasicTable
-      items={Object.keys(clusters).map((key) => {
-        return {
-          name: key,
-          status: clusters[key].status,
-          responseTime: clusters[key].took,
-        };
-      })}
+      items={
+        sortField
+          ? items.sort(Comparators.property(sortField, Comparators.default(sortDirection)))
+          : items
+      }
       isExpandable={true}
       itemIdToExpandedRowMap={expandedRows}
       itemId="name"
       columns={columns}
+      sorting={{
+        sort: sortField
+          ? {
+              field: sortField,
+              direction: sortDirection,
+            }
+          : undefined,
+      }}
+      onChange={({ sort }: Criteria<ClusterItem>) => {
+        if (sort) {
+          setSortField(sort.field);
+          setSortDirection(sort.direction);
+        }
+      }}
+      noItemsMessage={i18n.translate('inspector.requests.clusters.table.noItemsFound', {
+        defaultMessage: 'No clusters found',
+      })}
     />
   );
 }

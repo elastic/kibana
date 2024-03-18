@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { pick } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -45,19 +46,20 @@ export const LogCategorizationPage: FC = () => {
           showFrozenDataTierChoice={showNodeInfo}
           appDependencies={pick(services, [
             'application',
+            'charts',
             'data',
             'executionContext',
-            'charts',
             'fieldFormats',
             'http',
+            'i18n',
+            'lens',
             'notifications',
             'share',
             'storage',
+            'theme',
+            'uiActions',
             'uiSettings',
             'unifiedSearch',
-            'theme',
-            'lens',
-            'i18n',
           ])}
         />
       )}

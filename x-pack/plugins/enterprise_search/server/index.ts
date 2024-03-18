@@ -8,9 +8,8 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 
-import { EnterpriseSearchPlugin } from './plugin';
-
-export const plugin = (initializerContext: PluginInitializerContext) => {
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { EnterpriseSearchPlugin } = await import('./plugin');
   return new EnterpriseSearchPlugin(initializerContext);
 };
 
@@ -40,6 +39,8 @@ export const configSchema = schema.object({
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  // Temp Feature Flag for AI Playground page
+  showAIPlayground: schema.boolean({ defaultValue: false }),
 });
 
 export type ConfigType = TypeOf<typeof configSchema>;

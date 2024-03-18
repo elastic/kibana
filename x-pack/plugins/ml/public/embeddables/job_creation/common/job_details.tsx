@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useState, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -28,11 +29,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Embeddable } from '@kbn/lens-plugin/public';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-
-import { QuickLensJobCreator } from '../../../application/jobs/new_job/job_from_lens';
+import type { TimeRange } from '@kbn/es-query';
+import type { QuickLensJobCreator } from '../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
 import type { CreateState } from '../../../application/jobs/new_job/job_from_dashboard';
 import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '../../../../common/constants/new_job';
@@ -40,12 +39,11 @@ import { basicJobValidation } from '../../../../common/util/job_utils';
 import { JOB_ID_MAX_LENGTH } from '../../../../common/constants/validation';
 import { invalidTimeIntervalMessage } from '../../../application/jobs/new_job/common/job_validator/util';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
-import { useMlFromLensKibanaContext } from '../lens/context';
+import { useMlFromLensKibanaContext } from './context';
 
 export interface CreateADJobParams {
   jobId: string;
   bucketSpan: string;
-  embeddable: MapEmbeddable | Embeddable;
   startJob: boolean;
   runInRealTime: boolean;
 }
@@ -56,8 +54,9 @@ interface Props {
   createADJob: (args: CreateADJobParams) => Promise<CreateState>;
   layer?: LayerResult;
   layerIndex: number;
-  embeddable: Embeddable | MapEmbeddable;
+  timeRange: TimeRange | undefined;
   incomingCreateError?: { text: string; errorText: string };
+  outerFormComplete?: boolean;
 }
 
 enum STATE {
@@ -74,8 +73,9 @@ export const JobDetails: FC<Props> = ({
   createADJob,
   layer,
   layerIndex,
-  embeddable,
+  timeRange,
   incomingCreateError,
+  outerFormComplete,
 }) => {
   const {
     services: {
@@ -106,7 +106,6 @@ export const JobDetails: FC<Props> = ({
     const result = await createADJob({
       jobId,
       bucketSpan,
-      embeddable,
       startJob,
       runInRealTime,
     });
@@ -121,7 +120,6 @@ export const JobDetails: FC<Props> = ({
 
   const viewResults = useCallback(
     async (type: JOB_TYPE | null) => {
-      const { timeRange } = embeddable.getInput();
       const locator = share.url.locators.get(ML_APP_LOCATOR);
       if (locator) {
         const page = startJob
@@ -144,7 +142,7 @@ export const JobDetails: FC<Props> = ({
         application.navigateToUrl(url);
       }
     },
-    [jobId, embeddable, share, application, startJob]
+    [share, startJob, jobId, timeRange, application]
   );
 
   function setStartJobWrapper(start: boolean) {
@@ -313,7 +311,8 @@ export const JobDetails: FC<Props> = ({
                   state === STATE.VALIDATING ||
                   jobId === '' ||
                   jobIdValidationError !== '' ||
-                  bucketSpanValidationError !== ''
+                  bucketSpanValidationError !== '' ||
+                  outerFormComplete === false
                 }
                 onClick={createJob.bind(null, layerIndex)}
                 size="s"

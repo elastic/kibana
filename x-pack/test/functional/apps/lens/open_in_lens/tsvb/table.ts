@@ -114,8 +114,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('lnsDataTable');
       await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
       await testSubjects.click('indexPattern-advanced-accordion');
-      const reducedTimeRange = await testSubjects.find('indexPattern-dimension-reducedTimeRange');
-      expect(await reducedTimeRange.getVisibleText()).to.be('1 minute (1m)');
+      const reducedTimeRange = await testSubjects.find(
+        'indexPattern-dimension-reducedTimeRange > comboBoxSearchInput'
+      );
+      expect(await reducedTimeRange.getAttribute('value')).to.be('1 minute (1m)');
       await retry.try(async () => {
         const layerCount = await lens.getLayerCount();
         expect(layerCount).to.be(1);
@@ -198,7 +200,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('lnsDataTable');
       await retry.try(async () => {
         const closePalettePanels = await testSubjects.findAll(
-          'lns-indexPattern-PalettePanelContainerBack'
+          'lns-indexPattern-SettingWithSiblingFlyoutBack'
         );
         if (closePalettePanels.length) {
           await lens.closePalettePanel();
@@ -207,7 +209,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
 
-        await lens.openPalettePanel('lnsDatatable');
+        await lens.openPalettePanel();
         const colorStops = await lens.getPaletteColorStops();
 
         expect(colorStops).to.eql([

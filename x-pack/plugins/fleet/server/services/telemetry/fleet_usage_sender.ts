@@ -24,7 +24,7 @@ const FLEET_AGENTS_EVENT_TYPE = 'fleet_agents';
 
 export class FleetUsageSender {
   private taskManager?: TaskManagerStartContract;
-  private taskVersion = '1.1.3';
+  private taskVersion = '1.1.4';
   private taskType = 'Fleet-Usage-Sender';
   private wasStarted: boolean = false;
   private interval = '1h';
@@ -83,6 +83,7 @@ export class FleetUsageSender {
       const {
         agents_per_version: agentsPerVersion,
         agents_per_output_type: agentsPerOutputType,
+        upgrade_details: upgradeDetails,
         ...fleetUsageData
       } = usageData;
       appContextService
@@ -105,6 +106,13 @@ export class FleetUsageSender {
         core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, {
           agents_per_output_type: byOutputType,
         });
+      });
+
+      appContextService
+        .getLogger()
+        .debug('Agents upgrade details telemetry: ' + JSON.stringify(upgradeDetails));
+      upgradeDetails.forEach((upgradeDetailsObj) => {
+        core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, { upgrade_details: upgradeDetailsObj });
       });
     } catch (error) {
       appContextService

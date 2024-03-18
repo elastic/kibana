@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import { EuiCallOut, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getNestedProperty } from '@kbn/ml-nested-property';
@@ -146,7 +147,7 @@ export const SourceSelection: FC = () => {
                 type: 'index-pattern',
                 getIconForSavedObject: () => 'indexPatternApp',
                 name: i18n.translate(
-                  'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.indexPattern',
+                  'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.dataView',
                   {
                     defaultMessage: 'Data view',
                   }

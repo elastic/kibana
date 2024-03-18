@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useUrlParams } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -23,10 +23,17 @@ import type { CaseViewPageProps } from './types';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
 
+const getActiveTabId = (tabId?: string) => {
+  if (tabId && Object.values(CASE_VIEW_PAGE_TABS).includes(tabId as CASE_VIEW_PAGE_TABS)) {
+    return tabId;
+  }
+
+  return CASE_VIEW_PAGE_TABS.ACTIVITY;
+};
+
 export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
     caseData,
-    onComponentInitialized,
     refreshRef,
     ruleDetailsNavigation,
     actionsNavigation,
@@ -39,14 +46,8 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
 
     useCasesTitleBreadcrumbs(caseData.title);
 
-    const activeTabId = useMemo(() => {
-      if (urlParams.tabId && Object.values(CASE_VIEW_PAGE_TABS).includes(urlParams.tabId)) {
-        return urlParams.tabId;
-      }
-      return CASE_VIEW_PAGE_TABS.ACTIVITY;
-    }, [urlParams.tabId]);
+    const activeTabId = getActiveTabId(urlParams?.tabId);
 
-    const init = useRef(true);
     const timelineUi = useTimelineContext()?.ui;
 
     const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
@@ -82,16 +83,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       [onUpdateField]
     );
 
-    // useEffect used for component's initialization
-    useEffect(() => {
-      if (init.current) {
-        init.current = false;
-        if (onComponentInitialized) {
-          onComponentInitialized();
-        }
-      }
-    }, [onComponentInitialized]);
-
     return (
       <>
         <HeaderPage
@@ -113,15 +104,12 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             onUpdateField={onUpdateField}
           />
         </HeaderPage>
-
         <EuiFlexGroup>
           <EuiFlexItem>
             <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
           </EuiFlexItem>
         </EuiFlexGroup>
-
         <EuiSpacer size="l" />
-
         <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`} alignItems="baseline">
           {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && (
             <CaseViewActivity

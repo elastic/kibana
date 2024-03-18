@@ -15,14 +15,16 @@
       font-weight: $euiFontWeightRegular;
     }
 
-    .optionsList__filterValid {
+    .optionsList__selections {
+      overflow: hidden !important;
+    }
+
+    .optionsList__filter {
       font-weight: $euiFontWeightMedium;
     }
 
     .optionsList__filterInvalid {
-      color: $euiTextSubduedColor;
-      text-decoration: line-through;
-      font-weight: $euiFontWeightRegular;
+      color: $euiColorWarningText;
     }
 
     .optionsList__negateLabel {
@@ -31,10 +33,9 @@
       color: $euiColorDanger;
     }
 
-    .euiFilterButton__text-hasNotification {
+    .optionsList--selectionText {
       flex-grow: 1;
-      justify-content: space-between;
-      width: 0;
+      text-align: left;
     }
   }
 
@@ -65,7 +66,7 @@
     }
 
     .optionsList__actionsRow {
-      margin: ($euiSizeS / 2) 0 !important;
+      margin: calc($euiSizeS / 2) 0 !important;
 
       .optionsList__actionBarDivider {
         height: $euiSize;
@@ -75,12 +76,11 @@
   }
 
   .optionsList-control-ignored-selection-title {
-    padding-left: $euiSizeS;
+    padding-left: $euiSizeM;
   }
 
   .optionsList__selectionInvalid {
-    text-decoration: line-through;
-    color: $euiTextSubduedColor;
+    color: $euiColorWarningText;
   }
 
   .optionslist--loadingMoreGroupLabel {

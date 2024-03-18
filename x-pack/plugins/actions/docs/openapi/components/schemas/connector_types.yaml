@@ -12,6 +12,7 @@ enum:
   - .opsgenie
   - .pagerduty
   - .resilient
+  - .sentinelone
   - .servicenow
   - .servicenow-itom
   - .servicenow-sir
@@ -24,4 +25,5 @@ enum:
   - .torq
   - .webhook
   - .xmatters
-example: .server-log
+examples:
+  - .server-log

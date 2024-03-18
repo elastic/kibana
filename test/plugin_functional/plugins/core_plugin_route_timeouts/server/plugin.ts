@@ -53,7 +53,7 @@ export class CorePluginRouteTimeoutsPlugin implements Plugin {
           body: {
             accepts: ['application/json'],
           },
-          timeout: { idleSocket: 10 },
+          timeout: { idleSocket: 5 },
         },
         path: '/short_idle_socket_timeout',
         validate: {

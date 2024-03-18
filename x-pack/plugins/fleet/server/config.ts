@@ -21,7 +21,6 @@ import {
   PreconfiguredFleetProxiesSchema,
 } from './types';
 import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts';
-import { appContextService } from './services';
 
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
@@ -40,7 +39,6 @@ export const config: PluginConfigDescriptor = {
     },
     internal: {
       fleetServerStandalone: true,
-      disableProxies: true,
       activeAgentsSoftLimit: true,
       onlyAllowAgentUpgradeToKnownVersions: true,
     },
@@ -107,9 +105,27 @@ export const config: PluginConfigDescriptor = {
 
       return fullConfig;
     },
+    // Log invalid experimental values
+    (fullConfig, fromPath, addDeprecation) => {
+      for (const key of fullConfig?.xpack?.fleet?.enableExperimental ?? []) {
+        if (!isValidExperimentalValue(key)) {
+          addDeprecation({
+            configPath: 'xpack.fleet.fleet.enableExperimental',
+            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.fleet.enableExperimental].`,
+            correctiveActions: {
+              manualSteps: [
+                `Use [xpack.fleet.fleet.enableExperimental] with an array of valid experimental features.`,
+              ],
+            },
+            level: 'warning',
+          });
+        }
+      }
+    },
   ],
   schema: schema.object(
     {
+      isAirGapped: schema.maybe(schema.boolean({ defaultValue: false })),
       registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       agents: schema.object({
@@ -134,6 +150,7 @@ export const config: PluginConfigDescriptor = {
       setup: schema.maybe(
         schema.object({
           agentPolicySchemaUpgradeBatchSize: schema.maybe(schema.number()),
+          uninstallTokenVerificationBatchSize: schema.maybe(schema.number()),
         })
       ),
       developer: schema.object({
@@ -141,6 +158,9 @@ export const config: PluginConfigDescriptor = {
         disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
         allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
         bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
+        disableBundledPackagesCache: schema.boolean({
+          defaultValue: false,
+        }),
       }),
       packageVerification: schema.object({
         gpgKeyPath: schema.string({ defaultValue: DEFAULT_GPG_KEY_PATH }),
@@ -156,23 +176,11 @@ export const config: PluginConfigDescriptor = {
        */
       enableExperimental: schema.arrayOf(schema.string(), {
         defaultValue: () => [],
-        validate(list) {
-          for (const key of list) {
-            if (!isValidExperimentalValue(key)) {
-              appContextService
-                .getLogger()
-                .warn(`[${key}] is not a valid fleet experimental feature.`);
-            }
-          }
-        },
       }),
 
       internal: schema.maybe(
         schema.object({
           disableILMPolicies: schema.boolean({
-            defaultValue: false,
-          }),
-          disableProxies: schema.boolean({
             defaultValue: false,
           }),
           fleetServerStandalone: schema.boolean({

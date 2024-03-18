@@ -71,7 +71,7 @@ export function HomeApp({ directories, solutions }) {
         <Routes>
           <Route path="/tutorial/:id" render={renderTutorial} />
           <Route path="/tutorial_directory/:tab?" render={renderTutorialDirectory} />
-          {guidedOnboardingService.isEnabled && (
+          {guidedOnboardingService?.isEnabled && (
             <Route path="/getting_started">
               <GettingStarted />
             </Route>

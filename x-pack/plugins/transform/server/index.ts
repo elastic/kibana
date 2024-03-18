@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
-import { TransformServerPlugin } from './plugin';
-
-export const plugin = (ctx: PluginInitializerContext) => new TransformServerPlugin(ctx);
+export const plugin = async (ctx: PluginInitializerContext) => {
+  const { TransformServerPlugin } = await import('./plugin');
+  return new TransformServerPlugin(ctx);
+};
 
 export { registerTransformHealthRuleType } from './lib/alerting';

@@ -8,11 +8,9 @@
 
 export {
   FieldPicker,
-  TruncatedLabel,
   NameInput,
   DebouncedInput,
   useDebouncedValue,
-  TooltipWrapper,
   ColorPicker,
   IconSelect,
   IconSelectSetting,
@@ -31,6 +29,7 @@ export {
   LineStyleSettings,
   TextDecorationSetting,
   emptyTitleText,
+  ChartSwitchTrigger,
 } from './components';
 
 export { isFieldLensCompatible } from './util';

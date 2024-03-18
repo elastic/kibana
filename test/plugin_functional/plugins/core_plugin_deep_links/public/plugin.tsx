@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { DEFAULT_APP_VISIBILITY } from '@kbn/core-application-browser-internal';
 import { Plugin, CoreSetup } from '@kbn/core/public';
-import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 export class CorePluginDeepLinksPlugin
   implements Plugin<CorePluginDeepLinksPluginSetup, CorePluginDeepLinksPluginStart>
@@ -19,19 +20,19 @@ export class CorePluginDeepLinksPlugin
       appRoute: '/app/dl',
       defaultPath: '/home',
       category: DEFAULT_APP_CATEGORIES.security,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       deepLinks: [
         {
           id: 'home',
           title: 'DL Home',
           path: '/home',
-          navLinkStatus: AppNavLinkStatus.visible,
+          visibleIn: DEFAULT_APP_VISIBILITY,
         },
         {
           id: 'pageA',
-          title: 'DL Page A',
+          title: 'DL page A',
           path: '/page-a',
-          navLinkStatus: AppNavLinkStatus.visible,
+          visibleIn: DEFAULT_APP_VISIBILITY,
         },
         {
           id: 'sectionOne',
@@ -39,15 +40,15 @@ export class CorePluginDeepLinksPlugin
           deepLinks: [
             {
               id: 'pageB',
-              title: 'DL Page B',
+              title: 'DL page B',
               path: '/page-b',
-              navLinkStatus: AppNavLinkStatus.visible,
+              visibleIn: DEFAULT_APP_VISIBILITY,
             },
           ],
         },
         {
           id: 'pageC',
-          title: 'DL Page C',
+          title: 'DL page C',
           path: '/page-c',
           // navLinkStatus hidden by default
         },

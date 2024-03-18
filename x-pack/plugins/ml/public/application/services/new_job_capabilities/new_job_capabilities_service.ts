@@ -13,16 +13,23 @@ import {
   type FieldId,
   EVENT_RATE_FIELD_ID,
 } from '@kbn/ml-anomaly-utils';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import { getGeoFields, filterCategoryFields } from '../../../../common/util/fields_utils';
-import { ml } from '../ml_api_service';
+import { ml, type MlApiServices } from '../ml_api_service';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 
-class NewJobCapsService extends NewJobCapabilitiesServiceBase {
+export class NewJobCapsService extends NewJobCapabilitiesServiceBase {
   private _catFields: Field[] = [];
   private _dateFields: Field[] = [];
   private _geoFields: Field[] = [];
   private _includeEventRateField: boolean = true;
   private _removeTextFields: boolean = true;
+  private _mlApiService: MlApiServices;
+
+  constructor(mlApiService: MlApiServices) {
+    super();
+    this._mlApiService = mlApiService;
+  }
 
   public get catFields(): Field[] {
     return this._catFields;
@@ -49,7 +56,10 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
       this._includeEventRateField = includeEventRateField;
       this._removeTextFields = removeTextFields;
 
-      const resp = await ml.jobs.newJobCaps(dataView.getIndexPattern(), dataView.type === 'rollup');
+      const resp = await this._mlApiService.jobs.newJobCaps(
+        dataView.getIndexPattern(),
+        dataView.type === DataViewType.ROLLUP
+      );
       const { fields: allFields, aggs } = createObjects(resp, dataView.getIndexPattern());
 
       if (this._includeEventRateField === true) {
@@ -175,4 +185,4 @@ function addEventRateField(aggs: Aggregation[], fields: Field[]) {
   fields.splice(0, 0, eventRateField);
 }
 
-export const newJobCapsService = new NewJobCapsService();
+export const newJobCapsService = new NewJobCapsService(ml);

@@ -18,6 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
   const security = getService('security');
+  const retry = getService('retry');
+  const find = getService('find');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -33,6 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover esql view', async function () {
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -52,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('addFilter')).to.be(true);
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(true);
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
-        expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
+        expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
@@ -74,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(false);
         // when Lens suggests a table, we render an ESQL based histogram
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
-        expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
+        expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(false);
@@ -132,6 +135,107 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const cell = await dataGrid.getCellElement(0, 2);
         expect(await cell.getVisibleText()).to.be('1');
+      });
+
+      it('should render correctly if there are empty fields', async function () {
+        await PageObjects.discover.selectTextBaseLang();
+        const testQuery = `from logstash-* | limit 10 | keep machine.ram_range, bytes`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        const cell = await dataGrid.getCellElement(0, 3);
+        expect(await cell.getVisibleText()).to.be(' - ');
+        expect(await dataGrid.getHeaders()).to.eql([
+          'Control column',
+          'Select column',
+          'Numberbytes',
+          'machine.ram_range',
+        ]);
+      });
+    });
+
+    describe('errors', () => {
+      it('should show error messages for syntax errors in query', async function () {
+        await PageObjects.discover.selectTextBaseLang();
+        const brokenQueries = [
+          'from logstash-* | limit 10*',
+          'from logstash-* | limit A',
+          'from logstash-* | where a*',
+          'limit 10',
+        ];
+        for (const testQuery of brokenQueries) {
+          await monacoEditor.setCodeEditorValue(testQuery);
+          await testSubjects.click('querySubmitButton');
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          // error in fetching documents because of the invalid query
+          await PageObjects.discover.showsErrorCallout();
+          const message = await testSubjects.getVisibleText('discoverErrorCalloutMessage');
+          expect(message).to.contain(
+            "[esql] > Couldn't parse Elasticsearch ES|QL query. Check your query and try again."
+          );
+          expect(message).to.not.contain('undefined');
+          if (message.includes('line')) {
+            expect((await monacoEditor.getCurrentMarkers('kibanaCodeEditor')).length).to.eql(1);
+          }
+        }
+      });
+    });
+
+    describe('switch modal', () => {
+      beforeEach(async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+      });
+
+      it('should show switch modal when switching to a data view', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.selectIndexPattern('logstash-*', false);
+        await retry.try(async () => {
+          await testSubjects.existOrFail('unifiedSearch_switch_modal');
+        });
+      });
+
+      it('should not show switch modal when switching to a data view while a saved search is open', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.selectIndexPattern('logstash-*', false);
+        await retry.try(async () => {
+          await testSubjects.existOrFail('unifiedSearch_switch_modal');
+        });
+        await find.clickByCssSelector(
+          '[data-test-subj="unifiedSearch_switch_modal"] .euiModal__closeIcon'
+        );
+        await retry.try(async () => {
+          await testSubjects.missingOrFail('unifiedSearch_switch_modal');
+        });
+        await PageObjects.discover.saveSearch('esql_test');
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await testSubjects.missingOrFail('unifiedSearch_switch_modal');
+      });
+
+      it('should show switch modal when switching to a data view while a saved search with unsaved changes is open', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.saveSearch('esql_test2');
+        const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.selectIndexPattern('logstash-*', false);
+        await retry.try(async () => {
+          await testSubjects.existOrFail('unifiedSearch_switch_modal');
+        });
       });
     });
   });

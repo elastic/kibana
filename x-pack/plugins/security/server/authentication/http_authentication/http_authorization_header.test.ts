@@ -75,6 +75,23 @@ describe('HTTPAuthorizationHeader.parseFromRequest()', () => {
       expect(header!.credentials).toBe(credentials);
     }
   });
+
+  it('parses custom headers', () => {
+    const mockRequest = httpServerMock.createKibanaRequest({
+      headers: { 'es-client-authentication': 'SharedSecret secret' },
+    });
+
+    // Doesn't parse custom headers by default.
+    expect(HTTPAuthorizationHeader.parseFromRequest(mockRequest)).toBeNull();
+
+    const header = HTTPAuthorizationHeader.parseFromRequest(
+      mockRequest,
+      'es-client-authentication'
+    );
+    expect(header).not.toBeNull();
+    expect(header?.scheme).toBe('SharedSecret');
+    expect(header?.credentials).toBe('secret');
+  });
 });
 
 describe('toString()', () => {

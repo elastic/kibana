@@ -46,6 +46,7 @@ import type {
 import { createGridColumns } from './columns';
 import { createGridCell } from './cell_value';
 import {
+  buildSchemaDetectors,
   createGridFilterHandler,
   createGridHideHandler,
   createGridResizeHandler,
@@ -244,8 +245,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [columnConfig]
   );
 
-  const { sortingColumnId: sortBy, sortingDirection: sortDirection } = props.args;
-
   const isReadOnlySorted = renderMode !== 'edit';
 
   const onColumnResize = useMemo(
@@ -261,20 +260,17 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [onEditAction, setColumnConfig, columnConfig, isInteractive]
   );
 
-  const isNumericMap: Record<string, boolean> = useMemo(() => {
-    const numericMap: Record<string, boolean> = {};
-    for (const column of firstLocalTable.columns) {
-      // filtered metrics result as "number" type, but have no field
-      numericMap[column.id] =
-        (column.meta.type === 'number' && column.meta.field != null) ||
-        // as fallback check the first available value type
-        // mind here: date can be seen as numbers, to carefully check that is a filtered metric
-        (column.meta.field == null &&
-          typeof firstLocalTable.rows.find((row) => row[column.id] != null)?.[column.id] ===
-            'number');
-    }
-    return numericMap;
-  }, [firstLocalTable]);
+  const isNumericMap: Record<string, boolean> = useMemo(
+    () =>
+      firstLocalTable.columns.reduce<Record<string, boolean>>(
+        (map, column) => ({
+          ...map,
+          [column.id]: column.meta.type === 'number',
+        }),
+        {}
+      ),
+    [firstLocalTable]
+  );
 
   const alignments: Record<string, 'left' | 'right' | 'center'> = useMemo(() => {
     const alignmentMap: Record<string, 'left' | 'right' | 'center'> = {};
@@ -340,6 +336,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     ]
   );
 
+  const schemaDetectors = useMemo(
+    () => buildSchemaDetectors(columns, columnConfig, firstLocalTable, formatters),
+    [columns, firstLocalTable, columnConfig, formatters]
+  );
+
   const trailingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     if (!hasAtLeastOneRowClickAction || !onRowContextMenuClick || !isInteractive) {
       return [];
@@ -403,8 +404,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const sorting = useMemo<EuiDataGridSorting | undefined>(
-    () => createGridSortingConfig(sortBy, sortDirection as LensGridDirection, onEditAction),
-    [onEditAction, sortBy, sortDirection]
+    () =>
+      createGridSortingConfig(
+        columnConfig.sortingColumnId,
+        columnConfig.sortingDirection as LensGridDirection,
+        onEditAction
+      ),
+    [onEditAction, columnConfig]
   );
 
   const renderSummaryRow = useMemo(() => {
@@ -479,12 +485,14 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
                 }
               : undefined,
           }}
+          inMemory={{ level: 'sorting' }}
           columns={columns}
           columnVisibility={columnVisibility}
           trailingControlColumns={trailingControlColumns}
           rowCount={firstLocalTable.rows.length}
           renderCellValue={renderCellValue}
           gridStyle={gridStyle}
+          schemaDetectors={schemaDetectors}
           sorting={sorting}
           pagination={
             pagination && {

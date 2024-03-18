@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
-import { ComplianceDashboardData, GroupedFindingsEvaluation } from '../../../../common/types';
+import { ComplianceDashboardData, GroupedFindingsEvaluation } from '../../../../common/types_old';
 
 export interface RisksTableProps {
   data: ComplianceDashboardData['groupedFindingsEvaluation'];

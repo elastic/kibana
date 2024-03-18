@@ -25,12 +25,14 @@ import {
   buildComponentTemplates,
   installComponentAndIndexTemplateForDataStream,
 } from '../template/install';
-import { isFields, processFields } from '../../fields/field';
-import { generateMappings } from '../template/template';
+import { isFields } from '../../fields/field';
 import { getESAssetMetadata } from '../meta';
-import { updateEsAssetReferences } from '../../packages/install';
-import { getPathParts } from '../../archive';
-import { ElasticsearchAssetType } from '../../../../../common/types/models';
+import { updateEsAssetReferences } from '../../packages/es_assets_reference';
+import { getAssetFromAssetsMap, getPathParts } from '../../archive';
+import {
+  ElasticsearchAssetType,
+  type PackageInstallContext,
+} from '../../../../../common/types/models';
 import type {
   EsAssetReference,
   InstallablePackage,
@@ -40,10 +42,11 @@ import type {
 } from '../../../../../common/types/models';
 import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
+import { isUserSettingsTemplate } from '../template/utils';
 
 import { deleteTransforms } from './remove';
-import { getAsset } from './common';
 import { getDestinationIndexAliases } from './transform_utils';
+import { loadMappingForTransform } from './mappings';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {
@@ -69,7 +72,7 @@ interface TransformInstallation extends TransformModuleBase {
 }
 
 const installLegacyTransformsAssets = async (
-  installablePackage: InstallablePackage,
+  packageInstallContext: PackageInstallContext,
   installNameSuffix: string,
   transformPaths: string[],
   esClient: ElasticsearchClient,
@@ -89,7 +92,11 @@ const installLegacyTransformsAssets = async (
   if (transformPaths.length > 0) {
     const transformRefs = transformPaths.reduce<EsAssetReference[]>((acc, path) => {
       acc.push({
-        id: getLegacyTransformNameForInstallation(installablePackage, path, installNameSuffix),
+        id: getLegacyTransformNameForInstallation(
+          packageInstallContext.packageInfo,
+          path,
+          installNameSuffix
+        ),
         type: ElasticsearchAssetType.transform,
       });
 
@@ -99,7 +106,7 @@ const installLegacyTransformsAssets = async (
     // get and save transform refs before installing transforms
     esReferences = await updateEsAssetReferences(
       savedObjectsClient,
-      installablePackage.name,
+      packageInstallContext.packageInfo.name,
       esReferences,
       {
         assetsToAdd: transformRefs,
@@ -107,12 +114,14 @@ const installLegacyTransformsAssets = async (
     );
 
     const transforms: TransformInstallation[] = transformPaths.map((path: string) => {
-      const content = JSON.parse(getAsset(path).toString('utf-8'));
-      content._meta = getESAssetMetadata({ packageName: installablePackage.name });
+      const content = JSON.parse(
+        getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf-8')
+      );
+      content._meta = getESAssetMetadata({ packageName: packageInstallContext.packageInfo.name });
 
       return {
         installationName: getLegacyTransformNameForInstallation(
-          installablePackage,
+          packageInstallContext.packageInfo,
           path,
           installNameSuffix
         ),
@@ -130,7 +139,7 @@ const installLegacyTransformsAssets = async (
   if (previousInstalledTransformEsAssets.length > 0) {
     esReferences = await updateEsAssetReferences(
       savedObjectsClient,
-      installablePackage.name,
+      packageInstallContext.packageInfo.name,
       esReferences,
       {
         assetsToRemove: previousInstalledTransformEsAssets,
@@ -142,13 +151,14 @@ const installLegacyTransformsAssets = async (
 };
 
 const processTransformAssetsPerModule = (
-  installablePackage: InstallablePackage,
+  packageInstallContext: PackageInstallContext,
   installNameSuffix: string,
   transformPaths: string[],
   previousInstalledTransformEsAssets: EsAssetReference[] = [],
   force?: boolean,
   username?: string
 ) => {
+  const { assetsMap, packageInfo: installablePackage } = packageInstallContext;
   const transformsSpecifications = new Map();
   const destinationIndexTemplates: DestinationIndexTemplateInstallation[] = [];
   const transforms: TransformInstallation[] = [];
@@ -169,12 +179,10 @@ const processTransformAssetsPerModule = (
     }
     const packageAssets = transformsSpecifications.get(transformModuleId);
 
-    const content = safeLoad(getAsset(path).toString('utf-8'));
+    const content = safeLoad(getAssetFromAssetsMap(assetsMap, path).toString('utf-8'));
 
     // Handling fields.yml and all other files within 'fields' folder
     if (fileName === TRANSFORM_SPECS_TYPES.FIELDS || isFields(path)) {
-      const validFields = processFields(content);
-      const mappings = generateMappings(validFields);
       const templateName = getTransformAssetNameForInstallation(
         installablePackage,
         transformModuleId,
@@ -198,14 +206,6 @@ const processTransformAssetsPerModule = (
       } else {
         destinationIndexTemplates[indexToModify] = template;
       }
-
-      // If there's already mappings set previously, append it to new
-      const previousMappings =
-        transformsSpecifications.get(transformModuleId)?.get('mappings') ?? {};
-
-      transformsSpecifications.get(transformModuleId)?.set('mappings', {
-        properties: { ...previousMappings.properties, ...mappings.properties },
-      });
     }
 
     if (fileName === TRANSFORM_SPECS_TYPES.TRANSFORM) {
@@ -384,6 +384,20 @@ const processTransformAssetsPerModule = (
     version: t.transformVersion,
   }));
 
+  // Load and generate mappings
+  for (const destinationIndexTemplate of destinationIndexTemplates) {
+    if (!destinationIndexTemplate.transformModuleId) {
+      continue;
+    }
+
+    transformsSpecifications
+      .get(destinationIndexTemplate.transformModuleId)
+      ?.set(
+        'mappings',
+        loadMappingForTransform(packageInstallContext, destinationIndexTemplate.transformModuleId)
+      );
+  }
+
   return {
     indicesToAddRefs,
     indexTemplatesRefs,
@@ -399,7 +413,7 @@ const processTransformAssetsPerModule = (
 };
 
 const installTransformsAssets = async (
-  installablePackage: InstallablePackage,
+  packageInstallContext: PackageInstallContext,
   installNameSuffix: string,
   transformPaths: string[],
   esClient: ElasticsearchClient,
@@ -425,7 +439,7 @@ const installTransformsAssets = async (
       transformsToRemove,
       transformsToRemoveWithDestIndex,
     } = processTransformAssetsPerModule(
-      installablePackage,
+      packageInstallContext,
       installNameSuffix,
       transformPaths,
       previousInstalledTransformEsAssets,
@@ -441,13 +455,12 @@ const installTransformsAssets = async (
       ? await generateTransformSecondaryAuthHeaders({
           authorizationHeader,
           logger,
-          pkgName: installablePackage.name,
-          pkgVersion: installablePackage.version,
+          pkgName: packageInstallContext.packageInfo.name,
+          pkgVersion: packageInstallContext.packageInfo.version,
           username,
         })
       : // No need to generate api key/secondary auth if all transforms are run as kibana_system user
         undefined;
-
     // delete all previous transform
     await Promise.all([
       deleteTransforms(
@@ -469,7 +482,7 @@ const installTransformsAssets = async (
     // get and save refs associated with the transforms before installing
     esReferences = await updateEsAssetReferences(
       savedObjectsClient,
-      installablePackage.name,
+      packageInstallContext.packageInfo.name,
       esReferences,
       {
         assetsToAdd: [
@@ -504,7 +517,7 @@ const installTransformsAssets = async (
             mappings: customMappings,
             templateName: destinationIndexTemplate.installationName,
             registryElasticsearch,
-            packageName: installablePackage.name,
+            packageName: packageInstallContext.packageInfo.name,
             defaultSettings: {
               // Adding destination pipeline here because else these templates will be overridden
               // by index setting
@@ -533,6 +546,8 @@ const installTransformsAssets = async (
                   ],
                   _meta: destinationIndexTemplate._meta,
                   composed_of: Object.keys(componentTemplates),
+                  ignore_missing_component_templates:
+                    Object.keys(componentTemplates).filter(isUserSettingsTemplate),
                 },
               },
             });
@@ -579,7 +594,7 @@ const installTransformsAssets = async (
       // get and save refs associated with the transforms before installing
       esReferences = await updateEsAssetReferences(
         savedObjectsClient,
-        installablePackage.name,
+        packageInstallContext.packageInfo.name,
         esReferences,
         {
           assetsToRemove: installedTransforms,
@@ -593,8 +608,7 @@ const installTransformsAssets = async (
 };
 
 interface InstallTransformsParams {
-  installablePackage: InstallablePackage;
-  paths: string[];
+  packageInstallContext: PackageInstallContext;
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
@@ -611,8 +625,7 @@ interface InstallTransformsParams {
   authorizationHeader?: HTTPAuthorizationHeader | null;
 }
 export const installTransforms = async ({
-  installablePackage,
-  paths,
+  packageInstallContext,
   esClient,
   savedObjectsClient,
   logger,
@@ -620,11 +633,12 @@ export const installTransforms = async ({
   esReferences,
   authorizationHeader,
 }: InstallTransformsParams) => {
+  const { paths, packageInfo } = packageInstallContext;
   const transformPaths = paths.filter((path) => isTransform(path));
 
   const installation = await getInstallation({
     savedObjectsClient,
-    pkgName: installablePackage.name,
+    pkgName: packageInfo.name,
   });
   esReferences = esReferences ?? installation?.installed_es ?? [];
   let previousInstalledTransformEsAssets: EsAssetReference[] = [];
@@ -641,12 +655,12 @@ export const installTransforms = async ({
     }
   }
 
-  const installNameSuffix = `${installablePackage.version}`;
+  const installNameSuffix = `${packageInfo.version}`;
 
   // If package contains legacy transform specifications (i.e. with json instead of yml)
   if (transformPaths.some((p) => p.endsWith('.json')) || transformPaths.length === 0) {
     return await installLegacyTransformsAssets(
-      installablePackage,
+      packageInstallContext,
       installNameSuffix,
       transformPaths,
       esClient,
@@ -659,7 +673,7 @@ export const installTransforms = async ({
 
   // If package contains yml transform specifications
   return await installTransformsAssets(
-    installablePackage,
+    packageInstallContext,
     installNameSuffix,
     transformPaths,
     esClient,
@@ -713,7 +727,7 @@ async function handleTransformInstall({
             body: transform.content,
           },
           // add '{ headers: { es-secondary-authorization: 'ApiKey {encodedApiKey}' } }'
-          secondaryAuth ? { ...secondaryAuth } : undefined
+          { ignore: [409], ...(secondaryAuth ? { ...secondaryAuth } : {}) }
         ),
       { logger }
     );
@@ -726,7 +740,9 @@ async function handleTransformInstall({
       err?.body?.error?.reason?.includes('unauthorized for API key');
 
     const isAlreadyExistError =
-      isResponseError && err?.body?.error?.type === 'resource_already_exists_exception';
+      isResponseError &&
+      (err?.body?.error?.type === 'resource_already_exists_exception' ||
+        err?.body?.error?.caused_by?.type?.includes('version_conflict_engine_exception'));
 
     // swallow the error if the transform already exists or if API key has insufficient permissions
     if (!isUnauthorizedAPIKey && !isAlreadyExistError) {
@@ -756,12 +772,14 @@ async function handleTransformInstall({
         err?.body?.error?.type === 'security_exception' &&
         err?.body?.error?.reason?.includes('lacks the required permissions');
 
-      // swallow the error if the transform can't be started if API key has insufficient permissions
+      // No need to throw error if transform cannot be started, as failure to start shouldn't block package installation
       if (!isUnauthorizedAPIKey) {
-        throw err;
+        logger.debug(`Error starting transform: ${transform.installationName} cause ${err}`);
       }
     }
-  } else {
+  }
+
+  if (startTransform === false || transform?.content?.settings?.unattended === true) {
     // if transform was not set to start automatically in yml config,
     // we need to check using _stats if the transform had insufficient permissions
     try {
@@ -769,11 +787,15 @@ async function handleTransformInstall({
         () =>
           esClient.transform.getTransformStats(
             { transform_id: transform.installationName },
-            { ignore: [409] }
+            { ignore: [409, 404] }
           ),
         { logger, additionalResponseStatuses: [400] }
       );
-      if (Array.isArray(transformStats.transforms) && transformStats.transforms.length === 1) {
+      if (
+        transformStats &&
+        Array.isArray(transformStats.transforms) &&
+        transformStats.transforms.length === 1
+      ) {
         const transformHealth = transformStats.transforms[0].health;
         if (
           transformHealth &&

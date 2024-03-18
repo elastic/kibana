@@ -130,7 +130,7 @@ describe('useCreateAttachments', () => {
 
     await waitForNextUpdate();
 
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.configuration());
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.configuration({}));
   });
 
   it('shows the success toaster', async () => {

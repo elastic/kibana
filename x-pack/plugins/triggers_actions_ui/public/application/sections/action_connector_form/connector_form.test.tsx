@@ -9,7 +9,7 @@ import React, { lazy } from 'react';
 import { ConnectorForm } from './connector_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { act } from '@testing-library/react';
 import { AppMockRenderer, createAppMockRenderer } from '../test_utils';
 

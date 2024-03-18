@@ -11,21 +11,11 @@
     "**/*.js",
   ],
   "exclude": [
+    "src/entry.js",
     "**/*.config.js",
     "target/**/*",
   ],
   "kbn_references": [
-    "@kbn/ui-theme",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/monaco",
-    "@kbn/datemath",
-    "@kbn/flot-charts",
-    "@kbn/analytics",
-    "@kbn/es-query",
-    "@kbn/rison",
-    "@kbn/std",
-    "@kbn/safer-lodash-set",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
   ]
 }

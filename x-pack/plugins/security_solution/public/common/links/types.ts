@@ -15,6 +15,7 @@ import type {
   LinkCategories as GenericLinkCategories,
 } from '@kbn/security-solution-navigation';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { AppDeepLinkLocations } from '@kbn/core-application-browser';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { RequiredCapabilities } from '../lib/capabilities';
 
@@ -133,6 +134,10 @@ export interface LinkItem {
    * Reserved for links management, this property is set automatically
    * */
   unauthorized?: boolean;
+  /**
+   * Locations where the link is visible in the UI
+   */
+  visibleIn?: AppDeepLinkLocations[];
 }
 
 export type AppLinkItems = Readonly<LinkItem[]>;

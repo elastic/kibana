@@ -217,15 +217,6 @@ export const createStateService = (
       totalHitsStatus: UnifiedHistogramFetchStatus;
       totalHitsResult: number | Error | undefined;
     }) => {
-      // If we have a partial result already, we don't
-      // want to update the total hits back to loading
-      if (
-        state$.getValue().totalHitsStatus === UnifiedHistogramFetchStatus.partial &&
-        totalHits.totalHitsStatus === UnifiedHistogramFetchStatus.loading
-      ) {
-        return;
-      }
-
       updateState(totalHits);
     },
   };

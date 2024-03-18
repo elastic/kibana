@@ -27,7 +27,7 @@ export const getSumMetricAgg = () => {
     name: METRIC_TYPES.SUM,
     expressionName: aggSumFnName,
     title: sumTitle,
-    valueType: 'number',
+    getValueType: () => 'number',
     enableEmptyAsNull: true,
     makeLabel(aggConfig) {
       return i18n.translate('data.search.aggs.metrics.sumLabel', {

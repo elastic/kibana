@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { StackAlert } from '@kbn/alerts-as-data-utils';
 import { CoreSetup, Logger } from '@kbn/core/server';
 import { AlertingSetup, StackAlertsStartDeps } from '../types';
 
@@ -14,3 +15,8 @@ export interface RegisterRuleTypesParams {
   alerting: AlertingSetup;
   core: CoreSetup;
 }
+
+export type StackAlertType = Omit<StackAlert, 'kibana.alert.evaluation.threshold'> & {
+  // Defining a custom type for this because the schema generation script doesn't allow explicit null values
+  'kibana.alert.evaluation.threshold'?: string | number | null;
+};

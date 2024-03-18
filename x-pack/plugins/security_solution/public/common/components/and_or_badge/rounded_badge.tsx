@@ -22,7 +22,8 @@ const RoundBadge = styled(EuiBadge)`
   margin: 0 5px 0 5px;
   padding: 7px 6px 4px 6px;
   user-select: none;
-  width: 34px;
+  width: 40px;
+  height: 40px;
   .euiBadge__content {
     position: relative;
     top: -1px;

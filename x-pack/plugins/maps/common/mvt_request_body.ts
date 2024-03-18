@@ -53,7 +53,6 @@ export function getAggsTileRequest({
       grid_agg: renderAs === RENDER_AS.HEX ? 'geohex' : 'geotile',
       grid_type: renderAs === RENDER_AS.GRID || renderAs === RENDER_AS.HEX ? 'grid' : 'centroid',
       aggs: requestBody.aggs,
-      fields: requestBody.fields ? requestBody.fields : [],
       runtime_mappings: requestBody.runtime_mappings,
       with_labels: hasLabels,
     } as SearchMvtRequest['body'],
@@ -83,6 +82,7 @@ export function getHitsTileRequest({
   if (!requestBody) {
     throw new Error('Required requestBody parameter not provided');
   }
+  const size = typeof requestBody.size === 'number' ? requestBody.size : 10000;
   const tileRequestBody = {
     buffer,
     grid_precision: 0, // no aggs
@@ -90,7 +90,12 @@ export function getHitsTileRequest({
     extent: 4096, // full resolution,
     query: requestBody.query,
     runtime_mappings: requestBody.runtime_mappings,
-    track_total_hits: typeof requestBody.size === 'number' ? requestBody.size + 1 : false,
+    // Number of hits matching the query to count accurately
+    // Used to notify users of truncated results
+    track_total_hits: size + 1,
+    // Maximum number of features to return in the hits layer
+    // Used to fetch number of hits that correspondes with track_total_hits
+    size,
     with_labels: hasLabels,
   } as SearchMvtRequest['body'];
   if (requestBody.fields) {

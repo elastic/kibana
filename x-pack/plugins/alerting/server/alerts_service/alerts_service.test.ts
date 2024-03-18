@@ -7,7 +7,10 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  IndicesGetDataStreamResponse,
+  IndicesDataStreamIndex,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject } from 'rxjs';
 import { AlertsService } from './alerts_service';
@@ -72,9 +75,11 @@ const GetDataStreamResponse: IndicesGetDataStreamResponse = {
       generation: 1,
       timestamp_field: { name: 'ignored' },
       hidden: true,
-      indices: [{ index_name: 'ignored', index_uuid: 'ignored' }],
+      indices: [{ index_name: 'ignored', index_uuid: 'ignored' } as IndicesDataStreamIndex],
       status: 'green',
       template: 'ignored',
+      next_generation_managed_by: 'Index Lifecycle Management',
+      prefer_ilm: false,
     },
   ],
 };
@@ -900,6 +905,18 @@ describe('Alerts Service', () => {
           );
         });
 
+        test('should allow same context with different "shouldWrite" option', async () => {
+          alertsService.register(TestRegistrationContext);
+          alertsService.register({
+            ...TestRegistrationContext,
+            shouldWrite: false,
+          });
+
+          expect(logger.debug).toHaveBeenCalledWith(
+            `Resources for context "test" have already been registered.`
+          );
+        });
+
         test('should not update index template if simulating template throws error', async () => {
           clusterClient.indices.simulateTemplate.mockRejectedValueOnce(new Error('fail'));
 
@@ -1463,6 +1480,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -1483,6 +1501,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
           });
@@ -1516,6 +1535,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -1564,6 +1584,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -1598,6 +1619,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
           });
@@ -1662,6 +1684,7 @@ describe('Alerts Service', () => {
                 revision: 0,
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
+                alertDelay: 0,
               },
             }),
             alertsService.createAlertsClient({
@@ -1679,6 +1702,7 @@ describe('Alerts Service', () => {
                 revision: 0,
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
+                alertDelay: 0,
               },
             }),
           ]);
@@ -1713,6 +1737,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
           });
@@ -1769,6 +1794,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -1789,6 +1815,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
           });
@@ -1853,6 +1880,7 @@ describe('Alerts Service', () => {
                 revision: 0,
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
+                alertDelay: 0,
               },
             });
           };
@@ -1880,6 +1908,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
           });
@@ -1949,6 +1978,7 @@ describe('Alerts Service', () => {
                 revision: 0,
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
+                alertDelay: 0,
               },
             });
           };
@@ -2014,6 +2044,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -2079,6 +2110,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -2142,6 +2174,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -2358,10 +2391,10 @@ describe('Alerts Service', () => {
             dataStreamAdapter,
           });
 
-          await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+          await retryUntil('debug logger called', async () => logger.debug.mock.calls.length > 0);
 
-          expect(logger.error).toHaveBeenCalledWith(
-            new Error(`Server is stopping; must stop all async operations`)
+          expect(logger.debug).toHaveBeenCalledWith(
+            `Server is stopping; must stop all async operations`
           );
         });
       });

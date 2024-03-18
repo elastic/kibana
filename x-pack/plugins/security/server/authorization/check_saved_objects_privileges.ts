@@ -6,19 +6,14 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type {
+  CheckPrivilegesWithRequest,
+  CheckSavedObjectsPrivileges,
+  CheckSavedObjectsPrivilegesWithRequest,
+} from '@kbn/security-plugin-types-server';
 
-import type { CheckPrivilegesResponse, CheckPrivilegesWithRequest } from './types';
 import { ALL_SPACES_ID } from '../../common/constants';
 import type { SpacesService } from '../plugin';
-
-export type CheckSavedObjectsPrivilegesWithRequest = (
-  request: KibanaRequest
-) => CheckSavedObjectsPrivileges;
-
-export type CheckSavedObjectsPrivileges = (
-  actions: string | string[],
-  namespaceOrNamespaces?: string | Array<undefined | string>
-) => Promise<CheckPrivilegesResponse>;
 
 function uniq<T>(arr: T[]): T[] {
   return Array.from(new Set<T>(arr));

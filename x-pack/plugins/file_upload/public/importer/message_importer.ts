@@ -6,8 +6,8 @@
  */
 
 import { Importer } from './importer';
-import { ImportDocMessage } from '../../common/types';
-import { CreateDocsResponse, ImportFactoryOptions } from './types';
+import type { ImportDocMessage } from '../../common/types';
+import type { CreateDocsResponse, ImportFactoryOptions } from './types';
 
 export class MessageImporter extends Importer {
   private _excludeLinesRegex: RegExp | null;
@@ -30,7 +30,11 @@ export class MessageImporter extends Importer {
   // multiline_start_pattern regex
   // if it does, it is a legitimate end of line and can be pushed into the list,
   // if not, it must be a newline char inside a field value, so keep looking.
-  protected _createDocs(text: string, isLastPart: boolean): CreateDocsResponse {
+  protected _createDocs(
+    text: string,
+    isLastPart: boolean,
+    lineLimit?: number
+  ): CreateDocsResponse<ImportDocMessage> {
     let remainder = 0;
     try {
       const docs: ImportDocMessage[] = [];
@@ -52,6 +56,10 @@ export class MessageImporter extends Importer {
           line = '';
         } else {
           line += char;
+        }
+
+        if (lineLimit !== undefined && docs.length >= lineLimit) {
+          break;
         }
       }
 

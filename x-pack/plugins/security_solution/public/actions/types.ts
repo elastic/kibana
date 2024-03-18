@@ -47,6 +47,8 @@ export interface SecurityMetadata extends Record<string, unknown> {
    * an "and" query to the main data provider
    */
   andFilters?: AndFilter[];
+
+  dataViewId?: string;
 }
 
 export interface SecurityCellActionExecutionContext extends CellActionExecutionContext {
@@ -62,6 +64,7 @@ export interface SecurityCellActions {
   showTopN: CellActionFactory;
   copyToClipboard: CellActionFactory;
   toggleColumn: CellActionFactory;
+  toggleUserAssetField: CellActionFactory;
 }
 
 // All security cell actions names

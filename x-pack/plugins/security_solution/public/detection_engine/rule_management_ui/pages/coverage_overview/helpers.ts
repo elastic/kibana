@@ -10,15 +10,7 @@ import type {
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
 } from '../../../../../common/api/detection_engine';
-import type { CoverageOverviewMitreTactic } from '../../../rule_management/model/coverage_overview/mitre_tactic';
-import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { coverageOverviewCardColorThresholds } from './constants';
-
-export const getNumOfCoveredTechniques = (tactic: CoverageOverviewMitreTactic): number =>
-  tactic.techniques.filter((technique) => technique.enabledRules.length !== 0).length;
-
-export const getNumOfCoveredSubtechniques = (technique: CoverageOverviewMitreTechnique): number =>
-  technique.subtechniques.filter((subtechnique) => subtechnique.enabledRules.length !== 0).length;
 
 export const getCardBackgroundColor = (value: number) => {
   for (const { threshold, color } of coverageOverviewCardColorThresholds) {

@@ -110,12 +110,10 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="confirmSaveSavedObjectButton"
           fill={true}
           form="generated-id_form"
           isLoading={false}
-          size="m"
           type="submit"
         >
           Save
@@ -236,12 +234,10 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="confirmSaveSavedObjectButton"
           fill={true}
           form="generated-id_form"
           isLoading={false}
-          size="m"
           type="submit"
         >
           Save
@@ -362,12 +358,10 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="confirmSaveSavedObjectButton"
           fill={true}
           form="generated-id_form"
           isLoading={false}
-          size="m"
           type="submit"
         >
           Save
@@ -502,12 +496,10 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="confirmSaveSavedObjectButton"
           fill={true}
           form="generated-id_form"
           isLoading={false}
-          size="m"
           type="submit"
         >
           Save

@@ -26,11 +26,14 @@ export interface PackageSpecManifest {
   screenshots?: PackageSpecScreenshot[];
   policy_templates?: RegistryPolicyTemplate[];
   vars?: RegistryVarsEntry[];
-  owner: { github: string };
+  owner: { github: string; type?: 'elastic' | 'partner' | 'community' };
   elasticsearch?: Pick<
     RegistryElasticsearch,
     'index_template.settings' | 'index_template.mappings' | 'index_template.data_stream'
   >;
+  agent?: {
+    privileges?: { root?: boolean };
+  };
   asset_tags?: PackageSpecTags[];
 }
 export interface PackageSpecTags {
@@ -66,6 +69,7 @@ export type PackageSpecCategory =
   | 'datastore'
   | 'dns_security'
   | 'edr_xdr'
+  | 'cloudsecurity_cdr'
   | 'elasticsearch_sdk'
   | 'elastic_stack'
   | 'email_security'

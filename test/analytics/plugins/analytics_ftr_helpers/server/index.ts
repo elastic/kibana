@@ -8,4 +8,4 @@
 
 import { AnalyticsFTRHelpers } from './plugin';
 
-export const plugin = () => new AnalyticsFTRHelpers();
+export const plugin = async () => new AnalyticsFTRHelpers();

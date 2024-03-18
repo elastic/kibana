@@ -6,7 +6,7 @@
  */
 
 import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
-import type { Role } from '../../../../../../../common/model';
+import type { Role } from '../../../../../../../common';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 
@@ -58,6 +58,11 @@ describe('PrivilegeSummaryCalculator', () => {
           primary: undefined,
           subFeature: [],
         },
+        with_require_all_spaces_for_feature_and_sub_features: {
+          hasCustomizedSubFeaturePrivileges: false,
+          primary: undefined,
+          subFeature: [],
+        },
       });
     });
 
@@ -105,6 +110,13 @@ describe('PrivilegeSummaryCalculator', () => {
           subFeature: ['cool_all', 'cool_read', 'cool_toggle_1', 'cool_toggle_2'],
         },
         with_require_all_spaces_sub_features: {
+          hasCustomizedSubFeaturePrivileges: false,
+          primary: expect.objectContaining({
+            id: 'all',
+          }),
+          subFeature: ['cool_toggle_1'],
+        },
+        with_require_all_spaces_for_feature_and_sub_features: {
           hasCustomizedSubFeaturePrivileges: false,
           primary: expect.objectContaining({
             id: 'all',
@@ -168,6 +180,13 @@ describe('PrivilegeSummaryCalculator', () => {
           ],
         },
         with_require_all_spaces_sub_features: {
+          hasCustomizedSubFeaturePrivileges: false,
+          primary: expect.objectContaining({
+            id: 'all',
+          }),
+          subFeature: ['cool_toggle_1'],
+        },
+        with_require_all_spaces_for_feature_and_sub_features: {
           hasCustomizedSubFeaturePrivileges: false,
           primary: expect.objectContaining({
             id: 'all',
@@ -240,6 +259,13 @@ describe('PrivilegeSummaryCalculator', () => {
           }),
           subFeature: ['cool_toggle_1'],
         },
+        with_require_all_spaces_for_feature_and_sub_features: {
+          hasCustomizedSubFeaturePrivileges: false,
+          primary: expect.objectContaining({
+            id: 'all',
+          }),
+          subFeature: ['cool_toggle_1'],
+        },
       });
     });
 
@@ -282,6 +308,13 @@ describe('PrivilegeSummaryCalculator', () => {
           subFeature: ['cool_all', 'cool_read', 'cool_toggle_1', 'cool_toggle_2'],
         },
         with_require_all_spaces_sub_features: {
+          hasCustomizedSubFeaturePrivileges: false,
+          primary: expect.objectContaining({
+            id: 'all',
+          }),
+          subFeature: ['cool_toggle_1'],
+        },
+        with_require_all_spaces_for_feature_and_sub_features: {
           hasCustomizedSubFeaturePrivileges: false,
           primary: expect.objectContaining({
             id: 'all',
@@ -332,6 +365,11 @@ describe('PrivilegeSummaryCalculator', () => {
           primary: undefined,
           subFeature: [],
         },
+        with_require_all_spaces_for_feature_and_sub_features: {
+          hasCustomizedSubFeaturePrivileges: false,
+          primary: undefined,
+          subFeature: [],
+        },
       });
     });
 
@@ -372,6 +410,11 @@ describe('PrivilegeSummaryCalculator', () => {
           subFeature: [],
         },
         with_require_all_spaces_sub_features: {
+          hasCustomizedSubFeaturePrivileges: false,
+          primary: undefined,
+          subFeature: [],
+        },
+        with_require_all_spaces_for_feature_and_sub_features: {
           hasCustomizedSubFeaturePrivileges: false,
           primary: undefined,
           subFeature: [],

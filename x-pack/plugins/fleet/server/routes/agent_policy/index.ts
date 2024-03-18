@@ -76,7 +76,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: AGENT_POLICY_API_ROUTES.INFO_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgentPolicies: true },
       },
     })
     .addVersion(
@@ -92,7 +92,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgentPolicies: true },
       },
     })
     .addVersion(
@@ -108,7 +108,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .put({
       path: AGENT_POLICY_API_ROUTES.UPDATE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgentPolicies: true },
       },
     })
     .addVersion(
@@ -124,7 +124,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: AGENT_POLICY_API_ROUTES.COPY_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgentPolicies: true },
       },
     })
     .addVersion(
@@ -140,7 +140,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: AGENT_POLICY_API_ROUTES.DELETE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgentPolicies: true },
       },
     })
     .addVersion(
@@ -156,7 +156,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgentPolicies: true },
       },
     })
     .addVersion(
@@ -172,8 +172,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgentPolicies: true },
       },
+      enableQueryVersion: true,
     })
     .addVersion(
       {
@@ -188,7 +189,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: K8S_API_ROUTES.K8S_INFO_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgentPolicies: true },
       },
     })
     .addVersion(
@@ -204,8 +205,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: K8S_API_ROUTES.K8S_DOWNLOAD_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgentPolicies: true },
       },
+      enableQueryVersion: true,
     })
     .addVersion(
       {

@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
+import { APP_ID } from '../../../common';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SocTrends } from '../components/detection_response/soc_trends';
@@ -18,9 +19,8 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { HeaderPage } from '../../common/components/header_page';
-import { useGetUserCasesPermissions } from '../../common/lib/kibana';
 
-import { LandingPageComponent } from '../../common/components/landing_page';
+import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { AlertsByStatus } from '../components/detection_response/alerts_by_status';
 import { HostAlertsTable } from '../components/detection_response/host_alerts_table';
 import { RuleAlertsTable } from '../components/detection_response/rule_alerts_table';
@@ -31,13 +31,16 @@ import { CasesByStatus } from '../components/detection_response/cases_by_status'
 import { NoPrivileges } from '../../common/components/no_privileges';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
+import { useKibana } from '../../common/lib/kibana';
 
 const DetectionResponseComponent = () => {
+  const { cases } = useKibana().services;
   const { filterQuery } = useGlobalFilterQuery();
-  const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
+  const { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
   const { signalIndexName } = useSignalIndex();
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
-  const canReadCases = useGetUserCasesPermissions().read;
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+  const canReadCases = userCasesPermissions.read;
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
   const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
   if (!canReadAlerts && !canReadCases) {
@@ -49,7 +52,7 @@ const DetectionResponseComponent = () => {
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
+            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
           </FiltersGlobal>
           <SecuritySolutionPageWrapper data-test-subj="detectionResponsePage">
             <HeaderPage title={i18n.DETECTION_RESPONSE_TITLE} />
@@ -116,7 +119,7 @@ const DetectionResponseComponent = () => {
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.detectionAndResponse} />

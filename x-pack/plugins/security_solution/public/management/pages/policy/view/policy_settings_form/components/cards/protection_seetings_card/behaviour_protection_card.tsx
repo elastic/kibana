@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EuiSpacer } from '@elastic/eui';
 import { useGetProtectionsUnavailableComponent } from '../../../hooks/use_get_protections_unavailable_component';
-import { RelatedDetectionRulesCallout } from '../../related_detection_rules_callout';
 import { ReputationService } from './components/reputation_service';
 import { useTestIdGenerator } from '../../../../../../../hooks/use_test_id_generator';
 import { SettingCard } from '../../setting_card';
@@ -18,7 +17,10 @@ import { NotifyUserOption } from '../../notify_user_option';
 import { DetectPreventProtectionLevel } from '../../detect_prevent_protection_level';
 import { ProtectionSettingCardSwitch } from '../../protection_setting_card_switch';
 import type { Immutable } from '../../../../../../../../../common/endpoint/types';
-import { PolicyOperatingSystem } from '../../../../../../../../../common/endpoint/types';
+import {
+  PolicyOperatingSystem,
+  ProtectionModes,
+} from '../../../../../../../../../common/endpoint/types';
 import type { BehaviorProtectionOSes } from '../../../../../types';
 import { useLicense } from '../../../../../../../../common/hooks/use_license';
 import { SettingLockedCard } from '../../setting_locked_card';
@@ -51,6 +53,7 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
         defaultMessage: 'Malicious behavior protections',
       }
     );
+    const selected = (policy && policy.windows[protection].mode) !== ProtectionModes.off;
 
     if (!isProtectionsAllowed) {
       return null;
@@ -70,10 +73,13 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
         type={i18n.translate('xpack.securitySolution.endpoint.policy.details.behavior_protection', {
           defaultMessage: 'Malicious behavior',
         })}
+        selected={selected}
+        mode={mode}
         supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC, OperatingSystem.LINUX]}
         dataTestSubj={getTestId()}
         rightCorner={
           <ProtectionSettingCardSwitch
+            selected={selected}
             policy={policy}
             onChange={onChange}
             mode={mode}
@@ -111,7 +117,6 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
         />
 
         <EuiSpacer size="m" />
-        <RelatedDetectionRulesCallout data-test-subj={getTestId('rulesCallout')} />
       </SettingCard>
     );
   }

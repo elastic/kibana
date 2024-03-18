@@ -6,8 +6,8 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { ThreatIntelligencePlugin } from './plugin';
 
-export const plugin = (context: PluginInitializerContext) => {
+export const plugin = async (context: PluginInitializerContext) => {
+  const { ThreatIntelligencePlugin } = await import('./plugin');
   return new ThreatIntelligencePlugin(context);
 };

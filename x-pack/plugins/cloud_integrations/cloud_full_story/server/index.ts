@@ -6,10 +6,10 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { CloudFullStoryPlugin } from './plugin';
 
 export { config } from './config';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { CloudFullStoryPlugin } = await import('./plugin');
   return new CloudFullStoryPlugin(initializerContext);
 }

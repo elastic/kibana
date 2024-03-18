@@ -22,14 +22,17 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { allowAutoCreateRadioIds } from '../../../../../common/constants';
 import { serializers } from '../../../../shared_imports';
 
 import { serializeLegacyTemplate, serializeTemplate } from '../../../../../common/lib';
-import { TemplateDeserialized, getTemplateParameter } from '../../../../../common';
+import { TemplateDeserialized, getTemplateParameter, Aliases } from '../../../../../common';
 import { SimulateTemplate } from '../../index_templates';
+import { getLifecycleValue } from '../../../lib/data_streams';
 import { WizardSection } from '../template_form';
 
 const { stripEmptyFields } = serializers;
+const INFINITE_AS_ICON = true;
 
 const NoneDescriptionText = () => (
   <FormattedMessage
@@ -38,8 +41,8 @@ const NoneDescriptionText = () => (
   />
 );
 
-const getDescriptionText = (data: any) => {
-  const hasEntries = data && Object.entries(data).length > 0;
+const getDescriptionText = (data: Aliases | boolean | undefined) => {
+  const hasEntries = typeof data === 'boolean' ? data : data && Object.entries(data).length > 0;
 
   return hasEntries ? (
     <FormattedMessage
@@ -87,7 +90,9 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
       indexPatterns,
       version,
       order,
+      template: indexTemplate,
       priority,
+      allowAutoCreate,
       composedOf,
       _meta,
       _kbnMeta: { isLegacy },
@@ -108,6 +113,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
     const serializedMappings = getTemplateParameter(serializedTemplate, 'mappings');
     const serializedSettings = getTemplateParameter(serializedTemplate, 'settings');
     const serializedAliases = getTemplateParameter(serializedTemplate, 'aliases');
+    const serializedLifecycle = (indexTemplate as TemplateDeserialized)?.lifecycle;
 
     const numIndexPatterns = indexPatterns!.length;
 
@@ -186,6 +192,32 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                 {version ? version : <NoneDescriptionText />}
               </EuiDescriptionListDescription>
 
+              {/* Allow auto create */}
+              {isLegacy !== true &&
+                allowAutoCreate !== allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION && (
+                  <>
+                    <EuiDescriptionListTitle>
+                      <FormattedMessage
+                        id="xpack.idxMgmt.templateForm.stepReview.summaryTab.allowAutoCreateLabel"
+                        defaultMessage="Allow auto create"
+                      />
+                    </EuiDescriptionListTitle>
+                    <EuiDescriptionListDescription>
+                      {allowAutoCreate === allowAutoCreateRadioIds.TRUE_RADIO_OPTION ? (
+                        <FormattedMessage
+                          id="xpack.idxMgmt.templateForm.stepReview.summaryTab.yesDescriptionText"
+                          defaultMessage="Yes"
+                        />
+                      ) : (
+                        <FormattedMessage
+                          id="xpack.idxMgmt.templateForm.stepReview.summaryTab.noDescriptionText"
+                          defaultMessage="No"
+                        />
+                      )}
+                    </EuiDescriptionListDescription>
+                  </>
+                )}
+
               {/* components */}
               {isLegacy !== true && (
                 <>
@@ -257,6 +289,20 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               <EuiDescriptionListDescription>
                 {getDescriptionText(serializedAliases)}
               </EuiDescriptionListDescription>
+
+              {isLegacy !== true && serializedLifecycle?.enabled && (
+                <>
+                  <EuiDescriptionListTitle data-test-subj="lifecycleTitle">
+                    <FormattedMessage
+                      id="xpack.idxMgmt.templateForm.stepReview.summaryTab.lifecycleLabel"
+                      defaultMessage="Data retention"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription data-test-subj="lifecycleValue">
+                    {getLifecycleValue(serializedLifecycle, INFINITE_AS_ICON)}
+                  </EuiDescriptionListDescription>
+                </>
+              )}
 
               {/* Metadata (optional) */}
               {isLegacy !== true && _meta && (

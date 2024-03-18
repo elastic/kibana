@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { KibanaRequest } from '@kbn/core-http-server';
 import type { Message } from '@kbn/elastic-assistant';
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from 'langchain/schema';
+
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 export const getLangChainMessage = (
   assistantMessage: Pick<Message, 'content' | 'role'>
 ): BaseMessage => {
   switch (assistantMessage.role) {
     case 'system':
-      return new SystemMessage(assistantMessage.content);
+      return new SystemMessage(assistantMessage.content ?? '');
     case 'user':
-      return new HumanMessage(assistantMessage.content);
+      return new HumanMessage(assistantMessage.content ?? '');
     case 'assistant':
-      return new AIMessage(assistantMessage.content);
+      return new AIMessage(assistantMessage.content ?? '');
     default:
-      return new HumanMessage(assistantMessage.content);
+      return new HumanMessage(assistantMessage.content ?? '');
   }
 };
 
@@ -31,3 +34,25 @@ export const getMessageContentAndRole = (prompt: string): Pick<Message, 'content
   content: prompt,
   role: 'user',
 });
+
+export const requestHasRequiredAnonymizationParams = (
+  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>
+): boolean => {
+  const { allow, allowReplacement, replacements } = request?.body ?? {};
+
+  const allowIsValid =
+    Array.isArray(allow) &&
+    allow.length > 0 && // at least one field must be in the allow list
+    allow.every((item) => typeof item === 'string');
+
+  const allowReplacementIsValid =
+    Array.isArray(allowReplacement) && allowReplacement.every((item) => typeof item === 'string');
+
+  const replacementsIsValid =
+    typeof replacements === 'object' &&
+    replacements.every(
+      (replacement) => typeof replacement === 'object' && typeof replacement.value === 'string'
+    );
+
+  return allowIsValid && allowReplacementIsValid && replacementsIsValid;
+};

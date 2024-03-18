@@ -128,6 +128,8 @@ export const SUPPRESS_BY_DETAILS = 'Suppress alerts by';
 
 export const SUPPRESS_FOR_DETAILS = 'Suppress alerts for';
 
+export const SUPPRESS_MISSING_FIELD = 'If a suppression field is missing';
+
 export const TIMELINE_FIELD = (field: string) => {
   return `[data-test-subj="formatted-field-${field}"]`;
 };
@@ -145,6 +147,9 @@ export const THREAT_TACTIC = '[data-test-subj="threatTacticLink"]';
 export const THREAT_TECHNIQUE = '[data-test-subj="threatTechniqueLink"]';
 
 export const THREAT_SUBTECHNIQUE = '[data-test-subj="threatSubtechniqueLink"]';
+
+export const ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON =
+  '[data-test-subj="alertSuppressionInsufficientLicensingIcon"]';
 
 export const HIGHLIGHTED_ROWS_IN_TABLE =
   '[data-test-subj="euiDataGridBody"] .alertsTableHighlightedRow';

@@ -20,9 +20,9 @@ import type {
 import semver from 'semver';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 
-import type { AuthenticationProvider } from '../../common/model';
-import type { AuditLogger } from '../audit';
+import type { AuthenticationProvider } from '../../common';
 import { sessionCleanupConcurrentLimitEvent, sessionCleanupEvent } from '../audit';
 import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
@@ -276,6 +276,11 @@ export class SessionIndex {
         ({ body, statusCode } = await this.writeNewSessionDocument(sessionValue, {
           ignore404: false,
         }));
+        if (statusCode !== 201) {
+          this.options.logger.error(
+            `Failed to write a new session (status code: ${statusCode}): ${JSON.stringify(body)}.`
+          );
+        }
       }
 
       return {

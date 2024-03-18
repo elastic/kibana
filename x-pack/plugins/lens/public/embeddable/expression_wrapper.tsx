@@ -12,8 +12,8 @@ import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
-import type { CoreStart, KibanaExecutionContext } from '@kbn/core/public';
-import { ExecutionContextSearch } from '@kbn/data-plugin/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { ExecutionContextSearch } from '@kbn/es-query';
 import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
@@ -42,11 +42,11 @@ export interface ExpressionWrapperProps {
   style?: React.CSSProperties;
   className?: string;
   addUserMessages: AddUserMessages;
-  onRuntimeError: (message?: string) => void;
+  onRuntimeError: (error: Error) => void;
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   noPadding?: boolean;
-  docLinks: CoreStart['docLinks'];
+  abortController?: AbortController;
 }
 
 export function ExpressionWrapper({
@@ -72,7 +72,7 @@ export function ExpressionWrapper({
   executionContext,
   lensInspector,
   noPadding,
-  docLinks,
+  abortController,
 }: ExpressionWrapperProps) {
   if (!expression) return null;
   return (
@@ -86,6 +86,7 @@ export function ExpressionWrapper({
           interactive={interactive}
           searchContext={searchContext}
           searchSessionId={searchSessionId}
+          // @ts-expect-error upgrade typescript v4.9.5
           onData$={onData$}
           onRender$={onRender$}
           inspectorAdapters={lensInspector.adapters}
@@ -94,10 +95,15 @@ export function ExpressionWrapper({
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
           executionContext={executionContext}
+          abortController={abortController}
           renderError={(errorMessage, error) => {
-            const messages = getOriginalRequestErrorMessages(error || null, docLinks);
+            const messages = getOriginalRequestErrorMessages(error || null);
             addUserMessages(messages);
-            onRuntimeError(messages[0].shortMessage ?? (errorMessage || ''));
+            if (error?.original) {
+              onRuntimeError(error.original);
+            } else {
+              onRuntimeError(new Error(errorMessage ? errorMessage : ''));
+            }
 
             return <></>; // the embeddable will take care of displaying the messages
           }}

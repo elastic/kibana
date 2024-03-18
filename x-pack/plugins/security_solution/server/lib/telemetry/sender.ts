@@ -22,10 +22,12 @@ import type { ITelemetryReceiver } from './receiver';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel, tlog } from './helpers';
-import type { TelemetryEvent } from './types';
+import type { TelemetryChannel, TelemetryEvent } from './types';
 import type { SecurityTelemetryTaskConfig } from './task';
 import { SecurityTelemetryTask } from './task';
 import { telemetryConfiguration } from './configuration';
+import type { IAsyncTelemetryEventsSender, QueueConfig } from './async_sender.types';
+import { TaskMetricsService } from './task_metrics';
 
 const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
@@ -34,7 +36,8 @@ export interface ITelemetryEventsSender {
     telemetryReceiver: ITelemetryReceiver,
     telemetrySetup?: TelemetryPluginSetup,
     taskManager?: TaskManagerSetupContract,
-    telemetryUsageCounter?: UsageCounter
+    telemetryUsageCounter?: UsageCounter,
+    asyncTelemetrySender?: IAsyncTelemetryEventsSender
   ): void;
 
   getTelemetryUsageCluster(): UsageCounter | undefined;
@@ -47,6 +50,9 @@ export interface ITelemetryEventsSender {
   ): void;
 
   stop(): void;
+  /**
+   * @deprecated Use `sendAsync` instead.
+   */
   queueTelemetryEvents(events: TelemetryEvent[]): void;
   isTelemetryOptedIn(): Promise<boolean>;
   isTelemetryServicesReachable(): Promise<boolean>;
@@ -54,6 +60,32 @@ export interface ITelemetryEventsSender {
   processEvents(events: TelemetryEvent[]): TelemetryEvent[];
   sendOnDemand(channel: string, toSend: unknown[], axiosInstance?: AxiosInstance): Promise<void>;
   getV3UrlFromV2(v2url: string, channel: string): string;
+
+  // As a transition to the new sender, `IAsyncTelemetryEventsSender`, we wrap
+  // its "public API" here to expose a single Sender interface to the rest
+  // of the code. The `queueTelemetryEvents` is deprecated in favor of
+  // `sendAsync`.
+
+  /**
+   * Sends events to a given telemetry channel asynchronously.
+   */
+  sendAsync: (channel: TelemetryChannel, events: unknown[]) => void;
+
+  /**
+   * Simulates sending events to a given telemetry channel asynchronously
+   * and returns the request that should be sent to the server
+   */
+  simulateSendAsync: (channel: TelemetryChannel, events: unknown[]) => string[];
+
+  /**
+   * Updates the queue configuration for a given channel.
+   */
+  updateQueueConfig: (channel: TelemetryChannel, config: QueueConfig) => void;
+
+  /**
+   * Updates the default queue configuration.
+   */
+  updateDefaultQueueConfig: (config: QueueConfig) => void;
 }
 
 export class TelemetryEventsSender implements ITelemetryEventsSender {
@@ -75,6 +107,8 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
   private telemetryUsageCounter?: UsageCounter;
   private telemetryTasks?: SecurityTelemetryTask[];
 
+  private asyncTelemetrySender?: IAsyncTelemetryEventsSender;
+
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
   }
@@ -83,19 +117,28 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     telemetryReceiver: ITelemetryReceiver,
     telemetrySetup?: TelemetryPluginSetup,
     taskManager?: TaskManagerSetupContract,
-    telemetryUsageCounter?: UsageCounter
+    telemetryUsageCounter?: UsageCounter,
+    asyncTelemetrySender?: IAsyncTelemetryEventsSender
   ) {
     this.telemetrySetup = telemetrySetup;
     this.telemetryUsageCounter = telemetryUsageCounter;
     if (taskManager) {
+      const taskMetricsService = new TaskMetricsService(this.logger, this);
       this.telemetryTasks = createTelemetryTaskConfigs().map(
         (config: SecurityTelemetryTaskConfig) => {
-          const task = new SecurityTelemetryTask(config, this.logger, this, telemetryReceiver);
+          const task = new SecurityTelemetryTask(
+            config,
+            this.logger,
+            this,
+            telemetryReceiver,
+            taskMetricsService
+          );
           task.register(taskManager);
           return task;
         }
       );
     }
+    this.asyncTelemetrySender = asyncTelemetrySender;
   }
 
   public getTelemetryUsageCluster(): UsageCounter | undefined {
@@ -365,6 +408,29 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     return url.toString();
   }
 
+  public sendAsync(channel: TelemetryChannel, events: unknown[]): void {
+    this.getAsyncTelemetrySender().send(channel, events);
+  }
+
+  public simulateSendAsync(channel: TelemetryChannel, events: unknown[]): string[] {
+    return this.getAsyncTelemetrySender().simulateSend(channel, events);
+  }
+
+  public updateQueueConfig(channel: TelemetryChannel, config: QueueConfig): void {
+    this.getAsyncTelemetrySender().updateQueueConfig(channel, config);
+  }
+
+  public updateDefaultQueueConfig(config: QueueConfig): void {
+    this.getAsyncTelemetrySender().updateDefaultQueueConfig(config);
+  }
+
+  private getAsyncTelemetrySender(): IAsyncTelemetryEventsSender {
+    if (!this.asyncTelemetrySender) {
+      throw new Error('Telemetry Sender V2 not initialized');
+    }
+    return this.asyncTelemetrySender;
+  }
+
   private async fetchTelemetryPingUrl(): Promise<string> {
     const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
     if (!telemetryUrl) {
@@ -397,7 +463,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '8.0.0',
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         },
-        timeout: 5000,
+        timeout: 10000,
       });
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
@@ -409,7 +475,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         counterType: 'docs_sent',
         incrementBy: events.length,
       });
-      tlog(this.logger, `Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
+      tlog(this.logger, `Events sent!. Response: ${resp.status}`);
     } catch (err) {
       tlog(this.logger, `Error sending events: ${err}`);
       const errorStatus = err?.response?.status;

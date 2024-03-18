@@ -20,7 +20,7 @@ import { renderParameterTemplates } from './render';
 export const getTinesConnectorType = (): SubActionConnectorType<TinesConfig, TinesSecrets> => ({
   id: TINES_CONNECTOR_ID,
   name: TINES_TITLE,
-  Service: TinesConnector,
+  getService: (params) => new TinesConnector(params),
   schema: {
     config: TinesConfigSchema,
     secrets: TinesSecretsSchema,

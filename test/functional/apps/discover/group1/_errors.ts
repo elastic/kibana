@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('invalid scripted field error', () => {
       it('is rendered', async () => {
-        expect(await PageObjects.discover.noResultsErrorVisible()).to.be(true);
+        await PageObjects.discover.showsErrorCallout();
         const painlessStackTrace = await testSubjects.find('painlessStackTrace');
         expect(painlessStackTrace).not.to.be(undefined);
       });

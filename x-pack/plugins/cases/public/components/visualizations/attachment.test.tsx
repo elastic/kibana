@@ -24,7 +24,10 @@ describe('getVisualizationAttachmentType', () => {
 
   const attachmentViewProps: PersistableStateAttachmentViewProps = {
     persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
-    persistableStateAttachmentState: { attributes: {}, timeRange: {} },
+    persistableStateAttachmentState: {
+      attributes: { state: { query: {} } },
+      timeRange: {},
+    },
     attachmentId: 'test',
     caseData: { title: basicCase.title, id: basicCase.id },
   };

@@ -9,18 +9,190 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/generate-csv",
-        "id": "def-common.CsvGenerator",
+        "id": "def-server.CsvESQLGenerator",
+        "type": "Class",
+        "tags": [],
+        "label": "CsvESQLGenerator",
+        "description": [],
+        "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/generate-csv",
+            "id": "def-server.CsvESQLGenerator.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/generate-csv",
+                "id": "def-server.CsvESQLGenerator.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "job",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/generate-csv",
+                    "scope": "server",
+                    "docId": "kibKbnGenerateCsvPluginApi",
+                    "section": "def-server.JobParamsCsvESQL",
+                    "text": "JobParamsCsvESQL"
+                  }
+                ],
+                "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/generate-csv",
+                "id": "def-server.CsvESQLGenerator.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ByteSizeValue",
+                    "text": "ByteSizeValue"
+                  },
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>"
+                ],
+                "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/generate-csv",
+                "id": "def-server.CsvESQLGenerator.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "taskInstanceFields",
+                "description": [],
+                "signature": [
+                  "TaskInstanceFields"
+                ],
+                "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/generate-csv",
+                "id": "def-server.CsvESQLGenerator.Unnamed.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "clients",
+                "description": [],
+                "signature": [
+                  "Clients"
+                ],
+                "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/generate-csv",
+                "id": "def-server.CsvESQLGenerator.Unnamed.$5",
+                "type": "Object",
+                "tags": [],
+                "label": "cancellationToken",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/reporting-common",
+                    "scope": "common",
+                    "docId": "kibKbnReportingCommonPluginApi",
+                    "section": "def-common.CancellationToken",
+                    "text": "CancellationToken"
+                  }
+                ],
+                "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/generate-csv",
+                "id": "def-server.CsvESQLGenerator.Unnamed.$6",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
+                ],
+                "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/generate-csv",
+                "id": "def-server.CsvESQLGenerator.Unnamed.$7",
+                "type": "Object",
+                "tags": [],
+                "label": "stream",
+                "description": [],
+                "signature": [
+                  "Writable"
+                ],
+                "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/generate-csv",
+            "id": "def-server.CsvESQLGenerator.generateData",
+            "type": "Function",
+            "tags": [],
+            "label": "generateData",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "TaskRunResult",
+              ">"
+            ],
+            "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/generate-csv",
+        "id": "def-server.CsvGenerator",
         "type": "Class",
         "tags": [],
         "label": "CsvGenerator",
@@ -31,7 +203,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/generate-csv",
-            "id": "def-common.CsvGenerator.Unnamed",
+            "id": "def-server.CsvGenerator.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -45,20 +217,14 @@
             "children": [
               {
                 "parentPluginId": "@kbn/generate-csv",
-                "id": "def-common.CsvGenerator.Unnamed.$1",
+                "id": "def-server.CsvGenerator.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "job",
                 "description": [],
                 "signature": [
                   "Omit<",
-                  {
-                    "pluginId": "@kbn/generate-csv-types",
-                    "scope": "common",
-                    "docId": "kibKbnGenerateCsvTypesPluginApi",
-                    "section": "def-common.JobParams",
-                    "text": "JobParams"
-                  },
+                  "JobParamsCSV",
                   ", \"version\">"
                 ],
                 "path": "packages/kbn-generate-csv/src/generate_csv.ts",
@@ -68,19 +234,21 @@
               },
               {
                 "parentPluginId": "@kbn/generate-csv",
-                "id": "def-common.CsvGenerator.Unnamed.$2",
+                "id": "def-server.CsvGenerator.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "config",
                 "description": [],
                 "signature": [
+                  "Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
                   {
-                    "pluginId": "@kbn/generate-csv-types",
+                    "pluginId": "@kbn/config-schema",
                     "scope": "common",
-                    "docId": "kibKbnGenerateCsvTypesPluginApi",
-                    "section": "def-common.CsvConfig",
-                    "text": "CsvConfig"
-                  }
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ByteSizeValue",
+                    "text": "ByteSizeValue"
+                  },
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>"
                 ],
                 "path": "packages/kbn-generate-csv/src/generate_csv.ts",
                 "deprecated": false,
@@ -89,7 +257,22 @@
               },
               {
                 "parentPluginId": "@kbn/generate-csv",
-                "id": "def-common.CsvGenerator.Unnamed.$3",
+                "id": "def-server.CsvGenerator.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "taskInstanceFields",
+                "description": [],
+                "signature": [
+                  "TaskInstanceFields"
+                ],
+                "path": "packages/kbn-generate-csv/src/generate_csv.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/generate-csv",
+                "id": "def-server.CsvGenerator.Unnamed.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "clients",
@@ -104,7 +287,7 @@
               },
               {
                 "parentPluginId": "@kbn/generate-csv",
-                "id": "def-common.CsvGenerator.Unnamed.$4",
+                "id": "def-server.CsvGenerator.Unnamed.$5",
                 "type": "Object",
                 "tags": [],
                 "label": "dependencies",
@@ -119,7 +302,7 @@
               },
               {
                 "parentPluginId": "@kbn/generate-csv",
-                "id": "def-common.CsvGenerator.Unnamed.$5",
+                "id": "def-server.CsvGenerator.Unnamed.$6",
                 "type": "Object",
                 "tags": [],
                 "label": "cancellationToken",
@@ -140,7 +323,7 @@
               },
               {
                 "parentPluginId": "@kbn/generate-csv",
-                "id": "def-common.CsvGenerator.Unnamed.$6",
+                "id": "def-server.CsvGenerator.Unnamed.$7",
                 "type": "Object",
                 "tags": [],
                 "label": "logger",
@@ -161,7 +344,7 @@
               },
               {
                 "parentPluginId": "@kbn/generate-csv",
-                "id": "def-common.CsvGenerator.Unnamed.$7",
+                "id": "def-server.CsvGenerator.Unnamed.$8",
                 "type": "Object",
                 "tags": [],
                 "label": "stream",
@@ -179,20 +362,14 @@
           },
           {
             "parentPluginId": "@kbn/generate-csv",
-            "id": "def-common.CsvGenerator.generateData",
+            "id": "def-server.CsvGenerator.generateData",
             "type": "Function",
             "tags": [],
             "label": "generateData",
             "description": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/reporting-common",
-                "scope": "common",
-                "docId": "kibKbnReportingCommonPluginApi",
-                "section": "def-common.TaskRunResult",
-                "text": "TaskRunResult"
-              },
+              "TaskRunResult",
               ">"
             ],
             "path": "packages/kbn-generate-csv/src/generate_csv.ts",
@@ -205,6 +382,92 @@
         "initialIsOpen": false
       }
     ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/generate-csv",
+        "id": "def-server.JobParamsCsvESQL",
+        "type": "Interface",
+        "tags": [],
+        "label": "JobParamsCsvESQL",
+        "description": [],
+        "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/generate-csv",
+            "id": "def-server.JobParamsCsvESQL.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "{ esql: string; }"
+            ],
+            "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/generate-csv",
+            "id": "def-server.JobParamsCsvESQL.columns",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/generate-csv",
+            "id": "def-server.JobParamsCsvESQL.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/generate-csv",
+            "id": "def-server.JobParamsCsvESQL.browserTimezone",
+            "type": "string",
+            "tags": [],
+            "label": "browserTimezone",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],

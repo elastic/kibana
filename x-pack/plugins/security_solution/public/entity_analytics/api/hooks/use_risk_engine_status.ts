@@ -6,8 +6,8 @@
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { fetchRiskEngineStatus } from '../api';
-import { RiskEngineStatus } from '../../../../common/risk_engine/types';
+import { useEntityAnalyticsRoutes } from '../api';
+import { RiskEngineStatus } from '../../../../common/entity_analytics/risk_engine/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 const FETCH_RISK_ENGINE_STATUS = ['GET', 'FETCH_RISK_ENGINE_STATUS'];
 
@@ -21,15 +21,24 @@ export const useInvalidateRiskEngineStatusQuery = () => {
   }, [queryClient]);
 };
 
-export const useIsNewRiskScoreModuleInstalled = () => {
-  const { data: riskEngineStatus } = useRiskEngineStatus();
+interface RiskScoreModuleStatus {
+  isLoading: boolean;
+  installed?: boolean;
+}
 
-  return riskEngineStatus?.isNewRiskScoreModuleInstalled ?? false;
+export const useIsNewRiskScoreModuleInstalled = (): RiskScoreModuleStatus => {
+  const { data: riskEngineStatus, isLoading } = useRiskEngineStatus();
+
+  if (isLoading) {
+    return { isLoading: true };
+  }
+
+  return { isLoading: false, installed: !!riskEngineStatus?.isNewRiskScoreModuleInstalled };
 };
 
 export const useRiskEngineStatus = () => {
   const isNewRiskScoreModuleAvailable = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
-
+  const { fetchRiskEngineStatus } = useEntityAnalyticsRoutes();
   return useQuery(FETCH_RISK_ENGINE_STATUS, async ({ signal }) => {
     if (!isNewRiskScoreModuleAvailable) {
       return {

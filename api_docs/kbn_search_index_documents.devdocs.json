@@ -1,0 +1,425 @@
+{
+  "id": "@kbn/search-index-documents",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.DocumentList",
+        "type": "Function",
+        "tags": [],
+        "label": "DocumentList",
+        "description": [],
+        "signature": [
+          "({ dataTelemetryIdPrefix, docs, docsPerPage, isLoading, mappings, meta, onPaginate, setDocsPerPage, }: React.PropsWithChildren<DocumentListProps>) => JSX.Element"
+        ],
+        "path": "packages/kbn-search-index-documents/components/document_list.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.DocumentList.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  dataTelemetryIdPrefix,\n  docs,\n  docsPerPage,\n  isLoading,\n  mappings,\n  meta,\n  onPaginate,\n  setDocsPerPage,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<DocumentListProps>"
+            ],
+            "path": "packages/kbn-search-index-documents/components/document_list.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.DocumentsOverview",
+        "type": "Function",
+        "tags": [],
+        "label": "DocumentsOverview",
+        "description": [],
+        "signature": [
+          "({ accessControlSwitch, dataTelemetryIdPrefix, documentComponent, searchQueryCallback, }: React.PropsWithChildren<DocumentsProps>) => JSX.Element"
+        ],
+        "path": "packages/kbn-search-index-documents/components/documents_overview.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.DocumentsOverview.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  accessControlSwitch,\n  dataTelemetryIdPrefix,\n  documentComponent,\n  searchQueryCallback,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<DocumentsProps>"
+            ],
+            "path": "packages/kbn-search-index-documents/components/documents_overview.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.fetchSearchResults",
+        "type": "Function",
+        "tags": [],
+        "label": "fetchSearchResults",
+        "description": [],
+        "signature": [
+          "(client: ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "common",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-common.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", indexName: string, query?: string | undefined, from?: number, size?: number) => Promise<",
+          {
+            "pluginId": "@kbn/search-index-documents",
+            "scope": "common",
+            "docId": "kibKbnSearchIndexDocumentsPluginApi",
+            "section": "def-common.Paginate",
+            "text": "Paginate"
+          },
+          "<",
+          "SearchHit",
+          "<unknown>>>"
+        ],
+        "path": "packages/kbn-search-index-documents/lib/fetch_search_results.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.fetchSearchResults.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
+            ],
+            "path": "packages/kbn-search-index-documents/lib/fetch_search_results.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.fetchSearchResults.$2",
+            "type": "string",
+            "tags": [],
+            "label": "indexName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-search-index-documents/lib/fetch_search_results.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.fetchSearchResults.$3",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-index-documents/lib/fetch_search_results.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.fetchSearchResults.$4",
+            "type": "number",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-search-index-documents/lib/fetch_search_results.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.fetchSearchResults.$5",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-search-index-documents/lib/fetch_search_results.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.pageToPagination",
+        "type": "Function",
+        "tags": [],
+        "label": "pageToPagination",
+        "description": [],
+        "signature": [
+          "(page: { from: number; size: number; total: number; }) => { pageIndex: number; pageSize: number; totalItemCount: number; }"
+        ],
+        "path": "packages/kbn-search-index-documents/types/pagination.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.pageToPagination.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "path": "packages/kbn-search-index-documents/types/pagination.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/search-index-documents",
+                "id": "def-common.pageToPagination.$1.from",
+                "type": "number",
+                "tags": [],
+                "label": "from",
+                "description": [],
+                "path": "packages/kbn-search-index-documents/types/pagination.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/search-index-documents",
+                "id": "def-common.pageToPagination.$1.size",
+                "type": "number",
+                "tags": [],
+                "label": "size",
+                "description": [],
+                "path": "packages/kbn-search-index-documents/types/pagination.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/search-index-documents",
+                "id": "def-common.pageToPagination.$1.total",
+                "type": "number",
+                "tags": [],
+                "label": "total",
+                "description": [],
+                "path": "packages/kbn-search-index-documents/types/pagination.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.Result",
+        "type": "Function",
+        "tags": [],
+        "label": "Result",
+        "description": [],
+        "signature": [
+          "({ metaData, fields }: React.PropsWithChildren<ResultProps>) => JSX.Element"
+        ],
+        "path": "packages/kbn-search-index-documents/components/result/result.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.Result.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ metaData, fields }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<ResultProps>"
+            ],
+            "path": "packages/kbn-search-index-documents/components/result/result.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.Paginate",
+        "type": "Interface",
+        "tags": [],
+        "label": "Paginate",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/search-index-documents",
+            "scope": "common",
+            "docId": "kibKbnSearchIndexDocumentsPluginApi",
+            "section": "def-common.Paginate",
+            "text": "Paginate"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-search-index-documents/types/pagination.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.Paginate._meta",
+            "type": "Object",
+            "tags": [],
+            "label": "_meta",
+            "description": [],
+            "signature": [
+              "Meta"
+            ],
+            "path": "packages/kbn-search-index-documents/types/pagination.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.Paginate.data",
+            "type": "Array",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "T[]"
+            ],
+            "path": "packages/kbn-search-index-documents/types/pagination.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.DEFAULT_DOCS_PER_PAGE",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_DOCS_PER_PAGE",
+        "description": [],
+        "signature": [
+          "25"
+        ],
+        "path": "packages/kbn-search-index-documents/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.INDEX_DOCUMENTS_META_DEFAULT",
+        "type": "Object",
+        "tags": [],
+        "label": "INDEX_DOCUMENTS_META_DEFAULT",
+        "description": [],
+        "path": "packages/kbn-search-index-documents/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.INDEX_DOCUMENTS_META_DEFAULT.pageIndex",
+            "type": "number",
+            "tags": [],
+            "label": "pageIndex",
+            "description": [],
+            "path": "packages/kbn-search-index-documents/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.INDEX_DOCUMENTS_META_DEFAULT.pageSize",
+            "type": "number",
+            "tags": [],
+            "label": "pageSize",
+            "description": [],
+            "path": "packages/kbn-search-index-documents/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.INDEX_DOCUMENTS_META_DEFAULT.totalItemCount",
+            "type": "number",
+            "tags": [],
+            "label": "totalItemCount",
+            "description": [],
+            "path": "packages/kbn-search-index-documents/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

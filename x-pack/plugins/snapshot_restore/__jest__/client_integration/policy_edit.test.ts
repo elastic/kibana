@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 import { API_BASE_PATH } from '../../common';
 import { PolicyForm } from '../../public/application/components/policy_form';
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
@@ -39,12 +39,10 @@ describe('<PolicyEdit />', () => {
         features: [{ name: 'kibana' }, { name: 'tasks' }],
       });
 
-      testBed = await setup(httpSetup);
-
       await act(async () => {
-        await nextTick();
-        testBed.component.update();
+        testBed = await setup(httpSetup);
       });
+      testBed.component.update();
     });
 
     test('should set the correct page title', () => {
@@ -64,12 +62,10 @@ describe('<PolicyEdit />', () => {
           repositories: [{ name: 'this-is-a-new-repository' }],
         });
 
-        testBed = await setup(httpSetup);
-
         await act(async () => {
-          await nextTick();
-          testBed.component.update();
+          testBed = await setup(httpSetup);
         });
+        testBed.component.update();
       });
 
       test('should show repository-not-found warning', () => {
@@ -99,10 +95,7 @@ describe('<PolicyEdit />', () => {
     test('should use the same Form component as the "<PolicyAdd />" section', async () => {
       testBedPolicyAdd = await setupPolicyAdd(httpSetup);
 
-      await act(async () => {
-        await nextTick();
-        testBedPolicyAdd.component.update();
-      });
+      testBedPolicyAdd.component.update();
 
       const formEdit = testBed.component.find(PolicyForm);
       const formAdd = testBedPolicyAdd.component.find(PolicyForm);
@@ -116,6 +109,28 @@ describe('<PolicyEdit />', () => {
 
       const nameInput = find('nameInput');
       expect(nameInput.props().disabled).toEqual(true);
+    });
+
+    test('should disable the repo and snapshot fields for managed policies', async () => {
+      httpRequestsMockHelpers.setGetPolicyResponse(POLICY_EDIT.name, {
+        policy: {
+          ...POLICY_EDIT,
+          isManagedPolicy: true,
+        },
+      });
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
+
+      const { find } = testBed;
+
+      const snapshotInput = find('snapshotNameInput');
+      expect(snapshotInput.props().disabled).toEqual(true);
+
+      const repoSelect = find('repositorySelect');
+      expect(repoSelect.props().disabled).toEqual(true);
     });
 
     describe('form payload', () => {
@@ -138,10 +153,7 @@ describe('<PolicyEdit />', () => {
         form.setInputValue('expireAfterUnitSelect', EXPIRE_AFTER_UNIT);
         actions.clickNextButton();
 
-        await act(async () => {
-          actions.clickSubmitButton();
-          await nextTick();
-        });
+        actions.clickSubmitButton();
 
         const { name, isManagedPolicy, schedule, repository, retention } = POLICY_EDIT;
 
@@ -182,10 +194,7 @@ describe('<PolicyEdit />', () => {
         form.setInputValue('expireAfterValueInput', EXPIRE_AFTER_VALUE);
         actions.clickNextButton();
 
-        await act(async () => {
-          actions.clickSubmitButton();
-          await nextTick();
-        });
+        actions.clickSubmitButton();
 
         const { name, isManagedPolicy, schedule, repository, retention, snapshotName } =
           POLICY_EDIT;

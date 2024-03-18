@@ -50,12 +50,12 @@ export const CreatePackagePolicyBottomBar: React.FC<{
 }) => {
   const Bar = noAnimation ? NoAnimationCenteredRoundedBottomBar : CenteredRoundedBottomBar;
   return (
-    <Bar>
+    <Bar position="sticky">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiFlexItem grow={false}>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiButtonEmpty color="ghost" size="s" href={cancelUrl} onClick={cancelClickHandler}>
+            <EuiButtonEmpty color="text" size="s" href={cancelUrl} onClick={cancelClickHandler}>
               {cancelMessage || (
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicyBottomBar.backButton"
@@ -102,7 +102,7 @@ export const AgentStandaloneBottomBar: React.FC<{
         <EuiFlexItem grow={false}>
           <EuiFlexItem grow={false}>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiButtonEmpty color="ghost" size="s" href={cancelUrl} onClick={cancelClickHandler}>
+            <EuiButtonEmpty color="text" size="s" href={cancelUrl} onClick={cancelClickHandler}>
               <FormattedMessage
                 id="xpack.fleet.agentStandaloneBottomBar.backButton"
                 defaultMessage="Go back"
@@ -134,7 +134,7 @@ export const CreatePackagePolicyFinalBottomBar: React.FC<{
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="ghost" size="s" href={getHref('integrations_all')}>
+            <EuiButtonEmpty color="text" size="s" href={getHref('integrations_all')}>
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicyBottomBar.addAnotherIntegration"
                 defaultMessage="Add another integration"
@@ -193,7 +193,7 @@ export const AgentDataTimedOutBottomBar: React.FC<{
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            color="ghost"
+            color="text"
             size="s"
             href={troubleshootLink}
             iconType="popout"

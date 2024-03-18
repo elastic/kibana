@@ -8,10 +8,8 @@
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useState } from 'react';
-import type {
-  TableListViewTableProps,
-  UserContentCommonSchema,
-} from '@kbn/content-management-table-list-view-table';
+import type { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { TableListViewProps } from '@kbn/content-management-table-list-view';
 
 export type TableListTabParentProps<T extends UserContentCommonSchema = UserContentCommonSchema> =

@@ -28,14 +28,15 @@ import {
   useVectorSearchBreadcrumbs,
 } from './generate_breadcrumbs';
 import {
-  searchTitle,
-  analyticsTitle,
-  elasticsearchTitle,
-  appSearchTitle,
-  workplaceSearchTitle,
-  searchExperiencesTitle,
   aiSearchTitle,
+  analyticsTitle,
+  appSearchTitle,
+  elasticsearchTitle,
+  enterpriseSearchContentTitle,
+  searchExperiencesTitle,
+  searchTitle,
   vectorSearchTitle,
+  workplaceSearchTitle,
 } from './generate_title';
 
 /**
@@ -163,7 +164,7 @@ export const SetEnterpriseSearchContentChrome: React.FC<SetChromeProps> = ({ tra
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
-  const docTitle = appSearchTitle(title);
+  const docTitle = enterpriseSearchContentTitle(title);
 
   const crumbs = useGenerateBreadcrumbs(trail);
   const breadcrumbs = useEnterpriseSearchContentBreadcrumbs(crumbs);

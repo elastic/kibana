@@ -4,12 +4,42 @@ exports[`buildManagedUserDetailsQuery build query from options correctly 1`] = `
 Object {
   "allow_no_indices": true,
   "body": Object {
+    "aggs": Object {
+      "datasets": Object {
+        "aggs": Object {
+          "latest_hit": Object {
+            "top_hits": Object {
+              "_source": false,
+              "fields": Array [
+                "*",
+                "_index",
+                "_id",
+              ],
+              "size": 1,
+              "sort": Array [
+                Object {
+                  "@timestamp": Object {
+                    "order": "desc",
+                  },
+                },
+              ],
+            },
+          },
+        },
+        "terms": Object {
+          "field": "event.dataset",
+        },
+      },
+    },
     "query": Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "user.name": "test-user-name",
+            "terms": Object {
+              "event.dataset": Array [
+                "entityanalytics_okta.user",
+                "entityanalytics_entra_id.user",
+              ],
             },
           },
           Object {
@@ -18,9 +48,24 @@ Object {
             },
           },
         ],
+        "minimum_should_match": 1,
+        "should": Array [
+          Object {
+            "term": Object {
+              "user.name": "test-user-name",
+            },
+          },
+          Object {
+            "terms": Object {
+              "user.email": Array [
+                "test-user-name@mail.com",
+              ],
+            },
+          },
+        ],
       },
     },
-    "size": 1,
+    "size": 0,
   },
   "ignore_unavailable": true,
   "index": Array [

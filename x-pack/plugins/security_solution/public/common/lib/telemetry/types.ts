@@ -23,10 +23,13 @@ import type {
 } from './events/data_quality/types';
 import type {
   EntityAnalyticsTelemetryEvent,
+  ReportAddRiskInputToTimelineClickedParams,
   ReportEntityAlertsClickedParams,
   ReportEntityAnalyticsTelemetryEventParams,
   ReportEntityDetailsClickedParams,
   ReportEntityRiskFilteredParams,
+  ReportRiskInputsExpandedFlyoutOpenedParams,
+  ReportToggleRiskSummaryClickedParams,
 } from './events/entity_analytics/types';
 import type {
   AssistantTelemetryEvent,
@@ -34,6 +37,7 @@ import type {
   ReportAssistantInvokedParams,
   ReportAssistantQuickPromptParams,
   ReportAssistantMessageSentParams,
+  ReportAssistantSettingToggledParams,
 } from './events/ai_assistant/types';
 
 export * from './events/ai_assistant/types';
@@ -43,6 +47,9 @@ export type {
   ReportEntityAlertsClickedParams,
   ReportEntityDetailsClickedParams,
   ReportEntityRiskFilteredParams,
+  ReportRiskInputsExpandedFlyoutOpenedParams,
+  ReportToggleRiskSummaryClickedParams,
+  ReportAddRiskInputToTimelineClickedParams,
 } from './events/entity_analytics/types';
 
 export interface TelemetryServiceSetupParams {
@@ -92,11 +99,17 @@ export interface TelemetryClientStart {
   reportAssistantInvoked(params: ReportAssistantInvokedParams): void;
   reportAssistantMessageSent(params: ReportAssistantMessageSentParams): void;
   reportAssistantQuickPrompt(params: ReportAssistantQuickPromptParams): void;
+  reportAssistantSettingToggled(params: ReportAssistantSettingToggledParams): void;
 
+  // Entity Analytics
   reportEntityDetailsClicked(params: ReportEntityDetailsClickedParams): void;
   reportEntityAlertsClicked(params: ReportEntityAlertsClickedParams): void;
   reportEntityRiskFiltered(params: ReportEntityRiskFilteredParams): void;
   reportMLJobUpdate(params: ReportMLJobUpdateParams): void;
+  // Entity Analytics inside Entity Flyout
+  reportToggleRiskSummaryClicked(params: ReportToggleRiskSummaryClickedParams): void;
+  reportRiskInputsExpandedFlyoutOpened(params: ReportRiskInputsExpandedFlyoutOpenedParams): void;
+  reportAddRiskInputToTimelineClicked(params: ReportAddRiskInputToTimelineClickedParams): void;
 
   reportCellActionClicked(params: ReportCellActionClickedParams): void;
 

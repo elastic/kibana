@@ -50,7 +50,7 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { sourceOrDestinationIpExistsFilter } from '../../../common/components/visualization_actions/utils';
-import { LandingPageComponent } from '../../../common/components/landing_page';
+import { EmptyPrompt } from '../../../common/components/empty_prompt';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -109,7 +109,8 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       [dispatch]
     );
 
-    const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+    const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
+      useSourcererDataView();
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current
@@ -157,7 +158,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
           <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
             <EuiWindowEvent event="resize" handler={noop} />
             <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-              <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
+              <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
             </FiltersGlobal>
 
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -228,7 +229,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
             </SecuritySolutionPageWrapper>
           </StyledFullHeightContainer>
         ) : (
-          <LandingPageComponent />
+          <EmptyPrompt />
         )}
 
         <SpyRoute pageName={SecurityPageName.network} />

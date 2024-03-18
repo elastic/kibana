@@ -20,8 +20,8 @@ export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 50
 export const ROWS_HEIGHT_OPTIONS = {
   auto: -1,
   single: 0,
-  default: -1,
-};
+  default: 3,
+} as const;
 export const defaultRowLineHeight = '1.6em';
 export const defaultMonacoEditorWidth = 370;
 export const defaultTimeColumnWidth = 212;

@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
@@ -54,6 +54,7 @@ async function createPackagePolicy(
     spaceId: string;
     user: AuthenticatedUser | undefined;
     authorizationHeader?: HTTPAuthorizationHeader | null;
+    force?: boolean;
   }
 ) {
   const newPackagePolicy = await packagePolicyService
@@ -78,6 +79,7 @@ async function createPackagePolicy(
     user: options.user,
     bumpRevision: false,
     authorizationHeader: options.authorizationHeader,
+    force: options.force,
   });
 }
 
@@ -91,6 +93,7 @@ interface CreateAgentPolicyParams {
   spaceId: string;
   user?: AuthenticatedUser;
   authorizationHeader?: HTTPAuthorizationHeader | null;
+  force?: boolean;
 }
 
 export async function createAgentPolicyWithPackages({
@@ -103,6 +106,7 @@ export async function createAgentPolicyWithPackages({
   spaceId,
   user,
   authorizationHeader,
+  force,
 }: CreateAgentPolicyParams) {
   let agentPolicyId = newPolicy.id;
   const packagesToInstall = [];
@@ -128,6 +132,7 @@ export async function createAgentPolicyWithPackages({
       packagesToInstall,
       spaceId,
       authorizationHeader,
+      force,
     });
   }
 
@@ -137,6 +142,7 @@ export async function createAgentPolicyWithPackages({
     user,
     id: agentPolicyId,
     authorizationHeader,
+    skipDeploy: true, // skip deploying the policy until package policies are added
   });
 
   // Create the fleet server package policy and add it to agent policy.
@@ -145,6 +151,7 @@ export async function createAgentPolicyWithPackages({
       spaceId,
       user,
       authorizationHeader,
+      force,
     });
   }
 
@@ -154,6 +161,7 @@ export async function createAgentPolicyWithPackages({
       spaceId,
       user,
       authorizationHeader,
+      force,
     });
   }
 

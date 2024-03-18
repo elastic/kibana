@@ -12,7 +12,7 @@ import type { AppError } from '@kbn/securitysolution-t-grid';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ErrorToastOptions, ToastsStart, Toast, NotificationsStart } from '@kbn/core/public';
-import { IEsError, isEsError } from '@kbn/data-plugin/public';
+import { IEsError, isEsError } from '@kbn/search-errors';
 
 export type UseAppToasts = Pick<ToastsStart, 'addSuccess' | 'addWarning'> & {
   api: ToastsStart;
@@ -93,8 +93,10 @@ export const esErrorToErrorStack = (error: IEsError & MaybeESError): Error => {
       ? `(${error.statusCode})`
       : '';
   const stringifiedError = getStringifiedStack(maybeUnWrapped);
-  const adaptedError = new Error(`${error.attributes?.reason ?? error.message} ${statusCode}`);
-  adaptedError.name = error.attributes?.reason ?? error.message;
+  const adaptedError = new Error(
+    `${error.attributes?.error?.reason ?? error.message} ${statusCode}`
+  );
+  adaptedError.name = error.attributes?.error?.reason ?? error.message;
   if (stringifiedError != null) {
     adaptedError.stack = stringifiedError;
   }

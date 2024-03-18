@@ -98,11 +98,6 @@ export class ReportingPageObject extends FtrService {
     await this.share.openShareMenuItem('PNG Reports');
   }
 
-  async clearToastNotifications() {
-    const toasts = await this.testSubjects.findAll('toastCloseButton');
-    await Promise.all(toasts.map(async (t) => await t.click()));
-  }
-
   async getQueueReportError() {
     return await this.testSubjects.exists('errorToastMessage');
   }
@@ -190,6 +185,19 @@ export class ReportingPageObject extends FtrService {
         };
       })
     );
+  }
+
+  async openReportFlyout(reportTitle: string) {
+    const table = await this.testSubjects.find(REPORT_TABLE_ID);
+    const allRows = await table.findAllByTestSubject(REPORT_TABLE_ROW_ID);
+    for (const row of allRows) {
+      const titleColumn = await row.findByTestSubject('reportingListItemObjectTitle');
+      const title = await titleColumn.getVisibleText();
+      if (title === reportTitle) {
+        titleColumn.click();
+        return;
+      }
+    }
   }
 
   async writeSessionReport(name: string, reportExt: string, rawPdf: Buffer, folder: string) {

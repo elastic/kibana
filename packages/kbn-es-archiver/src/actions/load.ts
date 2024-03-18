@@ -28,7 +28,10 @@ import {
   migrateSavedObjectIndices,
   Progress,
   createDefaultSpace,
+  type LoadActionPerfOptions,
 } from '../lib';
+
+import soOverrideAllowedList from '../fixtures/override_saved_objects_index/exception_list.json';
 
 // pipe a series of streams into each other so that data and errors
 // flow from the first stream to the last. Errors from the last stream
@@ -38,6 +41,16 @@ const pipeline = (...streams: Readable[]) =>
     source.once('error', (error) => dest.destroy(error)).pipe(dest as any)
   );
 
+const warningToUpdateArchive = (path: string) => {
+  return `This test is using '${path}' archive that contains saved object index definitions (in the 'mappings.json').
+This has proven to be a source of conflicts and flakiness, so the goal is to remove support for this feature ASAP. We kindly ask you to
+update your test archives and remove SO index definitions, so that tests use the official saved object indices created by Kibana at startup.
+You can achieve that by simply removing your saved object index definitions from 'mappings.json' (likely removing the file altogether).
+We also recommend migrating existing tests to 'kbnArchiver' whenever possible. After the fix please remove archive path from the exception list:
+${resolve(__dirname, '../fixtures/override_saved_objects_index/exception_list.json')}.
+Find more information here: https://github.com/elastic/kibana/issues/161882`;
+};
+
 export async function loadAction({
   inputDir,
   skipExisting,
@@ -46,6 +59,7 @@ export async function loadAction({
   client,
   log,
   kbnClient,
+  performance,
 }: {
   inputDir: string;
   skipExisting: boolean;
@@ -54,8 +68,13 @@ export async function loadAction({
   client: Client;
   log: ToolingLog;
   kbnClient: KbnClient;
+  performance?: LoadActionPerfOptions;
 }) {
   const name = relative(REPO_ROOT, inputDir);
+  const isArchiveInExceptionList = soOverrideAllowedList.includes(name);
+  if (isArchiveInExceptionList) {
+    log.warning(warningToUpdateArchive(name));
+  }
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
@@ -80,8 +99,15 @@ export async function loadAction({
 
   await createPromiseFromStreams([
     recordStream,
-    createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
-    createIndexDocRecordsStream(client, stats, progress, useCreate),
+    createCreateIndexStream({
+      client,
+      stats,
+      skipExisting,
+      docsOnly,
+      isArchiveInExceptionList,
+      log,
+    }),
+    createIndexDocRecordsStream(client, stats, progress, useCreate, performance),
   ]);
 
   progress.deactivate();

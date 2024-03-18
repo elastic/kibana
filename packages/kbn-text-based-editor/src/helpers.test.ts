@@ -11,7 +11,7 @@ import {
   parseWarning,
   getInlineEditorText,
   getWrappedInPipesCode,
-  getIndicesForAutocomplete,
+  getIndicesList,
 } from './helpers';
 
 describe('helpers', function () {
@@ -23,7 +23,7 @@ describe('helpers', function () {
       const errors = [error];
       expect(parseErrors(errors, 'SELECT miaou from test')).toEqual([
         {
-          endColumn: 13,
+          endColumn: 14,
           endLineNumber: 1,
           message: ' Unknown column [miaou]',
           severity: 8,
@@ -47,7 +47,7 @@ describe('helpers', function () {
         )
       ).toEqual([
         {
-          endColumn: 11,
+          endColumn: 12,
           endLineNumber: 3,
           message: ' Condition expression needs to be boolean, found [TEXT]',
           severity: 8,
@@ -83,14 +83,14 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.',
-          severity: 8,
+          severity: 4,
           startColumn: 52,
           startLineNumber: 1,
         },
       ]);
     });
 
-    it('should return the correct array of warnings if multiple warnins are detected', function () {
+    it('should return the correct array of warnings if multiple warnings are detected', function () {
       const warning =
         '299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:52: evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.", 299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:84: evaluation of [date_parse(geo.src)] failed, treating result as null. Only first 20 failures recorded."';
       expect(parseWarning(warning)).toEqual([
@@ -99,7 +99,7 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.',
-          severity: 8,
+          severity: 4,
           startColumn: 52,
           startLineNumber: 1,
         },
@@ -108,7 +108,32 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'evaluation of [date_parse(geo.src)] failed, treating result as null. Only first 20 failures recorded.',
-          severity: 8,
+          severity: 4,
+          startColumn: 84,
+          startLineNumber: 1,
+        },
+      ]);
+    });
+
+    it('should return the correct array of warnings if the message contains additional info', function () {
+      const warning =
+        '299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:52: evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.", 299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:84: java.lang.IllegalArgumentException: evaluation of [date_parse(geo.src)] failed, treating result as null. Only first 20 failures recorded."';
+      expect(parseWarning(warning)).toEqual([
+        {
+          endColumn: 138,
+          endLineNumber: 1,
+          message:
+            'evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.',
+          severity: 4,
+          startColumn: 52,
+          startLineNumber: 1,
+        },
+        {
+          endColumn: 169,
+          endLineNumber: 1,
+          message:
+            'evaluation of [date_parse(geo.src)] failed, treating result as null. Only first 20 failures recorded.',
+          severity: 4,
           startColumn: 84,
           startLineNumber: 1,
         },
@@ -124,7 +149,7 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'Field [geo.coordinates] cannot be retrieved, it is unsupported or not indexed; returning null.',
-          severity: 8,
+          severity: 4,
           startColumn: 1,
           startLineNumber: 1,
         },
@@ -133,7 +158,7 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'Field [ip_range] cannot be retrieved, it is unsupported or not indexed; returning null.',
-          severity: 8,
+          severity: 4,
           startColumn: 1,
           startLineNumber: 1,
         },
@@ -142,7 +167,7 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'Field [timestamp_range] cannot be retrieved, it is unsupported or not indexed; returning null.',
-          severity: 8,
+          severity: 4,
           startColumn: 1,
           startLineNumber: 1,
         },
@@ -157,7 +182,7 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'Field [geo.coordinates] cannot be retrieved, it is unsupported or not indexed; returning null.',
-          severity: 8,
+          severity: 4,
           startColumn: 1,
           startLineNumber: 1,
         },
@@ -166,7 +191,7 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'Field [ip_range] cannot be retrieved, it is unsupported or not indexed; returning null.',
-          severity: 8,
+          severity: 4,
           startColumn: 1,
           startLineNumber: 1,
         },
@@ -175,7 +200,7 @@ describe('helpers', function () {
           endLineNumber: 1,
           message:
             'evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.',
-          severity: 8,
+          severity: 4,
           startColumn: 52,
           startLineNumber: 1,
         },
@@ -233,8 +258,8 @@ describe('helpers', function () {
     });
   });
 
-  describe('getIndicesForAutocomplete', function () {
-    it('should not return system indices', async function () {
+  describe('getIndicesList', function () {
+    it('should return also system indices with hidden flag on', async function () {
       const dataViewsMock = dataViewPluginMocks.createStartContract();
       const updatedDataViewsMock = {
         ...dataViewsMock,
@@ -249,8 +274,11 @@ describe('helpers', function () {
           },
         ]),
       };
-      const indices = await getIndicesForAutocomplete(updatedDataViewsMock);
-      expect(indices).toStrictEqual(['logs']);
+      const indices = await getIndicesList(updatedDataViewsMock);
+      expect(indices).toStrictEqual([
+        { name: '.system1', hidden: true },
+        { name: 'logs', hidden: false },
+      ]);
     });
   });
 });

@@ -7,6 +7,7 @@
 
 import Mustache from 'mustache';
 import { isString, isPlainObject, cloneDeepWith, merge } from 'lodash';
+import { Logger } from '@kbn/core/server';
 import { getMustacheLambdas } from './mustache_lambdas';
 
 export type Escape = 'markdown' | 'slack' | 'json' | 'none';
@@ -25,9 +26,14 @@ export function renderMustacheStringNoEscape(string: string, variables: Variable
 }
 
 // return a rendered mustache template given the specified variables and escape
-export function renderMustacheString(string: string, variables: Variables, escape: Escape): string {
+export function renderMustacheString(
+  logger: Logger,
+  string: string,
+  variables: Variables,
+  escape: Escape
+): string {
   const augmentedVariables = augmentObjectVariables(variables);
-  const lambdas = getMustacheLambdas();
+  const lambdas = getMustacheLambdas(logger);
 
   const previousMustacheEscape = Mustache.escape;
   Mustache.escape = getEscape(escape);
@@ -43,13 +49,17 @@ export function renderMustacheString(string: string, variables: Variables, escap
 }
 
 // return a cloned object with all strings rendered as mustache templates
-export function renderMustacheObject<Params>(params: Params, variables: Variables): Params {
+export function renderMustacheObject<Params>(
+  logger: Logger,
+  params: Params,
+  variables: Variables
+): Params {
   const augmentedVariables = augmentObjectVariables(variables);
   const result = cloneDeepWith(params, (value: unknown) => {
     if (!isString(value)) return;
 
     // since we're rendering a JS object, no escaping needed
-    return renderMustacheString(value, augmentedVariables, 'none');
+    return renderMustacheString(logger, value, augmentedVariables, 'none');
   });
 
   // The return type signature for `cloneDeep()` ends up taking the return
@@ -144,10 +154,14 @@ function escapeSlack(value: unknown): string {
   if (value == null) return '';
 
   const valueString = `${value}`;
-  // if the value contains * or _, escape the whole thing with back tics
+  // if the value contains * or _ and is not a url, escape the whole thing with back tics
   if (valueString.includes('_') || valueString.includes('*')) {
-    // replace unescapable back tics with single quote
-    return '`' + valueString.replace(/`/g, `'`) + '`';
+    try {
+      new URL(valueString);
+    } catch (e) {
+      // replace unescapable back tics with single quote
+      return '`' + valueString.replace(/`/g, `'`) + '`';
+    }
   }
 
   // otherwise, do "standard" escaping

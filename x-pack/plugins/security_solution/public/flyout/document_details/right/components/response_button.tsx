@@ -6,22 +6,22 @@
  */
 import React, { useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useRightPanelContext } from '../context';
-import { LeftPanelKey, LeftPanelResponseTab } from '../../left';
+import { DocumentDetailsLeftPanelKey, LeftPanelResponseTab } from '../../left';
 import { RESPONSE_BUTTON_TEST_ID } from './test_ids';
 
 /**
  * Response button that opens Response section in the left panel
  */
 export const ResponseButton: React.FC = () => {
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId } = useRightPanelContext();
 
   const goToResponseTab = useCallback(() => {
     openLeftPanel({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: { tab: LeftPanelResponseTab },
       params: {
         id: eventId,

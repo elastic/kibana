@@ -49,9 +49,6 @@ return (
     // Pass a ref to the containing element to
     // handle top panel resize functionality
     resizeRef={resizeRef}
-    // Optionally append an element after the
-    // hits counter display
-    appendHitsCounter={<MyButton />}
   >
     <MyLayout />
   </UnifiedHistogramContainer>
@@ -165,7 +162,6 @@ return (
     searchSessionId={searchSessionId}
     requestAdapter={requestAdapter}
     resizeRef={resizeRef}
-    appendHitsCounter={<MyButton />}
   >
     <MyLayout />
   </UnifiedHistogramContainer>

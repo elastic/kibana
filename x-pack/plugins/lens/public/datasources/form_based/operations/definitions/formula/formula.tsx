@@ -52,7 +52,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
   {
     type: 'formula',
     displayName: defaultLabel,
-    getDefaultLabel: (column, indexPattern) => column.params.formula ?? defaultLabel,
+    getDefaultLabel: (column) => column.params.formula ?? defaultLabel,
     input: 'managedReference',
     hidden: true,
     filterable: {
@@ -163,11 +163,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       const params = currentColumn.params;
       // TODO: improve this logic
       const useDisplayLabel = currentColumn.label !== defaultLabel;
-      const label = !params?.isFormulaBroken
-        ? useDisplayLabel
-          ? currentColumn.label
-          : params?.formula ?? defaultLabel
-        : defaultLabel;
+      const label = useDisplayLabel ? currentColumn.label : params?.formula ?? defaultLabel;
 
       return [
         {

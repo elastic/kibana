@@ -10,7 +10,6 @@ import { SELECTED_ALERTS } from '../../../screens/alerts';
 import { SERVER_SIDE_EVENT_COUNT } from '../../../screens/timeline';
 import { selectAllAlerts, selectFirstPageAlerts } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
 import {
   bulkInvestigateSelectedEventsInTimeline,
   selectAllEvents,
@@ -25,16 +24,15 @@ import { ALERTS_URL, hostsUrl } from '../../../urls/navigation';
 
 describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     cy.task('esArchiverLoad', { archiveName: 'bulk_process' });
     login();
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'bulk_process');
+    cy.task('esArchiverUnload', { archiveName: 'bulk_process' });
   });
 
-  context('Alerts', { tags: ['@brokenInServerless'] }, () => {
+  context('Alerts', () => {
     before(() => {
       createRule(getNewRule());
     });

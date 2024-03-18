@@ -66,7 +66,7 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
   },
   events: ({ props, actions, values }) => ({
     afterMount: () => {
-      const licenseSubscription = props.license$.subscribe(async (license: ILicense) => {
+      const licenseSubscription = props.license$.subscribe((license: ILicense) => {
         actions.setLicense(license);
       });
       actions.setLicenseSubscription(licenseSubscription);

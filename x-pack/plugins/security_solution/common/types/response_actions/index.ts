@@ -13,7 +13,7 @@ export interface RawEventData {
   _index: string;
 }
 
-export enum RESPONSE_ACTION_TYPES {
+export enum ResponseActionTypesEnum {
   OSQUERY = '.osquery',
   ENDPOINT = '.endpoint',
 }
@@ -34,7 +34,7 @@ export interface ExpandedEventFieldsObject {
 
 type RuleParameters = Array<{
   response_actions: Array<{
-    action_type_id: RESPONSE_ACTION_TYPES;
+    action_type_id: ResponseActionTypesEnum;
     params: Record<string, unknown>;
   }>;
 }>;

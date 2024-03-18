@@ -17,12 +17,13 @@ import type {
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
-import { HttpService } from '../http_service';
+import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 
 import type { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
 import type { DeepPartial } from '../../../../common/types/common';
 import type { JobMessage } from '../../../../common/types/audit_message';
+import type { PutDataFrameAnalyticsResponseSchema } from '../../../../server/routes/schemas/data_frame_analytics_schema';
 
 export interface GetDataFrameAnalyticsStatsResponseOk {
   node_failures?: object;
@@ -49,7 +50,7 @@ export interface DeleteDataFrameAnalyticsWithIndexResponse {
   acknowledged: boolean;
   analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
   destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
-  destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
+  destDataViewDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
 }
 
 export interface JobsExistsResponse {
@@ -83,12 +84,15 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
   },
   createDataFrameAnalytics(
     analyticsId: string,
-    analyticsConfig: DeepPartial<DataFrameAnalyticsConfig>
+    analyticsConfig: DeepPartial<DataFrameAnalyticsConfig>,
+    createDataView: boolean = false,
+    timeFieldName?: string
   ) {
     const body = JSON.stringify(analyticsConfig);
-    return httpService.http<any>({
+    return httpService.http<PutDataFrameAnalyticsResponseSchema>({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}`,
       method: 'PUT',
+      query: { createDataView, timeFieldName },
       body,
       version: '1',
     });
@@ -142,9 +146,10 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
       version: '1',
     });
   },
-  deleteDataFrameAnalytics(analyticsId: string) {
+  deleteDataFrameAnalytics(analyticsId: string, force: boolean = true) {
     return httpService.http<any>({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}`,
+      query: { force },
       method: 'DELETE',
       version: '1',
     });
@@ -152,11 +157,12 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
   deleteDataFrameAnalyticsAndDestIndex(
     analyticsId: string,
     deleteDestIndex: boolean,
-    deleteDestIndexPattern: boolean
+    deleteDestDataView: boolean,
+    force: boolean = true
   ) {
     return httpService.http<DeleteDataFrameAnalyticsWithIndexResponse>({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}`,
-      query: { deleteDestIndex, deleteDestIndexPattern },
+      query: { deleteDestIndex, deleteDestDataView, force },
       method: 'DELETE',
       version: '1',
     });

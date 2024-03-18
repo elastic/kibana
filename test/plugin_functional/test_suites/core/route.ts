@@ -7,14 +7,13 @@
  */
 
 import expect from '@kbn/expect';
-import { Test } from 'supertest';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { Test } from 'supertest';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/75440
-  describe.skip('route', function () {
+  describe('route', function () {
     describe('timeouts', function () {
       const writeBodyCharAtATime = (request: Test, body: string, interval: number) => {
         return new Promise((resolve, reject) => {
@@ -45,7 +44,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .set('Transfer-Encoding', 'chunked')
             .set('kbn-xsrf', 'true');
 
-          const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 10);
+          const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 20);
 
           await result.then(
             (res) => {
@@ -65,7 +64,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .set('Transfer-Encoding', 'chunked')
             .set('kbn-xsrf', 'true');
 
-          const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 10);
+          const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 20);
 
           await result.then(
             (res) => {
@@ -107,7 +106,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .set('Transfer-Encoding', 'chunked')
             .set('kbn-xsrf', 'true');
 
-          const result = writeBodyCharAtATime(request, '{"responseDelay":0}', 10);
+          const result = writeBodyCharAtATime(request, '{"responseDelay":0}', 20);
 
           await result.then(
             (res) => {
@@ -119,44 +118,23 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           );
         });
 
-        it('should timeout if servers response is too slow', async function () {
-          // start the request
-          const request = supertest
+        it('should timeout if servers response is too slow', async () => {
+          await supertest
             .post('/short_idle_socket_timeout')
+            .send({ responseDelay: 100 })
             .set('Content-Type', 'application/json')
-            .set('Transfer-Encoding', 'chunked')
-            .set('kbn-xsrf', 'true');
-
-          const result = writeBodyCharAtATime(request, '{"responseDelay":100}', 0);
-
-          await result.then(
-            (res) => {
-              expect(res).to.be(undefined);
-            },
-            (err) => {
-              expect(err.message).to.be('socket hang up');
-            }
-          );
+            .set('kbn-xsrf', 'true')
+            .then(() => expect('to throw').to.be('but it did NOT'))
+            .catch((error) => expect(error.message).to.be('socket hang up'));
         });
 
-        it('should not timeout if servers response is fast enough', async function () {
-          // start the request
-          const request = supertest
+        it('should not timeout if servers response is fast enough', async () => {
+          await supertest
             .post('/longer_idle_socket_timeout')
+            .send({ responseDelay: 100 })
             .set('Content-Type', 'application/json')
-            .set('Transfer-Encoding', 'chunked')
-            .set('kbn-xsrf', 'true');
-
-          const result = writeBodyCharAtATime(request, '{"responseDelay":100}', 0);
-
-          await result.then(
-            (res) => {
-              expect(res).to.have.property('statusCode', 200);
-            },
-            (err) => {
-              expect(err).to.be(undefined);
-            }
-          );
+            .set('kbn-xsrf', 'true')
+            .expect(200);
         });
       });
     });

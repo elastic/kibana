@@ -39,6 +39,7 @@ describe('Security Plugin', () => {
         license: {
           isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
+          getUnavailableReason: expect.any(Function),
           getFeatures: expect.any(Function),
           hasAtLeast: expect.any(Function),
           features$: expect.any(Observable),
@@ -66,6 +67,7 @@ describe('Security Plugin', () => {
         license: {
           isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
+          getUnavailableReason: expect.any(Function),
           getFeatures: expect.any(Function),
           hasAtLeast: expect.any(Function),
           features$: expect.any(Observable),
@@ -74,6 +76,18 @@ describe('Security Plugin', () => {
         fatalErrors: coreSetupMock.fatalErrors,
         getStartServices: coreSetupMock.getStartServices,
       });
+    });
+
+    it('calls core.security.registerSecurityApi', () => {
+      const coreSetupMock = coreMock.createSetup({ basePath: '/some-base-path' });
+
+      const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
+
+      plugin.setup(coreSetupMock, {
+        licensing: licensingMock.createSetup(),
+      });
+
+      expect(coreSetupMock.security.registerSecurityApi).toHaveBeenCalledTimes(1);
     });
   });
 

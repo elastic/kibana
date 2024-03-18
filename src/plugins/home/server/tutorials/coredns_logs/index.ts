@@ -39,7 +39,7 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-coredns.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/coredns.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/coredns.svg'),
     artifacts: {
       dashboards: [
         {
@@ -55,7 +55,7 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/coredns_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/coredns_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),

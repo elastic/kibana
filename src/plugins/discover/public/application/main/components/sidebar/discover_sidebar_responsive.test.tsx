@@ -13,13 +13,13 @@ import { EuiProgress } from '@elastic/eui';
 import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
-import { FetchStatus } from '../../../types';
+import { FetchStatus, SidebarToggleState } from '../../../types';
 import {
   AvailableFields$,
   DataDocuments$,
@@ -36,14 +36,32 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
-import type { SearchBarCustomization } from '../../../../customizations';
-import type { UnifiedFieldListSidebarContainerApi } from '@kbn/unified-field-list';
+import { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
   CustomDataViewPicker: jest
     .fn(() => <div data-test-subj="custom-data-view-picker" />)
     .mockName('CustomDataViewPickerMock'),
+};
+
+const smartFields = [
+  new DataViewField({
+    name: 'mock_field',
+    type: 'mock_field',
+    searchable: false,
+    aggregatable: false,
+  }),
+];
+
+const additionalFieldGroups = {
+  smartFields,
+};
+
+const mockFieldListCustomisation: FieldListCustomization = {
+  id: 'field_list',
+  additionalFieldGroups,
 };
 
 let mockUseCustomizations = false;
@@ -58,6 +76,8 @@ jest.mock('../../../../customizations', () => ({
     switch (id) {
       case 'search_bar':
         return mockSearchBarCustomization;
+      case 'field_list':
+        return mockFieldListCustomisation;
       default:
         throw new Error(`Unknown customization id: ${id}`);
     }
@@ -125,14 +145,6 @@ const mockCalcFieldCounts = jest.fn(() => {
   return mockfieldCounts;
 });
 
-jest.mock('../../../../kibana_services', () => ({
-  getUiActions: jest.fn(() => {
-    return {
-      getTriggerCompatibleActions: jest.fn(() => []),
-    };
-  }),
-}));
-
 jest.mock('../../utils/calc_field_counts', () => ({
   calcFieldCounts: () => mockCalcFieldCounts(),
 }));
@@ -169,8 +181,10 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarRe
     trackUiMetric: jest.fn(),
     onFieldEdited: jest.fn(),
     onDataViewCreated: jest.fn(),
-    unifiedFieldListSidebarContainerApi: null,
-    setUnifiedFieldListSidebarContainerApi: jest.fn(),
+    sidebarToggleState$: new BehaviorSubject<SidebarToggleState>({
+      isCollapsed: false,
+      toggle: () => {},
+    }),
   };
 }
 
@@ -202,21 +216,10 @@ async function mountComponent(
   mockedServices.data.query.getState = jest.fn().mockImplementation(() => appState.getState());
 
   await act(async () => {
-    const SidebarWrapper = () => {
-      const [api, setApi] = useState<UnifiedFieldListSidebarContainerApi | null>(null);
-      return (
-        <DiscoverSidebarResponsive
-          {...props}
-          unifiedFieldListSidebarContainerApi={api}
-          setUnifiedFieldListSidebarContainerApi={setApi}
-        />
-      );
-    };
-
     comp = mountWithIntl(
       <KibanaContextProvider services={mockedServices}>
         <DiscoverAppStateProvider value={appState}>
-          <SidebarWrapper />
+          <DiscoverSidebarResponsive {...props} />
         </DiscoverAppStateProvider>
       </KibanaContextProvider>
     );
@@ -471,7 +474,7 @@ describe('discover responsive sidebar', function () {
 
     expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('1');
     expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
-      '1 popular field. 1 available field. 0 empty fields. 0 meta fields.'
+      '1 popular field. 1 available field. 0 meta fields.'
     );
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
@@ -770,6 +773,20 @@ describe('discover responsive sidebar', function () {
       expect(findTestSubject(comp, 'fieldList').exists()).toBe(false);
       findTestSubject(comp, 'unifiedFieldListSidebar__toggle-expand').simulate('click');
       expect(findTestSubject(comp, 'fieldList').exists()).toBe(true);
+    });
+  });
+
+  describe('field list customization', () => {
+    it('should render Smart Fields', async () => {
+      mockUseCustomizations = true;
+      const comp = await mountComponent(props);
+
+      expect(findTestSubject(comp, 'fieldList').exists()).toBe(true);
+      expect(findTestSubject(comp, 'fieldListGroupedSmartFields').exists()).toBe(true);
+
+      const smartFieldsCount = findTestSubject(comp, 'fieldListGroupedSmartFields-count');
+
+      expect(smartFieldsCount.text()).toBe('1');
     });
   });
 });

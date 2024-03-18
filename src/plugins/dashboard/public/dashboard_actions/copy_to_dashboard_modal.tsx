@@ -5,46 +5,36 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState } from 'react';
 import { omit } from 'lodash';
+import React, { useCallback, useState } from 'react';
 
 import {
-  EuiRadio,
   EuiButton,
-  EuiSpacer,
+  EuiButtonEmpty,
   EuiFormRow,
   EuiModalBody,
-  EuiButtonEmpty,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiRadio,
+  EuiSpacer,
 } from '@elastic/eui';
-import {
-  EmbeddablePackageState,
-  IEmbeddable,
-  PanelNotFoundError,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddablePackageState, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 
-import { DashboardPanelState } from '../../common';
-import { pluginServices } from '../services/plugin_services';
-import { type DashboardContainer } from '../dashboard_container';
-import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
 import { createDashboardEditUrl, CREATE_NEW_DASHBOARD_URL } from '../dashboard_constants';
+import { pluginServices } from '../services/plugin_services';
+import { CopyToDashboardAPI } from './copy_to_dashboard_action';
+import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
 
 interface CopyToDashboardModalProps {
-  embeddable: IEmbeddable;
-  dashboardId?: string;
+  api: CopyToDashboardAPI;
   closeModal: () => void;
 }
 
 const DashboardPicker = withSuspense(LazyDashboardPicker);
 
-export function CopyToDashboardModal({
-  dashboardId,
-  embeddable,
-  closeModal,
-}: CopyToDashboardModalProps) {
+export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalProps) {
   const {
     embeddable: { getStateTransfer },
     dashboardCapabilities: { createNew: canCreateNew, showWriteControls: canEditExisting },
@@ -56,15 +46,18 @@ export function CopyToDashboardModal({
     null
   );
 
-  const onSubmit = useCallback(() => {
-    const dashboard = embeddable.getRoot() as DashboardContainer;
-    const panelToCopy = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
+  const dashboardId = api.parentApi.savedObjectId.value;
+
+  const onSubmit = useCallback(async () => {
+    const dashboard = api.parentApi;
+    const panelToCopy = await dashboard.getDashboardPanelFromId(api.uuid);
+
     if (!panelToCopy) {
       throw new PanelNotFoundError();
     }
 
     const state: EmbeddablePackageState = {
-      type: embeddable.type,
+      type: panelToCopy.type,
       input: {
         ...omit(panelToCopy.explicitInput, 'id'),
       },
@@ -84,7 +77,7 @@ export function CopyToDashboardModal({
       state,
       path,
     });
-  }, [dashboardOption, embeddable, selectedDashboard, stateTransfer, closeModal]);
+  }, [api, dashboardOption, selectedDashboard, closeModal, stateTransfer]);
 
   const titleId = 'copyToDashboardTitle';
   const descriptionId = 'copyToDashboardDescription';

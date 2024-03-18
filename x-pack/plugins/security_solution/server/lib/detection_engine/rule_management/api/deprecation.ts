@@ -16,7 +16,8 @@ import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/consta
  * @returns string
  */
 export const buildDeprecatedBulkEndpointMessage = (path: string) => {
-  const docsLink = getDocLinks({ kibanaBranch: 'main' }).siem.ruleApiOverview;
+  const docsLink = getDocLinks({ kibanaBranch: 'main', buildFlavor: 'traditional' }).siem
+    .ruleApiOverview;
   return `Deprecated endpoint: ${path} API is deprecated since v8.2. Please use the ${DETECTION_ENGINE_RULES_BULK_ACTION} API instead. See ${docsLink} for more detail.`;
 };
 

@@ -8,4 +8,4 @@
 import { PluginInitializer } from '@kbn/core/server';
 import { CasesFixturePlugin } from './plugin';
 
-export const plugin: PluginInitializer<void, void> = () => new CasesFixturePlugin();
+export const plugin: PluginInitializer<void, void> = async () => new CasesFixturePlugin();

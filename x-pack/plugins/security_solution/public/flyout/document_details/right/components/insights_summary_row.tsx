@@ -95,28 +95,29 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
   const colorDataTestSubj = `${dataTestSubj}Color`;
 
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent={'spaceBetween'} alignItems={'center'}>
+    <EuiFlexGroup
+      gutterSize="none"
+      justifyContent={'spaceBetween'}
+      alignItems={'center'}
+      responsive={false}
+    >
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup
+        <EuiIcon
           css={css`
-            padding: ${euiTheme.size.s};
+            margin: ${euiTheme.size.s};
           `}
-          alignItems={'center'}
-        >
-          <EuiIcon
-            data-test-subj={iconDataTestSubj}
-            aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.right.insights.insightSummaryButtonIconAriaLabel',
-              {
-                defaultMessage: 'Insight summary row icon',
-              }
-            )}
-            color="text"
-            display="empty"
-            type={icon}
-            size="m"
-          />
-        </EuiFlexGroup>
+          data-test-subj={iconDataTestSubj}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.flyout.right.insights.insightSummaryButtonIconAriaLabel',
+            {
+              defaultMessage: 'Insight summary row icon',
+            }
+          )}
+          color="text"
+          display="empty"
+          type={icon}
+          size="m"
+        />
       </EuiFlexItem>
       <EuiFlexItem
         data-test-subj={valueDataTestSubj}

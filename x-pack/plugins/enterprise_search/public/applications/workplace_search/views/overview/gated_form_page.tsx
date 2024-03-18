@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 
+import { docLinks } from '../../../shared/doc_links';
 import {
   EnterpriseSearchPageTemplateWrapper,
   PageTemplateProps,
@@ -35,7 +36,7 @@ export const WorkplaceSearchGatePage: React.FC<PageTemplateProps> = ({ isLoading
               blogUrl: (
                 <EuiLink
                   data-test-subj="workplaceSearch-gateForm-blog-link"
-                  href="#"
+                  href={docLinks.workplaceSearchGatedFormBlog}
                   target="_blank"
                   data-telemetry-id="workplaceSearch-gateForm-blog-viewLink"
                 >
@@ -56,6 +57,7 @@ export const WorkplaceSearchGatePage: React.FC<PageTemplateProps> = ({ isLoading
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
       }}
       isLoading={isLoading}
+      hideEmbeddedConsole
     >
       <SendWorkplaceSearchTelemetry action="viewed" metric="Workplace Search Gate form" />
 

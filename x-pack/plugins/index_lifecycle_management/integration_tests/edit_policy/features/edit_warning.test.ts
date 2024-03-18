@@ -67,6 +67,19 @@ describe('<EditPolicy /> edit warning', () => {
     expect(exists('editManagedPolicyCallOut')).toBe(true);
   });
 
+  test('an edit warning callout is shown for a deprecated policy', async () => {
+    httpRequestsMockHelpers.setLoadPolicies([POLICY_MANAGED_BY_ES]);
+
+    await act(async () => {
+      testBed = await initTestBed(httpSetup);
+    });
+    const { exists, component } = testBed;
+    component.update();
+
+    expect(exists('editWarning')).toBe(true);
+    expect(exists('editPolicyWithDeprecation')).toBe(true);
+  });
+
   test('no indices link if no indices', async () => {
     httpRequestsMockHelpers.setLoadPolicies([
       { ...getDefaultHotPhasePolicy(POLICY_NAME), indices: [] },

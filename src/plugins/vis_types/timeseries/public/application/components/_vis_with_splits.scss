@@ -20,7 +20,7 @@
   > .tvbVis {
     // Apply the minimum height on the vis itself so it doesn't interfere with flex calculations
     // Gauges are not completely square, so the height is just slightly less than the width
-    min-height: $euiSize * 12 / 1.25;
+    min-height: calc($euiSize * 12 / 1.25);
   }
 }
 

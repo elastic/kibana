@@ -10,9 +10,8 @@ import {
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiLoadingSpinner,
-  EuiToolTip,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import prettyMilliseconds from 'pretty-ms';
@@ -82,11 +81,9 @@ export const CasesMetrics: React.FC = () => {
             listItems={[
               {
                 title: (
-                  <EuiToolTip position="right" content={ATTC_DESCRIPTION}>
-                    <>
-                      {ATTC_STAT} <EuiIcon type="questionInCircle" />
-                    </>
-                  </EuiToolTip>
+                  <>
+                    {ATTC_STAT} <EuiIconTip content={ATTC_DESCRIPTION} position="right" />
+                  </>
                 ),
                 description: isCasesMetricsLoading ? (
                   <EuiLoadingSpinner data-test-subj={`mttr-stat-loading-spinner`} />

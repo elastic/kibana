@@ -7,13 +7,13 @@
 
 import React, { Fragment } from 'react';
 import {
+  EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiButton,
   EuiTitle,
   EuiSpacer,
-  EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { LayerTOC } from './layer_toc';
 import { isScreenshotMode } from '../../../kibana_services';
 import { ILayer } from '../../../classes/layers/layer';
+import { ExpandButton } from './expand_button';
 
 export interface Props {
   isReadOnly: boolean;
@@ -33,32 +34,6 @@ export interface Props {
   hideAllLayers: () => void;
   showAllLayers: () => void;
   zoom: number;
-}
-
-function renderExpandButton({
-  hasErrors,
-  isLoading,
-  onClick,
-}: {
-  hasErrors: boolean;
-  isLoading: boolean;
-  onClick: () => void;
-}) {
-  const expandLabel = i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
-    defaultMessage: 'Expand layers panel',
-  });
-
-  return (
-    <EuiButtonIcon
-      className="mapLayerControl__openLayerTOCButton"
-      color="text"
-      isLoading={isLoading}
-      onClick={onClick}
-      iconType={hasErrors ? 'warning' : 'menuLeft'}
-      aria-label={expandLabel}
-      data-test-subj="mapExpandLayerControlButton"
-    />
-  );
 }
 
 export function LayerControl({
@@ -77,8 +52,8 @@ export function LayerControl({
     if (isScreenshotMode()) {
       return null;
     }
-    const hasErrors = layerList.some((layer) => {
-      return layer.hasErrors();
+    const hasErrorsOrWarnings = layerList.some((layer) => {
+      return layer.hasErrors() || layer.hasWarnings();
     });
     const isLoading = layerList.some((layer) => {
       return layer.isLayerLoading(zoom);
@@ -92,7 +67,11 @@ export function LayerControl({
         })}
         position="left"
       >
-        {renderExpandButton({ hasErrors, isLoading, onClick: openLayerTOC })}
+        <ExpandButton
+          hasErrorsOrWarnings={hasErrorsOrWarnings}
+          isLoading={isLoading}
+          onClick={openLayerTOC}
+        />
       </EuiToolTip>
     );
   }

@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './response_actions';
-export * from './endpoint';
-export * from './osquery';
+export * from './response_actions.gen';

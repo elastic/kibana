@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/reporting-export-types-csv-common",
+  "owner": "@elastic/appex-sharedux"
+}

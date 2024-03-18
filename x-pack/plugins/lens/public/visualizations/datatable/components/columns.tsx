@@ -13,15 +13,17 @@ import {
   EuiDataGridColumnCellActionProps,
   EuiListGroupItemProps,
 } from '@elastic/eui';
-import type {
-  Datatable,
-  DatatableColumn,
-  DatatableColumnMeta,
-} from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { FormatFactory } from '../../../../common/types';
 import type { ColumnConfig } from '../../../../common/expressions';
 import { LensCellValueAction } from '../../../types';
+import { buildColumnsMetaLookup } from './helpers';
+
+const hasFilterCellAction = (actions: LensCellValueAction[]) => {
+  return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
+};
 
 export const createGridColumns = (
   bucketColumns: string[],
@@ -54,12 +56,7 @@ export const createGridColumns = (
   closeCellPopover?: Function,
   columnFilterable?: boolean[]
 ) => {
-  const columnsReverseLookup = table.columns.reduce<
-    Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
-  >((memo, { id, name, meta }, i) => {
-    memo[id] = { name, index: i, meta };
-    return memo;
-  }, {});
+  const columnsReverseLookup = buildColumnsMetaLookup(table);
 
   const getContentData = ({
     rowIndex,
@@ -81,7 +78,16 @@ export const createGridColumns = (
     const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
 
     const cellActions: EuiDataGridColumnCellAction[] = [];
-    if (filterable && handleFilterClick && !columnArgs?.oneClickFilter) {
+
+    // compatible cell actions from actions registry
+    const compatibleCellActions = columnCellValueActions?.[colIndex] ?? [];
+
+    if (
+      !hasFilterCellAction(compatibleCellActions) &&
+      filterable &&
+      handleFilterClick &&
+      !columnArgs?.oneClickFilter
+    ) {
       cellActions.push(
         ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
           const { rowValue, contentsIsDefined, cellContent } = getContentData({
@@ -166,8 +172,6 @@ export const createGridColumns = (
       );
     }
 
-    // Add all the column compatible cell actions
-    const compatibleCellActions = columnCellValueActions?.[colIndex] ?? [];
     compatibleCellActions.forEach((action) => {
       cellActions.push(({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
         const rowValue = table.rows[rowIndex][columnId];
@@ -276,6 +280,7 @@ export const createGridColumns = (
       visibleCellActions: 5,
       display: <div css={columnStyle}>{name}</div>,
       displayAsText: name,
+      schema: field,
       actions: {
         showHide: false,
         showMoveLeft: false,

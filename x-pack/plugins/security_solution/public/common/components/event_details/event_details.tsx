@@ -55,7 +55,7 @@ import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { InvestigationGuideView } from './investigation_guide_view';
 import { Overview } from './overview';
 import { Insights } from './insights/insights';
-import { useRiskScoreData } from './use_risk_score_data';
+import { useRiskScoreData } from '../../../entity_analytics/api/hooks/use_risk_score_data';
 import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { DETAILS_CLASS_NAME } from '../../../timelines/components/timeline/body/renderers/helpers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';

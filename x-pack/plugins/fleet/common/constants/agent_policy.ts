@@ -27,8 +27,13 @@ export const AGENT_POLICY_DEFAULT_MONITORING_DATASETS = [
   'elastic_agent.heartbeat',
   'elastic_agent.cloudbeat',
   'elastic_agent.cloud_defend',
+  'elastic_agent.pf_host_agent',
+  'elastic_agent.pf_elastic_collector',
+  'elastic_agent.pf_elastic_symbolizer',
 ];
 
 export const LICENSE_FOR_SCHEDULE_UPGRADE = 'platinum';
 
 export const DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT = 750;
+
+export const AGENTLESS_POLICY_ID = 'agentless'; // the policy id defined here: https://github.com/elastic/project-controller/blob/main/internal/project/security/security_kibana_config.go#L86

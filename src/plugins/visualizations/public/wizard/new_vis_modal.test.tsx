@@ -13,6 +13,7 @@ import NewVisModal from './new_vis_modal';
 import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import { VisParams } from '../../common';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
@@ -47,8 +48,10 @@ describe('NewVisModal', () => {
       title: 'Vis with alias Url',
       stage: 'production',
       group: VisGroups.PROMOTED,
-      aliasApp: 'otherApp',
-      aliasPath: '#/aliasUrl',
+      alias: {
+        app: 'otherApp',
+        path: '#/aliasUrl',
+      },
     },
     {
       name: 'visWithSearch',
@@ -59,7 +62,7 @@ describe('NewVisModal', () => {
     },
   ] as BaseVisType[];
   const visTypes: TypesStart = {
-    get<T>(id: string): BaseVisType<T> {
+    get<T extends VisParams>(id: string): BaseVisType<T> {
       return _visTypes.find((vis) => vis.name === id) as unknown as BaseVisType<T>;
     },
     all: () => _visTypes,
@@ -181,7 +184,7 @@ describe('NewVisModal', () => {
       );
     });
 
-    it('closes and redirects properly if visualization with aliasPath and originatingApp in props', () => {
+    it('closes and redirects properly if visualization with alias.path and originatingApp in props', () => {
       const onClose = jest.fn();
       const navigateToApp = jest.fn();
       const stateTransfer = embeddablePluginMock.createStartContract().getStateTransfer();

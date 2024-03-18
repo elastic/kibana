@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { IngestPipelinesPlugin } from './plugin';
-
-export function plugin() {
+export async function plugin() {
+  const { IngestPipelinesPlugin } = await import('./plugin');
   return new IngestPipelinesPlugin();
 }

@@ -39,6 +39,9 @@ const createAppClientMock = () => ({});
 const createRequestContextMock = (clients: MockClients = createMockClients()) => {
   return {
     core: clients.core,
+    dataQualityDashboard: {
+      getResultsIndexName: jest.fn(() => Promise.resolve('mock_results_index_name')),
+    },
   };
 };
 

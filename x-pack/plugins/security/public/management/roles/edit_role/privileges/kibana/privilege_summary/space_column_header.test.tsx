@@ -15,7 +15,7 @@ import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { SpaceColumnHeader } from './space_column_header';
-import type { RoleKibanaPrivilege } from '../../../../../../../common/model';
+import type { RoleKibanaPrivilege } from '../../../../../../../common';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 
 const spaces = [

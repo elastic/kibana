@@ -13,11 +13,18 @@ import { inputsSelectors } from '../../store';
 import type { VisualizationResponse } from './types';
 
 export const useVisualizationResponse = ({ visualizationId }: { visualizationId: string }) => {
-  const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
-  const { inspect } = useDeepEqualSelector((state) => getGlobalQuery(state, visualizationId));
+  const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
+  const { inspect, loading, searchSessionId } = useDeepEqualSelector((state) =>
+    getGlobalQuery(state, visualizationId)
+  );
   const response = useMemo(
-    () => (inspect ? parseVisualizationData<VisualizationResponse>(inspect?.response) : null),
-    [inspect]
+    () => ({
+      requests: inspect ? parseVisualizationData<VisualizationResponse>(inspect?.dsl) : null,
+      responses: inspect ? parseVisualizationData<VisualizationResponse>(inspect?.response) : null,
+      loading,
+      searchSessionId,
+    }),
+    [inspect, loading, searchSessionId]
   );
 
   return response;

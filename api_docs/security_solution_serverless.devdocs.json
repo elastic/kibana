@@ -107,6 +107,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolutionServerless",
+        "id": "def-common.SECURITY_PROJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_PROJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"security\""
+        ],
+        "path": "x-pack/plugins/security_solution_serverless/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []

@@ -47,9 +47,11 @@ const FindingsTabRedirecter = ({ lastTabSelected }: { lastTabSelected?: Findings
     );
   }
 
-  // otherwise stay on the vulnerabilities tab, since it's the first one.
+  // otherwise stay on the misconfigurations tab, since it's the first one.
   return (
-    <Redirect to={{ search: location.search, pathname: findingsNavigation.vulnerabilities.path }} />
+    <Redirect
+      to={{ search: location.search, pathname: findingsNavigation.findings_default.path }}
+    />
   );
 };
 
@@ -100,16 +102,6 @@ export const Findings = () => {
           <EuiSpacer />
           <EuiTabs size="l">
             <EuiTab
-              key="vuln_mgmt"
-              onClick={navigateToVulnerabilitiesTab}
-              isSelected={isVulnerabilitiesTabSelected(location.pathname)}
-            >
-              <FormattedMessage
-                id="xpack.csp.findings.tabs.vulnerabilities"
-                defaultMessage="Vulnerabilities"
-              />
-            </EuiTab>
-            <EuiTab
               key="configurations"
               onClick={navigateToConfigurationsTab}
               isSelected={!isVulnerabilitiesTabSelected(location.pathname)}
@@ -117,6 +109,16 @@ export const Findings = () => {
               <FormattedMessage
                 id="xpack.csp.findings.tabs.misconfigurations"
                 defaultMessage="Misconfigurations"
+              />
+            </EuiTab>
+            <EuiTab
+              key="vuln_mgmt"
+              onClick={navigateToVulnerabilitiesTab}
+              isSelected={isVulnerabilitiesTabSelected(location.pathname)}
+            >
+              <FormattedMessage
+                id="xpack.csp.findings.tabs.vulnerabilities"
+                defaultMessage="Vulnerabilities"
               />
             </EuiTab>
           </EuiTabs>

@@ -35,6 +35,7 @@ interface AutocompleteFieldListsProps {
   selectedField: DataViewFieldBase | undefined;
   selectedValue: string | undefined;
   allowLargeValueLists?: boolean;
+  'aria-label'?: string;
 }
 
 export interface AutocompleteListsData {
@@ -53,6 +54,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
   selectedField,
   selectedValue,
   allowLargeValueLists = false,
+  'aria-label': ariaLabel,
 }): JSX.Element => {
   const [error, setError] = useState<string | undefined>(undefined);
   const [listData, setListData] = useState<AutocompleteListsData>({
@@ -125,7 +127,12 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
           <EuiLink
             external
             target="_blank"
-            href={getDocLinks({ kibanaBranch: 'main' }).securitySolution.exceptions.value_lists}
+            href={
+              getDocLinks({
+                kibanaBranch: 'main',
+                buildFlavor: 'traditional',
+              }).securitySolution.exceptions.value_lists
+            }
           >
             {i18n.SEE_DOCUMENTATION}
           </EuiLink>
@@ -157,6 +164,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
         selectedOptions={selectedComboOptions}
         singleSelection={SINGLE_SELECTION}
         sortMatchesBy="startsWith"
+        aria-label={ariaLabel}
       />
     </EuiFormRow>
   );

@@ -7,22 +7,17 @@
 
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  CSV_REPORT_TYPE,
-  CSV_REPORT_TYPE_V2,
-  PDF_REPORT_TYPE,
-  PDF_REPORT_TYPE_V2,
-  PNG_REPORT_TYPE_V2,
-} from '../common/constants';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+
+import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
+import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
+
 import type { ReportingCore, ReportingInternalStart } from './core';
-import { ExportTypesRegistry } from './lib/export_types_registry';
 import { ReportingPlugin } from './plugin';
-import {
-  createMockConfigSchema,
-  createMockPluginSetup,
-  createMockPluginStart,
-} from './test_helpers';
+import { createMockPluginSetup, createMockPluginStart } from './test_helpers';
 import type { ReportingSetupDeps } from './types';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -92,7 +87,7 @@ describe('Reporting Plugin', () => {
   });
 
   describe('config and export types registration', () => {
-    jest.mock('./lib/export_types_registry');
+    jest.mock('@kbn/reporting-server/export_types_registry');
     ExportTypesRegistry.prototype.getAll = jest.fn(() => []); // code breaks if getAll returns undefined
     let registerSpy: jest.SpyInstance;
 

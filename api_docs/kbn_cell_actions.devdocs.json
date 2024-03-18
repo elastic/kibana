@@ -27,7 +27,7 @@
         "label": "addFilterIn",
         "description": [],
         "signature": [
-          "({ filterManager, fieldName, value, }: { filterManager: ",
+          "({ filterManager, fieldName, value, dataViewId, }: { filterManager: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -37,7 +37,7 @@
           },
           " | undefined; fieldName: string; value: ",
           "DefaultActionsSupportedValue",
-          "; }) => void"
+          "; dataViewId?: string | undefined; }) => void"
         ],
         "path": "packages/kbn-cell-actions/src/actions/filter/filter_in.ts",
         "deprecated": false,
@@ -48,7 +48,7 @@
             "id": "def-common.addFilterIn.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  filterManager,\n  fieldName,\n  value,\n}",
+            "label": "{\n  filterManager,\n  fieldName,\n  value,\n  dataViewId,\n}",
             "description": [],
             "path": "packages/kbn-cell-actions/src/actions/filter/filter_in.ts",
             "deprecated": false,
@@ -99,6 +99,20 @@
                 "path": "packages/kbn-cell-actions/src/actions/filter/filter_in.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/cell-actions",
+                "id": "def-common.addFilterIn.$1.dataViewId",
+                "type": "string",
+                "tags": [],
+                "label": "dataViewId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-cell-actions/src/actions/filter/filter_in.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -114,7 +128,7 @@
         "label": "addFilterOut",
         "description": [],
         "signature": [
-          "({ filterManager, fieldName, value, }: { filterManager: ",
+          "({ filterManager, fieldName, value, dataViewId, }: { filterManager: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -124,7 +138,7 @@
           },
           " | undefined; fieldName: string; value: ",
           "DefaultActionsSupportedValue",
-          "; }) => void"
+          "; dataViewId?: string | undefined; }) => void"
         ],
         "path": "packages/kbn-cell-actions/src/actions/filter/filter_out.ts",
         "deprecated": false,
@@ -135,7 +149,7 @@
             "id": "def-common.addFilterOut.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  filterManager,\n  fieldName,\n  value,\n}",
+            "label": "{\n  filterManager,\n  fieldName,\n  value,\n  dataViewId,\n}",
             "description": [],
             "path": "packages/kbn-cell-actions/src/actions/filter/filter_out.ts",
             "deprecated": false,
@@ -182,6 +196,20 @@
                 "description": [],
                 "signature": [
                   "string[] | boolean[] | number[]"
+                ],
+                "path": "packages/kbn-cell-actions/src/actions/filter/filter_out.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/cell-actions",
+                "id": "def-common.addFilterOut.$1.dataViewId",
+                "type": "string",
+                "tags": [],
+                "label": "dataViewId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
                 ],
                 "path": "packages/kbn-cell-actions/src/actions/filter/filter_out.ts",
                 "deprecated": false,
@@ -1305,36 +1333,6 @@
           "{ [P in Exclude<keyof C, \"id\">]: C[P]; }"
         ],
         "path": "packages/kbn-cell-actions/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cell-actions",
-        "id": "def-common.COPY_CELL_ACTION_TYPE",
-        "type": "string",
-        "tags": [],
-        "label": "COPY_CELL_ACTION_TYPE",
-        "description": [],
-        "signature": [
-          "\"cellAction-copy\""
-        ],
-        "path": "packages/kbn-cell-actions/src/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cell-actions",
-        "id": "def-common.FILTER_CELL_ACTION_TYPE",
-        "type": "string",
-        "tags": [],
-        "label": "FILTER_CELL_ACTION_TYPE",
-        "description": [],
-        "signature": [
-          "\"cellAction-filter\""
-        ],
-        "path": "packages/kbn-cell-actions/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

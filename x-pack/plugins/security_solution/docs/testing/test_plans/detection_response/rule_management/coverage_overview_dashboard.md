@@ -24,9 +24,9 @@ Status: `in progress`. The current test plan matches `Milestone 1 - MVP` of the 
 
 - **Rule Source**: The filter type defining rule type, current options are `prebuilt`(from elastic prebuilt rules package) and `custom`(created by user)
 
--**Initial filter state**: The filters present on initial page load. Rule activity will be set to `enabled`, rule source will be set to `prebuilt` and `custom` simultaneously.
+- **Initial filter state**: The filters present on initial page load. Rule activity will be set to `enabled`, rule source will be set to `prebuilt` and `custom` simultaneously.
 
--**Dashboard containing the rule data**: The normal render of the coverage overview dashboard. Any returned rule data mapped correctly to the tile layout of all the MITRE data in a colored grid
+- **Dashboard containing the rule data**: The normal render of the coverage overview dashboard. Any returned rule data mapped correctly to the tile layout of all the MITRE data in a colored grid
 
 ### Assumptions
 

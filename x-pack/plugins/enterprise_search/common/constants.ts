@@ -197,7 +197,7 @@ export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
   extract_binary_content: true,
   name: DEFAULT_PIPELINE_NAME,
   reduce_whitespace: true,
-  run_ml_inference: false,
+  run_ml_inference: true,
 };
 
 export interface DefaultConnectorsPipelineMeta {
@@ -227,7 +227,11 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
   hasIncrementalSyncEnabled: true,
   hasNativeConnectors: true,
   hasWebCrawler: true,
+  showAIPlayground: false,
 };
 
 export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = '.search-acl-filter-';
 export const PLUGIN_ID = 'enterpriseSearch';
+
+export const CONNECTOR_NATIVE_TYPE = 'native';
+export const CONNECTOR_CLIENTS_TYPE = 'connector_clients';

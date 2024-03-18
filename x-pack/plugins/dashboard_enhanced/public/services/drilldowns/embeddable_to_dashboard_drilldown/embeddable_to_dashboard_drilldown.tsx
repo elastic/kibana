@@ -5,16 +5,16 @@
  * 2.0.
  */
 import { extractTimeRange, isFilterPinned } from '@kbn/es-query';
+import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import type { KibanaLocation } from '@kbn/share-plugin/public';
 import {
   cleanEmptyKeys,
-  DashboardAppLocatorParams,
-  getEmbeddableParams,
+  DashboardLocatorParams,
+  getDashboardLocatorParamsFromEmbeddable,
 } from '@kbn/dashboard-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
-import { EnhancedEmbeddableContext } from '@kbn/embeddable-enhanced-plugin/public';
 import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
 import {
   AbstractDashboardDrilldown,
@@ -24,7 +24,9 @@ import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { createExtract, createInject } from '../../../../common';
 import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
 
-type Context = EnhancedEmbeddableContext & ApplyGlobalFilterActionContext;
+export type Context = ApplyGlobalFilterActionContext & {
+  embeddable: Partial<PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>>;
+};
 export type Params = AbstractDashboardDrilldownParams;
 
 /**
@@ -44,12 +46,12 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
     context: Context,
     useUrlForState: boolean
   ): Promise<KibanaLocation> {
-    let params: DashboardAppLocatorParams = { dashboardId: config.dashboardId };
+    let params: DashboardLocatorParams = { dashboardId: config.dashboardId };
 
     if (context.embeddable) {
       params = {
         ...params,
-        ...getEmbeddableParams(context.embeddable, config),
+        ...getDashboardLocatorParamsFromEmbeddable(context.embeddable, config),
       };
     }
 
@@ -75,7 +77,7 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
     return location;
   }
 
-  private useUrlForState(location: KibanaLocation<DashboardAppLocatorParams>) {
+  private useUrlForState(location: KibanaLocation<DashboardLocatorParams>) {
     const state = location.state;
     location.path = setStateToKbnUrl(
       '_a',

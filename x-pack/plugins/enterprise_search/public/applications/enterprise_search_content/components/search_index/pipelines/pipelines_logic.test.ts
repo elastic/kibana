@@ -23,7 +23,7 @@ const DEFAULT_PIPELINE_VALUES = {
   extract_binary_content: true,
   name: 'ent-search-generic-ingestion',
   reduce_whitespace: true,
-  run_ml_inference: false,
+  run_ml_inference: true,
 };
 
 const DEFAULT_VALUES = {
@@ -104,6 +104,7 @@ describe('PipelinesLogic', () => {
       });
       expect(PipelinesLogic.values).toEqual({
         ...DEFAULT_VALUES,
+        canUseMlInferencePipeline: true,
         hasIndexIngestionPipeline: true,
         pipelineName: 'new_pipeline_name',
         pipelineState: { ...DEFAULT_PIPELINE_VALUES, name: 'new_pipeline_name' },
@@ -152,6 +153,7 @@ describe('PipelinesLogic', () => {
         PipelinesLogic.actions.savePipeline = jest.fn();
         PipelinesLogic.actions.fetchCustomPipeline = jest.fn();
         PipelinesLogic.actions.fetchIndexApiSuccess(connectorIndex);
+        // @ts-expect-error pipeline._meta defined as mandatory
         PipelinesLogic.actions.createCustomPipelineSuccess({ [connectorIndex.name]: {} });
         expect(flashSuccessToast).toHaveBeenCalledWith('Custom pipeline created');
         expect(PipelinesLogic.actions.setPipelineState).toHaveBeenCalledWith({
@@ -215,6 +217,7 @@ describe('PipelinesLogic', () => {
           ...apiIndex,
         });
         const indexName = apiIndex.name;
+        // @ts-expect-error pipeline._meta defined as mandatory
         const indexPipelines: Record<string, IngestPipeline> = {
           [indexName]: {
             processors: [],

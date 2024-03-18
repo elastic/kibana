@@ -10,12 +10,15 @@ import type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import type { EnvironmentMode, PackageInfo } from '@kbn/config';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { DarkModeValue } from '@kbn/core-ui-settings-common';
+import type { BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
 
 /** @internal */
 export interface InjectedMetadataClusterInfo {
   cluster_uuid?: string;
   cluster_name?: string;
   cluster_version?: string;
+  cluster_build_flavor?: string;
 }
 
 /** @internal */
@@ -35,6 +38,16 @@ export interface InjectedMetadataExternalUrlPolicy {
 }
 
 /** @internal */
+export interface InjectedMetadataTheme {
+  darkMode: DarkModeValue;
+  version: ThemeVersion;
+  stylesheetPaths: {
+    default: string[];
+    dark: string[];
+  };
+}
+
+/** @internal */
 export interface InjectedMetadata {
   version: string;
   buildNumber: number;
@@ -42,7 +55,9 @@ export interface InjectedMetadata {
   basePath: string;
   serverBasePath: string;
   publicBaseUrl?: string;
+  assetsHrefBase: string;
   clusterInfo: InjectedMetadataClusterInfo;
+  logging: BrowserLoggingConfig;
   env: {
     mode: EnvironmentMode;
     packageInfo: PackageInfo;
@@ -51,10 +66,7 @@ export interface InjectedMetadata {
   i18n: {
     translationsUrl: string;
   };
-  theme: {
-    darkMode: boolean;
-    version: ThemeVersion;
-  };
+  theme: InjectedMetadataTheme;
   csp: {
     warnLegacyBrowsers: boolean;
   };

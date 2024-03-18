@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import deepmerge from 'deepmerge';
 import { CspConfigType } from './config';
 
 export type CspDirectiveName =
@@ -25,9 +26,9 @@ export type CspDirectiveName =
  * The default directives rules that are always applied
  */
 export const defaultRules: Partial<Record<CspDirectiveName, string[]>> = {
-  'script-src': [`'self'`],
-  'worker-src': [`blob:`, `'self'`],
-  'style-src': [`'unsafe-inline'`, `'self'`],
+  'script-src': [`'report-sample'`, `'self'`],
+  'worker-src': [`'report-sample'`, `'self'`, `blob:`],
+  'style-src': [`'report-sample'`, `'self'`, `'unsafe-inline'`],
 };
 
 /**
@@ -65,7 +66,14 @@ export class CspDirectives {
       .join('; ');
   }
 
-  static fromConfig(config: CspConfigType): CspDirectives {
+  static fromConfig(
+    firstConfig: CspConfigType,
+    ...otherConfigs: Array<Partial<CspConfigType>>
+  ): CspDirectives {
+    const config = otherConfigs.reduce<CspConfigType>(
+      (acc, conf) => deepmerge(acc, conf),
+      firstConfig
+    );
     const cspDirectives = new CspDirectives();
 
     // combining `default` directive configurations

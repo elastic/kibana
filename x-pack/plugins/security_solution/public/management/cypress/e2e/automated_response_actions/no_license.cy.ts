@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { disableExpandableFlyoutAdvancedSettings } from '../../tasks/common';
-import { APP_ALERTS_PATH } from '../../../../../common/constants';
+import { navigateToAlertsList } from '../../screens/alerts';
 import { closeAllToasts } from '../../tasks/toasts';
 import { fillUpNewRule } from '../../tasks/response_actions';
 import { login, ROLE } from '../../tasks/login';
@@ -19,29 +18,26 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
   describe('User cannot use endpoint action in form', () => {
     const [ruleName, ruleDescription] = generateRandomStringName(2);
 
-    before(() => {
+    beforeEach(() => {
       login(ROLE.endpoint_response_actions_access);
     });
 
     it('response actions are disabled', () => {
       fillUpNewRule(ruleName, ruleDescription);
-      // addEndpointResponseAction();
       cy.getByTestSubj('response-actions-wrapper').within(() => {
-        cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
+        cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').should(
           'be.disabled'
         );
       });
     });
   });
 
-  // FIXME: Flaky. Needs fixing (security team issue #7763)
-  describe.skip('User cannot see results', () => {
+  describe('User cannot see results', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
     const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
-    before(() => {
+    beforeEach(() => {
       login();
-      disableExpandableFlyoutAdvancedSettings();
       indexEndpointRuleAlerts({
         endpointAgentId,
         endpointHostname,
@@ -59,7 +55,7 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
       });
     });
 
-    after(() => {
+    afterEach(() => {
       if (endpointData) {
         endpointData.cleanup();
         endpointData = undefined;
@@ -70,12 +66,13 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
         alertData = undefined;
       }
     });
+
     it('show the permission denied callout', () => {
-      cy.visit(APP_ALERTS_PATH);
+      navigateToAlertsList(`query=(language:kuery,query:'agent.id: "${endpointAgentId}" ')`);
       closeAllToasts();
       cy.getByTestSubj('expand-event').first().click();
-      cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
-      cy.getByTestSubj('responseActionsViewTab').click();
+      cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
+      cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
       cy.contains('Permission denied');
       cy.contains(
         'To access these results, ask your administrator for Elastic Defend Kibana privileges.'

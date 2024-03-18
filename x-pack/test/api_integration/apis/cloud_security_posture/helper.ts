@@ -9,7 +9,7 @@ import type { SuperTest, Test } from 'supertest';
 import { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { IndexDetails } from '@kbn/cloud-security-posture-plugin/common/types';
+import type { IndexDetails } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import { SecurityService } from '../../../../../test/common/services/security/security';
 
 export const deleteIndex = (es: Client, indexToBeDeleted: string[]) => {
@@ -51,7 +51,7 @@ export async function createPackagePolicy(
   posture: string,
   packageName: string = 'cloud_security_posture-1'
 ) {
-  const version = '1.3.0';
+  const version = '1.7.1';
   const title = 'Security Posture Management';
   const streams = [
     {

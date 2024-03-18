@@ -35,7 +35,7 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should return error in case of multiple data layers', () => {
-    const mockDatasource = createMockDatasource('testDatasource');
+    const mockDatasource = createMockDatasource();
     mockDatasource.getLayers.mockReturnValue(['layer1', 'layer2']);
     expect(
       getLayerMetaInfo(

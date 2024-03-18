@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext, useMemo } from 'react';
-import { NavigationKibanaDependencies, NavigationServices } from '../types';
-import { CloudLinks, getCloudLinks } from './cloud_links';
+import React, { FC, useContext } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+
+import { NavigationKibanaDependencies, NavigationServices } from './types';
 
 const Context = React.createContext<NavigationServices | null>(null);
 
@@ -26,22 +27,19 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   children,
   ...dependencies
 }) => {
-  const { core, serverless, cloud } = dependencies;
+  const { core, activeNodes$ } = dependencies;
   const { chrome, http } = core;
   const { basePath } = http;
   const { navigateToUrl } = core.application;
-
-  const cloudLinks: CloudLinks = useMemo(() => (cloud ? getCloudLinks(cloud) : {}), [cloud]);
+  const isSideNavCollapsed = useObservable(chrome.getIsSideNavCollapsed$(), true);
 
   const value: NavigationServices = {
     basePath,
     recentlyAccessed$: chrome.recentlyAccessed.get$(),
-    navLinks$: chrome.navLinks.getNavLinks$(),
     navigateToUrl,
     navIsOpen: true,
-    onProjectNavigationChange: serverless.setNavigation,
-    activeNodes$: serverless.getActiveNavigationNodes$(),
-    cloudLinks,
+    activeNodes$,
+    isSideNavCollapsed,
   };
 
   return <Context.Provider value={value}>{children}</Context.Provider>;

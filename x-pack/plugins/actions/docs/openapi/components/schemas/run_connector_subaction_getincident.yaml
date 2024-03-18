@@ -18,4 +18,5 @@ properties:
       externalId:
         type: string
         description: The Jira, ServiceNow ITSM, or ServiceNow SecOps issue identifier.
-        example: 71778
+        examples:
+          - 71778

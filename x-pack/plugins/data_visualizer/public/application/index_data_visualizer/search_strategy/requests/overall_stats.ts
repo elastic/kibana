@@ -114,6 +114,15 @@ export function isNonAggregatableFieldOverallStats(
   return isPopulatedObject(arg, ['rawResponse']);
 }
 
+export function isNonAggregatableSampledDocs(
+  arg: unknown
+): arg is IKibanaSearchResponse<estypes.SearchResponse<unknown>> {
+  return (
+    isPopulatedObject(arg, ['rawResponse']) &&
+    (arg.rawResponse as estypes.SearchResponse).hasOwnProperty('hits')
+  );
+}
+
 export const processAggregatableFieldsExistResponse = (
   responses: AggregatableFieldOverallStats[] | undefined,
   aggregatableFields: OverallStatsSearchStrategyParams['aggregatableFields'],
@@ -204,6 +213,10 @@ export const checkNonAggregatableFieldExistsRequest = (
   const size = 0;
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
+  if (Array.isArray(filterCriteria)) {
+    filterCriteria.push({ exists: { field } });
+  }
+
   const searchBody = {
     query: {
       bool: {
@@ -212,9 +225,6 @@ export const checkNonAggregatableFieldExistsRequest = (
     },
     ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
   };
-  if (Array.isArray(filterCriteria)) {
-    filterCriteria.push({ exists: { field } });
-  }
 
   return {
     index,
@@ -227,9 +237,40 @@ export const checkNonAggregatableFieldExistsRequest = (
   };
 };
 
+const DEFAULT_DOCS_SAMPLE_OF_TEXT_FIELDS_SIZE = 1000;
+
+export const getSampleOfDocumentsForNonAggregatableFields = (
+  nonAggregatableFields: string[],
+  dataViewTitle: string,
+  query: Query['query'],
+  timeFieldName: string | undefined,
+  earliestMs: number | undefined,
+  latestMs: number | undefined,
+  runtimeMappings?: estypes.MappingRuntimeFields
+): estypes.SearchRequest => {
+  const index = dataViewTitle;
+  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
+
+  return {
+    index,
+    body: {
+      fields: nonAggregatableFields.map((fieldName) => fieldName),
+      query: {
+        bool: {
+          filter: filterCriteria,
+        },
+      },
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      size: DEFAULT_DOCS_SAMPLE_OF_TEXT_FIELDS_SIZE,
+    },
+  };
+};
+
 export const processNonAggregatableFieldsExistResponse = (
   results: IKibanaSearchResponse[] | undefined,
-  nonAggregatableFields: string[]
+  nonAggregatableFields: string[],
+  nonAggregatableFieldsCount: number[],
+  nonAggregatableFieldsUniqueCount: Array<Set<string>>
 ) => {
   const stats = {
     nonAggregatableExistsFields: [] as NonAggregatableField[],
@@ -238,12 +279,17 @@ export const processNonAggregatableFieldsExistResponse = (
 
   if (!results || nonAggregatableFields.length === 0) return stats;
 
-  nonAggregatableFields.forEach((fieldName) => {
+  nonAggregatableFields.forEach((fieldName, fieldIdx) => {
     const foundField = results.find((r) => r.rawResponse.fieldName === fieldName);
     const existsInDocs = foundField !== undefined && foundField.rawResponse.hits.total > 0;
     const fieldData: NonAggregatableField = {
       fieldName,
       existsInDocs,
+      stats: {
+        count: nonAggregatableFieldsCount[fieldIdx],
+        cardinality: nonAggregatableFieldsUniqueCount[fieldIdx].size,
+        sampleCount: DEFAULT_DOCS_SAMPLE_OF_TEXT_FIELDS_SIZE,
+      },
     };
     if (existsInDocs === true) {
       stats.nonAggregatableExistsFields.push(fieldData);

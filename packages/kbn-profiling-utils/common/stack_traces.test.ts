@@ -29,7 +29,7 @@ describe('Stack trace response operations', () => {
       samplingRate: 1.0,
     };
 
-    const decoded = decodeStackTraceResponse(original);
+    const decoded = decodeStackTraceResponse(original, false);
 
     expect(decoded.executables.size).toEqual(expected.executables.size);
     expect(decoded.executables.size).toEqual(0);
@@ -58,6 +58,9 @@ describe('Stack trace response operations', () => {
           frame_ids: ['abc123', 'def456'],
           address_or_lines: [123, 456],
           type_ids: [0, 1],
+          count: 3,
+          annual_co2_tons: 1,
+          annual_costs_usd: 1,
         },
       },
       stack_frames: {
@@ -92,6 +95,9 @@ describe('Stack trace response operations', () => {
             FrameIDs: ['abc123', makeFrameID('def456', 0), makeFrameID('def456', 1)],
             AddressOrLines: [123, 456, 456],
             Types: [0, 1, 1],
+            Count: 3,
+            selfAnnualCO2Kgs: 1,
+            selfAnnualCostUSD: 1,
           },
         ],
       ]),
@@ -135,7 +141,7 @@ describe('Stack trace response operations', () => {
       samplingRate: 1.0,
     };
 
-    const decoded = decodeStackTraceResponse(original);
+    const decoded = decodeStackTraceResponse(original, false);
 
     expect(decoded.executables.size).toEqual(expected.executables.size);
     expect(decoded.executables.size).toEqual(2);
@@ -165,6 +171,9 @@ describe('Stack trace response operations', () => {
           frame_ids: ['abc123'],
           address_or_lines: [123],
           type_ids: [0],
+          count: 3,
+          annual_co2_tons: 1,
+          annual_costs_usd: 1,
         },
       },
       stack_frames: {
@@ -191,6 +200,9 @@ describe('Stack trace response operations', () => {
             FrameIDs: ['abc123'],
             AddressOrLines: [123],
             Types: [0],
+            Count: 3,
+            selfAnnualCO2Kgs: 1,
+            selfAnnualCostUSD: 1,
           },
         ],
       ]),
@@ -211,7 +223,7 @@ describe('Stack trace response operations', () => {
       samplingRate: 1.0,
     };
 
-    const decoded = decodeStackTraceResponse(original);
+    const decoded = decodeStackTraceResponse(original, false);
 
     expect(decoded.executables.size).toEqual(expected.executables.size);
     expect(decoded.executables.size).toEqual(1);

@@ -6,48 +6,18 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { UserItem } from '../../../../../common/search_strategy';
-import type { AzureManagedUser } from '../../../../../common/search_strategy/security_solution/users/managed_details';
-import type { AnomalyTableProviderChildrenProps } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
-
-export interface ObservedUserTable {
-  label: string;
-  values: string[] | null | undefined | UserAnomalies;
-  field: string;
-}
+import type { SearchTypes } from '../../../../../common/detection_engine/types';
+import type { ManagedUserHits } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 
 export interface ManagedUserTable {
-  label: string;
-  value: string | null | undefined;
+  value: SearchTypes[];
   field?: string;
 }
 
-export type ObservedUsersTableColumns = Array<EuiBasicTableColumn<ObservedUserTable>>;
 export type ManagedUsersTableColumns = Array<EuiBasicTableColumn<ManagedUserTable>>;
-
-export interface ObservedUserData {
-  isLoading: boolean;
-  details: UserItem;
-  firstSeen: FirstLastSeenData;
-  lastSeen: FirstLastSeenData;
-  anomalies: UserAnomalies;
-}
 
 export interface ManagedUserData {
   isLoading: boolean;
-  details: AzureManagedUser | undefined;
+  data: ManagedUserHits | undefined;
   isIntegrationEnabled: boolean;
-  firstSeen: FirstLastSeenData;
-  lastSeen: FirstLastSeenData;
-}
-
-export interface FirstLastSeenData {
-  date: string | null | undefined;
-  isLoading: boolean;
-}
-
-export interface UserAnomalies {
-  isLoading: AnomalyTableProviderChildrenProps['isLoadingAnomaliesData'];
-  anomalies: AnomalyTableProviderChildrenProps['anomaliesData'];
-  jobNameById: AnomalyTableProviderChildrenProps['jobNameById'];
 }

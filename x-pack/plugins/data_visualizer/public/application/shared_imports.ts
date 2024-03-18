@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export { EuiCodeEditor } from '@kbn/es-ui-shared-plugin/public';
-export type { EuiCodeEditorProps } from '@kbn/es-ui-shared-plugin/public';
-
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 

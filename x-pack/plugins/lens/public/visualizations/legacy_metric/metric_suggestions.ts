@@ -20,6 +20,7 @@ export function getSuggestions({
   table,
   state,
   keptLayerIds,
+  datasourceId,
 }: SuggestionRequest<LegacyMetricState>): Array<VisualizationSuggestion<LegacyMetricState>> {
   // We only render metric charts for single-row queries. We require a single, numeric column.
   if (
@@ -39,15 +40,19 @@ export function getSuggestions({
     return [];
   }
 
-  return [getSuggestion(table)];
+  return [getSuggestion(table, datasourceId)];
 }
 
-function getSuggestion(table: TableSuggestion): VisualizationSuggestion<LegacyMetricState> {
+function getSuggestion(
+  table: TableSuggestion,
+  datasourceId?: string
+): VisualizationSuggestion<LegacyMetricState> {
   const col = table.columns[0];
   const title = table.label || col.operation.label;
 
   return {
     title,
+    hide: datasourceId === 'textBased',
     score: 0.1,
     previewIcon: IconChartMetric,
     state: {

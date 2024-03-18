@@ -52,19 +52,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       { name: '__other__', value: 5722.77 },
     ];
 
-    function assertMatchesExpectedData(state: DebugState) {
+    function assertMatchesExpectedData(state: DebugState | undefined) {
       expect(
-        state.bars![0].bars.map((bar) => ({
+        state?.bars![0].bars.map((bar) => ({
           x: bar.x,
           y: Math.floor(bar.y * 100) / 100,
         }))
       ).to.eql(expectedData);
     }
 
-    function assertMatchesExpectedPieData(state: DebugState) {
+    function assertMatchesExpectedPieData(state: DebugState | undefined) {
       expect(
         state
-          .partition![0].partitions.map((partition) => ({
+          ?.partition![0].partitions.map((partition) => ({
             name: partition.name,
             value: Math.floor(partition.value * 100) / 100,
           }))
@@ -74,37 +74,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should render xy chart', async () => {
       const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-      assertMatchesExpectedData(data!);
+      assertMatchesExpectedData(data);
     });
 
     it('should render pie chart', async () => {
       await PageObjects.lens.switchToVisualization('pie');
       const data = await PageObjects.lens.getCurrentChartDebugState('partitionVisChart');
-      assertMatchesExpectedPieData(data!);
+      assertMatchesExpectedPieData(data);
     });
 
     it('should render donut chart', async () => {
       await PageObjects.lens.switchToVisualization('donut');
       const data = await PageObjects.lens.getCurrentChartDebugState('partitionVisChart');
-      assertMatchesExpectedPieData(data!);
+      assertMatchesExpectedPieData(data);
     });
 
     it('should render treemap chart', async () => {
       await PageObjects.lens.switchToVisualization('treemap', 'treemap');
       const data = await PageObjects.lens.getCurrentChartDebugState('partitionVisChart');
-      assertMatchesExpectedPieData(data!);
+      assertMatchesExpectedPieData(data);
     });
 
     it('should render heatmap chart', async () => {
       await PageObjects.lens.switchToVisualization('heatmap', 'heat');
       const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
 
-      if (!debugState) {
-        throw new Error('Debug state is not available');
-      }
-
       // assert axes
-      expect(debugState.axes!.x[0].labels).to.eql([
+      expect(debugState?.axes!.x[0].labels).to.eql([
         '97.220.3.248',
         '169.228.188.120',
         '78.83.247.30',
@@ -112,18 +108,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '93.28.27.24',
         'Other',
       ]);
-      expect(debugState.axes!.y[0].labels).to.eql(['']);
+      expect(debugState?.axes!.y[0].labels).to.eql(['']);
 
       // assert cells
-      expect(debugState.heatmap!.cells.length).to.eql(6);
+      expect(debugState?.heatmap!.cells.length).to.eql(6);
 
       // assert legend
-      expect(debugState.legend!.items).to.eql([
-        { color: '#6092c0', key: '5,722.77 - 8,529.22', name: '5,722.77 - 8,529.22' },
-        { color: '#a8bfda', key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66' },
-        { color: '#ebeff5', key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11' },
-        { color: '#ecb385', key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55' },
-        { color: '#e7664c', key: '≥ 16,948.55', name: '≥ 16,948.55' },
+      expect(debugState?.legend!.items).to.eql([
+        { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#6092c0' },
+        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#a8bfda' },
+        { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#ebeff5' },
+        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ecb385' },
+        { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#e7664c' },
       ]);
     });
 

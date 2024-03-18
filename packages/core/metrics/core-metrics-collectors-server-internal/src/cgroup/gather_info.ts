@@ -7,8 +7,6 @@
  */
 import fs from 'fs/promises';
 
-import { GROUP_CPU, GROUP_CPUACCT } from './constants';
-
 const CONTROL_GROUP_RE = new RegExp('\\d+:([^:]+):(/.*)');
 const CONTROLLER_SEPARATOR_RE = ',';
 const PROC_SELF_CGROUP_FILE = '/proc/self/cgroup';
@@ -27,10 +25,15 @@ async function readProcSelf(): Promise<string[]> {
   return data.split(/\n/).filter((line) => line.trim().length > 0);
 }
 
-interface Result {
-  data: Record<string, string>;
-  v2: boolean;
-}
+type Result =
+  | {
+      v2: true;
+      path: string;
+    }
+  | {
+      v2: false;
+      data: Record<string, string>;
+    };
 
 export async function gatherInfo(): Promise<Result> {
   const lines = await readProcSelf();
@@ -39,11 +42,8 @@ export async function gatherInfo(): Promise<Result> {
     // eslint-disable-next-line prettier/prettier
     const [/* '0' */, /* '' */, path] = lines[0].trim().split(':');
     return {
-      data: {
-        [GROUP_CPU]: path,
-        [GROUP_CPUACCT]: path,
-      },
       v2: true,
+      path,
     };
   }
 

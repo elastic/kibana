@@ -9,7 +9,7 @@
 import { RouteOptionsCors, ServerOptions } from '@hapi/hapi';
 import { ServerOptions as TLSOptions } from 'https';
 import { defaultValidationErrorHandler } from './default_validation_error_handler';
-import { IHttpConfig } from './types';
+import { IHttpConfig, ISslConfig } from './types';
 
 const corsAllowedHeaders = ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'];
 
@@ -35,6 +35,7 @@ export function getServerOptions(config: IHttpConfig, { configureTLS = true } = 
       cors,
       payload: {
         maxBytes: config.maxPayload.getValueInBytes(),
+        timeout: config.payloadTimeout,
       },
       validate: {
         failAction: defaultValidationErrorHandler,
@@ -50,26 +51,31 @@ export function getServerOptions(config: IHttpConfig, { configureTLS = true } = 
     },
   };
 
-  if (configureTLS && config.ssl.enabled) {
-    const ssl = config.ssl;
-
-    // TODO: Hapi types have a typo in `tls` property type definition: `https.RequestOptions` is used instead of
-    // `https.ServerOptions`, and `honorCipherOrder` isn't presented in `https.RequestOptions`.
-    const tlsOptions: TLSOptions = {
-      ca: ssl.certificateAuthorities,
-      cert: ssl.certificate,
-      ciphers: config.ssl.cipherSuites?.join(':'),
-      // We use the server's cipher order rather than the client's to prevent the BEAST attack.
-      honorCipherOrder: true,
-      key: ssl.key,
-      passphrase: ssl.keyPassphrase,
-      secureOptions: ssl.getSecureOptions ? ssl.getSecureOptions() : undefined,
-      requestCert: ssl.requestCert,
-      rejectUnauthorized: ssl.rejectUnauthorized,
-    };
-
-    options.tls = tlsOptions;
+  if (configureTLS) {
+    options.tls = getServerTLSOptions(config.ssl);
   }
 
   return options;
+}
+
+/**
+ * Converts Kibana `SslConfig` into `TLSOptions` that are accepted by the Hapi server,
+ * and by https.Server.setSecureContext()
+ */
+export function getServerTLSOptions(ssl: ISslConfig): TLSOptions | undefined {
+  if (!ssl.enabled) {
+    return undefined;
+  }
+  return {
+    ca: ssl.certificateAuthorities,
+    cert: ssl.certificate,
+    ciphers: ssl.cipherSuites?.join(':'),
+    // We use the server's cipher order rather than the client's to prevent the BEAST attack.
+    honorCipherOrder: true,
+    key: ssl.key,
+    passphrase: ssl.keyPassphrase,
+    secureOptions: ssl.getSecureOptions ? ssl.getSecureOptions() : undefined,
+    requestCert: ssl.requestCert,
+    rejectUnauthorized: ssl.rejectUnauthorized,
+  };
 }

@@ -15,7 +15,6 @@ import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { TTYPlayerDeps, TTYPlayer } from '.';
 import userEvent from '@testing-library/user-event';
-import { ResizeObserver } from '@juggle/resize-observer';
 
 describe('TTYPlayer component', () => {
   beforeAll(() => {
@@ -34,8 +33,6 @@ describe('TTYPlayer component', () => {
         dispatchEvent: jest.fn(),
       })),
     });
-
-    global.ResizeObserver = ResizeObserver;
   });
 
   let render: () => ReturnType<AppContextTestRender['render']>;

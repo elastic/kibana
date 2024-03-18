@@ -6,17 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
+
+import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import { type DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
@@ -29,8 +31,9 @@ import type {
   ChromeHelpExtension,
   ChromeUserBanner,
   ChromeStyle,
-  ChromeProjectNavigation,
   ChromeSetProjectBreadcrumbsParams,
+  NavigationTreeDefinition,
+  AppDeepLinkId,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type {
@@ -38,12 +41,13 @@ import type {
   ChromeHelpMenuLink,
 } from '@kbn/core-chrome-browser';
 
+import { Logger } from '@kbn/logging';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
 import { ProjectNavigationService } from './project_navigation';
 import { RecentlyAccessedService } from './recently_accessed';
-import { Header, LoadingIndicator, ProjectHeader, ProjectSideNavigation } from './ui';
+import { Header, LoadingIndicator, ProjectHeader } from './ui';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
@@ -54,6 +58,7 @@ const SNAPSHOT_REGEX = /-snapshot/i;
 interface ConstructorParams {
   browserSupportsCsp: boolean;
   kibanaVersion: string;
+  coreContext: CoreContext;
 }
 
 export interface SetupDeps {
@@ -63,7 +68,7 @@ export interface SetupDeps {
 export interface StartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
-  http: HttpStart;
+  http: InternalHttpStart;
   injectedMetadata: InternalInjectedMetadataStart;
   notifications: NotificationsStart;
   customBranding: CustomBrandingStart;
@@ -80,8 +85,12 @@ export class ChromeService {
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation = new ProjectNavigationService();
   private mutationObserver: MutationObserver | undefined;
+  private readonly isSideNavCollapsed$ = new BehaviorSubject<boolean>(true);
+  private logger: Logger;
 
-  constructor(private readonly params: ConstructorParams) {}
+  constructor(private readonly params: ConstructorParams) {
+    this.logger = params.coreContext.logger.get('chrome-browser');
+  }
 
   /**
    * These observables allow consumers to toggle the chrome visibility via either:
@@ -202,6 +211,11 @@ export class ChromeService {
       return `kbnVersion-${formattedVersionClass}`;
     };
 
+    const setChromeStyle = (style: ChromeStyle) => {
+      if (style === chromeStyle$.getValue()) return;
+      chromeStyle$.next(style);
+    };
+
     const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
     const bodyClasses$ = combineLatest([
       headerBanner$,
@@ -222,7 +236,14 @@ export class ChromeService {
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
-    const projectNavigation = this.projectNavigation.start({ application, navLinks, http });
+    const projectNavigation = this.projectNavigation.start({
+      application,
+      navLinksService: navLinks,
+      http,
+      chromeBreadcrumbs$: breadcrumbs$,
+      logger: this.logger,
+      setChromeStyle,
+    });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start();
     const { customBranding$ } = customBranding;
@@ -243,10 +264,6 @@ export class ChromeService {
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
 
-    const setChromeStyle = (style: ChromeStyle) => {
-      chromeStyle$.next(style);
-    };
-
     const validateChromeStyle = () => {
       const chromeStyle = chromeStyle$.getValue();
       if (chromeStyle !== 'project') {
@@ -259,13 +276,17 @@ export class ChromeService {
 
     const setProjectSideNavComponent = (component: ISideNavComponent | null) => {
       validateChromeStyle();
-      projectNavigation.setProjectSideNavComponent(component);
+      projectNavigation.setSideNavComponent(component);
     };
 
-    const setProjectNavigation = (config: ChromeProjectNavigation) => {
+    function initProjectNavigation<
+      LinkId extends AppDeepLinkId = AppDeepLinkId,
+      Id extends string = string,
+      ChildrenId extends string = Id
+    >(navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>) {
       validateChromeStyle();
-      projectNavigation.setProjectNavigation(config);
-    };
+      projectNavigation.initNavigation(navigationTree$);
+    }
 
     const setProjectBreadcrumbs = (
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
@@ -277,11 +298,6 @@ export class ChromeService {
     const setProjectHome = (homeHref: string) => {
       validateChromeStyle();
       projectNavigation.setProjectHome(homeHref);
-    };
-
-    const setProjectsUrl = (projectsUrl: string) => {
-      validateChromeStyle();
-      projectNavigation.setProjectsUrl(projectsUrl);
     };
 
     const setProjectName = (projectName: string) => {
@@ -330,8 +346,11 @@ export class ChromeService {
     }
 
     const getHeaderComponent = () => {
+      const defaultChromeStyle = chromeStyle$.getValue();
+
       const HeaderComponent = () => {
         const isVisible = useObservable(this.isVisible$);
+        const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
 
         if (!isVisible) {
           return (
@@ -343,7 +362,7 @@ export class ChromeService {
         }
 
         // render header
-        if (chromeStyle$.getValue() === 'project') {
+        if (chromeStyle === 'project') {
           const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
           const projectBreadcrumbs$ = projectNavigation
             .getProjectBreadcrumbs$()
@@ -351,20 +370,19 @@ export class ChromeService {
           const activeNodes$ = projectNavigation.getActiveNodes$();
 
           const ProjectHeaderWithNavigationComponent = () => {
-            const CustomSideNavComponent = useObservable(projectNavigationComponent$, undefined);
+            const CustomSideNavComponent = useObservable(projectNavigationComponent$, {
+              current: null,
+            });
             const activeNodes = useObservable(activeNodes$, []);
 
             const currentProjectBreadcrumbs$ = projectBreadcrumbs$;
 
-            let SideNavComponent: ISideNavComponent = () => null;
-
-            if (CustomSideNavComponent !== undefined) {
-              // We have the state from the Observable
-              SideNavComponent =
-                CustomSideNavComponent.current !== null
-                  ? CustomSideNavComponent.current
-                  : ProjectSideNavigation;
-            }
+            const SideNavComponent = useMemo<ISideNavComponent>(() => {
+              if (CustomSideNavComponent.current) {
+                return CustomSideNavComponent.current;
+              }
+              return () => null;
+            }, [CustomSideNavComponent]);
 
             return (
               <ProjectHeader
@@ -381,11 +399,12 @@ export class ChromeService {
                 loadingCount$={http.getLoadingCount$()}
                 headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
                 homeHref$={projectNavigation.getProjectHome$()}
-                projectsUrl$={projectNavigation.getProjectsUrl$()}
-                projectName$={projectNavigation.getProjectName$()}
                 docLinks={docLinks}
                 kibanaVersion={injectedMetadata.getKibanaVersion()}
                 prependBasePath={http.basePath.prepend}
+                toggleSideNav={(isCollapsed) => {
+                  this.isSideNavCollapsed$.next(isCollapsed);
+                }}
               >
                 <SideNavComponent activeNodes={activeNodes} />
               </ProjectHeader>
@@ -508,14 +527,18 @@ export class ChromeService {
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
       setChromeStyle,
       getChromeStyle$: () => chromeStyle$.pipe(takeUntil(this.stop$)),
+      getIsSideNavCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
       project: {
         setHome: setProjectHome,
-        setProjectsUrl,
+        setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
         setProjectName,
-        setNavigation: setProjectNavigation,
+        initNavigation: initProjectNavigation,
+        getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
+        updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
+        changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
       },
     };
   }

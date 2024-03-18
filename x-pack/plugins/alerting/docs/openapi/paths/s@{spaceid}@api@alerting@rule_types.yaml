@@ -74,6 +74,66 @@ get:
                             type: string
                           name:
                             type: string 
+                alerts:
+                  type: object
+                  description: >
+                    Details for writing alerts as data documents for this rule type.
+                  properties:
+                    context:
+                      type: string
+                      description: >
+                        The namespace for this rule type.
+                      enum:
+                        - ml.anomaly-detection
+                        - observability.apm
+                        - observability.logs
+                        - observability.metrics
+                        - observability.slo
+                        - observability.threshold
+                        - observability.uptime
+                        - security
+                        - stack
+                    dynamic:
+                      type: string
+                      description: Indicates whether new fields are added dynamically.
+                      enum:
+                        - "false"
+                        - "runtime"
+                        - "strict"
+                        - "true"
+                    isSpaceAware:
+                      type: boolean
+                      description: >
+                        Indicates whether the alerts are space-aware.
+                        If true, space-specific alert indices are used.
+                    mappings:
+                      type: object
+                      properties:
+                        fieldMap:
+                          type: object
+                          description: >
+                            Mapping information for each field supported in alerts as data documents for this rule type.
+                            For more information about mapping parameters, refer to the Elasticsearch documentation.
+                          additionalProperties:
+                            $ref: '../components/schemas/fieldmap_properties.yaml'
+                    secondaryAlias:
+                      type: string
+                      description: >
+                        A secondary alias.
+                        It is typically used to support the signals alias for detection rules.
+                    shouldWrite: 
+                      type: boolean
+                      description: >
+                        Indicates whether the rule should write out alerts as data.
+                    useEcs:
+                      type: boolean
+                      description: >
+                        Indicates whether to include the ECS component template for the alerts.
+                    useLegacyAlerts:
+                      type: boolean
+                      default: false
+                      description: >
+                        Indicates whether to include the legacy component template for the alerts.
                 authorized_consumers:
                   description: The list of the plugins IDs that have access to the rule type.
                   type: object
@@ -134,6 +194,13 @@ get:
                           type: boolean
                         read:
                           type: boolean
+                    slo:
+                      type: object
+                      properties:
+                        all:
+                          type: boolean
+                        read:
+                          type: boolean
                     stackAlerts:
                       type: object
                       properties:
@@ -148,6 +215,13 @@ get:
                           type: boolean
                         read:
                           type: boolean                  
+                category:
+                  type: string
+                  description: The rule category, which is used by features such as category-specific maintenance windows.
+                  enum:
+                    - management
+                    - observability
+                    - securitySolution
                 default_action_group_id:
                   description: The default identifier for the rule type group.
                   type: string
@@ -156,6 +230,11 @@ get:
                   type: boolean
                 enabled_in_license:
                   description: Indicates whether the rule type is enabled or disabled based on the subscription.
+                  type: boolean
+                has_alerts_mappings:
+                  type: boolean
+                  description: Indicates whether the rule type has custom mappings for the alert data.
+                has_fields_for_a_a_d:
                   type: boolean
                 id: 
                   description: The unique identifier for the rule type.
@@ -166,14 +245,16 @@ get:
                 minimum_license_required:
                   description: The subscriptions required to use the rule type.
                   type: string
-                  example: basic
+                  examples:
+                    - basic
                 name:
                   description: The descriptive name of the rule type.
                   type: string
                 producer:
                   description: An identifier for the application that produces this rule type.
                   type: string
-                  example: stackAlerts
+                  examples:
+                    - stackAlerts
                 recovery_action_group:
                   description: An action group to use when an alert goes from an active state to an inactive one.
                   type: object
@@ -184,7 +265,8 @@ get:
                       type: string
                 rule_task_timeout:
                   type: string
-                  example: 5m
+                  examples:
+                    - 5m
           examples:
             getRuleTypesResponse:
               $ref: '../components/examples/get_rule_types_response.yaml'
@@ -194,5 +276,3 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
-servers:
-  - url: https://localhost:5601

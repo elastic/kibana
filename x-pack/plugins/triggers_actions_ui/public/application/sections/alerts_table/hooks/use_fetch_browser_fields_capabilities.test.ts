@@ -10,6 +10,7 @@ import { useFetchBrowserFieldCapabilities } from './use_fetch_browser_fields_cap
 import { useKibana } from '../../../../common/lib/kibana';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { AlertsField } from '../../../../types';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -48,7 +49,7 @@ describe('useFetchBrowserFieldCapabilities', () => {
   });
 
   afterEach(() => {
-    httpMock.mockReset();
+    httpMock.mockClear();
   });
 
   it('should not fetch for siem', () => {
@@ -97,5 +98,42 @@ describe('useFetchBrowserFieldCapabilities', () => {
 
     expect(httpMock).toHaveBeenCalledTimes(0);
     expect(result.current).toEqual([undefined, browserFields, []]);
+  });
+
+  it('should not fetch if the only featureId is not valid', async () => {
+    const { result } = renderHook(() =>
+      useFetchBrowserFieldCapabilities({
+        featureIds: ['alerts'] as unknown as AlertConsumers[],
+      })
+    );
+
+    expect(httpMock).toHaveBeenCalledTimes(0);
+    expect(result.current).toEqual([undefined, {}, []]);
+  });
+
+  it('should not fetch if all featureId are not valid', async () => {
+    const { result } = renderHook(() =>
+      useFetchBrowserFieldCapabilities({
+        featureIds: ['alerts', 'tomato'] as unknown as AlertConsumers[],
+      })
+    );
+
+    expect(httpMock).toHaveBeenCalledTimes(0);
+    expect(result.current).toEqual([undefined, {}, []]);
+  });
+
+  it('should filter out the non valid feature id', async () => {
+    const { waitForNextUpdate } = renderHook(() =>
+      useFetchBrowserFieldCapabilities({
+        featureIds: ['alerts', 'apm', 'logs'] as unknown as AlertConsumers[],
+      })
+    );
+
+    await waitForNextUpdate();
+
+    expect(httpMock).toHaveBeenCalledTimes(1);
+    expect(httpMock).toHaveBeenCalledWith('/internal/rac/alerts/browser_fields', {
+      query: { featureIds: ['apm', 'logs'] },
+    });
   });
 });

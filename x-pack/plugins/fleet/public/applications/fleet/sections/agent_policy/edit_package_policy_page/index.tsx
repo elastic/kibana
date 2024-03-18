@@ -19,7 +19,6 @@ import {
   EuiErrorBoundary,
 } from '@elastic/eui';
 
-import type { PackageInfo } from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
@@ -48,13 +47,17 @@ import {
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
 
-import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../common/constants';
+import {
+  AGENTLESS_POLICY_ID,
+  HIDDEN_API_REFERENCE_PACKAGES,
+} from '../../../../../../common/constants';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
 import { generateUpdatePackagePolicyDevToolsRequest } from '../services';
 
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
+import { getNewSecrets } from './utils';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -91,7 +94,6 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
 
-  const [] = useState<PackageInfo>();
   const {
     // data
     agentPolicy,
@@ -116,6 +118,14 @@ export const EditPackagePolicyForm = memo<{
   });
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+
+  const newSecrets = useMemo(() => {
+    if (!packageInfo) {
+      return [];
+    }
+
+    return getNewSecrets({ packageInfo, packagePolicy });
+  }, [packageInfo, packagePolicy]);
 
   const policyId = agentPolicy?.id ?? '';
 
@@ -180,7 +190,7 @@ export const EditPackagePolicyForm = memo<{
       setFormState('INVALID');
       return;
     }
-    if (agentCount !== 0 && formState !== 'CONFIRM') {
+    if (agentCount !== 0 && policyId !== AGENTLESS_POLICY_ID && formState !== 'CONFIRM') {
       setFormState('CONFIRM');
       return;
     }
@@ -418,7 +428,7 @@ export const EditPackagePolicyForm = memo<{
             )}
             {isUpgrade && upgradeDryRunData && (
               <>
-                <UpgradeStatusCallout dryRunData={upgradeDryRunData} />
+                <UpgradeStatusCallout dryRunData={upgradeDryRunData} newSecrets={newSecrets} />
                 <EuiSpacer size="xxl" />
               </>
             )}
@@ -439,7 +449,7 @@ export const EditPackagePolicyForm = memo<{
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
                     <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty color="ghost" href={cancelUrl}>
+                      <EuiButtonEmpty color="text" href={cancelUrl}>
                         <FormattedMessage
                           id="xpack.fleet.editPackagePolicy.cancelButton"
                           defaultMessage="Cancel"
@@ -451,7 +461,7 @@ export const EditPackagePolicyForm = memo<{
                         <DevtoolsRequestFlyoutButton
                           isDisabled={formState !== 'VALID'}
                           btnProps={{
-                            color: 'ghost',
+                            color: 'text',
                           }}
                           description={i18n.translate(
                             'xpack.fleet.editPackagePolicy.devtoolsRequestDescription',

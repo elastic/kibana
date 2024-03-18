@@ -16,41 +16,7 @@ import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { AssetsValidationError } from './validators/validation_error';
 import { GetApmIndicesMethod } from './asset_client_types';
-
-// Helper function allows test to verify error was thrown,
-// verify error is of the right class type, and error has
-// the expected metadata such as statusCode on it
-function expectToThrowValidationErrorWithStatusCode(
-  testFn: () => Promise<any>,
-  expectedError: Partial<AssetsValidationError> = {}
-) {
-  return expect(async () => {
-    try {
-      return await testFn();
-    } catch (error: any) {
-      if (error instanceof AssetsValidationError) {
-        if (expectedError.statusCode) {
-          expect(error.statusCode).toEqual(expectedError.statusCode);
-        }
-        if (expectedError.message) {
-          expect(error.message).toEqual(expect.stringContaining(expectedError.message));
-        }
-      }
-      throw error;
-    }
-  }).rejects.toThrow(AssetsValidationError);
-}
-
-function createGetApmIndicesMock(): jest.Mocked<GetApmIndicesMethod> {
-  return jest.fn(async (client: SavedObjectsClientContract) => ({
-    transaction: 'apm-mock-transaction-indices',
-    span: 'apm-mock-span-indices',
-    error: 'apm-mock-error-indices',
-    metric: 'apm-mock-metric-indices',
-    onboarding: 'apm-mock-onboarding-indices',
-    sourcemap: 'apm-mock-sourcemap-indices',
-  }));
-}
+import { createGetApmIndicesMock, expectToThrowValidationErrorWithStatusCode } from '../test_utils';
 
 function createAssetClient(
   metricsDataClient: MetricsDataClient,
@@ -100,112 +66,7 @@ describe('Server assets client', () => {
     });
   });
 
-  describe('getHosts', () => {
-    it('should query Elasticsearch correctly', async () => {
-      const client = createAssetClient(metricsDataClientMock, getApmIndicesMock);
-
-      await client.getHosts({
-        from: 'now-5d',
-        to: 'now-3d',
-        elasticsearchClient: esClientMock,
-        savedObjectsClient: soClientMock,
-      });
-
-      expect(metricsDataClientMock.getMetricIndices).toHaveBeenCalledTimes(1);
-      expect(metricsDataClientMock.getMetricIndices).toHaveBeenCalledWith({
-        savedObjectsClient: soClientMock,
-      });
-
-      const dsl = esClientMock.search.mock.lastCall?.[0] as SearchRequest | undefined;
-      const { bool } = dsl?.query || {};
-      expect(bool).toBeDefined();
-
-      expect(bool?.filter).toEqual([
-        {
-          range: {
-            '@timestamp': {
-              gte: 'now-5d',
-              lte: 'now-3d',
-            },
-          },
-        },
-      ]);
-
-      expect(bool?.must).toEqual([
-        {
-          exists: {
-            field: 'host.hostname',
-          },
-        },
-      ]);
-
-      expect(bool?.should).toEqual([
-        { exists: { field: 'kubernetes.node.name' } },
-        { exists: { field: 'kubernetes.pod.uid' } },
-        { exists: { field: 'container.id' } },
-      ]);
-    });
-
-    it('should reject with 400 for invalid "from" date', () => {
-      const client = createAssetClient(metricsDataClientMock, getApmIndicesMock);
-
-      return expectToThrowValidationErrorWithStatusCode(
-        () =>
-          client.getHosts({
-            from: 'now-1zz',
-            to: 'now-3d',
-            elasticsearchClient: esClientMock,
-            savedObjectsClient: soClientMock,
-          }),
-        { statusCode: 400 }
-      );
-    });
-
-    it('should reject with 400 for invalid "to" date', () => {
-      const client = createAssetClient(metricsDataClientMock, getApmIndicesMock);
-
-      return expectToThrowValidationErrorWithStatusCode(
-        () =>
-          client.getHosts({
-            from: 'now-5d',
-            to: 'now-3fe',
-            elasticsearchClient: esClientMock,
-            savedObjectsClient: soClientMock,
-          }),
-        { statusCode: 400 }
-      );
-    });
-
-    it('should reject with 400 when "from" is a date that is after "to"', () => {
-      const client = createAssetClient(metricsDataClientMock, getApmIndicesMock);
-
-      return expectToThrowValidationErrorWithStatusCode(
-        () =>
-          client.getHosts({
-            from: 'now',
-            to: 'now-5d',
-            elasticsearchClient: esClientMock,
-            savedObjectsClient: soClientMock,
-          }),
-        { statusCode: 400 }
-      );
-    });
-
-    it('should reject with 400 when "from" is in the future', () => {
-      const client = createAssetClient(metricsDataClientMock, getApmIndicesMock);
-
-      return expectToThrowValidationErrorWithStatusCode(
-        () =>
-          client.getHosts({
-            from: 'now+1d',
-            elasticsearchClient: esClientMock,
-            savedObjectsClient: soClientMock,
-          }),
-        { statusCode: 400 }
-      );
-    });
-  });
-
+  // TODO: Move this block to the get_services accessor folder
   describe('getServices', () => {
     it('should query Elasticsearch correctly', async () => {
       const client = createAssetClient(metricsDataClientMock, getApmIndicesMock);

@@ -58,12 +58,14 @@ Object {
       "hosts": Array [
         "http://es-data.co:9201",
       ],
+      "preset": "balanced",
       "type": "elasticsearch",
     },
     "default": Object {
       "hosts": Array [
         "http://127.0.0.1:9201",
       ],
+      "preset": "balanced",
       "type": "elasticsearch",
     },
   },
@@ -134,12 +136,14 @@ Object {
       "hosts": Array [
         "http://127.0.0.1:9201",
       ],
+      "preset": "balanced",
       "type": "elasticsearch",
     },
     "monitoring-output-id": Object {
       "hosts": Array [
         "http://es-monitoring.co:9201",
       ],
+      "preset": "balanced",
       "type": "elasticsearch",
     },
   },
@@ -210,12 +214,14 @@ Object {
       "hosts": Array [
         "http://es-data.co:9201",
       ],
+      "preset": "balanced",
       "type": "elasticsearch",
     },
     "monitoring-output-id": Object {
       "hosts": Array [
         "http://es-monitoring.co:9201",
       ],
+      "preset": "balanced",
       "type": "elasticsearch",
     },
   },

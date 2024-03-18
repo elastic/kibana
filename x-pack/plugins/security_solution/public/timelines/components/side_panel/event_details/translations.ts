@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const MESSAGE = i18n.translate(
-  'xpack.securitySolution.timeline.expandableEvent.messageTitle',
-  {
-    defaultMessage: 'Message',
-  }
-);
-
-export const OPEN_ALERT_DETAILS_PAGE = i18n.translate(
-  'xpack.securitySolution.timeline.expandableEvent.openAlertDetails',
-  {
-    defaultMessage: 'Open alert details page',
-  }
-);
-
 export const CLOSE = i18n.translate(
   'xpack.securitySolution.timeline.expandableEvent.closeEventDetailsLabel',
   {
@@ -46,6 +32,21 @@ export const ALERT_DETAILS = i18n.translate(
   'xpack.securitySolution.timeline.expandableEvent.alertTitleLabel',
   {
     defaultMessage: 'Alert details',
+  }
+);
+
+export const TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.timeline.expandableEvent.technicalPreviewLabel',
+  {
+    defaultMessage: 'Technical Preview',
+  }
+);
+
+export const TECHNICAL_PREVIEW_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.timeline.expandableEvent.technicalPreviewDescription',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
   }
 );
 

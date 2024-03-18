@@ -243,7 +243,15 @@
             "section": "def-common.I18nStart",
             "text": "I18nStart"
           },
-          "; theme: ",
+          "; analytics?: ",
+          {
+            "pluginId": "@kbn/core-analytics-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+            "section": "def-common.AnalyticsServiceStart",
+            "text": "AnalyticsServiceStart"
+          },
+          " | undefined; theme: ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
             "scope": "common",

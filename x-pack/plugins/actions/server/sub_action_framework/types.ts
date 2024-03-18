@@ -79,8 +79,12 @@ export interface SubActionConnectorType<Config, Secrets> {
     secrets: Type<Secrets>;
   };
   validators?: Array<ConfigValidator<Config> | SecretsValidator<Secrets>>;
-  Service: IService<Config, Secrets>;
+  getService: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
   renderParameterTemplates?: RenderParameterTemplates<ExecutorParams>;
+  isSystemActionType?: boolean;
+  getKibanaPrivileges?: (args?: {
+    params?: { subAction: string; subActionParams: Record<string, unknown> };
+  }) => string[];
 }
 
 export interface ExecutorParams extends ActionTypeParams {

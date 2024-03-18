@@ -13,10 +13,11 @@ import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 interface Props {
   children: React.ReactNode;
+  defaultVisible: boolean;
 }
 
-export const AdvancedParamsSection = ({ children }: Props) => {
-  const [isVisible, setIsVisible] = useState<boolean>(false);
+export const AdvancedParamsSection = ({ children, defaultVisible = false }: Props) => {
+  const [isVisible, setIsVisible] = useState<boolean>(defaultVisible);
 
   const toggleIsVisible = useCallback(() => {
     setIsVisible(!isVisible);

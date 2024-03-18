@@ -7,191 +7,67 @@
 
 import React, { useEffect, useState } from 'react';
 
-import queryString from 'query-string';
+import { useActions, useValues } from 'kea';
 
-import {
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiSteps,
-  EuiSelect,
-  EuiLink,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { LanguageDefinitionSnippetArguments } from '@kbn/search-api-panels';
 
-import { docLinks } from '../../../shared/doc_links';
-import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
-import { SetElasticsearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { ElasticsearchClientInstructions } from '../elasticsearch_client_instructions';
-import { ElasticsearchCloudId } from '../elasticsearch_cloud_id';
+import { FetchApiKeysAPILogic } from '../../../enterprise_search_overview/api/fetch_api_keys_logic';
+import { CreateApiKeyFlyout } from '../../../shared/api_key/create_api_key_flyout';
+import { useCloudDetails } from '../../../shared/cloud_details/cloud_details';
+import { GettingStarted } from '../../../shared/getting_started/getting_started';
+import { KibanaLogic } from '../../../shared/kibana';
 import { EnterpriseSearchElasticsearchPageTemplate } from '../layout';
 
-// Replace FormattedMessage with i18n strings
+export const ElasticsearchGuide = () => {
+  const cloudContext = useCloudDetails();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const { esConfig } = useValues(KibanaLogic);
 
-export const ElasticsearchGuide: React.FC = () => {
-  const languages = [
-    { value: 'dotnet', text: '.Net' },
-    { value: 'go', text: 'Go' },
-    { value: 'java', text: 'Java' },
-    { value: 'javascript', text: 'JavaScript' },
-    { value: 'php', text: 'PHP' },
-    { value: 'python', text: 'Python' },
-    { value: 'ruby', text: 'Ruby' },
-    { value: 'rust', text: 'Rust' },
-  ];
-
-  const client = queryString.parse(window.location.search).client as string;
-  const languageExists = languages.some((language) => language.value === client);
-  const [selectedLanguage, setSelectedLanguage] = useState(languageExists ? client : 'java');
-
-  const basicSelectId = useGeneratedHtmlId({ prefix: 'languageSelect' });
-
-  const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedLanguage(e.target.value);
+  const codeArgs: LanguageDefinitionSnippetArguments = {
+    apiKey: '',
+    cloudId: cloudContext.cloudId,
+    url: esConfig.elasticsearch_host,
   };
+  const { makeRequest } = useActions(FetchApiKeysAPILogic);
+  const { data } = useValues(FetchApiKeysAPILogic);
+  const apiKeys = data?.api_keys || [];
 
-  // TODO: The page keeps the scroll position if being opened from Enterpise Search Overview,
-  // This is a temporary solution for demoing
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  useEffect(() => makeRequest({}), []);
 
   return (
     <EnterpriseSearchElasticsearchPageTemplate>
-      <SetPageChrome />
-      <EuiFlexGroup alignItems="flexStart" data-test-subj="elasticsearchGuide">
-        {/* maxWidth is needed to prevent code blocks with long unbreakable strings (Kibana PR Cloud ID) from stretching the column */}
-        <EuiFlexItem grow={3} style={{ maxWidth: 800 }}>
-          <EuiText>
-            <h2>
-              {i18n.translate(
-                'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchTitle',
-                {
-                  defaultMessage: 'Getting started with Elasticsearch',
-                }
-              )}
-            </h2>
-            <p>
-              {i18n.translate(
-                'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchDescription',
-                {
-                  defaultMessage:
-                    "Elasticsearch provides the low-level tools you need to build fast, relevant search for your website or application. Because it's powerful and flexible, Elasticsearch can handle search use cases of all shapes and sizes.",
-                }
-              )}
-            </p>
-          </EuiText>
-
-          <EuiSpacer />
-
-          <EuiSteps
-            headingElement="h2"
-            steps={[
-              {
-                title: i18n.translate(
-                  'xpack.enterpriseSearch.overview.elasticsearchGuide.connectToElasticsearchTitle',
-                  { defaultMessage: 'Connect to Elasticsearch' }
-                ),
-                children: (
-                  <>
-                    <EuiText>
-                      <p>
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.overview.elasticsearchGuide.connectToElasticsearchDescription',
-                          {
-                            defaultMessage:
-                              'Elastic builds and maintains clients in several popular languages and our community has contributed many more.',
-                          }
-                        )}
-                      </p>
-                      <EuiLink href={docLinks.clientsGuide} target="_blank">
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchClientsLink',
-                          { defaultMessage: 'Learn more about Elasticsearch clients' }
-                        )}
-                      </EuiLink>
-                    </EuiText>
-
-                    <EuiSpacer />
-
-                    <EuiSelect
-                      prepend={i18n.translate(
-                        'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchClientsSelectLabel',
-                        { defaultMessage: 'Select a client' }
-                      )}
-                      id={basicSelectId}
-                      options={languages}
-                      value={selectedLanguage}
-                      onChange={(e) => onChange(e)}
-                      aria-label={i18n.translate(
-                        'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchClientsSelectAriaLabel',
-                        { defaultMessage: 'Language client' }
-                      )}
-                    />
-                    <EuiSpacer size="m" />
-                    <ElasticsearchClientInstructions language={selectedLanguage} />
-                  </>
-                ),
-              },
-              {
-                title: i18n.translate(
-                  'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchExperienceTitle',
-                  { defaultMessage: 'Build a search experience with Elasticsearch' }
-                ),
-                children: (
-                  <>
-                    <EuiText>
-                      <p>
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchExperienceDescription',
-                          {
-                            defaultMessage:
-                              'Ready to add an engaging, modern search experience to your application or website? Search UI, Elastic’s JavaScript search framework for building world-class search experiences, was made for the task.',
-                          }
-                        )}
-                      </p>
-                    </EuiText>
-                    <EuiSpacer size="l" />
-                    <EuiFlexGroup gutterSize="l" alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        <EuiText>
-                          <EuiLink
-                            href="https://www.elastic.co/enterprise-search/search-ui"
-                            target="_blank"
-                          >
-                            {i18n.translate(
-                              'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchUIMarketingLink',
-                              { defaultMessage: 'Learn more about Search UI' }
-                            )}
-                          </EuiLink>
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText>
-                          <EuiLink href="https://github.com/elastic/search-ui" target="_blank">
-                            {i18n.translate(
-                              'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchUIGitHubLink',
-                              { defaultMessage: 'Search UI on GitHub' }
-                            )}
-                          </EuiLink>
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </>
-                ),
-              },
-            ]}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <ElasticsearchCloudId />
-          <EuiSpacer />
-          <ElasticsearchResources />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {isFlyoutOpen && <CreateApiKeyFlyout onClose={() => setIsFlyoutOpen(false)} />}
+      <EuiTitle size="l" data-test-subj="elasticsearchGuide">
+        <h1>
+          {i18n.translate('xpack.enterpriseSearch.content.overview.gettingStarted.pageTitle', {
+            defaultMessage: 'Elasticsearch language clients',
+          })}
+        </h1>
+      </EuiTitle>
+      <EuiSpacer size="xl" />
+      <EuiText>
+        <p>
+          {i18n.translate(
+            'xpack.enterpriseSearch.content.overview.gettingStarted.pageDescription',
+            {
+              defaultMessage:
+                "Set up your programming language client, ingest some data, and you'll be ready to start searching within minutes.",
+            }
+          )}
+        </p>
+      </EuiText>
+      <EuiHorizontalRule />
+      <EuiSpacer />
+      <GettingStarted
+        apiKeys={apiKeys}
+        openApiKeyModal={() => setIsFlyoutOpen(true)}
+        codeArgs={codeArgs}
+        isPanelLeft
+        showPipelinesPanel
+      />
     </EnterpriseSearchElasticsearchPageTemplate>
   );
 };

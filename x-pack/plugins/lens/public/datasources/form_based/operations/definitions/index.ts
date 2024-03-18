@@ -51,7 +51,7 @@ import {
 import { staticValueOperation } from './static_value';
 import { lastValueOperation } from './last_value';
 import type {
-  FrameDatasourceAPI,
+  FramePublicAPI,
   IndexPattern,
   IndexPatternField,
   OperationMetadata,
@@ -267,8 +267,8 @@ interface BaseOperationDefinitionProps<
    */
   getDefaultLabel: (
     column: C,
-    indexPattern: IndexPattern,
-    columns: Record<string, GenericIndexPatternColumn>
+    columns: Record<string, GenericIndexPatternColumn>,
+    indexPattern?: IndexPattern
   ) => string;
   /**
    * This function is called if another column in the same layer changed or got added/removed.
@@ -350,11 +350,6 @@ interface BaseOperationDefinitionProps<
    * Operations can be used as middleware for other operations, hence not shown in the panel UI
    */
   hidden?: boolean;
-  documentation?: {
-    signature: string;
-    description: string;
-    section: 'elasticsearch' | 'calculation' | 'constants';
-  };
   quickFunctionDocumentation?: string;
   /**
    * React component for operation field specific behaviour
@@ -477,7 +472,7 @@ export type FieldBasedOperationErrorMessage =
         newState: (
           data: DataPublicPluginStart,
           core: CoreStart,
-          frame: FrameDatasourceAPI,
+          frame: FramePublicAPI,
           layerId: string
         ) => Promise<FormBasedLayer>;
       };
@@ -736,11 +731,13 @@ export type OperationType = string;
  * This is an operation definition of an unspecified column out of all possible
  * column types.
  */
-export type GenericOperationDefinition =
-  | OperationDefinition<BaseIndexPatternColumn, 'field'>
-  | OperationDefinition<BaseIndexPatternColumn, 'none'>
-  | OperationDefinition<BaseIndexPatternColumn, 'fullReference'>
-  | OperationDefinition<BaseIndexPatternColumn, 'managedReference'>;
+export type GenericOperationDefinition<
+  ColumnType extends BaseIndexPatternColumn = BaseIndexPatternColumn
+> =
+  | OperationDefinition<ColumnType, 'field'>
+  | OperationDefinition<ColumnType, 'none'>
+  | OperationDefinition<ColumnType, 'fullReference'>
+  | OperationDefinition<ColumnType, 'managedReference'>;
 
 /**
  * List of all available operation definitions

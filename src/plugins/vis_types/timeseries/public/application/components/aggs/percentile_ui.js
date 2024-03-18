@@ -13,7 +13,7 @@ import _ from 'lodash';
 import { TSVB_DEFAULT_COLOR } from '../../../../common/constants';
 import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -28,7 +28,7 @@ import { ColorPicker } from '../color_picker';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const newPercentile = (opts) => {
-  return _.assign({ id: uuidv1(), mode: 'line', shade: 0.2, color: TSVB_DEFAULT_COLOR }, opts);
+  return _.assign({ id: uuidv4(), mode: 'line', shade: 0.2, color: TSVB_DEFAULT_COLOR }, opts);
 };
 
 export class Percentiles extends Component {

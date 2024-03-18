@@ -43,11 +43,21 @@ const GroupSelectorComponent = ({
     [groupsSelected]
   );
 
-  const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () => [
+  const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
+    const isOptionDisabled = (key?: string) => {
+      // Do not disable when maxGroupingLevels is 1 to allow toggling between groups
+      if (maxGroupingLevels === 1) {
+        return false;
+      }
+      // Disable all non selected options when the maxGroupingLevels is reached
+      return groupsSelected.length === maxGroupingLevels && (key ? !isGroupSelected(key) : true);
+    };
+
+    return [
       {
         id: 'firstPanel',
-        title: i18n.SELECT_FIELD(maxGroupingLevels),
+        title:
+          maxGroupingLevels === 1 ? i18n.SELECT_SINGLE_FIELD : i18n.SELECT_FIELD(maxGroupingLevels),
         items: [
           {
             'data-test-subj': 'panel-none',
@@ -57,7 +67,7 @@ const GroupSelectorComponent = ({
           },
           ...options.map<EuiContextMenuPanelItemDescriptor>((o) => ({
             'data-test-subj': `panel-${o.key}`,
-            disabled: groupsSelected.length === maxGroupingLevels && !isGroupSelected(o.key),
+            disabled: isOptionDisabled(o.key),
             name: o.label,
             onClick: () => onGroupChange(o.key),
             icon: isGroupSelected(o.key) ? 'check' : 'empty',
@@ -66,7 +76,7 @@ const GroupSelectorComponent = ({
             'data-test-subj': `panel-custom`,
             name: i18n.CUSTOM_FIELD,
             icon: 'empty',
-            disabled: groupsSelected.length === maxGroupingLevels,
+            disabled: isOptionDisabled(),
             panel: 'customPanel',
             hasPanel: true,
           },
@@ -87,9 +97,8 @@ const GroupSelectorComponent = ({
           />
         ),
       },
-    ],
-    [fields, groupsSelected.length, isGroupSelected, maxGroupingLevels, onGroupChange, options]
-  );
+    ];
+  }, [fields, groupsSelected.length, isGroupSelected, maxGroupingLevels, onGroupChange, options]);
   const selectedOptions = useMemo(
     () => options.filter((groupOption) => isGroupSelected(groupOption.key)),
     [isGroupSelected, options]

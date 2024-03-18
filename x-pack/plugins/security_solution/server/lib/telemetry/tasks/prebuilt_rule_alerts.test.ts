@@ -7,7 +7,11 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTelemetryPrebuiltRuleAlertsTaskConfig } from './prebuilt_rule_alerts';
-import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
+import {
+  createMockTelemetryEventsSender,
+  createMockTelemetryReceiver,
+  createMockTaskMetrics,
+} from '../__mocks__';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
 const usageCountersServiceSetup = usageCountersServiceMock.createSetupContract();
@@ -33,20 +37,19 @@ describe('security telemetry - detection rule alerts task test', () => {
       .mockReturnValue(telemetryUsageCounter);
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const telemetryDetectionRuleAlertsTaskConfig = createTelemetryPrebuiltRuleAlertsTaskConfig(1);
+    const mockTaskMetrics = createMockTaskMetrics();
 
     await telemetryDetectionRuleAlertsTaskConfig.runTask(
       'test-id',
       logger,
       mockTelemetryReceiver,
       mockTelemetryEventsSender,
+      mockTaskMetrics,
       testTaskExecutionPeriod
     );
     expect(mockTelemetryReceiver.fetchDetectionRulesPackageVersion).toHaveBeenCalled();
-    expect(mockTelemetryReceiver.fetchPrebuiltRuleAlerts).toHaveBeenCalled();
-    expect(mockTelemetryEventsSender.getTelemetryUsageCluster).toHaveBeenCalled();
-    expect(mockTelemetryEventsSender.getTelemetryUsageCluster()?.incrementCounter).toBeCalledTimes(
-      1
-    );
-    expect(mockTelemetryEventsSender.sendOnDemand).toHaveBeenCalled();
+    expect(mockTelemetryReceiver.fetchPrebuiltRuleAlertsBatch).toHaveBeenCalled();
+    expect(mockTaskMetrics.start).toHaveBeenCalled();
+    expect(mockTaskMetrics.end).toHaveBeenCalled();
   });
 });

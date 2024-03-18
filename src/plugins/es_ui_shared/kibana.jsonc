@@ -1,14 +1,13 @@
 {
   "type": "plugin",
   "id": "@kbn/es-ui-shared-plugin",
-  "owner": "@elastic/platform-deployment-management",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "esUiShared",
     "server": true,
     "browser": true,
     "requiredBundles": [
-      "dataViews",
-      "kibanaReact"
+      "dataViews"
     ],
     "extraPublicDirs": [
       "static/validators/string",

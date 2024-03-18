@@ -9,9 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { Index as IndexWithoutIlm } from '@kbn/index-management-plugin/common/types';
+import { Index } from '@kbn/index-management-plugin/common/types';
 import { PLUGIN } from '../common/constants';
-import { Index } from '../common/types';
 import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
@@ -19,7 +18,7 @@ import { IndexLifecycleManagementConfig } from './config';
 import { handleEsError } from './shared_imports';
 
 const indexLifecycleDataEnricher = async (
-  indicesList: IndexWithoutIlm[],
+  indicesList: Index[],
   client: IScopedClusterClient
 ): Promise<Index[]> => {
   if (!indicesList || !indicesList.length) {
@@ -27,10 +26,10 @@ const indexLifecycleDataEnricher = async (
   }
 
   const { indices: ilmIndicesData } = await client.asCurrentUser.ilm.explainLifecycle({
-    index: '*',
+    index: '*,.*',
+    only_managed: true,
   });
-  // @ts-expect-error IndexLifecyclePolicy is not compatible with IlmExplainLifecycleResponse
-  return indicesList.map((index: IndexWithoutIlm) => {
+  return indicesList.map((index: Index) => {
     return {
       ...index,
       ilm: { ...(ilmIndicesData[index.name] || {}) },

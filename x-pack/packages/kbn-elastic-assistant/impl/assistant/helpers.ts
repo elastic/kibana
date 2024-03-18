@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { FetchConnectorExecuteResponse } from './api';
+import { merge } from 'lodash/fp';
+import { AIConnector } from '../connectorland/connector_selector';
+import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
 import { Conversation } from '../..';
 import type { Message } from '../assistant_context/types';
 import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
 
 export const getMessageFromRawResponse = (rawResponse: FetchConnectorExecuteResponse): Message => {
-  const { response, isError } = rawResponse;
+  const { response, isStream, isError } = rawResponse;
   const dateTimeString = new Date().toLocaleString(); // TODO: Pull from response
   if (rawResponse) {
     return {
       role: 'assistant',
-      content: response,
+      ...(isStream
+        ? { reader: response as ReadableStreamDefaultReader<Uint8Array> }
+        : { content: response as string }),
       timestamp: dateTimeString,
       isError,
+      traceData: rawResponse.traceData,
     };
   } else {
     return {
@@ -29,6 +33,20 @@ export const getMessageFromRawResponse = (rawResponse: FetchConnectorExecuteResp
       isError: true,
     };
   }
+};
+
+export const mergeBaseWithPersistedConversations = (
+  baseConversations: Record<string, Conversation>,
+  conversationsData: FetchConversationsResponse
+): Record<string, Conversation> => {
+  const userConversations = (conversationsData?.data ?? []).reduce<Record<string, Conversation>>(
+    (transformed, conversation) => {
+      transformed[conversation.title] = conversation;
+      return transformed;
+    },
+    {}
+  );
+  return merge(baseConversations, userConversations);
 };
 
 export const getBlockBotConversation = (
@@ -60,27 +78,49 @@ export const getBlockBotConversation = (
  * @param connectors
  */
 export const getDefaultConnector = (
-  connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> | undefined
-): ActionConnector<Record<string, unknown>, Record<string, unknown>> | undefined =>
-  connectors?.length === 1 ? connectors[0] : undefined;
+  connectors: AIConnector[] | undefined
+): AIConnector | undefined => (connectors?.length === 1 ? connectors[0] : undefined);
 
-/**
- * When `content` is a JSON string, prefixed with "```json\n"
- * and suffixed with "\n```", this function will attempt to parse it and return
- * the `action_input` property if it exists.
- */
-export const getFormattedMessageContent = (content: string): string => {
-  const formattedContentMatch = content.match(/```json\n([\s\S]+)\n```/);
+interface OptionalRequestParams {
+  alertsIndexPattern?: string;
+  allow?: string[];
+  allowReplacement?: string[];
+  size?: number;
+}
 
-  if (formattedContentMatch) {
-    try {
-      const parsedContent = JSON.parse(formattedContentMatch[1]);
+export const getOptionalRequestParams = ({
+  isEnabledRAGAlerts,
+  alertsIndexPattern,
+  allow,
+  allowReplacement,
+  size,
+}: {
+  isEnabledRAGAlerts: boolean;
+  alertsIndexPattern?: string;
+  allow?: string[];
+  allowReplacement?: string[];
+  size?: number;
+}): OptionalRequestParams => {
+  const optionalAlertsIndexPattern = alertsIndexPattern ? { alertsIndexPattern } : undefined;
+  const optionalAllow = allow ? { allow } : undefined;
+  const optionalAllowReplacement = allowReplacement ? { allowReplacement } : undefined;
+  const optionalSize = size ? { size } : undefined;
 
-      return parsedContent.action_input ?? content;
-    } catch {
-      // we don't want to throw an error here, so we'll fall back to the original content
-    }
+  // the settings toggle must be enabled:
+  if (!isEnabledRAGAlerts) {
+    return {}; // don't send any optional params
   }
 
-  return content;
+  return {
+    ...optionalAlertsIndexPattern,
+    ...optionalAllow,
+    ...optionalAllowReplacement,
+    ...optionalSize,
+  };
+};
+
+export const llmTypeDictionary: Record<string, string> = {
+  'Amazon Bedrock': 'bedrock',
+  'Azure OpenAI': 'openai',
+  OpenAI: 'openai',
 };

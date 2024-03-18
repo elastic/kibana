@@ -89,13 +89,16 @@ const externals = {
   uuid: '__kbnSharedDeps__.Uuid',
   '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
   '@kbn/es-query': '__kbnSharedDeps__.KbnEsQuery',
+  '@kbn/search-errors': '__kbnSharedDeps__.KbnSearchErrors',
   '@kbn/std': '__kbnSharedDeps__.KbnStd',
   '@kbn/safer-lodash-set': '__kbnSharedDeps__.SaferLodashSet',
+  '@kbn/shared-ux-error-boundary': '__kbnSharedDeps__.KbnSharedUxErrorBoundary',
   '@kbn/rison': '__kbnSharedDeps__.KbnRison',
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',
   '@tanstack/react-query': '__kbnSharedDeps__.ReactQuery',
   '@tanstack/react-query-devtools': '__kbnSharedDeps__.ReactQueryDevtools',
+  '@kbn/code-editor': '__kbnSharedDeps__.KbnCodeEditor',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

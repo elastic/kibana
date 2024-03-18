@@ -22,51 +22,65 @@ required:
 properties:
   actions:
     $ref: 'actions.yaml'
+  alert_delay:
+    $ref: 'alert_delay.yaml'
   api_key_created_by_user:
     type: boolean
     description: Indicates whether the API key that is associated with the rule was created by the user.
-    example: false
+    examples:
+      - false
   api_key_owner:
-    type: string
+    type:
+      - "string"
+      - "null"
     description: >
       The owner of the API key that is associated with the rule and used to run background tasks.
-    nullable: true
-    example: elastic
+    examples:
+      - elastic
   consumer:
     type: string
     description: The application or feature that owns the rule. For example, `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
-    example: alerts
+    examples:
+      - alerts
   created_at:
     type: string
     description: The date and time that the rule was created.
     format: date-time
-    example: '2022-12-05T23:36:58.284Z'
+    examples:
+      - '2022-12-05T23:36:58.284Z'
   created_by:
-    type: string
+    type:
+      - "string"
+      - "null"
     description: The identifier for the user that created the rule.
-    nullable: true
-    example: elastic
+    examples:
+      - elastic
   enabled:
     type: boolean
     description: Indicates whether the rule is currently enabled.
-    example: true
+    examples:
+      - true
   execution_status:
     type: object
     properties:
       last_duration:
         type: integer
-        example: 55
+        examples:
+          - 55
       last_execution_date:
         type: string
         format: date-time
-        example: '2022-12-06T00:13:43.890Z'
+        examples:
+          - '2022-12-06T00:13:43.890Z'
       status:
         type: string
-        example: ok
+        examples:
+          - ok
   id:
     type: string
     description: The identifier for the rule.
-    example: b530fed0-74f5-11ed-9801-35303b735aef
+    examples:
+      - b530fed0-74f5-11ed-9801-35303b735aef
   last_run:
     type: object
     properties:
@@ -83,39 +97,49 @@ properties:
             type: integer
       outcome:
         type: string
-        example: succeeded
+        examples:
+          - succeeded
       outcome_msg:
-        type: array
+        type:
+          - "array"
+          - "null"
         items:
           type: string
-        nullable: true
       outcome_order:
         type: integer
       warning:
-        type: string
-        nullable: true
-        example: null
+        type:
+          - "string"
+          - "null"
+        examples:
+          - null
   muted_alert_ids:
-    type: array
-    nullable: true
+    type:
+      - "array"
+      - "null"
     items:
       type: string
   mute_all:
     type: boolean
-    example: false
+    examples:
+      - false
   name:
     type: string
     description: The name of the rule.
-    example: cluster_health_rule
+    examples:
+      - cluster_health_rule
   next_run:
-    type: string
+    type:
+      - "string"
+      - "null"
     format: date-time
-    nullable: true
-    example: '2022-12-06T00:14:43.818Z'
+    examples:
+      - '2022-12-06T00:14:43.818Z'
   notify_when:
-    type: string
+    type:
+      - "string"
+      - "null"
     description: Indicates how often alerts generate actions.
-    nullable: true
   params:
     type: object
     description: The parameters for the rule.
@@ -127,7 +151,8 @@ properties:
     type: string
     description: >
       The identifier for the type of rule. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.
-    example: monitoring_alert_cluster_health
+    examples:
+      - monitoring_alert_cluster_health
   running:
     type: boolean
     description: Indicates whether the rule is running.
@@ -135,7 +160,8 @@ properties:
     $ref: 'schedule.yaml'
   scheduled_task_id:
     type: string
-    example: b530fed0-74f5-11ed-9801-35303b735aef
+    examples:
+      - b530fed0-74f5-11ed-9801-35303b735aef
   tags:
     $ref: 'tags.yaml'
   throttle:
@@ -143,9 +169,12 @@ properties:
   updated_at:
     type: string
     description: The date and time that the rule was updated most recently.
-    example: '2022-12-05T23:36:58.284Z'
+    examples:
+      - '2022-12-05T23:36:58.284Z'
   updated_by:
-    type: string
+    type:
+      - "string"
+      - "null"
     description: The identifier for the user that updated this rule most recently.
-    nullable: true
-    example: elastic
+    examples:
+      - elastic

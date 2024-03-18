@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await surrDocs.click();
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
-      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+      await testSubjects.click('~breadcrumb & ~first');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be('logstash*');
@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await singleView.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+      await testSubjects.click('~breadcrumb & ~first');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be('logstash*');
@@ -201,7 +201,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
       // open saved search
-      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+      await testSubjects.click('~breadcrumb & ~first');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const savedSearch = await find.byCssSelector(`[data-test-subj="breadcrumb last"]`);
@@ -255,12 +255,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const second = await PageObjects.discover.getCurrentDataViewId();
       expect(first).not.equal(second);
 
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
 
       await browser.goBack();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const [firstToast, secondToast] = await toasts.getAllToastElements();
+      const [firstToast, secondToast] = await toasts.getAll();
 
       expect([await firstToast.getVisibleText(), await secondToast.getVisibleText()].sort()).to.eql(
         [

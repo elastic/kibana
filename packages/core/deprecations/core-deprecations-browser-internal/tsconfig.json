@@ -16,7 +16,8 @@
     "@kbn/core-http-browser",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-deprecations-common",
-    "@kbn/core-deprecations-browser"
+    "@kbn/core-deprecations-browser",
+    "@kbn/core-http-browser-internal"
   ],
   "exclude": [
     "target/**/*",

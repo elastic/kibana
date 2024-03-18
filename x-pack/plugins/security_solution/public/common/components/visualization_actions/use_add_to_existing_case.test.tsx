@@ -8,7 +8,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { useAddToExistingCase } from './use_add_to_existing_case';
-import { useGetUserCasesPermissions } from '../../lib/kibana';
 import {
   allCasesPermissions,
   readCasesPermissions,
@@ -16,30 +15,15 @@ import {
 } from '../../../cases_test_utils';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 
-const mockedUseKibana = mockUseKibana();
-const mockGetUseCasesAddToExistingCaseModal = jest.fn();
-
-jest.mock('../../lib/kibana', () => {
-  const original = jest.requireActual('../../lib/kibana');
-
-  return {
-    ...original,
-    useGetUserCasesPermissions: jest.fn(),
-    useKibana: () => ({
-      ...mockedUseKibana,
-      services: {
-        ...mockedUseKibana.services,
-        cases: {
-          hooks: {
-            useCasesAddToExistingCaseModal: mockGetUseCasesAddToExistingCaseModal,
-          },
-        },
-      },
-    }),
-  };
-});
+jest.mock('../../lib/kibana');
 
 describe('useAddToExistingCase', () => {
+  const mockedUseKibana = mockUseKibana();
+  const mockCanUseCases = jest.fn();
+  const mockUseCasesAddToExistingCaseModal = jest.fn().mockReturnValue({
+    open: jest.fn(),
+    close: jest.fn(),
+  });
   const mockOnAddToCaseClicked = jest.fn();
   const timeRange = {
     from: '2022-03-06T16:00:00.000Z',
@@ -47,7 +31,10 @@ describe('useAddToExistingCase', () => {
   };
 
   beforeEach(() => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
+    mockCanUseCases.mockReturnValue(allCasesPermissions());
+    mockedUseKibana.services.cases.hooks.useCasesAddToExistingCaseModal =
+      mockUseCasesAddToExistingCaseModal;
+    mockedUseKibana.services.cases.helpers.canUseCases = mockCanUseCases;
   });
 
   it('useCasesAddToExistingCaseModal with attachments', () => {
@@ -56,9 +43,10 @@ describe('useAddToExistingCase', () => {
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange,
         onAddToCaseClicked: mockOnAddToCaseClicked,
+        lensMetadata: undefined,
       })
     );
-    expect(mockGetUseCasesAddToExistingCaseModal).toHaveBeenCalledWith({
+    expect(mockUseCasesAddToExistingCaseModal).toHaveBeenCalledWith({
       onClose: mockOnAddToCaseClicked,
       successToaster: {
         title: 'Successfully added visualization to the case',
@@ -68,26 +56,28 @@ describe('useAddToExistingCase', () => {
   });
 
   it("disables the button if the user can't create but can read", () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
+    mockCanUseCases.mockReturnValue(readCasesPermissions());
 
     const { result } = renderHook(() =>
       useAddToExistingCase({
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange,
         onAddToCaseClicked: mockOnAddToCaseClicked,
+        lensMetadata: undefined,
       })
     );
     expect(result.current.disabled).toEqual(true);
   });
 
   it("disables the button if the user can't read but can create", () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(writeCasesPermissions());
+    mockCanUseCases.mockReturnValue(writeCasesPermissions());
 
     const { result } = renderHook(() =>
       useAddToExistingCase({
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange,
         onAddToCaseClicked: mockOnAddToCaseClicked,
+        lensMetadata: undefined,
       })
     );
     expect(result.current.disabled).toEqual(true);
@@ -99,6 +89,7 @@ describe('useAddToExistingCase', () => {
         lensAttributes: null,
         timeRange,
         onAddToCaseClicked: mockOnAddToCaseClicked,
+        lensMetadata: undefined,
       })
     );
     expect(result.current.disabled).toEqual(true);
@@ -110,6 +101,7 @@ describe('useAddToExistingCase', () => {
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange: null,
         onAddToCaseClicked: mockOnAddToCaseClicked,
+        lensMetadata: undefined,
       })
     );
     expect(result.current.disabled).toEqual(true);
@@ -118,14 +110,18 @@ describe('useAddToExistingCase', () => {
   it('should open add to existing case modal', () => {
     const mockOpenCaseModal = jest.fn();
     const mockClick = jest.fn();
+    const lensMetadata = {
+      description: 'test_description',
+    };
 
-    mockGetUseCasesAddToExistingCaseModal.mockReturnValue({ open: mockOpenCaseModal });
+    mockUseCasesAddToExistingCaseModal.mockReturnValue({ open: mockOpenCaseModal });
 
     const { result } = renderHook(() =>
       useAddToExistingCase({
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange,
         onAddToCaseClicked: mockClick,
+        lensMetadata,
       })
     );
 
@@ -137,6 +133,7 @@ describe('useAddToExistingCase', () => {
         persistableStateAttachmentState: {
           attributes: kpiHostMetricLensAttributes,
           timeRange,
+          metadata: lensMetadata,
         },
         persistableStateAttachmentTypeId: '.lens',
         type: AttachmentType.persistableState as const,

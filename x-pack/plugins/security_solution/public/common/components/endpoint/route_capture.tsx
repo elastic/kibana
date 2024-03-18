@@ -10,7 +10,7 @@ import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { TimelineId } from '../../../../common/types';
 import type { AppLocation } from '../../../../common/endpoint/types';
-import { timelineActions } from '../../../timelines/store/timeline';
+import { timelineActions } from '../../../timelines/store';
 
 /**
  * This component should be used above all routes, but below the Provider.

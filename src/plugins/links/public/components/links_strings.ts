@@ -22,13 +22,15 @@ export const LinksStrings = {
       i18n.translate('links.editor.updateButtonLabel', {
         defaultMessage: 'Update link',
       }),
-    getEditLinkTitle: () =>
-      i18n.translate('links.editor.editLinkTitle', {
-        defaultMessage: 'Edit link',
+    getEditLinkTitle: (label?: string) =>
+      i18n.translate('links.editor.editLinkTitle.hasLabel', {
+        defaultMessage: 'Edit {label} link',
+        values: { label: label ?? '' },
       }),
-    getDeleteLinkTitle: () =>
+    getDeleteLinkTitle: (label?: string) =>
       i18n.translate('links.editor.deleteLinkTitle', {
-        defaultMessage: 'Delete link',
+        defaultMessage: 'Delete {label} link',
+        values: { label: label ?? '' },
       }),
     getCancelButtonLabel: () =>
       i18n.translate('links.editor.cancelButtonLabel', {
@@ -38,7 +40,7 @@ export const LinksStrings = {
       getTechnicalPreviewTooltip: () =>
         i18n.translate('links.panelEditor.technicalPreviewTooltip', {
           defaultMessage:
-            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
         }),
       getTechnicalPreviewLabel: () =>
         i18n.translate('links.panelEditor.technicalPreviewLabel', {

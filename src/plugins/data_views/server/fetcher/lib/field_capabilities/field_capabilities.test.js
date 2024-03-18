@@ -34,9 +34,12 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
   const fillUndefinedParams = (args) => ({
     callCluster: undefined,
     indices: undefined,
+    expandWildcards: undefined,
     fieldCapsOptions: undefined,
+    fieldTypes: undefined,
     indexFilter: undefined,
     fields: undefined,
+    includeEmptyFields: undefined,
     ...args,
   });
 

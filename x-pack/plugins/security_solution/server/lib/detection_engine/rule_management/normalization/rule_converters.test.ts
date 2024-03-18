@@ -15,6 +15,7 @@ import {
   getThreatRuleParams,
   getThresholdRuleParams,
 } from '../../rule_schema/mocks';
+import type { PatchRuleRequestBody } from '../../../../../common/api/detection_engine';
 
 describe('rule_converters', () => {
   describe('patchTypeSpecificSnakeToCamel', () => {
@@ -40,10 +41,10 @@ describe('rule_converters', () => {
         timestamp_field: 1,
         event_category_override: 1,
         tiebreaker_field: 1,
-      };
+      } as PatchRuleRequestBody;
       const rule = getEqlRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
-        'Invalid value "1" supplied to "timestamp_field",Invalid value "1" supplied to "event_category_override",Invalid value "1" supplied to "tiebreaker_field"'
+        'event_category_override: Expected string, received number, tiebreaker_field: Expected string, received number, timestamp_field: Expected string, received number'
       );
     });
 
@@ -66,10 +67,10 @@ describe('rule_converters', () => {
       const patchParams = {
         threat_indicator_path: 1,
         threat_query: 1,
-      };
+      } as PatchRuleRequestBody;
       const rule = getThreatRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
-        'Invalid value "1" supplied to "threat_query",Invalid value "1" supplied to "threat_indicator_path"'
+        'threat_query: Expected string, received number, threat_indicator_path: Expected string, received number'
       );
     });
 
@@ -77,7 +78,7 @@ describe('rule_converters', () => {
       const patchParams = {
         index: ['new-test-index'],
         language: 'lucene',
-      };
+      } as PatchRuleRequestBody;
       const rule = getQueryRuleParams();
       const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
       expect(patchedParams).toEqual(
@@ -92,10 +93,10 @@ describe('rule_converters', () => {
       const patchParams = {
         index: [1],
         language: 'non-language',
-      };
+      } as PatchRuleRequestBody;
       const rule = getQueryRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
-        'Invalid value "1" supplied to "index",Invalid value "non-language" supplied to "language"'
+        "index.0: Expected string, received number, language: Invalid enum value. Expected 'kuery' | 'lucene', received 'non-language'"
       );
     });
 
@@ -103,7 +104,7 @@ describe('rule_converters', () => {
       const patchParams = {
         index: ['new-test-index'],
         language: 'lucene',
-      };
+      } as PatchRuleRequestBody;
       const rule = getSavedQueryRuleParams();
       const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
       expect(patchedParams).toEqual(
@@ -118,10 +119,10 @@ describe('rule_converters', () => {
       const patchParams = {
         index: [1],
         language: 'non-language',
-      };
+      } as PatchRuleRequestBody;
       const rule = getSavedQueryRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
-        'Invalid value "1" supplied to "index",Invalid value "non-language" supplied to "language"'
+        "index.0: Expected string, received number, language: Invalid enum value. Expected 'kuery' | 'lucene', received 'non-language'"
       );
     });
 
@@ -150,10 +151,46 @@ describe('rule_converters', () => {
           field: ['host.name'],
           value: 'invalid',
         },
-      };
+      } as PatchRuleRequestBody;
       const rule = getThresholdRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
-        'Invalid value "invalid" supplied to "threshold,value"'
+        'threshold.value: Expected number, received string'
+      );
+    });
+
+    test('should accept threshold alerts suppression params', () => {
+      const patchParams = {
+        alert_suppression: {
+          duration: { value: 4, unit: 'h' as const },
+        },
+      };
+      const rule = getThresholdRuleParams();
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      expect(patchedParams).toEqual(
+        expect.objectContaining({
+          alertSuppression: {
+            duration: { value: 4, unit: 'h' },
+          },
+        })
+      );
+    });
+
+    test('should accept threat_match alerts suppression params', () => {
+      const patchParams = {
+        alert_suppression: {
+          group_by: ['agent.name'],
+          missing_fields_strategy: 'suppress' as const,
+        },
+      };
+      const rule = getThreatRuleParams();
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      expect(patchedParams).toEqual(
+        expect.objectContaining({
+          alertSuppression: {
+            groupBy: ['agent.name'],
+            missingFieldsStrategy: 'suppress',
+          },
+        })
       );
     });
 
@@ -173,10 +210,10 @@ describe('rule_converters', () => {
     test('should reject invalid machine learning params when existing rule type is machine learning', () => {
       const patchParams = {
         anomaly_threshold: 'invalid',
-      };
+      } as PatchRuleRequestBody;
       const rule = getMlRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
-        'Invalid value "invalid" supplied to "anomaly_threshold"'
+        'anomaly_threshold: Expected number, received string'
       );
     });
 
@@ -196,10 +233,10 @@ describe('rule_converters', () => {
     test('should reject invalid new terms params when existing rule type is new terms', () => {
       const patchParams = {
         new_terms_fields: 'invalid',
-      };
+      } as PatchRuleRequestBody;
       const rule = getNewTermsRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
-        'Invalid value "invalid" supplied to "new_terms_fields"'
+        'new_terms_fields: Expected array, received string'
       );
     });
   });

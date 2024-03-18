@@ -211,6 +211,9 @@ describe('mappingFromFieldMap', () => {
                 case_ids: {
                   type: 'keyword',
                 },
+                consecutive_matches: {
+                  type: 'long',
+                },
                 duration: {
                   properties: {
                     us: {
@@ -242,6 +245,11 @@ describe('mappingFromFieldMap', () => {
                 },
                 reason: {
                   type: 'keyword',
+                  fields: {
+                    text: {
+                      type: 'match_only_text',
+                    },
+                  },
                 },
                 rule: {
                   properties: {
@@ -306,6 +314,9 @@ describe('mappingFromFieldMap', () => {
                 workflow_tags: {
                   type: 'keyword',
                 },
+                workflow_assignee_ids: {
+                  type: 'keyword',
+                },
               },
             },
             space_ids: {
@@ -363,6 +374,7 @@ describe('mappingFromFieldMap', () => {
                 },
                 system_status: { type: 'keyword' },
                 workflow_reason: { type: 'keyword' },
+                workflow_status_updated_at: { type: 'date' },
                 workflow_user: { type: 'keyword' },
               },
             },

@@ -13,6 +13,7 @@ import { EuiModal, EuiConfirmModal } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
@@ -56,6 +57,7 @@ class ModalRef implements OverlayRef {
 interface StartDeps {
   i18n: I18nStart;
   theme: ThemeServiceStart;
+  analytics: AnalyticsServiceStart;
   targetDomElement: Element;
 }
 
@@ -64,7 +66,7 @@ export class ModalService {
   private activeModal: ModalRef | null = null;
   private targetDomElement: Element | null = null;
 
-  public start({ i18n, theme, targetDomElement }: StartDeps): OverlayModalStart {
+  public start({ analytics, i18n, theme, targetDomElement }: StartDeps): OverlayModalStart {
     this.targetDomElement = targetDomElement;
 
     return {
@@ -87,7 +89,7 @@ export class ModalService {
         this.activeModal = modal;
 
         render(
-          <KibanaRenderContextProvider i18n={i18n} theme={theme}>
+          <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
             <EuiModal {...options} onClose={() => modal.close()}>
               <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
             </EuiModal>
@@ -147,7 +149,7 @@ export class ModalService {
           };
 
           render(
-            <KibanaRenderContextProvider i18n={i18n} theme={theme}>
+            <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
               <EuiConfirmModal {...props} />
             </KibanaRenderContextProvider>,
             targetDomElement

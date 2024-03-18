@@ -12,7 +12,6 @@
     "@kbn/core",
     "@kbn/expressions-plugin",
     "@kbn/data-plugin",
-    "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/data-views-plugin",
     "@kbn/inspector-plugin",

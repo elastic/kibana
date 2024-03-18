@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AppNavLinkStatus } from '@kbn/core/public';
 import { getCasesDeepLinks } from './deep_links';
 
 describe('getCasesDeepLinks', () => {
@@ -19,12 +18,12 @@ describe('getCasesDeepLinks', () => {
         {
           id: 'cases_create',
           path: '/cases/create',
-          title: 'Create New Case',
+          title: 'Create',
         },
         {
           id: 'cases_configure',
           path: '/cases/configure',
-          title: 'Configure Cases',
+          title: 'Settings',
         },
       ],
     });
@@ -40,12 +39,12 @@ describe('getCasesDeepLinks', () => {
         {
           id: 'cases_create',
           path: '/test/create',
-          title: 'Create New Case',
+          title: 'Create',
         },
         {
           id: 'cases_configure',
           path: '/test/configure',
-          title: 'Configure Cases',
+          title: 'Settings',
         },
       ],
     });
@@ -55,10 +54,10 @@ describe('getCasesDeepLinks', () => {
     const deepLinks = getCasesDeepLinks({
       extend: {
         cases: {
-          searchable: false,
+          visibleIn: [],
         },
         cases_create: {
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         },
         cases_configure: {
           order: 8002,
@@ -70,18 +69,18 @@ describe('getCasesDeepLinks', () => {
       id: 'cases',
       path: '/cases',
       title: 'Cases',
-      searchable: false,
+      visibleIn: [],
       deepLinks: [
         {
           id: 'cases_create',
           path: '/cases/create',
-          title: 'Create New Case',
-          navLinkStatus: AppNavLinkStatus.hidden,
+          title: 'Create',
+          visibleIn: [],
         },
         {
           id: 'cases_configure',
           path: '/cases/configure',
-          title: 'Configure Cases',
+          title: 'Settings',
           order: 8002,
         },
       ],
@@ -115,12 +114,12 @@ describe('getCasesDeepLinks', () => {
         {
           id: 'cases_create',
           path: '/cases/create',
-          title: 'Create New Case',
+          title: 'Create',
         },
         {
           id: 'cases_configure',
           path: '/cases/configure',
-          title: 'Configure Cases',
+          title: 'Settings',
         },
       ],
     });
@@ -136,7 +135,7 @@ describe('getCasesDeepLinks', () => {
           title: 'My new create cases title',
         },
         cases_configure: {
-          title: 'My new configure cases title',
+          title: 'My new settings title',
         },
       },
     });
@@ -154,7 +153,7 @@ describe('getCasesDeepLinks', () => {
         {
           id: 'cases_configure',
           path: '/cases/configure',
-          title: 'My new configure cases title',
+          title: 'My new settings title',
         },
       ],
     });

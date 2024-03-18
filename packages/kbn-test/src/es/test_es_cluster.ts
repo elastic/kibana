@@ -71,7 +71,10 @@ export interface CreateTestEsClusterOptions {
    */
   esArgs?: string[];
   esFrom?: string;
-  esServerlessOptions?: Pick<ServerlessOptions, 'image' | 'tag' | 'resources' | 'host'>;
+  esServerlessOptions?: Pick<
+    ServerlessOptions,
+    'image' | 'tag' | 'resources' | 'host' | 'kibanaUrl' | 'projectType'
+  >;
   esJavaOpts?: string;
   /**
    * License to run your cluster under. Keep in mind that a `trial` license
@@ -239,13 +242,15 @@ export function createTestEsCluster<
       } else if (esFrom === 'snapshot') {
         installPath = (await firstNode.installSnapshot(config)).installPath;
       } else if (esFrom === 'serverless') {
+        if (!esServerlessOptions) {
+          throw new Error(
+            `'esServerlessOptions' must be defined to start Elasticsearch in serverless mode`
+          );
+        }
         await firstNode.runServerless({
           basePath,
           esArgs: customEsArgs,
-          image: esServerlessOptions?.image,
-          tag: esServerlessOptions?.tag,
-          host: esServerlessOptions?.host,
-          resources: esServerlessOptions?.resources,
+          ...esServerlessOptions,
           port,
           clean: true,
           background: true,

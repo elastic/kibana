@@ -11,13 +11,19 @@ import { Redirect, RouteProps } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { createSearchSessionMock } from '../__mocks__/search_session';
 import { discoverServiceMock as mockDiscoverServices } from '../__mocks__/services';
-import { CustomDiscoverRoutes, DiscoverRouter, DiscoverRoutes } from './discover_router';
+import {
+  CustomDiscoverRoutes,
+  DiscoverRouter,
+  DiscoverRoutes,
+  DiscoverRoutesProps,
+} from './discover_router';
 import { DiscoverMainRoute } from './main';
 import { SingleDocRoute } from './doc';
 import { ContextAppRoute } from './context';
 import { createProfileRegistry } from '../customizations/profile_registry';
 import { addProfile } from '../../common/customizations';
 import { NotFoundRoute } from './not_found';
+import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
 
 let mockProfile: string | undefined;
 
@@ -43,9 +49,9 @@ const gatherRoutes = (wrapper: ShallowWrapper) => {
   });
 };
 
-const props = {
-  isDev: false,
+const props: DiscoverRoutesProps = {
   customizationCallbacks: [],
+  customizationContext: mockCustomizationContext,
 };
 
 describe('DiscoverRoutes', () => {
@@ -147,13 +153,16 @@ describe('CustomDiscoverRoutes', () => {
   it('should show DiscoverRoutes for a valid profile', () => {
     mockProfile = 'test';
     const component = shallow(
-      <CustomDiscoverRoutes profileRegistry={profileRegistry} isDev={props.isDev} />
+      <CustomDiscoverRoutes
+        profileRegistry={profileRegistry}
+        customizationContext={mockCustomizationContext}
+      />
     );
     expect(component.find(DiscoverRoutes).getElement()).toMatchObject(
       <DiscoverRoutes
         prefix={addProfile('', mockProfile)}
         customizationCallbacks={callbacks}
-        isDev={props.isDev}
+        customizationContext={mockCustomizationContext}
       />
     );
   });
@@ -161,7 +170,10 @@ describe('CustomDiscoverRoutes', () => {
   it('should show NotFoundRoute for an invalid profile', () => {
     mockProfile = 'invalid';
     const component = shallow(
-      <CustomDiscoverRoutes profileRegistry={profileRegistry} isDev={props.isDev} />
+      <CustomDiscoverRoutes
+        profileRegistry={profileRegistry}
+        customizationContext={mockCustomizationContext}
+      />
     );
     expect(component.find(NotFoundRoute).getElement()).toMatchObject(<NotFoundRoute />);
   });
@@ -178,7 +190,7 @@ describe('DiscoverRouter', () => {
         services={mockDiscoverServices}
         history={history}
         profileRegistry={profileRegistry}
-        isDev={props.isDev}
+        customizationContext={mockCustomizationContext}
       />
     );
     gatherRoutes(component);
@@ -186,13 +198,19 @@ describe('DiscoverRouter', () => {
 
   it('should show DiscoverRoutes component for / route', () => {
     expect(pathMap['/']).toMatchObject(
-      <DiscoverRoutes customizationCallbacks={callbacks} isDev={props.isDev} />
+      <DiscoverRoutes
+        customizationCallbacks={callbacks}
+        customizationContext={mockCustomizationContext}
+      />
     );
   });
 
   it(`should show CustomDiscoverRoutes component for ${profilePath} route`, () => {
     expect(pathMap[profilePath]).toMatchObject(
-      <CustomDiscoverRoutes profileRegistry={profileRegistry} isDev={props.isDev} />
+      <CustomDiscoverRoutes
+        profileRegistry={profileRegistry}
+        customizationContext={mockCustomizationContext}
+      />
     );
   });
 });

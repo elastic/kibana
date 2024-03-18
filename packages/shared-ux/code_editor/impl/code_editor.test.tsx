@@ -13,9 +13,27 @@ import { monaco } from '@kbn/monaco';
 
 import { keys } from '@elastic/eui';
 
-import { mockedEditorInstance } from './code_editor.test.helpers';
+import { MockedMonacoEditor, mockedEditorInstance } from '@kbn/code-editor-mock/monaco_mock';
 
 import { CodeEditor } from './code_editor';
+
+jest.mock('react-monaco-editor', () => {
+  return function JestMockEditor() {
+    return MockedMonacoEditor;
+  };
+});
+
+// Mock the htmlIdGenerator to generate predictable ids for snapshot tests
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: () => {
+      return () => '1234';
+    },
+  };
+});
 
 // A sample language definition with a few example tokens
 const simpleLogLang: monaco.languages.IMonarchLanguage = {
@@ -50,11 +68,6 @@ describe('<CodeEditor />', () => {
         dispatchEvent: jest.fn(),
       })),
     });
-    window.ResizeObserver = class ResizeObserver {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-    };
 
     monaco.languages.register({ id: 'loglang' });
     monaco.languages.setMonarchTokensProvider('loglang', simpleLogLang);
@@ -133,16 +146,20 @@ describe('<CodeEditor />', () => {
 
     test('should be tabable', () => {
       const DOMnode = getHint().getDOMNode();
-      expect(getHint().find('[data-test-subj="codeEditorHint"]').exists()).toBeTruthy();
+      expect(getHint().find('[data-test-subj~="codeEditorHint"]').exists()).toBeTruthy();
       expect(DOMnode.getAttribute('tabindex')).toBe('0');
       expect(DOMnode).toMatchSnapshot();
     });
 
     test('should be disabled when the ui monaco editor gains focus', async () => {
       // Initially it is visible and active
-      expect(getHint().find('[data-test-subj="codeEditorHint"]').exists()).toBeTruthy();
+      expect(getHint().find('[data-test-subj~="codeEditorHint"]').prop('data-test-subj')).toContain(
+        `codeEditorHint--active`
+      );
       getHint().simulate('keydown', { key: keys.ENTER });
-      expect(getHint().find('[data-test-subj="codeEditorHint"]').exists()).toBeFalsy();
+      expect(getHint().find('[data-test-subj~="codeEditorHint"]').prop('data-test-subj')).toContain(
+        `codeEditorHint--inactive`
+      );
     });
 
     test('should be enabled when hitting the ESC key', () => {
@@ -152,7 +169,9 @@ describe('<CodeEditor />', () => {
         keyCode: monaco.KeyCode.Escape,
       });
 
-      // expect((getHint().props() as any).className).not.toContain('isInactive');
+      expect(getHint().find('[data-test-subj~="codeEditorHint"]').prop('data-test-subj')).toContain(
+        `codeEditorHint--active`
+      );
     });
 
     test('should detect that the suggestion menu is open and not show the hint on ESC', async () => {

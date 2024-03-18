@@ -10,11 +10,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 const API_BASE_PATH = '/api/searchprofiler';
 
-// Flaky https://github.com/elastic/kibana/issues/97954
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe.skip('Profile', () => {
+  describe('Profile', () => {
     it('should return profile results for a valid index', async () => {
       const payload = {
         index: '_all',
@@ -46,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       const { body } = await supertest
-        .post(`${API_BASE_PATH}/execute`)
+        .post(`${API_BASE_PATH}/profile`)
         .set('kbn-xsrf', 'xxx')
         .set('Content-Type', 'application/json;charset=UTF-8')
         .send(payloadWithInvalidIndex)

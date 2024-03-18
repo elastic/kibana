@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
@@ -22,7 +22,7 @@ import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import { CORRELATIONS_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
-import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
+import { DocumentDetailsLeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 
 /**
@@ -38,12 +38,13 @@ export const CorrelationsOverview: React.FC = () => {
     indexName,
     getFieldsData,
     scopeId,
+    isPreview,
   } = useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToCorrelationsTab = useCallback(() => {
     openLeftPanel({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: {
         tab: LeftPanelInsightsTab,
         subTab: CORRELATIONS_TAB_ID,
@@ -64,6 +65,8 @@ export const CorrelationsOverview: React.FC = () => {
     getFieldsData,
     dataAsNestedObject,
     dataFormattedForFieldBrowser,
+    eventId,
+    isPreview,
   });
   const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
     getFieldsData,

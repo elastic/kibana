@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 import {
   EuiButtonEmpty,
@@ -22,11 +23,8 @@ import {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesContextProps, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -79,8 +77,8 @@ export const JobsListPage: FC<Props> = ({
   const theme$ = coreStart.theme.theme$;
 
   const mlServices = useMemo(
-    () => getMlGlobalServices(coreStart.http, usageCollection),
-    [coreStart.http, usageCollection]
+    () => getMlGlobalServices(coreStart.http, data.dataViews, usageCollection),
+    [coreStart.http, data.dataViews, usageCollection]
   );
 
   const check = async () => {
@@ -124,7 +122,11 @@ export const JobsListPage: FC<Props> = ({
   }
 
   return (
-    <RedirectAppLinks application={coreStart.application}>
+    <RedirectAppLinks
+      coreStart={{
+        application: coreStart.application,
+      }}
+    >
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider

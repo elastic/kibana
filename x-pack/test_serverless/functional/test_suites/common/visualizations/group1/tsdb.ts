@@ -238,7 +238,13 @@ function sumFirstNValues(n: number, bars: Array<{ y: number }>): number {
 }
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'lens', 'dashboard']);
+  const PageObjects = getPageObjects([
+    'common',
+    'timePicker',
+    'lens',
+    'dashboard',
+    'svlCommonPage',
+  ]);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
@@ -319,6 +325,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const toTime = 'Jun 16, 2023 @ 00:00:00.000';
 
     before(async () => {
+      await PageObjects.svlCommonPage.loginAsAdmin();
       log.info(`loading ${tsdbIndex} index...`);
       await esArchiver.loadIfNeeded(tsdbEsArchive);
       log.info(`creating a data view for "${tsdbDataView}"...`);

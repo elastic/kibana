@@ -7,11 +7,12 @@
 
 import React, { useCallback } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
 import { SelectedPromptContext } from '../prompt_context/types';
-import { useSendMessages } from '../use_send_messages';
+import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
-import { Conversation, Message, Prompt } from '../../..';
+import { Conversation, Message, Prompt, useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
 import { getDefaultSystemPrompt } from '../use_conversation/helpers';
 
@@ -27,13 +28,16 @@ export interface UseChatSendProps {
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
+  refresh: () => Promise<Conversation | undefined>;
+  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation>>;
 }
 
-interface UseChatSend {
+export interface UseChatSend {
   handleButtonSendMessage: (m: string) => void;
   handleOnChatCleared: () => void;
   handlePromptChange: (prompt: string) => void;
   handleSendMessage: (promptText: string) => void;
+  handleRegenerateResponse: () => void;
   isLoading: boolean;
 }
 
@@ -52,9 +56,17 @@ export const useChatSend = ({
   setPromptTextPreview,
   setSelectedPromptContexts,
   setUserPrompt,
+  refresh,
+  setCurrentConversation,
 }: UseChatSendProps): UseChatSend => {
-  const { isLoading, sendMessages } = useSendMessages();
-  const { appendMessage, appendReplacements, clearConversation } = useConversation();
+  const {
+    assistantTelemetry,
+    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
+    toasts,
+  } = useAssistantContext();
+
+  const { isLoading, sendMessage } = useSendMessage();
+  const { clearConversation, removeLastMessage } = useConversation();
 
   const handlePromptChange = (prompt: string) => {
     setPromptTextPreview(prompt);
@@ -64,53 +76,121 @@ export const useChatSend = ({
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
     async (promptText: string) => {
-      const onNewReplacements = (newReplacements: Record<string, string>) =>
-        appendReplacements({
-          conversationId: currentConversation.id,
-          replacements: newReplacements,
-        });
-
+      if (!currentConversation.apiConfig) {
+        toasts?.addError(
+          new Error('The conversation needs a connector configured in order to send a message.'),
+          {
+            title: i18n.translate('xpack.elasticAssistant.knowledgeBase.setupError', {
+              defaultMessage: 'Error setting up Knowledge Base',
+            }),
+          }
+        );
+        return;
+      }
       const systemPrompt = allSystemPrompts.find((prompt) => prompt.id === editingSystemPromptId);
 
-      const message = await getCombinedMessage({
+      const userMessage = getCombinedMessage({
         isNewChat: currentConversation.messages.length === 0,
         currentReplacements: currentConversation.replacements,
-        onNewReplacements,
         promptText,
         selectedPromptContexts,
         selectedSystemPrompt: systemPrompt,
       });
 
-      const updatedMessages = appendMessage({
-        conversationId: currentConversation.id,
-        message,
+      const replacements = userMessage.replacements ?? currentConversation.replacements;
+      const updatedMessages = [...currentConversation.messages, userMessage].map((m) => ({
+        ...m,
+        content: m.content ?? '',
+      }));
+      setCurrentConversation({
+        ...currentConversation,
+        replacements,
+        messages: updatedMessages,
       });
 
       // Reset prompt context selection and preview before sending:
       setSelectedPromptContexts({});
       setPromptTextPreview('');
 
-      const rawResponse = await sendMessages({
-        http,
+      const rawResponse = await sendMessage({
         apiConfig: currentConversation.apiConfig,
-        messages: updatedMessages,
+        http,
+        message: userMessage.content ?? '',
+        conversationId: currentConversation.id,
+        replacements,
       });
+
+      assistantTelemetry?.reportAssistantMessageSent({
+        conversationId: currentConversation.title,
+        role: userMessage.role,
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
+      });
+
       const responseMessage: Message = getMessageFromRawResponse(rawResponse);
-      appendMessage({ conversationId: currentConversation.id, message: responseMessage });
+
+      setCurrentConversation({
+        ...currentConversation,
+        replacements,
+        messages: [...updatedMessages, responseMessage],
+      });
+      assistantTelemetry?.reportAssistantMessageSent({
+        conversationId: currentConversation.title,
+        role: responseMessage.role,
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
+      });
     },
     [
       allSystemPrompts,
+      assistantTelemetry,
       currentConversation,
-      selectedPromptContexts,
-      appendMessage,
-      setSelectedPromptContexts,
-      setPromptTextPreview,
-      sendMessages,
-      http,
-      appendReplacements,
       editingSystemPromptId,
+      http,
+      isEnabledKnowledgeBase,
+      isEnabledRAGAlerts,
+      selectedPromptContexts,
+      sendMessage,
+      setCurrentConversation,
+      setPromptTextPreview,
+      setSelectedPromptContexts,
+      toasts,
     ]
   );
+
+  const handleRegenerateResponse = useCallback(async () => {
+    if (!currentConversation.apiConfig) {
+      toasts?.addError(
+        new Error('The conversation needs a connector configured in order to send a message.'),
+        {
+          title: i18n.translate('xpack.elasticAssistant.knowledgeBase.setupError', {
+            defaultMessage: 'Error setting up Knowledge Base',
+          }),
+        }
+      );
+      return;
+    }
+    // remove last message from the local state immediately
+    setCurrentConversation({
+      ...currentConversation,
+      messages: currentConversation.messages.slice(0, -1),
+    });
+    const updatedMessages = (await removeLastMessage(currentConversation.id)) ?? [];
+
+    const rawResponse = await sendMessage({
+      apiConfig: currentConversation.apiConfig,
+      http,
+      // do not send any new messages, the previous conversation is already stored
+      conversationId: currentConversation.id,
+      replacements: [],
+    });
+
+    const responseMessage: Message = getMessageFromRawResponse(rawResponse);
+    setCurrentConversation({
+      ...currentConversation,
+      messages: [...updatedMessages, responseMessage],
+    });
+  }, [currentConversation, http, removeLastMessage, sendMessage, setCurrentConversation, toasts]);
 
   const handleButtonSendMessage = useCallback(
     (message: string) => {
@@ -120,7 +200,7 @@ export const useChatSend = ({
     [handleSendMessage, setUserPrompt]
   );
 
-  const handleOnChatCleared = useCallback(() => {
+  const handleOnChatCleared = useCallback(async () => {
     const defaultSystemPromptId = getDefaultSystemPrompt({
       allSystemPrompts,
       conversation: currentConversation,
@@ -129,12 +209,15 @@ export const useChatSend = ({
     setPromptTextPreview('');
     setUserPrompt('');
     setSelectedPromptContexts({});
-    clearConversation(currentConversation.id);
+    await clearConversation(currentConversation.id);
+    await refresh();
+
     setEditingSystemPromptId(defaultSystemPromptId);
   }, [
     allSystemPrompts,
     clearConversation,
     currentConversation,
+    refresh,
     setEditingSystemPromptId,
     setPromptTextPreview,
     setSelectedPromptContexts,
@@ -146,6 +229,7 @@ export const useChatSend = ({
     handleOnChatCleared,
     handlePromptChange,
     handleSendMessage,
+    handleRegenerateResponse,
     isLoading,
   };
 };

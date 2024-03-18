@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const embeddableError = await testSubjects.find('embeddableError');
       const errorMessage = await embeddableError.findByTestSubject('errorMessageMarkdown');
       expect(await errorMessage.getVisibleText()).to.equal(
-        'Expected AND, OR, end of input, whitespace but "n" found. this < is not : a valid > query ----------^'
+        'Expected AND, OR, end of input, whitespace but "n" found.\nthis < is not : a valid > query\n----------^'
       );
     });
 
@@ -144,6 +144,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not show the full screen button', async () => {
       await addSearchEmbeddableToDashboard();
       await testSubjects.missingOrFail('dataGridFullScreenButton');
+    });
+
+    it('should show the the grid toolbar', async () => {
+      await addSearchEmbeddableToDashboard();
+      await testSubjects.existOrFail('dscGridToolbar');
     });
   });
 }

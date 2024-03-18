@@ -28,6 +28,7 @@ const INDEX_TEMPLATE_TO_CLEAN = [
 export async function cleanUpOldFileIndices(esClient: ElasticsearchClient, logger: Logger) {
   try {
     // Clean indices
+    logger.info('Cleaning old indices');
     await pMap(
       INDICES_TO_CLEAN,
       async (indiceToClean) => {

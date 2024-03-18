@@ -14,17 +14,17 @@ import type { FieldsEqlOptions } from '../../../../../../common/search_strategy'
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { EqlQueryBar } from '../../../../../detections/components/rules/eql_query_bar';
+import { EqlQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/eql_query_bar';
 
 import {
   debounceAsync,
   eqlValidator,
-} from '../../../../../detections/components/rules/eql_query_bar/validators';
-import type { FieldValueQueryBar } from '../../../../../detections/components/rules/query_bar';
+} from '../../../../../detection_engine/rule_creation_ui/components/eql_query_bar/validators';
+import type { FieldValueQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/query_bar';
 
 import type { FormSchema } from '../../../../../shared_imports';
 import { Form, UseField, useForm, useFormData } from '../../../../../shared_imports';
-import { timelineActions } from '../../../../store/timeline';
+import { timelineActions } from '../../../../store';
 import * as i18n from '../translations';
 import { getEqlOptions } from './selectors';
 

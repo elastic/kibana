@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list-view';
 import { useContentClient } from '@kbn/content-management-plugin/public';
-import React from 'react';
+import { TableListView } from '@kbn/content-management-table-list-view';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
+import React from 'react';
 
 const LISTING_LIMIT = 1000;
 
@@ -60,7 +61,7 @@ export const MSearchTable = () => {
       title={`MSearch Demo`}
       urlStateEnabled={false}
       emptyPrompt={<>No data found. Try to install some sample data first.</>}
-      onClickTitle={(item) => {
+      getOnClickTitle={(item) => () => {
         alert(`Clicked item ${item.attributes.title} (${item.id})`);
       }}
     />

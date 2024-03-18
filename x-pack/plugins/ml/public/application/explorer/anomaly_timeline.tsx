@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -32,26 +35,27 @@ import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
-  SaveModalDashboardProps,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, AnomalySwimlaneEmbeddableInput } from '../..';
-import {
-  OVERALL_LABEL,
-  SWIMLANE_TYPE,
-  SwimlaneType,
-  VIEW_BY_JOB_LABEL,
-} from './explorer_constants';
+import type { AnomalySwimlaneEmbeddableInput } from '../..';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
+import type { SwimlaneType } from './explorer_constants';
+import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { useMlKibana } from '../contexts/kibana';
-import { ExplorerState } from './reducers/explorer_reducer';
+import type { ExplorerState } from './reducers/explorer_reducer';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
-import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
+import type {
+  AppStateSelectedCells,
+  OverallSwimlaneData,
+  ViewBySwimLaneData,
+} from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
 import { SeverityControl } from '../components/severity_control';
 import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
@@ -61,6 +65,7 @@ import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { useTimeBuckets } from '../components/custom_hooks/use_time_buckets';
 import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
+import { SwimLaneWrapper } from './alerts';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -506,6 +511,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
+
           {annotationXDomain && Array.isArray(annotations) && annotations.length > 0 ? (
             <>
               <MlTooltipComponent>
@@ -522,29 +528,35 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             </>
           ) : null}
 
-          <SwimlaneContainer
-            id="overall"
-            data-test-subj="mlAnomalyExplorerSwimlaneOverall"
-            filterActive={filterActive}
-            timeBuckets={timeBuckets}
-            swimlaneData={overallSwimlaneData as OverallSwimlaneData}
-            swimlaneType={SWIMLANE_TYPE.OVERALL}
+          <SwimLaneWrapper
             selection={overallCellSelection}
-            onCellsSelection={setSelectedCells}
-            onResize={onResize}
-            isLoading={loading}
-            noDataWarning={
-              <EuiText textAlign={'center'}>
-                <h5>
-                  <NoOverallData />
-                </h5>
-              </EuiText>
-            }
-            showTimeline={false}
-            showLegend={false}
-            yAxisWidth={Y_AXIS_LABEL_WIDTH}
-            chartsService={chartsService}
-          />
+            swimlaneContainerWidth={swimlaneContainerWidth}
+            swimLaneData={overallSwimlaneData as OverallSwimlaneData}
+          >
+            <SwimlaneContainer
+              id="overall"
+              data-test-subj="mlAnomalyExplorerSwimlaneOverall"
+              filterActive={filterActive}
+              timeBuckets={timeBuckets}
+              swimlaneData={overallSwimlaneData as OverallSwimlaneData}
+              swimlaneType={SWIMLANE_TYPE.OVERALL}
+              selection={overallCellSelection}
+              onCellsSelection={setSelectedCells}
+              onResize={onResize}
+              isLoading={loading}
+              noDataWarning={
+                <EuiText textAlign={'center'}>
+                  <h5>
+                    <NoOverallData />
+                  </h5>
+                </EuiText>
+              }
+              showTimeline={false}
+              showLegend={false}
+              yAxisWidth={Y_AXIS_LABEL_WIDTH}
+              chartsService={chartsService}
+            />
+          </SwimLaneWrapper>
 
           <EuiSpacer size="m" />
           {viewBySwimlaneOptions.length > 0 && (

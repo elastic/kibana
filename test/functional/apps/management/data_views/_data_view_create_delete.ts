@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const es = getService('es');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
   describe('creating and deleting default data view', function describeIndexTests() {
@@ -184,6 +185,55 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(`Index Star`);
         });
       });
+
+      it('prefills the form with previously saved values', async () => {
+        await PageObjects.settings.editIndexPattern('logs*', 'utc_time', 'Logs UTC', true);
+
+        await PageObjects.settings.clickEditIndexButton();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.waitFor('time field', async () => {
+          const timeFieldInput = await PageObjects.settings.getTimeFieldNameField();
+          return (await timeFieldInput.getAttribute('value')) === 'utc_time';
+        });
+        expect(await (await PageObjects.settings.getNameField()).getAttribute('value')).to.be(
+          'Logs UTC'
+        );
+        expect(
+          await (await PageObjects.settings.getIndexPatternField()).getAttribute('value')
+        ).to.be('logs*');
+
+        await testSubjects.click('closeFlyoutButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await testSubjects.getVisibleText('currentIndexPatternTimeField')).to.be('utc_time');
+
+        await PageObjects.settings.editIndexPattern(
+          'logstash-*',
+          PageObjects.settings.noTimeFieldOption,
+          'Just logs',
+          true
+        );
+
+        await PageObjects.settings.clickEditIndexButton();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.waitFor('time field', async () => {
+          const timeFieldInput = await PageObjects.settings.getTimeFieldNameField();
+          return (
+            (await timeFieldInput.getAttribute('value')) === PageObjects.settings.noTimeFieldOption
+          );
+        });
+        expect(await (await PageObjects.settings.getNameField()).getAttribute('value')).to.be(
+          'Just logs'
+        );
+        expect(
+          await (await PageObjects.settings.getIndexPatternField()).getAttribute('value')
+        ).to.be('logstash-*');
+
+        await testSubjects.click('closeFlyoutButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail('currentIndexPatternTimeField');
+      });
     });
 
     describe('index pattern edit', function () {
@@ -248,6 +298,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(currentUrl).to.contain('management/kibana/dataViews');
           });
         });
+      });
+    });
+
+    describe('hidden index support', () => {
+      it('can create data view against hidden index', async () => {
+        const pattern = 'logstash-2015.09.2*';
+
+        await es.transport.request({
+          path: '/logstash-2015.09.2*/_settings',
+          method: 'PUT',
+          body: {
+            index: {
+              hidden: true,
+            },
+          },
+        });
+
+        await PageObjects.settings.createIndexPattern(
+          pattern,
+          '@timestamp',
+          undefined,
+          undefined,
+          undefined,
+          true
+        );
+        const patternName = await PageObjects.settings.getIndexPageHeading();
+        expect(patternName).to.be(pattern);
+
+        // verify that allow hidden persists through reload
+        await browser.refresh();
+
+        await testSubjects.click('editIndexPatternButton');
+        await testSubjects.click('toggleAdvancedSetting');
+        const allowHiddenField = await testSubjects.find('allowHiddenField');
+        const button = await allowHiddenField.findByTagName('button');
+        expect(await button.getAttribute('aria-checked')).to.be('true');
       });
     });
   });

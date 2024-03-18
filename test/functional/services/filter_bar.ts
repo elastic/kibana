@@ -65,6 +65,7 @@ type Filter = FilterLeaf | FilterNode;
 
 export class FilterBarService extends FtrService {
   private readonly comboBox = this.ctx.getService('comboBox');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
@@ -175,6 +176,11 @@ export class FilterBarService extends FtrService {
   public async isFilterPinned(key: string): Promise<boolean> {
     const filter = await this.testSubjects.find(`~filter & ~filter-key-${key}`);
     return (await filter.getAttribute('data-test-subj')).includes('filter-pinned');
+  }
+
+  public async isFilterNegated(key: string): Promise<boolean> {
+    const filter = await this.testSubjects.find(`~filter & ~filter-key-${key}`);
+    return (await filter.getAttribute('data-test-subj')).includes('filter-negated');
   }
 
   public async getFilterCount(): Promise<number> {
@@ -313,6 +319,21 @@ export class FilterBarService extends FtrService {
 
   public async addFilter(filter: Filter): Promise<void> {
     await this.addFilterAndSelectDataView(null, filter);
+  }
+
+  public async addDslFilter(value: string, waitUntilLoadingHasFinished = true) {
+    await this.testSubjects.click('addFilter');
+    await this.testSubjects.click('editQueryDSL');
+    await this.monacoEditor.waitCodeEditorReady('addFilterPopover');
+    await this.monacoEditor.setCodeEditorValue(value);
+    await this.testSubjects.scrollIntoView('saveFilter');
+    await this.testSubjects.clickWhenNotDisabled('saveFilter');
+    await this.retry.try(async () => {
+      await this.testSubjects.waitForDeleted('saveFilter');
+    });
+    if (waitUntilLoadingHasFinished) {
+      await this.header.waitUntilLoadingHasFinished();
+    }
   }
 
   /**

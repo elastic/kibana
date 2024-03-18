@@ -38,15 +38,6 @@ describe('TimeseriesVisualization', () => {
 
     setCharts({
       theme: {
-        useChartsTheme: () => ({
-          axes: {
-            tickLabel: {
-              padding: {
-                inner: 0,
-              },
-            },
-          },
-        }),
         useChartsBaseTheme: () => ({
           axes: {
             tickLabel: {

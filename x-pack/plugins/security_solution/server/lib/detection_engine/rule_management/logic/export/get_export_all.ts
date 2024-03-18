@@ -7,21 +7,20 @@
 
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
-import type { ISavedObjectsExporter, KibanaRequest, Logger } from '@kbn/core/server';
+import type { ISavedObjectsExporter, KibanaRequest } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { getNonPackagedRules } from '../search/get_existing_prepackaged_rules';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
-import { transformAlertsToRules, transformRuleToExportableFormat } from '../../utils/utils';
+import { transformAlertsToRules } from '../../utils/utils';
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 import { getRuleActionConnectorsForExport } from './get_export_rule_action_connectors';
+import { transformRuleToExportableFormat } from './transform_rule_to_exportable_format';
 
 export const getExportAll = async (
   rulesClient: RulesClient,
   exceptionsClient: ExceptionListClient | undefined,
-  savedObjectsClient: RuleExecutorServices['savedObjectsClient'],
-  logger: Logger,
   actionsExporter: ISavedObjectsExporter,
   request: KibanaRequest,
   actionsClient: ActionsClient

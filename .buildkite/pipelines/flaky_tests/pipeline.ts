@@ -143,11 +143,9 @@ for (const testSuite of testSuites) {
       },
       depends_on: 'build',
       timeout_in_minutes: 150,
+      cancel_on_build_failing: true,
       retry: {
-        automatic: [
-          { exit_status: '-1', limit: 3 },
-          // { exit_status: '*', limit: 1 },
-        ],
+        automatic: [{ exit_status: '-1', limit: 3 }],
       },
     });
     continue;
@@ -162,15 +160,21 @@ for (const testSuite of testSuites) {
           `Group configuration was not found in groups.json for the following cypress suite: {${suiteName}}.`
         );
       }
+      const agentQueue = suiteName.includes('defend_workflows') ? 'n2-4-virt' : 'n2-4-spot';
       steps.push({
         command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
         label: group.name,
-        agents: { queue: 'n2-4-spot' },
+        agents: { queue: agentQueue },
         depends_on: 'build',
+        timeout_in_minutes: 150,
         parallelism: testSuite.count,
         concurrency,
         concurrency_group: process.env.UUID,
         concurrency_method: 'eager',
+        cancel_on_build_failing: true,
+        retry: {
+          automatic: [{ exit_status: '-1', limit: 3 }],
+        },
         env: {
           // disable split of test cases between parallel jobs when running them in flaky test runner
           // by setting chunks vars to value 1, which means all test will run in one job

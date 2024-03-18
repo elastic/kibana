@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { Pagination } from '@elastic/eui';
+import { pageToPagination } from '@kbn/search-index-documents';
 
-import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
-
-import { Meta } from '../../../../../common/types';
+import { Paginate } from '../../../../../common/types/pagination';
 
 import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
@@ -20,8 +21,8 @@ export interface SearchDocumentsApiLogicArgs {
 }
 
 export interface SearchDocumentsApiLogicValues {
-  meta: Meta;
-  results: SearchResponseBody;
+  meta: Pagination;
+  results: Paginate<SearchHit>;
 }
 
 export type SearchDocumentsApiLogicActions = Actions<
@@ -42,12 +43,17 @@ export const searchDocuments = async ({
     size: docsPerPage || pagination.pageSize,
   };
 
-  return await HttpLogic.values.http.post<SearchDocumentsApiLogicValues>(route, {
+  const response = await HttpLogic.values.http.post<SearchDocumentsApiLogicValues>(route, {
     body: JSON.stringify({
       searchQuery,
     }),
     query,
   });
+
+  return {
+    meta: pageToPagination(response.results?._meta?.page),
+    results: response.results?.data,
+  };
 };
 
 export const searchDocumentsApiLogic = (indexName: string) =>

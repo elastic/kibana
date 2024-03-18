@@ -8,23 +8,33 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-// @ts-ignore
-import { initElasticsearchHelpers } from './lib';
-// @ts-ignore
+import { componentTemplatesApi } from './lib/component_templates.api';
+import { componentTemplateHelpers } from './lib/component_template.helpers';
 import { API_BASE_PATH } from './constants';
 
+const CACHE_TEMPLATES = true;
+
 export default function ({ getService }: FtrProviderContext) {
+  const log = getService('log');
   const supertest = getService('supertest');
 
   const {
     createComponentTemplate,
-    createIndexTemplate,
+    getAllComponentTemplates,
+    getOneComponentTemplate,
+    updateComponentTemplate,
+    deleteComponentTemplate,
+    getComponentTemplateDatastreams,
+  } = componentTemplatesApi(getService);
+  const {
+    addDatastream,
+    addIndexTemplate,
+    addComponentTemplate,
+    removeComponentTemplate,
+    cleanupDatastreams,
     cleanUpIndexTemplates,
     cleanUpComponentTemplates,
-    deleteComponentTemplate,
-    cleanupDatastreams,
-    createDatastream,
-  } = initElasticsearchHelpers(getService);
+  } = componentTemplateHelpers(getService);
 
   describe('Component templates', function () {
     after(async () => {
@@ -62,20 +72,16 @@ export default function ({ getService }: FtrProviderContext) {
       // Create component template to verify GET requests
       before(async () => {
         try {
-          await createComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, true);
+          await addComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, CACHE_TEMPLATES);
         } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log('[Setup error] Error creating component template');
+          log.debug('[Setup error] Error creating component template');
           throw err;
         }
       });
 
       describe('all component templates', () => {
         it('should return an array of component templates', async () => {
-          const { body: componentTemplates } = await supertest
-            .get(`${API_BASE_PATH}/component_templates`)
-            .set('kbn-xsrf', 'xxx')
-            .expect(200);
+          const { body: componentTemplates } = await getAllComponentTemplates().expect(200);
 
           const testComponentTemplate = componentTemplates.find(
             ({ name }: { name: string }) => name === COMPONENT_NAME
@@ -86,6 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
             usedBy: [],
             isManaged: false,
             hasSettings: true,
+            isDeprecated: false,
             hasMappings: true,
             hasAliases: false,
           });
@@ -94,9 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('one component template', () => {
         it('should return a single component template', async () => {
-          const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_NAME}`;
-
-          const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(200);
+          const { body } = await getOneComponentTemplate(COMPONENT_NAME).expect(200);
 
           expect(body).to.eql({
             name: COMPONENT_NAME,
@@ -117,49 +122,48 @@ export default function ({ getService }: FtrProviderContext) {
       after(async () => {
         // Clean up any component templates created in test cases
         await Promise.all(
-          [COMPONENT_NAME, REQUIRED_FIELDS_COMPONENT_NAME].map(deleteComponentTemplate)
+          [COMPONENT_NAME, REQUIRED_FIELDS_COMPONENT_NAME].map(removeComponentTemplate)
         ).catch((err) => {
-          // eslint-disable-next-line no-console
-          console.log(`[Cleanup error] Error deleting component templates: ${err.message}`);
+          log.debug(`[Cleanup error] Error deleting component templates: ${err.message}`);
           throw err;
         });
       });
 
       it('should create a component template', async () => {
-        const { body } = await supertest
-          .post(`${API_BASE_PATH}/component_templates`)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            name: COMPONENT_NAME,
-            version: 1,
-            template: {
-              settings: {
-                number_of_shards: 1,
-              },
-              aliases: {
-                alias1: {},
-              },
-              mappings: {
-                properties: {
-                  host_name: {
-                    type: 'keyword',
-                  },
+        const { body } = await createComponentTemplate(COMPONENT_NAME, {
+          version: 1,
+          template: {
+            settings: {
+              number_of_shards: 1,
+            },
+            aliases: {
+              alias1: {},
+            },
+            mappings: {
+              properties: {
+                host_name: {
+                  type: 'keyword',
                 },
               },
             },
-            _meta: {
-              description: 'set number of shards to one',
-              serialization: {
-                class: 'MyComponentTemplate',
-                id: 10,
-              },
+            lifecycle: {
+              // @ts-expect-error @elastic/elasticsearch enabled prop is still not in the ES types
+              enabled: true,
+              data_retention: '2d',
             },
-            _kbnMeta: {
-              usedBy: [],
-              isManaged: false,
+          },
+          _meta: {
+            description: 'set number of shards to one',
+            serialization: {
+              class: 'MyComponentTemplate',
+              id: 10,
             },
-          })
-          .expect(200);
+          },
+          _kbnMeta: {
+            usedBy: [],
+            isManaged: false,
+          },
+        }).expect(200);
 
         expect(body).to.eql({
           acknowledged: true,
@@ -167,19 +171,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should create a component template with only required fields', async () => {
-        const { body } = await supertest
-          .post(`${API_BASE_PATH}/component_templates`)
-          .set('kbn-xsrf', 'xxx')
+        const { body } = await createComponentTemplate(REQUIRED_FIELDS_COMPONENT_NAME, {
           // Excludes version and _meta fields
-          .send({
-            name: REQUIRED_FIELDS_COMPONENT_NAME,
-            template: {},
-            _kbnMeta: {
-              usedBy: [],
-              isManaged: false,
-            },
-          })
-          .expect(200);
+          template: {},
+          _kbnMeta: {
+            usedBy: [],
+            isManaged: false,
+          },
+        }).expect(200);
 
         expect(body).to.eql({
           acknowledged: true,
@@ -187,18 +186,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should not allow creation of a component template with the same name of an existing one', async () => {
-        const { body } = await supertest
-          .post(`${API_BASE_PATH}/component_templates`)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            name: COMPONENT_NAME,
-            template: {},
-            _kbnMeta: {
-              usedBy: [],
-              isManaged: false,
-            },
-          })
-          .expect(409);
+        const { body } = await createComponentTemplate(COMPONENT_NAME, {
+          template: {},
+          _kbnMeta: {
+            usedBy: [],
+            isManaged: false,
+          },
+        }).expect(409);
 
         expect(body).to.eql({
           statusCode: 409,
@@ -237,30 +231,22 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         // Create component template that can be used to test PUT request
         try {
-          await createComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, true);
+          await addComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, CACHE_TEMPLATES);
         } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log('[Setup error] Error creating component template');
+          log.debug('[Setup error] Error creating component template');
           throw err;
         }
       });
 
       it('should allow an existing component template to be updated', async () => {
-        const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_NAME}`;
-
-        const { body } = await supertest
-          .put(uri)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            ...COMPONENT,
-            name: COMPONENT_NAME,
-            version: 1,
-            _kbnMeta: {
-              usedBy: [],
-              isManaged: false,
-            },
-          })
-          .expect(200);
+        const { body } = await updateComponentTemplate(COMPONENT_NAME, {
+          ...COMPONENT,
+          version: 1,
+          _kbnMeta: {
+            usedBy: [],
+            isManaged: false,
+          },
+        }).expect(200);
 
         expect(body).to.eql({
           acknowledged: true,
@@ -268,21 +254,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should not allow a non-existing component template to be updated', async () => {
-        const uri = `${API_BASE_PATH}/component_templates/component_does_not_exist`;
-
-        const { body } = await supertest
-          .put(uri)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            ...COMPONENT,
-            name: 'component_does_not_exist',
-            version: 1,
-            _kbnMeta: {
-              usedBy: [],
-              isManaged: false,
-            },
-          })
-          .expect(404);
+        const { body } = await updateComponentTemplate('component_does_not_exist', {
+          ...COMPONENT,
+          version: 1,
+          _kbnMeta: {
+            usedBy: [],
+            isManaged: false,
+          },
+        }).expect(404);
 
         expect(body).to.eql({
           statusCode: 404,
@@ -300,6 +279,35 @@ export default function ({ getService }: FtrProviderContext) {
               type: 'resource_not_found_exception',
             },
           },
+        });
+      });
+
+      it('should allow a deprecated component template to be updated', async () => {
+        const deprecatedTemplateName = 'deprecated_component_template';
+        const deprecatedTemplate = {
+          template: {},
+          deprecated: true,
+        };
+        try {
+          await addComponentTemplate(
+            { body: deprecatedTemplate, name: deprecatedTemplateName },
+            CACHE_TEMPLATES
+          );
+        } catch (err) {
+          log.debug('[Setup error] Error creating component template');
+          throw err;
+        }
+        const { body } = await updateComponentTemplate(deprecatedTemplateName, {
+          ...deprecatedTemplate,
+          version: 1,
+          _kbnMeta: {
+            usedBy: [],
+            isManaged: false,
+          },
+        }).expect(200);
+
+        expect(body).to.eql({
+          acknowledged: true,
         });
       });
     });
@@ -324,20 +332,17 @@ export default function ({ getService }: FtrProviderContext) {
         // Create several component templates that can be used to test deletion
         await Promise.all(
           [componentTemplateA, componentTemplateB, componentTemplateC, componentTemplateD].map(
-            (template) => createComponentTemplate(template, false)
+            (template) => addComponentTemplate(template, !CACHE_TEMPLATES)
           )
         ).catch((err) => {
-          // eslint-disable-next-line no-console
-          console.log(`[Setup error] Error creating component templates: ${err.message}`);
+          log.debug(`[Setup error] Error creating component templates: ${err.message}`);
           throw err;
         });
       });
 
       it('should delete a component template', async () => {
         const { name } = componentTemplateA;
-        const uri = `${API_BASE_PATH}/component_templates/${name}`;
-
-        const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
+        const { body } = await deleteComponentTemplate(name).expect(200);
 
         expect(body).to.eql({
           itemsDeleted: [name],
@@ -349,11 +354,11 @@ export default function ({ getService }: FtrProviderContext) {
         const { name: componentTemplate1Name } = componentTemplateB;
         const { name: componentTemplate2Name } = componentTemplateC;
 
-        const uri = `${API_BASE_PATH}/component_templates/${componentTemplate1Name},${componentTemplate2Name}`;
-
         const {
           body: { itemsDeleted, errors },
-        } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
+        } = await deleteComponentTemplate(
+          `${componentTemplate1Name},${componentTemplate2Name}`
+        ).expect(200);
 
         expect(errors).to.eql([]);
 
@@ -367,9 +372,9 @@ export default function ({ getService }: FtrProviderContext) {
         const COMPONENT_DOES_NOT_EXIST = 'component_does_not_exist';
         const { name: componentTemplateName } = componentTemplateD;
 
-        const uri = `${API_BASE_PATH}/component_templates/${componentTemplateName},${COMPONENT_DOES_NOT_EXIST}`;
-
-        const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
+        const { body } = await deleteComponentTemplate(
+          `${componentTemplateName},${COMPONENT_DOES_NOT_EXIST}`
+        ).expect(200);
         expect(body.itemsDeleted).to.eql([componentTemplateName]);
         expect(body.errors[0].name).to.eql(COMPONENT_DOES_NOT_EXIST);
 
@@ -437,20 +442,17 @@ export default function ({ getService }: FtrProviderContext) {
       // Create component template to verify GET requests
       before(async () => {
         try {
-          await createComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, true);
-          await createIndexTemplate({ body: TEMPLATE, name: TEMPLATE_NAME }, true);
+          await addComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, CACHE_TEMPLATES);
+          await addIndexTemplate({ body: TEMPLATE, name: TEMPLATE_NAME }, CACHE_TEMPLATES);
         } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log('[Setup error] Error creating component template');
+          log.debug('[Setup error] Error creating component template');
           throw err;
         }
       });
 
       describe('without datastreams', () => {
         it('should return no datastreams', async () => {
-          const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_NAME}/datastreams`;
-
-          const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(200);
+          const { body } = await getComponentTemplateDatastreams(COMPONENT_NAME).expect(200);
 
           expect(body).to.eql({ data_streams: [] });
         });
@@ -458,12 +460,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('with datastreams', () => {
         before(async () => {
-          await createDatastream(DATASTREAM_NAME);
+          await addDatastream(DATASTREAM_NAME, CACHE_TEMPLATES);
         });
         it('should return datastreams', async () => {
-          const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_NAME}/datastreams`;
-
-          const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(200);
+          const { body } = await getComponentTemplateDatastreams(COMPONENT_NAME).expect(200);
 
           expect(body).to.eql({ data_streams: ['logs-test-component-template-default'] });
         });

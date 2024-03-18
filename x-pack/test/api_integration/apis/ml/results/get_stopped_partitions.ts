@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_logs');
+      await ml.testResources.deleteDataViewByTitle('ft_module_sample_logs');
       await ml.api.cleanMlIndices();
     });
 

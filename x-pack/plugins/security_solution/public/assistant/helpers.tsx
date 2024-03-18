@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { analyzeMarkdown } from '@kbn/elastic-assistant';
 import type { Conversation, CodeBlockDetails } from '@kbn/elastic-assistant';
 import React from 'react';
-
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import type { TimelineEventsDetailsItem } from '../../common/search_strategy';
 import type { Rule } from '../detection_engine/rule_management/logic';
 import { SendToTimelineButton } from './send_to_timeline';
-import { INVESTIGATE_IN_TIMELINE } from '../actions/add_to_timeline/constants';
 
 export const LOCAL_STORAGE_KEY = `securityAssistant`;
 
@@ -21,8 +20,6 @@ export interface QueryField {
   field: string;
   values: string;
 }
-
-export const SECURITY_ASSISTANT_UI_SETTING_KEY = 'securityAssistant';
 
 export const getPromptContextFromDetectionRules = (rules: Rule[]): string => {
   const data = rules.map((rule) => `Rule Name:${rule.name}\nRule Description:${rule.description}`);
@@ -49,27 +46,13 @@ export const getPromptContextFromEventDetailsItem = (data: TimelineEventsDetails
   return getFieldsAsCsv(allFields);
 };
 
-const sendToTimelineEligibleQueryTypes: Array<CodeBlockDetails['type']> = ['kql', 'dsl', 'eql'];
-
-/**
- * Returns message contents with replacements applied.
- *
- * @param message
- * @param replacements
- */
-export const getMessageContentWithReplacements = ({
-  messageContent,
-  replacements,
-}: {
-  messageContent: string;
-  replacements: Record<string, string> | undefined;
-}): string =>
-  replacements != null
-    ? Object.keys(replacements).reduce(
-        (acc, replacement) => acc.replaceAll(replacement, replacements[replacement]),
-        messageContent
-      )
-    : messageContent;
+const sendToTimelineEligibleQueryTypes: Array<CodeBlockDetails['type']> = [
+  'kql',
+  'dsl',
+  'eql',
+  'esql',
+  'sql', // Models often put the code block language as sql, for esql, so adding this as a fallback
+];
 
 /**
  * Augments the messages in a conversation with code block details, including
@@ -79,14 +62,17 @@ export const getMessageContentWithReplacements = ({
  * @param currentConversation
  */
 export const augmentMessageCodeBlocks = (
-  currentConversation: Conversation
+  currentConversation: Conversation,
+  showAnonymizedValues: boolean
 ): CodeBlockDetails[][] => {
   const cbd = currentConversation.messages.map(({ content }) =>
     analyzeMarkdown(
-      getMessageContentWithReplacements({
-        messageContent: content,
-        replacements: currentConversation.replacements,
-      })
+      showAnonymizedValues
+        ? content ?? ''
+        : replaceAnonymizedValuesWithOriginalValues({
+            messageContent: content ?? '',
+            replacements: currentConversation.replacements,
+          })
     )
   );
 
@@ -119,9 +105,7 @@ export const augmentMessageCodeBlocks = (
             ]}
             keepDataView={true}
           >
-            <EuiToolTip position="right" content={INVESTIGATE_IN_TIMELINE}>
-              <EuiIcon type="timeline" />
-            </EuiToolTip>
+            <EuiIcon type="timeline" />
           </SendToTimelineButton>
         ) : null,
       };

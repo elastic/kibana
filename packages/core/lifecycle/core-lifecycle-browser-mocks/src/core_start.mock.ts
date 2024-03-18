@@ -21,6 +21,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 
 export function createCoreStartMock({ basePath = '' } = {}) {
   const mock = {
@@ -40,6 +41,10 @@ export function createCoreStartMock({ basePath = '' } = {}) {
     deprecations: deprecationsServiceMock.createStartContract(),
     theme: themeServiceMock.createStartContract(),
     fatalErrors: fatalErrorsServiceMock.createStartContract(),
+    security: securityServiceMock.createStart(),
+    plugins: {
+      onStart: jest.fn(),
+    },
   };
 
   return mock;

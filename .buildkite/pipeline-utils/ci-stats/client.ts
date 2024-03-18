@@ -201,7 +201,7 @@ export class CiStatsClient {
           headers: this.defaultHeaders,
         });
       } catch (error) {
-        console.error('CI Stats request error:', error);
+        console.error('CI Stats request error:', error?.response?.data?.message);
 
         if (attempt < maxAttempts) {
           const sec = attempt * 3;
@@ -210,7 +210,7 @@ export class CiStatsClient {
           continue;
         }
 
-        throw error;
+        throw new Error('Failed to connect to CI Stats.');
       }
     }
   }

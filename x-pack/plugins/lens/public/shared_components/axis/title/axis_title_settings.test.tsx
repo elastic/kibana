@@ -6,95 +6,80 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { AxisTitleSettings, AxisTitleSettingsProps } from './axis_title_settings';
-import { Label, VisLabel } from '../../vis_label';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
+const renderAxisTicksSettings = (propsOverrides?: Partial<AxisTitleSettingsProps>) => {
+  const rtlRender = render(
+    <AxisTitleSettings
+      axisTitle="My custom X axis title"
+      axis="x"
+      isAxisTitleVisible={true}
+      updateTitleState={jest.fn()}
+      {...propsOverrides}
+    />
+  );
 
   return {
-    ...original,
-    debounce: (fn: unknown) => fn,
+    getAxisTitleSelect: () => screen.getByLabelText('Label'),
+    getAxisTitleInput: () => screen.getByLabelText('Axis title'),
+    ...rtlRender,
   };
-});
+};
 
 describe('Axes Title settings', () => {
-  let props: AxisTitleSettingsProps;
-  beforeEach(() => {
-    props = {
-      axisTitle: 'My custom X axis title',
-      axis: 'x',
-      isAxisTitleVisible: true,
-      updateTitleState: jest.fn(),
-    };
-  });
   it('should show the axes title on the corresponding input text', () => {
-    const component = mount(<AxisTitleSettings {...props} />);
-    expect(component.find('[data-test-subj="lnsxAxisTitle"]').last().prop('value')).toBe(
-      'My custom X axis title'
-    );
+    const { getAxisTitleInput } = renderAxisTicksSettings();
+    expect(getAxisTitleInput()).toHaveValue('My custom X axis title');
   });
 
   it('should set the mode to Auto if no title is passed over', () => {
-    const component = mount(<AxisTitleSettings {...props} axisTitle={undefined} />);
-    expect(component.find('[data-test-subj="lnsxAxisTitle"]').last().prop('value')).toBe('');
+    const { getAxisTitleInput } = renderAxisTicksSettings({ axisTitle: undefined });
+    expect(getAxisTitleInput()).toHaveValue('');
   });
 
   it('should set the mode to Auto if empty title is passed over', () => {
-    const component = mount(<AxisTitleSettings {...props} axisTitle={''} />);
-    expect(component.find('[data-test-subj="lnsxAxisTitle"]').last().prop('value')).toBe('');
+    const { getAxisTitleInput } = renderAxisTicksSettings({ axisTitle: '' });
+    expect(getAxisTitleInput()).toHaveValue('');
   });
 
   it('should set the mode to None if empty title is passed over and the visibility is set to false', () => {
-    const component = mount(
-      <AxisTitleSettings {...props} axisTitle={''} isAxisTitleVisible={false} />
-    );
-    expect(component.find('[data-test-subj="lnsxAxisTitle-select"]').last().prop('value')).toBe(
-      'none'
-    );
+    const { getAxisTitleSelect } = renderAxisTicksSettings({
+      axisTitle: '',
+      isAxisTitleVisible: false,
+    });
+    expect(getAxisTitleSelect()).toHaveValue('none');
   });
 
   it('should disable the input text if the switch is off', () => {
-    const component = mount(<AxisTitleSettings {...props} isAxisTitleVisible={false} />);
-    expect(component.find('[data-test-subj="lnsxAxisTitle"]').last().prop('disabled')).toBe(true);
+    const { getAxisTitleInput } = renderAxisTicksSettings({
+      isAxisTitleVisible: false,
+    });
+    expect(getAxisTitleInput()).toBeDisabled();
   });
 
   it('should allow custom mode on user input even with empty string', () => {
-    let component = mount(<AxisTitleSettings {...props} axisTitle={''} />);
-
-    // switch mode
-    act(() => {
-      component.find(VisLabel).prop('handleChange')!({
-        label: '',
-        mode: 'custom',
-      } as Label);
+    const { getAxisTitleSelect, getAxisTitleInput } = renderAxisTicksSettings({
+      axisTitle: '',
     });
-    component = component.update();
-    expect(component.find('[data-test-subj="lnsxAxisTitle-select"]').last().prop('value')).toBe(
-      'custom'
-    );
-    expect(component.find('[data-test-subj="lnsxAxisTitle"]').last().prop('value')).toBe('');
+    userEvent.selectOptions(getAxisTitleSelect(), 'custom');
+    expect(getAxisTitleSelect()).toHaveValue('custom');
+    expect(getAxisTitleInput()).toHaveValue('');
   });
 
-  it('should reset the label when moving from custom to auto', () => {
-    let component = mount(
-      <AxisTitleSettings {...props} isAxisTitleVisible={true} axisTitle={'Custom title'} />
-    );
-
-    // switch mode
-    // Perform the change down one level to check the actual value swap
-    act(() => {
-      component.find(VisLabel).find('EuiSelect').prop('onChange')!({
-        target: { value: 'auto' },
-      } as React.ChangeEvent<HTMLSelectElement>);
+  it('should reset the label when moving from custom to auto', async () => {
+    const updateTitleStateSpy = jest.fn();
+    const { getAxisTitleSelect, getAxisTitleInput } = renderAxisTicksSettings({
+      isAxisTitleVisible: true,
+      axisTitle: 'Custom title',
+      updateTitleState: updateTitleStateSpy,
     });
-    component = component.update();
-    expect(component.find('[data-test-subj="lnsxAxisTitle-select"]').last().prop('value')).toBe(
-      'auto'
+    userEvent.selectOptions(getAxisTitleSelect(), 'auto');
+    expect(getAxisTitleSelect()).toHaveValue('auto');
+    expect(getAxisTitleInput()).toHaveValue('');
+    await waitFor(() =>
+      expect(updateTitleStateSpy).toHaveBeenCalledWith({ title: undefined, visible: true }, 'x')
     );
-    expect(component.find('[data-test-subj="lnsxAxisTitle"]').last().prop('value')).toBe('');
-    expect(props.updateTitleState).toHaveBeenCalledWith({ title: undefined, visible: true }, 'x');
   });
 });

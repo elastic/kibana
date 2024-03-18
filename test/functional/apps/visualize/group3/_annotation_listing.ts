@@ -50,8 +50,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('by text', () => {
         it('matches on the first word', async function () {
-          await listingTable.searchForItemWithName('search');
-          await listingTable.expectItemsCount('eventAnnotation', 1);
+          await retry.try(async () => {
+            await listingTable.searchForItemWithName('search');
+            await listingTable.expectItemsCount('eventAnnotation', 1);
+          });
         });
 
         it('matches the second word', async function () {
@@ -154,11 +156,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           await PageObjects.annotationEditor.saveGroup();
-          await listingTable.clearSearchFilter();
         });
       });
 
       describe('data view switching', () => {
+        before(async () => {
+          await listingTable.clearSearchFilter();
+        });
+
         it('recovers from missing data view', async () => {
           await listingTable.clickItemLink('eventAnnotation', 'missing data view');
 

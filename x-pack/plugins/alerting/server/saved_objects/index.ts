@@ -23,51 +23,67 @@ import { RawRule } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import { RuleTypeRegistry } from '../rule_type_registry';
-export { partiallyUpdateAlert } from './partially_update_alert';
+export { partiallyUpdateRule } from './partially_update_rule';
+export { getLatestRuleVersion, getMinimumCompatibleVersion } from './rule_model_versions';
 import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../../common';
+import { ruleModelVersions } from './rule_model_versions';
 
-// Use caution when removing items from this array! Any field which has
-// ever existed in the rule SO must be included in this array to prevent
-// decryption failures during migration.
-export const AlertAttributesExcludedFromAAD = [
-  'scheduledTaskId',
-  'muteAll',
-  'mutedInstanceIds',
-  'updatedBy',
-  'updatedAt',
-  'executionStatus',
-  'monitoring',
-  'snoozeEndTime', // field removed in 8.2, but must be retained in case an rule created/updated in 8.2 is being migrated
-  'snoozeSchedule',
-  'isSnoozedUntil',
-  'lastRun',
-  'nextRun',
-  'revision',
-  'running',
+export const RULE_SAVED_OBJECT_TYPE = 'alert';
+
+export const RuleAttributesToEncrypt = ['apiKey'];
+
+// Use caution when removing items from this array! These fields
+// are used to construct decryption AAD and must be remain in
+// this array to prevent decryption failures during migration.
+// NOTE: Always update the RuleAttributesNotPartiallyUpdatable
+// type if this const changes!
+export const RuleAttributesIncludedInAAD = [
+  'enabled',
+  'name',
+  'tags',
+  'alertTypeId',
+  'consumer',
+  'legacyId',
+  'schedule',
+  'actions',
+  'params',
+  'mapped_params',
+  'createdBy',
+  'createdAt',
+  'apiKeyOwner',
+  'apiKeyCreatedByUser',
+  'throttle',
+  'notifyWhen',
+  'meta',
+  'alertDelay',
 ];
 
-// useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
-// type which is a subset of RawAlert with just attributes excluded from AAD
-
-// useful for Pick<RawAlert, AlertAttributesExcludedFromAADType>
-export type AlertAttributesExcludedFromAADType =
-  | 'scheduledTaskId'
-  | 'muteAll'
-  | 'mutedInstanceIds'
-  | 'updatedBy'
-  | 'updatedAt'
-  | 'executionStatus'
-  | 'monitoring'
-  | 'snoozeEndTime'
-  | 'snoozeSchedule'
-  | 'isSnoozedUntil'
-  | 'lastRun'
-  | 'nextRun'
-  | 'revision'
-  | 'running';
+// useful type for Omit<RuleAttributes, [...RuleAttributesToEncrypt, ...RuleAttributesIncludedInAAD]>
+// which will produce a subset of RuleAttributes with just attributes that are safe to partually
+// update from AAD
+export type RuleAttributesNotPartiallyUpdatable =
+  | 'apiKey'
+  | 'enabled'
+  | 'name'
+  | 'tags'
+  | 'alertTypeId'
+  | 'consumer'
+  | 'legacyId'
+  | 'schedule'
+  | 'actions'
+  | 'params'
+  | 'mapped_params'
+  | 'createdBy'
+  | 'createdAt'
+  | 'apiKeyOwner'
+  | 'apiKeyCreatedByUser'
+  | 'throttle'
+  | 'notifyWhen'
+  | 'meta'
+  | 'alertDelay';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -78,7 +94,7 @@ export function setupSavedObjects(
   getSearchSourceMigrations: () => MigrateFunctionsObject
 ) {
   savedObjects.registerType({
-    name: 'alert',
+    name: RULE_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
@@ -106,6 +122,7 @@ export function setupSavedObjects(
         return isRuleExportable(ruleSavedObject, ruleTypeRegistry, logger);
       },
     },
+    modelVersions: ruleModelVersions,
   });
 
   savedObjects.registerType({
@@ -143,14 +160,15 @@ export function setupSavedObjects(
 
   // Encrypted attributes
   encryptedSavedObjects.registerType({
-    type: 'alert',
-    attributesToEncrypt: new Set(['apiKey']),
-    attributesToExcludeFromAAD: new Set(AlertAttributesExcludedFromAAD),
+    type: RULE_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(RuleAttributesToEncrypt),
+    attributesToIncludeInAAD: new Set(RuleAttributesIncludedInAAD),
   });
 
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: 'api_key_pending_invalidation',
     attributesToEncrypt: new Set(['apiKeyId']),
+    attributesToIncludeInAAD: new Set(['createdAt']),
   });
 }

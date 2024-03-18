@@ -10,4 +10,5 @@ schema:
     type: string
     minItems: 1
     maxItems: 100
-example: d4e7abb0-b462-11ec-9a8d-698504725a43
+  examples:
+    - [ d4e7abb0-b462-11ec-9a8d-698504725a43 ]

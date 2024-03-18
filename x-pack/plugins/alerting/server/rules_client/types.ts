@@ -11,6 +11,7 @@ import {
   SavedObjectsClientContract,
   PluginInitializerContext,
   ISavedObjectsRepository,
+  UiSettingsServiceStart,
 } from '@kbn/core/server';
 import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import {
@@ -78,6 +79,7 @@ export interface RulesClientContext {
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
   readonly getAlertIndicesAlias: GetAlertIndicesAlias;
   readonly alertsService: AlertsService | null;
+  readonly uiSettings: UiSettingsServiceStart;
 }
 
 export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;

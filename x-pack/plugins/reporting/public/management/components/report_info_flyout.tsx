@@ -5,48 +5,48 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
+
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiFlyoutFooter,
-  EuiPortal,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
   EuiButton,
-  EuiTitle,
-  EuiLoadingSpinner,
-  EuiPopover,
+  EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiLoadingSpinner,
+  EuiPopover,
+  EuiPortal,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ClientConfigType, Job, useInternalApiClient } from '@kbn/reporting-public';
 
-import { Job } from '../../lib/job';
-import { useInternalApiClient } from '../../lib/reporting_api_client';
-
+import { InspectInConsoleButton } from './inspect_in_console_button/inspect_in_console_button';
 import { ReportInfoFlyoutContent } from './report_info_flyout_content';
 
 interface Props {
+  config: ClientConfigType;
   onClose: () => void;
   job: Job;
 }
 
-export const ReportInfoFlyout: FunctionComponent<Props> = ({ onClose, job }) => {
+export const ReportInfoFlyout: FunctionComponent<Props> = ({ config, onClose, job }) => {
+  const isMounted = useMountedState();
+  const { apiClient } = useInternalApiClient();
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadingError, setLoadingError] = useState<undefined | Error>();
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState<boolean>(false);
   const [info, setInfo] = useState<undefined | Job>();
-  const isMounted = useMountedState();
-  const { apiClient } = useInternalApiClient();
-
-  const closePopover = () => setIsActionsPopoverOpen(false);
 
   useEffect(() => {
-    (async function loadInfo() {
+    async function loadInfo() {
       if (isLoading) {
         try {
           const infoResponse = await apiClient.getInfo(job.id);
@@ -63,7 +63,8 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ onClose, job }) => 
           }
         }
       }
-    })();
+    }
+    loadInfo();
   }, [isLoading, apiClient, job.id, isMounted]);
 
   const actionsButton = (
@@ -92,6 +93,7 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ onClose, job }) => 
         defaultMessage: 'Download',
       })}
     </EuiContextMenuItem>,
+    <InspectInConsoleButton job={job} config={config} />,
     <EuiContextMenuItem
       data-test-subj="reportInfoFlyoutOpenInKibanaButton"
       disabled={!job.canLinkToKibanaApp}
@@ -106,7 +108,9 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ onClose, job }) => 
         defaultMessage: 'Open in Kibana',
       })}
     </EuiContextMenuItem>,
-  ];
+  ].filter(Boolean);
+
+  const closePopover = () => setIsActionsPopoverOpen(false);
 
   return (
     <EuiPortal>

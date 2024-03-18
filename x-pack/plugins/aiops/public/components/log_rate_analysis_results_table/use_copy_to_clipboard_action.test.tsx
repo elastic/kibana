@@ -10,9 +10,9 @@ import userEvent from '@testing-library/user-event';
 import { render, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
 
-import { finalSignificantTermGroups } from '../../../common/__mocks__/artificial_logs/final_significant_term_groups';
+import { finalSignificantItemGroups } from '../../../common/__mocks__/artificial_logs/final_significant_item_groups';
 import { significantTerms } from '../../../common/__mocks__/artificial_logs/significant_terms';
 
 import { getGroupTableItems } from './get_group_table_items';
@@ -20,14 +20,14 @@ import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';
 import type { GroupTableItem } from './types';
 
 interface Action {
-  render: (tableItem: SignificantTerm | GroupTableItem) => ReactElement;
+  render: (tableItem: SignificantItem | GroupTableItem) => ReactElement;
 }
 
 const execCommandMock = (global.document.execCommand = jest.fn());
 const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
 describe('useCopyToClipboardAction', () => {
-  it('renders the action for a single significant term', async () => {
+  it('renders the action for a single significant item', async () => {
     execCommandMock.mockImplementationOnce(() => true);
     const { result } = renderHook(() => useCopyToClipboardAction());
     const { findByText, getByTestId } = render(
@@ -57,7 +57,7 @@ describe('useCopyToClipboardAction', () => {
 
   it('renders the action for a group of items', async () => {
     execCommandMock.mockImplementationOnce(() => true);
-    const groupTableItems = getGroupTableItems(finalSignificantTermGroups);
+    const groupTableItems = getGroupTableItems(finalSignificantItemGroups);
     const { result } = renderHook(useCopyToClipboardAction);
     const { findByText, getByText } = render((result.current as Action).render(groupTableItems[0]));
 

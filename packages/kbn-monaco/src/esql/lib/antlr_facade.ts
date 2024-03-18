@@ -6,19 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { CommonTokenStream, CodePointCharStream } from 'antlr4ts';
+import { CommonTokenStream, type CharStream, type ErrorListener } from 'antlr4';
 
-import { esql_lexer as ESQLLexer } from '../antlr/esql_lexer';
-import { esql_parser as ESQLParser } from '../antlr/esql_parser';
-import type { esql_parserListener as ESQLParserListener } from '../antlr/esql_parser_listener';
-
-import type { ANTLREErrorListener } from '../../common/error_listener';
+import { default as ESQLLexer } from '../antlr/esql_lexer';
+import { default as ESQLParser } from '../antlr/esql_parser';
+import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 
 export const ROOT_STATEMENT = 'singleStatement';
 
 export const getParser = (
-  inputStream: CodePointCharStream,
-  errorListener: ANTLREErrorListener,
+  inputStream: CharStream,
+  errorListener: ErrorListener<any>,
   parseListener?: ESQLParserListener
 ) => {
   const lexer = getLexer(inputStream, errorListener);
@@ -29,13 +27,15 @@ export const getParser = (
   parser.addErrorListener(errorListener);
 
   if (parseListener) {
+    // @ts-expect-error the addParseListener API does exist and is documented here
+    // https://github.com/antlr/antlr4/blob/dev/doc/listeners.md
     parser.addParseListener(parseListener);
   }
 
   return parser;
 };
 
-export const getLexer = (inputStream: CodePointCharStream, errorListener: ANTLREErrorListener) => {
+export const getLexer = (inputStream: CharStream, errorListener: ErrorListener<any>) => {
   const lexer = new ESQLLexer(inputStream);
 
   lexer.removeErrorListeners();

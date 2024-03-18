@@ -12,13 +12,15 @@ import type { LensPublicStart, LensSavedObjectAttributes } from '@kbn/lens-plugi
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { QuickLensJobCreator } from './quick_create_job';
 import type { MlApiServices } from '../../../services/ml_api_service';
 
-import { getDefaultQuery } from '../utils/new_job_utils';
+import { getDefaultQuery, getRisonValue } from '../utils/new_job_utils';
 
 interface Dependencies {
   lens: LensPublicStart;
+  dataViews: DataViewsContract;
   kibanaConfig: IUiSettingsClient;
   timeFilter: TimefilterContract;
   dashboardService: DashboardStart;
@@ -27,13 +29,13 @@ interface Dependencies {
 export async function resolver(
   deps: Dependencies,
   lensSavedObjectRisonString: string | undefined,
-  fromRisonStrong: string,
-  toRisonStrong: string,
+  fromRisonString: string,
+  toRisonString: string,
   queryRisonString: string,
   filtersRisonString: string,
   layerIndexRisonString: string
 ) {
-  const { lens, mlApiServices, timeFilter, kibanaConfig, dashboardService } = deps;
+  const { dataViews, lens, mlApiServices, timeFilter, kibanaConfig, dashboardService } = deps;
   if (lensSavedObjectRisonString === undefined) {
     throw new Error('Cannot create visualization');
   }
@@ -43,40 +45,15 @@ export async function resolver(
     throw new Error('Cannot create visualization');
   }
 
-  let query: Query;
-  let filters: Filter[];
-  try {
-    query = rison.decode(queryRisonString) as Query;
-  } catch (error) {
-    query = getDefaultQuery();
-  }
-  try {
-    filters = rison.decode(filtersRisonString) as Filter[];
-  } catch (error) {
-    filters = [];
-  }
-
-  let from: string;
-  let to: string;
-  try {
-    from = rison.decode(fromRisonStrong) as string;
-  } catch (error) {
-    from = '';
-  }
-  try {
-    to = rison.decode(toRisonStrong) as string;
-  } catch (error) {
-    to = '';
-  }
-  let layerIndex: number | undefined;
-  try {
-    layerIndex = rison.decode(layerIndexRisonString) as number;
-  } catch (error) {
-    layerIndex = undefined;
-  }
+  const query = getRisonValue<Query>(queryRisonString, getDefaultQuery()) as Query;
+  const filters = getRisonValue<Filter[]>(filtersRisonString, []);
+  const from = getRisonValue<string>(fromRisonString, '');
+  const to = getRisonValue<string>(toRisonString, '');
+  const layerIndex = getRisonValue<number | undefined>(layerIndexRisonString, undefined);
 
   const jobCreator = new QuickLensJobCreator(
     lens,
+    dataViews,
     kibanaConfig,
     timeFilter,
     dashboardService,

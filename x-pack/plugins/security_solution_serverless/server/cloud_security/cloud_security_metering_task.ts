@@ -205,28 +205,29 @@ const indexHasDataInDateRange = async (
   cloudSecuritySolution: CloudSecuritySolutions,
   searchFrom: Date
 ) => {
-  const response = await esClient.search({
-    index: METERING_CONFIGS[cloudSecuritySolution].index,
-    size: 1,
-    _source: false,
-    query: getSearchQueryByCloudSecuritySolution(cloudSecuritySolution, searchFrom),
-  });
+  const response = await esClient.search(
+    {
+      index: METERING_CONFIGS[cloudSecuritySolution].index,
+      size: 1,
+      _source: false,
+      query: getSearchQueryByCloudSecuritySolution(cloudSecuritySolution, searchFrom),
+    },
+    { ignore: [404] }
+  );
 
-  return response.hits.hits.length > 0;
+  return response.hits?.hits.length > 0;
 };
 
 const getSearchStartDate = (lastSuccessfulReport: Date): Date => {
   const initialDate = new Date();
   const thresholdDate = new Date(initialDate.getTime() - THRESHOLD_MINUTES * 60 * 1000);
 
-  let lastSuccessfulReport1;
-
   if (lastSuccessfulReport) {
-    lastSuccessfulReport1 = new Date(lastSuccessfulReport);
+    const lastSuccessfulReportDate = new Date(lastSuccessfulReport);
 
     const searchFrom =
-      lastSuccessfulReport && lastSuccessfulReport1 > thresholdDate
-        ? lastSuccessfulReport1
+      lastSuccessfulReport && lastSuccessfulReportDate > thresholdDate
+        ? lastSuccessfulReportDate
         : thresholdDate;
     return searchFrom;
   }

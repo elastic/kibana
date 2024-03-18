@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { TabsParams } from '../../page_objects/infra_logs_page';
 
 export function LogStreamPageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['infraLogs']);
   const retry = getService('retry');
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
 
   return {
@@ -41,6 +42,31 @@ export function LogStreamPageProvider({ getPageObjects, getService }: FtrProvide
       entryElement: WebElementWrapper
     ): Promise<WebElementWrapper[]> {
       return await testSubjects.findAllDescendant('~logColumn', entryElement);
+    },
+
+    async getLogEntryColumnValueByName(
+      entryElement: WebElementWrapper,
+      column: string
+    ): Promise<string> {
+      const columnElement = await testSubjects.findDescendant(`~${column}`, entryElement);
+
+      const contentElement = await columnElement.findByCssSelector(
+        `[data-test-subj='LogEntryColumnContent']`
+      );
+
+      return await contentElement.getVisibleText();
+    },
+
+    async openLogEntryDetailsFlyout(entryElement: WebElementWrapper) {
+      await entryElement.click();
+
+      const menuButton = await testSubjects.findDescendant(
+        `~infraLogEntryContextMenuButton`,
+        entryElement
+      );
+      await menuButton.click();
+
+      await find.clickByButtonText('View details');
     },
 
     async getNoLogsIndicesPrompt() {

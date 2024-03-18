@@ -17,12 +17,9 @@ import type { LocationDescriptor, History } from 'history';
 
 import { WithServices } from './__jest__';
 import { getTagList } from './mocks';
-import {
-  TableListViewTable,
-  type TableListViewTableProps,
-  type UserContentCommonSchema,
-} from './table_list_view_table';
+import { TableListViewTable, type TableListViewTableProps } from './table_list_view_table';
 import { getActions } from './table_list_view.test.helpers';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 const mockUseEffect = useEffect;
 
@@ -682,10 +679,38 @@ describe('TableListView', () => {
     const setupTagFiltering = registerTestBed<string, TableListViewTableProps>(
       WithServices<TableListViewTableProps>(TableListViewTable, {
         getTagList: () => [
-          { id: 'id-tag-1', name: 'tag-1', type: 'tag', description: '', color: '' },
-          { id: 'id-tag-2', name: 'tag-2', type: 'tag', description: '', color: '' },
-          { id: 'id-tag-3', name: 'tag-3', type: 'tag', description: '', color: '' },
-          { id: 'id-tag-4', name: 'tag-4', type: 'tag', description: '', color: '' },
+          {
+            id: 'id-tag-1',
+            name: 'tag-1',
+            type: 'tag',
+            description: '',
+            color: '',
+            managed: false,
+          },
+          {
+            id: 'id-tag-2',
+            name: 'tag-2',
+            type: 'tag',
+            description: '',
+            color: '',
+            managed: false,
+          },
+          {
+            id: 'id-tag-3',
+            name: 'tag-3',
+            type: 'tag',
+            description: '',
+            color: '',
+            managed: false,
+          },
+          {
+            id: 'id-tag-4',
+            name: 'tag-4',
+            type: 'tag',
+            description: '',
+            color: '',
+            managed: false,
+          },
         ],
       }),
       {
@@ -832,7 +857,14 @@ describe('TableListView', () => {
     const setupInitialFilter = registerTestBed<string, TableListViewTableProps>(
       WithServices<TableListViewTableProps>(TableListViewTable, {
         getTagList: () => [
-          { id: 'id-tag-foo', name: 'foo', type: 'tag', description: '', color: '' },
+          {
+            id: 'id-tag-foo',
+            name: 'foo',
+            type: 'tag',
+            description: '',
+            color: '',
+            managed: false,
+          },
         ],
       }),
       {
@@ -1057,8 +1089,22 @@ describe('TableListView', () => {
     const setupTagFiltering = registerTestBed<string, TableListViewTableProps>(
       WithServices<TableListViewTableProps>(TableListViewTable, {
         getTagList: () => [
-          { id: 'id-tag-1', name: 'tag-1', type: 'tag', description: '', color: '' },
-          { id: 'id-tag-2', name: 'tag-2', type: 'tag', description: '', color: '' },
+          {
+            id: 'id-tag-1',
+            name: 'tag-1',
+            type: 'tag',
+            description: '',
+            color: '',
+            managed: false,
+          },
+          {
+            id: 'id-tag-2',
+            name: 'tag-2',
+            type: 'tag',
+            description: '',
+            color: '',
+            managed: false,
+          },
         ],
       }),
       {

@@ -12,7 +12,7 @@ import type {
 
 import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-
+import { SloBurnRateRuleParams } from './slo_api';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function AlertingApiProvider({ getService }: FtrProviderContext) {
@@ -21,6 +21,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
   const requestTimeout = 30 * 1000;
   const retryTimeout = 120 * 1000;
+  const logger = getService('log');
 
   return {
     async waitForRuleStatus({
@@ -50,12 +51,18 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
 
     async waitForDocumentInIndex<T>({
       indexName,
+      docCountTarget = 1,
     }: {
       indexName: string;
+      docCountTarget?: number;
     }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
       return await retry.tryForTime(retryTimeout, async () => {
-        const response = await es.search<T>({ index: indexName });
-        if (response.hits.hits.length === 0) {
+        const response = await es.search<T>({
+          index: indexName,
+          rest_total_hits_as_int: true,
+        });
+        logger.debug(`Found ${response.hits.total} docs, looking for atleast ${docCountTarget}.`);
+        if (!response.hits.total || response.hits.total < docCountTarget) {
           throw new Error('No hits found');
         }
         return response;
@@ -117,7 +124,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
     }: {
       ruleTypeId: string;
       name: string;
-      params: MetricThresholdParams | ThresholdParams;
+      params: MetricThresholdParams | ThresholdParams | SloBurnRateRuleParams;
       actions?: any[];
       tags?: any[];
       schedule?: { interval: string };
@@ -139,6 +146,17 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
           actions,
         });
       return body;
+    },
+
+    async findRule(ruleId: string) {
+      if (!ruleId) {
+        throw new Error(`'ruleId' is undefined`);
+      }
+      const response = await supertest
+        .get('/api/alerting/rules/_find')
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo');
+      return response.body.data.find((obj: any) => obj.id === ruleId);
     },
   };
 }

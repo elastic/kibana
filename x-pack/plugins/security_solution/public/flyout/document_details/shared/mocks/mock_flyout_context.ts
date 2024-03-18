@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
-import type { State } from '@kbn/expandable-flyout/src/reducer';
+import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 /**
- * Mock flyout context
+ * Mock flyout api
  */
-export const mockFlyoutContextValue: ExpandableFlyoutContext = {
-  panels: {} as State,
+export const mockFlyoutApi: ExpandableFlyoutApi = {
   openFlyout: jest.fn(),
   openRightPanel: jest.fn(),
   openLeftPanel: jest.fn(),

@@ -33,6 +33,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
 
+  const hasFocus = async (testSubject: string) => {
+    const targetElement = await testSubjects.find(testSubject);
+    const activeElement = await find.activeElement();
+    return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
+  };
+
   describe('View case', () => {
     describe('page', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
@@ -40,7 +46,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('should show the case view page correctly', async () => {
         await testSubjects.existOrFail('case-view-title');
         await testSubjects.existOrFail('header-page-supplements');
+        await testSubjects.existOrFail('case-action-bar-wrapper');
 
+        await testSubjects.existOrFail('case-view-tabs');
+        await testSubjects.existOrFail('case-view-tab-title-alerts');
         await testSubjects.existOrFail('case-view-tab-title-activity');
         await testSubjects.existOrFail('case-view-tab-title-files');
         await testSubjects.existOrFail('description');
@@ -122,6 +131,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await desc.getVisibleText()).equal('Description with space');
       });
 
+      it('comment area does not have focus on page load', async () => {
+        browser.refresh();
+        expect(await hasFocus('euiMarkdownEditorTextArea')).to.be(false);
+      });
+
       it('adds a comment to a case', async () => {
         const commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
@@ -135,7 +149,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const newComment = await find.byCssSelector(
           '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
+
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
+      });
+
+      it('quotes a comment on a case', async () => {
+        const commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        await testSubjects.click('property-actions-user-action-ellipses');
+        await testSubjects.click('property-actions-user-action-quote');
+
+        expect(await commentArea.getVisibleText()).equal('> Test comment from automation ');
+        expect(await hasFocus('euiMarkdownEditorTextArea')).to.be(true);
       });
 
       it('adds a category to a case', async () => {
@@ -989,13 +1016,27 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('Tabs', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
+      it('renders tabs correctly', async () => {
+        await testSubjects.existOrFail('case-view-tab-title-activity');
+        await testSubjects.existOrFail('case-view-tab-title-files');
+        await testSubjects.existOrFail('case-view-tab-title-alerts');
+      });
+
       it('shows the "activity" tab by default', async () => {
         await testSubjects.existOrFail('case-view-tab-title-activity');
         await testSubjects.existOrFail('case-view-tab-content-activity');
       });
 
-      // there are no alerts in stack management yet
-      it.skip("shows the 'alerts' tab when clicked", async () => {
+      it("shows the 'activity' tab when clicked", async () => {
+        // Go to the files tab first
+        await testSubjects.click('case-view-tab-title-files');
+        await testSubjects.existOrFail('case-view-tab-content-files');
+
+        await testSubjects.click('case-view-tab-title-activity');
+        await testSubjects.existOrFail('case-view-tab-content-activity');
+      });
+
+      it("shows the 'alerts' tab when clicked", async () => {
         await testSubjects.click('case-view-tab-title-alerts');
         await testSubjects.existOrFail('case-view-tab-content-alerts');
       });
@@ -1003,6 +1044,36 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it("shows the 'files' tab when clicked", async () => {
         await testSubjects.click('case-view-tab-title-files');
         await testSubjects.existOrFail('case-view-tab-content-files');
+      });
+
+      describe('Query params', () => {
+        it('renders the activity tab when the query parameter tabId=activity', async () => {
+          const theCase = await createAndNavigateToCase(getPageObject, getService);
+
+          await cases.navigation.navigateToSingleCase('cases', theCase.id, 'activity');
+          await testSubjects.existOrFail('case-view-tab-title-activity');
+        });
+
+        it('renders the activity tab when the query parameter tabId=alerts', async () => {
+          const theCase = await createAndNavigateToCase(getPageObject, getService);
+
+          await cases.navigation.navigateToSingleCase('cases', theCase.id, 'alerts');
+          await testSubjects.existOrFail('case-view-tab-title-activity');
+        });
+
+        it('renders the activity tab when the query parameter tabId=files', async () => {
+          const theCase = await createAndNavigateToCase(getPageObject, getService);
+
+          await cases.navigation.navigateToSingleCase('cases', theCase.id, 'files');
+          await testSubjects.existOrFail('case-view-tab-content-files');
+        });
+
+        it('renders the activity tab when the query parameter tabId has an unknown value', async () => {
+          const theCase = await createAndNavigateToCase(getPageObject, getService);
+
+          await cases.navigation.navigateToSingleCase('cases', theCase.id, 'fake');
+          await testSubjects.existOrFail('case-view-tab-title-activity');
+        });
       });
     });
 
@@ -1159,13 +1230,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         {
           key: 'valid_key_1',
           label: 'Summary',
-          type: CustomFieldTypes.TEXT,
+          type: CustomFieldTypes.TEXT as const,
+          defaultValue: 'foobar',
           required: true,
         },
         {
           key: 'valid_key_2',
           label: 'Sync',
-          type: CustomFieldTypes.TOGGLE,
+          type: CustomFieldTypes.TOGGLE as const,
+          defaultValue: false,
           required: true,
         },
       ];
@@ -1197,13 +1270,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('updates a custom field correctly', async () => {
-        const summary = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
-        expect(await summary.getVisibleText()).equal('this is a text field value');
+        const textField = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
+        expect(await textField.getVisibleText()).equal('this is a text field value');
 
-        const sync = await testSubjects.find(
+        const toggle = await testSubjects.find(
           `case-toggle-custom-field-form-field-${customFields[1].key}`
         );
-        expect(await sync.getAttribute('aria-checked')).equal('true');
+        expect(await toggle.getAttribute('aria-checked')).equal('true');
 
         await testSubjects.click(`case-text-custom-field-edit-button-${customFields[0].key}`);
 
@@ -1221,19 +1294,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click(`case-text-custom-field-submit-button-${customFields[0].key}`);
 
-        await retry.waitFor('update toast exist', async () => {
-          return await testSubjects.exists('toastCloseButton');
-        });
+        await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.click('toastCloseButton');
+        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
 
-        await sync.click();
+        await toggle.click();
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(await summary.getVisibleText()).equal('this is a text field value edited!!');
-
-        expect(await sync.getAttribute('aria-checked')).equal('false');
+        expect(await toggle.getAttribute('aria-checked')).equal('false');
 
         // validate user action
         const userActions = await find.allByCssSelector(

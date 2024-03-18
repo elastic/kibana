@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
 import { KibanaUtilsPublicPlugin } from './plugin';
 
 export type { Get, Set } from '../common';
@@ -112,8 +111,8 @@ export {
 } from './history';
 export { applyDiff } from './state_management/utils/diff_object';
 
-export type { KibanaUtilsSetup } from './plugin';
+export type { KibanaUtilsPublicSetup as KibanaUtilsSetup, KibanaUtilsPublicStart } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new KibanaUtilsPublicPlugin(initializerContext);
+export function plugin() {
+  return new KibanaUtilsPublicPlugin();
 }

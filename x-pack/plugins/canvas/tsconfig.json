@@ -84,6 +84,10 @@
     "@kbn/content-management-plugin",
     "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/reporting-server",
+    "@kbn/reporting-export-types-pdf-common",
+    "@kbn/code-editor",
+    "@kbn/shared-ux-markdown",
   ],
   "exclude": [
     "target/**/*",

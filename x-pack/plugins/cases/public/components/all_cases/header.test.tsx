@@ -46,9 +46,9 @@ describe('CasesTableHeader', () => {
     expect(result.getByTestId('configure-case-button')).toBeInTheDocument();
   });
 
-  it('does not display the configure button when the user does not have update privileges', () => {
+  it('does not display the configure button when the user does not have settings privileges', () => {
     appMockRender = createAppMockRenderer({
-      permissions: buildCasesPermissions({ update: false }),
+      permissions: buildCasesPermissions({ settings: false }),
     });
     const result = appMockRender.render(<CasesTableHeader actionsErrors={[]} />);
 

@@ -39,7 +39,7 @@ export class SavedObjectsManagementColumnService {
   }
 
   start(spacesApi?: SpacesApi): SavedObjectsManagementColumnServiceStart {
-    if (spacesApi) {
+    if (spacesApi && !spacesApi.hasOnlyDefaultSpace) {
       registerSpacesApiColumns(this, spacesApi);
     }
     return {

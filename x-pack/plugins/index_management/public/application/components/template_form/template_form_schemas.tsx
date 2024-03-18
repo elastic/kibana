@@ -20,6 +20,7 @@ import {
 } from '../../../shared_imports';
 
 import {
+  allowAutoCreateRadioIds,
   INVALID_INDEX_PATTERN_CHARS,
   INVALID_TEMPLATE_NAME_CHARS,
 } from '../../../../common/constants';
@@ -157,6 +158,92 @@ export const schemas: Record<string, FormSchema> = {
         defaultMessage: 'Version (optional)',
       }),
       formatters: [toInt],
+    },
+
+    'lifecycle.enabled': {
+      type: FIELD_TYPES.TOGGLE,
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.enableDataRetentionLabel', {
+        defaultMessage: 'Enable data retention',
+      }),
+      defaultValue: false,
+    },
+    'lifecycle.infiniteDataRetention': {
+      type: FIELD_TYPES.TOGGLE,
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.infiniteDataRetentionLabel', {
+        defaultMessage: 'Keep data indefinitely',
+      }),
+      defaultValue: false,
+    },
+    'lifecycle.value': {
+      type: FIELD_TYPES.TEXT,
+      label: i18n.translate(
+        'xpack.idxMgmt.templateForm.stepLogistics.fieldDataRetentionValueLabel',
+        {
+          defaultMessage: 'Data Retention',
+        }
+      ),
+      formatters: [toInt],
+      validations: [
+        {
+          validator: ({ value, formData }) => {
+            // If infiniteRetentionPeriod is set, we dont need to validate the data retention field
+            if (formData['lifecycle.infiniteDataRetention']) {
+              return undefined;
+            }
+
+            if (!value) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.templateForm.stepLogistics.dataRetentionFieldRequiredError',
+                  {
+                    defaultMessage: 'A data retention value is required.',
+                  }
+                ),
+              };
+            }
+
+            if (value <= 0) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.templateForm.stepLogistics.dataRetentionFieldNonNegativeError',
+                  {
+                    defaultMessage: `A positive value is required.`,
+                  }
+                ),
+              };
+            }
+
+            if (value % 1 !== 0) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.templateForm.stepLogistics.dataRetentionFieldDecimalError',
+                  {
+                    defaultMessage: `The value should be an integer number.`,
+                  }
+                ),
+              };
+            }
+          },
+        },
+      ],
+    },
+    'lifecycle.unit': {
+      type: FIELD_TYPES.TEXT,
+      label: i18n.translate(
+        'xpack.idxMgmt.templateForm.stepLogistics.fieldDataRetentionUnitLabel',
+        {
+          defaultMessage: 'Time unit',
+        }
+      ),
+      defaultValue: 'd',
+    },
+
+    allowAutoCreate: {
+      type: FIELD_TYPES.RADIO_GROUP,
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldAllowAutoCreateLabel', {
+        defaultMessage: 'Allow auto create',
+      }),
+      defaultValue: allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION,
     },
     _meta: {
       label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorLabel', {

@@ -8,7 +8,7 @@ exports[`<Toolbar /> is rendered 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <button
-      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-EuiButton"
       type="button"
     >
       <span
@@ -19,6 +19,10 @@ exports[`<Toolbar /> is rendered 1`] = `
         >
           Create chart
         </span>
+        <span
+          color="inherit"
+          data-euiicon-type="arrowDown"
+        />
       </span>
     </button>
   </div>

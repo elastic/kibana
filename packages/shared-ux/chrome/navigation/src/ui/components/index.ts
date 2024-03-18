@@ -6,5 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { Navigation } from './navigation';
+export { RecentlyAccessed } from './recently_accessed';
+
+export { NavigationPanel, PanelProvider } from './panel';
+
 export type { Props as RecentlyAccessedProps } from './recently_accessed';
+
+export type {
+  PanelContent,
+  PanelComponentProps,
+  ContentProvider as PanelContentProvider,
+} from './panel';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 
 import { EuiCallOut, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
 
@@ -37,7 +38,7 @@ export const JobConfigErrorCallout: FC<Props> = ({
       application: { getUrlForApp },
     },
   } = useMlKibana();
-  const containsIndexPatternLink =
+  const containsDataViewLink =
     typeof jobCapsServiceErrorMessage === 'string' &&
     jobCapsServiceErrorMessage.includes('locate that index-pattern') &&
     jobCapsServiceErrorMessage.includes('click here to re-create');
@@ -45,7 +46,7 @@ export const JobConfigErrorCallout: FC<Props> = ({
   const message = (
     <p>{jobConfigErrorMessage ? jobConfigErrorMessage : jobCapsServiceErrorMessage}</p>
   );
-  const newIndexPatternUrl = useMemo(
+  const newDataViewUrl = useMemo(
     () =>
       getUrlForApp('management', {
         path: 'kibana/indexPatterns',
@@ -54,8 +55,8 @@ export const JobConfigErrorCallout: FC<Props> = ({
     []
   );
 
-  const calloutBody = containsIndexPatternLink ? (
-    <EuiLink href={newIndexPatternUrl} target="_blank">
+  const calloutBody = containsDataViewLink ? (
+    <EuiLink href={newDataViewUrl} target="_blank">
       {message}
     </EuiLink>
   ) : (

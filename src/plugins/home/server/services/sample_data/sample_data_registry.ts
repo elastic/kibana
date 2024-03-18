@@ -15,6 +15,7 @@ import {
   SampleDatasetSchema,
   SampleDatasetDashboardPanel,
   AppLinkData,
+  SampleDatasetProviderContext,
 } from './lib/sample_dataset_registry_types';
 import { sampleDataSchema } from './lib/sample_dataset_schema';
 
@@ -34,11 +35,15 @@ export class SampleDataRegistry {
 
   private readonly sampleDatasets: SampleDatasetSchema[] = [];
   private readonly appLinksMap = new Map<string, AppLinkData[]>();
+  private sampleDataProviderContext?: SampleDatasetProviderContext;
 
   private registerSampleDataSet(specProvider: SampleDatasetProvider) {
+    if (!this.sampleDataProviderContext) {
+      throw new Error('#registerSampleDataSet called before #setup');
+    }
     let value: SampleDatasetSchema;
     try {
-      value = sampleDataSchema.validate(specProvider());
+      value = sampleDataSchema.validate(specProvider(this.sampleDataProviderContext));
     } catch (error) {
       throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);
     }
@@ -82,6 +87,10 @@ export class SampleDataRegistry {
     createListRoute(router, this.sampleDatasets, this.appLinksMap, logger);
     createInstallRoute(router, this.sampleDatasets, logger, usageTracker, core.analytics);
     createUninstallRoute(router, this.sampleDatasets, logger, usageTracker, core.analytics);
+
+    this.sampleDataProviderContext = {
+      staticAssets: core.http.staticAssets,
+    };
 
     this.registerSampleDataSet(flightsSpecProvider);
     this.registerSampleDataSet(logsSpecProvider);

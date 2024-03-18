@@ -21,7 +21,6 @@
       "unifiedSearch",
       "savedObjectsTagging",
       "taskManager",
-      "guidedOnboarding",
       "files",
       "uiActions",
       "dashboard"
@@ -36,6 +35,7 @@
       "discover",
       "ingestPipelines",
       "spaces",
+      "guidedOnboarding",
     ],
     "requiredBundles": [
       "kibanaReact",

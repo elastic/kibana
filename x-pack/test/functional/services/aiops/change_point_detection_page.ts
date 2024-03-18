@@ -9,6 +9,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlTableService } from '../ml/common_table_service';
 
+export interface DashboardAttachmentOptions {
+  applyTimeRange: boolean;
+  maxSeries: number;
+}
+
 export function ChangePointDetectionPageProvider(
   { getService, getPageObject }: FtrProviderContext,
   tableService: MlTableService
@@ -18,9 +23,10 @@ export function ChangePointDetectionPageProvider(
   const comboBox = getService('comboBox');
   const browser = getService('browser');
   const elasticChart = getService('elasticChart');
+  const dashboardPage = getPageObject('dashboard');
 
   return {
-    async navigateToIndexPatternSelection() {
+    async navigateToDataViewSelection() {
       await testSubjects.click('mlMainTab changePointDetection');
       await testSubjects.existOrFail('mlPageSourceSelection');
     },
@@ -121,6 +127,134 @@ export function ChangePointDetectionPageProvider(
     async assertPanelExist(index: number) {
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.existOrFail(`aiopsChangePointPanel_${index}`);
+      });
+    },
+
+    async openPanelContextMenu(panelIndex: number) {
+      await testSubjects.click(
+        `aiopsChangePointPanel_${panelIndex} > aiopsChangePointDetectionContextMenuButton`
+      );
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail(`aiopsChangePointDetectionAttachButton`);
+      });
+    },
+
+    async clickAttachChartsButton() {
+      await testSubjects.click('aiopsChangePointDetectionAttachButton');
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.missingOrFail(`aiopsChangePointDetectionAttachButton`);
+        await testSubjects.existOrFail(`aiopsChangePointDetectionAttachToDashboardButton`);
+      });
+    },
+
+    async clickAttachDashboardButton() {
+      await testSubjects.click('aiopsChangePointDetectionAttachToDashboardButton');
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail(`aiopsChangePointDetectionDashboardAttachmentForm`);
+      });
+    },
+
+    async assertApplyTimeRangeControl(expectedValue: boolean) {
+      const isChecked = await testSubjects.isEuiSwitchChecked(
+        `aiopsChangePointDetectionAttachToDashboardApplyTimeRangeSwitch`
+      );
+      expect(isChecked).to.eql(
+        expectedValue,
+        `Expected apply time range to be ${expectedValue ? 'enabled' : 'disabled'}`
+      );
+    },
+
+    async assertMaxSeriesControl(expectedValue: number) {
+      const currentValue = Number(
+        await testSubjects.getAttribute('aiopsMaxSeriesControlFieldNumber', 'value')
+      );
+      expect(currentValue).to.eql(
+        expectedValue,
+        `Expected max series control to be ${expectedValue} (got ${currentValue})`
+      );
+    },
+
+    async toggleApplyTimeRangeControl(isChecked: boolean) {
+      await testSubjects.setEuiSwitch(
+        `aiopsChangePointDetectionAttachToDashboardApplyTimeRangeSwitch`,
+        isChecked ? 'check' : 'uncheck'
+      );
+      await this.assertApplyTimeRangeControl(isChecked);
+    },
+
+    async setMaxSeriesControl(value: number) {
+      await testSubjects.setValue('aiopsMaxSeriesControlFieldNumber', value.toString());
+      await this.assertMaxSeriesControl(value);
+    },
+
+    async completeDashboardAttachmentForm(attachmentOptions: DashboardAttachmentOptions) {
+      // assert default values
+      await this.assertApplyTimeRangeControl(false);
+      await this.assertMaxSeriesControl(6);
+
+      if (attachmentOptions.applyTimeRange) {
+        await this.toggleApplyTimeRangeControl(attachmentOptions.applyTimeRange);
+      }
+
+      if (attachmentOptions.maxSeries) {
+        await this.setMaxSeriesControl(attachmentOptions.maxSeries);
+      }
+
+      await testSubjects.click('aiopsChangePointDetectionSubmitDashboardAttachButton');
+
+      await retry.tryForTime(30 * 1000, async () => {
+        // await testSubjects.missingOrFail(`aiopsChangePointDetectionSubmitDashboardAttachButton`);
+        await testSubjects.existOrFail('savedObjectSaveModal');
+      });
+    },
+
+    async completeSaveToDashboardForm(options?: { createNew: boolean; dashboardName?: string }) {
+      await retry.tryForTime(30 * 1000, async () => {
+        const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
+
+        if (options?.createNew) {
+          const label = await dashboardSelector.findByCssSelector(
+            `label[for="new-dashboard-option"]`
+          );
+          await label.click();
+        }
+
+        await testSubjects.click('confirmSaveSavedObjectButton');
+        await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+          testSubjects
+            .missingOrFail('confirmSaveSavedObjectButton')
+            .then(() => true)
+            .catch(() => false)
+        );
+
+        // make sure the dashboard page actually loaded
+        const dashboardItemCount = await dashboardPage.getSharedItemsCount();
+        expect(dashboardItemCount).to.not.eql(undefined);
+      });
+      // changing to the dashboard app might take some time
+      const embeddable = await testSubjects.find('aiopsEmbeddableChangePointChart', 30 * 1000);
+      const lensChart = await embeddable.findByClassName('lnsExpressionRenderer');
+      expect(await lensChart.isDisplayed()).to.eql(
+        true,
+        'Change point detection chart should be displayed in dashboard'
+      );
+    },
+
+    async attachChartsToDashboard(
+      panelIndex: number,
+      attachmentOptions: DashboardAttachmentOptions
+    ) {
+      await this.assertPanelExist(panelIndex);
+      await this.openPanelContextMenu(panelIndex);
+      await this.clickAttachChartsButton();
+      await this.clickAttachDashboardButton();
+      await this.completeDashboardAttachmentForm(attachmentOptions);
+      await this.completeSaveToDashboardForm({ createNew: true });
+    },
+
+    async assertFiltersApplied() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail('filter-items-group');
       });
     },
 

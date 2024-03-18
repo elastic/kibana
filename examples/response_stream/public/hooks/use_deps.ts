@@ -10,4 +10,4 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { ResponseStreamDeps } from '../mount';
 
-export const useDeps = () => useKibana().services as ResponseStreamDeps;
+export const useDeps = () => useKibana().services as unknown as ResponseStreamDeps;

@@ -16,10 +16,10 @@ function generator(options: TemplateContext) {
   const dir = options.ironbank ? 'ironbank' : 'base';
   const template = readFileSync(resolve(__dirname, dir, './Dockerfile'));
   return Mustache.render(template.toString(), {
-    packageManager: options.baseImage.includes('ubi') ? 'microdnf' : 'apt-get',
-    ubi: options.baseImage.includes('ubi'),
+    packageManager: options.baseImage === 'ubi' ? 'microdnf' : 'apt-get',
+    ubi: options.baseImage === 'ubi',
     ubuntu: options.baseImage === 'ubuntu',
-    opensslLegacyProvider: !(options.cloud || options.serverless),
+    opensslLegacyProvider: !(options.cloud || options.serverless || options.fips),
     ...options,
   });
 }

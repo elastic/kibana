@@ -7,3 +7,4 @@
  */
 
 export { createCoreContextConfigServiceMock } from './create_core_context_config_service.mock';
+export { createRuntimePluginContractResolverMock } from './plugin_contract_resolver.mock';

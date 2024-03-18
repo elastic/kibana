@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -51,22 +52,24 @@ export const ChangePointDetectionPage: FC = () => {
           appDependencies={{
             ...pick(services, [
               'application',
-              'data',
-              'executionContext',
+              'cases',
               'charts',
+              'data',
+              'embeddable',
+              'executionContext',
               'fieldFormats',
               'http',
+              'i18n',
+              'lens',
               'notifications',
+              'presentationUtil',
               'share',
               'storage',
+              'theme',
+              'uiActions',
               'uiSettings',
               'unifiedSearch',
-              'theme',
-              'lens',
-              'presentationUtil',
-              'embeddable',
-              'cases',
-              'i18n',
+              'usageCollection',
             ]),
             fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
           }}

@@ -7,16 +7,31 @@
 
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import styled from 'styled-components';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { FlyoutFooter } from '../../../timelines/components/side_panel/event_details/flyout';
 import { useRightPanelContext } from './context';
 import { useHostIsolationTools } from '../../../timelines/components/side_panel/event_details/use_host_isolation_tools';
 
+const ContainerDiv = styled('div')`
+  .side-panel-flyout-footer {
+    padding: ${euiThemeVars.euiPanelPaddingModifiers.paddingMedium};
+  }
+`;
+
+interface PanelFooterProps {
+  /**
+   * Boolean that indicates whether flyout is in preview and action should be hidden
+   */
+  isPreview: boolean;
+}
+
 /**
  *
  */
-export const PanelFooter: FC = () => {
-  const { closeFlyout, openRightPanel } = useExpandableFlyoutContext();
+export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
+  const { closeFlyout, openRightPanel } = useExpandableFlyoutApi();
   const {
     eventId,
     indexName,
@@ -25,7 +40,6 @@ export const PanelFooter: FC = () => {
     refetchFlyoutData,
     scopeId,
   } = useRightPanelContext();
-
   const { isHostIsolationPanelOpen, showHostIsolationPanel } = useHostIsolationTools();
 
   const showHostIsolationPanelCallback = useCallback(
@@ -44,17 +58,19 @@ export const PanelFooter: FC = () => {
     [eventId, indexName, openRightPanel, scopeId, showHostIsolationPanel]
   );
 
-  return (
-    <FlyoutFooter
-      detailsData={dataFormattedForFieldBrowser}
-      detailsEcsData={dataAsNestedObject}
-      handleOnEventClosed={closeFlyout}
-      isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-      isReadOnly={false}
-      loadingEventDetails={false}
-      onAddIsolationStatusClick={showHostIsolationPanelCallback}
-      scopeId={scopeId}
-      refetchFlyoutData={refetchFlyoutData}
-    />
-  );
+  return !isPreview ? (
+    <ContainerDiv>
+      <FlyoutFooter
+        detailsData={dataFormattedForFieldBrowser}
+        detailsEcsData={dataAsNestedObject}
+        handleOnEventClosed={closeFlyout}
+        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+        isReadOnly={false}
+        loadingEventDetails={false}
+        onAddIsolationStatusClick={showHostIsolationPanelCallback}
+        scopeId={scopeId}
+        refetchFlyoutData={refetchFlyoutData}
+      />
+    </ContainerDiv>
+  ) : null;
 };

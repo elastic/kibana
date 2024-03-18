@@ -99,11 +99,11 @@
             "signature": [
               "({ http }: { http: ",
               {
-                "pluginId": "@kbn/core-http-browser",
+                "pluginId": "@kbn/core-http-browser-internal",
                 "scope": "common",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
-                "text": "HttpSetup"
+                "docId": "kibKbnCoreHttpBrowserInternalPluginApi",
+                "section": "def-common.InternalHttpStart",
+                "text": "InternalHttpStart"
               },
               "; }) => Promise<",
               {
@@ -133,18 +133,22 @@
                   {
                     "parentPluginId": "@kbn/core-saved-objects-browser-internal",
                     "id": "def-common.SavedObjectsService.start.$1.http",
-                    "type": "Object",
+                    "type": "CompoundType",
                     "tags": [],
                     "label": "http",
                     "description": [],
                     "signature": [
+                      "Omit<",
                       {
                         "pluginId": "@kbn/core-http-browser",
                         "scope": "common",
                         "docId": "kibKbnCoreHttpBrowserPluginApi",
                         "section": "def-common.HttpSetup",
                         "text": "HttpSetup"
-                      }
+                      },
+                      ", \"staticAssets\"> & { staticAssets: ",
+                      "InternalStaticAssets",
+                      "; }"
                     ],
                     "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
                     "deprecated": false,

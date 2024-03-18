@@ -106,7 +106,7 @@ export function useDockerRegistry() {
   beforeAll(async () => {
     jest.setTimeout(BEFORE_SETUP_TIMEOUT);
     await pRetry(() => pullDockerImage(), {
-      retries: 3,
+      retries: 5,
     });
 
     await pRetry(() => startDockerRegistryServer(), {

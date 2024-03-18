@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
-import { EuiFormRow, EuiSpacer, EuiTitle, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiTitle, EuiText, EuiSelect } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
@@ -130,7 +130,12 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
       ))}
       <EuiFormRow
         fullWidth
-        label={i18n.SEVERITY_REQUIRED_LABEL}
+        label={i18n.SEVERITY_LABEL}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {i18n.REQUIRED_LABEL}
+          </EuiText>
+        }
         error={errors.severity}
         isInvalid={isFieldInvalid(severity, errors.severity)}
       >

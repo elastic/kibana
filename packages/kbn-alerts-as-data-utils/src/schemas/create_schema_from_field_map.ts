@@ -150,7 +150,7 @@ const generateSchemaLines = ({
         break;
       case 'object':
       case 'nested':
-        if (!isEnabled) {
+        if (!isEnabled || !isArray) {
           lineWriter.addLine(`${keyToWrite}: ${getSchemaDefinition('schemaUnknown', isArray)},`);
         } else if (isArray && null != fieldMap.properties) {
           lineWriter.addLineAndIndent(`${keyToWrite}: rt.array(`);
@@ -322,6 +322,7 @@ export const schemaGeoPoint = rt.union([
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const %%schemaPrefix%%Required = %%REQUIRED_FIELDS%%;
+// prettier-ignore
 const %%schemaPrefix%%Optional = %%OPTIONAL_FIELDS%%;
 
 // prettier-ignore

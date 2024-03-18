@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import {
+  DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
 } from '@kbn/security-solution-plugin/common/constants';
@@ -16,16 +17,11 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { FetchRulesResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { internalAlertingSnoozeRule } from '../../urls/routes';
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 export const findAllRules = () => {
   return rootRequest<FetchRulesResponse>({
     url: DETECTION_ENGINE_RULES_URL_FIND,
-    headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': '2023-10-31',
-    },
   });
 };
 
@@ -36,11 +32,6 @@ export const createRule = (
     method: 'POST',
     url: DETECTION_ENGINE_RULES_URL,
     body: rule,
-    headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': '2023-10-31',
-    },
     failOnStatusCode: false,
   });
 };
@@ -52,7 +43,7 @@ export const createRule = (
  * @param duration Snooze duration in milliseconds, -1 for indefinite
  */
 export const snoozeRule = (id: string, duration: number): Cypress.Chainable =>
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: internalAlertingSnoozeRule(id),
     body: {
@@ -61,7 +52,6 @@ export const snoozeRule = (id: string, duration: number): Cypress.Chainable =>
         rRule: { dtstart: new Date().toISOString(), count: 1, tzid: moment().format('zz') },
       },
     },
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 
@@ -69,11 +59,6 @@ export const deleteCustomRule = (ruleId = '1') => {
   rootRequest({
     method: 'DELETE',
     url: `api/detection_engine/rules?rule_id=${ruleId}`,
-    headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': '2023-10-31',
-    },
     failOnStatusCode: false,
   });
 };
@@ -89,10 +74,7 @@ export const importRule = (ndjsonPath: string) => {
         url: 'api/detection_engine/rules/_import',
         method: 'POST',
         headers: {
-          'kbn-xsrf': 'cypress-creds',
           'content-type': 'multipart/form-data',
-          'x-elastic-internal-origin': 'security-solution',
-          'elastic-api-version': '2023-10-31',
         },
         body: formdata,
       })
@@ -108,10 +90,7 @@ export const waitForRulesToFinishExecution = (ruleIds: string[], afterDate?: Dat
         method: 'GET',
         url: DETECTION_ENGINE_RULES_URL_FIND,
         headers: {
-          'kbn-xsrf': 'cypress-creds',
           'content-type': 'multipart/form-data',
-          'x-elastic-internal-origin': 'security-solution',
-          'elastic-api-version': '2023-10-31',
         },
       }).then((response) => {
         const areAllRulesFinished = ruleIds.every((ruleId) =>
@@ -131,3 +110,28 @@ export const waitForRulesToFinishExecution = (ruleIds: string[], afterDate?: Dat
       }),
     { interval: 500, timeout: 12000 }
   );
+
+type EnableRulesParameters =
+  | {
+      names: string[];
+      ids?: undefined;
+    }
+  | {
+      names?: undefined;
+      ids: string[];
+    };
+
+export const enableRules = ({ names, ids }: EnableRulesParameters): Cypress.Chainable => {
+  const query = names?.map((name) => `alert.attributes.name: "${name}"`).join(' OR ');
+
+  return rootRequest({
+    method: 'POST',
+    url: DETECTION_ENGINE_RULES_BULK_ACTION,
+    body: {
+      action: 'enable',
+      query,
+      ids,
+    },
+    failOnStatusCode: false,
+  });
+};

@@ -10,11 +10,10 @@
  * of the anomalies table.
  */
 
-import React, { FC, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { capitalize } from 'lodash';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,17 +26,16 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { getSeverity, type MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
-
+import { type MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
+import { getAnomalyDescription } from '../../../../common/util/anomaly_description';
 import { MAX_CHARS } from './anomalies_table_constants';
 import type { CategoryDefinition } from '../../services/ml_api_service/results';
-import { EntityCellFilter } from '../entity_cell';
-import { ExplorerJob } from '../../explorer/explorer_utils';
-
+import type { EntityCellFilter } from '../entity_cell';
+import type { ExplorerJob } from '../../explorer/explorer_utils';
 import {
-  getInfluencersItems,
   AnomalyExplanationDetails,
   DetailsItems,
+  getInfluencersItems,
 } from './anomaly_details_utils';
 
 interface Props {
@@ -166,56 +164,7 @@ const Contents: FC<{
 };
 
 const Description: FC<{ anomaly: MlAnomaliesTableRecordExtended }> = ({ anomaly }) => {
-  const source = anomaly.source;
-
-  let anomalyDescription = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.anomalyInLabel', {
-    defaultMessage: '{anomalySeverity} anomaly in {anomalyDetector}',
-    values: {
-      anomalySeverity: capitalize(getSeverity(anomaly.severity).label),
-      anomalyDetector: anomaly.detector,
-    },
-  });
-  if (anomaly.entityName !== undefined) {
-    anomalyDescription += i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.foundForLabel', {
-      defaultMessage: ' found for {anomalyEntityName} {anomalyEntityValue}',
-      values: {
-        anomalyEntityName: anomaly.entityName,
-        anomalyEntityValue: anomaly.entityValue,
-      },
-    });
-  }
-
-  if (
-    source.partition_field_name !== undefined &&
-    source.partition_field_name !== anomaly.entityName
-  ) {
-    anomalyDescription += i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.detectedInLabel', {
-      defaultMessage: ' detected in {sourcePartitionFieldName} {sourcePartitionFieldValue}',
-      values: {
-        sourcePartitionFieldName: source.partition_field_name,
-        sourcePartitionFieldValue: source.partition_field_value,
-      },
-    });
-  }
-
-  // Check for a correlatedByFieldValue in the source which will be present for multivariate analyses
-  // where the record is anomalous due to relationship with another 'by' field value.
-  let mvDescription;
-  if (source.correlated_by_field_value !== undefined) {
-    mvDescription = i18n.translate(
-      'xpack.ml.anomaliesTable.anomalyDetails.multivariateDescription',
-      {
-        defaultMessage:
-          'multivariate correlations found in {sourceByFieldName}; ' +
-          '{sourceByFieldValue} is considered anomalous given {sourceCorrelatedByFieldValue}',
-        values: {
-          sourceByFieldName: source.by_field_name,
-          sourceByFieldValue: source.by_field_value,
-          sourceCorrelatedByFieldValue: source.correlated_by_field_value,
-        },
-      }
-    );
-  }
+  const { anomalyDescription, mvDescription } = getAnomalyDescription(anomaly);
 
   return (
     <>
@@ -361,7 +310,7 @@ const CategoryExamples: FC<{ definition: CategoryDefinition; examples: string[] 
     <EuiFlexGroup
       direction="column"
       justifyContent="center"
-      gutterSize="m"
+      gutterSize="xs"
       className="mlAnomalyCategoryExamples"
     >
       {definition !== undefined && definition.terms && (

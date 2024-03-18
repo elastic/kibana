@@ -17,6 +17,8 @@ interface UseAlertByIdsOptions {
 
 interface Hit {
   fields: Record<string, string[]>;
+  _index: string;
+  _id: string;
 }
 
 interface UserAlertByIdsResult {
@@ -25,6 +27,9 @@ interface UserAlertByIdsResult {
   data?: Hit[];
 }
 
+// It prevents recreating the array on every hook call
+const ALL_FIELD = ['*'];
+
 /**
  * Fetches the alert documents associated to the ids that are passed.
  * By default it fetches all fields but they can be limited by passing
@@ -32,7 +37,7 @@ interface UserAlertByIdsResult {
  */
 export const useAlertsByIds = ({
   alertIds,
-  fields = ['*'],
+  fields = ALL_FIELD,
 }: UseAlertByIdsOptions): UserAlertByIdsResult => {
   const [initialQuery] = useState(() => generateAlertByIdsQuery(alertIds, fields));
 

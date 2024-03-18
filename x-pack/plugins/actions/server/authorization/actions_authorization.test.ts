@@ -14,10 +14,16 @@ import {
 } from '../constants/saved_objects';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { AuthorizationMode } from './get_authorization_mode_by_source';
+import {
+  CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG,
+  CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG,
+} from '../feature';
 
 const request = {} as KibanaRequest;
 
 const mockAuthorizationAction = (type: string, operation: string) => `${type}/${operation}`;
+const BASIC_EXECUTE_AUTHZ = `api:${CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG}`;
+const ADVANCED_EXECUTE_AUTHZ = `api:${CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG}`;
 
 function mockSecurity() {
   const security = securityMock.createSetup();
@@ -83,7 +89,7 @@ describe('ensureAuthorized', () => {
 
     expect(authorization.actions.savedObject.get).toHaveBeenCalledWith('action', 'create');
     expect(checkPrivileges).toHaveBeenCalledWith({
-      kibana: [mockAuthorizationAction('action', 'create')],
+      kibana: [mockAuthorizationAction('action', 'create'), BASIC_EXECUTE_AUTHZ],
     });
   });
 
@@ -123,6 +129,7 @@ describe('ensureAuthorized', () => {
       kibana: [
         mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'get'),
         mockAuthorizationAction(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
+        BASIC_EXECUTE_AUTHZ,
       ],
     });
   });
@@ -225,6 +232,54 @@ describe('ensureAuthorized', () => {
         mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'get'),
         mockAuthorizationAction(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
         'test/create',
+        BASIC_EXECUTE_AUTHZ,
+      ],
+    });
+  });
+
+  test('checks SentinelOne connector privileges correctly', async () => {
+    const { authorization } = mockSecurity();
+    const checkPrivileges: jest.MockedFunction<
+      ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+    > = jest.fn();
+
+    authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    const actionsAuthorization = new ActionsAuthorization({
+      request,
+      authorization,
+    });
+
+    checkPrivileges.mockResolvedValueOnce({
+      username: 'some-user',
+      hasAllRequested: true,
+      privileges: [
+        {
+          privilege: mockAuthorizationAction('myType', 'execute'),
+          authorized: true,
+        },
+      ],
+    });
+
+    await actionsAuthorization.ensureAuthorized({
+      operation: 'execute',
+      actionTypeId: '.sentinelone',
+    });
+
+    expect(authorization.actions.savedObject.get).toHaveBeenCalledWith(
+      ACTION_SAVED_OBJECT_TYPE,
+      'get'
+    );
+
+    expect(authorization.actions.savedObject.get).toHaveBeenCalledWith(
+      ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      'create'
+    );
+
+    expect(checkPrivileges).toHaveBeenCalledWith({
+      kibana: [
+        mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'get'),
+        mockAuthorizationAction(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
+        ADVANCED_EXECUTE_AUTHZ,
       ],
     });
   });

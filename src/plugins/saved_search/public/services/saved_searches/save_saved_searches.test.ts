@@ -34,6 +34,7 @@ describe('saveSavedSearch', () => {
       sharingSavedObjectProps: {
         outcome: 'aliasMatch',
       },
+      managed: false,
     } as SavedSearch;
   });
 
@@ -127,7 +128,9 @@ describe('saveSavedSearch', () => {
         kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
         refreshInterval: undefined,
         rowHeight: undefined,
+        headerRowHeight: undefined,
         rowsPerPage: undefined,
+        sampleSize: undefined,
         sort: [],
         timeRange: undefined,
         timeRestore: false,
@@ -161,7 +164,9 @@ describe('saveSavedSearch', () => {
         kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
         refreshInterval: undefined,
         rowHeight: undefined,
+        headerRowHeight: undefined,
         rowsPerPage: undefined,
+        sampleSize: undefined,
         timeRange: undefined,
         sort: [],
         title: 'title',
@@ -210,7 +215,9 @@ describe('saveSavedSearch', () => {
         kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
         refreshInterval: undefined,
         rowHeight: undefined,
+        headerRowHeight: undefined,
         rowsPerPage: undefined,
+        sampleSize: undefined,
         sort: [],
         timeRange: undefined,
         timeRestore: false,

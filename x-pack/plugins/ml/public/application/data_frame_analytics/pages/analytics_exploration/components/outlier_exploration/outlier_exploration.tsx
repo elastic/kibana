@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { isOutlierAnalysis, FEATURE_INFLUENCE } from '@kbn/ml-data-frame-analytics-utils';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   useColorRange,
   COLOR_RANGE,
@@ -32,8 +33,8 @@ import { ExplorationQueryBar } from '../exploration_query_bar';
 import { getFeatureCount } from './common';
 import { useOutlierData } from './use_outlier_data';
 import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
-import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
-import { IndexPatternPrompt } from '../index_pattern_prompt';
+import type { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
+import { DataViewPrompt } from '../data_view_prompt';
 
 export type TableItem = Record<string, any>;
 
@@ -42,12 +43,12 @@ interface ExplorationProps {
 }
 
 export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) => {
-  const { indexPattern, indexPatternErrorMessage, jobConfig, needsDestIndexPattern } =
+  const { dataView, dataViewErrorMessage, jobConfig, needsDestDataView } =
     useResultsViewConfig(jobId);
   const [pageUrlState, setPageUrlState] = useExplorationUrlState();
   const [searchQuery, setSearchQuery] =
     useState<estypes.QueryDslQueryContainer>(defaultSearchQuery);
-  const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
+  const outlierData = useOutlierData(dataView, jobConfig, searchQuery);
 
   const searchQueryUpdateHandler: ExplorationQueryBarProps['setSearchQuery'] = useCallback(
     (update) => {
@@ -81,20 +82,20 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
   // If feature influence was enabled for the legacy job we'll show a callout
   // with some additional information for a workaround.
   const showLegacyFeatureInfluenceFormatCallout =
-    !needsDestIndexPattern &&
+    !needsDestDataView &&
     isOutlierAnalysis(jobConfig?.analysis) &&
     jobConfig?.analysis.outlier_detection.compute_feature_influence === true &&
     columnsWithCharts.findIndex((d) => d.id === `${resultsField}.${FEATURE_INFLUENCE}`) === -1;
 
   const scatterplotFieldOptions = useScatterplotFieldOptions(
-    indexPattern,
+    dataView,
     jobConfig?.analyzed_fields?.includes,
     jobConfig?.analyzed_fields?.excludes,
     resultsField
   );
   const destIndex = getDestinationIndex(jobConfig);
 
-  if (indexPatternErrorMessage !== undefined) {
+  if (dataViewErrorMessage !== undefined) {
     return (
       <EuiPanel grow={false} hasShadow={false} hasBorder>
         <EuiCallOut
@@ -105,10 +106,8 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
           iconType="cross"
         >
           <p>
-            {indexPatternErrorMessage}
-            {needsDestIndexPattern ? (
-              <IndexPatternPrompt destIndex={destIndex} color="text" />
-            ) : null}
+            {dataViewErrorMessage}
+            {needsDestDataView ? <DataViewPrompt destIndex={destIndex} color="text" /> : null}
           </p>
         </EuiCallOut>
       </EuiPanel>
@@ -124,10 +123,10 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
         </>
       )}
       {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
-        indexPattern !== undefined && (
+        dataView !== undefined && (
           <>
             <ExplorationQueryBar
-              indexPattern={indexPattern}
+              dataView={dataView}
               setSearchQuery={searchQueryUpdateHandler}
               query={query}
             />
@@ -165,9 +164,9 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
           showColorRange && !showLegacyFeatureInfluenceFormatCallout ? colorRange : undefined
         }
         indexData={outlierData}
-        indexPattern={indexPattern}
+        dataView={dataView}
         jobConfig={jobConfig}
-        needsDestIndexPattern={needsDestIndexPattern}
+        needsDestDataView={needsDestDataView}
         searchQuery={searchQuery}
       />
     </>

@@ -23,5 +23,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./has_user_index_pattern'));
     loadTestFile(require.resolve('./swap_references'));
     loadTestFile(require.resolve('./resolve_index'));
+    loadTestFile(require.resolve('./fields_route'));
   });
 }

@@ -19,6 +19,7 @@ const HTML_ATTRIBUTES_TO_REMOVE = [
   'data-rfd-draggable-id',
   'href',
   'value',
+  'title',
 ];
 
 /**
@@ -81,6 +82,6 @@ function getTargetDefinition(target: HTMLElement): string[] {
     target.tagName,
     ...[...target.attributes]
       .filter((attr) => !HTML_ATTRIBUTES_TO_REMOVE.includes(attr.name))
-      .map((attr) => `${attr.name}=${attr.value}`),
+      .map((attr) => `${attr.name}=${attr.value}`.slice(0, 256)),
   ];
 }

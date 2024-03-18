@@ -6,12 +6,15 @@
  */
 
 import { parse } from 'query-string';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { basicResolvers } from '../../resolvers';
 import { ML_PAGES } from '../../../../locator';
-import { NavigateToPath, useMlKibana, useNavigateToPath } from '../../../contexts/kibana';
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
+import type { NavigateToPath } from '../../../contexts/kibana';
+import { useMlKibana, useNavigateToPath } from '../../../contexts/kibana';
+import type { MlRoute, PageProps } from '../../router';
+import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { Page } from '../../../jobs/new_job/recognize';
 import { mlJobService } from '../../../services/job_service';
@@ -105,18 +108,16 @@ const CheckViewOrCreateWrapper: FC<PageProps> = ({ location }) => {
           }
         })
         .catch(async (err: Error) => {
-          // eslint-disable-next-line no-console
-          console.error(`Error checking whether jobs in module ${moduleId} exists`, err);
-          toasts.addWarning({
+          toasts.addError(err, {
             title: i18n.translate('xpack.ml.newJob.recognize.moduleCheckJobsExistWarningTitle', {
               defaultMessage: 'Error checking module {moduleId}',
               values: { moduleId },
             }),
-            text: i18n.translate(
+            toastMessage: i18n.translate(
               'xpack.ml.newJob.recognize.moduleCheckJobsExistWarningDescription',
               {
                 defaultMessage:
-                  'An error occurred trying to check whether the jobs in the module have been created.',
+                  'An error occurred checking whether the jobs in the module have been created. Search the list for matching jobs or create new jobs.',
               }
             ),
           });

@@ -10,11 +10,13 @@ import { ProfilingESField } from './elasticsearch';
 import {
   Executable,
   FileID,
+  isErrorFrame,
   StackFrame,
   StackFrameID,
   StackTrace,
   StackTraceID,
 } from './profiling';
+import { convertTonsToKgs } from './utils';
 
 /** Profiling status response */
 export interface ProfilingStatusResponse {
@@ -42,6 +44,9 @@ export interface ProfilingStackTrace {
   ['frame_ids']: string[];
   ['address_or_lines']: number[];
   ['type_ids']: number[];
+  ['annual_co2_tons']: number;
+  ['annual_costs_usd']: number;
+  count: number;
 }
 
 interface ProfilingStackTraces {
@@ -107,7 +112,8 @@ export const makeFrameID = (frameID: string, n: number): string => {
 // createInlineTrace builds a new StackTrace with inline frames.
 const createInlineTrace = (
   trace: ProfilingStackTrace,
-  frames: Map<StackFrameID, StackFrame>
+  frames: Map<StackFrameID, StackFrame>,
+  showErrorFrames: boolean
 ): StackTrace => {
   // The arrays need to be extended with the inline frame information.
   const frameIDs: string[] = [];
@@ -115,7 +121,11 @@ const createInlineTrace = (
   const addressOrLines: number[] = [];
   const typeIDs: number[] = [];
 
-  for (let i = 0; i < trace.frame_ids.length; i++) {
+  // Error frames only appear as first frame in a stacktrace.
+  const start =
+    !showErrorFrames && trace.frame_ids.length > 0 && isErrorFrame(trace.type_ids[0]) ? 1 : 0;
+
+  for (let i = start; i < trace.frame_ids.length; i++) {
     const frameID = trace.frame_ids[i];
     frameIDs.push(frameID);
     fileIDs.push(trace.file_ids[i]);
@@ -140,15 +150,22 @@ const createInlineTrace = (
     FileIDs: fileIDs,
     AddressOrLines: addressOrLines,
     Types: typeIDs,
-  } as StackTrace;
+    selfAnnualCO2Kgs: convertTonsToKgs(trace.annual_co2_tons),
+    selfAnnualCostUSD: trace.annual_costs_usd,
+    Count: trace.count,
+  };
 };
 
 /**
  * Decodes stack trace response
  * @param response StackTraceResponse
+ * @param showErrorFrames
  * @returns DecodedStackTraceResponse
  */
-export function decodeStackTraceResponse(response: StackTraceResponse): DecodedStackTraceResponse {
+export function decodeStackTraceResponse(
+  response: StackTraceResponse,
+  showErrorFrames: boolean
+): DecodedStackTraceResponse {
   const stackTraceEvents: Map<StackTraceID, number> = new Map();
   for (const [key, value] of Object.entries(response.stack_trace_events ?? {})) {
     stackTraceEvents.set(key, value);
@@ -174,7 +191,7 @@ export function decodeStackTraceResponse(response: StackTraceResponse): DecodedS
 
   const stackTraces: Map<StackTraceID, StackTrace> = new Map();
   for (const [traceID, trace] of Object.entries(response.stack_traces ?? {})) {
-    stackTraces.set(traceID, createInlineTrace(trace, stackFrames));
+    stackTraces.set(traceID, createInlineTrace(trace, stackFrames, showErrorFrames));
   }
 
   const executables: Map<FileID, Executable> = new Map();

@@ -48,11 +48,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('A button to open a modal to view the CloudID and ES endpoint is added', async () => {
-        await PageObjects.common.clickAndValidate('helpMenuButton', 'endpointsHelpLink');
-        expect(await find.byCssSelector('[data-test-subj="endpointsHelpLink"]')).to.not.be(null);
+        await PageObjects.common.clickAndValidate('helpMenuButton', 'connectionDetailsHelpLink');
+        expect(await find.byCssSelector('[data-test-subj="connectionDetailsHelpLink"]')).to.not.be(
+          null
+        );
 
         // Open the modal
-        await PageObjects.common.clickAndValidate('endpointsHelpLink', 'deploymentDetailsModal');
+        await PageObjects.common.clickAndValidate(
+          'connectionDetailsHelpLink',
+          'deploymentDetailsModal'
+        );
 
         const esEndpointInput = await find.byCssSelector(
           '[data-test-subj="deploymentDetailsEsEndpoint"]'

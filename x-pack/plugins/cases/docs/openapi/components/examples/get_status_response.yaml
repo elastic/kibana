@@ -1,7 +1,0 @@
-summary: Get the number of cases in each state.
-value: 
-  {
-    "count_open_cases": 27,
-    "count_in_progress_cases": 50,
-    "count_closed_cases": 198
-  }

@@ -6,9 +6,9 @@
  */
 
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
-import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { act, fireEvent, render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
+import { TestProviders } from '../../../mock';
 import type {
   UseBulkAlertTagsItemsProps,
   UseBulkAlertTagsPanel,
@@ -19,6 +19,12 @@ import { useUiSetting$ } from '../../../lib/kibana';
 
 jest.mock('./use_set_alert_tags');
 jest.mock('../../../lib/kibana');
+jest.mock(
+  '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
+  () => ({
+    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true }),
+  })
+);
 
 const defaultProps: UseBulkAlertTagsItemsProps = {
   refetch: () => {},

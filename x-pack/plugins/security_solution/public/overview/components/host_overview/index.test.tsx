@@ -14,7 +14,7 @@ import { TestProviders } from '../../../common/mock';
 import { HostOverview } from '.';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
-import { useRiskScore } from '../../../explore/containers/risk_score/all';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 
 const defaultProps = {
   data: undefined,
@@ -25,7 +25,7 @@ const defaultProps = {
   loading: true,
 };
 
-jest.mock('../../../explore/containers/risk_score/all');
+jest.mock('../../../entity_analytics/api/hooks/use_risk_score');
 
 const mockUseRiskScore = useRiskScore as jest.Mock;
 

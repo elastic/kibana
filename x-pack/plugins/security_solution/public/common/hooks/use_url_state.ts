@@ -15,8 +15,7 @@ import { useQueryTimelineByIdOnUrlChange } from './timeline/use_query_timeline_b
 import { useInitFlyoutFromUrlParam } from './flyout/use_init_flyout_url_param';
 import { useSyncFlyoutUrlParam } from './flyout/use_sync_flyout_url_param';
 
-// NOTE: the expandable flyout package url state is handled here:
-// x-pack/plugins/security_solution/public/flyout/url/use_sync_flyout_state_with_url.tsx
+export const EXPANDABLE_FLYOUT_URL_KEY = 'eventFlyout' as const;
 
 export const useUrlState = () => {
   useSyncGlobalQueryString();
@@ -30,14 +29,14 @@ export const useUrlState = () => {
   useSyncFlyoutUrlParam();
 };
 
-export enum URL_PARAM_KEY {
-  appQuery = 'query',
-  eventFlyout = 'eventFlyout',
-  filters = 'filters',
-  savedQuery = 'savedQuery',
-  sourcerer = 'sourcerer',
-  timeline = 'timeline',
-  timerange = 'timerange',
-  pageFilter = 'pageFilters',
-  rulesTable = 'rulesTable',
-}
+export const URL_PARAM_KEY = {
+  appQuery: 'query',
+  eventFlyout: EXPANDABLE_FLYOUT_URL_KEY,
+  filters: 'filters',
+  savedQuery: 'savedQuery',
+  sourcerer: 'sourcerer',
+  timeline: 'timeline',
+  timerange: 'timerange',
+  pageFilter: 'pageFilters',
+  rulesTable: 'rulesTable',
+} as const;

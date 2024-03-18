@@ -19,10 +19,7 @@ export function SvlSecNavigationServiceProvider({
     async navigateToLandingPage() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('landingPage');
-        // Currently, the security landing page app is not loading correctly.
-        // Replace '~kbnAppWrapper' with a proper test subject of the landing
-        // page once it loads successfully.
-        await testSubjects.existOrFail('~kbnAppWrapper', { timeout: 2000 });
+        await testSubjects.existOrFail('welcome-header', { timeout: 2000 });
       });
     },
   };

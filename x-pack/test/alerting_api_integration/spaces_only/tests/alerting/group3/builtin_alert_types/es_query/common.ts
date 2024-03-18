@@ -24,6 +24,11 @@ export const RULE_INTERVAL_SECONDS = 4;
 export const RULE_INTERVAL_MILLIS = RULE_INTERVAL_SECONDS * 1000;
 export const ES_GROUPS_TO_WRITE = 3;
 
+export interface SourceField {
+  label: string;
+  searchPath: string;
+}
+
 export async function createConnector(
   supertest: any,
   objectRemover: ObjectRemover,

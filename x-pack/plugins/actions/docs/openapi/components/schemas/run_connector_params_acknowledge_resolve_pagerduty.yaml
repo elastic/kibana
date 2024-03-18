@@ -1,0 +1,17 @@
+title: PagerDuty connector parameters
+description: Test an action that acknowledges or resolves a PagerDuty alert.
+type: object
+required:
+  - dedupKey
+  - eventAction
+properties:
+  dedupKey:
+    description: The deduplication key for the PagerDuty alert.
+    type: string
+    maxLength: 255
+  eventAction:
+    description: The type of event.
+    type: string
+    enum:
+      - acknowledge
+      - resolve

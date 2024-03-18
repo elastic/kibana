@@ -9,7 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   IndicesCreateResponse,
-  MlGetTrainedModelsResponse,
+  MlGetTrainedModelsStatsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { Document } from 'langchain/document';
 
@@ -20,6 +20,11 @@ import {
 } from './elasticsearch_store';
 import { mockMsearchResponse } from '../../../__mocks__/msearch_response';
 import { mockQueryText } from '../../../__mocks__/query_text';
+import { coreMock } from '@kbn/core/server/mocks';
+import {
+  KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
+  KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
+} from '../../telemetry/event_based_telemetry';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(),
@@ -36,10 +41,12 @@ jest.mock('@kbn/core/server', () => ({
 
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
 const mockLogger = loggingSystemMock.createLogger();
+const reportEvent = jest.fn();
+const mockTelemetry = { ...coreMock.createSetup().analytics, reportEvent };
 const KB_INDEX = '.elastic-assistant-kb';
 
 const getElasticsearchStore = () => {
-  return new ElasticsearchStore(mockEsClient, KB_INDEX, mockLogger);
+  return new ElasticsearchStore(mockEsClient, KB_INDEX, mockLogger, mockTelemetry);
 };
 
 describe('ElasticsearchStore', () => {
@@ -142,17 +149,69 @@ describe('ElasticsearchStore', () => {
     });
   });
 
-  describe('Model Management', () => {
-    it('Checks if a model is installed', async () => {
-      mockEsClient.ml.getTrainedModels.mockResolvedValue({
-        trained_model_configs: [{ fully_defined: true }],
-      } as MlGetTrainedModelsResponse);
+  describe('isModelInstalled', () => {
+    it('returns true if model is started and fully allocated', async () => {
+      mockEsClient.ml.getTrainedModelsStats.mockResolvedValue({
+        trained_model_stats: [
+          {
+            deployment_stats: {
+              state: 'started',
+              allocation_status: {
+                state: 'fully_allocated',
+              },
+            },
+          },
+        ],
+      } as MlGetTrainedModelsStatsResponse);
 
       const isInstalled = await esStore.isModelInstalled('.elser_model_2');
 
       expect(isInstalled).toBe(true);
-      expect(mockEsClient.ml.getTrainedModels).toHaveBeenCalledWith({
-        include: 'definition_status',
+      expect(mockEsClient.ml.getTrainedModelsStats).toHaveBeenCalledWith({
+        model_id: '.elser_model_2',
+      });
+    });
+
+    it('returns false if model is not started', async () => {
+      mockEsClient.ml.getTrainedModelsStats.mockResolvedValue({
+        trained_model_stats: [
+          {
+            deployment_stats: {
+              state: 'starting',
+              allocation_status: {
+                state: 'fully_allocated',
+              },
+            },
+          },
+        ],
+      } as MlGetTrainedModelsStatsResponse);
+
+      const isInstalled = await esStore.isModelInstalled('.elser_model_2');
+
+      expect(isInstalled).toBe(false);
+      expect(mockEsClient.ml.getTrainedModelsStats).toHaveBeenCalledWith({
+        model_id: '.elser_model_2',
+      });
+    });
+
+    it('returns false if model is not fully allocated', async () => {
+      mockEsClient.ml.getTrainedModelsStats.mockResolvedValue({
+        trained_model_stats: [
+          {
+            deployment_stats: {
+              state: 'started',
+              allocation_status: {
+                state: 'starting',
+              },
+            },
+          },
+        ],
+      } as MlGetTrainedModelsStatsResponse);
+
+      const isInstalled = await esStore.isModelInstalled('.elser_model_2');
+
+      expect(isInstalled).toBe(false);
+      expect(mockEsClient.ml.getTrainedModelsStats).toHaveBeenCalledWith({
         model_id: '.elser_model_2',
       });
     });
@@ -225,7 +284,7 @@ describe('ElasticsearchStore', () => {
             "[[esql-from]]\n=== `FROM`\n\nThe `FROM` source command returns a table with up to 10,000 documents from a\ndata stream, index, or alias. Each row in the resulting table represents a\ndocument. Each column corresponds to a field, and can be accessed by the name\nof that field.\n\n[source,esql]\n----\nFROM employees\n----\n\nYou can use <<api-date-math-index-names,date math>> to refer to indices, aliases\nand data streams. This can be useful for time series data, for example to access\ntoday's index:\n\n[source,esql]\n----\nFROM <logs-{now/d}>\n----\n\nUse comma-separated lists or wildcards to query multiple data streams, indices,\nor aliases:\n\n[source,esql]\n----\nFROM employees-00001,employees-*\n----\n",
           metadata: {
             source:
-              '/Users/andrew.goldstein/Projects/forks/andrew-goldstein/kibana/x-pack/plugins/elastic_assistant/server/knowledge_base/esql/docs/source_commands/from.asciidoc',
+              '/Users/andrew.goldstein/Projects/forks/andrew-goldstein/kibana/x-pack/plugins/elastic_assistant/server/knowledge_base/esql/documentation/source_commands/from.asciidoc',
           },
         },
         {
@@ -361,6 +420,31 @@ describe('ElasticsearchStore', () => {
             size: TERMS_QUERY_SIZE,
           },
         ],
+      });
+    });
+
+    it('Reports successful telemetry event', async () => {
+      mockEsClient.msearch.mockResolvedValue(mockMsearchResponse);
+
+      await esStore.similaritySearch(mockQueryText);
+
+      expect(reportEvent).toHaveBeenCalledWith(KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT.eventType, {
+        model: '.elser_model_2',
+        resourceAccessed: 'esql',
+        responseTime: 142,
+        resultCount: 2,
+      });
+    });
+
+    it('Reports error telemetry event', async () => {
+      mockEsClient.msearch.mockRejectedValue(new Error('Oh no!'));
+
+      await esStore.similaritySearch(mockQueryText);
+
+      expect(reportEvent).toHaveBeenCalledWith(KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT.eventType, {
+        model: '.elser_model_2',
+        resourceAccessed: 'esql',
+        errorMessage: 'Oh no!',
       });
     });
   });

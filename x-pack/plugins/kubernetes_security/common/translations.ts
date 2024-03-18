@@ -49,6 +49,12 @@ export const TREE_NAVIGATION_LOADING = i18n.translate(
     defaultMessage: 'Loading',
   }
 );
+export const TREE_NAVIGATION_EMPTY = i18n.translate(
+  'xpack.kubernetesSecurity.treeNavigation.empty',
+  {
+    defaultMessage: 'No data available',
+  }
+);
 export const TREE_NAVIGATION_SHOW_MORE = (name: string) =>
   i18n.translate('xpack.kubernetesSecurity.treeNavigation.loadMore', {
     values: { name },

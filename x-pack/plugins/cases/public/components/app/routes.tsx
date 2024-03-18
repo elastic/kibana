@@ -32,7 +32,6 @@ import type { CaseViewProps } from '../case_view/types';
 const CaseViewLazy: React.FC<CaseViewProps> = lazy(() => import('../case_view'));
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
-  onComponentInitialized,
   actionsNavigation,
   ruleDetailsNavigation,
   showAlertDetails,
@@ -71,7 +70,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         </Route>
 
         <Route path={getCasesConfigurePath(basePath)}>
-          {permissions.update ? (
+          {permissions.settings ? (
             <ConfigureCases />
           ) : (
             <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
@@ -81,7 +80,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
           <Suspense fallback={<EuiLoadingSpinner />}>
             <CaseViewLazy
-              onComponentInitialized={onComponentInitialized}
               actionsNavigation={actionsNavigation}
               ruleDetailsNavigation={ruleDetailsNavigation}
               showAlertDetails={showAlertDetails}

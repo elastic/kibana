@@ -470,4 +470,82 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       },
     ]);
   });
+  it('returns agent inputs using package policy namespace if defined', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            inputs: [
+              {
+                ...mockInput,
+                streams: [{ ...mockInput.streams[0] }, { ...mockInput.streams[1], enabled: false }],
+              },
+            ],
+            namespace: 'packagepolicyspace',
+          },
+        ],
+        packageInfoCache,
+        'default',
+        'agentpolicyspace'
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'packagepolicyspace' },
+        use_output: 'default',
+        streams: [
+          {
+            id: 'test-logs-foo',
+            data_stream: { dataset: 'foo', type: 'logs' },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+          },
+        ],
+      },
+    ]);
+  });
+  it('returns agent inputs using agent policy namespace if package policy namespace is blank', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            inputs: [
+              {
+                ...mockInput,
+                streams: [{ ...mockInput.streams[0] }, { ...mockInput.streams[1], enabled: false }],
+              },
+            ],
+            namespace: '',
+          },
+        ],
+        packageInfoCache,
+        'default',
+        'agentpolicyspace'
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'agentpolicyspace' },
+        use_output: 'default',
+        streams: [
+          {
+            id: 'test-logs-foo',
+            data_stream: { dataset: 'foo', type: 'logs' },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+          },
+        ],
+      },
+    ]);
+  });
 });

@@ -79,7 +79,7 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
     >
       <EuiFlexGroup css={{ height: '100%' }} direction="column" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiText size="xs">
+          <EuiText data-test-subj={`coverageOverviewTechniqueTitle-${technique.id}`} size="xs">
             <h4>{technique.name}</h4>
           </EuiText>
           {SubtechniqueInfo}

@@ -11,12 +11,11 @@ import {
   EuiIcon,
   EuiPopover,
   EuiSelectable,
-  EuiText,
   EuiPopoverTitle,
   useEuiTheme,
   EuiIconTip,
 } from '@elastic/eui';
-import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
+import { ChartSwitchTrigger } from '@kbn/visualization-ui-components';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -24,7 +23,6 @@ import { getIgnoreGlobalFilterIcon } from '../../../shared_components/ignore_glo
 import type {
   VisualizationLayerHeaderContentProps,
   VisualizationLayerWidgetProps,
-  VisualizationType,
 } from '../../../types';
 import { State, visualizationTypes, SeriesType, XYAnnotationLayerConfig } from '../types';
 import {
@@ -168,11 +166,12 @@ function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
 
   return (
     <EuiPopover
-      panelClassName="lnsChangeIndexPatternPopover"
       button={
-        <DataLayerHeaderTrigger
+        <ChartSwitchTrigger
+          label={currentVisType.fullLabel || currentVisType.label}
+          icon={currentVisType.icon}
+          dataTestSubj="lns_layer_settings"
           onClick={() => setPopoverIsOpen(!isPopoverOpen)}
-          currentVisType={currentVisType}
         />
       }
       isOpen={isPopoverOpen}
@@ -186,7 +185,11 @@ function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
           defaultMessage: 'Layer visualization type',
         })}
       </EuiPopoverTitle>
-      <div>
+      <div
+        css={css`
+          width: 320px;
+        `}
+      >
         <EuiSelectable<{
           key?: string;
           label: string;
@@ -220,29 +223,3 @@ function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
     </EuiPopover>
   );
 }
-
-const DataLayerHeaderTrigger = function ({
-  currentVisType,
-  onClick,
-}: {
-  currentVisType: VisualizationType;
-  onClick: () => void;
-}) {
-  return (
-    <ToolbarButton
-      data-test-subj="lns_layer_settings"
-      title={currentVisType.fullLabel || currentVisType.label}
-      onClick={onClick}
-      fullWidth
-      size="s"
-      textProps={{ style: { lineHeight: '100%' } }}
-    >
-      <>
-        <EuiIcon type={currentVisType.icon} />
-        <EuiText size="s" className="lnsLayerPanelChartSwitch_title">
-          {currentVisType.fullLabel || currentVisType.label}
-        </EuiText>
-      </>
-    </ToolbarButton>
-  );
-};

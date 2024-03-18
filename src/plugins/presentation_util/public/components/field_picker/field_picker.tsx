@@ -141,6 +141,7 @@ export const FieldPicker = ({
         isVirtualized: true,
         showIcons: false,
         bordered: true,
+        truncationProps: { truncation: 'middle' },
       }}
       height="full"
     >

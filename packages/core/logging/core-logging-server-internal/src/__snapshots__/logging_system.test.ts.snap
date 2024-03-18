@@ -16,7 +16,7 @@ exports[`asLoggerFactory() only allows to create new loggers. 1`] = `
 Object {
   "@timestamp": "2012-01-30T22:33:22.011-05:00",
   "ecs": Object {
-    "version": "8.6.1",
+    "version": "8.11.0",
   },
   "log": Object {
     "level": "TRACE",
@@ -25,6 +25,7 @@ Object {
   "message": "buffered trace message",
   "process": Object {
     "pid": Any<Number>,
+    "uptime": 10,
   },
 }
 `;
@@ -33,7 +34,7 @@ exports[`asLoggerFactory() only allows to create new loggers. 2`] = `
 Object {
   "@timestamp": "2012-01-30T17:33:22.011-05:00",
   "ecs": Object {
-    "version": "8.6.1",
+    "version": "8.11.0",
   },
   "log": Object {
     "level": "INFO",
@@ -42,6 +43,7 @@ Object {
   "message": "buffered info message",
   "process": Object {
     "pid": Any<Number>,
+    "uptime": 10,
   },
   "some": "value",
 }
@@ -51,7 +53,7 @@ exports[`asLoggerFactory() only allows to create new loggers. 3`] = `
 Object {
   "@timestamp": "2012-01-30T12:33:22.011-05:00",
   "ecs": Object {
-    "version": "8.6.1",
+    "version": "8.11.0",
   },
   "log": Object {
     "level": "FATAL",
@@ -60,6 +62,7 @@ Object {
   "message": "buffered fatal message",
   "process": Object {
     "pid": Any<Number>,
+    "uptime": 10,
   },
 }
 `;
@@ -68,7 +71,7 @@ exports[`flushes memory buffer logger and switches to real logger once config is
 Object {
   "@timestamp": "2012-02-01T09:33:22.011-05:00",
   "ecs": Object {
-    "version": "8.6.1",
+    "version": "8.11.0",
   },
   "log": Object {
     "level": "INFO",
@@ -77,6 +80,7 @@ Object {
   "message": "buffered info message",
   "process": Object {
     "pid": Any<Number>,
+    "uptime": 10,
   },
   "some": "value",
 }
@@ -86,7 +90,7 @@ exports[`flushes memory buffer logger and switches to real logger once config is
 Object {
   "@timestamp": "2012-01-31T23:33:22.011-05:00",
   "ecs": Object {
-    "version": "8.6.1",
+    "version": "8.11.0",
   },
   "log": Object {
     "level": "INFO",
@@ -95,6 +99,7 @@ Object {
   "message": "some new info message",
   "process": Object {
     "pid": Any<Number>,
+    "uptime": 10,
   },
 }
 `;

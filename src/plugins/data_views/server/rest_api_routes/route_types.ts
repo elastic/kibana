@@ -121,6 +121,7 @@ export type DataViewSpecRestResponse = {
   allowNoIndex?: boolean;
   namespaces?: string[];
   name?: string;
+  allowHidden?: boolean;
 };
 
 export interface DataViewListItemRestResponse {

@@ -33,4 +33,12 @@ export const RISK_SCORE_UPDATE_BUTTON = '[data-test-subj="risk-score-update-butt
 
 export const RISK_SCORE_STATUS = '[data-test-subj="risk-score-status"]';
 
+export const RISK_SCORE_STATUS_LOADING = '[data-test-subj="risk-score-status-loading"]';
+
+export const RISK_SCORE_PRIVILEGES_CALLOUT =
+  '[data-test-subj="callout-missing-risk-engine-privileges"]';
+
 export const RISK_SCORE_SWITCH = '[data-test-subj="risk-score-switch"]';
+
+export const RISK_SCORE_PREVIEW_PRIVILEGES_CALLOUT =
+  '[data-test-subj="missing-risk-engine-preview-permissions"]';

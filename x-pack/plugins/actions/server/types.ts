@@ -16,6 +16,9 @@ import {
   SavedObjectReference,
   Logger,
 } from '@kbn/core/server';
+import { AnySchema } from 'joi';
+import { SubActionConnector } from './sub_action_framework/sub_action_connector';
+import { ServiceParams } from './sub_action_framework/types';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
@@ -76,6 +79,7 @@ export interface ActionTypeExecutorOptions<
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
   source?: ActionExecutionSource<unknown>;
+  request?: KibanaRequest;
 }
 
 export type ActionResult = Connector;
@@ -100,11 +104,12 @@ export type ExecutorType<
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
-export interface ValidatorType<Type> {
+export interface ValidatorType<T> {
   schema: {
-    validate(value: unknown): Type;
+    validate(value: unknown): T;
+    getSchema?: () => AnySchema;
   };
-  customValidator?: (value: Type, validatorServices: ValidatorServices) => void;
+  customValidator?: (value: T, validatorServices: ValidatorServices) => void;
 }
 
 export interface ValidatorServices {
@@ -118,6 +123,7 @@ export interface ActionValidationService {
 }
 
 export type RenderParameterTemplates<Params extends ActionTypeParams> = (
+  logger: Logger,
   params: Params,
   variables: Record<string, unknown>,
   actionId?: string
@@ -155,6 +161,7 @@ export interface ActionType<
   getKibanaPrivileges?: (args?: { params?: Params }) => string[];
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
+  getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
 }
 
 export interface RawAction extends Record<string, unknown> {

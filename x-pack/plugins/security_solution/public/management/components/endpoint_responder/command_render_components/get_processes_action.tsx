@@ -22,16 +22,20 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
   table {
     background-color: transparent;
   }
+
   .euiTableHeaderCell {
     border-bottom: ${(props) => props.theme.eui.euiBorderThin};
+
     .euiTableCellContent__text {
       font-weight: ${(props) => props.theme.eui.euiFontWeightRegular};
     }
   }
+
   .euiTableRow {
     &:hover {
       background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade} !important;
     }
+
     .euiTableRowCell {
       border-top: none !important;
       border-bottom: none !important;
@@ -51,7 +55,7 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
             comment: command.args.args?.comment?.[0],
           }
         : undefined;
-    }, [command.args.args?.comment, endpointId]);
+    }, [endpointId, command.args.args?.comment]);
 
     const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
       ProcessesRequestBody,
@@ -71,6 +75,7 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
       () => [
         {
           field: 'user',
+          'data-test-subj': 'process_list_user',
           name: i18n.translate(
             'xpack.securitySolution.endpointResponseActions.getProcesses.table.header.user',
             { defaultMessage: 'USER' }
@@ -79,6 +84,7 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
         },
         {
           field: 'pid',
+          'data-test-subj': 'process_list_pid',
           name: i18n.translate(
             'xpack.securitySolution.endpointResponseActions.getProcesses.table.header.pid',
             { defaultMessage: 'PID' }
@@ -87,6 +93,7 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
         },
         {
           field: 'entity_id',
+          'data-test-subj': 'process_list_entity_id',
           name: i18n.translate(
             'xpack.securitySolution.endpointResponseActions.getProcesses.table.header.enityId',
             { defaultMessage: 'ENTITY ID' }
@@ -96,6 +103,7 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
 
         {
           field: 'command',
+          'data-test-subj': 'process_list_command',
           name: i18n.translate(
             'xpack.securitySolution.endpointResponseActions.getProcesses.table.header.command',
             { defaultMessage: 'COMMAND' }
@@ -120,7 +128,11 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
     // Show results
     return (
       <ResultComponent data-test-subj="getProcessesSuccessCallout" showTitle={false}>
-        <StyledEuiBasicTable items={[...tableEntries]} columns={columns} />
+        <StyledEuiBasicTable
+          data-test-subj={'getProcessListTable'}
+          items={[...tableEntries]}
+          columns={columns}
+        />
       </ResultComponent>
     );
   }

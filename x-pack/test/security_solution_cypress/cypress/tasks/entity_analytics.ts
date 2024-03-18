@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  RISK_ENGINE_STATUS_URL,
+  RISK_SCORE_INDEX_STATUS_API_URL,
+} from '@kbn/security-solution-plugin/common/constants';
 import { BASIC_TABLE_LOADING } from '../screens/common';
 import {
   ANOMALIES_TABLE_ROWS,
@@ -44,11 +48,41 @@ export const riskEngineStatusChange = () => {
   cy.get(RISK_SCORE_SWITCH).click();
 };
 
-export const enableRiskEngine = () => {
-  cy.visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
-  cy.get(RISK_SCORE_STATUS).should('have.text', 'Off');
-  riskEngineStatusChange();
+export const mockRiskEngineEnabled = () => {
+  // mock the risk engine status
+  cy.intercept('GET', RISK_ENGINE_STATUS_URL, {
+    statusCode: 200,
+    body: {
+      risk_engine_status: 'ENABLED',
+      legacy_risk_engine_status: 'INSTALLED',
+      is_max_amount_of_risk_engines_reached: false,
+    },
+  }).as('riskEngineStatus');
+
+  // mock the risk index status
+  cy.intercept('GET', `${RISK_SCORE_INDEX_STATUS_API_URL}?indexName=*&entity=*`, {
+    statusCode: 200,
+    body: {
+      isDeprecated: false,
+      isEnabled: true,
+    },
+  }).as('riskIndexStatus');
 };
+
+/**
+ * @deprecated
+ * At the moment there isn't a way to clean all assets created by the risk engine enablement.
+ * We can't clean assets after each tests and we can't call this function from the `after` hook (cypress good practice).
+ * Reintroduce this task when we can safely delete the risk engine data.
+ *
+ * Please use `mockRiskEngineEnabled` instead.
+ */
+// const enableRiskEngine = () => {
+//   cy.visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
+//   cy.get(RISK_SCORE_STATUS).should('have.text', 'Off');
+//   riskEngineStatusChange();
+//   cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
+// };
 
 export const updateRiskEngine = () => {
   cy.get(RISK_SCORE_UPDATE_BUTTON).click();

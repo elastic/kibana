@@ -6,7 +6,6 @@
  */
 
 import { truncate } from 'lodash';
-import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 
@@ -20,22 +19,24 @@ import {
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
   RULES_TABLE_MAX_PAGE_SIZE,
 } from '../../../../../../../common/constants';
-import type { PerformBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import type {
+  BulkEditActionResponse,
+  PerformBulkActionResponse,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 import {
-  BulkActionType,
+  BulkActionTypeEnum,
   PerformBulkActionRequestBody,
   PerformBulkActionRequestQuery,
-} from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+} from '../../../../../../../common/api/detection_engine/rule_management';
 import type {
   NormalizedRuleError,
   RuleDetailsInError,
-  BulkEditActionResponse,
   BulkEditActionResults,
   BulkEditActionSummary,
 } from '../../../../../../../common/api/detection_engine';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../../../utils/route_limited_concurrency_tag';
 import type { PromisePoolError, PromisePoolOutcome } from '../../../../../../utils/promise_pool';
 import { initPromisePool } from '../../../../../../utils/promise_pool';
@@ -56,6 +57,7 @@ import {
   validateBulkDuplicateRule,
   dryRunValidateBulkEditRule,
 } from '../../../logic/bulk_actions/validations';
+import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
@@ -240,7 +242,7 @@ export const performBulkActionRoute = (
       options: {
         tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
         timeout: {
-          idleSocket: moment.duration(15, 'minutes').asMilliseconds(),
+          idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
         },
       },
     })
@@ -249,8 +251,8 @@ export const performBulkActionRoute = (
         version: '2023-10-31',
         validate: {
           request: {
-            body: buildRouteValidation(PerformBulkActionRequestBody),
-            query: buildRouteValidation(PerformBulkActionRequestQuery),
+            body: buildRouteValidationWithZod(PerformBulkActionRequestBody),
+            query: buildRouteValidationWithZod(PerformBulkActionRequestQuery),
           },
         },
       },
@@ -272,10 +274,10 @@ export const performBulkActionRoute = (
           });
         }
 
-        const isDryRun = request.query.dry_run === 'true';
+        const isDryRun = request.query.dry_run;
 
         // dry run is not supported for export, as it doesn't change ES state and has different response format(exported JSON file)
-        if (isDryRun && body.action === BulkActionType.export) {
+        if (isDryRun && body.action === BulkActionTypeEnum.export) {
           return siemResponse.error({
             body: `Export action doesn't support dry_run mode`,
             statusCode: 400,
@@ -318,7 +320,7 @@ export const performBulkActionRoute = (
 
           // handling this action before switch statement as bulkEditRules fetch rules within
           // rulesClient method, hence there is no need to use fetchRulesByQueryOrIds utility
-          if (body.action === BulkActionType.edit && !isDryRun) {
+          if (body.action === BulkActionTypeEnum.edit && !isDryRun) {
             const { rules, errors, skipped } = await bulkEditRules({
               rulesClient,
               filter: query,
@@ -348,7 +350,7 @@ export const performBulkActionRoute = (
           let deleted: RuleAlertType[] = [];
 
           switch (body.action) {
-            case BulkActionType.enable:
+            case BulkActionTypeEnum.enable:
               bulkActionOutcome = await initPromisePool({
                 concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
                 items: rules,
@@ -375,7 +377,7 @@ export const performBulkActionRoute = (
                 .map(({ result }) => result)
                 .filter((rule): rule is RuleAlertType => rule !== null);
               break;
-            case BulkActionType.disable:
+            case BulkActionTypeEnum.disable:
               bulkActionOutcome = await initPromisePool({
                 concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
                 items: rules,
@@ -403,7 +405,7 @@ export const performBulkActionRoute = (
                 .filter((rule): rule is RuleAlertType => rule !== null);
               break;
 
-            case BulkActionType.delete:
+            case BulkActionTypeEnum.delete:
               bulkActionOutcome = await initPromisePool({
                 concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
                 items: rules,
@@ -427,7 +429,7 @@ export const performBulkActionRoute = (
                 .filter((rule): rule is RuleAlertType => rule !== null);
               break;
 
-            case BulkActionType.duplicate:
+            case BulkActionTypeEnum.duplicate:
               bulkActionOutcome = await initPromisePool({
                 concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
                 items: rules,
@@ -486,13 +488,11 @@ export const performBulkActionRoute = (
                 .filter((rule): rule is RuleAlertType => rule !== null);
               break;
 
-            case BulkActionType.export:
+            case BulkActionTypeEnum.export:
               const exported = await getExportByObjectIds(
                 rulesClient,
                 exceptionsClient,
-                savedObjectsClient,
-                rules.map(({ params }) => ({ rule_id: params.ruleId })),
-                logger,
+                rules.map(({ params }) => params.ruleId),
                 exporter,
                 request,
                 actionsClient
@@ -510,7 +510,7 @@ export const performBulkActionRoute = (
 
             // will be processed only when isDryRun === true
             // during dry run only validation is getting performed and rule is not saved in ES
-            case BulkActionType.edit:
+            case BulkActionTypeEnum.edit:
               bulkActionOutcome = await initPromisePool({
                 concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
                 items: rules,

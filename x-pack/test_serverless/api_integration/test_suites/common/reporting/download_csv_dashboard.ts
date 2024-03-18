@@ -7,8 +7,8 @@
 
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
-import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
-import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
+import type { JobParamsDownloadCSV } from '@kbn/reporting-export-types-csv-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const ELASTIC_USERNAME = 'elastic_serverless';
@@ -47,7 +47,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('CSV Generation from SearchSource: Dashboard', () => {
     before(async () => {
-      await esArchiver.load(archives.data);
+      await esArchiver.load(archives.data, {
+        performance: {
+          batchSize: 300,
+          concurrency: 5,
+        },
+      });
       await kibanaServer.importExport.load(archives.savedObjects);
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': true,

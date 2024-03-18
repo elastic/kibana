@@ -14,47 +14,47 @@ paths:
         - name: ruleId
           in: path
           required: true
-          description: Saved object ID of the rule to get execution results for
           schema:
             type: string
             minLength: 1
-        - name: start
+        - name: search_term
           in: query
-          required: true
+          required: false
+          description: Include events of matching the search term. If omitted, all events will be included.
+          schema:
+            type: string
+        - name: event_types
+          in: query
+          required: false
+          description: Include events of the specified types. If omitted, all types of events will be included.
+          schema:
+            type: array
+            items:
+              $ref: '../../model/execution_event.schema.yaml#/components/schemas/RuleExecutionEventType'
+            default: []
+        - name: log_levels
+          in: query
+          required: false
+          description: Include events having these log levels. If omitted, events of all levels will be included.
+          schema:
+            type: array
+            items:
+              $ref: '../../model/execution_event.schema.yaml#/components/schemas/LogLevel'
+            default: []
+        - name: date_start
+          in: query
+          required: false
           description: Start date of the time range to query
           schema:
             type: string
             format: date-time
-        - name: end
+        - name: date_end
           in: query
-          required: true
+          required: false
           description: End date of the time range to query
           schema:
             type: string
             format: date-time
-        - name: query_text
-          in: query
-          required: false
-          description: Query text to filter results by
-          schema:
-            type: string
-            default: ''
-        - name: status_filters
-          in: query
-          required: false
-          description: Comma-separated list of rule execution statuses to filter results by
-          schema:
-            type: array
-            items:
-              $ref: '../../model/execution_status.schema.yaml#/components/schemas/RuleExecutionStatus'
-            default: []
-        - name: sort_field
-          in: query
-          required: false
-          description: Field to sort results by
-          schema:
-            $ref: '../../model/execution_result.schema.yaml#/components/schemas/SortFieldOfRuleExecutionResult'
-            default: timestamp
         - name: sort_order
           in: query
           required: false
@@ -87,6 +87,9 @@ paths:
                   events:
                     type: array
                     items:
-                      $ref: '../../model/execution_result.schema.yaml#/components/schemas/RuleExecutionResult'
-                  total:
-                    type: integer
+                      $ref: '../../model/execution_event.schema.yaml#/components/schemas/RuleExecutionEvent'
+                  pagination:
+                    $ref: '../../../model/pagination.schema.yaml#/components/schemas/PaginationResult'
+                required:
+                  - events
+                  - pagination

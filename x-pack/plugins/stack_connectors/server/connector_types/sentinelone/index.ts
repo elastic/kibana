@@ -26,7 +26,7 @@ export const getSentinelOneConnectorType = (): SubActionConnectorType<
 > => ({
   id: SENTINELONE_CONNECTOR_ID,
   name: SENTINELONE_TITLE,
-  Service: SentinelOneConnector,
+  getService: (params) => new SentinelOneConnector(params),
   schema: {
     config: SentinelOneConfigSchema,
     secrets: SentinelOneSecretsSchema,

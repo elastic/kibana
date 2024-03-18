@@ -14,7 +14,7 @@ import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/
 import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
 
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useAuthz, useLink, useAgentVersion } from '../../../../hooks';
+import { useAuthz, useLink } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import { isAgentUpgradeable } from '../../../../services';
 import { ExperimentalFeaturesService } from '../../../../services';
@@ -42,7 +42,6 @@ export const TableRowActions: React.FunctionComponent<{
   const hasFleetAllPrivileges = useAuthz().fleet.all;
 
   const isUnenrolling = agent.status === 'unenrolling';
-  const latestAgentVersion = useAgentVersion();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { diagnosticFileUploadEnabled, agentTamperProtectionEnabled } =
     ExperimentalFeaturesService.get();
@@ -107,7 +106,7 @@ export const TableRowActions: React.FunctionComponent<{
       <EuiContextMenuItem
         key="agentUpgradeBtn"
         icon="refresh"
-        disabled={!!latestAgentVersion && !isAgentUpgradeable(agent, latestAgentVersion)}
+        disabled={!isAgentUpgradeable(agent)}
         onClick={() => {
           onUpgradeClick();
         }}

@@ -1064,6 +1064,22 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.operatorExcluded",
+        "type": "Object",
+        "tags": [],
+        "label": "operatorExcluded",
+        "description": [],
+        "signature": [
+          "KeyofC",
+          "<{ excluded: null; }>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/operator/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
         "id": "def-common.operatorIncluded",
         "type": "Object",
         "tags": [],

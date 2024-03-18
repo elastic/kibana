@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
+import { ALERT_TABLE_GENERIC_CONFIG_ID } from './constants';
 import {
   AlertsTableConfigurationRegistry,
   AlertsTableConfigurationRegistryWithActions,
@@ -90,5 +91,19 @@ export class AlertTableConfigRegistry {
     }
     this.objectTypes.set(id, objectType);
     return this.objectTypes.get(id)!;
+  }
+
+  public getAlertConfigIdPerRuleTypes(ruleTypeIds: string[]): string {
+    const alertConfigs: string[] = [];
+    Array.from(this.objectTypes).forEach(([id, objectType]) => {
+      if (ruleTypeIds.every((ruleTypeId) => objectType.ruleTypeIds?.includes(ruleTypeId))) {
+        alertConfigs.push(id);
+      }
+    });
+    if (alertConfigs.length === 1) {
+      return alertConfigs[0];
+    }
+    // If there is more than one, we will return the generic alert configuration id
+    return ALERT_TABLE_GENERIC_CONFIG_ID;
   }
 }

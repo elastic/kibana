@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo } from 'react';
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -26,7 +26,7 @@ import {
   type UseIndexDataReturnType,
 } from '@kbn/ml-data-grid';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 import {
   useColorRange,
@@ -41,17 +41,17 @@ import { getFeatureCount, getOutlierScoreFieldName } from './common';
 import { useExplorationDataGrid } from '../exploration_results_table/use_exploration_data_grid';
 
 export const useOutlierData = (
-  indexPattern: DataView | undefined,
+  dataView: DataView | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
   searchQuery: estypes.QueryDslQueryContainer
 ): UseIndexDataReturnType => {
   const needsDestIndexFields =
-    indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
+    dataView !== undefined && dataView.title === jobConfig?.source.index[0];
 
   const columns = useMemo(() => {
     const newColumns: EuiDataGridColumn[] = [];
 
-    if (jobConfig !== undefined && indexPattern !== undefined) {
+    if (jobConfig !== undefined && dataView !== undefined) {
       const resultsField = jobConfig.dest.results_field;
       const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
       newColumns.push(
@@ -63,7 +63,7 @@ export const useOutlierData = (
 
     return newColumns;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobConfig, indexPattern]);
+  }, [jobConfig, dataView]);
 
   const dataGrid = useExplorationDataGrid(
     columns,
@@ -95,11 +95,8 @@ export const useOutlierData = (
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const dataLoader = useMemo(
-    () =>
-      indexPattern !== undefined
-        ? new DataLoader(indexPattern, getToastNotifications())
-        : undefined,
-    [indexPattern]
+    () => (dataView !== undefined ? new DataLoader(dataView, getToastNotifications()) : undefined),
+    [dataView]
   );
 
   const fetchColumnChartsData = async function () {
@@ -146,7 +143,7 @@ export const useOutlierData = (
   );
 
   const renderCellValue = useRenderCellValue(
-    indexPattern,
+    dataView,
     dataGrid.pagination,
     dataGrid.tableItems,
     jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD,

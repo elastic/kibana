@@ -27,7 +27,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
     });
 
     it('clicking on the `No integrations installed` prompt action button - `install CNVM`: navigates to the CNVM integration installation page', async () => {
-      await findings.navigateToVulnerabilities();
+      await findings.navigateToLatestVulnerabilitiesPage();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const element = await notInstalledVulnerabilities.getElement();
       expect(element).to.not.be(null);

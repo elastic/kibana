@@ -49,7 +49,7 @@ const NetworkContainerComponent = () => {
         strict
         path={NETWORK_PATH}
         render={({ location: { search = '' } }) => (
-          <Redirect to={{ pathname: `${NETWORK_PATH}/${NetworkRouteType.flows}`, search }} />
+          <Redirect to={{ pathname: `${NETWORK_PATH}/${NetworkRouteType.events}`, search }} />
         )}
       />
       <Route path={`${NETWORK_PATH}/ml-network`}>

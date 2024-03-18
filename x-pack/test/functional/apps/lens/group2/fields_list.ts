@@ -9,13 +9,22 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'lens',
+    'common',
+    'header',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
   const find = getService('find');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
+  const es = getService('es');
+  const queryBar = getService('queryBar');
 
   describe('lens fields list tests', () => {
     for (const datasourceType of ['form-based', 'ad-hoc', 'ad-hoc-no-timefield']) {
@@ -48,11 +57,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.header.waitUntilLoadingHasFinished();
           });
         });
-
         it('should show all fields as available', async () => {
           expect(
             await (await testSubjects.find('lnsIndexPatternAvailableFields-count')).getVisibleText()
-          ).to.eql(53);
+          ).to.eql(50);
         });
 
         it('should show a histogram and top values popover for numeric field', async () => {
@@ -231,5 +239,51 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
       });
     }
+
+    describe(`update field list test`, () => {
+      before(async () => {
+        await es.transport.request({
+          path: '/field-update-test/_doc',
+          method: 'POST',
+          body: {
+            '@timestamp': new Date().toISOString(),
+            oldField: 10,
+          },
+        });
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVisType('lens');
+        await PageObjects.timePicker.setCommonlyUsedTime('This_week');
+
+        await PageObjects.lens.createAdHocDataView('field-update-test', true);
+        await retry.try(async () => {
+          const selectedPattern = await PageObjects.lens.getDataPanelIndexPattern();
+          expect(selectedPattern).to.eql('field-update-test*');
+        });
+      });
+      after(async () => {
+        await es.transport.request({
+          path: '/field-update-test',
+          method: 'DELETE',
+        });
+      });
+
+      it('should show new fields Available fields', async () => {
+        await es.transport.request({
+          path: '/field-update-test/_doc?refresh=true',
+          method: 'POST',
+          body: {
+            '@timestamp': new Date().toISOString(),
+            oldField: 20,
+            newField: 20,
+          },
+        });
+
+        await PageObjects.lens.waitForField('oldField');
+        await queryBar.setQuery('oldField: 20');
+        await queryBar.submitQuery();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.lens.waitForField('newField');
+      });
+    });
   });
 }

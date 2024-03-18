@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { agentPolicyRouteService } from '../../services';
 import { API_VERSIONS } from '../../../common/constants';
@@ -22,6 +22,7 @@ import type {
   CopyAgentPolicyResponse,
   DeleteAgentPolicyRequest,
   DeleteAgentPolicyResponse,
+  BulkGetAgentPoliciesResponse,
 } from '../../types';
 
 import { useRequest, sendRequest, useConditionalRequest, sendRequestForRq } from './use_request';
@@ -42,6 +43,17 @@ export const useGetAgentPoliciesQuery = (query?: GetAgentPoliciesRequest['query'
       path: agentPolicyRouteService.getListPath(),
       method: 'get',
       query,
+      version: API_VERSIONS.public.v1,
+    })
+  );
+};
+
+export const useBulkGetAgentPoliciesQuery = (ids: string[], options?: { full?: boolean }) => {
+  return useQuery<BulkGetAgentPoliciesResponse, RequestError>(['agentPolicies', ids], () =>
+    sendRequestForRq<BulkGetAgentPoliciesResponse>({
+      path: agentPolicyRouteService.getBulkGetPath(),
+      method: 'post',
+      body: JSON.stringify({ ids, full: options?.full }),
       version: API_VERSIONS.public.v1,
     })
   );
@@ -129,14 +141,23 @@ export const sendCopyAgentPolicy = (
   });
 };
 
-export const sendDeleteAgentPolicy = (body: DeleteAgentPolicyRequest['body']) => {
-  return sendRequest<DeleteAgentPolicyResponse>({
-    path: agentPolicyRouteService.getDeletePath(),
-    method: 'post',
-    body: JSON.stringify(body),
-    version: API_VERSIONS.public.v1,
+export function useDeleteAgentPolicyMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: function sendDeleteAgentPolicy(body: DeleteAgentPolicyRequest['body']) {
+      return sendRequest<DeleteAgentPolicyResponse>({
+        path: agentPolicyRouteService.getDeletePath(),
+        method: 'post',
+        body: JSON.stringify(body),
+        version: API_VERSIONS.public.v1,
+      });
+    },
+    onSuccess: () => {
+      return queryClient.invalidateQueries(['agentPolicies']);
+    },
   });
-};
+}
 
 export const sendResetOnePreconfiguredAgentPolicy = (agentPolicyId: string) => {
   return sendRequest({

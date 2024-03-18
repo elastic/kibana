@@ -78,6 +78,7 @@ export const createRepositoryHelpers = ({
   });
   const migrationHelper = new MigrationHelper({
     migrator,
+    encryptionHelper,
   });
 
   const helpers: RepositoryHelpers = {

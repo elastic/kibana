@@ -1,0 +1,41 @@
+openapi: 3.0.0
+info:
+  title: Get Capabilities API endpoint
+  version: '1'
+paths:
+  /internal/elastic_assistant/capabilities:
+    get:
+      operationId: GetCapabilities
+      x-codegen-enabled: true
+      description: Get Elastic Assistant capabilities for the requesting plugin
+      summary: Get Elastic Assistant capabilities
+      tags:
+        - Capabilities API
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  assistantModelEvaluation:
+                    type: boolean
+                  assistantStreamingEnabled:
+                    type: boolean
+                required:
+                  - assistantModelEvaluation
+                  - assistantStreamingEnabled
+        '400':
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string

@@ -7,23 +7,23 @@
  */
 
 import {
-  PluginServices,
-  PluginServiceProviders,
   PluginServiceProvider,
+  PluginServiceProviders,
   PluginServiceRegistry,
+  PluginServices,
 } from '@kbn/presentation-util-plugin/public';
-import { ControlsServices } from './types';
-import { dataServiceFactory } from './data/data.story';
-import { unifiedSearchServiceFactory } from './unified_search/unified_search.story';
-import { overlaysServiceFactory } from './overlays/overlays.story';
-import { dataViewsServiceFactory } from './data_views/data_views.story';
-import { httpServiceFactory } from './http/http.stub';
-import { settingsServiceFactory } from './settings/settings.story';
-import { themeServiceFactory } from './theme/theme.story';
-
-import { optionsListServiceFactory } from './options_list/options_list.story';
 import { controlsServiceFactory } from './controls/controls.story';
+import { coreServiceFactory } from './core/core.story';
+import { dataServiceFactory } from './data/data.story';
+import { dataViewsServiceFactory } from './data_views/data_views.story';
 import { embeddableServiceFactory } from './embeddable/embeddable.story';
+import { httpServiceFactory } from './http/http.stub';
+import { optionsListServiceFactory } from './options_list/options_list.story';
+import { overlaysServiceFactory } from './overlays/overlays.story';
+import { settingsServiceFactory } from './settings/settings.story';
+import { storageServiceFactory } from './storage/storage_service.stub';
+import { ControlsServices } from './types';
+import { unifiedSearchServiceFactory } from './unified_search/unified_search.story';
 
 export const providers: PluginServiceProviders<ControlsServices> = {
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
@@ -32,9 +32,9 @@ export const providers: PluginServiceProviders<ControlsServices> = {
   unifiedSearch: new PluginServiceProvider(unifiedSearchServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
-  theme: new PluginServiceProvider(themeServiceFactory),
+  core: new PluginServiceProvider(coreServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
-
+  storage: new PluginServiceProvider(storageServiceFactory),
   controls: new PluginServiceProvider(controlsServiceFactory),
   optionsList: new PluginServiceProvider(optionsListServiceFactory),
 };

@@ -9,8 +9,6 @@ import { useState, useCallback, useEffect } from 'react';
 import type React from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 
-import type { KafkaTopicWhenType, ValueOf } from '../../common/types';
-
 export interface FormInput {
   validate: () => boolean;
 }
@@ -84,6 +82,72 @@ export function useInput(
   };
 }
 
+type MaybeSecret = string | { id: string } | undefined;
+
+export function useSecretInput(
+  initialValue: MaybeSecret,
+  validate?: (value: MaybeSecret) => string[] | undefined,
+  disabled: boolean = false
+) {
+  const [value, setValue] = useState<MaybeSecret>(initialValue);
+  const [errors, setErrors] = useState<string[] | undefined>();
+  const [hasChanged, setHasChanged] = useState(false);
+
+  const onChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+      const newValue = e.target.value;
+      setValue(newValue);
+      if (errors && validate && validate(newValue) === undefined) {
+        setErrors(undefined);
+      }
+    },
+    [errors, validate]
+  );
+
+  useEffect(() => {
+    if (hasChanged) {
+      return;
+    }
+    if (value !== initialValue) {
+      setHasChanged(true);
+    }
+  }, [hasChanged, value, initialValue]);
+
+  const isInvalid = errors !== undefined;
+
+  return {
+    value,
+    errors,
+    props: {
+      onChange,
+      value: typeof value === 'string' ? value : '',
+      isInvalid,
+      disabled,
+    },
+    formRowProps: {
+      error: errors,
+      isInvalid,
+      initialValue,
+      clear: () => {
+        setValue('');
+      },
+    },
+    cancelEdit: () => {
+      setValue(initialValue || '');
+    },
+    validate: () => {
+      if (validate) {
+        const newErrors = validate(value);
+        setErrors(newErrors);
+        return newErrors === undefined;
+      }
+
+      return true;
+    },
+    setValue,
+    hasChanged,
+  };
+}
 export function useRadioInput(defaultValue: string, disabled = false) {
   const [value, setValue] = useState<string>(defaultValue);
   const [hasChanged, setHasChanged] = useState(false);
@@ -239,25 +303,6 @@ export function useKeyValueInput(
     validate,
     disabled
   );
-}
-
-type Topic = Array<{
-  topic: string;
-  when?: {
-    type?: ValueOf<KafkaTopicWhenType>;
-    condition?: string;
-  };
-}>;
-
-export function useTopicsInput(
-  id: string,
-  defaultValue: Topic = [],
-  validate?: (
-    value: Topic
-  ) => Array<{ message: string; index: number; condition?: boolean }> | undefined,
-  disabled = false
-) {
-  return useCustomInput<Topic>(id, defaultValue, validate, disabled);
 }
 
 export function useNumberInput(

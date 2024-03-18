@@ -11,21 +11,20 @@ import React, { memo } from 'react';
 import type { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
-
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
-import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
+import { APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
-import { KibanaContextProvider, useKibana, useUiSetting$ } from '../common/lib/kibana';
+import { KibanaContextProvider, useKibana, useDarkMode } from '../common/lib/kibana';
 import type { State } from '../common/store';
 import type { StartServices } from '../types';
 import { PageRouter } from './routes';
@@ -52,21 +51,22 @@ const StartAppComponent: FC<StartAppComponent> = ({
   const services = useKibana().services;
   const {
     i18n,
+    analytics,
     application: { capabilities },
     uiActions,
     upselling,
   } = services;
 
-  const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+  const darkMode = useDarkMode();
 
   return (
-    <EuiErrorBoundary>
-      <i18n.Context>
-        <ManageGlobalToaster>
-          <ReduxStoreProvider store={store}>
-            <KibanaThemeProvider theme$={theme$}>
-              <EuiThemeProvider darkMode={darkMode}>
-                <AssistantProvider>
+    <KibanaErrorBoundaryProvider analytics={analytics}>
+      <KibanaErrorBoundary>
+        <i18n.Context>
+          <ManageGlobalToaster>
+            <ReduxStoreProvider store={store}>
+              <KibanaThemeProvider theme$={theme$}>
+                <EuiThemeProvider darkMode={darkMode}>
                   <MlCapabilitiesProvider>
                     <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                       <ManageUserInfo>
@@ -77,9 +77,11 @@ const StartAppComponent: FC<StartAppComponent> = ({
                             >
                               <UpsellingProvider upsellingService={upselling}>
                                 <DiscoverInTimelineContextProvider>
-                                  <PageRouter history={history} onAppLeave={onAppLeave}>
-                                    {children}
-                                  </PageRouter>
+                                  <AssistantProvider>
+                                    <PageRouter history={history} onAppLeave={onAppLeave}>
+                                      {children}
+                                    </PageRouter>
+                                  </AssistantProvider>
                                 </DiscoverInTimelineContextProvider>
                               </UpsellingProvider>
                             </CellActionsProvider>
@@ -88,15 +90,15 @@ const StartAppComponent: FC<StartAppComponent> = ({
                       </ManageUserInfo>
                     </UserPrivilegesProvider>
                   </MlCapabilitiesProvider>
-                </AssistantProvider>
-              </EuiThemeProvider>
-            </KibanaThemeProvider>
-            <ErrorToastDispatcher />
-            <GlobalToaster />
-          </ReduxStoreProvider>
-        </ManageGlobalToaster>
-      </i18n.Context>
-    </EuiErrorBoundary>
+                </EuiThemeProvider>
+              </KibanaThemeProvider>
+              <ErrorToastDispatcher />
+              <GlobalToaster />
+            </ReduxStoreProvider>
+          </ManageGlobalToaster>
+        </i18n.Context>
+      </KibanaErrorBoundary>
+    </KibanaErrorBoundaryProvider>
   );
 };
 

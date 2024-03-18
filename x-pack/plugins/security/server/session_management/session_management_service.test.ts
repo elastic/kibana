@@ -8,6 +8,7 @@
 import { Subject } from 'rxjs';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type {
   TaskManagerStartContract,
   TaskRunCreatorFunction,
@@ -21,7 +22,6 @@ import {
   SESSION_INDEX_CLEANUP_TASK_NAME,
   SessionManagementService,
 } from './session_management_service';
-import type { AuditServiceSetup } from '../audit';
 import { auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';

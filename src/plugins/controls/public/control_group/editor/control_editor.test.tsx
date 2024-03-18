@@ -6,29 +6,33 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { ReactWrapper } from 'enzyme';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { ControlGroupInput } from '../types';
-import { pluginServices } from '../../services';
-import { ControlEditor, EditControlProps } from './control_editor';
 import { OptionsListEmbeddableFactory } from '../..';
-import {
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
-} from '../../../common/control_group/control_group_constants';
-import { mockControlGroupContainer, mockOptionsListEmbeddable } from '../../../common/mocks';
-import { RangeSliderEmbeddableFactory } from '../../range_slider';
-import { ControlGroupContainerContext } from '../embeddable/control_group_container';
 import {
   OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
 } from '../../../common';
+import {
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+} from '../../../common/control_group/control_group_constants';
+import {
+  mockControlGroupContainer,
+  mockOptionsListEmbeddable,
+  mockRangeSliderEmbeddable,
+} from '../../../common/mocks';
+import { RangeSliderEmbeddableFactory } from '../../range_slider';
+import { pluginServices } from '../../services';
+import { ControlGroupContainerContext } from '../embeddable/control_group_container';
+import { ControlGroupInput } from '../types';
+import { ControlEditor, EditControlProps } from './control_editor';
 
 describe('Data control editor', () => {
   interface MountOptions {
@@ -96,10 +100,13 @@ describe('Data control editor', () => {
         await selectField('machine.os.raw');
       });
 
-      test('creates an options list control', async () => {
-        expect(findTestSubject(controlEditor, 'control-editor-type').text()).toEqual(
-          'Options list'
-        );
+      test('can only create an options list control', async () => {
+        expect(
+          findTestSubject(controlEditor, 'create__optionsListControl').instance()
+        ).toBeEnabled();
+        expect(
+          findTestSubject(controlEditor, 'create__rangeSliderControl').instance()
+        ).not.toBeEnabled();
       });
 
       test('has custom settings', async () => {
@@ -113,6 +120,8 @@ describe('Data control editor', () => {
           'optionsListControl__searchOptionsRadioGroup'
         );
         expect(searchOptions.exists()).toBe(true);
+        const options = searchOptions.find('div.euiRadioGroup__item');
+        expect(options.length).toBe(3);
       });
     });
 
@@ -122,18 +131,23 @@ describe('Data control editor', () => {
         await selectField('clientip');
       });
 
-      test('creates an options list control', async () => {
-        expect(findTestSubject(controlEditor, 'control-editor-type').text()).toEqual(
-          'Options list'
-        );
+      test('can only create an options list control', async () => {
+        expect(
+          findTestSubject(controlEditor, 'create__optionsListControl').instance()
+        ).toBeEnabled();
+        expect(
+          findTestSubject(controlEditor, 'create__rangeSliderControl').instance()
+        ).not.toBeEnabled();
       });
 
-      test('does not have custom search options', async () => {
+      test('has custom search options', async () => {
         const searchOptions = findTestSubject(
           controlEditor,
           'optionsListControl__searchOptionsRadioGroup'
         );
-        expect(searchOptions.exists()).toBe(false);
+        expect(searchOptions.exists()).toBe(true);
+        const options = searchOptions.find('div.euiRadioGroup__item');
+        expect(options.length).toBe(2);
       });
     });
 
@@ -143,15 +157,64 @@ describe('Data control editor', () => {
         await selectField('bytes');
       });
 
-      test('creates a range slider control', async () => {
-        expect(findTestSubject(controlEditor, 'control-editor-type').text()).toEqual(
-          'Range slider'
-        );
+      test('can create an options list or range slider control', async () => {
+        expect(
+          findTestSubject(controlEditor, 'create__optionsListControl').instance()
+        ).toBeEnabled();
+        expect(
+          findTestSubject(controlEditor, 'create__rangeSliderControl').instance()
+        ).toBeEnabled();
       });
 
-      test('does not have any custom settings', async () => {
-        const searchOptions = findTestSubject(controlEditor, 'control-editor-custom-settings');
+      test('defaults to options list creation', async () => {
+        expect(
+          findTestSubject(controlEditor, 'create__optionsListControl').prop('aria-pressed')
+        ).toBe(true);
+      });
+
+      test('when creating options list, has custom settings', async () => {
+        findTestSubject(controlEditor, 'create__optionsListControl').simulate('click');
+        const customSettings = findTestSubject(controlEditor, 'control-editor-custom-settings');
+        expect(customSettings.exists()).toBe(true);
+      });
+
+      test('when creating options list, does not have custom search options', async () => {
+        findTestSubject(controlEditor, 'create__optionsListControl').simulate('click');
+        const searchOptions = findTestSubject(
+          controlEditor,
+          'optionsListControl__searchOptionsRadioGroup'
+        );
         expect(searchOptions.exists()).toBe(false);
+      });
+
+      test('when creating range slider, does have custom settings', async () => {
+        findTestSubject(controlEditor, 'create__rangeSliderControl').simulate('click');
+        const searchOptions = findTestSubject(controlEditor, 'control-editor-custom-settings');
+        expect(searchOptions.exists()).toBe(true);
+      });
+
+      test('when creating range slider, validates step setting is greater than 0', async () => {
+        findTestSubject(controlEditor, 'create__rangeSliderControl').simulate('click');
+        const stepOption = findTestSubject(
+          controlEditor,
+          'rangeSliderControl__stepAdditionalSetting'
+        );
+        expect(stepOption.exists()).toBe(true);
+
+        const saveButton = findTestSubject(controlEditor, 'control-editor-save');
+        expect(saveButton.instance()).toBeEnabled();
+
+        stepOption.simulate('change', { target: { valueAsNumber: undefined } });
+        expect(saveButton.instance()).toBeDisabled();
+
+        stepOption.simulate('change', { target: { valueAsNumber: 0.5 } });
+        expect(saveButton.instance()).toBeEnabled();
+
+        stepOption.simulate('change', { target: { valueAsNumber: 0 } });
+        expect(saveButton.instance()).toBeDisabled();
+
+        stepOption.simulate('change', { target: { valueAsNumber: 1 } });
+        expect(saveButton.instance()).toBeEnabled();
       });
     });
 
@@ -174,15 +237,28 @@ describe('Data control editor', () => {
   });
 
   describe('editing existing options list control', () => {
-    const openOptionsListEditor = async (explicitInput?: Partial<OptionsListEmbeddableInput>) => {
-      const control = await mockOptionsListEmbeddable({
-        explicitInput: {
-          title: 'machine.os.raw',
-          dataViewId: stubDataView.id,
-          fieldName: 'machine.os.raw',
-          ...explicitInput,
-        },
-      });
+    const openEditor = async (
+      type: string,
+      explicitInput?: Partial<OptionsListEmbeddableInput>
+    ) => {
+      const control =
+        type === 'optionsList'
+          ? await mockOptionsListEmbeddable({
+              explicitInput: {
+                title: 'machine.os.raw',
+                dataViewId: stubDataView.id,
+                fieldName: 'machine.os.raw',
+                ...explicitInput,
+              },
+            })
+          : await mockRangeSliderEmbeddable({
+              explicitInput: {
+                title: 'bytes',
+                dataViewId: stubDataView.id,
+                fieldName: 'bytes',
+                ...explicitInput,
+              },
+            });
       await mountComponent({
         componentOptions: { isCreate: false, embeddable: control },
       });
@@ -190,23 +266,45 @@ describe('Data control editor', () => {
 
     describe('control title', () => {
       test('auto-fills default', async () => {
-        await openOptionsListEditor();
+        await openEditor('optionsList');
         const titleInput = findTestSubject(controlEditor, 'control-editor-title-input');
         expect(titleInput.prop('value')).toBe('machine.os.raw');
         expect(titleInput.prop('placeholder')).toBe('machine.os.raw');
       });
 
       test('auto-fills custom title', async () => {
-        await openOptionsListEditor({ title: 'Custom Title' });
+        await openEditor('optionsList', { title: 'Custom Title' });
         const titleInput = findTestSubject(controlEditor, 'control-editor-title-input');
         expect(titleInput.prop('value')).toBe('Custom Title');
         expect(titleInput.prop('placeholder')).toBe('machine.os.raw');
       });
     });
 
+    describe('control type', () => {
+      test('selects the default control type', async () => {
+        await openEditor('optionsList', { fieldName: 'bytes' });
+        expect(
+          findTestSubject(controlEditor, 'create__optionsListControl').prop('aria-pressed')
+        ).toBe(true);
+        expect(
+          findTestSubject(controlEditor, 'create__rangeSliderControl').prop('aria-pressed')
+        ).toBe(false);
+      });
+
+      test('selects the given, non-default control type', async () => {
+        await openEditor('rangeSlider', { fieldName: 'bytes' });
+        expect(
+          findTestSubject(controlEditor, 'create__optionsListControl').prop('aria-pressed')
+        ).toBe(false);
+        expect(
+          findTestSubject(controlEditor, 'create__rangeSliderControl').prop('aria-pressed')
+        ).toBe(true);
+      });
+    });
+
     describe('selection options', () => {
       test('selects default', async () => {
-        await openOptionsListEditor();
+        await openEditor('optionsList');
         const radioGroup = findTestSubject(
           controlEditor,
           'optionsListControl__selectionOptionsRadioGroup'
@@ -216,7 +314,7 @@ describe('Data control editor', () => {
       });
 
       test('selects given', async () => {
-        await openOptionsListEditor({ singleSelect: true });
+        await openEditor('optionsList', { singleSelect: true });
         const radioGroup = findTestSubject(
           controlEditor,
           'optionsListControl__selectionOptionsRadioGroup'
@@ -228,7 +326,7 @@ describe('Data control editor', () => {
 
     describe('search techniques', () => {
       test('selects default', async () => {
-        await openOptionsListEditor();
+        await openEditor('optionsList');
         const radioGroup = findTestSubject(
           controlEditor,
           'optionsListControl__searchOptionsRadioGroup'
@@ -238,7 +336,7 @@ describe('Data control editor', () => {
       });
 
       test('selects given', async () => {
-        await openOptionsListEditor({ searchTechnique: 'wildcard' });
+        await openEditor('optionsList', { searchTechnique: 'wildcard' });
         const radioGroup = findTestSubject(
           controlEditor,
           'optionsListControl__searchOptionsRadioGroup'

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { Store } from 'redux';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
@@ -16,14 +15,12 @@ import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { Direction } from '../../../../../common/search_strategy';
 import {
-  createSecuritySolutionStorageMock,
   defaultHeaders,
-  kibanaObservable,
   mockGlobalState,
   mockTimelineData,
-  SUB_PLUGINS_REDUCER,
+  createMockStore,
+  TestProviders,
 } from '../../../../common/mock';
-import { TestProviders } from '../../../../common/mock/test_providers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
@@ -31,11 +28,10 @@ import type { Props } from '.';
 import { StatefulBody } from '.';
 import type { Sort } from './sort';
 import { getDefaultControlColumn } from './control_columns';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions } from '../../../store';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 import type { State } from '../../../../common/store';
-import { createStore } from '../../../../common/store';
 import type { UseFieldBrowserOptionsProps } from '../../fields_browser';
 import type {
   DraggableProvided,
@@ -131,19 +127,6 @@ jest.mock('../../../../common/components/links', () => {
   };
 });
 
-jest.mock(
-  '../../../../detections/components/alerts_table/timeline_actions/use_open_alert_details',
-  () => {
-    return {
-      useOpenAlertDetailsAction: () => {
-        return {
-          alertDetailsActionItems: [],
-        };
-      },
-    };
-  }
-);
-
 // Prevent Resolver from rendering
 jest.mock('../../graph_overlay');
 
@@ -227,7 +210,10 @@ jest.mock('@hello-pangea/dnd', () => ({
 }));
 
 describe('Body', () => {
-  const getWrapper = async (childrenComponent: JSX.Element, store?: { store: Store<State> }) => {
+  const getWrapper = async (
+    childrenComponent: JSX.Element,
+    store?: { store: ReturnType<typeof createMockStore> }
+  ) => {
     const wrapper = mount(childrenComponent, {
       wrappingComponent: TestProviders,
       wrappingComponentProps: store ?? {},
@@ -314,7 +300,6 @@ describe('Body', () => {
       expect(wrapper.find('[data-test-subj="events"]').first().exists()).toEqual(true);
     });
     test('it renders a tooltip for timestamp', async () => {
-      const { storage } = createSecuritySolutionStorageMock();
       const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
       const state: State = {
         ...mockGlobalState,
@@ -331,7 +316,7 @@ describe('Body', () => {
         },
       };
 
-      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const store = createMockStore(state);
       const wrapper = await getWrapper(<StatefulBody {...props} />, { store });
 
       headersJustTimestamp.forEach(() => {
@@ -391,7 +376,6 @@ describe('Body', () => {
     });
 
     test('Add two notes to an event', async () => {
-      const { storage } = createSecuritySolutionStorageMock();
       const state: State = {
         ...mockGlobalState,
         timeline: {
@@ -407,7 +391,7 @@ describe('Body', () => {
         },
       };
 
-      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const store = createMockStore(state);
 
       const Proxy = (proxyProps: Props) => <StatefulBody {...proxyProps} />;
 

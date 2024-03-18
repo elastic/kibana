@@ -7,7 +7,7 @@
  */
 
 import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '@kbn/core/public';
+import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import {
   PHONE_TRIGGER,
@@ -64,12 +64,12 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
     core.application.register({
       id: 'uiActionsExplorer',
       title: 'Ui Actions Explorer',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
         return renderApp(
-          { uiActionsApi: depsStart.uiActions, openModal: coreStart.overlays.openModal },
+          { uiActionsStartService: depsStart.uiActions, openModal: coreStart.overlays.openModal },
           params
         );
       },
@@ -77,10 +77,8 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
 
     deps.developerExamples.register({
       appId: 'uiActionsExplorer',
-      title: 'Ui Actions & Triggers',
-      description: `Ui Actions can be used to make any part of your UI extensible. It has built in support for
-      context menus, but you can also render all actions attached to a given trigger however you like, just how
-      panel badges and panel notifications does.`,
+      title: 'Actions & Triggers',
+      description: `Learn how to extent Kibana's UI event system with actions and triggers. In the screen shot, plugins extend dashboard panels by attaching new actions to PANEL_BADGE_TRIGGER and CONTEXT_MENU_TRIGGER triggers.`,
       image,
       links: [
         {

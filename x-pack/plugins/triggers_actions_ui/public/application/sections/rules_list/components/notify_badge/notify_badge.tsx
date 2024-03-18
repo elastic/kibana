@@ -199,7 +199,6 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   }, [formattedSnoozeText, isLoading, isDisabled, openPopover]);
 
   const scheduledSnoozeButton = useMemo(() => {
-    // TODO: Implement scheduled snooze button
     return (
       <EuiButton
         size="s"

@@ -39,7 +39,7 @@ export const mockMsearchResponse: MsearchResponse = {
             _source: {
               metadata: {
                 source:
-                  '/Users/andrew.goldstein/Projects/forks/andrew-goldstein/kibana/x-pack/plugins/elastic_assistant/server/knowledge_base/esql/docs/source_commands/from.asciidoc',
+                  '/Users/andrew.goldstein/Projects/forks/andrew-goldstein/kibana/x-pack/plugins/elastic_assistant/server/knowledge_base/esql/documentation/source_commands/from.asciidoc',
               },
               vector: {
                 tokens: {

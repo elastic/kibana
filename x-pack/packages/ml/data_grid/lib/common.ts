@@ -9,10 +9,10 @@ import moment from 'moment-timezone';
 import { useMemo } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -83,7 +83,7 @@ export const euiDataGridToolbarSettings = {
  * @param {DataView} dataView - The Kibana data view.
  * @returns {string[]} - The array of field names from the data view.
  */
-export const getFieldsFromKibanaIndexPattern = (dataView: DataView): string[] => {
+export const getFieldsFromKibanaDataView = (dataView: DataView): string[] => {
   const allFields = dataView.fields.map((f) => f.name);
   const dataViewFields: string[] = allFields.filter((f) => {
     if (dataView.metaFields.includes(f)) {

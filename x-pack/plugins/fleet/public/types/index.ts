@@ -137,12 +137,15 @@ export type {
   KibanaSavedObjectType,
   GetInputsTemplatesRequest,
   GetInputsTemplatesResponse,
+  BulkGetAgentPoliciesResponse,
+  RegistryPolicyIntegrationTemplate,
 } from '../../common/types';
 export {
   entries,
   ElasticsearchAssetType,
   KibanaAssetType,
   InstallStatus,
+  SetupTechnology,
 } from '../../common/types';
 
 export * from './intra_app_route_state';

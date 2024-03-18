@@ -34,6 +34,8 @@ import { FlyoutPanels } from './flyout_panels';
 
 import { removeSpaces } from '../lib';
 
+import { noTimeFieldLabel, noTimeFieldValue } from '../lib/extract_time_fields';
+
 import {
   DataViewEditorContext,
   RollupIndicesCapsResponse,
@@ -98,14 +100,20 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     // Prefill with data if editData exists
     defaultValue: {
-      type: defaultTypeIsRollup ? INDEX_PATTERN_TYPE.ROLLUP : INDEX_PATTERN_TYPE.DEFAULT,
+      type:
+        defaultTypeIsRollup || editData?.type === INDEX_PATTERN_TYPE.ROLLUP
+          ? INDEX_PATTERN_TYPE.ROLLUP
+          : INDEX_PATTERN_TYPE.DEFAULT,
       isAdHoc: false,
       ...(editData
         ? {
             title: editData.getIndexPattern(),
             id: editData.id,
             name: editData.name,
-            ...(editData.timeFieldName
+            allowHidden: editData.getAllowHidden(),
+            ...(editData.timeFieldName === noTimeFieldValue
+              ? { timestampField: { label: noTimeFieldLabel, value: noTimeFieldValue } }
+              : editData.timeFieldName
               ? {
                   timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },
                 }
@@ -124,6 +132,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         timeFieldName: formData.timestampField?.value,
         id: formData.id,
         name: formData.name,
+        allowHidden: formData.allowHidden,
       };
 
       if (type === INDEX_PATTERN_TYPE.ROLLUP && rollupIndex) {
@@ -255,6 +264,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
           className="indexPatternEditor__form"
           error={form.getErrors()}
           isInvalid={form.isSubmitted && !form.isValid && form.getErrors().length}
+          data-validation-error={form.getErrors().length ? '1' : '0'}
+          data-test-subj="indexPatternEditorForm"
         >
           <UseField path="isAdHoc" />
           {indexPatternTypeSelect}
@@ -293,6 +304,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             onAllowHiddenChange={() => {
               form.getFields().title.validate();
             }}
+            defaultVisible={editData?.getAllowHidden()}
           />
         </Form>
         <Footer

@@ -25,8 +25,8 @@ describe('application-level user messages', () => {
       getApplicationUserMessages({
         visualizationType: undefined,
 
-        visualizationMap: {},
-        visualization: { activeId: '', state: {} },
+        visualization: undefined,
+        visualizationState: { activeId: '', state: {} },
         activeDatasource: {} as Datasource,
         activeDatasourceState: null,
         dataViews: {} as DataViewsState,
@@ -53,8 +53,8 @@ describe('application-level user messages', () => {
     expect(
       getApplicationUserMessages({
         visualizationType: '123',
-        visualizationMap: {},
-        visualization: { activeId: 'id_for_type_that_doesnt_exist', state: {} },
+        visualization: undefined,
+        visualizationState: { activeId: 'id_for_type_that_doesnt_exist', state: {} },
 
         activeDatasource: {} as Datasource,
         activeDatasourceState: null,
@@ -84,8 +84,8 @@ describe('application-level user messages', () => {
         activeDatasource: null,
 
         visualizationType: '123',
-        visualizationMap: { 'some-id': {} as Visualization },
-        visualization: { activeId: 'some-id', state: {} },
+        visualization: {} as Visualization,
+        visualizationState: { activeId: 'some-id', state: {} },
         activeDatasourceState: null,
         dataViews: {} as DataViewsState,
         core: {} as CoreStart,
@@ -138,8 +138,8 @@ describe('application-level user messages', () => {
 
     const irrelevantProps = {
       dataViews: {} as DataViewsState,
-      visualizationMap: { foo: {} as Visualization },
-      visualization: { activeId: 'foo', state: {} },
+      visualization: {} as Visualization,
+      visualizationState: { activeId: 'foo', state: {} },
     };
 
     it('generates error if missing an index pattern', () => {

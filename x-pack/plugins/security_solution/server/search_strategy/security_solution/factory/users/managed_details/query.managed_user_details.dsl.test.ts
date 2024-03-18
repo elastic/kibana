@@ -11,8 +11,9 @@ import { buildManagedUserDetailsQuery } from './query.managed_user_details.dsl';
 
 export const mockOptions: ManagedUserDetailsRequestOptions = {
   defaultIndex: ['logs-*'],
-  userName: 'test-user-name',
+  userEmail: ['test-user-name@mail.com'],
   factoryQueryType: UsersQueries.managedDetails,
+  userName: 'test-user-name',
 };
 
 describe('buildManagedUserDetailsQuery', () => {

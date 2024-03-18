@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { hostsUrl, NETWORK_URL, USERS_URL } from '../urls/navigation';
+import { hostsUrl, networkUrl, usersUrl } from '../urls/navigation';
 import { EVENT_CONTAINER_TABLE_NOT_LOADING } from './alerts';
 import { ALL_HOSTS_TAB, ALL_HOSTS_TABLE, UNIQUE_IPS_VISUALIZATIONS } from './hosts/all_hosts';
 import { HOST_BY_RISK_TABLE, RISK_DETAILS_NAV } from './hosts/host_risk';
@@ -86,7 +86,6 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
         altInspectId: '[data-test-subj="events-viewer-panel"]',
         id: EVENT_CONTAINER_TABLE_NOT_LOADING,
       },
-
       {
         title: 'Host risk',
         tab: RISK_DETAILS_NAV,
@@ -135,7 +134,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
   },
   {
     pageName: 'Network',
-    url: NETWORK_URL,
+    url: networkUrl('flows'),
     lensVisualizations: [
       {
         title: 'Network events',
@@ -222,7 +221,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
   },
   {
     pageName: 'Users',
-    url: USERS_URL,
+    url: usersUrl('allUsers'),
     lensVisualizations: [
       {
         title: 'Users',

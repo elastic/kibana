@@ -1,5 +1,5 @@
 {
-  "journeyName": "POST /api/status",
+  "journeyName": "GET /api/status",
   "scalabilitySetup": {
     "responseTimeThreshold": {
       "threshold1": 1000,

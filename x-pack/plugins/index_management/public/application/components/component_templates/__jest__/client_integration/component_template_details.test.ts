@@ -15,10 +15,12 @@ const { setup } = pageHelpers.componentTemplateDetails;
 
 const COMPONENT_TEMPLATE: ComponentTemplateDeserialized = {
   name: 'comp-1',
+  deprecated: true,
   template: {
     mappings: { properties: { ip_address: { type: 'ip' } } },
     aliases: { mydata: {} },
     settings: { number_of_shards: 1 },
+    lifecycle: { enabled: true, data_retention: '4d' },
   },
   version: 1,
   _meta: { description: 'component template test' },
@@ -61,6 +63,9 @@ describe('<ComponentTemplateDetails />', () => {
       // Verify footer does not display since "actions" prop was not provided
       expect(exists('footer')).toBe(false);
 
+      // Verify the deprecated badge is displayed
+      expect(exists('deprecatedComponentTemplateBadge')).toBe(true);
+
       // Verify tabs exist
       expect(exists('settingsTab')).toBe(true);
       expect(exists('mappingsTab')).toBe(true);
@@ -72,6 +77,7 @@ describe('<ComponentTemplateDetails />', () => {
       expect(exists('summaryTabContent.usedByTitle')).toBe(true);
       expect(exists('summaryTabContent.versionTitle')).toBe(true);
       expect(exists('summaryTabContent.metaTitle')).toBe(true);
+      expect(exists('summaryTabContent.dataRetentionTitle')).toBe(true);
 
       // [Settings tab] Navigate to tab and verify content
       act(() => {

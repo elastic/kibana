@@ -16,12 +16,13 @@ import {
   createResultSchema,
   searchOptionsSchemas,
 } from '@kbn/content-management-utils';
+import { DataViewType } from '../..';
 import { serializedFieldFormatSchema, fieldSpecSchema } from '../../schemas';
 
 const dataViewAttributesSchema = schema.object(
   {
     title: schema.string(),
-    type: schema.maybe(schema.literal('rollup')),
+    type: schema.maybe(schema.literal(DataViewType.ROLLUP)),
     timeFieldName: schema.maybe(schema.string()),
     sourceFilters: schema.maybe(
       schema.arrayOf(
@@ -46,6 +47,7 @@ const dataViewAttributesSchema = schema.object(
     allowNoIndex: schema.maybe(schema.boolean()),
     runtimeFieldMap: schema.maybe(schema.any()),
     name: schema.maybe(schema.string()),
+    allowHidden: schema.maybe(schema.boolean()),
   },
   { unknowns: 'forbid' }
 );

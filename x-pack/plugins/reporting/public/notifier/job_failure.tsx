@@ -11,8 +11,9 @@ import React from 'react';
 import { DocLinksStart, ThemeServiceStart, ToastInput } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import * as errors from '@kbn/reporting-common/errors';
-import type { JobSummary, ManagementLinkFn } from '../../common/types';
+import { ManagementLinkFn } from '@kbn/reporting-common/types';
 import { sharedI18nTexts } from '../shared_i18n_texts';
+import type { JobSummary } from '../types';
 
 export const getFailureToast = (
   errorText: string,

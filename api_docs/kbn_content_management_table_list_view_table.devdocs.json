@@ -2,26 +2,10 @@
   "id": "@kbn/content-management-table-list-view-table",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/content-management-table-list-view-table",
-        "id": "def-common.TableListViewKibanaProvider",
+        "id": "def-public.TableListViewKibanaProvider",
         "type": "Function",
         "tags": [],
         "label": "TableListViewKibanaProvider",
@@ -32,9 +16,9 @@
           "({ children, ...services }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/content-management-table-list-view-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnContentManagementTableListViewTablePluginApi",
-            "section": "def-common.TableListViewKibanaDependencies",
+            "section": "def-public.TableListViewKibanaDependencies",
             "text": "TableListViewKibanaDependencies"
           },
           ">) => JSX.Element"
@@ -45,7 +29,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewKibanaProvider.$1",
+            "id": "def-public.TableListViewKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  ...services\n}",
@@ -54,9 +38,9 @@
               "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/content-management-table-list-view-table",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnContentManagementTableListViewTablePluginApi",
-                "section": "def-common.TableListViewKibanaDependencies",
+                "section": "def-public.TableListViewKibanaDependencies",
                 "text": "TableListViewKibanaDependencies"
               },
               ">"
@@ -72,7 +56,7 @@
       },
       {
         "parentPluginId": "@kbn/content-management-table-list-view-table",
-        "id": "def-common.TableListViewProvider",
+        "id": "def-public.TableListViewProvider",
         "type": "Function",
         "tags": [],
         "label": "TableListViewProvider",
@@ -90,7 +74,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewProvider.$1",
+            "id": "def-public.TableListViewProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{ children, ...services }",
@@ -111,7 +95,7 @@
       },
       {
         "parentPluginId": "@kbn/content-management-table-list-view-table",
-        "id": "def-common.TableListViewTable",
+        "id": "def-public.TableListViewTable",
         "type": "Function",
         "tags": [],
         "label": "TableListViewTable",
@@ -119,18 +103,18 @@
         "signature": [
           "<T extends ",
           {
-            "pluginId": "@kbn/content-management-table-list-view-table",
+            "pluginId": "@kbn/content-management-table-list-view-common",
             "scope": "common",
-            "docId": "kibKbnContentManagementTableListViewTablePluginApi",
+            "docId": "kibKbnContentManagementTableListViewCommonPluginApi",
             "section": "def-common.UserContentCommonSchema",
             "text": "UserContentCommonSchema"
           },
-          ">({ tableCaption, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, rowItemActions, findItems, createItem, editItem, itemIsEditable, deleteItems, getDetailViewLink, onClickTitle, id: listingId, contentEditor, titleColumnName, withoutPageTemplateWrapper, onFetchSuccess, refreshListBouncer, setPageDataTestSubject, }: ",
+          ">({ tableCaption, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, rowItemActions, findItems, createItem, editItem, deleteItems, getDetailViewLink, getOnClickTitle, id: listingId, contentEditor, titleColumnName, withoutPageTemplateWrapper, onFetchSuccess, refreshListBouncer, setPageDataTestSubject, }: ",
           {
             "pluginId": "@kbn/content-management-table-list-view-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnContentManagementTableListViewTablePluginApi",
-            "section": "def-common.TableListViewTableProps",
+            "section": "def-public.TableListViewTableProps",
             "text": "TableListViewTableProps"
           },
           "<T>) => JSX.Element | null"
@@ -142,7 +126,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTable.$1",
+            "id": "def-public.TableListViewTable.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -150,9 +134,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/content-management-table-list-view-table",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnContentManagementTableListViewTablePluginApi",
-                "section": "def-common.TableListViewTableProps",
+                "section": "def-public.TableListViewTableProps",
                 "text": "TableListViewTableProps"
               },
               "<T>"
@@ -168,7 +152,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/content-management-table-list-view-table",
-        "id": "def-common.TableListViewKibanaDependencies",
+        "id": "def-public.TableListViewKibanaDependencies",
         "type": "Interface",
         "tags": [],
         "label": "TableListViewKibanaDependencies",
@@ -181,7 +165,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewKibanaDependencies.core",
+            "id": "def-public.TableListViewKibanaDependencies.core",
             "type": "Object",
             "tags": [],
             "label": "core",
@@ -233,7 +217,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewKibanaDependencies.toMountPoint",
+            "id": "def-public.TableListViewKibanaDependencies.toMountPoint",
             "type": "Function",
             "tags": [],
             "label": "toMountPoint",
@@ -259,7 +243,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-table-list-view-table",
-                "id": "def-common.TableListViewKibanaDependencies.toMountPoint.$1",
+                "id": "def-public.TableListViewKibanaDependencies.toMountPoint.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "node",
@@ -274,7 +258,7 @@
               },
               {
                 "parentPluginId": "@kbn/content-management-table-list-view-table",
-                "id": "def-common.TableListViewKibanaDependencies.toMountPoint.$2",
+                "id": "def-public.TableListViewKibanaDependencies.toMountPoint.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -285,7 +269,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/content-management-table-list-view-table",
-                    "id": "def-common.TableListViewKibanaDependencies.toMountPoint.$2.theme$",
+                    "id": "def-public.TableListViewKibanaDependencies.toMountPoint.$2.theme$",
                     "type": "Object",
                     "tags": [],
                     "label": "theme$",
@@ -305,7 +289,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewKibanaDependencies.savedObjectsTagging",
+            "id": "def-public.TableListViewKibanaDependencies.savedObjectsTagging",
             "type": "Object",
             "tags": [],
             "label": "savedObjectsTagging",
@@ -314,7 +298,13 @@
             ],
             "signature": [
               "{ ui: { components: { TagList: React.FC<{ object: { references: ",
-              "SavedObjectsReference",
+              {
+                "pluginId": "@kbn/content-management-content-editor",
+                "scope": "common",
+                "docId": "kibKbnContentManagementContentEditorPluginApi",
+                "section": "def-common.SavedObjectsReference",
+                "text": "SavedObjectsReference"
+              },
               "[]; }; onClick?: ((tag: ",
               "Tag",
               ") => void) | undefined; tagRender?: ((tag: ",
@@ -326,7 +316,13 @@
               "[]; valid: boolean; }>; getTagList: () => ",
               "Tag",
               "[]; getTagIdsFromReferences: (references: ",
-              "SavedObjectsReference",
+              {
+                "pluginId": "@kbn/content-management-content-editor",
+                "scope": "common",
+                "docId": "kibKbnContentManagementContentEditorPluginApi",
+                "section": "def-common.SavedObjectsReference",
+                "text": "SavedObjectsReference"
+              },
               "[]) => string[]; }; } | undefined"
             ],
             "path": "packages/content-management/table_list_view_table/src/services.tsx",
@@ -335,7 +331,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewKibanaDependencies.FormattedRelative",
+            "id": "def-public.TableListViewKibanaDependencies.FormattedRelative",
             "type": "Object",
             "tags": [],
             "label": "FormattedRelative",
@@ -354,7 +350,7 @@
       },
       {
         "parentPluginId": "@kbn/content-management-table-list-view-table",
-        "id": "def-common.TableListViewTableProps",
+        "id": "def-public.TableListViewTableProps",
         "type": "Interface",
         "tags": [],
         "label": "TableListViewTableProps",
@@ -362,9 +358,9 @@
         "signature": [
           {
             "pluginId": "@kbn/content-management-table-list-view-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnContentManagementTableListViewTablePluginApi",
-            "section": "def-common.TableListViewTableProps",
+            "section": "def-public.TableListViewTableProps",
             "text": "TableListViewTableProps"
           },
           "<T>"
@@ -375,7 +371,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.entityName",
+            "id": "def-public.TableListViewTableProps.entityName",
             "type": "string",
             "tags": [],
             "label": "entityName",
@@ -386,7 +382,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.entityNamePlural",
+            "id": "def-public.TableListViewTableProps.entityNamePlural",
             "type": "string",
             "tags": [],
             "label": "entityNamePlural",
@@ -397,7 +393,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.listingLimit",
+            "id": "def-public.TableListViewTableProps.listingLimit",
             "type": "number",
             "tags": [],
             "label": "listingLimit",
@@ -408,7 +404,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.initialFilter",
+            "id": "def-public.TableListViewTableProps.initialFilter",
             "type": "string",
             "tags": [],
             "label": "initialFilter",
@@ -422,7 +418,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.initialPageSize",
+            "id": "def-public.TableListViewTableProps.initialPageSize",
             "type": "number",
             "tags": [],
             "label": "initialPageSize",
@@ -433,7 +429,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.emptyPrompt",
+            "id": "def-public.TableListViewTableProps.emptyPrompt",
             "type": "Object",
             "tags": [],
             "label": "emptyPrompt",
@@ -447,7 +443,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.customTableColumn",
+            "id": "def-public.TableListViewTableProps.customTableColumn",
             "type": "CompoundType",
             "tags": [],
             "label": "customTableColumn",
@@ -464,7 +460,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.urlStateEnabled",
+            "id": "def-public.TableListViewTableProps.urlStateEnabled",
             "type": "CompoundType",
             "tags": [],
             "label": "urlStateEnabled",
@@ -478,7 +474,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.headingId",
+            "id": "def-public.TableListViewTableProps.headingId",
             "type": "string",
             "tags": [],
             "label": "headingId",
@@ -494,7 +490,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.id",
+            "id": "def-public.TableListViewTableProps.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -510,7 +506,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.rowItemActions",
+            "id": "def-public.TableListViewTableProps.rowItemActions",
             "type": "Function",
             "tags": [],
             "label": "rowItemActions",
@@ -521,9 +517,9 @@
               "((obj: T) => ",
               {
                 "pluginId": "@kbn/content-management-table-list-view-table",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnContentManagementTableListViewTablePluginApi",
-                "section": "def-common.RowActions",
+                "section": "def-public.RowActions",
                 "text": "RowActions"
               },
               " | undefined) | undefined"
@@ -534,7 +530,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-table-list-view-table",
-                "id": "def-common.TableListViewTableProps.rowItemActions.$1",
+                "id": "def-public.TableListViewTableProps.rowItemActions.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "obj",
@@ -552,7 +548,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.findItems",
+            "id": "def-public.TableListViewTableProps.findItems",
             "type": "Function",
             "tags": [],
             "label": "findItems",
@@ -570,7 +566,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-table-list-view-table",
-                "id": "def-common.TableListViewTableProps.findItems.$1",
+                "id": "def-public.TableListViewTableProps.findItems.$1",
                 "type": "string",
                 "tags": [],
                 "label": "searchQuery",
@@ -585,7 +581,7 @@
               },
               {
                 "parentPluginId": "@kbn/content-management-table-list-view-table",
-                "id": "def-common.TableListViewTableProps.findItems.$2",
+                "id": "def-public.TableListViewTableProps.findItems.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "refs",
@@ -596,7 +592,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/content-management-table-list-view-table",
-                    "id": "def-common.TableListViewTableProps.findItems.$2.references",
+                    "id": "def-public.TableListViewTableProps.findItems.$2.references",
                     "type": "Array",
                     "tags": [],
                     "label": "references",
@@ -611,7 +607,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/content-management-table-list-view-table",
-                    "id": "def-common.TableListViewTableProps.findItems.$2.referencesToExclude",
+                    "id": "def-public.TableListViewTableProps.findItems.$2.referencesToExclude",
                     "type": "Array",
                     "tags": [],
                     "label": "referencesToExclude",
@@ -631,7 +627,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.getDetailViewLink",
+            "id": "def-public.TableListViewTableProps.getDetailViewLink",
             "type": "Function",
             "tags": [],
             "label": "getDetailViewLink",
@@ -647,7 +643,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-table-list-view-table",
-                "id": "def-common.TableListViewTableProps.getDetailViewLink.$1",
+                "id": "def-public.TableListViewTableProps.getDetailViewLink.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "entity",
@@ -665,15 +661,15 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.onClickTitle",
+            "id": "def-public.TableListViewTableProps.getOnClickTitle",
             "type": "Function",
             "tags": [],
-            "label": "onClickTitle",
+            "label": "getOnClickTitle",
             "description": [
               "Handler to execute when clicking the item title"
             ],
             "signature": [
-              "((item: T) => void) | undefined"
+              "((item: T) => (() => void) | undefined) | undefined"
             ],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
@@ -681,7 +677,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-table-list-view-table",
-                "id": "def-common.TableListViewTableProps.onClickTitle.$1",
+                "id": "def-public.TableListViewTableProps.getOnClickTitle.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "item",
@@ -699,7 +695,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.createItem",
+            "id": "def-public.TableListViewTableProps.createItem",
             "type": "Function",
             "tags": [],
             "label": "createItem",
@@ -715,7 +711,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.deleteItems",
+            "id": "def-public.TableListViewTableProps.deleteItems",
             "type": "Function",
             "tags": [],
             "label": "deleteItems",
@@ -729,7 +725,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-table-list-view-table",
-                "id": "def-common.TableListViewTableProps.deleteItems.$1",
+                "id": "def-public.TableListViewTableProps.deleteItems.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "items",
@@ -747,7 +743,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.editItem",
+            "id": "def-public.TableListViewTableProps.editItem",
             "type": "Function",
             "tags": [],
             "label": "editItem",
@@ -763,7 +759,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-table-list-view-table",
-                "id": "def-common.TableListViewTableProps.editItem.$1",
+                "id": "def-public.TableListViewTableProps.editItem.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "item",
@@ -781,41 +777,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.itemIsEditable",
-            "type": "Function",
-            "tags": [],
-            "label": "itemIsEditable",
-            "description": [
-              "\nHandler to set edit action visiblity, and content editor readonly state per item. If not provided all non-managed items are considered editable. Note: Items with the managed property set to true will always be non-editable."
-            ],
-            "signature": [
-              "((item: T) => boolean) | undefined"
-            ],
-            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/content-management-table-list-view-table",
-                "id": "def-common.TableListViewTableProps.itemIsEditable.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "item",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.titleColumnName",
+            "id": "def-public.TableListViewTableProps.titleColumnName",
             "type": "string",
             "tags": [],
             "label": "titleColumnName",
@@ -831,7 +793,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.withoutPageTemplateWrapper",
+            "id": "def-public.TableListViewTableProps.withoutPageTemplateWrapper",
             "type": "CompoundType",
             "tags": [
               "note",
@@ -864,7 +826,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.contentEditor",
+            "id": "def-public.TableListViewTableProps.contentEditor",
             "type": "Object",
             "tags": [],
             "label": "contentEditor",
@@ -878,7 +840,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.tableCaption",
+            "id": "def-public.TableListViewTableProps.tableCaption",
             "type": "string",
             "tags": [],
             "label": "tableCaption",
@@ -889,7 +851,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.refreshListBouncer",
+            "id": "def-public.TableListViewTableProps.refreshListBouncer",
             "type": "CompoundType",
             "tags": [],
             "label": "refreshListBouncer",
@@ -905,7 +867,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.onFetchSuccess",
+            "id": "def-public.TableListViewTableProps.onFetchSuccess",
             "type": "Function",
             "tags": [],
             "label": "onFetchSuccess",
@@ -921,7 +883,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.TableListViewTableProps.setPageDataTestSubject",
+            "id": "def-public.TableListViewTableProps.setPageDataTestSubject",
             "type": "Function",
             "tags": [],
             "label": "setPageDataTestSubject",
@@ -935,7 +897,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-table-list-view-table",
-                "id": "def-common.TableListViewTableProps.setPageDataTestSubject.$1",
+                "id": "def-public.TableListViewTableProps.setPageDataTestSubject.$1",
                 "type": "string",
                 "tags": [],
                 "label": "subject",
@@ -953,109 +915,19 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/content-management-table-list-view-table",
-        "id": "def-common.UserContentCommonSchema",
-        "type": "Interface",
-        "tags": [],
-        "label": "UserContentCommonSchema",
-        "description": [],
-        "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.UserContentCommonSchema.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.UserContentCommonSchema.updatedAt",
-            "type": "string",
-            "tags": [],
-            "label": "updatedAt",
-            "description": [],
-            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.UserContentCommonSchema.managed",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "managed",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.UserContentCommonSchema.references",
-            "type": "Array",
-            "tags": [],
-            "label": "references",
-            "description": [],
-            "signature": [
-              "SavedObjectsReference",
-              "[]"
-            ],
-            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.UserContentCommonSchema.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-common.UserContentCommonSchema.attributes",
-            "type": "Object",
-            "tags": [],
-            "label": "attributes",
-            "description": [],
-            "signature": [
-              "{ title: string; description?: string | undefined; }"
-            ],
-            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/content-management-table-list-view-table",
-        "id": "def-common.RowActions",
+        "id": "def-public.RowActions",
         "type": "Type",
         "tags": [],
         "label": "RowActions",
         "description": [],
         "signature": [
-          "{ delete?: { enabled: boolean; reason?: string | undefined; } | undefined; }"
+          "{ delete?: { enabled: boolean; reason?: string | undefined; } | undefined; edit?: { enabled: boolean; reason?: string | undefined; } | undefined; }"
         ],
         "path": "packages/content-management/table_list_view_table/src/types.ts",
         "deprecated": false,
@@ -1063,6 +935,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

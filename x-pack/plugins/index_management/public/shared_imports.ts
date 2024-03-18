@@ -25,7 +25,10 @@ export {
   PageLoading,
   PageError,
   SectionLoading,
-  EuiCodeEditor,
+  useAuthorizationContext,
+  NotAuthorizedSection,
+  WithPrivileges,
+  AuthorizationProvider,
 } from '@kbn/es-ui-shared-plugin/public';
 
 export type {
@@ -64,6 +67,7 @@ export {
   NumericField,
   JsonEditorField,
   ComboBoxField,
+  RadioGroupField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 export { isJSON } from '@kbn/es-ui-shared-plugin/static/validators/string';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,16 +22,17 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiCallOut,
-  EuiText,
   EuiTextArea,
 } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
+import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 
-import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/constants/validation_messages';
+import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/validators/messages';
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
-import { TransformId } from '../../../../../../common/types/transform';
+import type { TransformId } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
@@ -45,25 +47,25 @@ import {
   useGetTransforms,
   useGetTransformsPreview,
 } from '../../../../hooks';
-import { SearchItems } from '../../../../hooks/use_search_items';
-import { StepDetailsTimeField } from './step_details_time_field';
+import type { SearchItems } from '../../../../hooks/use_search_items';
 import {
   getTransformConfigQuery,
   getPreviewTransformRequestBody,
   isTransformIdValid,
 } from '../../../../common';
-import { EsIndexName } from './common';
+import type { EsIndexName } from './common';
 import {
-  continuousModeDelayValidator,
+  isContinuousModeDelay,
+  isRetentionPolicyMaxAge,
+  isTransformWizardFrequency,
   integerRangeMinus1To100Validator,
-  retentionPolicyMaxAgeValidator,
-  transformFrequencyValidator,
   transformSettingsPageSearchSizeValidator,
 } from '../../../../common/validators';
-import { StepDefineExposedState } from '../step_define/common';
+import type { StepDefineExposedState } from '../step_define/common';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
-import { getDefaultStepDetailsState, StepDetailsExposedState } from './common';
+import type { StepDetailsExposedState } from './common';
+import { getDefaultStepDetailsState } from './common';
 
 interface StepDetailsFormProps {
   overrides?: StepDetailsExposedState;
@@ -88,6 +90,9 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [destinationIndex, setDestinationIndex] = useState<EsIndexName>(
       defaults.destinationIndex
     );
+    const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(
+      destinationIndex !== undefined && destinationIndex === transformId
+    );
     const [destinationIngestPipeline, setDestinationIngestPipeline] = useState<string>(
       defaults.destinationIngestPipeline
     );
@@ -103,8 +108,37 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [createDataView, setCreateDataView] = useState(
       canCreateDataView === false ? false : defaults.createDataView
     );
-    const [dataViewAvailableTimeFields, setDataViewAvailableTimeFields] = useState<string[]>([]);
     const [dataViewTimeField, setDataViewTimeField] = useState<string | undefined>();
+
+    const previewRequest = useMemo(() => {
+      const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
+      const transformConfigQuery = getTransformConfigQuery(searchQuery);
+      return getPreviewTransformRequestBody(
+        searchItems.dataView,
+        transformConfigQuery,
+        partialPreviewRequest,
+        stepDefineState.runtimeMappings
+      );
+    }, [searchItems.dataView, stepDefineState]);
+
+    const { error: transformsPreviewError, data: transformPreview } =
+      useGetTransformsPreview(previewRequest);
+
+    const destIndexAvailableTimeFields = useMemo<string[]>(() => {
+      if (!transformPreview) return [];
+      const properties = transformPreview.generated_dest_index.mappings.properties;
+      const timeFields: string[] = Object.keys(properties).filter(
+        (col) => properties[col].type === 'date'
+      );
+      return timeFields;
+    }, [transformPreview]);
+
+    useEffect(
+      function resetDataViewTimeField() {
+        setDataViewTimeField(destIndexAvailableTimeFields[0]);
+      },
+      [destIndexAvailableTimeFields]
+    );
 
     const onTimeFieldChanged = React.useCallback(
       (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -115,11 +149,11 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         }
         // Find the time field based on the selected value
         // this is to account for undefined when user chooses not to use a date field
-        const timeField = dataViewAvailableTimeFields.find((col) => col === value);
+        const timeField = destIndexAvailableTimeFields.find((col) => col === value);
 
         setDataViewTimeField(timeField);
       },
-      [setDataViewTimeField, dataViewAvailableTimeFields]
+      [setDataViewTimeField, destIndexAvailableTimeFields]
     );
 
     const {
@@ -142,31 +176,6 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       // custom comparison
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [transformsError]);
-
-    const previewRequest = useMemo(() => {
-      const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
-      const transformConfigQuery = getTransformConfigQuery(searchQuery);
-      return getPreviewTransformRequestBody(
-        searchItems.dataView,
-        transformConfigQuery,
-        partialPreviewRequest,
-        stepDefineState.runtimeMappings
-      );
-    }, [searchItems.dataView, stepDefineState]);
-    const { error: transformsPreviewError, data: transformPreview } =
-      useGetTransformsPreview(previewRequest);
-
-    useEffect(() => {
-      if (transformPreview) {
-        const properties = transformPreview.generated_dest_index.mappings.properties;
-        const timeFields: string[] = Object.keys(properties).filter(
-          (col) => properties[col].type === 'date'
-        );
-
-        setDataViewAvailableTimeFields(timeFields);
-        setDataViewTimeField(timeFields[0]);
-      }
-    }, [transformPreview]);
 
     useEffect(() => {
       if (transformsPreviewError !== null) {
@@ -239,24 +248,24 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       }
     }, [dataViewTitlesError]);
 
-    const dateFieldNames = searchItems.dataView.fields
+    const sourceIndexDateFieldNames = searchItems.dataView.fields
       .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
       .map((f) => f.name)
       .sort();
 
     // Continuous Mode
-    const isContinuousModeAvailable = dateFieldNames.length > 0;
+    const isContinuousModeAvailable = sourceIndexDateFieldNames.length > 0;
     const [isContinuousModeEnabled, setContinuousModeEnabled] = useState(
       defaults.isContinuousModeEnabled
     );
     const [continuousModeDateField, setContinuousModeDateField] = useState(
-      isContinuousModeAvailable ? dateFieldNames[0] : ''
+      isContinuousModeAvailable ? sourceIndexDateFieldNames[0] : ''
     );
     const [continuousModeDelay, setContinuousModeDelay] = useState(defaults.continuousModeDelay);
-    const isContinuousModeDelayValid = continuousModeDelayValidator(continuousModeDelay);
+    const isContinuousModeDelayValid = isContinuousModeDelay(continuousModeDelay);
 
     // Retention Policy
-    const isRetentionPolicyAvailable = dateFieldNames.length > 0;
+    const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
     const [isRetentionPolicyEnabled, setRetentionPolicyEnabled] = useState(
       defaults.isRetentionPolicyEnabled
     );
@@ -267,17 +276,29 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       defaults.retentionPolicyMaxAge
     );
     const retentionPolicyMaxAgeEmpty = retentionPolicyMaxAge === '';
-    const isRetentionPolicyMaxAgeValid = retentionPolicyMaxAgeValidator(retentionPolicyMaxAge);
+    const isRetentionPolicyMaxAgeValid = isRetentionPolicyMaxAge(retentionPolicyMaxAge);
 
-    // Reset retention policy settings when the user disables the whole option
     useEffect(() => {
+      // Reset retention policy settings when the user disables the whole option
       if (!isRetentionPolicyEnabled) {
         setRetentionPolicyDateField(
-          isRetentionPolicyAvailable ? dataViewAvailableTimeFields[0] : ''
+          isRetentionPolicyAvailable ? destIndexAvailableTimeFields[0] : ''
         );
         setRetentionPolicyMaxAge('');
       }
-    }, [isRetentionPolicyEnabled]);
+
+      // When retention policy is first enabled, pick a default option
+      if (
+        isRetentionPolicyAvailable &&
+        isRetentionPolicyEnabled &&
+        retentionPolicyDateField === ''
+      ) {
+        // If a time field '@timestamp' exists, prioritize that
+        const prioritizeTimestamp = destIndexAvailableTimeFields.find((d) => d === '@timestamp');
+        // else pick the first available option
+        setRetentionPolicyDateField(prioritizeTimestamp ?? destIndexAvailableTimeFields[0]);
+      }
+    }, [isRetentionPolicyEnabled, isRetentionPolicyAvailable, destIndexAvailableTimeFields]);
 
     const transformIdExists = transformIds.some((id) => transformId === id);
     const transformIdEmpty = transformId === '';
@@ -289,7 +310,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const dataViewTitleExists = dataViewTitles?.some((name) => destinationIndex === name) ?? false;
 
     const [transformFrequency, setTransformFrequency] = useState(defaults.transformFrequency);
-    const isTransformFrequencyValid = transformFrequencyValidator(transformFrequency);
+    const isTransformFrequencyValid = isTransformWizardFrequency(transformFrequency);
 
     const [transformSettingsMaxPageSearchSize, setTransformSettingsMaxPageSearchSize] = useState<
       number | undefined
@@ -378,6 +399,13 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       /* eslint-enable react-hooks/exhaustive-deps */
     ]);
 
+    useEffect(() => {
+      if (destIndexSameAsId === true && !transformIdEmpty && transformIdValid) {
+        setDestinationIndex(transformId);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [destIndexSameAsId, transformId]);
+
     return (
       <div data-test-subj="transformStepDetailsForm">
         <EuiForm>
@@ -439,51 +467,31 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             />
           </EuiFormRow>
 
-          <EuiFormRow
-            label={i18n.translate('xpack.transform.stepDetailsForm.destinationIndexLabel', {
-              defaultMessage: 'Destination index',
-            })}
-            isInvalid={!indexNameEmpty && !indexNameValid}
-            helpText={
-              indexNameExists &&
-              i18n.translate('xpack.transform.stepDetailsForm.destinationIndexHelpText', {
+          <DestinationIndexForm
+            createIndexLink={esIndicesCreateIndex}
+            destinationIndex={destinationIndex}
+            destinationIndexNameEmpty={indexNameEmpty}
+            destinationIndexNameExists={indexNameExists}
+            destinationIndexNameValid={indexNameValid}
+            destIndexSameAsId={destIndexSameAsId}
+            fullWidth={false}
+            indexNameExistsMessage={i18n.translate(
+              'xpack.transform.stepDetailsForm.destinationIndexHelpText',
+              {
                 defaultMessage:
                   'An index with this name already exists. Be aware that running this transform will modify this destination index.',
-              })
-            }
-            error={
-              !indexNameEmpty &&
-              !indexNameValid && [
-                <>
-                  {i18n.translate('xpack.transform.stepDetailsForm.destinationIndexInvalidError', {
-                    defaultMessage: 'Invalid destination index name.',
-                  })}
-                  <br />
-                  <EuiLink href={esIndicesCreateIndex} target="_blank">
-                    {i18n.translate(
-                      'xpack.transform.stepDetailsForm.destinationIndexInvalidErrorLink',
-                      {
-                        defaultMessage: 'Learn more about index name limitations.',
-                      }
-                    )}
-                  </EuiLink>
-                </>,
-              ]
-            }
-          >
-            <EuiFieldText
-              value={destinationIndex}
-              onChange={(e) => setDestinationIndex(e.target.value)}
-              aria-label={i18n.translate(
-                'xpack.transform.stepDetailsForm.destinationIndexInputAriaLabel',
-                {
-                  defaultMessage: 'Choose a unique destination index name.',
-                }
-              )}
-              isInvalid={!indexNameEmpty && !indexNameValid}
-              data-test-subj="transformDestinationIndexInput"
-            />
-          </EuiFormRow>
+              }
+            )}
+            isJobCreated={transformIdExists}
+            onDestinationIndexChange={setDestinationIndex}
+            setDestIndexSameAsId={setDestIndexSameAsId}
+            switchLabel={i18n.translate(
+              'xpack.transform.stepDetailsForm.destinationIndexFormSwitchLabel',
+              {
+                defaultMessage: 'Use transform ID as destination index name',
+              }
+            )}
+          />
 
           {ingestPipelineNames.length > 0 && (
             <EuiFormRow
@@ -542,45 +550,15 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             </>
           ) : null}
 
-          <EuiFormRow
-            isInvalid={(createDataView && dataViewTitleExists) || canCreateDataView === false}
-            error={[
-              ...(canCreateDataView === false
-                ? [
-                    <EuiText size="xs" color="warning">
-                      {i18n.translate('xpack.transform.stepDetailsForm.dataViewPermissionWarning', {
-                        defaultMessage: 'You need permission to create data views.',
-                      })}
-                    </EuiText>,
-                  ]
-                : []),
-              ...(createDataView && dataViewTitleExists
-                ? [
-                    i18n.translate('xpack.transform.stepDetailsForm.dataViewTitleError', {
-                      defaultMessage: 'A data view with this title already exists.',
-                    }),
-                  ]
-                : []),
-            ]}
-          >
-            <EuiSwitch
-              name="transformCreateDataView"
-              disabled={canCreateDataView === false}
-              label={i18n.translate('xpack.transform.stepCreateForm.createDataViewLabel', {
-                defaultMessage: 'Create Kibana data view',
-              })}
-              checked={createDataView === true}
-              onChange={() => setCreateDataView(!createDataView)}
-              data-test-subj="transformCreateDataViewSwitch"
-            />
-          </EuiFormRow>
-          {createDataView && !dataViewTitleExists && dataViewAvailableTimeFields.length > 0 && (
-            <StepDetailsTimeField
-              dataViewAvailableTimeFields={dataViewAvailableTimeFields}
-              dataViewTimeField={dataViewTimeField}
-              onTimeFieldChanged={onTimeFieldChanged}
-            />
-          )}
+          <CreateDataViewForm
+            canCreateDataView={canCreateDataView}
+            createDataView={createDataView}
+            dataViewTitleExists={dataViewTitleExists}
+            setCreateDataView={setCreateDataView}
+            dataViewAvailableTimeFields={destIndexAvailableTimeFields}
+            dataViewTimeField={dataViewTimeField}
+            onTimeFieldChanged={onTimeFieldChanged}
+          />
 
           {/* Continuous mode */}
           <EuiFormRow
@@ -622,7 +600,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 )}
               >
                 <EuiSelect
-                  options={dateFieldNames.map((text: string) => ({ text, value: text }))}
+                  options={sourceIndexDateFieldNames.map((text: string) => ({ text, value: text }))}
                   value={continuousModeDateField}
                   onChange={(e) => setContinuousModeDateField(e.target.value)}
                   data-test-subj="transformContinuousDateFieldSelect"
@@ -692,7 +670,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               data-test-subj="transformRetentionPolicySwitch"
             />
           </EuiFormRow>
-          {isRetentionPolicyEnabled && (
+          {isRetentionPolicyEnabled && isRetentionPolicyAvailable && (
             <>
               <EuiFormRow
                 label={i18n.translate(
@@ -710,7 +688,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 )}
               >
                 <EuiSelect
-                  options={dataViewAvailableTimeFields.map((text: string) => ({ text }))}
+                  options={destIndexAvailableTimeFields.map((text: string) => ({ text }))}
                   value={retentionPolicyDateField}
                   onChange={(e) => setRetentionPolicyDateField(e.target.value)}
                   data-test-subj="transformRetentionPolicyDateFieldSelect"

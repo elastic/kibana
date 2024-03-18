@@ -7,6 +7,8 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core-plugins-server';
-import { LinksServerPlugin } from './plugin';
 
-export const plugin = (initContext: PluginInitializerContext) => new LinksServerPlugin(initContext);
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { LinksServerPlugin } = await import('./plugin');
+  return new LinksServerPlugin(initContext);
+};

@@ -23,7 +23,7 @@ describe('When initializing file client via createESFileClient()', () => {
   let logger: MockedLogger;
 
   beforeEach(() => {
-    ElasticsearchBlobStorageClient.configureConcurrentUpload(Infinity);
+    ElasticsearchBlobStorageClient.configureConcurrentTransfers(Infinity);
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggingSystemMock.createLogger();
   });

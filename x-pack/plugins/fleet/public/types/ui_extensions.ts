@@ -36,6 +36,8 @@ export type PackagePolicyReplaceDefineStepExtensionComponentProps = (
   validationResults?: PackagePolicyValidationResults;
   agentPolicy?: AgentPolicy;
   packageInfo: PackageInfo;
+  agentlessPolicy?: AgentPolicy;
+  handleSetupTechnologyChange?: (setupTechnology: string) => void;
 };
 
 /**
@@ -109,6 +111,12 @@ export interface PackagePolicyResponseExtension {
   package: string;
   view: 'package-policy-response';
   Component: LazyExoticComponent<PackagePolicyResponseExtensionComponent>;
+}
+
+export interface EndpointAgentTamperProtectionExtension {
+  package: string;
+  view: 'endpoint-agent-tamper-protection';
+  Component: LazyExoticComponent<ComponentType>;
 }
 
 export interface PackageGenericErrorsListExtension {
@@ -217,4 +225,5 @@ export type UIExtensionPoint =
   | PackageAssetsExtension
   | PackageGenericErrorsListExtension
   | AgentEnrollmentFlyoutFinalStepExtension
-  | PackagePolicyCreateMultiStepExtension;
+  | PackagePolicyCreateMultiStepExtension
+  | EndpointAgentTamperProtectionExtension;

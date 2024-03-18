@@ -16,8 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Indices', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
-      // Navigate to the index management page
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('indexManagement');
       // Navigate to the indices tab
       await pageObjects.indexManagement.changeTabs('indicesTab');
@@ -27,6 +26,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('renders the indices tab', async () => {
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/indices`);
+    });
+    it('can create an index', async () => {
+      const testIndexName = `index-ftr-test-${Math.random()}`;
+      await pageObjects.indexManagement.clickCreateIndexButton();
+      await pageObjects.indexManagement.setCreateIndexName(testIndexName);
+      await pageObjects.indexManagement.clickCreateIndexSaveButton();
+      await pageObjects.indexManagement.expectIndexToExist(testIndexName);
     });
   });
 };

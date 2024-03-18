@@ -16,6 +16,8 @@ import type {
   KibanaRequest,
 } from '@kbn/core/server';
 
+import { CoreKibanaRequest } from '@kbn/core/server';
+
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
   EncryptedSavedObjectsClient,
@@ -25,7 +27,7 @@ import type {
 import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
@@ -40,6 +42,8 @@ import type {
   PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
+  PostAgentPolicyCreateCallback,
+  PostAgentPolicyUpdateCallback,
 } from '../types';
 import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
@@ -62,6 +66,7 @@ class AppContextService {
   private isProductionMode: FleetAppContext['isProductionMode'] = false;
   private kibanaVersion: FleetAppContext['kibanaVersion'] = kibanaPackageJson.version;
   private kibanaBranch: FleetAppContext['kibanaBranch'] = kibanaPackageJson.branch;
+  private kibanaInstanceId: FleetAppContext['kibanaInstanceId'] = '';
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
@@ -86,6 +91,7 @@ class AppContextService {
     this.logger = appContext.logger;
     this.kibanaVersion = appContext.kibanaVersion;
     this.kibanaBranch = appContext.kibanaBranch;
+    this.kibanaInstanceId = appContext.kibanaInstanceId;
     this.httpSetup = appContext.httpSetup;
     this.telemetryEventsSender = appContext.telemetryEventsSender;
     this.savedObjectsTagging = appContext.savedObjectsTagging;
@@ -170,6 +176,23 @@ class AppContextService {
     }
     return this.savedObjectsTagging;
   }
+  public getInternalUserSOClientForSpaceId(spaceId?: string) {
+    const request = CoreKibanaRequest.from({
+      headers: {},
+      path: '/',
+      route: { settings: {} },
+      url: { href: '', hash: '' } as URL,
+      raw: { req: { url: '/' } } as any,
+    });
+    if (this.httpSetup && spaceId && spaceId !== DEFAULT_SPACE_ID) {
+      this.httpSetup?.basePath.set(request, `/s/${spaceId}`);
+    }
+
+    // soClient as kibana internal users, be careful on how you use it, security is not enabled
+    return appContextService.getSavedObjects().getScopedClient(request, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+    });
+  }
 
   public getInternalUserSOClient(request: KibanaRequest) {
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
@@ -209,6 +232,10 @@ class AppContextService {
     return this.kibanaBranch;
   }
 
+  public getKibanaInstanceId() {
+    return this.kibanaInstanceId;
+  }
+
   public addExternalCallback(type: ExternalCallback[0], callback: ExternalCallback[1]) {
     if (!this.externalCallbacks.has(type)) {
       this.externalCallbacks.set(type, new Set());
@@ -220,7 +247,11 @@ class AppContextService {
     type: T
   ):
     | Set<
-        T extends 'packagePolicyCreate'
+        T extends 'agentPolicyCreate'
+          ? PostAgentPolicyCreateCallback
+          : T extends 'agentPolicyUpdate'
+          ? PostAgentPolicyUpdateCallback
+          : T extends 'packagePolicyCreate'
           ? PostPackagePolicyCreateCallback
           : T extends 'packagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
@@ -233,7 +264,11 @@ class AppContextService {
     | undefined {
     if (this.externalCallbacks) {
       return this.externalCallbacks.get(type) as Set<
-        T extends 'packagePolicyCreate'
+        T extends 'agentPolicyCreate'
+          ? PostAgentPolicyCreateCallback
+          : T extends 'agentPolicyUpdate'
+          ? PostAgentPolicyUpdateCallback
+          : T extends 'packagePolicyCreate'
           ? PostPackagePolicyCreateCallback
           : T extends 'packagePolicyDelete'
           ? PostPackagePolicyDeleteCallback

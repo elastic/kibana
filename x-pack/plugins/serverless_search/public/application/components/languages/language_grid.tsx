@@ -38,7 +38,7 @@ export const LanguageGrid: React.FC<LanguageGridProps> = ({
   const columns = isXLarge ? 3 : isLarge ? 2 : 1;
 
   return (
-    <EuiFlexGrid columns={columns} gutterSize="s">
+    <EuiFlexGrid columns={columns} gutterSize="s" data-test-subj="client-select-container">
       {languages.map((language) => (
         <EuiFlexItem key={language.id}>
           <EuiPanel
@@ -51,6 +51,7 @@ export const LanguageGrid: React.FC<LanguageGridProps> = ({
             }
             onClick={() => setSelectedLanguage(language)}
             color={language.id === selectedLanguage ? 'primary' : 'plain'}
+            data-test-subj={`${language.id}-client-panel`}
           >
             <EuiFlexGroup justifyContent="flexStart" responsive={false}>
               <EuiFlexItem grow={false}>

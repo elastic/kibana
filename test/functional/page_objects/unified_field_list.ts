@@ -88,9 +88,31 @@ export class UnifiedFieldListPageObject extends FtrService {
     );
   }
 
+  public async openSidebarSection(sectionName: SidebarSectionName) {
+    const openedSectionSelector = `${this.getSidebarSectionSelector(
+      sectionName,
+      true
+    )}.euiAccordion-isOpen`;
+
+    if (await this.find.existsByCssSelector(openedSectionSelector)) {
+      return;
+    }
+
+    await this.retry.waitFor(`${sectionName} fields section to open`, async () => {
+      await this.toggleSidebarSection(sectionName);
+      return await this.find.existsByCssSelector(openedSectionSelector);
+    });
+  }
+
   public async waitUntilFieldPopoverIsOpen() {
     await this.retry.waitFor('popover is open', async () => {
       return Boolean(await this.find.byCssSelector('[data-popover-open="true"]'));
+    });
+  }
+
+  public async waitUntilFieldPopoverIsLoaded() {
+    await this.retry.waitFor('popover is loaded', async () => {
+      return !(await this.find.existsByCssSelector('[data-test-subj*="-statsLoading"]'));
     });
   }
 
@@ -99,11 +121,21 @@ export class UnifiedFieldListPageObject extends FtrService {
     await this.testSubjects.click(`field-${field}`);
 
     await this.waitUntilFieldPopoverIsOpen();
+    // Wait until the field stats popover is opened and loaded before
+    // hitting the edit button, otherwise the click may occur at the
+    // exact time the field stats load, triggering a layout shift, and
+    // will result in the "filter for" button being clicked instead of
+    // the edit button, causing test flakiness
+    await this.waitUntilFieldPopoverIsLoaded();
   }
 
   public async clickFieldListItemToggle(field: string) {
     await this.testSubjects.moveMouseTo(`field-${field}`);
     await this.testSubjects.click(`fieldToggle-${field}`);
+  }
+
+  public async pressEnterFieldListItemToggle(field: string) {
+    await this.testSubjects.pressEnter(`field-${field}-showDetails`);
   }
 
   public async clickFieldListItemAdd(field: string) {

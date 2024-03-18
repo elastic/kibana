@@ -5,47 +5,66 @@
  * 2.0.
  */
 
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { getComments } from '.';
 import type { ConversationRole } from '@kbn/elastic-assistant/impl/assistant_context/types';
 
 const user: ConversationRole = 'user';
+const currentConversation = {
+  apiConfig: {
+    connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
+    connectorTypeTitle: 'OpenAI',
+    provider: OpenAiProviderType.OpenAi,
+  },
+  replacements: [],
+  category: 'assistant',
+  id: '1',
+  title: '1',
+  messages: [
+    {
+      role: user,
+      content: 'Hello {name}',
+      timestamp: '2022-01-01',
+      isError: false,
+    },
+  ],
+};
+const showAnonymizedValues = false;
+const testProps = {
+  refetchCurrentConversation: jest.fn(),
+  regenerateMessage: jest.fn(),
+  isFetchingResponse: false,
+  currentConversation,
+  showAnonymizedValues,
+};
 describe('getComments', () => {
   it('Does not add error state message has no error', () => {
-    const currentConversation = {
-      apiConfig: {},
-      id: '1',
-      messages: [
-        {
-          role: user,
-          content: 'Hello {name}',
-          timestamp: '2022-01-01',
-          isError: false,
-        },
-      ],
-    };
-    const lastCommentRef = { current: null };
-    const showAnonymizedValues = false;
-
-    const result = getComments({ currentConversation, lastCommentRef, showAnonymizedValues });
+    const result = getComments(testProps);
     expect(result[0].eventColor).toEqual(undefined);
   });
   it('Adds error state when message has error', () => {
-    const currentConversation = {
-      apiConfig: {},
-      id: '1',
-      messages: [
-        {
-          role: user,
-          content: 'Hello {name}',
-          timestamp: '2022-01-01',
-          isError: true,
+    const result = getComments({
+      ...testProps,
+      currentConversation: {
+        category: 'assistant',
+        apiConfig: {
+          connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
+          connectorTypeTitle: 'OpenAI',
+          provider: OpenAiProviderType.OpenAi,
         },
-      ],
-    };
-    const lastCommentRef = { current: null };
-    const showAnonymizedValues = false;
-
-    const result = getComments({ currentConversation, lastCommentRef, showAnonymizedValues });
+        replacements: [],
+        id: '1',
+        title: '1',
+        messages: [
+          {
+            role: user,
+            content: 'Hello {name}',
+            timestamp: '2022-01-01',
+            isError: true,
+          },
+        ],
+      },
+    });
     expect(result[0].eventColor).toEqual('danger');
   });
 });

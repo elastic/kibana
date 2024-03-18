@@ -8,7 +8,6 @@
 
 import { PluginConfigDescriptor } from '@kbn/core/server';
 import { configSchema, VislibConfig } from '../config';
-import { VisTypeVislibServerPlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<VislibConfig> = {
   exposeToBrowser: {
@@ -17,4 +16,7 @@ export const config: PluginConfigDescriptor<VislibConfig> = {
   schema: configSchema,
 };
 
-export const plugin = () => new VisTypeVislibServerPlugin();
+export const plugin = async () => {
+  const { VisTypeVislibServerPlugin } = await import('./plugin');
+  return new VisTypeVislibServerPlugin();
+};

@@ -182,7 +182,7 @@ export function MachineLearningDataVisualizerTableProvider(
       await retry.tryForTime(30 * 1000, async () => {
         await this.ensureActionsMenuOpen(fieldName);
         const actionMenuViewInLensButton = await find.byCssSelector(
-          '[data-test-subj="dataVisualizerActionViewInLensButton"][class="euiContextMenuItem"]'
+          '.euiContextMenuItem[data-test-subj="dataVisualizerActionViewInLensButton"]'
         );
         const isEnabled = await actionMenuViewInLensButton.isEnabled();
         expect(isEnabled).to.eql(
@@ -217,7 +217,7 @@ export function MachineLearningDataVisualizerTableProvider(
         await this.ensureActionsMenuOpen(fieldName);
 
         const button = await find.byCssSelector(
-          `[data-test-subj="${testSubj}"][class="euiContextMenuItem"]`
+          `.euiContextMenuItem[data-test-subj="${testSubj}"]`
         );
         await button.click();
         await this.assertActionsMenuClosed(fieldName, testSubj);
@@ -388,8 +388,8 @@ export function MachineLearningDataVisualizerTableProvider(
     public async assertNumberFieldContents(
       fieldName: string,
       docCountFormatted: string,
-      topValuesCount: number,
-      viewableInLens: boolean,
+      topValuesCount?: number,
+      viewableInLens?: boolean,
       hasActionMenu = false,
       checkDistributionPreviewExist = true
     ) {
@@ -402,10 +402,12 @@ export function MachineLearningDataVisualizerTableProvider(
         this.detailsSelector(fieldName, 'dataVisualizerNumberSummaryTable')
       );
 
-      await testSubjects.existOrFail(
-        this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValues')
-      );
-      await this.assertTopValuesCount(fieldName, topValuesCount);
+      if (topValuesCount !== undefined) {
+        await testSubjects.existOrFail(
+          this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValues')
+        );
+        await this.assertTopValuesCount(fieldName, topValuesCount);
+      }
 
       if (checkDistributionPreviewExist) {
         await this.assertDistributionPreviewExist(fieldName);

@@ -43,5 +43,6 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     isolationRequestState: createUninitialisedResourceState(),
     endpointPendingActions: createLoadedResourceState(new Map()),
     metadataTransformStats: createUninitialisedResourceState(),
+    isInitialized: false,
   };
 };

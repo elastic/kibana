@@ -9,9 +9,9 @@ jest.mock('fs');
 
 import { createReadStream, ReadStream } from 'fs';
 import { Readable } from 'stream';
-import { md5 } from './checksum';
+import { sha256 } from './checksum';
 
-describe('md5', () => {
+describe('sha1', () => {
   let stream: ReadStream;
 
   beforeEach(() => {
@@ -25,14 +25,16 @@ describe('md5', () => {
     (createReadStream as jest.MockedFunction<typeof createReadStream>).mockReturnValue(stream);
   });
 
-  it('should return an md5 hash', async () => {
-    await expect(md5('path')).resolves.toBe('437b930db84b8079c2dd804a71936b5f');
+  it('should return an sha256 hash', async () => {
+    expect(await sha256('path')).toMatchInlineSnapshot(
+      `"3fc9b689459d738f8c88a3a48aa9e33542016b7a4052e001aaa536fca74813cb"`
+    );
   });
 
   it('should reject on stream error', async () => {
     const error = new Error('Some error');
     stream.destroy(error);
 
-    await expect(md5('path')).rejects.toEqual(error);
+    await expect(sha256('path')).rejects.toEqual(error);
   });
 });

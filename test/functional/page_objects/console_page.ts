@@ -8,8 +8,8 @@
 
 import { Key } from 'selenium-webdriver';
 import { asyncForEach } from '@kbn/std';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export class ConsolePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -500,6 +500,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getRequestQueryParams() {
+    await this.sleepForDebouncePeriod();
     const requestEditor = await this.getRequestEditor();
     const requestQueryParams = await requestEditor.findAllByCssSelector('.ace_url.ace_param');
 
@@ -531,6 +532,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getRequestLineHighlighting() {
+    await this.sleepForDebouncePeriod();
     const requestEditor = await this.getRequestEditor();
     const requestLine = await requestEditor.findAllByCssSelector('.ace_line > *');
     const line = [];

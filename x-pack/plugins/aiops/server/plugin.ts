@@ -5,23 +5,28 @@
  * 2.0.
  */
 
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { PLUGIN_ID } from '../common';
 import { isActiveLicense } from './lib/license';
-import {
+import type {
   AiopsLicense,
   AiopsPluginSetup,
   AiopsPluginStart,
   AiopsPluginSetupDeps,
   AiopsPluginStartDeps,
 } from './types';
-
-import { defineLogRateAnalysisRoute } from './routes';
-import { defineLogCategorizationRoutes } from './routes/log_categorization';
+import { defineRoute as defineLogRateAnalysisRoute } from './routes/log_rate_analysis/define_route';
+import { defineRoute as defineCategorizationFieldValidationRoute } from './routes/categorization_field_validation/define_route';
 import { registerCasesPersistableState } from './register_cases';
 
 export class AiopsPlugin
@@ -59,7 +64,7 @@ export class AiopsPlugin
     // Register server side APIs
     core.getStartServices().then(([coreStart, depsStart]) => {
       defineLogRateAnalysisRoute(router, aiopsLicense, this.logger, coreStart, this.usageCounter);
-      defineLogCategorizationRoutes(router, aiopsLicense, this.usageCounter);
+      defineCategorizationFieldValidationRoute(router, aiopsLicense, this.usageCounter);
     });
 
     return {};

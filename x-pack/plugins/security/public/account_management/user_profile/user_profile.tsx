@@ -34,7 +34,7 @@ import type { FunctionComponent } from 'react';
 import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
-import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import type { CoreStart, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -42,8 +42,9 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { DarkModeValue, UserProfileData } from '@kbn/user-profile-components';
 import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
 
-import { createImageHandler, getRandomColor, IMAGE_FILE_TYPES, VALID_HEX_COLOR } from './utils';
+import { createImageHandler, getRandomColor, VALID_HEX_COLOR } from './utils';
 import type { AuthenticatedUser } from '../../../common';
+import { IMAGE_FILE_TYPES } from '../../../common/constants';
 import {
   canUserChangeDetails,
   canUserChangePassword,
@@ -138,7 +139,7 @@ const UserDetailsEditor: FunctionComponent<UserDetailsEditorProps> = ({ user }) 
         labelAppend={<OptionalText />}
         fullWidth
       >
-        <FormField name="user.full_name" fullWidth />
+        <FormField name="user.full_name" data-test-subj={'userProfileFullName'} fullWidth />
       </FormRow>
 
       <FormRow
@@ -153,7 +154,7 @@ const UserDetailsEditor: FunctionComponent<UserDetailsEditorProps> = ({ user }) 
         labelAppend={<OptionalText />}
         fullWidth
       >
-        <FormField type="email" name="user.email" fullWidth />
+        <FormField type="email" name="user.email" data-test-subj={'userProfileEmail'} fullWidth />
       </FormRow>
     </EuiDescribedFormGroup>
   );
@@ -189,6 +190,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
       <EuiKeyPadMenuItem
         name={id}
         label={label}
+        data-test-subj={`themeKeyPadItem${label}`}
         checkable="single"
         isSelected={idSelected === id}
         isDisabled={isThemeOverridden}
@@ -654,7 +656,8 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
   const isCloudUser = user.elastic_cloud_user;
 
   const { isThemeOverridden, isOverriddenThemeDarkMode } = determineIfThemeOverridden(
-    services.settings.client
+    services.settings.client,
+    services.theme
   );
 
   const rightSideItems = [
@@ -810,7 +813,11 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                 </Form>
               </KibanaPageTemplate.Section>
               {formChanges.count > 0 ? (
-                <KibanaPageTemplate.BottomBar paddingSize="m" position="fixed">
+                <KibanaPageTemplate.BottomBar
+                  paddingSize="m"
+                  position="fixed"
+                  data-test-subj={'userProfileBottomBar'}
+                >
                   <SaveChangesBottomBar />
                 </KibanaPageTemplate.BottomBar>
               ) : null}
@@ -964,7 +971,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={formik.handleReset} color="ghost">
+        <EuiButtonEmpty onClick={formik.handleReset} color="text">
           <FormattedMessage
             id="xpack.security.accountManagement.userProfile.discardChangesButton"
             defaultMessage="Discard"
@@ -974,6 +981,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
       <EuiFlexItem grow={false}>
         <EuiButton
           onClick={formik.submitForm}
+          data-test-subj="saveProfileChangesButton"
           isLoading={formik.isSubmitting}
           isDisabled={formik.submitCount > 0 && !formik.isValid}
           color="success"
@@ -991,12 +999,15 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
   );
 };
 
-function determineIfThemeOverridden(settingsClient: IUiSettingsClient): {
+function determineIfThemeOverridden(
+  settingsClient: IUiSettingsClient,
+  theme: ThemeServiceStart
+): {
   isThemeOverridden: boolean;
   isOverriddenThemeDarkMode: boolean;
 } {
   return {
     isThemeOverridden: settingsClient.isOverridden('theme:darkMode'),
-    isOverriddenThemeDarkMode: settingsClient.get<boolean>('theme:darkMode'),
+    isOverriddenThemeDarkMode: theme.getTheme().darkMode,
   };
 }

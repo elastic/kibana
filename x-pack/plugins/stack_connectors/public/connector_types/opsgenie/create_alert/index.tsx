@@ -19,6 +19,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
 import type {
   OpsgenieActionParams,
@@ -60,6 +61,11 @@ const FormView: React.FC<FormViewProps> = ({
         error={errors['subActionParams.message']}
         label={i18n.MESSAGE_FIELD_LABEL}
         isInvalid={isMessageInvalid}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {i18n.REQUIRED_LABEL}
+          </EuiText>
+        }
       >
         <TextFieldWithMessageVariables
           index={index}

@@ -15,7 +15,7 @@ import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import type { ControlColumnProps } from '../../../../../common/types';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store';
 import type { CellValueElementProps } from '../cell_rendering';
 import type { Direction } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers';
@@ -25,10 +25,10 @@ import { Footer, footerHeight } from '../footer';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineDefaults } from '../../../store/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
-import type { TimelineModel } from '../../../store/timeline/model';
+import type { TimelineModel } from '../../../store/model';
 import type { State } from '../../../../common/store';
 import { calculateTotalPages } from '../helpers';
 import type { RowRenderer, ToggleDetailPanel } from '../../../../../common/types/timeline';
@@ -182,7 +182,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     [sort]
   );
 
-  const [isQueryLoading, { events, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
+  const [isQueryLoading, { events, totalCount, pageInfo, loadPage, refreshedAt, refetch }] =
     useTimelineEvents({
       endDate: '',
       id: `pinned-${timelineId}`,
@@ -253,7 +253,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
               <Footer
                 activePage={pageInfo.activePage}
                 data-test-subj="timeline-footer"
-                updatedAt={updatedAt}
+                updatedAt={refreshedAt}
                 height={footerHeight}
                 id={timelineId}
                 isLive={false}

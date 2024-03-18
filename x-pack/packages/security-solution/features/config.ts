@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { securityDefaultAppFeaturesConfig } from './src/security/app_feature_config';
-export { getCasesDefaultAppFeaturesConfig } from './src/cases/app_feature_config';
-export { assistantDefaultAppFeaturesConfig } from './src/assistant/app_feature_config';
+export { securityDefaultProductFeaturesConfig } from './src/security/product_feature_config';
+export { getCasesDefaultProductFeaturesConfig } from './src/cases/product_feature_config';
+export { assistantDefaultProductFeaturesConfig } from './src/assistant/product_feature_config';
 
-export { createEnabledAppFeaturesConfigMap } from './src/helpers';
+export { createEnabledProductFeaturesConfigMap } from './src/helpers';

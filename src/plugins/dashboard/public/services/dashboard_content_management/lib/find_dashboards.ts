@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { Reference } from '@kbn/content-management-utils';
 import { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
-import { Reference } from '@kbn/content-management-utils';
 import {
-  DashboardItem,
-  DashboardCrudTypes,
   DashboardAttributes,
+  DashboardCrudTypes,
+  DashboardItem,
 } from '../../../../common/content_management';
-import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { DashboardStartDependencies } from '../../../plugin';
 import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 
 export interface SearchDashboardsArgs {
@@ -83,19 +83,34 @@ export async function findDashboardById(
       references: cachedDashboard.item.references,
     };
   }
+
   /** Otherwise, fetch the dashboard from the content management client, add it to the cache, and return the result */
-  const response = await contentManagement.client
-    .get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
+  try {
+    const response = await contentManagement.client.get<
+      DashboardCrudTypes['GetIn'],
+      DashboardCrudTypes['GetOut']
+    >({
       contentTypeId: DASHBOARD_CONTENT_ID,
       id,
-    })
-    .then((result) => {
-      dashboardContentManagementCache.addDashboard(result);
-      return { id, status: 'success', attributes: result.item.attributes };
-    })
-    .catch((e) => ({ status: 'error', error: e.body, id }));
+    });
+    if (response.item.error) {
+      throw response.item.error;
+    }
 
-  return response as FindDashboardsByIdResponse;
+    dashboardContentManagementCache.addDashboard(response);
+    return {
+      id,
+      status: 'success',
+      attributes: response.item.attributes,
+      references: response.item.references,
+    };
+  } catch (e) {
+    return {
+      status: 'error',
+      error: e.body || e.message,
+      id,
+    };
+  }
 }
 
 export async function findDashboardsByIds(

@@ -19,9 +19,10 @@ export const fromSavedSearchAttributes = (
   tags: string[] | undefined,
   references: SavedObjectReference[] | undefined,
   searchSource: SavedSearch['searchSource'],
-  sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps']
+  sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'],
+  managed: boolean
 ): SavedSearch => ({
-  ...fromSavedSearchAttributesCommon(id, attributes, tags, searchSource),
+  ...fromSavedSearchAttributesCommon(id, attributes, tags, searchSource, managed),
   sharingSavedObjectProps,
   references,
 });
@@ -40,11 +41,13 @@ export const toSavedSearchAttributes = (
   viewMode: savedSearch.viewMode,
   hideAggregatedPreview: savedSearch.hideAggregatedPreview,
   rowHeight: savedSearch.rowHeight,
+  headerRowHeight: savedSearch.headerRowHeight,
   isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
   usesAdHocDataView: savedSearch.usesAdHocDataView,
   timeRestore: savedSearch.timeRestore ?? false,
   timeRange: savedSearch.timeRange ? pick(savedSearch.timeRange, ['from', 'to']) : undefined,
   refreshInterval: savedSearch.refreshInterval,
   rowsPerPage: savedSearch.rowsPerPage,
+  sampleSize: savedSearch.sampleSize,
   breakdownField: savedSearch.breakdownField,
 });

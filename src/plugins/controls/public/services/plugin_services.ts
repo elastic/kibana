@@ -7,25 +7,26 @@
  */
 
 import {
-  PluginServiceProviders,
   KibanaPluginServiceParams,
   PluginServiceProvider,
+  PluginServiceProviders,
   PluginServiceRegistry,
   PluginServices,
 } from '@kbn/presentation-util-plugin/public';
 import { ControlsPluginStartDeps } from '../types';
 import { ControlsServices } from './types';
 
-import { dataViewsServiceFactory } from './data_views/data_views_service';
 import { controlsServiceFactory } from './controls/controls_service';
-import { overlaysServiceFactory } from './overlays/overlays_service';
+import { coreServiceFactory } from './core/core_service';
 import { dataServiceFactory } from './data/data_service';
+import { dataViewsServiceFactory } from './data_views/data_views_service';
+import { embeddableServiceFactory } from './embeddable/embeddable_service';
 import { httpServiceFactory } from './http/http_service';
 import { optionsListServiceFactory } from './options_list/options_list_service';
+import { overlaysServiceFactory } from './overlays/overlays_service';
 import { settingsServiceFactory } from './settings/settings_service';
+import { controlsStorageServiceFactory } from './storage/storage_service';
 import { unifiedSearchServiceFactory } from './unified_search/unified_search_service';
-import { themeServiceFactory } from './theme/theme_service';
-import { embeddableServiceFactory } from './embeddable/embeddable_service';
 
 export const providers: PluginServiceProviders<
   ControlsServices,
@@ -39,7 +40,8 @@ export const providers: PluginServiceProviders<
   optionsList: new PluginServiceProvider(optionsListServiceFactory, ['data', 'http']),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
-  theme: new PluginServiceProvider(themeServiceFactory),
+  storage: new PluginServiceProvider(controlsStorageServiceFactory),
+  core: new PluginServiceProvider(coreServiceFactory),
   unifiedSearch: new PluginServiceProvider(unifiedSearchServiceFactory),
 };
 

@@ -8,6 +8,7 @@
 
 import type { PluginName } from '@kbn/core-base-common';
 import type { Plugin } from '@kbn/core-plugins-browser';
+import { createRuntimePluginContractResolverMock } from './test_helpers';
 
 export type MockedPluginInitializer = jest.Mock<Plugin<unknown, unknown>>;
 
@@ -20,3 +21,11 @@ export const mockPluginInitializerProvider: jest.Mock<MockedPluginInitializer, [
 jest.mock('./plugin_reader', () => ({
   read: mockPluginInitializerProvider,
 }));
+
+export const runtimeResolverMock = createRuntimePluginContractResolverMock();
+
+jest.doMock('./plugin_contract_resolver', () => {
+  return {
+    RuntimePluginContractResolver: jest.fn().mockImplementation(() => runtimeResolverMock),
+  };
+});

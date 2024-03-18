@@ -119,7 +119,7 @@ export function Doc(props: DocProps) {
 
         {reqState === ElasticRequestState.Found && hit !== null && dataView && (
           <div data-test-subj="doc-hit">
-            <UnifiedDocViewer hit={hit} dataView={dataView} />
+            <UnifiedDocViewer hit={hit} dataView={dataView} hideActionsColumn />
           </div>
         )}
       </EuiPageBody>

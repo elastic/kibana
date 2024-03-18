@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EcsVersion } from '@kbn/ecs';
+import { EcsVersion } from '@elastic/ecs';
 import { LogLevel, LogRecord } from '@kbn/logging';
 import { JsonLayout } from './json_layout';
+
+jest.spyOn(process, 'uptime').mockReturnValue(10);
 
 const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 30, 22, 11));
 const records: LogRecord[] = [
@@ -121,6 +123,7 @@ test('`format()` correctly formats record with meta-data', () => {
     },
     process: {
       pid: 5355,
+      uptime: 10,
     },
   });
 });
@@ -169,6 +172,7 @@ test('`format()` correctly formats error record with meta-data', () => {
     },
     process: {
       pid: 5355,
+      uptime: 10,
     },
   });
 });
@@ -202,6 +206,7 @@ test('format() meta can merge override logs', () => {
     },
     process: {
       pid: 3,
+      uptime: 10,
     },
   });
 });
@@ -232,6 +237,7 @@ test('format() meta can not override message', () => {
     },
     process: {
       pid: 3,
+      uptime: 10,
     },
   });
 });
@@ -262,6 +268,7 @@ test('format() meta can not override ecs version', () => {
     },
     process: {
       pid: 3,
+      uptime: 10,
     },
   });
 });
@@ -295,6 +302,7 @@ test('format() meta can not override logger or level', () => {
     },
     process: {
       pid: 3,
+      uptime: 10,
     },
   });
 });
@@ -325,6 +333,7 @@ test('format() meta can not override timestamp', () => {
     },
     process: {
       pid: 3,
+      uptime: 10,
     },
   });
 });
@@ -359,9 +368,99 @@ test('format() meta can not override tracing properties', () => {
     },
     process: {
       pid: 3,
+      uptime: 10,
     },
     span: { id: 'span_override' },
     trace: { id: 'trace_override' },
     transaction: { id: 'transaction_override' },
+  });
+});
+
+test('format() meta.toJSON() is used if own property', () => {
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        meta: {
+          server: {
+            address: 'localhost',
+          },
+          service: {
+            version: '1',
+          },
+          // @ts-expect-error cannot override @timestamp
+          toJSON() {
+            return {
+              server: {
+                address: 'localhost',
+              },
+            };
+          },
+        },
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: expect.any(String) },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    process: {
+      pid: 3,
+      uptime: 10,
+    },
+    server: {
+      address: 'localhost',
+    },
+  });
+});
+
+test('format() meta.toJSON() is used if present on prototype', () => {
+  class SomeClass {
+    foo: string = 'bar';
+    hello: string = 'dolly';
+
+    toJSON() {
+      return {
+        foo: this.foo,
+      };
+    }
+  }
+
+  const someInstance = new SomeClass();
+
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        // @ts-expect-error meta is not of the correct type
+        meta: someInstance,
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: expect.any(String) },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    process: {
+      pid: 3,
+      uptime: 10,
+    },
+    foo: 'bar',
   });
 });

@@ -16,11 +16,13 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
   params,
   frequency,
   alerts_filter: alertsFilter,
+  use_alert_data_for_template: useAlertDataForTemplate,
 }) => ({
   group,
   id,
   params,
   actionTypeId,
+  ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
   ...(frequency
     ? {
         frequency: {
@@ -75,6 +77,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   active_snoozes: activeSnoozes,
   last_run: lastRun,
   next_run: nextRun,
+  alert_delay: alertDelay,
   ...rest
 }: any) => ({
   ruleTypeId,
@@ -97,6 +100,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   ...(lastRun ? { lastRun: transformLastRun(lastRun) } : {}),
   ...(nextRun ? { nextRun } : {}),
   ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
+  ...(alertDelay ? { alertDelay } : {}),
   ...rest,
 });
 

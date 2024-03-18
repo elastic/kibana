@@ -70,7 +70,8 @@ import type {
   ALERT_RULE_TIMESTAMP_OVERRIDE,
 } from '../../../../../field_maps/field_names';
 // TODO: Create and import 8.0.0 versioned RuleAlertAction type
-import type { RuleAlertAction, SearchTypes } from '../../../../../detection_engine/types';
+import type { SearchTypes } from '../../../../../detection_engine/types';
+import type { RuleAction } from '../../rule_schema';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.0.0.
 Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.0.0.
@@ -110,7 +111,7 @@ export interface BaseFields800 {
   [ALERT_RISK_SCORE]: number;
   // TODO: version rule schemas and pull in 8.0.0 versioned rule schema to define alert rule parameters type
   [ALERT_RULE_PARAMETERS]: { [key: string]: SearchTypes };
-  [ALERT_RULE_ACTIONS]: RuleAlertAction[];
+  [ALERT_RULE_ACTIONS]: RuleAction[];
   [ALERT_RULE_AUTHOR]: string[];
   [ALERT_RULE_CREATED_AT]: string;
   [ALERT_RULE_CREATED_BY]: string;

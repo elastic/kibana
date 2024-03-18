@@ -46,9 +46,13 @@ export interface FindCaseCommentsArgs {
   options?: SavedObjectFindOptionsKueryNode;
 }
 
-export interface PostCaseArgs extends IndexRefresh {
+export interface CreateCaseArgs extends IndexRefresh {
   attributes: CaseTransformedAttributes;
   id: string;
+}
+
+export interface BulkCreateCasesArgs extends IndexRefresh {
+  cases: Array<{ id: string } & CaseTransformedAttributes>;
 }
 
 export interface PatchCase extends IndexRefresh {

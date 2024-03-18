@@ -15,6 +15,7 @@ export const shareServiceFactory: ShareServiceFactory = () => {
   const pluginMock = sharePluginMock.createStartContract();
 
   return {
+    url: pluginMock.url,
     toggleShareContextMenu: pluginMock.toggleShareContextMenu,
   };
 };

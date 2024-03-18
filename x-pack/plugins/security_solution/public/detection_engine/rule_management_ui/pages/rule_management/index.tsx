@@ -9,6 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import React, { useCallback } from 'react';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
@@ -35,8 +36,7 @@ import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { RulesPageTourComponent } from '../../components/rules_table/alternative_tour/tour';
-import { useIsEsqlRuleTypeEnabled } from '../../../rule_creation/hooks';
+import { RuleFeatureTour } from '../../components/rules_table/feature_tour/rules_feature_tour';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -55,6 +55,9 @@ const RulesPageComponent: React.FC = () => {
     invalidateFetchRuleManagementFilters,
     invalidateFetchCoverageOverviewQuery,
   ]);
+  const isPerFieldPrebuiltRulesDiffingEnabled = useIsExperimentalFeatureEnabled(
+    'perFieldPrebuiltRulesDiffingEnabled'
+  );
 
   const [
     {
@@ -68,11 +71,11 @@ const RulesPageComponent: React.FC = () => {
   const {
     loading: listsConfigLoading,
     canWriteIndex: canWriteListsIndex,
+    canCreateIndex: canCreateListsIndex,
     needsConfiguration: needsListsConfiguration,
+    needsIndex: needsListsIndex,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
-
-  const isEsqlRuleTypeEnabled = useIsEsqlRuleTypeEnabled();
 
   if (
     redirectToDetections(
@@ -89,17 +92,13 @@ const RulesPageComponent: React.FC = () => {
     return null;
   }
 
-  const addNewRuleButton = (
-    <SecuritySolutionLinkButton
-      data-test-subj="create-new-rule"
-      fill
-      iconType="plusInCircle"
-      isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
-      deepLinkId={SecurityPageName.rulesCreate}
-    >
-      {i18n.ADD_NEW_RULE}
-    </SecuritySolutionLinkButton>
-  );
+  // - if lists data stream does not exist and user doesn't have enough privileges to create it,
+  // lists button should be disabled
+  // - if data stream exists and user doesn't have enough privileges to create it,
+  // user still can import value lists, so button should not be disabled if user has enough other privileges
+  const cantCreateNonExistentListIndex = needsListsIndex && !canCreateListsIndex;
+  const isImportValueListDisabled =
+    cantCreateNonExistentListIndex || !canWriteListsIndex || !canUserCRUD || loading;
 
   return (
     <>
@@ -133,11 +132,18 @@ const RulesPageComponent: React.FC = () => {
                 <AddElasticRulesButton isDisabled={!canUserCRUD || loading} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiToolTip position="top" content={i18n.UPLOAD_VALUE_LISTS_TOOLTIP}>
+                <EuiToolTip
+                  position="top"
+                  content={
+                    cantCreateNonExistentListIndex
+                      ? i18n.UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP
+                      : i18n.UPLOAD_VALUE_LISTS_TOOLTIP
+                  }
+                >
                   <EuiButtonEmpty
                     data-test-subj="open-value-lists-modal-button"
                     iconType="importAction"
-                    isDisabled={!canWriteListsIndex || !canUserCRUD || loading}
+                    isDisabled={isImportValueListDisabled}
                     onClick={showValueListFlyout}
                   >
                     {i18n.IMPORT_VALUE_LISTS}
@@ -155,11 +161,15 @@ const RulesPageComponent: React.FC = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {isEsqlRuleTypeEnabled ? (
-                  <RulesPageTourComponent>{addNewRuleButton}</RulesPageTourComponent>
-                ) : (
-                  addNewRuleButton
-                )}
+                <SecuritySolutionLinkButton
+                  data-test-subj="create-new-rule"
+                  fill
+                  iconType="plusInCircle"
+                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                  deepLinkId={SecurityPageName.rulesCreate}
+                >
+                  {i18n.ADD_NEW_RULE}
+                </SecuritySolutionLinkButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
@@ -167,6 +177,7 @@ const RulesPageComponent: React.FC = () => {
             kibanaServices={kibanaServices}
             categories={[DEFAULT_APP_CATEGORIES.security.id]}
           />
+          {isPerFieldPrebuiltRulesDiffingEnabled && <RuleFeatureTour />}
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>

@@ -24,9 +24,10 @@ const createLoggerMock = (context: string[] = []) => {
     isLevelEnabled: jest.fn(),
   };
   mockLog.get.mockImplementation((...ctx) => ({
-    ctx,
     ...mockLog,
+    context: Array.isArray(context) ? context.concat(ctx) : [context, ...ctx].filter(Boolean),
   }));
+
   mockLog.isLevelEnabled.mockReturnValue(true);
 
   return mockLog;

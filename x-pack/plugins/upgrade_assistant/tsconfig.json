@@ -37,6 +37,7 @@
     "@kbn/utility-types",
     "@kbn/shared-ux-router",
     "@kbn/logs-shared-plugin",
+    "@kbn/shared-ux-link-redirect-app"
   ],
   "exclude": [
     "target/**/*",

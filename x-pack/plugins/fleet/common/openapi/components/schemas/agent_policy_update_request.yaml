@@ -27,9 +27,9 @@ properties:
     type: string
     nullable: true
   unenroll_timeout:
-    type: number
+    type: integer
   inactivity_timeout:
-    type: number
+    type: integer
   agent_features:
     type: array
     items:
@@ -44,6 +44,9 @@ properties:
         - enabled
   is_protected:
     type: boolean
+  force:
+    type: boolean
+    description: Force agent policy creation even if packages are not verified.
 required:
   - name
   - namespace

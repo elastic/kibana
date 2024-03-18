@@ -7,18 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 import type {
-  Embeddable,
   LensPublicStart,
   DataType,
   ChartInfo,
   LensSavedObjectAttributes,
 } from '@kbn/lens-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { apiIsOfType } from '@kbn/presentation-publishing';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
-
+import type { LensApi } from '@kbn/lens-plugin/public';
+import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 
 export const COMPATIBLE_SERIES_TYPES = [
@@ -43,7 +45,7 @@ export const COMPATIBLE_SPLIT_FIELD_TYPES: DataType[] = [
 ];
 
 export async function redirectToADJobWizards(
-  embeddable: Embeddable,
+  embeddable: LensApi,
   layerIndex: number,
   share: SharePluginStart,
   lens: LensPublicStart
@@ -66,7 +68,7 @@ export async function redirectToADJobWizards(
   window.open(url, '_blank');
 }
 
-export async function getJobsItemsFromEmbeddable(embeddable: Embeddable, lens?: LensPublicStart) {
+export async function getJobsItemsFromEmbeddable(embeddable: LensApi, lens?: LensPublicStart) {
   if (!lens) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromLens.createJob.error.lensNotFound', {
@@ -75,9 +77,11 @@ export async function getJobsItemsFromEmbeddable(embeddable: Embeddable, lens?: 
     );
   }
 
-  const { filters, timeRange, ...input } = embeddable.getInput();
-  const query = input.query === undefined ? { query: '', language: 'kuery' } : input.query;
+  const dashboardApi = apiIsOfType(embeddable.parentApi, 'dashboard')
+    ? (embeddable.parentApi as DashboardAPI)
+    : undefined;
 
+  const timeRange = embeddable.timeRange$?.value ?? dashboardApi?.timeRange$?.value;
   if (timeRange === undefined) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromLens.createJob.error.noTimeRange', {
@@ -85,8 +89,6 @@ export async function getJobsItemsFromEmbeddable(embeddable: Embeddable, lens?: 
       })
     );
   }
-  const { to, from } = timeRange;
-
   const vis = embeddable.getSavedVis();
 
   if (vis === undefined) {
@@ -97,17 +99,14 @@ export async function getJobsItemsFromEmbeddable(embeddable: Embeddable, lens?: 
     );
   }
 
-  const chartInfo = await getChartInfoFromVisualization(lens, vis);
-  const dashboard = embeddable.parent?.type === 'dashboard' ? embeddable.parent : undefined;
-
   return {
     vis,
-    chartInfo,
-    from,
-    to,
-    query,
-    filters,
-    dashboard,
+    chartInfo: await getChartInfoFromVisualization(lens, vis),
+    from: timeRange.from,
+    to: timeRange.to,
+    query: (dashboardApi?.query$?.value as Query) ?? { query: '', language: 'kuery' },
+    filters: dashboardApi?.filters$?.value ?? [],
+    dashboard: dashboardApi,
   };
 }
 
@@ -186,6 +185,8 @@ export async function getVisTypeFactory(lens: LensPublicStart) {
 export async function isCompatibleVisualizationType(chartInfo: ChartInfo) {
   return (
     chartInfo.visualizationType === COMPATIBLE_VISUALIZATION &&
+    // @ts-expect-error esql is missing in the type
+    chartInfo.query.esql === undefined &&
     chartInfo.layers.some((l) => l.layerType === layerTypes.DATA && l.dataView !== undefined)
   );
 }
@@ -236,7 +237,7 @@ export function createDetectors(
 export async function getChartInfoFromVisualization(
   lens: LensPublicStart,
   vis: LensSavedObjectAttributes
-) {
+): Promise<ChartInfo> {
   const chartInfo = await (await (await lens.stateHelperApi()).chartInfo).getChartInfo(vis);
   if (!chartInfo) {
     throw new Error('Cannot create job, chart info is undefined');

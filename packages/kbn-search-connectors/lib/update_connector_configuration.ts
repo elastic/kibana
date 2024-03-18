@@ -22,15 +22,14 @@ export const updateConnectorConfiguration = async (
   connectorId: string,
   configuration: Record<string, string | number | boolean>
 ) => {
-  const connectorResult = await fetchConnectorById(client, connectorId);
-  const connector = connectorResult?.value;
+  const connector = await fetchConnectorById(client, connectorId);
   if (connector) {
     const status =
       connector.status === ConnectorStatus.NEEDS_CONFIGURATION ||
       connector.status === ConnectorStatus.CREATED
         ? ConnectorStatus.CONFIGURED
         : connector.status;
-    const updatedConfig = Object.keys(connector.configuration)
+    const updatedConfig: ConnectorConfiguration = Object.keys(connector.configuration)
       .map((key) => {
         const configEntry = connector.configuration[key];
         return isConfigEntry(configEntry)
@@ -49,8 +48,6 @@ export const updateConnectorConfiguration = async (
     await client.update<ConnectorDocument>({
       doc: { configuration: updatedConfig, status },
       id: connectorId,
-      if_primary_term: connectorResult?.primaryTerm,
-      if_seq_no: connectorResult?.seqNo,
       index: CONNECTORS_INDEX,
     });
     return updatedConfig;

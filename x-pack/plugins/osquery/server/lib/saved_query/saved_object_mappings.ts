@@ -9,6 +9,11 @@ import { produce } from 'immer';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
+  packAssetSavedObjectModelVersion1,
+  packSavedObjectModelVersion1,
+  savedQueryModelVersion1,
+} from './saved_object_model_versions';
+import {
   savedQuerySavedObjectType,
   packSavedObjectType,
   packAssetSavedObjectType,
@@ -67,6 +72,9 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     interval: {
       type: 'keyword',
     },
+    timeout: {
+      type: 'short',
+    },
     ecs_mapping: {
       dynamic: false,
       properties: {},
@@ -80,6 +88,9 @@ export const savedQueryType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: savedQuerySavedObjectMappings,
+  modelVersions: {
+    1: savedQueryModelVersion1,
+  },
   management: {
     importableAndExportable: true,
     getTitle: (savedObject) => savedObject.attributes.id,
@@ -145,6 +156,9 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
         interval: {
           type: 'text',
         },
+        timeout: {
+          type: 'short',
+        },
         platform: {
           type: 'keyword',
         },
@@ -166,6 +180,9 @@ export const packType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: packSavedObjectMappings,
+  modelVersions: {
+    1: packSavedObjectModelVersion1,
+  },
   management: {
     defaultSearchField: 'name',
     importableAndExportable: true,
@@ -219,6 +236,9 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
         interval: {
           type: 'text',
         },
+        timeout: {
+          type: 'short',
+        },
         platform: {
           type: 'keyword',
         },
@@ -241,6 +261,9 @@ export const packAssetType: SavedObjectsType = {
   management: {
     importableAndExportable: true,
     visibleInManagement: false,
+  },
+  modelVersions: {
+    1: packAssetSavedObjectModelVersion1,
   },
   namespaceType: 'agnostic',
   mappings: packAssetSavedObjectMappings,

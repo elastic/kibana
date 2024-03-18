@@ -14,7 +14,7 @@ export const observabilityAIAssistantDebugLogger = {
   appenders: ['console'],
 };
 
-const observabilityAIAssistantFtrConfigs = {
+export const observabilityAIAssistantFtrConfigs = {
   basic: {
     license: 'basic' as const,
     kibanaConfig: {

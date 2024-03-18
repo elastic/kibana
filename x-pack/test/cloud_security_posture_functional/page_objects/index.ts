@@ -10,12 +10,14 @@ import { FindingsPageProvider } from './findings_page';
 import { CspDashboardPageProvider } from './csp_dashboard_page';
 import { AddCisIntegrationFormPageProvider } from './add_cis_integration_form_page';
 import { VulnerabilityDashboardPageProvider } from './vulnerability_dashboard_page_object';
+import { RulePagePageProvider } from './rule_page';
 
 export const cloudSecurityPosturePageObjects = {
   findings: FindingsPageProvider,
   cloudPostureDashboard: CspDashboardPageProvider,
   cisAddIntegration: AddCisIntegrationFormPageProvider,
   vulnerabilityDashboard: VulnerabilityDashboardPageProvider,
+  rule: RulePagePageProvider,
 };
 export const pageObjects = {
   ...xpackFunctionalPageObjects,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RoleKibanaPrivilege } from '../../../../common/model';
+import type { RoleKibanaPrivilege } from '../../../../common';
 
 /**
  * Determines if the passed privilege spec defines global privileges.

@@ -25,8 +25,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
   describe('data view field editor example', function () {
     before(async () => {
-      // TODO: Serverless tests require login first
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginAsAdmin();
       // TODO: emptyKibanaIndex fails in Serverless with
       // "index_not_found_exception: no such index [.kibana_ingest]",
       // so it was switched to `savedObjects.cleanStandardList()`
@@ -55,7 +54,15 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         }
         return false;
       });
-      await PageObjects.settings.createIndexPattern('blogs', null);
+      // re-create default dataview : default_all_data_id which was created when serverles_search plugin was started.
+      await PageObjects.settings.createIndexPattern(
+        'blogs',
+        null,
+        true,
+        'default_all_data_id',
+        'default:all-data'
+      );
+
       await PageObjects.common.navigateToApp('dataViewFieldEditorExample');
     });
 

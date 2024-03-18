@@ -251,7 +251,7 @@ export class CoreUsageDataService
           pingTimeoutMs: es.pingTimeout.asMilliseconds(),
           requestHeadersWhitelistConfigured: isConfigured.stringOrArray(
             es.requestHeadersWhitelist,
-            ['authorization']
+            ['authorization', 'es-client-authentication']
           ),
           requestTimeoutMs: es.requestTimeout.asMilliseconds(),
           shardTimeoutMs: es.shardTimeout.asMilliseconds(),

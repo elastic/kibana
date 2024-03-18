@@ -40,7 +40,7 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-zeek.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/zeek.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/zeek.svg'),
     artifacts: {
       dashboards: [
         {
@@ -56,7 +56,7 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/zeek_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/zeek_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),

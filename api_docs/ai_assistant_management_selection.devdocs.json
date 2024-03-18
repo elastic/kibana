@@ -1,0 +1,55 @@
+{
+  "id": "aiAssistantManagementSelection",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "aiAssistantManagementSelection",
+      "id": "def-public.AiAssistantManagementSelectionPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "AiAssistantManagementSelectionPluginSetup",
+      "description": [],
+      "path": "src/plugins/ai_assistant_management/selection/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "aiAssistantManagementSelection",
+      "id": "def-public.AiAssistantManagementSelectionPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "AiAssistantManagementSelectionPluginStart",
+      "description": [],
+      "path": "src/plugins/ai_assistant_management/selection/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

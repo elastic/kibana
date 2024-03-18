@@ -109,13 +109,7 @@ export const CreateDockerUBI: Task = {
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
-      baseImage: 'ubi8',
-      context: false,
-      image: true,
-    });
-    await runDockerGenerator(config, log, build, {
-      architecture: 'x64',
-      baseImage: 'ubi9',
+      baseImage: 'ubi',
       context: false,
       image: true,
     });
@@ -143,6 +137,20 @@ export const CreateDockerCloud: Task = {
   },
 };
 
+export const CreateDockerFIPS: Task = {
+  description: 'Creating Docker FIPS image',
+
+  async run(config, log, build) {
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      baseImage: 'ubi',
+      context: false,
+      image: true,
+      fips: true,
+    });
+  },
+};
+
 export const CreateDockerContexts: Task = {
   description: 'Creating Docker build contexts',
 
@@ -154,12 +162,7 @@ export const CreateDockerContexts: Task = {
       dockerBuildDate,
     });
     await runDockerGenerator(config, log, build, {
-      baseImage: 'ubi8',
-      context: true,
-      image: false,
-    });
-    await runDockerGenerator(config, log, build, {
-      baseImage: 'ubi9',
+      baseImage: 'ubi',
       context: true,
       image: false,
     });
@@ -180,6 +183,12 @@ export const CreateDockerContexts: Task = {
       serverless: true,
       context: true,
       image: false,
+    });
+    await runDockerGenerator(config, log, build, {
+      baseImage: 'ubi',
+      context: true,
+      image: false,
+      fips: true,
     });
   },
 };

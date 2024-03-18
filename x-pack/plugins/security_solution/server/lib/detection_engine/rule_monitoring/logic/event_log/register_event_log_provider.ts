@@ -12,6 +12,6 @@ import { RULE_EXECUTION_LOG_PROVIDER } from './event_log_constants';
 export const registerEventLogProvider = (eventLogService: IEventLogService) => {
   eventLogService.registerProviderActions(
     RULE_EXECUTION_LOG_PROVIDER,
-    Object.keys(RuleExecutionEventType)
+    RuleExecutionEventType.options
   );
 };

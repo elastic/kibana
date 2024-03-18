@@ -13,7 +13,7 @@
     "target/**/*",
   ],
   "kbn_references": [
-    "@kbn/kibana-react-plugin",
     "@kbn/core",
+    "@kbn/shared-ux-link-redirect-app",
   ]
 }

@@ -8,13 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
-import { ReportingSetup } from '@kbn/reporting-plugin/server';
+import { ReportingStart } from '@kbn/reporting-plugin/server/types';
 
 /*
  * Register Canvas as a Kibana feature,
  * with Reporting sub-feature integration (if enabled)
  */
-export function getCanvasFeature(plugins: { reporting?: ReportingSetup }): KibanaFeatureConfig {
+export function getCanvasFeature(plugins: { reporting?: ReportingStart }): KibanaFeatureConfig {
   const includeReporting = plugins.reporting && plugins.reporting.usesUiCapabilities();
 
   return {

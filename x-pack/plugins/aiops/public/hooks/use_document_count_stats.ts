@@ -16,12 +16,8 @@ import { extractErrorProperties } from '@kbn/ml-error-utils';
 
 import { RANDOM_SAMPLER_SEED } from '../../common/constants';
 
-import {
-  DocumentCountStats,
-  getDocumentCountStatsRequest,
-  processDocumentCountStats,
-  DocumentStatsSearchStrategyParams,
-} from '../get_document_stats';
+import type { DocumentCountStats, DocumentStatsSearchStrategyParams } from '../get_document_stats';
+import { getDocumentCountStatsRequest, processDocumentCountStats } from '../get_document_stats';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
 
@@ -77,12 +73,12 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
 
   const [documentStatsCache, setDocumentStatsCache] = useState<Record<string, DocumentStats>>({});
 
+  const cacheKey = stringHash(
+    `${JSON.stringify(searchParams)}_${JSON.stringify(searchParamsCompare)}`
+  );
+
   const fetchDocumentCountData = useCallback(async () => {
     if (!searchParams) return;
-
-    const cacheKey = stringHash(
-      `${JSON.stringify(searchParams)}_${JSON.stringify(searchParamsCompare)}`
-    );
 
     if (documentStatsCache[cacheKey]) {
       setDocumentStats(documentStatsCache[cacheKey]);
@@ -94,7 +90,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
 
       const totalHitsParams = {
         ...searchParams,
-        selectedSignificantTerm: undefined,
+        selectedSignificantItem: undefined,
         trackTotalHits: true,
       };
 
@@ -172,7 +168,9 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
         displayError(toasts, searchParams!.index, extractErrorProperties(error));
       }
     }
-  }, [data?.search, documentStatsCache, searchParams, searchParamsCompare, toasts]);
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.search, documentStatsCache, cacheKey]);
 
   useEffect(
     function getDocumentCountData() {

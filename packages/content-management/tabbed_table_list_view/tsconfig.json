@@ -20,6 +20,7 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/content-management-table-list-view-table",
     "@kbn/content-management-table-list-view",
+    "@kbn/content-management-table-list-view-common",
   ],
   "exclude": [
     "target/**/*",

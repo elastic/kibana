@@ -11,11 +11,11 @@ import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import type { EqlOptionsSelected } from '@kbn/timelines-plugin/common';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
-import { updateIsLoading } from '../../../../timelines/store/timeline/actions';
+import { updateIsLoading } from '../../../../timelines/store/actions';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { TimelineModel } from '../../../..';
-import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
+import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
 import { sourcererActions } from '../../../../common/store/sourcerer';
 import {
   dispatchUpdateTimeline,

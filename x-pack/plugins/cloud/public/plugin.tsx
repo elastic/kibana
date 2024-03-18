@@ -11,16 +11,18 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
-import { ELASTIC_SUPPORT_LINK, CLOUD_SNAPSHOTS_PATH } from '../common/constants';
+import { CLOUD_SNAPSHOTS_PATH } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
 import type { CloudSetup, CloudStart } from './types';
 import { getFullCloudUrl } from '../common/utils';
+import { getSupportUrl } from './utils';
 
 export interface CloudConfigType {
   id?: string;
   cname?: string;
   base_url?: string;
   profile_url?: string;
+  deployments_url?: string;
   deployment_url?: string;
   projects_url?: string;
   billing_url?: string;
@@ -32,10 +34,14 @@ export interface CloudConfigType {
   serverless?: {
     project_id: string;
     project_name?: string;
+    project_type?: string;
   };
 }
 
 interface CloudUrls {
+  /** Link to all deployments page on cloud */
+  deploymentsUrl?: string;
+  /** Link to the current deployment on cloud */
   deploymentUrl?: string;
   profileUrl?: string;
   billingUrl?: string;
@@ -93,6 +99,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       serverless: {
         projectId: this.config.serverless?.project_id,
         projectName: this.config.serverless?.project_name,
+        projectType: this.config.serverless?.project_type,
       },
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);
@@ -101,7 +108,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public start(coreStart: CoreStart): CloudStart {
-    coreStart.chrome.setHelpSupportUrl(ELASTIC_SUPPORT_LINK);
+    coreStart.chrome.setHelpSupportUrl(getSupportUrl(this.config));
 
     // Nest all the registered context providers under the Cloud Services Provider.
     // This way, plugins only need to require Cloud's context provider to have all the enriched Cloud services.
@@ -119,6 +126,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     };
 
     const {
+      deploymentsUrl,
       deploymentUrl,
       profileUrl,
       billingUrl,
@@ -138,6 +146,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       isCloudEnabled: this.isCloudEnabled,
       cloudId: this.config.id,
       billingUrl,
+      deploymentsUrl,
       deploymentUrl,
       profileUrl,
       organizationUrl,
@@ -148,6 +157,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       serverless: {
         projectId: this.config.serverless?.project_id,
         projectName: this.config.serverless?.project_name,
+        projectType: this.config.serverless?.project_type,
       },
       performanceUrl,
       usersAndRolesUrl,
@@ -161,6 +171,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       profile_url: profileUrl,
       billing_url: billingUrl,
       organization_url: organizationUrl,
+      deployments_url: deploymentsUrl,
       deployment_url: deploymentUrl,
       base_url: baseUrl,
       performance_url: performanceUrl,
@@ -168,6 +179,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       projects_url: projectsUrl,
     } = this.config;
 
+    const fullCloudDeploymentsUrl = getFullCloudUrl(baseUrl, deploymentsUrl);
     const fullCloudDeploymentUrl = getFullCloudUrl(baseUrl, deploymentUrl);
     const fullCloudProfileUrl = getFullCloudUrl(baseUrl, profileUrl);
     const fullCloudBillingUrl = getFullCloudUrl(baseUrl, billingUrl);
@@ -178,6 +190,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const fullCloudSnapshotsUrl = `${fullCloudDeploymentUrl}/${CLOUD_SNAPSHOTS_PATH}`;
 
     return {
+      deploymentsUrl: fullCloudDeploymentsUrl,
       deploymentUrl: fullCloudDeploymentUrl,
       profileUrl: fullCloudProfileUrl,
       billingUrl: fullCloudBillingUrl,

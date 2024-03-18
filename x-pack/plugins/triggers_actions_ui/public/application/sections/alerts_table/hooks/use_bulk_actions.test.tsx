@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from './use_bulk_actions';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { createCasesServiceMock } from '../index.mock';
+import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
 
 jest.mock('./apis/bulk_get_cases');
 jest.mock('../../../../common/lib/kibana');
@@ -37,7 +38,7 @@ describe('bulk action hooks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
+    appMockRender = createAppMockRenderer(AlertsTableQueryContext);
   });
 
   const refresh = jest.fn();
@@ -300,14 +301,29 @@ describe('bulk action hooks', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
-    it('should not how the bulk actions when the user lacks any observability permissions', () => {
+    it('should not show the bulk actions when the user lacks any observability permissions', () => {
       mockKibana.mockImplementation(() => ({
         services: {
           application: { capabilities: {} },
         },
       }));
       const { result } = renderHook(
-        () => useBulkUntrackActions({ setIsBulkActionsLoading, refresh, clearSelection }),
+        () =>
+          useBulkUntrackActions({
+            setIsBulkActionsLoading,
+            refresh,
+            clearSelection,
+            isAllSelected: true,
+            query: {
+              bool: {
+                must: {
+                  term: {
+                    test: 'test',
+                  },
+                },
+              },
+            },
+          }),
         {
           wrapper: appMockRender.AppWrapper,
         }
@@ -360,10 +376,45 @@ describe('bulk action hooks', () => {
               },
               Object {
                 "data-test-subj": "mark-as-untracked",
-                "disableOnQuery": true,
+                "disableOnQuery": false,
                 "disabledLabel": "Mark as untracked",
                 "key": "mark-as-untracked",
                 "label": "Mark as untracked",
+                "onClick": [Function],
+              },
+            ],
+          },
+        ]
+      `);
+    });
+
+    it('appends only the case bulk actions for SIEM', async () => {
+      const { result } = renderHook(
+        () => useBulkActions({ alerts: [], query: {}, casesConfig, refresh, featureIds: ['siem'] }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      expect(result.current.bulkActions).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": 0,
+            "items": Array [
+              Object {
+                "data-test-subj": "attach-new-case",
+                "disableOnQuery": true,
+                "disabledLabel": "Add to new case",
+                "key": "attach-new-case",
+                "label": "Add to new case",
+                "onClick": [Function],
+              },
+              Object {
+                "data-test-subj": "attach-existing-case",
+                "disableOnQuery": true,
+                "disabledLabel": "Add to existing case",
+                "key": "attach-existing-case",
+                "label": "Add to existing case",
                 "onClick": [Function],
               },
             ],

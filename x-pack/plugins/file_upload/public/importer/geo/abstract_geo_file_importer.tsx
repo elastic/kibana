@@ -314,7 +314,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
     throw new Error('read(data: ArrayBuffer) not supported, use previewFile and import instead.');
   }
 
-  protected _createDocs(text: string): CreateDocsResponse {
+  protected _createDocs(text: string): CreateDocsResponse<ImportDoc> {
     throw new Error('_createDocs not implemented.');
   }
 }

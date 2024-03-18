@@ -9,3 +9,5 @@ export { createFilterInCellActionFactory } from './cell_action/filter_in';
 export { createFilterOutCellActionFactory } from './cell_action/filter_out';
 export { createFilterInDiscoverCellActionFactory } from './discover/filter_in';
 export { createFilterOutDiscoverCellActionFactory } from './discover/filter_out';
+export { createFilterInLensAction } from './lens/filter_in';
+export { createFilterOutLensAction } from './lens/filter_out';

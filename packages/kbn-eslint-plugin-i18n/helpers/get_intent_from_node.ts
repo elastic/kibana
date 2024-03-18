@@ -5,21 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { TSESTree } from '@typescript-eslint/typescript-estree';
-import { lowerCaseFirstLetter, upperCaseFirstLetter } from './utils';
+import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
+import { geti18nIdentifierFromString, lowerCaseFirstLetter } from './utils';
 
-export function getIntentFromNode(originalNode: TSESTree.JSXText): string {
-  const value = lowerCaseFirstLetter(
-    originalNode.value
-      .replace(/[?!@#$%^&*()_+\][{}|/<>,'"]/g, '')
-      .trim()
-      .split(' ')
-      .filter((v, i) => i < 4)
-      .map(upperCaseFirstLetter)
-      .join('')
-  );
+const EXEMPTED_TAG_NAMES = ['EuiCode', 'EuiBetaBadge', 'FormattedMessage'];
 
-  const { parent } = originalNode;
+export function getIntentFromNode(
+  value: string,
+  parent: TSESTree.Node | undefined
+): string | false {
+  const intent = geti18nIdentifierFromString(value);
 
   if (
     parent &&
@@ -29,12 +24,35 @@ export function getIntentFromNode(originalNode: TSESTree.JSXText): string {
   ) {
     const parentTagName = String(parent.openingElement.name.name);
 
-    if (parentTagName.includes('Eui')) {
-      return `${value}${parentTagName.replace('Eui', '')}Label`;
+    // Exceptions
+    if (EXEMPTED_TAG_NAMES.includes(parentTagName)) {
+      return false;
     }
 
-    return `${lowerCaseFirstLetter(parentTagName)}.${value}Label`;
+    if (parentTagName.includes('Eui')) {
+      return `${intent}${parentTagName.replace('Eui', '')}Label`;
+    }
+
+    return `${lowerCaseFirstLetter(parentTagName)}.${intent}Label`;
   }
 
-  return `${value}Label`;
+  if (
+    parent &&
+    'parent' in parent &&
+    parent.parent &&
+    'name' in parent.parent &&
+    typeof parent.parent.name !== 'string' &&
+    'type' in parent.parent.name &&
+    parent.parent.name.type === AST_NODE_TYPES.JSXIdentifier
+  ) {
+    const parentTagName = String(parent.parent.name.name);
+
+    if (EXEMPTED_TAG_NAMES.includes(parentTagName)) {
+      return false;
+    }
+
+    return `${lowerCaseFirstLetter(parentTagName)}.${intent}Label`;
+  }
+
+  return `${intent}Label`;
 }

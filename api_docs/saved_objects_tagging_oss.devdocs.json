@@ -2024,6 +2024,17 @@
           },
           {
             "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-common.Tag.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-common.Tag.name",
             "type": "string",
             "tags": [],

@@ -27,12 +27,11 @@ export function useValidateFieldRequest() {
       index: string,
       field: string,
       timeField: string,
-      start: number | undefined,
-      end: number | undefined,
+      timeRange: { from: number; to: number },
       queryIn: QueryDslQueryContainer,
       headers?: HttpFetchOptions['headers']
     ) => {
-      const query = createCategorizeQuery(queryIn, timeField, start, end);
+      const query = createCategorizeQuery(queryIn, timeField, timeRange);
       const resp = await http.post<FieldValidationResults>(
         AIOPS_API_ENDPOINT.CATEGORIZATION_FIELD_VALIDATION,
         {
@@ -42,8 +41,8 @@ export function useValidateFieldRequest() {
             size: 5,
             field,
             timeField,
-            start,
-            end,
+            start: timeRange.from,
+            end: timeRange.to,
             // only text fields are supported in pattern analysis,
             // and it is not possible to create a text runtime field
             // so runtimeMappings are not needed
