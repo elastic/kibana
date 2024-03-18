@@ -8,26 +8,34 @@
 
 import {
   apiIsOfType,
-  apiPublishesLocalUnifiedSearch,
+  apiPublishesUnifiedSearch,
   apiPublishesPanelTitle,
   HasType,
-  PublishesWritableLocalUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import {
+  DefaultEmbeddableApi,
+  SerializedReactEmbeddableTitles,
+} from '@kbn/embeddable-plugin/public';
 import { CanLinkToLibrary, CanUnlinkFromLibrary } from '@kbn/presentation-library';
 import { CONTENT_ID } from '../../common';
+import { LinksAttributes } from '../../common/content_management';
 
 export type LinksApi = HasType<typeof CONTENT_ID> &
   DefaultEmbeddableApi &
   CanLinkToLibrary &
-  CanUnlinkFromLibrary &
-  PublishesWritableLocalUnifiedSearch;
+  CanUnlinkFromLibrary;
 
 export const isLinksApi = (api: unknown): api is LinksApi => {
   return Boolean(
     api &&
       apiIsOfType(api, CONTENT_ID) &&
       apiPublishesPanelTitle(api) &&
-      apiPublishesLocalUnifiedSearch(api)
+      apiPublishesUnifiedSearch(api)
   );
 };
+
+export interface LinksSerializableState
+  extends SerializedReactEmbeddableTitles,
+    Partial<LinksAttributes> {
+  attributes?: LinksAttributes;
+}
