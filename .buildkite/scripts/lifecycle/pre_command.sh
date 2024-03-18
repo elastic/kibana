@@ -151,13 +151,6 @@ export GCS_SA_CDN_QA_EMAIL
 GCS_SA_CDN_QA_BUCKET="$(vault_get gcs-sa-cdn-qa bucket)"
 export GCS_SA_CDN_QA_BUCKET
 
-
-ELASTIC_APM_SERVER_URL=$(vault_get project-kibana-ci-apm apm_server_url)
-export ELASTIC_APM_SERVER_URL
-
-ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_server_api_key)
-export ELASTIC_APM_API_KEY
-
 # Setup Failed Test Reporter Elasticsearch credentials
 {
   TEST_FAILURES_ES_CLOUD_ID=$(vault_get failed_tests_reporter_es cloud_id)
