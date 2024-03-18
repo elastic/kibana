@@ -11,7 +11,7 @@ import type {
   FunctionDefinition,
   FunctionResponse,
 } from '../../common/functions/types';
-import type { Message, ObservabilityAIAssistantScreenContext } from '../../common/types';
+import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import { ChatFunctionClient } from './chat_function_client';
 import type { ObservabilityAIAssistantClient } from './client';
@@ -26,7 +26,7 @@ type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
     arguments: TArguments;
     messages: Message[];
     connectorId: string;
-    screenContexts: ObservabilityAIAssistantScreenContext[];
+    screenContexts: ObservabilityAIAssistantScreenContextRequest[];
   },
   signal: AbortSignal
 ) => Promise<TResponse>;

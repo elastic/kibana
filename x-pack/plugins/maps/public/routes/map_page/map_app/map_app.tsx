@@ -492,8 +492,7 @@ export class MapApp extends React.Component<Props, State> {
             ? [
                 getManagedContentBadge(
                   i18n.translate('xpack.maps.mapController.managedMapDescriptionTooltip', {
-                    defaultMessage:
-                      'This map is managed by Elastic. Changes here must be saved to a new map.',
+                    defaultMessage: 'Elastic manages this map. Save any changes to a new map.',
                   })
                 ),
               ]
