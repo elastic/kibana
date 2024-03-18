@@ -82,7 +82,7 @@ export interface FullAgentPolicyInput {
 
 export type FullAgentPolicyOutputPermissions = Record<string, SecurityRoleDescriptor>;
 
-export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256'> & {
+export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256' | 'id'> & {
   proxy_url?: string;
   proxy_headers?: any;
   [key: string]: any;

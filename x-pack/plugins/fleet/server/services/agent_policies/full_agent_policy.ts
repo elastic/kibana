@@ -322,6 +322,7 @@ export function transformOutputToFullPolicyOutput(
 ): FullAgentPolicyOutput {
   const {
     config_yaml,
+    id,
     type,
     hosts,
     ca_sha256,
@@ -434,6 +435,7 @@ export function transformOutputToFullPolicyOutput(
   const newOutput: FullAgentPolicyOutput = {
     ...configJs,
     ...shipperDiskQueueData,
+    id,
     type,
     hosts,
     ...kafkaData,
