@@ -122,13 +122,13 @@ In order to support the customization of Elastic Prebuilt Rules, we need to modi
 
 ### `rule_source` field
 
-The `rule_source` field will be a required top-level object field in our rule schema that will be a discriminated union of two types: `'internal'` and `'external'`.
+The `rule_source` field will be a top-level object field in our rule schema that will be a discriminated union of two types: `'internal'` and `'external'`.
 
 Rules with `rule_source` of type `internal` are rules generated internally in the Kibana application and which don't have an external origin outside of it.
 
 Rules with `rule_source` of type `external` are rules who have an external origin or source. Elastic prebuilt rules are a case of `external` rule, with the `detection-rules` repository handled by the TRaDE team being their external source origin.
 
-This also means that a rule with this type of `rule_source` will determine that the rule is an Elastic Prebuilt Rule that can receive upstream updates via Fleet. This field is intented to partly replace the currently existing `immutable` field, which is used today for the same purpose, but -as its name indicates- also currently determines if a rule's fields can be modified/customized.
+This also means that a rule with this type of `rule_source` will determine that the rule is an Elastic Prebuilt Rule that can receive upstream updates via Fleet. This field is intended to partly replace the currently existing `immutable` field, which is used today for the same purpose, but -as its name indicates- also currently determines if a rule's fields can be modified/customized.
 
 As seen in the schema, when the `rule_source` has type `'external'`, the object can contain two other subfields as well, `is_customized` and `source_updated_at`, explained below. If the object has type `'internal'`, no other fields should be present (subject to change in the future).
 
