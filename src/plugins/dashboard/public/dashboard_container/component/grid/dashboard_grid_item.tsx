@@ -105,9 +105,10 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       if (reactEmbeddableRegistryHasKey(type)) {
         return (
           <ReactEmbeddableRenderer
-            uuid={id}
-            key={`${type}_${id}`}
             type={type}
+            maybeId={id}
+            parentApi={container}
+            key={`${type}_${id}`}
             state={{ rawState: panel.explicitInput, version: panel.version, references }}
           />
         );

@@ -62,11 +62,6 @@ const config: TaskManagerConfig = {
   },
   poll_interval: 6000000,
   request_capacity: 1000,
-  requeue_invalid_tasks: {
-    enabled: false,
-    delay: 3000,
-    max_attempts: 20,
-  },
   unsafe: {
     authenticate_background_task_utilization: true,
     exclude_task_types: [],
