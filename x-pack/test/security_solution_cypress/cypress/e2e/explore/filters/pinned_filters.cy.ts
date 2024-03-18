@@ -55,12 +55,9 @@ describe('ESS - pinned filters', { tags: ['@ess'] }, () => {
 });
 
 describe('SERVERLESS - pinned filters', { tags: ['@serverless'] }, () => {
-  before(() => {
+  beforeEach(() => {
     deleteDataView(DATAVIEW);
     postDataView(DATAVIEW);
-  });
-
-  beforeEach(() => {
     login();
   });
 
