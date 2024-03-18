@@ -59,7 +59,6 @@ export class ServerlessObservabilityPlugin
     serverless.setProjectHome('/app/observability/landing');
     serverless.initNavigation(navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
 
-    management.setIsSidebarEnabled(false);
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.RULES],
