@@ -6,7 +6,7 @@
  */
 import { Response } from 'supertest';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
-import { omit } from 'lodash';
+import { omit, pick } from 'lodash';
 import { PassThrough } from 'stream';
 import expect from '@kbn/expect';
 import {
@@ -17,7 +17,8 @@ import {
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import type OpenAI from 'openai';
-import { createLlmProxy, LlmProxy } from '../../common/create_llm_proxy';
+import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { createLlmProxy, LlmProxy, LlmResponseSimulator } from '../../common/create_llm_proxy';
 import { createOpenAiChunk } from '../../common/create_openai_chunk';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -47,6 +48,66 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   describe('Complete', () => {
     let proxy: LlmProxy;
     let connectorId: string;
+
+    async function getEvents(
+      params: { screenContexts?: ObservabilityAIAssistantScreenContextRequest[] },
+      cb: (conversationSimulator: LlmResponseSimulator) => Promise<void>
+    ) {
+      const titleInterceptor = proxy.intercept(
+        'title',
+        (body) =>
+          (JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming).functions?.find(
+            (fn) => fn.name === 'title_conversation'
+          ) !== undefined
+      );
+
+      const conversationInterceptor = proxy.intercept(
+        'conversation',
+        (body) =>
+          (JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming).functions?.find(
+            (fn) => fn.name === 'title_conversation'
+          ) === undefined
+      );
+
+      const responsePromise = new Promise<Response>((resolve, reject) => {
+        supertest
+          .post(COMPLETE_API_URL)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            messages,
+            connectorId,
+            persist: true,
+            screenContexts: params.screenContexts || [],
+          })
+          .end((err, response) => {
+            if (err) {
+              return reject(err);
+            }
+            return resolve(response);
+          });
+      });
+
+      const [conversationSimulator, titleSimulator] = await Promise.all([
+        conversationInterceptor.waitForIntercept(),
+        titleInterceptor.waitForIntercept(),
+      ]);
+
+      await titleSimulator.status(200);
+      await titleSimulator.next('My generated title');
+      await titleSimulator.complete();
+
+      await conversationSimulator.status(200);
+      await cb(conversationSimulator);
+
+      const response = await responsePromise;
+
+      return String(response.body)
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => JSON.parse(line) as StreamingChatResponseEvent)
+        .slice(2); // ignore context request/response, we're testing this elsewhere
+    }
 
     before(async () => {
       proxy = await createLlmProxy();
@@ -185,80 +246,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('when creating a new conversation', async () => {
-      let lines: StreamingChatResponseEvent[];
+      let events: StreamingChatResponseEvent[];
+
       before(async () => {
-        const titleInterceptor = proxy.intercept(
-          'title',
-          (body) =>
-            (
-              JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
-            ).functions?.find((fn) => fn.name === 'title_conversation') !== undefined
-        );
-
-        const conversationInterceptor = proxy.intercept(
-          'conversation',
-          (body) =>
-            (
-              JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
-            ).functions?.find((fn) => fn.name === 'title_conversation') === undefined
-        );
-
-        const responsePromise = new Promise<Response>((resolve, reject) => {
-          supertest
-            .post(COMPLETE_API_URL)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              messages,
-              connectorId,
-              persist: true,
-              screenContexts: [],
-            })
-            .end((err, response) => {
-              if (err) {
-                return reject(err);
-              }
-              return resolve(response);
-            });
+        events = await getEvents({}, async (conversationSimulator) => {
+          await conversationSimulator.next('Hello');
+          await conversationSimulator.next(' again');
+          await conversationSimulator.complete();
         });
-
-        const [conversationSimulator, titleSimulator] = await Promise.all([
-          conversationInterceptor.waitForIntercept(),
-          titleInterceptor.waitForIntercept(),
-        ]);
-
-        await titleSimulator.status(200);
-        await titleSimulator.next('My generated title');
-        await titleSimulator.complete();
-
-        await conversationSimulator.status(200);
-        await conversationSimulator.next('Hello');
-        await conversationSimulator.next(' again');
-        await conversationSimulator.complete();
-
-        const response = await responsePromise;
-
-        lines = String(response.body)
-          .split('\n')
-          .map((line) => line.trim())
-          .filter(Boolean)
-          .map((line) => JSON.parse(line) as StreamingChatResponseEvent)
-          .slice(2); // ignore context request/response, we're testing this elsewhere
       });
 
       it('creates a new conversation', async () => {
-        expect(omit(lines[0], 'id')).to.eql({
+        expect(omit(events[0], 'id')).to.eql({
           type: StreamingChatResponseEventType.ChatCompletionChunk,
           message: {
             content: 'Hello',
           },
         });
-        expect(omit(lines[1], 'id')).to.eql({
+        expect(omit(events[1], 'id')).to.eql({
           type: StreamingChatResponseEventType.ChatCompletionChunk,
           message: {
             content: ' again',
           },
         });
-        expect(omit(lines[2], 'id', 'message.@timestamp')).to.eql({
+        expect(omit(events[2], 'id', 'message.@timestamp')).to.eql({
           type: StreamingChatResponseEventType.MessageAdd,
           message: {
             message: {
@@ -272,7 +283,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           },
         });
-        expect(omit(lines[3], 'conversation.id', 'conversation.last_updated')).to.eql({
+        expect(omit(events[3], 'conversation.id', 'conversation.last_updated')).to.eql({
           type: StreamingChatResponseEventType.ConversationCreate,
           conversation: {
             title: 'My generated title',
@@ -281,7 +292,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        const createdConversationId = lines.filter(
+        const createdConversationId = events.filter(
           (line): line is ConversationCreateEvent =>
             line.type === StreamingChatResponseEventType.ConversationCreate
         )[0]?.conversation.id;
@@ -296,6 +307,79 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           })
           .expect(200);
+      });
+    });
+
+    describe('after executing a screen context action', async () => {
+      let events: StreamingChatResponseEvent[];
+
+      before(async () => {
+        events = await getEvents(
+          {
+            screenContexts: [
+              {
+                actions: [
+                  {
+                    name: 'my_action',
+                    description: 'My action',
+                    parameters: {
+                      type: 'object',
+                      properties: {
+                        foo: {
+                          type: 'string',
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          async (conversationSimulator) => {
+            await conversationSimulator.next({
+              function_call: { name: 'my_action', arguments: JSON.stringify({ foo: 'bar' }) },
+            });
+            await conversationSimulator.complete();
+          }
+        );
+      });
+
+      it('closes the stream without persisting the conversation', () => {
+        expect(
+          pick(
+            events[events.length - 1],
+            'message.message.content',
+            'message.message.function_call',
+            'message.message.role'
+          )
+        ).to.eql({
+          message: {
+            message: {
+              content: '',
+              function_call: {
+                name: 'my_action',
+                arguments: JSON.stringify({ foo: 'bar' }),
+                trigger: MessageRole.Assistant,
+              },
+              role: MessageRole.Assistant,
+            },
+          },
+        });
+      });
+
+      it('does not store the conversation', async () => {
+        expect(
+          events.filter((event) => event.type === StreamingChatResponseEventType.ConversationCreate)
+            .length
+        ).to.eql(0);
+
+        const conversations = await observabilityAIAssistantAPIClient
+          .writeUser({
+            endpoint: 'POST /internal/observability_ai_assistant/conversations',
+          })
+          .expect(200);
+
+        expect(conversations.body.conversations.length).to.be(0);
       });
     });
 
