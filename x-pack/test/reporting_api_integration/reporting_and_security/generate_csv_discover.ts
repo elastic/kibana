@@ -18,8 +18,6 @@ export default function ({ getService }: FtrProviderContext) {
   const esVersion = getService('esVersion');
 
   describe('Generate CSV from SearchSource', function () {
-    // Failing ES 8.X forward compatibility: https://github.com/elastic/kibana/issues/151229
-    this.onlyEsVersion('<=7');
     let csvFile: string;
 
     before(async () => {
@@ -36,33 +34,57 @@ export default function ({ getService }: FtrProviderContext) {
       const { text: reportApiJson, status } = await reportingAPI.generateCsv({
         title: 'CSV Report',
         browserTimezone: 'UTC',
+        columns: [
+          'order_date',
+          'category',
+          'currency',
+          'customer_id',
+          'order_id',
+          'day_of_week_i',
+          'products.created_on',
+          'sku',
+        ],
         objectType: 'search',
-        version: '7.15.0',
+        version: '7.17.19',
         searchSource: {
-          version: true,
-          query: { query: '', language: 'kuery' },
           index: '5193f870-d861-11e9-a311-0fa548c5f953',
           sort: [{ order_date: 'desc' }],
-          fields: ['*'],
-          filter: [],
-          parent: {
-            query: { language: 'kuery', query: '' },
-            filter: [],
-            parent: {
-              filter: [
-                {
-                  meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
-                  range: {
-                    order_date: {
-                      gte: fromTime,
-                      lte: toTime,
-                      format: 'strict_date_optional_time',
-                    },
+          fields: [
+            'order_date',
+            'category',
+            'currency',
+            'customer_id',
+            'order_id',
+            'day_of_week_i',
+            'products.created_on',
+            'sku',
+          ],
+          filter: [
+            {
+              meta: {
+                field: 'order_date',
+                index: '5193f870-d861-11e9-a311-0fa548c5f953',
+                params: {},
+              },
+              query: {
+                range: {
+                  order_date: {
+                    format: 'strict_date_optional_time',
+                    gte: fromTime,
+                    lte: toTime,
                   },
                 },
-              ],
+              },
             },
+          ],
+          parent: {
+            filter: [],
+            highlightAll: true,
+            index: '5193f870-d861-11e9-a311-0fa548c5f953',
+            query: { language: 'kuery', query: '' },
+            version: true,
           },
+          trackTotalHits: true,
         } as unknown as SearchSourceFields,
       });
       expect(status).to.be(200);
