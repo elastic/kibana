@@ -30,6 +30,8 @@ import {
   OLD_SLOS_PATH,
   OLD_SLOS_WELCOME_PATH,
   OLD_SLOS_OUTDATED_DEFINITIONS_PATH,
+  OLD_SLO_DETAIL_PATH,
+  OLD_SLO_EDIT_PATH,
 } from '../../common/locators/paths';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
 
@@ -40,9 +42,11 @@ function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: str
     application: { navigateToApp },
   } = useKibana().services;
   const history = useHistory();
-  const { search, hash } = useLocation();
-
+  const { search, hash, pathname } = useLocation();
   if (redirectToApp) {
+    if (to === '/:sloId') {
+      to = pathname.split('/slos')[1];
+    }
     navigateToApp(redirectToApp, {
       path: `/${to}${search ? `?${search}` : ''}${hash}`,
       replace: true,
@@ -151,6 +155,20 @@ export const routes = {
   [OLD_SLOS_OUTDATED_DEFINITIONS_PATH]: {
     handler: () => {
       return <SimpleRedirect to="/outdated-definitions" redirectToApp="slo" />;
+    },
+    params: {},
+    exact: true,
+  },
+  [OLD_SLO_DETAIL_PATH]: {
+    handler: () => {
+      return <SimpleRedirect to="/:sloId" redirectToApp="slo" />;
+    },
+    params: {},
+    exact: true,
+  },
+  [OLD_SLO_EDIT_PATH]: {
+    handler: () => {
+      return <SimpleRedirect to="/:sloId" redirectToApp="slo" />;
     },
     params: {},
     exact: true,

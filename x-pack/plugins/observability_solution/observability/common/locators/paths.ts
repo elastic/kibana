@@ -21,6 +21,8 @@ export const CASES_PATH = '/cases' as const;
 export const OLD_SLOS_PATH = '/slos' as const;
 export const OLD_SLOS_WELCOME_PATH = '/slos/welcome' as const;
 export const OLD_SLOS_OUTDATED_DEFINITIONS_PATH = '/slos/outdated-definitions' as const;
+export const OLD_SLO_DETAIL_PATH = '/slos/:sloId' as const;
+export const OLD_SLO_EDIT_PATH = '/slos/edit/:sloId' as const;
 
 export const SLO_DETAIL_PATH = '/:sloId' as const;
 
