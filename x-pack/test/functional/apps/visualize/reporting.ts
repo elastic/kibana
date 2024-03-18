@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'visualize',
     'visEditor',
+    'share',
   ]);
 
   describe('Visualize Reporting Screenshots', function () {
@@ -68,22 +69,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('is available if new', async () => {
-        await PageObjects.visualize.gotoVisualizationLandingPage();
-        await PageObjects.visualize.clickNewVisualization();
-        await PageObjects.visualize.clickAggBasedVisualizations();
-        await PageObjects.visualize.clickAreaChart();
-        await PageObjects.visualize.clickNewSearch('ecommerce');
-        await PageObjects.reporting.openPdfReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.visualize.gotoVisualizationLandingPage();
+          await PageObjects.visualize.clickNewVisualization();
+          await PageObjects.visualize.clickAggBasedVisualizations();
+          await PageObjects.visualize.clickAreaChart();
+          await PageObjects.visualize.clickNewSearch('ecommerce');
+          await PageObjects.reporting.openPdfReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        }
       });
 
       it('becomes available when saved', async () => {
-        await PageObjects.visEditor.clickBucket('X-axis');
-        await PageObjects.visEditor.selectAggregation('Date Histogram');
-        await PageObjects.visEditor.clickGo();
-        await PageObjects.visualize.saveVisualization('my viz');
-        await PageObjects.reporting.openPdfReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        if (await PageObjects.share.checkOldVersion()) {
+          await PageObjects.visEditor.clickBucket('X-axis');
+          await PageObjects.visEditor.selectAggregation('Date Histogram');
+          await PageObjects.visEditor.clickGo();
+          await PageObjects.visualize.saveVisualization('my viz');
+          await PageObjects.reporting.openPdfReportingPanel();
+          expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        }
       });
     });
 
@@ -114,36 +119,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('TSVB Gauge: PNG file matches the baseline image', async function () {
-        log.debug('load saved visualization');
-        await PageObjects.visualize.loadSavedVisualization(
-          '[K7.6-eCommerce] Sold Products per Day',
-          { navigateToVisualize: false }
-        );
+        if (await PageObjects.share.checkOldVersion()) {
+          log.debug('load saved visualization');
+          await PageObjects.visualize.loadSavedVisualization(
+            '[K7.6-eCommerce] Sold Products per Day',
+            { navigateToVisualize: false }
+          );
 
-        log.debug('open png reporting panel');
-        await PageObjects.reporting.openPngReportingPanel();
-        log.debug('click generate report button');
-        await PageObjects.reporting.clickGenerateReportButton();
+          log.debug('open png reporting panel');
+          await PageObjects.reporting.openPngReportingPanel();
+          log.debug('click generate report button');
+          await PageObjects.reporting.clickGenerateReportButton();
 
-        log.debug('get the report download URL');
-        const url = await PageObjects.reporting.getReportURL(60000);
-        log.debug('download the report');
-        const reportData = await PageObjects.reporting.getRawPdfReportData(url);
-        const sessionReportPath = await PageObjects.reporting.writeSessionReport(
-          reportFileName,
-          'png',
-          reportData,
-          REPORTS_FOLDER
-        );
+          log.debug('get the report download URL');
+          const url = await PageObjects.reporting.getReportURL(60000);
+          log.debug('download the report');
+          const reportData = await PageObjects.reporting.getRawPdfReportData(url);
+          const sessionReportPath = await PageObjects.reporting.writeSessionReport(
+            reportFileName,
+            'png',
+            reportData,
+            REPORTS_FOLDER
+          );
 
-        // check the file
-        const percentDiff = await png.checkIfPngsMatch(
-          sessionReportPath,
-          PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
-          config.get('screenshots.directory')
-        );
+          // check the file
+          const percentDiff = await png.checkIfPngsMatch(
+            sessionReportPath,
+            PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
+            config.get('screenshots.directory')
+          );
 
-        expect(percentDiff).to.be.lessThan(0.01);
+          expect(percentDiff).to.be.lessThan(0.01);
+        }
       });
     });
   });

@@ -85,8 +85,8 @@ export default function ({
     describe('Print PDF button', () => {
       it('is available if new', async () => {
         await PageObjects.dashboard.navigateToApp();
+        await PageObjects.dashboard.clickNewDashboard();
         if (await PageObjects.share.checkOldVersion()) {
-          await PageObjects.dashboard.clickNewDashboard();
           await PageObjects.reporting.openPdfReportingPanel();
           expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
           await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover

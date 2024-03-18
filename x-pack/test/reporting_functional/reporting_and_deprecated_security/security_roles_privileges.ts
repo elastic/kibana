@@ -26,9 +26,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Dashboard: Download CSV file', () => {
       it('does not allow user that does not have reporting_user role', async () => {
+        await reportingFunctional.loginDataAnalyst();
+        await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
         if (await PageObjects.share.checkOldVersion()) {
-          await reportingFunctional.loginDataAnalyst();
-          await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
           await reportingFunctional.tryDashboardDownloadCsvFail('Ecommerce Data');
         }
       });
