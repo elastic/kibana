@@ -71,18 +71,10 @@ const Query = styled.div`
 
 export const getQueryLabel = (ruleType: Type | undefined): string => {
   switch (ruleType) {
-    case 'query':
-      return i18n.QUERY_LABEL;
     case 'eql':
       return i18n.EQL_QUERY_LABEL;
     case 'saved_query':
       return i18n.SAVED_QUERY_LABEL;
-    case 'threshold':
-      return i18n.QUERY_LABEL;
-    case 'threat_match':
-      return i18n.THREAT_QUERY_LABEL;
-    case 'new_terms':
-      return i18n.QUERY_LABEL;
     case 'esql':
       return i18n.ESQL_QUERY_LABEL;
     default:
