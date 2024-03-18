@@ -15,7 +15,7 @@ OUTPUT_DIR="${KIBANA_DIR}/${OUTPUT_REL}"
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Extract APM metrics"
-for journey in x-pack/performance/journeys/*; do
+for journey in x-pack/performance/journeys_e2e/*; do
   echo "Looking for journey=${journey} and BUILD_ID=${BUILD_ID} in APM traces"
 
   node scripts/extract_performance_testing_dataset \

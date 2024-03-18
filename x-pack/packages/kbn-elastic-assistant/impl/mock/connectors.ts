@@ -6,7 +6,7 @@
  */
 
 import { ActionType } from '@kbn/actions-plugin/common';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import { AIConnector } from '../connectorland/connector_selector';
 
 export const mockActionTypes = [
   {
@@ -31,9 +31,10 @@ export const mockActionTypes = [
   } as ActionType,
 ];
 
-export const mockConnectors: ActionConnector[] = [
+export const mockConnectors: AIConnector[] = [
   {
     id: 'connectorId',
+    connectorTypeTitle: 'OpenAI',
     name: 'Captain Connector',
     isMissingSecrets: false,
     actionTypeId: '.gen-ai',
@@ -47,6 +48,7 @@ export const mockConnectors: ActionConnector[] = [
   },
   {
     id: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
+    connectorTypeTitle: 'OpenAI',
     name: 'Professor Connector',
     isMissingSecrets: false,
     actionTypeId: '.gen-ai',

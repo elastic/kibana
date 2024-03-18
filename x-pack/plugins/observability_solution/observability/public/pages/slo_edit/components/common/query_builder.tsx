@@ -32,7 +32,7 @@ export function QueryBuilder(props: SearchBarProps) {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <QuerySearchBar
             {...props}
