@@ -7,7 +7,11 @@
 
 import { badRequest } from '@hapi/boom';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { findInventoryFields, inventoryModels } from '@kbn/metrics-data-access-plugin/common';
+import {
+  findInventoryFields,
+  InventoryItemType,
+  inventoryModels,
+} from '@kbn/metrics-data-access-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 
 import { _IGNORED } from '../../../../common/es_fields';
@@ -21,19 +25,14 @@ export async function getDataStreamDetails(args: {
   start: number;
   end: number;
 }): Promise<DataStreamDetails> {
-  const { esClient, dataStream } = args;
+  const { esClient, dataStream, start, end } = args;
 
   if (!dataStream?.trim()) {
     throw badRequest(`Data Stream name cannot be empty. Received value "${dataStream}"`);
   }
 
   const createdOn = await getDataStreamCreatedOn(esClient, dataStream);
-  const dataStreamSummaryStats = await getDataStreamSummaryStats(
-    esClient,
-    dataStream,
-    args.start,
-    args.end
-  );
+  const dataStreamSummaryStats = await getDataStreamSummaryStats(esClient, dataStream, start, end);
   const avgDocSizeInBytes =
     dataStreamSummaryStats.docsCount > 0 ? await getAvgDocSizeInBytes(esClient, dataStream) : 0;
   const sizeBytes = Math.ceil(avgDocSizeInBytes * dataStreamSummaryStats.docsCount);
@@ -66,7 +65,7 @@ const serviceNamesAgg: TermAggregation = {
 
 // Gather host terms like 'host', 'pod', 'container'
 const hostsAgg: TermAggregation = inventoryModels
-  .map((model) => findInventoryFields(model.id))
+  .map((model) => findInventoryFields(model.id as InventoryItemType))
   .reduce(
     (acc, fields) => ({ ...acc, [fields.id]: { terms: { field: fields.id, size: MAX_HOSTS } } }),
     {} as TermAggregation
@@ -101,8 +100,8 @@ async function getDataStreamSummaryStats(
     },
   });
 
-  const docsCount = Number(response.aggregations.total_count.value);
-  const degradedDocsCount = Number(response.aggregations.degraded_count.doc_count);
+  const docsCount = Number(response.aggregations?.total_count.value ?? 0);
+  const degradedDocsCount = Number(response.aggregations?.degraded_count.doc_count ?? 0);
 
   return {
     docsCount,
