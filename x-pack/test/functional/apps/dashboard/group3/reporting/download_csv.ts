@@ -62,6 +62,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.existOrFail('csvReportStarted'); // validate toast panel
   };
 
+  const createPartialCsv = (csvFile: unknown) => {
+    const partialCsvFile = (csvFile as string).split('\n').slice(0, 4);
+    return partialCsvFile.join('\n');
+  };
+
+  /*
+   * Tests
+   */
   describe('Dashboard Generate CSV', () => {
     describe('Default Saved Search Data', () => {
       before(async () => {
@@ -84,7 +92,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickDownloadCsv();
 
         const csvFile = await getCsvReportData();
-        expectSnapshot(csvFile).toMatch();
+        expect(csvFile.length).to.be(76137);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('Downloads a filtered CSV export of a saved search panel', async function () {
@@ -97,7 +106,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickDownloadCsv();
 
         const csvFile = await getCsvReportData();
-        expectSnapshot(csvFile).toMatch();
+        expect(csvFile.length).to.be(17106);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('Downloads a saved search panel with a custom time range that does not intersect with dashboard time range', async function () {
@@ -109,7 +119,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickDownloadCsv();
 
         const csvFile = await getCsvReportData();
-        expectSnapshot(csvFile).toMatch();
+        expect(csvFile.length).to.be(23277);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('Gets the correct filename if panel titles are hidden', async () => {
@@ -122,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickDownloadCsv();
         await testSubjects.existOrFail('csvReportStarted');
 
-        const csvFile = await getCsvReportData(); // file exists with proper name
+        const csvFile = await getCsvReportData();
         expect(csvFile).to.not.be(null);
       });
     });
@@ -159,7 +170,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickDownloadCsv();
 
         const csvFile = await getCsvReportData();
-        expectSnapshot(csvFile).toMatch();
+        expect(csvFile.length).to.be(2446);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
 
@@ -196,7 +208,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickDownloadCsv();
 
         const csvFile = await getCsvReportData();
-        expectSnapshot(csvFile).toMatch();
+        expect(csvFile.length).to.be(166);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
   });

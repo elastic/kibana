@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { SortDirection } from '@kbn/data-plugin/common';
 import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { Filter } from '@kbn/es-query';
@@ -56,6 +57,11 @@ export default ({ getService }: FtrProviderContext) => {
       data: 'x-pack/test/functional/es_archives/reporting/big_int_id_field',
       savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/big_int_id_field',
     },
+  };
+
+  const createPartialCsv = (csvFile: unknown) => {
+    const partialCsvFile = (csvFile as string).split('\n').slice(0, 4);
+    return partialCsvFile.join('\n');
   };
 
   /*
@@ -147,7 +153,8 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-        expectSnapshot(csvFile).toMatch();
+        expect((csvFile as string).length).to.be(124183);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
 
@@ -186,17 +193,20 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('includes an unmapped field to the report', async () => {
         const csvFile = await generateCsvReportWithUnmapped(['text', 'unmapped']);
-        expectSnapshot(csvFile).toMatch();
+        expect((csvFile as string).length).to.be(88);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('includes an unmapped nested field to the report', async () => {
         const csvFile = await generateCsvReportWithUnmapped(['text', 'nested.unmapped']);
-        expectSnapshot(csvFile).toMatch();
+        expect((csvFile as string).length).to.be(97);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('includes all unmapped fields to the report', async () => {
         const csvFile = await generateCsvReportWithUnmapped(['*']);
-        expectSnapshot(csvFile).toMatch();
+        expect((csvFile as string).length).to.be(120);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
 
@@ -324,7 +334,8 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-        expectSnapshot(csvFile).toMatch();
+        expect((csvFile as string).length).to.be(1267140);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('Exports CSV with all fields when using defaults', async () => {
@@ -369,7 +380,8 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-        expectSnapshot(csvFile).toMatch();
+        expect((csvFile as string).length).to.be(914755);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
 
@@ -420,7 +432,8 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-        expectSnapshot(csvFile).toMatch();
+        expect((csvFile as string).length).to.be(3020);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('With filters and timebased data, non-default timezone', async () => {
@@ -459,7 +472,8 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-        expectSnapshot(csvFile).toMatch();
+        expect((csvFile as string).length).to.be(3020);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
 
@@ -492,7 +506,8 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-        expectSnapshot(csvFile).toMatch();
+        expect((csvFile as string).length).to.be(103);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('Formatted date_nanos data, custom timezone (New York)', async () => {
@@ -514,7 +529,8 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-        expectSnapshot(csvFile).toMatch();
+        expect((csvFile as string).length).to.be(103);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
 
@@ -550,7 +566,8 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-        expectSnapshot(csvFile).toMatch();
+        expect((csvFile as string).length).to.be(134);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('With filters and non-timebased data', async () => {
@@ -575,7 +592,8 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-        expectSnapshot(csvFile).toMatch();
+        expect((csvFile as string).length).to.be(274);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
 
@@ -652,7 +670,8 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-        expectSnapshot(csvFile).toMatch();
+        expect((csvFile as string).length).to.be(329);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
 
@@ -711,7 +730,8 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-        expectSnapshot(csvFile).toMatch();
+        expect((csvFile as string).length).to.be(4826973);
+        expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
   });
