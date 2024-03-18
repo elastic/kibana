@@ -139,7 +139,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             title={
               <h2>
                 <FormattedMessage
-                  id="xpack.idxMgmt.indexDetails.mappings.invaluMappingKeysErrorMessageTitle"
+                  id="xpack.idxMgmt.indexDetails.mappings.invalidMappingKeysErrorMessageTitle"
                   defaultMessage="Unable to load the mapping"
                 />
               </h2>
@@ -147,7 +147,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             body={
               <h2>
                 <FormattedMessage
-                  id="xpack.idxMgmt.indexDetails.mappings.invaluMappingKeysErrorMessageBody"
+                  id="xpack.idxMgmt.indexDetails.mappings.invalidMappingKeysErrorMessageBody"
                   defaultMessage="The mapping contains invalid keys. Please provide a mapping with valid keys."
                 />
               </h2>
