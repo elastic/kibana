@@ -22,7 +22,7 @@ describe('Differential Functions page', () => {
     cy.contains('Comparison functions');
   });
 
-  describe('summary2', () => {
+  describe('summary12', () => {
     it('shows only the baseline values when comparison data is not available', () => {
       cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential', { rangeFrom, rangeTo });
