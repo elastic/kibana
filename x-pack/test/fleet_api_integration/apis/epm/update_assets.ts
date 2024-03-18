@@ -223,7 +223,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           mapping: {
             total_fields: {
-              limit: '10000',
+              limit: '1000',
             },
           },
         },
