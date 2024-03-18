@@ -706,7 +706,7 @@ describe('getAuthzFromRequest', () => {
           kibana: [
             {
               resource: 'default',
-              privilege: 'api:fleet-all',
+              privilege: 'api:fleet-agents-all',
               authorized: true,
             },
           ],

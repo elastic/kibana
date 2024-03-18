@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import type { NewAgentPolicy, AgentPolicy } from '../../../types';
-import { useAuthz } from '../../../../../hooks';
 
 import type { ValidationResults } from './agent_policy_validation';
 
@@ -31,7 +30,6 @@ export const AgentPolicyGeneralFields: React.FunctionComponent<Props> = ({
   nameLabel,
   disabled,
 }) => {
-  const authz = useAuthz();
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
   const isDisabled = disabled || agentPolicy.is_managed === true;
 
