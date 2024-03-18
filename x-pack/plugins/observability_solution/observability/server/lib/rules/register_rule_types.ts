@@ -15,15 +15,11 @@ import {
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { CustomThresholdLocators } from './custom_threshold/custom_threshold_executor';
-import { sloFeatureId, observabilityFeatureId } from '../../../common';
+import { observabilityFeatureId } from '../../../common';
 import { ObservabilityConfig } from '../..';
-import {
-  SLO_RULE_REGISTRATION_CONTEXT,
-  THRESHOLD_RULE_REGISTRATION_CONTEXT,
-} from '../../common/constants';
+import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../common/constants';
 import { sloBurnRateRuleType } from './slo_burn_rate';
 import { thresholdRuleType } from './custom_threshold/register_custom_threshold_rule_type';
-import { sloRuleFieldMap } from './slo_burn_rate/field_map';
 
 export function registerRuleTypes(
   alertingPlugin: PluginSetupContract,
@@ -33,30 +29,7 @@ export function registerRuleTypes(
   ruleDataService: IRuleDataService,
   locators: CustomThresholdLocators
 ) {
-  // SLO RULE
-  const ruleDataClientSLO = ruleDataService.initializeIndex({
-    feature: sloFeatureId,
-    registrationContext: SLO_RULE_REGISTRATION_CONTEXT,
-    dataset: Dataset.alerts,
-    componentTemplateRefs: [],
-    componentTemplates: [
-      {
-        name: 'mappings',
-        mappings: mappingFromFieldMap(
-          { ...legacyExperimentalFieldMap, ...sloRuleFieldMap },
-          'strict'
-        ),
-      },
-    ],
-  });
-
-  const createLifecycleRuleExecutorSLO = createLifecycleExecutor(
-    logger.get('rules'),
-    ruleDataClientSLO
-  );
-  alertingPlugin.registerType(
-    sloBurnRateRuleType(createLifecycleRuleExecutorSLO, basePath, locators.alertsLocator)
-  );
+  alertingPlugin.registerType(sloBurnRateRuleType(basePath, locators.alertsLocator));
 
   const ruleDataClientThreshold = ruleDataService.initializeIndex({
     feature: observabilityFeatureId,
