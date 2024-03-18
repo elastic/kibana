@@ -45,7 +45,7 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
       return testResponse.body;
     },
     {
-      retries: MAX_RETRIES,
+      retryCount: MAX_RETRIES,
       timeout: ATTEMPT_TIMEOUT,
     }
   );
@@ -86,7 +86,7 @@ export const installPrebuiltRulesPackageByVersion = async (
       return testResponse.body;
     },
     {
-      retries: MAX_RETRIES,
+      retryCount: MAX_RETRIES,
       timeout: ATTEMPT_TIMEOUT,
     }
   );

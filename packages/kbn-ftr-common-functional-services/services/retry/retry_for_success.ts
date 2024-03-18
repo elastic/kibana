@@ -13,9 +13,9 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const returnTrue = () => true;
 
-const defaultOnFailure = (methodName: string) => (lastError: Error | undefined) => {
+const defaultOnFailure = (methodName: string) => (lastError: Error | undefined, reason: string) => {
   throw new Error(
-    `${methodName} timeout${lastError ? `: ${lastError.stack || lastError.message}` : ''}`
+    `${methodName} ${reason}\n${lastError ? `${lastError.stack || lastError.message}` : ''}`
   );
 };
 
@@ -44,27 +44,45 @@ interface Options<T> {
   onFailureBlock?: () => Promise<T>;
   onFailure?: ReturnType<typeof defaultOnFailure>;
   accept?: (v: T) => boolean;
+  description?: string;
   retryDelay?: number;
+  retryCount?: number;
 }
 
 export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
   const {
+    description,
     timeout,
     methodName,
     block,
     onFailureBlock,
     accept = returnTrue,
     retryDelay = 502,
+    retryCount,
   } = options;
   const { onFailure = defaultOnFailure(methodName) } = options;
 
   const start = Date.now();
   const criticalWebDriverErrors = ['NoSuchSessionError', 'NoSuchWindowError'];
   let lastError;
+  let attemptCounter = 0;
+  const addText = (str: string | undefined) => (str ? ` waiting for '${str}'` : '');
 
   while (true) {
+    if (retryCount) {
+      // Use retryCount as an optional condiotion
+      if (++attemptCounter > retryCount) {
+        onFailure(
+          lastError,
+          // optionally extend error message with description
+          `reached the limit of attempts${addText(description)}: ${
+            attemptCounter - 1
+          } out of ${retryCount}`
+        );
+      }
+    }
     if (Date.now() - start > timeout) {
-      await onFailure(lastError);
+      onFailure(lastError, `reached timeout ${timeout} ms${addText(description)}`);
       throw new Error('expected onFailure() option to throw an error');
     } else if (lastError && criticalWebDriverErrors.includes(lastError.name)) {
       // Aborting retry since WebDriver session is invalid or browser window is closed

@@ -10,12 +10,9 @@ import { FtrService } from '../ftr_provider_context';
 import { retryForSuccess } from './retry_for_success';
 import { retryForTruthy } from './retry_for_truthy';
 
-/**
- * retr
- */
 interface TryWithAttemptsOptions {
-  retries?: number;
   timeout?: number;
+  retryCount?: number;
   retryDelay?: number;
 }
 
@@ -23,15 +20,23 @@ export class RetryService extends FtrService {
   private readonly config = this.ctx.getService('config');
   private readonly log = this.ctx.getService('log');
 
+  /**
+   * Use to retry block within {timeout} period and return block result.
+   * @param timeout retrying timeout
+   * @param block retrying operation
+   * @param onFailureBlock optional block to run on operation failure before the new attempt
+   * @param retryDelay optional delay before the new attempt
+   * @returns result from block
+   */
   public async tryForTime<T>(
     timeout: number,
     block: () => Promise<T>,
     onFailureBlock?: () => Promise<T>,
     retryDelay?: number
   ) {
-    return await retryForSuccess(this.log, {
+    return await retryForSuccess<T>(this.log, {
       timeout,
-      methodName: 'retry.tryForTime',
+      methodName: 'retry.retryWithRetries',
       block,
       onFailureBlock,
       retryDelay,
@@ -52,6 +57,13 @@ export class RetryService extends FtrService {
     });
   }
 
+  /**
+   * Use to wait for block condition to be true
+   * @param description block description
+   * @param timeout retrying timeout
+   * @param block retrying operation
+   * @param onFailureBlock optional block to run on operation failure before the new attempt
+   */
   public async waitForWithTimeout(
     description: string,
     timeout: number,
@@ -81,46 +93,30 @@ export class RetryService extends FtrService {
     });
   }
 
+  /**
+   * Use to retry block {options.retryCount} times within {options.timeout} period and return block result
+   * @param description block description
+   * @param block retrying operation
+   * @param options TryWithAttemptsOptions
+   * @param onFailureBlock optional block to run on operation failure before the new attempt
+   * @returns result from block
+   */
   public async tryWithRetries<T>(
     description: string,
     block: () => Promise<T>,
-    options: TryWithAttemptsOptions = {}
+    options: TryWithAttemptsOptions,
+    onFailureBlock?: () => Promise<T>
   ): Promise<T> {
-    const {
-      retries = 2,
-      timeout = this.config.get('timeouts.waitFor'),
-      retryDelay = 200,
-    } = options;
-    let retryAttempt = 0;
-    const result = await this.tryForTime(
+    const { retryCount = 2, timeout = this.config.get('timeouts.try'), retryDelay = 200 } = options;
+
+    return await retryForSuccess<T>(this.log, {
+      description,
       timeout,
-      async () => {
-        if (retryAttempt > retries) {
-          // Log error message if we reached the maximum number of retries
-          // but don't throw an error, return it to break the retry loop.
-          const errorMessage = `Reached maximum number of retries: ${retryAttempt - 1}/${retries}`;
-          this.log.error(errorMessage);
-          return new Error(JSON.stringify(errorMessage));
-        }
-
-        retryAttempt = retryAttempt + 1;
-
-        // Catch the error thrown by the test and log it, throw it again to force `tryForTime` to retry.
-        try {
-          return await block();
-        } catch (error) {
-          this.log.error(`Retrying ${description}: ${error}`);
-          throw error;
-        }
-      },
-      undefined,
-      retryDelay
-    );
-
-    if (result instanceof Error) {
-      throw result;
-    }
-
-    return result;
+      methodName: 'retry.retryWithRetries',
+      block,
+      onFailureBlock,
+      retryDelay,
+      retryCount,
+    });
   }
 }
