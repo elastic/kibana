@@ -22,7 +22,7 @@ export const DocumentFieldsSearch = React.memo(
       <EuiFlexItem grow={false}>
         <EuiFieldSearch
           disabled={disabled}
-          style={{ minWidth: '350px' }}
+          fullWidth
           placeholder={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.documentFields.searchFieldsPlaceholder',
             {
