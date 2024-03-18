@@ -22,10 +22,13 @@ destination_file="./packages/kbn-monaco/src/esql/antlr/esql_lexer.g4"
 cp "$source_file" "$destination_file"
 
 # Insert the license header
-license_header=$(cat "$license_header_file")
-
 echo "Inserting license header into $destination_file"
-echo $license_header
+
+license_header=$(cat $license_header_file)
+echo "License header: $license_header"
+
+echo "in comparison with file: $destination_file"
+cat $license_header_file
 
 sed -i -e "1s/^/$license_header\n/" "$destination_file" || exit
 
