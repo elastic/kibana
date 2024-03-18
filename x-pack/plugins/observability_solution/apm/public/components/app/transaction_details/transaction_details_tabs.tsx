@@ -28,6 +28,8 @@ import { latencyCorrelationsTab } from './latency_correlations_tab';
 import { profilingTab } from './profiling_tab';
 import { traceSamplesTab } from './trace_samples_tab';
 import { useTransactionProfilingSetting } from '../../../hooks/use_profiling_integration_setting';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { isJavaAgentName } from '../../../../common/agent_name';
 
 export interface TabContentProps {
   clearChartSelection: () => void;
@@ -43,6 +45,7 @@ export function TransactionDetailsTabs() {
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view'
   );
+  const { agentName } = useApmServiceContext();
 
   const isCriticalPathFeatureEnabled = useCriticalPathFeatureEnabledSetting();
   const isTransactionProfilingEnabled = useTransactionProfilingSetting();
@@ -57,12 +60,12 @@ export function TransactionDetailsTabs() {
       tabs.push(aggregatedCriticalPathTab);
     }
 
-    if (isTransactionProfilingEnabled) {
+    if (isTransactionProfilingEnabled && isJavaAgentName(agentName)) {
       tabs.push(profilingTab);
     }
 
     return tabs;
-  }, [isCriticalPathFeatureEnabled, isTransactionProfilingEnabled]);
+  }, [agentName, isCriticalPathFeatureEnabled, isTransactionProfilingEnabled]);
 
   const { urlParams } = useLegacyUrlParams();
   const history = useHistory();

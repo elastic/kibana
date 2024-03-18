@@ -26,10 +26,12 @@ import { useOptionsList } from '../embeddable/options_list_embeddable';
 const aggregationToggleButtons = [
   {
     id: 'optionsList__includeResults',
+    key: 'optionsList__includeResults',
     label: OptionsListStrings.popover.getIncludeLabel(),
   },
   {
     id: 'optionsList__excludeResults',
+    key: 'optionsList__excludeResults',
     label: OptionsListStrings.popover.getExcludeLabel(),
   },
 ];

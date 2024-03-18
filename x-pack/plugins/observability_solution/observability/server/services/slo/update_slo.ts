@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
 import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
 import { isEqual, pick } from 'lodash';
 import {
@@ -31,7 +31,8 @@ export class UpdateSLO {
     private summaryTransformManager: TransformManager,
     private esClient: ElasticsearchClient,
     private logger: Logger,
-    private spaceId: string
+    private spaceId: string,
+    private basePath: IBasePath
   ) {}
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
@@ -66,7 +67,9 @@ export class UpdateSLO {
       // At this point, we still need to update the summary pipeline to include the changes (name, desc, tags, ...) in the summary index
       await retryTransientEsErrors(
         () =>
-          this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(updatedSlo, this.spaceId)),
+          this.esClient.ingest.putPipeline(
+            getSLOSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
+          ),
         { logger: this.logger }
       );
 
@@ -82,7 +85,9 @@ export class UpdateSLO {
 
       await retryTransientEsErrors(
         () =>
-          this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(updatedSlo, this.spaceId)),
+          this.esClient.ingest.putPipeline(
+            getSLOSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
+          ),
         { logger: this.logger }
       );
 

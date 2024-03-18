@@ -35,10 +35,12 @@ import {
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import {
+  CompatibleJSONSchema,
   FunctionResponse,
   FunctionVisibility,
+} from '../../../common/functions/types';
+import {
   MessageRole,
-  type CompatibleJSONSchema,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -46,6 +48,7 @@ import {
   type Message,
 } from '../../../common/types';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
+import { createFunctionResponseError } from '../../../common/utils/create_function_response_error';
 import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
 import type { ChatFunctionClient } from '../chat_function_client';
 import {
@@ -134,33 +137,41 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
-  complete = (
-    params: {
-      messages: Message[];
-      connectorId: string;
-      signal: AbortSignal;
-      functionClient: ChatFunctionClient;
-      persist: boolean;
-    } & ({ conversationId: string } | { title?: string })
-  ): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
+  complete = (params: {
+    messages: Message[];
+    connectorId: string;
+    signal: AbortSignal;
+    functionClient: ChatFunctionClient;
+    persist: boolean;
+    responseLanguage?: string;
+    conversationId?: string;
+    title?: string;
+  }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
       (subscriber) => {
         const { messages, connectorId, signal, functionClient, persist } = params;
 
-        let conversationId: string = '';
-        let title: string = '';
-        if ('conversationId' in params) {
-          conversationId = params.conversationId;
-        }
-
-        if ('title' in params) {
-          title = params.title || '';
-        }
+        const conversationId = params.conversationId || '';
+        const title = params.title || '';
+        const responseLanguage = params.responseLanguage || 'English';
 
         let numFunctionsCalled: number = 0;
 
         const MAX_FUNCTION_CALLS = 5;
         const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
+
+        const allFunctions = functionClient
+          .getFunctions()
+          .filter((fn) => {
+            const visibility = fn.definition.visibility ?? FunctionVisibility.All;
+            return (
+              visibility === FunctionVisibility.All ||
+              visibility === FunctionVisibility.AssistantOnly
+            );
+          })
+          .map((fn) => pick(fn.definition, 'name', 'description', 'parameters'));
+
+        const allActions = functionClient.getActions();
 
         const next = async (nextMessages: Message[]): Promise<void> => {
           const lastMessage = last(nextMessages);
@@ -202,18 +213,7 @@ export class ObservabilityAIAssistantClient {
             return await next(nextMessages.concat(addedMessage));
           } else if (isUserMessage) {
             const functions =
-              numFunctionsCalled >= MAX_FUNCTION_CALLS
-                ? []
-                : functionClient
-                    .getFunctions()
-                    .filter((fn) => {
-                      const visibility = fn.definition.visibility ?? FunctionVisibility.All;
-                      return (
-                        visibility === FunctionVisibility.All ||
-                        visibility === FunctionVisibility.AssistantOnly
-                      );
-                    })
-                    .map((fn) => pick(fn.definition, 'name', 'description', 'parameters'));
+              numFunctionsCalled >= MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
 
             if (numFunctionsCalled >= MAX_FUNCTION_CALLS) {
               this.dependencies.logger.debug(
@@ -257,9 +257,37 @@ export class ObservabilityAIAssistantClient {
           }
 
           if (isAssistantMessageWithFunctionRequest) {
-            const span = apm.startSpan(
-              `execute_function ${lastMessage.message.function_call!.name}`
-            );
+            const functionCallName = lastMessage.message.function_call!.name;
+
+            if (functionClient.hasAction(functionCallName)) {
+              this.dependencies.logger.debug(`Executing client-side action: ${functionCallName}`);
+
+              // if validation fails, return the error to the LLM.
+              // otherwise, close the stream.
+
+              try {
+                functionClient.validate(
+                  functionCallName,
+                  JSON.parse(lastMessage.message.function_call!.arguments || '{}')
+                );
+              } catch (error) {
+                const functionResponseMessage = createFunctionResponseError({
+                  name: functionCallName,
+                  error,
+                });
+                nextMessages = nextMessages.concat(functionResponseMessage.message);
+
+                subscriber.next(functionResponseMessage);
+
+                return await next(nextMessages);
+              }
+
+              subscriber.complete();
+
+              return;
+            }
+
+            const span = apm.startSpan(`execute_function ${functionCallName}`);
 
             span?.addLabels({
               ai_assistant_args: JSON.stringify(lastMessage.message.function_call!.arguments ?? {}),
@@ -276,7 +304,7 @@ export class ObservabilityAIAssistantClient {
                 : await functionClient
                     .executeFunction({
                       connectorId,
-                      name: lastMessage.message.function_call!.name,
+                      name: functionCallName,
                       messages: nextMessages,
                       args: lastMessage.message.function_call!.arguments,
                       signal,
@@ -316,6 +344,7 @@ export class ObservabilityAIAssistantClient {
             numFunctionsCalled++;
 
             if (signal.aborted) {
+              span?.end();
               return;
             }
 
@@ -421,7 +450,7 @@ export class ObservabilityAIAssistantClient {
           subscriber.complete();
         };
 
-        next(messages).catch((error) => {
+        next(this.addResponseLanguage(messages, responseLanguage)).catch((error) => {
           if (!signal.aborted) {
             this.dependencies.logger.error(error);
           }
@@ -434,6 +463,7 @@ export class ObservabilityAIAssistantClient {
                 messages,
                 connectorId,
                 signal,
+                responseLanguage,
               }).catch((error) => {
                 this.dependencies.logger.error(
                   'Could not generate title, falling back to default title'
@@ -457,7 +487,7 @@ export class ObservabilityAIAssistantClient {
     }: {
       messages: Message[];
       connectorId: string;
-      functions?: Array<{ name: string; description: string; parameters: CompatibleJSONSchema }>;
+      functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
       functionCall?: string;
       signal: AbortSignal;
     }
@@ -622,10 +652,12 @@ export class ObservabilityAIAssistantClient {
     messages,
     connectorId,
     signal,
+    responseLanguage,
   }: {
     messages: Message[];
     connectorId: string;
     signal: AbortSignal;
+    responseLanguage: string;
   }) => {
     const response$ = await this.chat('generate_title', {
       messages: [
@@ -633,7 +665,7 @@ export class ObservabilityAIAssistantClient {
           '@timestamp': new Date().toString(),
           message: {
             role: MessageRole.System,
-            content: `You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.`,
+            content: `You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you. Please create the title in ${responseLanguage}.`,
           },
         },
         {
@@ -798,5 +830,19 @@ export class ObservabilityAIAssistantClient {
 
   deleteKnowledgeBaseEntry = async (id: string) => {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
+  };
+
+  private addResponseLanguage = (messages: Message[], responseLanguage: string): Message[] => {
+    const [systemMessage, ...rest] = messages;
+
+    const extendedSystemMessage: Message = {
+      ...systemMessage,
+      message: {
+        ...systemMessage.message,
+        content: `You MUST respond in the users preferred language which is: ${responseLanguage}. ${systemMessage.message.content}`,
+      },
+    };
+
+    return [extendedSystemMessage].concat(rest);
   };
 }
