@@ -7,6 +7,7 @@
 
 import { FunctionComponent, ReactNode } from 'react';
 import { ApplicationStart } from '@kbn/core-application-browser';
+import { EuiBreadcrumb } from '@elastic/eui';
 import { Index } from '../types';
 
 export enum Section {
@@ -41,4 +42,5 @@ export interface IndexDetailsTab {
   // an optional function to return a boolean for when to render the tab
   // if omitted, the tab is always rendered
   shouldRenderTab?: (args: { index: Index }) => boolean;
+  breadcrumb?: EuiBreadcrumb;
 }

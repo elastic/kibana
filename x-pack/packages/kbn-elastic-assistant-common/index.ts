@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { GetCapabilitiesResponse } from './impl/schemas/capabilities/get_capabilities_route.gen';
+// Schema constants
+export * from './impl/schemas';
 
 export { defaultAssistantFeatures } from './impl/capabilities';
 export type { AssistantFeatures } from './impl/capabilities';
@@ -20,3 +21,9 @@ export {
 } from './impl/data_anonymization/helpers';
 
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
+export {
+  replaceAnonymizedValuesWithOriginalValues,
+  replaceOriginalValuesWithUuidValues,
+} from './impl/data_anonymization/helpers';
+
+export * from './constants';

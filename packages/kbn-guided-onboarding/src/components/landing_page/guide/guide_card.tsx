@@ -8,14 +8,7 @@
 
 import React, { Fragment, useCallback, useState } from 'react';
 
-import {
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiTextColor,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
@@ -138,7 +131,7 @@ export const GuideCard = ({
 
   const cardCss = css`
     position: relative;
-    height: 125px;
+    height: 150px;
     width: 380px;
     .euiCard__top {
       margin-block-end: 8px;
@@ -149,7 +142,7 @@ export const GuideCard = ({
     }
     @media (min-width: 768px) and (max-width: 1210px) {
       max-width: 230px;
-      height: 175px;
+      height: 200px;
       justify-content: center;
     }
   `;
@@ -175,16 +168,12 @@ export const GuideCard = ({
           )}
           {isComplete && (
             <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <small>
-                  {i18n.translate('guidedOnboardingPackage.gettingStarted.cards.completeLabel', {
-                    defaultMessage: 'Guide complete',
-                  })}
-                </small>
-              </EuiFlexItem>
+              <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
+              <small>
+                {i18n.translate('guidedOnboardingPackage.gettingStarted.cards.completeLabel', {
+                  defaultMessage: 'Guide complete',
+                })}
+              </small>
             </EuiFlexGroup>
           )}
         </>

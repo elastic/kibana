@@ -50,13 +50,10 @@ import { appContextService, packagePolicyService } from '../..';
 
 import { auditLoggingService } from '../../audit_logging';
 
-import {
-  createInstallation,
-  restartInstallation,
-  installIndexTemplatesAndPipelines,
-} from './install';
+import { createInstallation, restartInstallation } from './install';
 import { withPackageSpan } from './utils';
 import { clearLatestFailedAttempts } from './install_errors_helpers';
+import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path

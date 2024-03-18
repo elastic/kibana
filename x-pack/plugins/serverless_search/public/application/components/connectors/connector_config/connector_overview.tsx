@@ -64,9 +64,9 @@ export const ConnectorOverview: React.FC<ConnectorOverviewProps> = ({ connector 
         <EuiButton
           data-test-subj="serverlessSearchConnectorOverviewSyncButton"
           color="primary"
-          disabled={
-            ![ConnectorStatus.CONFIGURED, ConnectorStatus.CONNECTED].includes(connector.status)
-          }
+          disabled={[ConnectorStatus.CREATED, ConnectorStatus.NEEDS_CONFIGURATION].includes(
+            connector.status
+          )}
           fill
           isLoading={isLoading}
           onClick={() => mutate()}

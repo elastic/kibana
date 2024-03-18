@@ -15,6 +15,8 @@ If you are still having doubts, questions or queries, please feel free to ping o
 
 [**Running the tests**](#running-the-tests)
 
+[**Enabling Experimental Flags**](#enabling-experimental-flags)
+
 [**Debugging your test**](#debugging-your-test)
 
 [**Folder structure**](#folder-structure)
@@ -93,6 +95,29 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 | junit:merge | Merges individual test reports into a single report and moves the report to the `junit` directory |
 
 Please note that all the headless mode commands do not open the Cypress UI and are typically used in CI/CD environments. The scripts that open the Cypress UI are useful for development and debugging.
+
+### Enabling experimental flags
+
+When writing a test that requires an experimental flag enabled, you need to pass an extra configuration to the header of the test:
+
+```typescript
+describe(
+  'My Experimental Flag test',
+  {
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'MY_EXPERIMENTAL_FLAG',
+          ])}`,
+        ],
+      },
+    },
+  },
+  ...
+```
+
+Note that this configuration doesn't work for local development. In this case, you need to update the configuration files: `../config` and `../serverless_config`, but you shouldn't commit these changes.
 
 ## Debugging your test
 
@@ -207,6 +232,21 @@ Note that the command will create the folder if it does not exist.
 ### Using an archive from within the Cypress tests
 
 Task [cypress/support/es_archiver.ts](https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/cypress/support/es_archiver.ts) provides helpers such as `esArchiverLoad` and `esArchiverUnload` by means of `es_archiver`'s CLI.
+
+Archives used only for Cypress tests purposes are stored in `x-pack/test/security_solution_cypress/es_archives` and are used as follow on the tests.
+
+```typescript
+cy.task('esArchiverLoad', { archiveName: 'overview' });
+cy.task('esArchiverUnload', { archiveName: 'overview'});
+
+```
+
+You can also use archives stored in `kibana/x-pack/test/functional/es_archives`. In order to do sow uste it on the tests as follow.
+
+```typescript
+cy.task('esArchiverLoad', { archiveName: 'security_solution/alias' }, type: 'ftr');
+cy.task('esArchiverUnload', { archiveName: 'security_solution/alias', type:'ftr'});
+```
 
 ## Serverless
 

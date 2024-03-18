@@ -7,18 +7,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { TracksOverlays } from '@kbn/presentation-containers';
 import {
   apiCanAccessViewMode,
   apiPublishesDataViews,
-  apiPublishesLocalUnifiedSearch,
+  apiPublishesUnifiedSearch,
+  apiPublishesPanelTitle,
   CanAccessViewMode,
   EmbeddableApiContext,
   getInheritedViewMode,
   HasParentApi,
   PublishesDataViews,
-  PublishesWritableLocalUnifiedSearch,
+  PublishesWritableUnifiedSearch,
   PublishesWritablePanelDescription,
   PublishesWritablePanelTitle,
+  PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openCustomizePanelFlyout } from './open_customize_panel';
@@ -26,18 +29,18 @@ import { openCustomizePanelFlyout } from './open_customize_panel';
 export const ACTION_CUSTOMIZE_PANEL = 'ACTION_CUSTOMIZE_PANEL';
 
 export type CustomizePanelActionApi = CanAccessViewMode &
-  PublishesDataViews &
   Partial<
-    PublishesWritableLocalUnifiedSearch &
+    PublishesDataViews &
+      PublishesWritableUnifiedSearch &
       PublishesWritablePanelDescription &
       PublishesWritablePanelTitle &
-      HasParentApi
+      HasParentApi<Partial<PublishesUnifiedSearch & TracksOverlays>>
   >;
 
 export const isApiCompatibleWithCustomizePanelAction = (
   api: unknown | null
 ): api is CustomizePanelActionApi =>
-  Boolean(apiCanAccessViewMode(api) && apiPublishesDataViews(api));
+  apiCanAccessViewMode(api) && (apiPublishesDataViews(api) || apiPublishesPanelTitle(api));
 
 export class CustomizePanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CUSTOMIZE_PANEL;
@@ -61,8 +64,8 @@ export class CustomizePanelAction implements Action<EmbeddableApiContext> {
     // It should be possible to customize just the time range in View mode
     return (
       getInheritedViewMode(embeddable) === 'edit' ||
-      (apiPublishesLocalUnifiedSearch(embeddable) &&
-        (embeddable.isCompatibleWithLocalUnifiedSearch?.() ?? true))
+      (apiPublishesUnifiedSearch(embeddable) &&
+        (embeddable.isCompatibleWithUnifiedSearch?.() ?? true))
     );
   }
 

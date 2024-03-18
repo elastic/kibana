@@ -15,16 +15,17 @@ jest.mock('../../../../lib/content_stream', () => ({
 
 import { estypes } from '@elastic/elasticsearch';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { ElasticsearchClientMock, coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { ExportType } from '@kbn/reporting-server';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+import { ExportType } from '@kbn/reporting-server';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 
 import { ReportingCore } from '../../../..';
-import { INTERNAL_ROUTES } from '../../../../../common/constants';
 import { ReportingInternalSetup, ReportingInternalStart } from '../../../../core';
-import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../../lib';
+import { ContentStream, getContentStream } from '../../../../lib';
 import { reportingMock } from '../../../../mocks';
 import {
   createMockPluginSetup,
@@ -32,6 +33,7 @@ import {
   createMockReportingCore,
 } from '../../../../test_helpers';
 import { ReportingRequestHandlerContext } from '../../../../types';
+import { EventTracker } from '../../../../usage';
 import { registerJobInfoRoutesInternal as registerJobInfoRoutes } from '../jobs';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
@@ -39,11 +41,12 @@ type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 describe(`Reporting Job Management Routes: Internal`, () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
+  let eventTracker: EventTracker;
   let usageCounter: IUsageCounter;
   let httpSetup: SetupServerReturn['httpSetup'];
   let startDeps: SetupServerReturn['startDeps'];
   let exportTypesRegistry: ExportTypesRegistry;
-  let core: ReportingCore;
+  let reportingCore: ReportingCore;
   let mockSetupDeps: ReportingInternalSetup;
   let mockStartDeps: ReportingInternalStart;
   let mockEsClient: ElasticsearchClientMock;
@@ -72,6 +75,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
     }) as estypes.SearchResponseBody;
   };
 
+  const coreSetupMock = coreMock.createSetup();
   const mockConfigSchema = createMockConfigSchema({ roles: { enabled: false } });
 
   beforeEach(async () => {
@@ -104,12 +108,15 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       mockConfigSchema
     );
 
-    core = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
+    reportingCore = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
 
     usageCounter = {
       incrementCounter: jest.fn(),
     };
-    core.getUsageCounter = jest.fn().mockReturnValue(usageCounter);
+    jest.spyOn(reportingCore, 'getUsageCounter').mockReturnValue(usageCounter);
+
+    eventTracker = new EventTracker(coreSetupMock.analytics, 'jobId', 'exportTypeId', 'appId');
+    jest.spyOn(reportingCore, 'getEventTracker').mockReturnValue(eventTracker);
 
     exportTypesRegistry = new ExportTypesRegistry();
     exportTypesRegistry.register({
@@ -125,9 +132,9 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       jobContentExtension: 'pdf',
       validLicenses: ['basic', 'gold'],
     } as ExportType);
-    core.getExportTypesRegistry = () => exportTypesRegistry;
+    reportingCore.getExportTypesRegistry = () => exportTypesRegistry;
 
-    mockEsClient = (await core.getEsClient()).asInternalUser as typeof mockEsClient;
+    mockEsClient = (await reportingCore.getEsClient()).asInternalUser as typeof mockEsClient;
     stream = new Readable({
       read() {
         this.push('test');
@@ -148,7 +155,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
   describe('download report', () => {
     it('fails on malformed download IDs', async () => {
       mockEsClient.search.mockResponseOnce(getHits());
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
 
@@ -173,8 +180,8 @@ describe(`Reporting Job Management Routes: Internal`, () => {
         },
         mockConfigSchema
       );
-      core = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
-      registerJobInfoRoutes(core);
+      reportingCore = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
 
@@ -188,7 +195,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
     it('returns 404 if job not found', async () => {
       mockEsClient.search.mockResponseOnce(getHits());
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
 
@@ -204,7 +211,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
           payload: { title: 'invalid!' },
         })
       );
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
 
@@ -221,7 +228,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
         })
       );
 
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
 
@@ -238,7 +245,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
         })
       );
 
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
 
@@ -255,7 +262,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
           payload: { title: 'incomplete!' },
         })
       );
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
       await supertest(httpSetup.server.listener)
@@ -275,7 +282,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
           payload: { title: 'failing job!' },
         })
       );
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
       await supertest(httpSetup.server.listener)
@@ -289,7 +296,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
     it('when a known job-type is complete', async () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
       await supertest(httpSetup.server.listener)
@@ -303,9 +310,9 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
 
       // @ts-ignore
-      core.pluginSetupDeps.security = null;
+      reportingCore.pluginSetupDeps.security = null;
 
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
 
@@ -322,7 +329,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
           jobType: mockJobTypeUnencoded,
         })
       );
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
       await supertest(httpSetup.server.listener)
@@ -339,7 +346,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
           outputContentType: 'application/html',
         })
       );
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
       await supertest(httpSetup.server.listener)
@@ -361,7 +368,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
           title: '日本語ダッシュボード',
         })
       );
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
       await supertest(httpSetup.server.listener)
@@ -392,13 +399,13 @@ describe(`Reporting Job Management Routes: Internal`, () => {
         mockConfigSchema
       );
 
-      core = await createMockReportingCore(
+      reportingCore = await createMockReportingCore(
         createMockConfigSchema({ roles: { enabled: true } }),
         mockSetupDeps,
         mockStartDeps
       );
 
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
 
@@ -417,7 +424,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
   describe('usage counters', () => {
     it('increments the info api counter', async () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
       await supertest(httpSetup.server.listener)
@@ -434,7 +441,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
     it('increments the download api counter', async () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
       await supertest(httpSetup.server.listener)
@@ -452,7 +459,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
     it('increments the delete api counter', async () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
       await supertest(httpSetup.server.listener)
@@ -469,7 +476,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
     it('increments the count api counter', async () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
       await supertest(httpSetup.server.listener)
@@ -499,13 +506,51 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
       (getContentStream as jest.MockedFunction<typeof getContentStream>).mockResolvedValue(stream);
       mockEsClient.search.mockResponseOnce(getCompleteHits());
-      registerJobInfoRoutes(core);
+      registerJobInfoRoutes(reportingCore);
 
       await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/dank`)
         .expect(500)
         .expect('Content-Type', 'application/json; charset=utf-8');
+    });
+  });
+
+  describe('telemetry', () => {
+    it('supports download report event tracking', async () => {
+      mockEsClient.search.mockResponseOnce(getCompleteHits());
+      registerJobInfoRoutes(reportingCore);
+
+      await server.start();
+      await supertest(httpSetup.server.listener).get(
+        `${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`
+      );
+
+      expect(eventTracker.downloadReport).toHaveBeenCalledTimes(1);
+    });
+
+    it('supports delete report event tracking', async () => {
+      stream = new Readable({
+        read() {
+          this.push('test');
+          this.push(null);
+        },
+      }) as typeof stream;
+      stream.end = jest.fn().mockImplementation((_name, _encoding, callback) => {
+        callback();
+      });
+
+      (getContentStream as jest.MockedFunction<typeof getContentStream>).mockResolvedValue(stream);
+      mockEsClient.search.mockResponseOnce(getCompleteHits());
+      registerJobInfoRoutes(reportingCore);
+
+      await server.start();
+      await supertest(httpSetup.server.listener)
+        .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/dank`)
+        .expect(200)
+        .expect('Content-Type', 'application/json; charset=utf-8');
+
+      expect(eventTracker.deleteReport).toHaveBeenCalledTimes(1);
     });
   });
 });

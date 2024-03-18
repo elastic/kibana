@@ -6,10 +6,25 @@
  */
 
 import { alertsFieldMap840 } from '../8.4.0';
-import { ALERT_HOST_CRITICALITY, ALERT_USER_CRITICALITY } from '../field_names';
+import {
+  ALERT_HOST_CRITICALITY,
+  ALERT_USER_CRITICALITY,
+  LEGACY_ALERT_HOST_CRITICALITY,
+  LEGACY_ALERT_USER_CRITICALITY,
+} from '../field_names';
 
 export const alertsFieldMap8130 = {
   ...alertsFieldMap840,
+  [LEGACY_ALERT_HOST_CRITICALITY]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [LEGACY_ALERT_USER_CRITICALITY]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   /**
    * Stores the criticality level for the host, as determined by analysts, in relation to the alert.
    * The Criticality level is copied from the asset criticality index.

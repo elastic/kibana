@@ -44,7 +44,6 @@ import type {
   PrebootRequestHandlerContext,
 } from '@kbn/core-http-request-handler-context-server';
 import { RenderingService } from '@kbn/core-rendering-server-internal';
-
 import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
 import type {
   InternalCorePreboot,
@@ -54,6 +53,7 @@ import type {
 import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { CoreInjectionService } from '@kbn/core-di-server-internal';
+import { SecurityService } from '@kbn/core-security-server-internal';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 
@@ -102,6 +102,7 @@ export class Server {
   private readonly customBranding: CustomBrandingService;
   private readonly userSettingsService: UserSettingsService;
   private readonly injectionService: CoreInjectionService;
+  private readonly security: SecurityService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -151,6 +152,7 @@ export class Server {
     this.docLinks = new DocLinksService(core);
     this.customBranding = new CustomBrandingService(core);
     this.userSettingsService = new UserSettingsService(core);
+    this.security = new SecurityService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -251,6 +253,7 @@ export class Server {
     });
     const executionContextSetup = this.executionContext.setup();
     const docLinksSetup = this.docLinks.setup();
+    const securitySetup = this.security.setup();
 
     const injectionSetup = this.injectionService.setup();
 
@@ -350,6 +353,7 @@ export class Server {
       coreUsageData: coreUsageDataSetup,
       userSettings: userSettingsServiceSetup,
       injection: injectionSetup,
+      security: securitySetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -370,6 +374,7 @@ export class Server {
 
     const injectionStart = this.injectionService.start();
     const analyticsStart = this.analytics.start();
+    const securityStart = this.security.start();
     const executionContextStart = this.executionContext.start();
     const docLinkStart = this.docLinks.start();
     const elasticsearchStart = await this.elasticsearch.start();
@@ -422,6 +427,7 @@ export class Server {
       coreUsageData: coreUsageDataStart,
       deprecations: deprecationsStart,
       injection: injectionStart,
+      security: securityStart,
     };
 
     await this.plugins.start(this.coreStart);
@@ -452,6 +458,7 @@ export class Server {
     await this.customBranding.stop();
     this.node.stop();
     this.deprecations.stop();
+    this.security.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {

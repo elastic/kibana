@@ -546,6 +546,20 @@
           },
           {
             "parentPluginId": "@kbn/field-utils",
+            "id": "def-common.FieldBase.isNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-field-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/field-utils",
             "id": "def-common.FieldBase.conflictDescriptions",
             "type": "Object",
             "tags": [],

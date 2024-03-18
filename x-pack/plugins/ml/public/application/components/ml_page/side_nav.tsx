@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
-import React, { ReactNode, useCallback, useMemo } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-plugin/common';
 import { useUrlState } from '@kbn/ml-url-state';
 import { NotificationsIndicator } from './notifications_indicator';
@@ -234,6 +235,16 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             disabled: false,
             testSubj: 'mlMainTab indexDataVisualizer',
           },
+          {
+            id: 'esql_datavisualizer',
+            pathId: ML_PAGES.DATA_VISUALIZER_ESQL,
+            name: i18n.translate('xpack.ml.navMenu.esqlDataVisualizerLinkText', {
+              defaultMessage: 'ES|QL',
+            }),
+            disabled: false,
+            testSubj: 'mlMainTab esqlDataVisualizer',
+          },
+
           {
             id: 'data_drift',
             pathId: ML_PAGES.DATA_DRIFT_INDEX_SELECT,

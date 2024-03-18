@@ -19,3 +19,7 @@ export * from './execution_log_types';
 export const BASE_ACTION_API_PATH = '/api/actions';
 export const INTERNAL_BASE_ACTION_API_PATH = '/internal/actions';
 export const ACTIONS_FEATURE_ID = 'actions';
+
+export const DEFAULT_MICROSOFT_EXCHANGE_URL = 'https://login.microsoftonline.com';
+export const DEFAULT_MICROSOFT_GRAPH_API_URL = 'https://graph.microsoft.com/v1.0';
+export const DEFAULT_MICROSOFT_GRAPH_API_SCOPE = 'https://graph.microsoft.com/.default';

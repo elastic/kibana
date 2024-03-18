@@ -14,7 +14,7 @@ import {
   usageCollectionPluginMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
 import { FeaturesAvailability } from '.';
-import { ExportTypesRegistry } from '../lib';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { createMockReportingCore } from '../test_helpers';
 import {
   getReportingUsageCollector,

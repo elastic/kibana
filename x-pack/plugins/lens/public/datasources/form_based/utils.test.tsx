@@ -310,7 +310,11 @@ describe('indexpattern_datasource utils', () => {
         ]),
         [
           `${rootId}X${formulaParts.length}`,
-          { operationType: 'math', references: formulaParts.map((_, i) => `${rootId}X${i}`) },
+          {
+            operationType: 'math',
+            references: formulaParts.map((_, i) => `${rootId}X${i}`),
+            label: 'Part of formula',
+          },
         ],
       ]);
     }
@@ -434,6 +438,69 @@ describe('indexpattern_datasource utils', () => {
         docLinks
       );
       expect(warnings).toHaveLength(2);
+    });
+
+    // formula columns should never have a source field
+    // but it has been observed in the wild (https://github.com/elastic/kibana/issues/168561)
+    it('should ignore formula column with source field', () => {
+      const state = {
+        layers: {
+          '08ae29be-2717-4320-a908-a50ca73ee558': {
+            indexPatternId: '0',
+            columnOrder: [
+              '62f73507-09c4-4bf9-9e6f-a9692e348d94',
+              '1a027207-98b3-4a57-a97f-4c67e95eebc1',
+            ],
+            columns: {
+              '1a027207-98b3-4a57-a97f-4c67e95eebc1': {
+                customLabel: true,
+                dataType: 'number',
+                filter: {
+                  language: 'kuery',
+                  query: 'my:field',
+                },
+                isBucketed: false,
+                label: 'Failures',
+                operationType: 'count',
+                params: {
+                  emptyAsNull: true,
+                },
+                scale: 'ratio',
+                sourceField: '___records___',
+              },
+              '62f73507-09c4-4bf9-9e6f-a9692e348d94': {
+                customLabel: true,
+                dataType: 'number',
+                filter: {
+                  language: 'kuery',
+                  query: 'my:field',
+                },
+                isBucketed: false,
+                label: 'Success',
+                operationType: 'formula',
+                params: {
+                  emptyAsNull: true,
+                  formula: 'count(kql=\'message:"some message" AND message:"SUCCESS"\')',
+                  isFormulaBroken: false,
+                },
+                references: ['62f73507-09c4-4bf9-9e6f-a9692e348d94X0'],
+                scale: 'ratio',
+                // here's the issue - this should not be here
+                sourceField: '___records___',
+              },
+            },
+            incompleteColumns: {},
+          },
+        },
+      } as unknown as FormBasedPrivateState;
+
+      expect(() => {
+        getUnsupportedOperationsWarningMessage(
+          state,
+          createFramePublic(createMockedIndexPatternWithAdditionalFields([])),
+          docLinks
+        );
+      }).not.toThrow();
     });
   });
 });

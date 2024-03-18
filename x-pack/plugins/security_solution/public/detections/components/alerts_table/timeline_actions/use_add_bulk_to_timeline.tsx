@@ -23,7 +23,7 @@ import { eventsViewerSelector } from '../../../../common/components/events_viewe
 import type { State } from '../../../../common/store/types';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
 import { timelineActions } from '../../../../timelines/store';
-import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
+import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { INVESTIGATE_BULK_IN_TIMELINE } from '../translations';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineType } from '../../../../../common/api/timeline';

@@ -48,7 +48,7 @@ export const DashboardViewportComponent = () => {
 
   const panelCount = Object.keys(dashboard.select((state) => state.explicitInput.panels)).length;
   const controlCount = Object.keys(
-    dashboard.select((state) => state.explicitInput.controlGroupInput?.panels) ?? {}
+    controlGroup?.select((state) => state.explicitInput.panels) ?? {}
   ).length;
 
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);

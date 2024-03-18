@@ -11,31 +11,32 @@ import type { Writable } from 'stream';
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
 import {
-  cellHasFormulas,
   ESQL_SEARCH_STRATEGY,
+  type IKibanaSearchRequest,
+  type IKibanaSearchResponse,
+  cellHasFormulas,
   getEsQueryConfig,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
 } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
+import { type Filter, buildEsQuery } from '@kbn/es-query';
+import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
+import { i18n } from '@kbn/i18n';
 import {
   AuthenticationExpiredError,
-  byteSizeValueToNumber,
   CancellationToken,
   ReportingError,
+  byteSizeValueToNumber,
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
-import { buildEsQuery, Filter } from '@kbn/es-query';
+import { type TaskInstanceFields } from '@kbn/reporting-common/types';
 import { zipObject } from 'lodash';
-import { i18n } from '@kbn/i18n';
 
-import { CONTENT_TYPE_CSV } from './constants';
-import { CsvExportSettings, getExportSettings } from './get_export_settings';
-import { i18nTexts } from './i18n_texts';
-import { MaxSizeStringBuilder } from './max_size_string_builder';
+import { CONTENT_TYPE_CSV } from '../constants';
+import { type CsvExportSettings, getExportSettings } from './lib/get_export_settings';
+import { i18nTexts } from './lib/i18n_texts';
+import { MaxSizeStringBuilder } from './lib/max_size_string_builder';
 
 export interface JobParamsCsvESQL {
   query: { esql: string };
@@ -58,6 +59,7 @@ export class CsvESQLGenerator {
   constructor(
     private job: JobParamsCsvESQL,
     private config: ReportingConfigType['csv'],
+    private taskInstanceFields: TaskInstanceFields,
     private clients: Clients,
     private cancellationToken: CancellationToken,
     private logger: Logger,
@@ -67,6 +69,7 @@ export class CsvESQLGenerator {
   public async generateData(): Promise<TaskRunResult> {
     const settings = await getExportSettings(
       this.clients.uiSettings,
+      this.taskInstanceFields,
       this.config,
       this.job.browserTimezone,
       this.logger
@@ -111,7 +114,7 @@ export class CsvESQLGenerator {
           strategy: ESQL_SEARCH_STRATEGY,
           abortSignal: abortController.signal,
           transport: {
-            requestTimeout: settings.scroll.duration,
+            requestTimeout: settings.scroll.duration(this.taskInstanceFields),
           },
         })
       );

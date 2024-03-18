@@ -89,7 +89,8 @@ describe('kibanaContextFn', () => {
             filter: [],
           }),
         } as unknown as SavedSearch['searchSource'],
-        {} as SavedSearch['sharingSavedObjectProps']
+        {} as SavedSearch['sharingSavedObjectProps'],
+        false
       )
     );
     const args = {

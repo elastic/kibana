@@ -32,7 +32,7 @@ import * as commonI18n from '../../timeline/properties/translations';
 import * as i18n from './translations';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../../common/lib/apm/user_actions';
-import { useCreateTimeline } from '../../timeline/properties/use_create_timeline';
+import { useCreateTimeline } from '../../../hooks/use_create_timeline';
 import { NOTES_PANEL_WIDTH } from '../../timeline/properties/notes_size';
 import { formSchema } from './schema';
 

@@ -8,9 +8,9 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AddTimelineButton } from './add_timeline_button';
-import { useCreateTimeline } from '../timeline/properties/use_create_timeline';
+import { useCreateTimeline } from '../../hooks/use_create_timeline';
 
-jest.mock('../timeline/properties/use_create_timeline');
+jest.mock('../../hooks/use_create_timeline');
 
 const timelineId = 'timelineId';
 const renderAddTimelineButton = () => render(<AddTimelineButton timelineId={timelineId} />);

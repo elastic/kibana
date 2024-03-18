@@ -23,9 +23,10 @@ export default function ({ getService }: FtrProviderContext) {
       await logFile.reset();
     });
 
-    it('logs audit events when reading and writing saved objects', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/119267
+    it.skip('logs audit events when reading and writing saved objects', async () => {
       await supertest.get('/audit_log?query=param').set('kbn-xsrf', 'foo').expect(204);
-      await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
+      await logFile.isWritten();
       const content = await logFile.readJSON();
 
       const httpEvent = content.find((c) => c.event.action === 'http_request');
@@ -68,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username, password },
         })
         .expect(200);
-      await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
+      await logFile.isWritten();
       const content = await logFile.readJSON();
 
       const loginEvent = content.find((c) => c.event.action === 'user_login');
@@ -92,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username, password: 'invalid_password' },
         })
         .expect(401);
-      await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
+      await logFile.isWritten();
       const content = await logFile.readJSON();
 
       const loginEvent = content.find((c) => c.event.action === 'user_login');

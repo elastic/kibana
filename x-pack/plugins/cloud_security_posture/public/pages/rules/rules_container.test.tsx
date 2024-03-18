@@ -85,6 +85,8 @@ const params = {
     ruleNumber: undefined,
     search: '',
     section: undefined,
+    sortField: 'metadata.benchmark.rule_number',
+    sortOrder: 'asc',
   },
   benchmarkId: 'cis_k8s',
   benchmarkVersion: '1.0.1',

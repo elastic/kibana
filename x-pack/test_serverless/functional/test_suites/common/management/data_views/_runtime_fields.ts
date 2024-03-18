@@ -16,10 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common']);
   const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/173558
-  describe.skip('runtime fields', function () {
-    this.tags(['skipFirefox']);
-
+  describe('runtime fields', function () {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -66,6 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.existOrFail('flyoutTitle');
         });
         await PageObjects.settings.setFieldType('Long');
+        await new Promise((r) => setTimeout(r, 500));
         await PageObjects.settings.setFieldScriptWithoutToggle('emit(6);');
         await PageObjects.settings.toggleRow('formatRow');
         await PageObjects.settings.setFieldFormat('bytes');

@@ -334,6 +334,9 @@ export class IndexTable extends Component {
 
   areAllItemsSelected = () => {
     const { indices } = this.props;
+    if (indices.length <= 0) {
+      return false;
+    }
     const indexOfUnselectedItem = indices.findIndex((index) => !this.isItemSelected(index.name));
     return indexOfUnselectedItem === -1;
   };

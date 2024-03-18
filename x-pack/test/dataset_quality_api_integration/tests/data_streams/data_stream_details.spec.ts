@@ -56,21 +56,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns error when dataStream param is not provided', async () => {
-        expect(
-          (await expectToReject(() => callApiAs('datasetQualityLogsUser', encodeURIComponent(' '))))
-            .message
-        ).to.contain('Data Stream name cannot be empty');
+        const expectedMessage = 'Data Stream name cannot be empty';
+        const err = await expectToReject<DatasetQualityApiError>(() =>
+          callApiAs('datasetQualityLogsUser', encodeURIComponent(' '))
+        );
+        expect(err.res.status).to.be(400);
+        expect(err.res.body.message.indexOf(expectedMessage)).to.greaterThan(-1);
       });
 
-      it('returns 404 if matching data stream is not available', async () => {
+      it('returns {} if matching data stream is not available', async () => {
         const nonExistentDataSet = 'Non-existent';
         const nonExistentDataStream = `${type}-${nonExistentDataSet}-${namespace}`;
-        const expectedMessage = `"${nonExistentDataStream}" not found`;
-        const err = await expectToReject<DatasetQualityApiError>(() =>
-          callApiAs('datasetQualityLogsUser', nonExistentDataStream)
-        );
-        expect(err.res.status).to.be(404);
-        expect(err.res.body.message.indexOf(expectedMessage)).to.greaterThan(-1);
+        const resp = await callApiAs('datasetQualityLogsUser', nonExistentDataStream);
+        expect(resp.body).empty();
       });
 
       it('returns data stream details correctly', async () => {

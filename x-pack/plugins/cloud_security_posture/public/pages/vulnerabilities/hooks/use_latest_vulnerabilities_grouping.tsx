@@ -14,9 +14,13 @@ import {
   parseGroupingQuery,
 } from '@kbn/securitysolution-grouping/src';
 import { useMemo } from 'react';
+import { buildEsQuery, Filter } from '@kbn/es-query';
 import { LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
-import { LATEST_VULNERABILITIES_RETENTION_POLICY } from '../../../../common/constants';
+import {
+  LATEST_VULNERABILITIES_RETENTION_POLICY,
+  VULNERABILITIES_SEVERITY,
+} from '../../../../common/constants';
 import {
   VulnerabilitiesGroupingAggregation,
   VulnerabilitiesRootGroupingAggregation,
@@ -29,7 +33,7 @@ import {
   VULNERABILITY_FIELDS,
 } from '../constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
-import { VULNERABILITIES_UNIT, groupingTitle } from '../translations';
+import { VULNERABILITIES_UNIT, groupingTitle, VULNERABILITIES_GROUPS_UNIT } from '../translations';
 
 const getTermAggregation = (key: keyof VulnerabilitiesGroupingAggregation, field: string) => ({
   [key]: {
@@ -48,12 +52,45 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
           field,
         },
       },
+      critical: {
+        filter: {
+          term: {
+            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.CRITICAL },
+          },
+        },
+      },
+      high: {
+        filter: {
+          term: {
+            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.HIGH },
+          },
+        },
+      },
+      medium: {
+        filter: {
+          term: {
+            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.MEDIUM },
+          },
+        },
+      },
+      low: {
+        filter: {
+          term: { 'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.LOW } },
+        },
+      },
     },
   ];
 
   switch (field) {
     case GROUPING_OPTIONS.RESOURCE_NAME:
       return [...aggMetrics, getTermAggregation('resourceId', VULNERABILITY_FIELDS.RESOURCE_ID)];
+    case GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+      return [
+        ...aggMetrics,
+        getTermAggregation('cloudProvider', VULNERABILITY_FIELDS.CLOUD_PROVIDER),
+      ];
+    case GROUPING_OPTIONS.CVE:
+      return [...aggMetrics, getTermAggregation('description', VULNERABILITY_FIELDS.DESCRIPTION)];
   }
   return aggMetrics;
 };
@@ -74,9 +111,15 @@ export const isVulnerabilitiesRootGroupingAggregation = (
 export const useLatestVulnerabilitiesGrouping = ({
   groupPanelRenderer,
   groupStatsRenderer,
+  groupingLevel = 0,
+  groupFilters = [],
+  selectedGroup,
 }: {
   groupPanelRenderer?: GroupPanelRenderer<VulnerabilitiesGroupingAggregation>;
   groupStatsRenderer?: GroupStatsRenderer<VulnerabilitiesGroupingAggregation>;
+  groupingLevel?: number;
+  groupFilters?: Filter[];
+  selectedGroup?: string;
 }) => {
   const { dataView } = useDataViewContext();
 
@@ -85,7 +128,6 @@ export const useLatestVulnerabilitiesGrouping = ({
     grouping,
     pageSize,
     query,
-    selectedGroup,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
     setUrlQuery,
@@ -94,6 +136,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     onResetFilters,
     error,
     filters,
+    setActivePageIndex,
   } = useCloudSecurityGrouping({
     dataView,
     groupingTitle,
@@ -103,18 +146,23 @@ export const useLatestVulnerabilitiesGrouping = ({
     groupPanelRenderer,
     groupStatsRenderer,
     groupingLocalStorageKey: LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
+    groupingLevel,
+    groupsUnit: VULNERABILITIES_GROUPS_UNIT,
   });
 
+  const additionalFilters = buildEsQuery(dataView, [], groupFilters);
+  const currentSelectedGroup = selectedGroup || grouping.selectedGroups[0];
+
   const groupingQuery = getGroupingQuery({
-    additionalFilters: query ? [query] : [],
-    groupByField: selectedGroup,
+    additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
+    groupByField: currentSelectedGroup,
     uniqueValue,
     from: `now-${LATEST_VULNERABILITIES_RETENTION_POLICY}`,
     to: 'now',
     pageNumber: activePageIndex * pageSize,
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }],
-    statsAggregations: getAggregationsByGroupField(selectedGroup),
+    statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
   });
 
   const { data, isFetching } = useGroupedVulnerabilities({
@@ -125,11 +173,11 @@ export const useLatestVulnerabilitiesGrouping = ({
   const groupData = useMemo(
     () =>
       parseGroupingQuery(
-        selectedGroup,
+        currentSelectedGroup,
         uniqueValue,
         data as GroupingAggregation<VulnerabilitiesGroupingAggregation>
       ),
-    [data, selectedGroup, uniqueValue]
+    [data, currentSelectedGroup, uniqueValue]
   );
 
   const isEmptyResults =
@@ -142,6 +190,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     grouping,
     isFetching,
     activePageIndex,
+    setActivePageIndex,
     pageSize,
     selectedGroup,
     onChangeGroupsItemsPerPage,

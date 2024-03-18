@@ -11,7 +11,7 @@ import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../../common/endpoint/servi
 import { getResponseActionsClient } from '../..';
 import { ResponseActionsClientImpl } from './lib/base_response_actions_client';
 import { UnsupportedResponseActionsAgentTypeError } from './errors';
-import { sentinelOneMock } from './sentinelone/mock';
+import { sentinelOneMock } from './sentinelone/mocks';
 
 describe('getResponseActionsClient()', () => {
   let options: GetResponseActionsClientConstructorOptions;

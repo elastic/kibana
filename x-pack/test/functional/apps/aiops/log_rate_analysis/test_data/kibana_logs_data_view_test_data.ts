@@ -14,7 +14,7 @@ export const kibanaLogsDataViewTestData: TestData = {
   analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
   dataGenerator: 'kibana_sample_data_logs',
   isSavedSearch: false,
-  sourceIndexOrSavedSearch: 'kibana_sample_data_logs',
+  sourceIndexOrSavedSearch: 'kibana_sample_data_logstsdb',
   brushIntervalFactor: 1,
   chartClickCoordinates: [235, 0],
   fieldSelectorSearch: 'referer',
@@ -29,7 +29,25 @@ export const kibanaLogsDataViewTestData: TestData = {
     },
   },
   expected: {
-    totalDocCountFormatted: '14,074',
+    totalDocCountFormatted: '14,068',
+    globalState: {
+      refreshInterval: { pause: true, value: 60000 },
+      time: { from: '2023-04-16T00:39:02.912Z', to: '2023-06-15T21:45:26.749Z' },
+    },
+    appState: {
+      logRateAnalysis: {
+        filters: [],
+        searchQuery: { match_all: {} },
+        searchQueryLanguage: 'kuery',
+        searchString: '',
+        wp: {
+          bMax: 1684368000000,
+          bMin: 1682899200000,
+          dMax: 1685491200000,
+          dMin: 1684886400000,
+        },
+      },
+    },
     analysisGroupsTable: [
       {
         group:

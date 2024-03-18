@@ -10,10 +10,7 @@ import React, { useMemo } from 'react';
 import { find } from 'lodash/fp';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { CellActionsMode } from '@kbn/cell-actions';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { getSourcererScopeId } from '../../../../helpers';
-import { SecurityCellActions } from '../../../../common/components/cell_actions';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type {
   EnrichedFieldInfo,
@@ -23,7 +20,7 @@ import { SIGNAL_STATUS_FIELD_NAME } from '../../../../timelines/components/timel
 import { StatusPopoverButton } from '../../../../common/components/event_details/overview/status_popover_button';
 import { useRightPanelContext } from '../context';
 import { getEnrichedFieldInfo } from '../../../../common/components/event_details/helpers';
-import { SecurityCellActionsTrigger } from '../../../../actions/constants';
+import { CellActions } from './cell_actions';
 import { STATUS_TITLE_TEST_ID } from './test_ids';
 
 /**
@@ -74,17 +71,7 @@ export const DocumentStatus: FC = () => {
         {!statusData || !hasData(statusData) || isPreview ? (
           getEmptyTagValue()
         ) : (
-          <SecurityCellActions
-            data={{
-              field: SIGNAL_STATUS_FIELD_NAME,
-              value: statusData.values[0],
-            }}
-            mode={CellActionsMode.HOVER_RIGHT}
-            triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
-            visibleCellActions={6}
-            sourcererScopeId={getSourcererScopeId(scopeId)}
-            metadata={{ scopeId }}
-          >
+          <CellActions field={SIGNAL_STATUS_FIELD_NAME} value={statusData.values[0]}>
             <StatusPopoverButton
               eventId={eventId}
               contextId={scopeId}
@@ -92,7 +79,7 @@ export const DocumentStatus: FC = () => {
               scopeId={scopeId}
               handleOnEventClosed={closeFlyout}
             />
-          </SecurityCellActions>
+          </CellActions>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

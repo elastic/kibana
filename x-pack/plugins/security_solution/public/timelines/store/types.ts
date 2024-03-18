@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type { FilterManager } from '@kbn/data-plugin/public';
-import type { TableById } from '@kbn/securitysolution-data-table';
-import type { RootEpicDependencies } from '../../common/store/epic';
 import type { ColumnHeaderOptions, SortColumnTimeline } from '../../../common/types';
 import type { RowRendererId } from '../../../common/api/timeline';
-import type { inputsModel } from '../../common/store/inputs';
-import type { NotesById } from '../../common/store/app/model';
 
 import type { TimelineModel } from './model';
 
@@ -36,20 +31,11 @@ export interface TimelineState {
   insertTimeline: InsertTimeline | null;
 }
 
-export interface TimelineEpicDependencies<State> extends RootEpicDependencies {
-  timelineByIdSelector: (state: State) => TimelineById;
-  timelineTimeRangeSelector: (state: State) => inputsModel.TimeRange;
-  selectAllTimelineQuery: () => (state: State, id: string) => inputsModel.GlobalQuery;
-  selectNotesByIdSelector: (state: State) => NotesById;
-  tableByIdSelector: (state: State) => TableById;
-}
-
 export interface TimelineModelSettings {
   documentType: string;
   defaultColumns: ColumnHeaderOptions[];
   /** A list of Ids of excluded Row Renderers */
   excludedRowRendererIds: RowRendererId[];
-  filterManager?: FilterManager;
   footerText?: string | React.ReactNode;
   loadingText?: string | React.ReactNode;
   queryFields: string[];

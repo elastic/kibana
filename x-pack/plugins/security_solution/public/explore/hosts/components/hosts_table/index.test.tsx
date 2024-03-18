@@ -9,16 +9,8 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../../../common/mock/match_media';
-import {
-  mockGlobalState,
-  TestProviders,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../../../common/mock';
+import { TestProviders, createMockStore } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import type { State } from '../../../../common/store';
-import { createStore } from '../../../../common/store';
 import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
 import { HostsTable } from '.';
@@ -57,15 +49,8 @@ jest.mock('../../../../helper_hooks', () => ({
 
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
-  const state: State = mockGlobalState;
-  const { storage } = createSecuritySolutionStorageMock();
-
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createMockStore();
   const mount = useMountAppended();
-
-  beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-  });
 
   describe('rendering', () => {
     test('it renders the default Hosts table', () => {

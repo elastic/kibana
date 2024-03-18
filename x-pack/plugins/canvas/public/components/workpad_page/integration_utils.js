@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shallowEqual } from 'recompose';
+import { shallowEqual } from 'react-recompose';
 import { getNodes, getSelectedPage } from '../../state/selectors/workpad';
 import { addElement, removeElements, setMultiplePositions } from '../../state/actions/elements';
 import { selectToplevelNodes } from '../../state/actions/transient';

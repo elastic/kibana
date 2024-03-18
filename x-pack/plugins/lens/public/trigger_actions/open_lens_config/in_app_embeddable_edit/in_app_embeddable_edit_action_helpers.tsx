@@ -40,7 +40,7 @@ export async function executeEditEmbeddableAction({
   lensEvent: LensChartLoadEvent;
   container?: HTMLElement | null;
   onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => void;
-  onApply?: () => void;
+  onApply?: (newAttributes: TypedLensByValueInput['attributes']) => void;
   onCancel?: () => void;
 }) {
   const isCompatibleAction = isEmbeddableEditActionCompatible(core, attributes);
@@ -118,6 +118,7 @@ export async function executeEditEmbeddableAction({
       onCancelCb={onCancel}
       canEditTextBasedQuery={activeDatasourceId === 'textBased'}
       updateSuggestion={onUpdateSuggestion}
+      hideTimeFilterInfo={true}
     />
   );
 

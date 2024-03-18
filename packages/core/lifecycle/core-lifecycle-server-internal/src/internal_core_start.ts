@@ -19,6 +19,7 @@ import type { InternalUiSettingsServiceStart } from '@kbn/core-ui-settings-serve
 import type { CoreUsageDataStart } from '@kbn/core-usage-data-server';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-server';
 import type { InternalCoreDiServiceStart } from '@kbn/core-di-server-internal';
+import type { InternalSecurityServiceStart } from '@kbn/core-security-server-internal';
 
 /**
  * @internal
@@ -37,4 +38,5 @@ export interface InternalCoreStart {
   deprecations: InternalDeprecationsServiceStart;
   customBranding: CustomBrandingStart;
   injection: InternalCoreDiServiceStart;
+  security: InternalSecurityServiceStart;
 }

@@ -7,6 +7,7 @@
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import {
   AppMountParameters,
   CoreStart,
@@ -15,7 +16,6 @@ import {
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-  AppNavLinkStatus,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
@@ -61,13 +61,14 @@ interface PluginsSetup {
 export interface PluginsStart {
   charts: ChartsPluginStart;
   cloud?: CloudSetup & CloudStart;
+  console?: ConsolePluginStart;
   data: DataPublicPluginStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
+  ml: MlPluginStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
-  ml: MlPluginStart;
 }
 
 export interface ESConfig {
@@ -76,7 +77,6 @@ export interface ESConfig {
 
 export class EnterpriseSearchPlugin implements Plugin {
   private config: ClientConfigType;
-  private esConfig: ESConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
@@ -84,6 +84,7 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   private data: ClientData = {} as ClientData;
+  private esConfig: ESConfig;
 
   private async getInitialData(http: HttpSetup) {
     try {
@@ -165,6 +166,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
       },
       title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAV_TITLE,
+      visibleIn: ['home', 'kibanaOverview', 'globalSearch', 'sideNav'],
     });
 
     core.application.register({
@@ -250,8 +252,8 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(EnterpriseSearchAISearch, kibanaDeps, pluginData);
       },
-      navLinkStatus: AppNavLinkStatus.hidden,
       title: AI_SEARCH_PLUGIN.NAV_TITLE,
+      visibleIn: [],
     });
 
     core.application.register({
@@ -272,8 +274,6 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(Applications, kibanaDeps, pluginData);
       },
-      navLinkStatus: AppNavLinkStatus.default,
-      searchable: true,
       title: APPLICATIONS_PLUGIN.NAV_TITLE,
     });
 
@@ -295,8 +295,6 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(Analytics, kibanaDeps, pluginData);
       },
-      navLinkStatus: AppNavLinkStatus.default,
-      searchable: true,
       title: ANALYTICS_PLUGIN.NAME,
     });
 
@@ -318,8 +316,8 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(SearchExperiences, kibanaDeps, pluginData);
       },
-      navLinkStatus: AppNavLinkStatus.hidden,
       title: SEARCH_EXPERIENCES_PLUGIN.NAME,
+      visibleIn: [],
     });
 
     if (config.canDeployEntSearch) {
@@ -341,8 +339,8 @@ export class EnterpriseSearchPlugin implements Plugin {
 
           return renderApp(AppSearch, kibanaDeps, pluginData);
         },
-        navLinkStatus: AppNavLinkStatus.hidden,
         title: APP_SEARCH_PLUGIN.NAME,
+        visibleIn: [],
       });
 
       core.application.register({
@@ -366,8 +364,8 @@ export class EnterpriseSearchPlugin implements Plugin {
 
           return renderApp(WorkplaceSearch, kibanaDeps, pluginData);
         },
-        navLinkStatus: AppNavLinkStatus.hidden,
         title: WORKPLACE_SEARCH_PLUGIN.NAME,
+        visibleIn: [],
       });
     }
 
@@ -435,13 +433,17 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
   }
 
-  public async start(core: CoreStart) {
+  public start(core: CoreStart) {
     if (!this.config.ui?.enabled) {
       return;
     }
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);
+
+    // Return empty start contract rather than void in order for plugins
+    // that depend on the enterprise search plugin to determine whether it is enabled or not
+    return {};
   }
 
   public stop() {}

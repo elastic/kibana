@@ -1460,7 +1460,7 @@
             "section": "def-common.HttpSetup",
             "text": "HttpSetup"
           },
-          ") => { createQuery: (attributes: ",
+          ") => { isDuplicateTitle: (title: string, id?: string | undefined) => Promise<boolean>; createQuery: (attributes: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -1492,15 +1492,7 @@
             "section": "def-common.SavedQuery",
             "text": "SavedQuery"
           },
-          ">; getAllSavedQueries: () => Promise<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.SavedQuery",
-            "text": "SavedQuery"
-          },
-          "[]>; findSavedQueries: (search?: string, perPage?: number, page?: number) => Promise<{ total: number; queries: ",
+          ">; findSavedQueries: (search?: string, perPage?: number, page?: number) => Promise<{ total: number; queries: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -2840,7 +2832,7 @@
             "label": "savedQueries",
             "description": [],
             "signature": [
-              "{ createQuery: (attributes: ",
+              "{ isDuplicateTitle: (title: string, id?: string | undefined) => Promise<boolean>; createQuery: (attributes: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -2872,15 +2864,7 @@
                 "section": "def-common.SavedQuery",
                 "text": "SavedQuery"
               },
-              ">; getAllSavedQueries: () => Promise<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.SavedQuery",
-                "text": "SavedQuery"
-              },
-              "[]>; findSavedQueries: (search?: string, perPage?: number, page?: number) => Promise<{ total: number; queries: ",
+              ">; findSavedQueries: (search?: string, perPage?: number, page?: number) => Promise<{ total: number; queries: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -3054,6 +3038,53 @@
         "children": [
           {
             "parentPluginId": "data",
+            "id": "def-public.SavedQueryService.isDuplicateTitle",
+            "type": "Function",
+            "tags": [],
+            "label": "isDuplicateTitle",
+            "description": [],
+            "signature": [
+              "(title: string, id?: string | undefined) => Promise<boolean>"
+            ],
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.SavedQueryService.isDuplicateTitle.$1",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.SavedQueryService.isDuplicateTitle.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.SavedQueryService.createQuery",
             "type": "Function",
             "tags": [],
@@ -3173,30 +3204,6 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SavedQueryService.getAllSavedQueries",
-            "type": "Function",
-            "tags": [],
-            "label": "getAllSavedQueries",
-            "description": [],
-            "signature": [
-              "() => Promise<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.SavedQuery",
-                "text": "SavedQuery"
-              },
-              "[]>"
-            ],
-            "path": "src/plugins/data/public/query/saved_query/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
             "returnComment": []
           },
           {

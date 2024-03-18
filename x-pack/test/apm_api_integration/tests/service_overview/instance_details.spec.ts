@@ -47,6 +47,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177494
   registry.when('Instance details when data is loaded', { config: 'basic', archives: [] }, () => {
     const range = timerange(new Date(start).getTime(), new Date(end).getTime());
 
@@ -56,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     const metricOnlyInstance = apm
       .service({ name: 'service1', environment: 'production', agentName: 'java' })
-      .instance('metric-only-production');
+      .instance('multiple-env-service-production');
 
     before(async () => {
       return synthtrace.index([

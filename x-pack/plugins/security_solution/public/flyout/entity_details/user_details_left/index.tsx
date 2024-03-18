@@ -41,6 +41,10 @@ export const UserDetailsPanel = ({ isRiskScoreExist, user, path }: UserDetailsPa
 
   if (managedUser.isLoading) return <FlyoutLoading />;
 
+  if (!selectedTabId) {
+    return null;
+  }
+
   return (
     <>
       <LeftPanelHeader
@@ -62,7 +66,7 @@ const useSelectedTab = (
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const selectedTabId = useMemo(() => {
-    const defaultTab = tabs[0].id;
+    const defaultTab = tabs.length > 0 ? tabs[0].id : undefined;
     if (!path) return defaultTab;
 
     return tabs.find((tab) => tab.id === path.tab)?.id ?? defaultTab;

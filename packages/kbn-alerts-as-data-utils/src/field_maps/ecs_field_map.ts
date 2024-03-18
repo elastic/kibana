@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EcsFlat } from '@kbn/ecs';
+import { EcsFlat } from '@elastic/ecs';
 import { EcsMetadata, FieldMap } from './types';
 
 const EXCLUDED_TYPES = ['constant_keyword'];

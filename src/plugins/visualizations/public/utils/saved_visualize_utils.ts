@@ -61,16 +61,19 @@ export function mapHitSource(
     id,
     references,
     updatedAt,
+    managed,
   }: {
     attributes: SavedObjectAttributes;
     id: string;
     references: SavedObjectReference[];
     updatedAt?: string;
+    managed?: boolean;
   }
 ) {
   const newAttributes: {
     id: string;
     references: SavedObjectReference[];
+    managed?: boolean;
     url: string;
     savedObjectType?: string;
     editor?: { editUrl?: string };
@@ -86,6 +89,7 @@ export function mapHitSource(
     references,
     url: urlFor(id),
     updatedAt,
+    managed,
     ...attributes,
   };
 
@@ -227,6 +231,7 @@ export async function getSavedVisualization(
     getEsType: () => SAVED_VIS_TYPE,
     getDisplayName: () => SAVED_VIS_TYPE,
     searchSource: opts.searchSource ? services.search.searchSource.createEmpty() : undefined,
+    managed: false,
   } as VisSavedObject;
   const defaultsProps = getDefaults(opts);
 
@@ -255,6 +260,7 @@ export async function getSavedVisualization(
 
   Object.assign(savedObject, attributes);
   savedObject.lastSavedTitle = savedObject.title;
+  savedObject.managed = Boolean(resp.managed);
 
   savedObject.sharingSavedObjectProps = {
     aliasTargetId,

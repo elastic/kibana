@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const toasts = getService('toasts');
 
   const setFieldsFromSource = async (setValue: boolean) => {
     await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
@@ -38,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const getReport = async () => {
     // close any open notification toasts
-    await PageObjects.reporting.clearToastNotifications();
+    await toasts.dismissAll();
 
     await PageObjects.reporting.openCsvReportingPanel();
     await PageObjects.reporting.clickGenerateReportButton();
@@ -80,6 +81,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Generate CSV: new search', () => {
       before(async () => {
         await reportingAPI.initEcommerce();
+        /**
+         *  Important: `esArchiver.emptyKibanaIndex()` above also resets the
+         * Kibana time zone setting, so we're re-applying it here.
+         * The serverless version of the test uses
+         * `kibanaServer.savedObjects.cleanStandardList` instead,
+         * which does not reset the time zone setting,
+         * so we don't need to re-apply it in these tests.
+         */
+        await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
       });
 
       after(async () => {

@@ -24,7 +24,11 @@ export interface UseGetGroupSelectorArgs {
   groupingState: GroupMap;
   maxGroupingLevels?: number;
   onOptionsChange?: (newOptions: GroupOption[]) => void;
-  onGroupChange?: (param: { groupByField: string; tableId: string }) => void;
+  onGroupChange?: (param: {
+    groupByField: string;
+    groupByFields: string[];
+    tableId: string;
+  }) => void;
   tracker?: (
     type: UiCounterMetricType,
     event: string | string[],
@@ -112,33 +116,46 @@ export const useGetGroupSelector = ({
 
   const onChange = useCallback(
     (groupSelection: string) => {
+      let newSelectedGroups: string[] = [];
+      let sendTelemetry = true;
       // Simulate a toggle behavior when maxGroupingLevels is 1
       if (maxGroupingLevels === 1) {
-        setSelectedGroups([groupSelection]);
+        newSelectedGroups = [groupSelection];
       } else {
+        // if the group is already selected, remove it
         if (selectedGroups.find((selected) => selected === groupSelection)) {
+          sendTelemetry = false;
           const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
           if (groups.length === 0) {
-            setSelectedGroups(['none']);
+            newSelectedGroups = ['none'];
           } else {
-            setSelectedGroups(groups);
+            newSelectedGroups = groups;
           }
-          return;
+        } else {
+          newSelectedGroups = isNoneGroup([groupSelection])
+            ? [groupSelection]
+            : [
+                ...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'),
+                groupSelection,
+              ];
         }
-
-        const newSelectedGroups = isNoneGroup([groupSelection])
-          ? [groupSelection]
-          : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection];
-        setSelectedGroups(newSelectedGroups);
       }
 
-      // built-in telemetry: UI-counter
-      tracker?.(
-        METRIC_TYPE.CLICK,
-        getTelemetryEvent.groupChanged({ groupingId, selected: groupSelection })
-      );
+      setSelectedGroups(newSelectedGroups);
 
-      onGroupChange?.({ tableId: groupingId, groupByField: groupSelection });
+      if (sendTelemetry) {
+        // built-in telemetry: UI-counter
+        tracker?.(
+          METRIC_TYPE.CLICK,
+          getTelemetryEvent.groupChanged({ groupingId, selected: groupSelection })
+        );
+      }
+
+      onGroupChange?.({
+        tableId: groupingId,
+        groupByField: groupSelection,
+        groupByFields: newSelectedGroups,
+      });
     },
     [groupingId, maxGroupingLevels, onGroupChange, selectedGroups, setSelectedGroups, tracker]
   );

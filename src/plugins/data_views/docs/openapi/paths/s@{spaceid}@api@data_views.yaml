@@ -1,0 +1,43 @@
+get:
+  summary: Retrieves a list of all data views.
+  operationId: getAllDataViews
+  description: >
+    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  tags:
+    - data views
+  parameters:
+    - $ref: '../components/parameters/space_id.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data_view:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    namespaces:
+                      type: array
+                      items:
+                        type: string
+                    title:
+                      type: string
+                    typeMeta:
+                      type: object
+          examples:
+            getAllDataViewsResponse:
+              $ref: '../components/examples/get_data_views_response.yaml'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'

@@ -21,7 +21,7 @@ export const apiHasType = (api: unknown | null): api is HasType => {
 
 export const apiIsOfType = <T extends string = string>(
   api: unknown | null,
-  typeToCheck: string
+  typeToCheck: T
 ): api is HasType<T> => {
   return Boolean(api && (api as HasType).type) && (api as HasType).type === typeToCheck;
 };

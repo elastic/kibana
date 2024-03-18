@@ -105,9 +105,14 @@
     "@kbn/visualization-utils",
     "@kbn/test-eui-helpers",
     "@kbn/shared-ux-utility",
+    "@kbn/esql-utils",
     "@kbn/text-based-editor",
     "@kbn/managed-content-badge",
-    "@kbn/sort-predicates"
+    "@kbn/sort-predicates",
+    "@kbn/presentation-publishing",
+    "@kbn/saved-objects-finder-plugin",
+    "@kbn/unified-data-table",
+    "@kbn/shared-ux-markdown"
   ],
   "exclude": ["target/**/*"]
 }

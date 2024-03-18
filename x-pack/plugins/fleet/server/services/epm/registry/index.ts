@@ -94,16 +94,8 @@ async function _fetchFindLatestPackage(
 
     const bundledPackage = await getBundledPackageByName(packageName);
 
-    // temporary workaround to allow synthetics package beta version until there is a GA available
-    // needed because synthetics is installed by default on kibana startup
-    const prereleaseAllowedExceptions = ['synthetics'];
-
-    const prereleaseEnabled = prerelease || prereleaseAllowedExceptions.includes(packageName);
-
     const registryUrl = getRegistryUrl();
-    const url = new URL(
-      `${registryUrl}/search?package=${packageName}&prerelease=${prereleaseEnabled}`
-    );
+    const url = new URL(`${registryUrl}/search?package=${packageName}&prerelease=${prerelease}`);
 
     if (!ignoreConstraints) {
       setConstraints(url);

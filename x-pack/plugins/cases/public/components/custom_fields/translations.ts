@@ -59,6 +59,10 @@ export const FIELD_OPTIONS = i18n.translate('xpack.cases.customFields.fieldOptio
   defaultMessage: 'Options',
 });
 
+export const DEFAULT_VALUE = i18n.translate('xpack.cases.customFields.defaultValue', {
+  defaultMessage: 'Default value',
+});
+
 export const FIELD_OPTION_REQUIRED = i18n.translate(
   'xpack.cases.customFields.fieldOptions.Required',
   {
@@ -73,7 +77,7 @@ export const REQUIRED = i18n.translate('xpack.cases.customFields.required', {
 export const REQUIRED_FIELD = (fieldName: string): string =>
   i18n.translate('xpack.cases.customFields.requiredField', {
     values: { fieldName },
-    defaultMessage: '{fieldName} is required.',
+    defaultMessage: 'A {fieldName} is required.',
   });
 
 export const EDIT_CUSTOM_FIELDS_ARIA_LABEL = (customFieldLabel: string) =>
@@ -114,5 +118,12 @@ export const TOGGLE_FIELD_OFF_LABEL = i18n.translate(
   'xpack.cases.customFields.tableFilters.toggle.off',
   {
     defaultMessage: 'Off',
+  }
+);
+
+export const POPULATED_WITH_DEFAULT = i18n.translate(
+  'xpack.cases.customFields.fieldOptions.populatedWithDefault',
+  {
+    defaultMessage: 'This field is populated with the default value.',
   }
 );

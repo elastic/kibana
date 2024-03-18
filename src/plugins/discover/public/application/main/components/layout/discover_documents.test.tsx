@@ -11,7 +11,6 @@ import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DataDocuments$ } from '../../services/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
@@ -26,8 +25,6 @@ import { DiscoverAppState } from '../../services/discover_app_state_container';
 import { DiscoverCustomization, DiscoverCustomizationProvider } from '../../../../customizations';
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
-
-setHeaderActionMenuMounter(jest.fn());
 
 const customisationService = createCustomizationService();
 
@@ -120,10 +117,16 @@ describe('Discover documents layout', () => {
       }),
     };
 
+    const customControlColumnsConfiguration = () => ({
+      leadingControlColumns: [],
+      trailingControlColumns: [],
+    });
+
     const customization: DiscoverCustomization = {
       id: 'data_table',
       customCellRenderer,
       customGridColumnsConfiguration,
+      customControlColumnsConfiguration,
     };
 
     customisationService.set(customization);
@@ -134,6 +137,9 @@ describe('Discover documents layout', () => {
     expect(discoverGridComponent.prop('externalCustomRenderers')).toEqual(customCellRenderer);
     expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toEqual(
       customGridColumnsConfiguration
+    );
+    expect(discoverGridComponent.prop('customControlColumnsConfiguration')).toEqual(
+      customControlColumnsConfiguration
     );
   });
 });

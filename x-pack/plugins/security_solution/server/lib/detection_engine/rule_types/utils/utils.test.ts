@@ -960,6 +960,7 @@ describe('utils', () => {
         success: true,
         warning: false,
         warningMessages: [],
+        suppressedAlertsCount: 0,
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -981,6 +982,7 @@ describe('utils', () => {
         success: true,
         warning: false,
         warningMessages: [],
+        suppressedAlertsCount: 0,
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -1300,6 +1302,7 @@ describe('utils', () => {
         success: true,
         warning: false,
         warningMessages: [],
+        suppressedAlertsCount: 0,
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1328,6 +1331,7 @@ describe('utils', () => {
         success: false,
         warning: true,
         warningMessages: ['test warning'],
+        suppressedAlertsCount: 0,
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1349,6 +1353,7 @@ describe('utils', () => {
         success: true,
         warning: false,
         warningMessages: [],
+        suppressedAlertsCount: 0,
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1368,6 +1373,7 @@ describe('utils', () => {
         success: true,
         warning: false,
         warningMessages: [],
+        suppressedAlertsCount: 0,
       };
       expect(merged).toEqual(expected);
     });
@@ -1449,6 +1455,7 @@ describe('utils', () => {
         success: true, // Defaults to success true is all of it was successful
         warning: true,
         warningMessages: ['warning1', 'warning2'],
+        suppressedAlertsCount: 0,
       };
       expect(merged).toEqual(expected);
     });

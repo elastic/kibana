@@ -9,10 +9,22 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['timePicker', 'lens', 'common']);
+  const PageObjects = getPageObjects([
+    'visChart',
+    'timePicker',
+    'lens',
+    'common',
+    'discover',
+    'maps',
+    'visualize',
+    'dashboard',
+  ]);
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const listingTable = getService('listingTable');
+  const log = getService('log');
 
   describe('Managed Content', () => {
     before(async () => {
@@ -23,9 +35,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/managed_content');
+      kibanaServer.importExport.savedObjects.clean({ types: ['dashboard'] }); // we do create a new dashboard in this test
     });
 
     describe('preventing the user from overwriting managed content', () => {
+      const expectManagedContentSignifiers = async (
+        expected: boolean,
+        saveButtonTestSubject: string
+      ) => {
+        await testSubjects[expected ? 'existOrFail' : 'missingOrFail']('managedContentBadge');
+        await testSubjects.click(saveButtonTestSubject);
+
+        const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
+        expect(await testSubjects.isEuiSwitchChecked(saveAsNewCheckbox)).to.be(expected);
+        expect(await saveAsNewCheckbox.getAttribute('disabled')).to.be(expected ? 'true' : null);
+      };
+
       it('lens', async () => {
         await PageObjects.common.navigateToActualUrl(
           'lens',
@@ -34,11 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.lens.waitForVisualization('xyVisChart');
 
-        await testSubjects.existOrFail('managedContentBadge');
-        await testSubjects.click('lnsApp_saveButton');
-        const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
-        expect(await testSubjects.isEuiSwitchChecked(saveAsNewCheckbox)).to.be(true);
-        expect(await saveAsNewCheckbox.getAttribute('disabled')).to.be('true');
+        await expectManagedContentSignifiers(true, 'lnsApp_saveButton');
 
         await PageObjects.common.navigateToActualUrl(
           'lens',
@@ -47,11 +68,146 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.lens.waitForVisualization('xyVisChart');
 
-        await testSubjects.missingOrFail('managedContentBadge');
-        await testSubjects.click('lnsApp_saveButton');
-        await testSubjects.existOrFail('saveAsNewCheckbox');
-        expect(await testSubjects.isEuiSwitchChecked('saveAsNewCheckbox')).to.be(false);
-        expect(await saveAsNewCheckbox.getAttribute('disabled')).to.be(null);
+        await expectManagedContentSignifiers(false, 'lnsApp_saveButton');
+      });
+
+      it('discover', async () => {
+        await PageObjects.common.navigateToActualUrl(
+          'discover',
+          'view/managed-3d62-4113-ac7c-de2e20a68fbc'
+        );
+        await PageObjects.discover.waitForDiscoverAppOnScreen();
+
+        await expectManagedContentSignifiers(true, 'discoverSaveButton');
+
+        await PageObjects.common.navigateToActualUrl(
+          'discover',
+          'view/unmanaged-3d62-4113-ac7c-de2e20a68fbc'
+        );
+        await PageObjects.discover.waitForDiscoverAppOnScreen();
+
+        await expectManagedContentSignifiers(false, 'discoverSaveButton');
+      });
+
+      it('visualize', async () => {
+        await PageObjects.common.navigateToActualUrl(
+          'visualize',
+          'edit/managed-feb9-4ba6-9538-1b8f67fb4f57'
+        );
+        await PageObjects.visChart.waitForVisualization();
+
+        await expectManagedContentSignifiers(true, 'visualizeSaveButton');
+
+        await PageObjects.common.navigateToActualUrl(
+          'visualize',
+          'edit/unmanaged-feb9-4ba6-9538-1b8f67fb4f57'
+        );
+        await PageObjects.visChart.waitForVisualization();
+
+        await expectManagedContentSignifiers(false, 'visualizeSaveButton');
+      });
+
+      it('maps', async () => {
+        await PageObjects.common.navigateToActualUrl(
+          'maps',
+          'map/managed-d7ab-46eb-a807-8fed28ed8566'
+        );
+        await PageObjects.maps.waitForLayerAddPanelClosed();
+
+        await expectManagedContentSignifiers(true, 'mapSaveButton');
+
+        await PageObjects.common.navigateToActualUrl(
+          'maps',
+          'map/unmanaged-d7ab-46eb-a807-8fed28ed8566'
+        );
+        await PageObjects.maps.waitForLayerAddPanelClosed();
+
+        await expectManagedContentSignifiers(false, 'mapSaveButton');
+      });
+    });
+
+    describe('library views', () => {
+      const assertInspectorReadonly = async (name: string) => {
+        log.debug(`making sure table list inspector for ${name} is read-only`);
+        await listingTable.searchForItemWithName(name);
+        await listingTable.waitUntilTableIsLoaded();
+        await listingTable.inspectVisualization();
+        expect(await listingTable.inspectorFieldsReadonly()).to.be(true);
+        await listingTable.closeInspector();
+      };
+
+      it('visualize library: managed content is read-only', async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+
+        const deletableItems = await listingTable.getAllSelectableItemsNames();
+
+        expect(deletableItems).to.eql([
+          'Unmanaged lens vis',
+          'Unmanaged legacy visualization',
+          'Unmanaged map',
+        ]);
+
+        await assertInspectorReadonly('Managed lens vis');
+        await assertInspectorReadonly('Managed legacy visualization');
+        await assertInspectorReadonly('Managed map');
+      });
+
+      it('dashboard library: managed content is read-only', async () => {
+        await PageObjects.dashboard.gotoDashboardListingURL();
+
+        const deletableItems = await listingTable.getAllSelectableItemsNames();
+
+        expect(deletableItems).to.eql([]);
+
+        await assertInspectorReadonly('Managed dashboard');
+      });
+    });
+
+    describe('managed panels in dashboards', () => {
+      it('inlines panels when managed dashboard cloned', async () => {
+        await PageObjects.common.navigateToActualUrl(
+          'dashboard',
+          'view/c44c86f9-b105-4a9c-9a24-449a58a827f3',
+          // for some reason the URL didn't always match the expected, so I turned off this check
+          // URL doesn't matter as long as we get the dashboard app
+          { ensureCurrentUrl: false }
+        );
+
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        await PageObjects.dashboard.clickClone();
+
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        await testSubjects.missingOrFail('embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION');
+      });
+
+      it('adds managed panels by-value', async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+
+        await dashboardAddPanel.addEmbeddables([
+          { name: 'Managed lens vis', type: 'lens' },
+          { name: 'Managed legacy visualization', type: 'visualization' },
+          { name: 'Managed map', type: 'map' },
+          { name: 'Managed saved search', type: 'search' },
+        ]);
+
+        await testSubjects.missingOrFail('embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION');
+
+        await dashboardAddPanel.addEmbeddables([
+          { name: 'Unmanaged lens vis', type: 'lens' },
+          { name: 'Unmanaged legacy visualization', type: 'visualization' },
+          { name: 'Unmanaged map', type: 'map' },
+          { name: 'Unmanaged saved search', type: 'search' },
+        ]);
+
+        const byRefSignifiers = await testSubjects.findAll(
+          'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
+        );
+
+        expect(byRefSignifiers.length).to.be(4);
       });
     });
   });

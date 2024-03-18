@@ -16,7 +16,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { lastValueFrom } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
 import { extractWarnings, type SearchResponseWarning } from '@kbn/search-response-warnings';
-import type { IESAggSource } from '../es_agg_source';
+import { hasESAggSourceMethod } from '../es_agg_source/types';
 import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,
@@ -30,13 +30,11 @@ import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../../util/geo_tile_utils';
-import { IVectorSource } from '../vector_source';
 import {
   AbstractESSourceDescriptor,
   AbstractSourceDescriptor,
   DynamicStylePropertyOptions,
   MapExtent,
-  StyleMetaData,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorStyle } from '../../styles/vector/vector_style';
@@ -45,43 +43,10 @@ import { IField } from '../../fields/field';
 import { FieldFormatter } from '../../../../common/constants';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { mergeExecutionContext } from '../execution_context_utils';
+import type { IESSource } from './types';
 
 export function isSearchSourceAbortError(error: Error) {
   return error.name === 'AbortError';
-}
-
-export interface IESSource extends IVectorSource {
-  isESSource(): true;
-
-  getId(): string;
-
-  getIndexPattern(): Promise<DataView>;
-
-  getIndexPatternId(): string;
-
-  getGeoFieldName(): string;
-
-  loadStylePropsMeta({
-    layerName,
-    style,
-    dynamicStyleProps,
-    registerCancelCallback,
-    sourceQuery,
-    timeFilters,
-    searchSessionId,
-    inspectorAdapters,
-    executionContext,
-  }: {
-    layerName: string;
-    style: IVectorStyle;
-    dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
-    registerCancelCallback: (callback: () => void) => void;
-    sourceQuery?: Query;
-    timeFilters: TimeRange;
-    searchSessionId?: string;
-    inspectorAdapters: Adapters;
-    executionContext: KibanaExecutionContext;
-  }): Promise<{ styleMeta: StyleMetaData; warnings: SearchResponseWarning[] }>;
 }
 
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
@@ -137,21 +102,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   isQueryAware(): boolean {
-    return true;
-  }
-
-  getIndexPatternIds(): string[] {
-    return [this.getIndexPatternId()];
-  }
-
-  getQueryableIndexPatternIds(): string[] {
-    if (this.getApplyGlobalQuery()) {
-      return [this.getIndexPatternId()];
-    }
-    return [];
-  }
-
-  isESSource(): true {
     return true;
   }
 
@@ -233,13 +183,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       // buffer can be empty
       const geoField = await this._getGeoField();
       const buffer: MapExtent =
-        'isGeoGridPrecisionAware' in this &&
-        'getGeoGridPrecision' in this &&
-        (this as IESAggSource).isGeoGridPrecisionAware()
-          ? expandToTileBoundaries(
-              requestMeta.buffer,
-              (this as IESAggSource).getGeoGridPrecision(requestMeta.zoom)
-            )
+        hasESAggSourceMethod(this, 'isGeoGridPrecisionAware') &&
+        hasESAggSourceMethod(this, 'getGeoGridPrecision') &&
+        this.isGeoGridPrecisionAware()
+          ? expandToTileBoundaries(requestMeta.buffer, this.getGeoGridPrecision(requestMeta.zoom))
           : requestMeta.buffer;
       const extentFilter = createExtentFilter(buffer, [geoField.name]);
 

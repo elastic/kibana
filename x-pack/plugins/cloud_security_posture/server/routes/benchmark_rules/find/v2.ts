@@ -45,7 +45,7 @@ export const findBenchmarkRuleHandler = async (
   );
 
   // Semantic version sorting using semver for valid versions and custom comparison for invalid versions
-  const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules);
+  const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules, 'asc');
 
   return {
     items: sortedCspBenchmarkRules,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { FunctionComponent, useMemo, useState } from 'react';
 import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,14 +14,21 @@ import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { DetailsPageMappingsContent } from './details_page_mappings_content';
 import { Index } from '../../../../../../common';
 import { useLoadIndexMappings } from '../../../../services';
-import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 
 export const DetailsPageMappings: FunctionComponent<{ index: Index }> = ({ index }) => {
   const { isLoading, data, error, resendRequest } = useLoadIndexMappings(index.name);
+  const [jsonError, setJsonError] = useState<boolean>(false);
 
-  useEffect(() => {
-    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetailsMappings);
-  }, []);
+  const stringifiedData = useMemo(() => {
+    if (data) {
+      try {
+        setJsonError(false);
+        return JSON.stringify(data, null, 2);
+      } catch (e) {
+        setJsonError(true);
+      }
+    }
+  }, [data]);
 
   if (isLoading) {
     return (
@@ -33,7 +40,7 @@ export const DetailsPageMappings: FunctionComponent<{ index: Index }> = ({ index
       </SectionLoading>
     );
   }
-  if (error) {
+  if (error || jsonError || !stringifiedData) {
     return (
       <EuiPageTemplate.EmptyPrompt
         data-test-subj="indexDetailsMappingsError"
@@ -77,5 +84,5 @@ export const DetailsPageMappings: FunctionComponent<{ index: Index }> = ({ index
     );
   }
 
-  return <DetailsPageMappingsContent index={index} data={data} />;
+  return <DetailsPageMappingsContent index={index} data={stringifiedData} />;
 };

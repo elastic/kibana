@@ -29,6 +29,7 @@ interface Props {
   onChange: (role: Role) => void;
   validator: RoleValidator;
   editable?: boolean;
+  isDarkMode?: boolean;
 }
 
 interface State {
@@ -94,6 +95,7 @@ export class IndexPrivileges extends Component<Props, State> {
             remoteClusters={remoteClusters}
             onChange={this.onIndexPrivilegeChange(i)}
             onDelete={this.onIndexPrivilegeDelete(i)}
+            isDarkMode={this.props.isDarkMode}
           />
         ))}
         {this.props.editable && (

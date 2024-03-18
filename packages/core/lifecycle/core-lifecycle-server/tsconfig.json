@@ -31,7 +31,8 @@
     "@kbn/core-custom-branding-server",
     "@kbn/core-user-settings-server",
     "@kbn/core-plugins-contracts-server",
-    "@kbn/core-di-server"
+    "@kbn/core-di-server",
+    "@kbn/core-security-server"
   ],
   "exclude": [
     "target/**/*",

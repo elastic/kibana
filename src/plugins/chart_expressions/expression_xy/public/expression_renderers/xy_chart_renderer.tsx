@@ -284,7 +284,6 @@ export const getXyChartRenderer = ({
               syncColors={config.syncColors}
               syncTooltips={config.syncTooltips}
               syncCursor={config.syncCursor}
-              shouldUseVeil={handlers.shouldUseSizeTransitionVeil()}
               uiState={handlers.uiState as PersistedState}
               renderComplete={renderComplete}
               setChartSize={setChartSize}

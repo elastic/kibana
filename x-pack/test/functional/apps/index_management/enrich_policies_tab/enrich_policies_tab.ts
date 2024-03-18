@@ -90,7 +90,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.clickExecuteEnrichPolicyAt(0);
       await pageObjects.indexManagement.clickConfirmModalButton();
 
-      const successToast = await toasts.getToastElement(1);
+      const successToast = await toasts.getElementByIndex(1);
       expect(await successToast.getVisibleText()).to.contain(`Executed ${ENRICH_POLICY_NAME}`);
     });
 
@@ -98,7 +98,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.clickDeleteEnrichPolicyAt(0);
       await pageObjects.indexManagement.clickConfirmModalButton();
 
-      const successToast = await toasts.getToastElement(2);
+      const successToast = await toasts.getElementByIndex(2);
       expect(await successToast.getVisibleText()).to.contain(`Deleted ${ENRICH_POLICY_NAME}`);
     });
   });

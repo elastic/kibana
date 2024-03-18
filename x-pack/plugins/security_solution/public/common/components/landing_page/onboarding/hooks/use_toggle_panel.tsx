@@ -11,7 +11,7 @@ import { useNavigateTo } from '@kbn/security-solution-navigation';
 
 import { SecurityPageName } from '../../../../../../common';
 
-import { onboardingStorage } from '../storage';
+import { OnboardingStorage } from '../storage';
 import {
   getActiveSectionsInitialStates,
   getActiveProductsInitialStates,
@@ -31,8 +31,12 @@ import { OnboardingActions } from '../types';
 import { findCardSectionByStepId } from '../helpers';
 import type { SecurityProductTypes } from '../configs';
 import { ALL_PRODUCT_LINES, ProductLine } from '../configs';
+import { useSpaceId } from '../../../../hooks/use_space_id';
 
-const syncExpandedCardStepsToStorageFromURL = (maybeStepId: string) => {
+const syncExpandedCardStepsToStorageFromURL = (
+  onboardingStorage: OnboardingStorage,
+  maybeStepId: string
+) => {
   const { matchedCard, matchedStep } = findCardSectionByStepId(maybeStepId);
   const hasStepContent = matchedStep && matchedStep.description;
 
@@ -76,7 +80,9 @@ export const useTogglePanel = ({
 
   const { hash: detailName } = useLocation();
   const stepIdFromHash = detailName.split('#')[1];
+  const spaceId = useSpaceId();
 
+  const onboardingStorage = useMemo(() => new OnboardingStorage(spaceId), [spaceId]);
   const {
     getAllFinishedStepsFromStorage,
     getActiveProductsFromStorage,
@@ -90,7 +96,10 @@ export const useTogglePanel = ({
   } = onboardingStorage;
 
   const finishedStepsInitialStates = useMemo(
-    () => getFinishedStepsInitialStates({ finishedSteps: getAllFinishedStepsFromStorage() }),
+    () =>
+      getFinishedStepsInitialStates({
+        finishedSteps: getAllFinishedStepsFromStorage(),
+      }),
     [getAllFinishedStepsFromStorage]
   );
 
@@ -121,11 +130,11 @@ export const useTogglePanel = ({
 
   const expandedCardsInitialStates: ExpandedCardSteps = useMemo(() => {
     if (stepIdFromHash) {
-      syncExpandedCardStepsToStorageFromURL(stepIdFromHash);
+      syncExpandedCardStepsToStorageFromURL(onboardingStorage, stepIdFromHash);
     }
 
     return getAllExpandedCardStepsFromStorage();
-  }, [getAllExpandedCardStepsFromStorage, stepIdFromHash]);
+  }, [onboardingStorage, getAllExpandedCardStepsFromStorage, stepIdFromHash]);
 
   const onStepClicked: OnStepClicked = useCallback(
     ({ stepId, cardId, isExpanded }) => {

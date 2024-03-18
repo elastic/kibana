@@ -61,6 +61,7 @@ export async function upgradeBatch(
     version: string;
     sourceUri?: string | undefined;
     force?: boolean;
+    skipRateLimitCheck?: boolean;
     upgradeDurationSeconds?: number;
     startTime?: string;
     total?: number;
@@ -87,8 +88,11 @@ export async function upgradeBatch(
       //  - currently upgrading
       //  - upgradeable b/c of version check
       const isNotAllowed =
-        getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently ||
-        (!options.force && !isAgentUpgradeableToVersion(agent, options.version));
+        (!options.skipRateLimitCheck &&
+          getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently) ||
+        (!options.force &&
+          !options.skipRateLimitCheck &&
+          !isAgentUpgradeableToVersion(agent, options.version));
       if (isNotAllowed) {
         throw new FleetError(
           `Agent ${agent.id} is not upgradeable: ${getNotUpgradeableMessage(

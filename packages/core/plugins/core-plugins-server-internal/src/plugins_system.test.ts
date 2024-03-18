@@ -888,7 +888,7 @@ describe('stop', () => {
     expect(stopSpy1.mock.invocationCallOrder[0]).toBeLessThan(stopSpy2.mock.invocationCallOrder[0]);
   });
 
-  it('waits for 30 sec to finish "stop" and move on to the next plugin.', async () => {
+  it('waits for 15 sec to finish "stop" and move on to the next plugin.', async () => {
     const [plugin1, plugin2] = [createPlugin('timeout-stop-1'), createPlugin('timeout-stop-2')].map(
       (plugin, index) => {
         jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
@@ -918,7 +918,7 @@ describe('stop', () => {
 
     expect(loggingSystemMock.collect(logger).warn.flat()).toEqual(
       expect.arrayContaining([
-        `"timeout-stop-1" plugin didn't stop in 30sec., move on to the next.`,
+        `"timeout-stop-1" plugin didn't stop in 15sec., move on to the next.`,
       ])
     );
   });

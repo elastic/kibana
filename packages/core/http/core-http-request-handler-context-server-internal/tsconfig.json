@@ -27,6 +27,8 @@
     "@kbn/core-base-common-internal",
     "@kbn/core-di-server-internal",
     "@kbn/core-di-server-mocks",
+    "@kbn/core-security-server-internal",
+    "@kbn/core-security-server-mocks",
   ],
   "exclude": [
     "target/**/*",

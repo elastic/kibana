@@ -7,7 +7,6 @@
  */
 
 import type { PluginInitializer } from '@kbn/core-plugins-browser';
-import { AppNavLinkStatus } from '@kbn/core-application-browser';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -39,7 +38,7 @@ export const plugin: PluginInitializer<
       title: 'Mock IDP',
       chromeless: true,
       appRoute: MOCK_IDP_LOGIN_PATH,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: async (params) => {
         const [[coreStart], { LoginPage }] = await Promise.all([
           coreSetup.getStartServices(),
@@ -50,7 +49,7 @@ export const plugin: PluginInitializer<
           <KibanaThemeProvider theme={coreStart.theme}>
             <KibanaContextProvider services={coreStart}>
               <I18nProvider>
-                <LoginPage projectType={plugins.cloud?.serverless.projectType} />
+                <LoginPage />
               </I18nProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>,
@@ -70,7 +69,7 @@ export const plugin: PluginInitializer<
           <KibanaThemeProvider theme={coreStart.theme}>
             <KibanaContextProvider services={coreStart}>
               <I18nProvider>
-                <RoleSwitcher projectType={plugins.cloud?.serverless.projectType} />
+                <RoleSwitcher />
               </I18nProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>,

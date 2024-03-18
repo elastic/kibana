@@ -8,24 +8,29 @@
 
 import React from 'react';
 import { Markdown } from './markdown';
-import { render } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 
 describe('shared ux markdown component', () => {
-  it('renders for editor', () => {
-    const component = render(<Markdown readOnly={false} />);
-    expect(component).toMatchSnapshot();
+  it('renders markdown editor by default', () => {
+    render(<Markdown />);
+    expect(screen.getByTestId('euiMarkdownEditorToolbar')).toBeInTheDocument();
+  });
+
+  it('renders markdown editor with tooltip action button when the prop `enableTooltipSupport` is true', () => {
+    render(<Markdown enableTooltipSupport={true} />);
+
+    expect(screen.getByLabelText('Tooltip', { selector: 'button' })).toBeInTheDocument();
   });
 
   it('renders for displaying a readonly message', () => {
-    const component = render(<Markdown readOnly markdownContent="error message" />);
-    expect(component.text()).toContain('error message');
+    render(<Markdown markdownContent="error message" readOnly />);
+    expect(screen.queryByTestId('euiMarkdownEditorToolbar')).not.toBeInTheDocument();
+    expect(screen.getByText(/error message/i)).toBeInTheDocument();
   });
 
   it('will not render EuiMarkdownFormat when readOnly false and markdownContent specified', () => {
     const exampleMarkdownContent = 'error';
-    const component = render(
-      <Markdown readOnly={false} markdownContent={exampleMarkdownContent} />
-    );
-    expect(component.has('EuiMarkdownEditor')).toBeTruthy();
+    render(<Markdown markdownContent={exampleMarkdownContent} />);
+    expect(screen.getByTestId('euiMarkdownEditorToolbar')).toBeInTheDocument();
   });
 });

@@ -37,7 +37,7 @@ import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate, useDarkMode } from '@kbn/kibana-react-plugin/public';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
@@ -304,6 +304,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
   history,
   spacesApiUi,
 }) => {
+  const isDarkMode = useDarkMode();
+
   if (!dataViews) {
     // The dataViews plugin is technically marked as an optional dependency because we don't need to pull it in for Anonymous pages (such
     // as the login page). That said, it _is_ required for this page to function correctly, so we throw an error here if it's not available.
@@ -483,6 +485,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
           license={license}
           docLinks={docLinks}
           canUseRemoteIndices={featureCheckState.value?.canUseRemoteIndices}
+          isDarkMode={isDarkMode}
         />
       </div>
     );

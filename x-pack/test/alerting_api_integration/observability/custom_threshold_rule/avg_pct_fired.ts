@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { omit } from 'lodash';
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
@@ -23,7 +22,7 @@ import {
   waitForRuleStatus,
 } from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ActionDocument, LogExplorerLocatorParsedParams } from './typings';
+import { ActionDocument, LogsExplorerLocatorParsedParams } from './typings';
 import { ISO_DATE_REGEX } from './constants';
 
 // eslint-disable-next-line import/no-default-export
@@ -36,18 +35,18 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Custom Threshold rule - AVG - PCT - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
-    const DATE_VIEW_TITLE = 'kbn-data-forge-fake_hosts.fake_hosts-*';
-    const DATE_VIEW_NAME = 'ad-hoc-data-view-name';
+    const DATA_VIEW_TITLE = 'kbn-data-forge-fake_hosts.fake_hosts-*';
+    const DATA_VIEW_NAME = 'ad-hoc-data-view-name';
     const DATA_VIEW_ID = 'data-view-id';
     const MOCKED_AD_HOC_DATA_VIEW = {
       id: DATA_VIEW_ID,
-      title: DATE_VIEW_TITLE,
+      title: DATA_VIEW_TITLE,
       timeFieldName: '@timestamp',
       sourceFilters: [],
       fieldFormats: {},
       runtimeFieldMap: {},
       allowNoIndex: false,
-      name: DATE_VIEW_NAME,
+      name: DATA_VIEW_NAME,
       allowHidden: false,
     };
     let dataForgeConfig: PartialConfig;
@@ -55,7 +54,6 @@ export default function ({ getService }: FtrProviderContext) {
     let actionId: string;
     let ruleId: string;
     let alertId: string;
-    let startedAt: string;
 
     before(async () => {
       dataForgeConfig = {
@@ -70,13 +68,18 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           },
         ],
-        indexing: { dataset: 'fake_hosts' as Dataset, eventsPerCycle: 1, interval: 10000 },
+        indexing: {
+          dataset: 'fake_hosts' as Dataset,
+          eventsPerCycle: 1,
+          interval: 10000,
+          alignEventsToInterval: true,
+        },
       };
       dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
       logger.info(JSON.stringify(dataForgeIndices.join(',')));
       await waitForDocumentInIndex({
         esClient,
-        indexName: DATE_VIEW_TITLE,
+        indexName: DATA_VIEW_TITLE,
         docCountTarget: 270,
       });
     });
@@ -176,11 +179,10 @@ export default function ({ getService }: FtrProviderContext) {
           ruleId,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
-        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (Beta)'
+          'Custom threshold'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -204,7 +206,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('kibana.alert.workflow_status', 'open');
         expect(resp.hits.hits[0]._source).property('event.kind', 'signal');
         expect(resp.hits.hits[0]._source).property('event.action', 'open');
-
+        expect(resp.hits.hits[0]._source).property('kibana.alert.evaluation.threshold').eql([0.5]);
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
           .eql({
@@ -227,7 +229,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should set correct action variables', async () => {
-        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
         const resp = await waitForDocumentInIndex<ActionDocument>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
@@ -235,22 +236,23 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+          `https://localhost:5601/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `Average system.cpu.user.pct is 250%, above the threshold of 50%. (duration: 5 mins, data view: ${DATE_VIEW_NAME})`
+          `Average system.cpu.user.pct is 250%, above the threshold of 50%. (duration: 5 mins, data view: ${DATA_VIEW_NAME})`
         );
         expect(resp.hits.hits[0]._source?.value).eql('250%');
 
-        const parsedViewInAppUrl = parseSearchParams<LogExplorerLocatorParsedParams>(
+        const parsedViewInAppUrl = parseSearchParams<LogsExplorerLocatorParsedParams>(
           new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
         );
 
-        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOG_EXPLORER_LOCATOR');
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOGS_EXPLORER_LOCATOR');
         expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
-          dataset: DATE_VIEW_TITLE,
+          dataset: DATA_VIEW_TITLE,
           timeRange: { to: 'now' },
           query: { query: '', language: 'kuery' },
+          filters: [],
         });
         expect(parsedViewInAppUrl.params.timeRange.from).match(ISO_DATE_REGEX);
       });

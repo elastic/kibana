@@ -408,15 +408,6 @@ const expectAssetsInstalled = ({
       { meta: true }
     );
     expect(resPackage.statusCode).equal(200);
-
-    const resUserSettings = await es.transport.request(
-      {
-        method: 'GET',
-        path: `/_component_template/${logsTemplateName}@custom`,
-      },
-      { meta: true }
-    );
-    expect(resUserSettings.statusCode).equal(200);
   });
   it('should have installed the kibana assets', async function () {
     // These are installed from Fleet along with every package

@@ -250,6 +250,7 @@ export const ElasticsearchOverview = () => {
           assetBasePath={assetBasePath}
           docLinks={docLinks}
           application={application}
+          consolePlugin={consolePlugin}
           sharePlugin={share}
           additionalIngestionPanel={<ConnectorIngestionPanel assetBasePath={assetBasePath} />}
         />
@@ -277,6 +278,7 @@ export const ElasticsearchOverview = () => {
               setSelectedLanguage={setSelectedLanguage}
               assetBasePath={assetBasePath}
               application={application}
+              consolePlugin={consolePlugin}
               sharePlugin={share}
             />
           }

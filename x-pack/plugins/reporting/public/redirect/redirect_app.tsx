@@ -17,7 +17,7 @@ import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
 import { LocatorParams } from '@kbn/reporting-common/types';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 
-import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 import type { SharePluginSetup } from '../shared_imports';
 
 import './redirect_app.scss';

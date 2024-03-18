@@ -308,7 +308,22 @@ describe('bulk action hooks', () => {
         },
       }));
       const { result } = renderHook(
-        () => useBulkUntrackActions({ setIsBulkActionsLoading, refresh, clearSelection }),
+        () =>
+          useBulkUntrackActions({
+            setIsBulkActionsLoading,
+            refresh,
+            clearSelection,
+            isAllSelected: true,
+            query: {
+              bool: {
+                must: {
+                  term: {
+                    test: 'test',
+                  },
+                },
+              },
+            },
+          }),
         {
           wrapper: appMockRender.AppWrapper,
         }
@@ -361,7 +376,7 @@ describe('bulk action hooks', () => {
               },
               Object {
                 "data-test-subj": "mark-as-untracked",
-                "disableOnQuery": true,
+                "disableOnQuery": false,
                 "disabledLabel": "Mark as untracked",
                 "key": "mark-as-untracked",
                 "label": "Mark as untracked",

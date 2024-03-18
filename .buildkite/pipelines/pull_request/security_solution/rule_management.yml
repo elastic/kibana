@@ -3,7 +3,9 @@ steps:
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -15,7 +17,9 @@ steps:
     label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 4
     retry:
@@ -27,7 +31,9 @@ steps:
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -39,7 +45,9 @@ steps:
     label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 6
     retry:

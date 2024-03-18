@@ -61,8 +61,7 @@ The username for HTTP basic authentication.
 [[servicenow-action-configuration]]
 === Test connectors
 
-You can test connectors with the <<execute-connector-api,run connector API>> or
-as you're creating or editing the connector in {kib}. For example:
+When you create or edit a connector, use the *Test* tab to test its actions:
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-params-test.png[ServiceNow params test]
@@ -98,6 +97,8 @@ Subcategory::
 The category of the incident.
 Urgency::
 The extent to which the incident resolution can delay.
+
+NOTE: When you create a rule that uses a {sn-itsm} connector, its recovery actions close {sn} incidents based on the correlation ID. If there are multiple incidents that match the correlation ID, the latest open incident for that ID is closed.
 
 [float]
 [[servicenow-connector-networking-configuration]]

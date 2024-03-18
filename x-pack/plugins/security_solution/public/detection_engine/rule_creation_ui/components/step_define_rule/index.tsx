@@ -63,6 +63,7 @@ import { Field, Form, getUseField, UseField, UseMultiFields } from '../../../../
 import type { FormHook } from '../../../../shared_imports';
 import { schema } from './schema';
 import { getTermsAggregationFields } from './utils';
+import { useExperimentalFeatureFieldsTransform } from './use_experimental_feature_fields_transform';
 import * as i18n from './translations';
 import {
   isEqlRule,
@@ -87,6 +88,7 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common
 import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
+import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -176,6 +178,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   thresholdFields,
   enableThresholdSuppression,
 }) => {
+  const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
@@ -807,8 +810,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [isUpdateView, mlCapabilities]
   );
 
-  const isAlertSuppressionEnabled = isQueryRule(ruleType) || isThresholdRule;
-
   return (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
@@ -997,7 +998,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </RuleTypeEuiFormRow>
 
           <RuleTypeEuiFormRow
-            $isVisible={isAlertSuppressionEnabled && isQueryRule(ruleType)}
+            $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
             data-test-subj="alertSuppressionInput"
           >
             <UseField
@@ -1033,8 +1034,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </IntendedRuleTypeEuiFormRow>
 
           <IntendedRuleTypeEuiFormRow
-            // only query rule has this suppression configuration
-            $isVisible={isAlertSuppressionEnabled && isQueryRule(ruleType)}
+            // threshold rule does not have this suppression configuration
+            $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
             data-test-subj="alertSuppressionMissingFields"
             label={
               <span>
@@ -1077,13 +1078,14 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
   indexPattern,
 }) => {
   const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(data);
+  const transformFields = useExperimentalFeatureFieldsTransform();
 
   return (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
         schema={filterRuleFieldsForType(schema, data.ruleType)}
-        data={filterRuleFieldsForType(dataForDescription, data.ruleType)}
+        data={filterRuleFieldsForType(transformFields(dataForDescription), data.ruleType)}
         indexPatterns={indexPattern}
       />
     </StepContentWrapper>

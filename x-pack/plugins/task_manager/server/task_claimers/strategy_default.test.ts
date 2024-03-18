@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { v1 as uuidv1, v4 as uuidv4 } from 'uuid';
 import { filter, take, toArray } from 'rxjs/operators';
 
-import { TaskStatus, ConcreteTaskInstance } from '../task';
+import { TaskStatus, ConcreteTaskInstance, TaskPriority } from '../task';
 import { SearchOpts, StoreOpts, UpdateByQueryOpts, UpdateByQuerySearchOpts } from '../task_store';
 import { asTaskClaimEvent, TaskEvent } from '../task_events';
 import { asOk, isOk, unwrap } from '../lib/result_type';
@@ -255,6 +255,7 @@ describe('TaskClaiming', () => {
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',
+          priority: TaskPriority.Low,
           createTaskRunner: jest.fn(),
         },
         bar: {
@@ -351,6 +352,28 @@ describe('TaskClaiming', () => {
         },
       });
       expect(sort).toMatchObject([
+        {
+          _script: {
+            type: 'number',
+            order: 'desc',
+            script: {
+              lang: 'painless',
+              params: {
+                priority_map: {
+                  foo: 1,
+                },
+              },
+              source: `
+            String taskType = doc['task.taskType'].value;
+            if (params.priority_map.containsKey(taskType)) {
+              return params.priority_map[taskType];
+            } else {
+              return 50;
+            }
+          `,
+            },
+          },
+        },
         {
           _script: {
             type: 'number',

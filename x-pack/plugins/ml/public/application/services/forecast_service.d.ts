@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { Job } from '../../../common/types/anomaly_detection_jobs';
+import type { Observable } from 'rxjs';
+import type { Job } from '../../../common/types/anomaly_detection_jobs';
 
 export interface ForecastData {
   success: boolean;
@@ -32,3 +32,5 @@ export const mlForecastService: {
 
   getForecastDateRange: (job: Job, forecastId: string) => Promise<ForecastDateRange>;
 };
+
+export type MlForecastService = typeof mlForecastService;

@@ -7,46 +7,118 @@
 
 import expect from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import {
+  expectDefaultElasticsearchOutput,
+  expectDefaultFleetServer,
+} from '../../common/fleet/default_setup';
 
-export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
-  const supertest = getService('supertest');
+export default function (ctx: FtrProviderContext) {
+  const svlCommonApi = ctx.getService('svlCommonApi');
+  const supertest = ctx.getService('supertest');
 
-  describe('fleet', function () {
-    it('rejects request to create a new fleet server hosts', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/178780
+  describe.skip('fleet', function () {
+    let defaultFleetServerHostUrl: string = '';
+    let defaultEsOutputUrl: string = '';
+    before(async () => {
+      const { body, status } = await supertest
+        .get('/api/fleet/fleet_server_hosts')
+        .set(svlCommonApi.getInternalRequestHeader());
+
+      expect(status).toBe(200);
+
+      defaultFleetServerHostUrl =
+        body.items.find((item: any) => item.is_default)?.host_urls?.[0] ?? '';
+      expect(defaultFleetServerHostUrl).not.toBe('');
+    });
+    before(async () => {
+      const { body, status } = await supertest
+        .get('/api/fleet/outputs')
+        .set(svlCommonApi.getInternalRequestHeader());
+
+      expect(status).toBe(200);
+      defaultEsOutputUrl = body.items.find((item: any) => item.is_default)?.hosts?.[0] ?? '';
+      expect(defaultEsOutputUrl).not.toBe('');
+    });
+    it('rejects request to create a new fleet server hosts if host url is different from default', async () => {
+      await expectDefaultFleetServer(ctx);
+
       const { body, status } = await supertest
         .post('/api/fleet/fleet_server_hosts')
         .set(svlCommonApi.getInternalRequestHeader())
         .send({
           name: 'test',
-          host_urls: ['https://localhost:8220'],
+          host_urls: ['https://localhost:8221'],
         });
 
       // in a non-serverless environment this would succeed with a 200
       expect(body).toEqual({
         statusCode: 403,
         error: 'Forbidden',
-        message: 'Fleet server host write APIs are disabled',
+        message: `Fleet server host must have default URL in serverless: ${defaultFleetServerHostUrl}`,
       });
       expect(status).toBe(403);
     });
 
-    it('rejects request to create a new proxy', async () => {
+    it('accepts request to create a new fleet server hosts if host url is same as default', async () => {
+      await expectDefaultFleetServer(ctx);
+
       const { body, status } = await supertest
-        .post('/api/fleet/proxies')
+        .post('/api/fleet/fleet_server_hosts')
         .set(svlCommonApi.getInternalRequestHeader())
         .send({
-          name: 'test',
-          url: 'https://localhost:8220',
+          name: 'Test Fleet server host',
+          host_urls: [defaultFleetServerHostUrl],
         });
 
+      expect(body).toEqual({
+        item: expect.objectContaining({
+          name: 'Test Fleet server host',
+          host_urls: [defaultFleetServerHostUrl],
+        }),
+      });
+      expect(status).toBe(200);
+    });
+
+    it('rejects request to create a new elasticsearch output if host is different from default', async () => {
+      await expectDefaultElasticsearchOutput(ctx);
+
+      const { body, status } = await supertest
+        .post('/api/fleet/outputs')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .send({
+          name: 'Test output',
+          type: 'elasticsearch',
+          hosts: ['https://localhost:9201'],
+        });
       // in a non-serverless environment this would succeed with a 200
       expect(body).toEqual({
-        statusCode: 403,
-        error: 'Forbidden',
-        message: 'Proxies write APIs are disabled',
+        statusCode: 400,
+        error: 'Bad Request',
+        message: `Elasticsearch output host must have default URL in serverless: ${defaultEsOutputUrl}`,
       });
-      expect(status).toBe(403);
+      expect(status).toBe(400);
+    });
+
+    it('accepts request to create a new elasticsearch output if host url is same as default', async () => {
+      await expectDefaultElasticsearchOutput(ctx);
+
+      const { body, status } = await supertest
+        .post('/api/fleet/outputs')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .send({
+          name: 'Test output',
+          type: 'elasticsearch',
+          hosts: [defaultEsOutputUrl],
+        });
+
+      expect(body).toEqual({
+        item: expect.objectContaining({
+          name: 'Test output',
+          hosts: [defaultEsOutputUrl],
+        }),
+      });
+      expect(status).toBe(200);
     });
   });
 }

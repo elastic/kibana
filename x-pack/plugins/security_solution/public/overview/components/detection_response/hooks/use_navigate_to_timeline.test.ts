@@ -12,7 +12,7 @@ import { updateProviders } from '../../../../timelines/store/actions';
 import { useNavigateToTimeline } from './use_navigate_to_timeline';
 import * as mock from './mock_data';
 
-jest.mock('../../../../timelines/components/timeline/properties/use_create_timeline', () => ({
+jest.mock('../../../../timelines/hooks/use_create_timeline', () => ({
   useCreateTimeline: () => jest.fn(),
 }));
 

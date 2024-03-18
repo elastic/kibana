@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
-  const find = getService('find');
+  const testSubjects = getService('testSubjects');
 
   describe('Data view field caps cache advanced setting', async function () {
     before(async () => {
@@ -19,8 +19,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clickKibanaSettings();
     });
     it('should have cache setting', async () => {
-      const cacheSetting = await find.byCssSelector('#data_views\\:cache_max_age-group');
-      expect(cacheSetting).to.not.be(undefined);
+      expect(
+        await testSubjects.exists('management-settings-editField-data_views:cache_max_age')
+      ).to.be(true);
     });
   });
 }

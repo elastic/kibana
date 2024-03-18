@@ -51,6 +51,8 @@
           "BooleanC",
           "; pendingRecoveredCount: ",
           "NumberC",
+          "; activeCount: ",
+          "NumberC",
           "; }>>; trackedAlertsRecovered: ",
           "RecordC",
           "<",
@@ -70,6 +72,8 @@
           ">; flapping: ",
           "BooleanC",
           "; pendingRecoveredCount: ",
+          "NumberC",
+          "; activeCount: ",
           "NumberC",
           "; }>>; }>"
         ],
@@ -255,7 +259,7 @@
         "label": "TrackedLifecycleAlertState",
         "description": [],
         "signature": [
-          "{ alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; }"
+          "{ alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; activeCount: number; }"
         ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/lifecycle_state.ts",
         "deprecated": false,
@@ -272,7 +276,7 @@
           "\nThis is redefined instead of derived from above `wrappedStateRt` because\nthere's no easy way to instantiate generic values such as the runtime type\nfactory function."
         ],
         "signature": [
-          "RuleTypeState & { wrapped: State; trackedAlerts: Record<string, { alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; }>; trackedAlertsRecovered: Record<string, { alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; }>; }"
+          "RuleTypeState & { wrapped: State; trackedAlerts: Record<string, { alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; activeCount: number; }>; trackedAlertsRecovered: Record<string, { alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; activeCount: number; }>; }"
         ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/lifecycle_state.ts",
         "deprecated": false,

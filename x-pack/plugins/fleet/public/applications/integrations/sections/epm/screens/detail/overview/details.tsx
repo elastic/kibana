@@ -21,12 +21,15 @@ import {
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import { withSuspense, LazyReplacementCard } from '@kbn/custom-integrations-plugin/public';
+import { uniq } from 'lodash';
 
 import type {
   PackageInfo,
   PackageSpecCategory,
   AssetTypeToParts,
   KibanaAssetType,
+  RegistryPolicyTemplate,
+  RegistryPolicyIntegrationTemplate,
 } from '../../../../../types';
 import { entries } from '../../../../../types';
 import { useGetCategoriesQuery } from '../../../../../hooks';
@@ -41,6 +44,7 @@ const ReplacementCard = withSuspense(LazyReplacementCard);
 
 interface Props {
   packageInfo: PackageInfo;
+  integrationInfo?: RegistryPolicyTemplate;
 }
 
 const Replacements = euiStyled(EuiFlexItem)`
@@ -60,16 +64,32 @@ const Replacements = euiStyled(EuiFlexItem)`
   }
 `;
 
-export const Details: React.FC<Props> = memo(({ packageInfo }) => {
+export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) => {
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategoriesQuery();
+
+  const mergedCategories: Array<string | undefined> = useMemo(() => {
+    let allCategories: Array<string | undefined> = [];
+
+    if (packageInfo?.categories) {
+      allCategories = packageInfo.categories;
+    }
+    if ((integrationInfo as RegistryPolicyIntegrationTemplate)?.categories) {
+      allCategories = uniq([
+        ...allCategories,
+        ...((integrationInfo as RegistryPolicyIntegrationTemplate)?.categories || []),
+      ]);
+    }
+    return allCategories;
+  }, [integrationInfo, packageInfo?.categories]);
+
   const packageCategories: string[] = useMemo(() => {
     if (!isLoadingCategories && categoriesData?.items) {
       return categoriesData.items
-        .filter((category) => packageInfo.categories?.includes(category.id as PackageSpecCategory))
+        .filter((category) => mergedCategories?.includes(category.id as PackageSpecCategory))
         .map((category) => category.title);
     }
     return [];
-  }, [categoriesData, isLoadingCategories, packageInfo.categories]);
+  }, [categoriesData, isLoadingCategories, mergedCategories]);
 
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
   const toggleNoticeModal = useCallback(() => {

@@ -30,3 +30,12 @@ if [ -d "$JOURNEY_SCREENSHOTS_DIR" ]; then
   buildkite-agent artifact upload "**/*fullscreen*.png"
   cd "$KIBANA_DIR"
 fi
+
+echo "--- Upload server logs"
+JOURNEY_SERVER_LOGS_REL_PATH=".ftr/journey_server_logs"
+JOURNEY_SERVER_LOGS_DIR="${KIBANA_DIR}/${JOURNEY_SERVER_LOGS_REL_PATH}"
+if [ -d "$JOURNEY_SERVER_LOGS_DIR" ]; then
+  cd "$KIBANA_DIR"
+  tar -czf server-logs.tar.gz $JOURNEY_SERVER_LOGS_REL_PATH/**/*
+  buildkite-agent artifact upload server-logs.tar.gz
+fi

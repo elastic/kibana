@@ -4,8 +4,6 @@
 <titleabbrev>Collect monitoring data with {agent}</titleabbrev>
 ++++
 
-preview::[]
-
 In 8.5 and later, you can use {agent} to collect data about {kib} and ship it to
 the monitoring cluster, rather than <<monitoring-metricbeat,using {metricbeat}>>
 or routing data through the production cluster as described in

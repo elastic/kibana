@@ -11,7 +11,6 @@ import { waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { timelineActions } from '../../../../store';
-import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { UserName } from './user_name';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
@@ -66,15 +65,6 @@ describe('UserName', () => {
     value: 'Mock User',
   };
 
-  let toggleExpandedDetail: jest.SpyInstance;
-
-  beforeAll(() => {
-    toggleExpandedDetail = jest.spyOn(activeTimeline, 'toggleExpandedDetail');
-  });
-
-  afterEach(() => {
-    toggleExpandedDetail.mockClear();
-  });
   test('should render user name', () => {
     const wrapper = mount(
       <TestProviders>
@@ -99,33 +89,7 @@ describe('UserName', () => {
     expect(wrapper.find('[data-test-subj="DefaultDraggable"]').exists()).toEqual(true);
   });
 
-  test('if timelineId equals to `timeline-1`, should call toggleExpandedDetail', async () => {
-    const context = {
-      enableHostDetailsFlyout: true,
-      enableIpDetailsFlyout: true,
-      timelineID: TimelineId.active,
-      tabType: TimelineTabs.query,
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulEventContext.Provider value={context}>
-          <UserName {...props} />
-        </StatefulEventContext.Provider>
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
-    await waitFor(() => {
-      expect(toggleExpandedDetail).toHaveBeenCalledWith({
-        panelView: 'userDetail',
-        params: {
-          userName: props.value,
-        },
-      });
-    });
-  });
-
-  test('if timelineId not equals to `TimelineId.active`, should not call toggleExpandedDetail', async () => {
+  test('if newUserDetailsFlyout, should open UserDetailsSidePanel', async () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
@@ -150,7 +114,6 @@ describe('UserName', () => {
         },
         tabType: context.tabType,
       });
-      expect(toggleExpandedDetail).not.toHaveBeenCalled();
     });
   });
 });

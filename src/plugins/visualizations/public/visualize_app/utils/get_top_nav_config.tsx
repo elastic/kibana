@@ -605,6 +605,14 @@ export const getTopNavConfig = (
                       }
                     )}
                     onClose={() => {}}
+                    mustCopyOnSaveMessage={
+                      savedVis.managed
+                        ? i18n.translate('visualizations.topNavMenu.mustCopyOnSave', {
+                            defaultMessage:
+                              'Elastic manages this visualization. Save any changes to a new visualization.',
+                          })
+                        : undefined
+                    }
                   />
                 );
               }

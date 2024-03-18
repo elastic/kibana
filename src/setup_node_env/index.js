@@ -14,3 +14,5 @@ require('./dns_ipv4_first');
 
 require('@kbn/babel-register').install();
 require('./polyfill');
+
+require('@kbn/security-hardening');

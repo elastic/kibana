@@ -26,7 +26,7 @@ describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () =>
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'ransomware_detection');
+    cy.task('esArchiverUnload', { archiveName: 'ransomware_detection' });
   });
 
   describe('Ransomware in Alerts Page', () => {

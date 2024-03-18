@@ -5,48 +5,329 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX } from '@kbn/search-connectors';
+import { collectConnectorStats } from '@kbn/search-connectors';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { isIndexNotFoundException } from '@kbn/search-connectors/utils/identify_exceptions';
+
+import { ConnectorStats } from '../../../common/types';
 
 interface Telemetry {
-  native: {
-    total: number;
-  };
-  clients: {
-    total: number;
-  };
+  connectors: ConnectorStats[];
 }
 
 const defaultTelemetryMetrics: Telemetry = {
-  native: {
-    total: 0,
-  },
-  clients: {
-    total: 0,
-  },
+  connectors: [],
 };
 
 /**
  * Register the telemetry collector
  */
 
-export const registerTelemetryUsageCollector = (usageCollection: UsageCollectionSetup) => {
+export const registerTelemetryUsageCollector = (
+  usageCollection: UsageCollectionSetup,
+  log: Logger
+) => {
   const telemetryUsageCollector = usageCollection.makeUsageCollector<Telemetry>({
     type: 'connectors_serverless',
     isReady: () => true,
     schema: {
-      native: {
-        total: { type: 'long' },
-      },
-      clients: {
-        total: { type: 'long' },
+      connectors: {
+        type: 'array',
+        items: {
+          id: { type: 'keyword' },
+          serviceType: { type: 'keyword' },
+          isNative: { type: 'boolean' },
+          isDeleted: { type: 'boolean' },
+          status: { type: 'keyword' },
+          indexName: { type: 'keyword' },
+          dlsEnabled: { type: 'boolean' },
+          sslEnabled: { type: 'boolean' },
+          fetchSelectively: { type: 'boolean' },
+          textExtractionServiceEnabled: { type: 'boolean' },
+          documents: {
+            total: { type: 'long' },
+            volume: { type: 'long' },
+            inLastSync: { type: 'long' },
+          },
+          dataSourceSpecific: {
+            confluence: {
+              dataSourceType: { type: 'keyword' },
+            },
+            github: {
+              isCloud: { type: 'boolean' },
+            },
+            jira: {
+              dataSourceType: { type: 'keyword' },
+            },
+            mongodb: {
+              directConnect: { type: 'boolean' },
+            },
+            mssql: {
+              validateHost: { type: 'boolean' },
+              tables: { type: 'long' },
+            },
+            mysql: {
+              tables: { type: 'long' },
+            },
+            oracle: {
+              tables: { type: 'long' },
+            },
+            postgresql: {
+              tables: { type: 'long' },
+            },
+            slack: {
+              autoJoinChannelsEnabled: { type: 'boolean' },
+              syncUsersEnabled: { type: 'boolean' },
+              fetchLastNDays: { type: 'long' },
+            },
+            zoom: {
+              recordingAge: { type: 'long' },
+            },
+          },
+          scheduling: {
+            accessControl: {
+              enabled: { type: 'boolean' },
+              interval: { type: 'text' },
+            },
+            full: {
+              enabled: { type: 'boolean' },
+              interval: { type: 'text' },
+            },
+            incremental: {
+              enabled: { type: 'boolean' },
+              interval: { type: 'text' },
+            },
+          },
+          syncRules: {
+            active: {
+              withBasicRules: { type: 'boolean' },
+              withAdvancedRules: { type: 'boolean' },
+            },
+            draft: {
+              withBasicRules: { type: 'boolean' },
+              withAdvancedRules: { type: 'boolean' },
+            },
+          },
+          ingestPipeline: {
+            name: { type: 'keyword' },
+            extractBinaryContent: { type: 'boolean' },
+            reduceWhitespace: { type: 'boolean' },
+            runMLInference: { type: 'boolean' },
+          },
+          syncJobs: {
+            overall: {
+              total: { type: 'long' },
+              last30Days: {
+                overall: {
+                  total: { type: 'long' },
+                  manual: { type: 'long' },
+                  scheduled: { type: 'long' },
+                  completed: { type: 'long' },
+                  errored: { type: 'long' },
+                  canceled: { type: 'long' },
+                  suspended: { type: 'long' },
+                  idle: { type: 'long' },
+                  running: { type: 'long' },
+                  totalDurationSeconds: { type: 'long' },
+                },
+                accessControl: {
+                  total: { type: 'long' },
+                  manual: { type: 'long' },
+                  scheduled: { type: 'long' },
+                  completed: { type: 'long' },
+                  errored: { type: 'long' },
+                  canceled: { type: 'long' },
+                  suspended: { type: 'long' },
+                  idle: { type: 'long' },
+                  running: { type: 'long' },
+                  totalDurationSeconds: { type: 'long' },
+                },
+                full: {
+                  total: { type: 'long' },
+                  manual: { type: 'long' },
+                  scheduled: { type: 'long' },
+                  completed: { type: 'long' },
+                  errored: { type: 'long' },
+                  canceled: { type: 'long' },
+                  suspended: { type: 'long' },
+                  idle: { type: 'long' },
+                  running: { type: 'long' },
+                  totalDurationSeconds: { type: 'long' },
+                },
+                incremental: {
+                  total: { type: 'long' },
+                  manual: { type: 'long' },
+                  scheduled: { type: 'long' },
+                  completed: { type: 'long' },
+                  errored: { type: 'long' },
+                  canceled: { type: 'long' },
+                  suspended: { type: 'long' },
+                  idle: { type: 'long' },
+                  running: { type: 'long' },
+                  totalDurationSeconds: { type: 'long' },
+                },
+              },
+              last7Days: {
+                overall: {
+                  total: { type: 'long' },
+                  manual: { type: 'long' },
+                  scheduled: { type: 'long' },
+                  completed: { type: 'long' },
+                  errored: { type: 'long' },
+                  canceled: { type: 'long' },
+                  suspended: { type: 'long' },
+                  idle: { type: 'long' },
+                  running: { type: 'long' },
+                  totalDurationSeconds: { type: 'long' },
+                },
+                accessControl: {
+                  total: { type: 'long' },
+                  manual: { type: 'long' },
+                  scheduled: { type: 'long' },
+                  completed: { type: 'long' },
+                  errored: { type: 'long' },
+                  canceled: { type: 'long' },
+                  suspended: { type: 'long' },
+                  idle: { type: 'long' },
+                  running: { type: 'long' },
+                  totalDurationSeconds: { type: 'long' },
+                },
+                full: {
+                  total: { type: 'long' },
+                  manual: { type: 'long' },
+                  scheduled: { type: 'long' },
+                  completed: { type: 'long' },
+                  errored: { type: 'long' },
+                  canceled: { type: 'long' },
+                  suspended: { type: 'long' },
+                  idle: { type: 'long' },
+                  running: { type: 'long' },
+                  totalDurationSeconds: { type: 'long' },
+                },
+                incremental: {
+                  total: { type: 'long' },
+                  manual: { type: 'long' },
+                  scheduled: { type: 'long' },
+                  completed: { type: 'long' },
+                  errored: { type: 'long' },
+                  canceled: { type: 'long' },
+                  suspended: { type: 'long' },
+                  idle: { type: 'long' },
+                  running: { type: 'long' },
+                  totalDurationSeconds: { type: 'long' },
+                },
+              },
+            },
+            withTextExtractionServiceEnabled: {
+              total: { type: 'long' },
+              last30Days: {
+                overall: {
+                  total: { type: 'long' },
+                  manual: { type: 'long' },
+                  scheduled: { type: 'long' },
+                  completed: { type: 'long' },
+                  errored: { type: 'long' },
+                  canceled: { type: 'long' },
+                  suspended: { type: 'long' },
+                  idle: { type: 'long' },
+                  running: { type: 'long' },
+                  totalDurationSeconds: { type: 'long' },
+                },
+                accessControl: {
+                  total: { type: 'long' },
+                  manual: { type: 'long' },
+                  scheduled: { type: 'long' },
+                  completed: { type: 'long' },
+                  errored: { type: 'long' },
+                  canceled: { type: 'long' },
+                  suspended: { type: 'long' },
+                  idle: { type: 'long' },
+                  running: { type: 'long' },
+                  totalDurationSeconds: { type: 'long' },
+                },
+                full: {
+                  total: { type: 'long' },
+                  manual: { type: 'long' },
+                  scheduled: { type: 'long' },
+                  completed: { type: 'long' },
+                  errored: { type: 'long' },
+                  canceled: { type: 'long' },
+                  suspended: { type: 'long' },
+                  idle: { type: 'long' },
+                  running: { type: 'long' },
+                  totalDurationSeconds: { type: 'long' },
+                },
+                incremental: {
+                  total: { type: 'long' },
+                  manual: { type: 'long' },
+                  scheduled: { type: 'long' },
+                  completed: { type: 'long' },
+                  errored: { type: 'long' },
+                  canceled: { type: 'long' },
+                  suspended: { type: 'long' },
+                  idle: { type: 'long' },
+                  running: { type: 'long' },
+                  totalDurationSeconds: { type: 'long' },
+                },
+              },
+              last7Days: {
+                overall: {
+                  total: { type: 'long' },
+                  manual: { type: 'long' },
+                  scheduled: { type: 'long' },
+                  completed: { type: 'long' },
+                  errored: { type: 'long' },
+                  canceled: { type: 'long' },
+                  suspended: { type: 'long' },
+                  idle: { type: 'long' },
+                  running: { type: 'long' },
+                  totalDurationSeconds: { type: 'long' },
+                },
+                accessControl: {
+                  total: { type: 'long' },
+                  manual: { type: 'long' },
+                  scheduled: { type: 'long' },
+                  completed: { type: 'long' },
+                  errored: { type: 'long' },
+                  canceled: { type: 'long' },
+                  suspended: { type: 'long' },
+                  idle: { type: 'long' },
+                  running: { type: 'long' },
+                  totalDurationSeconds: { type: 'long' },
+                },
+                full: {
+                  total: { type: 'long' },
+                  manual: { type: 'long' },
+                  scheduled: { type: 'long' },
+                  completed: { type: 'long' },
+                  errored: { type: 'long' },
+                  canceled: { type: 'long' },
+                  suspended: { type: 'long' },
+                  idle: { type: 'long' },
+                  running: { type: 'long' },
+                  totalDurationSeconds: { type: 'long' },
+                },
+                incremental: {
+                  total: { type: 'long' },
+                  manual: { type: 'long' },
+                  scheduled: { type: 'long' },
+                  completed: { type: 'long' },
+                  errored: { type: 'long' },
+                  canceled: { type: 'long' },
+                  suspended: { type: 'long' },
+                  idle: { type: 'long' },
+                  running: { type: 'long' },
+                  totalDurationSeconds: { type: 'long' },
+                },
+              },
+            },
+          },
+        },
       },
     },
     async fetch({ esClient }) {
-      return await fetchTelemetryMetrics(esClient);
+      return await fetchTelemetryMetrics(esClient, log);
     },
   });
   usageCollection.registerCollector(telemetryUsageCollector);
@@ -56,60 +337,17 @@ export const registerTelemetryUsageCollector = (usageCollection: UsageCollection
  * Fetch the aggregated telemetry metrics
  */
 
-// @ts-ignore
-export const fetchTelemetryMetrics = async (client: ElasticsearchClient): Promise<Telemetry> => {
+export const fetchTelemetryMetrics = async (
+  client: ElasticsearchClient,
+  log: Logger
+): Promise<Telemetry> => {
   try {
-    const [nativeCountResponse, clientsCountResponse] = await Promise.all([
-      client.count({
-        index: CONNECTORS_INDEX,
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  is_native: true,
-                },
-              },
-            ],
-            must_not: [
-              {
-                term: {
-                  service_type: {
-                    value: 'elastic-crawler',
-                  },
-                },
-              },
-            ],
-          },
-        },
-      }),
-      client.count({
-        index: CONNECTORS_INDEX,
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  is_native: false,
-                },
-              },
-            ],
-          },
-        },
-      }),
-    ]);
-
+    const connectors = await collectConnectorStats(client);
     return {
-      native: {
-        total: nativeCountResponse.count,
-      },
-      clients: {
-        total: clientsCountResponse.count,
-      },
+      connectors,
     } as Telemetry;
   } catch (error) {
-    if (isIndexNotFoundException(error)) {
-      return defaultTelemetryMetrics;
-    }
+    log.error(`Couldn't fetch telemetry due to error: ${error}`);
+    return defaultTelemetryMetrics;
   }
 };

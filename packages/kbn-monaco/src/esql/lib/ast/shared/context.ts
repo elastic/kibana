@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { enrichModes } from '../definitions/settings';
 import type {
   ESQLAstItem,
   ESQLSingleAstItem,
@@ -132,14 +133,14 @@ function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
   return node.name !== '=' && command.name !== 'enrich';
 }
 function isBuiltinFunction(node: ESQLFunction) {
-  return Boolean(getFunctionDefinition(node.name)?.builtin);
+  return getFunctionDefinition(node.name)?.type === 'builtin';
 }
 
 export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
   const { command, option, setting, node } = findAstPosition(ast, offset);
   if (node) {
     if (node.type === 'function') {
-      if (['in', 'not_in'].includes(node.name)) {
+      if (['in', 'not_in'].includes(node.name) && Array.isArray(node.args[1])) {
         // command ... a in ( <here> )
         return { type: 'list' as const, command, node, option, setting };
       }
@@ -152,10 +153,28 @@ export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
       // command ... by <here>
       return { type: 'option' as const, command, node, option, setting };
     }
-    if (node.type === 'mode' || option) {
-      // command [<here>
+    // for now it's only an enrich thing
+    if (node.type === 'source' && node.text === enrichModes.prefix) {
+      // command _<here>
       return { type: 'setting' as const, command, node, option, setting };
     }
+  }
+  if (!command && innerText.trim().toLowerCase() === 'show') {
+    return {
+      type: 'expression' as const,
+      // The ES grammar makes the "SHOW" command an invalid type at grammar level
+      // so we need to create a fake command to make it work the AST in this case
+      command: {
+        type: 'command',
+        name: 'show',
+        text: innerText.trim(),
+        location: { min: 0, max: innerText.length },
+        incomplete: true,
+        args: [],
+      } as ESQLCommand,
+      node,
+      option,
+    };
   }
 
   if (!command || (innerText.length <= offset && getLastCharFromTrimmed(innerText) === '|')) {
@@ -166,9 +185,6 @@ export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
   if (command && command.args.length) {
     if (option) {
       return { type: 'option' as const, command, node, option, setting };
-    }
-    if (setting?.incomplete) {
-      return { type: 'setting' as const, command, node, option, setting };
     }
   }
 

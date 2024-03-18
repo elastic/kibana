@@ -28,3 +28,7 @@ if (!global.hasOwnProperty('TextEncoder')) {
 //
 // https://github.com/jsdom/jsdom/issues/2555
 global.Blob = require('blob-polyfill').Blob;
+
+if (!global.hasOwnProperty('ResizeObserver')) {
+  global.ResizeObserver = require('resize-observer-polyfill');
+}

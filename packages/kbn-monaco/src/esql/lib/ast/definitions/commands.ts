@@ -7,9 +7,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isColumnItem, isSettingItem } from '../shared/helpers';
-import { ESQLColumn, ESQLCommand, ESQLCommandMode, ESQLMessage } from '../types';
-import { ccqMode } from './settings';
+import {
+  getFunctionDefinition,
+  isAssignment,
+  isColumnItem,
+  isFunctionItem,
+  isLiteralItem,
+} from '../shared/helpers';
+import type { ESQLColumn, ESQLCommand, ESQLAstItem, ESQLMessage, ESQLFunction } from '../types';
+import { enrichModes } from './settings';
 import {
   appendSeparatorOption,
   asOption,
@@ -72,10 +78,110 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['… | stats avg = avg(a)', '… | stats sum(b) by b', '… | stats sum(b) by b % 2'],
     signature: {
       multipleParams: true,
-      params: [{ name: 'expression', type: 'function' }],
+      params: [{ name: 'expression', type: 'function', optional: true }],
     },
     options: [byOption],
     modes: [],
+    validate: (command: ESQLCommand) => {
+      const messages: ESQLMessage[] = [];
+      if (!command.args.length) {
+        messages.push({
+          location: command.location,
+          text: i18n.translate('monaco.esql.validation.statsNoArguments', {
+            defaultMessage: 'At least one aggregation or grouping expression required in [STATS]',
+          }),
+          type: 'error',
+          code: 'statsNoArguments',
+        });
+      }
+
+      // now that all functions are supported, there's a specific check to perform
+      // unfortunately the logic here is a bit complex as it needs to dig deeper into the args
+      // until an agg function is detected
+      // in the long run this might be integrated into the validation function
+      const statsArg = command.args
+        .flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg))
+        .filter(isFunctionItem);
+
+      if (statsArg.length) {
+        function isAggFunction(arg: ESQLAstItem): arg is ESQLFunction {
+          return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'agg';
+        }
+        function isOtherFunction(arg: ESQLAstItem): arg is ESQLFunction {
+          return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== 'agg';
+        }
+
+        function checkAggExistence(arg: ESQLFunction): boolean {
+          if (isAggFunction(arg)) {
+            return true;
+          }
+          if (isOtherFunction(arg)) {
+            return (arg as ESQLFunction).args.filter(isFunctionItem).some(checkAggExistence);
+          }
+          return false;
+        }
+        // first check: is there an agg function somewhere?
+        const noAggsExpressions = statsArg.filter((arg) => !checkAggExistence(arg));
+
+        if (noAggsExpressions.length) {
+          messages.push(
+            ...noAggsExpressions.map((fn) => ({
+              location: fn.location,
+              text: i18n.translate('monaco.esql.validation.statsNoAggFunction', {
+                defaultMessage:
+                  'At least one aggregation function required in [STATS], found [{expression}]',
+                values: {
+                  expression: fn.text,
+                },
+              }),
+              type: 'error' as const,
+              code: 'statsNoAggFunction',
+            }))
+          );
+        } else {
+          function isConstantOrAggFn(arg: ESQLAstItem): boolean {
+            return isLiteralItem(arg) || isAggFunction(arg);
+          }
+          // now check that:
+          // * the agg function is at root level
+          // * or if it's a builtin function, then all operands are agg functions or literals
+          // * or if it's a eval function then all arguments are agg functions or literals
+          function checkFunctionContent(arg: ESQLFunction) {
+            if (isAggFunction(arg)) {
+              return true;
+            }
+            return (arg as ESQLFunction).args.every(
+              (subArg): boolean =>
+                isConstantOrAggFn(subArg) ||
+                (isOtherFunction(subArg) ? checkFunctionContent(subArg) : false)
+            );
+          }
+          // @TODO: improve here the check to get the last instance of the invalidExpression
+          // to provide a better location for the error message
+          // i.e. STATS round(round(round( a + sum(b) )))
+          // should return the location of the + node, just before the agg one
+          const invalidExpressions = statsArg.filter((arg) => !checkFunctionContent(arg));
+
+          if (invalidExpressions.length) {
+            messages.push(
+              ...invalidExpressions.map((fn) => ({
+                location: fn.location,
+                text: i18n.translate('monaco.esql.validation.noCombinationOfAggAndNonAggValues', {
+                  defaultMessage:
+                    'Cannot combine aggregation and non-aggregation values in [STATS], found [{expression}]',
+                  values: {
+                    expression: fn.text,
+                  },
+                }),
+                type: 'error' as const,
+                code: 'statsNoCombinationOfAggAndNonAggValues',
+              }))
+            );
+          }
+        }
+      }
+      return messages;
+    },
   },
   {
     name: 'eval',
@@ -135,21 +241,6 @@ export const commandDefinitions: CommandDefinition[] = [
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
     },
-    validate: (command: ESQLCommand) => {
-      // the command name is automatically converted into KEEP by the ast_walker
-      // so validate the actual text
-      const messages: ESQLMessage[] = [];
-      if (/^project/.test(command.text.toLowerCase())) {
-        messages.push({
-          location: command.location,
-          text: i18n.translate('monaco.esql.validation.projectCommandDeprecated', {
-            defaultMessage: 'PROJECT command is no longer supported, please use KEEP instead',
-          }),
-          type: 'warning',
-        });
-      }
-      return messages;
-    },
   },
   {
     name: 'drop',
@@ -174,6 +265,7 @@ export const commandDefinitions: CommandDefinition[] = [
               defaultMessage: 'Removing all fields is not allowed [*]',
             }),
             type: 'error' as const,
+            code: 'dropAllColumnsError',
           }))
         );
       }
@@ -187,6 +279,7 @@ export const commandDefinitions: CommandDefinition[] = [
             defaultMessage: 'Drop [@timestamp] will remove all time filters to the search results',
           }),
           type: 'warning',
+          code: 'dropTimestampWarning',
         });
       }
       return messages;
@@ -272,7 +365,7 @@ export const commandDefinitions: CommandDefinition[] = [
     modes: [],
     signature: {
       multipleParams: false,
-      params: [{ name: 'column', type: 'column', innerType: 'list' }],
+      params: [{ name: 'column', type: 'column', innerType: 'any' }],
     },
   },
   {
@@ -287,40 +380,10 @@ export const commandDefinitions: CommandDefinition[] = [
       '… | enrich my-policy on pivotField with a = enrichFieldA, b = enrichFieldB',
     ],
     options: [onOption, withOption],
-    modes: [ccqMode],
+    modes: [enrichModes],
     signature: {
       multipleParams: false,
       params: [{ name: 'policyName', type: 'source', innerType: 'policy' }],
-    },
-    validate: (command: ESQLCommand) => {
-      const messages: ESQLMessage[] = [];
-      if (command.args.some(isSettingItem)) {
-        const settings = command.args.filter(isSettingItem);
-        const settingCounters: Record<string, number> = {};
-        const settingLookup: Record<string, ESQLCommandMode> = {};
-        for (const setting of settings) {
-          if (!settingCounters[setting.name]) {
-            settingCounters[setting.name] = 0;
-            settingLookup[setting.name] = setting;
-          }
-          settingCounters[setting.name]++;
-        }
-        const duplicateSettings = Object.entries(settingCounters).filter(([_, count]) => count > 1);
-        messages.push(
-          ...duplicateSettings.map(([name]) => ({
-            location: settingLookup[name].location,
-            text: i18n.translate('monaco.esql.validation.duplicateSettingWarning', {
-              defaultMessage:
-                'Multiple definition of setting [{name}]. Only last one will be applied.',
-              values: {
-                name,
-              },
-            }),
-            type: 'warning' as const,
-          }))
-        );
-      }
-      return messages;
     },
   },
 ];

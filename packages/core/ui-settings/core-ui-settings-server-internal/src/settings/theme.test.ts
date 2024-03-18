@@ -18,15 +18,16 @@ describe('theme settings', () => {
   describe('theme:darkMode', () => {
     const validate = getValidationFn(themeSettings['theme:darkMode']);
 
-    it('should only accept boolean values', () => {
+    it('should only accept expected values', () => {
       expect(() => validate(true)).not.toThrow();
       expect(() => validate(false)).not.toThrow();
-      expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [boolean] but got [string]"`
-      );
-      expect(() => validate(12)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [boolean] but got [number]"`
-      );
+
+      expect(() => validate('enabled')).not.toThrow();
+      expect(() => validate('disabled')).not.toThrow();
+      expect(() => validate('system')).not.toThrow();
+
+      expect(() => validate('foo')).toThrowError();
+      expect(() => validate(12)).toThrowError();
     });
   });
 });
@@ -35,22 +36,22 @@ describe('process.env.KBN_OPTIMIZER_THEMES handling', () => {
   it('defaults to properties of first tag', () => {
     process.env.KBN_OPTIMIZER_THEMES = 'v8dark,v8light';
     let settings = getThemeSettings({ isDist: false });
-    expect(settings['theme:darkMode'].value).toBe(true);
+    expect(settings['theme:darkMode'].value).toBe('enabled');
 
     process.env.KBN_OPTIMIZER_THEMES = 'v8light,v8dark';
     settings = getThemeSettings({ isDist: false });
-    expect(settings['theme:darkMode'].value).toBe(false);
+    expect(settings['theme:darkMode'].value).toBe('disabled');
   });
 
   it('ignores the value when isDist is undefined', () => {
     process.env.KBN_OPTIMIZER_THEMES = 'v8dark';
     const settings = getThemeSettings({ isDist: undefined });
-    expect(settings['theme:darkMode'].value).toBe(false);
+    expect(settings['theme:darkMode'].value).toBe('disabled');
   });
 
   it('ignores the value when isDist is true', () => {
     process.env.KBN_OPTIMIZER_THEMES = 'v8dark';
     const settings = getThemeSettings({ isDist: true });
-    expect(settings['theme:darkMode'].value).toBe(false);
+    expect(settings['theme:darkMode'].value).toBe('disabled');
   });
 });

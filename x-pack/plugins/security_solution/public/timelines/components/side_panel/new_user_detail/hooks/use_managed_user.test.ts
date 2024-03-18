@@ -38,18 +38,28 @@ jest.mock('../../../../../common/hooks/use_space_id', () => ({
   useSpaceId: () => 'test-space-id',
 }));
 
+const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(true);
+
+jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
+}));
+
 const mockSearch = jest.fn().mockReturnValue({
   data: [],
 });
 
+const useSearchStrategyDefaultResponse = {
+  loading: false,
+  result: { users: [] },
+  search: (...params: unknown[]) => mockSearch(...params),
+  refetch: () => {},
+  inspect: {},
+};
+
+const mockUseSearchStrategy = jest.fn().mockReturnValue(useSearchStrategyDefaultResponse);
+
 jest.mock('../../../../../common/containers/use_search_strategy', () => ({
-  useSearchStrategy: () => ({
-    loading: false,
-    result: { users: [] },
-    search: (...params: unknown[]) => mockSearch(...params),
-    refetch: () => {},
-    inspect: {},
-  }),
+  useSearchStrategy: () => mockUseSearchStrategy(),
 }));
 
 describe('useManagedUser', () => {
@@ -107,5 +117,29 @@ describe('useManagedUser', () => {
         userEmail: email,
       })
     );
+  });
+
+  it('should not search if the feature is disabled', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    renderHook(() => useManagedUser('test-userName', undefined, false), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockSearch).not.toHaveBeenCalled();
+  });
+
+  it('should return loading false when the feature is disabled', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseInstalledIntegrations.mockReturnValue({
+      data: [],
+      isLoading: true,
+    });
+    mockUseSearchStrategy.mockReturnValue({ ...useSearchStrategyDefaultResponse, loading: true });
+
+    const { result } = renderHook(() => useManagedUser('test-userName', undefined, false), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.isLoading).toBeFalsy();
   });
 });

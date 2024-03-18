@@ -46,7 +46,6 @@ export interface ESQLCommandOption extends ESQLAstBaseItem {
 
 export interface ESQLCommandMode extends ESQLAstBaseItem {
   type: 'mode';
-  args: ESQLAstItem[];
 }
 
 export interface ESQLFunction extends ESQLAstBaseItem {
@@ -85,6 +84,7 @@ export interface ESQLMessage {
   type: 'error' | 'warning';
   text: string;
   location: ESQLLocation;
+  code: string;
 }
 
 export type AstProviderFn = (

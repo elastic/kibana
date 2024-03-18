@@ -39,12 +39,12 @@ export const CrawlerConfiguration: React.FC = () => {
       <EuiSplitPanel.Outer hasBorder hasShadow={false}>
         <EuiSplitPanel.Inner>
           <EuiTitle size="s">
-            <h3>
+            <h2>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.crawler.crawlerConfiguration.extractHTML.title',
                 { defaultMessage: 'Store full HTML' }
               )}
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer />
           <EuiText size="s">

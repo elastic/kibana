@@ -26,19 +26,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['svlCommonPage', 'common', 'console', 'header']);
 
   describe('console app', function describeIndexTests() {
-    this.tags('includeFirefox');
     before(async () => {
-      await PageObjects.svlCommonPage.login();
+      // TODO: https://github.com/elastic/kibana/issues/176582
+      // this test scenario requires roles definition check:
+      // Search & Oblt projects 'viewer' role has access to Console, but for
+      // Security project only 'admin' role has access
+      await PageObjects.svlCommonPage.loginWithRole('admin');
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('dev_tools', { hash: '/console' });
     });
 
     beforeEach(async () => {
       await PageObjects.console.closeHelpIfExists();
-    });
-
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
     it('should show the default request', async () => {

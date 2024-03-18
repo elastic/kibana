@@ -6,12 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { UiActionsPresentableGrouping as PresentableGrouping } from '@kbn/ui-actions-plugin/public';
 
-export const drilldownGrouping: PresentableGrouping<{
-  embeddable?: IEmbeddable;
-}> = [
+export const drilldownGrouping: PresentableGrouping = [
   {
     id: 'drilldowns',
     getDisplayName: () =>

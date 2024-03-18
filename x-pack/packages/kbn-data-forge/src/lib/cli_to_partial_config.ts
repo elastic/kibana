@@ -47,6 +47,7 @@ export function cliOptionsToPartialConfig(options: CliOptions) {
       concurrency: options.concurrency,
       reduceWeekendTrafficBy: options.reduceWeekendTrafficBy,
       ephemeralProjectIds: options.ephemeralProjectIds,
+      alignEventsToInterval: options.alignEventsToInterval === true,
     },
     schedule: [schedule],
   };

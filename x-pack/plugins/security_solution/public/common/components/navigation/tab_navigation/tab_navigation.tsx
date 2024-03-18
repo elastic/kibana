@@ -50,6 +50,7 @@ const TabNavigationItemComponent = ({
       href={appHref}
       onClick={handleClick}
       append={isBeta && <EuiBadge color={'#E0E5EE'}>{betaOptions?.text ?? BETA}</EuiBadge>}
+      id={id}
     >
       {name}
     </EuiTab>

@@ -17,6 +17,7 @@
     "@kbn/core-deprecations-server",
     "@kbn/core-ui-settings-server",
     "@kbn/core-di-server"
+    "@kbn/core-security-server"
   ],
   "exclude": [
     "target/**/*",
