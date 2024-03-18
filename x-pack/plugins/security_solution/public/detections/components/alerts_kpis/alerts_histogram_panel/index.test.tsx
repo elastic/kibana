@@ -882,7 +882,7 @@ describe('AlertsHistogramPanel', () => {
             <AlertsHistogramPanel {...defaultProps} />
           </TestProviders>
         );
-        expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toContain('');
+        expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toEqual('');
       });
     });
   });
