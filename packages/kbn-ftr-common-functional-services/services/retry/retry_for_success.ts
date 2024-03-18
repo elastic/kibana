@@ -70,7 +70,7 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
 
   while (true) {
     if (retryCount) {
-      // Use retryCount as an optional condiotion
+      // Use retryCount as an optional condition
       if (++attemptCounter > retryCount) {
         onFailure(
           lastError,
