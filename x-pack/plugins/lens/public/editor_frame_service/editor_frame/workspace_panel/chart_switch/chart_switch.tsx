@@ -58,7 +58,7 @@ export interface ChartSwitchProps {
   framePublicAPI: FramePublicAPI;
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
-  size?: 's' | 'm';
+  layerId: string;
 }
 
 type SelectableEntry = EuiSelectableOption<{ value: string }>;
@@ -96,7 +96,7 @@ export const ChartSwitch = memo(function ChartSwitch({
   framePublicAPI,
   visualizationMap: completeVisualizationMap,
   datasourceMap,
-  size = 'm',
+  layerId,
 }: ChartSwitchProps) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const dispatchLens = useLensDispatch();
@@ -141,10 +141,10 @@ export const ChartSwitch = memo(function ChartSwitch({
     subVisualizationId: string
   ): VisualizationSelection {
     const newVisualization = visualizationMap[visualizationId];
-    const switchVisType = (type: string, state: unknown) => {
+    const switchVisType = (type: string, state: unknown, lId: string) => {
       if (visualizationMap[visualizationId].switchVisualizationType) {
         return safeFnCall(
-          () => visualizationMap[visualizationId].switchVisualizationType!(type, state),
+          () => visualizationMap[visualizationId].switchVisualizationType!(type, state, lId),
           state
         );
       }
@@ -154,12 +154,18 @@ export const ChartSwitch = memo(function ChartSwitch({
     const containsData = layers.some(
       ([_layerId, datasource]) => datasource && datasource.getTableSpec().length > 0
     );
+
     // Always show the active visualization as a valid selection
     if (
       visualization.activeId === visualizationId &&
       visualization.state &&
       safeFnCall(
-        () => newVisualization.getVisualizationTypeId(visualization.state) === subVisualizationId,
+        () =>
+          newVisualization.getVisualizationTypeId(visualization.state) === subVisualizationId ||
+          newVisualization.isSubtypeCompatible?.(
+            newVisualization.getVisualizationTypeId(visualization.state),
+            subVisualizationId
+          ),
         false
       )
     ) {
@@ -168,7 +174,8 @@ export const ChartSwitch = memo(function ChartSwitch({
         subVisualizationId,
         dataLoss: 'nothing',
         keptLayerIds: Object.keys(framePublicAPI.datasourceLayers),
-        getVisualizationState: () => switchVisType(subVisualizationId, visualization.state),
+        getVisualizationState: () =>
+          switchVisType(subVisualizationId, visualization.state, layerId),
         sameDatasources: true,
       };
     }
@@ -181,7 +188,8 @@ export const ChartSwitch = memo(function ChartSwitch({
       datasourceStates,
       visualization,
       newVisualization,
-      subVisualizationId
+      subVisualizationId,
+      layerId
     );
 
     let dataLoss: VisualizationSelection['dataLoss'];
@@ -217,7 +225,8 @@ export const ChartSwitch = memo(function ChartSwitch({
         ? () =>
             switchVisType(
               subVisualizationId,
-              newVisualization.initialize(addNewLayer, topSuggestion.visualizationState)
+              newVisualization.initialize(addNewLayer, topSuggestion.visualizationState),
+              layerId
             )
         : () =>
             switchVisType(
@@ -228,7 +237,8 @@ export const ChartSwitch = memo(function ChartSwitch({
                 visualization.activeId && visualizationMap[visualization.activeId].getMainPalette
                   ? visualizationMap[visualization.activeId].getMainPalette!(visualization.state)
                   : undefined
-              )
+              ),
+              layerId
             ),
       keptLayerIds: topSuggestion ? topSuggestion.keptLayerIds : [],
       datasourceState: topSuggestion ? topSuggestion.datasourceState : undefined,
@@ -357,7 +367,7 @@ export const ChartSwitch = memo(function ChartSwitch({
   );
 
   const { icon, label } = (visualization.activeId &&
-    visualizationMap[visualization.activeId]?.getDescription(visualization.state)) || {
+    visualizationMap[visualization.activeId]?.getDescription(visualization.state, layerId)) || {
     label: i18n.translate('xpack.lens.configPanel.selectVisualization', {
       defaultMessage: 'Select a visualization',
     }),
@@ -374,7 +384,7 @@ export const ChartSwitch = memo(function ChartSwitch({
         panelPaddingSize="s"
         button={
           <ChartSwitchTrigger
-            size={size}
+            size="s"
             icon={icon}
             label={label}
             dataTestSubj="lnsChartSwitchPopover"
@@ -445,7 +455,8 @@ function getTopSuggestion(
   datasourceStates: DatasourceStates,
   visualization: VisualizationState,
   newVisualization: Visualization<unknown>,
-  subVisualizationId?: string
+  subVisualizationId?: string,
+  layerId?: string
 ): Suggestion | undefined {
   const mainPalette =
     visualization.activeId &&
@@ -483,6 +494,7 @@ function getTopSuggestion(
 
   return (
     suggestions.find((s) => s.changeType === 'unchanged' || s.changeType === 'reduced') ||
+    suggestions.find((s) => s.keptLayerIds.some((id) => id === layerId)) ||
     suggestions[0]
   );
 }

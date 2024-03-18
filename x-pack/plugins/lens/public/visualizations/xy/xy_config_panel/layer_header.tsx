@@ -55,7 +55,7 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
       />
     );
   }
-  return <DataLayerHeader {...props} />;
+  return null;
 }
 
 export function LayerHeaderContent(props: VisualizationLayerHeaderContentProps<State>) {
@@ -66,7 +66,7 @@ export function LayerHeaderContent(props: VisualizationLayerHeaderContentProps<S
   return null;
 }
 
-function ReferenceLayerHeader() {
+export function ReferenceLayerHeader() {
   return (
     <StaticHeader
       icon={IconChartBarReferenceLine}
@@ -77,7 +77,7 @@ function ReferenceLayerHeader() {
   );
 }
 
-function AnnotationsLayerHeader({
+export function AnnotationsLayerHeader({
   title,
   hasUnsavedChanges,
 }: {
@@ -208,12 +208,16 @@ function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
               'data-test-subj': `lnsXY_seriesType-${t.id}`,
             }))}
           onChange={(newOptions) => {
-            const chosenType = newOptions.find(({ checked }) => checked === 'on');
-            if (!chosenType) {
+            const newType = newOptions.find(({ checked }) => checked === 'on');
+            if (!newType) {
               return;
             }
-            const id = chosenType.value!;
-            props.setState(updateLayer(state, { ...layer, seriesType: id as SeriesType }, index));
+            props.setState({
+              ...state,
+              layers: state.layers.map((l, i) =>
+                i === index ? { ...layer, seriesType: newType.value as SeriesType } : l
+              ),
+            });
             setPopoverIsOpen(false);
           }}
         >

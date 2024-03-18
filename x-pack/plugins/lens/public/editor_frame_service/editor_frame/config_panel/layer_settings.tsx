@@ -12,7 +12,6 @@ import {
   VisualizationLayerWidgetProps,
   VisualizationMap,
 } from '../../../types';
-import { StaticHeader } from '../../../shared_components';
 import { ChartSwitch } from '../workspace_panel/chart_switch';
 
 export function LayerSettings({
@@ -20,7 +19,6 @@ export function LayerSettings({
   layerConfigProps,
   visualizationMap,
   datasourceMap,
-  shouldDisplayChartSwitch,
 }: {
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
@@ -28,20 +26,26 @@ export function LayerSettings({
   layerConfigProps: VisualizationLayerWidgetProps;
   shouldDisplayChartSwitch?: boolean;
 }) {
-  if (shouldDisplayChartSwitch) {
-    return (
-      <ChartSwitch
-        datasourceMap={datasourceMap}
-        visualizationMap={visualizationMap}
-        framePublicAPI={layerConfigProps.frame}
-        size="s"
-      />
-    );
+  const layerHeader = activeVisualization.getCustomLayerHeader?.(layerConfigProps);
+  if (layerHeader) {
+    return layerHeader;
   }
-  if (!activeVisualization.LayerHeaderComponent) {
-    const description = activeVisualization.getDescription(layerConfigProps.state);
-    return <StaticHeader label={description.label} icon={description.icon} />;
-  }
+  // if (shouldDisplayChartSwitch) {
+  return (
+    <ChartSwitch
+      datasourceMap={datasourceMap}
+      visualizationMap={visualizationMap}
+      framePublicAPI={layerConfigProps.frame}
+      size="s"
+      layerId={layerConfigProps.layerId}
+    />
+  );
+  // }
 
-  return <activeVisualization.LayerHeaderComponent {...layerConfigProps} />;
+  // if (!layerHeader) {
+  //   const description = activeVisualization.getDescription(layerConfigProps.state);
+  //   return <StaticHeader label={description.label} icon={description.icon} />;
+  // }
+
+  // return layerHeader;
 }

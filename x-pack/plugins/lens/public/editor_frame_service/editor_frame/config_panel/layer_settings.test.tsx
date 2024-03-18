@@ -39,14 +39,14 @@ describe('LayerSettings', () => {
     );
   };
 
-  it('should render a static header if visualization has only a description value', () => {
+  it('should render chart switch if custom layer header was not passed', () => {
     renderLayerSettings({
       activeVisualization: {
         ...createMockVisualization(),
         getDescription: () => ({ icon: 'myIcon', label: 'myVisualizationType' }),
       },
     });
-    expect(screen.getByText('myVisualizationType')).toBeInTheDocument();
+    expect(screen.getByTestId('lnsChartSwitchPopover')).toBeInTheDocument();
   });
 
   it('should use custom renderer if passed', () => {
@@ -55,7 +55,7 @@ describe('LayerSettings', () => {
     renderLayerSettings({
       activeVisualization: {
         ...createMockVisualization(),
-        LayerHeaderComponent: () => <div>{customLayerHeader}</div>,
+        getCustomLayerHeader: () => <div>{customLayerHeader}</div>,
       },
     });
     expect(screen.getByText(customLayerHeader)).toBeInTheDocument();

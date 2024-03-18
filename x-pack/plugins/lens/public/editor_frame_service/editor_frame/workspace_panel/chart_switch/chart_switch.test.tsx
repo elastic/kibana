@@ -153,6 +153,7 @@ describe('chart_switch', () => {
         framePublicAPI={frame}
         visualizationMap={visualizationMap}
         datasourceMap={datasourceMap}
+        layerId="a"
         {...propsOverrides}
       />,
       {},
@@ -346,6 +347,33 @@ describe('chart_switch', () => {
     expect(within(getMenuItem('subvisC2')).queryByText(/warning/i)).not.toBeInTheDocument();
   });
 
+  it('should not show a warning when the subvisualization is compatible', async () => {
+    frame = mockFrame(['a', 'b', 'c']);
+
+    visualizationMap.visC.getVisualizationTypeId.mockReturnValue('subvisC2');
+    visualizationMap.visC.switchVisualizationType = jest.fn(() => ({ type: 'subvisC1' }));
+    // we're mocking that subvisC1 is compatible with subvisC2
+    visualizationMap.visC.isSubtypeCompatible = jest.fn(
+      (t1, t2) => t2 === 'subvisC1' && t1 === 'subvisC2'
+    );
+    const { openChartSwitch, getMenuItem } = renderChartSwitch(undefined, {
+      preloadedStateOverrides: {
+        visualization: {
+          activeId: 'visC',
+          state: { type: 'subvisC2' },
+        },
+      },
+    });
+    openChartSwitch();
+
+    // subvisC1 is compatible
+    expect(within(getMenuItem('subvisC1')).queryByText(/warning/i)).not.toBeInTheDocument();
+    // subvisC2 is itself
+    expect(within(getMenuItem('subvisC2')).queryByText(/warning/i)).not.toBeInTheDocument();
+    // subvisC2 is not compatible
+    expect(within(getMenuItem('subvisC3')).queryByText(/warning/i)).toBeInTheDocument();
+  });
+
   it('should get suggestions when switching subvisualization', async () => {
     visualizationMap.visB.getSuggestions.mockReturnValueOnce([]);
     frame = mockFrame(['a', 'b', 'c']);
@@ -376,6 +404,39 @@ describe('chart_switch', () => {
         clearStagedPreview: true,
       },
     });
+  });
+
+  it.only('should get suggestions when switching subvisualization based on the current layer', async () => {
+    visualizationMap.visC.getSuggestions.mockReturnValueOnce([]);
+    frame = mockFrame(['a', 'b', 'c']);
+    datasourceMap.testDatasource.getLayers.mockReturnValue(['a', 'b', 'c']);
+
+    const { openChartSwitch, switchToVis, store } = renderChartSwitch({ layerId: 'c' });
+    openChartSwitch();
+    screen.debug();
+    switchToVis('visC');
+
+    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'a');
+    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'b');
+    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'c');
+    expect(visualizationMap.visB.getSuggestions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        keptLayerIds: ['a'],
+      })
+    );
+
+    // expect(store.dispatch).toHaveBeenCalledWith({
+    //   type: 'lens/switchVisualization',
+    //   payload: {
+    //     suggestion: {
+    //       datasourceId: undefined,
+    //       datasourceState: undefined,
+    //       visualizationState: 'visB initial state',
+    //       newVisualizationId: 'visB',
+    //     },
+    //     clearStagedPreview: true,
+    //   },
+    // });
   });
 
   it('should query main palette from active chart and pass into suggestions', async () => {
@@ -417,9 +478,13 @@ describe('chart_switch', () => {
 
     openChartSwitch();
     switchToVis('subvisC3');
-    expect(visualizationMap.visC.switchVisualizationType).toHaveBeenCalledWith('subvisC3', {
-      type: 'subvisC3',
-    });
+    expect(visualizationMap.visC.switchVisualizationType).toHaveBeenCalledWith(
+      'subvisC3',
+      {
+        type: 'subvisC3',
+      },
+      'a'
+    );
 
     expect(store.dispatch).toHaveBeenCalledWith({
       type: 'lens/switchVisualization',
@@ -454,9 +519,13 @@ describe('chart_switch', () => {
     openChartSwitch();
     switchToVis('subvisC3');
 
-    expect(visualizationMap.visC.switchVisualizationType).toHaveBeenCalledWith('subvisC3', {
-      type: 'subvisC1',
-    });
+    expect(visualizationMap.visC.switchVisualizationType).toHaveBeenCalledWith(
+      'subvisC3',
+      {
+        type: 'subvisC1',
+      },
+      'a'
+    );
     expect(datasourceMap.testDatasource.removeLayer).not.toHaveBeenCalled();
   });
 
@@ -544,10 +613,14 @@ describe('chart_switch', () => {
     });
     openChartSwitch();
     switchToVis('subvisC1');
-    expect(visualizationMap.visC.switchVisualizationType).toHaveBeenCalledWith('subvisC1', {
-      type: 'subvisC1',
-      notPrimary: true,
-    });
+    expect(visualizationMap.visC.switchVisualizationType).toHaveBeenCalledWith(
+      'subvisC1',
+      {
+        type: 'subvisC1',
+        notPrimary: true,
+      },
+      'a'
+    );
   });
 
   it('should show all visualization types and subtypes except from one that are hidden (D)', async () => {
