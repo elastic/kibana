@@ -32,7 +32,7 @@ export function useUpdateCustomDashboard() {
     (errorMessage: string) => {
       if (errorMessage) {
         notifications.toasts.danger({
-          title: i18n.translate('xpack.infra.fetchingDashboards.addFailure.toast.title', {
+          title: i18n.translate('xpack.infra.fetchingLinkedDashboards.addFailure.toast.title', {
             defaultMessage: 'Error while fetching linked dashboards',
           }),
           body: errorMessage,
