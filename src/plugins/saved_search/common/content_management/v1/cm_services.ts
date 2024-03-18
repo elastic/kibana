@@ -69,7 +69,20 @@ const savedSearchAttributesSchema = schema.object(
       })
     ),
     breakdownField: schema.maybe(schema.string()),
-    visContextJSON: schema.maybe(schema.string()), // TODO: should we create a new version?
+    visContext: schema.maybe(
+      schema.object({
+        // unified histogram state
+        suggestionType: schema.string(),
+        requestData: schema.object({
+          dataViewId: schema.maybe(schema.string()),
+          timeField: schema.maybe(schema.string()),
+          timeInterval: schema.maybe(schema.string()),
+          breakdownField: schema.maybe(schema.string()),
+        }),
+        // lens attributes
+        attributes: schema.recordOf(schema.string(), schema.any()),
+      })
+    ),
     version: schema.maybe(schema.number()),
   },
   { unknowns: 'forbid' }

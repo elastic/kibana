@@ -73,6 +73,6 @@ export function getSavedSearchObjectType(
     schemas: {
       '8.8.0': SCHEMA_SEARCH_V8_8_0,
     },
-    migrations: () => getAllMigrations(getSearchSourceMigrations()), // TODO: add lens embeddable migrations for `visContextJSON`
+    migrations: () => getAllMigrations(getSearchSourceMigrations()),
   };
 }

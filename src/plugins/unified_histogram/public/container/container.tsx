@@ -12,7 +12,11 @@ import { pick } from 'lodash';
 import useMount from 'react-use/lib/useMount';
 import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
-import type { UnifiedHistogramInputMessage, UnifiedHistogramRequestContext } from '../types';
+import type {
+  UnifiedHistogramInputMessage,
+  UnifiedHistogramRequestContext,
+  UnifiedHistogramVisContext,
+} from '../types';
 import {
   createStateService,
   UnifiedHistogramStateOptions,
@@ -21,8 +25,7 @@ import {
 import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';
 import { topPanelHeightSelector } from './utils/state_selectors';
-import { toExternalVisContextJSONString } from '../utils/external_vis_context';
-import { removeTablesFromLensAttributes } from '../utils/lens_vis_from_table';
+import { exportVisContext } from '../utils/external_vis_context';
 
 type LayoutProps = Pick<
   UnifiedHistogramLayoutProps,
@@ -45,7 +48,7 @@ export type UnifiedHistogramContainerProps = {
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
   requestAdapter?: UnifiedHistogramRequestContext['adapter'];
   isChartLoading?: boolean;
-  onVisContextJSONChanged?: (nextVisContextJSON: string | undefined) => void;
+  onVisContextChanged?: (nextVisContext: UnifiedHistogramVisContext | undefined) => void;
 } & Pick<
   UnifiedHistogramLayoutProps,
   | 'services'
@@ -62,7 +65,7 @@ export type UnifiedHistogramContainerProps = {
   | 'children'
   | 'onBrushEnd'
   | 'onFilter'
-  | 'externalVisContextJSON'
+  | 'externalVisContext'
   | 'withDefaultActions'
   | 'disabledActions'
   | 'abortController'
@@ -89,7 +92,7 @@ export type UnifiedHistogramApi = {
 export const UnifiedHistogramContainer = forwardRef<
   UnifiedHistogramApi,
   UnifiedHistogramContainerProps
->(({ onVisContextJSONChanged, ...containerProps }, ref) => {
+>(({ onVisContextChanged, ...containerProps }, ref) => {
   const [layoutProps, setLayoutProps] = useState<LayoutProps>();
   const [stateService, setStateService] = useState<UnifiedHistogramStateService>();
   const [lensSuggestionsApi, setLensSuggestionsApi] = useState<LensSuggestionsApi>();
@@ -143,21 +146,15 @@ export const UnifiedHistogramContainer = forwardRef<
 
   const handleVisContextChange: UnifiedHistogramLayoutProps['onVisContextChanged'] | undefined =
     useMemo(() => {
-      if (!onVisContextJSONChanged) {
+      if (!onVisContextChanged) {
         return undefined;
       }
 
       return (visContext) => {
         // console.log('updating vis context', visContext);
-        const lightweightVisContext = visContext
-          ? {
-              ...visContext,
-              attributes: removeTablesFromLensAttributes(visContext?.attributes),
-            }
-          : undefined;
-        onVisContextJSONChanged(toExternalVisContextJSONString(lightweightVisContext));
+        onVisContextChanged(exportVisContext(visContext));
       };
-    }, [onVisContextJSONChanged]);
+    }, [onVisContextChanged]);
 
   // Don't render anything until the container is initialized
   if (!layoutProps || !lensSuggestionsApi || !api) {

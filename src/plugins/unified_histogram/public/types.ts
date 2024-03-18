@@ -174,13 +174,11 @@ export interface LensRequestData {
   breakdownField?: string;
 }
 
-export interface UnifiedHistogramLensAttributesContext {
+/**
+ * Unified Histogram type for recreating a stored Lens vis
+ */
+export interface UnifiedHistogramVisContext {
   attributes: TypedLensByValueInput['attributes'];
   requestData: LensRequestData;
   suggestionType: UnifiedHistogramSuggestionType;
 }
-
-/**
- * Unified Histogram type for recreating a stored Lens vis
- */
-export type ExternalVisContext = UnifiedHistogramLensAttributesContext;

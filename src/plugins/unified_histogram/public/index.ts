@@ -28,12 +28,8 @@ export type {
   UnifiedHistogramServices,
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramAdapters,
-  ExternalVisContext,
+  UnifiedHistogramVisContext,
 } from './types';
 export { UnifiedHistogramFetchStatus } from './types';
-export {
-  toExternalVisContextJSONString,
-  fromExternalVisContextJSONString,
-} from './utils/external_vis_context';
 
 export const plugin = () => new UnifiedHistogramPublicPlugin();

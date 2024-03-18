@@ -8,11 +8,12 @@
 
 import { pick } from 'lodash';
 import type { Suggestion } from '@kbn/lens-plugin/public';
-import type { ExternalVisContext } from '../types';
+import type { UnifiedHistogramVisContext } from '../types';
+import { removeTablesFromLensAttributes } from './lens_vis_from_table';
 
-export const toExternalVisContextJSONString = (
-  visContext: ExternalVisContext | undefined
-): string | undefined => {
+export const exportVisContext = (
+  visContext: UnifiedHistogramVisContext | undefined
+): UnifiedHistogramVisContext | undefined => {
   if (
     !visContext ||
     !visContext.requestData ||
@@ -22,35 +23,31 @@ export const toExternalVisContextJSONString = (
     return undefined;
   }
 
-  return JSON.stringify(pick(visContext, ['attributes', 'requestData', 'suggestionType']));
-};
+  try {
+    const visContextWithoutTables = visContext
+      ? {
+          ...visContext,
+          attributes: removeTablesFromLensAttributes(visContext?.attributes),
+        }
+      : undefined;
 
-export const fromExternalVisContextJSONString = (
-  visContextJSON: string | undefined
-): ExternalVisContext | undefined => {
-  if (!visContextJSON) {
+    const visContextWithoutTablesAndUndefinedValues = visContextWithoutTables
+      ? JSON.parse(JSON.stringify(visContextWithoutTables))
+      : undefined;
+
+    return pick(visContextWithoutTablesAndUndefinedValues, [
+      'attributes',
+      'requestData',
+      'suggestionType',
+    ]);
+  } catch {
     return undefined;
   }
-
-  let visContext: ExternalVisContext | undefined;
-
-  try {
-    visContext = JSON.parse(visContextJSON);
-
-    if (!visContext?.requestData || !visContext.attributes || !visContext.suggestionType) {
-      visContext = undefined;
-      throw new Error('visContextJSON is invalid');
-    }
-  } catch {
-    // nothing
-  }
-
-  return visContext;
 };
 
 export const isSuggestionAndVisContextCompatible = (
   suggestion: Suggestion | undefined,
-  externalVisContext: ExternalVisContext | undefined
+  externalVisContext: UnifiedHistogramVisContext | undefined
 ): boolean => {
   if (!suggestion && !externalVisContext) {
     return true;

@@ -13,7 +13,7 @@ import type { TimeRange } from '@kbn/data-plugin/common';
 import { LensVisService, type QueryParams } from '../services/lens_vis_service';
 import { unifiedHistogramServicesMock } from './services';
 import { histogramESQLSuggestionMock } from './suggestions';
-import { UnifiedHistogramSuggestionContext, UnifiedHistogramLensAttributesContext } from '../types';
+import { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
 
 const TIME_RANGE: TimeRange = {
   from: '2022-11-17T00:00:00.000Z',
@@ -44,7 +44,7 @@ export const getLensVisMock = async ({
   hasHistogramSuggestionForESQL?: boolean;
 }): Promise<{
   lensService: LensVisService;
-  lensAttributesContext: UnifiedHistogramLensAttributesContext | undefined;
+  lensAttributesContext: UnifiedHistogramVisContext | undefined;
   currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
 }> => {
   const lensApi = await unifiedHistogramServicesMock.lens.stateHelperApi();
@@ -61,7 +61,7 @@ export const getLensVisMock = async ({
       : lensApi.suggestions,
   });
 
-  let lensAttributesContext: UnifiedHistogramLensAttributesContext | undefined;
+  let lensAttributesContext: UnifiedHistogramVisContext | undefined;
   lensService.lensAttributesContext$.subscribe((nextAttributesContext) => {
     lensAttributesContext = nextAttributesContext;
   });

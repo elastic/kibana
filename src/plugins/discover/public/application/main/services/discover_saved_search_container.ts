@@ -12,6 +12,7 @@ import { cloneDeep } from 'lodash';
 import { COMPARE_ALL_OPTIONS, FilterCompareOptions } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
@@ -117,10 +118,10 @@ export interface DiscoverSavedSearchContainer {
    */
   updateWithFilterManagerFilters: () => SavedSearch;
   /**
-   * Updates the current value of visContextJSON in saved search
+   * Updates the current value of visContext in saved search
    * @param params
    */
-  updateVisContext: (params: { nextVisContextJSON: string | undefined }) => void;
+  updateVisContext: (params: { nextVisContext: UnifiedHistogramVisContext | undefined }) => void;
 }
 
 export function getSavedSearchContainer({
@@ -223,11 +224,15 @@ export function getSavedSearchContainer({
     return nextSavedSearch;
   };
 
-  const updateVisContext = ({ nextVisContextJSON }: { nextVisContextJSON: string | undefined }) => {
+  const updateVisContext = ({
+    nextVisContext,
+  }: {
+    nextVisContext: UnifiedHistogramVisContext | undefined;
+  }) => {
     const previousSavedSearch = getState();
     const nextSavedSearch: SavedSearch = {
       ...previousSavedSearch,
-      visContextJSON: nextVisContextJSON,
+      visContext: nextVisContext,
     };
 
     assignNextSavedSearch({ nextSavedSearch });
@@ -380,10 +385,5 @@ function getSavedSearchValueForComparison(
   savedSearch: Omit<SavedSearch, 'searchSource'>,
   key: keyof Omit<SavedSearch, 'searchSource'>
 ) {
-  if (key === 'visContextJSON' && savedSearch.visContextJSON) {
-    // the stringified JSON might have keys in a different order, so we parse it back into an object to compare
-    return JSON.parse(savedSearch.visContextJSON);
-  }
-
   return savedSearch[key];
 }

@@ -15,7 +15,7 @@ import type { Datatable } from '@kbn/expressions-plugin/common';
 import type {
   UnifiedHistogramServices,
   UnifiedHistogramChartLoadEvent,
-  UnifiedHistogramLensAttributesContext,
+  UnifiedHistogramVisContext,
   UnifiedHistogramSuggestionContext,
 } from '../types';
 
@@ -32,7 +32,7 @@ export function ChartConfigPanel({
   onSuggestionContextChange,
 }: {
   services: UnifiedHistogramServices;
-  lensAttributesContext: UnifiedHistogramLensAttributesContext;
+  lensAttributesContext: UnifiedHistogramVisContext;
   isFlyoutVisible: boolean;
   setIsFlyoutVisible: (flag: boolean) => void;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];

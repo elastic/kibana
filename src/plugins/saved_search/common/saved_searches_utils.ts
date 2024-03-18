@@ -36,6 +36,6 @@ export const fromSavedSearchAttributes = (
   rowsPerPage: attributes.rowsPerPage,
   sampleSize: attributes.sampleSize,
   breakdownField: attributes.breakdownField,
-  visContextJSON: attributes.visContextJSON,
+  visContext: attributes.visContext,
   managed,
 });

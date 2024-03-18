@@ -228,6 +228,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await getCurrentVisSeriesTypeLabel()).to.be('Line');
 
+      await testSubjects.missingOrFail('unsavedChangesBadge');
       await checkESQLHistogramVis(
         'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',
         '10'

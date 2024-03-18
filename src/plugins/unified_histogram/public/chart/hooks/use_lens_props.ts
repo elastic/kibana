@@ -15,7 +15,7 @@ import type { Observable } from 'rxjs';
 import type {
   UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
-  UnifiedHistogramLensAttributesContext,
+  UnifiedHistogramVisContext,
 } from '../../types';
 import { useStableCallback } from '../../hooks/use_stable_callback';
 
@@ -29,7 +29,7 @@ export const useLensProps = ({
   request?: UnifiedHistogramRequestContext;
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
-  attributesContext: UnifiedHistogramLensAttributesContext;
+  attributesContext: UnifiedHistogramVisContext;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
 }) => {
   const buildLensProps = useCallback(() => {

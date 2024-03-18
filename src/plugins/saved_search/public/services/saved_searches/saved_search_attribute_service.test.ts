@@ -242,7 +242,7 @@ describe('getSavedSearchAttributeService', () => {
           "title": "saved-search-title",
           "usesAdHocDataView": undefined,
           "viewMode": undefined,
-          "visContextJSON": undefined,
+          "visContext": undefined,
         }
       `);
     });

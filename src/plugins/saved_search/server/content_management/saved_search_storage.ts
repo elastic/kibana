@@ -45,7 +45,7 @@ export class SavedSearchStorage extends SOContentStorage<SavedSearchCrudTypes> {
         'rowsPerPage',
         'breakdownField',
         'sampleSize',
-        'visContextJSON',
+        'visContext',
       ],
       logger,
       throwOnResultValidationError,

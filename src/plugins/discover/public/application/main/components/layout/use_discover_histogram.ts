@@ -11,8 +11,10 @@ import {
   UnifiedHistogramApi,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
+  UnifiedHistogramVisContext,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   debounceTime,
@@ -230,7 +232,7 @@ export const useDiscoverHistogram = ({
   const {
     dataView: textBasedDataView,
     query: textBasedQuery,
-    externalVisContextJSON: textBasedExternalVisContextJSON,
+    externalVisContext: textBasedExternalVisContext,
     columns: textBasedColumns,
   } = useObservable(textBasedFetchComplete$, initialTextBasedProps);
 
@@ -329,10 +331,10 @@ export const useDiscoverHistogram = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
 
-  const onVisContextJSONChanged = useCallback(
-    (nextVisContextJSON: string | undefined) => {
+  const onVisContextChanged = useCallback(
+    (nextVisContext: UnifiedHistogramVisContext | undefined) => {
       stateContainer.savedSearchState.updateVisContext({
-        nextVisContextJSON,
+        nextVisContext,
       });
     },
     [stateContainer]
@@ -353,8 +355,8 @@ export const useDiscoverHistogram = ({
     withDefaultActions: histogramCustomization?.withDefaultActions,
     disabledActions: histogramCustomization?.disabledActions,
     isChartLoading: isSuggestionLoading,
-    externalVisContextJSON: isPlainRecord ? textBasedExternalVisContextJSON : undefined, // visContextJSON should be in sync with current query
-    onVisContextJSONChanged: isPlainRecord ? onVisContextJSONChanged : undefined,
+    externalVisContext: isPlainRecord ? textBasedExternalVisContext : undefined, // visContext should be in sync with current query
+    onVisContextChanged: isPlainRecord ? onVisContextChanged : undefined,
   };
 };
 
@@ -430,7 +432,7 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
 const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) => {
   return merge(
     stateContainer.savedSearchState.getCurrent$().pipe(
-      distinctUntilChanged((prev, curr) => prev.visContextJSON === curr.visContextJSON),
+      distinctUntilChanged((prev, curr) => deepEqual(prev.visContext, curr.visContext)),
       map((savedSearch) => {
         return getUnifiedHistogramPropsForTextBased({
           documentsValue: stateContainer.dataState.data$.documents$.getValue(),
@@ -478,7 +480,7 @@ function getUnifiedHistogramPropsForTextBased({
   const nextProps = {
     dataView: savedSearch.searchSource.getField('index')!,
     query: savedSearch.searchSource.getField('query'),
-    externalVisContextJSON: savedSearch.visContextJSON,
+    externalVisContext: savedSearch.visContext,
     columns,
   };
 

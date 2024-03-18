@@ -50,5 +50,5 @@ export const toSavedSearchAttributes = (
   rowsPerPage: savedSearch.rowsPerPage,
   sampleSize: savedSearch.sampleSize,
   breakdownField: savedSearch.breakdownField,
-  visContextJSON: savedSearch.visContextJSON,
+  visContext: savedSearch.visContext,
 });
