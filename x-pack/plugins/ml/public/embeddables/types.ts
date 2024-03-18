@@ -15,6 +15,7 @@ import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
 import type { SwimlaneType } from '../application/explorer/explorer_constants';
+import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
 import type { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
 import type { AnomalyTimelineService } from '../application/services/anomaly_timeline_service';
@@ -67,6 +68,13 @@ export type AnomalySwimlaneEmbeddableOutput = EmbeddableOutput &
 
 export interface EditSwimlanePanelContext {
   embeddable: IEmbeddable<AnomalySwimlaneEmbeddableInput, AnomalySwimlaneEmbeddableOutput>;
+}
+
+export interface SwimLaneDrilldownContext extends EditSwimlanePanelContext {
+  /**
+   * Optional data provided by swim lane selection
+   */
+  data?: AppStateSelectedCells;
 }
 
 /**
@@ -136,6 +144,13 @@ export interface AnomalyChartsCustomOutput {
 export type AnomalyChartsEmbeddableOutput = EmbeddableOutput & AnomalyChartsCustomOutput;
 export interface EditAnomalyChartsPanelContext {
   embeddable: IEmbeddable<AnomalyChartsEmbeddableInput, AnomalyChartsEmbeddableOutput>;
+}
+
+export interface AnomalyChartsFieldSelectionContext extends EditAnomalyChartsPanelContext {
+  /**
+   * Optional fields selected using anomaly charts
+   */
+  data?: MlEntityField[];
 }
 
 export type MappedEmbeddableTypeOf<TEmbeddableType extends MlEmbeddableTypes> =
