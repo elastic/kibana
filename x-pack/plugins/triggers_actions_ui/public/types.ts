@@ -13,7 +13,6 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { AlertData } from '@kbn/observability-plugin/public/hooks/use_fetch_alert_detail';
 import type {
   IconType,
   RecursivePartial,
@@ -67,7 +66,6 @@ import {
 import React from 'react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
-import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
@@ -413,10 +411,6 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   alertDetailsAppSection?:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<any>>;
-  getAssistantMessages?: (
-    alertDetail: AlertData,
-    timerange: { start: string; end: string }
-  ) => Promise<Message[]> | Message[];
 }
 
 export interface IErrorObject {

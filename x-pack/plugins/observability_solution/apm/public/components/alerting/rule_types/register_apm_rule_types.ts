@@ -10,10 +10,6 @@ import { lazy } from 'react';
 import { ALERT_REASON, ApmRuleType } from '@kbn/rule-data-utils';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import {
-  type Message,
-  MessageRole,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import {
   getAlertUrlErrorCount,
   getAlertUrlTransaction,
 } from '../../../../common/utils/formatters';
@@ -95,61 +91,6 @@ export function registerApmRuleTypes(
     alertDetailsAppSection: lazy(
       () => import('../ui_components/alert_details_app_section')
     ),
-    getAssistantMessages: (alertDetail, timerange) => {
-      const now = new Date().toISOString();
-      // @ts-expect-error
-      const serviceName = alertDetail.formatted.fields[SERVICE_NAME];
-
-      return [
-        {
-          '@timestamp': now,
-          message: {
-            role: MessageRole.Assistant,
-            content: '',
-            function_call: {
-              name: 'get_apm_service_summary',
-              arguments: JSON.stringify({
-                start: timerange.start,
-                end: timerange.end,
-                'service.name': serviceName,
-              }),
-              trigger: 'assistant',
-            },
-          },
-        },
-        {
-          '@timestamp': now,
-          message: {
-            role: MessageRole.Assistant,
-            content: '',
-            function_call: {
-              name: 'get_apm_services_list',
-              arguments: JSON.stringify({
-                start: timerange.start,
-                end: timerange.end,
-              }),
-              trigger: 'assistant',
-            },
-          },
-        },
-        {
-          '@timestamp': now,
-          message: {
-            role: MessageRole.Assistant,
-            content: '',
-            function_call: {
-              name: 'get_apm_downstream_dependencies',
-              arguments: JSON.stringify({
-                start: timerange.start,
-                end: timerange.end,
-                'service.name': serviceName,
-              }),
-              trigger: 'assistant',
-            },
-          },
-        },
-      ] as Message[];
-    },
     requiresAppContext: false,
     defaultActionMessage: transactionDurationMessage,
     priority: 60,
