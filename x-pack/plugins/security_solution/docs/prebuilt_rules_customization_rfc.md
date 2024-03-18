@@ -180,17 +180,13 @@ Custom rules will have:
   };  
 }  
 ```
-### Deprecating the `immutable` field
+### `immutable` field
 
 In the current application's state, rules with `immutable: false` are rules which are not Elastic Prebuilt Rules, i.e. custom rules, and can be modified. Meanwhile, `immutable: true` rules are Elastic Prebuilt Rules, created by the TRaDE team, distributed via the `security_detection_engine` Fleet package, and cannot be modified once installed.
 
 When successfully implemented, the `rule_source` field should replace the `immutable` field as a mechanism to mark Elastic prebuilt rules, but with one difference: the `rule_source` field will determine if the rule is an Elastic Prebuilt Rule or not, but now all rules will be customizable by the user in Kibana, i.e. independently of the existence (or absence) of `rule_source`.
 
 Because of this difference between the `rule_source` and `immutable` fields, the `immutable` field will lose its original meaning as soon as we allow users to customize prebuilt rules, which might become confusing for those API consumers who interact directly with this field. That's why we want to first deprecate it and later after a large enough deprecation period we could consider removing it completely from the API.
-
-To ensure backward compatibility and avoid breaking changes, we will deprecate the `immutable` field but keep it within the rule schema, asking our users to stop relying on this field in Detection API responses. During the migration period, we want to keep the value of the `immutable` field in sync with the `rule_source` fields: this means that for all rules that have a `immutable` value of `true`, the `rule_source` field will always be of type `'external'`. Viceversa, rules with `immutable: false` will have a `rule_source` field of type `'internal'`.
-
-This means, however, that there will be a change in behaviour of the `immutable` field: with the release of the feature, rules with the `immutable: true` value will now be customizable by the user, which is not the current behaviour.
 
 ### Changes needed in rule schema
 
@@ -369,6 +365,10 @@ export const PrebuiltRuleAsset = BaseCreateProps.and(TypeSpecificCreateProps).an
 
 ### Deprecating the `immutable` field
 
+To ensure backward compatibility and avoid breaking changes, we will deprecate the `immutable` field but keep it within the rule schema, asking our users to stop relying on this field in Detection API responses. During the migration period, we want to keep the value of the `immutable` field in sync with the `rule_source` fields: this means that for all rules that have a `immutable` value of `true`, the `rule_source` field will always be of type `'external'`. Viceversa, rules with `immutable: false` will have a `rule_source` field of type `'internal'`.
+
+This means, however, that there will be a change in behaviour of the `immutable` field: with the release of the feature, rules with the `immutable: true` value will now be customizable by the user, which is not the current behaviour.
+
 In order to mark the `immutable` field as deprecated, and making sure that our application and API users are aware that the field has been deprecated and replaced by the `rule_source` field, we will communicate this change in three ways:
 
 1. via updates to the documentation of all endpoints that return `RuleResponse` types
@@ -478,13 +478,6 @@ interface OnReadNormalizationResult {
   rule_source: RuleSource
 }
 
-/**
- * To calculate `rule_source`:
- * - Use `rule_source` field  if already exists in the internal rule object params.
- * - If it does not exist, check the value `immutable` from the rules param:
- *   - if it is `true`, create a new `rule_source` object, with `isCustomized` set to `false` and `repoNam` set to `elastic_prebuilt` (Use case of rule_source rules that have not been yet migrated-on-write)
- *   - otherwise, the field should be `undefined` (use case of custom rules).
- */
 const getRuleSourceValueForRuleRead = (ruleParams: BaseRuleParams): RuleSource | undefined => {
   if (ruleParams.rule_source) {
     return ruleParams.rule_source;
