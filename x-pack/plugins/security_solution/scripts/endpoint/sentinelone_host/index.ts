@@ -102,7 +102,7 @@ const runCli: RunFn = async ({ log, flags }) => {
     password,
   });
 
-  const hostVm = await createVm({
+  const s1HostVm = await createVm({
     type: 'multipass',
     name: vmName,
     log,
@@ -111,7 +111,7 @@ const runCli: RunFn = async ({ log, flags }) => {
   });
 
   const s1Info = await installSentinelOneAgent({
-    hostVm,
+    hostVm: s1HostVm,
     log,
     s1Client,
   });
@@ -175,9 +175,12 @@ ${s1Info.status}`);
     createDetectionEngineSentinelOneRuleIfNeeded(kbnClient, log),
   ]);
 
+  // Trigger an alert on the SentinelOn host so that we get an alert back in Kibana
+  await s1HostVm.exec('nslookup elastic.co');
+
   log.info(`Done!
 
-${hostVm.info()}
+${s1HostVm.info()}
 ${agentPolicyVm ? `${agentPolicyVm.info()}\n` : ''}
 ${await getMultipassVmCountNotice(2)}
 `);
