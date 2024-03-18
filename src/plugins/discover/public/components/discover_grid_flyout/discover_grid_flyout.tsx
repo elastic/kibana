@@ -25,7 +25,7 @@ import {
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
@@ -38,7 +38,13 @@ export interface DiscoverGridFlyoutProps {
   filters?: Filter[];
   query?: Query | AggregateQuery;
   columns: string[];
-  columnsMeta?: DataTableColumnsMeta;
+  columnsMeta?: Record<
+    string,
+    {
+      type: DatatableColumnMeta['type'];
+      esType?: DatatableColumnMeta['esType'];
+    }
+  >;
   hit: DataTableRecord;
   hits?: DataTableRecord[];
   dataView: DataView;
