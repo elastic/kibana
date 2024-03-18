@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compact, isEmpty, omit } from 'lodash';
+import { compact, isEmpty, merge, omit } from 'lodash';
 import OpenAI from 'openai';
 import { MessageRole } from '../../../../common';
 import { processOpenAiStream } from '../../../../common/utils/process_openai_stream';
@@ -44,7 +44,16 @@ export const createOpenAiAdapter: LlmApiAdapterFactory = ({
           })
       );
 
-      const functionsForOpenAI = functions;
+      const functionsForOpenAI = functions?.map((fn) => ({
+        ...fn,
+        parameters: merge(
+          {
+            type: 'object',
+            properties: {},
+          },
+          fn.parameters
+        ),
+      }));
 
       const request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string } = {
         messages: messagesForOpenAI as OpenAI.ChatCompletionCreateParams['messages'],

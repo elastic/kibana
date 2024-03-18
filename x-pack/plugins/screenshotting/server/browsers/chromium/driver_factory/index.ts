@@ -388,7 +388,7 @@ export class HeadlessChromiumDriverFactory {
   }
 
   getPageExit(browser: Browser, page: Page): Rx.Observable<Error> {
-    const pageError$ = this.getPageEventAsObservable(page, 'requestfailed').pipe(
+    const pageError$ = this.getPageEventAsObservable(page, 'error').pipe(
       map((err) => new Error(`Reporting encountered an error: ${err.toString()}`))
     );
 
