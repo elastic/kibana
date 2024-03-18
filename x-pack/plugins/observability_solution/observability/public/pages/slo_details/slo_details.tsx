@@ -5,36 +5,38 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
-import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
-import type { IBasePath } from '@kbn/core-http-browser';
-import { i18n } from '@kbn/i18n';
-import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useIsMutating } from '@tanstack/react-query';
-import dedent from 'dedent';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { paths } from '../../../common/locators/paths';
-import { ObservabilityAppPageTemplate } from '../../components/observability_app_page_template';
-import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
-import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
+import { useIsMutating } from '@tanstack/react-query';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+
+import dedent from 'dedent';
+import { useSloDetailsTabs } from './hooks/use_slo_details_tabs';
+import { useKibana } from '../../utils/kibana_react';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
-import { useKibana } from '../../utils/kibana_react';
 import PageNotFound from '../404';
-import { HeaderControl } from './components/header_control';
-import { HeaderTitle } from './components/header_title';
 import {
   ALERTS_TAB_ID,
   OVERVIEW_TAB_ID,
   SloDetails,
-  SloTabId,
   TAB_ID_URL_PARAM,
+  SloTabId,
 } from './components/slo_details';
-import { useGetInstanceIdQueryParam } from './hooks/use_get_instance_id_query_param';
-import { useSloDetailsTabs } from './hooks/use_slo_details_tabs';
+import { HeaderTitle } from './components/header_title';
+import { HeaderControl } from './components/header_control';
+import { paths } from '../../../common/locators/paths';
 import type { SloDetailsPathParams } from './types';
+import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
+import { useGetInstanceIdQueryParam } from './hooks/use_get_instance_id_query_param';
+import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 export function SloDetailsPage() {
   const {
@@ -44,6 +46,7 @@ export function SloDetailsPage() {
       service: { setScreenContext },
     },
   } = useKibana().services;
+  const { ObservabilityPageTemplate } = usePluginContext();
   const { search } = useLocation();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
@@ -119,7 +122,7 @@ export function SloDetailsPage() {
   };
 
   return (
-    <ObservabilityAppPageTemplate
+    <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: <HeaderTitle isLoading={isPerformingAction} slo={slo} />,
         rightSideItems: [
@@ -134,11 +137,12 @@ export function SloDetailsPage() {
       }}
       data-test-subj="sloDetailsPage"
     >
+      <HeaderMenu />
       {isLoading && <EuiLoadingSpinner data-test-subj="sloDetailsLoading" />}
       {!isLoading && (
         <SloDetails slo={slo!} isAutoRefreshing={isAutoRefreshing} selectedTabId={selectedTabId} />
       )}
-    </ObservabilityAppPageTemplate>
+    </ObservabilityPageTemplate>
   );
 }
 

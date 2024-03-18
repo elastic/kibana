@@ -24,7 +24,6 @@ import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { routes } from '../routes/routes';
 import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 import { HideableReactQueryDevTools } from './hideable_react_query_dev_tools';
-import { HeaderMenu } from '../pages/overview/components/header_menu/header_menu';
 
 function App() {
   return (
@@ -120,7 +119,6 @@ export const renderApp = ({
                           data-test-subj="observabilityMainContainer"
                         >
                           <QueryClientProvider client={queryClient}>
-                            <HeaderMenu />
                             <App />
                             <HideableReactQueryDevTools />
                           </QueryClientProvider>

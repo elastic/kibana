@@ -22,10 +22,9 @@ export function useIsNavControlVisible() {
   useEffect(() => {
     const appSubscription = combineLatest([currentAppId$, applications$]).subscribe({
       next: ([appId, applications]) => {
-        const isObservabilityApp = true;
-        //
-        // appId &&
-        // applications.get(appId)?.category?.id === DEFAULT_APP_CATEGORIES.observability.id;
+        const isObservabilityApp =
+          appId &&
+          applications.get(appId)?.category?.id === DEFAULT_APP_CATEGORIES.observability.id;
 
         setIsVisible(!!isObservabilityApp);
       },

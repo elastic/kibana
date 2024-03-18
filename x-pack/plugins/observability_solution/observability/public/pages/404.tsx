@@ -8,11 +8,13 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
-import { ObservabilityAppPageTemplate } from '../components/observability_app_page_template';
+import { usePluginContext } from '../hooks/use_plugin_context';
 
 function PageNotFound() {
+  const { ObservabilityPageTemplate } = usePluginContext();
+
   return (
-    <ObservabilityAppPageTemplate data-test-subj="pageNotFound">
+    <ObservabilityPageTemplate data-test-subj="pageNotFound">
       <EuiCallOut
         color="warning"
         iconType="iInCircle"
@@ -31,7 +33,7 @@ function PageNotFound() {
           />
         </p>
       </EuiCallOut>
-    </ObservabilityAppPageTemplate>
+    </ObservabilityPageTemplate>
   );
 }
 

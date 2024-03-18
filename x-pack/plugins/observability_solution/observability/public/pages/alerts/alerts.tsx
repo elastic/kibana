@@ -19,6 +19,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { rulesLocatorID } from '../../../common';
 import { RulesParams } from '../../locators/rules';
 import { useKibana } from '../../utils/kibana_react';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { useToasts } from '../../hooks/use_toast';
@@ -33,7 +34,7 @@ import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_buck
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
-import { ObservabilityAppPageTemplate } from '../../components/observability_app_page_template';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -64,7 +65,7 @@ function InternalAlertsPage() {
     },
     uiSettings,
   } = kibanaServices;
-
+  const { ObservabilityPageTemplate } = usePluginContext();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
@@ -171,7 +172,7 @@ function InternalAlertsPage() {
 
   return (
     <Provider value={alertSearchBarStateContainer}>
-      <ObservabilityAppPageTemplate
+      <ObservabilityPageTemplate
         data-test-subj="alertsPageWithData"
         pageHeader={{
           pageTitle: (
@@ -185,6 +186,7 @@ function InternalAlertsPage() {
           ),
         }}
       >
+        <HeaderMenu />
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem>
             <MaintenanceWindowCallout
@@ -223,7 +225,7 @@ function InternalAlertsPage() {
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
-      </ObservabilityAppPageTemplate>
+      </ObservabilityPageTemplate>
     </Provider>
   );
 }

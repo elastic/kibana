@@ -12,14 +12,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination, EuiText } fro
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { useLicense } from '../../hooks/use_license';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { useFetchSloDefinitions } from '../../hooks/slo/use_fetch_slo_definitions';
 import { paths } from '../../../common/locators/paths';
 import { SloListEmpty } from '../slos/components/slo_list_empty';
 import { OutdatedSlo } from './outdated_slo';
 import { OutdatedSloSearchBar } from './outdated_slo_search_bar';
-import { ObservabilityAppPageTemplate } from '../../components/observability_app_page_template';
 
 export function SlosOutdatedDefinitions() {
   const {
@@ -27,6 +28,7 @@ export function SlosOutdatedDefinitions() {
   } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
   const { data: globalDiagnosis } = useFetchSloGlobalDiagnosis();
+  const { ObservabilityPageTemplate } = usePluginContext();
 
   useBreadcrumbs([
     {
@@ -84,7 +86,7 @@ export function SlosOutdatedDefinitions() {
   ) : null;
 
   return (
-    <ObservabilityAppPageTemplate
+    <ObservabilityPageTemplate
       data-test-subj="slosOutdatedDefinitions"
       pageHeader={{
         pageTitle: i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.pageTitle', {
@@ -92,6 +94,8 @@ export function SlosOutdatedDefinitions() {
         }),
       }}
     >
+      <HeaderMenu />
+
       {!hasSlosAndHasPermissions ? (
         errors
       ) : (
@@ -132,6 +136,6 @@ export function SlosOutdatedDefinitions() {
           )}
         </>
       )}
-    </ObservabilityAppPageTemplate>
+    </ObservabilityPageTemplate>
   );
 }

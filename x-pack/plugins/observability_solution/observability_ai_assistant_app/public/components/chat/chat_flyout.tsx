@@ -136,7 +136,6 @@ export function ChatFlyout({
 
   const handleToggleFlyoutPositionMode = (newFlyoutPositionMode: FlyoutPositionMode) => {
     setFlyoutPositionMode(newFlyoutPositionMode);
-    // onSetFlyoutPositionMode?.(newFlyoutPositionMode);
   };
 
   return isOpen ? (
