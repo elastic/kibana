@@ -535,9 +535,7 @@ export const normalizePrebuiltSchemaOnRuleRead = (
 
 This type of migration will be in charge of updating saved object fields in Elasticsearch from the legacy form to the new form, and will be performed on all write operations of the rules (see list below). This means that we need to perform this type of migration of rules whenever any endpoint operation that writes/updates a rule saved object is called.
 
-> In Elasticsearch, the type of rule saved objects is called `alert`.
-
-This migration strategy of write/update operations means that a user's data will be migrated incrementally, and that both types of data (non-migrated and migrated saved objects) will coexist for an indeterminate amount of time. Therefore we have to maintain backwards data compatibility for the non-migrated data types.
+This migration strategy means that rules will be migrated incrementally, and that both non-migrated and migrated rules will coexist for an indeterminate amount of time. Therefore we have to maintain backwards compatibility with non-migrated rules.
 
 The migration logic should take place within the handler logic of all endpoints that carry out write/update endpoint operations, and the endpoint should return the already-migrated rule(s).
 
@@ -562,7 +560,7 @@ For the **bulk edit** action, we can take advantage of the `ruleParamsModifier` 
 
 For the **duplicate** rule action:
 
-Since we will be creating a new rule on ES, we should create it with the new schema. Per definition, all duplicated rules will be `custom` rules. That means that for all rules -including prebuilt rules-, when duplicating, the `rule_source` field will not be created on the newly created rule.
+Since we will be creating a new rule on ES, we should create it with the new schema. Per definition, all duplicated rules will be `custom` rules. That means that all duplicated rules (the duplicates) should get a `rule_source` of type `internal`.
 This action will not perform a migration-on-write of the original rule being duplicated for two reasons:
 
 - it would violate the principle of least surprise for the endpoint
