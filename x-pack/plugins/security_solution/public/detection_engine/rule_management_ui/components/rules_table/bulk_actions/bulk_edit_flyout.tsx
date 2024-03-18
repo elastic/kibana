@@ -18,6 +18,7 @@ import { TagsForm } from './forms/tags_form';
 import { TimelineTemplateForm } from './forms/timeline_template_form';
 import { RuleActionsForm } from './forms/rule_actions_form';
 import { ScheduleForm } from './forms/schedule_form';
+import { InvestigationFieldsForm } from './forms/investigation_fields_form';
 
 interface BulkEditFlyoutProps {
   onClose: () => void;
@@ -37,6 +38,11 @@ const BulkEditFlyoutComponent = ({ editAction, ...props }: BulkEditFlyoutProps) 
     case BulkActionEditTypeEnum.delete_tags:
     case BulkActionEditTypeEnum.set_tags:
       return <TagsForm {...props} editAction={editAction} />;
+
+    case BulkActionEditTypeEnum.add_investigation_fields:
+    case BulkActionEditTypeEnum.delete_investigation_fields:
+    case BulkActionEditTypeEnum.set_investigation_fields:
+      return <InvestigationFieldsForm {...props} editAction={editAction} />;
 
     case BulkActionEditTypeEnum.set_timeline:
       return <TimelineTemplateForm {...props} />;

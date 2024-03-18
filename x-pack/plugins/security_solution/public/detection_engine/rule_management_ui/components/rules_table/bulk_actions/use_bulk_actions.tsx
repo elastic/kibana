@@ -329,6 +329,13 @@ export const useBulkActions = ({
               panel: 1,
             },
             {
+              key: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
+              name: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
+              'data-test-subj': 'investigationFieldsBulkEditRule',
+              disabled: isEditDisabled,
+              panel: 3,
+            },
+            {
               key: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               name: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               'data-test-subj': 'addRuleActionsBulk',
@@ -450,6 +457,34 @@ export const useBulkActions = ({
               name: i18n.BULK_ACTION_DELETE_INDEX_PATTERNS,
               'data-test-subj': 'deleteIndexPatternsBulkEditRule',
               onClick: handleBulkEdit(BulkActionEditTypeEnum.delete_index_patterns),
+              disabled: isEditDisabled,
+              toolTipContent: missingActionPrivileges
+                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+                : undefined,
+              toolTipProps: { position: 'right' },
+            },
+          ],
+        },
+        {
+          id: 3,
+          title: i18n.BULK_ACTION_MENU_TITLE,
+          items: [
+            {
+              key: i18n.BULK_ACTION_ADD_INVESTIGATION_FIELDS,
+              name: i18n.BULK_ACTION_ADD_INVESTIGATION_FIELDS,
+              'data-test-subj': 'addInvestigationFieldsBulkEditRule',
+              onClick: handleBulkEdit(BulkActionEditTypeEnum.add_investigation_fields),
+              disabled: isEditDisabled,
+              toolTipContent: missingActionPrivileges
+                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+                : undefined,
+              toolTipProps: { position: 'right' },
+            },
+            {
+              key: i18n.BULK_ACTION_DELETE_INVESTIGATION_FIELDS,
+              name: i18n.BULK_ACTION_DELETE_INVESTIGATION_FIELDS,
+              'data-test-subj': 'deleteInvestigationFieldsBulkEditRule',
+              onClick: handleBulkEdit(BulkActionEditTypeEnum.delete_investigation_fields),
               disabled: isEditDisabled,
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES

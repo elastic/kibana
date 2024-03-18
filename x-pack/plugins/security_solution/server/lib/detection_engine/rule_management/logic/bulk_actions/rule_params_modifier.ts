@@ -63,6 +63,7 @@ const shouldSkipIndexPatternsBulkAction = (
   return false;
 };
 
+// eslint-disable-next-line complexity
 const applyBulkActionEditToRuleParams = (
   existingRuleParams: RuleAlertType['params'],
   action: BulkActionEditForRuleParams
@@ -149,6 +150,33 @@ const applyBulkActionEditToRuleParams = (
       }
 
       ruleParams.index = action.value;
+      break;
+    }
+    // investigation_fields actions
+    case BulkActionEditTypeEnum.add_investigation_fields: {
+      ruleParams.investigationFields = {
+        field_names: addItemsToArray(
+          (Array.isArray(ruleParams.investigationFields)
+            ? ruleParams.investigationFields
+            : ruleParams.investigationFields?.field_names) ?? [],
+          action.value.field_names
+        ),
+      };
+      break;
+    }
+    case BulkActionEditTypeEnum.delete_investigation_fields: {
+      if (ruleParams.investigationFields) {
+        ruleParams.investigationFields = deleteItemsFromArray(
+          (Array.isArray(ruleParams.investigationFields)
+            ? ruleParams.investigationFields
+            : ruleParams.investigationFields?.field_names) ?? [],
+          action.value.field_names
+        );
+      }
+      break;
+    }
+    case BulkActionEditTypeEnum.set_investigation_fields: {
+      ruleParams.investigationFields = action.value;
       break;
     }
     // timeline actions
