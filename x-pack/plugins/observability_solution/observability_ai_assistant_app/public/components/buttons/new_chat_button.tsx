@@ -11,8 +11,9 @@ import { i18n } from '@kbn/i18n';
 export function NewChatButton(
   props: React.ComponentProps<typeof EuiButton> & { collapsed?: boolean }
 ) {
+  const { collapsed, ...nextProps } = props;
   return !props.collapsed ? (
-    <EuiButton data-test-subj="observabilityAiAssistantNewChatButton" fill {...props}>
+    <EuiButton data-test-subj="observabilityAiAssistantNewChatButton" fill {...nextProps}>
       <EuiIconNewChat style={{ fill: 'white' }} />
       {i18n.translate('xpack.observabilityAiAssistant.newChatButton', {
         defaultMessage: 'New chat',
@@ -23,7 +24,7 @@ export function NewChatButton(
       data-test-subj="observabilityAiAssistantNewChatButtonButton"
       iconType={EuiIconNewChat}
       size="xs"
-      {...props}
+      {...nextProps}
     />
   );
 }
