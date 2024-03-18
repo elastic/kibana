@@ -320,7 +320,7 @@ export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
 
 #### Internal rule schema
 
-**The internal rule schema** needs to represent that the new `ruleSource` field may not always exist, so both need to be optional.
+**The internal rule schema** needs to represent that the new `ruleSource` field may not always exist, so it must be optional.
 
 _Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_schema/model/rule_schemas.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_schema/model/rule_schemas.ts)_
 
