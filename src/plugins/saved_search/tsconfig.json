@@ -33,6 +33,7 @@
     "@kbn/core-plugins-server",
     "@kbn/utility-types",
     "@kbn/saved-objects-finder-plugin",
+    "@kbn/unified-histogram-plugin",
   ],
   "exclude": [
     "target/**/*",
