@@ -356,6 +356,9 @@ describe('Test discover state actions', () => {
     discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
       return { from: 'now-15d', to: 'now' };
     });
+    discoverServiceMock.data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
+      return { pause: true, value: 1000 };
+    });
     discoverServiceMock.data.search.searchSource.create = jest
       .fn()
       .mockReturnValue(savedSearchMock.searchSource);
@@ -529,7 +532,7 @@ describe('Test discover state actions', () => {
       ...savedSearchMock,
       searchSource: createSearchSourceMock({ index: dataViewMock, filter: [] }),
       timeRestore: true,
-      timeRange: { from: 'now-666m', to: 'now' },
+      timeRange: { from: 'now-15d', to: 'now' },
     };
     const { state } = await getState(url, {
       savedSearch,
@@ -542,12 +545,40 @@ describe('Test discover state actions', () => {
     unsubscribe();
   });
 
-  test('loadSavedSearch given a URL with different time range than without timeRestore not showing as changed', async () => {
-    const url = '/#?_g=(time:(from:now-24h%2Fh,to:now))';
+  test('loadSavedSearch given a URL with different refresh interval than the stored one showing as changed', async () => {
+    const url = '/#_g=(time:(from:now-15d,to:now),refreshInterval:(pause:!f,value:1234))';
+    discoverServiceMock.data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
+      return { pause: false, value: 1234 };
+    });
     const savedSearch = {
       ...savedSearchMock,
       searchSource: createSearchSourceMock({ index: dataViewMock, filter: [] }),
-      timeRestore: false,
+      timeRestore: true,
+      timeRange: { from: 'now-15d', to: 'now' },
+      refreshInterval: { pause: false, value: 60000 },
+    };
+    const { state } = await getState(url, {
+      savedSearch,
+      isEmptyUrl: false,
+    });
+    await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
+    const unsubscribe = state.actions.initializeAndSync();
+    await new Promise(process.nextTick);
+    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
+    unsubscribe();
+  });
+
+  test('loadSavedSearch given a URL with matching time range and refresh interval not showing as changed', async () => {
+    const url = '/#?_g=(time:(from:now-15d,to:now),refreshInterval:(pause:!f,value:60000))';
+    discoverServiceMock.data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
+      return { pause: false, value: 60000 };
+    });
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: createSearchSourceMock({ index: dataViewMock, filter: [] }),
+      timeRestore: true,
+      timeRange: { from: 'now-15d', to: 'now' },
+      refreshInterval: { pause: false, value: 60000 },
     };
     const { state } = await getState(url, {
       savedSearch,

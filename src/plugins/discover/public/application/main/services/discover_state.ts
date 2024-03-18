@@ -377,7 +377,10 @@ export function getDiscoverStateContainer({
   const initializeAndSync = () => {
     // This needs to be the first thing that's wired up because initAndSync is pulling the current state from the URL which
     // might change the time filter and thus needs to re-check whether the saved search has changed.
-    const timefilerUnsubscribe = services.timefilter.getTimeUpdate$().subscribe(() => {
+    const timefilerUnsubscribe = merge(
+      services.timefilter.getTimeUpdate$(),
+      services.timefilter.getRefreshIntervalUpdate$()
+    ).subscribe(() => {
       savedSearchContainer.updateTimeRange();
     });
 

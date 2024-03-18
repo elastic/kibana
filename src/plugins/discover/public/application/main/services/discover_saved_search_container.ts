@@ -112,7 +112,7 @@ export interface DiscoverSavedSearchContainer {
    */
   update: (params: UpdateParams) => SavedSearch;
   /**
-   * Updates the current state of the saved search with new time range
+   * Updates the current state of the saved search with new time range and refresh interval
    */
   updateTimeRange: () => void;
   /**
@@ -227,9 +227,11 @@ export function getSavedSearchContainer({
     if (!previousSavedSearch.timeRestore) {
       return;
     }
+    const refreshInterval = services.timefilter.getRefreshInterval();
     const nextSavedSearch: SavedSearch = {
       ...previousSavedSearch,
       timeRange: services.timefilter.getTime(),
+      refreshInterval: { value: refreshInterval.value, pause: refreshInterval.pause },
     };
 
     assignNextSavedSearch({ nextSavedSearch });
