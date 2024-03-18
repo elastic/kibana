@@ -23,6 +23,7 @@ import {
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import moment from 'moment';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { metricValueFormatter } from '../../../common/custom_threshold_rule/metric_value_formatter';
 import {
   Comparator,
@@ -166,7 +167,9 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
     return [
       {
         id: ColumnIDs.STATUS,
-        key: 'Status',
+        key: i18n.translate('xpack.observability.alertFlyout.overviewTab.status', {
+          defaultMessage: 'Status',
+        }),
         value: alert.fields[ALERT_STATUS],
         meta: {
           flapping: alert.fields[ALERT_FLAPPING],
@@ -174,12 +177,16 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
       },
       {
         id: ColumnIDs.SOURCE,
-        key: 'Affected entity / source',
+        key: i18n.translate('xpack.observability.alertFlyout.overviewTab.sources', {
+          defaultMessage: 'Affected entity / source',
+        }),
         value: 'TODO',
       },
       {
         id: ColumnIDs.TRIGGERED,
-        key: 'Triggered',
+        key: i18n.translate('xpack.observability.alertFlyout.overviewTab.triggered', {
+          defaultMessage: 'Triggered',
+        }),
         value: alert.fields[ALERT_START],
         meta: {
           dateFormat,
@@ -187,12 +194,16 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
       },
       {
         id: ColumnIDs.DURATION,
-        key: 'Duration',
+        key: i18n.translate('xpack.observability.alertFlyout.overviewTab.duration', {
+          defaultMessage: 'Duration',
+        }),
         value: alert.fields[ALERT_DURATION],
       },
       {
         id: ColumnIDs.OBSERVED_VALUE,
-        key: 'Observed value',
+        key: i18n.translate('xpack.observability.alertFlyout.overviewTab.observedValue', {
+          defaultMessage: 'Observed value',
+        }),
         value: alert.fields[ALERT_EVALUATION_VALUES],
         meta: {
           ruleParams: alert.fields[ALERT_RULE_PARAMETERS],
@@ -200,7 +211,9 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
       },
       {
         id: ColumnIDs.THRESHOLD,
-        key: 'Threshold',
+        key: i18n.translate('xpack.observability.alertFlyout.overviewTab.threshold', {
+          defaultMessage: 'Threshold',
+        }),
         value: alert.fields[ALERT_EVALUATION_THRESHOLD],
         meta: {
           ruleParams: alert.fields[ALERT_RULE_PARAMETERS],
@@ -208,17 +221,23 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
       },
       {
         id: ColumnIDs.RULE_NAME,
-        key: 'Rule name',
+        key: i18n.translate('xpack.observability.alertFlyout.overviewTab.ruleName', {
+          defaultMessage: 'Rule name',
+        }),
         value: alert.fields[ALERT_RULE_NAME],
       },
       {
         id: ColumnIDs.RULE_TYPE,
-        key: 'Rule type',
+        key: i18n.translate('xpack.observability.alertFlyout.overviewTab.ruleType', {
+          defaultMessage: 'Rule type',
+        }),
         value: alert.fields[ALERT_RULE_CATEGORY],
       },
       {
         id: ColumnIDs.CASES,
-        key: 'Cases',
+        key: i18n.translate('xpack.observability.alertFlyout.overviewTab.cases', {
+          defaultMessage: 'Cases',
+        }),
         value: cases.map((fetchedCase) => fetchedCase.title).join(', '),
       },
     ];
