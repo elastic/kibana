@@ -224,7 +224,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           }
         ),
         render: (namespace: InMemoryPackagePolicy['namespace']) => {
-          return namespace ? (
+          return (namespace && namespace != agentPolicy.namespace) ? (
             <EuiBadge color="hollow">{namespace}</EuiBadge>
           ) : (
             <>
