@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -132,14 +133,26 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         {mappingsDefinition === null ? (
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.idxMgmt.indexDetails.mappings.invaluMappingKeysErrorMessage"
-                defaultMessage="Error: Mapping contains invalid keys"
-              />
-            </p>
-          </EuiText>
+          <EuiEmptyPrompt
+            color="danger"
+            iconType="error"
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexDetails.mappings.invaluMappingKeysErrorMessageTitle"
+                  defaultMessage="Unable to load the mapping"
+                />
+              </h2>
+            }
+            body={
+              <h2>
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexDetails.mappings.invaluMappingKeysErrorMessageBody"
+                  defaultMessage="Mapping contains invalid keys. Please provide a mapping with valid keys."
+                />
+              </h2>
+            }
+          />
         ) : searchTerm !== '' ? (
           <SearchResult result={search.result} documentFieldsState={documentFields} />
         ) : (

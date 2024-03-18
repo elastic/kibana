@@ -84,7 +84,5 @@ export const DetailsPageMappings: FunctionComponent<{ index: Index }> = ({ index
     );
   }
 
-  return (
-    <DetailsPageMappingsContent index={index} data={stringifiedData} jsonData={data.mappings} />
-  );
+  return <DetailsPageMappingsContent index={index} data={stringifiedData} jsonData={data} />;
 };
