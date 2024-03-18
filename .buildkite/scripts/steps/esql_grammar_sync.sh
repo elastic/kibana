@@ -34,7 +34,6 @@ options { caseInsensitive = true; }' "$destination_file" || exit
 echo "File copied and modified successfully. Checking for differences."
 
 # Check for differences
-git diff
 git diff --exit-code --quiet "$destination_file"
 
 if [ $? -ne 0 ]; then
