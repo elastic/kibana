@@ -399,10 +399,9 @@ export function getBoundsRoundedToInterval(bounds, interval, inclusiveEnd = fals
   return { min: moment(adjustedMinMs), max: moment(adjustedMaxMs) };
 }
 
+// Converts a moment.duration into an Elasticsearch compatible interval expression,
+// and provides associated metadata.
 export function calcEsInterval(duration) {
-  // Converts a moment.duration into an Elasticsearch compatible interval expression,
-  // and provides associated metadata.
-
   // Note this was a copy of Kibana's original ui/time_buckets/calc_es_interval,
   // but with the definition of a 'large' unit changed from 'M' to 'w',
   // bringing it into line with the time units supported by Elasticsearch
