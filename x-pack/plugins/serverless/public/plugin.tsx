@@ -100,7 +100,6 @@ export class ServerlessPlugin
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       setProjectHome: (homeHref: string) => project.setHome(homeHref),
       getNavigationCards: (roleManagementEnabled, extendCardNavDefinitions) => {
-        // const roleManagementEnabled = security.authz.isRoleManagementEnabled(); // Could not reference the security plugin without cyclic dep issue, not sure why
         if (!roleManagementEnabled) return extendCardNavDefinitions;
 
         const manageOrgMembersNavCard = generateManageOrgMembersNavCard(cloud.organizationUrl);

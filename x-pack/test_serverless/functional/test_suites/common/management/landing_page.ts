@@ -42,7 +42,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('navigates to API keys management by clicking the card', async () => {
       await testSubjects.click('app-card-api_keys');
-      // Is there a better way to check this? We do not have a test subject for the API Key page header
       expect(async () => {
         await pageObjects.common.waitUntilUrlIncludes('/app/management/security/api_keys');
       }).not.to.throwError();

@@ -7,22 +7,9 @@
 
 import { PluginInitializerContext } from '@kbn/core/public';
 import { ServerlessPlugin } from './plugin';
-// import {
-//   ServerlessPluginSetup,
-//   ServerlessPluginSetupDependencies,
-//   ServerlessPluginStart,
-//   ServerlessPluginStartDependencies,
-// } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ServerlessPlugin(initializerContext);
 }
-
-// export const plugin: PluginInitializer<
-//   ServerlessPluginSetup,
-//   ServerlessPluginStart,
-//   ServerlessPluginSetupDependencies,
-//   ServerlessPluginStartDependencies
-// > = (initializerContext: PluginInitializerContext) => new ServerlessPlugin(initializerContext);
 
 export type { ServerlessPluginSetup, ServerlessPluginStart } from './types';

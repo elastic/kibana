@@ -49,5 +49,4 @@ export interface ServerlessPluginSetupDependencies {
 
 export interface ServerlessPluginStartDependencies {
   cloud: CloudStart;
-  // security: SecurityPluginStart; // Referencing the security plugin caused a cyclic dep issue, not sure why
 }
