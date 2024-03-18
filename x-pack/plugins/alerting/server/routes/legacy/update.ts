@@ -38,7 +38,6 @@ const bodySchema = schema.object({
       id: schema.string(),
       params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
       actionTypeId: schema.maybe(schema.string()),
-      type: schema.oneOf([schema.literal('default'), schema.literal('system')]),
     }),
     { defaultValue: [] }
   ),
@@ -69,7 +68,7 @@ export const updateAlertRoute = (
         const { id } = req.params;
         const { name, actions, params, schedule, tags, throttle, notifyWhen } = req.body;
         try {
-          const alertRes = await rulesClient.update({
+          const { systemActions, ...alertRes } = await rulesClient.update({
             id,
             data: {
               name,

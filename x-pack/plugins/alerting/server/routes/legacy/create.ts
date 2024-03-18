@@ -38,7 +38,6 @@ export const bodySchema = schema.object({
       id: schema.string(),
       actionTypeId: schema.maybe(schema.string()),
       params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-      type: schema.oneOf([schema.literal('default'), schema.literal('system')]),
     }),
     { defaultValue: [] }
   ),
@@ -79,10 +78,11 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         });
 
         try {
-          const alertRes: SanitizedRule<RuleTypeParams> = await rulesClient.create<RuleTypeParams>({
-            data: { ...alert, notifyWhen },
-            options: { id: params?.id },
-          });
+          const { systemActions, ...alertRes }: SanitizedRule<RuleTypeParams> =
+            await rulesClient.create<RuleTypeParams>({
+              data: { ...alert, notifyWhen },
+              options: { id: params?.id },
+            });
           return res.ok({
             body: alertRes,
           });
