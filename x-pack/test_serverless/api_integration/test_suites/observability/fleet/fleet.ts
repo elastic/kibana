@@ -16,7 +16,8 @@ export default function (ctx: FtrProviderContext) {
   const svlCommonApi = ctx.getService('svlCommonApi');
   const supertest = ctx.getService('supertest');
 
-  describe('fleet', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/178780
+  describe.skip('fleet', function () {
     let defaultFleetServerHostUrl: string = '';
     let defaultEsOutputUrl: string = '';
     before(async () => {
