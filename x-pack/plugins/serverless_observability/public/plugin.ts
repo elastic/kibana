@@ -52,8 +52,7 @@ export class ServerlessObservabilityPlugin
     core: CoreStart,
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
-    const { observabilityShared, serverless, management } = setupDeps;
-    observabilityShared.setIsSidebarEnabled(false);
+    const { serverless, management } = setupDeps;
 
     const navigationTree$ = of(navigationTree);
     serverless.setProjectHome('/app/observability/landing');
