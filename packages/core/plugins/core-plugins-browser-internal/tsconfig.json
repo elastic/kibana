@@ -37,6 +37,7 @@
     "@kbn/core-deprecations-browser-mocks",
     "@kbn/utility-types",
     "@kbn/core-plugins-contracts-browser",
+    "@kbn/core-security-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

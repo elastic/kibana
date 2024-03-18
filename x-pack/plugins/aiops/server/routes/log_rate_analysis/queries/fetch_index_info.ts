@@ -12,7 +12,6 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 
-import { getRandomDocsRequest } from './get_random_docs_request';
 import { getTotalDocCountRequest } from './get_total_doc_count_request';
 
 // TODO Consolidate with duplicate `fetchPValues` in
@@ -25,6 +24,8 @@ const SUPPORTED_ES_FIELD_TYPES = [
 ];
 
 const SUPPORTED_ES_FIELD_TYPES_TEXT = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.MATCH_ONLY_TEXT];
+
+const IGNORE_FIELD_NAMES = ['_tier'];
 
 interface IndexInfo {
   fieldCandidates: string[];
@@ -46,14 +47,14 @@ export const fetchIndexInfo = async (
     {
       index,
       fields: '*',
+      // @ts-expect-error include_empty_fields missing from FieldCapsRequest
+      include_empty_fields: false,
     },
     { signal: abortSignal, maxRetries: 0 }
   );
 
   const allFieldNames: string[] = [];
 
-  const finalFieldCandidates: Set<string> = new Set([]);
-  const finalTextFieldCandidates: Set<string> = new Set([]);
   const acceptableFields: Set<string> = new Set();
   const acceptableTextFields: Set<string> = new Set();
 
@@ -64,11 +65,11 @@ export const fetchIndexInfo = async (
     const isTextField = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES_TEXT.includes(type));
 
     // Check if fieldName is something we can aggregate on
-    if (isSupportedType && isAggregatable) {
+    if (isSupportedType && isAggregatable && !IGNORE_FIELD_NAMES.includes(key)) {
       acceptableFields.add(key);
     }
 
-    if (isTextField) {
+    if (isTextField && !IGNORE_FIELD_NAMES.includes(key)) {
       acceptableTextFields.add(key);
     }
 
@@ -84,46 +85,35 @@ export const fetchIndexInfo = async (
     }
   );
 
-  // Only the deviation window will be used to identify field candidates and sample probability based on total doc count.
-  const respDeviationRandomDocs = await esClient.search(
-    getRandomDocsRequest({ ...params, start: params.deviationMin, end: params.deviationMax }),
+  // Get the total doc count for the deviation time range
+  const respDeviationTotalDocCount = await esClient.search(
+    getTotalDocCountRequest({ ...params, start: params.deviationMin, end: params.deviationMax }),
     {
       signal: abortSignal,
       maxRetries: 0,
     }
   );
-  const sampledDocs = respDeviationRandomDocs.hits.hits.map((d) => d.fields ?? {});
 
   const textFieldCandidatesOverridesWithKeywordPostfix = textFieldCandidatesOverrides.map(
     (d) => `${d}.keyword`
   );
 
-  // Get all field names for each returned doc and flatten it
-  // to a list of unique field names used across all docs
-  // and filter by list of acceptable fields.
-  [...new Set(sampledDocs.map(Object.keys).flat(1))].forEach((field) => {
-    if (
-      acceptableFields.has(field) &&
-      !textFieldCandidatesOverridesWithKeywordPostfix.includes(field)
-    ) {
-      finalFieldCandidates.add(field);
-    }
-    if (
-      acceptableTextFields.has(field) &&
-      (!allFieldNames.includes(`${field}.keyword`) || textFieldCandidatesOverrides.includes(field))
-    ) {
-      finalTextFieldCandidates.add(field);
-    }
-  });
+  const fieldCandidates: string[] = [...acceptableFields].filter(
+    (field) => !textFieldCandidatesOverridesWithKeywordPostfix.includes(field)
+  );
+  const textFieldCandidates: string[] = [...acceptableTextFields].filter(
+    (field) =>
+      !allFieldNames.includes(`${field}.keyword`) || textFieldCandidatesOverrides.includes(field)
+  );
 
   const baselineTotalDocCount = (respBaselineTotalDocCount.hits.total as estypes.SearchTotalHits)
     .value;
-  const deviationTotalDocCount = (respDeviationRandomDocs.hits.total as estypes.SearchTotalHits)
+  const deviationTotalDocCount = (respDeviationTotalDocCount.hits.total as estypes.SearchTotalHits)
     .value;
 
   return {
-    fieldCandidates: [...finalFieldCandidates],
-    textFieldCandidates: [...finalTextFieldCandidates],
+    fieldCandidates,
+    textFieldCandidates,
     baselineTotalDocCount,
     deviationTotalDocCount,
     zeroDocsFallback: baselineTotalDocCount === 0 || deviationTotalDocCount === 0,
