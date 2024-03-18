@@ -166,17 +166,15 @@ The `source_updated_at` will be a field containing a date in ISO 8601 format whi
 
 This field will be optional in both the API schema and the internal rule schema, since this value will not exist for prebuilt rules until a new version of each rule which includes this field in the prebuilt rule asset is published by the TRaDE team, and the user installs it or updates to it.
 
+**NOTE:** the field will not be included in first iteration of the implementation. There is a dependency with the TRaDE team that has blocked the inclusion of this field in the `security-rule` SO, and the change has therefore been postponed. See ticket https://github.com/elastic/detection-rules/issues/2826 for details.
+
 ### Changes needed in rule schema
 
 As detailed further down in the [Plan for carrying out migrations of rule SOs](#plan-for-carrying-out-migrations-of-rule-sos) section, we will be performing incremental migration-on-write on our saved objects to get to our new schemas (see details in linked section).
 
 This means that we need to differentiate between changes to the internal rule schema and the API schema.
 
-#### API schema
-
-##### API request and response rule schema
-
-**In the API schema** the `rule_source` will be a required, as it will allow us to differentiate between Elastic prebuilt rules, and custom rules. 
+#### API request and response rule schema
 
 Notice, as well, that `immutable` and `rule_source` will continue to be part **only of the API response schema**, and never form part of the **request parameters**.
 
@@ -266,7 +264,7 @@ ResponseFields:
 #  [... file continues below...]
 ```
 
-##### Rule Import request schema
+#### Rule Import request schema
 
 We also need to modify the `RuleToImport` schema, since now we will be allowing the importing of both custom rules and prebuilt rules.
 
