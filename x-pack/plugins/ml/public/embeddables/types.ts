@@ -59,7 +59,7 @@ export interface AnomalySwimlaneEmbeddableCustomOutput {
   perPage?: number;
   fromPage?: number;
   interval?: number;
-  indexPatterns?: DataView[];
+  indexPatterns: DataView[];
 }
 
 export type AnomalySwimlaneEmbeddableOutput = EmbeddableOutput &

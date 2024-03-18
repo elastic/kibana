@@ -7,6 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { IContainer } from '@kbn/embeddable-plugin/public';
+import { embeddableInputToSubject, embeddableOutputToSubject } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import React, { Suspense } from 'react';
@@ -55,16 +56,22 @@ export class AnomalySwimlaneEmbeddable extends AnomalyDetectionEmbeddable<
   ) {
     super(initialInput, services[2].anomalyDetectorService, services[1].data.dataViews, parent);
 
-    this.apiSubscriptions.add(
-      this.getInput$().subscribe((input) => {
-        this.viewBy.next(input.viewBy);
-      })
+    this.viewBy = embeddableInputToSubject<string, AnomalySwimlaneEmbeddableInput>(
+      this.apiSubscriptions,
+      this,
+      'viewBy'
     );
-    this.apiSubscriptions.add(
-      this.getOutput$().subscribe((output) => {
-        this.perPage?.next(output.perPage);
-        this.fromPage?.next(output.fromPage);
-      })
+
+    this.perPage = embeddableOutputToSubject<number, AnomalySwimlaneEmbeddableOutput>(
+      this.apiSubscriptions,
+      this,
+      'perPage'
+    );
+
+    this.fromPage = embeddableOutputToSubject<number, AnomalySwimlaneEmbeddableOutput>(
+      this.apiSubscriptions,
+      this,
+      'fromPage'
     );
   }
 
