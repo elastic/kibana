@@ -15,12 +15,12 @@ import { SaveDashboardModal } from './save_dashboard_modal';
 
 export function LinkDashboard({
   onRefresh,
-  emptyButton = false,
+  newDashboardButton = false,
   customDashboards,
   assetType,
 }: {
   onRefresh: () => void;
-  emptyButton?: boolean;
+  newDashboardButton?: boolean;
   customDashboards?: DashboardItemWithTitle[];
   assetType: InfraCustomDashboardAssetType;
 }) {
@@ -28,7 +28,7 @@ export function LinkDashboard({
 
   return (
     <>
-      {emptyButton ? (
+      {newDashboardButton ? (
         <EuiButtonEmpty
           color="text"
           size="s"
@@ -36,7 +36,7 @@ export function LinkDashboard({
           data-test-subj="infraLinkDashboardMenu"
           onClick={() => setIsModalVisible(true)}
         >
-          {i18n.translate('xpack.infra.assetDetails.dashboards.linkEmptyButtonLabel', {
+          {i18n.translate('xpack.infra.assetDetails.dashboards.linkNewDashboardButtonLabel', {
             defaultMessage: 'Link new dashboard',
           })}
         </EuiButtonEmpty>

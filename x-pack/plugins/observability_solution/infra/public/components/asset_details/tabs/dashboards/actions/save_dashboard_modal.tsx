@@ -52,31 +52,17 @@ export function SaveDashboardModal({
   const { data: allAvailableDashboards, status } = useDashboardFetcher();
   const [, setUrlState] = useAssetDetailsUrlState();
 
-  let defaultOption: EuiComboBoxOptionOption<string> | undefined;
-
   const [assetNameEnabled, setAssetNameFiltersEnabled] = useState(
     currentDashboard?.hostNameFilterEnabled ?? true
   );
-
-  if (currentDashboard) {
-    const { title, id } = currentDashboard;
-    defaultOption = { label: title, value: id };
-  }
-
-  const [selectedDashboard, setSelectedDashboard] = useState(defaultOption ? [defaultOption] : []);
+  const [selectedDashboard, setSelectedDashboard] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >(currentDashboard ? [{ label: currentDashboard.title, value: currentDashboard.id }] : []);
 
   const { loading, updateCustomDashboard } = useUpdateCustomDashboard();
-  const {
-    dashboards,
-    loading: savedObjectDashboardsLoading,
-    error: savedObjectDashboardsError,
-  } = useCustomDashboard({ assetType });
+  const { dashboards, loading: savedObjectDashboardsLoading } = useCustomDashboard({ assetType });
 
   const isEditMode = !!currentDashboard?.id;
-
-  const reloadCustomDashboards = useCallback(() => {
-    onRefresh();
-  }, [onRefresh]);
 
   const options = useMemo(
     () =>
@@ -106,14 +92,14 @@ export function SaveDashboardModal({
             ],
           });
 
-          if (result && !loading && !savedObjectDashboardsError) {
+          if (result && !loading) {
             notifications.toasts.success(
               isEditMode
                 ? getEditSuccessToastLabels(newDashboard.label)
                 : getLinkSuccessToastLabels(newDashboard.label)
             );
             setUrlState({ dashboardId: newDashboard.value });
-            reloadCustomDashboards();
+            onRefresh();
           }
         }
       } catch (error) {
@@ -122,7 +108,7 @@ export function SaveDashboardModal({
             defaultMessage: 'Error while adding "{dashboardName}" dashboard',
             values: { dashboardName: newDashboard.label },
           }),
-          body: error.body.message,
+          body: error.message,
         });
       }
       onClose();
@@ -136,11 +122,10 @@ export function SaveDashboardModal({
       assetType,
       assetNameEnabled,
       loading,
-      savedObjectDashboardsError,
       notifications.toasts,
       isEditMode,
       setUrlState,
-      reloadCustomDashboards,
+      onRefresh,
     ]
   );
 
@@ -205,12 +190,21 @@ export function SaveDashboardModal({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="infraSelectDashboardCancelButton" onClick={onClose}>
+        <EuiButtonEmpty
+          data-test-subj="infraSelectDashboardCancelButton"
+          onClick={onClose}
+          isDisabled={loading || savedObjectDashboardsLoading}
+        >
           {i18n.translate('xpack.infra.customDashboards.selectDashboard.cancel', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
-        <EuiButton data-test-subj="infraSelectDashboardButton" onClick={onClickSave} fill>
+        <EuiButton
+          data-test-subj="infraSelectDashboardButton"
+          onClick={onClickSave}
+          isLoading={loading || savedObjectDashboardsLoading}
+          fill
+        >
           {isEditMode
             ? i18n.translate('xpack.infra.customDashboards.selectDashboard.edit', {
                 defaultMessage: 'Save',

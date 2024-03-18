@@ -29,7 +29,7 @@ export function UnlinkDashboard({
   const { notifications } = useKibana();
 
   const [, setUrlState] = useAssetDetailsUrlState();
-  const { updateCustomDashboard } = useUpdateCustomDashboard();
+  const { updateCustomDashboard, loading } = useUpdateCustomDashboard();
   const { dashboards } = useCustomDashboard({ assetType });
 
   const onConfirm = useCallback(
@@ -37,19 +37,21 @@ export function UnlinkDashboard({
       try {
         const dashboardList =
           dashboards?.dashboardIdList?.filter(({ id }) => id !== currentDashboard.id) || [];
-        await updateCustomDashboard({
+        const result = await updateCustomDashboard({
           assetType,
           dashboardIdList: [...dashboardList],
         });
         setUrlState({ dashboardId: dashboardList[0]?.id });
 
-        notifications.toasts.success({
-          title: i18n.translate('xpack.infra.customDashboards.unlinkSuccess.toast.title', {
-            defaultMessage: 'Unlinked "{dashboardName}" dashboard',
-            values: { dashboardName: currentDashboard?.title },
-          }),
-        });
-        onRefresh();
+        if (result && !loading) {
+          notifications.toasts.success({
+            title: i18n.translate('xpack.infra.customDashboards.unlinkSuccess.toast.title', {
+              defaultMessage: 'Unlinked "{dashboardName}" dashboard',
+              values: { dashboardName: currentDashboard?.title },
+            }),
+          });
+          onRefresh();
+        }
       } catch (error) {
         notifications.toasts.danger({
           title: i18n.translate('xpack.infra.customDashboards.unlinkFailure.toast.title', {
@@ -66,10 +68,11 @@ export function UnlinkDashboard({
       dashboards?.dashboardIdList,
       updateCustomDashboard,
       assetType,
+      setUrlState,
+      loading,
       currentDashboard.id,
       currentDashboard?.title,
       notifications.toasts,
-      setUrlState,
       onRefresh,
     ]
   );
@@ -105,6 +108,7 @@ export function UnlinkDashboard({
           )}
           buttonColor="danger"
           defaultFocusedButton="confirm"
+          isLoading={loading}
         >
           <p>
             {i18n.translate('xpack.infra.customDashboards.unlinkEmptyButtonLabel.confirm.body', {

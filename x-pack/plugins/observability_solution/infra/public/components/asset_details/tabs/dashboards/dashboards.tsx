@@ -26,6 +26,7 @@ import {
 
 import { buildPhraseFilter, Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { HOST_FIELD } from '../../../../../common/constants';
 import type {
   DashboardIdItem,
@@ -77,12 +78,14 @@ export function Dashboards() {
   const { dashboards, loading, reload } = useCustomDashboard({ assetType: asset.type });
 
   useEffect(() => {
+    const allAvailableDashboardsMap = new Map<string, DashboardItem>();
+    allAvailableDashboards.forEach((availableDashboard) => {
+      allAvailableDashboardsMap.set(availableDashboard.id, availableDashboard);
+    });
     const filteredCustomDashboards =
       dashboards?.dashboardIdList?.reduce<DashboardItemWithTitle[]>(
         (result: DashboardItemWithTitle[], customDashboard: DashboardIdItem) => {
-          const matchedDashboard = allAvailableDashboards.find(
-            ({ id }) => id === customDashboard.id
-          );
+          const matchedDashboard = allAvailableDashboardsMap.get(customDashboard.id);
           if (matchedDashboard) {
             result.push({
               title: matchedDashboard.attributes.title,
@@ -168,7 +171,7 @@ export function Dashboards() {
                 <ContextMenu
                   items={[
                     <LinkDashboard
-                      emptyButton
+                      newDashboardButton
                       onRefresh={reload}
                       customDashboards={customDashboards}
                       assetType={asset.type}
