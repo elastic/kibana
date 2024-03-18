@@ -7,7 +7,6 @@
 
 import React, { useContext, useMemo, useRef } from 'react';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
-import { EuiSpacer } from '@elastic/eui';
 import { AnomaliesTable } from '../../../ml/anomaly_detection/anomalies_table/anomalies_table';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
@@ -38,8 +37,16 @@ export const Anomalies = () => {
         hideDatePicker
         request$={request$}
       />
-      <EuiSpacer size="m" />
-      <div style={{ textAlign: 'right' }}>
+      <div
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'flex-end',
+        }}
+      >
         <FeatureFeedbackButton
           data-test-subj="infraMLHostFlyoutFeedbackLink"
           formUrl={INFRA_ML_FLYOUT_FEEDBACK_LINK}
