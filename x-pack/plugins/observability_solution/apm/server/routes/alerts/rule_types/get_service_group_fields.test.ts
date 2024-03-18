@@ -19,6 +19,12 @@ const mockSourceObj = {
       name: 'typescript',
     },
   },
+  container: {
+    id: 'my-container',
+  },
+  host: {
+    name: 'my-host',
+  },
   labels: {
     team: 'test',
     event: ['event-0', 'event-1'],
@@ -42,6 +48,8 @@ describe('getSourceFields', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "agent.name": "nodejs",
+        "container.id": "my-container",
+        "host.name": "my-host",
         "labels": Object {
           "event": Array [
             "event-0",
@@ -71,6 +79,8 @@ describe('getSourceFieldsAgg', () => {
                 "service.environment",
                 "service.language.name",
                 "labels",
+                "host.name",
+                "container.id",
               ],
             },
             "size": 1,
@@ -95,6 +105,8 @@ describe('getSourceFieldsAgg', () => {
                 "service.environment",
                 "service.language.name",
                 "labels",
+                "host.name",
+                "container.id",
               ],
             },
             "size": 1,
@@ -118,6 +130,8 @@ describe('flattenSourceDoc', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "agent.name": "nodejs",
+        "container.id": "my-container",
+        "host.name": "my-host",
         "labels": Object {
           "event": Array [
             "event-0",
