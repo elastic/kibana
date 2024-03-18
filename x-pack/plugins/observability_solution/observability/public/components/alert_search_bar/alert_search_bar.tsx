@@ -35,6 +35,10 @@ export function ObservabilityAlertSearchBar({
   onRangeFromChange,
   onRangeToChange,
   onStatusChange,
+  onFiltersChange,
+  filters,
+  savedQuery,
+  setSavedQuery,
   kuery,
   rangeFrom,
   rangeTo,
@@ -43,6 +47,7 @@ export function ObservabilityAlertSearchBar({
 }: ObservabilityAlertSearchBarProps) {
   const toasts = useToasts();
 
+  const clearSavedQuery = useCallback(() => setSavedQuery(undefined), [setSavedQuery]);
   const onAlertStatusChange = useCallback(
     (alertStatus: AlertStatus) => {
       try {
@@ -80,6 +85,26 @@ export function ObservabilityAlertSearchBar({
     onAlertStatusChange(status);
   }, [onAlertStatusChange, status]);
 
+  useEffect(() => {
+    try {
+      onEsQueryChange(
+        buildEsQuery({
+          timeRange: {
+            to: rangeTo,
+            from: rangeFrom,
+          },
+          kuery,
+          filters,
+        })
+      );
+    } catch (error) {
+      toasts.addError(error, {
+        title: toastTitle,
+      });
+      onKueryChange(DEFAULT_QUERY_STRING);
+    }
+  }, [filters, kuery, onEsQueryChange, onKueryChange, rangeFrom, rangeTo, toasts]);
+
   const onSearchBarParamsChange = useCallback<
     (query: {
       dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
@@ -87,40 +112,13 @@ export function ObservabilityAlertSearchBar({
     }) => void
   >(
     ({ dateRange, query }) => {
-      try {
-        // First try to create es query to make sure query is valid, then save it in state
-        const esQuery = buildEsQuery({
-          timeRange: {
-            to: dateRange.to,
-            from: dateRange.from,
-          },
-          kuery: query,
-          queries: [...getAlertStatusQuery(status), ...defaultSearchQueries],
-          config: getEsQueryConfig(uiSettings),
-        });
-        if (query) onKueryChange(query);
-        timeFilterService.setTime(dateRange);
-        onRangeFromChange(dateRange.from);
-        onRangeToChange(dateRange.to);
-        onEsQueryChange(esQuery);
-      } catch (error) {
-        toasts.addError(error, {
-          title: toastTitle,
-        });
-        onKueryChange(DEFAULT_QUERY_STRING);
-      }
+      clearSavedQuery();
+      onKueryChange(query ?? '');
+      timeFilterService.setTime(dateRange);
+      onRangeFromChange(dateRange.from);
+      onRangeToChange(dateRange.to);
     },
-    [
-      status,
-      defaultSearchQueries,
-      uiSettings,
-      onKueryChange,
-      timeFilterService,
-      onRangeFromChange,
-      onRangeToChange,
-      onEsQueryChange,
-      toasts,
-    ]
+    [onKueryChange, timeFilterService, clearSavedQuery, onRangeFromChange, onRangeToChange]
   );
 
   return (
@@ -131,6 +129,12 @@ export function ObservabilityAlertSearchBar({
           featureIds={observabilityAlertFeatureIds}
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
+          showFilterBar
+          filters={filters}
+          onFiltersUpdated={onFiltersChange}
+          savedQuery={savedQuery}
+          onSavedQueryUpdated={setSavedQuery}
+          onClearSavedQuery={clearSavedQuery}
           query={kuery}
           onQuerySubmit={onSearchBarParamsChange}
         />
