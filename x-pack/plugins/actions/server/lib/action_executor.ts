@@ -59,7 +59,6 @@ export interface ActionExecutorContext {
 export interface TaskInfo {
   scheduled: Date;
   attempts: number;
-  numSkippedRuns?: number;
 }
 
 export interface ExecuteOptions<Source = unknown> {
