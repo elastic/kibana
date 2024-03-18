@@ -6,12 +6,17 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { Prompt, QuickPrompt } from '../../../..';
-import { UseAssistantContext, useAssistantContext } from '../../../assistant_context';
+import { Conversation, Prompt, QuickPrompt } from '../../../..';
+import { useAssistantContext } from '../../../assistant_context';
 import type { KnowledgeBaseConfig } from '../../types';
+import {
+  ConversationsBulkActions,
+  bulkChangeConversations,
+} from '../../api/conversations/use_bulk_actions_conversations';
 
 interface UseSettingsUpdater {
-  conversationSettings: UseAssistantContext['conversations'];
+  conversationSettings: Record<string, Conversation>;
+  conversationsSettingsBulkActions: ConversationsBulkActions;
   defaultAllow: string[];
   defaultAllowReplacement: string[];
   knowledgeBase: KnowledgeBaseConfig;
@@ -20,39 +25,44 @@ interface UseSettingsUpdater {
   systemPromptSettings: Prompt[];
   setUpdatedDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setUpdatedDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
-  setUpdatedConversationSettings: React.Dispatch<
-    React.SetStateAction<UseAssistantContext['conversations']>
+  setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
+  setConversationsSettingsBulkActions: React.Dispatch<
+    React.SetStateAction<ConversationsBulkActions>
   >;
   setUpdatedKnowledgeBaseSettings: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
   setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<Prompt[]>>;
-  saveSettings: () => void;
+  saveSettings: () => Promise<boolean>;
 }
 
-export const useSettingsUpdater = (): UseSettingsUpdater => {
+export const useSettingsUpdater = (
+  conversations: Record<string, Conversation>
+): UseSettingsUpdater => {
   // Initial state from assistant context
   const {
     allQuickPrompts,
     allSystemPrompts,
     assistantTelemetry,
-    conversations,
     defaultAllow,
     defaultAllowReplacement,
     knowledgeBase,
     setAllQuickPrompts,
     setAllSystemPrompts,
-    setConversations,
     setDefaultAllow,
     setDefaultAllowReplacement,
     setKnowledgeBase,
+    http,
+    toasts,
   } = useAssistantContext();
 
   /**
    * Pending updating state
    */
   // Conversations
-  const [updatedConversationSettings, setUpdatedConversationSettings] =
-    useState<UseAssistantContext['conversations']>(conversations);
+  const [conversationSettings, setConversationSettings] =
+    useState<Record<string, Conversation>>(conversations);
+  const [conversationsSettingsBulkActions, setConversationsSettingsBulkActions] =
+    useState<ConversationsBulkActions>({});
   // Quick Prompts
   const [updatedQuickPromptSettings, setUpdatedQuickPromptSettings] =
     useState<QuickPrompt[]>(allQuickPrompts);
@@ -71,7 +81,8 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
    * Reset all pending settings
    */
   const resetSettings = useCallback((): void => {
-    setUpdatedConversationSettings(conversations);
+    setConversationSettings(conversations);
+    setConversationsSettingsBulkActions({});
     setUpdatedQuickPromptSettings(allQuickPrompts);
     setUpdatedKnowledgeBaseSettings(knowledgeBase);
     setUpdatedSystemPromptSettings(allSystemPrompts);
@@ -89,10 +100,18 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
   /**
    * Save all pending settings
    */
-  const saveSettings = useCallback((): void => {
+  const saveSettings = useCallback(async (): Promise<boolean> => {
     setAllQuickPrompts(updatedQuickPromptSettings);
     setAllSystemPrompts(updatedSystemPromptSettings);
-    setConversations(updatedConversationSettings);
+
+    const hasBulkConversations =
+      conversationsSettingsBulkActions.create ||
+      conversationsSettingsBulkActions.update ||
+      conversationsSettingsBulkActions.delete;
+    const bulkResult = hasBulkConversations
+      ? await bulkChangeConversations(http, conversationsSettingsBulkActions, toasts)
+      : undefined;
+
     const didUpdateKnowledgeBase =
       knowledgeBase.isEnabledKnowledgeBase !== updatedKnowledgeBaseSettings.isEnabledKnowledgeBase;
     const didUpdateRAGAlerts =
@@ -110,26 +129,30 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     setKnowledgeBase(updatedKnowledgeBaseSettings);
     setDefaultAllow(updatedDefaultAllow);
     setDefaultAllowReplacement(updatedDefaultAllowReplacement);
+
+    return bulkResult?.success ?? true;
   }, [
-    assistantTelemetry,
-    knowledgeBase.isEnabledRAGAlerts,
-    knowledgeBase.isEnabledKnowledgeBase,
     setAllQuickPrompts,
-    setAllSystemPrompts,
-    setConversations,
-    setDefaultAllow,
-    setDefaultAllowReplacement,
-    setKnowledgeBase,
-    updatedConversationSettings,
-    updatedDefaultAllow,
-    updatedDefaultAllowReplacement,
-    updatedKnowledgeBaseSettings,
     updatedQuickPromptSettings,
+    setAllSystemPrompts,
     updatedSystemPromptSettings,
+    http,
+    conversationsSettingsBulkActions,
+    toasts,
+    knowledgeBase.isEnabledKnowledgeBase,
+    knowledgeBase.isEnabledRAGAlerts,
+    updatedKnowledgeBaseSettings,
+    setKnowledgeBase,
+    setDefaultAllow,
+    updatedDefaultAllow,
+    setDefaultAllowReplacement,
+    updatedDefaultAllowReplacement,
+    assistantTelemetry,
   ]);
 
   return {
-    conversationSettings: updatedConversationSettings,
+    conversationSettings,
+    conversationsSettingsBulkActions,
     defaultAllow: updatedDefaultAllow,
     defaultAllowReplacement: updatedDefaultAllowReplacement,
     knowledgeBase: updatedKnowledgeBaseSettings,
@@ -139,9 +162,10 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     saveSettings,
     setUpdatedDefaultAllow,
     setUpdatedDefaultAllowReplacement,
-    setUpdatedConversationSettings,
     setUpdatedKnowledgeBaseSettings,
     setUpdatedQuickPromptSettings,
     setUpdatedSystemPromptSettings,
+    setConversationSettings,
+    setConversationsSettingsBulkActions,
   };
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import {
   ALERT_REASON,
@@ -35,6 +36,7 @@ import {
   getOpenAlerts,
   getPreviewAlerts,
   previewRule,
+  dataGeneratorFactory,
 } from '../../../../utils';
 import {
   createRule,
@@ -65,11 +67,18 @@ export default ({ getService }: FtrProviderContext) => {
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
 
   describe('@ess @serverless EQL type rules', () => {
+    const { indexListOfDocuments } = dataGeneratorFactory({
+      es,
+      index: 'ecs_compliant',
+      log,
+    });
+
     before(async () => {
       await esArchiver.load(auditPath);
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
       );
+      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
 
     after(async () => {
@@ -77,6 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
       );
+      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
@@ -530,6 +540,85 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ],
       });
+    });
+
+    it('ensures common fields are present in generated shell alert', async () => {
+      const id = uuidv4();
+      const doc1 = {
+        id,
+        agent: {
+          name: 'agent-1',
+          type: 'auditbeat',
+          version: '8.13.0',
+        },
+        client: {
+          ip: ['127.0.0.1', '127.0.0.2'],
+        },
+        'host.name': 'host-0',
+      };
+
+      const doc2 = {
+        id,
+        agent: {
+          name: 'agent-0',
+          type: 'auditbeat',
+          version: '8.13.0',
+        },
+        client: {
+          ip: ['127.0.0.1', '127.0.0.3'],
+        },
+        'host.name': 'host-0',
+      };
+
+      await indexListOfDocuments([
+        { '@timestamp': '2020-10-28T06:15:00.000Z', ...doc1 },
+        { '@timestamp': '2020-10-28T06:16:00.000Z', ...doc2 },
+      ]);
+
+      const rule: EqlRuleCreateProps = {
+        ...getEqlRuleForAlertTesting(['ecs_compliant']),
+        query: `sequence [any where id == "${id}" ] [any where true]`,
+        from: 'now-35m',
+        interval: '30m',
+      };
+      const { previewId } = await previewRule({
+        supertest,
+        rule,
+        timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+      });
+
+      const previewAlerts = await getPreviewAlerts({ es, previewId, sort: ['agent.name'] });
+
+      expect(previewAlerts).to.have.length(3);
+
+      const buildingBlockAlerts = previewAlerts.filter(
+        (alert) => alert._source?.['kibana.alert.building_block_type']
+      );
+      const shellAlert = previewAlerts.filter(
+        (alert) => !alert._source?.['kibana.alert.building_block_type']
+      )[0];
+
+      // check building block alert retains all fields from source documents
+      // alerts sorted by agent.name, so we assert it against agent-0 document
+      expect(buildingBlockAlerts[0]._source).eql({
+        ...buildingBlockAlerts[0]._source,
+        ...doc2,
+      });
+
+      expect(buildingBlockAlerts[1]._source).eql({
+        ...buildingBlockAlerts[1]._source,
+        ...doc1,
+      });
+
+      // shell alert should have only common properties from building block alerts
+      expect(shellAlert._source?.agent).eql({
+        type: 'auditbeat',
+        version: '8.13.0',
+        // agent name is absent as this field is not common
+      });
+      // only common values in array are present
+      expect(shellAlert._source?.client).eql({ ip: ['127.0.0.1'] });
+      expect(shellAlert._source?.['host.name']).be('host-0');
     });
 
     it('generates up to max_alerts with an EQL rule', async () => {

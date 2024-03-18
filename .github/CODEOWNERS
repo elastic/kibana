@@ -277,6 +277,13 @@ packages/core/saved-objects/core-saved-objects-server @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-server-internal @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-server-mocks @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-utils-server @elastic/kibana-core
+packages/core/security/core-security-browser @elastic/kibana-core
+packages/core/security/core-security-browser-internal @elastic/kibana-core
+packages/core/security/core-security-browser-mocks @elastic/kibana-core
+packages/core/security/core-security-common @elastic/kibana-core @elastic/kibana-security
+packages/core/security/core-security-server @elastic/kibana-core
+packages/core/security/core-security-server-internal @elastic/kibana-core
+packages/core/security/core-security-server-mocks @elastic/kibana-core
 packages/core/status/core-status-common @elastic/kibana-core
 packages/core/status/core-status-common-internal @elastic/kibana-core
 packages/core/status/core-status-server @elastic/kibana-core
@@ -488,6 +495,7 @@ src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/kibana_utils @elastic/appex-sharedux
 x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 packages/kbn-language-documentation-popover @elastic/kibana-visualizations
+x-pack/examples/lens_config_builder_example @elastic/kibana-visualizations
 packages/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team @elastic/kibana-visualizations
 packages/kbn-lens-formula-docs @elastic/kibana-visualizations
 x-pack/examples/lens_embeddable_inline_editing_example @elastic/kibana-visualizations
@@ -776,6 +784,8 @@ packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/kbn-shared-ux-utility @elastic/appex-sharedux
 x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/plugins/snapshot_restore @elastic/platform-deployment-management
+packages/solution-nav/es @elastic/appex-sharedux
+packages/solution-nav/oblt @elastic/appex-sharedux
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-sort-predicates @elastic/kibana-visualizations
@@ -1056,7 +1066,6 @@ x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-
 /x-pack/test/functional/apps/monitoring @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
 /x-pack/test/api_integration/apis/monitoring @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
 /x-pack/test/api_integration/apis/monitoring_collection @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
-/x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer @elastic/obs-ux-logs-team
 
 # Fleet
 /fleet_packages.json @elastic/fleet
@@ -1087,7 +1096,11 @@ x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-
 
 # Logs
 /x-pack/test/api_integration/apis/logs_ui @elastic/obs-ux-logs-team
+/x-pack/test/dataset_quality_api_integration @elastic/obs-ux-logs-team
 /x-pack/test/functional/apps/observability_logs_explorer @elastic/obs-ux-logs-team
+/x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer @elastic/obs-ux-logs-team
+/x-pack/test/functional/apps/dataset_quality @elastic/obs-ux-logs-team
+/x-pack/test_serverless/functional/test_suites/observability/dataset_quality @elastic/obs-ux-logs-team
 
 # Observability onboarding tour
 /x-pack/plugins/observability_solution/observability_shared/public/components/tour @elastic/platform-onboarding
@@ -1539,8 +1552,6 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 **/*.scss @elastic/kibana-design
 
 # Observability design
-/x-pack/plugins/observability_solution/apm/**/*.scss @elastic/observability-design
-/x-pack/plugins/observability_solution/infra/**/*.scss @elastic/observability-design
 /x-pack/plugins/fleet/**/*.scss @elastic/observability-design
 /x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
 
@@ -1552,7 +1563,6 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 /x-pack/plugins/security_solution/**/*.scss @elastic/security-design
 /x-pack/plugins/security_solution_ess/**/*.scss @elastic/security-design
 /x-pack/plugins/security_solution_serverless/**/*.scss @elastic/security-design
-/x-pack/plugins/observability_solution/logs_explorer/**/*.scss @elastic/observability-design
 
 # Logstash
 #CC# /x-pack/plugins/logstash/ @elastic/logstash

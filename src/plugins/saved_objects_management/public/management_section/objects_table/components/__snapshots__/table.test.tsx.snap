@@ -26,20 +26,33 @@ exports[`Table prevents saved objects from being deleted 1`] = `
     onChange={[Function]}
     toolsRight={
       Array [
-        <EuiButton
-          color="danger"
-          data-test-subj="savedObjectsManagementDelete"
-          iconType="trash"
-          isDisabled={true}
-          onClick={[Function]}
-          title="Unable to delete saved objects"
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              defaultMessage="Selected objects can’t be deleted because they are either Elastic managed objects or hidden objects."
+              id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
+              values={Object {}}
+            />
+          }
+          delay="regular"
+          display="inlineBlock"
+          position="top"
         >
-          <FormattedMessage
-            defaultMessage="Delete"
-            id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
-            values={Object {}}
-          />
-        </EuiButton>,
+          <EuiButton
+            color="danger"
+            data-test-subj="savedObjectsManagementDelete"
+            iconType="trash"
+            isDisabled={true}
+            onClick={[Function]}
+            title="Unable to delete saved objects"
+          >
+            <FormattedMessage
+              defaultMessage="Delete"
+              id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>
+        </EuiToolTip>,
         <EuiPopover
           anchorPosition="downCenter"
           button={
@@ -261,19 +274,32 @@ exports[`Table should render normally 1`] = `
     onChange={[Function]}
     toolsRight={
       Array [
-        <EuiButton
-          color="danger"
-          data-test-subj="savedObjectsManagementDelete"
-          iconType="trash"
-          isDisabled={false}
-          onClick={[Function]}
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              defaultMessage="Selected objects can’t be deleted because they are either Elastic managed objects or hidden objects."
+              id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
+              values={Object {}}
+            />
+          }
+          delay="regular"
+          display="inlineBlock"
+          position="top"
         >
-          <FormattedMessage
-            defaultMessage="Delete"
-            id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
-            values={Object {}}
-          />
-        </EuiButton>,
+          <EuiButton
+            color="danger"
+            data-test-subj="savedObjectsManagementDelete"
+            iconType="trash"
+            isDisabled={false}
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Delete"
+              id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>
+        </EuiToolTip>,
         <EuiPopover
           anchorPosition="downCenter"
           button={
