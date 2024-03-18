@@ -321,7 +321,7 @@ export const getUiSettings: (
     value: true,
     description: i18n.translate('discover.advancedSettings.enableESQLDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} This tech preview feature is highly experimental--do not rely on this for production saved searches, visualizations or dashboards. This setting enables ES|QL in Discover. If you have feedback on this experience please reach out to us on {link}',
+        'This setting enables ES|QL in Discover. If you have feedback on this experience please reach out to us on {link}',
       values: {
         link:
           `<a href="https://discuss.elastic.co/c/elastic-stack/kibana" target="_blank" rel="noopener">` +
