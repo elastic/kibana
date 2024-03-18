@@ -43,6 +43,7 @@ jest.mock('../../../detections/containers/detection_engine/lists/use_lists_confi
   useListsConfig: jest.fn().mockReturnValue({ loading: false }),
 }));
 
+// FLAKY: https://github.com/elastic/kibana/issues/177669
 // FLAKY: https://github.com/elastic/kibana/issues/177670
 // FLAKY: https://github.com/elastic/kibana/issues/177671
 // FLAKY: https://github.com/elastic/kibana/issues/177672
