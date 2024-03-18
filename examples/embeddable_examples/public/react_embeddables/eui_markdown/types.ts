@@ -15,4 +15,4 @@ export type MarkdownEditorSerializedState = SerializedReactEmbeddableTitles & {
   content: string;
 };
 
-export type MarkdownEditorApi = DefaultEmbeddableApi;
+export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEditorSerializedState>;

@@ -26,6 +26,7 @@ import type { InternalUiSettingsServiceSetup } from '@kbn/core-ui-settings-serve
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalCustomBrandingSetup } from '@kbn/core-custom-branding-server-internal';
 import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
+import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -49,4 +50,5 @@ export interface InternalCoreSetup {
   coreUsageData: InternalCoreUsageDataSetup;
   customBranding: InternalCustomBrandingSetup;
   userSettings: InternalUserSettingsServiceSetup;
+  security: InternalSecurityServiceSetup;
 }
