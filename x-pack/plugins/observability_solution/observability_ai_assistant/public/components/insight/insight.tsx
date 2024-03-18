@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextArea,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isArray, last } from 'lodash';
@@ -197,6 +198,13 @@ export interface InsightProps {
   dataTestSubj?: string;
 }
 
+enum FETCH_STATUS {
+  LOADING = 'loading',
+  SUCCESS = 'success',
+  FAILURE = 'failure',
+  NOT_INITIATED = 'not_initiated',
+}
+
 export function Insight({
   messages: initialMessagesOrCallback,
   title,
@@ -207,17 +215,26 @@ export function Insight({
   const [isInsightOpen, setInsightOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
   const [isPromptUpdated, setIsPromptUpdated] = useState(false);
-  const [isLoadingMessages, setIsLoadingMessages] = useState(true);
+  const [messagesFetchStatus, setMessagesFetchStatus] = useState<FETCH_STATUS>(
+    FETCH_STATUS.NOT_INITIATED
+  );
 
   const updateInitialMessages = useCallback(() => {
     if (isArray(initialMessagesOrCallback)) {
       setMessages(initialMessagesOrCallback);
-      setIsLoadingMessages(false);
+      setMessagesFetchStatus(FETCH_STATUS.SUCCESS);
     } else {
-      initialMessagesOrCallback().then((data) => {
-        setMessages(data ?? []);
-        setIsLoadingMessages(false);
-      });
+      setMessagesFetchStatus(FETCH_STATUS.LOADING);
+      initialMessagesOrCallback()
+        .then((data) => {
+          setMessages(data ?? []);
+          setMessagesFetchStatus(FETCH_STATUS.SUCCESS);
+        })
+        .catch((e) => {
+          setMessagesFetchStatus(FETCH_STATUS.FAILURE);
+          // eslint-disable-next-line no-console
+          console.log('Could not load insight messages', e);
+        });
     }
   }, [initialMessagesOrCallback]);
 
@@ -264,7 +281,8 @@ export function Insight({
 
   if (
     connectors.selectedConnector &&
-    ((!isInsightOpen && hasOpened) || (isInsightOpen && !isEditingPrompt && !isLoadingMessages))
+    ((!isInsightOpen && hasOpened) ||
+      (isInsightOpen && !isEditingPrompt && messagesFetchStatus === FETCH_STATUS.SUCCESS))
   ) {
     children = (
       <>
@@ -320,6 +338,20 @@ export function Insight({
   } else if (!connectors.loading && !connectors.connectors?.length) {
     children = (
       <MissingCredentialsCallout connectorsManagementHref={getConnectorsManagementHref(http!)} />
+    );
+  } else if (messagesFetchStatus === FETCH_STATUS.FAILURE) {
+    children = (
+      <EuiCallOut
+        size="s"
+        title={i18n.translate(
+          'xpack.observabilityAiAssistant.insight.div.errorFetchingMessagesLabel',
+          {
+            defaultMessage: 'Could not fetch prompt messages',
+          }
+        )}
+        color="danger"
+        iconType="error"
+      />
     );
   }
 
