@@ -20,7 +20,7 @@ interface UseAssistantOverlay {
  * `useAssistantOverlay` is a hook that registers context with the assistant overlay, and
  * returns an optional `showAssistantOverlay` function to display the assistant overlay.
  * As an alterative to using the `showAssistantOverlay` returned from this hook, you may
- * use the `NewChatById` component and pass it the `promptContextId` returned by this hook.
+ * use the `NewChatByTitle` component and pass it the `promptContextId` returned by this hook.
  *
  * USE THIS WHEN: You want to register context in one part of the tree, and then show
  * a _New chat_ button in another part of the tree without passing around the data, or when
@@ -38,7 +38,7 @@ export const useAssistantOverlay = (
   /**
    * optionally automatically add this context to a specific conversation when the assistant is displayed
    */
-  conversationId: string | null,
+  conversationTitle: string | null,
 
   /**
    * The assistant will display this **short**, static description
@@ -98,11 +98,11 @@ export const useAssistantOverlay = (
         assistantContextShowOverlay({
           showOverlay,
           promptContextId,
-          conversationId: conversationId ?? undefined,
+          conversationTitle: conversationTitle ?? undefined,
         });
       }
     },
-    [assistantContextShowOverlay, conversationId, promptContextId]
+    [assistantContextShowOverlay, conversationTitle, promptContextId]
   );
 
   useEffect(() => {

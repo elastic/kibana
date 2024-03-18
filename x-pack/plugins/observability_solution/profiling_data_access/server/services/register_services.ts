@@ -31,6 +31,6 @@ export function registerServices(params: RegisterServicesParams) {
     fetchFlamechartData: createFetchFlamechart(params),
     getStatus: createGetStatusService(params),
     getSetupState: createSetupState(params),
-    fetchFunction: createFetchFunctions(params),
+    fetchFunctions: createFetchFunctions(params),
   };
 }
