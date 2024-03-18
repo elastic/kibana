@@ -193,65 +193,59 @@ export class AuthenticationService {
         return toolkit.next();
       }
 
+      const isAuthRoute = request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW);
+
       // If users can eventually re-login we want to redirect them directly to the page they tried
       // to access initially, but we only want to do that for routes that aren't part of the various
       // authentication flows that wouldn't make any sense after successful authentication.
-      const originalURL = request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW)
+      const originalURL = isAuthRoute
         ? `${http.basePath.get(request)}/`
         : this.authenticator.getRequestOriginalURL(request);
 
-      const redirectLoginLogout = async () => {
-        const needsToLogout = (await this.session?.getSID(request)) !== undefined;
-        if (needsToLogout) {
-          this.logger.warn(
-            'Could not authenticate user with the existing session. Forcing logout.'
-          );
-        }
-
-        return toolkit.render({
-          body: '<div/>',
-          headers: {
-            'Content-Security-Policy': http.csp.header,
-            Refresh: `0;url=${http.basePath.prepend(
-              `${
-                needsToLogout ? '/logout' : '/login'
-              }?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-                originalURL
-              )}`
-            )}`,
-          },
-        });
-      };
-
-      if (
-        preResponse.statusCode >= 400 &&
-        canRedirectRequest(request) &&
-        (request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW) || preResponse.statusCode === 401)
-      ) {
-        if (!isLoginPageAvailable) {
-          const customBrandingValue = await customBranding.getBrandingFor(request, {
-            unauthenticated: true,
-          });
-
-          return toolkit.render({
-            body: renderUnauthenticatedPage({
-              staticAssets: http.staticAssets,
-              basePath: http.basePath,
-              originalURL,
-              customBranding: customBrandingValue,
-            }),
-            headers: { 'Content-Security-Policy': http.csp.header },
-          });
-        }
-
-        return await redirectLoginLogout();
-      }
-
-      if (preResponse.statusCode !== 401 || !canRedirectRequest(request)) {
+      // Let API responses or <400 responses pass through as we can let their handlers deal with them.
+      if (preResponse.statusCode < 400 || !canRedirectRequest(request)) {
         return toolkit.next();
       }
 
-      return await redirectLoginLogout();
+      if (preResponse.statusCode !== 401 && !isAuthRoute) {
+        return toolkit.next();
+      }
+
+      // Now we are only dealing with authentication flow errors or 401 errors in non-authentication routes.
+      // At this point we redirect users to the login page if it's available, or render a dedicated unauthenticated error page.
+      if (!isLoginPageAvailable) {
+        const customBrandingValue = await customBranding.getBrandingFor(request, {
+          unauthenticated: true,
+        });
+        return toolkit.render({
+          body: renderUnauthenticatedPage({
+            staticAssets: http.staticAssets,
+            basePath: http.basePath,
+            originalURL,
+            customBranding: customBrandingValue,
+          }),
+          headers: { 'Content-Security-Policy': http.csp.header },
+        });
+      }
+
+      const needsToLogout = (await this.session?.getSID(request)) !== undefined;
+      if (needsToLogout) {
+        this.logger.warn('Could not authenticate user with the existing session. Forcing logout.');
+      }
+
+      return toolkit.render({
+        body: '<div/>',
+        headers: {
+          'Content-Security-Policy': http.csp.header,
+          Refresh: `0;url=${http.basePath.prepend(
+            `${
+              needsToLogout ? '/logout' : '/login'
+            }?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+              originalURL
+            )}`
+          )}`,
+        },
+      });
     });
 
     elasticsearch.setUnauthorizedErrorHandler(async ({ error, request }, toolkit) => {

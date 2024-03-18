@@ -1074,6 +1074,7 @@ describe('AuthenticationService', () => {
           { isTLSEnabled: false }
         );
       });
+
       it('when login page is unavailable', async () => {
         const mockRenderUnauthorizedPage = jest
           .requireMock('./unauthenticated_page')
