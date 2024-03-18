@@ -57,7 +57,7 @@ import { PipelineButtonOverview } from './pipeline_button_overview';
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
   const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
-  const { application, cloud, http, user, share, console: consolePlugin } = useKibanaServices();
+  const { application, cloud, user, share, console: consolePlugin } = useKibanaServices();
   const { elasticsearchURL, cloudId } = useMemo(() => {
     return {
       elasticsearchURL: cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER,
@@ -98,7 +98,13 @@ export const ElasticsearchOverview = () => {
         bottomBorder="extended"
         data-test-subj="select-client-section"
       >
-        <SelectClientPanel docLinks={docLinks} http={http} callout={<ConnectorsCallout />}>
+        <SelectClientPanel
+          docLinks={docLinks}
+          callout={<ConnectorsCallout />}
+          application={application}
+          consolePlugin={consolePlugin}
+          sharePlugin={share}
+        >
           <EuiFlexItem>
             <LanguageGrid
               assetBasePath={assetBasePath}

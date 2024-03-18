@@ -25,7 +25,7 @@ import type { CasesClientArgs } from '../types';
 import type { FindCommentsArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
 
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
-import { decodeWithExcessOrThrow } from '../../../common/api';
+import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 import {
   defaultSortField,
   transformComments,
@@ -37,7 +37,6 @@ import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { buildFilter, combineFilters } from '../utils';
 import { Operations } from '../../authorization';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
 import { AttachmentRt, AttachmentsRt } from '../../../common/types/domain';
 
 const normalizeAlertResponse = (
