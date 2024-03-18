@@ -240,8 +240,6 @@ export class JourneyFtrHarness {
     // unloading the test data so that the scalability data extractor can focus on just the APM data produced
     // by Kibana running under test.
     await this.teardownApm();
-    // We allow opt-in afterSteps hook to manage Kibana/ES state
-    await this.journeyConfig.getAfterStepsFn(this.getCtx());
     await Promise.all([
       asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
         // Keep ES data when journey is run twice (avoid unload after "Warmup" phase)

@@ -119,11 +119,6 @@ export interface JourneyConfigOptions<CtxExt> {
    * but before archives are loaded. APM traces are not collected for this hook.
    */
   beforeSteps?: (ctx: BaseStepCtx & CtxExt) => Promise<void>;
-  /**
-   * Use this to define actions that will be executed on teardown,
-   * but before archives are unloaded. APM traces are not collected for this hook.
-   */
-  afterSteps?: (ctx: BaseStepCtx & CtxExt) => Promise<void>;
 }
 
 export class JourneyConfig<CtxExt extends object> {
@@ -193,14 +188,6 @@ export class JourneyConfig<CtxExt extends object> {
   async getBeforeStepsFn(ctx: BaseStepCtx & CtxExt) {
     if (this.#opts.beforeSteps) {
       await this.#opts.beforeSteps(ctx);
-    } else {
-      new Promise<void>((resolve) => resolve());
-    }
-  }
-
-  async getAfterStepsFn(ctx: BaseStepCtx & CtxExt) {
-    if (this.#opts.afterSteps) {
-      await this.#opts.afterSteps(ctx);
     } else {
       new Promise<void>((resolve) => resolve());
     }
