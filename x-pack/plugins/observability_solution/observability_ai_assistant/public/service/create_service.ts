@@ -6,9 +6,11 @@
  */
 
 import type { AnalyticsServiceStart, CoreStart } from '@kbn/core/public';
-import { without } from 'lodash';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { compact, without } from 'lodash';
+import { BehaviorSubject, debounceTime, filter, lastValueFrom, of, Subject, take } from 'rxjs';
 import type { Message, ObservabilityAIAssistantScreenContext } from '../../common/types';
+import { createFunctionRequestMessage } from '../../common/utils/create_function_request_message';
+import { createFunctionResponseMessage } from '../../common/utils/create_function_response_message';
 import { createCallObservabilityAIAssistantAPI } from '../api';
 import type { ChatRegistrationRenderFunction, ObservabilityAIAssistantService } from '../types';
 
@@ -21,7 +23,7 @@ export function createService({
   coreStart: CoreStart;
   enabled: boolean;
 }): ObservabilityAIAssistantService {
-  const client = createCallObservabilityAIAssistantAPI(coreStart);
+  const apiClient = createCallObservabilityAIAssistantAPI(coreStart);
 
   const registrations: ChatRegistrationRenderFunction[] = [];
 
@@ -37,17 +39,50 @@ export function createService({
     },
     start: async ({ signal }) => {
       const mod = await import('./create_chat_service');
-      return await mod.createChatService({ analytics, client, signal, registrations });
+      return await mod.createChatService({ analytics, apiClient, signal, registrations });
     },
-    callApi: client,
+    callApi: apiClient,
     getScreenContexts() {
       return screenContexts$.value;
     },
     setScreenContext: (context: ObservabilityAIAssistantScreenContext) => {
       screenContexts$.next(screenContexts$.value.concat(context));
-      return () => {
+
+      function unsubscribe() {
         screenContexts$.next(without(screenContexts$.value, context));
-      };
+      }
+
+      return unsubscribe;
+    },
+    navigate: async (cb) => {
+      cb();
+
+      // wait for at least 1s of no network activity
+      await lastValueFrom(
+        coreStart.http.getLoadingCount$().pipe(
+          filter((count) => count === 0),
+          debounceTime(1000),
+          take(1)
+        )
+      );
+
+      return of(
+        createFunctionRequestMessage({
+          name: 'context',
+          args: {
+            queries: [],
+            categories: [],
+          },
+        }),
+        createFunctionResponseMessage({
+          name: 'context',
+          content: {
+            screenDescription: compact(
+              screenContexts$.value.map((context) => context.screenDescription)
+            ).join('\n\n'),
+          },
+        })
+      );
     },
     conversations: {
       openNewConversation: ({ messages, title }: { messages: Message[]; title?: string }) => {

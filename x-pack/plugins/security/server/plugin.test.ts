@@ -132,6 +132,12 @@ describe('Security Plugin', () => {
         }
       `);
     });
+
+    it('calls core.security.registerSecurityApi', () => {
+      plugin.setup(mockCoreSetup, mockSetupDependencies);
+
+      expect(mockCoreSetup.security.registerSecurityApi).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('start()', () => {
