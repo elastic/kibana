@@ -74,8 +74,8 @@ describe(
     });
 
     afterEach(() => {
-      cy.task('esArchiverUnload', 'risk_scores_new_complete_data');
-      cy.task('esArchiverUnload', 'user_managed_data');
+      cy.task('esArchiverUnload', { archiveName: 'risk_scores_new_complete_data' });
+      cy.task('esArchiverUnload', { archiveName: 'user_managed_data' });
       deleteAlertsAndRules(); // esArchiverUnload doesn't work properly when using with `useCreate` and `docsOnly` flags
       deleteCriticality({ idField: 'host.name', idValue: SIEM_KIBANA_HOST_NAME });
       deleteCriticality({ idField: 'user.name', idValue: USER_NAME });
