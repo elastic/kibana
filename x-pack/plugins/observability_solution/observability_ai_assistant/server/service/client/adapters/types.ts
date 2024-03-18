@@ -10,12 +10,12 @@ import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { Message } from '../../../../common';
 import type { ChatCompletionChunkEvent } from '../../../../common/conversation_complete';
-import type { CompatibleJSONSchema } from '../../../../common/types';
+import { CompatibleJSONSchema } from '../../../../common/functions/types';
 
 export type LlmApiAdapterFactory = (options: {
   logger: Logger;
   messages: Message[];
-  functions?: Array<{ name: string; description: string; parameters: CompatibleJSONSchema }>;
+  functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
   functionCall?: string;
 }) => LlmApiAdapter;
 

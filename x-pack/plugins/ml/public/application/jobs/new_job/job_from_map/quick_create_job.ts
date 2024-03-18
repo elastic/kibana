@@ -6,13 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-
+import type { MapApi } from '@kbn/maps-plugin/public';
 import type { MlApiServices } from '../../../services/ml_api_service';
 import {
   CREATED_BY_LABEL,
@@ -63,7 +62,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
   }: {
     jobId: string;
     bucketSpan: string;
-    embeddable: MapEmbeddable;
+    embeddable: MapApi;
     startJob: boolean;
     runInRealTime: boolean;
     dataViewId?: string;
@@ -81,8 +80,8 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
     } = await getJobsItemsFromEmbeddable(embeddable);
 
     // Map level stuff
-    const embeddableQuery = (await embeddable.getQuery()) ?? getDefaultQuery();
-    const embeddableFilters = (await embeddable.getFilters()) ?? [];
+    const embeddableQuery = (embeddable.query$?.value as Query) ?? getDefaultQuery();
+    const embeddableFilters = embeddable.filters$?.value ?? [];
 
     if (dashboardQuery === undefined || dashboardFilters === undefined) {
       throw new Error('Cannot create job, query and filters are undefined');

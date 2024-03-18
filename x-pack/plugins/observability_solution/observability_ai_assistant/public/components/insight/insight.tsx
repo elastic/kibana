@@ -18,8 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep, last } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common/types';
-import { sendEvent, TELEMETRY } from '../../analytics';
-import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
+import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { ChatState, useChat } from '../../hooks/use_chat';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
@@ -30,13 +29,13 @@ import { getConnectorsManagementHref } from '../../utils/get_connectors_manageme
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StartChatButton } from '../buttons/start_chat_button';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
-import { ChatFlyout } from '../chat/chat_flyout';
-import { FeedbackButtons } from '../feedback_buttons';
+import { FeedbackButtons } from '../buttons/feedback_buttons';
 import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
 import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { InsightBase } from './insight_base';
 import { ActionsMenu } from './actions_menu';
+import { ObservabilityAIAssistantTelemetryEventType } from '../../analytics/telemetry_event_type';
 
 function getLastMessageOfType(messages: Message[], role: MessageRole) {
   return last(messages.filter((msg) => msg.message.role === role));
@@ -64,13 +63,14 @@ function ChatContent({
     persist: false,
   });
 
-  const lastAssistantResponse = getLastMessageOfType(messages, MessageRole.Assistant);
+  const lastAssistantResponse = getLastMessageOfType(
+    messages.slice(initialMessagesRef.current.length + 1),
+    MessageRole.Assistant
+  );
 
   useEffect(() => {
     next(initialMessagesRef.current);
   }, [next]);
-
-  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
@@ -95,8 +95,8 @@ function ChatContent({
               <FeedbackButtons
                 onClickFeedback={(feedback) => {
                   if (lastAssistantResponse) {
-                    sendEvent(chatService.analytics, {
-                      type: TELEMETRY.observability_ai_assistant_insight_feedback,
+                    chatService.sendAnalyticsEvent({
+                      type: ObservabilityAIAssistantTelemetryEventType.InsightFeedback,
                       payload: {
                         feedback,
                         message: lastAssistantResponse,
@@ -115,22 +115,16 @@ function ChatContent({
               <EuiFlexItem grow={false}>
                 <StartChatButton
                   onClick={() => {
-                    setIsOpen(() => true);
+                    service.conversations.openNewConversation({
+                      messages,
+                      title: defaultTitle,
+                    });
                   }}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           )
         }
-      />
-      <ChatFlyout
-        isOpen={isOpen}
-        onClose={() => {
-          setIsOpen(false);
-        }}
-        initialMessages={messages}
-        initialTitle={defaultTitle}
-        startedFrom="contextualInsight"
       />
     </>
   );
@@ -328,9 +322,9 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
       isOpen={isInsightOpen}
     >
       {chatService.value ? (
-        <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
+        <ObservabilityAIAssistantChatServiceContext.Provider value={chatService.value}>
           {children}
-        </ObservabilityAIAssistantChatServiceProvider>
+        </ObservabilityAIAssistantChatServiceContext.Provider>
       ) : null}
     </InsightBase>
   );

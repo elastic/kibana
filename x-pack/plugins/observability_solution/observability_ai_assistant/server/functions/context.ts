@@ -15,21 +15,22 @@ import { compact, last, omit } from 'lodash';
 import { lastValueFrom, Observable } from 'rxjs';
 import { FunctionRegistrationParameters } from '.';
 import { MessageAddEvent } from '../../common/conversation_complete';
-import { FunctionVisibility, MessageRole, type Message } from '../../common/types';
+import { FunctionVisibility } from '../../common/functions/types';
+import { MessageRole, type Message } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
+import { createFunctionResponseMessage } from '../../common/utils/create_function_response_message';
 import type { ObservabilityAIAssistantClient } from '../service/client';
-import { createFunctionResponseMessage } from '../service/util/create_function_response_message';
 import { parseSuggestionScores } from './parse_suggestion_scores';
 
 const MAX_TOKEN_COUNT_FOR_DATA_ON_SCREEN = 1000;
 
 export function registerContextFunction({
   client,
-  registerFunction,
+  functions,
   resources,
   isKnowledgeBaseAvailable,
 }: FunctionRegistrationParameters & { isKnowledgeBaseAvailable: boolean }) {
-  registerFunction(
+  functions.registerFunction(
     {
       name: 'context',
       contexts: ['core'],
