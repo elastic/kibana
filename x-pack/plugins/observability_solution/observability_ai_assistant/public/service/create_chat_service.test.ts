@@ -73,7 +73,7 @@ describe('createChatService', () => {
           reportEvent: () => {},
           telemetryCounter$: new Observable(),
         },
-        client: clientSpy,
+        apiClient: clientSpy,
         registrations: [],
         signal: new AbortController().signal,
       });
