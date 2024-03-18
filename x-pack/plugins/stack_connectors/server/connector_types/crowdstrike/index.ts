@@ -13,23 +13,23 @@ import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { CROWDSTRIKE_CONNECTOR_ID, CROWDSTRIKE_TITLE } from '../../../common/crowdstrike/constants';
 import {
-  SentinelOneConfigSchema,
-  SentinelOneSecretsSchema,
+  CrowdstrikeConfigSchema,
+  CrowdstrikeSecretsSchema,
 } from '../../../common/crowdstrike/schema';
-import { SentinelOneConfig, SentinelOneSecrets } from '../../../common/crowdstrike/types';
+import { CrowdstrikeConfig, CrowdstrikeSecrets } from '../../../common/crowdstrike/types';
 import { CrowdstrikeConnector } from './crowdstrike';
 import { renderParameterTemplates } from './render';
 
 export const getCrowdstrikeConnectorType = (): SubActionConnectorType<
-  SentinelOneConfig,
-  SentinelOneSecrets
+  CrowdstrikeConfig,
+  CrowdstrikeSecrets
 > => ({
   id: CROWDSTRIKE_CONNECTOR_ID,
   name: CROWDSTRIKE_TITLE,
   getService: (params) => new CrowdstrikeConnector(params),
   schema: {
-    config: SentinelOneConfigSchema,
-    secrets: SentinelOneSecretsSchema,
+    config: CrowdstrikeConfigSchema,
+    secrets: CrowdstrikeSecretsSchema,
   },
   validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
   supportedFeatureIds: [SecurityConnectorFeatureId],
