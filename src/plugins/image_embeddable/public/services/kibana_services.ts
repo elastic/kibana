@@ -51,6 +51,7 @@ export const setKibanaServices = (
   securityService = deps.security;
   uiActionsService = deps.uiActions;
   screenshotModeService = deps.screenshotMode;
+
   // if (deps.usageCollection)
   //   trackUiMetric = deps.usageCollection.reportUiCounter.bind(deps.usageCollection, CONTENT_ID);
 

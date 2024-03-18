@@ -16,8 +16,9 @@ import {
   registerReactEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
-import { imageClickTrigger } from '../actions';
+import { imageClickTrigger, IMAGE_CLICK_TRIGGER } from '../actions';
 import { openImageEditor } from '../image_editor/open_image_editor';
 import { ImageViewer, ImageViewerContext } from '../image_viewer';
 import { FileImageMetadata, imageEmbeddableFileKind } from '../imports';
@@ -32,7 +33,11 @@ import { IMAGE_EMBEDDABLE_TYPE } from './constants';
 import { ImageEmbeddableStrings } from './image_embeddable_strings';
 import { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
 
-export const registerImageEmbeddableFactory = () => {
+export const registerImageEmbeddableFactory = ({
+  embeddableEnhanced,
+}: {
+  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+}) => {
   const imageEmbeddableFactory: ReactEmbeddableFactory<
     ImageEmbeddableSerializedState,
     ImageEmbeddableApi
@@ -45,6 +50,12 @@ export const registerImageEmbeddableFactory = () => {
       const { titlesApi, titleComparators, serializeTitles } =
         initializeReactEmbeddableTitles(initialState);
 
+      const embeddableEnhancedApi = embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
+        'test',
+        () => titlesApi.panelTitle.getValue(),
+        initialState
+      );
+
       const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
       const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.imageConfig);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
@@ -53,8 +64,10 @@ export const registerImageEmbeddableFactory = () => {
       const api = buildApi(
         {
           ...titlesApi,
+          ...(embeddableEnhancedApi?.dynamicActionsApi ?? {}),
           dataLoading: dataLoading$,
           blockingError: blockingError$,
+          supportedTriggers: () => [IMAGE_CLICK_TRIGGER],
           onEdit: async () => {
             const newImageConfig = await openImageEditor(imageConfig$.getValue());
             imageConfig$.next(newImageConfig);
@@ -65,6 +78,7 @@ export const registerImageEmbeddableFactory = () => {
             return {
               rawState: {
                 ...serializeTitles(),
+                ...(embeddableEnhancedApi?.serializeDynamicActions() ?? {}),
                 imageConfig: imageConfig$.getValue(),
               },
             };
@@ -72,6 +86,7 @@ export const registerImageEmbeddableFactory = () => {
         },
         {
           ...titleComparators,
+          ...(embeddableEnhancedApi?.dynamicActionsComparator ?? {}),
           imageConfig: [
             imageConfig$,
             (value) => imageConfig$.next(value),
@@ -92,10 +107,14 @@ export const registerImageEmbeddableFactory = () => {
             // hack: timeout to give a chance for a drilldown action to be registered just after it is created by user
             setTimeout(() => {
               if (!mounted) return;
+
               uiActionsService
-                .getTriggerCompatibleActions(imageClickTrigger.id, { embeddable: this })
+                .getTriggerCompatibleActions(imageClickTrigger.id, { embeddable: api })
                 .catch(() => [])
-                .then((actions) => mounted && setHasTriggerActions(actions.length > 0));
+                .then((actions) => {
+                  // console.log('here', actions);
+                  if (mounted) setHasTriggerActions(actions.length > 0);
+                });
             }, 0);
             return () => {
               mounted = false;

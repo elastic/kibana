@@ -13,6 +13,7 @@ import {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
+import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { imageClickTrigger } from './actions';
@@ -33,6 +34,7 @@ export interface ImageEmbeddableStartDependencies {
   security?: SecurityPluginStart;
   uiActions: UiActionsStart;
   screenshotMode?: ScreenshotModePluginStart;
+  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -65,7 +67,7 @@ export class ImageEmbeddablePlugin
 
     untilPluginStartServicesReady().then(() => {
       registerCreateImageAction();
-      registerImageEmbeddableFactory();
+      registerImageEmbeddableFactory({ embeddableEnhanced: plugins.embeddableEnhanced });
     });
 
     return {};

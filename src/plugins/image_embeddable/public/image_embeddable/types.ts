@@ -6,24 +6,30 @@
  * Side Public License, v 1.
  */
 
+import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import {
   DefaultEmbeddableApi,
   SerializedReactEmbeddableTitles,
 } from '@kbn/embeddable-plugin/public';
 import {
   HasEditCapabilities,
+  HasSupportedTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
 } from '@kbn/presentation-publishing';
 
-export type ImageEmbeddableSerializedState = SerializedReactEmbeddableTitles & {
-  imageConfig: ImageConfig;
-};
+export type ImageEmbeddableSerializedState = SerializedReactEmbeddableTitles &
+  Partial<DynamicActionsSerializedState> & {
+    imageConfig: ImageConfig;
+  };
 
 export type ImageEmbeddableApi = DefaultEmbeddableApi<ImageEmbeddableSerializedState> &
   HasEditCapabilities &
   PublishesDataLoading &
-  PublishesBlockingError;
+  PublishesBlockingError &
+  HasSupportedTriggers &
+  Partial<HasDynamicActions>;
 
 export type ImageSizing = 'fill' | 'contain' | 'cover' | 'none';
 

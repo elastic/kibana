@@ -23,7 +23,8 @@
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-mount",
-    "@kbn/security-plugin-types-public"
+    "@kbn/security-plugin-types-public",
+    "@kbn/embeddable-enhanced-plugin/public"
   ],
   "exclude": ["target/**/*"]
 }
