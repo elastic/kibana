@@ -600,17 +600,17 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         ? `${SERVERLESS_DOCS}action-connectors`
         : `${KIBANA_DOCS}action-types.html`,
       apmRulesErrorCount: isServerless
-        ? `${SERVERLESS_OBSERVABILITY_DOCS}/create-error-count-threshold-alert-rule`
-        : `${KIBANA_DOCS}/apm-alerts.html`,
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}create-error-count-threshold-alert-rule`
+        : `${KIBANA_DOCS}apm-alerts.html`,
       apmRulesTransactionDuration: isServerless
-        ? `${SERVERLESS_OBSERVABILITY_DOCS}/create-latency-threshold-alert-rule`
-        : `${KIBANA_DOCS}/apm-alerts.html`,
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}create-latency-threshold-alert-rule`
+        : `${KIBANA_DOCS}apm-alerts.html`,
       apmRulesTransactionError: isServerless
-        ? `${SERVERLESS_OBSERVABILITY_DOCS}/create-failed-transaction-rate-threshold-alert-rule`
-        : `${KIBANA_DOCS}/apm-alerts.html`,
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}create-failed-transaction-rate-threshold-alert-rule`
+        : `${KIBANA_DOCS}apm-alerts.html`,
       apmRulesAnomaly: isServerless
-        ? `${SERVERLESS_OBSERVABILITY_DOCS}/create-anomaly-alert-rule`
-        : `${KIBANA_DOCS}/apm-alerts.html`,
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}create-anomaly-alert-rule`
+        : `${KIBANA_DOCS}apm-alerts.html`,
       emailAction: `${KIBANA_DOCS}email-action-type.html`,
       emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
       emailExchangeClientSecretConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-secret`,
