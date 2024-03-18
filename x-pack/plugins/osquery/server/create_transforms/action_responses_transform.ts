@@ -33,11 +33,11 @@ export const actionResponsesTransform: TransformPutTransformRequest = {
   sync: {
     time: {
       field: '@timestamp',
-      delay: '1s',
+      delay: '10s',
     },
   },
   latest: {
-    unique_key: ['@timestamp', 'action_id', 'agent_id'],
+    unique_key: ['action_id', 'agent_id'],
     sort: '@timestamp',
   },
   frequency: '1s',
