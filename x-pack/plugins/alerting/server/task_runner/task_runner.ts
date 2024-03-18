@@ -78,7 +78,7 @@ import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status
 import { RunningHandler } from './running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
-import { getMaintenanceWindows, filterMaintenanceWindows } from './get_maintenance_windows';
+import { getMaintenanceWindows, filterMaintenanceWindowsIds } from './get_maintenance_windows';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
 
@@ -500,11 +500,10 @@ export class TaskRunner<
       });
 
       // Set the event log MW Id field the first time with MWs without scoped queries
-      this.maintenanceWindowsWithoutScopedQueryIds = filterMaintenanceWindows({
+      this.maintenanceWindowsWithoutScopedQueryIds = filterMaintenanceWindowsIds({
         maintenanceWindows: this.maintenanceWindows,
-        idsOnly: true,
         withScopedQuery: false,
-      }) as string[];
+      });
 
       if (this.maintenanceWindowsWithoutScopedQueryIds.length) {
         this.alertingEventLogger.setMaintenanceWindowIds(

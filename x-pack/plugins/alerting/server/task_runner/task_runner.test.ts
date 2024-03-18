@@ -834,7 +834,7 @@ describe('Task Runner', () => {
       mockMaintenanceWindows
     );
 
-    alertsClient.persistAlertsWithUpdatedMaintenanceWindows.mockResolvedValue({
+    alertsClient.persistAlerts.mockResolvedValue({
       alertIds: [],
       maintenanceWindowIds: ['test-id-1', 'test-id-2'],
     });
@@ -855,9 +855,7 @@ describe('Task Runner', () => {
     await taskRunner.run();
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
-    expect(alertsClient.persistAlertsWithUpdatedMaintenanceWindows).toHaveBeenLastCalledWith(
-      mockMaintenanceWindows
-    );
+    expect(alertsClient.persistAlerts).toHaveBeenLastCalledWith(mockMaintenanceWindows);
 
     expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith(['test-id-1']);
     expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith([

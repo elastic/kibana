@@ -13,7 +13,11 @@ import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { MaintenanceWindowStatus } from '../types';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { mockedRawRuleSO, mockedRule } from './fixtures';
-import { filterMaintenanceWindows, getMaintenanceWindows } from './get_maintenance_windows';
+import {
+  filterMaintenanceWindows,
+  filterMaintenanceWindowsIds,
+  getMaintenanceWindows,
+} from './get_maintenance_windows';
 import { getFakeKibanaRequest } from './rule_loader';
 import { TaskRunnerContext } from './types';
 
@@ -228,39 +232,87 @@ describe('filterMaintenanceWindows', () => {
       id: 'test-id3',
     },
   ];
-  test('correctly filters maintenance windows when withScopedQuery = true and idsOnly = false', () => {
+  test('correctly filters maintenance windows when withScopedQuery = true', () => {
     expect(
       filterMaintenanceWindows({
         maintenanceWindows: mockMaintenanceWindows,
         withScopedQuery: true,
-        idsOnly: false,
       })
     ).toEqual([mockMaintenanceWindows[0]]);
   });
-  test('correctly filters maintenance windows when withScopedQuery = true and idsOnly = true', () => {
-    expect(
-      filterMaintenanceWindows({
-        maintenanceWindows: mockMaintenanceWindows,
-        withScopedQuery: true,
-        idsOnly: true,
-      })
-    ).toEqual(['test-id1']);
-  });
-  test('correctly filters maintenance windows when withScopedQuery = false and idsOnly = false', () => {
+  test('correctly filters maintenance windows when withScopedQuery = false', () => {
     expect(
       filterMaintenanceWindows({
         maintenanceWindows: mockMaintenanceWindows,
         withScopedQuery: false,
-        idsOnly: false,
       })
     ).toEqual([mockMaintenanceWindows[1], mockMaintenanceWindows[2]]);
   });
-  test('correctly filters maintenance windows when withScopedQuery = false and idsOnly = true', () => {
+});
+
+describe('filterMaintenanceWindowsIds', () => {
+  const mockMaintenanceWindows: MaintenanceWindow[] = [
+    {
+      ...getMockMaintenanceWindow(),
+      eventStartTime: new Date().toISOString(),
+      eventEndTime: new Date().toISOString(),
+      status: MaintenanceWindowStatus.Running,
+      id: 'test-id1',
+      scopedQuery: {
+        kql: "_id: '1234'",
+        filters: [
+          {
+            meta: {
+              disabled: false,
+              negate: false,
+              alias: null,
+              key: 'kibana.alert.action_group',
+              field: 'kibana.alert.action_group',
+              params: {
+                query: 'test',
+              },
+              type: 'phrase',
+            },
+            $state: {
+              store: 'appState',
+            },
+            query: {
+              match_phrase: {
+                'kibana.alert.action_group': 'test',
+              },
+            },
+          },
+        ],
+      },
+    },
+    {
+      ...getMockMaintenanceWindow(),
+      eventStartTime: new Date().toISOString(),
+      eventEndTime: new Date().toISOString(),
+      status: MaintenanceWindowStatus.Running,
+      id: 'test-id2',
+    },
+    {
+      ...getMockMaintenanceWindow(),
+      eventStartTime: new Date().toISOString(),
+      eventEndTime: new Date().toISOString(),
+      status: MaintenanceWindowStatus.Running,
+      id: 'test-id3',
+    },
+  ];
+  test('correctly filters maintenance windows when withScopedQuery = true', () => {
     expect(
-      filterMaintenanceWindows({
+      filterMaintenanceWindowsIds({
+        maintenanceWindows: mockMaintenanceWindows,
+        withScopedQuery: true,
+      })
+    ).toEqual(['test-id1']);
+  });
+  test('correctly filters maintenance windows when withScopedQuery = false', () => {
+    expect(
+      filterMaintenanceWindowsIds({
         maintenanceWindows: mockMaintenanceWindows,
         withScopedQuery: false,
-        idsOnly: true,
       })
     ).toEqual(['test-id2', 'test-id3']);
   });

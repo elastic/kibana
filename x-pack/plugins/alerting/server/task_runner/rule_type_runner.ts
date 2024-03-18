@@ -290,8 +290,9 @@ export class RuleTypeRunner<
     });
 
     await this.options.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
-      const updateAlertsMaintenanceWindowResult =
-        await alertsClient.persistAlertsWithUpdatedMaintenanceWindows?.(maintenanceWindows);
+      const updateAlertsMaintenanceWindowResult = await alertsClient.persistAlerts(
+        maintenanceWindows
+      );
 
       // Set the event log MW ids again, this time including the ids that matched alerts with
       // scoped query

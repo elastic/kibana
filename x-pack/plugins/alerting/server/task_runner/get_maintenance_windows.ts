@@ -20,15 +20,13 @@ interface GetMaintenanceWindowsOpts {
 
 interface FilterMaintenanceWindowsOpts {
   maintenanceWindows: MaintenanceWindow[];
-  idsOnly: boolean;
   withScopedQuery: boolean;
 }
 
 export const filterMaintenanceWindows = ({
   maintenanceWindows,
-  idsOnly,
   withScopedQuery,
-}: FilterMaintenanceWindowsOpts): string[] | MaintenanceWindow[] => {
+}: FilterMaintenanceWindowsOpts): MaintenanceWindow[] => {
   const filteredMaintenanceWindows = maintenanceWindows.filter(({ scopedQuery }) => {
     if (withScopedQuery && scopedQuery) {
       return true;
@@ -39,11 +37,19 @@ export const filterMaintenanceWindows = ({
     return false;
   });
 
-  if (idsOnly) {
-    return filteredMaintenanceWindows.map(({ id }) => id);
-  } else {
-    return filteredMaintenanceWindows;
-  }
+  return filteredMaintenanceWindows;
+};
+
+export const filterMaintenanceWindowsIds = ({
+  maintenanceWindows,
+  withScopedQuery,
+}: FilterMaintenanceWindowsOpts): string[] => {
+  const filteredMaintenanceWindows = filterMaintenanceWindows({
+    maintenanceWindows,
+    withScopedQuery,
+  });
+
+  return filteredMaintenanceWindows.map(({ id }) => id);
 };
 
 export const getMaintenanceWindows = async (

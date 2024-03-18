@@ -822,10 +822,8 @@ describe('Task Runner', () => {
       expect(alertsClientNotToUse.processAlerts).not.toHaveBeenCalled();
       expect(alertsClientNotToUse.logAlerts).not.toHaveBeenCalled();
 
-      expect(alertsClientToUse.persistAlertsWithUpdatedMaintenanceWindows).toHaveBeenCalled();
-      expect(
-        alertsClientNotToUse.persistAlertsWithUpdatedMaintenanceWindows
-      ).not.toHaveBeenCalled();
+      expect(alertsClientToUse.persistAlerts).toHaveBeenCalled();
+      expect(alertsClientNotToUse.persistAlerts).not.toHaveBeenCalled();
 
       expect(alertsClientToUse.getProcessedAlerts).toHaveBeenCalledWith('activeCurrent');
       expect(alertsClientToUse.getProcessedAlerts).toHaveBeenCalledWith('recoveredCurrent');

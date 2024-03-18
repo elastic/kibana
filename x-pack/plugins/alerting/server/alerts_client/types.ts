@@ -80,8 +80,7 @@ export interface IAlertsClient<
   getProcessedAlerts(
     type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
   ): Record<string, LegacyAlert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
-  persistAlerts(): Promise<void>;
-  persistAlertsWithUpdatedMaintenanceWindows?(maintenanceWindows: MaintenanceWindow[]): Promise<{
+  persistAlerts(maintenanceWindows?: MaintenanceWindow[]): Promise<{
     alertIds: string[];
     maintenanceWindowIds: string[];
   } | null>;

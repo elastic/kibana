@@ -196,7 +196,7 @@ describe('RuleTypeRunner', () => {
         alertDelay: 0,
         ruleRunMetricsStore,
       });
-      expect(alertsClient.persistAlertsWithUpdatedMaintenanceWindows).toHaveBeenCalledWith([]);
+      expect(alertsClient.persistAlerts).toHaveBeenCalledWith([]);
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
         eventLogger: alertingEventLogger,
         ruleRunMetricsStore,
@@ -298,7 +298,7 @@ describe('RuleTypeRunner', () => {
       );
       expect(ruleRunMetricsStore.setSearchMetrics).not.toHaveBeenCalled();
       expect(alertsClient.processAlerts).not.toHaveBeenCalled();
-      expect(alertsClient.persistAlertsWithUpdatedMaintenanceWindows).not.toHaveBeenCalled();
+      expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
 
@@ -395,7 +395,7 @@ describe('RuleTypeRunner', () => {
       );
       expect(ruleRunMetricsStore.setSearchMetrics).not.toHaveBeenCalled();
       expect(alertsClient.processAlerts).not.toHaveBeenCalled();
-      expect(alertsClient.persistAlertsWithUpdatedMaintenanceWindows).not.toHaveBeenCalled();
+      expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
 
@@ -498,7 +498,7 @@ describe('RuleTypeRunner', () => {
         alertDelay: 0,
         ruleRunMetricsStore,
       });
-      expect(alertsClient.persistAlertsWithUpdatedMaintenanceWindows).toHaveBeenCalledWith([]);
+      expect(alertsClient.persistAlerts).toHaveBeenCalledWith([]);
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
         eventLogger: alertingEventLogger,
         ruleRunMetricsStore,
@@ -609,7 +609,7 @@ describe('RuleTypeRunner', () => {
         alertDelay: 0,
         ruleRunMetricsStore,
       });
-      expect(alertsClient.persistAlertsWithUpdatedMaintenanceWindows).toHaveBeenCalledWith([]);
+      expect(alertsClient.persistAlerts).toHaveBeenCalledWith([]);
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
         eventLogger: alertingEventLogger,
         ruleRunMetricsStore,
@@ -714,12 +714,12 @@ describe('RuleTypeRunner', () => {
         alertDelay: 0,
         ruleRunMetricsStore,
       });
-      expect(alertsClient.persistAlertsWithUpdatedMaintenanceWindows).not.toHaveBeenCalled();
+      expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
 
-    test('should throw error if alertsClient.persistAlertsWithUpdatedMaintenanceWindows throws error', async () => {
-      alertsClient.persistAlertsWithUpdatedMaintenanceWindows.mockImplementationOnce(() => {
+    test('should throw error if alertsClient.persistAlerts throws error', async () => {
+      alertsClient.persistAlerts.mockImplementationOnce(() => {
         throw new Error('persist alerts failed');
       });
 
@@ -815,7 +815,7 @@ describe('RuleTypeRunner', () => {
         alertDelay: 0,
         ruleRunMetricsStore,
       });
-      expect(alertsClient.persistAlertsWithUpdatedMaintenanceWindows).toHaveBeenCalledWith([]);
+      expect(alertsClient.persistAlerts).toHaveBeenCalledWith([]);
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
 
@@ -916,7 +916,7 @@ describe('RuleTypeRunner', () => {
         alertDelay: 0,
         ruleRunMetricsStore,
       });
-      expect(alertsClient.persistAlertsWithUpdatedMaintenanceWindows).toHaveBeenCalledWith([]);
+      expect(alertsClient.persistAlerts).toHaveBeenCalledWith([]);
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
         eventLogger: alertingEventLogger,
         ruleRunMetricsStore,
