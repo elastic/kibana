@@ -14,8 +14,14 @@ import { css } from '@emotion/react';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverMainRoute } from '../../application/main';
 import type { DiscoverServices } from '../../build_services';
-import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
+import {
+  createDiscoverRootContext,
+  createProfileRegistry,
+  CustomizationCallback,
+  DiscoverContextProvider,
+} from '../../customizations';
 import { LoadingIndicator } from '../common/loading_indicator';
+import { DISCOVER_DEFAULT_PROFILE_ID } from '../../../common/customizations';
 
 export interface DiscoverContainerInternalProps {
   /*
@@ -43,12 +49,24 @@ const discoverContainerWrapperCss = css`
   }
 `;
 
-const customizationContext: DiscoverCustomizationContext = {
+const rootContext = createDiscoverRootContext({
   displayMode: 'embedded',
   inlineTopNav: {
     enabled: false,
     showLogsExplorerTabs: false,
   },
+});
+
+const createScopedProfileRegistry = (customizationCallbacks: CustomizationCallback[]) => {
+  const registry = createProfileRegistry();
+  const defaultProfile = registry.get(DISCOVER_DEFAULT_PROFILE_ID)!;
+
+  registry.set({
+    ...defaultProfile,
+    customizationCallbacks,
+  });
+
+  return registry;
 };
 
 export const DiscoverContainerInternal = ({
@@ -75,6 +93,11 @@ export const DiscoverContainerInternal = ({
       : undefined;
   }, [discoverServices, overrideServices, scopedHistory]);
 
+  const profileRegistry = useMemo(
+    () => createScopedProfileRegistry(customizationCallbacks),
+    [customizationCallbacks]
+  );
+
   if (!services || isLoading) {
     return (
       <EuiFlexGroup css={discoverContainerWrapperCss}>
@@ -94,11 +117,9 @@ export const DiscoverContainerInternal = ({
         `}
       >
         <KibanaContextProvider services={services}>
-          <DiscoverMainRoute
-            customizationCallbacks={customizationCallbacks}
-            customizationContext={customizationContext}
-            stateStorageContainer={stateStorageContainer}
-          />
+          <DiscoverContextProvider rootContext={rootContext} profileRegistry={profileRegistry}>
+            <DiscoverMainRoute stateStorageContainer={stateStorageContainer} />
+          </DiscoverContextProvider>
         </KibanaContextProvider>
       </EuiFlexItem>
     </EuiFlexGroup>

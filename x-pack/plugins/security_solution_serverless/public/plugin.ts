@@ -56,7 +56,11 @@ export class SecuritySolutionServerlessPlugin
 
     setupNavigation(core, setupDeps);
 
-    setupDeps.discover.showInlineTopNav();
+    setupDeps.discover.setRootContext({
+      inlineTopNav: {
+        enabled: true,
+      },
+    });
 
     return {};
   }

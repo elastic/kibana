@@ -13,6 +13,7 @@ import { LogsExplorerTabs } from '../../../../components/logs_explorer_tabs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import type { DiscoverStateContainer } from '../../services/discover_state';
+import { useDiscoverContext } from '../../../../customizations';
 
 export const DiscoverTopNavInline = ({
   stateContainer,
@@ -21,20 +22,17 @@ export const DiscoverTopNavInline = ({
   stateContainer: DiscoverStateContainer;
   hideNavMenuItems?: boolean;
 }) => {
-  const { customizationContext } = stateContainer;
+  const { rootContext } = useDiscoverContext();
   const services = useDiscoverServices();
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
 
-  if (
-    !customizationContext.inlineTopNav.enabled ||
-    customizationContext.displayMode !== 'standalone'
-  ) {
+  if (!rootContext.inlineTopNav.enabled || rootContext.displayMode !== 'standalone') {
     return null;
   }
 
   return (
     <EuiHeader css={{ boxShadow: 'none' }} data-test-subj="discoverTopNavInline">
-      {customizationContext.inlineTopNav.showLogsExplorerTabs && (
+      {rootContext.inlineTopNav.showLogsExplorerTabs && (
         <EuiHeaderSection>
           <EuiHeaderSectionItem>
             <LogsExplorerTabs services={services} selectedTab="discover" />

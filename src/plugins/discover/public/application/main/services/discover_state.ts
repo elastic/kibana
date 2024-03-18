@@ -53,7 +53,7 @@ import {
   getDiscoverGlobalStateContainer,
   DiscoverGlobalStateContainer,
 } from './discover_global_state_container';
-import type { DiscoverCustomizationContext } from '../../../customizations';
+import { DiscoverRootContext } from '../../../customizations';
 
 export interface DiscoverStateContainerParams {
   /**
@@ -71,7 +71,7 @@ export interface DiscoverStateContainerParams {
   /**
    * Context object for customization related properties
    */
-  customizationContext: DiscoverCustomizationContext;
+  rootContext: DiscoverRootContext;
   /**
    * a custom url state storage
    */
@@ -126,10 +126,6 @@ export interface DiscoverStateContainer {
    * Service for handling search sessions
    */
   searchSessionManager: DiscoverSearchSessionManager;
-  /**
-   * Context object for customization related properties
-   */
-  customizationContext: DiscoverCustomizationContext;
   /**
    * Complex functions to update multiple containers from UI
    */
@@ -212,7 +208,7 @@ export interface DiscoverStateContainer {
 export function getDiscoverStateContainer({
   history,
   services,
-  customizationContext,
+  rootContext,
   stateStorageContainer,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
@@ -226,7 +222,7 @@ export function getDiscoverStateContainer({
     createKbnUrlStateStorage({
       useHash: storeInSessionStorage,
       history,
-      useHashQuery: customizationContext.displayMode !== 'embedded',
+      useHashQuery: rootContext.displayMode !== 'embedded',
       ...(toasts && withNotifyOnErrors(toasts)),
     });
 
@@ -504,7 +500,6 @@ export function getDiscoverStateContainer({
     savedSearchState: savedSearchContainer,
     stateStorage,
     searchSessionManager,
-    customizationContext,
     actions: {
       initializeAndSync,
       fetchData,

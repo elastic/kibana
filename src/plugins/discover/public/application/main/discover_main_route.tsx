@@ -33,9 +33,8 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
 import {
-  CustomizationCallback,
-  DiscoverCustomizationContext,
   DiscoverCustomizationProvider,
+  useDiscoverContext,
   useDiscoverCustomizationService,
 } from '../../customizations';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
@@ -49,16 +48,10 @@ interface DiscoverLandingParams {
 }
 
 export interface MainRouteProps {
-  customizationCallbacks: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
-  customizationContext: DiscoverCustomizationContext;
 }
 
-export function DiscoverMainRoute({
-  customizationCallbacks,
-  customizationContext,
-  stateStorageContainer,
-}: MainRouteProps) {
+export function DiscoverMainRoute({ stateStorageContainer }: MainRouteProps) {
   const history = useHistory();
   const services = useDiscoverServices();
   const {
@@ -72,16 +65,15 @@ export function DiscoverMainRoute({
     getScopedHistory,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
-  const [stateContainer, { reset: resetStateContainer }] = useDiscoverStateContainer({
+  const { rootContext } = useDiscoverContext();
+  const { stateContainer, resetStateContainer } = useDiscoverStateContainer({
     history,
     services,
-    customizationContext,
+    rootContext,
     stateStorageContainer,
   });
-
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
     useDiscoverCustomizationService({
-      customizationCallbacks,
       stateContainer,
     });
   const [error, setError] = useState<Error>();
@@ -170,7 +162,7 @@ export function DiscoverMainRoute({
           dataViewSpec: historyLocationState?.dataViewSpec,
           initialAppState,
         });
-        if (customizationContext.displayMode === 'standalone') {
+        if (rootContext.displayMode === 'standalone') {
           if (currentSavedSearch?.id) {
             chrome.recentlyAccessed.add(
               getSavedSearchFullPathUrl(currentSavedSearch.id),
@@ -218,7 +210,7 @@ export function DiscoverMainRoute({
       stateContainer.actions,
       savedSearchId,
       historyLocationState?.dataViewSpec,
-      customizationContext.displayMode,
+      rootContext.displayMode,
       services,
       chrome.recentlyAccessed,
       history,

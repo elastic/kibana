@@ -21,7 +21,7 @@ import { useInternalStateSelector } from '../../services/discover_internal_state
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
-import { useDiscoverCustomization } from '../../../../customizations';
+import { useDiscoverContext, useDiscoverCustomization } from '../../../../customizations';
 import { addLog } from '../../../../utils/add_log';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { isTextBasedQuery } from '../../utils/is_text_based_query';
@@ -171,8 +171,9 @@ export const DiscoverTopNav = ({
   );
 
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
+  const { rootContext } = useDiscoverContext();
   const topNavProps = useMemo(() => {
-    if (stateContainer.customizationContext.inlineTopNav.enabled) {
+    if (rootContext.inlineTopNav.enabled) {
       return undefined;
     }
 
@@ -181,12 +182,7 @@ export const DiscoverTopNav = ({
       config: topNavMenu,
       setMenuMountPoint: setHeaderActionMenu,
     };
-  }, [
-    setHeaderActionMenu,
-    stateContainer.customizationContext.inlineTopNav.enabled,
-    topNavBadges,
-    topNavMenu,
-  ]);
+  }, [rootContext.inlineTopNav.enabled, setHeaderActionMenu, topNavBadges, topNavMenu]);
 
   const savedSearchId = useSavedSearch().id;
   const savedSearchHasChanged = useSavedSearchHasChanged();

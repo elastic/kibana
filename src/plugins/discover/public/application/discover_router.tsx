@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Redirect, useParams } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { History } from 'history';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -18,24 +18,23 @@ import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
-import type { CustomizationCallback, DiscoverCustomizationContext } from '../customizations';
-import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
+import {
+  DiscoverContextProvider,
+  DiscoverProfileRegistry,
+  DiscoverRootContext,
+  useDiscoverContext,
+} from '../customizations';
 import { addProfile } from '../../common/customizations';
 
-export interface DiscoverRoutesProps {
-  prefix?: string;
-  customizationCallbacks: CustomizationCallback[];
-  customizationContext: DiscoverCustomizationContext;
-}
-
-export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProps) => {
+export const DiscoverRoutes = () => {
+  const { currentProfile } = useDiscoverContext();
   const prefixPath = useCallback(
-    (path: string) => (prefix ? `${prefix}/${path}` : `/${path}`),
-    [prefix]
+    (path: string) => `${addProfile('', currentProfile.id)}/${path}`,
+    [currentProfile.id]
   );
 
   return (
-    <Routes>
+    <Routes key={currentProfile.id}>
       <Route path={prefixPath('context/:dataViewId/:id')}>
         <ContextAppRoute />
       </Route>
@@ -54,71 +53,43 @@ export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProp
         <ViewAlertRoute />
       </Route>
       <Route path={prefixPath('view/:id')}>
-        <DiscoverMainRoute {...mainRouteProps} />
+        <DiscoverMainRoute />
       </Route>
       <Route path={prefixPath('')} exact>
-        <DiscoverMainRoute {...mainRouteProps} />
+        <DiscoverMainRoute />
       </Route>
       <NotFoundRoute />
     </Routes>
   );
 };
 
-interface CustomDiscoverRoutesProps {
-  profileRegistry: DiscoverProfileRegistry;
-  customizationContext: DiscoverCustomizationContext;
-}
-
-export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscoverRoutesProps) => {
-  const { profile } = useParams<{ profile: string }>();
-  const customizationCallbacks = useMemo(
-    () => profileRegistry.get(profile)?.customizationCallbacks,
-    [profile, profileRegistry]
-  );
-
-  if (customizationCallbacks) {
-    return (
-      <DiscoverRoutes
-        prefix={addProfile('', profile)}
-        customizationCallbacks={customizationCallbacks}
-        {...props}
-      />
-    );
-  }
-
-  return <NotFoundRoute />;
-};
-
 export interface DiscoverRouterProps {
   services: DiscoverServices;
-  profileRegistry: DiscoverProfileRegistry;
-  customizationContext: DiscoverCustomizationContext;
   history: History;
+  profileRegistry: DiscoverProfileRegistry;
+  rootContext: DiscoverRootContext;
 }
 
 export const DiscoverRouter = ({
   services,
   history,
   profileRegistry,
-  ...routeProps
+  rootContext,
 }: DiscoverRouterProps) => {
-  const customizationCallbacks = useMemo(
-    () => profileRegistry.get('default')?.customizationCallbacks ?? [],
-    [profileRegistry]
-  );
-
   return (
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <Router history={history} data-test-subj="discover-react-router">
-          <Routes>
-            <Route path={addProfile('', ':profile')}>
-              <CustomDiscoverRoutes profileRegistry={profileRegistry} {...routeProps} />
-            </Route>
-            <Route path="/">
-              <DiscoverRoutes customizationCallbacks={customizationCallbacks} {...routeProps} />
-            </Route>
-          </Routes>
+          <DiscoverContextProvider rootContext={rootContext} profileRegistry={profileRegistry}>
+            <Routes>
+              <Route path={addProfile('', ':profile')}>
+                <DiscoverRoutes />
+              </Route>
+              <Route path="/">
+                <DiscoverRoutes />
+              </Route>
+            </Routes>
+          </DiscoverContextProvider>
         </Router>
       </EuiErrorBoundary>
     </KibanaContextProvider>

@@ -7,8 +7,13 @@
  */
 
 import { matchPath } from 'react-router-dom';
+import { DISCOVER_DEFAULT_PROFILE_ID } from './consts';
 
 export const addProfile = (path: string, profile: string) => {
+  if (profile === DISCOVER_DEFAULT_PROFILE_ID) {
+    return path;
+  }
+
   const trimmedPath = path.trim();
   const hasSlash = trimmedPath.endsWith('/');
 
@@ -16,12 +21,25 @@ export const addProfile = (path: string, profile: string) => {
 };
 
 export const getProfile = (path: string) => {
-  const match = matchPath<{ profile?: string }>(path, {
+  const profileMatch = matchPath<{ profile?: string }>(path, {
     path: '/p/:profile',
   });
 
-  return {
-    profile: match?.params.profile,
-    isProfileRootPath: match?.isExact ?? false,
-  };
+  let profile: string;
+  let isProfileRootPath: boolean;
+
+  if (
+    profileMatch &&
+    profileMatch.params.profile &&
+    profileMatch.params.profile !== DISCOVER_DEFAULT_PROFILE_ID
+  ) {
+    profile = profileMatch.params.profile;
+    isProfileRootPath = profileMatch.isExact;
+  } else {
+    const rootMatch = matchPath(path, { path: '/' });
+    profile = DISCOVER_DEFAULT_PROFILE_ID;
+    isProfileRootPath = rootMatch?.isExact ?? false;
+  }
+
+  return { profile, isProfileRootPath };
 };

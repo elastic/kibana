@@ -8,7 +8,7 @@
 
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { useDiscoverCustomization } from '../../../../customizations';
+import { useDiscoverContext, useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
@@ -50,27 +50,43 @@ export const useDiscoverTopNav = ({
     stateContainer,
   });
 
-  const topNavMenu = useMemo(
-    () =>
-      getTopNavLinks({
-        dataView,
-        services,
-        state: stateContainer,
-        onOpenInspector,
-        isTextBased,
-        adHocDataViews,
-        topNavCustomization,
-      }),
-    [
-      adHocDataViews,
+  const { runtimeContext } = useDiscoverContext();
+  const topNavMenu = useMemo(() => {
+    const links = getTopNavLinks({
       dataView,
-      isTextBased,
-      onOpenInspector,
       services,
-      stateContainer,
+      state: stateContainer,
+      onOpenInspector,
+      isTextBased,
+      adHocDataViews,
       topNavCustomization,
-    ]
-  );
+    });
+
+    const returnLocation = runtimeContext.returnLocation;
+
+    if (returnLocation) {
+      links.push({
+        id: 'returnToApp',
+        label: returnLocation.title,
+        description: returnLocation.title,
+        emphasize: true,
+        run: async () => {
+          services.application.navigateToUrl(returnLocation.url);
+        },
+      });
+    }
+
+    return links;
+  }, [
+    adHocDataViews,
+    dataView,
+    isTextBased,
+    onOpenInspector,
+    runtimeContext.returnLocation,
+    services,
+    stateContainer,
+    topNavCustomization,
+  ]);
 
   return {
     topNavMenu,

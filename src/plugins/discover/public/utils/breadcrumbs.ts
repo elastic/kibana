@@ -15,7 +15,7 @@ const rootPath = '#/';
 
 const getRootPath = ({ history }: DiscoverServices) => {
   const { profile } = getProfile(history.location.pathname);
-  return profile ? addProfile(rootPath, profile) : rootPath;
+  return addProfile(rootPath, profile);
 };
 
 function getRootBreadcrumbs({

@@ -46,6 +46,7 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TRUNCATE_MAX_HEIGHT, ENABLE_ESQL } from '@kbn/discover-utils';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import { DeepPartial } from '@kbn/utility-types';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
 import { buildServices, UrlTracker } from './build_services';
@@ -66,11 +67,12 @@ import {
   DiscoverAppLocatorDefinition,
   DiscoverESQLLocatorDefinition,
 } from '../common';
-import type { DiscoverCustomizationContext, RegisterCustomizationProfile } from './customizations';
 import {
-  createRegisterCustomizationProfile,
+  createDiscoverRootContext,
   createProfileRegistry,
-} from './customizations/profile_registry';
+  DiscoverRootContext,
+  RegisterDiscoverProfile,
+} from './customizations';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 import {
   DiscoverContainerInternal,
@@ -114,9 +116,7 @@ export interface DiscoverSetup {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  readonly showInlineTopNav: (
-    options?: Partial<Omit<DiscoverCustomizationContext['inlineTopNav'], 'enabled'>>
-  ) => void;
+  readonly setRootContext: (rootContext: DeepPartial<DiscoverRootContext>) => void;
 }
 
 export interface DiscoverStart {
@@ -152,7 +152,7 @@ export interface DiscoverStart {
    */
   readonly locator: undefined | DiscoverAppLocator;
   readonly DiscoverContainer: ComponentType<DiscoverContainerProps>;
-  readonly registerCustomizationProfile: RegisterCustomizationProfile;
+  readonly registerProfile: RegisterDiscoverProfile;
 }
 
 /**
@@ -218,10 +218,7 @@ export class DiscoverPlugin
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
-  private inlineTopNav: DiscoverCustomizationContext['inlineTopNav'] = {
-    enabled: false,
-    showLogsExplorerTabs: false,
-  };
+  private rootContext?: DeepPartial<DiscoverRootContext>;
 
   setup(
     core: CoreSetup<DiscoverStartPlugins, DiscoverStart>,
@@ -351,10 +348,7 @@ export class DiscoverPlugin
           element: params.element,
           services,
           profileRegistry: this.profileRegistry,
-          customizationContext: {
-            displayMode: 'standalone',
-            inlineTopNav: this.inlineTopNav,
-          },
+          rootContext: createDiscoverRootContext(this.rootContext),
         });
 
         return () => {
@@ -395,9 +389,8 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      showInlineTopNav: ({ showLogsExplorerTabs } = {}) => {
-        this.inlineTopNav.enabled = true;
-        this.inlineTopNav.showLogsExplorerTabs = showLogsExplorerTabs ?? false;
+      setRootContext: (rootContext) => {
+        this.rootContext = rootContext;
       },
     };
   }
@@ -434,7 +427,7 @@ export class DiscoverPlugin
       DiscoverContainer: (props: DiscoverContainerProps) => (
         <DiscoverContainerInternal getDiscoverServices={getDiscoverServicesInternal} {...props} />
       ),
-      registerCustomizationProfile: createRegisterCustomizationProfile(this.profileRegistry),
+      registerProfile: this.profileRegistry.set,
     };
   }
 

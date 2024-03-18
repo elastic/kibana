@@ -23,12 +23,10 @@ export const useDiscoverStateContainer = (params: DiscoverStateContainerParams) 
     getDiscoverStateContainer(params)
   );
 
-  return [
+  return {
     stateContainer,
-    {
-      reset: () => {
-        setStateContainer(getDiscoverStateContainer(params));
-      },
+    resetStateContainer: () => {
+      setStateContainer(getDiscoverStateContainer(params));
     },
-  ] as const;
+  };
 };
