@@ -38,11 +38,12 @@ export function AlertDetailContextualInsights({
     const { start, end } = getConversationTimeRange(alert);
 
     const {
-      apmTimeseries,
+      serviceSummary,
+      serviceList,
       downstreamDependencies,
       logCategories,
-      serviceList,
-      serviceSummary,
+      serviceChangePoints,
+      exitSpanChangePoints,
     } = await callApmApi(
       'GET /internal/apm/assistant/get_apm_alert_details_context',
       {
@@ -62,6 +63,31 @@ export function AlertDetailContextualInsights({
 
     const serviceName = alert.fields[SERVICE_NAME];
 
+    const content = {
+      apmAlertContext: dedent(
+        `High level information about the service where the alert occurred. Use this as background but do not repeat this information to the user. 
+        ${JSON.stringify(serviceSummary)}
+        
+        Related APM services. These may be able to influence the performance of "${serviceName}":
+        ${JSON.stringify(serviceList)}
+  
+        Downstream dependencies from the service "${serviceName}". Problems in these services can negatively affect the performance of "${serviceName}":
+        ${JSON.stringify(downstreamDependencies)}
+  
+        Significant change points for "${serviceName}". Use this to spot dips or spikes in throughput, latency and failure rate.
+        ${JSON.stringify(serviceChangePoints)}
+
+        Significant change points for the dependencies of "${serviceName}". Use this to spot dips or spikes in throughput, latency and failure rate for downstream dependencies:
+        ${JSON.stringify(exitSpanChangePoints)}
+  
+        Log events occurring around the time of the alert. The log messages can sometimes diagnose the root cause of the alert:
+        ${JSON.stringify(logCategories)}
+  
+        Help the user understand the root cause of the alert by using the above information. Suggest actions the user should take to investigate further.
+        `
+      ),
+    };
+
     return [
       createFunctionRequestMessage({
         name: 'get_apm_alert_details_context',
@@ -75,25 +101,8 @@ export function AlertDetailContextualInsights({
 
       createFunctionResponseMessage({
         name: 'get_apm_alert_details_context',
-        content: dedent(
-          `Summary for the service where the alert occurred. Use this as background. DO NOT repeat this information to the user. 
-          ${JSON.stringify(serviceSummary)}
-          
-          Services reporting to this cluster. These may or may not be connected to "${serviceName}":
-          ${JSON.stringify(serviceList)}
-    
-          Downstream dependencies from the service "${serviceName}". Problems in these services can negatively affect the performance of "${serviceName}":
-          ${JSON.stringify(downstreamDependencies)}
-    
-          Timeseries and change points for the service "${serviceName}". Use this to spot significant changes likes dips in throughput or spikes in latency:
-          ${JSON.stringify(apmTimeseries)}
-    
-          Log categories occurring around the time of the alert. Use this to find significant events that may be related to the alert.
-          ${JSON.stringify(logCategories)}
-  
-          Help the user understand the root cause of the alert. Please look for correlations between logs and time series change points. Suggest actions the user should take to investigate further.
-          `
-        ),
+        content: JSON.stringify(content),
+        data: content,
       }).message,
     ];
   }, [alert]);

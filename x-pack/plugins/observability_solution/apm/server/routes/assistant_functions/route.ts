@@ -34,6 +34,7 @@ import {
   ApmTimeseriesType,
   getApmTimeseries,
   getApmTimeseriesRt,
+  TimeseriesChangePoint,
   type ApmTimeseries,
 } from './get_apm_timeseries';
 import { getLogCategories, LogCategories } from './get_log_categories';
@@ -65,7 +66,14 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
     downstreamDependencies: APMDownstreamDependency[];
     serviceList: ApmServicesListItem[];
     logCategories: LogCategories;
-    apmTimeseries: ApmTimeseries[];
+    serviceChangePoints: Array<{
+      title: string;
+      changes: TimeseriesChangePoint[];
+    }>;
+    exitSpanChangePoints: Array<{
+      title: string;
+      changes: TimeseriesChangePoint[];
+    }>;
   }> => {
     const { context, request, plugins, logger, params } = resources;
     const { query } = params;
@@ -138,7 +146,7 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
       },
     });
 
-    const apmTimeseriesPromise = getApmTimeseries({
+    const apmServiceTimeseriesPromise = getApmTimeseries({
       apmEventClient,
       arguments: {
         start: query.start,
@@ -178,13 +186,32 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
               'transaction.name': query['transaction.name'],
             },
           },
+        ],
+      },
+    });
+
+    const exitSpanTimeseriesPromise = getApmTimeseries({
+      apmEventClient,
+      arguments: {
+        start: query.start,
+        end: query.end,
+        stats: [
           {
-            title: 'Failure rate',
+            title: 'Exit span latency',
             groupByFields: ['transaction.name'],
             'service.name': query['service.name'],
             'service.environment': query['service.environment'],
             timeseries: {
               name: ApmTimeseriesType.exitSpanLatency,
+            },
+          },
+          {
+            title: 'Exit span failure rate',
+            groupByFields: ['transaction.name'],
+            'service.name': query['service.name'],
+            'service.environment': query['service.environment'],
+            timeseries: {
+              name: ApmTimeseriesType.exitSpanFailureRate,
             },
           },
         ],
@@ -197,20 +224,35 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
       serviceList,
       logCategories,
       apmTimeseries,
+      exitSpanTimeseries,
     ] = await Promise.all([
       serviceSummaryPromise,
       downstreamDependenciesPromise,
       serviceListPromise,
       logCategoriesPromise,
-      apmTimeseriesPromise,
+      apmServiceTimeseriesPromise,
+      exitSpanTimeseriesPromise,
     ]);
+
+    const serviceChangePoints = apmTimeseries.map(
+      (timeseries): { title: string; changes: TimeseriesChangePoint[] } => {
+        return { title: timeseries.stat.title, changes: timeseries.changes };
+      }
+    );
+
+    const exitSpanChangePoints = exitSpanTimeseries.map(
+      (timeseries): { title: string; changes: TimeseriesChangePoint[] } => {
+        return { title: timeseries.stat.title, changes: timeseries.changes };
+      }
+    );
 
     return {
       serviceSummary,
       downstreamDependencies,
       serviceList,
       logCategories,
-      apmTimeseries,
+      serviceChangePoints,
+      exitSpanChangePoints,
     };
   },
 });

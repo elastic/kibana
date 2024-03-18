@@ -96,6 +96,15 @@ export const getApmTimeseriesRt = t.type({
 
 type ApmTimeseriesArgs = t.TypeOf<typeof getApmTimeseriesRt>;
 
+export interface TimeseriesChangePoint {
+  change_point?: number | undefined;
+  r_value?: number | undefined;
+  trend?: string | undefined;
+  p_value: number;
+  date: string | undefined;
+  type: string;
+}
+
 export interface ApmTimeseries {
   stat: ApmTimeseriesArgs['stats'][number];
   group: string;
@@ -105,14 +114,7 @@ export interface ApmTimeseries {
   start: number;
   end: number;
   unit: string;
-  changes: Array<{
-    change_point?: number | undefined;
-    r_value?: number | undefined;
-    trend?: string | undefined;
-    p_value: number;
-    date: string | undefined;
-    type: string;
-  }>;
+  changes: TimeseriesChangePoint[];
 }
 
 export async function getApmTimeseries({
