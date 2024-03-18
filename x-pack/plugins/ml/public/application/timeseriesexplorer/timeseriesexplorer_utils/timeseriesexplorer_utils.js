@@ -15,11 +15,11 @@ import { each, get, find } from 'lodash';
 import moment from 'moment-timezone';
 
 import { isMultiBucketAnomaly, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import { getBoundsRoundedToInterval, getTimeBucketsFromCache } from '@kbn/ml-time-buckets';
 
 import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
 
-import { getBoundsRoundedToInterval, getTimeBucketsFromCache } from '../../util/time_buckets';
 import { CHARTS_POINT_TARGET, TIME_FIELD_NAME } from '../timeseriesexplorer_constants';
 
 // create new job objects based on standard job config objects

@@ -13,7 +13,7 @@ import React from 'react';
 
 import { TimeseriesChart } from './timeseries_chart';
 
-jest.mock('../../../util/time_buckets', () => ({
+jest.mock('@kbn/ml-time-buckets', () => ({
   TimeBuckets: function () {
     this.setBounds = jest.fn();
     this.setInterval = jest.fn();
