@@ -112,4 +112,5 @@ export interface ObservabilityAIAssistantScreenContext {
     value: any;
   }>;
   actions?: ScreenContextActionDefinition[];
+  starterPrompts?: string[];
 }

@@ -80,6 +80,7 @@ export function SloList() {
           : ''
       }
       `),
+      starterPrompts: ['What is an SLO?', 'How do I create an SLO?'],
     });
   }, [sloList, setScreenContext]);
 

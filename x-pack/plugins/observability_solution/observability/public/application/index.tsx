@@ -86,6 +86,10 @@ export const renderApp = ({
   const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
   const PresentationContextProvider = plugins.presentationUtil?.ContextProvider ?? React.Fragment;
 
+  const clearScreenContext = plugins.observabilityAIAssistant.service.setScreenContext({
+    starterPrompts: ['Do I have any alerts?', 'How can I create a new rule?', 'What are cases?'],
+  });
+
   ReactDOM.render(
     <PresentationContextProvider>
       <EuiErrorBoundary>
@@ -141,6 +145,7 @@ export const renderApp = ({
     // via the ExploratoryView app, which uses search sessions. Therefore on unmounting we need to clear
     // these sessions.
     plugins.data.search.session.clear();
+    clearScreenContext();
     ReactDOM.unmountComponentAtNode(element);
   };
 };
