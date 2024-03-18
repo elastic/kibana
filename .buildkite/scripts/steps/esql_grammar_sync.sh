@@ -14,6 +14,10 @@ destination_file="./packages/kbn-monaco/src/esql/antlr/esql_lexer.g4"
 # Copy the file
 cp "$source_file" "$destination_file"
 
+# Insert the license header after fetching it from https://github.com/elastic/open-source/blob/main/legal/elastic-license-2.0-header.txt
+license_header=$(curl -s https://raw.githubusercontent.com/elastic/open-source/main/legal/elastic-license-2.0-header.txt)
+sed -i -e "1s/^/$license_header\n/" "$destination_file" || exit
+
 # Replace the line containing "lexer grammar" with "lexer grammar esql_lexer;"
 sed -i -e 's/lexer grammar.*$/lexer grammar esql_lexer;/' "$destination_file" || exit
 
@@ -51,7 +55,7 @@ if [ $? -ne 0 ]; then
   echo "Changes committed. Creating pull request."
 
   # Create a PR
-  gh pr create --title '[ES|QL] Update lexer grammar' --body 'This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch.' --base main --head "$BRANCH_NAME" --label 'release_note:skip' || exit
+  gh pr create --draft --title '[ES|QL] Update lexer grammar' --body 'This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch.' --base main --head "$BRANCH_NAME" --label 'release_note:skip' || exit
 
 else
   echo "No differences found. Our work is done here."
