@@ -30,6 +30,9 @@ describe('Alerts timeline', { tags: ['@ess'] }, () => {
     // First we login as a privileged user to create alerts.
     deleteAlertsAndRules();
     createRule(getNewRule());
+    login();
+    visit(ALERTS_URL);
+    waitForAlertsToPopulate();
   });
 
   context('Privileges: read only', () => {

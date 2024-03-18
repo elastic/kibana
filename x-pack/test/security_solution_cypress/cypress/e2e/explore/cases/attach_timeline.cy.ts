@@ -25,6 +25,7 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       login();
       deleteTimelines();
+      deleteAllCasesItems();
       createTimeline(getTimeline()).then((response) => {
         cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
       });
@@ -58,13 +59,13 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
 
   context('with cases created', () => {
     beforeEach(() => {
-      deleteAllCasesItems();
+      login();
       deleteTimelines();
+      deleteAllCasesItems();
       createTimeline(getTimeline()).then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
       );
       createCase(getCase1()).then((response) => cy.wrap(response.body.id).as('caseId'));
-      login();
     });
 
     it('attach timeline to an existing case', function () {
