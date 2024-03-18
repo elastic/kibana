@@ -24,9 +24,6 @@ cp "$source_file" "$destination_file"
 # Insert the license header
 echo -e "${license_header}\n\n$(cat ${destination_file})" > ${destination_file}
 
-echo "license header inserted!"
-head -n 10 "$destination_file"
-
 # Replace the line containing "lexer grammar" with "lexer grammar esql_lexer;"
 sed -i -e 's/lexer grammar.*$/lexer grammar esql_lexer;/' "$destination_file" || exit
 
@@ -39,8 +36,6 @@ echo "File copied and modified successfully. Checking for differences."
 # Check for differences
 git diff
 git diff --exit-code --quiet "$destination_file"
-
-cat "$destination_file"
 
 if [ $? -ne 0 ]; then
   echo "Differences found. Building ANTLR stuff."
