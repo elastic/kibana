@@ -130,15 +130,13 @@ Rules with `rule_source` of type `external` are rules who have an external origi
 
 This also means that a rule with this type of `rule_source` will determine that the rule is an Elastic Prebuilt Rule that can receive upstream updates via Fleet. This field is intended to partly replace the currently existing `immutable` field, which is used today for the same purpose, but -as its name indicates- also currently determines if a rule's fields can be modified/customized.
 
-As seen in the schema, when the `rule_source` has type `'external'`, the object can contain two other subfields as well, `is_customized` and `source_updated_at`, explained below. If the object has type `'internal'`, no other fields should be present (subject to change in the future).
-
 ### Deprecating the `immutable` field
 
 In the current application's state, rules with `immutable: false` are rules which are not Elastic Prebuilt Rules, i.e. custom rules, and can be modified. Meanwhile, `immutable: true` rules are Elastic Prebuilt Rules, created by the TRaDE team, distributed via the `security_detection_engine` Fleet package, and cannot be modified once installed.
 
 When successfully implemented, the `rule_source` field should replace the `immutable` field as a mechanism to mark Elastic prebuilt rules, but with one difference: the `rule_source` field will determine if the rule is an Elastic Prebuilt Rule or not, but now all rules will be customizable by the user in Kibana, i.e. independently of the existence (or absence) of `rule_source`.
 
-Because of this difference in the behaviour of the `rule_source` and `immutable` fields, we feel that a field called `immutable` will lose its meaning over time and become confusing, especially for consumers of the API who interact directly with the field name. That's why we want to eventually deprecate it and fully replace it with `rule_source`.
+Because of this difference between the `rule_source` and `immutable` fields, the `immutable` field will lose its original meaning as soon as we allow users to customize prebuilt rules, which might become confusing for those API consumers who interact directly with this field. That's why we want to first deprecate it and later after a large enough deprecation period we could consider removing it completely from the API.
 
 To ensure backward compatibility and avoid breaking changes, we will deprecate the `immutable` field but keep it within the rule schema, asking our users to stop relying on this field in Detection API responses. During the migration period, we want to keep the value of the `immutable` field in sync with the `rule_source` fields: this means that for all rules that have a `immutable` value of `true`, the `rule_source` field will always be of type `'external'`. Viceversa, rules with `immutable: false` will have a `rule_source` field of type `'internal'`.
 
@@ -146,11 +144,11 @@ This means, however, that there will be a change in behaviour of the `immutable`
 
 ### Subfields in the `rule_source` field
 
-In this first phase, the `rule_source` will conditionally contain three subfields: the desciminant `type`, and the `is_customized` and `source_updated_at` values, only present when `type` is `'external'`.
+In this first phase, the `rule_source` will conditionally contain three subfields: the discriminant `type`, and the `is_customized` and `source_updated_at` values, only present when `type` is `'external'`.
 
 #### `type` subfield
 
-The `type` subfield serves as the discriminat to the disciminated union field `rule_source` and can take two values, as explained above: `'internal'` and `'external'`.
+The `type` subfield serves as the discriminant to the discriminated union field `rule_source` and can take two values, as explained above: `'internal'` and `'external'`.
 
 #### `is_customized` subfield
 
@@ -192,7 +190,7 @@ _Source: [x-pack/plugins/security_solution/common/api/detection_engine/model/rul
 # Add deprecation warning to `immutable` field
 IsRuleImmutable:
   type: boolean
-  description: '[DEPRECATION WARNING - This field is deprecated and will be removed in a future release. Use the prebuilt field to determine if a rule is an Elastic prebuilt rule or a custom rule.] - Determines whether the rule is immutable (i.e. cannot be modified by the user).'
+  description: '[DEPRECATION WARNING! This field is deprecated and... <the warning explains the deprecation period and suggests a replacement> ] - Determines whether the rule is a prebuilt Elastic rule.'
 
 IsExternalRuleCustomized:
   type: boolean
