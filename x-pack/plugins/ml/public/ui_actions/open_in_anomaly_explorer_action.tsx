@@ -13,7 +13,7 @@ import type {
   EmbeddableApiContext,
   HasParentApi,
   HasType,
-  PublishesLocalUnifiedSearch,
+  PublishesUnifiedSearch,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiHasType, apiIsOfType } from '@kbn/presentation-publishing';
@@ -63,7 +63,7 @@ export interface OpenInAnomalyExplorerAnomalyChartsActionContext extends Embedda
 }
 
 export type OpenInAnomalyExplorerBaseActionApi = Partial<
-  HasParentApi<HasType> & PublishesLocalUnifiedSearch & { jobIds: JobId[] }
+  HasParentApi<HasType> & PublishesUnifiedSearch & { jobIds: JobId[] }
 >;
 
 export type OpenInAnomalyExplorerFromSwimLaneActionApi = HasType<AnomalySwimLaneEmbeddableType> &
@@ -117,13 +117,13 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
       if (isSwimLaneEmbeddableContext(context)) {
         const { data, embeddable } = context;
 
-        const { localTimeRange, viewBy, jobIds, perPage, fromPage } = embeddable;
+        const { timeRange$, viewBy, jobIds, perPage, fromPage } = embeddable;
 
         return locator.getUrl({
           page: 'explorer',
           pageState: {
             jobIds,
-            timeRange: localTimeRange?.getValue(),
+            timeRange: timeRange$?.getValue(),
             mlExplorerSwimlane: {
               viewByFromPage: fromPage.getValue(),
               viewByPerPage: perPage.getValue(),
@@ -140,7 +140,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
         });
       } else if (isAnomalyChartsEmbeddableContext(context)) {
         const { embeddable } = context;
-        const { jobIds, localTimeRange, entityFields } = embeddable;
+        const { jobIds, timeRange$, entityFields } = embeddable;
 
         let mlExplorerFilter: ExplorerAppState['mlExplorerFilter'] | undefined;
         const entityFieldsValue = entityFields.getValue();
@@ -176,7 +176,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
           page: 'explorer',
           pageState: {
             jobIds,
-            timeRange: localTimeRange?.getValue(),
+            timeRange: timeRange$?.getValue(),
             // @ts-ignore QueryDslQueryContainer is not compatible with SerializableRecord
             ...(mlExplorerFilter ? ({ mlExplorerFilter } as SerializableRecord) : {}),
             query: {},
