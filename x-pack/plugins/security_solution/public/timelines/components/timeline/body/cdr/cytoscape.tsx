@@ -10,6 +10,7 @@ import dagre from 'cytoscape-dagre';
 import { useDispatch } from 'react-redux';
 import { isEqual } from 'lodash';
 import type { CSSProperties, ReactNode } from 'react';
+import { useCallback } from 'react';
 import React, { useContext, createContext, memo, useEffect, useRef, useState } from 'react';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { ThemeContext } from 'styled-components';
@@ -83,7 +84,6 @@ const Popover = ({
   timelineId: string;
 }) => {
   const dispatch = useDispatch();
-  const [searchValue, setSearchValue] = useState('');
 
   const data = React.useMemo(
     () =>
@@ -205,6 +205,91 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
   });
   useCytoscapeEventHandlers({ cy, serviceName, theme });
 
+  const eventNodeHandler = useCallback(
+    (event: cytoscape.EventObject) => {
+      if (!cy) {
+        return;
+      }
+      // console.log('event-node', { event });
+      const node = event.target; // The node that was clicked
+      const eventId = node.data('id').split('-')[1];
+      const eventData = data.find((d) => d._id === eventId);
+
+      const isExpanded = node.data('isExpanded');
+
+      if (!isExpanded) {
+        event.target.lock();
+        node.data('isExpanded', true);
+
+        const alertNodes = node.data('alertNodes');
+        alertNodes.forEach((alertNode: AlertNode) => {
+          cy.add(alertNode);
+          cy.add({
+            data: {
+              source: node.data('id'),
+              target: alertNode.data.id,
+            },
+          });
+        });
+        cy.trigger('custom:data', [true]);
+        event.target.unlock();
+      } else {
+        const aggregatedDataByEvent = data.filter((d) => {
+          return d.ecs.event?.action?.[0] === eventData?.ecs.event?.action?.[0];
+        });
+
+        if (aggregatedDataByEvent) {
+          // Create a function to generate a unique key for each item
+          const createUniqueKey = (item: { field: string; value: string }) =>
+            `${item.field}:${item.value}`;
+
+          // Use reduce to accumulate items, but filter out duplicates based on the unique key
+          const extraItems = aggregatedDataByEvent
+            .map((d) => {
+              return Object.entries(getFlattenedObject(d.ecs))
+                .filter(
+                  ([field]) =>
+                    field !== 'event.action' &&
+                    field !== '' &&
+                    field !== null &&
+                    field !== undefined
+                )
+                .map(([field, value]) => ({
+                  field,
+                  value: String(value),
+                }));
+            })
+            .reduce((acc, val) => {
+              // Use a Set to track which items have already been added
+              const seen = new Set(acc.map(createUniqueKey));
+
+              // Filter out duplicates by checking against the 'seen' set
+              const filteredVal = val.filter((item) => {
+                const key = createUniqueKey(item);
+                if (!seen.has(key)) {
+                  seen.add(key);
+                  return true;
+                }
+                return false;
+              });
+
+              return acc.concat(filteredVal);
+            }, []);
+
+          setPopoverItems([
+            {
+              field: 'event.action',
+              value: eventData?.ecs?.event?.action?.[0] || '',
+            },
+            ...extraItems,
+          ]);
+          setIsPopoverOpen(true);
+        }
+      }
+    },
+    [cy, data]
+  );
+
   useEffect(() => {
     async function getElements() {
       setElements(await Promise.all(await convertToCytoscapeElements(data, getDocument)));
@@ -302,64 +387,8 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
         // For example, you could display more information about the node
         // or trigger other changes in your application based on the node clicked
       });
-      cy.elements('node.event-node').on('click', function (event) {
-        // console.log('event-node', { event });
-        const node = event.target; // The node that was clicked
-        const eventId = node.data('id').split('-')[1];
-        const eventData = data.find((d) => d._id === eventId);
+      cy.elements('node.event-node').on('click', eventNodeHandler);
 
-        const aggregatedDataByEvent = data.filter((d) => {
-          return d.ecs.event?.action?.[0] === eventData?.ecs.event?.action?.[0];
-        });
-
-        if (aggregatedDataByEvent) {
-          // Create a function to generate a unique key for each item
-          const createUniqueKey = (item: { field: string; value: string }) =>
-            `${item.field}:${item.value}`;
-
-          // Use reduce to accumulate items, but filter out duplicates based on the unique key
-          const extraItems = aggregatedDataByEvent
-            .map((d) => {
-              return Object.entries(getFlattenedObject(d.ecs))
-                .filter(
-                  ([field]) =>
-                    field !== 'event.action' &&
-                    field !== '' &&
-                    field !== null &&
-                    field !== undefined
-                )
-                .map(([field, value]) => ({
-                  field,
-                  value: String(value),
-                }));
-            })
-            .reduce((acc, val) => {
-              // Use a Set to track which items have already been added
-              const seen = new Set(acc.map(createUniqueKey));
-
-              // Filter out duplicates by checking against the 'seen' set
-              const filteredVal = val.filter((item) => {
-                const key = createUniqueKey(item);
-                if (!seen.has(key)) {
-                  seen.add(key);
-                  return true;
-                }
-                return false;
-              });
-
-              return acc.concat(filteredVal);
-            }, []);
-
-          setPopoverItems([
-            {
-              field: 'event.action',
-              value: eventData?.ecs?.event?.action?.[0] || '',
-            },
-            ...extraItems,
-          ]);
-          setIsPopoverOpen(true);
-        }
-      });
       cy.trigger('custom:data', [fit]);
 
       setTimeout(() => {
@@ -378,10 +407,11 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
 
     return () => {
       if (cy) {
+        cy.elements('node.event-node').off('click');
         cy.off('click');
       }
     };
-  }, [cy, data, elements]);
+  }, [cy, data, elements, eventNodeHandler]);
 
   // Add the height to the div style. The height is a separate prop because it
   // is required and can trigger rendering when changed.
@@ -417,17 +447,20 @@ export const Cytoscape = memo(CytoscapeComponent, (prevProps, nextProps) => {
   return propsAreEqual;
 });
 
+interface AlertNode {
+  data: {
+    id: string;
+    label: string;
+    eventId: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    document: any;
+  };
+  classes?: string;
+}
+
 interface Event extends TimelineItem {
   occurrences: number;
-  alertNodes: Array<{
-    data: {
-      id: string;
-      label: string;
-      eventId: string;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      document: any;
-    };
-  }>;
+  alertNodes: AlertNode[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -470,29 +503,23 @@ export async function convertToCytoscapeElements(
     // assumes we're working with AWS docs only
     const document = await getDocument(event._index as string, event._id, ['aws.*']);
     const label = getResourceName(event, document);
+    const getAlertNode = () => ({
+      data: {
+        id: `alert-${event._id}`,
+        label,
+        eventId: event._id,
+        document,
+      },
+      classes: 'alert-node',
+    });
+
     if (!existing) {
       event.occurrences = 1;
-      event.alertNodes = [
-        {
-          data: {
-            id: `alert-${event._id}`,
-            label,
-            eventId: event._id,
-            document,
-          },
-        },
-      ];
+      event.alertNodes = [getAlertNode()];
       items.push(event);
     } else {
       existing.occurrences += 1;
-      existing.alertNodes.push({
-        data: {
-          id: `alert-${event._id}`,
-          label,
-          eventId: event._id,
-          document,
-        },
-      });
+      existing.alertNodes.push(getAlertNode());
     }
   }
 
@@ -524,6 +551,8 @@ export async function convertToCytoscapeElements(
           parent: `event-${eventName}`,
           label: `${eventName} x ${event.occurrences}`,
           eventId: event._id,
+          alertNodes: event.alertNodes,
+          isExpanded: false,
         },
         classes: 'event-node',
       };
@@ -537,16 +566,6 @@ export async function convertToCytoscapeElements(
           target: eventNode.data.id,
           label: '',
         },
-      });
-
-      event.alertNodes.forEach((alertNode) => {
-        elements.push(alertNode);
-        elements.push({
-          data: {
-            source: eventNode.data.id,
-            target: alertNode.data.id,
-          },
-        });
       });
 
       userNodeId = userNode.data.id;
