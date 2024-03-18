@@ -62,5 +62,35 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     ownerId: {
       type: 'keyword',
     },
+    runStats: {
+      properties: {
+        aggregated: {
+          properties: {
+            historySize: {
+              type: 'long',
+            },
+            avgDuration: {
+              type: 'long',
+            },
+            successOutcomeRatio: {
+              type: 'double',
+            },
+          },
+        },
+        history: {
+          properties: {
+            timestamp: {
+              type: 'date',
+            },
+            outcome: {
+              type: 'keyword',
+            },
+            duration: {
+              type: 'long',
+            },
+          },
+        },
+      },
+    },
   },
 };

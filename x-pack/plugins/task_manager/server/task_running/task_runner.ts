@@ -14,7 +14,7 @@
 import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { defaults, flow, identity, isUndefined, omit, random } from 'lodash';
+import { defaults, flow, identity, isUndefined, omit, random, mean } from 'lodash';
 import { ExecutionContextStart, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import moment from 'moment';
@@ -53,6 +53,7 @@ import {
   SuccessfulRunResult,
   TaskDefinition,
   TaskStatus,
+  RunStatsHistory,
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { createSkipError, isRetryableError, isSkipError, isUnrecoverableError } from './errors';
@@ -64,6 +65,7 @@ export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
 export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
 export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
+const MAX_NUM_RUN_STATS = 100;
 
 export interface TaskRunner {
   isExpired: boolean;
@@ -655,11 +657,31 @@ export class TaskManagerRunner implements TaskRunner {
       this.logger.warn(
         `Task Manager has skipped executing the Task (${taskType}/${id}) ${skipAttempts} times as it has invalid params.`
       );
+      const updatedRunStatsHistory: RunStatsHistory = ([] as RunStatsHistory)
+        .concat(
+          {
+            timestamp: new Date(),
+            outcome: 'failure',
+            duration: Date.now() - this.instance.task.startedAt!.getTime(),
+          },
+          this.instance.task.runStats?.history ?? []
+        )
+        .slice(0, MAX_NUM_RUN_STATS);
       return asOk({
         state: this.instance.task.state,
         runAt: moment().add(delay, 'millisecond').toDate(),
         attempts: 0,
         skipAttempts,
+        runStats: {
+          aggregated: {
+            historySize: updatedRunStatsHistory.length,
+            avgDuration: mean(updatedRunStatsHistory.map((a) => a.duration)),
+            successOutcomeRatio:
+              updatedRunStatsHistory.filter((a) => a.outcome === 'success').length /
+              MAX_NUM_RUN_STATS,
+          },
+          history: updatedRunStatsHistory,
+        },
       });
     }
 
@@ -681,10 +703,30 @@ export class TaskManagerRunner implements TaskRunner {
           };
 
       if (reschedule.runAt || reschedule.schedule) {
+        const updatedRunStatsHistory: RunStatsHistory = ([] as RunStatsHistory)
+          .concat(
+            {
+              timestamp: new Date(),
+              outcome: 'failure',
+              duration: Date.now() - this.instance.task.startedAt!.getTime(),
+            },
+            this.instance.task.runStats?.history ?? []
+          )
+          .slice(0, MAX_NUM_RUN_STATS);
         return asOk({
           state,
           attempts,
           skipAttempts,
+          runStats: {
+            aggregated: {
+              historySize: updatedRunStatsHistory.length,
+              avgDuration: mean(updatedRunStatsHistory.map((a) => a.duration)),
+              successOutcomeRatio:
+                updatedRunStatsHistory.filter((a) => a.outcome === 'success').length /
+                MAX_NUM_RUN_STATS,
+            },
+            history: updatedRunStatsHistory,
+          },
           ...reschedule,
         });
       }
@@ -724,6 +766,17 @@ export class TaskManagerRunner implements TaskRunner {
             requeueInvalidTaskAttempts = 0;
           }
 
+          const updatedRunStatsHistory: RunStatsHistory = ([] as RunStatsHistory)
+            .concat(
+              {
+                timestamp: new Date(),
+                outcome: !hasTaskRunFailed ? 'failure' : 'success',
+                duration: Date.now() - this.instance.task.startedAt!.getTime(),
+              },
+              this.instance.task.runStats?.history ?? []
+            )
+            .slice(0, MAX_NUM_RUN_STATS);
+
           return asOk({
             runAt:
               runAt || intervalFromDate(startedAt!, reschedule?.interval ?? schedule?.interval)!,
@@ -732,6 +785,16 @@ export class TaskManagerRunner implements TaskRunner {
             attempts,
             status: TaskStatus.Idle,
             numSkippedRuns: requeueInvalidTaskAttempts,
+            runStats: {
+              aggregated: {
+                historySize: updatedRunStatsHistory.length,
+                avgDuration: mean(updatedRunStatsHistory.map((a) => a.duration)),
+                successOutcomeRatio:
+                  updatedRunStatsHistory.filter((a) => a.outcome === 'success').length /
+                  MAX_NUM_RUN_STATS,
+              },
+              history: updatedRunStatsHistory,
+            },
           });
         }
       ),

@@ -459,6 +459,7 @@ describe('TaskPool', () => {
           type: '',
           title: '',
           timeout: '5m',
+          workerCost: 1,
           createTaskRunner: jest.fn(),
         };
       },

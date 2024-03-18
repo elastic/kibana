@@ -450,7 +450,22 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * The random uuid of the Kibana instance which claimed ownership of the task last
    */
   ownerId: string | null;
+
+  runStats?: {
+    aggregated: {
+      historySize: number;
+      avgDuration: number;
+      successOutcomeRatio: number;
+    };
+    history: RunStatsHistory;
+  };
 }
+
+export type RunStatsHistory = Array<{
+  timestamp: Date;
+  outcome: string;
+  duration: number;
+}>;
 
 /**
  * A task instance that has an id and is ready for storage.

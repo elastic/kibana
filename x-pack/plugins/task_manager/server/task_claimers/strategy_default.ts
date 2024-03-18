@@ -14,9 +14,12 @@ import { Subject } from 'rxjs';
 import { asOk, isOk, isErr } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { TaskClaimerOpts, ClaimOwnershipResult } from '.';
-import { ConcreteTaskInstance, TaskPriority, TaskStatus } from '../task';
+import { ConcreteTaskInstance, TaskDefinition, TaskPriority, TaskStatus } from '../task';
 import { TaskClaim, asTaskClaimEvent, startTaskTimer } from '../task_events';
 import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from '../queries/query_clauses';
+
+const MIN_HISTORY_SIZE = 100;
+const LONG_RUNNING_TASK_AVG_DURATION_THRESHOLD = 1 * 60 * 1000;
 
 import {
   IdleTaskWithExpiredRunAt,
@@ -51,6 +54,7 @@ export async function claimAvailableTasksDefault(
     );
 
     const docsToUpdate = processResultFromSearches(opts, results);
+    console.log('*** docsToUpdate', JSON.stringify(docsToUpdate, null, 2));
 
     if (docsToUpdate.length === 0) {
       return {
@@ -110,10 +114,8 @@ function processResultFromSearches(
   const sortedResults = ([] as ConcreteTaskInstance[]).concat(...results).sort((a, b) => {
     const aTaskDef = definitions.get(a.taskType);
     const bTaskDef = definitions.get(b.taskType);
-    const aPriority =
-      typeof aTaskDef.priority === 'number' ? aTaskDef.priority : TaskPriority.Normal;
-    const bPriority =
-      typeof bTaskDef.priority === 'number' ? bTaskDef.priority : TaskPriority.Normal;
+    const aPriority = getTaskPriority(a, aTaskDef);
+    const bPriority = getTaskPriority(b, bTaskDef);
     if (aPriority === bPriority) {
       return aTaskDef.workerCost - bTaskDef.workerCost;
     }
@@ -167,6 +169,7 @@ async function searchForTasks(
   const sort: NonNullable<SearchOpts['sort']> = getClaimSort(definitions);
   const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
 
+  // console.log('*** SEARCH FOR TASKS', JSON.stringify({ query, sort, size }, null, 2));
   const searchResult = await taskStore.fetch({ query, sort, size, seq_no_primary_term: true });
 
   return searchResult.docs;
@@ -184,7 +187,9 @@ function getClaimSort(definitions: TaskTypeDictionary): estypes.SortCombinations
           // Use priority if explicitly specified in task definition, otherwise default to 50 (Normal)
           source: `
             String taskType = doc['task.taskType'].value;
-            if (params.priority_map.containsKey(taskType)) {
+            if (doc.containsKey('task.runStats') && doc['task.runStats.aggregated.historySize'].value >= ${MIN_HISTORY_SIZE} && (doc['task.runStats.aggregated.avgDuration'].value >= ${LONG_RUNNING_TASK_AVG_DURATION_THRESHOLD} || doc['task.runStats.aggregated.successOutcomeRatio'].value == 0)) {
+              return ${TaskPriority.LongRunning};
+            } else if (params.priority_map.containsKey(taskType)) {
               return params.priority_map[taskType];
             } else {
               return ${TaskPriority.Normal};
@@ -205,4 +210,16 @@ function getClaimSort(definitions: TaskTypeDictionary): estypes.SortCombinations
     },
     SortByRunAtAndRetryAt,
   ];
+}
+
+function getTaskPriority(task: ConcreteTaskInstance, taskDef: TaskDefinition): TaskPriority {
+  if (
+    task.runStats &&
+    task.runStats.aggregated.historySize >= MIN_HISTORY_SIZE &&
+    (task.runStats.aggregated.avgDuration >= LONG_RUNNING_TASK_AVG_DURATION_THRESHOLD ||
+      task.runStats?.aggregated.successOutcomeRatio === 0)
+  ) {
+    return TaskPriority.LongRunning;
+  }
+  return typeof taskDef.priority === 'number' ? taskDef.priority : TaskPriority.Normal;
 }

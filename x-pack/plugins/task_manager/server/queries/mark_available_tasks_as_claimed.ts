@@ -33,7 +33,11 @@ export function taskWithLessThanMaxAttempts(type: string, maxAttempts: number): 
 export function tasksOfType(taskTypes: string[]): estypes.QueryDslQueryContainer {
   return {
     bool: {
-      should: [...taskTypes].map((type) => ({ term: { 'task.taskType': type } })),
+      should: {
+        terms: {
+          'task.taskType': taskTypes,
+        },
+      },
     },
   };
 }
