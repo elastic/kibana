@@ -21,7 +21,7 @@ destination_file="./packages/kbn-monaco/src/esql/antlr/esql_lexer.g4"
 cp "$source_file" "$destination_file"
 
 # Insert the license header
-license_header=$(cat $license_header_file)
+license_header=$(cat "$license_header_file")
 
 echo "Inserting license header into $destination_file"
 echo $license_header
