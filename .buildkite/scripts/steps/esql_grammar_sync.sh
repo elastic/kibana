@@ -21,8 +21,10 @@ destination_file="./packages/kbn-monaco/src/esql/antlr/esql_lexer.g4"
 # Copy the file
 cp "$source_file" "$destination_file"
 
+antlr
+
 # Insert the license header
-# echo -e "${license_header}\n\n$(cat ${destination_file})" > ${destination_file}
+echo -e "${license_header}\n\n$(cat ${destination_file})" > ${destination_file}
 
 # Replace the line containing "lexer grammar" with "lexer grammar esql_lexer;"
 sed -i -e 's/lexer grammar.*$/lexer grammar esql_lexer;/' "$destination_file" || exit
