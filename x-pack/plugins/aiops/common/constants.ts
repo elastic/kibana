@@ -50,3 +50,7 @@ export const CHANGE_POINT_DETECTION_VIEW_TYPE = {
 
 export type ChangePointDetectionViewType =
   typeof CHANGE_POINT_DETECTION_VIEW_TYPE[keyof typeof CHANGE_POINT_DETECTION_VIEW_TYPE];
+
+export const EMBEDDABLE_LOG_CATEGORIZATION_TYPE = 'aiopsLogCategorization' as const;
+
+export type EmbeddableLogCategorizationType = typeof EMBEDDABLE_LOG_CATEGORIZATION_TYPE;

@@ -14,8 +14,9 @@ import {
   CASES_ATTACHMENT_CHANGE_POINT_CHART,
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
 } from '../../common/constants';
-import { getEmbeddableChangePointChart } from '../embeddable/embeddable_change_point_chart_component';
+
 import type { AiopsPluginStartDeps } from '../types';
+import { getEmbeddableChangePointChart } from '../embeddables/change_point_chart';
 
 export function registerChangePointChartsAttachment(
   cases: CasesPublicSetup,

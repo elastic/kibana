@@ -23,9 +23,9 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { EmbeddableInputTracker } from './embeddable_chart_component_wrapper';
-import type { EmbeddableChangePointType } from '../../common/constants';
-import { EMBEDDABLE_ORIGIN } from '../../common/constants';
-import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';
+import type { EmbeddableChangePointType } from '../../../common/constants';
+import { EMBEDDABLE_ORIGIN } from '../../../common/constants';
+import { AiopsAppContext, type AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 
 import type { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
 

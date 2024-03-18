@@ -26,6 +26,7 @@ import type { Filter } from '@kbn/es-query';
 import { useTableState } from '@kbn/ml-in-memory-table';
 
 import moment from 'moment';
+import { css } from '@emotion/react';
 import type { CategorizationAdditionalFilter } from '../../../../common/api/log_categorization/create_category_request';
 import {
   type QueryMode,
@@ -63,6 +64,7 @@ interface Props {
   additionalFilter?: CategorizationAdditionalFilter;
   navigateToDiscover?: boolean;
   displayExamples?: boolean;
+  displayHeader?: boolean;
 }
 
 export const CategoryTable: FC<Props> = ({
@@ -82,6 +84,7 @@ export const CategoryTable: FC<Props> = ({
   additionalFilter,
   navigateToDiscover = true,
   displayExamples = true,
+  displayHeader = true,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
@@ -306,16 +309,30 @@ export const CategoryTable: FC<Props> = ({
     };
   };
 
+  const tableStyle = css({
+    thead: {
+      position: 'sticky',
+      insetBlockStart: 0,
+      zIndex: 1,
+      backgroundColor: euiTheme.euiColorEmptyShade,
+      boxShadow: `inset 0 0px 0, inset 0 -1px 0 ${euiTheme.euiBorderColor}`,
+    },
+  });
+
   return (
     <>
-      <TableHeader
-        categoriesCount={categories.length}
-        selectedCategoriesCount={selectedCategories.length}
-        labels={labels}
-        openInDiscover={(queryMode: QueryMode) => openInDiscover(queryMode)}
-      />
-      <EuiSpacer size="xs" />
-      <EuiHorizontalRule margin="none" />
+      {displayHeader ? (
+        <>
+          <TableHeader
+            categoriesCount={categories.length}
+            selectedCategoriesCount={selectedCategories.length}
+            labels={labels}
+            openInDiscover={(queryMode: QueryMode) => openInDiscover(queryMode)}
+          />
+          <EuiSpacer size="xs" />
+          <EuiHorizontalRule margin="none" />
+        </>
+      ) : null}
 
       <EuiInMemoryTable<Category>
         compressed
@@ -330,6 +347,7 @@ export const CategoryTable: FC<Props> = ({
         data-test-subj="aiopsLogPatternsTable"
         isExpandable={true}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        css={tableStyle}
         rowProps={(category) => {
           return enableRowActions
             ? {

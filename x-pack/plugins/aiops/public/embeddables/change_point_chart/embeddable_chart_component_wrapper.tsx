@@ -11,26 +11,26 @@ import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
-import { ChangePointsTable } from '../components/change_point_detection/change_points_table';
-import { CHANGE_POINT_DETECTION_VIEW_TYPE } from '../../common/constants';
-import { ReloadContextProvider } from '../hooks/use_reload';
+import { ChangePointsTable } from '../../components/change_point_detection/change_points_table';
+import { CHANGE_POINT_DETECTION_VIEW_TYPE } from '../../../common/constants';
+import { ReloadContextProvider } from '../../hooks/use_reload';
 import {
   type ChangePointAnnotation,
   ChangePointDetectionControlsContextProvider,
   type ChangePointDetectionRequestParams,
-} from '../components/change_point_detection/change_point_detection_context';
+} from '../../components/change_point_detection/change_point_detection_context';
 import type {
   EmbeddableChangePointChartInput,
   EmbeddableChangePointChartOutput,
 } from './embeddable_change_point_chart';
 import type { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
-import { FilterQueryContextProvider, useFilterQueryUpdates } from '../hooks/use_filters_query';
-import { DataSourceContextProvider, useDataSource } from '../hooks/use_data_source';
-import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
-import { createMergedEsQuery } from '../application/utils/search_utils';
-import { useChangePointResults } from '../components/change_point_detection/use_change_point_agg_request';
-import { ChartsGrid } from '../components/change_point_detection/charts_grid';
-import { NoChangePointsWarning } from '../components/change_point_detection/no_change_points_warning';
+import { FilterQueryContextProvider, useFilterQueryUpdates } from '../../hooks/use_filters_query';
+import { DataSourceContextProvider, useDataSource } from '../../hooks/use_data_source';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { createMergedEsQuery } from '../../application/utils/search_utils';
+import { useChangePointResults } from '../../components/change_point_detection/use_change_point_agg_request';
+import { ChartsGrid } from '../../components/change_point_detection/charts_grid';
+import { NoChangePointsWarning } from '../../components/change_point_detection/no_change_points_warning';
 
 const defaultSort = {
   field: 'p_value' as keyof ChangePointAnnotation,

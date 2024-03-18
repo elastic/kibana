@@ -13,8 +13,8 @@ import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type {
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
   EmbeddableChangePointType,
-} from '../../common/constants';
-import type { AiopsPluginStart, AiopsPluginStartDeps } from '../types';
+} from '../../../common/constants';
+import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 import { EmbeddableChangePointChart } from './embeddable_change_point_chart';
 

@@ -9,9 +9,9 @@ import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import type { EmbeddableChangePointChartExplicitInput } from './types';
-import type { AiopsAppDependencies } from '..';
-import { AiopsAppContext } from '../hooks/use_aiops_app_context';
-import type { AiopsPluginStartDeps } from '../types';
+import type { AiopsAppDependencies } from '../..';
+import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
+import type { AiopsPluginStartDeps } from '../../types';
 import { ChangePointChartInitializer } from './change_point_chart_initializer';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 

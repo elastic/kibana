@@ -126,3 +126,58 @@ export class RandomSampler {
     return wrapper;
   }
 }
+
+export const randomSamplerText = (randomSamplerPreference: RandomSamplerOption) => {
+  switch (randomSamplerPreference) {
+    case RANDOM_SAMPLER_OPTION.OFF:
+      return {
+        calloutInfoMessage: i18n.translate(
+          'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.offCallout.message',
+          {
+            defaultMessage:
+              'Random sampling can be turned on to increase the speed of analysis, although some accuracy will be lost.',
+          }
+        ),
+        buttonText: i18n.translate(
+          'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.offCallout.button',
+          {
+            defaultMessage: 'No sampling',
+          }
+        ),
+      };
+    case RANDOM_SAMPLER_OPTION.ON_AUTOMATIC:
+      return {
+        calloutInfoMessage: i18n.translate(
+          'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onAutomaticCallout.message',
+          {
+            defaultMessage:
+              'The pattern analysis will use random sampler aggregations. The probability is automatically set to balance accuracy and speed.',
+          }
+        ),
+        buttonText: i18n.translate(
+          'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onAutomaticCallout.button',
+          {
+            defaultMessage: 'Auto sampling',
+          }
+        ),
+      };
+
+    case RANDOM_SAMPLER_OPTION.ON_MANUAL:
+    default:
+      return {
+        calloutInfoMessage: i18n.translate(
+          'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onManualCallout.message',
+          {
+            defaultMessage:
+              'The pattern analysis will use random sampler aggregations. A lower percentage probability increases performance, but some accuracy is lost.',
+          }
+        ),
+        buttonText: i18n.translate(
+          'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onManualCallout.button',
+          {
+            defaultMessage: 'Manual sampling',
+          }
+        ),
+      };
+  }
+};

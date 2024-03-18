@@ -14,10 +14,10 @@ import { EuiLoadingChart } from '@elastic/eui';
 import {
   type ChangePointDetectionViewType,
   type EmbeddableChangePointType,
-} from '../../common/constants';
-import type { AiopsPluginStartDeps } from '../types';
+} from '../../../common/constants';
+import type { AiopsPluginStartDeps } from '../../types';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
-import type { ChangePointAnnotation } from '../components/change_point_detection/change_point_detection_context';
+import type { ChangePointAnnotation } from '../../components/change_point_detection/change_point_detection_context';
 
 export interface EmbeddableChangePointChartProps {
   viewType?: ChangePointDetectionViewType;

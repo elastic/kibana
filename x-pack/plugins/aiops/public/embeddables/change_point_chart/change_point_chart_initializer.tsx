@@ -28,16 +28,16 @@ import usePrevious from 'react-use/lib/usePrevious';
 import {
   ChangePointDetectionControlsContextProvider,
   useChangePointDetectionControlsContext,
-} from '../components/change_point_detection/change_point_detection_context';
-import { DEFAULT_AGG_FUNCTION } from '../components/change_point_detection/constants';
-import { FunctionPicker } from '../components/change_point_detection/function_picker';
-import { MaxSeriesControl } from '../components/change_point_detection/max_series_control';
-import { MetricFieldSelector } from '../components/change_point_detection/metric_field_selector';
-import { PartitionsSelector } from '../components/change_point_detection/partitions_selector';
-import { SplitFieldSelector } from '../components/change_point_detection/split_field_selector';
-import { ViewTypeSelector } from '../components/change_point_detection/view_type_selector';
-import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
-import { DataSourceContextProvider } from '../hooks/use_data_source';
+} from '../../components/change_point_detection/change_point_detection_context';
+import { DEFAULT_AGG_FUNCTION } from '../../components/change_point_detection/constants';
+import { FunctionPicker } from '../../components/change_point_detection/function_picker';
+import { MaxSeriesControl } from '../../components/change_point_detection/max_series_control';
+import { MetricFieldSelector } from '../../components/change_point_detection/metric_field_selector';
+import { PartitionsSelector } from '../../components/change_point_detection/partitions_selector';
+import { SplitFieldSelector } from '../../components/change_point_detection/split_field_selector';
+import { ViewTypeSelector } from '../../components/change_point_detection/view_type_selector';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import { DEFAULT_SERIES } from './const';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 import type { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';

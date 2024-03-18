@@ -22,17 +22,20 @@ export const DocumentViewModeToggle = ({
   prepend,
   stateContainer,
   setDiscoverViewMode,
+  patternCount,
 }: {
   viewMode: VIEW_MODE;
   isTextBasedQuery: boolean;
   prepend?: ReactElement;
   stateContainer: DiscoverStateContainer;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
+  patternCount?: number;
 }) => {
   const { euiTheme } = useEuiTheme();
   const { uiSettings } = useDiscoverServices();
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
-  const includesNormalTabsStyle = viewMode === VIEW_MODE.AGGREGATED_LEVEL || isLegacy;
+  const includesNormalTabsStyle =
+    viewMode === VIEW_MODE.AGGREGATED_LEVEL || viewMode === VIEW_MODE.PATTERN_LEVEL || isLegacy;
 
   const containerPadding = includesNormalTabsStyle ? euiTheme.size.s : 0;
   const containerCss = css`
@@ -88,6 +91,17 @@ export const DocumentViewModeToggle = ({
               <FormattedMessage
                 id="discover.viewModes.fieldStatistics.label"
                 defaultMessage="Field statistics"
+              />
+            </EuiTab>
+            <EuiTab
+              isSelected={viewMode === VIEW_MODE.PATTERN_LEVEL}
+              onClick={() => setDiscoverViewMode(VIEW_MODE.PATTERN_LEVEL)}
+              data-test-subj="dscViewModeFieldStatsButton"
+            >
+              <FormattedMessage
+                id="discover.viewModes.patternAnalysis.label"
+                defaultMessage="Patterns {patternCount}"
+                values={{ patternCount: patternCount ? ` (${patternCount})` : '' }}
               />
             </EuiTab>
           </EuiTabs>
