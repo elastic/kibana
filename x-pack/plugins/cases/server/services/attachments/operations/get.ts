@@ -13,7 +13,7 @@ import type {
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { isSOError } from '../../../common/error';
-import { decodeOrThrow } from '../../../../common/api';
+import { decodeOrThrow } from '../../../common/runtime_types';
 import type {
   AttachmentPersistedAttributes,
   AttachmentTransformedAttributes,
