@@ -63,3 +63,13 @@ export type StringOrNumber = string | number;
 export interface Fields<T = unknown[]> {
   [x: string]: T | Array<Fields<T>>;
 }
+
+export interface EventHit extends SearchHit {
+  sort: string[];
+  _source: EventSource;
+  fields: Fields;
+  aggregations: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [agg: string]: any;
+  };
+}
