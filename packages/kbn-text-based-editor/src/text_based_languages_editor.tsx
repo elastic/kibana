@@ -63,7 +63,7 @@ import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
-import { addQueriesToCache, updateCachedQueries } from './history_localStorage';
+import { addQueriesToCache, updateCachedQueries } from './history_localstorage';
 
 import './overwrite.scss';
 

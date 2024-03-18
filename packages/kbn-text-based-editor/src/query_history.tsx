@@ -24,7 +24,7 @@ import {
   euiScrollBarStyles,
 } from '@elastic/eui';
 import { css, Interpolation, Theme } from '@emotion/react';
-import { type QueryHistoryItem, getHistoryItems } from './history_localStorage';
+import { type QueryHistoryItem, getHistoryItems } from './history_localstorage';
 import { getReducedSpaceStyling, swapArrayElements } from './query_history_helpers';
 
 const CONTAINER_MAX_HEIGHT = 190;
