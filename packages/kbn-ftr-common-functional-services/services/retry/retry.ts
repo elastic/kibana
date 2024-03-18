@@ -10,10 +10,10 @@ import { FtrService } from '../ftr_provider_context';
 import { retryForSuccess } from './retry_for_success';
 import { retryForTruthy } from './retry_for_truthy';
 
-interface TryWithAttemptsOptions {
-  timeout?: number;
-  retryCount?: number;
+interface TryWithRetriesOptions {
+  retryCount: number;
   retryDelay?: number;
+  timeout?: number;
 }
 
 export class RetryService extends FtrService {
@@ -97,17 +97,17 @@ export class RetryService extends FtrService {
    * Use to retry block {options.retryCount} times within {options.timeout} period and return block result
    * @param description block description
    * @param block retrying operation
-   * @param options TryWithAttemptsOptions
+   * @param options options.retryCount to retry block multiple times
    * @param onFailureBlock optional block to run on operation failure before the new attempt
    * @returns result from block
    */
   public async tryWithRetries<T>(
     description: string,
     block: () => Promise<T>,
-    options: TryWithAttemptsOptions,
+    options: TryWithRetriesOptions,
     onFailureBlock?: () => Promise<T>
   ): Promise<T> {
-    const { retryCount = 2, timeout = this.config.get('timeouts.try'), retryDelay = 200 } = options;
+    const { retryCount, timeout = this.config.get('timeouts.try'), retryDelay = 200 } = options;
 
     return await retryForSuccess<T>(this.log, {
       description,
