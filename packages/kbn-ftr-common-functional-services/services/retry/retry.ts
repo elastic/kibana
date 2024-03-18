@@ -10,6 +10,9 @@ import { FtrService } from '../ftr_provider_context';
 import { retryForSuccess } from './retry_for_success';
 import { retryForTruthy } from './retry_for_truthy';
 
+/**
+ * retr
+ */
 interface TryWithAttemptsOptions {
   retries?: number;
   timeout?: number;
@@ -79,6 +82,7 @@ export class RetryService extends FtrService {
   }
 
   public async tryWithRetries<T>(
+    description: string,
     block: () => Promise<T>,
     options: TryWithAttemptsOptions = {}
   ): Promise<T> {
@@ -94,12 +98,20 @@ export class RetryService extends FtrService {
         if (retryAttempt > retries) {
           // Log error message if we reached the maximum number of retries
           // but don't throw an error, return it to break the retry loop.
-          return new Error(`Service reached the retries limit: ${retries}`);
+          const errorMessage = `Reached maximum number of retries: ${retryAttempt - 1}/${retries}`;
+          this.log.error(errorMessage);
+          return new Error(JSON.stringify(errorMessage));
         }
 
         retryAttempt = retryAttempt + 1;
 
-        return block();
+        // Catch the error thrown by the test and log it, throw it again to force `tryForTime` to retry.
+        try {
+          return await block();
+        } catch (error) {
+          this.log.error(`Retrying ${description}: ${error}`);
+          throw error;
+        }
       },
       undefined,
       retryDelay
