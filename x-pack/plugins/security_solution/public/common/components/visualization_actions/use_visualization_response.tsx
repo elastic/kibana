@@ -26,6 +26,5 @@ export const useVisualizationResponse = ({ visualizationId }: { visualizationId:
     }),
     [inspect, loading, searchSessionId]
   );
-  console.log(visualizationId, JSON.stringify(response, null, 2));
   return response;
 };
