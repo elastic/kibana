@@ -44,7 +44,10 @@ import type { AggregatableField, NonAggregatableField } from '../types/overall_s
 import { getSupportedAggs } from '../utils/get_supported_aggs';
 import { DEFAULT_BAR_TARGET } from '../../common/constants';
 import type { DataVisualizerGridInput } from '../embeddables/grid_embeddable/types';
-import { getDefaultPageState } from '../constants/index_data_visualizer_viewer';
+import {
+  DATA_VISUALIZER_INDEX_VIEWER_ID,
+  getDefaultPageState,
+} from '../constants/index_data_visualizer_viewer';
 
 const defaults = getDefaultPageState();
 
@@ -118,31 +121,36 @@ export const useDataVisualizerGridData = (
   const dataViewFields: DataViewField[] = useMemo(() => currentDataView.fields, [currentDataView]);
 
   const { visibleFieldNames, fieldsToFetch } = useMemo(() => {
+    // Helper logic to add multi-fields to the table for embeddables outside of Index data visualizer
+    // For example, adding {field} will also add {field.keyword} if it exists
     const _fieldsToFetch =
-      Array.isArray(input?.visibleFieldNames) && input.visibleFieldNames.length === 0
-        ? input.fieldsToFetch
+      input.id === DATA_VISUALIZER_INDEX_VIEWER_ID
+        ? undefined
         : [
-            ...dataViewFields
-              .filter((field) => {
-                const visibleNames = input?.visibleFieldNames ?? [];
-                if (visibleNames.includes(field.name)) {
-                  return true;
-                }
-
-                const parent = field.getSubtypeMulti()?.multi?.parent;
-                const matchesParent = parent ? visibleNames.indexOf(parent) > -1 : false;
-                if (matchesParent) {
-                  return true;
-                }
-                return false;
-              })
-              .map((f) => f.name),
+            ...new Set([
+              ...dataViewFields
+                .filter((field) => {
+                  if (input?.visibleFieldNames?.length === 0) return true;
+                  const visibleNames = input?.visibleFieldNames ?? [];
+                  if (visibleNames.includes(field.name)) return true;
+                  const parent = field.getSubtypeMulti()?.multi?.parent;
+                  const matchesParent = parent ? visibleNames.indexOf(parent) > -1 : false;
+                  if (matchesParent) {
+                    return true;
+                  }
+                  return false;
+                })
+                .map((f) => f.name),
+              ...(input.fieldsToFetch ?? []),
+              ...Object.keys(currentDataView.getRuntimeMappings() ?? {}),
+            ]),
           ];
     return {
-      visibleFieldNames: _fieldsToFetch,
-      fieldsToFetch: _fieldsToFetch,
+      visibleFieldNames:
+        input.id === DATA_VISUALIZER_INDEX_VIEWER_ID ? input.visibleFieldNames : _fieldsToFetch,
+      fieldsToFetch: input.id === DATA_VISUALIZER_INDEX_VIEWER_ID ? _fieldsToFetch : undefined,
     };
-  }, [input, dataViewFields]);
+  }, [input.id, input.fieldsToFetch, input.visibleFieldNames, dataViewFields, currentDataView]);
 
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery, queryOrAggregateQuery } = useMemo(() => {

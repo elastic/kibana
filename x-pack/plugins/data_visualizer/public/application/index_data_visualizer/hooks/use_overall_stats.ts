@@ -104,11 +104,12 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
       if (!searchStrategyParams) return;
 
-      const { index, searchQuery, timeFieldName, earliest, latest } = searchStrategyParams;
+      const { index, searchQuery, timeFieldName, earliest, latest, runtimeFieldMap } =
+        searchStrategyParams;
 
       const fetchPopulatedFields = async () => {
         // Trick to avoid duplicate getFieldsForWildcard requests
-        // as earliest & latest timestamps will trigger another update
+        // wouldn't make sense to make time-based query if either earliest & latest timestamps is undefined
         if (timeFieldName !== undefined && (earliest === undefined || latest === undefined)) {
           return;
         }
@@ -132,7 +133,15 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           includeEmptyFields: false,
         });
         if (!unmounted) {
-          setPopulatedFieldsInIndex(new Set(nonEmptyFields.map((field) => field.name)));
+          setPopulatedFieldsInIndex(
+            new Set([
+              ...nonEmptyFields.map((field) => field.name),
+              // Field caps API don't know about runtime fields
+              // so by default we expect runtime fields to be populated
+              // so we can later check as needed
+              ...Object.keys(runtimeFieldMap ?? {}),
+            ])
+          );
         }
       };
 
@@ -150,6 +159,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       searchStrategyParams?.latest,
       searchStrategyParams?.searchQuery,
       searchStrategyParams?.index,
+      searchStrategyParams?.runtimeFieldMap,
     ]
   );
   const startFetch = useCallback(async () => {
