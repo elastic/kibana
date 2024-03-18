@@ -10,8 +10,15 @@ import dagre from 'cytoscape-dagre';
 import { useDispatch } from 'react-redux';
 import { isEqual } from 'lodash';
 import type { CSSProperties, ReactNode } from 'react';
-import { useCallback } from 'react';
-import React, { useContext, createContext, memo, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  createContext,
+  memo,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { ThemeContext } from 'styled-components';
 // import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
