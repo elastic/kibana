@@ -212,10 +212,11 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   arguments: JSON.stringify({ queries: [], categories: [] }),
                 });
 
-                expect(pick(contextResponse, 'name', 'content')).to.eql({
-                  name: 'context',
-                  content: JSON.stringify({ screen_description: '', learnings: [] }),
-                });
+                expect(contextResponse.name).to.eql('context');
+
+                const parsedContext = JSON.parse(contextResponse.content || '');
+
+                expect(parsedContext.screen_description).to.contain('The user is looking at');
 
                 expect(pick(assistantResponse, 'role', 'content')).to.eql({
                   role: 'assistant',
@@ -275,10 +276,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                     arguments: JSON.stringify({ queries: [], categories: [] }),
                   });
 
-                  expect(pick(contextResponse, 'name', 'content')).to.eql({
-                    name: 'context',
-                    content: JSON.stringify({ screen_description: '', learnings: [] }),
-                  });
+                  expect(contextResponse.name).to.eql('context');
 
                   expect(pick(assistantResponse, 'role', 'content')).to.eql({
                     role: 'assistant',

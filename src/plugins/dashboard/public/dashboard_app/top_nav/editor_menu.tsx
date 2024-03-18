@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import './editor_menu.scss';
+
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   EuiBadge,
