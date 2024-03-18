@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { sample } from 'lodash';
+import { get, random, sample } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { faker } from '@faker-js/faker';
 import { Moment } from 'moment';
 import { ADMIN_CONSOLE_HOSTS, DOMAINS } from '../../../common/constants';
 import { User } from '../login_cache';
+import { getApmAgent } from '../../../../../lib/get_apm_agent';
+import { ConnectionTimeoutError } from '../errors/connection_timeout_error';
 
 export function createEvent(
   timestamp: Moment,
@@ -64,10 +66,34 @@ export function createEvent(
     },
   };
 
-  return overrides != null
-    ? Object.keys(overrides).reduce((acc, key) => {
-        const value = overrides[key];
-        return set(acc, key, value);
-      }, baseEvent)
-    : baseEvent;
+  const event =
+    overrides != null
+      ? Object.keys(overrides).reduce((acc, key) => {
+          const value = overrides[key];
+          return set(acc, key, value);
+        }, baseEvent)
+      : baseEvent;
+
+  const host = get(event, 'host.name');
+  if (host) {
+    const apmAgent = getApmAgent();
+    const transaction = apmAgent?.startTransaction(`${method} ${path}`, 'request', {
+      startTime: timestamp.valueOf(),
+    });
+    transaction?.setLabel('host', host);
+    transaction?.setLabel('domain', domain);
+    const duration = get(event, 'event.duration', random(10, 150) * 1_000_000) / 1_000_000;
+    const outcome = statusCode >= 500 ? 'failure' : 'success';
+    if (outcome === 'failure') {
+      const message = get(event, 'message', 'Oops!') as string;
+      const error = message.includes('Connection Timeout')
+        ? new ConnectionTimeoutError(message)
+        : new Error(message);
+      apmAgent?.captureError(error, { parent: transaction });
+    }
+    transaction?.setOutcome(outcome);
+    transaction?.end(outcome, timestamp.valueOf() + duration);
+  }
+
+  return event;
 }

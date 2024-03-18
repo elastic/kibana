@@ -94,7 +94,10 @@ export function parseCliOptions(): CliOptions {
       'The number of ephemeral projects to create. This is only enabled for the "fake_stack" dataset. It will create project IDs that will last 5 to 12 hours.',
       parseCliInt,
       DEFAULTS.EPHEMERAL_PROJECT_IDS
-    );
+    )
+    .option('--apm-server <address>', 'The address of the APM server.', DEFAULTS.APM_SERVER)
+    .option('--apm-api-key <key>', 'The API key for APM server.', '')
+    .option('--apm-secret-token <token>', 'The secret token for APM server.', '');
 
   program.parse(process.argv);
   return program.opts() as CliOptions;

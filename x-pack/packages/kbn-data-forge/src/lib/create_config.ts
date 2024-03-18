@@ -66,6 +66,12 @@ export function createConfig(partialConfig: PartialConfig = {}) {
       ...(partialConfig.indexing ?? {}),
     },
     schedule: partialConfig.schedule ?? [schedule],
+    apm: {
+      server: DEFAULTS.APM_SERVER,
+      apiKey: '',
+      secretToken: '',
+      ...(partialConfig.apm ?? {}),
+    },
   };
 
   const decodedConfig = ConfigRT.decode(config);

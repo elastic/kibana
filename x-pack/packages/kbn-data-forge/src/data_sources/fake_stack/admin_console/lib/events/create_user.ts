@@ -32,7 +32,7 @@ export const createUser: EventFunction = (_schedule, timestamp) => {
     event: {
       action: 'createUser',
       category: 'administrative',
-      duration: random(10, 150) * 1000000,
+      duration: random(10, 150) * 1_000_000,
     },
     'http.response.bytes': bytes,
     host: { name: host },

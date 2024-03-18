@@ -20,6 +20,7 @@ import { Doc, EventFunction, EventTemplate, GeneratorFunction } from '../../../t
 import { qaDeployedToProduction } from './lib/events/qa_deployed_to_production';
 import { mongodbProxyTimeout } from './lib/events/mongodb_proxy_timeout';
 import { addEphemeralProjectId } from '../../../lib/add_ephemeral_project_id';
+import { startApmAgent } from '../../../lib/get_apm_agent';
 
 const GOOD_EVENT_TEMPLATES: EventTemplate = [
   [mongodbProxyTimeout, 1],
@@ -55,6 +56,7 @@ let firstRun = true;
 export const kibanaAssets = `${__dirname}/assets/admin_console.ndjson`;
 
 export const generateEvent: GeneratorFunction = (config, schedule, _index, timestamp) => {
+  startApmAgent(config);
   let startupEvents: Doc[] = [];
   if (firstRun && schedule.template !== 'internalErrors') {
     firstRun = false;

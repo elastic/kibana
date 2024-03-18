@@ -50,6 +50,11 @@ export function cliOptionsToPartialConfig(options: CliOptions) {
       alignEventsToInterval: options.alignEventsToInterval === true,
     },
     schedule: [schedule],
+    apm: {
+      server: options.apmServer,
+      apiKey: options.apmApiKey,
+      secretToken: options.apmSecretToken,
+    },
   };
 
   return config;
