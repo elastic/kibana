@@ -12,7 +12,7 @@ run_bootstrap() {
     yarn kbn bootstrap --force-install
 }
 
-echo "-- yarn install and boostrap"
+echo "--- yarn install and boostrap"
 if ! run_bootstrap; then
   echo "--- bootstrap failed, trying again in 15 seconds"
   sleep 15
