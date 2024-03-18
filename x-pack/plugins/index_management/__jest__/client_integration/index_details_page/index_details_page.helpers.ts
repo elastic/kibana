@@ -43,6 +43,9 @@ export interface IndexDetailsPageTestBed extends TestBed {
       getDocsLinkHref: () => string;
       isErrorDisplayed: () => boolean;
       clickErrorReloadButton: () => Promise<void>;
+      getTreeViewContent: () => string;
+      clickToggleViewButton: () => Promise<void>;
+      isSearchBarDisabled: () => boolean;
     };
     settings: {
       getCodeBlockContent: () => string;
@@ -194,6 +197,18 @@ export const setup = async ({
         find('indexDetailsMappingsReloadButton').simulate('click');
       });
       component.update();
+    },
+    getTreeViewContent: () => {
+      return find('@timestampField-fieldName').text();
+    },
+    clickToggleViewButton: async () => {
+      await act(async () => {
+        find('indexDetailsMappingsToggleViewButton').simulate('click');
+      });
+      component.update();
+    },
+    isSearchBarDisabled: () => {
+      return find('DocumentFieldsSearch').prop('disabled');
     },
   };
 
