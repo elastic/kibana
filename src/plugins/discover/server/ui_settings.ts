@@ -34,10 +34,6 @@ import {
 } from '@kbn/discover-utils';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
-const technicalPreviewLabel = i18n.translate('discover.advancedSettings.technicalPreviewLabel', {
-  defaultMessage: 'technical preview',
-});
-
 export const getUiSettings: (
   docLinks: DocLinksServiceSetup,
   enableValidations: boolean
@@ -329,7 +325,6 @@ export const getUiSettings: (
             defaultMessage: 'discuss.elastic.co/c/elastic-stack/kibana',
           }) +
           '</a>',
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
       },
     }),
     requiresPageReload: true,
