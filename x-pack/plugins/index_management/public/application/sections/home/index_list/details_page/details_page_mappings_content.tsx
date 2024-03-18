@@ -148,7 +148,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               <h2>
                 <FormattedMessage
                   id="xpack.idxMgmt.indexDetails.mappings.invaluMappingKeysErrorMessageBody"
-                  defaultMessage="Mapping contains invalid keys. Please provide a mapping with valid keys."
+                  defaultMessage="The mapping contains invalid keys. Please provide a mapping with valid keys."
                 />
               </h2>
             }
