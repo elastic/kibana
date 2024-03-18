@@ -6904,7 +6904,7 @@
             "section": "def-common.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string[] | undefined>; localTimeRange: ",
+          "<string[] | undefined>; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -6920,7 +6920,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined>; setLocalTimeRange: (timeRange: ",
+          " | undefined>; setTimeRange: (timeRange: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -6928,15 +6928,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined) => void; getFallbackTimeRange: (() => ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined) | undefined; isCompatibleWithLocalUnifiedSearch: (() => boolean) | undefined; canLinkToLibrary: (() => Promise<boolean>) | undefined; linkToLibrary: (() => Promise<void>) | undefined; canUnlinkFromLibrary: (() => Promise<boolean>) | undefined; unlinkFromLibrary: (() => Promise<void>) | undefined; viewMode: ",
+          " | undefined) => void; isCompatibleWithUnifiedSearch: (() => boolean) | undefined; canLinkToLibrary: (() => Promise<boolean>) | undefined; linkToLibrary: (() => Promise<void>) | undefined; canUnlinkFromLibrary: (() => Promise<boolean>) | undefined; unlinkFromLibrary: (() => Promise<void>) | undefined; viewMode: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -6968,7 +6960,7 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          "; getDescription: () => string; localFilters: ",
+          "; getDescription: () => string; filters$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -6984,7 +6976,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined>; localQuery: ",
+          "[] | undefined>; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",

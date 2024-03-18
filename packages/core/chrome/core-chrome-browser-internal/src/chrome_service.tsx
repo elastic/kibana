@@ -34,7 +34,6 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   NavigationTreeDefinition,
   AppDeepLinkId,
-  CloudURLs,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type {
@@ -213,6 +212,7 @@ export class ChromeService {
     };
 
     const setChromeStyle = (style: ChromeStyle) => {
+      if (style === chromeStyle$.getValue()) return;
       chromeStyle$.next(style);
     };
 
@@ -283,12 +283,9 @@ export class ChromeService {
       LinkId extends AppDeepLinkId = AppDeepLinkId,
       Id extends string = string,
       ChildrenId extends string = Id
-    >(
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
-      deps: { cloudUrls: CloudURLs }
-    ) {
+    >(navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>) {
       validateChromeStyle();
-      projectNavigation.initNavigation(navigationTree$, deps);
+      projectNavigation.initNavigation(navigationTree$);
     }
 
     const setProjectBreadcrumbs = (
@@ -303,19 +300,9 @@ export class ChromeService {
       projectNavigation.setProjectHome(homeHref);
     };
 
-    const setProjectsUrl = (projectsUrl: string) => {
-      validateChromeStyle();
-      projectNavigation.setProjectsUrl(projectsUrl);
-    };
-
     const setProjectName = (projectName: string) => {
       validateChromeStyle();
       projectNavigation.setProjectName(projectName);
-    };
-
-    const setProjectUrl = (projectUrl: string) => {
-      validateChromeStyle();
-      projectNavigation.setProjectUrl(projectUrl);
     };
 
     const isIE = () => {
@@ -543,8 +530,7 @@ export class ChromeService {
       getIsSideNavCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
       project: {
         setHome: setProjectHome,
-        setProjectsUrl,
-        setProjectUrl,
+        setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
         setProjectName,
         initNavigation: initProjectNavigation,
         getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
