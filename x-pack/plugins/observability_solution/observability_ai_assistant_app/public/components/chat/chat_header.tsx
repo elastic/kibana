@@ -23,7 +23,7 @@ import { AssistantAvatar } from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatActionsMenu } from './chat_actions_menu';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
-import type { FlyoutPositionMode, FlyoutWidthMode } from './chat_flyout';
+import type { FlyoutPositionMode } from './chat_flyout';
 
 // needed to prevent InlineTextEdit component from expanding container
 const minWidthClassName = css`
@@ -43,26 +43,22 @@ const chatHeaderMobileClassName = css`
 export function ChatHeader({
   connectors,
   conversationId,
-  flyoutWidthMode,
   flyoutPositionMode,
   licenseInvalid,
   loading,
   title,
   onCopyConversation,
   onSaveTitle,
-  onToggleFlyoutWidthMode,
   onToggleFlyoutPositionMode,
 }: {
   connectors: UseGenAIConnectorsResult;
   conversationId?: string;
-  flyoutWidthMode?: FlyoutWidthMode;
   flyoutPositionMode?: FlyoutPositionMode;
   licenseInvalid: boolean;
   loading: boolean;
   title: string;
   onCopyConversation: () => void;
   onSaveTitle: (title: string) => void;
-  onToggleFlyoutWidthMode?: (newFlyoutWidthMode: FlyoutWidthMode) => void;
   onToggleFlyoutPositionMode?: (newFlyoutPositionMode: FlyoutPositionMode) => void;
 }) {
   const theme = useEuiTheme();
@@ -75,10 +71,6 @@ export function ChatHeader({
   useEffect(() => {
     setNewTitle(title);
   }, [title]);
-
-  const handleToggleFlyoutWidthMode = () => {
-    onToggleFlyoutWidthMode?.(flyoutWidthMode === 'side' ? 'full' : 'side');
-  };
 
   const handleNavigateToConversations = () => {
     if (conversationId) {
@@ -150,7 +142,7 @@ export function ChatHeader({
 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" responsive={false}>
-            {flyoutWidthMode && onToggleFlyoutWidthMode ? (
+            {flyoutPositionMode && onToggleFlyoutPositionMode ? (
               <>
                 <EuiFlexItem grow={false}>
                   <EuiPopover
@@ -203,38 +195,6 @@ export function ChatHeader({
                           data-test-subj="observabilityAiAssistantChatHeaderButton"
                           iconType="discuss"
                           onClick={handleNavigateToConversations}
-                        />
-                      </EuiToolTip>
-                    }
-                  />
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    anchorPosition="downLeft"
-                    button={
-                      <EuiToolTip
-                        content={
-                          flyoutWidthMode === 'side'
-                            ? i18n.translate(
-                                'xpack.observabilityAiAssistant.chatHeader.euiToolTip.expandFlyoutWidthModeLabel',
-                                { defaultMessage: 'Expand flyout' }
-                              )
-                            : i18n.translate(
-                                'xpack.observabilityAiAssistant.chatHeader.euiToolTip.collapseFlyoutWidthModeLabel',
-                                { defaultMessage: 'Collapse flyout' }
-                              )
-                        }
-                        display="block"
-                      >
-                        <EuiButtonIcon
-                          aria-label={i18n.translate(
-                            'xpack.observabilityAiAssistant.chatActionsMenu.euiButtonIcon.toggleFlyoutWidthModeLabel',
-                            { defaultMessage: 'Toggle flyout width mode' }
-                          )}
-                          data-test-subj="observabilityAiAssistantChatHeaderButton"
-                          iconType={flyoutWidthMode === 'side' ? 'expand' : 'minimize'}
-                          onClick={handleToggleFlyoutWidthMode}
                         />
                       </EuiToolTip>
                     }

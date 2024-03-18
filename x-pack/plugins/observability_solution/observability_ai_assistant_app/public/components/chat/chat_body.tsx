@@ -38,7 +38,7 @@ import { useLicense } from '../../hooks/use_license';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
-import { FlyoutPositionMode, FlyoutWidthMode } from './chat_flyout';
+import { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
@@ -95,7 +95,6 @@ const PADDING_AND_BORDER = 32;
 export function ChatBody({
   connectors,
   currentUser,
-  flyoutWidthMode,
   flyoutPositionMode,
   initialConversationId,
   initialMessages,
@@ -103,12 +102,10 @@ export function ChatBody({
   knowledgeBase,
   showLinkToConversationsApp,
   onConversationUpdate,
-  onToggleFlyoutWidthMode,
   onToggleFlyoutPositionMode,
 }: {
   connectors: ReturnType<typeof useGenAIConnectors>;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
-  flyoutWidthMode?: FlyoutWidthMode;
   flyoutPositionMode?: FlyoutPositionMode;
   initialTitle?: string;
   initialMessages?: Message[];
@@ -116,7 +113,6 @@ export function ChatBody({
   knowledgeBase: UseKnowledgeBaseResult;
   showLinkToConversationsApp: boolean;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
-  onToggleFlyoutWidthMode?: (flyoutWidthMode: FlyoutWidthMode) => void;
   onToggleFlyoutPositionMode?: (flyoutPositionMode: FlyoutPositionMode) => void;
 }) {
   const license = useLicense();
@@ -468,7 +464,6 @@ export function ChatBody({
               ? conversation.value.conversation.id
               : undefined
           }
-          flyoutWidthMode={flyoutWidthMode}
           flyoutPositionMode={flyoutPositionMode}
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}
@@ -477,7 +472,6 @@ export function ChatBody({
           onSaveTitle={(newTitle) => {
             saveTitle(newTitle);
           }}
-          onToggleFlyoutWidthMode={onToggleFlyoutWidthMode}
           onToggleFlyoutPositionMode={onToggleFlyoutPositionMode}
         />
       </EuiFlexItem>

@@ -35,7 +35,6 @@ const CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED = 34;
 
 const SIDEBAR_WIDTH = 400;
 
-export type FlyoutWidthMode = 'side' | 'full';
 export type FlyoutPositionMode = 'push' | 'overlay';
 
 export function ChatFlyout({
@@ -45,8 +44,6 @@ export function ChatFlyout({
   initialFlyoutPositionMode,
   isOpen,
   onClose,
-  onSelectConversation,
-  onSetFlyoutPositionMode,
 }: {
   initialConversationId?: string;
   initialTitle: string;
@@ -54,8 +51,6 @@ export function ChatFlyout({
   initialFlyoutPositionMode?: FlyoutPositionMode;
   isOpen: boolean;
   onClose: () => void;
-  onSelectConversation?: (id: string) => void;
-  onSetFlyoutPositionMode?: (mode: FlyoutPositionMode) => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
@@ -68,7 +63,6 @@ export function ChatFlyout({
 
   const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
 
-  const [flyoutWidthMode, setFlyoutWidthMode] = useState<FlyoutWidthMode>('side');
   const [flyoutPositionMode, setFlyoutPositionMode] = useState<FlyoutPositionMode>(
     initialFlyoutPositionMode || 'overlay'
   );
@@ -140,10 +134,6 @@ export function ChatFlyout({
     z-index: 1;
   `;
 
-  const handleToggleFlyoutWidthMode = (newFlyoutWidthMode: FlyoutWidthMode) => {
-    setFlyoutWidthMode(newFlyoutWidthMode);
-  };
-
   const handleToggleFlyoutPositionMode = (newFlyoutPositionMode: FlyoutPositionMode) => {
     setFlyoutPositionMode(newFlyoutPositionMode);
     // onSetFlyoutPositionMode?.(newFlyoutPositionMode);
@@ -170,7 +160,6 @@ export function ChatFlyout({
         size={getFlyoutWidth({
           breakpoint,
           expanded: conversationsExpanded,
-          flyoutWidthMode,
           isSecondSlotVisible,
         })}
         type={flyoutPositionMode}
@@ -267,7 +256,6 @@ export function ChatFlyout({
               key={bodyKey}
               connectors={connectors}
               currentUser={currentUser}
-              flyoutWidthMode={flyoutWidthMode}
               flyoutPositionMode={flyoutPositionMode}
               initialTitle={initialTitle}
               initialMessages={initialMessages}
@@ -281,7 +269,6 @@ export function ChatFlyout({
                 setConversationId(conversation.conversation.id);
                 conversationList.conversations.refresh();
               }}
-              onToggleFlyoutWidthMode={handleToggleFlyoutWidthMode}
               onToggleFlyoutPositionMode={handleToggleFlyoutPositionMode}
             />
           </EuiFlexItem>
@@ -311,16 +298,11 @@ const getFlyoutWidth = ({
   breakpoint,
   expanded,
   isSecondSlotVisible,
-  flyoutWidthMode,
 }: {
   breakpoint?: string;
   expanded: boolean;
   isSecondSlotVisible: boolean;
-  flyoutWidthMode?: FlyoutWidthMode;
 }) => {
-  if (flyoutWidthMode === 'full') {
-    return '100%';
-  }
   if (breakpoint === 'xs') {
     return '90vw';
   }
