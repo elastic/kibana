@@ -572,19 +572,19 @@ export class ObservabilityAIAssistantClient {
       switch (connector.actionTypeId) {
         case ObservabilityAIAssistantConnectorType.OpenAI:
           adapter = createOpenAiAdapter({
-            logger: this.dependencies.logger,
             messages,
-            functionCall,
             functions,
+            functionCall,
+            logger: this.dependencies.logger,
           });
           break;
 
         case ObservabilityAIAssistantConnectorType.Bedrock:
           adapter = createBedrockClaudeAdapter({
-            logger: this.dependencies.logger,
             messages,
-            functionCall,
             functions,
+            functionCall,
+            logger: this.dependencies.logger,
           });
           break;
 

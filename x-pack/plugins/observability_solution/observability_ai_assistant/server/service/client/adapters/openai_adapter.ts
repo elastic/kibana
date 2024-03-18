@@ -8,17 +8,18 @@
 import { encode } from 'gpt-tokenizer';
 import { compact, isEmpty, merge, omit } from 'lodash';
 import OpenAI from 'openai';
+import { CompatibleJSONSchema } from '../../../../common/functions/types';
 import { Message, MessageRole } from '../../../../common';
 import { processOpenAiStream } from './process_openai_stream';
 import { eventsourceStreamIntoObservable } from '../../util/eventsource_stream_into_observable';
-import { LlmApiAdapterFactory, LlmFunction } from './types';
+import { LlmApiAdapterFactory } from './types';
 
 function getOpenAIPromptTokenCount({
   messages,
   functions,
 }: {
   messages: Message[];
-  functions?: LlmFunction[];
+  functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
 }) {
   // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
   const tokensFromMessages = encode(

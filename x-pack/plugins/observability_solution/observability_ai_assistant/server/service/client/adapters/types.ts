@@ -8,12 +8,12 @@
 import type { Readable } from 'node:stream';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import { CompatibleJSONSchema } from '../../../../common/functions/types';
 import type { Message } from '../../../../common';
 import type {
   ChatCompletionChunkEvent,
   TokenCountEvent,
 } from '../../../../common/conversation_complete';
+import { CompatibleJSONSchema } from '../../../../common/functions/types';
 
 export interface LlmFunction {
   name: string;
@@ -24,7 +24,7 @@ export interface LlmFunction {
 export type LlmApiAdapterFactory = (options: {
   logger: Logger;
   messages: Message[];
-  functions?: LlmFunction[];
+  functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
   functionCall?: string;
 }) => LlmApiAdapter;
 
