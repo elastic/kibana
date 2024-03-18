@@ -27,6 +27,7 @@ const createStartContract = (): jest.Mocked<Start> => {
       AggregateQueryTopNavMenu: jest.fn(),
     },
     addSolutionNavigation: jest.fn(),
+    isSolutionNavigationEnabled: jest.fn(),
   };
   return startContract;
 };
