@@ -1,6 +1,6 @@
 # RFC: Prebuilt Rules Customization
 
-_Status_: Finished Part 1, which includes sections from `Necessary rule schema changes` up until -and including- `Exporting and importing rules`.
+_Status_: Completed, pending correction over team's feedback.
 
 Covers:
 
@@ -12,12 +12,6 @@ Covers:
 - calculation of `isCustomized` field on endpoints that update/patch rules.
 - additional changes needed to `/upgrade/_review` and `/upgrade/_perform` endpoints
 - UI Changes
-
-_Pending_:
-
-
-- Additional details on `Changes needed in the UI`: Rule Details page, Rules Table
-- Update `/upgrade/_perform` endpoint description to match POC proposal
 
 ## Table of Contents
 
