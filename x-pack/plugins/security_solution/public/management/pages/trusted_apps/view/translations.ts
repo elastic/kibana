@@ -161,7 +161,7 @@ export const INPUT_ERRORS = {
     }),
   wildcardWithWrongField: (index: number) =>
     i18n.translate('xpack.securitySolution.trustedapps.create.conditionWrongFieldMsg', {
-      defaultMessage: `[{row}] Using a '*' or a '?' is not available with this field.`,
+      defaultMessage: `[{row}] Wildcards (? or *) are not supported for hash or signature entries.`,
       values: { row: index + 1 },
     }),
 };
