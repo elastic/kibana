@@ -8,7 +8,6 @@
 import React, { createContext, useContext } from 'react';
 import { Observable } from 'rxjs';
 import SemVer from 'semver/classes/semver';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import {
   ApplicationStart,
@@ -27,6 +26,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { ExtensionsService } from '../services';
 import { UiMetricService, NotificationService, HttpService } from './services';
+import { breadcrumbService } from './services/breadcrumbs';
 
 export const AppContext = createContext<AppDependencies | undefined>(undefined);
 
@@ -59,7 +59,7 @@ export interface AppDependencies {
     enableDataStreamsStorageColumn: boolean;
   };
   history: ScopedHistory;
-  setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
+  setBreadcrumbs: typeof breadcrumbService.setBreadcrumbs;
   uiSettings: IUiSettingsClient;
   settings: SettingsStart;
   url: SharePluginStart['url'];

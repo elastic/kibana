@@ -20,6 +20,7 @@ import {
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { IndexManagementPluginStart } from '@kbn/index-management-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
@@ -64,6 +65,7 @@ export interface PluginsStart {
   console?: ConsolePluginStart;
   data: DataPublicPluginStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
+  indexManagement: IndexManagementPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   ml: MlPluginStart;
