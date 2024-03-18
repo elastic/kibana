@@ -155,6 +155,7 @@ export default function (providerContext: FtrProviderContext) {
       const response = await esClient.indices.getMapping({ index: indexName });
 
       expect(Object.values(response)[0].mappings).to.eql({
+        subobjects: false,
         _meta: {
           managed_by: 'fleet',
           managed: true,
@@ -343,224 +344,164 @@ export default function (providerContext: FtrProviderContext) {
             type: 'date',
             ignore_malformed: false,
           },
-          cloud: {
-            properties: {
-              account: {
-                properties: {
-                  id: {
-                    type: 'keyword',
-                    ignore_above: 1024,
-                  },
-                },
-              },
-              availability_zone: {
-                type: 'keyword',
-                ignore_above: 1024,
-              },
-              image: {
-                properties: {
-                  id: {
-                    type: 'keyword',
-                    ignore_above: 1024,
-                  },
-                },
-              },
-              instance: {
-                properties: {
-                  id: {
-                    type: 'keyword',
-                    ignore_above: 1024,
-                  },
-                  name: {
-                    type: 'keyword',
-                    fields: {
-                      text: {
-                        type: 'match_only_text',
-                      },
-                    },
-                  },
-                },
-              },
-              machine: {
-                properties: {
-                  type: {
-                    type: 'keyword',
-                    ignore_above: 1024,
-                  },
-                },
-              },
-              project: {
-                properties: {
-                  id: {
-                    type: 'keyword',
-                    ignore_above: 1024,
-                  },
-                },
-              },
-              provider: {
-                type: 'keyword',
-                ignore_above: 1024,
-              },
-              region: {
-                type: 'keyword',
-                ignore_above: 1024,
+          'cloud.account.id': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'cloud.availability_zone': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'cloud.image.id': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'cloud.instance.id': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'cloud.instance.name': {
+            type: 'keyword',
+            fields: {
+              text: {
+                type: 'match_only_text',
               },
             },
           },
-          container: {
-            properties: {
-              id: {
-                type: 'keyword',
-                ignore_above: 1024,
-              },
-              image: {
-                properties: {
-                  name: {
-                    type: 'keyword',
-                    fields: {
-                      text: {
-                        type: 'match_only_text',
-                      },
-                    },
-                  },
-                },
-              },
-              labels: {
-                properties: {
-                  foo_id: {
-                    type: 'keyword',
-                    ignore_above: 1024,
-                  },
-                },
-              },
-              name: {
-                type: 'keyword',
-                fields: {
-                  text: {
-                    type: 'match_only_text',
-                  },
-                },
+          'cloud.machine.type': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'cloud.project.id': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'cloud.provider': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'cloud.region': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'container.id': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'container.image.name': {
+            type: 'keyword',
+            fields: {
+              text: {
+                type: 'match_only_text',
               },
             },
           },
-          data_stream: {
-            properties: {
-              dataset: {
-                type: 'constant_keyword',
-              },
-              namespace: {
-                type: 'constant_keyword',
-              },
-              type: {
-                type: 'constant_keyword',
-                value: 'logs',
+          'container.labels.foo_id': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'container.name': {
+            type: 'keyword',
+            fields: {
+              text: {
+                type: 'match_only_text',
               },
             },
           },
-          event: {
-            properties: {
-              agent_id_status: {
-                type: 'keyword',
-                ignore_above: 1024,
-              },
-              ingested: {
-                type: 'date',
-                format: 'strict_date_time_no_millis||strict_date_optional_time||epoch_millis',
+          'data_stream.dataset': {
+            type: 'constant_keyword',
+          },
+          'data_stream.namespace': {
+            type: 'constant_keyword',
+          },
+          'data_stream.type': {
+            type: 'constant_keyword',
+            value: 'logs',
+          },
+          'event.agent_id_status': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'event.ingested': {
+            type: 'date',
+            format: 'strict_date_time_no_millis||strict_date_optional_time||epoch_millis',
+          },
+          'host.architecture': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'host.domain': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'host.hostname': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'host.id': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'host.ip': {
+            type: 'ip',
+          },
+          'host.mac': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'host.name': {
+            type: 'keyword',
+            fields: {
+              text: {
+                type: 'match_only_text',
               },
             },
           },
-          host: {
-            properties: {
-              architecture: {
-                type: 'keyword',
-                ignore_above: 1024,
-              },
-              domain: {
-                type: 'keyword',
-                ignore_above: 1024,
-              },
-              hostname: {
-                type: 'keyword',
-                ignore_above: 1024,
-              },
-              mac: {
-                type: 'keyword',
-                ignore_above: 1024,
-              },
-              id: {
-                type: 'keyword',
-                ignore_above: 1024,
-              },
-              ip: {
-                type: 'ip',
-              },
-              name: {
-                type: 'keyword',
-                fields: {
-                  text: {
-                    type: 'match_only_text',
-                  },
-                },
-              },
-              os: {
-                properties: {
-                  build: {
-                    type: 'keyword',
-                    ignore_above: 1024,
-                  },
-                  codename: {
-                    type: 'keyword',
-                    ignore_above: 1024,
-                  },
-                  containerized: {
-                    type: 'boolean',
-                  },
-                  family: {
-                    type: 'keyword',
-                    ignore_above: 1024,
-                  },
-                  kernel: {
-                    type: 'keyword',
-                    ignore_above: 1024,
-                  },
-                  name: {
-                    type: 'keyword',
-                    fields: {
-                      text: {
-                        type: 'match_only_text',
-                      },
-                    },
-                  },
-                  platform: {
-                    type: 'keyword',
-                    ignore_above: 1024,
-                  },
-                  type: {
-                    type: 'keyword',
-                    ignore_above: 1024,
-                  },
-                  version: {
-                    type: 'keyword',
-                    ignore_above: 1024,
-                  },
-                },
+          'host.os.build': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'host.os.codename': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'host.os.containerized': {
+            type: 'boolean',
+          },
+          'host.os.family': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'host.os.kernel': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'host.os.name': {
+            type: 'keyword',
+            fields: {
+              text: {
+                type: 'match_only_text',
               },
             },
           },
-          input: {
-            properties: {
-              type: {
-                type: 'keyword',
-                ignore_above: 1024,
-              },
-            },
+          'host.os.platform': {
+            type: 'keyword',
+            ignore_above: 1024,
           },
-          log: {
-            properties: {
-              offset: {
-                type: 'long',
-              },
-            },
+          'host.os.type': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'host.os.version': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'input.type': {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          'log.offset': {
+            type: 'long',
           },
         },
       });
