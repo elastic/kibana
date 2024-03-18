@@ -101,7 +101,7 @@ jest.mock('../../../../common/components/search_bar', () => ({
 jest.mock('../../../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
-jest.mock('../../../../common/components/landing_page');
+jest.mock('../../../../common/components/empty_prompt');
 
 const getMockHistory = (ip: string) => ({
   length: 2,
@@ -204,6 +204,6 @@ describe('Network Details', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="siem-landing-page"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="empty-prompt"]').exists()).toBe(true);
   });
 });

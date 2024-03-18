@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiBasicTableColumn,
+  EuiText,
   EuiBadge,
   EuiButtonIcon,
   EuiIcon,
@@ -17,6 +18,7 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import React from 'react';
+import moment from 'moment';
 import styled from 'styled-components';
 
 import { EMPTY_STAT, getIlmPhaseDescription, getIncompatibleStatColor } from '../../helpers';
@@ -41,6 +43,7 @@ export interface IndexSummaryTableItem {
   pattern: string;
   patternDocsCount: number;
   sizeInBytes: number;
+  checkedAt: number | undefined;
 }
 
 export const getResultToolTip = (incompatible: number | undefined): string => {
@@ -233,6 +236,17 @@ export const getSummaryTableColumns = ({
       <EuiToolTip content={INDEX_SIZE_TOOLTIP}>
         <span data-test-subj="sizeInBytes">{formatBytes(sizeInBytes)}</span>
       </EuiToolTip>
+    ),
+    sortable: true,
+    truncateText: false,
+  },
+  {
+    field: 'checkedAt',
+    name: i18n.LAST_CHECK,
+    render: (_, { checkedAt }) => (
+      <EuiText size="xs">
+        {checkedAt && moment(checkedAt).isValid() ? moment(checkedAt).fromNow() : EMPTY_STAT}
+      </EuiText>
     ),
     sortable: true,
     truncateText: false,

@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await discoverLink.isDisplayed()).to.be(true);
       });
 
-      it('should navigate to discover keeping the current columns/filters/query/time/data view', async () => {
+      it('should navigate to discover keeping the current filters/query/time/data view and use fallback columns for virtual columns', async () => {
         await retry.try(async () => {
           await testSubjects.existOrFail('superDatePickerstartDatePopoverButton');
           await testSubjects.existOrFail('superDatePickerendDatePopoverButton');
@@ -69,8 +69,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql([
             '@timestamp',
-            'resource',
-            'content',
+            'host.name',
+            'service.name',
+            'message',
           ]);
         });
 

@@ -74,13 +74,15 @@ const onDropToDimension = jest.fn();
 
 describe('LayerPanel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
-  let mockVisualization2: jest.Mocked<Visualization>;
 
   let mockDatasource = createMockDatasource('testDatasource');
 
   function getDefaultProps() {
     return {
       layerId: 'first',
+      visualizationMap: {
+        testVis: mockVisualization,
+      },
       activeVisualization: mockVisualization,
       dimensionGroups: mockVisualization.getConfiguration({} as VisualizationConfigProps).groups,
       datasourceMap: {
@@ -144,7 +146,6 @@ describe('LayerPanel', () => {
   beforeEach(() => {
     mockVisualization = createMockVisualization(faker.random.alphaNumeric());
     mockVisualization.getLayerIds.mockReturnValue(['first']);
-    mockVisualization2 = createMockVisualization(faker.random.alphaNumeric());
     mockDatasource = createMockDatasource();
   });
 
@@ -238,6 +239,38 @@ describe('LayerPanel', () => {
       renderLayerPanel();
       expect(screen.getAllByTestId('lnsGroupTestId')).toHaveLength(2);
       expect(screen.getByText('Requires field')).toBeInTheDocument();
+    });
+
+    it('should not render the required warning when the chart is empty', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            ...defaultGroup,
+            groupLabel: 'B',
+            groupId: 'b',
+            requiredMinDimensionCount: 1,
+          },
+        ],
+      });
+
+      renderLayerPanel();
+      expect(screen.queryByText('Requires field')).not.toBeInTheDocument();
+    });
+
+    it('should render the required warning when the chart is empty but isInlineEditing', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            ...defaultGroup,
+            groupLabel: 'B',
+            groupId: 'b',
+            requiredMinDimensionCount: 1,
+          },
+        ],
+      });
+
+      renderLayerPanel({ setIsInlineFlyoutVisible: jest.fn() });
+      expect(screen.queryByText('Requires field')).toBeInTheDocument();
     });
 
     it('should tell the user to remove the correct number of dimensions', async () => {
@@ -434,6 +467,7 @@ describe('LayerPanel', () => {
       act(() => {
         stateFn('newDatasourceState');
       });
+
       expect(updateAll).toHaveBeenCalled();
     });
 
@@ -510,79 +544,6 @@ describe('LayerPanel', () => {
         });
       });
       expect(screen.getByRole('heading', { name: defaultGroup.groupLabel })).toBeInTheDocument();
-    });
-
-    it('should close the DimensionContainer when the activeVisualization has changed', async () => {
-      /**
-       * The ID generation system for new dimensions has been messy before, so
-       * this tests that the ID used in the first render is used to keep the container
-       * open in future renders
-       */
-
-      (generateId as jest.Mock).mockReturnValue(`columnId`);
-      mockVisualization.getConfiguration.mockReturnValue({
-        groups: [
-          {
-            ...defaultGroup,
-            accessors: [{ columnId: 'columnId' }],
-          },
-        ],
-      });
-      // Normally the configuration would change in response to a state update,
-      // but this test is updating it directly
-      mockVisualization2.getConfiguration.mockReturnValue({
-        groups: [
-          {
-            ...defaultGroup,
-            accessors: [{ columnId: 'columnId' }, { columnId: 'secondColumnId' }],
-          },
-        ],
-      });
-
-      const { rerender } = renderLayerPanel();
-      userEvent.click(screen.getAllByTestId('lns-empty-dimension')[0]);
-      expect(screen.getByRole('heading', { name: defaultGroup.groupLabel })).toBeInTheDocument();
-      rerender(<LayerPanel {...props} activeVisualization={mockVisualization2} />);
-      expect(
-        screen.queryByRole('heading', { name: defaultGroup.groupLabel })
-      ).not.toBeInTheDocument();
-    });
-
-    it('should close the DimensionContainer when the column cannot be found in the config', async () => {
-      /**
-       * The ID generation system for new dimensions has been messy before, so
-       * this tests that the ID used in the first render is used to keep the container
-       * open in future renders
-       */
-
-      (generateId as jest.Mock).mockReturnValue(`columnId`);
-      mockVisualization.getConfiguration.mockReturnValue({
-        groups: [
-          {
-            ...defaultGroup,
-            accessors: [{ columnId: 'columnId' }],
-          },
-        ],
-      });
-      // Normally the configuration would change in response to a state update,
-      // but this test is updating it directly
-      mockVisualization2.getConfiguration.mockReturnValue({
-        groups: [
-          {
-            ...defaultGroup,
-            accessors: [{ columnId: 'secondColumnId' }],
-          },
-        ],
-      });
-
-      const { rerender } = renderLayerPanel();
-      // opens dimension editor and creates another column with secondColumnId
-      userEvent.click(screen.getAllByTestId('lns-empty-dimension')[0]);
-      expect(screen.getByRole('heading', { name: defaultGroup.groupLabel })).toBeInTheDocument();
-      rerender(<LayerPanel {...getDefaultProps()} activeVisualization={mockVisualization2} />);
-      expect(
-        screen.queryByRole('heading', { name: defaultGroup.groupLabel })
-      ).not.toBeInTheDocument();
     });
 
     it('should only update the state on close when needed', async () => {
@@ -1076,6 +1037,5 @@ describe('LayerPanel', () => {
       });
     });
   });
-
   // TODO - test user message display
 });

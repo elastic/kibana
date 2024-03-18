@@ -31,3 +31,5 @@ import { registerLanguage } from './src/helpers';
 
 export { BarePluginApi, registerLanguage };
 export * from './src/types';
+
+export { CONSOLE_LANG_ID } from './src/console';

@@ -9,6 +9,7 @@ import { omit } from 'lodash';
 import type { Filter } from '@kbn/es-query';
 import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
+import type { ReviewRuleUpgradeResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route';
 import type { Threshold } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 
@@ -18,6 +19,8 @@ import {
   INSTALL_PREBUILT_RULE_PREVIEW,
   UPDATE_PREBUILT_RULE_PREVIEW,
   UPDATE_PREBUILT_RULE_BUTTON,
+  PER_FIELD_DIFF_WRAPPER,
+  PER_FIELD_DIFF_DEFINITION_SECTION,
 } from '../../../../screens/alerts_detection_rules';
 import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../../screens/breadcrumbs';
 import {
@@ -49,12 +52,14 @@ import {
   assertMachineLearningPropertiesShown,
   assertNewTermsFieldsPropertyShown,
   assertSavedQueryPropertiesShown,
+  assertSelectedPreviewTab,
   assertThreatMatchQueryPropertiesShown,
   assertThresholdPropertyShown,
   assertWindowSizePropertyShown,
   closeRulePreview,
   openRuleInstallPreview,
   openRuleUpdatePreview,
+  selectPreviewTab,
 } from '../../../../tasks/prebuilt_rules_preview';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
@@ -62,8 +67,15 @@ import {
   deleteDataView,
   postDataView,
 } from '../../../../tasks/api_calls/common';
+import { enableRules, waitForRulesToFinishExecution } from '../../../../tasks/api_calls/rules';
 
 const TEST_ENV_TAGS = ['@ess', '@serverless'];
+
+const PREVIEW_TABS = {
+  OVERVIEW: 'Overview',
+  JSON_VIEW: 'JSON view',
+  UPDATES: 'Updates', // Currently open by default on upgrade
+};
 
 describe('Detection rules, Prebuilt Rules Installation and Update workflow', () => {
   const commonProperties: Partial<PrebuiltRuleAsset> = {
@@ -662,7 +674,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       installPrebuiltRuleAssets([UPDATED_RULE_1, UPDATED_RULE_2]);
 
       visitRulesManagementTable();
-      clickRuleUpdatesTab();
     });
 
     describe('Basic functionality', { tags: TEST_ENV_TAGS }, () => {
@@ -842,6 +853,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_CUSTOM_QUERY_INDEX_PATTERN_RULE['security-rule'].name);
+          selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
           const { index } = UPDATED_CUSTOM_QUERY_INDEX_PATTERN_RULE['security-rule'] as {
             index: string[];
@@ -868,6 +880,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           closeRulePreview();
 
           openRuleUpdatePreview(UPDATED_SAVED_QUERY_DATA_VIEW_RULE['security-rule'].name);
+          selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
           const { data_view_id: dataViewId } = UPDATED_SAVED_QUERY_DATA_VIEW_RULE[
             'security-rule'
@@ -889,6 +902,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_MACHINE_LEARNING_RULE['security-rule'].name);
+          selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
           assertCommonPropertiesShown(commonProperties);
 
@@ -910,6 +924,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_THRESHOLD_RULE_INDEX_PATTERN['security-rule'].name);
+          selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
           assertCommonPropertiesShown(commonProperties);
 
@@ -940,6 +955,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_EQL_INDEX_PATTERN_RULE['security-rule'].name);
+          selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
           assertCommonPropertiesShown(commonProperties);
 
@@ -956,6 +972,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_THREAT_MATCH_INDEX_PATTERN_RULE['security-rule'].name);
+          selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
           assertCommonPropertiesShown(commonProperties);
 
@@ -999,6 +1016,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_NEW_TERMS_INDEX_PATTERN_RULE['security-rule'].name);
+          selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
           assertCommonPropertiesShown(commonProperties);
 
@@ -1040,6 +1058,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
             clickRuleUpdatesTab();
 
             openRuleUpdatePreview(UPDATED_ESQL_RULE['security-rule'].name);
+            selectPreviewTab(PREVIEW_TABS.OVERVIEW);
 
             assertCommonPropertiesShown(commonProperties);
 
@@ -1049,5 +1068,180 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         }
       );
     });
+
+    describe('Viewing rule changes in JSON diff view', { tags: TEST_ENV_TAGS }, () => {
+      it('User can see changes in a side-by-side JSON diff view', () => {
+        clickRuleUpdatesTab();
+
+        openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
+        selectPreviewTab(PREVIEW_TABS.JSON_VIEW);
+
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Current rule').should('be.visible');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Elastic update').should('be.visible');
+
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('"version": 1').should('be.visible');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('"version": 2').should('be.visible');
+
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW)
+          .contains('"name": "Outdated rule 1"')
+          .should('be.visible');
+
+        /* Select another rule without closing the preview for the current rule */
+        openRuleUpdatePreview(OUTDATED_RULE_2['security-rule'].name);
+
+        /* Make sure the JSON diff is displayed for the newly selected rule */
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW)
+          .contains('"name": "Outdated rule 2"')
+          .should('be.visible');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW)
+          .contains('"name": "Outdated rule 1"')
+          .should('not.exist');
+      });
+
+      it('Dynamic properties should not be included in preview', () => {
+        const dateBeforeRuleExecution = new Date();
+
+        /* Enable a rule and wait for it to execute */
+        enableRules({ names: [OUTDATED_RULE_1['security-rule'].name] });
+        waitForRulesToFinishExecution(
+          [OUTDATED_RULE_1['security-rule'].rule_id],
+          dateBeforeRuleExecution
+        );
+
+        cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/upgrade/_review').as(
+          'updatePrebuiltRulesReview'
+        );
+
+        clickRuleUpdatesTab();
+
+        /* Check that API response contains dynamic properties, like "enabled" and "execution_summary" */
+        cy.wait('@updatePrebuiltRulesReview')
+          .its('response.body')
+          .then((body: ReviewRuleUpgradeResponseBody) => {
+            const executedRuleInfo = body.rules.find(
+              (ruleInfo) => ruleInfo.rule_id === OUTDATED_RULE_1['security-rule'].rule_id
+            );
+
+            const enabled = executedRuleInfo?.current_rule?.enabled;
+            expect(enabled).to.eql(true);
+
+            const executionSummary = executedRuleInfo?.current_rule?.execution_summary;
+            expect(executionSummary).to.not.eql(undefined);
+          });
+
+        /* Open the preview and check that dynamic properties are not shown in the diff */
+        openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
+
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('enabled').should('not.exist');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('execution_summary').should('not.exist');
+      });
+    });
+
+    describe(
+      'Viewing rule changes in per-field diff view',
+      {
+        tags: TEST_ENV_TAGS,
+        env: {
+          ftrConfig: {
+            kbnServerArgs: [
+              `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+                'perFieldPrebuiltRulesDiffingEnabled',
+              ])}`,
+            ],
+          },
+        },
+      },
+      () => {
+        it('User can see changes in a side-by-side per-field diff view', () => {
+          clickRuleUpdatesTab();
+
+          openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
+          assertSelectedPreviewTab(PREVIEW_TABS.UPDATES); // Should be open by default
+
+          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Current rule').should('be.visible');
+          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Elastic update').should('be.visible');
+
+          cy.get(PER_FIELD_DIFF_WRAPPER).should('have.length', 2);
+
+          /* Version should be the first field in the order */
+          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('Version').should('be.visible');
+          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('1').should('be.visible');
+          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('2').should('be.visible');
+
+          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Name').should('be.visible');
+          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Outdated rule 1').should('be.visible');
+          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Updated rule 1').should('be.visible');
+        });
+
+        it('User can switch between rules upgrades without closing flyout', () => {
+          clickRuleUpdatesTab();
+
+          openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
+          assertSelectedPreviewTab(PREVIEW_TABS.UPDATES); // Should be open by default
+
+          /* Version should be the first field in the order */
+          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('Version').should('be.visible');
+          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('1').should('be.visible');
+          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('2').should('be.visible');
+
+          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Name').should('be.visible');
+          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Outdated rule 1').should('be.visible');
+          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Updated rule 1').should('be.visible');
+
+          /* Select another rule without closing the preview for the current rule */
+          openRuleUpdatePreview(OUTDATED_RULE_2['security-rule'].name);
+
+          /* Make sure the per-field diff is displayed for the newly selected rule */
+          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Name').should('be.visible');
+          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Outdated rule 2').should('be.visible');
+          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Updated rule 2').should('be.visible');
+          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Outdated rule 1').should('not.exist');
+          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Updated rule 1').should('not.exist');
+
+          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('Version').should('be.visible');
+          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('1').should('be.visible');
+          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('2').should('be.visible');
+        });
+
+        it('User can see changes when updated rule is a different rule type', () => {
+          const OUTDATED_RULE_WITH_QUERY_TYPE = createRuleAssetSavedObject({
+            name: 'Query rule',
+            rule_id: 'rule_id',
+            version: 1,
+            type: 'query',
+            language: 'kuery',
+          });
+          const UPDATED_RULE_WITH_EQL_TYPE = createRuleAssetSavedObject({
+            language: 'eql',
+            name: 'EQL rule',
+            rule_id: 'rule_id',
+            version: 2,
+            type: 'eql',
+          });
+          /* Create a new rule and install it */
+          createAndInstallMockedPrebuiltRules([OUTDATED_RULE_WITH_QUERY_TYPE]);
+          /* Create a second version of the rule, making it available for update */
+          installPrebuiltRuleAssets([UPDATED_RULE_WITH_EQL_TYPE]);
+
+          cy.reload();
+          clickRuleUpdatesTab();
+
+          openRuleUpdatePreview(OUTDATED_RULE_WITH_QUERY_TYPE['security-rule'].name);
+          assertSelectedPreviewTab(PREVIEW_TABS.UPDATES); // Should be open by default
+
+          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Current rule').should('be.visible');
+          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Elastic update').should('be.visible');
+
+          cy.get(PER_FIELD_DIFF_WRAPPER).should('have.length', 5);
+
+          cy.get(PER_FIELD_DIFF_DEFINITION_SECTION).contains('Type').should('be.visible');
+          cy.get(PER_FIELD_DIFF_DEFINITION_SECTION).contains('query').should('be.visible');
+          cy.get(PER_FIELD_DIFF_DEFINITION_SECTION).contains('eql').should('be.visible');
+
+          cy.get(PER_FIELD_DIFF_DEFINITION_SECTION).contains('KQL query').should('exist');
+          cy.get(PER_FIELD_DIFF_DEFINITION_SECTION).contains('EQL query').should('exist');
+        });
+      }
+    );
   });
 });

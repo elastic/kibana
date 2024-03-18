@@ -42,6 +42,7 @@ export class VisualizePageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly visEditor = this.ctx.getPageObject('visEditor');
   private readonly visChart = this.ctx.getPageObject('visChart');
+  private readonly toasts = this.ctx.getService('toasts');
 
   index = {
     LOGSTASH_TIME_BASED: 'logstash-*',
@@ -398,7 +399,7 @@ export class VisualizePageObject extends FtrService {
 
     // Confirm that the Visualization has actually been saved
     await this.testSubjects.existOrFail('saveVisualizationSuccess');
-    const message = await this.common.closeToast();
+    const message = await this.toasts.getTitleAndDismiss();
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForSaveModalToClose();
 

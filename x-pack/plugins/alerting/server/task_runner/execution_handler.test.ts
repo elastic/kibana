@@ -26,7 +26,6 @@ import {
 } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
-import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext, RuleNotifyWhen } from '../../common';
@@ -38,6 +37,7 @@ import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute_function';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { TaskRunnerContext } from './types';
 
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
@@ -2026,165 +2026,6 @@ describe('Execution Handler', () => {
             "id": "1",
             "params": Object {
               "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 3 goes here",
-              "contextVal": "My  goes here",
-              "foo": true,
-              "stateVal": "My  goes here",
-            },
-            "relatedSavedObjects": Array [
-              Object {
-                "id": "1",
-                "namespace": "test1",
-                "type": "alert",
-                "typeId": "test",
-              },
-            ],
-            "source": Object {
-              "source": Object {
-                "id": "1",
-                "type": "alert",
-              },
-              "type": "SAVED_OBJECT",
-            },
-            "spaceId": "test1",
-          },
-        ],
-      ]
-    `);
-  });
-
-  test('does not schedule actions for alerts with activeCount less than the notificationDelay.active threshold', async () => {
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
-        ...defaultExecutionParams,
-        rule: {
-          ...defaultExecutionParams.rule,
-          notificationDelay: {
-            active: 3,
-          },
-        },
-      })
-    );
-
-    await executionHandler.run({
-      ...generateAlert({ id: 1 }),
-      ...generateAlert({ id: 2, activeCount: 2 }),
-    });
-
-    expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(2);
-
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
-      'no scheduling of action "1" for rule "1": the alert activeCount: 0 is less than the rule notificationDelay.active: 3 threshold.'
-    );
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
-      'no scheduling of action "1" for rule "1": the alert activeCount: 2 is less than the rule notificationDelay.active: 3 threshold.'
-    );
-  });
-
-  test('schedules actions for alerts with activeCount greater than or equal the notificationDelay.active threshold', async () => {
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
-        ...defaultExecutionParams,
-        rule: {
-          ...defaultExecutionParams.rule,
-          notificationDelay: {
-            active: 3,
-          },
-        },
-      })
-    );
-
-    await executionHandler.run({
-      ...generateAlert({ id: 1, activeCount: 3 }),
-      ...generateAlert({ id: 2, activeCount: 4 }),
-    });
-
-    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
-    expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "actionTypeId": "test",
-            "apiKey": "MTIzOmFiYw==",
-            "consumer": "rule-consumer",
-            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
-            "id": "1",
-            "params": Object {
-              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
-              "contextVal": "My  goes here",
-              "foo": true,
-              "stateVal": "My  goes here",
-            },
-            "relatedSavedObjects": Array [
-              Object {
-                "id": "1",
-                "namespace": "test1",
-                "type": "alert",
-                "typeId": "test",
-              },
-            ],
-            "source": Object {
-              "source": Object {
-                "id": "1",
-                "type": "alert",
-              },
-              "type": "SAVED_OBJECT",
-            },
-            "spaceId": "test1",
-          },
-          Object {
-            "actionTypeId": "test",
-            "apiKey": "MTIzOmFiYw==",
-            "consumer": "rule-consumer",
-            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
-            "id": "1",
-            "params": Object {
-              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
-              "contextVal": "My  goes here",
-              "foo": true,
-              "stateVal": "My  goes here",
-            },
-            "relatedSavedObjects": Array [
-              Object {
-                "id": "1",
-                "namespace": "test1",
-                "type": "alert",
-                "typeId": "test",
-              },
-            ],
-            "source": Object {
-              "source": Object {
-                "id": "1",
-                "type": "alert",
-              },
-              "type": "SAVED_OBJECT",
-            },
-            "spaceId": "test1",
-          },
-        ],
-      ]
-    `);
-  });
-
-  test('schedules actions if notificationDelay.active threshold is not defined', async () => {
-    const executionHandler = new ExecutionHandler(generateExecutionParams());
-
-    await executionHandler.run({
-      ...generateAlert({ id: 1, activeCount: 1 }),
-    });
-
-    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
-    expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "actionTypeId": "test",
-            "apiKey": "MTIzOmFiYw==",
-            "consumer": "rule-consumer",
-            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
-            "id": "1",
-            "params": Object {
-              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
               "contextVal": "My  goes here",
               "foo": true,
               "stateVal": "My  goes here",

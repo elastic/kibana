@@ -19,7 +19,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('GET /infra/services', () => {
     const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
     const to = new Date().toISOString();
-    describe('with transactions', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176950
+    describe.skip('with transactions', () => {
       before(async () => {
         await synthtrace.index(
           generateServicesData({ from, to, instanceCount: 3, servicesPerHost: 3 })
@@ -81,7 +82,8 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
       });
     });
-    describe('with logs only', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176967
+    describe.skip('with logs only', () => {
       before(async () => {
         await synthtrace.index(
           generateServicesLogsOnlyData({ from, to, instanceCount: 1, servicesPerHost: 2 })

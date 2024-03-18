@@ -17,6 +17,7 @@ export type {
 } from './controller';
 export type {
   LogsExplorerCustomizations,
+  LogsExplorerCustomizationEvents,
   LogsExplorerFlyoutContentProps,
 } from './customizations/types';
 export type { LogsExplorerControllerContext } from './state_machines/logs_explorer_controller';
@@ -25,6 +26,7 @@ export {
   getDiscoverColumnsFromDisplayOptions,
   getDiscoverGridFromDisplayOptions,
   getDiscoverFiltersFromState,
+  getDiscoverColumnsWithFallbackFieldsFromDisplayOptions,
 } from './utils/convert_discover_app_state';
 
 export function plugin(context: PluginInitializerContext<LogsExplorerConfig>) {

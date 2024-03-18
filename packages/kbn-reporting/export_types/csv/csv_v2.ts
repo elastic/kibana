@@ -147,6 +147,7 @@ export class CsvV2ExportType extends ExportType<
           ...job,
         },
         csvConfig,
+        taskInstanceFields,
         clients,
         cancellationToken,
         logger,

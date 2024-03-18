@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 
 export interface TimeRangeBounds {
   min?: Moment;
@@ -33,6 +33,7 @@ export declare class TimeBuckets {
   public setBounds(bounds: TimeRangeBounds): void;
   public getBounds(): { min: any; max: any };
   public getInterval(): TimeBucketsInterval;
+  public getIntervalToNearestMultiple(divisorSecs: any): TimeBucketsInterval;
   public getScaledDateFormat(): string;
 }
 

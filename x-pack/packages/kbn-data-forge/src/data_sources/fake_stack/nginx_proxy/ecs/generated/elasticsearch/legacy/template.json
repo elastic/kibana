@@ -36,6 +36,20 @@
           }
         }
       },
+      "http": {
+        "properties": {
+          "response": {
+            "properties": {
+              "bytes": {
+                "type": "long"
+              },
+              "status_code": {
+                "type": "long"
+              }
+            }
+          }
+        }
+      },
       "labels": {
         "type": "object"
       },

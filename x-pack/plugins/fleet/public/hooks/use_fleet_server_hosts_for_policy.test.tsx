@@ -10,21 +10,15 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useFleetServerHostsForPolicy } from './use_fleet_server_hosts_for_policy';
 import { useGetFleetServerHosts } from './use_request/fleet_server_hosts';
 import { useGetFleetProxies } from './use_request/fleet_proxies';
+import { useGetDownloadSources } from './use_request/download_source';
 
 jest.mock('./use_request/fleet_server_hosts');
 jest.mock('./use_request/fleet_proxies');
-
-const mockedUseGetFleetServerHosts = useGetFleetServerHosts as jest.MockedFunction<
-  typeof useGetFleetServerHosts
->;
-
-const mockedUseGetFleetProxies = useGetFleetProxies as jest.MockedFunction<
-  typeof useGetFleetProxies
->;
+jest.mock('./use_request/download_source');
 
 describe('useFleetServerHostsForPolicy', () => {
   beforeEach(() => {
-    mockedUseGetFleetServerHosts.mockReturnValue({
+    jest.mocked(useGetFleetServerHosts).mockReturnValue({
       isLoading: false,
       isInitialRequest: false,
       data: {
@@ -49,11 +43,26 @@ describe('useFleetServerHostsForPolicy', () => {
         total: 2,
       },
     } as any);
-    mockedUseGetFleetProxies.mockReturnValue({
+    jest.mocked(useGetFleetProxies).mockReturnValue({
       isInitialRequest: false,
       isLoading: false,
       data: {
         items: [],
+      },
+    } as any);
+    jest.mocked(useGetDownloadSources).mockReturnValue({
+      isInitialRequest: false,
+      isLoading: false,
+      data: {
+        items: [
+          {
+            id: 'default',
+            is_default: true,
+          },
+          {
+            id: 'custom1',
+          },
+        ],
       },
     } as any);
   });
@@ -79,5 +88,26 @@ describe('useFleetServerHostsForPolicy', () => {
       } as any)
     );
     expect(result.current.fleetServerHosts).toEqual(['https://custom1:8220']);
+  });
+
+  it('should return default download source if used with a policy not overriding download source', () => {
+    const { result } = renderHook(() =>
+      useFleetServerHostsForPolicy({
+        id: 'testpolicy1',
+        fleet_server_host_id: 'custom1',
+      } as any)
+    );
+    expect(result.current.downloadSource?.id).toEqual('default');
+  });
+
+  it('should return custom download source if used with a policy overriding download source', () => {
+    const { result } = renderHook(() =>
+      useFleetServerHostsForPolicy({
+        id: 'testpolicy1',
+        fleet_server_host_id: 'custom1',
+        download_source_id: 'custom1',
+      } as any)
+    );
+    expect(result.current.downloadSource?.id).toEqual('custom1');
   });
 });

@@ -389,15 +389,13 @@ export function MachineLearningCommonUIProvider({
 
     async assertLastToastHeader(expectedHeader: string, timeout: number = 5000) {
       await retry.tryForTime(timeout, async () => {
-        const resultToast = await toasts.getToastElement(1);
-        const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
-        const title: string = await titleElement.getVisibleText();
+        const title: string = await toasts.getTitleByIndex(1);
         expect(title).to.eql(
           expectedHeader,
           `Expected the toast header to equal "${expectedHeader}" (got "${title}")`
         );
       });
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
     },
 
     async ensureAllMenuPopoversClosed() {

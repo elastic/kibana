@@ -41,7 +41,7 @@ describe('RiskInputsUtilityBar', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('risk-input-utility-bar')).toHaveTextContent('Showing 1 Risk input');
+    expect(getByTestId('risk-input-utility-bar')).toHaveTextContent('Showing 1 Risk contribution');
   });
 
   it('renders current page message when totalItemCount is 20', () => {
@@ -58,7 +58,7 @@ describe('RiskInputsUtilityBar', () => {
     );
 
     expect(getByTestId('risk-input-utility-bar')).toHaveTextContent(
-      'Showing 1-10 of 20 Risk input'
+      'Showing 1-10 of 20 Risk contribution'
     );
   });
 
@@ -76,7 +76,7 @@ describe('RiskInputsUtilityBar', () => {
     );
 
     expect(getByTestId('risk-input-utility-bar')).toHaveTextContent(
-      'Showing 11-20 of 20 Risk inputs'
+      'Showing 11-20 of 20 Risk contribution'
     );
   });
 
@@ -93,7 +93,7 @@ describe('RiskInputsUtilityBar', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('risk-input-utility-bar')).toHaveTextContent('3 selected risk input');
+    expect(getByTestId('risk-input-utility-bar')).toHaveTextContent('3 selected risk contribution');
   });
 
   it('toggles the popover when button is clicked', () => {

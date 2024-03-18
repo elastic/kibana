@@ -22,13 +22,13 @@ components:
               type: object
               properties:
                 field:
-                  $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+                  $ref: '../../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
                 type:
                   type: string
                   enum:
                     - mapping
                 value:
-                  $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+                  $ref: '../../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
               required:
                 - field
                 - type

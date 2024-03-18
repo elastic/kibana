@@ -107,6 +107,7 @@ export interface DataQualityCheckResult {
   markdownComments: string[];
   sameFamily: number | undefined;
   pattern: string;
+  checkedAt: number | undefined;
 }
 
 export interface PatternRollup {
@@ -186,8 +187,8 @@ export type DataQualityIndexCheckedParams = DataQualityCheckAllCompletedParams &
 
 export interface DataQualityCheckAllCompletedParams {
   batchId: string;
-  ecsVersion?: string;
-  isCheckAll?: boolean;
+  ecsVersion: string;
+  isCheckAll: boolean;
   numberOfDocuments?: number;
   numberOfIncompatibleFields?: number;
   numberOfIndices?: number;

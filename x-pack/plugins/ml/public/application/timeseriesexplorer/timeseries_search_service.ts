@@ -6,8 +6,9 @@
  */
 
 import { each, find, get, filter } from 'lodash';
+import type { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import { ml } from '../services/ml_api_service';
@@ -15,11 +16,10 @@ import {
   isModelPlotChartableForDetector,
   isModelPlotEnabled,
 } from '../../../common/util/job_utils';
-// @ts-ignore
 import { buildConfigFromDetector } from '../util/chart_config_builder';
 import { mlResultsService } from '../services/results_service';
-import { ModelPlotOutput } from '../services/results_service/result_service_rx';
-import { Job } from '../../../common/types/anomaly_detection_jobs';
+import type { ModelPlotOutput } from '../services/results_service/result_service_rx';
+import type { Job } from '../../../common/types/anomaly_detection_jobs';
 
 function getMetricData(
   job: Job,
@@ -113,29 +113,48 @@ function getMetricData(
   }
 }
 
-// Builds chart detail information (charting function description and entity counts) used
-// in the title area of the time series chart.
-// Queries Elasticsearch if necessary to obtain the distinct count of entities
-// for which data is being plotted.
+interface TimeSeriesExplorerChartDetails {
+  success: boolean;
+  results: {
+    functionLabel: string | null;
+    entityData: { count?: number; entities: Array<{ fieldName: string; cardinality?: number }> };
+  };
+}
+
+/**
+ * Builds chart detail information (charting function description and entity counts) used
+ * in the title area of the time series chart.
+ * Queries Elasticsearch if necessary to obtain the distinct count of entities
+ * for which data is being plotted.
+ * @param job Job config info
+ * @param detectorIndex The index of the detector in the job config
+ * @param entityFields Array of field name - field value pairs
+ * @param earliestMs Earliest timestamp in milliseconds
+ * @param latestMs Latest timestamp in milliseconds
+ * @param metricFunctionDescription The underlying function (min, max, avg) for "metric" detector type
+ * @returns chart data to plot for Single Metric Viewer/Time series explorer
+ */
 function getChartDetails(
   job: Job,
   detectorIndex: number,
-  entityFields: any[],
+  entityFields: MlEntityField[],
   earliestMs: number,
-  latestMs: number
+  latestMs: number,
+  metricFunctionDescription?: ES_AGGREGATION
 ) {
   return new Promise((resolve, reject) => {
-    const obj: any = {
+    const obj: TimeSeriesExplorerChartDetails = {
       success: true,
       results: { functionLabel: '', entityData: { entities: [] } },
     };
 
-    const chartConfig = buildConfigFromDetector(job, detectorIndex);
+    const chartConfig = buildConfigFromDetector(job, detectorIndex, metricFunctionDescription);
+
     let functionLabel: string | null = chartConfig.metricFunction;
     if (chartConfig.metricFieldName !== undefined) {
-      functionLabel += ' ';
-      functionLabel += chartConfig.metricFieldName;
+      functionLabel += ` ${chartConfig.metricFieldName}`;
     }
+
     obj.results.functionLabel = functionLabel;
 
     const blankEntityFields = filter(entityFields, (entity) => {

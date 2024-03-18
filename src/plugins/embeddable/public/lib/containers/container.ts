@@ -131,6 +131,16 @@ export abstract class Container<
     this.removeEmbeddable(id);
   }
 
+  public async addNewPanel<ApiType extends unknown = unknown>(
+    panelPackage: PanelPackage
+  ): Promise<ApiType | undefined> {
+    const newEmbeddable = await this.addNewEmbeddable(
+      panelPackage.panelType,
+      panelPackage.initialState as Partial<EmbeddableInput>
+    );
+    return newEmbeddable as ApiType;
+  }
+
   public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
     return await this.replaceEmbeddable(
       idToRemove,

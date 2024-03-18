@@ -13,18 +13,15 @@ import { getIndexPipelineParameters } from './get_index_pipeline';
 describe('getIndexPipelineParameters', () => {
   const defaultMockClient = () => ({
     asCurrentUser: {
-      get: jest.fn().mockResolvedValue({}),
       indices: {
         getMapping: jest.fn().mockResolvedValue({}),
       },
       ingest: {
         getPipeline: jest.fn().mockRejectedValue('Pipeline not found'),
       },
-      search: jest.fn().mockResolvedValue({
-        hits: {
-          hits: [],
-        },
-      }),
+      transport: {
+        request: jest.fn().mockResolvedValue({}),
+      },
     },
   });
   let mockClient = defaultMockClient();
@@ -41,26 +38,19 @@ describe('getIndexPipelineParameters', () => {
     );
   });
   it('returns connector pipeline params if found', async () => {
-    mockClient.asCurrentUser.search = jest.fn().mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'unit-test',
-            _source: {},
+    mockClient.asCurrentUser.transport.request = jest.fn().mockResolvedValue({
+      count: 1,
+      results: [
+        {
+          id: 'unit-test',
+          pipeline: {
+            extract_binary_content: false,
+            name: 'unit-test-pipeline',
+            reduce_whitespace: true,
+            run_ml_inference: true,
           },
-        ],
-      },
-    });
-    mockClient.asCurrentUser.get = jest.fn().mockResolvedValue({
-      _id: 'unit-test',
-      _source: {
-        pipeline: {
-          extract_binary_content: false,
-          name: 'unit-test-pipeline',
-          reduce_whitespace: true,
-          run_ml_inference: true,
         },
-      },
+      ],
     });
     await expect(getIndexPipelineParameters('my-index', client)).resolves.toEqual({
       extract_binary_content: false,

@@ -18,15 +18,22 @@
       "logsShared",
       "observabilityAIAssistant",
       "observabilityShared",
+      "observability",
       "share",
       "kibanaUtils",
       "datasetQuality"
     ],
     "optionalPlugins": [
-      "serverless"
+      "serverless",
+      "triggersActionsUi",
+      "unifiedSearch",
+      "dataViews",
+      "dataViewEditor",
+      "lens"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "triggersActionsUi"
     ],
     "extraPublicDirs": [
       "common",

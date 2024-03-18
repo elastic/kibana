@@ -18,15 +18,22 @@ import type { AnomalyDetectorService } from '../application/services/anomaly_det
 import type { AnomalyTimelineService } from '../application/services/anomaly_timeline_service';
 import type { MlDependencies } from '../application/app';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
-import { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
-import {
-  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+import type { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
+import type { MlJobService } from '../application/services/job_service';
+import type {
   AnomalyExplorerChartsEmbeddableType,
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
-import { MlResultsService } from '../application/services/results_service';
+import {
+  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+} from './constants';
+import type { MlResultsService } from '../application/services/results_service';
+import type { MlApiServices } from '../application/services/ml_api_service';
+import type { MlFieldFormatService } from '../application/services/field_format_service';
+import type { MlTimeSeriesSearchService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
+import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
@@ -100,13 +107,48 @@ export interface AnomalyChartsEmbeddableCustomInput {
 
 export type AnomalyChartsEmbeddableInput = EmbeddableInput & AnomalyChartsEmbeddableCustomInput;
 
+export interface SingleMetricViewerEmbeddableCustomInput {
+  jobIds: JobId[];
+  title: string;
+  functionDescription?: string;
+  panelTitle: string;
+  selectedDetectorIndex: number;
+  selectedEntities: MlEntityField[];
+  // Embeddable inputs which are not included in the default interface
+  filters: Filter[];
+  query: Query;
+  refreshConfig: RefreshInterval;
+  timeRange: TimeRange;
+}
+
+export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
+  SingleMetricViewerEmbeddableCustomInput;
+
 export interface AnomalyChartsServices {
   anomalyDetectorService: AnomalyDetectorService;
   anomalyExplorerService: AnomalyExplorerChartsService;
+  mlFieldFormatService: MlFieldFormatService;
   mlResultsService: MlResultsService;
+  mlApiServices?: MlApiServices;
+}
+
+export interface SingleMetricViewerServices {
+  anomalyExplorerService: AnomalyExplorerChartsService;
+  anomalyDetectorService: AnomalyDetectorService;
+  mlApiServices: MlApiServices;
+  mlCapabilities: MlCapabilitiesService;
+  mlFieldFormatService: MlFieldFormatService;
+  mlJobService: MlJobService;
+  mlResultsService: MlResultsService;
+  mlTimeSeriesSearchService?: MlTimeSeriesSearchService;
 }
 
 export type AnomalyChartsEmbeddableServices = [CoreStart, MlDependencies, AnomalyChartsServices];
+export type SingleMetricViewerEmbeddableServices = [
+  CoreStart,
+  MlDependencies,
+  SingleMetricViewerServices
+];
 export interface AnomalyChartsCustomOutput {
   entityFields?: MlEntityField[];
   severity?: number;

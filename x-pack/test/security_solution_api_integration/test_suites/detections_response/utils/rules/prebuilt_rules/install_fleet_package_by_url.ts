@@ -9,6 +9,7 @@ import type SuperTest from 'supertest';
 import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { ToolingLog } from '@kbn/tooling-log';
 import expect from 'expect';
 import { retry } from '../../retry';
 import { refreshSavedObjectIndices } from '../../refresh_index';
@@ -28,7 +29,8 @@ const ATTEMPT_TIMEOUT = 120000;
 export const installPrebuiltRulesPackageViaFleetAPI = async (
   es: Client,
   supertest: SuperTest.SuperTest<SuperTest.Test>,
-  retryService: RetryService
+  retryService: RetryService,
+  log: ToolingLog
 ): Promise<InstallPackageResponse> => {
   const fleetResponse = await retry<InstallPackageResponse>({
     test: async () => {
@@ -44,9 +46,11 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
 
       return testResponse.body;
     },
+    utilityName: installPrebuiltRulesPackageViaFleetAPI.name,
     retryService,
     retries: MAX_RETRIES,
     timeout: ATTEMPT_TIMEOUT,
+    log,
   });
 
   await refreshSavedObjectIndices(es);
@@ -67,7 +71,8 @@ export const installPrebuiltRulesPackageByVersion = async (
   es: Client,
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   version: string,
-  retryService: RetryService
+  retryService: RetryService,
+  log: ToolingLog
 ): Promise<InstallPackageResponse> => {
   const fleetResponse = await retry<InstallPackageResponse>({
     test: async () => {
@@ -83,9 +88,11 @@ export const installPrebuiltRulesPackageByVersion = async (
 
       return testResponse.body;
     },
+    utilityName: installPrebuiltRulesPackageByVersion.name,
     retryService,
     retries: MAX_RETRIES,
     timeout: ATTEMPT_TIMEOUT,
+    log,
   });
 
   await refreshSavedObjectIndices(es);

@@ -23,7 +23,6 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
-import type { actionCreateService } from '..';
 
 export const createActionRequestsEsSearchResultsMock = (
   agentIds?: string[],
@@ -240,15 +239,4 @@ export const createHapiReadableStreamMock = (): HapiReadableStream => {
   };
 
   return readable;
-};
-
-export const createActionCreateServiceMock = (): jest.Mocked<
-  ReturnType<typeof actionCreateService>
-> => {
-  const createdActionMock = new EndpointActionGenerator('seed').generateActionDetails();
-
-  return {
-    createAction: jest.fn().mockResolvedValue(createdActionMock),
-    createActionFromAlert: jest.fn().mockResolvedValue(createdActionMock),
-  };
 };

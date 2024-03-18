@@ -14,12 +14,12 @@ describe('getGroupFilter', () => {
     expect(getGroupFilter(finalSignificantItemGroups[0])).toStrictEqual([
       {
         term: {
-          url: 'login.php',
+          response_code: '500',
         },
       },
       {
         term: {
-          user: 'Peter',
+          url: 'home.php',
         },
       },
     ]);

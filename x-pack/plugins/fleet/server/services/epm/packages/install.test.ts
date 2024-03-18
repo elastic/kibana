@@ -26,6 +26,7 @@ import {
   handleInstallPackageFailure,
   installAssetsForInputPackagePolicy,
   installPackage,
+  isPackageVersionOrLaterInstalled,
 } from './install';
 import * as install from './_install_package';
 import { getBundledPackageByPkgKey } from './bundled_packages';
@@ -713,5 +714,112 @@ describe('handleInstallPackageFailure', () => {
         }),
       })
     );
+  });
+});
+
+describe('isPackageVersionOrLaterInstalled', () => {
+  beforeEach(() => {
+    jest.mocked(getInstallationObject).mockReset();
+  });
+  it('should return true if package is installed in the same version as expected', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    jest.mocked(getInstallationObject).mockResolvedValueOnce({
+      attributes: { name: 'test', version: '1.0.0', install_status: 'installed' },
+    } as any);
+    const res = await isPackageVersionOrLaterInstalled({
+      savedObjectsClient,
+      pkgName: 'test',
+      pkgVersion: '1.0.0',
+    });
+
+    expect(res).toEqual(
+      expect.objectContaining({
+        package: expect.objectContaining({
+          name: 'test',
+          version: '1.0.0',
+          install_status: 'installed',
+        }),
+      })
+    );
+  });
+
+  it('should return true if package is installed in an higher version as expected', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    jest.mocked(getInstallationObject).mockResolvedValueOnce({
+      attributes: { name: 'test', version: '1.2.0', install_status: 'installed' },
+    } as any);
+    const res = await isPackageVersionOrLaterInstalled({
+      savedObjectsClient,
+      pkgName: 'test',
+      pkgVersion: '1.0.0',
+    });
+
+    expect(res).toEqual(
+      expect.objectContaining({
+        package: expect.objectContaining({
+          name: 'test',
+          version: '1.2.0',
+          install_status: 'installed',
+        }),
+      })
+    );
+  });
+
+  it('should return false if package is installed in an lower version as expected', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    jest.mocked(getInstallationObject).mockResolvedValueOnce({
+      attributes: { name: 'test', version: '0.9.0', install_status: 'installed' },
+    } as any);
+    const res = await isPackageVersionOrLaterInstalled({
+      savedObjectsClient,
+      pkgName: 'test',
+      pkgVersion: '1.0.0',
+    });
+
+    expect(res).toEqual(false);
+  });
+
+  it('should retry if package is currently installing', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    jest.mocked(getInstallationObject).mockResolvedValueOnce({
+      attributes: { name: 'test', version: '1.0.0', install_status: 'installing' },
+    } as any);
+    jest.mocked(getInstallationObject).mockResolvedValueOnce({
+      attributes: { name: 'test', version: '1.0.0', install_status: 'installing' },
+    } as any);
+    jest.mocked(getInstallationObject).mockResolvedValueOnce({
+      attributes: { name: 'test', version: '1.0.0', install_status: 'installed' },
+    } as any);
+
+    const res = await isPackageVersionOrLaterInstalled({
+      savedObjectsClient,
+      pkgName: 'test',
+      pkgVersion: '1.0.0',
+    });
+
+    expect(res).toEqual(
+      expect.objectContaining({
+        package: expect.objectContaining({
+          name: 'test',
+          version: '1.0.0',
+          install_status: 'installed',
+        }),
+      })
+    );
+
+    expect(getInstallationObject).toBeCalledTimes(3);
+  });
+
+  it('should throw on unexpected error', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    jest.mocked(getInstallationObject).mockRejectedValueOnce(new Error('test unexpected error'));
+
+    const res = isPackageVersionOrLaterInstalled({
+      savedObjectsClient,
+      pkgName: 'test',
+      pkgVersion: '1.0.0',
+    });
+
+    await expect(res).rejects.toThrowError('test unexpected error');
   });
 });

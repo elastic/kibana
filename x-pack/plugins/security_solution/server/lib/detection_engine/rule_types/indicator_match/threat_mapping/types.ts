@@ -120,7 +120,8 @@ export interface CreateThreatSignalOptions {
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
   runOpts: RunOpts<ThreatRuleParams>;
-  licensing: LicensingPluginSetup;
+  sortOrder?: SortOrderOrUndefined;
+  isAlertSuppressionActive: boolean;
 }
 
 export interface CreateEventSignalOptions {
@@ -163,7 +164,8 @@ export interface CreateEventSignalOptions {
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
   runOpts: RunOpts<ThreatRuleParams>;
-  licensing: LicensingPluginSetup;
+  sortOrder?: SortOrderOrUndefined;
+  isAlertSuppressionActive: boolean;
 }
 
 type EntryKey = 'field' | 'value';
@@ -312,6 +314,7 @@ export interface EventsOptions {
   exceptionFilter: Filter | undefined;
   eventListConfig?: OverrideBodyQuery;
   indexFields: DataViewFieldBase[];
+  sortOrder?: SortOrderOrUndefined;
 }
 
 export interface EventDoc {

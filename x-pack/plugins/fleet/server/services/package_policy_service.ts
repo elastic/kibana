@@ -213,4 +213,31 @@ export interface PackagePolicyClient {
     packageInfo: PackageInfo;
     experimentalDataStreamFeatures: ExperimentalDataStreamFeature[];
   }>;
+
+  /**
+   * Returns an `AsyncIterable` for retrieving all integration policy IDs
+   * @param soClient
+   * @param options
+   */
+  fetchAllItemIds(
+    soClient: SavedObjectsClientContract,
+    options?: PackagePolicyClientFetchAllItemIdsOptions
+  ): AsyncIterable<string[]>;
+
+  /**
+   * Returns an `AsyncIterable` for retrieving all integration policies
+   * @param soClient
+   * @param options
+   */
+  fetchAllItems(
+    soClient: SavedObjectsClientContract,
+    options?: PackagePolicyClientFetchAllItemsOptions
+  ): AsyncIterable<PackagePolicy[]>;
 }
+
+export type PackagePolicyClientFetchAllItemIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'>;
+
+export type PackagePolicyClientFetchAllItemsOptions = Pick<
+  ListWithKuery,
+  'perPage' | 'kuery' | 'sortField' | 'sortOrder'
+>;

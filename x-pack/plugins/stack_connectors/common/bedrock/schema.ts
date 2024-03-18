@@ -32,6 +32,8 @@ export const InvokeAIActionParamsSchema = schema.object({
     })
   ),
   model: schema.maybe(schema.string()),
+  temperature: schema.maybe(schema.number()),
+  stopSequences: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({

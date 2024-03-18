@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { AssetCriticalitySelector } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+import { AssetCriticalityAccordion } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import {
   ExpandableHostDetails,
   ExpandableHostDetailsPageLink,
@@ -83,7 +83,7 @@ export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
           <EuiSpacer size="m" />
           <ExpandableHostDetailsPageLink hostName={hostName} />
           <EuiHorizontalRule />
-          <AssetCriticalitySelector entity={entity} />
+          <AssetCriticalityAccordion entity={entity} />
           <ExpandableHostDetails contextID={contextID} scopeId={scopeId} hostName={hostName} />
         </StyledEuiFlyoutBody>
       </>
@@ -111,7 +111,7 @@ export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
           <ExpandableHostDetailsPageLink hostName={hostName} />
         </StyledEuiFlexButtonWrapper>
         <EuiSpacer size="m" />
-        <AssetCriticalitySelector entity={entity} />
+        <AssetCriticalityAccordion entity={entity} />
         <StyledPanelContent>
           <ExpandableHostDetails
             contextID={contextID}

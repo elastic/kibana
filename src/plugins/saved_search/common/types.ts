@@ -36,6 +36,7 @@ export interface SavedSearchAttributes {
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
+  headerRowHeight?: number;
 
   timeRestore?: boolean;
   timeRange?: Pick<TimeRange, 'from' | 'to'>;
@@ -63,6 +64,7 @@ export interface SavedSearch {
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
+  headerRowHeight?: number;
   isTextBasedQuery?: boolean;
   usesAdHocDataView?: boolean;
 

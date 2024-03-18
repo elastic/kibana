@@ -14,18 +14,18 @@ import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { setAlertStatus } from '../../../utils';
 import {
-  createAlertsIndex,
-  setAlertStatus,
   getQueryAlertIds,
-  deleteAllRules,
   createRule,
   waitForAlertsToBePresent,
   getAlertsByIds,
   waitForRuleSuccess,
   getRuleForAlertTesting,
+  deleteAllRules,
   deleteAllAlerts,
-} from '../../../utils';
+  createAlertsIndex,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 

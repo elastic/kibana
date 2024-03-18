@@ -18,6 +18,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/e
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
+import { context } from '@kbn/kibana-react-plugin/public';
 
 import { getColumns } from './anomalies_table_columns';
 
@@ -29,6 +30,8 @@ import { ml } from '../../services/ml_api_service';
 import { INFLUENCERS_LIMIT, ANOMALIES_TABLE_TABS, MAX_CHARS } from './anomalies_table_constants';
 
 export class AnomaliesTableInternal extends Component {
+  static contextType = context;
+
   constructor(props) {
     super(props);
 
@@ -144,9 +147,8 @@ export class AnomaliesTableInternal extends Component {
   };
 
   unsetShowRuleEditorFlyoutFunction = () => {
-    const showRuleEditorFlyout = () => {};
     this.setState({
-      showRuleEditorFlyout,
+      showRuleEditorFlyout: () => {},
     });
   };
 
@@ -190,6 +192,7 @@ export class AnomaliesTableInternal extends Component {
     }
 
     const columns = getColumns(
+      this.context.services.mlServices.mlFieldFormatService,
       tableData.anomalies,
       tableData.jobIds,
       tableData.examplesByJobId,

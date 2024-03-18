@@ -12,12 +12,13 @@ import type {
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
   ResponseActionsClientWriteActionResponseToEndpointIndexOptions,
 } from './base_response_actions_client';
-import { ResponseActionsClientImpl } from './base_response_actions_client';
+import { HOST_NOT_ENROLLED, ResponseActionsClientImpl } from './base_response_actions_client';
 import type {
   ActionDetails,
   LogsEndpointAction,
   LogsEndpointActionResponse,
   EndpointActionResponseDataOutput,
+  EndpointActionDataParameterTypes,
 } from '../../../../../../common/endpoint/types';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -28,12 +29,19 @@ import type { Logger } from '@kbn/logging';
 import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
-import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
+import {
+  ENDPOINT_ACTION_RESPONSES_INDEX,
+  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+  ENDPOINT_ACTIONS_INDEX,
+} from '../../../../../../common/endpoint/constants';
 import type { DeepMutable } from '../../../../../../common/endpoint/types/utility_types';
 import { set } from 'lodash';
 import { responseActionsClientMock } from '../mocks';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getResponseActionFeatureKey } from '../../../feature_usage/feature_keys';
+import { isActionSupportedByAgentType as _isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');
@@ -44,7 +52,22 @@ jest.mock('../../action_details_by_id', () => {
   };
 });
 
+jest.mock(
+  '../../../../../../common/endpoint/service/response_actions/is_response_action_supported',
+  () => {
+    const original = jest.requireActual(
+      '../../../../../../common/endpoint/service/response_actions/is_response_action_supported'
+    );
+
+    return {
+      ...original,
+      isActionSupportedByAgentType: jest.fn(original.isActionSupportedByAgentType),
+    };
+  }
+);
+
 const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
+const isActionSupportedByAgentTypeMock = _isActionSupportedByAgentType as jest.Mock;
 
 describe('ResponseActionsClientImpl base class', () => {
   let constructorOptions: ReturnType<typeof responseActionsClientMock.createConstructorOptions>;
@@ -66,6 +89,12 @@ describe('ResponseActionsClientImpl base class', () => {
 
   afterEach(() => {
     getActionDetailsByIdMock.mockClear();
+    isActionSupportedByAgentTypeMock.mockReset();
+    isActionSupportedByAgentTypeMock.mockImplementation(
+      jest.requireActual(
+        '../../../../../../common/endpoint/service/response_actions/is_response_action_supported'
+      ).isActionSupportedByAgentType
+    );
   });
 
   describe('Public methods', () => {
@@ -120,6 +149,7 @@ describe('ResponseActionsClientImpl base class', () => {
         caseIds: ['case-999'],
         alertIds: [KNOWN_ALERT_ID_1, KNOWN_ALERT_ID_2, KNOWN_ALERT_ID_3],
         comment: 'this is a case comment',
+        actionId: 'action-123',
         hosts: [
           {
             hostId: '1-2-3',
@@ -141,7 +171,7 @@ describe('ResponseActionsClientImpl base class', () => {
       expect(casesClient.cases.getCasesByAlertID).not.toHaveBeenCalled();
       expect(casesClient.attachments.bulkCreate).not.toHaveBeenCalled();
       expect(logger.debug).toHaveBeenCalledWith(
-        "Nothing to do. 'caseIds' and 'alertIds' are empty"
+        "No updates to Cases needed. 'caseIds' and 'alertIds' are empty"
       );
     });
 
@@ -151,7 +181,7 @@ describe('ResponseActionsClientImpl base class', () => {
 
       expect(casesClient.cases.getCasesByAlertID).not.toHaveBeenCalled();
       expect(casesClient.attachments.bulkCreate).not.toHaveBeenCalled();
-      expect(logger.debug).toHaveBeenCalledWith("Nothing to do. 'hosts' is empty");
+      expect(logger.debug).toHaveBeenCalledWith("No updates to Cases needed. 'hosts' is empty");
     });
 
     it('should do nothing if cases client was not provided', async () => {
@@ -190,7 +220,9 @@ describe('ResponseActionsClientImpl base class', () => {
       updateCasesOptions.alertIds = [KNOWN_ALERT_ID_3];
       await baseClassMock.updateCases(updateCasesOptions);
 
-      expect(logger.debug).toHaveBeenCalledWith(`Nothing to do. Alert IDs are not tied to Cases`);
+      expect(logger.debug).toHaveBeenCalledWith(
+        `No updates to Cases needed. Alert IDs are not tied to Cases`
+      );
     });
 
     it('should update cases with an attachment for each host', async () => {
@@ -201,76 +233,29 @@ describe('ResponseActionsClientImpl base class', () => {
       expect(casesClient.attachments.bulkCreate).toHaveBeenLastCalledWith({
         attachments: [
           {
-            actions: {
+            externalReferenceAttachmentTypeId: 'endpoint',
+            externalReferenceId: 'action-123',
+            owner: 'securitySolution',
+            externalReferenceStorage: {
+              type: 'elasticSearchDoc',
+            },
+            type: 'externalReference',
+            externalReferenceMetadata: {
+              command: 'isolate',
+              comment: 'this is a case comment',
               targets: [
                 {
                   endpointId: '1-2-3',
                   hostname: 'foo-one',
+                  agentType: 'endpoint',
                 },
                 {
                   endpointId: '4-5-6',
                   hostname: 'foo-two',
+                  agentType: 'endpoint',
                 },
               ],
-              type: 'isolate',
             },
-            comment: 'this is a case comment',
-            owner: 'securitySolution',
-            type: 'actions',
-          },
-          {
-            actions: {
-              targets: [
-                {
-                  endpointId: '1-2-3',
-                  hostname: 'foo-one',
-                },
-                {
-                  endpointId: '4-5-6',
-                  hostname: 'foo-two',
-                },
-              ],
-              type: 'isolate',
-            },
-            comment: 'this is a case comment',
-            owner: 'securitySolution',
-            type: 'actions',
-          },
-          {
-            actions: {
-              targets: [
-                {
-                  endpointId: '1-2-3',
-                  hostname: 'foo-one',
-                },
-                {
-                  endpointId: '4-5-6',
-                  hostname: 'foo-two',
-                },
-              ],
-              type: 'isolate',
-            },
-            comment: 'this is a case comment',
-            owner: 'securitySolution',
-            type: 'actions',
-          },
-          {
-            actions: {
-              targets: [
-                {
-                  endpointId: '1-2-3',
-                  hostname: 'foo-one',
-                },
-                {
-                  endpointId: '4-5-6',
-                  hostname: 'foo-two',
-                },
-              ],
-              type: 'isolate',
-            },
-            comment: 'this is a case comment',
-            owner: 'securitySolution',
-            type: 'actions',
           },
         ],
         caseId: 'case-3',
@@ -280,7 +265,7 @@ describe('ResponseActionsClientImpl base class', () => {
     it('should not error if update to a case fails', async () => {
       (casesClient.attachments.bulkCreate as jest.Mock).mockImplementation(async (options) => {
         if (options.caseId === 'case-2') {
-          throw new Error('update filed to case-2');
+          throw new Error('update failed to case-2');
         }
       });
       await baseClassMock.updateCases(updateCasesOptions);
@@ -329,8 +314,8 @@ describe('ResponseActionsClientImpl base class', () => {
         agent_type: 'endpoint',
         endpoint_ids: ['one'],
         comment: 'test comment',
-        rule_name: undefined,
-        rule_id: undefined,
+        ruleName: undefined,
+        ruleId: undefined,
         alert_ids: undefined,
         case_ids: undefined,
         hosts: undefined,
@@ -411,11 +396,11 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     it('should include Rule information if rule_id and rule_name were provided', async () => {
-      indexDocOptions.rule_id = '1-2-3';
-      indexDocOptions.rule_name = 'rule 123';
+      indexDocOptions.ruleId = '1-2-3';
+      indexDocOptions.ruleName = 'rule 123';
       expectedIndexDoc.rule = {
-        name: indexDocOptions.rule_name,
-        id: indexDocOptions.rule_id,
+        name: indexDocOptions.ruleName,
+        id: indexDocOptions.ruleId,
       };
 
       await expect(
@@ -424,7 +409,7 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     it('should NOT include Rule information if rule_id or rule_name are missing', async () => {
-      indexDocOptions.rule_id = '1-2-3';
+      indexDocOptions.ruleId = '1-2-3';
 
       await expect(
         baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
@@ -451,6 +436,68 @@ describe('ResponseActionsClientImpl base class', () => {
         'message',
         expect.stringContaining('Failed to create action request document:')
       );
+    });
+
+    it('should throw error if endpoint_ids is empty', async () => {
+      indexDocOptions.endpoint_ids = [];
+      const responsePromise = baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+
+      await expect(responsePromise).rejects.toHaveProperty('message', HOST_NOT_ENROLLED);
+      await expect(responsePromise).rejects.toHaveProperty('statusCode', 400);
+    });
+
+    it('should throw error is response action is not supported by agent type', async () => {
+      isActionSupportedByAgentTypeMock.mockReturnValue(false);
+      const responsePromise = baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+
+      await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsNotSupportedError);
+    });
+
+    describe('And class is instantiated with `isAutomated` set to `true`', () => {
+      beforeEach(() => {
+        constructorOptions.isAutomated = true;
+        baseClassMock = new MockClassWithExposedProtectedMembers(constructorOptions);
+      });
+
+      describe('#riteActionRequestToEndpointIndex()', () => {
+        it('should write doc with error when license is not Enterprise', async () => {
+          (
+            constructorOptions.endpointService.getLicenseService().isEnterprise as jest.Mock
+          ).mockReturnValue(false);
+
+          await expect(
+            baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+          ).resolves.toMatchObject({
+            error: {
+              message: 'At least Enterprise license is required to use Response Actions.',
+            },
+          });
+        });
+
+        it('should write doc with error when endpoint_ids is empty', async () => {
+          indexDocOptions.endpoint_ids = [];
+
+          await expect(
+            baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+          ).resolves.toMatchObject({
+            error: {
+              message: HOST_NOT_ENROLLED,
+            },
+          });
+        });
+
+        it('should write doc with error when action is not supported by agent', async () => {
+          isActionSupportedByAgentTypeMock.mockReturnValue(false);
+
+          await expect(
+            baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+          ).resolves.toMatchObject({
+            error: {
+              message: 'Action [isolate] not supported',
+            },
+          });
+        });
+      });
     });
   });
 
@@ -510,6 +557,111 @@ describe('ResponseActionsClientImpl base class', () => {
       await expect(responsePromise).rejects.toHaveProperty('statusCode', 500);
     });
   });
+
+  describe('#fetchAllPendingActions()', () => {
+    beforeEach(() => {
+      const generator = new EndpointActionGenerator('seed');
+      const actionRequestEsHitPages = [
+        // Page 1
+        [
+          generator.generateActionEsHit({
+            agent: { id: 'agent-a' },
+            EndpointActions: { action_id: 'action-id-1' },
+          }),
+        ],
+        // Page 2
+        [
+          generator.generateActionEsHit({
+            agent: { id: 'agent-b' },
+            EndpointActions: { action_id: 'action-id-2' },
+          }),
+        ],
+      ];
+      let nextActionRequestPageNumber = 0;
+
+      constructorOptions.esClient.search.mockImplementation(async (_searchReq) => {
+        const searchReq = _searchReq as SearchRequest;
+
+        // FYI: The iterable uses a Point In Time
+        if (searchReq!.pit) {
+          return generator.toEsSearchResponse(
+            actionRequestEsHitPages[nextActionRequestPageNumber++] ?? []
+          );
+        }
+
+        switch (searchReq!.index) {
+          case ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN:
+            // `action-1` will have a response - thus its complete
+            if (JSON.stringify(searchReq).includes('action-id-1')) {
+              return generator.toEsSearchResponse([
+                generator.toEsSearchHit(
+                  generator.generateResponse({
+                    agent: { id: 'agent-a' },
+                    EndpointActions: { action_id: 'action-id-1' },
+                  }),
+                  ENDPOINT_ACTION_RESPONSES_INDEX
+                ),
+              ]);
+            }
+
+            // `action-2 will not have a response - it will be pending
+            return generator.toEsSearchResponse([]);
+        }
+
+        return generator.toEsSearchResponse([]);
+      });
+    });
+
+    it('should return an async iterable', () => {
+      const iterable = baseClassMock.fetchAllPendingActions();
+
+      expect(iterable).toEqual({
+        [Symbol.asyncIterator]: expect.any(Function),
+      });
+    });
+
+    it('should query ES with expected criteria', async () => {
+      for await (const pendingActions of baseClassMock.fetchAllPendingActions()) {
+        expect(pendingActions);
+      }
+
+      expect(constructorOptions.esClient.search).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: { term: { 'EndpointActions.input_type': expect.any(String) } },
+              must_not: { exists: { field: 'error' } },
+              filter: [{ range: { 'EndpointActions.expiration': { gte: 'now' } } }],
+            },
+          },
+        })
+      );
+    });
+
+    it('should provide an array of pending actions', async () => {
+      const iterationData: Array<
+        Array<
+          LogsEndpointAction<EndpointActionDataParameterTypes, EndpointActionResponseDataOutput, {}>
+        >
+      > = [];
+
+      for await (const pendingActions of baseClassMock.fetchAllPendingActions()) {
+        iterationData.push(pendingActions);
+      }
+
+      expect(iterationData.length).toBe(2);
+      expect(iterationData[0]).toEqual([]); // First page of results should be empty due to how the mock was setup
+      expect(iterationData[1]).toEqual([
+        expect.objectContaining({
+          EndpointActions: expect.objectContaining({
+            action_id: 'action-id-2',
+          }),
+          agent: { id: 'agent-b' },
+        }),
+      ]);
+    });
+  });
 });
 
 class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
@@ -537,5 +689,9 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
     options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {
     return super.writeActionResponseToEndpointIndex<TOutputContent>(options);
+  }
+
+  public fetchAllPendingActions(): AsyncIterable<LogsEndpointAction[]> {
+    return super.fetchAllPendingActions();
   }
 }

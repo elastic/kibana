@@ -26,16 +26,14 @@ interface DataTableColumnHeaderProps {
   showColumnTokens?: boolean;
 }
 
-export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = (props) => {
-  const {
-    columnDisplayName,
-    showColumnTokens,
-    columnName,
-    columnTypes,
-    dataView,
-    headerRowHeight = 1,
-  } = props;
-
+export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
+  columnDisplayName,
+  showColumnTokens,
+  columnName,
+  columnTypes,
+  dataView,
+  headerRowHeight,
+}) => {
   return (
     <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
       {showColumnTokens && (

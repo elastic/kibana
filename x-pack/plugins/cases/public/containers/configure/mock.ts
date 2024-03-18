@@ -74,4 +74,5 @@ export const casesConfigurationsMock: CasesConfigurationUI = {
   mappings: [],
   version: 'WzHJ12',
   customFields: customFieldsConfigurationMock,
+  owner: 'securitySolution',
 };

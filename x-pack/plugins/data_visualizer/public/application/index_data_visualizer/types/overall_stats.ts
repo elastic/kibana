@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocumentCountStats } from '../../../../common/types/field_stats';
+import type { DocumentCountStats } from '../../../../common/types/field_stats';
 
 export interface AggregatableField {
   fieldName: string;

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import { first } from 'lodash';
 import { AgentName } from '@kbn/elastic-agent-utils';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ChipWithPopover } from '../common/popover_chip';
@@ -27,10 +26,12 @@ export const Resource = ({ row }: DataGridCellValueElementProps) => {
           text={resourceDoc[constants.SERVICE_NAME_FIELD] as string}
           rightSideIcon="arrowDown"
           leftSideIcon={
-            <AgentIcon
-              agentName={first((resourceDoc[constants.AGENT_NAME_FIELD] ?? []) as AgentName[])}
-              size="m"
-            />
+            resourceDoc[constants.AGENT_NAME_FIELD] && (
+              <AgentIcon
+                agentName={resourceDoc[constants.AGENT_NAME_FIELD] as AgentName}
+                size="m"
+              />
+            )
           }
         />
       )}

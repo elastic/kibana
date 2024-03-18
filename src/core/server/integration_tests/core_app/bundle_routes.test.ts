@@ -17,7 +17,7 @@ import { HttpService } from '@kbn/core-http-server-internal';
 import { createHttpServer } from '@kbn/core-http-server-mocks';
 import { registerRouteForBundle, FileHashCache } from '@kbn/core-apps-server-internal';
 
-const buildNum = 1234;
+const buildHash = 'buildHash';
 const fooPluginFixture = resolve(__dirname, './__fixtures__/plugin/foo');
 
 describe('bundle routes', () => {
@@ -47,8 +47,8 @@ describe('bundle routes', () => {
       isDist,
       fileHashCache,
       bundlesPath: fooPluginFixture,
-      routePath: `/${buildNum}/bundles/plugin/foo/`,
-      publicPath: `/${buildNum}/bundles/plugin/foo/`,
+      routePath: `/${buildHash}/bundles/plugin/foo/`,
+      publicPath: `/${buildHash}/bundles/plugin/foo/`,
     });
   };
 
@@ -62,7 +62,7 @@ describe('bundle routes', () => {
     await server.start();
 
     const response = await supertest(innerServer.listener)
-      .get(`/${buildNum}/bundles/plugin/foo/image.png`)
+      .get(`/${buildHash}/bundles/plugin/foo/image.png`)
       .expect(200);
 
     const actualImage = await readFile(resolve(fooPluginFixture, 'image.png'));
@@ -80,7 +80,7 @@ describe('bundle routes', () => {
     await server.start();
 
     const response = await supertest(innerServer.listener)
-      .get(`/${buildNum}/bundles/plugin/foo/plugin.js`)
+      .get(`/${buildHash}/bundles/plugin/foo/plugin.js`)
       .expect(200);
 
     const actualFile = await readFile(resolve(fooPluginFixture, 'plugin.js'));
@@ -98,7 +98,7 @@ describe('bundle routes', () => {
     await server.start();
 
     await supertest(innerServer.listener)
-      .get(`/${buildNum}/bundles/plugin/foo/../outside_output.js`)
+      .get(`/${buildHash}/bundles/plugin/foo/../outside_output.js`)
       .expect(404);
   });
 
@@ -112,7 +112,7 @@ describe('bundle routes', () => {
     await server.start();
 
     await supertest(innerServer.listener)
-      .get(`/${buildNum}/bundles/plugin/foo/missing.js`)
+      .get(`/${buildHash}/bundles/plugin/foo/missing.js`)
       .expect(404);
   });
 
@@ -126,7 +126,7 @@ describe('bundle routes', () => {
     await server.start();
 
     const response = await supertest(innerServer.listener)
-      .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
+      .get(`/${buildHash}/bundles/plugin/foo/gzip_chunk.js`)
       .expect(200);
 
     expect(response.get('content-encoding')).toEqual('gzip');
@@ -151,7 +151,7 @@ describe('bundle routes', () => {
       await server.start();
 
       const response = await supertest(innerServer.listener)
-        .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
+        .get(`/${buildHash}/bundles/plugin/foo/gzip_chunk.js`)
         .expect(200);
 
       expect(response.get('cache-control')).toEqual('max-age=31536000');
@@ -170,7 +170,7 @@ describe('bundle routes', () => {
       await server.start();
 
       const response = await supertest(innerServer.listener)
-        .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
+        .get(`/${buildHash}/bundles/plugin/foo/gzip_chunk.js`)
         .expect(200);
 
       expect(response.get('cache-control')).toEqual('must-revalidate');

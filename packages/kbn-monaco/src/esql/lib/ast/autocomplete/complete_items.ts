@@ -113,7 +113,7 @@ export const pipeCompleteItem = buildCharCompleteItem(
   i18n.translate('monaco.esql.autocomplete.pipeDoc', {
     defaultMessage: 'Pipe (|)',
   }),
-  { sortText: 'B', quoted: false }
+  { sortText: 'C', quoted: false }
 );
 
 export const commaCompleteItem = buildCharCompleteItem(
@@ -121,7 +121,7 @@ export const commaCompleteItem = buildCharCompleteItem(
   i18n.translate('monaco.esql.autocomplete.commaDoc', {
     defaultMessage: 'Comma (,)',
   }),
-  { sortText: 'C', quoted: false }
+  { sortText: 'B', quoted: false }
 );
 
 export const colonCompleteItem = buildCharCompleteItem(

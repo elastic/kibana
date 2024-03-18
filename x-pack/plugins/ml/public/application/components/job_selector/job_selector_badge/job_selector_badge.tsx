@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
+import type { FC } from 'react';
+import React from 'react';
+import type { EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { tabColor } from '../../../../../common/util/group_color_utils';
 

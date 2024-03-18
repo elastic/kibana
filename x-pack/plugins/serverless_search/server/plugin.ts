@@ -69,7 +69,7 @@ export class ServerlessSearchPlugin
         await dataViewsService.createAndSave({
           allowNoIndex: false,
           name: 'default:all-data',
-          title: '*',
+          title: '*,-.*',
           id: 'default_all_data_id',
         });
       }
@@ -99,7 +99,7 @@ export class ServerlessSearchPlugin
 
     if (usageCollection) {
       getStartServices().then(() => {
-        registerTelemetryUsageCollector(usageCollection);
+        registerTelemetryUsageCollector(usageCollection, this.logger);
       });
     }
 

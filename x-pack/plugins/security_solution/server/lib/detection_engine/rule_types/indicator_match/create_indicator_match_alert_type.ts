@@ -43,6 +43,9 @@ export const createIndicatorMatchAlertType = (
         },
       },
     },
+    schemas: {
+      params: { type: 'zod', schema: ThreatRuleParams },
+    },
     actionGroups: [
       {
         id: 'default',

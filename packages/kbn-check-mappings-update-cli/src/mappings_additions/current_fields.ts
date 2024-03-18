@@ -9,6 +9,7 @@
 import { readFile, writeFile } from 'fs/promises';
 import Path from 'path';
 import { FieldListMap } from '@kbn/core-saved-objects-base-server-internal';
+import { prettyPrintAndSortKeys } from '@kbn/utils';
 
 const CURRENT_FIELDS_FILE_PATH = Path.resolve(__dirname, '../../current_fields.json');
 
@@ -25,5 +26,5 @@ export const readCurrentFields = async (): Promise<FieldListMap> => {
 };
 
 export const writeCurrentFields = async (fieldMap: FieldListMap) => {
-  await writeFile(CURRENT_FIELDS_FILE_PATH, JSON.stringify(fieldMap, null, 2) + '\n', 'utf-8');
+  await writeFile(CURRENT_FIELDS_FILE_PATH, prettyPrintAndSortKeys(fieldMap) + '\n', 'utf-8');
 };

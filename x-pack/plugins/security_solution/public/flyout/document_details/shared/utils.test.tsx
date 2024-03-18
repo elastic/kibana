@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getField } from './utils';
+import { getField, getFieldArray } from './utils';
 
 describe('test getField', () => {
   it('should return the string value if field is a string', () => {
@@ -26,5 +26,24 @@ describe('test getField', () => {
     expect(getField([1, 2, 3], '-')).toBe('-');
     expect(getField({ test: 'test string' }, '-')).toBe('-');
     expect(getField(null, '-')).toBe('-');
+  });
+});
+
+describe('test getFieldArray', () => {
+  it('should return the string value in an array if field is a string', () => {
+    expect(getFieldArray('test string')).toStrictEqual(['test string']);
+  });
+  it('should return field array', () => {
+    expect(getFieldArray(['string1', 'string2', 'string3'])).toStrictEqual([
+      'string1',
+      'string2',
+      'string3',
+    ]);
+    expect(getFieldArray([1, 2, 3])).toStrictEqual([1, 2, 3]);
+  });
+
+  it('should return empty array if field is null or empty', () => {
+    expect(getFieldArray(undefined)).toStrictEqual([]);
+    expect(getFieldArray(null)).toStrictEqual([]);
   });
 });

@@ -7,10 +7,12 @@
  */
 
 export * from './cancel_syncs';
+export * from './collect_connector_stats';
 export * from './create_connector';
 export * from './create_connector_document';
 export * from './create_connector_secret';
 export * from './delete_connector';
+export * from './delete_connector_secret';
 export * from './fetch_connectors';
 export * from './fetch_sync_jobs';
 export * from './update_filtering';
@@ -22,5 +24,6 @@ export * from './update_connector_configuration';
 export * from './update_connector_index_name';
 export * from './update_connector_name_and_description';
 export * from './update_connector_scheduling';
+export * from './update_connector_secret';
 export * from './update_connector_service_type';
 export * from './update_connector_status';

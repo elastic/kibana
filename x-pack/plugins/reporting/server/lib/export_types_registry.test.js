@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExportTypesRegistry } from './export_types_registry';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 
 describe('ExportTypesRegistry', function () {
   let exportTypesRegistry;

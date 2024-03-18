@@ -18,6 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
   const security = getService('security');
+  const retry = getService('retry');
+  const find = getService('find');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -33,6 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover esql view', async function () {
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -152,6 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ]);
       });
     });
+
     describe('errors', () => {
       it('should show error messages for syntax errors in query', async function () {
         await PageObjects.discover.selectTextBaseLang();
@@ -177,6 +181,61 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect((await monacoEditor.getCurrentMarkers('kibanaCodeEditor')).length).to.eql(1);
           }
         }
+      });
+    });
+
+    describe('switch modal', () => {
+      beforeEach(async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+      });
+
+      it('should show switch modal when switching to a data view', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.selectIndexPattern('logstash-*', false);
+        await retry.try(async () => {
+          await testSubjects.existOrFail('unifiedSearch_switch_modal');
+        });
+      });
+
+      it('should not show switch modal when switching to a data view while a saved search is open', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.selectIndexPattern('logstash-*', false);
+        await retry.try(async () => {
+          await testSubjects.existOrFail('unifiedSearch_switch_modal');
+        });
+        await find.clickByCssSelector(
+          '[data-test-subj="unifiedSearch_switch_modal"] .euiModal__closeIcon'
+        );
+        await retry.try(async () => {
+          await testSubjects.missingOrFail('unifiedSearch_switch_modal');
+        });
+        await PageObjects.discover.saveSearch('esql_test');
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await testSubjects.missingOrFail('unifiedSearch_switch_modal');
+      });
+
+      it('should show switch modal when switching to a data view while a saved search with unsaved changes is open', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.saveSearch('esql_test2');
+        const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.selectIndexPattern('logstash-*', false);
+        await retry.try(async () => {
+          await testSubjects.existOrFail('unifiedSearch_switch_modal');
+        });
       });
     });
   });

@@ -22,10 +22,8 @@ import {
   withOption,
   appendSeparatorOption,
 } from '../definitions/options';
-import { ccqMode } from '../definitions/settings';
 import {
   CommandDefinition,
-  CommandModeDefinition,
   CommandOptionsDefinition,
   FunctionDefinition,
   SignatureArgType,
@@ -44,7 +42,7 @@ import {
 import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
 
-function isSingleItem(arg: ESQLAstItem): arg is ESQLSingleAstItem {
+export function isSingleItem(arg: ESQLAstItem): arg is ESQLSingleAstItem {
   return arg && !Array.isArray(arg);
 }
 
@@ -93,7 +91,7 @@ export function isIncompleteItem(arg: ESQLAstItem): boolean {
 }
 
 export function isMathFunction(query: string, offset: number) {
-  const queryTrimmed = query.substring(0, offset).trimEnd();
+  const queryTrimmed = query.trimEnd();
   // try to get the full operation token (e.g. "+", "in", "like", etc...) but it requires the token
   // to be spaced out from a field/function (e.g. "field + ") so it is subject to issues
   const [opString] = queryTrimmed.split(' ').reverse();
@@ -217,10 +215,6 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
   return [byOption, metadataOption, asOption, onOption, withOption, appendSeparatorOption].find(
     ({ name }) => name === optionName
   );
-}
-
-export function getCommandMode(settingName: CommandModeDefinition['name']) {
-  return [ccqMode].find(({ name }) => name === settingName);
 }
 
 function compareLiteralType(argTypes: string, item: ESQLLiteral) {
@@ -358,7 +352,8 @@ export function isEqualType(
   item: ESQLSingleAstItem,
   argDef: SignatureArgType,
   references: ReferenceMaps,
-  parentCommand?: string
+  parentCommand?: string,
+  nameHit?: string
 ) {
   const argType = 'innerType' in argDef && argDef.innerType ? argDef.innerType : argDef.type;
   if (argType === 'any') {
@@ -381,11 +376,12 @@ export function isEqualType(
       // anything goes, so avoid any effort here
       return true;
     }
-    const hit = getColumnHit(item.name, references);
-    if (!hit) {
+    const hit = getColumnHit(nameHit ?? item.name, references);
+    const validHit = hit;
+    if (!validHit) {
       return false;
     }
-    const wrappedTypes = Array.isArray(hit.type) ? hit.type : [hit.type];
+    const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
     return wrappedTypes.some((ct) => argType === ct);
   }
 }
@@ -431,6 +427,11 @@ function getWildcardPosition(name: string) {
 export function hasWildcard(name: string) {
   return name.includes('*');
 }
+export function isVariable(
+  column: ESQLRealField | ESQLVariable | undefined
+): column is ESQLVariable {
+  return Boolean(column && 'location' in column);
+}
 export function hasCCSSource(name: string) {
   return name.includes(':');
 }
@@ -443,9 +444,9 @@ export function columnExists(
     return { hit: true, nameHit: column.name };
   }
   if (column.quoted) {
-    const trimmedName = column.name.replace(/\s/g, '');
-    if (variables.has(trimmedName)) {
-      return { hit: true, nameHit: trimmedName };
+    const originalName = column.text;
+    if (variables.has(originalName)) {
+      return { hit: true, nameHit: originalName };
     }
   }
   if (

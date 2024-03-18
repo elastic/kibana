@@ -21,7 +21,7 @@ import { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { Store } from 'redux';
 import { DataProvider } from '@kbn/timelines-plugin/common';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public/types';
+import { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public/types';
 import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Policy } from './modules/block_list/hooks/use_policies';
 
@@ -33,7 +33,7 @@ export interface SecuritySolutionDataViewBase extends DataViewBase {
 export interface ThreatIntelligencePluginSetup {}
 
 export interface SetupPlugins {
-  cases: CasesUiSetup;
+  cases: CasesPublicSetup;
 }
 
 export interface ThreatIntelligencePluginStart {
@@ -47,7 +47,7 @@ export interface ThreatIntelligencePluginStartDeps {
 }
 
 export type Services = {
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
   data: DataPublicPluginStart;
   storage: Storage;
   dataViews: DataViewsPublicPluginStart;

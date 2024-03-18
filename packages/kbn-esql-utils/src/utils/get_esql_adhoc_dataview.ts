@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {
@@ -32,6 +33,7 @@ export async function getESQLAdHocDataview(
 ) {
   return await dataViewsService.create({
     title: indexPattern,
+    type: ESQL_TYPE,
     id: await sha256(`esql-${indexPattern}`),
   });
 }

@@ -437,7 +437,7 @@ describe('Response actions history page', () => {
       }, []);
 
       expect(selectedFilterOptions.length).toEqual(1);
-      expect(selectedFilterOptions).toEqual(['Endpoint. Checked option.']);
+      expect(selectedFilterOptions).toEqual(['Elastic Defend. Checked option.']);
       expect(history.location.search).toEqual('?agentTypes=endpoint');
     });
   });
