@@ -24,10 +24,10 @@ import {
   StreamingChatResponseEventType,
 } from '../../../common/conversation_complete';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
-import type { CreateChatCompletionResponseChunk } from '../../../common/utils/process_openai_stream';
 import { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { observableIntoStream } from '../util/observable_into_stream';
+import { CreateChatCompletionResponseChunk } from './adapters/process_openai_stream';
 
 type ChunkDelta = CreateChatCompletionResponseChunk['choices'][number]['delta'];
 
