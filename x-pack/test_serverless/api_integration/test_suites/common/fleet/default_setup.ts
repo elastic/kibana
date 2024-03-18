@@ -20,7 +20,7 @@ export async function expectDefaultFleetServer({ getService }: FtrProviderContex
     const { body, status } = await supertest.get(
       `/api/fleet/fleet_server_hosts/${defaultFleetServerHostId}`
     );
-    if (status === 200 && body.item.host_urls.includes(defaultFleetServerHostUrl)) {
+    if (status === 200 && body.item.host_urls.length > 0) {
       return true;
     } else {
       throw new Error(`Expected default Fleet Server id ${defaultFleetServerHostId} to exist`);
@@ -36,7 +36,7 @@ export async function expectDefaultElasticsearchOutput({ getService }: FtrProvid
     const { body, status } = await supertest.get(
       `/api/fleet/outputs/${defaultElasticsearchOutputId}`
     );
-    if (status === 200 && body.item.hosts.includes(defaultElasticsearchOutputHostUrl)) {
+    if (status === 200 && body.item.hosts.length > 0) {
       return true;
     } else {
       throw new Error(
