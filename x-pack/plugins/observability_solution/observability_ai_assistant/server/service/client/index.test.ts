@@ -339,8 +339,8 @@ describe('Observability AI Assistant client', () => {
               last_updated: expect.any(String),
               token_count: {
                 completion: 2,
-                prompt: 174,
-                total: 176,
+                prompt: 100,
+                total: 102,
               },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
@@ -397,8 +397,8 @@ describe('Observability AI Assistant client', () => {
               last_updated: expect.any(String),
               token_count: {
                 completion: 8,
-                prompt: 395,
-                total: 403,
+                prompt: 284,
+                total: 292,
               },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
@@ -415,8 +415,8 @@ describe('Observability AI Assistant client', () => {
                 title: 'An auto-generated title',
                 token_count: {
                   completion: 8,
-                  prompt: 395,
-                  total: 403,
+                  prompt: 284,
+                  total: 292,
                 },
               },
               labels: {},
@@ -542,8 +542,8 @@ describe('Observability AI Assistant client', () => {
           last_updated: expect.any(String),
           token_count: {
             completion: 2,
-            prompt: 174,
-            total: 176,
+            prompt: 100,
+            total: 102,
           },
         },
         type: StreamingChatResponseEventType.ConversationUpdate,
@@ -561,8 +561,8 @@ describe('Observability AI Assistant client', () => {
             title: 'My stored conversation',
             token_count: {
               completion: 2,
-              prompt: 174,
-              total: 176,
+              prompt: 100,
+              total: 102,
             },
           },
           labels: {},
@@ -917,8 +917,8 @@ describe('Observability AI Assistant client', () => {
               title: 'My predefined title',
               token_count: {
                 completion: 24,
-                prompt: 698,
-                total: 722,
+                prompt: 458,
+                total: 482,
               },
             },
           });
