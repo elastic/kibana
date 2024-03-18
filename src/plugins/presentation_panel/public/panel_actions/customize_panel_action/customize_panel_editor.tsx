@@ -30,7 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import {
-  apiPublishesLocalUnifiedSearch,
+  apiPublishesUnifiedSearch,
   getInheritedViewMode,
   getPanelTitle,
 } from '@kbn/presentation-publishing';
@@ -64,9 +64,10 @@ export const CustomizePanelEditor = ({
     api.panelDescription?.value ?? api.defaultPanelDescription?.value
   );
   const [panelTitle, setPanelTitle] = useState(getPanelTitle(api));
-  const [localTimeRange, setLocalTimeRange] = useState(
-    api.localTimeRange?.value ?? api?.getFallbackTimeRange?.()
+  const [timeRange, setTimeRange] = useState(
+    api.timeRange$?.value ?? api.parentApi?.timeRange$?.value
   );
+
   const initialFocusRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -75,9 +76,7 @@ export const CustomizePanelEditor = ({
     }
   }, [initialFocusRef, focusOnTitle]);
 
-  const [hasOwnTimeRange, setHasOwnTimeRange] = useState<boolean>(
-    Boolean(api.localTimeRange?.value)
-  );
+  const [hasOwnTimeRange, setHasOwnTimeRange] = useState<boolean>(Boolean(api.timeRange$?.value));
 
   const commonlyUsedRangesForDatePicker = useMemo(() => {
     const commonlyUsedRanges = core.uiSettings.get<TimePickerQuickRange[]>(
@@ -103,9 +102,9 @@ export const CustomizePanelEditor = ({
     if (panelDescription !== api.panelDescription?.value)
       api.setPanelDescription?.(panelDescription);
 
-    const newTimeRange = hasOwnTimeRange ? localTimeRange : undefined;
-    if (newTimeRange !== api.localTimeRange?.value) {
-      api.setLocalTimeRange?.(newTimeRange);
+    const newTimeRange = hasOwnTimeRange ? timeRange : undefined;
+    if (newTimeRange !== api.timeRange$?.value) {
+      api.setTimeRange?.(newTimeRange);
     }
 
     onClose();
@@ -226,10 +225,7 @@ export const CustomizePanelEditor = ({
   };
 
   const renderCustomTimeRangeComponent = () => {
-    if (
-      !apiPublishesLocalUnifiedSearch(api) ||
-      !(api.isCompatibleWithLocalUnifiedSearch?.() ?? true)
-    )
+    if (!apiPublishesUnifiedSearch(api) || !(api.isCompatibleWithUnifiedSearch?.() ?? true))
       return null;
 
     return (
@@ -258,9 +254,9 @@ export const CustomizePanelEditor = ({
             }
           >
             <EuiSuperDatePicker
-              start={localTimeRange?.from ?? undefined}
-              end={localTimeRange?.to ?? undefined}
-              onTimeChange={({ start, end }) => setLocalTimeRange({ from: start, to: end })}
+              start={timeRange?.from ?? undefined}
+              end={timeRange?.to ?? undefined}
+              onTimeChange={({ start, end }) => setTimeRange({ from: start, to: end })}
               showUpdateButton={false}
               dateFormat={dateFormat}
               commonlyUsedRanges={commonlyUsedRangesForDatePicker}
@@ -273,7 +269,7 @@ export const CustomizePanelEditor = ({
   };
 
   const renderFilterDetails = () => {
-    if (!apiPublishesLocalUnifiedSearch(api)) return null;
+    if (!apiPublishesUnifiedSearch(api)) return null;
 
     return (
       <>

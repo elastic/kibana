@@ -14,7 +14,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
 
-  describe('', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/170047
+  describe.skip('', () => {
     it('finds a data view', async () => {
       await testSubjects.existOrFail('dataViewTitle');
     });
