@@ -73,9 +73,7 @@ describe('api', () => {
           parent: null,
           description: 'Incident description',
           summary: 'Incident title',
-          customFields: {
-            foo: 'bar',
-          },
+          customFields: null,
         },
       });
       expect(externalService.updateIncident).not.toHaveBeenCalled();
@@ -93,9 +91,7 @@ describe('api', () => {
           labels: ['kibana', 'elastic'],
           priority: 'High',
           parent: null,
-          customFields: {
-            foo: 'bar',
-          },
+          customFields: null,
         },
       });
       expect(externalService.updateIncident).not.toHaveBeenCalled();
@@ -140,6 +136,34 @@ describe('api', () => {
           commentId: 'case-comment-2',
           comment: 'Another comment',
         },
+      });
+    });
+
+    describe('customFields', () => {
+      test('it calls createIncident with customFields correctly', async () => {
+        const customFields = {
+          foo: 'bar',
+          foobar1: true,
+          foobar2: 2,
+        };
+        const params = {
+          ...apiParams,
+          incident: { ...apiParams.incident, externalId: null, customFields },
+        };
+        await api.pushToService({ externalService, params, logger: mockedLogger });
+
+        expect(externalService.createIncident).toHaveBeenCalledWith({
+          incident: {
+            labels: ['kibana', 'elastic'],
+            priority: 'High',
+            issueType: '10006',
+            parent: null,
+            description: 'Incident description',
+            summary: 'Incident title',
+            customFields,
+          },
+        });
+        expect(externalService.updateIncident).not.toHaveBeenCalled();
       });
     });
   });
@@ -199,9 +223,7 @@ describe('api', () => {
           parent: null,
           description: 'Incident description',
           summary: 'Incident title',
-          customFields: {
-            foo: 'bar',
-          },
+          customFields: null,
         },
       });
       expect(externalService.createIncident).not.toHaveBeenCalled();
@@ -220,9 +242,7 @@ describe('api', () => {
           labels: ['kibana', 'elastic'],
           priority: 'High',
           parent: null,
-          customFields: {
-            foo: 'bar',
-          },
+          customFields: null,
         },
       });
       expect(externalService.createIncident).not.toHaveBeenCalled();
@@ -267,6 +287,35 @@ describe('api', () => {
           commentId: 'case-comment-2',
           comment: 'Another comment',
         },
+      });
+    });
+
+    describe('customFields', () => {
+      test('it calls updateIncident with customFields correctly', async () => {
+        const customFields = {
+          foo: 'bar',
+          foobar1: true,
+          foobar2: 2,
+        };
+        const params = {
+          ...apiParams,
+          incident: { ...apiParams.incident, customFields },
+        };
+        await api.pushToService({ externalService, params, logger: mockedLogger });
+
+        expect(externalService.updateIncident).toHaveBeenCalledWith({
+          incidentId: 'incident-3',
+          incident: {
+            labels: ['kibana', 'elastic'],
+            priority: 'High',
+            issueType: '10006',
+            parent: null,
+            description: 'Incident description',
+            summary: 'Incident title',
+            customFields,
+          },
+        });
+        expect(externalService.createIncident).not.toHaveBeenCalled();
       });
     });
   });

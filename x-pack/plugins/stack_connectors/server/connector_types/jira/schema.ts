@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { validateCustomFieldsSchema } from './validators';
 
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),
@@ -42,7 +43,11 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
       )
     ),
     parent: schema.nullable(schema.string()),
-    customFields: schema.nullable(schema.recordOf(schema.string(), schema.string())),
+    customFields: schema.nullable(
+      schema.recordOf(schema.string(), schema.any(), {
+        validate: validateCustomFieldsSchema,
+      })
+    ),
   }),
   comments: schema.nullable(
     schema.arrayOf(

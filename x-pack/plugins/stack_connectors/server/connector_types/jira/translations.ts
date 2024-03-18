@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { MAX_CUSTOM_FIELDS_LENGTH } from './constants';
 
 export const NAME = i18n.translate('xpack.stackConnectors.jira.title', {
   defaultMessage: 'Jira',
@@ -18,3 +19,10 @@ export const ALLOWED_HOSTS_ERROR = (message: string) =>
       message,
     },
   });
+
+export const CUSTOM_FIELDS_LENGTH_ERROR = i18n.translate(
+  'xpack.stackConnectors.jira.schema.customFieldsLengthError',
+  {
+    defaultMessage: `A maximum of ${MAX_CUSTOM_FIELDS_LENGTH} customFields can be updated at a time.`,
+  }
+);

@@ -51,7 +51,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
   let jiraSimulatorURL: string = '<could not determine kibana url>';
 
-  describe.only('Jira', () => {
+  describe('Jira', () => {
     before(() => {
       jiraSimulatorURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA)

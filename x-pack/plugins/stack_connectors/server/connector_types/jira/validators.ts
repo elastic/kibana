@@ -13,6 +13,7 @@ import {
 } from './types';
 
 import * as i18n from './translations';
+import { MAX_CUSTOM_FIELDS_LENGTH } from './constants';
 
 export const validateCommonConfig = (
   configObject: JiraPublicConfigurationType,
@@ -34,4 +35,10 @@ export const validateCommonSecrets = (
 export const validate: ExternalServiceValidation = {
   config: validateCommonConfig,
   secrets: validateCommonSecrets,
+};
+
+export const validateCustomFieldsSchema = (customFields: Record<string, unknown>) => {
+  if (Object.keys(customFields).length > MAX_CUSTOM_FIELDS_LENGTH) {
+    return i18n.CUSTOM_FIELDS_LENGTH_ERROR;
+  }
 };
