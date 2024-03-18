@@ -7,6 +7,11 @@
 
 import datemath from '@elastic/datemath';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import {
+  SERVICE_NAME,
+  CONTAINER_ID,
+  HOST_NAME,
+} from '../../../../common/es_fields/apm';
 import { getTypedSearch } from '../../diagnostics/create_typed_es_client';
 
 export type LogCategories =
@@ -24,10 +29,19 @@ export async function getLogCategories({
   arguments: {
     start: string;
     end: string;
+    'service.name'?: string;
+    'host.name'?: string;
+    'container.id'?: string;
   };
 }): Promise<LogCategories> {
   const start = datemath.parse(args.start)?.valueOf()!;
   const end = datemath.parse(args.end)?.valueOf()!;
+
+  const keyValueFilters = getShouldMatchOrNotExistFilter([
+    { field: SERVICE_NAME, value: args['service.name'] },
+    { field: CONTAINER_ID, value: args['container.id'] },
+    { field: HOST_NAME, value: args['host.name'] },
+  ]);
 
   const search = getTypedSearch(esClient);
   const res = await search({
@@ -38,6 +52,7 @@ export async function getLogCategories({
     query: {
       bool: {
         filter: [
+          ...keyValueFilters,
           { exists: { field: 'message' } },
           {
             range: {
@@ -65,4 +80,38 @@ export async function getLogCategories({
       return { key: key as string, docCount };
     }
   );
+}
+
+// field/value pairs should match, or the field should not exist
+function getShouldMatchOrNotExistFilter(
+  keyValuePairs: Array<{
+    field: string;
+    value?: string;
+  }>
+) {
+  return keyValuePairs
+    .filter(({ value }) => value)
+    .map(({ field, value }) => {
+      return {
+        bool: {
+          should: [
+            {
+              bool: {
+                filter: [{ term: { [field]: value } }],
+              },
+            },
+            {
+              bool: {
+                must_not: {
+                  bool: {
+                    filter: [{ exists: { field } }],
+                  },
+                },
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      };
+    });
 }

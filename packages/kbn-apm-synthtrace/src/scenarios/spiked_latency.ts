@@ -92,6 +92,8 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
         return rangeWithInterval.generator((timestamp, i) => {
           const duration = getDuration(transactionName);
           return serviceInstance
+            .containerId(`spiked-${generateShortId()}`)
+            .hostName(`spiked-${generateShortId()}`)
             .transaction({ transactionName })
             .timestamp(timestamp)
             .duration(duration)

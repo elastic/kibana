@@ -56,6 +56,10 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
         'service.environment': t.string,
         'transaction.type': t.string,
         'transaction.name': t.string,
+
+        // alert fields
+        'host.name': t.string,
+        'container.id': t.string,
       }),
     ]),
   }),
@@ -143,6 +147,10 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
       arguments: {
         start: query.start,
         end: query.end,
+
+        'service.name': query['service.name'],
+        'host.name': query['host.name'],
+        'container.id': query['container.id'],
       },
     });
 
