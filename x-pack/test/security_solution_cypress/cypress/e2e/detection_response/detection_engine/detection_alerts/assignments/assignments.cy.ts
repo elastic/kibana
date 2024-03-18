@@ -45,7 +45,7 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_multiple');
+    cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
   });
 
   beforeEach(() => {

@@ -6,20 +6,15 @@
  */
 
 import { v4 } from 'uuid';
-import { MessageRole } from '../../../common';
-import {
-  type MessageAddEvent,
-  StreamingChatResponseEventType,
-} from '../../../common/conversation_complete';
+import { MessageRole } from '..';
+import { MessageAddEvent, StreamingChatResponseEventType } from '../conversation_complete';
 
-export function createFunctionResponseMessage({
+export function createFunctionRequestMessage({
   name,
-  content,
-  data,
+  args,
 }: {
   name: string;
-  content: unknown;
-  data?: unknown;
+  args: unknown;
 }): MessageAddEvent {
   return {
     id: v4(),
@@ -27,10 +22,12 @@ export function createFunctionResponseMessage({
     message: {
       '@timestamp': new Date().toISOString(),
       message: {
-        content: JSON.stringify(content),
-        ...(data ? { data: JSON.stringify(data) } : {}),
-        name,
-        role: MessageRole.User,
+        function_call: {
+          name,
+          arguments: JSON.stringify(args),
+          trigger: MessageRole.Assistant as const,
+        },
+        role: MessageRole.Assistant,
       },
     },
   };

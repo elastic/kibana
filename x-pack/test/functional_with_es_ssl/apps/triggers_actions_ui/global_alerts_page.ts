@@ -30,7 +30,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const objectRemover = new ObjectRemover(supertest);
 
   describe('Global alerts page', function () {
-    describe('Loads the page with limited privileges', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/178322
+    describe.skip('Loads the page with limited privileges', () => {
       before(async () => {
         await security.testUser.setRoles(['alerts_and_actions_role']);
       });
