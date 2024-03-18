@@ -19,6 +19,16 @@ export const VALUE = i18n.translate('xpack.lists.exceptions.builder.valueLabel',
   defaultMessage: 'Value',
 });
 
+export const EXCEPTION_ITEM_ARIA_LABEL = (
+  name: string,
+  groupIndex: number,
+  positionIndex: number
+): string =>
+  i18n.translate('xpack.lists.exceptions.item.ariaLabel', {
+    defaultMessage: '"{name}" in group {group}, position {position} ',
+    values: { group: groupIndex + 1, name, position: positionIndex + 1 },
+  });
+
 export const EXCEPTION_FIELD_VALUE_PLACEHOLDER = i18n.translate(
   'xpack.lists.exceptions.builder.exceptionFieldValuePlaceholder',
   {

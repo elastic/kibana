@@ -9,10 +9,16 @@ import type { ItemSet } from '../../../../common/types';
 
 export function getValueCounts(df: ItemSet[], field: string) {
   return df.reduce<Record<string, number>>((p, c) => {
-    if (c.set[field] === undefined) {
+    const fieldItems = c.set.filter((d) => d.fieldName === field);
+
+    if (fieldItems.length === 0) {
       return p;
     }
-    p[c.set[field]] = p[c.set[field]] ? p[c.set[field]] + 1 : 1;
+
+    for (const { fieldValue } of fieldItems) {
+      p[fieldValue] = p[fieldValue] ? p[fieldValue] + 1 : 1;
+    }
+
     return p;
   }, {});
 }

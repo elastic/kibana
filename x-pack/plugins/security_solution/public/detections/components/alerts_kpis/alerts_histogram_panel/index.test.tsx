@@ -87,15 +87,6 @@ jest.mock('../../../../common/components/visualization_actions/use_visualization
   };
 });
 
-jest.mock('../../../hooks/alerts_visualization/use_alert_histogram_count', () => {
-  const actual = jest.requireActual(
-    '../../../hooks/alerts_visualization/use_alert_histogram_count'
-  );
-  return {
-    ...actual,
-    useAlertHistogramCount: jest.fn().mockReturnValue('Showing: 999 alerts'),
-  };
-});
 jest.mock('../common/hooks', () => {
   const actual = jest.requireActual('../common/hooks');
   return {
@@ -561,7 +552,12 @@ describe('AlertsHistogramPanel', () => {
 
       mockUseVisualizationResponse.mockReturnValue({
         loading: false,
-        responses: null,
+        responses: [
+          {
+            hits: { total: 0 },
+            aggregations: { myAgg: { buckets: [{ key: 'A' }, { key: 'B' }, { key: 'C' }] } },
+          },
+        ],
       });
       wrapper.setProps({ filters: [] });
       wrapper.update();
@@ -592,6 +588,27 @@ describe('AlertsHistogramPanel', () => {
         expect((VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual(
           155
         );
+      });
+    });
+
+    it('should render correct subtitle with empty string', async () => {
+      mockUseVisualizationResponse.mockReturnValue({
+        responses: [
+          {
+            hits: { total: 0 },
+            aggregations: { myAgg: { buckets: [] } },
+          },
+        ],
+        loading: false,
+      });
+
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toEqual('');
       });
     });
   });

@@ -32,6 +32,7 @@ import { accountManagementApp, UserProfileAPIClient } from './account_management
 import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import { AuthenticationService } from './authentication';
+import { buildSecurityApi } from './build_security_api';
 import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
@@ -73,18 +74,20 @@ export class SecurityPlugin
   private readonly authenticationService = new AuthenticationService();
   private readonly navControlService;
   private readonly securityLicenseService = new SecurityLicenseService();
-  private readonly managementService = new ManagementService();
+  private readonly managementService: ManagementService;
   private readonly securityCheckupService: SecurityCheckupService;
   private readonly anonymousAccessService = new AnonymousAccessService();
   private readonly analyticsService = new AnalyticsService();
   private authc!: AuthenticationServiceSetup;
   private securityApiClients!: SecurityApiClients;
-
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
     this.securityCheckupService = new SecurityCheckupService(this.config, localStorage);
     this.navControlService = new SecurityNavControlService(
       initializerContext.env.packageInfo.buildFlavor
+    );
+    this.managementService = new ManagementService(
+      this.initializerContext.config.get<ConfigType>()
     );
   }
 
@@ -130,6 +133,8 @@ export class SecurityPlugin
       securityApiClients: this.securityApiClients,
     });
 
+    core.security.registerSecurityApi(buildSecurityApi({ authc: this.authc }));
+
     if (management) {
       this.managementService.setup({
         license,
@@ -137,7 +142,6 @@ export class SecurityPlugin
         authc: this.authc,
         fatalErrors: core.fatalErrors,
         getStartServices: core.getStartServices,
-        uiConfig: this.config.ui,
       });
     }
 
@@ -188,7 +192,6 @@ export class SecurityPlugin
     if (management) {
       this.managementService.start({
         capabilities: application.capabilities,
-        uiConfig: this.config.ui,
       });
     }
 

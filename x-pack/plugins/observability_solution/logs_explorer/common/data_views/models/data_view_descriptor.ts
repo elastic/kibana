@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataViewSpecWithId } from '../../dataset_selection';
+import { DataViewSpecWithId } from '../../data_source_selection';
 import { DataViewDescriptorType } from '../types';
 import { buildIndexPatternRegExp } from '../utils';
 

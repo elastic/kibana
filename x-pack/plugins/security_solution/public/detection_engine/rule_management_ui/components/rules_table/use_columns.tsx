@@ -96,6 +96,7 @@ const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): Ta
               (isMlRule(rule.type) && !hasMlPermissions)
             }
             isLoading={loadingIds.includes(rule.id)}
+            ruleName={rule.name}
           />
         </EuiToolTip>
       ),
@@ -432,24 +433,19 @@ export const useMonitoringColumns = ({
             title={i18n.COLUMN_GAP}
             customTooltip={
               <div style={{ maxWidth: '20px' }}>
-                <PopoverTooltip columnName={i18n.COLUMN_GAP}>
+                <PopoverTooltip columnName={i18n.COLUMN_GAP} anchorColor="subdued">
                   <EuiText style={{ width: 300 }}>
-                    <p>
-                      <FormattedMessage
-                        defaultMessage="Duration of most recent gap in Rule execution. Adjust Rule look-back or {seeDocs} for mitigating gaps."
-                        id="xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltip"
-                        values={{
-                          seeDocs: (
-                            <EuiLink
-                              href={`${docLinks.links.siem.troubleshootGaps}`}
-                              target="_blank"
-                            >
-                              {i18n.COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION}
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    </p>
+                    <FormattedMessage
+                      defaultMessage="Duration of most recent gap in Rule execution. Adjust Rule look-back or {seeDocs} for mitigating gaps."
+                      id="xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltip"
+                      values={{
+                        seeDocs: (
+                          <EuiLink href={`${docLinks.links.siem.troubleshootGaps}`} target="_blank">
+                            {i18n.COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
                   </EuiText>
                 </PopoverTooltip>
               </div>

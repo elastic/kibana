@@ -10,8 +10,9 @@ import type { EuiComboBox, EuiTitleSize } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { noop } from 'lodash/fp';
+import { isEmpty, noop } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
+import { sumBy } from 'lodash';
 
 import type { Filter } from '@kbn/es-query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -20,7 +21,11 @@ import type { UpdateDateRange } from '../../../../common/components/charts/commo
 import { HeaderSection } from '../../../../common/components/header_section';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { useKibana } from '../../../../common/lib/kibana';
-import { showInitialLoadingSpinner } from './helpers';
+import {
+  showInitialLoadingSpinner,
+  createGenericSubtitle,
+  createEmbeddedDataSubtitle,
+} from './helpers';
 import * as i18n from './translations';
 import { LinkButton } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../app/types';
@@ -212,6 +217,26 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       }
     }, [isAlertsPageChartsEnabled, isExpanded, toggleStatus]);
 
+    const { responses, loading } = useVisualizationResponse({
+      visualizationId,
+    });
+    const embeddedDataLoaded = !loading && !isEmpty(responses);
+
+    const aggregationBucketsCount = useMemo(
+      () =>
+        loading
+          ? 0
+          : sumBy(responses, (responseItem) =>
+              sumBy(Object.values(responseItem.aggregations ?? {}), 'buckets.length')
+            ),
+      [loading, responses]
+    );
+    const embeddedDataAvailable = !!aggregationBucketsCount;
+
+    const subtitle = showHistogram
+      ? createEmbeddedDataSubtitle(embeddedDataLoaded, embeddedDataAvailable, totalAlerts)
+      : createGenericSubtitle(isInitialLoading, showTotalAlertsCount, totalAlerts);
+
     return (
       <KpiPanel
         height={panelHeight}
@@ -230,8 +255,8 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           toggleStatus={showHistogram}
           toggleQuery={hideQueryToggle ? undefined : toggleQuery}
           showInspectButton={false}
-          subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
-          isInspectDisabled={true}
+          subtitle={subtitle}
+          isInspectDisabled={false}
         >
           <EuiFlexGroup alignItems="flexStart" data-test-subj="panelFlexGroup" gutterSize="none">
             <EuiFlexItem grow={false}>
@@ -270,17 +295,15 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               )}
               {headerChildren != null && headerChildren}
             </EuiFlexItem>
-
             {linkButton}
           </EuiFlexGroup>
         </HeaderSection>
-        {showHistogram && (
+        {showHistogram ? (
           <VisualizationEmbeddable
             data-test-subj="embeddable-matrix-histogram"
             extraActions={extraActions}
             extraOptions={{
               filters,
-              showLegend,
             }}
             getLensAttributes={getLensAttributes}
             height={chartHeight ?? CHART_HEIGHT}
@@ -290,7 +313,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             stackByField={selectedStackByOption}
             timerange={timerange}
           />
-        )}
+        ) : null}
       </KpiPanel>
     );
   }

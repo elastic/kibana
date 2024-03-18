@@ -31,7 +31,7 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
   | 'editItem'
   | 'deleteItems'
   | 'getDetailViewLink'
-  | 'onClickTitle'
+  | 'getOnClickTitle'
   | 'id'
   | 'rowItemActions'
   | 'contentEditor'
@@ -65,7 +65,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
   editItem,
   deleteItems,
   getDetailViewLink,
-  onClickTitle,
+  getOnClickTitle,
   rowItemActions,
   id: listingId,
   contentEditor,
@@ -114,7 +114,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
           deleteItems={deleteItems}
           rowItemActions={rowItemActions}
           getDetailViewLink={getDetailViewLink}
-          onClickTitle={onClickTitle}
+          getOnClickTitle={getOnClickTitle}
           id={listingId}
           contentEditor={contentEditor}
           titleColumnName={titleColumnName}

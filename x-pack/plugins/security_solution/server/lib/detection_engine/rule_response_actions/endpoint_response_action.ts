@@ -5,81 +5,155 @@
  * 2.0.
  */
 
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { each } from 'lodash';
-
-import type { ExperimentalFeatures } from '../../../../common';
-import { isIsolateAction, isProcessesAction } from './endpoint_params_type_guards';
-import type { RuleResponseEndpointAction } from '../../../../common/api/detection_engine';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { stringify } from '../../../endpoint/utils/stringify';
+import type {
+  RuleResponseEndpointAction,
+  ProcessesParams,
+} from '../../../../common/api/detection_engine';
+import type { KillOrSuspendProcessRequestBody } from '../../../../common/endpoint/types';
+import { getErrorProcessAlerts, getIsolateAlerts, getProcessAlerts } from './utils';
+import type { AlertsAction, ResponseActionAlerts } from './types';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { getProcessAlerts, getIsolateAlerts, getErrorProcessAlerts } from './utils';
 
-import type { ResponseActionAlerts, AlertsAction } from './types';
-
-export const endpointResponseAction = (
+export const endpointResponseAction = async (
   responseAction: RuleResponseEndpointAction,
   endpointAppContextService: EndpointAppContextService,
-  { alerts }: ResponseActionAlerts,
-  experimentalFeatures: ExperimentalFeatures
-) => {
+  { alerts }: ResponseActionAlerts
+): Promise<void> => {
+  const logger = endpointAppContextService.createLogger(
+    'ruleExecution',
+    'automatedResponseActions'
+  );
+  const ruleId = alerts[0][ALERT_RULE_UUID];
+  const ruleName = alerts[0][ALERT_RULE_NAME];
+  const logMsgPrefix = `Rule [${ruleName}][${ruleId}]:`;
   const { comment, command } = responseAction.params;
+  const errors: string[] = [];
+  const responseActionsClient = endpointAppContextService.getInternalResponseActionsClient({
+    agentType: 'endpoint',
+    username: 'unknown',
+  });
 
-  const commonData = {
-    comment,
-    command,
-    rule_id: alerts[0][ALERT_RULE_UUID],
-    rule_name: alerts[0][ALERT_RULE_NAME],
-    agent_type: 'endpoint' as const,
+  const automatedProcessActionsEnabled =
+    endpointAppContextService.experimentalFeatures.automatedProcessActionsEnabled;
+
+  const processResponseActionClientError = (err: Error, endpointIds: string[]): Promise<void> => {
+    errors.push(
+      `attempt to [${command}] host IDs [${endpointIds.join(', ')}] returned error: ${err.message}`
+    );
+
+    return Promise.resolve();
   };
 
-  if (isIsolateAction(responseAction.params)) {
-    const alertsPerAgent = getIsolateAlerts(alerts);
-    each(alertsPerAgent, (actionPayload) => {
-      return endpointAppContextService.getActionCreateService().createActionFromAlert(
-        {
-          ...actionPayload,
-          ...commonData,
-        },
-        actionPayload.endpoint_ids
+  const response: Array<Promise<unknown>> = [];
+
+  switch (command) {
+    case 'isolate':
+      response.push(
+        Promise.all(
+          Object.values(getIsolateAlerts(alerts)).map(
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            ({ endpoint_ids, alert_ids, parameters, error, hosts }: AlertsAction) => {
+              logger.info(
+                `${logMsgPrefix} [${command}] [${endpoint_ids.length}] agent(s): ${stringify(
+                  endpoint_ids
+                )}`
+              );
+
+              return responseActionsClient
+                .isolate(
+                  {
+                    endpoint_ids,
+                    alert_ids,
+                    parameters,
+                    comment,
+                  },
+                  {
+                    hosts,
+                    ruleName,
+                    ruleId,
+                    error,
+                  }
+                )
+                .catch((err) => {
+                  return processResponseActionClientError(err, endpoint_ids);
+                });
+            }
+          )
+        )
       );
-    });
-  }
 
-  const automatedProcessActionsEnabled = experimentalFeatures?.automatedProcessActionsEnabled;
+      break;
 
-  if (automatedProcessActionsEnabled) {
-    const createProcessActionFromAlerts = (
-      actionAlerts: Record<string, Record<string, AlertsAction>>
-    ) => {
-      const createAction = async (alert: AlertsAction) => {
-        const { hosts, parameters, error } = alert;
+    case 'suspend-process':
+    case 'kill-process':
+      if (automatedProcessActionsEnabled) {
+        const processesActionRuleConfig: ProcessesParams['config'] = (
+          responseAction.params as ProcessesParams
+        ).config;
 
-        const actionData = {
-          hosts,
-          endpoint_ids: alert.endpoint_ids,
-          alert_ids: alert.alert_ids,
-          error,
-          parameters,
-          ...commonData,
+        const createProcessActionFromAlerts = (
+          actionAlerts: Record<string, Record<string, AlertsAction>>
+        ) => {
+          return each(actionAlerts, (actionPerAgent) => {
+            return each(
+              actionPerAgent,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              ({ endpoint_ids, alert_ids, parameters, error, hosts }: AlertsAction) => {
+                logger.info(
+                  `${logMsgPrefix} [${command}] [${endpoint_ids.length}] agent(s): ${stringify(
+                    endpoint_ids
+                  )}`
+                );
+
+                return responseActionsClient[
+                  command === 'kill-process' ? 'killProcess' : 'suspendProcess'
+                ](
+                  {
+                    comment,
+                    endpoint_ids,
+                    alert_ids,
+                    parameters: parameters as KillOrSuspendProcessRequestBody['parameters'],
+                  },
+                  {
+                    hosts,
+                    ruleId,
+                    ruleName,
+                    error,
+                  }
+                ).catch((err) => {
+                  return processResponseActionClientError(err, endpoint_ids);
+                });
+              }
+            );
+          });
         };
 
-        return endpointAppContextService
-          .getActionCreateService()
-          .createActionFromAlert(actionData, alert.endpoint_ids);
-      };
-      return each(actionAlerts, (actionPerAgent) => {
-        return each(actionPerAgent, createAction);
-      });
-    };
+        const foundFields = getProcessAlerts(alerts, processesActionRuleConfig);
+        const notFoundField = getErrorProcessAlerts(alerts, processesActionRuleConfig);
+        const processActions = createProcessActionFromAlerts(foundFields);
+        const processActionsWithError = createProcessActionFromAlerts(notFoundField);
 
-    if (isProcessesAction(responseAction.params)) {
-      const foundFields = getProcessAlerts(alerts, responseAction.params.config);
-      const notFoundField = getErrorProcessAlerts(alerts, responseAction.params.config);
+        response.push(Promise.all([processActions, processActionsWithError]));
+      }
 
-      const processActions = createProcessActionFromAlerts(foundFields);
-      const processActionsWithError = createProcessActionFromAlerts(notFoundField);
+      break;
 
-      return Promise.all([processActions, processActionsWithError]);
-    }
+    default:
+      errors.push(`response action [${command}] is not supported`);
   }
+
+  return Promise.all(response)
+    .then(() => {})
+    .finally(() => {
+      if (errors.length !== 0) {
+        logger.error(
+          `${logMsgPrefix} The following [${errors.length}] errors were encountered:\n${errors.join(
+            '\n'
+          )}`
+        );
+      }
+    });
 };

@@ -52,11 +52,7 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import {
-  useSizeTransitionVeil,
-  getOverridesFor,
-  ChartSizeSpec,
-} from '@kbn/chart-expressions-common';
+import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
 import type {
   FilterEvent,
   BrushEvent,
@@ -148,7 +144,6 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   syncCursor: boolean;
   eventAnnotationService: EventAnnotationServiceType;
   renderComplete: () => void;
-  shouldUseVeil: boolean;
   uiState?: PersistedState;
   timeFormat: string;
   setChartSize: (chartSizeSpec: ChartSizeSpec) => void;
@@ -211,7 +206,6 @@ export function XYChart({
   syncColors,
   syncTooltips,
   syncCursor,
-  shouldUseVeil,
   useLegacyTimeAxis,
   renderComplete,
   uiState,
@@ -305,30 +299,28 @@ export function XYChart({
 
   const isTimeViz = isTimeChart(dataLayers);
 
-  const chartSizeSpec: ChartSizeSpec =
-    isTimeViz && !isHorizontalChart(dataLayers)
-      ? {
-          aspectRatio: {
-            x: 16,
-            y: 9,
-          },
-          minDimensions: {
-            y: { value: 300, unit: 'pixels' },
-            x: { value: 100, unit: 'percentage' },
-          },
-        }
-      : {
-          maxDimensions: {
-            x: { value: 100, unit: 'percentage' },
-            y: { value: 100, unit: 'percentage' },
-          },
-        };
+  useEffect(() => {
+    const chartSizeSpec: ChartSizeSpec =
+      isTimeViz && !isHorizontalChart(dataLayers)
+        ? {
+            aspectRatio: {
+              x: 16,
+              y: 9,
+            },
+            minDimensions: {
+              y: { value: 300, unit: 'pixels' },
+              x: { value: 100, unit: 'percentage' },
+            },
+          }
+        : {
+            maxDimensions: {
+              x: { value: 100, unit: 'percentage' },
+              y: { value: 100, unit: 'percentage' },
+            },
+          };
 
-  const { veil, onResize, containerRef } = useSizeTransitionVeil(
-    chartSizeSpec,
-    setChartSize,
-    shouldUseVeil
-  );
+    setChartSize(chartSizeSpec);
+  }, [dataLayers, isTimeViz, setChartSize]);
 
   const formattedDatatables = useMemo(
     () =>
@@ -746,8 +738,7 @@ export function XYChart({
   );
 
   return (
-    <div ref={containerRef} css={chartContainerStyle}>
-      {veil}
+    <div css={chartContainerStyle}>
       {showLegend !== undefined && uiState && (
         <LegendToggle
           onClick={toggleLegend}
@@ -821,7 +812,6 @@ export function XYChart({
               />
             }
             onRenderChange={onRenderChange}
-            onResize={onResize}
             onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
             externalPointerEvents={{
               tooltip: { visible: syncTooltips, placement: Placement.Right },

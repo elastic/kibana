@@ -6,6 +6,7 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { Replacement } from '@kbn/elastic-assistant-common';
 import { getAnonymizedValue, transformRawData } from '@kbn/elastic-assistant-common';
 import { DynamicTool } from 'langchain/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
@@ -67,11 +68,26 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
 
         // Accumulate replacements locally so we can, for example use the same
         // replacement for a hostname when we see it in multiple alerts:
-        let localReplacements = { ...replacements };
-        const localOnNewReplacements = (newReplacements: Record<string, string>) => {
-          localReplacements = { ...localReplacements, ...newReplacements }; // update the local state
-
+        let localReplacements: Replacement[] = replacements ?? [];
+        const localOnNewReplacements = (newReplacements: Replacement[]) => {
+          const localReplacementsDict = localReplacements.reduce(
+            (acc: Record<string, string>, r) => {
+              acc[r.value] = r.uuid;
+              return acc;
+            },
+            {}
+          );
+          const newReplacementsDict = newReplacements.reduce((acc: Record<string, string>, r) => {
+            acc[r.value] = r.uuid;
+            return acc;
+          }, {});
+          const updatedReplacements = { ...localReplacementsDict, ...newReplacementsDict };
+          localReplacements = Object.keys(updatedReplacements).map((key) => ({
+            value: key,
+            uuid: updatedReplacements[key],
+          }));
           onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
+          return Promise.resolve(localReplacements);
         };
 
         return JSON.stringify(

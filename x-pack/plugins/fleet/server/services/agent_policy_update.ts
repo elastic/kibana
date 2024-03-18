@@ -32,7 +32,8 @@ export async function agentPolicyUpdateEventHandler(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   action: string,
-  agentPolicyId: string
+  agentPolicyId: string,
+  options?: { skipDeploy?: boolean }
 ) {
   // `soClient` from ingest `appContextService` is used to create policy change actions
   // to ensure encrypted SOs are handled correctly
@@ -44,7 +45,9 @@ export async function agentPolicyUpdateEventHandler(
       agentPolicyId,
       forceRecreate: true,
     });
-    await agentPolicyService.deployPolicy(internalSoClient, agentPolicyId);
+    if (!options?.skipDeploy) {
+      await agentPolicyService.deployPolicy(internalSoClient, agentPolicyId);
+    }
   }
 
   if (action === 'updated') {
