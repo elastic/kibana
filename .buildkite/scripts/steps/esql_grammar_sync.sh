@@ -1,21 +1,27 @@
 #!/bin/bash
 
+git config --global user.name kibanamachine
+git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
+
 cd "$PARENT_DIR" || exit
 
 rm -rf elasticsearch
+
 git clone https://github.com/elastic/elasticsearch --depth 1 || exit
+git clone https://github.com/elastic/open-source --depth 1 || exit
 
 cd "$KIBANA_DIR" || exit
 
 # Source and destination paths
+license_header_file="$PARENT_DIR/open-source/legal/elastic-license-2.0-header.txt"
 source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBaseLexer.g4"
 destination_file="./packages/kbn-monaco/src/esql/antlr/esql_lexer.g4"
 
 # Copy the file
 cp "$source_file" "$destination_file"
 
-# Insert the license header after fetching it from https://github.com/elastic/open-source/blob/main/legal/elastic-license-2.0-header.txt
-license_header=$(curl -s https://raw.githubusercontent.com/elastic/open-source/main/legal/elastic-license-2.0-header.txt)
+# Insert the license header
+license_header=$(cat $license_header_file)
 sed -i -e "1s/^/$license_header\n/" "$destination_file" || exit
 
 # Replace the line containing "lexer grammar" with "lexer grammar esql_lexer;"
@@ -44,9 +50,6 @@ if [ $? -ne 0 ]; then
 
   # Make a commit
   BRANCH_NAME="esql_grammar_sync_$(date +%s)"
-
-  git config --global user.name kibanamachine
-  git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
   git checkout -b "$BRANCH_NAME"
 
