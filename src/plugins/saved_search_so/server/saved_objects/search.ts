@@ -23,7 +23,7 @@ export function getSavedSearchObjectType({
   lensEmbeddableFactory,
 }: {
   getSearchSourceMigrations: () => MigrateFunctionsObject;
-  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'] | undefined;
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }): SavedObjectsType {
   return {
     name: 'search',
