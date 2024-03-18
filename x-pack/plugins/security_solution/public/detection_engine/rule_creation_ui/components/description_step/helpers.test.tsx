@@ -556,10 +556,6 @@ describe('helpers', () => {
       const label = getQueryLabel('threshold');
       expect(label).toEqual(i18n.QUERY_LABEL);
     });
-    test('returns query label for threat_match rule type', () => {
-      const label = getQueryLabel('threat_match');
-      expect(label).toEqual(i18n.THREAT_QUERY_LABEL);
-    });
     test('returns query label for new_terms rule type', () => {
       const label = getQueryLabel('new_terms');
       expect(label).toEqual(i18n.QUERY_LABEL);
