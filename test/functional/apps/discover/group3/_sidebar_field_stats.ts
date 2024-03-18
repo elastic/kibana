@@ -165,7 +165,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
         expect(topValuesRows.length).to.eql(10);
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '11 records'
+          '42 records'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -193,7 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('unifiedFieldStats-buttonGroup');
         await testSubjects.missingOrFail('unifiedFieldStats-histogram');
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '16 records'
+          '32 records'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });

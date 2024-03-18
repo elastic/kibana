@@ -80,8 +80,8 @@ export async function getStringTopValues(
     | STATS ${getSafeESQLFieldName(`${field.name}_terms`)} = count(${getSafeESQLFieldName(
       field.name
     )}) BY ${getSafeESQLFieldName(field.name)}
-    | LIMIT ${size}
-    | SORT ${getSafeESQLFieldName(`${field.name}_terms`)} DESC`;
+    | SORT ${getSafeESQLFieldName(`${field.name}_terms`)} DESC
+    | LIMIT ${size}`;
 
   const result = await searchHandler({ query: esqlQuery });
   const values = result?.values as Array<[number, string]>;
