@@ -26,10 +26,10 @@ SRCS = glob(
 SHARED_DEPS = [
   "//packages/kbn-i18n",
   "//packages/kbn-ui-theme",
+  "//packages/kbn-esql-ast-core",
   "@npm//antlr4",
   "@npm//monaco-editor",
   "@npm//monaco-yaml",
-  "@npm//js-levenshtein",
 ]
 
 webpack_cli(
