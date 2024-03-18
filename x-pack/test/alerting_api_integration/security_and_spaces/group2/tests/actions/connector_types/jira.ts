@@ -14,6 +14,7 @@ import {
   ExternalServiceSimulator,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { MAX_CUSTOM_FIELDS_LENGTH } from '@kbn/stack-connectors-plugin/server/connector_types/jira/constants';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -460,6 +461,42 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               url: `${jiraSimulatorURL}/browse/CK-1`,
             },
           });
+        });
+
+        it('throws when trying to create an incident with too many custom fields', async () => {
+          const customFields = new Array(MAX_CUSTOM_FIELDS_LENGTH + 1)
+            .fill('foobar')
+            .reduce((acc, curr, idx) => {
+              acc[idx] = curr;
+              return acc;
+            }, {});
+
+          await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockJira.params,
+                subActionParams: {
+                  ...mockJira.params.subActionParams,
+                  incident: {
+                    ...mockJira.params.subActionParams.incident,
+                    customFields,
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                connector_id: simulatedActionId,
+                status: 'error',
+                retry: false,
+                message:
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.customFields]: types that failed validation:\n - [subActionParams.incident.customFields.0]: A maximum of 10 customFields can be updated at a time.\n - [subActionParams.incident.customFields.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                errorSource: TaskErrorSource.FRAMEWORK,
+              });
+            });
         });
       });
 
