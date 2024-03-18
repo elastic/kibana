@@ -2,7 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/fips/build.sh
     label: 'Build FIPS Image'
     agents:
-      queue: n2-2-spot
+      queue: n2-4-spot
     depends_on:
       - build
       - quick_checks
@@ -12,3 +12,12 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
+
+  - wait
+
+  - command: .buildkite/scripts/steps/fips/smoke_tests.sh
+    label: 'Smoke testing for FIPS'
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 60
+    soft_fail: true
