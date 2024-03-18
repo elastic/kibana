@@ -190,7 +190,6 @@ describe('EQL search strategy', () => {
               options,
               params: {
                 ...params,
-                // @ts-expect-error not allowed at top level when using `typesWithBodyKey`
                 wait_for_completion_timeout: '5ms',
                 keep_on_completion: false,
               },
@@ -282,7 +281,6 @@ describe('EQL search strategy', () => {
         it('passes along a timestamp_field argument', async () => {
           const eqlSearch = eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
           const request: EqlSearchStrategyRequest = {
-            // @ts-expect-error timestamp_field not allowed at top level when using `typesWithBodyKey`
             params: { index: 'all', timestamp_field: 'timestamp' },
           };
 
@@ -295,7 +293,6 @@ describe('EQL search strategy', () => {
         it('passes along an event_category_field argument', async () => {
           const eqlSearch = eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
           const request: EqlSearchStrategyRequest = {
-            // @ts-expect-error timestamp_field not allowed at top level when using `typesWithBodyKey`
             params: { index: 'all', event_category_field: 'event_category' },
           };
 
@@ -310,7 +307,6 @@ describe('EQL search strategy', () => {
         it('passes along a tiebreaker_field argument', async () => {
           const eqlSearch = eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
           const request: EqlSearchStrategyRequest = {
-            // @ts-expect-error tiebreaker_field not allowed at top level when using `typesWithBodyKey`
             params: { index: 'all', tiebreaker_field: 'event_category' },
           };
 
