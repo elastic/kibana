@@ -21,15 +21,15 @@ import {
   openKibanaNavigation,
 } from '../../../tasks/kibana_navigation';
 import { ALERTS_PAGE } from '../../../screens/kibana_navigation';
-import { postDataView } from '../../../tasks/api_calls/common';
+import { deleteDataView, postDataView } from '../../../tasks/api_calls/common';
 import { navigateToAlertsPageInServerless } from '../../../tasks/serverless/navigation';
 
-describe('ESS - pinned filters', { tags: ['@ess'] }, () => {
-  before(() => {
-    postDataView('audit*');
-  });
+const DATAVIEW = 'audit*';
 
+describe('ESS - pinned filters', { tags: ['@ess'] }, () => {
   beforeEach(() => {
+    deleteDataView(DATAVIEW);
+    postDataView(DATAVIEW);
     login();
   });
 
@@ -56,7 +56,8 @@ describe('ESS - pinned filters', { tags: ['@ess'] }, () => {
 
 describe('SERVERLESS - pinned filters', { tags: ['@serverless'] }, () => {
   before(() => {
-    postDataView('audit*');
+    deleteDataView(DATAVIEW);
+    postDataView(DATAVIEW);
   });
 
   beforeEach(() => {
