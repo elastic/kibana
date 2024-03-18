@@ -35,6 +35,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(url).to.contain(`/management`);
       });
 
+      it('displays the API keys management card, and will navigate to the API keys UI', async () => {
+        await pageObjects.svlManagementPage.assertApiKeysManagementCardExists();
+        await pageObjects.svlManagementPage.clickApiKeysManagementCard();
+
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain('/management/security/api_keys');
+      });
+
       it('displays the roles management card, and will navigate to the Roles UI', async () => {
         await pageObjects.svlManagementPage.assertRoleManagementCardExists();
         await pageObjects.svlManagementPage.clickRoleManagementCard();
@@ -86,6 +94,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const url = await browser.getCurrentUrl();
         // `--xpack.cloud.organization_url: '/account/members'`,
         expect(url).to.contain('/account/members');
+      });
+
+      describe('API keys management card  - search solution', function () {
+        this.tags(['skipSvlOblt', 'skipSvlSec']);
+
+        it('displays the API keys management card, and will navigate to the API keys UI (search only)', async () => {
+          await pageObjects.svlManagementPage.assertApiKeysManagementCardExists();
+          await pageObjects.svlManagementPage.clickApiKeysManagementCard();
+
+          const url = await browser.getCurrentUrl();
+          expect(url).to.contain('/management/security/api_keys');
+        });
+      });
+
+      describe('API keys management card - oblt & sec solutions', function () {
+        this.tags(['skipSvlSearch']);
+
+        it('should not display the API keys manangement card (oblt & security only)', async () => {
+          await retry.waitFor('page to be visible', async () => {
+            return await testSubjects.exists('cards-navigation-page');
+          });
+          await pageObjects.svlManagementPage.assertApiKeysManagementCardDoesNotExist();
+        });
       });
     });
   });
