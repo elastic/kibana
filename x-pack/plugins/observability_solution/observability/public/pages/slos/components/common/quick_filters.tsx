@@ -110,6 +110,10 @@ export const getSelectedOptions = (filter?: Filter) => {
 };
 
 const Container = styled.div`
+  .controlsWrapper {
+    align-items: flex-start;
+    min-height: initial;
+  }
   .controlGroup {
     min-height: initial;
   }

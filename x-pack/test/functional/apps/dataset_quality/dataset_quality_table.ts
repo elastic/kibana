@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     after(async () => {
       await synthtrace.clean();
+      await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
     });
 
     it('shows the right number of rows in correct order', async () => {
