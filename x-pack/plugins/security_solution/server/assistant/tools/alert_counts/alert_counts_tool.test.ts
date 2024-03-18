@@ -10,16 +10,16 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { DynamicTool } from 'langchain/tools';
 import { omit } from 'lodash/fp';
 
-import type { RequestBody } from '@kbn/elastic-assistant-plugin/server/lib/langchain/types';
 import { ALERT_COUNTS_TOOL } from './alert_counts_tool';
 import type { RetrievalQAChain } from 'langchain/chains';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 describe('AlertCountsTool', () => {
   const alertsIndexPattern = 'alerts-index';
   const esClient = {
     search: jest.fn().mockResolvedValue({}),
   } as unknown as ElasticsearchClient;
-  const replacements = { key: 'value' };
+  const replacements = [{ uuid: 'key', value: 'value' }];
   const request = {
     body: {
       isEnabledKnowledgeBase: false,
@@ -29,7 +29,7 @@ describe('AlertCountsTool', () => {
       replacements,
       size: 20,
     },
-  } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+  } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   const isEnabledKnowledgeBase = true;
   const chain = {} as unknown as RetrievalQAChain;
   const modelExists = true;
@@ -61,7 +61,7 @@ describe('AlertCountsTool', () => {
           alertsIndexPattern: '.alerts-security.alerts-default',
           size: 20,
         },
-      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
       const params = {
         esClient,
         request: requestMissingAnonymizationParams,
@@ -165,7 +165,7 @@ describe('AlertCountsTool', () => {
       const requestWithMissingParams = omit('body.allow', request) as unknown as KibanaRequest<
         unknown,
         unknown,
-        RequestBody
+        ExecuteConnectorRequestBody
       >;
 
       const tool = ALERT_COUNTS_TOOL.getTool({
