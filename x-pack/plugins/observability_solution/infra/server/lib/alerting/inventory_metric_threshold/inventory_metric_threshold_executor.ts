@@ -65,7 +65,7 @@ export type InventoryMetricThresholdAlertContext = AlertContext; // no specific 
 
 export type InventoryMetricThresholdAlert = Omit<
   ObservabilityMetricsAlert,
-  'kibana.alert.evaluation.values'
+  'kibana.alert.evaluation.values' | 'kibana.alert.evaluation.threshold'
 > & {
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
   [ALERT_EVALUATION_VALUES]?: Array<number | null>;
