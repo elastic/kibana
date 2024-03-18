@@ -500,6 +500,7 @@ describe('Risk Scoring Task', () => {
             interval: '1h',
             scoresWritten: 10,
             taskDurationInSeconds: 0,
+            alertSampleSizePerShard: 10000,
           });
         });
 
@@ -577,6 +578,7 @@ describe('Risk Scoring Task', () => {
               interval: '1h',
               scoresWritten: 0,
               taskDurationInSeconds: 0,
+              alertSampleSizePerShard: 10000,
             }
           );
         });
