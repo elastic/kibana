@@ -6,8 +6,9 @@ git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 cd "$PARENT_DIR" || exit
 
 rm -rf elasticsearch
-
 git clone https://github.com/elastic/elasticsearch --depth 1 || exit
+
+rm -rf open-source
 git clone https://github.com/elastic/open-source --depth 1 || exit
 
 cd "$KIBANA_DIR" || exit
