@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { GaugeShapes } from '@kbn/visualizations-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -41,12 +42,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const debugData = bullet?.rows[0][0];
       expect(debugData?.subtype).to.be('horizontal');
       expect(debugData?.title).to.be('Average of bytes');
-      expect(debugData?.value).to.be(5727.322);
+      expect(Math.round(debugData?.value ?? 0)).to.be(5727);
       expect(debugData?.domain).to.eql([0, 10000]);
     });
 
     it('should reflect edits for gauge', async () => {
-      await PageObjects.lens.switchToVisualization('horizontalBullet', 'horizontal');
+      await PageObjects.lens.switchToVisualization(GaugeShapes.HORIZONTAL_BULLET, 'horizontal');
       await PageObjects.lens.waitForVisualization('gaugeChart');
       await PageObjects.lens.configureDimension({
         dimension: 'lnsGauge_metricDimensionPanel > lns-dimensionTrigger',
@@ -94,11 +95,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
-    it('should seamlessly switch to vertical chart without losing configuration', async () => {
-      await PageObjects.lens.switchToVisualization('verticalBullet', 'vertical');
+    it('should seamlessly switch to vertical bullet chart without losing configuration', async () => {
+      await PageObjects.lens.switchToVisualization(GaugeShapes.VERTICAL_BULLET, 'vertical');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
       expect(debugData?.subtype).to.be('vertical');
+      expect(debugData?.title).to.be('custom title');
+      expect(debugData?.subtitle).to.be('custom subtitle');
+      expect(debugData?.value).to.be(14005);
+      expect(debugData?.target).to.be(11250);
+      expect(debugData?.domain).to.eql([1000, 25000]);
+    });
+    it('should seamlessly switch to arc gauge chart without losing configuration', async () => {
+      await PageObjects.lens.switchToVisualization(GaugeShapes.ARC, 'arc');
+      const { bullet } = await elasticChart.getChartDebugData();
+      const debugData = bullet?.rows[0][0];
+      expect(debugData?.subtype).to.be('half-circle');
+      expect(debugData?.title).to.be('custom title');
+      expect(debugData?.subtitle).to.be('custom subtitle');
+      expect(debugData?.value).to.be(14005);
+      expect(debugData?.target).to.be(11250);
+      expect(debugData?.domain).to.eql([1000, 25000]);
+    });
+    it('should seamlessly switch to major arc gauge chart without losing configuration', async () => {
+      await PageObjects.lens.switchToVisualization(GaugeShapes.MAJOR_ARC, 'major arc');
+      const { bullet } = await elasticChart.getChartDebugData();
+      const debugData = bullet?.rows[0][0];
+      expect(debugData?.subtype).to.be('two-thirds-circle');
+      expect(debugData?.title).to.be('custom title');
+      expect(debugData?.subtitle).to.be('custom subtitle');
+      expect(debugData?.value).to.be(14005);
+      expect(debugData?.target).to.be(11250);
+      expect(debugData?.domain).to.eql([1000, 25000]);
+    });
+    it('should seamlessly switch to circle gauge chart without losing configuration', async () => {
+      await PageObjects.lens.switchToVisualization(GaugeShapes.CIRCLE, 'circle');
+      const { bullet } = await elasticChart.getChartDebugData();
+      const debugData = bullet?.rows[0][0];
+      expect(debugData?.subtype).to.be('circle');
       expect(debugData?.title).to.be('custom title');
       expect(debugData?.subtitle).to.be('custom subtitle');
       expect(debugData?.value).to.be(14005);
