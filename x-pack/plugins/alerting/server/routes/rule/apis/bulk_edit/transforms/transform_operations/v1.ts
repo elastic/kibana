@@ -29,7 +29,7 @@ export const transformOperations = ({
         return {
           id: action.id,
           params: action.params,
-          ...(action.uuid && { uuid: action.uuid }),
+          uuid: action.uuid,
         };
       }
 
@@ -38,8 +38,6 @@ export const transformOperations = ({
         group: action.group ?? 'default',
         params: action.params,
         uuid: action.uuid,
-        ...(action.frequency && { frequency: action.frequency }),
-        ...(action.uuid && { uuid: action.uuid }),
         frequency: action.frequency,
       };
     });
