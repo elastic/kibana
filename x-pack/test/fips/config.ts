@@ -28,11 +28,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     esTestCluster: {
       ...functionalConfig.get('esTestCluster'),
+      license: 'trial',
       serverArgs: [
-        'path.repo=/tmp/',
-        'xpack.security.authc.api_key.enabled=true',
-        'network.host=0.0.0.0',
-        // 'network.bind_host=127.0.0.1',
+        // 'path.repo=/tmp/',
+        // 'xpack.security.authc.api_key.enabled=true',
+        // 'network.host=0.0.0.0',
+        'network.bind_host=127.0.0.1,192.168.56.1',
+        'discovery.type=single-node',
       ],
     },
 
