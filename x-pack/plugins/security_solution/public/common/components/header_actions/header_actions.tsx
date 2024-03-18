@@ -193,7 +193,13 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
     [columnHeaders, dispatch, timelineId, defaultColumns]
   );
 
-  const ColumnSorting = useDataGridColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
+  const ColumnSorting = useDataGridColumnSorting({
+    columns: myColumns,
+    sorting: sortedColumns,
+    schema: {},
+    schemaDetectors: [],
+    displayValues,
+  });
 
   return (
     <ActionsContainer>
