@@ -38,10 +38,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ],
     },
 
-    kbnTestServer: {
-      dockerImage:
-        // 'docker.elastic.co/kibana-ci/kibana-ubi-fips:8.14.0-SNAPSHOT-e101c22703375e070e5baf576e21465b29071ba2',
-        'docker.elastic.co/kibana/kibana:8.14.0-SNAPSHOT',
-    },
+    // kbnTestServer: {
+    //   dockerImage:
+    //     'docker.elastic.co/kibana-ci/kibana-ubi-fips:8.14.0-SNAPSHOT-e101c22703375e070e5baf576e21465b29071ba2',
+    //     'docker.elastic.co/kibana/kibana:8.14.0-SNAPSHOT',
+    // },
   };
 }
