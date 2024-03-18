@@ -13,7 +13,7 @@ import {
 } from '@testing-library/react-hooks';
 import { merge } from 'lodash';
 import React from 'react';
-import { Observable, Subject } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import {
   MessageRole,
   StreamingChatResponseEventType,
@@ -54,6 +54,7 @@ const mockService: MockedService = {
     openNewConversation: jest.fn(),
     predefinedConversation$: new Observable(),
   },
+  navigate: jest.fn().mockReturnValue(of()),
 };
 
 const mockChatService = createMockChatService();
