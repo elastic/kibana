@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { LoadActionPerfOptions } from '@kbn/es-archiver';
+import expect from '@kbn/expect';
+import { INTERNAL_ROUTES, PUBLIC_ROUTES } from '@kbn/reporting-common';
+import type { JobParamsCSV, JobParamsDownloadCSV } from '@kbn/reporting-export-types-csv-common';
 import type { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-pdf-common';
 import type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
-import type { JobParamsCSV, JobParamsDownloadCSV } from '@kbn/reporting-export-types-csv-common';
 import rison from '@kbn/rison';
-import { LoadActionPerfOptions } from '@kbn/es-archiver';
-import { INTERNAL_ROUTES } from '@kbn/reporting-common';
+import { Response } from 'supertest';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
@@ -35,6 +37,39 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const REPORTING_USER_USERNAME = 'reporting_user';
   const REPORTING_USER_PASSWORD = 'reporting_user-password';
   const REPORTING_ROLE = 'test_reporting_user';
+
+  const waitForJobToFinish = async (downloadReportPath: string, ignoreFailure = false) => {
+    log.debug(`Waiting for job to finish: ${downloadReportPath}`);
+    const JOB_IS_PENDING_CODE = 503;
+    let response: Response & { statusCode?: number };
+
+    const statusCode = await new Promise((resolve) => {
+      const intervalId = setInterval(async () => {
+        response = await supertest.get(downloadReportPath).responseType('blob');
+        if (response.statusCode === 503) {
+          log.debug(`Report at path ${downloadReportPath} is pending`);
+        } else if (response.statusCode === 200) {
+          log.debug(`Report at path ${downloadReportPath} is complete`);
+        } else {
+          log.debug(`Report at path ${downloadReportPath} returned code ${response.statusCode}`);
+        }
+        if (response.statusCode !== JOB_IS_PENDING_CODE) {
+          clearInterval(intervalId);
+          resolve(response.statusCode);
+        }
+      }, 1500);
+    });
+    if (!ignoreFailure) {
+      const jobInfo = await supertest.get(
+        downloadReportPath.replace(
+          PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX,
+          INTERNAL_ROUTES.JOBS.INFO_PREFIX
+        )
+      );
+      expect(jobInfo.body.output.warnings).to.be(undefined); // expect no failure message to be present in job info
+      expect(statusCode).to.be(200);
+    }
+  };
 
   const logTaskManagerHealth = async () => {
     // Check task manager health for analyzing test failures. See https://github.com/elastic/kibana/issues/114946
@@ -263,6 +298,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   };
 
   return {
+    waitForJobToFinish,
     logTaskManagerHealth,
     initEcommerce,
     teardownEcommerce,
