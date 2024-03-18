@@ -224,7 +224,7 @@ export const HASH_TO_VERSION_MAP = {
   'synthetics-param|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
   'synthetics-privates-locations|3d1b76c39bfb2cc8296b024d73854724': '10.1.0',
   'tag|83d55da58f6530f7055415717ec06474': '10.0.0',
-  'task|b4a368fd68cd32ef6990877634639db6': '10.0.0',
+  'task|b4a368fd68cd32ef6990877634639db6': '10.1.0',
   'telemetry|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
   'threshold-explorer-view|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
   'ui-metric|0d409297dc5ebe1e3a1da691c6ee32e3': '10.0.0',
