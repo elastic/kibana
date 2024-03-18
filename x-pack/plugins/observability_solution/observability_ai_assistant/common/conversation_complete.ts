@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Conversation, type Message } from './types';
+import { type Message } from './types';
 
 export enum StreamingChatResponseEventType {
   ChatCompletionChunk = 'chatCompletionChunk',
@@ -42,14 +42,22 @@ export type ChatCompletionChunkEvent = StreamingChatResponseEventBase<
 export type ConversationCreateEvent = StreamingChatResponseEventBase<
   StreamingChatResponseEventType.ConversationCreate,
   {
-    conversation: Conversation['conversation'];
+    conversation: {
+      id: string;
+      title: string;
+      last_updated: string;
+    };
   }
 >;
 
 export type ConversationUpdateEvent = StreamingChatResponseEventBase<
   StreamingChatResponseEventType.ConversationUpdate,
   {
-    conversation: Conversation['conversation'];
+    conversation: {
+      id: string;
+      title: string;
+      last_updated: string;
+    };
   }
 >;
 
