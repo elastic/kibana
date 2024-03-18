@@ -29,7 +29,7 @@ describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () =
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'bulk_process');
+    cy.task('esArchiverUnload', { archiveName: 'bulk_process' });
   });
 
   context('Alerts', () => {

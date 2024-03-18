@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import type { ClusterDetails } from '@kbn/es-types';
+import { estypes } from '@elastic/elasticsearch';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ClustersTable } from './clusters_table';
 
@@ -17,15 +17,15 @@ describe('ClustersTable', () => {
       remote1: {
         status: 'successful',
         took: 50,
-      } as unknown as ClusterDetails,
+      } as unknown as estypes.ClusterDetails,
       remote2: {
         status: 'skipped',
         took: 1000,
-      } as unknown as ClusterDetails,
+      } as unknown as estypes.ClusterDetails,
       remote3: {
         status: 'failed',
         took: 90,
-      } as unknown as ClusterDetails,
+      } as unknown as estypes.ClusterDetails,
     };
 
     test('should render rows in native order', () => {
