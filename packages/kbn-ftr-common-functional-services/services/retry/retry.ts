@@ -36,7 +36,7 @@ export class RetryService extends FtrService {
   ) {
     return await retryForSuccess<T>(this.log, {
       timeout,
-      methodName: 'retry.retryWithRetries',
+      methodName: 'retry.tryForTime',
       block,
       onFailureBlock,
       retryDelay,
@@ -112,7 +112,7 @@ export class RetryService extends FtrService {
     return await retryForSuccess<T>(this.log, {
       description,
       timeout,
-      methodName: 'retry.retryWithRetries',
+      methodName: 'retry.tryWithRetries',
       block,
       onFailureBlock,
       retryDelay,
