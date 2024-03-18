@@ -66,7 +66,7 @@ export class SloPlugin
     const app: App = {
       id: sloAppId,
       title: PLUGIN_NAME,
-      order: 8000,
+      order: 8002,
       updater$: appUpdater$,
       euiIconType: 'logoObservability',
       appRoute: SLOS_BASE_PATH,

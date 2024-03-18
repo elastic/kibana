@@ -399,11 +399,16 @@ export class Plugin
                   path: link.path ?? '',
                 }));
 
+              // After migrating to SLO plugin, SLOs navigation entry was removed from deepLinks
+              // But we still want to keep the same order in the navigation Alerts, SLOs, Cases
+              const alertsLink = otherLinks[0];
+              const casesLink = otherLinks[1];
+
               return [
                 {
                   label: '',
                   sortKey: 100,
-                  entries: [...overviewLink, ...sloLink, ...otherLinks, ...aiAssistantLink],
+                  entries: [...overviewLink, alertsLink, ...sloLink, casesLink, ...aiAssistantLink],
                 },
               ];
             })
