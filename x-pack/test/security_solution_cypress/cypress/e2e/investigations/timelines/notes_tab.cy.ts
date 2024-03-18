@@ -30,15 +30,14 @@ import {
 } from '../../../tasks/timeline';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
+import { deleteTimelines } from '../../../tasks/api_calls/common';
 
 const text = 'system_indices_superuser';
 const link = 'https://www.elastic.co/';
 
 describe.skip('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    login();
-    visit(TIMELINES_URL);
-
+  beforeEach(function () {
+    deleteTimelines();
     createTimeline(getTimelineNonValidQuery())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId: string) =>
@@ -47,9 +46,6 @@ describe.skip('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
           // request responses and indeterminism since on clicks to activates URL's.
           .then(() => cy.wrap(timelineId).as('timelineId'))
       );
-  });
-
-  beforeEach(function () {
     login();
     visit(TIMELINES_URL);
     openTimelineById(this?.timelineId as string);
