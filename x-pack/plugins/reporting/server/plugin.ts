@@ -25,7 +25,7 @@ import type {
   ReportingStartDeps,
 } from './types';
 import { ReportingRequestHandlerContext } from './types';
-import { registerReportingEventTypes } from './usage';
+import { registerReportingEventTypes, registerReportingUsageCollector } from './usage';
 
 /*
  * @internal
@@ -71,6 +71,7 @@ export class ReportingPlugin
 
     registerUiSettings(core);
     registerDeprecations({ core, reportingCore });
+    registerReportingUsageCollector(reportingCore, plugins.usageCollection);
     registerReportingEventTypes(core);
 
     // Routes
