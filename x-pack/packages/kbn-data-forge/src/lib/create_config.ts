@@ -67,6 +67,7 @@ export function createConfig(partialConfig: PartialConfig = {}) {
     },
     schedule: partialConfig.schedule ?? [schedule],
     apm: {
+      enabled: false,
       server: DEFAULTS.APM_SERVER,
       apiKey: '',
       secretToken: '',

@@ -7,11 +7,12 @@
 
 import type { Agent } from 'elastic-apm-node';
 import { Config } from '../types';
+import { logger } from './logger';
 
 let agent: Agent;
 
 export function startApmAgent(config: Config) {
-  if (!agent) {
+  if (!agent && config.apm.enabled) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     agent = require('elastic-apm-node').start({
       serviceName: 'admin-console',
@@ -20,6 +21,7 @@ export function startApmAgent(config: Config) {
       secretToken: config.apm.secretToken,
       enviroment: 'production',
       instrument: false,
+      logger,
     });
   }
   return agent;

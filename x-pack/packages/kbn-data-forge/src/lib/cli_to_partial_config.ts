@@ -51,6 +51,7 @@ export function cliOptionsToPartialConfig(options: CliOptions) {
     },
     schedule: [schedule],
     apm: {
+      enabled: !!options.enableApm,
       server: options.apmServer,
       apiKey: options.apmApiKey,
       secretToken: options.apmSecretToken,

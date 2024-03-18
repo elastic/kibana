@@ -74,14 +74,14 @@ export function createEvent(
         }, baseEvent)
       : baseEvent;
 
+  const apmAgent = getApmAgent();
   const host = get(event, 'host.name');
-  if (host) {
-    const apmAgent = getApmAgent();
-    const transaction = apmAgent?.startTransaction(`${method} ${path}`, 'request', {
+  if (host && apmAgent != null) {
+    const transaction = apmAgent.startTransaction(`${method} ${path}`, 'request', {
       startTime: timestamp.valueOf(),
     });
-    transaction?.setLabel('host', host);
-    transaction?.setLabel('domain', domain);
+    transaction.setLabel('host', host);
+    transaction.setLabel('domain', domain);
     const duration = get(event, 'event.duration', random(10, 150) * 1_000_000) / 1_000_000;
     const outcome = statusCode >= 500 ? 'failure' : 'success';
     if (outcome === 'failure') {
@@ -89,10 +89,10 @@ export function createEvent(
       const error = message.includes('Connection Timeout')
         ? new ConnectionTimeoutError(message)
         : new Error(message);
-      apmAgent?.captureError(error, { parent: transaction });
+      apmAgent.captureError(error, { parent: transaction });
     }
-    transaction?.setOutcome(outcome);
-    transaction?.end(outcome, timestamp.valueOf() + duration);
+    transaction.setOutcome(outcome);
+    transaction.end(outcome, timestamp.valueOf() + duration);
   }
 
   return event;

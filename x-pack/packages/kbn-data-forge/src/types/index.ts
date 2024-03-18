@@ -123,6 +123,7 @@ export const ConfigRT = rt.type({
   }),
   schedule: rt.array(ScheduleRT),
   apm: rt.type({
+    enabled: rt.boolean,
     server: rt.string,
     apiKey: rt.string,
     secretToken: rt.string,
@@ -185,6 +186,7 @@ export interface CliOptions {
   reduceWeekendTrafficBy: number;
   ephemeralProjectIds: number;
   alignEventsToInterval: boolean;
+  enableApm: boolean;
   apmServer: string;
   apmApiKey: string;
   apmSecretToken: string;

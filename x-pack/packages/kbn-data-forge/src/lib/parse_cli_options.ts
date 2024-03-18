@@ -95,6 +95,7 @@ export function parseCliOptions(): CliOptions {
       parseCliInt,
       DEFAULTS.EPHEMERAL_PROJECT_IDS
     )
+    .option('--enable-apm', 'Send APM data to the APM server.')
     .option('--apm-server <address>', 'The address of the APM server.', DEFAULTS.APM_SERVER)
     .option('--apm-api-key <key>', 'The API key for APM server.', '')
     .option('--apm-secret-token <token>', 'The secret token for APM server.', '');
