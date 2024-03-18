@@ -436,6 +436,29 @@ As part of the epic, we should move away from this practice and create new CRUD 
 
 Our migration strategy will consist of two distinct types of migration: a **migration on write** that will update the SO on Elasticsearch, and a **normalization on read**, which will transform legacy rules to the new schema **in memory** on read operations, before returning it as a response from an API endpoint.
 
+
+
+| API endpoint | Normalization-on-read | Migration-on-write | Comments |
+|-|-|-|-|  
+| **Find Rules** - `GET /rules/_find` | <center>✅</center> | <center>❌</center> |  |
+| **Read Rule** - `GET /rules` | <center>✅</center> | <center>❌</center> |  |
+| **Delete Rules** - `DELETE /rules` | <center>✅</center> | <center>❌</center> |  |
+| **Export Rules** - `POST /rules/_export` | <center>✅</center> | <center>❌</center> | - Endpoints is unused in UI, still used via public API <br> - See section [Exporting rules](#exporting-rules) |
+| **Import Rules** - `POST /rules/_import` | <center>✅</center> | <center>✅</center> | - See section [Importing rules](#importing-rules) |
+| **Update Rule** - `PUT /rules`| <center>✅</center> | <center>✅</center> | - Used in the UI when updating/modifying a single rule via the Rule Editing page |
+| **Patch Rule** - `PATCH /rules`| <center>✅</center> | <center>✅</center> | - Used in the UI for attaching shared exceptions list to rules |
+| **Bulk Update Rules** - `PUT /rules/_bulk_update`| <center>✅</center> | <center>✅</center> | - Deprecated and unused by the UI. Might still be used by API users |
+| **Bulk Patch Rules** - `PATCH /rules/_bulk_update`| <center>✅</center> | <center>✅</center> | - Deprecated and unused by the UI. Might still be used by API users |
+| **Perform Rule Upgrade** - `POST /prebuilt_rules/upgrade/_perform` (Internal) | <center>✅</center> | <center>✅</center> | - Current way of upgrading a prebuilt rule |
+| **(LEGACY) Install Prebuilt Rules And Timelines** - `PUT /rules/prepackaged` | <center>✅</center> | <center>✅</center> | - Legacy endpoint for installing prebuilt rules and updating rules. |
+|**Bulk Actions** - `POST /rules/_bulk_action`: | | | This endpoint includes a `dry_run` mode that is executed to evaluate preconditions and warn the user before executing the actual request. No migration logic should take place for dry run requests, i.e when `dry_run=true`, since we never write to ES when this parameter is set to `true`.|
+|  <li>_**Enable and disable action**_</li> | <center>✅</center> | <center>❌</center> | - Migration-on-write is technically possible but should be done on Alerting Framework side. |
+| <li>_**Delete action**_</li> | <center>✅</center> | <center>❌</center> | - Deletes ES object but returns deleted rules data, so so normalization-on-read is enough. |
+| <li>_**Export action**_</li> | <center>✅</center> | <center>❌</center> | - See section [Exporting rules](#exporting-rules) |
+| <li>_**Duplicate rule action**_</li> | <center>❌</center> | <center>❌</center> | - Per definition, all duplicated rules will be `custom` rules. That means that all duplicated rules (the duplicates) are newly created and should get a `rule_source` of type `internal`, and no migration or normalization is neccessary. |
+| <li>_**Edit rule action**_</li> | <center>❌</center> | <center>✅</center> | - No normalization-on-read is needed since endpoint doesn't return whole rule object <br>- We can take advantage of the `ruleParamsModifier` to carry out the migration-on-write, regardless of the type of edit that is being performed. <br>- See implementation details in the [Bulk editing rules](#bulk-editing-rules) section.
+
+
 #### Normalization on read
 
 All endpoints that respond with a rule Saved Object, typed as `RuleResponse`, will perform **normalization on read**, which will transform legacy rules to the new schema **in memory** on read operation, before returning it as a response from an API endpoint.
@@ -516,20 +539,6 @@ export const normalizePrebuiltSchemaOnRuleRead = (
 };
 ```
 
-##### Rule Management endpoints that will perform normalization-on-read
-
-- All endpoints that also perform migration-on-write, as listed in the below `Migration on write` section. All of them use the `internalRuleToAPIResponse` methods to transform the rule before returning the response, so the normalization on read will take place there. For these specific cases, however, the normalization-on-read will take place, but the data stored in ES for each rule should match the response given by the endpoint, i.e. the normalized in-memory value and the stored value of the rule should be the same.
-- **Find Rules - `GET /rules/_find`**
-- **Read Rule - GET /rules:**
-- **Delete Rules - DELETE /rules**
-- **Bulk Actions** - `POST /rules/_bulk_action`: all other action types not mentioned in the previous section will perform normalization-on-read before responding:
-  - Enable
-  - Disable
-  - Delete
-  - Export: see Importing and Exporting Rules section below
-- **Export Rules** - `POST /rules/_export`:
-  - this endpoint is unused via the UI, but might still be used via the public API
-  - same logic as for `_bulk_action` with the `export` action explained in section [Exporting rules](#exporting-rules) below: only normalization-on-read will be performed before writing to the output `ndjson` file.
 
 #### Migration on write
 
@@ -539,39 +548,7 @@ This migration strategy means that rules will be migrated incrementally, and tha
 
 The migration logic should take place within the handler logic of all endpoints that carry out write/update endpoint operations, and the endpoint should return the already-migrated rule(s).
 
-##### Rule Management endpoints that should include migration-on-write logic
-
-All of the following endpoints either fetch the rule before updating it, or send the rule's params as part of the body in the request. Therefore, we can apply migraton logic to them -as described below- before saving the rules to Elasticsearch.
-
-- **Update Rule** - `PUT /rules`: used in the UI when updating/modifying a single rule via the Rule Editing page
-- **Patch Rule** - `PATCH /rules`: used in the UI for attaching shared exceptions list to rules
-- **Bulk Update Rules** - `PUT /rules/_bulk_update`: deprecated and unused by the UI. Might still be used by API users
-- **Bulk Patch Rules** - `PATCH /rules/_bulk_update`: deprecated and unused by the UI. Might still be used by API users
-- **Import Rules** - `POST /rules/_import`:
-  - See section [Importing rules](#importing-rules)
-- **Perform Rule Upgrade** - `POST /prebuilt_rules/upgrade/_perform` (Internal): current way of upgrading a prebuilt rule
-- **(LEGACY) Install Prebuilt Rules And Timelines** - `PUT /rules/prepackaged`: legacy endpoint for installing prebuilt rules. Also updates existing prebuilt rules package, so these rules should be migrated during update as well.
-- **Bulk Actions** - `POST /rules/_bulk_action`:
-  This endpoint includes many types of actions, but only the **bulk edit** and the **duplicate** actions should perform a migration on write.
-
-This endpoint also includes a `dry_run` mode that is executed to evaluate preconditions and warn the user before executing the actual request. No migration logic should take place for dry run requests, i.e when `dry_run=true`, since we never write to ES when this parameter is set to `true`.
-
-For the **bulk edit** action, we can take advantage of the `ruleParamsModifier` to carry out the migration, regardless of the type of edit that is being performed. See implementation details in the below [Bulk editing rules](#bulk-editing-rules) section.
-
-For the **duplicate** rule action:
-
-Since we will be creating a new rule on ES, we should create it with the new schema. Per definition, all duplicated rules will be `custom` rules. That means that all duplicated rules (the duplicates) should get a `rule_source` of type `internal`.
-This action will not perform a migration-on-write of the original rule being duplicated for two reasons:
-
-- it would violate the principle of least surprise for the endpoint
-- the current implementation of the endpoint does not modify the original rule. This gives us no window of opportunity to migrate the rule and save to ES without adding performance overhead.
-
-All other type of actions should **not** perform migration-on-write:
-
-- Enable
-- Disable
-- Delete
-- Export: see Importing and Exporting Rules section below
+Endpoints that perform migration-on-write either fetch the rule before updating it, or send the rule's params as part of the body in the request. Therefore, we can apply migraton logic to them -as described below- before saving the rules to Elasticsearch.
 
 ### Technical implementation of migration-on-write
 
