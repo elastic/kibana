@@ -303,7 +303,6 @@ export const createInventoryMetricThresholdExecutor =
 
         const payload = {
           [ALERT_REASON]: reason,
-          [ALERT_ACTION_GROUP]: actionGroup,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
           [ALERT_EVALUATION_THRESHOLD]: thresholds,
           ...flattenAdditionalContext(additionalContext),
@@ -328,7 +327,7 @@ export const createInventoryMetricThresholdExecutor =
       const additionalContext = getContextForRecoveredAlerts(alertHits);
       const originalActionGroup = getOriginalActionGroup(alertHits);
 
-      recoveredAlert.alert.setContext({
+      const recoveredContext = {
         alertDetailsUrl: await getAlertUrl(
           alertUuid,
           spaceId,
@@ -353,6 +352,11 @@ export const createInventoryMetricThresholdExecutor =
         originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS_ID,
         originalAlertStateWasWARNING: originalActionGroup === WARNING_ACTIONS_ID,
         ...additionalContext,
+      };
+
+      alertsClient.setAlertData({
+        id: recoveredAlertId,
+        context: recoveredContext,
       });
     }
 
