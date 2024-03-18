@@ -135,7 +135,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   const [dataView, changeDataView] = useState<DataView | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const isCanceledRef = useRef<boolean>(false);
-  const isTextBased = Boolean(query && isOfAggregateQueryType(query));
+  const isTextBased = !!query && isOfAggregateQueryType(query);
 
   const setState: typeof changeState = useCallback(
     (nextState) => {
@@ -186,33 +186,32 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       abortControllerRef.current?.abort();
       abortControllerRef.current = new AbortController();
 
-      const results =
-        query && isOfAggregateQueryType(query)
-          ? await loadFieldStatsTextBased({
-              services: { data },
-              dataView: loadedDataView,
-              field,
-              fromDate,
-              toDate,
-              baseQuery: query,
-              abortController: abortControllerRef.current,
-            })
-          : await loadFieldStats({
-              services: { data },
-              dataView: loadedDataView,
-              field,
-              fromDate,
-              toDate,
-              dslQuery:
-                dslQuery ??
-                buildEsQuery(
-                  loadedDataView,
-                  query ?? [],
-                  filters ?? [],
-                  getEsQueryConfig(uiSettings)
-                ),
-              abortController: abortControllerRef.current,
-            });
+      const results = isTextBased
+        ? await loadFieldStatsTextBased({
+            services: { data },
+            dataView: loadedDataView,
+            field,
+            fromDate,
+            toDate,
+            baseQuery: query,
+            abortController: abortControllerRef.current,
+          })
+        : await loadFieldStats({
+            services: { data },
+            dataView: loadedDataView,
+            field,
+            fromDate,
+            toDate,
+            dslQuery:
+              dslQuery ??
+              buildEsQuery(
+                loadedDataView,
+                query ?? [],
+                filters ?? [],
+                getEsQueryConfig(uiSettings)
+              ),
+            abortController: abortControllerRef.current,
+          });
 
       abortControllerRef.current = null;
 
