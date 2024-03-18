@@ -101,15 +101,19 @@ export function AlertDetailsAppSection({
         ),
         value: serviceName,
       },
-      {
-        label: (
-          <FormattedMessage
-            id="xpack.apm.pages.alertDetails.alertSummary.serviceName"
-            defaultMessage="Transaction name"
-          />
-        ),
-        value: transactionName,
-      },
+      ...(transactionName
+        ? [
+            {
+              label: (
+                <FormattedMessage
+                  id="xpack.apm.pages.alertDetails.alertSummary.transactionName"
+                  defaultMessage="Transaction name"
+                />
+              ),
+              value: transactionName,
+            },
+          ]
+        : []),
     ];
     setAlertSummaryFields(alertSummaryFields);
   }, [
