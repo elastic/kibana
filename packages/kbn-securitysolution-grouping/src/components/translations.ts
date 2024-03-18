@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 
 export const GROUPS_UNIT = (totalCount: number) =>
   i18n.translate('grouping.total.unit', {
-    values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {group} other {groups}}`,
+    values: { totalCount, groupCount: totalCount.toLocaleString() },
+    defaultMessage: `{groupCount} {totalCount, plural, =1 {group} other {groups}}`,
   });
 
 export const TAKE_ACTION = i18n.translate('grouping.additionalActions.takeAction', {
