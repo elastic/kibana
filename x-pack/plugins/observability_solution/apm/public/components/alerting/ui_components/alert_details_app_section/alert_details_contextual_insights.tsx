@@ -111,16 +111,18 @@ export function AlertDetailContextualInsights({
     ];
   }, [alert]);
 
+  if (!ObservabilityAIAssistantContextualInsight) {
+    return null;
+  }
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      {ObservabilityAIAssistantContextualInsight ? (
-        <EuiFlexItem grow={false}>
-          <ObservabilityAIAssistantContextualInsight
-            title={'Help me understand this alert'}
-            messages={getPromptMessages}
-          />
-        </EuiFlexItem>
-      ) : null}
+      <EuiFlexItem grow={false}>
+        <ObservabilityAIAssistantContextualInsight
+          title={'Help me understand this alert'}
+          messages={getPromptMessages}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
