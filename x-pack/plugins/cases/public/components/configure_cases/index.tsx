@@ -339,7 +339,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
         title={i18n.CONFIGURE_CASES_PAGE_TITLE}
       />
       <EuiPageBody restrictWidth={true}>
-        <div style={{ paddingTop: 0 }} css={getFormWrapperCss(euiTheme)}>
+        <div css={getFormWrapperCss(euiTheme)}>
           {hasMinimumLicensePermissions && (
             <>
               {!connectorIsValid && (

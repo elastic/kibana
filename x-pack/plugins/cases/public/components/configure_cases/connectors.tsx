@@ -96,10 +96,8 @@ const ConnectorsComponent: React.FC<Props> = ({
         <EuiFormRow
           fullWidth
           css={css`
-            .euiFormRow__labelWrapper {
-              .euiFormRow__label {
-                width: 100%;
-              }
+            label {
+              width: 100%;
             }
           `}
           label={dropDownLabel}
