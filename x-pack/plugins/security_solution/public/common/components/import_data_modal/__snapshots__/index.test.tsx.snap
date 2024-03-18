@@ -48,7 +48,9 @@ Object {
               <div
                 class="euiText emotion-euiText-s"
               >
-                <h4>
+                <h4
+                  id="generated-id"
+                >
                   description
                 </h4>
               </div>
@@ -64,6 +66,7 @@ Object {
                   <input
                     accept=".ndjson"
                     aria-describedby="rule-file-picker-filePicker__prompt"
+                    aria-labelledby="generated-id"
                     class="euiFilePicker__input"
                     data-test-subj="rule-file-picker"
                     id="rule-file-picker"
@@ -255,7 +258,9 @@ Object {
               <div
                 class="euiText emotion-euiText-s"
               >
-                <h4>
+                <h4
+                  id="generated-id"
+                >
                   description
                 </h4>
               </div>
@@ -271,6 +276,7 @@ Object {
                   <input
                     accept=".ndjson"
                     aria-describedby="rule-file-picker-filePicker__prompt"
+                    aria-labelledby="generated-id"
                     class="euiFilePicker__input"
                     data-test-subj="rule-file-picker"
                     id="rule-file-picker"
@@ -541,7 +547,9 @@ Object {
               <div
                 class="euiText emotion-euiText-s"
               >
-                <h4>
+                <h4
+                  id="generated-id"
+                >
                   description
                 </h4>
               </div>
@@ -557,6 +565,7 @@ Object {
                   <input
                     accept=".ndjson"
                     aria-describedby="rule-file-picker-filePicker__prompt"
+                    aria-labelledby="generated-id"
                     class="euiFilePicker__input"
                     data-test-subj="rule-file-picker"
                     id="rule-file-picker"

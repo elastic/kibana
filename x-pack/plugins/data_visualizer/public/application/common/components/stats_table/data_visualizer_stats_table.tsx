@@ -7,15 +7,14 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
+import type { EuiBasicTableColumn, HorizontalAlignment } from '@elastic/eui';
 import {
   CENTER_ALIGNMENT,
-  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiIcon,
   EuiInMemoryTable,
   EuiText,
   EuiToolTip,
-  HorizontalAlignment,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
   EuiResizeObserver,
@@ -24,7 +23,7 @@ import {
   useEuiMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { throttle } from 'lodash';
 import { css } from '@emotion/react';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
@@ -34,11 +33,11 @@ import { IndexBasedNumberContentPreview } from './components/field_data_row/numb
 
 import { useTableSettings } from './use_table_settings';
 import { TopValuesPreview } from './components/field_data_row/top_values_preview';
-import {
+import type {
   FieldVisConfig,
   FileBasedFieldVisConfig,
-  isIndexBasedFieldVisConfig,
 } from '../../../../../common/types/field_vis_config';
+import { isIndexBasedFieldVisConfig } from '../../../../../common/types/field_vis_config';
 import { FileBasedNumberContentPreview } from '../field_data_row';
 import { BooleanContentPreview } from './components/field_data_row';
 import { calculateTableColumnsDimensions } from './utils';

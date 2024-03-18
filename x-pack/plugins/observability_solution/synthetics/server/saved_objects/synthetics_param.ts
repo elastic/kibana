@@ -10,6 +10,7 @@ import { syntheticsParamType } from '../../common/types/saved_objects';
 export const SYNTHETICS_SECRET_ENCRYPTED_TYPE = {
   type: syntheticsParamType,
   attributesToEncrypt: new Set(['value']),
+  attributesToIncludeInAAD: new Set(['key', 'description', 'tags']),
 };
 
 export const syntheticsParamSavedObjectType: SavedObjectsType = {

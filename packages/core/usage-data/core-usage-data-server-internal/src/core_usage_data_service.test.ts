@@ -311,7 +311,7 @@ describe('CoreUsageDataService', () => {
                   "crossOriginOpenerPolicy": "same-origin",
                   "disableEmbedding": false,
                   "permissionsPolicyConfigured": true,
-                  "referrerPolicy": "no-referrer-when-downgrade",
+                  "referrerPolicy": "strict-origin-when-cross-origin",
                   "strictTransportSecurity": "NULL",
                   "xContentTypeOptions": "nosniff",
                 },

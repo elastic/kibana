@@ -7,7 +7,8 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,7 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 
 import { FILE_FORMATS } from '../../../../../common/constants';
 import { FileContents } from '../file_contents';
@@ -83,7 +84,7 @@ export const ResultsView: FC<Props> = ({
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
-      <div className="results">
+      <div>
         <EuiPanel data-test-subj="dataVisualizerFileFileContentPanel" hasShadow={false} hasBorder>
           <FileContents
             data={data}

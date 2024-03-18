@@ -100,11 +100,9 @@ export function useFetchAgentsData() {
   >();
   const [allTags, setAllTags] = useState<string[]>();
   const [isLoading, setIsLoading] = useState(false);
-  const [shownAgents, setShownAgents] = useState(0);
-  const [inactiveShownAgents, setInactiveShownAgents] = useState(0);
+  const [nAgentsInTable, setNAgentsInTable] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
   const [totalManagedAgentIds, setTotalManagedAgentIds] = useState<string[]>([]);
-  const [inactiveManagedAgentIds, setinactiveManagedAgentIds] = useState<string[]>([]);
   const [managedAgentsOnCurrentPage, setManagedAgentsOnCurrentPage] = useState(0);
 
   const getSortFieldForAPI = (field: keyof Agent): string => {
@@ -201,11 +199,8 @@ export function useFetchAgentsData() {
           }
 
           setAgentsOnCurrentPage(agentsResponse.data.items);
-          setShownAgents(agentsResponse.data.total);
+          setNAgentsInTable(agentsResponse.data.total);
           setTotalInactiveAgents(totalInactiveAgentsResponse.data.results.inactive || 0);
-          setInactiveShownAgents(
-            showInactive ? totalInactiveAgentsResponse.data.results.inactive || 0 : 0
-          );
 
           const managedAgentPolicies = managedAgentPoliciesResponse.data?.items ?? [];
 
@@ -227,11 +222,7 @@ export function useFetchAgentsData() {
             }
             const allManagedAgents = response.data?.items ?? [];
             const allManagedAgentIds = allManagedAgents?.map((agent) => agent.id);
-            const inactiveManagedIds = allManagedAgents
-              ?.filter((agent) => agent.status === 'inactive')
-              .map((agent) => agent.id);
             setTotalManagedAgentIds(allManagedAgentIds);
-            setinactiveManagedAgentIds(inactiveManagedIds);
 
             setManagedAgentsOnCurrentPage(
               agentsResponse.data.items
@@ -298,11 +289,9 @@ export function useFetchAgentsData() {
     agentsOnCurrentPage,
     agentsStatus,
     isLoading,
-    shownAgents,
-    inactiveShownAgents,
+    nAgentsInTable,
     totalInactiveAgents,
     totalManagedAgentIds,
-    inactiveManagedAgentIds,
     managedAgentsOnCurrentPage,
     showUpgradeable,
     setShowUpgradeable,

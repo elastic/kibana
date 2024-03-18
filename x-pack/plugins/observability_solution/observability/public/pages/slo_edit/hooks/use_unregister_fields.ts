@@ -20,6 +20,7 @@ import {
   HISTOGRAM_DEFAULT_VALUES,
   SLO_EDIT_FORM_DEFAULT_VALUES,
   TIMESLICE_METRIC_DEFAULT_VALUES,
+  SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY,
 } from '../constants';
 import { CreateSLOForm } from '../types';
 
@@ -108,6 +109,11 @@ export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
               keepDefaultValues: true,
             }
           );
+          break;
+        case 'sli.synthetics.availability':
+          reset(Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY), {
+            keepDefaultValues: true,
+          });
           break;
         default:
           assertNever(indicatorType);

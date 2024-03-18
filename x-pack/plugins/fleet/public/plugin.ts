@@ -324,7 +324,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
             all: capabilities.fleet.all as boolean,
             read: capabilities.fleet.read as boolean,
           },
-          isSuperuser: false,
+          subfeatureEnabled: this.experimentalFeatures.subfeaturePrivileges ?? false,
         }),
         packagePrivileges: calculatePackagePrivilegesFromCapabilities(capabilities),
         endpointExceptionsPrivileges:
