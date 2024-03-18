@@ -913,19 +913,16 @@ export default function ({ getService }: FtrProviderContext) {
         // Non-auth flow routes
         await supertest
           .get('/authentication/app/not_auth_flow')
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie)
           .expect(200);
 
         await supertest
           .get('/authentication/app/not_auth_flow?statusCode=400')
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie)
           .expect(400);
 
         const { text: nonauthFlow500ResponseText } = await supertest
           .get('/authentication/app/not_auth_flow?statusCode=500')
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie)
           .expect(500);
         expect(nonauthFlow500ResponseText).to.eql(
@@ -933,6 +930,11 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         // Auth-flow routes
+        await supertest
+          .get('/authentication/app/auth_flow')
+          .set('Cookie', sessionCookie)
+          .expect(200);
+
         const { text: authFlow401ResponseText } = await supertest
           .get('/authentication/app/auth_flow?statusCode=401')
           .set('Cookie', sessionCookie)

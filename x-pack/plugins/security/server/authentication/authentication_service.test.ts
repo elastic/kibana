@@ -992,7 +992,6 @@ describe('AuthenticationService', () => {
         const mockRenderUnauthorizedPage = jest
           .requireMock('./unauthenticated_page')
           .renderUnauthenticatedPage.mockReturnValue('rendered-view');
-
         mockStartAuthenticationParams.session.getSID.mockResolvedValue('some-sid');
 
         const { authenticator, onPreResponseHandler } = getService();
@@ -1053,6 +1052,56 @@ describe('AuthenticationService', () => {
           basePath: mockSetupAuthenticationParams.http.basePath,
           staticAssets: expect.any(Object),
           originalURL: '/mock-server-basepath/',
+        });
+      });
+    });
+
+    describe('handles unexpected post-authentication failures', () => {
+      let mockReturnedValue: { type: any; body: string };
+      let mockOnPreResponseToolkit: jest.Mocked<OnPreResponseToolkit>;
+      beforeEach(() => {
+        mockReturnedValue = { type: 'render' as any, body: 'body' };
+        mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.render.mockReturnValue(mockReturnedValue);
+
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate({
+            authc: {
+              providers: { saml: { saml1: { order: 150, realm: 'saml1' } } },
+            },
+          }),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+      });
+      it('when login page is unavailable', async () => {
+        const mockRenderUnauthorizedPage = jest
+          .requireMock('./unauthenticated_page')
+          .renderUnauthenticatedPage.mockReturnValue('rendered-view');
+
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({ path: '/app/some', query: { param: 'one two' } }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: 'rendered-view',
+          headers: {
+            'Content-Security-Policy': CspConfig.DEFAULT.header,
+          },
+        });
+
+        expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
+          basePath: mockSetupAuthenticationParams.http.basePath,
+          staticAssets: expect.any(Object),
+          originalURL: '/mock-server-basepath/app/some',
         });
       });
     });
