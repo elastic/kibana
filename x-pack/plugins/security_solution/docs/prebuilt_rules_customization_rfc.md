@@ -130,6 +130,56 @@ Rules with `rule_source` of type `external` are rules who have an external origi
 
 This also means that a rule with this type of `rule_source` will determine that the rule is an Elastic Prebuilt Rule that can receive upstream updates via Fleet. This field is intended to partly replace the currently existing `immutable` field, which is used today for the same purpose, but -as its name indicates- also currently determines if a rule's fields can be modified/customized.
 
+Prebuilt rules will have:
+
+```ts
+{  
+  rule_source: {  
+    /**  
+     * The discriminant of the discriminated union type of the `rule_source` field.  
+     */  
+    type: 'external';  
+
+    /**  
+     * Determines whether the rule (which is prebuilt/external) has been customized by the user,  
+     * i.e. if any of its fields have been modified and diverged from the base version of the rule,  
+     * which is the version that is installed from the `security_detection_engine` Fleet package.  
+     * The value will be initially set to `false` when a brand new prebuilt rule is installed,  
+     * but will be rewritten to `true` if a rule's field is edited and diverges from the value  
+     * from the base version of the rule.  
+     * See section "Updating the `isCustomized` flag"  
+     */  
+    is_customized: boolean;  
+
+    /**  
+     * A date in ISO 8601 format which describes the last time that this prebuilt rule was created  
+     * and subsequently updated by the TRaDE team, the team responsible for creating prebuilt rules.  
+     * Its usage is detailed in https://github.com/elastic/detection-rules/issues/2826.  
+     * This field will be optional in both the API schema and the internal rule schema, since  
+     * this value will not exist for prebuilt rules until a new version of each rule which includes  
+     * this field in the prebuilt rule asset is published by the TRaDE team, and the user installs  
+     * it or updates to it.
+     * NOTE: the field will not be included in first iteration of the implementation. There is a 
+     * dependency with the TRaDE team that has blocked the inclusion of this field in the `security-rule` SO, 
+     * and the change has therefore been postponed. 
+     * See ticket https://github.com/elastic/detection-rules/issues/2826 for details.
+     */  
+    source_updated_at?: Date;  
+  };  
+} 
+```
+
+Custom rules will have:
+```ts
+{  
+  rule_source: {  
+    /**  
+     * The discriminant of the discriminated union type of the `rule_source` field.  
+     */  
+    type: 'internal';  
+  };  
+}  
+```
 ### Deprecating the `immutable` field
 
 In the current application's state, rules with `immutable: false` are rules which are not Elastic Prebuilt Rules, i.e. custom rules, and can be modified. Meanwhile, `immutable: true` rules are Elastic Prebuilt Rules, created by the TRaDE team, distributed via the `security_detection_engine` Fleet package, and cannot be modified once installed.
@@ -141,32 +191,6 @@ Because of this difference between the `rule_source` and `immutable` fields, the
 To ensure backward compatibility and avoid breaking changes, we will deprecate the `immutable` field but keep it within the rule schema, asking our users to stop relying on this field in Detection API responses. During the migration period, we want to keep the value of the `immutable` field in sync with the `rule_source` fields: this means that for all rules that have a `immutable` value of `true`, the `rule_source` field will always be of type `'external'`. Viceversa, rules with `immutable: false` will have a `rule_source` field of type `'internal'`.
 
 This means, however, that there will be a change in behaviour of the `immutable` field: with the release of the feature, rules with the `immutable: true` value will now be customizable by the user, which is not the current behaviour.
-
-### Subfields in the `rule_source` field
-
-In this first phase, the `rule_source` will conditionally contain three subfields: the discriminant `type`, and the `is_customized` and `source_updated_at` values, only present when `type` is `'external'`.
-
-#### `type` subfield
-
-The `type` subfield serves as the discriminant to the discriminated union field `rule_source` and can take two values, as explained above: `'internal'` and `'external'`.
-
-#### `is_customized` subfield
-
-The `is_customized` field will be a boolean field that determines whether an external/Prebuilt Rule has been customized by the user, i.e. if any of its fields have been modified and diverged from the base version of the rule, which is the version that is installed from the Prebuilt Rules `security_detection_engine` Fleet package.
-
-This means that the `is_customized` subfield only makes sense and will be used for prebuilt rules, or rules whose `rule_source` field is of type `'external'`.
-
-For prebuilt rules, the `rule_source.is_customized` value will be initially set to `false` when a brand new rule is installed, but will be rewritten to `true` if a rule's field is edited and diverges from the value from the base version of the rule.
-
-See section [Updating the `isCustomized` flag](#updating-the-is_customized-field)
-
-#### `source_updated_at` subfield
-
-The `source_updated_at` will be a field containing a date in ISO 8601 format which describes the last time that an Elastic Prebuilt Detection rule was created and subsequently updated by the TRaDe team, the team responsible for creating detection rules. Its usage is detailed in this [ticket](https://github.com/elastic/detection-rules/issues/2826).
-
-This field will be optional in both the API schema and the internal rule schema, since this value will not exist for prebuilt rules until a new version of each rule which includes this field in the prebuilt rule asset is published by the TRaDE team, and the user installs it or updates to it.
-
-**NOTE:** the field will not be included in first iteration of the implementation. There is a dependency with the TRaDE team that has blocked the inclusion of this field in the `security-rule` SO, and the change has therefore been postponed. See ticket https://github.com/elastic/detection-rules/issues/2826 for details.
 
 ### Changes needed in rule schema
 
@@ -322,7 +346,7 @@ In the internal rule schema, there are two additional important reasons why we n
 - When rules are executed, a call to the method `validateRuleTypeParams` is done, which is a method that validates the passed rule's parameters using the validators defined in `x-pack/plugins/security_solution/server/lib/detection_engine/rule_types`, within each of the rule query types files (for [EQL rules](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/eql/create_eql_alert_type.ts#L27), for example). The validation is done based on the internal rule schema `BaseRulesParams` displayed above. Having `ruleSource` as required field would cause custom rules or prebuilt rules that haven't had their schema migrated to fail during runtime.
 - The Rule Client `update` method also calls the `validateRuleTypeParams` to validate the rule's params. Since the Rule Client's `update` method is used in our endpoint handlers, such as and `/rules/patch` and `/_bulk_actions`, these would fail when executed against a payload of custom rule.
 
-##### Prebuilt Rule asset schema
+#### Prebuilt Rule asset schema
 
 The `PrebuiltRuleAsset` type needs to be updated to include the new `source_updated_at` date that will be progressively shipped with new versions of rules in the Elastic Prebuilt Rules package.
 
@@ -585,7 +609,7 @@ Additionally:
 
 - **Bulk Actions** - `POST /rules/_bulk_action`: with **duplicate** action
 
-will perform migration but does not allow for customization during the duplication proces.
+will perform migration but does not allow for customization during the duplication process.
 
 So we can analyze the expected outputs of the migration of all these 8 endpoints together.
 
@@ -611,12 +635,12 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
       <td>N/A - Doesn't apply for custom rules</td>
       <td>
         <pre>
-          {
-            rule_source: {
-              type: 'internal'
-            },
-            immutable: false,
-          }
+{
+  rule_source: {
+    type: 'internal'
+  },
+  immutable: false,
+}
         </pre>
       </td>
     </tr>
@@ -633,12 +657,12 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
       <td>N/A - Doesn't apply for custom rules</td>
       <td>
         <pre>
-          {
-            rule_source: {
-              type: 'internal'
-            },
-            immutable: false,
-          }
+{
+  rule_source: {
+    type: 'internal'
+  },
+  immutable: false,
+}
         </pre>
       </td>
     </tr>
@@ -651,14 +675,14 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
       <td>No</td>
       <td>
         <pre>
-          {
-            rule_source: {
-              type: 'external',
-              isCustomized: false,
-              ...
-            },
-            immutable: true,
-          }
+{
+  rule_source: {
+    type: 'external',
+    isCustomized: false,
+    ...
+  },
+  immutable: true,
+}
         </pre>
       </td>
     </tr>
@@ -671,14 +695,14 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
       <td>Yes</td>
       <td>
         <pre>
-          {
-            rule_source: {
-              type: 'external',
-              isCustomized: true,
-              ...
-            },
-            immutable: true,
-          }
+{
+  rule_source: {
+    type: 'external',
+    isCustomized: true,
+    ...
+  },
+  immutable: true,
+}
         </pre>
       </td>
     </tr>
@@ -686,25 +710,25 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
       <td><b>Prebuilt rule</b> (already migrated, no customizations)</td>
       <td>
         <pre> 
-          {
-            type: 'external',
-            isCustomized: false,
-              ...
-          }
+{
+  type: 'external',
+  isCustomized: false,
+    ...
+}
           </pre>
       </td>
       <td><pre>true</pre></td>
       <td>No</td>
       <td>
         <pre>
-          {
-            rule_source: {
-              type: 'external',
-              isCustomized: false,
-              ...
-            },
-            immutable: true,
-          }
+{
+  rule_source: {
+    type: 'external',
+    isCustomized: false,
+    ...
+  },
+  immutable: true,
+}
         </pre>
       </td>
     </tr>
@@ -712,25 +736,25 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
       <td><b>Prebuilt rule</b> (already migrated, with customizations)</td>
       <td>
         <pre> 
-          {
-            type: 'external',
-            isCustomized: true,
-              ...
-          }
+{
+  type: 'external',
+  isCustomized: true,
+    ...
+}
           </pre>
       </td>
       <td><pre>true</pre></td>
       <td>Yes</td>
       <td>
         <pre>
-          {
-            rule_source: {
-              type: 'external',
-              isCustomized: true,
-              ...
-            },
-            immutable: true,
-          }
+{
+  rule_source: {
+    type: 'external',
+    isCustomized: true,
+    ...
+  },
+  immutable: true,
+}
         </pre>
       </td>
     </tr>
@@ -738,25 +762,25 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
       <td><i>Customized</i> <b>Prebuilt rule</b> (already migrated, no customizations after update)</td>
       <td>
         <pre> 
-          {
-            type: 'external',
-            isCustomized: true,
-              ...
-          }
+{
+  type: 'external',
+  isCustomized: true,
+    ...
+}
           </pre>
       </td>
       <td><pre>true</pre></td>
       <td>No</td>
       <td>
         <pre>
-          {
-            rule_source: {
-              type: 'external',
-              isCustomized: false,
-              ...
-            },
-            immutable: true,
-          }
+{
+  rule_source: {
+    type: 'external',
+    isCustomized: false,
+    ...
+  },
+  immutable: true,
+}
         </pre>
       </td>
     </tr>
@@ -764,25 +788,25 @@ The resulting values for `immutable` and `rule_source` when calling these endpoi
       <td>Invalid case: Migrating a migrated non-customized prebuilt rule, with customizations. <br><br> `immutable` should never be false if `rule_source.type' is 'external'. Migration should correct this inconsistency.</td>
       <td>
         <pre> 
-          {
-            type: 'external',
-            isCustomized: false,
-              ...
-          }
+{
+  type: 'external',
+  isCustomized: false,
+    ...
+}
           </pre>
       </td>
       <td><pre>false</pre></td>
       <td>Yes</td>
       <td>
         <pre>
-          {
-            rule_source: {
-              type: 'external',
-              isCustomized: true,
-              ...
-            },
-            immutable: true,
-          }
+{
+  rule_source: {
+    type: 'external',
+    isCustomized: true,
+    ...
+  },
+  immutable: true,
+}
         </pre>
       </td>
     </tr>
