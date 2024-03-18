@@ -22,6 +22,10 @@ cp "$source_file" "$destination_file"
 
 # Insert the license header
 license_header=$(cat $license_header_file)
+
+echo "Inserting license header into $destination_file"
+echo $license_header
+
 sed -i -e "1s/^/$license_header\n/" "$destination_file" || exit
 
 # Replace the line containing "lexer grammar" with "lexer grammar esql_lexer;"
