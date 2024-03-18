@@ -62,6 +62,8 @@
     "@kbn/code-editor-mock",
     "@kbn/io-ts-utils",
     "@kbn/lens-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/observability-ai-assistant-plugin",
   ],
   "exclude": ["target/**/*"]
 }
