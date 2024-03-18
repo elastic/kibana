@@ -72,7 +72,7 @@ describe(
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'exceptions');
+      cy.task('esArchiverUnload', { archiveName: 'exceptions' });
     });
 
     beforeEach(() => {
@@ -263,7 +263,7 @@ describe(
       });
 
       afterEach(() => {
-        cy.task('esArchiverUnload', 'exceptions_2');
+        cy.task('esArchiverUnload', { archiveName: 'exceptions_2' });
       });
 
       it('Cannot create an item to add to rule but not shared list as rule has no lists attached', () => {

@@ -63,6 +63,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityFilterBarFieldSearch: 'datasetQualityFilterBarFieldSearch',
     datasetQualityIntegrationsSelectable: 'datasetQualityIntegrationsSelectable',
     datasetQualityIntegrationsSelectableButton: 'datasetQualityIntegrationsSelectableButton',
+    datasetQualityNamespacesSelectable: 'datasetQualityNamespacesSelectable',
+    datasetQualityNamespacesSelectableButton: 'datasetQualityNamespacesSelectableButton',
     datasetQualityDatasetHealthKpi: 'datasetQualityDatasetHealthKpi',
 
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
@@ -172,6 +174,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         testSubjectSelectors.datasetQualityIntegrationsSelectableButton,
         testSubjectSelectors.datasetQualityIntegrationsSelectable,
         integrations
+      );
+    },
+
+    async filterForNamespaces(namespaces: string[]) {
+      return euiSelectable.selectOnlyOptionsWithText(
+        testSubjectSelectors.datasetQualityNamespacesSelectableButton,
+        testSubjectSelectors.datasetQualityNamespacesSelectable,
+        namespaces
       );
     },
 

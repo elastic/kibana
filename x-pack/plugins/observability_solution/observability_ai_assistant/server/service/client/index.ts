@@ -48,6 +48,7 @@ import {
   type Message,
 } from '../../../common/types';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
+import { createFunctionResponseError } from '../../../common/utils/create_function_response_error';
 import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
 import type { ChatFunctionClient } from '../chat_function_client';
 import {
@@ -159,6 +160,19 @@ export class ObservabilityAIAssistantClient {
         const MAX_FUNCTION_CALLS = 5;
         const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
 
+        const allFunctions = functionClient
+          .getFunctions()
+          .filter((fn) => {
+            const visibility = fn.definition.visibility ?? FunctionVisibility.All;
+            return (
+              visibility === FunctionVisibility.All ||
+              visibility === FunctionVisibility.AssistantOnly
+            );
+          })
+          .map((fn) => pick(fn.definition, 'name', 'description', 'parameters'));
+
+        const allActions = functionClient.getActions();
+
         const next = async (nextMessages: Message[]): Promise<void> => {
           const lastMessage = last(nextMessages);
 
@@ -199,18 +213,7 @@ export class ObservabilityAIAssistantClient {
             return await next(nextMessages.concat(addedMessage));
           } else if (isUserMessage) {
             const functions =
-              numFunctionsCalled >= MAX_FUNCTION_CALLS
-                ? []
-                : functionClient
-                    .getFunctions()
-                    .filter((fn) => {
-                      const visibility = fn.definition.visibility ?? FunctionVisibility.All;
-                      return (
-                        visibility === FunctionVisibility.All ||
-                        visibility === FunctionVisibility.AssistantOnly
-                      );
-                    })
-                    .map((fn) => pick(fn.definition, 'name', 'description', 'parameters'));
+              numFunctionsCalled >= MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
 
             if (numFunctionsCalled >= MAX_FUNCTION_CALLS) {
               this.dependencies.logger.debug(
@@ -254,9 +257,37 @@ export class ObservabilityAIAssistantClient {
           }
 
           if (isAssistantMessageWithFunctionRequest) {
-            const span = apm.startSpan(
-              `execute_function ${lastMessage.message.function_call!.name}`
-            );
+            const functionCallName = lastMessage.message.function_call!.name;
+
+            if (functionClient.hasAction(functionCallName)) {
+              this.dependencies.logger.debug(`Executing client-side action: ${functionCallName}`);
+
+              // if validation fails, return the error to the LLM.
+              // otherwise, close the stream.
+
+              try {
+                functionClient.validate(
+                  functionCallName,
+                  JSON.parse(lastMessage.message.function_call!.arguments || '{}')
+                );
+              } catch (error) {
+                const functionResponseMessage = createFunctionResponseError({
+                  name: functionCallName,
+                  error,
+                });
+                nextMessages = nextMessages.concat(functionResponseMessage.message);
+
+                subscriber.next(functionResponseMessage);
+
+                return await next(nextMessages);
+              }
+
+              subscriber.complete();
+
+              return;
+            }
+
+            const span = apm.startSpan(`execute_function ${functionCallName}`);
 
             span?.addLabels({
               ai_assistant_args: JSON.stringify(lastMessage.message.function_call!.arguments ?? {}),
@@ -273,7 +304,7 @@ export class ObservabilityAIAssistantClient {
                 : await functionClient
                     .executeFunction({
                       connectorId,
-                      name: lastMessage.message.function_call!.name,
+                      name: functionCallName,
                       messages: nextMessages,
                       args: lastMessage.message.function_call!.arguments,
                       signal,
@@ -313,6 +344,7 @@ export class ObservabilityAIAssistantClient {
             numFunctionsCalled++;
 
             if (signal.aborted) {
+              span?.end();
               return;
             }
 
@@ -455,7 +487,7 @@ export class ObservabilityAIAssistantClient {
     }: {
       messages: Message[];
       connectorId: string;
-      functions?: Array<{ name: string; description: string; parameters: CompatibleJSONSchema }>;
+      functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
       functionCall?: string;
       signal: AbortSignal;
     }
