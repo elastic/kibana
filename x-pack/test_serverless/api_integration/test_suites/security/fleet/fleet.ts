@@ -6,7 +6,6 @@
  */
 
 import expect from 'expect';
-import { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   expectDefaultElasticsearchOutput,
@@ -15,26 +14,15 @@ import {
 
 export default function (ctx: FtrProviderContext) {
   const svlCommonApi = ctx.getService('svlCommonApi');
-  const svlUserManager = ctx.getService('svlUserManager');
-  const supertestWithoutAuth = ctx.getService('supertestWithoutAuth');
-  let roleAuthc: RoleCredentials;
+  const supertest = ctx.getService('supertest');
 
   describe('fleet', function () {
-    before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
-    });
-
-    after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
-    });
-
     it('rejects request to create a new fleet server hosts if host url is different from default', async () => {
       await expectDefaultFleetServer(ctx);
 
-      const { body, status } = await supertestWithoutAuth
+      const { body, status } = await supertest
         .post('/api/fleet/fleet_server_hosts')
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleAuthc.apiKeyHeader)
         .send({
           name: 'test',
           host_urls: ['https://localhost:8221'],
@@ -52,10 +40,9 @@ export default function (ctx: FtrProviderContext) {
     it('accepts request to create a new fleet server hosts if host url is same as default', async () => {
       await expectDefaultFleetServer(ctx);
 
-      const { body, status } = await supertestWithoutAuth
+      const { body, status } = await supertest
         .post('/api/fleet/fleet_server_hosts')
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleAuthc.apiKeyHeader)
         .send({
           name: 'Test Fleet server host',
           host_urls: ['https://localhost:8220'],
@@ -73,10 +60,10 @@ export default function (ctx: FtrProviderContext) {
     it('rejects request to create a new elasticsearch output if host is different from default', async () => {
       await expectDefaultElasticsearchOutput(ctx);
 
-      const { body, status } = await supertestWithoutAuth
+      const { body, status } = await supertest
         .post('/api/fleet/outputs')
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleAuthc.apiKeyHeader)
+
         .send({
           name: 'Test output',
           type: 'elasticsearch',
@@ -96,10 +83,9 @@ export default function (ctx: FtrProviderContext) {
     it('accepts request to create a new elasticsearch output if host url is same as default', async () => {
       await expectDefaultElasticsearchOutput(ctx);
 
-      const { body, status } = await supertestWithoutAuth
+      const { body, status } = await supertest
         .post('/api/fleet/outputs')
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleAuthc.apiKeyHeader)
         .send({
           name: 'Test output',
           type: 'elasticsearch',
