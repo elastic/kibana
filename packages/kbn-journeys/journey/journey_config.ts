@@ -15,16 +15,10 @@ import { Readable } from 'stream';
 import { BaseStepCtx } from './journey';
 import { SynthtraceClientType } from '../services/synthtrace';
 
-export interface SynthtraceOptions {
-  from: Date;
-  to: Date;
-  count?: number;
-}
-
-interface JourneySynthtrace<T extends { '@timestamp'?: number | undefined }> {
+interface JourneySynthtrace<T extends { '@timestamp'?: number | undefined }, O = any> {
   type: SynthtraceClientType;
-  generator: (options: SynthtraceOptions) => Readable | SynthtraceGenerator<T>;
-  options: SynthtraceOptions;
+  generator: (options: O) => Readable | SynthtraceGenerator<T>;
+  options: O;
 }
 
 export interface RampConcurrentUsersAction {
@@ -141,8 +135,8 @@ export interface JourneyConfigOptions<CtxExt extends { '@timestamp'?: number | u
    *   type: 'infra',
    *   generator: generateHostsData,
    *   options: {
-   *      from: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
-   *      to: new Date().toISOString(),
+   *      from: new Date(Date.now() - 1000 * 60 * 10),
+   *      to: new Date(),
    *      count: 1000,
    *   },
    * },
