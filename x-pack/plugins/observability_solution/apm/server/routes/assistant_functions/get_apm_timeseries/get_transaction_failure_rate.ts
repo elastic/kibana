@@ -8,7 +8,10 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
-import { TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
+import {
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getOutcomeAggregation } from '../../../lib/helpers/transaction_error_rate';
@@ -21,6 +24,7 @@ export async function getTransactionFailureRate({
   intervalString,
   filter,
   transactionType,
+  transactionName,
   groupByFields = [],
 }: {
   apmEventClient: APMEventClient;
@@ -30,6 +34,7 @@ export async function getTransactionFailureRate({
   bucketSize: number;
   filter: QueryDslQueryContainer[];
   transactionType?: string;
+  transactionName?: string;
   groupByFields?: string[];
 }) {
   return (
@@ -42,7 +47,11 @@ export async function getTransactionFailureRate({
       documentType: ApmDocumentType.TransactionMetric,
       rollupInterval: RollupInterval.OneMinute,
       intervalString,
-      filter: filter.concat(...termQuery(TRANSACTION_TYPE, transactionType)),
+      filter: [
+        ...filter,
+        ...termQuery(TRANSACTION_TYPE, transactionType),
+        ...termQuery(TRANSACTION_NAME, transactionName),
+      ],
       groupByFields: ['transaction.type', ...groupByFields],
       aggs: {
         ...getOutcomeAggregation(ApmDocumentType.TransactionMetric),

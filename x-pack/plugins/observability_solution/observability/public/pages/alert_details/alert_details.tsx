@@ -198,18 +198,10 @@ export function AlertDetails() {
   );
 }
 
-export function getConversationTimeRange(alertDetail: AlertData) {
-  const padding = 1 * 60 * 1000; // 1 minute
-  const start = new Date(alertDetail.formatted.start - padding).toISOString();
-  const end = new Date(alertDetail.formatted.start + padding).toISOString();
-  return { start, end };
-}
-
 export function getScreenDescription(alertDetail: AlertData) {
   const alertState = alertDetail.formatted.active ? 'active' : 'recovered';
   const alertStarted = new Date(alertDetail.formatted.start).toISOString();
   const alertUpdated = new Date(alertDetail.formatted.lastUpdated).toISOString();
-  const conversationTimeRange = getConversationTimeRange(alertDetail);
 
   return dedent(`The user is looking at an ${alertState} alert. It started at ${alertStarted}, and was last updated at ${alertUpdated}.
 
@@ -228,6 +220,5 @@ export function getScreenDescription(alertDetail: AlertData) {
   Please suggestion root causes if possilbe.
   Suggest next steps for the user to take.
 
-  The current time range is ${conversationTimeRange.start} - ${conversationTimeRange.end}
   `);
 }

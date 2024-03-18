@@ -37,8 +37,6 @@ export function AlertDetailContextualInsights({
   } = useKibana();
 
   const getPromptMessages = useCallback(async () => {
-    const { start, end } = getConversationTimeRange(alert);
-
     const {
       serviceSummary,
       serviceList,
@@ -58,8 +56,7 @@ export function AlertDetailContextualInsights({
             [SERVICE_ENVIRONMENT]: alert.fields[SERVICE_ENVIRONMENT],
             [TRANSACTION_TYPE]: alert.fields[TRANSACTION_TYPE],
             [TRANSACTION_NAME]: alert.fields[TRANSACTION_NAME],
-            end,
-            start,
+            alert_started_at: new Date(alert.start).toISOString(),
           },
         },
       }
@@ -125,13 +122,4 @@ export function AlertDetailContextualInsights({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
-
-export function getConversationTimeRange(
-  alert: AlertDetailsAppSectionProps['alert']
-) {
-  const padding = 5 * 60 * 1000; // 5 minutes
-  const start = new Date(alert.start - padding).toISOString();
-  const end = new Date(alert.start + padding).toISOString();
-  return { start, end };
 }

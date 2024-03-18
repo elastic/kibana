@@ -55,7 +55,7 @@ export async function getTransactionLatency({
         ...termQuery(TRANSACTION_TYPE, transactionType),
         ...termQuery(TRANSACTION_NAME, transactionName)
       ),
-      groupByFields: ['service.name', 'transaction.type', ...groupByFields],
+      groupByFields: ['transaction.type', ...groupByFields],
       aggs: {
         ...getLatencyAggregation(
           latencyAggregationType,

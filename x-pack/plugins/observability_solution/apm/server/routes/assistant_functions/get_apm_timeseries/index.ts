@@ -158,12 +158,14 @@ export async function getApmTimeseries({
               return await getTransactionThroughput({
                 ...parameters,
                 transactionType: stat.timeseries['transaction.type'],
+                transactionName: stat.timeseries['transaction.name'],
               });
 
             case ApmTimeseriesType.transactionFailureRate:
               return await getTransactionFailureRate({
                 ...parameters,
                 transactionType: stat.timeseries['transaction.type'],
+                transactionName: stat.timeseries['transaction.name'],
               });
 
             case ApmTimeseriesType.transactionLatency:
