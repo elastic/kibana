@@ -10,20 +10,29 @@ import { appContextService } from '../..';
 
 import { handleStateMachine } from './integrations_state_machine';
 
-const getTestDefinition = (mockEvent1: any, mockEvent2: any, mockEvent3: any, context?: any) => {
+const getTestDefinition = (
+  mockEvent1: any,
+  mockEvent2: any,
+  mockEvent3: any,
+  context?: any,
+  onPostTransition?: any
+) => {
   return {
     context,
     states: {
       state1: {
         onTransitionTo: mockEvent1,
+        onPostTransition,
         nextState: 'state2',
       },
       state2: {
         onTransitionTo: mockEvent2,
+        onPostTransition,
         nextState: 'state3',
       },
       state3: {
         onTransitionTo: mockEvent3,
+        onPostTransition,
         nextState: 'end',
       },
     },
@@ -116,6 +125,31 @@ describe('handleStateMachine', () => {
     );
     expect(mockContract.logger?.debug).toHaveBeenCalledWith(
       'state: state3 - status success - stateResult: undefined - nextState: end'
+    );
+  });
+
+  it('should execute postTransition function after the transition is complete', async () => {
+    const mockEventState1 = jest.fn();
+    const mockEventState2 = jest.fn();
+    const mockEventState3 = jest.fn();
+    const mockPostTransition = jest.fn();
+    const testDefinition = getTestDefinition(
+      mockEventState1,
+      mockEventState2,
+      mockEventState3,
+      undefined,
+      mockPostTransition
+    );
+    await handleStateMachine('state1', testDefinition);
+
+    expect(mockEventState1).toHaveBeenCalled();
+    expect(mockPostTransition).toHaveBeenCalled();
+    expect(mockEventState2).toHaveBeenCalled();
+    expect(mockPostTransition).toHaveBeenCalled();
+    expect(mockEventState3).toHaveBeenCalled();
+    expect(mockPostTransition).toHaveBeenCalled();
+    expect(mockContract.logger?.debug).toHaveBeenCalledWith(
+      'Executing post transition function: mockConstructor'
     );
   });
 });

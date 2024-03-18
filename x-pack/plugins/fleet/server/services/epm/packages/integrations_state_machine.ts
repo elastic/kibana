@@ -9,6 +9,7 @@ export interface State {
   onTransitionTo: any;
   nextState?: string;
   currentStatus?: string;
+  onPostTransition?: any;
 }
 
 export type StatusName = 'success' | 'failed' | 'pending';
@@ -45,10 +46,17 @@ async function handleState(currentStateName: string, definition: StateMachineDef
   } else {
     currentStatus = 'failed';
   }
-  // update SO with current state data
   logger.debug(
     `state: ${currentStateName} - status ${currentStatus} - stateResult: ${stateResult} - nextState: ${currentState.nextState}`
   );
+  if (typeof currentState.onPostTransition === 'function') {
+    try {
+      await currentState.onPostTransition.call(undefined, context);
+      logger.debug(`Executing post transition function: ${currentState.onPostTransition.name}`);
+    } catch (error) {
+      logger.warn(`Error during execution of post transition function: ${error.message}`);
+    }
+  }
   if (currentStatus === 'success' && currentState?.nextState && currentState?.nextState !== 'end') {
     handleState(currentState.nextState, definition);
   } else {
