@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const retry = getService('retry');
 
   describe('', () => {
     it('finds a data view', async () => {
@@ -21,7 +22,10 @@ export default function ({ getService }: FtrProviderContext) {
     it('opens the field editor', async () => {
       await testSubjects.click('addField');
       await testSubjects.existOrFail('flyoutTitle');
-      await testSubjects.click('closeFlyoutButton');
+      await retry.try(async () => {
+        await testSubjects.click('closeFlyoutButton');
+        await testSubjects.missingOrFail('flyoutTitle');
+      });
     });
 
     it('uses preconfigured options for a new field', async () => {
