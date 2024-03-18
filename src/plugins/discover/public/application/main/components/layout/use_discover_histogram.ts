@@ -30,7 +30,6 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { getUiActions } from '../../../../kibana_services';
 import { FetchStatus } from '../../../types';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
@@ -322,8 +321,6 @@ export const useDiscoverHistogram = ({
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
-  const servicesMemoized = useMemo(() => ({ ...services, uiActions: getUiActions() }), [services]);
-
   const filtersMemoized = useMemo(
     () => [...(filters ?? []), ...customFilters],
     [filters, customFilters]
@@ -344,7 +341,7 @@ export const useDiscoverHistogram = ({
   return {
     ref,
     getCreationOptions,
-    services: servicesMemoized,
+    services,
     dataView: isPlainRecord ? textBasedDataView : dataView,
     query: isPlainRecord ? textBasedQuery : query,
     filters: filtersMemoized,

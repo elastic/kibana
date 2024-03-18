@@ -15,9 +15,13 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiTabs,
+  EuiTab,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { useSloDetailsTabs } from '../../../pages/slo_details/hooks/use_slo_details_tabs';
 import { HeaderTitle } from '../../../pages/slo_details/components/header_title';
 import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
 import { useKibana } from '../../../utils/kibana_react';
@@ -47,9 +51,12 @@ export function SloOverviewDetails({
 
   const [selectedTabId, setSelectedTabId] = useState<SloTabId>(OVERVIEW_TAB_ID);
 
-  const handleSelectedTab = (newTabId: SloTabId) => {
-    setSelectedTabId(newTabId);
-  };
+  const { tabs } = useSloDetailsTabs({
+    slo,
+    isAutoRefreshing: false,
+    selectedTabId,
+    setSelectedTabId,
+  });
 
   if (!slo) {
     return null;
@@ -70,12 +77,20 @@ export function SloOverviewDetails({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <HeaderTitle slo={slo} isLoading={false} showTitle={false} />
-        <SloDetails
-          slo={slo}
-          isAutoRefreshing={false}
-          selectedTabId={selectedTabId}
-          handleSelectedTab={handleSelectedTab}
-        />
+        <EuiTabs>
+          {tabs.map((tab, index) => (
+            <EuiTab
+              key={index}
+              onClick={tab.onClick}
+              isSelected={tab.id === selectedTabId}
+              append={tab.append}
+            >
+              {tab.label}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+        <EuiSpacer size="m" />
+        <SloDetails slo={slo} isAutoRefreshing={false} selectedTabId={selectedTabId} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

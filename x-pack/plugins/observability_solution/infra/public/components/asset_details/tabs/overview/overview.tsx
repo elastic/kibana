@@ -35,7 +35,7 @@ export const Overview = () => {
   } = useMetadataStateContext();
   const { logs, metrics } = useDataViewsContext();
 
-  const isFullPageView = renderMode.mode !== 'flyout';
+  const isFullPageView = renderMode.mode === 'page';
 
   const state = useIntersectingState(ref, { dateRange });
 

@@ -46,15 +46,14 @@ describe('inject_exceptions_list', () => {
     ).toEqual<FuncReturn>([]);
   });
 
-  test('logs expect error message if the exceptionsList is undefined', () => {
-    injectExceptionsReferences({
-      logger,
-      exceptionsList: undefined as unknown as RuleParams['exceptionsList'],
-      savedObjectReferences: mockSavedObjectReferences(),
-    });
-    expect(logger.error).toBeCalledWith(
-      'Exception list is null when it never should be. This indicates potentially that saved object migrations did not run correctly. Returning empty exception list'
-    );
+  test('returns empty array given undefined', () => {
+    expect(
+      injectExceptionsReferences({
+        logger,
+        exceptionsList: undefined as unknown as RuleParams['exceptionsList'],
+        savedObjectReferences: mockSavedObjectReferences(),
+      })
+    ).toEqual([]);
   });
 
   test('returns empty array given an empty array for "exceptionsList"', () => {

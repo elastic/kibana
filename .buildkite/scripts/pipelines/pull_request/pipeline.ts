@@ -81,8 +81,10 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     if (
-      // Failing: See https://github.com/elastic/kibana/issues/177084
-      // (await doAnyChangesMatch([/^x-pack\/plugins\/apm/, /^packages\/kbn-apm-synthtrace/])) ||
+      (await doAnyChangesMatch([
+        /^x-pack\/plugins\/observability_solution\/apm/,
+        /^packages\/kbn-apm-synthtrace/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
@@ -101,7 +103,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/plugins\/profiling/])) ||
+      (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution\/profiling/])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/profiling_cypress.yml'));
@@ -114,21 +116,26 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
     }
 
-    if (await doAnyChangesMatch([/^x-pack\/plugins\/exploratory_view/])) {
+    if (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution\/exploratory_view/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
     }
 
     if (
       await doAnyChangesMatch([
-        /^x-pack\/plugins\/synthetics/,
-        /^x-pack\/plugins\/exploratory_view/,
+        /^x-pack\/plugins\/observability_solution\/synthetics/,
+        /^x-pack\/plugins\/observability_solution\/exploratory_view/,
       ])
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
     }
 
-    if (await doAnyChangesMatch([/^x-pack\/plugins\/ux/, /^x-pack\/plugins\/exploratory_view/])) {
+    if (
+      await doAnyChangesMatch([
+        /^x-pack\/plugins\/observability_solution\/ux/,
+        /^x-pack\/plugins\/observability_solution\/exploratory_view/,
+      ])
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
     }
 
@@ -226,6 +233,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
         /^x-pack\/packages\/security-solution/,
         /^x-pack\/packages\/kbn-elastic-assistant/,
         /^x-pack\/packages\/kbn-elastic-assistant-common/,
+        /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/test\/security_solution_cypress/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
@@ -264,6 +272,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
         /^x-pack\/packages\/security-solution/,
         /^x-pack\/packages\/kbn-elastic-assistant/,
         /^x-pack\/packages\/kbn-elastic-assistant-common/,
+        /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/test\/security_solution_cypress/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')

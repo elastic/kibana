@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import { map as mapObservable } from 'rxjs/operators';
 import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
@@ -19,7 +20,7 @@ import type {
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { SeriesConfigWithMetadata } from '../../../common/types/results';
 
-import { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
+import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
 import type { TimeRangeBounds } from '../util/time_buckets';
 import type { AppStateSelectedCells } from '../explorer/explorer_utils';
 import { SWIM_LANE_LABEL_WIDTH } from '../explorer/swimlane_container';

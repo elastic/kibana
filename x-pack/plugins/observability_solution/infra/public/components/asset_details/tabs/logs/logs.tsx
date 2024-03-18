@@ -10,7 +10,6 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import {
   DEFAULT_LOG_VIEW,
@@ -107,20 +106,18 @@ export const Logs = () => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <RedirectAppLinks coreStart={services}>
-              <EuiButtonEmpty
-                data-test-subj="infraAssetDetailsLogsTabOpenInLogsButton"
-                size="xs"
-                flush="both"
-                iconType="popout"
-                href={logsUrl}
-              >
-                <FormattedMessage
-                  id="xpack.infra.nodeDetails.logs.openLogsLink"
-                  defaultMessage="Open in Logs"
-                />
-              </EuiButtonEmpty>
-            </RedirectAppLinks>
+            <EuiButtonEmpty
+              data-test-subj="infraAssetDetailsLogsTabOpenInLogsButton"
+              size="xs"
+              flush="both"
+              iconType="popout"
+              href={logsUrl}
+            >
+              <FormattedMessage
+                id="xpack.infra.nodeDetails.logs.openLogsLink"
+                defaultMessage="Open in Logs"
+              />
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

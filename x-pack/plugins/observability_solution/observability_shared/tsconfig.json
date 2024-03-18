@@ -40,7 +40,7 @@
     "@kbn/management-settings-field-definition",
     "@kbn/management-settings-types",
     "@kbn/management-settings-utilities",
-    "@kbn/core-chrome-browser"
+    "@kbn/core-chrome-browser",
   ],
   "exclude": ["target/**/*"]
 }

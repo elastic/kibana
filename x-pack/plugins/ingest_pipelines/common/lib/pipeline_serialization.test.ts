@@ -12,6 +12,7 @@ describe('pipeline_serialization', () => {
     it('should deserialize pipelines', () => {
       expect(
         deserializePipelines({
+          // @ts-expect-error pipeline._meta defined as mandatory
           pipeline1: {
             description: 'pipeline 1 description',
             version: 1,
@@ -31,6 +32,7 @@ describe('pipeline_serialization', () => {
               },
             ],
           },
+          // @ts-expect-error pipeline._meta defined as mandatory
           pipeline2: {
             description: 'pipeline2 description',
             version: 1,
@@ -40,7 +42,6 @@ describe('pipeline_serialization', () => {
             description: 'pipeline3 description',
             version: 1,
             processors: [],
-            // @ts-expect-error es type do not contains _meta https://github.com/elastic/elasticsearch-js/issues/1724
             _meta: {
               managed: true,
             },

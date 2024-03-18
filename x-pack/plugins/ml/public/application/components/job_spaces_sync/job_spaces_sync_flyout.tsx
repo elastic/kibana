@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -24,7 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { useMlApiContext } from '../../contexts/kibana';
-import { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
+import type { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
 import { SyncList } from './sync_list';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 

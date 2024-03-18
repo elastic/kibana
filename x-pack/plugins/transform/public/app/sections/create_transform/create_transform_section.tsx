@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { FC } from 'react';
+import React, { useEffect } from 'react';
+import type { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiButtonEmpty, EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';

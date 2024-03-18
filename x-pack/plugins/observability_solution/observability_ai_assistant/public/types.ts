@@ -5,55 +5,42 @@
  * 2.0.
  */
 
-import type { ForwardRefExoticComponent, RefAttributes } from 'react';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { Observable } from 'rxjs';
-import type { AnalyticsServiceStart } from '@kbn/core/public';
-import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type {
-  DataViewsPublicPluginSetup,
-  DataViewsPublicPluginStart,
-} from '@kbn/data-views-plugin/public';
-import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
-import type { ILicense, LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
-import type {
-  ObservabilitySharedPluginSetup,
-  ObservabilitySharedPluginStart,
-} from '@kbn/observability-shared-plugin/public';
-import type {
-  AuthenticatedUser,
-  SecurityPluginSetup,
-  SecurityPluginStart,
-} from '@kbn/security-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { WithSuspenseExtendedDeps } from '@kbn/shared-ux-utility';
-import type {
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
-} from '@kbn/triggers-actions-ui-plugin/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
+  MessageAddEvent,
+  StreamingChatResponseEventWithoutError,
+} from '../common/conversation_complete';
 import type {
   ContextDefinition,
   FunctionDefinition,
   FunctionResponse,
+} from '../common/functions/types';
+import type {
   Message,
   ObservabilityAIAssistantScreenContext,
   PendingMessage,
 } from '../common/types';
-import type { ChatActionClickHandler } from './components/chat/types';
+import type { TelemetryEventTypeWithPayload } from './analytics';
 import type { ObservabilityAIAssistantAPIClient } from './api';
+import type { ChatActionClickHandler } from './components/chat/types';
 import type { InsightProps } from './components/insight/insight';
+import { ObservabilityAIAssistantChatServiceContext } from './context/observability_ai_assistant_chat_service_context';
+import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_context';
+import { useChat } from './hooks/use_chat';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
+import { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
+import type { UseUserPreferredLanguageResult } from './hooks/use_user_preferred_language';
+import { createScreenContextAction } from './utils/create_screen_context_action';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
-export type { CreateChatCompletionResponseChunk } from '../common/types';
 export type { PendingMessage };
 
 export interface ObservabilityAIAssistantChatService {
-  analytics: AnalyticsServiceStart;
+  sendAnalyticsEvent: (event: TelemetryEventTypeWithPayload) => void;
   chat: (
     name: string,
     options: {
@@ -64,12 +51,13 @@ export interface ObservabilityAIAssistantChatService {
     }
   ) => Observable<StreamingChatResponseEventWithoutError>;
   complete: (options: {
-    screenContexts: ObservabilityAIAssistantScreenContext[];
+    getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
     conversationId?: string;
     connectorId: string;
     messages: Message[];
     persist: boolean;
     signal: AbortSignal;
+    responseLanguage: string;
   }) => Observable<StreamingChatResponseEventWithoutError>;
   getContexts: () => ContextDefinition[];
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
@@ -83,16 +71,20 @@ export interface ObservabilityAIAssistantChatService {
   ) => React.ReactNode;
 }
 
+export interface ObservabilityAIAssistantConversationService {
+  openNewConversation: ({}: { messages: Message[]; title?: string }) => void;
+  predefinedConversation$: Observable<{ messages: Message[]; title?: string }>;
+}
+
 export interface ObservabilityAIAssistantService {
-  isEnabled: () => boolean;
   callApi: ObservabilityAIAssistantAPIClient;
-  getCurrentUser: () => Promise<AuthenticatedUser>;
-  getLicense: () => Observable<ILicense>;
-  getLicenseManagementLocator: () => SharePluginStart;
+  isEnabled: () => boolean;
   start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
   register: (fn: ChatRegistrationRenderFunction) => void;
   setScreenContext: (screenContext: ObservabilityAIAssistantScreenContext) => () => void;
   getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
+  conversations: ObservabilityAIAssistantConversationService;
+  navigate: (callback: () => void) => Promise<Observable<MessageAddEvent>>;
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
@@ -113,38 +105,28 @@ export type ChatRegistrationRenderFunction = ({}: {
 export interface ConfigSchema {}
 
 export interface ObservabilityAIAssistantPluginSetupDependencies {
-  data: DataPublicPluginSetup;
-  dataViews: DataViewsPublicPluginSetup;
-  features: FeaturesPluginSetup;
-  lens: LensPublicSetup;
-  observabilityShared: ObservabilitySharedPluginSetup;
+  licensing: {};
   security: SecurityPluginSetup;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   ml: MlPluginSetup;
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
-  data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
-  features: FeaturesPluginStart;
-  lens: LensPublicStart;
   licensing: LicensingPluginStart;
-  observabilityShared: ObservabilitySharedPluginStart;
   security: SecurityPluginStart;
-  share: SharePluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  uiActions: UiActionsStart;
   ml: MlPluginStart;
 }
 
-export interface ObservabilityAIAssistantPluginSetup {}
+export interface ObservabilityAIAssistantPublicSetup {}
 
-export interface ObservabilityAIAssistantPluginStart {
+export interface ObservabilityAIAssistantPublicStart {
   service: ObservabilityAIAssistantService;
   ObservabilityAIAssistantContextualInsight: React.ForwardRefExoticComponent<InsightProps> | null;
-  ObservabilityAIAssistantActionMenuItem: ForwardRefExoticComponent<
-    Pick<RefAttributes<{}> & WithSuspenseExtendedDeps, 'css' | 'key' | 'analytics'> &
-      RefAttributes<{}>
-  > | null;
+  ObservabilityAIAssistantMultipaneFlyoutContext: typeof ObservabilityAIAssistantMultipaneFlyoutContext;
+  ObservabilityAIAssistantChatServiceContext: typeof ObservabilityAIAssistantChatServiceContext;
+  useObservabilityAIAssistantChatService: typeof useObservabilityAIAssistantChatService;
   useGenAIConnectors: () => UseGenAIConnectorsResult;
+  useChat: typeof useChat;
+  useUserPreferredLanguage: () => UseUserPreferredLanguageResult;
+  getContextualInsightMessages: ({}: { message: string; instructions: string }) => Message[];
+  createScreenContextAction: typeof createScreenContextAction;
 }

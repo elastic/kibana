@@ -15,23 +15,17 @@ import type { MetadataData } from './metadata_summary_list';
 import { Popover } from '../../common/popover';
 
 const columnTitles = {
-  hostIp: i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.metadataHostIpHeading', {
+  hostIp: i18n.translate('xpack.infra.assetDetails.overview.metadataHostIpHeading', {
     defaultMessage: 'Host IP',
   }),
-  hostOsVersion: i18n.translate(
-    'xpack.infra.assetDetailsEmbeddable.overview.metadataHostOsVersionHeading',
-    {
-      defaultMessage: 'Host OS version',
-    }
-  ),
-  cloudProvider: i18n.translate(
-    'xpack.infra.assetDetailsEmbeddable.overview.metadataCloudProviderHeading',
-    {
-      defaultMessage: 'Cloud provider',
-    }
-  ),
+  hostOsVersion: i18n.translate('xpack.infra.assetDetails.overview.metadataHostOsVersionHeading', {
+    defaultMessage: 'Host OS version',
+  }),
+  cloudProvider: i18n.translate('xpack.infra.assetDetails.overview.metadataCloudProviderHeading', {
+    defaultMessage: 'Cloud provider',
+  }),
   operatingSystem: i18n.translate(
-    'xpack.infra.assetDetailsEmbeddable.overview.metadataOperatingSystemHeading',
+    'xpack.infra.assetDetails.overview.metadataOperatingSystemHeading',
     {
       defaultMessage: 'Operating system',
     }

@@ -40,3 +40,5 @@ export const getSLOSummaryTransformId = (sloId: string, sloRevision: number) =>
 
 export const getSLOSummaryPipelineId = (sloId: string, sloRevision: number) =>
   `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;
+
+export const SYNTHETICS_INDEX_PATTERN = 'synthetics-*';

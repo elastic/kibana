@@ -47,7 +47,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/177545
-  registry.when.skip('Trace exists', { config: 'basic', archives: [] }, () => {
+  registry.when('Trace exists', { config: 'basic', archives: [] }, () => {
     let entryTransactionId: string;
     let serviceATraceId: string;
 

@@ -10,9 +10,9 @@ import { ComponentStory } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { SloRulesBadge as Component, Props } from './slo_rules_badge';
+import { BurnRateRuleParams } from '../../../../typings';
 
 export default {
   component: Component,
@@ -32,4 +32,4 @@ WithNoRule.args = { rules: [] };
 export const WithLoadingRule = Template.bind({});
 WithLoadingRule.args = { rules: undefined };
 export const WithRule = Template.bind({});
-WithRule.args = { rules: [{ name: 'rulename' }] as Array<Rule<SloRule>> };
+WithRule.args = { rules: [{ name: 'rulename' }] as Array<Rule<BurnRateRuleParams>> };

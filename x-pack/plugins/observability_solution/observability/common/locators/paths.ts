@@ -27,29 +27,33 @@ export const paths = {
   observability: {
     alerts: `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}`,
     alertDetails: (alertId: string) =>
-      `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}/${encodeURI(alertId)}`,
+      `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}/${encodeURIComponent(alertId)}`,
     rules: `${OBSERVABILITY_BASE_PATH}${RULES_PATH}`,
-    ruleDetails: (ruleId: string) => `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/${encodeURI(ruleId)}`,
+    ruleDetails: (ruleId: string) =>
+      `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/${encodeURIComponent(ruleId)}`,
     slos: `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}`,
     slosWelcome: `${OBSERVABILITY_BASE_PATH}${SLOS_WELCOME_PATH}`,
     slosOutdatedDefinitions: `${OBSERVABILITY_BASE_PATH}${SLOS_OUTDATED_DEFINITIONS_PATH}`,
     sloCreate: `${OBSERVABILITY_BASE_PATH}${SLO_CREATE_PATH}`,
     sloCreateWithEncodedForm: (encodedParams: string) =>
       `${OBSERVABILITY_BASE_PATH}${SLO_CREATE_PATH}?_a=${encodedParams}`,
-    sloEdit: (sloId: string) => `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/edit/${encodeURI(sloId)}`,
+    sloEdit: (sloId: string) =>
+      `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/edit/${encodeURIComponent(sloId)}`,
     sloEditWithEncodedForm: (sloId: string, encodedParams: string) =>
-      `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/edit/${encodeURI(sloId)}?_a=${encodedParams}`,
+      `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/edit/${encodeURIComponent(
+        sloId
+      )}?_a=${encodedParams}`,
     sloDetails: (sloId: string, instanceId?: string) =>
       !!instanceId
-        ? `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/${encodeURI(sloId)}?instanceId=${encodeURI(
-            instanceId
-          )}`
-        : `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/${encodeURI(sloId)}`,
+        ? `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/${encodeURIComponent(
+            sloId
+          )}?instanceId=${encodeURIComponent(instanceId)}`
+        : `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/${encodeURIComponent(sloId)}`,
   },
 };
 
 export const relativePaths = {
   observability: {
-    ruleDetails: (ruleId: string) => `${RULES_PATH}/${encodeURI(ruleId)}`,
+    ruleDetails: (ruleId: string) => `${RULES_PATH}/${encodeURIComponent(ruleId)}`,
   },
 };

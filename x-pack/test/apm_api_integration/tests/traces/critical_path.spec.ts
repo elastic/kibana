@@ -105,7 +105,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   // FLAKY: https://github.com/elastic/kibana/issues/177542
-  registry.when.skip('Aggregated critical path', { config: 'basic', archives: [] }, () => {
+  registry.when('Aggregated critical path', { config: 'basic', archives: [] }, () => {
     it('builds up the correct tree for a single transaction', async () => {
       const java = apm
         .service({ name: 'java', environment: 'production', agentName: 'java' })

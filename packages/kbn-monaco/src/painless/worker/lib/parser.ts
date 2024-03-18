@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CommonTokenStream, CharStreams } from 'antlr4ts';
-import { painless_parser as PainlessParser, SourceContext } from '../../antlr/painless_parser';
+import { CommonTokenStream, CharStreams } from 'antlr4';
+import { default as PainlessParser, SourceContext } from '../../antlr/painless_parser';
 import { PainlessLexerEnhanced } from './lexer';
 import { EditorError } from '../../../types';
-import { ANTLREErrorListener } from '../../../common/error_listener';
+import { ANTLRErrorListener } from '../../../common/error_listener';
 
 const parse = (
   code: string
@@ -20,7 +20,7 @@ const parse = (
 } => {
   const inputStream = CharStreams.fromString(code);
   const lexer = new PainlessLexerEnhanced(inputStream);
-  const painlessLangErrorListener = new ANTLREErrorListener();
+  const painlessLangErrorListener = new ANTLRErrorListener();
   const tokenStream = new CommonTokenStream(lexer);
   const parser = new PainlessParser(tokenStream);
 

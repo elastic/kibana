@@ -14,17 +14,16 @@ import {
   Metric,
   MetricTrendShape,
   Settings,
+  MetricDatum,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
-import { MetricDatum } from '@elastic/charts/dist/chart_types/metric/specs';
 import { SloOverviewDetails } from '../common/slo_overview_details';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
-import { SloCardBadgesPortal } from '../../../pages/slos/components/card_view/badges_portal';
 import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_card_item_badges';
 import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
 import { useKibana } from '../../../utils/kibana_react';
@@ -48,7 +47,7 @@ const getSloChartData = ({
   sliValue: string;
   sloTarget: string;
   historicalSummary?: HistoricalSummaryResponse[];
-}) => {
+}): MetricDatum => {
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
   return {
@@ -105,8 +104,6 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
     ],
   });
 
-  const containerRef = React.useRef<HTMLDivElement>(null);
-
   const { colors } = useSloCardColor();
   const chartsData: MetricDatum[][] = [[]];
   sloList?.results.forEach((slo) => {
@@ -125,6 +122,10 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
       chartsData.push([]);
     }
 
+    const rules = rulesBySlo?.[slo?.id];
+    const activeAlerts = activeAlertsBySlo.get(slo);
+    const hasGroupBy = Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE);
+
     const data = getSloChartData({
       slo,
       subTitle,
@@ -133,6 +134,15 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
       sloTarget,
       historicalSummary,
     });
+    data.body = (
+      <SloCardItemBadges
+        slo={slo}
+        rules={rules}
+        activeAlerts={activeAlerts}
+        handleCreateRule={() => {}}
+        hasGroupBy={hasGroupBy}
+      />
+    );
     chartsData[chartsData.length - 1].push(data);
   });
 
@@ -148,7 +158,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
 
   return (
     <>
-      <div ref={containerRef} style={{ width: '100%' }}>
+      <div style={{ width: '100%' }}>
         <Chart>
           <Settings
             baseTheme={DARK_THEME}
@@ -163,25 +173,6 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
           />
           <Metric id={`slo-id-instances`} data={chartsData} />
         </Chart>
-        {sloList?.results.map((slo, index) => {
-          const rules = rulesBySlo?.[slo?.id];
-          const activeAlerts = activeAlertsBySlo.get(slo);
-          const hasGroupBy = Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE);
-
-          return (
-            <div key={slo.id + slo.instanceId}>
-              <SloCardBadgesPortal containerRef={containerRef} index={index}>
-                <SloCardItemBadges
-                  slo={slo}
-                  rules={rules}
-                  activeAlerts={activeAlerts}
-                  handleCreateRule={() => {}}
-                  hasGroupBy={hasGroupBy}
-                />
-              </SloCardBadgesPortal>
-            </div>
-          );
-        })}
       </div>
       <SloOverviewDetails slo={selectedSlo} setSelectedSlo={setSelectedSlo} />
     </>

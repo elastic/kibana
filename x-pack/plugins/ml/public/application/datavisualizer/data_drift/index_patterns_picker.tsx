@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { EuiPageBody, EuiPageSection, EuiButton, EuiPanel } from '@elastic/eui';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';

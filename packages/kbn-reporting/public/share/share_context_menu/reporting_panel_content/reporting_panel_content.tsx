@@ -7,7 +7,6 @@
  */
 
 import React, { Component, ReactElement } from 'react';
-import url from 'url';
 
 import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
@@ -88,7 +87,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
       props.reportType,
       this.props.apiClient.getDecoratedJobParams(this.props.getJobParams(true))
     );
-    return url.resolve(window.location.href, relativePath);
+    return new URL(relativePath, window.location.href).toString();
   };
 
   public componentDidUpdate(_prevProps: Props, prevState: State) {

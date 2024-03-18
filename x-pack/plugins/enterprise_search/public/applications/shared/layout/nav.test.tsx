@@ -57,12 +57,6 @@ const baseNavItems = [
         items: undefined,
         name: 'Web crawlers',
       },
-      {
-        href: '/app/enterprise_search/content/settings',
-        id: 'settings',
-        items: undefined,
-        name: 'Settings',
-      },
     ],
     name: 'Content',
   },
@@ -366,15 +360,12 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
 
   it('returns basic nav all params are empty', () => {
     const navItems = useEnterpriseSearchAnalyticsNav();
-    // filter out settings item because we're setting hasDefaultIngestPipeline to false
     expect(navItems).toEqual(
       baseNavItems.map((item) =>
         item.id === 'content'
           ? {
               ...item,
-              items: item.items?.filter(
-                (contentItem: { id: string }) => contentItem.id !== 'settings'
-              ),
+              items: item.items,
             }
           : item
       )
@@ -382,16 +373,13 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
   });
 
   it('returns basic nav if only name provided', () => {
-    // filter out settings item because we're setting hasDefaultIngestPipeline to false
     const navItems = useEnterpriseSearchAnalyticsNav('my-test-collection');
     expect(navItems).toEqual(
       baseNavItems.map((item) =>
         item.id === 'content'
           ? {
               ...item,
-              items: item.items?.filter(
-                (contentItem: { id: string }) => contentItem.id !== 'settings'
-              ),
+              items: item.items,
             }
           : item
       )
