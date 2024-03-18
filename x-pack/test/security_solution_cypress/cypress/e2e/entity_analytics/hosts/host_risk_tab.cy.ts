@@ -39,7 +39,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_hosts');
+      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
     });
 
     it('renders the table', () => {
@@ -86,7 +86,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_scores_new');
+      cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
     });
 
     it('renders the table', () => {
