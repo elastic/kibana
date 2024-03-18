@@ -165,7 +165,7 @@ export class EmbeddableEnhancedPlugin
       storage,
       uiActions: this.uiActions!,
     });
-    this.startDynamicActions({ ...api, enhancements: { dynamicActions } });
+    this.startDynamicActions(dynamicActions);
 
     return {
       dynamicActionsApi: { ...api, enhancements: { dynamicActions } },
@@ -222,7 +222,7 @@ export class EmbeddableEnhancedPlugin
       uiActions: this.uiActions!,
     });
 
-    const stop = this.startDynamicActions({ ...api, enhancements: { dynamicActions } });
+    const stop = this.startDynamicActions(dynamicActions);
     embeddable.getInput$().subscribe({
       next: () => {
         storage.reload$.next();
@@ -241,20 +241,20 @@ export class EmbeddableEnhancedPlugin
     return enhancedEmbeddable;
   }
 
-  private startDynamicActions(api: HasDynamicActions) {
-    api.enhancements.dynamicActions.start().catch((error) => {
+  private startDynamicActions(dynamicActions: DynamicActionManager) {
+    dynamicActions.start().catch((error) => {
       /* eslint-disable no-console */
 
-      console.log('Failed to start embeddable dynamic actions', api);
+      console.log('Failed to start embeddable dynamic actions', dynamicActions, error);
       console.error(error);
       /* eslint-enable */
     });
 
     const stop = () => {
-      api.enhancements.dynamicActions.stop().catch((error) => {
+      dynamicActions.stop().catch((error) => {
         /* eslint-disable no-console */
 
-        console.log('Failed to stop embeddable dynamic actions', api);
+        console.log('Failed to stop embeddable dynamic actions', dynamicActions);
         console.error(error);
         /* eslint-enable */
       });

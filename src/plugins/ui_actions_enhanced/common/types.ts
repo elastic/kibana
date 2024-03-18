@@ -26,5 +26,5 @@ export type SerializedEvent = {
 };
 
 export type DynamicActionsState = {
-  events: SerializedEvent[];
+  events?: SerializedEvent[];
 };

@@ -105,7 +105,7 @@ export class ApiActionStorage extends AbstractActionStorage {
 
   private getEventsFromEmbeddable() {
     const dynamicActionsState = this.api.dynamicActionsState$.getValue();
-    const events = dynamicActionsState?.dynamicActions.events ?? [];
+    const events = dynamicActionsState?.dynamicActions?.events ?? [];
     return this.migrate(events);
   }
 

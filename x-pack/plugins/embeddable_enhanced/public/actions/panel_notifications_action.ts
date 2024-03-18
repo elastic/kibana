@@ -54,7 +54,7 @@ export class PanelNotificationsAction implements ActionDefinition<EmbeddableApiC
 
   private getEventCount({ embeddable }: EmbeddableApiContext): number {
     return isApiCompatible(embeddable)
-      ? (embeddable.dynamicActionsState$.getValue()?.dynamicActions.events ?? []).length
+      ? (embeddable.dynamicActionsState$.getValue()?.dynamicActions?.events ?? []).length
       : 0;
   }
 
