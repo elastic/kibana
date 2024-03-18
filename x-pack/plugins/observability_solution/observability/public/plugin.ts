@@ -391,24 +391,34 @@ export class Plugin
               // properties used by the deepLinks.
               //
               // See https://github.com/elastic/kibana/issues/103325.
-              const otherLinks: NavigationEntry[] = deepLinks
-                .filter((link) => (link.visibleIn ?? []).length > 0)
+              const otherLinks = deepLinks.filter((link) => (link.visibleIn ?? []).length > 0);
+              const alertsLink: NavigationEntry[] = otherLinks
+                .filter((link) => link.id === 'alerts')
                 .map((link) => ({
                   app: observabilityAppId,
                   label: link.title,
                   path: link.path ?? '',
                 }));
 
-              // After migrating to SLO plugin, SLOs navigation entry was removed from deepLinks
-              // But we still want to keep the same order in the navigation Alerts, SLOs, Cases
-              const alertsLink = otherLinks[0];
-              const casesLink = otherLinks[1];
+              const casesLink: NavigationEntry[] = otherLinks
+                .filter((link) => link.id === 'cases')
+                .map((link) => ({
+                  app: observabilityAppId,
+                  label: link.title,
+                  path: link.path ?? '',
+                }));
 
               return [
                 {
                   label: '',
                   sortKey: 100,
-                  entries: [...overviewLink, alertsLink, ...sloLink, casesLink, ...aiAssistantLink],
+                  entries: [
+                    ...overviewLink,
+                    ...alertsLink,
+                    ...sloLink,
+                    ...casesLink,
+                    ...aiAssistantLink,
+                  ],
                 },
               ];
             })
