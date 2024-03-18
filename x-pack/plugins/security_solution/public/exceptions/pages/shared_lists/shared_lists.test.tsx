@@ -44,6 +44,7 @@ jest.mock('../../../detections/containers/detection_engine/lists/use_lists_confi
 }));
 
 // FLAKY: https://github.com/elastic/kibana/issues/177670
+// FLAKY: https://github.com/elastic/kibana/issues/177671
 describe.skip('SharedLists', () => {
   const mockHistory = generateHistoryMock();
   const exceptionList1 = getExceptionListSchemaMock();
