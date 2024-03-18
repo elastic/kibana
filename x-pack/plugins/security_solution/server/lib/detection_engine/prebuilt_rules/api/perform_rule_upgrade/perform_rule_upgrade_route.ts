@@ -30,6 +30,7 @@ import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
+import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 
 export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -38,6 +39,9 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
       path: PERFORM_RULE_UPGRADE_URL,
       options: {
         tags: ['access:securitySolution'],
+        timeout: {
+          idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
+        },
       },
     })
     .addVersion(

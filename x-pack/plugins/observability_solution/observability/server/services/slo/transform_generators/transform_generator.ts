@@ -14,7 +14,7 @@ import { TransformSettings } from '../../../assets/transform_templates/slo_trans
 import { SLO } from '../../../domain/models';
 
 export abstract class TransformGenerator {
-  public abstract getTransformParams(slo: SLO): TransformPutTransformRequest;
+  public abstract getTransformParams(slo: SLO, spaceId: string): TransformPutTransformRequest;
 
   public buildCommonRuntimeMappings(slo: SLO): MappingRuntimeFields {
     const groupings = [slo.groupBy].flat().filter((value) => !!value);

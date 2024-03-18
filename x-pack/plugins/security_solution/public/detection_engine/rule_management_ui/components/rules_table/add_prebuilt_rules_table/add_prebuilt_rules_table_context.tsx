@@ -24,6 +24,7 @@ import { useRuleDetailsFlyout } from '../../../../rule_management/components/rul
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleDetailsFlyout } from '../../../../rule_management/components/rule_details/rule_details_flyout';
 import * as i18n from './translations';
+import { isUpgradeReviewRequestEnabled } from './add_prebuilt_rules_utils';
 
 export interface AddPrebuiltRulesTableState {
   /**
@@ -125,11 +126,11 @@ export const AddPrebuiltRulesTableContextProvider = ({
     refetchInterval: 60000, // Refetch available rules for installation every minute
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
     // Fetch rules to install only after background installation of security_detection_rules package is complete
-    enabled: Boolean(
-      !isUpgradingSecurityPackages &&
-        prebuiltRulesStatus &&
-        prebuiltRulesStatus.num_prebuilt_rules_total_in_package > 0
-    ),
+    enabled: isUpgradeReviewRequestEnabled({
+      canUserCRUD,
+      isUpgradingSecurityPackages,
+      prebuiltRulesStatus,
+    }),
   });
 
   const { mutateAsync: installAllRulesRequest } = usePerformInstallAllRules();

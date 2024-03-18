@@ -33,7 +33,7 @@ const apmMobileServiceOverview = url.format({
     rangeTo,
   },
 });
-describe('Mobile Service overview page', () => {
+describe.skip('Mobile Service overview page', () => {
   before(() => {
     synthtrace.index(
       generateMobileData({

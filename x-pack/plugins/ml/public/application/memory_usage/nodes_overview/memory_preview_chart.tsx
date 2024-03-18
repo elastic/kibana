@@ -6,14 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import type { SeriesColorAccessor } from '@elastic/charts';
 import {
   Axis,
   BarSeries,
   Chart,
   Position,
   ScaleType,
-  SeriesColorAccessor,
   Settings,
   LineAnnotation,
   AnnotationDomainType,
@@ -22,7 +23,7 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
+import type { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { getMemoryItemColor } from '../memory_item_colors';
 import { useMlKibana } from '../../contexts/kibana';

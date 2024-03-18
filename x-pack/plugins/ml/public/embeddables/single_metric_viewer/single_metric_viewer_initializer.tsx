@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,9 +21,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import type { SingleMetricViewerServices } from '..';
-import { TimeRangeBounds } from '../../application/util/time_buckets';
+import type { TimeRangeBounds } from '../../application/util/time_buckets';
 import { SeriesControls } from '../../application/timeseriesexplorer/components/series_controls';
 import {
   APP_STATE_ACTION,

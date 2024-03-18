@@ -113,7 +113,7 @@ const packageNotInstalledRenderer = ({
     <FullSizeCenteredPage>
       <EuiEmptyPrompt
         data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
-        icon={<EuiImage size="m" margin="m" src={noDataIllustration} alt="no-data-illustration" />}
+        icon={<EuiImage size="m" margin="m" src={noDataIllustration} alt="" role="presentation" />}
         title={
           <h2>
             <FormattedMessage

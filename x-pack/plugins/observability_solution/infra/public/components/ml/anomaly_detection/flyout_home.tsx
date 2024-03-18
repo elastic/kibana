@@ -99,8 +99,9 @@ export const FlyoutHome = (props: Props) => {
   });
 
   // Used for prefilling the feedback form (if both types are enabled do not prefill)
+  // In case the host type is the only option (if props.hideJobType is true) - prefill 'host'
   const mlJobTypeByNode =
-    hostJobSummaries.length > 0 && k8sJobSummaries.length === 0
+    props.hideJobType || (hostJobSummaries.length > 0 && k8sJobSummaries.length === 0)
       ? 'host'
       : hostJobSummaries.length === 0 && k8sJobSummaries.length > 0
       ? 'pod'

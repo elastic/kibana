@@ -9,16 +9,9 @@ import React from 'react';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { ActionMenuContent } from './action_menu_content';
 
-export const ActionMenu = ({
-  appMountParameters,
-  observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
-}: {
-  appMountParameters: AppMountParameters;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
-}) => (
+export const ActionMenu = ({ appMountParameters }: { appMountParameters: AppMountParameters }) => (
   <HeaderMenuPortal
     setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
     theme$={appMountParameters.theme$}
@@ -26,9 +19,6 @@ export const ActionMenu = ({
     <EuiFlexGroup responsive={false} gutterSize="s">
       <EuiFlexItem>
         <ActionMenuContent />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {ObservabilityAIAssistantActionMenuItem ? <ObservabilityAIAssistantActionMenuItem /> : null}
       </EuiFlexItem>
     </EuiFlexGroup>
   </HeaderMenuPortal>

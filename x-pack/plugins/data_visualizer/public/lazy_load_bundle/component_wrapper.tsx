@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Suspense } from 'react';
+import type { FC } from 'react';
+import React, { Suspense } from 'react';
 import { EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
 import type { DataDriftDetectionAppStateProps } from '../application/data_drift/data_drift_app_state';
 

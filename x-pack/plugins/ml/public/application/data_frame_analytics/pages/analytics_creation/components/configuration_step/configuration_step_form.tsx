@@ -5,22 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiBadge,
-  EuiComboBoxOptionOption,
-  EuiFormRow,
-  EuiPanel,
-  EuiRange,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import type { FC } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiBadge, EuiFormRow, EuiPanel, EuiRange, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce, cloneDeep } from 'lodash';
 
-import { Query } from '@kbn/data-plugin/common/query';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
+import type { Query } from '@kbn/data-plugin/common/query';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import {
   getCombinedRuntimeMappings,
   isRuntimeMappings,
@@ -40,17 +34,15 @@ import {
   EuiComboBoxWithFieldStats,
   FieldStatsFlyoutProvider,
 } from '../../../../../components/field_stats_flyout';
-import { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
+import type { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useDataSource } from '../../../../../contexts/ml';
 
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
-import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import type { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { Messages } from '../shared';
-import {
-  DEFAULT_MODEL_MEMORY_LIMIT,
-  State,
-} from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import type { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { handleExplainErrorMessage, shouldAddAsDepVarOption } from './form_options_validation';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
@@ -62,12 +54,13 @@ import { AnalysisFieldsTable } from './analysis_fields_table';
 import { fetchExplainData } from '../shared';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
-import { useSavedSearch, SavedSearchQuery } from './use_saved_search';
-import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
+import type { SavedSearchQuery } from './use_saved_search';
+import { useSavedSearch } from './use_saved_search';
+import type { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
 
 import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
 import { RuntimeMappings } from '../runtime_mappings';
-import { ConfigurationStepProps } from './configuration_step';
+import type { ConfigurationStepProps } from './configuration_step';
 import { IndexPermissionsCallout } from '../index_permissions_callout';
 
 const runtimeMappingKey = 'runtime_mapping';

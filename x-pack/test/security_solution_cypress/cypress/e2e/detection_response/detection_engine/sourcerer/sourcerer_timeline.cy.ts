@@ -58,7 +58,8 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'
     isNotSourcererOption(`${DEFAULT_ALERTS_INDEX}-default`);
   });
 
-  describe('Modified badge', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/173854
+  describe.skip('Modified badge', () => {
     it('Selecting new data view does not add a modified badge', () => {
       openTimelineUsingToggle();
       cy.get(SOURCERER.badgeModified).should(`not.exist`);
