@@ -155,20 +155,13 @@ export function useFetchAgentsData() {
               kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
               perPage: SO_SEARCH_LIMIT,
               full: false,
-            }).catch(() => {
-              // TODO fix that
-              return {
-                error: undefined,
-                data: {
-                  items: [],
-                },
-              };
             }),
             sendGetAgentTags({
               kuery: kuery && kuery !== '' ? kuery : undefined,
               showInactive,
             }),
           ]);
+
           isLoadingVar.current = false;
           // Return if a newer request has been triggered
           if (currentRequestRef.current !== currentRequest) {
