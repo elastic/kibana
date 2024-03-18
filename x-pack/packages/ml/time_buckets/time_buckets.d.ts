@@ -120,11 +120,6 @@ export declare class TimeBuckets {
    */
   public getScaledDateFormat(): string;
 }
-/**
- * Retrieves a TimeBuckets instance from cache.
- * @returns An instance of TimeBuckets.
- */
-export declare function getTimeBucketsFromCache(): InstanceType<typeof TimeBuckets>;
 
 /**
  * Adjusts the given time range bounds to align with the specified interval.
