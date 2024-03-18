@@ -5,66 +5,49 @@
  * 2.0.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   DynamicActionsState,
   UiActionsEnhancedAbstractActionStorage as AbstractActionStorage,
   UiActionsEnhancedSerializedEvent as SerializedEvent,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-  VALUE_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
+import { HasDynamicActions } from './interfaces/has_dynamic_actions';
 
-export interface EmbeddableWithDynamicActionsInput extends EmbeddableInput {
-  enhancements?: {
-    dynamicActions: DynamicActionsState;
-    [key: string]: SerializableRecord;
-  };
-}
-
-export type EmbeddableWithDynamicActions<
-  I extends EmbeddableWithDynamicActionsInput = EmbeddableWithDynamicActionsInput,
-  O extends EmbeddableOutput = EmbeddableOutput
-> = IEmbeddable<I, O>;
-
-export class EmbeddableActionStorage extends AbstractActionStorage {
-  constructor(private readonly embbeddable: EmbeddableWithDynamicActions) {
+export type DynamicActionStorageApi = Pick<
+  HasDynamicActions,
+  'setDynamicActions' | 'dynamicActionsState$'
+>;
+export class ApiActionStorage extends AbstractActionStorage {
+  constructor(
+    private id: string,
+    private getPanelTitle: () => string | undefined,
+    private readonly api: DynamicActionStorageApi
+  ) {
     super();
   }
 
-  private put(input: EmbeddableWithDynamicActionsInput, events: SerializedEvent[]) {
-    this.embbeddable.updateInput({
-      enhancements: {
-        ...(input.enhancements || {}),
-        dynamicActions: {
-          ...(input.enhancements?.dynamicActions || {}),
-          events,
-        },
-      },
-    });
+  private put(dynamicActionsState: DynamicActionsState) {
+    this.api.setDynamicActions({ dynamicActions: dynamicActionsState });
   }
 
   public async create(event: SerializedEvent) {
-    const input = this.embbeddable.getInput();
     const events = this.getEventsFromEmbeddable();
     const exists = !!events.find(({ eventId }) => eventId === event.eventId);
 
     if (exists) {
       throw new Error(
         `[EEXIST]: Event with [eventId = ${event.eventId}] already exists on ` +
-          `[embeddable.id = ${input.id}, embeddable.title = ${input.title}].`
+          `[embeddable.id = ${this.id}, embeddable.title = ${this.getPanelTitle()}].`
       );
     }
 
-    this.put(input, [...events, event]);
+    this.put({
+      events: [...events, event],
+    });
   }
 
   public async update(event: SerializedEvent) {
-    const input = this.embbeddable.getInput();
+    const dynamicActionsState = this.api.dynamicActionsState$.getValue();
     const events = this.getEventsFromEmbeddable();
     const index = events.findIndex(({ eventId }) => eventId === event.eventId);
 
@@ -72,15 +55,19 @@ export class EmbeddableActionStorage extends AbstractActionStorage {
       throw new Error(
         `[ENOENT]: Event with [eventId = ${event.eventId}] could not be ` +
           `updated as it does not exist in ` +
-          `[embeddable.id = ${input.id}, embeddable.title = ${input.title}].`
+          `[embeddable.id = ${this.id}, embeddable.title = ${this.getPanelTitle()}].`
       );
     }
 
-    this.put(input, [...events.slice(0, index), event, ...events.slice(index + 1)]);
+    this.put({
+      ...dynamicActionsState,
+      events: [...events.slice(0, index), event, ...events.slice(index + 1)],
+    });
   }
 
   public async remove(eventId: string) {
-    const input = this.embbeddable.getInput();
+    const dynamicActionsState = this.api.dynamicActionsState$.getValue();
+
     const events = this.getEventsFromEmbeddable();
     const index = events.findIndex((event) => eventId === event.eventId);
 
@@ -88,22 +75,24 @@ export class EmbeddableActionStorage extends AbstractActionStorage {
       throw new Error(
         `[ENOENT]: Event with [eventId = ${eventId}] could not be ` +
           `removed as it does not exist in ` +
-          `[embeddable.id = ${input.id}, embeddable.title = ${input.title}].`
+          `[embeddable.id = ${this.id}, embeddable.title = ${this.getPanelTitle()}].`
       );
     }
 
-    this.put(input, [...events.slice(0, index), ...events.slice(index + 1)]);
+    this.put({
+      ...dynamicActionsState,
+      events: [...events.slice(0, index), ...events.slice(index + 1)],
+    });
   }
 
   public async read(eventId: string): Promise<SerializedEvent> {
-    const input = this.embbeddable.getInput();
     const events = this.getEventsFromEmbeddable();
     const event = events.find((ev) => eventId === ev.eventId);
 
     if (!event) {
       throw new Error(
         `[ENOENT]: Event with [eventId = ${eventId}] could not be found in ` +
-          `[embeddable.id = ${input.id}, embeddable.title = ${input.title}].`
+          `[embeddable.id = ${this.id}, embeddable.title = ${this.getPanelTitle()}].`
       );
     }
 
@@ -115,8 +104,8 @@ export class EmbeddableActionStorage extends AbstractActionStorage {
   }
 
   private getEventsFromEmbeddable() {
-    const input = this.embbeddable.getInput();
-    const events = input.enhancements?.dynamicActions?.events || [];
+    const dynamicActionsState = this.api.dynamicActionsState$.getValue();
+    const events = dynamicActionsState?.dynamicActions.events ?? [];
     return this.migrate(events);
   }
 

@@ -11,7 +11,7 @@ import { EmbeddableEnhancedPlugin } from './plugin';
 export type {
   SetupContract as EmbeddableEnhancedSetupContract,
   SetupDependencies as EmbeddableEnhancedSetupDependencies,
-  StartContract as EmbeddableEnhancedStartContract,
+  EmbeddableEnhancedPluginStart as EmbeddableEnhancedPluginStart,
   StartDependencies as EmbeddableEnhancedStartDependencies,
 } from './plugin';
 
