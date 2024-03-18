@@ -1854,6 +1854,10 @@ Once done editing the rule, the user clicks on the "Save Changes" button, which 
 - Field validation should continue to work as it does for custom rules.
 - No fields should return a validation error for the values that come from the `security_detection_engine` package prebuilt rules. This means that a user should be able to successfully save the prebuilt rule with no changes. See **List of issues to fix** below.
 
+#### Via Rules Table page
+
+- The Rules Table's filter should be updated so that rules can be fitlered according to their status as **custom**, **Elastic prebuilt** and **customized Elastic prebuilt**. Notice that **customized Elastic prebuilt** will be a subset of **Elastic prebuilt**.
+
 #### Via Bulk Actions
 
 Custom rules can currently be updated via the Rule Table's **Bulk Actions**, which uses the **Bulk Actions** - `POST /rules/_bulk_action` endpoint.
@@ -1871,7 +1875,7 @@ As explained above, the UI validates that the five actions listed above are only
 **Expected behaviour for customizing prebuilt rules**
 
 - The Bulk Actions UI should now allow users to edit prebuilt rules.
-- All bulk actions actions listed above should now be applicable to prebuilt rules (This means that the changes in the API for the validation done in `dryRun` mode should not remove the rules from the payload anymore).
+- All bulk actions listed above should now be applicable to prebuilt rules (This means that the changes in the API for the validation done in `dryRun` mode should not remove the rules from the payload anymore).
 
 > The `dryRun` mode request will still be necessary since we perform other checks that can still prevent prebuilt rules from being edited. For example, Machine Learning and ES|QL rules cannot be bulk edited to add or delete index patterns, since they don't have that field in their schema.
 
@@ -1884,7 +1888,9 @@ The Rules Details page allows the user to modify the rule in two ways:
 - setting rule snoozing
   - uses `POST /alerting/rule/{rule_id}/_snooze` endpoint
 
-Both of these actions are already possible for prebuilt rules, **so no changes are necessary here.**
+Both of these actions are already possible for prebuilt rules.
+
+- The Rule Details page should include a text field that lets the user know if the current rules is **custom**, **Elastic prebuilt** and **customized Elastic prebuilt**. 
 
 #### Via the Shared Exception Lists page
 
@@ -1914,12 +1920,9 @@ All of these actions are currently applicable for both prebuilt security rules a
 
 This means that **no changes will be needed in this page.**
 
-## List of things to fix (create tickets)
+## Design Discussion link
 
-1. Validation of EQL queries incorrectly fails: valid EQL queries that come with Prebuilt Rules are rejected by the EQL validator when trying to edit a rule. See [link](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/schema.tsx#L186).
-2. Custom Query field overflows the viewport and cannot be completely visualized/edited when the query is too long, i.e. occupies too many lines. This is often the case from Prebuilt Rules. The editable field also does not allow scrolling. See example:
-   ![](2023-12-01-14-13-07.png)
-
+For an up-to-date discussion on the design changes needed for Milestone 3, please see [this ticket](https://github.com/elastic/kibana/issues/178211).
 
 
 ## Upgrading Prebuilt Rules
@@ -2833,19 +2836,6 @@ Rules whose diffing algorithm resulted in a `CONFLICT` need to be manually resol
 > See [designs](https://www.figma.com/file/gLHm8LpTtSkAUQHrkG3RHU/%5B8.7%5D-%5BRules%5D-Rule-Immutability%2FCustomization?type=design&mode=design&t=LkauhLzUKUatF6cL-0#712870904).
 
 ## Other changes to UX/UI
-
-### Rules Table page
-
-- The Rules Table's filter should be updated so that rules can be fitlered according to their status as **custom**, **Elastic prebuilt** and **customized Elastic prebuilt**. Notice that **customized Elastic prebuilt** will be a subset of **Elastic prebuilt**.
-
-### Rule Details page
-
-- The Rule Details page shouls include some kind of indication or text field that lets the user know if the current rules is **custom**, **Elastic prebuilt** and **customized Elastic prebuilt**. 
-
-## Design Discussion link
-
-For an up-to-date discussion on the design changes needed for Milestone 3, please see [this ticket](https://github.com/elastic/kibana/issues/178211).
-
 
 
 
