@@ -799,14 +799,13 @@ Firstly, when bulk editing rules, the migration should be carried out for the fo
   - Bulk adding or deleting tags
   - Updating rule schedules
   - Adding rules actions
-  - Duplicating a rule (with the migration applied only to the new rule)
 
 Out of the actions mentioned above, the only use cases that should possibly result in the migration having a result of `rule_source.isCustomized = true` are the first three:
   - Bulk adding or deleting index patterns
   - Bulk adding or deleting tags
   - Updating rule schedules
 
-That means that updating a rule's actions or duplicating a rule should not be considered a customization of a prebuilt rule.
+That means that updating a rule's actions should not be considered a customization of a prebuilt rule.
 
 Secondly, in contrast with other endpoints, the migration for bulk editing rules needs to be carried within the Alerting Framework's `RuleClient` since we need to migrate the rule's `rule_source` and `immutable` parameters before the `RuleClient` does the saving of the rule into Elasticsearch.
 
@@ -963,10 +962,6 @@ The calculation of the value for the `rule_source.is_customized` field for the u
 
 Again, this endpoint suffers from tightly coupled logic explained in [`Problem with tightly coupled logic in our endpoints`](#problem-with-tightly-coupled-logic-in-our-endpoints): it uses the `upgradePrebuiltRules` method to actually upgrade the rules, but this method either patches existing rules -for the normal case-, or deletes an existing rule and recreates it if the rule underwent a type change, using the `patchRules` and `createRules` methods respectively. We should decouple that logic by introducing a new CRUD method with a specific use case for upgrading prebuilt rule.
 
-The changes in the `upgradePrebuiltRules` method need to take into account both paths. In the endpoint logic handler, when calculating if the rule was customized by the user, we will create a boolean called `isRuleCustomizedDuringUpgrade`, that can be passed as an argument to `upgradePrebuiltRules`:
-
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_route.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_route.ts)_
-
 ### Rule monitoring endpoints
 
 - [**Detection Engine Health: Get Cluster Health** - `GET or POST /detection_engine/health/_cluster` (internal):](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts)
@@ -1038,13 +1033,13 @@ The user will now be able to import both custom and prebuilt rules (including an
 
 We want to handle the case of importing both migrated and non-migrated rules via an `ndjson` file.
 
-If a user imports a prebuilt rule, Kibana should continue to track the rule asset from the `security_detection_engine` package if the `rule_id` matches. This means that a user will be able to update a previously exported prebuilt rule, visualize any diffs on any customized fields, and continue to receive updates on the rule.
+If a user imports a prebuilt rule, Kibana should continue to track the rule asset from the `security_detection_engine` package if the `rule_id` matches. This means that a user will be able to upgrade a previously imported prebuilt rule, visualize any diffs on any customized fields, and continue to receive updates on the rule. 
 
 To allow for importing of Elastic prebuilt rules, we will **not rely** in the `rule_source` or the legacy `immutable` fields (which are not part of the import endpoint parameters), but we will rather **calculate them dynamically based on the `rule_id` and `version` request parameters**.
 
 The logic to importing a rule is as follows:
 
- - First, read the import endpoint request parameters `rule_id` and `version`. These two are the two required parameters in the endpoint, while all other rule fields are optional.
+ - First, read the import endpoint request parameters `rule_id` and `version`. These two are two required parameters in the endpoint.
 
 - Secondly, check that the `security_detection_engine` Fleet package is installed and install it if it isn't. We will need the package to be installed to check if a rule that is being imported is an Elastic prebuilt rule.
 
@@ -1053,7 +1048,7 @@ The logic to importing a rule is as follows:
 - **If a matching `rule_id` and `version` is found**, that means that the rule is an Elastic prebuilt rule, and we should therefore dynamically calculate the rule's `rule_source` field and its subfields:
   - `type`: should be always `external` since a matching external `security-rule` was found.
   - `source_updated_at`: can be retrieved from the corresponding `security-rule` asset.
-  - `is_customized`: should be calculated based on the `security-rule` asset's field and the field rules that were part of the import request parameters. If any of them are different, i.e. have diverged from the base version, `is_customized` should be true.
+  - `is_customized`: should be calculated based on the differences between the `security-rule` asset's fields and the rule fields from the import request. If any of them are different, i.e. have diverged from the base version, `is_customized` should be true. 
 
 - Finally, using the import payload, plus the rule's `security-rule` asset fields and the calculated `rule_source` fields, create the rule, or update it if already exists in Kibana.
 
