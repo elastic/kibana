@@ -22,7 +22,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { ChatCompletionChunkEvent } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/emit_with_concatenated_message';
-import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/server/service/util/create_function_response_message';
+import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
 import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
 
@@ -352,11 +352,16 @@ export function registerQueryFunction({
           ],
           connectorId,
           signal,
+          functions: functions.getActions(),
         }
       );
 
       return esqlResponse$.pipe(
         emitWithConcatenatedMessage((msg) => {
+          if (msg.message.function_call.name) {
+            return msg;
+          }
+
           const esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger).match(
             /```esql([\s\S]*?)```/
           )?.[1];
