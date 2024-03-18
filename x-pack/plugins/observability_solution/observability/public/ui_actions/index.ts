@@ -18,7 +18,7 @@ export function registerSloAlertsUiActions(
   // Initialize actions
   const editSloAlertsPanelAction = createEditSloAlertsPanelAction(core.getStartServices);
   // Register actions
-  uiActions.registerAction(editSloAlertsPanelAction);
+  uiActions.registerAction(editSloAlertsPanelAction); // TODO fix type
   // Assign and register triggers
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, editSloAlertsPanelAction.id);
 }
