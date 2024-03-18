@@ -125,6 +125,10 @@ export const calculateAuthz = ({
   const writeIntegrationPolicies = subfeatureEnabled
     ? (fleet.agentPolicies?.all && integrations.all) ?? false
     : ((fleet.all || fleet.agentPolicies?.all) ?? false) && integrations.all;
+  const readIntegrationPolicies = subfeatureEnabled
+    ? (fleet.agentPolicies?.read && (integrations.all || integrations.read)) ?? false
+    : ((fleet.all || fleet.read || fleet.agentPolicies?.read) ?? false) &&
+      (integrations.all || integrations.read);
 
   return {
     fleet: fleetAuthz,
@@ -139,9 +143,7 @@ export const calculateAuthz = ({
       readPackageSettings: fleet.all && integrations.all,
       writePackageSettings: fleet.all && integrations.all,
 
-      readIntegrationPolicies:
-        ((fleet.all || fleet.read || fleet.agentPolicies?.read) ?? false) &&
-        (integrations.all || integrations.read),
+      readIntegrationPolicies,
       writeIntegrationPolicies,
     },
   };
