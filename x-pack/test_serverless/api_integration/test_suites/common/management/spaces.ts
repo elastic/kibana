@@ -19,7 +19,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('spaces', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+      // admin is the only predefined role that will work for all 3 solutions
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       commonRequestHeader = svlCommonApi.getCommonRequestHeader();
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
     });
