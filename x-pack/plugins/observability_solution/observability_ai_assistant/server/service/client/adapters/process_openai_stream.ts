@@ -6,16 +6,24 @@
  */
 import { encode } from 'gpt-tokenizer';
 import { first, sum } from 'lodash';
+import OpenAI from 'openai';
 import { filter, map, Observable, tap } from 'rxjs';
 import { v4 } from 'uuid';
+import { TokenCountEvent } from '../../../../common/conversation_complete';
 import {
-  type ChatCompletionChunkEvent,
+  ChatCompletionChunkEvent,
   createInternalServerError,
   createTokenLimitReachedError,
   StreamingChatResponseEventType,
-  TokenCountEvent,
-} from '../../../../common/conversation_complete';
-import type { CreateChatCompletionResponseChunk } from '../../../../common/types';
+} from '../../../../common';
+
+export type CreateChatCompletionResponseChunk = Omit<OpenAI.ChatCompletionChunk, 'choices'> & {
+  choices: Array<
+    Omit<OpenAI.ChatCompletionChunk.Choice, 'message'> & {
+      delta: { content?: string; function_call?: { name?: string; arguments?: string } };
+    }
+  >;
+};
 
 export function processOpenAiStream(promptTokenCount: number) {
   return (source: Observable<string>): Observable<ChatCompletionChunkEvent | TokenCountEvent> => {
@@ -45,7 +53,6 @@ export function processOpenAiStream(promptTokenCount: number) {
           if ('error' in line) {
             throw createInternalServerError(line.error.message);
           }
-
           if (
             'choices' in line &&
             line.choices.length &&
