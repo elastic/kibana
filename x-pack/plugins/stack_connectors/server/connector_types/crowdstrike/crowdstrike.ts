@@ -9,39 +9,39 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type {
-  SentinelOneConfig,
-  SentinelOneSecrets,
-  SentinelOneGetAgentsResponse,
-  SentinelOneGetAgentsParams,
-  SentinelOneBaseApiResponse,
-  SentinelOneIsolateHostParams,
+  CrowdstrikeConfig,
+  CrowdstrikeSecrets,
+  CrowdstrikeGetAgentsResponse,
+  CrowdstrikeGetAgentsParams,
+  CrowdstrikeBaseApiResponse,
+  CrowdstrikeIsolateHostParams,
 } from '../../../common/crowdstrike/types';
 import {
-  SentinelOneGetAgentsResponseSchema,
-  SentinelOneIsolateHostResponseSchema,
-  SentinelOneIsolateHostParamsSchema,
-  SentinelOneGetAgentsParamsSchema,
+  CrowdstrikeGetAgentsResponseSchema,
+  CrowdstrikeIsolateHostResponseSchema,
+  CrowdstrikeIsolateHostParamsSchema,
+  CrowdstrikeGetAgentsParamsSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 
 export const API_MAX_RESULTS = 1000;
-export const API_PATH = '/web/api/v2.1';
+export const API_PATH = '/api.crowdstrike.com/';
 
 export class CrowdstrikeConnector extends SubActionConnector<
-  SentinelOneConfig,
-  SentinelOneSecrets
+  CrowdstrikeConfig,
+  CrowdstrikeSecrets
 > {
   private urls: {
     agents: string;
     hostAction: string;
   };
 
-  constructor(params: ServiceParams<SentinelOneConfig, SentinelOneSecrets>) {
+  constructor(params: ServiceParams<CrowdstrikeConfig, CrowdstrikeSecrets>) {
     super(params);
 
     this.urls = {
-      hostAction: `${this.config.url}${API_PATH}/agents/actions/disconnect`,
-      agents: `${this.config.url}${API_PATH}/agents`,
+      hostAction: `${this.config.url}${API_PATH}/devices/entities/devices-actions/v2`,
+      agents: `${this.config.url}${API_PATH}/devices/entities/devices/v1 `,
     };
 
     this.registerSubActions();
@@ -51,22 +51,22 @@ export class CrowdstrikeConnector extends SubActionConnector<
     this.registerSubAction({
       name: SUB_ACTION.GET_AGENTS,
       method: 'getAgents',
-      schema: SentinelOneGetAgentsParamsSchema,
+      schema: CrowdstrikeGetAgentsParamsSchema,
     });
     this.registerSubAction({
       name: SUB_ACTION.GET_AGENT_DETAILS,
-      method: 'getAgents',
-      schema: SentinelOneGetAgentsParamsSchema,
+      method: 'getAgentDetails',
+      schema: CrowdstrikeGetAgentsParamsSchema,
     });
 
     this.registerSubAction({
       name: SUB_ACTION.HOST_ACTIONS,
       method: 'hostActions',
-      schema: SentinelOneIsolateHostParamsSchema,
+      schema: CrowdstrikeIsolateHostParamsSchema,
     });
   }
 
-  public async executeHostActions({ alertIds, ...payload }: SentinelOneIsolateHostParams) {
+  public async executeHostActions({ alertIds, ...payload }: CrowdstrikeIsolateHostParams) {
     const response = await this.getAgents(payload);
 
     if (response.data.length === 0) {
@@ -91,23 +91,23 @@ export class CrowdstrikeConnector extends SubActionConnector<
           ids: agentId,
         },
       },
-      responseSchema: SentinelOneIsolateHostResponseSchema,
+      responseSchema: CrowdstrikeIsolateHostResponseSchema,
     });
   }
 
   public async getAgents(
-    payload: SentinelOneGetAgentsParams
-  ): Promise<SentinelOneGetAgentsResponse> {
+    payload: CrowdstrikeGetAgentsParams
+  ): Promise<CrowdstrikeGetAgentsResponse> {
     return this.crowdstrikeApiRequest({
       url: this.urls.agents,
       params: {
         ...payload,
       },
-      responseSchema: SentinelOneGetAgentsResponseSchema,
+      responseSchema: CrowdstrikeGetAgentsResponseSchema,
     });
   }
 
-  private async crowdstrikeApiRequest<R extends SentinelOneBaseApiResponse>(
+  private async crowdstrikeApiRequest<R extends CrowdstrikeBaseApiResponse>(
     req: SubActionRequestParams<R>
   ): Promise<R> {
     const response = await this.request<R>({
