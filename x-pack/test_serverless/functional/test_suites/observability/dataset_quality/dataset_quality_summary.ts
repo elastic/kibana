@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const to = '2024-01-01T12:00:00.000Z';
 
   // Failing: See https://github.com/elastic/kibana/issues/178874
+  // Failing: See https://github.com/elastic/kibana/issues/178884
   describe.skip('Dataset quality summary', () => {
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
