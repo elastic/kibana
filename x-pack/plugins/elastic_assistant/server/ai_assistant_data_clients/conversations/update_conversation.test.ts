@@ -7,7 +7,7 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { updateConversation } from './update_conversation';
+import { transformToUpdateScheme, updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';
 import { ConversationResponse, ConversationUpdateProps } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
@@ -47,7 +47,18 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   },
   category: 'assistant',
   excludeFromLastConversationStorage: false,
-  messages: [],
+  messages: [
+    {
+      content: 'Message 3',
+      role: 'user',
+      timestamp: '2024-02-14T22:29:43.862Z',
+    },
+    {
+      content: 'Message 4',
+      role: 'user',
+      timestamp: '2024-02-14T22:29:43.862Z',
+    },
+  ],
   replacements: [],
   createdAt: '2020-04-20T15:25:31.830Z',
   namespace: 'default',
@@ -98,6 +109,43 @@ describe('updateConversation', () => {
     expect(updatedList).toEqual(expected);
   });
 
+  test('it returns a conversation with converted string datetime to ISO from the client', async () => {
+    const conversation: ConversationUpdateProps = getUpdateConversationOptionsMock();
+    const existingConversation = getConversationResponseMock();
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(existingConversation);
+
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.updateByQuery.mockResolvedValue({ updated: 1 });
+
+    const updatedList = await updateConversation({
+      esClient,
+      logger: loggerMock.create(),
+      conversationIndex: 'index-1',
+      user: mockUser1,
+      conversationUpdateProps: {
+        ...conversation,
+        messages: [
+          {
+            content: 'Message 3',
+            role: 'user',
+            timestamp: '18/03/2024, 12:05:03',
+          },
+          {
+            content: 'Message 4',
+            role: 'user',
+            timestamp: '1/23/2024, 12:23:44 PM',
+          },
+        ],
+      },
+    });
+    const expected: ConversationResponse = {
+      ...getConversationResponseMock(),
+      id: conversation.id,
+      title: 'test',
+    };
+    expect(updatedList).toEqual(expected);
+  });
+
   test('it returns null when there is not a conversation to update', async () => {
     (getConversation as unknown as jest.Mock).mockResolvedValueOnce(null);
     const conversation = getUpdateConversationOptionsMock();
@@ -111,5 +159,43 @@ describe('updateConversation', () => {
       user: mockUser1,
     });
     expect(updatedList).toEqual(null);
+  });
+});
+
+describe('transformToUpdateScheme', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('it returns a transformed conversation with converted string datetime to ISO from the client', async () => {
+    const conversation: ConversationUpdateProps = getUpdateConversationOptionsMock();
+    const existingConversation = getConversationResponseMock();
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(existingConversation);
+
+    const transformed = transformToUpdateScheme(new Date().toISOString(), {
+      ...conversation,
+      messages: [
+        {
+          content: 'Message 3',
+          role: 'user',
+          timestamp: '06/12/2024, 12:05:03',
+        },
+        {
+          content: 'Message 4',
+          role: 'user',
+          timestamp: '1/23/2024, 12:23:44 PM',
+        },
+      ],
+    });
+    const expected: ConversationResponse = {
+      ...getConversationResponseMock(),
+      id: conversation.id,
+      title: 'test',
+    };
+    expect(transformed).toEqual(expected);
   });
 });

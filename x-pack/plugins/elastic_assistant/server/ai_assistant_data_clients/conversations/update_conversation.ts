@@ -17,6 +17,7 @@ import {
   UUID,
 } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import moment from 'moment';
 import { getConversation } from './get_conversation';
 import { getUpdateScript } from './helpers';
 
@@ -126,7 +127,7 @@ export const transformToUpdateScheme = (
     exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
     replacements,
     messages: messages?.map((message) => ({
-      '@timestamp': new Date(message.timestamp).toISOString(),
+      '@timestamp': moment(message.timestamp).format('DD-MMM-YYYY'),
       content: message.content,
       is_error: message.isError,
       reader: message.reader,
