@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('spaces', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
       commonRequestHeader = svlCommonApi.getCommonRequestHeader();
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
     });
