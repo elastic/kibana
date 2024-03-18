@@ -287,8 +287,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             title: 'My generated title',
             token_count: {
               completion: 7,
-              prompt: 2399,
-              total: 2406,
+              prompt: 2262,
+              total: 2269,
             },
           },
         });
@@ -497,16 +497,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('has correct token count for a new conversation', async () => {
         expect(conversationCreatedEvent.conversation.token_count).to.eql({
           completion: 21,
-          prompt: 2399,
-          total: 2420,
+          prompt: 2262,
+          total: 2283,
         });
       });
 
       it('has correct token count for the updated conversation', async () => {
         expect(conversationUpdatedEvent.conversation.token_count).to.eql({
           completion: 31,
-          prompt: 4923,
-          total: 4954,
+          prompt: 4522,
+          total: 4553,
         });
       });
     });

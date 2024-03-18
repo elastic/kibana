@@ -135,7 +135,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(tokenCountChunk).to.eql(
               {
                 type: 'tokenCount',
-                tokens: { completion: 20, prompt: 68, total: 88 },
+                tokens: { completion: 20, prompt: 33, total: 53 },
               },
               `received token count chunk did not match expected`
             );
