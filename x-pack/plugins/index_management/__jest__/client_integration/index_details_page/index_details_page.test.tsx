@@ -483,7 +483,7 @@ describe('<IndexDetailsPage />', () => {
       expect(tabContent).toContain('@timestamp');
     });
 
-    it('search bar is disabled in JSON view', async () => {
+    it('search bar is enabled in JSON view', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
       expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(true);
     });
