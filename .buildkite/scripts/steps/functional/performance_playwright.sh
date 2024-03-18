@@ -12,15 +12,15 @@ run_bootstrap() {
     yarn kbn bootstrap --force-install
 }
 
+echo "-- yarn install and boostrap"
 if ! run_bootstrap; then
-  echo "bootstrap failed, trying again in 15 seconds"
+  echo "--- bootstrap failed, trying again in 15 seconds"
   sleep 15
 
   # Most bootstrap failures will result in a problem inside node_modules that does not get fixed on the next bootstrap
   # So, we should just delete node_modules in between attempts
   rm -rf node_modules
 
-  echo "--- Retrying bootstrap..."
   run_bootstrap
 fi
 
