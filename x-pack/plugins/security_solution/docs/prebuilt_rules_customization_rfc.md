@@ -1052,7 +1052,19 @@ The logic to importing a rule is as follows:
 
 - Finally, using the import payload, plus the rule's `security-rule` asset fields and the calculated `rule_source` fields, create the rule, or update it if already exists in Kibana.
 
-**If a matching `rule_id` is found, but the `version` is not found**, reject the import for that rule. Without a version, we cannot dynamically calculate `rule_source`.
+**If a matching `rule_id` is found, but the `version` is not found**, it means there are some versions of this prebuilt rule known to Kibana, which means we should identify the rule being imported as prebuilt. The prebuilt rules package has a limit on the number of historical rule versions, and we can't assume that for a given rule_id we will always have ALL historical versions available as security-rule assets.
+
+In this case, we will the rule's params to be:
+```
+{ 
+  rule_source: {
+    type: 'external',
+    is_customized: false
+  },
+  immutable: true
+}
+```
+
 
 **If a matching `rule_id` is NOT found**, that means that the rule is a custom rule. And `rule_source` will be simply:
 ```
@@ -1301,7 +1313,7 @@ Given the requirements described above, the following table shows the behaviour 
     </td>
     <td><b>No</b></td>
     <td>
-    Rule import rejected<br> because of rule_id match
+    Rule import rejected<br> because of rule_id match and overwrite flag is false
       </td>
     <tr>
 
@@ -1458,10 +1470,10 @@ In both cases, the validation checks if the `immutable` param of the rule is `fa
 
 Depending on the endpoint, we will have to modify it to address multiple changes. These are:
 
-**1. Introduction of migration logic**: as explained in the first section of this document, endpoints should have the additional reponsibility of migrating our rule schema.
-**2. Calculation of the `is_customized` field**: this field which is part of the `rule_source` field for external rules needs to be recalculated whenever a rule's field is possibly modified. See implementation details in the [Updating the `is_customized` field](#updating-the-is_customized-field) section.
-**3. Removing checks that block modifying prebuilt rules:** some of our endpoints prevent users from modifying prebuilt rules. This check needs to be removed from all endpoints to allow the customization of prebuilt rules.
-**4. Blocking the update of non-customizable fields:** while the goal of this epic is to allow users to modify their prebuilt rule fields, there are certain rule fields that we will still want to prevent the user from modifying via endpoints, since we will not provide support for resolving conflicts for them via the UI or API if they arise during an update. See the **Customizable** column in [this ticket](https://github.com/elastic/kibana/issues/147239) for a detailed list of fields that should be blocked from modification via the endpoints.
+1. **Introduction of migration logic**: as explained in the first section of this document, endpoints should have the additional responsibility of migrating our rule schema.
+2. **Calculation of the `is_customized` field**: this field which is part of the `rule_source` field for external rules needs to be recalculated whenever a rule's field is possibly modified. See implementation details in the [Updating the `is_customized` field](#updating-the-is_customized-field) section.
+3. **Removing checks that block modifying prebuilt rules:** some of our endpoints prevent users from modifying prebuilt rules. This check needs to be removed from all endpoints to allow the customization of prebuilt rules.
+4. **Blocking the update of non-customizable fields:** while the goal of this epic is to allow users to modify their prebuilt rule fields, there are certain rule fields that we will still want to prevent the user from modifying via endpoints, since we will not provide support for resolving conflicts for them via the UI or API if they arise during an update. See the **Customizable** column in [this ticket](https://github.com/elastic/kibana/issues/147239) for a detailed list of fields that should be blocked from modification via the endpoints.
 
 The table below shows which of these changes need to be applied to our endpoints: (✅ change needed - ❌ no change needed)
 
@@ -1794,7 +1806,7 @@ So, if the corresponding rule asset is not found, do not attempt to do any compa
 Reasons:
 - A prebuilt rule which is being modified has a much higher chance of ending up as `is_customized: true` than `false`. Given that we cannot know this for certain, marking it as customized is the best educated guess.
 - If we ended up making a wrong assumption in that previous point, it can be corrected the next time the rule is upgraded, or if the rule is modified again and the rule asset is found this time.
-- A rule which is missing its base version makes more sense being customized than non-customized from a domain-modelling poitn of view.
+- A rule which is missing its base version makes more sense being customized than non-customized from a domain-modelling point of view.
 - The alternative of rejecting the update on a simple field name change is just bad UX: a user just wants to change a rule's name and probably doesn't care that the corresponding `security-rule` asset is not installed.
 
 ### In the UI
@@ -1812,7 +1824,7 @@ The **Rule Edit Page** is currently split into four tabs:
 | **Schedule**   | - Interval<br>- Lookback time                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | **Actions**    | - Actions<br>- Response actions (custom query rules only)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
-Out of these four tabs, only **Actions** is enabled and accesible when editing a prebuilt rule - since actions (and shared exceptions lists and snoozing) are the only fields that can currently be modified for prebuilt rules from the UI.
+Out of these four tabs, only **Actions** is enabled and accessible when editing a prebuilt rule - since actions (and shared exceptions lists and snoozing) are the only fields that can currently be modified for prebuilt rules from the UI.
 
 All of the fields in the UI, listed above, are currently editable for custom rules, except for rule type, which is read only.
 
