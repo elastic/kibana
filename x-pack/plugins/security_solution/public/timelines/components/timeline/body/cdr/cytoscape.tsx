@@ -173,22 +173,6 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
     }>
   >([]);
   const [popoverSearchTerm, setPopoverSearchTerm] = useState<string>('');
-  const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([]);
-
-  const getDocument = React.useCallback(
-    async (index: string, docId: string, source?: string[]) => {
-      try {
-        const body = { query: { terms: { _id: [docId] } }, _source: source ? source : [] };
-
-        return (await dataService.search.search({ params: { index, body } }).toPromise())
-          ?.rawResponse.hits.hits[0]._source;
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error('failed to get document', e);
-      }
-    },
-    [dataService.search]
-  );
 
   const closePopover = () => {
     setPopoverSearchTerm('');
@@ -198,6 +182,8 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
 
   const theme = useTheme();
   const isTraceExplorerEnabled = false;
+
+  const elements = React.useMemo(() => convertToCytoscapeElements(data), [data]);
 
   const [ref, cy] = useCytoscape({
     ...getCytoscapeOptions(theme, isTraceExplorerEnabled),
@@ -290,12 +276,6 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
     [cy, data]
   );
 
-  useEffect(() => {
-    async function getElements() {
-      setElements(await Promise.all(await convertToCytoscapeElements(data, getDocument)));
-    }
-    getElements();
-  }, [data, getDocument]);
   // Add items from the elements prop to the cytoscape collection and remove
   // items that no longer are in the list, then trigger an event to notify
   // the handlers that data has changed.
@@ -315,16 +295,6 @@ function CytoscapeComponent({ children, data, height, serviceName, style, id }: 
           // element. Set the data with the new element data.
           const newElement = elements.find((el) => el.data.id === element.id());
           element.data(newElement?.data ?? element.data());
-        }
-      });
-      cy.elements().on('click', async function (event) {
-        const node = event.target;
-        if (node.id().startsWith('alert')) {
-          // console.log(node.data(), 'element data');
-          const doc = getFlattenedObject(node.data().document);
-          const elems = Object.keys(doc).map((k) => ({ field: k, value: doc[k] }));
-          setPopoverItems(elems);
-          setIsPopoverOpen(true);
         }
       });
 
@@ -481,11 +451,7 @@ const getResourceName = (event: TimelineItem, document: any) => {
   return 'Resource Name';
 };
 
-export async function convertToCytoscapeElements(
-  data: TimelineItem[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getDocument: (index: string, docId: string, source?: string[]) => Promise<any>
-): Promise<cytoscape.ElementDefinition[]> {
+export function convertToCytoscapeElements(data: TimelineItem[]): cytoscape.ElementDefinition[] {
   const elements: cytoscape.ElementDefinition[] = [];
 
   // remove duplicated data
@@ -501,12 +467,10 @@ export async function convertToCytoscapeElements(
     });
 
     // assumes we're working with AWS docs only
-    const document = await getDocument(event._index as string, event._id, ['aws.*']);
-    const label = getResourceName(event, document);
     const getAlertNode = () => ({
       data: {
         id: `alert-${event._id}`,
-        label,
+        label: 'Resource Name',
         eventId: event._id,
         document,
       },
