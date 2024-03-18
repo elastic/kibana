@@ -9,18 +9,20 @@ import { SecurityIndexPrivilege } from '@elastic/elasticsearch/lib/api/types';
 import { UptimeEsClient } from '../../lib';
 import { SyntheticsServerSetup } from '../../types';
 import { getFakeKibanaRequest } from '../utils/fake_kibana_request';
-import { serviceApiKeyPrivileges, syntheticsIndex } from '../get_api_key';
+import { getServiceApiKeyPrivileges, syntheticsIndex } from '../get_api_key';
 
 export const checkHasPrivileges = async (
   server: SyntheticsServerSetup,
   apiKey: { id: string; apiKey: string }
 ) => {
+  const { isServerless } = server;
+  const { indices: index, cluster } = getServiceApiKeyPrivileges(isServerless);
   return await server.coreStart.elasticsearch.client
     .asScoped(getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey }))
     .asCurrentUser.security.hasPrivileges({
       body: {
-        index: serviceApiKeyPrivileges.indices,
-        cluster: serviceApiKeyPrivileges.cluster,
+        index,
+        cluster,
       },
     });
 };

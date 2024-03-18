@@ -34,17 +34,19 @@ import { uptimeRuleTypeFieldMap } from './alert_rules/common';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
-  private initContext: PluginInitializerContext;
   private logger: Logger;
   private server?: SyntheticsServerSetup;
   private syntheticsService?: SyntheticsService;
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
-  constructor(initializerContext: PluginInitializerContext<UptimeConfig>) {
-    this.initContext = initializerContext;
-    this.logger = initializerContext.logger.get();
+  constructor(private readonly initContext: PluginInitializerContext<UptimeConfig>) {
+    this.logger = initContext.logger.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
+  }
+
+  private get _isServerless(): boolean {
+    return this.initContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(core: CoreSetup, plugins: SyntheticsPluginsSetupDependencies) {
@@ -77,6 +79,7 @@ export class Plugin implements PluginType {
       logger: this.logger,
       telemetry: this.telemetryEventsSender,
       isDev: this.initContext.env.mode.dev,
+      isServerless: this._isServerless,
       share: plugins.share,
     } as SyntheticsServerSetup;
 
