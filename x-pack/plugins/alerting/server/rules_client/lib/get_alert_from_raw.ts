@@ -137,6 +137,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
           actions,
           references: references || [],
           isSystemAction: context.isSystemAction,
+          omitGeneratedValues,
         })
       : [],
     systemActions: actions
@@ -145,6 +146,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
           actions,
           references: references || [],
           isSystemAction: context.isSystemAction,
+          omitGeneratedValues,
         })
       : [],
     params: injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
