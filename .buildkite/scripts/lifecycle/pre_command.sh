@@ -105,11 +105,6 @@ export KIBANA_DOCKER_PASSWORD
 KIBANA_CI_REPORTER_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
 export KIBANA_CI_REPORTER_KEY
 
-ELASTIC_APM_SERVER_URL=$(retry 5 5 vault read -field=apm_server_url secret/kibana-issues/dev/project-kibana-ci-apm)
-export ELASTIC_APM_SERVER_URL
-
-ELASTIC_APM_API_KEY=$(retry 5 5 vault read -field=apm_server_api_key secret/kibana-issues/dev/project-kibana-ci-apm)
-export ELASTIC_APM_API_KEY
 
 BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
 export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
