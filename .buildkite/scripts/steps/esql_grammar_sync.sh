@@ -29,6 +29,9 @@ echo "File copied and modified successfully. Checking for differences."
 
 # Check for differences
 git diff --exit-code --quiet "$destination_file"
+
+cat "$destination_file"
+
 if [ $? -ne 0 ]; then
   echo "Differences found. Building ANTLR stuff."
 
