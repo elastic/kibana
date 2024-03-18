@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
@@ -17,11 +18,13 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
 import { basicResolvers } from '../resolvers';
 import { ML_PAGES } from '../../../locator';
-import { NavigateToPath, useMlKibana } from '../../contexts/kibana';
+import type { NavigateToPath } from '../../contexts/kibana';
+import { useMlKibana } from '../../contexts/kibana';
 
-import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
-import { createPath, MlRoute, PageLoader, PageProps } from '../router';
+import type { MlRoute, PageProps } from '../router';
+import { createPath, PageLoader } from '../router';
 import { useRefresh } from '../use_refresh';
 import { useRouteResolver } from '../use_resolver';
 import { Explorer } from '../../explorer';

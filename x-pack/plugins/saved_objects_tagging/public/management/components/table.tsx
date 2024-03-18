@@ -6,9 +6,10 @@
  */
 
 import React, { FC, ReactNode } from 'react';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, Query } from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, Query, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { TagsCapabilities, TagWithRelations } from '../../../common';
 import { TagBadge } from '../../components';
 import { TagAction } from '../actions';
@@ -66,7 +67,19 @@ export const TagTable: FC<TagTableProps> = ({
       sortable: (tag: TagWithRelations) => tag.name,
       'data-test-subj': 'tagsTableRowName',
       render: (name: string, tag: TagWithRelations) => {
-        return <TagBadge tag={tag} />;
+        return (
+          <>
+            <TagBadge tag={tag} />
+            {tag.managed && (
+              <div css={{ marginLeft: euiThemeVars.euiSizeS }}>
+                <EuiIconTip
+                  type="lock"
+                  content="This tag is managed by Elastic and cannot be deleted, edited, or assigned to objects."
+                />
+              </div>
+            )}
+          </>
+        );
       },
     },
     {
@@ -152,6 +165,14 @@ export const TagTable: FC<TagTableProps> = ({
           ? {
               selected: selectedTags,
               onSelectionChange,
+              selectable: (tag: TagWithRelations) => !tag.managed,
+              selectableMessage: (selectable) =>
+                selectable
+                  ? ''
+                  : i18n.translate('xpack.savedObjectsTagging.management.table.managedMessage', {
+                      defaultMessage:
+                        'This tag is managed by Elastic and cannot be deleted or assigned to objects.',
+                    }),
             }
           : undefined
       }

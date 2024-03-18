@@ -23,7 +23,7 @@ import {
   VIEW_CASE,
 } from './translations';
 import { OWNER_INFO } from '../../common/constants';
-import { useCasesContext } from '../components/cases_context/use_cases_context';
+import { useApplication } from './lib/kibana/use_application';
 
 const LINE_CLAMP = 3;
 const Title = styled.span`
@@ -119,7 +119,7 @@ const getErrorMessage = (error: Error | ServerError): string => {
 };
 
 export const useCasesToast = () => {
-  const { appId } = useCasesContext();
+  const { appId } = useApplication();
   const { getUrlForApp, navigateToUrl } = useKibana().services.application;
 
   const toasts = useToasts();
@@ -141,13 +141,18 @@ export const useCasesToast = () => {
           ? OWNER_INFO[theCase.owner].appId
           : appId;
 
-        const url = getUrlForApp(appIdToNavigateTo, {
-          deepLinkId: 'cases',
-          path: generateCaseViewPath({ detailName: theCase.id }),
-        });
+        const url =
+          appIdToNavigateTo != null
+            ? getUrlForApp(appIdToNavigateTo, {
+                deepLinkId: 'cases',
+                path: generateCaseViewPath({ detailName: theCase.id }),
+              })
+            : null;
 
         const onViewCaseClick = () => {
-          navigateToUrl(url);
+          if (url) {
+            navigateToUrl(url);
+          }
         };
 
         const renderTitle = getToastTitle({ theCase, title, attachments });
@@ -158,7 +163,10 @@ export const useCasesToast = () => {
           iconType: 'check',
           title: toMountPoint(<Title>{renderTitle}</Title>),
           text: toMountPoint(
-            <CaseToastSuccessContent content={renderContent} onViewCaseClick={onViewCaseClick} />
+            <CaseToastSuccessContent
+              content={renderContent}
+              onViewCaseClick={url != null ? onViewCaseClick : undefined}
+            />
           ),
         });
       },
@@ -189,7 +197,7 @@ export const CaseToastSuccessContent = ({
   onViewCaseClick,
   content,
 }: {
-  onViewCaseClick: () => void;
+  onViewCaseClick?: () => void;
   content?: string;
 }) => {
   return (
@@ -199,14 +207,16 @@ export const CaseToastSuccessContent = ({
           {content}
         </EuiTextStyled>
       ) : null}
-      <EuiButtonEmpty
-        size="xs"
-        flush="left"
-        onClick={onViewCaseClick}
-        data-test-subj="toaster-content-case-view-link"
-      >
-        {VIEW_CASE}
-      </EuiButtonEmpty>
+      {onViewCaseClick !== undefined ? (
+        <EuiButtonEmpty
+          size="xs"
+          flush="left"
+          onClick={onViewCaseClick}
+          data-test-subj="toaster-content-case-view-link"
+        >
+          {VIEW_CASE}
+        </EuiButtonEmpty>
+      ) : null}
     </>
   );
 };

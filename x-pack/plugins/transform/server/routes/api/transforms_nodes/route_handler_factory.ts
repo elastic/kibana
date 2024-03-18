@@ -11,7 +11,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { NODES_INFO_PRIVILEGES } from '../../../../common/constants';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 import { wrapError, wrapEsError } from '../../utils/error_utils';
 

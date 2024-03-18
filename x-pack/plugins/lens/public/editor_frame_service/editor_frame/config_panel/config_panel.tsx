@@ -275,10 +275,12 @@ export function LayerPanels(
               layerId={layerId}
               layerIndex={layerIndex}
               visualizationState={visualization.state}
+              visualizationMap={props.visualizationMap}
               updateVisualization={setVisualizationState}
               updateDatasource={updateDatasource}
               updateDatasourceAsync={updateDatasourceAsync}
               displayLayerSettings={!props.hideLayerHeader}
+              shouldDisplayChartSwitch={props.shouldDisplayChartSwitch}
               onChangeIndexPattern={(args) => {
                 onChangeIndexPattern(args);
                 const layersToRemove =

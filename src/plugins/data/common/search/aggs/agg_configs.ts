@@ -117,7 +117,7 @@ export class AggConfigs {
   isSamplingEnabled() {
     return (
       isSamplingEnabled(this.opts.probability) &&
-      this.getRequestAggs().filter((agg) => !agg.type.hasNoDsl).length > 0
+      this.getRequestAggs().some((agg) => !agg.type.hasNoDsl)
     );
   }
 

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { EuiStepStatus } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,7 +15,6 @@ import {
   EuiPageBody,
   EuiSpacer,
   EuiSteps,
-  EuiStepStatus,
   EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

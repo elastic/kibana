@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useContext } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,

@@ -20,8 +20,8 @@ export class SloDetailsLocatorDefinition implements LocatorDefinition<SloDetails
 
   public readonly getLocation = async ({ sloId, instanceId }: SloDetailsLocatorParams) => {
     const queryParams =
-      !!instanceId && instanceId !== '*' ? `?instanceId=${encodeURI(instanceId)}` : '';
-    const path = !!sloId ? `${SLOS_PATH}/${encodeURI(sloId)}${queryParams}` : SLOS_PATH;
+      !!instanceId && instanceId !== '*' ? `?instanceId=${encodeURIComponent(instanceId)}` : '';
+    const path = !!sloId ? `${SLOS_PATH}/${encodeURIComponent(sloId)}${queryParams}` : SLOS_PATH;
 
     return {
       app: 'observability',

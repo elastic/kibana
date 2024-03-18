@@ -147,7 +147,7 @@ function LatencyChart({
           alertStart={alert.start}
           color={euiTheme.colors.danger}
           id={'alertActiveRect'}
-          key={'alertThresholdRect'}
+          key={'alertActiveRect'}
         />,
         <AlertAnnotation
           key={'alertAnnotationStart'}

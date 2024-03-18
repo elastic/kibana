@@ -60,6 +60,11 @@ const policies = [
   },
 ];
 
+const NESTING_LEVELS = 4;
+const NESTED_DEPTHS = Array(NESTING_LEVELS)
+  .fill(0)
+  .map((_, i) => i + 1);
+
 function getCallbackMocks() {
   return {
     getFieldsFor: jest.fn(async ({ query }) => {
@@ -345,14 +350,14 @@ describe('validation logic', () => {
     ['eval', 'stats', 'rename', 'limit', 'keep', 'drop', 'mv_expand', 'dissect', 'grok'].map(
       (command) =>
         testErrorsAndWarnings(command, [
-          `SyntaxError: mismatched input '${command}' expecting {EXPLAIN, FROM, ROW, SHOW}`,
+          `SyntaxError: mismatched input '${command}' expecting {'explain', 'from', 'row', 'show'}`,
         ])
     );
   });
 
   describe('from', () => {
     testErrorsAndWarnings('f', [
-      "SyntaxError: mismatched input 'f' expecting {EXPLAIN, FROM, ROW, SHOW}",
+      "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'row', 'show'}",
     ]);
     testErrorsAndWarnings(`from `, [
       "SyntaxError: missing {QUOTED_IDENTIFIER, FROM_UNQUOTED_IDENTIFIER} at '<EOF>'",
@@ -440,7 +445,7 @@ describe('validation logic', () => {
 
   describe('row', () => {
     testErrorsAndWarnings('row', [
-      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
     ]);
     testErrorsAndWarnings('row missing_column', ['Unknown column [missing_column]']);
     testErrorsAndWarnings('row fn()', ['Unknown function [fn]']);
@@ -469,7 +474,7 @@ describe('validation logic', () => {
       "SyntaxError: mismatched input '<EOF>' expecting '('",
     ]);
     testErrorsAndWarnings('row var = 1 in (', [
-      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
       'Error: [in] function expects exactly 2 arguments, got 1.',
     ]);
     testErrorsAndWarnings('row var = 1 not in ', [
@@ -509,7 +514,7 @@ describe('validation logic', () => {
     }
 
     for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
-      for (const { params, infiniteParams, ...signRest } of signatures) {
+      for (const { params, ...signRest } of signatures) {
         const fieldMapping = getFieldMapping(params);
         const signatureStringCorrect = tweakSignatureForRowCommand(
           getFunctionSignatures(
@@ -712,16 +717,16 @@ describe('validation logic', () => {
     ]);
     testErrorsAndWarnings('from index | keep `any#Char$Field`', []);
     testErrorsAndWarnings('from index | project ', [
-      "SyntaxError: mismatched input 'project' expecting {DISSECT, DROP, ENRICH, EVAL, GROK, INLINESTATS, KEEP, LIMIT, MV_EXPAND, RENAME, SORT, STATS, WHERE}",
+      "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
     ]);
     testErrorsAndWarnings('from index | project stringField, numberField, dateField', [
-      "SyntaxError: mismatched input 'project' expecting {DISSECT, DROP, ENRICH, EVAL, GROK, INLINESTATS, KEEP, LIMIT, MV_EXPAND, RENAME, SORT, STATS, WHERE}",
+      "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
     ]);
     testErrorsAndWarnings('from index | PROJECT stringField, numberField, dateField', [
-      "SyntaxError: mismatched input 'PROJECT' expecting {DISSECT, DROP, ENRICH, EVAL, GROK, INLINESTATS, KEEP, LIMIT, MV_EXPAND, RENAME, SORT, STATS, WHERE}",
+      "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
     ]);
     testErrorsAndWarnings('from index | project missingField, numberField, dateField', [
-      "SyntaxError: mismatched input 'project' expecting {DISSECT, DROP, ENRICH, EVAL, GROK, INLINESTATS, KEEP, LIMIT, MV_EXPAND, RENAME, SORT, STATS, WHERE}",
+      "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
     ]);
     testErrorsAndWarnings('from index | keep s*', []);
     testErrorsAndWarnings('from index | keep *Field', []);
@@ -818,10 +823,10 @@ describe('validation logic', () => {
       "SyntaxError: mismatched input '<EOF>' expecting ID_PATTERN",
     ]);
     testErrorsAndWarnings('from a_index | rename stringField', [
-      "SyntaxError: mismatched input '<EOF>' expecting AS",
+      "SyntaxError: mismatched input '<EOF>' expecting 'as'",
     ]);
     testErrorsAndWarnings('from a_index | rename a', [
-      "SyntaxError: mismatched input '<EOF>' expecting AS",
+      "SyntaxError: mismatched input '<EOF>' expecting 'as'",
       'Unknown column [a]',
     ]);
     testErrorsAndWarnings('from a_index | rename stringField as', [
@@ -864,7 +869,7 @@ describe('validation logic', () => {
 
   describe('dissect', () => {
     testErrorsAndWarnings('from a_index | dissect', [
-      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
     ]);
     testErrorsAndWarnings('from a_index | dissect stringField', [
       "SyntaxError: missing STRING at '<EOF>'",
@@ -889,7 +894,7 @@ describe('validation logic', () => {
       "SyntaxError: mismatched input '<EOF>' expecting '='",
     ]);
     testErrorsAndWarnings('from a_index | dissect stringField "%{firstWord}" option = ', [
-      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, NULL, '?', TRUE, '+', '-', OPENING_BRACKET}",
+      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', OPENING_BRACKET}",
       'Invalid option for DISSECT: [option]',
     ]);
     testErrorsAndWarnings('from a_index | dissect stringField "%{firstWord}" option = 1', [
@@ -915,7 +920,7 @@ describe('validation logic', () => {
 
   describe('grok', () => {
     testErrorsAndWarnings('from a_index | grok', [
-      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
     ]);
     testErrorsAndWarnings('from a_index | grok stringField', [
       "SyntaxError: missing STRING at '<EOF>'",
@@ -962,7 +967,7 @@ describe('validation logic', () => {
       ]);
     }
 
-    for (const nesting of [1, 2, 3, 4]) {
+    for (const nesting of NESTED_DEPTHS) {
       for (const evenOp of ['-', '+']) {
         for (const oddOp of ['-', '+']) {
           // This builds a combination of +/- operators
@@ -988,7 +993,7 @@ describe('validation logic', () => {
     }
     for (const wrongOp of ['*', '/', '%']) {
       testErrorsAndWarnings(`from a_index | where ${wrongOp}+ numberField`, [
-        `SyntaxError: extraneous input '${wrongOp}' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}`,
+        `SyntaxError: extraneous input '${wrongOp}' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}`,
       ]);
     }
 
@@ -1055,6 +1060,48 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from a_index | where ${camelCase(field)}Field Is nOt NuLL`, []);
     }
 
+    for (const {
+      name,
+      alias,
+      signatures,
+      ...defRest
+    } of statsAggregationFunctionDefinitions.filter(
+      ({ name: fnName, signatures: statsSignatures }) =>
+        statsSignatures.some(({ returnType, params }) => ['number'].includes(returnType))
+    )) {
+      for (const { params, ...signRest } of signatures) {
+        const fieldMapping = getFieldMapping(params);
+
+        testErrorsAndWarnings(
+          `from a_index | where ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          }`,
+          [`WHERE does not support function ${name}`]
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | where ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          } > 0`,
+          [`WHERE does not support function ${name}`]
+        );
+      }
+    }
+
     // Test that all functions work in where
     const numericOrStringFunctions = evalFunctionsDefinitions.filter(({ name, signatures }) => {
       return signatures.some(
@@ -1112,7 +1159,7 @@ describe('validation logic', () => {
 
   describe('eval', () => {
     testErrorsAndWarnings('from a_index | eval ', [
-      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
     ]);
     testErrorsAndWarnings('from a_index | eval stringField ', []);
     testErrorsAndWarnings('from a_index | eval b = stringField', []);
@@ -1125,7 +1172,7 @@ describe('validation logic', () => {
     ]);
     testErrorsAndWarnings('from a_index | eval a=b', ['Unknown column [b]']);
     testErrorsAndWarnings('from a_index | eval a=b, ', [
-      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
       'Unknown column [b]',
     ]);
     testErrorsAndWarnings('from a_index | eval a=round', ['Unknown column [round]']);
@@ -1134,7 +1181,7 @@ describe('validation logic', () => {
     ]);
     testErrorsAndWarnings('from a_index | eval a=round(numberField) ', []);
     testErrorsAndWarnings('from a_index | eval a=round(numberField), ', [
-      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
     ]);
     testErrorsAndWarnings('from a_index | eval a=round(numberField) + round(numberField) ', []);
     testErrorsAndWarnings('from a_index | eval a=round(numberField) + round(stringField) ', [
@@ -1168,7 +1215,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from a_index | eval ${camelCase(field)}Field IS not NULL`, []);
     }
 
-    for (const nesting of [1, 2, 3, 4]) {
+    for (const nesting of NESTED_DEPTHS) {
       for (const evenOp of ['-', '+']) {
         for (const oddOp of ['-', '+']) {
           // This builds a combination of +/- operators
@@ -1194,12 +1241,73 @@ describe('validation logic', () => {
 
     for (const wrongOp of ['*', '/', '%']) {
       testErrorsAndWarnings(`from a_index | eval ${wrongOp}+ numberField`, [
-        `SyntaxError: extraneous input '${wrongOp}' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}`,
+        `SyntaxError: extraneous input '${wrongOp}' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}`,
       ]);
     }
 
+    for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
+      for (const { params, ...signRest } of signatures) {
+        const fieldMapping = getFieldMapping(params);
+        testErrorsAndWarnings(
+          `from a_index | eval var = ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          }`,
+          [`EVAL does not support function ${name}`]
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | eval var = ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          } > 0`,
+          [`EVAL does not support function ${name}`]
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | eval ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          }`,
+          [`EVAL does not support function ${name}`]
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | eval ${
+            getFunctionSignatures(
+              {
+                name,
+                ...defRest,
+                signatures: [{ params: fieldMapping, ...signRest }],
+              },
+              { withTypes: false }
+            )[0].declaration
+          } > 0`,
+          [`EVAL does not support function ${name}`]
+        );
+      }
+    }
+
     for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
-      for (const { params, infiniteParams, ...signRest } of signatures) {
+      for (const { params, ...signRest } of signatures) {
         const fieldMapping = getFieldMapping(params);
         testErrorsAndWarnings(
           `from a_index | eval var = ${
@@ -1306,7 +1414,7 @@ describe('validation logic', () => {
             expectedErrors
           );
 
-          if (!infiniteParams && !signRest.minParams) {
+          if (!signRest.minParams) {
             // test that additional args are spotted
             const fieldMappingWithOneExtraArg = getFieldMapping(params).concat({
               name: 'extraArg',
@@ -1484,11 +1592,11 @@ describe('validation logic', () => {
       []
     );
     testErrorsAndWarnings('from a_index | eval not', [
-      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
       'Error: [not] function expects exactly one argument, got 0.',
     ]);
     testErrorsAndWarnings('from a_index | eval in', [
-      "SyntaxError: mismatched input 'in' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+      "SyntaxError: mismatched input 'in' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
     ]);
 
     testErrorsAndWarnings('from a_index | eval stringField in stringField', [
@@ -1557,16 +1665,16 @@ describe('validation logic', () => {
     ]);
     testErrorsAndWarnings('from a_index | stats by stringField', []);
     testErrorsAndWarnings('from a_index | stats by ', [
-      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
     ]);
     testErrorsAndWarnings('from a_index | stats numberField ', [
       'Expected an aggregate function or group but got [numberField] of type [FieldAttribute]',
     ]);
     testErrorsAndWarnings('from a_index | stats numberField=', [
-      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
     ]);
     testErrorsAndWarnings('from a_index | stats numberField=5 by ', [
-      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
     ]);
     testErrorsAndWarnings('from a_index | stats avg(numberField) by wrongField', [
       'Unknown column [wrongField]',
@@ -1629,7 +1737,7 @@ describe('validation logic', () => {
       'At least one aggregation function required in [STATS], found [numberField+1]',
     ]);
 
-    for (const nesting of [1, 2, 3, 4]) {
+    for (const nesting of NESTED_DEPTHS) {
       const moreBuiltinWrapping = Array(nesting).fill('+1').join('');
       testErrorsAndWarnings(`from a_index | stats 5 + avg(numberField) ${moreBuiltinWrapping}`, []);
       testErrorsAndWarnings(`from a_index | stats 5 ${moreBuiltinWrapping} + avg(numberField)`, []);
@@ -1727,7 +1835,7 @@ describe('validation logic', () => {
     ]);
 
     for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
-      for (const { params, infiniteParams, ...signRest } of signatures) {
+      for (const { params, ...signRest } of signatures) {
         const fieldMapping = getFieldMapping(params);
 
         const correctSignature = getFunctionSignatures(
@@ -1957,23 +2065,28 @@ describe('validation logic', () => {
     | STATS avg_numberField = AVG(\`numberField * 3.281\`)`,
       []
     );
+
+    testErrorsAndWarnings(
+      `FROM index | STATS AVG(numberField) by round(numberField) + 1 | EVAL \`round(numberField) + 1\` / 2`,
+      []
+    );
   });
 
   describe('sort', () => {
     testErrorsAndWarnings('from a_index | sort ', [
-      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
     ]);
     testErrorsAndWarnings('from a_index | sort "field" ', []);
     testErrorsAndWarnings('from a_index | sort wrongField ', ['Unknown column [wrongField]']);
     testErrorsAndWarnings('from a_index | sort numberField, ', [
-      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+      "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
     ]);
     testErrorsAndWarnings('from a_index | sort numberField, stringField', []);
     for (const dir of ['desc', 'asc']) {
       testErrorsAndWarnings(`from a_index | sort "field" ${dir} `, []);
       testErrorsAndWarnings(`from a_index | sort numberField ${dir} `, []);
       testErrorsAndWarnings(`from a_index | sort numberField ${dir} nulls `, [
-        "SyntaxError: missing {FIRST, LAST} at '<EOF>'",
+        "SyntaxError: missing {'first', 'last'} at '<EOF>'",
       ]);
       for (const nullDir of ['first', 'last']) {
         testErrorsAndWarnings(`from a_index | sort numberField ${dir} nulls ${nullDir}`, []);
@@ -2130,6 +2243,52 @@ describe('validation logic', () => {
       [],
       ['Column [numberField] of type number has been overwritten as new type: string']
     );
+  });
+
+  describe('quoting and escaping expressions', () => {
+    function getTicks(amount: number) {
+      return Array(amount).fill('`').join('');
+    }
+    /**
+     * Given an initial quoted expression, build a new quoted expression
+     * that appends as many +1 to the previous one based on the nesting level
+     * i.e. given the expression `round(...) + 1` returns
+     * ```round(...) + 1`` + 1` (for nesting 1)
+     * ```````round(...) + 1```` + 1`` + 1` (for nesting 2)
+     *  etc...
+     * Note how backticks double for each level + wrapping quotes
+     * The general rule follows an exponential curve given a nesting N:
+     * (`){ (2^N)-1 } ticks expression (`){ 2^N-1 } +1 (`){ 2^N-2 } +1 ... +1
+     *
+     * Mind that nesting arg here is equivalent to N-1
+     */
+    function buildNestedExpression(expr: string, nesting: number) {
+      const openingTicks = getTicks(Math.pow(2, nesting + 1) - 1);
+      const firstClosingBatch = getTicks(Math.pow(2, nesting));
+      const additionalPlusOneswithTicks = Array(nesting)
+        .fill(' + 1')
+        .reduce((acc, plusOneAppended, i) => {
+          // workout how many ticks to add: 2^N-i
+          const ticks = getTicks(Math.pow(2, nesting - 1 - i));
+          return `${acc}${plusOneAppended}${ticks}`;
+        }, '');
+      const ret = `${openingTicks}${expr}${firstClosingBatch}${additionalPlusOneswithTicks}`;
+      return ret;
+    }
+
+    for (const nesting of NESTED_DEPTHS) {
+      // start with a quotable expression
+      const expr = 'round(numberField) + 1';
+      const startingQuery = `from a_index | eval ${expr}`;
+      // now pipe for each nesting level a new eval command that appends a +1 to the previous quoted expression
+      const finalQuery = `${startingQuery} | ${Array(nesting)
+        .fill('')
+        .map((_, i) => {
+          return `eval ${buildNestedExpression(expr, i)} + 1`;
+        })
+        .join(' | ')} | keep ${buildNestedExpression(expr, nesting)}`;
+      testErrorsAndWarnings(finalQuery, []);
+    }
   });
 
   describe('callbacks', () => {

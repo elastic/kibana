@@ -7,9 +7,9 @@
 
 import { get } from 'lodash';
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
-import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import type { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import type { Category, CategoriesAgg, CatResponse } from './types';
 

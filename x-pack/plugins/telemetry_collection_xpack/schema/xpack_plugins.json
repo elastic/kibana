@@ -7700,6 +7700,9 @@
               "agent_count": {
                 "type": "long"
               },
+              "is_agentless": {
+                "type": "boolean"
+              },
               "account_type": {
                 "type": "keyword"
               },
