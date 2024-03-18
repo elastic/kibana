@@ -9,9 +9,44 @@
 import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
-import { VIEW_MODE } from '@kbn/saved-search';
-import type { DiscoverGridSettings } from '@kbn/saved-search/types';
-export type { SavedSearchAttributes } from '@kbn/saved-search/types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { VIEW_MODE } from '.';
+
+export interface DiscoverGridSettings extends SerializableRecord {
+  columns?: Record<string, DiscoverGridSettingsColumn>;
+}
+
+export interface DiscoverGridSettingsColumn extends SerializableRecord {
+  width?: number;
+}
+
+/** @internal **/
+export interface SavedSearchAttributes {
+  title: string;
+  sort: Array<[string, string]>;
+  columns: string[];
+  description: string;
+  grid: DiscoverGridSettings;
+  hideChart: boolean;
+  isTextBasedQuery: boolean;
+  usesAdHocDataView?: boolean;
+  kibanaSavedObjectMeta: {
+    searchSourceJSON: string;
+  };
+  viewMode?: VIEW_MODE;
+  hideAggregatedPreview?: boolean;
+  rowHeight?: number;
+  headerRowHeight?: number;
+
+  timeRestore?: boolean;
+  timeRange?: Pick<TimeRange, 'from' | 'to'>;
+  refreshInterval?: RefreshInterval;
+
+  rowsPerPage?: number;
+  sampleSize?: number;
+  breakdownField?: string;
+  visContextJSON?: string;
+}
 
 /** @internal **/
 export type SortOrder = [string, string];

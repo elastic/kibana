@@ -9,7 +9,6 @@
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { getAllMigrations } from './search_migrations';
 import {
   SCHEMA_SEARCH_V8_8_0,
@@ -18,13 +17,9 @@ import {
   SCHEMA_SEARCH_MODEL_VERSION_3,
 } from './schema';
 
-export function getSavedSearchObjectType({
-  getSearchSourceMigrations,
-  lensEmbeddableFactory,
-}: {
-  getSearchSourceMigrations: () => MigrateFunctionsObject;
-  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
-}): SavedObjectsType {
+export function getSavedSearchObjectType(
+  getSearchSourceMigrations: () => MigrateFunctionsObject
+): SavedObjectsType {
   return {
     name: 'search',
     indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
@@ -78,10 +73,6 @@ export function getSavedSearchObjectType({
     schemas: {
       '8.8.0': SCHEMA_SEARCH_V8_8_0,
     },
-    migrations: () =>
-      getAllMigrations({
-        searchSourceMigrations: getSearchSourceMigrations(),
-        lensEmbeddableFactory,
-      }),
+    migrations: () => getAllMigrations(getSearchSourceMigrations()), // TODO: add lens embeddable migrations for `visContextJSON`
   };
 }
