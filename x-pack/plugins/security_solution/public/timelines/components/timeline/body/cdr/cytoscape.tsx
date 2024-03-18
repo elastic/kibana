@@ -502,17 +502,10 @@ export function convertToCytoscapeElements(data: TimelineItem[]): cytoscape.Elem
       elements.push(userNode);
 
       const eventName = event.ecs.event?.action?.[0];
-      const eventNodeWrapper = {
-        data: {
-          id: `event-${eventName}`,
-          eventId: event._id,
-        },
-        classes: 'event-node-border',
-      };
+
       const eventNode = {
         data: {
           id: `event-${event._id}-inner`,
-          parent: `event-${eventName}`,
           label: `${eventName} x ${event.occurrences}`,
           eventId: event._id,
           alertNodes: event.alertNodes,
@@ -520,7 +513,6 @@ export function convertToCytoscapeElements(data: TimelineItem[]): cytoscape.Elem
         },
         classes: 'event-node',
       };
-      elements.push(eventNodeWrapper);
       elements.push(eventNode);
 
       // Edge from user to alert

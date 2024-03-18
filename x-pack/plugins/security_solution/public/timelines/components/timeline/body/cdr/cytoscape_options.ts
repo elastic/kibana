@@ -196,41 +196,30 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
         'z-index': zIndexNode,
       },
     },
-    {
-      selector: 'node.event-node-border',
-      style: {
-        ghost: 'no',
-        shape: 'rectangle',
-        'background-color': '#FFF9E8',
-        'border-color': '#FEC514',
-        'border-width': 2,
-        'background-image': 'none',
-        width: '160px',
-        // padding: '10px', // Adjust as needed for visual appearance
-      },
-    },
-    {
-      selector: ':parent',
-      style: {
-        'z-compound-depth': 'top',
-      },
-    },
+    // {
+    //   selector: 'node.event-node-border',
+    //   style: {
+    //     ghost: 'no',
+    //     shape: 'star',
+    //     'background-color': '#FFF9E8',
+    //     'border-color': '#FEC514',
+    //     'border-width': 2,
+    //     'background-image': 'none',
+    //     width: '160px',
+    //     // padding: '10px', // Adjust as needed for visual appearance
+    //   },
+    // },
     {
       selector: 'node.event-node',
       style: {
-        'z-compound-depth': 'top',
-        'background-image': 'none',
-        'background-color': 'data(backgroundColor)', // Use this to control visibility dynamically
-        'border-width': 0,
-        'text-valign': 'center',
+        ghost: 'yes',
+        shape: 'triangle',
+        'text-margin-y': parseInt(theme.eui.euiSizeS, 10),
+        'text-valign': 'bottom',
         'text-halign': 'center',
-        color: '#1A1C21',
         'font-size': '12px',
-        width: '140px',
         'text-wrap': 'wrap',
         'text-max-width': '140px',
-        'background-opacity': 0, // Ensure any specified background is fully transparent
-        // Ensure no shape is visually rendered. Since 'shape: none' is not valid, focus on making it invisible.
       },
     },
     {
