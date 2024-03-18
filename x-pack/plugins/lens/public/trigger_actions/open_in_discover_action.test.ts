@@ -18,9 +18,9 @@ describe('open in discover action', () => {
     type: DOC_TYPE,
     panelTitle: 'some title',
     hidePanelTitle: false,
-    localFilters: new BehaviorSubject([]),
-    localQuery: new BehaviorSubject({ query: 'test', language: 'kuery' }),
-    localTimeRange: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
+    filters$: new BehaviorSubject([]),
+    query$: new BehaviorSubject({ query: 'test', language: 'kuery' }),
+    timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
     getSavedVis: jest.fn(() => undefined),
     canViewUnderlyingData: () => Promise.resolve(true),
     getViewUnderlyingDataArgs: jest.fn(() => ({
