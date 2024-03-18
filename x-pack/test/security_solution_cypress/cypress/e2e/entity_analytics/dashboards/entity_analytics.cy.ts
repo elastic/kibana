@@ -70,7 +70,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_multiple');
+    cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
   });
 
   describe('legacy risk score', () => {
@@ -101,8 +101,8 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
       });
 
       after(() => {
-        cy.task('esArchiverUnload', 'risk_hosts_no_data');
-        cy.task('esArchiverUnload', 'risk_users_no_data');
+        cy.task('esArchiverUnload', { archiveName: 'risk_hosts_no_data' });
+        cy.task('esArchiverUnload', { archiveName: 'risk_users_no_data' });
       });
 
       it('shows no data detected prompt for host risk score module', () => {
@@ -126,8 +126,8 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
       });
 
       after(() => {
-        cy.task('esArchiverUnload', 'risk_hosts_legacy_data');
-        cy.task('esArchiverUnload', 'risk_users_legacy_data');
+        cy.task('esArchiverUnload', { archiveName: 'risk_hosts_legacy_data' });
+        cy.task('esArchiverUnload', { archiveName: 'risk_users_legacy_data' });
       });
 
       it('shows enable host risk button', () => {
@@ -150,7 +150,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
       });
 
       after(() => {
-        cy.task('esArchiverUnload', 'risk_hosts');
+        cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
       });
 
       it('renders donut chart', () => {
@@ -235,7 +235,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
       });
 
       after(() => {
-        cy.task('esArchiverUnload', 'risk_users');
+        cy.task('esArchiverUnload', { archiveName: 'risk_users' });
       });
 
       it('renders donut chart', () => {
@@ -338,7 +338,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
         });
 
         after(() => {
-          cy.task('esArchiverUnload', 'risk_scores_new_no_data');
+          cy.task('esArchiverUnload', { archiveName: 'risk_scores_new_no_data' });
         });
 
         it('shows no data detected prompt for host and user risk scores', () => {
@@ -353,7 +353,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
         });
 
         after(() => {
-          cy.task('esArchiverUnload', 'risk_scores_new');
+          cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
         });
 
         it('renders donut chart', () => {
@@ -446,7 +446,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
         });
 
         after(() => {
-          cy.task('esArchiverUnload', 'risk_scores_new');
+          cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
         });
 
         it('renders donut chart', () => {
@@ -546,7 +546,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'network');
+      cy.task('esArchiverUnload', { archiveName: 'network' });
     });
 
     it('should enable a job and renders the table with pagination', () => {
