@@ -20,14 +20,6 @@ export class DashboardPageLinks extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly settings = this.ctx.getPageObject('settings');
 
-  public async toggleLinksLab(value?: boolean) {
-    this.log.debug(`toggle the links lab setting to ${value}`);
-    await this.header.clickStackManagement();
-    await this.settings.clickKibanaSettings();
-
-    await this.settings.toggleAdvancedSettingCheckbox('labs:dashboard:linksPanel', value);
-  }
-
   /* -----------------------------------------------------------
     Links panel
     ----------------------------------------------------------- */

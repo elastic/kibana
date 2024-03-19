@@ -89,7 +89,7 @@ export class LinksFactoryDefinition
   }
 
   public canCreateNew() {
-    return presentationUtil.labsService.isProjectEnabled('labs:dashboard:linksPanel');
+    return true;
   }
 
   public getDefaultInput(): Partial<LinksInput> {
