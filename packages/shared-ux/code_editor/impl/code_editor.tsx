@@ -148,6 +148,11 @@ export interface CodeEditorProps {
     minLines?: number;
     maxLines?: number;
   };
+
+  /**
+   * Enables the editor to get disabled when pressing ESC to resolve focus trapping for accessibility.
+   */
+  accessibilityOverlayEnabled?: boolean;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -177,6 +182,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     defaultMessage: 'Cannot edit in read-only editor',
   }),
   fitToContent,
+  accessibilityOverlayEnabled = true,
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
   const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
@@ -486,7 +492,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       data-test-subj="kibanaCodeEditor"
       className="kibanaCodeEditor"
     >
-      {renderPrompt()}
+      {accessibilityOverlayEnabled && renderPrompt()}
 
       <FullScreenDisplay>
         {allowFullScreen || isCopyable ? (
