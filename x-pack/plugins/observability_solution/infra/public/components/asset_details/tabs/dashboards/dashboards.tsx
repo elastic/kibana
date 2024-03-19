@@ -24,14 +24,10 @@ import {
   DashboardRenderer,
 } from '@kbn/dashboard-plugin/public';
 
-import { buildPhraseFilter, Filter } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
-import { HOST_FIELD } from '../../../../../common/constants';
 import type {
   DashboardIdItem,
   DashboardItemWithTitle,
-  InfraCustomDashboardAssetType,
 } from '../../../../../common/custom_dashboards';
 
 import { EmptyDashboards } from './empty_dashboards';
@@ -44,26 +40,7 @@ import { useDataViewsContext } from '../../hooks/use_data_views';
 import { DashboardSelector } from './dashboard_selector';
 import { ContextMenu } from './context_menu';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
-
-const fieldByAssetType = {
-  host: HOST_FIELD,
-} as Record<InfraCustomDashboardAssetType, string>;
-
-export function getFilterByAssetName(
-  assetName: string,
-  assetType: InfraCustomDashboardAssetType,
-  dataView: DataView
-): Filter[] {
-  const filters: Filter[] = [];
-
-  const assetNameField = dataView.getFieldByName(fieldByAssetType[assetType]);
-  if (assetNameField) {
-    const assetNameFilter = buildPhraseFilter(assetNameField, assetName, dataView);
-    filters.push(assetNameFilter);
-  }
-
-  return filters;
-}
+import { getFilterByAssetName } from './build_asset_name_filter';
 
 export function Dashboards() {
   const { dateRange } = useDatePickerContext();
