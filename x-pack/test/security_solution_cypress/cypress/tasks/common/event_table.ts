@@ -14,7 +14,8 @@ import { EVENT_VIEWER_CHECKBOX, SELECT_ALL_EVENTS_CHECKBOX } from '../../screens
 
 export const selectFirstPageEvents = () => {
   cy.get(EVENT_VIEWER_CHECKBOX).find(SELECT_ALL_EVENTS_CHECKBOX).scrollIntoView();
-  cy.get(EVENT_VIEWER_CHECKBOX).find(SELECT_ALL_EVENTS_CHECKBOX).click({ force: true });
+  cy.get(EVENT_VIEWER_CHECKBOX).find(SELECT_ALL_EVENTS_CHECKBOX).click();
+  cy.get(SELECT_ALL_EVENTS_CHECKBOX).should('be.checked');
 };
 
 export const selectAllEvents = () => {

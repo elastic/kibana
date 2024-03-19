@@ -36,3 +36,8 @@ export const opensInspectQueryModal = () => {
 export const waitsForEventsToBeLoaded = () => {
   cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
 };
+
+export const waitForEventsDataGridToBeLoaded = () => {
+  cy.get('[data-test-subj="events-container-loading-true"]').should('not.exist');
+  cy.get('[data-test-subj="events-container-loading-false"]').should('exist');
+};
