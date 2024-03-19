@@ -4932,6 +4932,14 @@
             "section": "def-common.PluginsServiceStart",
             "text": "PluginsServiceStart"
           },
+          " | undefined; security?: ",
+          {
+            "pluginId": "@kbn/core-security-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityBrowserPluginApi",
+            "section": "def-common.SecurityServiceStart",
+            "text": "SecurityServiceStart"
+          },
           " | undefined; }"
         ],
         "path": "src/plugins/kibana_react/public/context/types.ts",

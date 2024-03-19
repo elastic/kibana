@@ -42,6 +42,7 @@ export const SearchControls = ({ search, onSearch, onSort, isLoading }: SearchCo
       <EuiFlexGroup gutterSize="xs" responsive={false}>
         <EuiFlexItem>
           <EuiFieldSearch
+            data-test-subj="logsExplorerSearchControlsFieldSearch"
             compressed
             incremental
             value={search.name}

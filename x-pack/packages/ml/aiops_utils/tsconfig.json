@@ -15,6 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/ml-is-populated-object",
+    "@kbn/ml-agg-utils",
   ],
   "exclude": [
     "target/**/*",
