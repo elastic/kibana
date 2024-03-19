@@ -23,10 +23,10 @@ export class RetryService extends FtrService {
   /**
    * Use to retry block within {timeout} period and return block result.
    * @param timeout retrying timeout
-   * @param block retrying operation
-   * @param onFailureBlock optional block to run on operation failure before the new attempt
+   * @param block retriable action
+   * @param onFailureBlock optional action to run before the new retriable action attempt
    * @param retryDelay optional delay before the new attempt
-   * @returns result from block
+   * @returns result from retriable action
    */
   public async tryForTime<T>(
     timeout: number,
@@ -59,10 +59,10 @@ export class RetryService extends FtrService {
 
   /**
    * Use to wait for block condition to be true
-   * @param description block description
+   * @param description description for retriable action
    * @param timeout retrying timeout
-   * @param block retrying operation
-   * @param onFailureBlock optional block to run on operation failure before the new attempt
+   * @param block retriable action
+   * @param onFailureBlock optional action to run before the new retriable action attempt
    */
   public async waitForWithTimeout(
     description: string,
@@ -95,11 +95,11 @@ export class RetryService extends FtrService {
 
   /**
    * Use to retry block {options.retryCount} times within {options.timeout} period and return block result
-   * @param description block description
-   * @param block retrying operation
-   * @param options options.retryCount to retry block multiple times
-   * @param onFailureBlock optional block to run on operation failure before the new attempt
-   * @returns result from block
+   * @param description description for retriable action
+   * @param block retriable action
+   * @param options options.retryCount for how many attempts to retry
+   * @param onFailureBlock optional action to run before the new retriable action attempt
+   * @returns result from retriable action
    */
   public async tryWithRetries<T>(
     description: string,
