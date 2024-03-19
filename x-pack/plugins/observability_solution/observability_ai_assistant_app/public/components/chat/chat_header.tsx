@@ -152,11 +152,11 @@ export function ChatHeader({
                         content={
                           flyoutPositionMode === 'overlay'
                             ? i18n.translate(
-                                'xpack.observabilityAiAssistant.chatHeader.euiToolTip.flyoutModeLabel',
+                                'xpack.observabilityAiAssistant.chatHeader.euiToolTip.flyoutModeLabel.dock',
                                 { defaultMessage: 'Dock chat' }
                               )
                             : i18n.translate(
-                                'xpack.observabilityAiAssistant.chatHeader.euiToolTip.flyoutModeLabel',
+                                'xpack.observabilityAiAssistant.chatHeader.euiToolTip.flyoutModeLabel.undock',
                                 { defaultMessage: 'Undock chat' }
                               )
                         }
