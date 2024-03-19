@@ -217,13 +217,13 @@ describe('shows suggestions', () => {
         title: 'Bullet vertical',
         hide: false, // shows suggestion when current is gauge
         incomplete: false,
-        score: 0.5,
+        score: 1,
       },
       {
         hide: false,
         incomplete: false,
         previewIcon: IconChartGaugeArc,
-        score: 0.5,
+        score: 0.1,
         state: {
           labelMajorMode: 'auto',
           layerId: 'first',
@@ -253,7 +253,7 @@ describe('shows suggestions', () => {
         hide: false,
         incomplete: false,
         previewIcon: IconChartGaugeCircle,
-        score: 0.5,
+        score: 0.1,
         state: {
           labelMajorMode: 'auto',
           layerId: 'first',

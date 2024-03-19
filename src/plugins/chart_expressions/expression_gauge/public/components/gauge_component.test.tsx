@@ -175,7 +175,7 @@ describe('GaugeComponent', function () {
     } as GaugeRenderProps;
     const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
     const datum = bullet.prop<BulletProps['data']>('data')[0]?.[0];
-    expect(datum?.value).toEqual(10);
+    expect(datum?.value).toEqual(12);
   });
 
   describe('labelMajor and labelMinor settings', () => {

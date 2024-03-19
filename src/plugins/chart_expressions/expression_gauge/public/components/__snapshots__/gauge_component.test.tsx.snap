@@ -574,6 +574,13 @@ exports[`GaugeComponent renders the chart 1`] = `
     }
     id="bullet"
     subtype="vertical"
+    valueLabels={
+      Object {
+        "active": "Current",
+        "target": "Goal",
+        "value": "Count of records",
+      }
+    }
   />
 </Chart>
 `;

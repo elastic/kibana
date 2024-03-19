@@ -65,7 +65,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const debugData = bullet?.rows[0][0];
       expect(debugData?.subtype).to.be('half-circle');
       expect(debugData?.title).to.be('Average machine.ram');
-      expect(debugData?.value).to.be(100);
+      expect(Math.round(debugData?.value ?? 0)).to.be(13104036080);
       expect(debugData?.domain).to.eql([0, 100]);
     });
 
