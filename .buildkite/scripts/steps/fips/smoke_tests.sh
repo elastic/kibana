@@ -15,10 +15,10 @@ echo "--- Smoke Testing for FIPS"
 mkdir -p target
 cd target
 
-download_artifact "kibana-ubi-fips-$FULL_VERSION-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-KIBANA_IP_ADDRESS="192.168.56.7"
+# download_artifact "kibana-ubi-fips-$FULL_VERSION-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+# KIBANA_IP_ADDRESS="192.168.56.7"
 
-docker load <"kibana-ubi-fips-$FULL_VERSION-docker-image.tar.gz"
+# docker load <"kibana-ubi-fips-$FULL_VERSION-docker-image.tar.gz"
 
 cd ..
 
@@ -42,9 +42,16 @@ while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 30; done
 # }
 # trap "echoKibanaLogs" EXIT
 
-export SERVER_HOST="0.0.0.0"
-export ELASTICSEARCH_HOSTS="http://127.0.0.1:9200"
-export ELASTICSEARCH_USERNAME="kibana_system"
-export ELASTICSEARCH_PASSWORD="changeme"
+# export SERVER_HOST="0.0.0.0"
+# export ELASTICSEARCH_HOSTS="http://127.0.0.1:9200"
+# export ELASTICSEARCH_USERNAME="kibana_system"
+# export ELASTICSEARCH_PASSWORD="changeme"
 
-docker run -p 5601:5601 --rm docker.elastic.co/kibana-ci/kibana-ubi-fips:$FULL_VERSION-$BUILDKITE_COMMIT
+# docker run -p 5601:5601 --rm docker.elastic.co/kibana-ci/kibana-ubi-fips:$FULL_VERSION-$BUILDKITE_COMMIT
+docker run \
+  -p 5601:5601 \
+  --env SERVER_HOST="0.0.0.0" \
+  --env ELASTICSEARCH_HOSTS="http://127.0.0.1:9200" \
+  --env ELASTICSEARCH_USERNAME="kibana_system" \
+  --env ELASTICSEARCH_PASSWORD="changeme" \
+  docker.elastic.co/kibana-ci/kibana-ubi-fips:8.14.0-SNAPSHOT-75d5abe8ff6163ddcf7311beebe988d47bb7f790
