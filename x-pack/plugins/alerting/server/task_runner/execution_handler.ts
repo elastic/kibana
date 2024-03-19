@@ -584,7 +584,7 @@ export class ExecutionHandler<
   }
 
   private isSystemAction(action?: RuleAction | RuleSystemAction): action is RuleSystemAction {
-    return this.taskRunnerContext.actionsPlugin.isSystemActionConnector(action?.actionTypeId ?? '');
+    return this.taskRunnerContext.actionsPlugin.isSystemActionConnector(action?.id ?? '');
   }
 
   private isRecoveredAlert(actionGroup: string) {

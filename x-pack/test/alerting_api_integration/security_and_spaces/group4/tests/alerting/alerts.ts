@@ -1876,7 +1876,7 @@ instanceStateValue: true
       });
     }
 
-    describe.only('connector adapters', () => {
+    describe('connector adapters', () => {
       const space = SuperuserAtSpace1.space;
 
       const connectorId = 'system-connector-test.system-action-connector-adapter';
