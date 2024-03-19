@@ -10,6 +10,7 @@ import type { CoreService, CoreContext } from '@kbn/core-base-browser-internal';
 import type { PluginName, PluginOpaqueId } from '@kbn/core-base-common';
 import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
+import { di } from '@kbn/core-di-browser';
 import { PluginWrapper } from './plugin';
 import {
   createPluginInitializerContext,
@@ -148,6 +149,10 @@ export class PluginsService
         pluginDepContracts
       );
 
+      // Ensure all public plugin contracts are exposed services DI
+      di.provide(async (container) => {
+        container.bind(`legacy.${pluginName}.start`).toConstantValue(contract);
+      });
       contracts.set(pluginName, contract);
     }
 

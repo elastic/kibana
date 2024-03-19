@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
+// Instead of a package, this could be part of a new service layer
+
 import type { FormulaPublicApi, LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import { ServiceIdentifier } from '@kbn/core-di-common';
+import { serviceIdentifiers, di } from '@kbn/core-di-browser';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { LensAttributes, LensConfig, LensConfigOptions } from './types';
@@ -21,6 +25,9 @@ import {
   buildPartitionChart,
 } from './charts';
 
+export const serviceIdentifier: ServiceIdentifier<LensConfigBuilder> = 'LensConfigBuilder';
+
+@di.injectable()
 export class LensConfigBuilder {
   private charts = {
     metric: buildMetric,
@@ -38,7 +45,12 @@ export class LensConfigBuilder {
   private formulaAPI: FormulaPublicApi;
   private dataViewsAPI: DataViewsPublicPluginStart;
 
-  constructor(formulaAPI: FormulaPublicApi, dataViewsAPI: DataViewsPublicPluginStart) {
+  constructor(
+    @di.inject(serviceIdentifiers.formula)
+    formulaAPI: FormulaPublicApi,
+    @di.inject(serviceIdentifiers.legacy.dataViews.start)
+    dataViewsAPI: DataViewsPublicPluginStart
+  ) {
     this.formulaAPI = formulaAPI;
     this.dataViewsAPI = dataViewsAPI;
   }
@@ -74,3 +86,8 @@ export class LensConfigBuilder {
     return chartState;
   }
 }
+
+// Should live in a service-specific loader layer that runs before everything else
+di.provide(async (container) => {
+  container.bind(serviceIdentifiers.lensConfigBuilder).to(LensConfigBuilder);
+});

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { css } from '@emotion/react';
 import {
@@ -20,11 +20,13 @@ import {
   EuiButton,
   EuiTitle,
 } from '@elastic/eui';
+import { di } from '@kbn/core-di-browser';
 import type { CoreStart } from '@kbn/core/public';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder/config_builder';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import useAsync from 'react-use/lib/useAsync';
+import * as lensConfigBuilder from '@kbn/lens-embeddable-utils/config_builder';
 import type { StartDependencies } from './plugin';
 import { LensChart } from './embeddable';
 import { MultiPaneFlyout } from './flyout';
@@ -40,10 +42,17 @@ export const App = (props: {
   const [isInlineEditingVisible, setIsinlineEditingVisible] = useState(false);
   const [panelActive, setPanelActive] = useState<number | null>(null);
 
-  const configBuilder = useMemo(
-    () => new LensConfigBuilder(props.stateHelpers.formula, props.plugins.dataViews),
-    [props.plugins.dataViews, props.stateHelpers.formula]
+  const { value: configBuilder, error } = useAsync(() =>
+    di.get(lensConfigBuilder.serviceIdentifier)
   );
+
+  if (error) {
+    throw error;
+  }
+
+  if (!configBuilder) {
+    return null;
+  }
 
   return (
     <KibanaContextProvider

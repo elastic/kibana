@@ -5,16 +5,13 @@
  * 2.0.
  */
 
+import { di, serviceIdentifiers } from '@kbn/core-di-browser';
 import { useCallback } from 'react';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
-import {
-  type LensAttributes,
-  type LensConfig,
-  LensConfigBuilder,
-} from '@kbn/lens-embeddable-utils/config_builder';
+import { type LensAttributes, type LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { useKibanaContextForPlugin } from './use_kibana';
 
 export type UseLensAttributesParams = LensConfig;
@@ -31,7 +28,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
       return undefined;
     }
 
-    const builder = new LensConfigBuilder(formulaAPI, dataViews);
+    const builder = await di.get(serviceIdentifiers.lensConfigBuilder);
 
     return builder.build(params) as Promise<LensAttributes>;
   }, [params.chartType, params.dataset, dataViews]);

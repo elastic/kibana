@@ -25,6 +25,7 @@ export const MomentTimezone = require('moment-timezone/moment-timezone');
 export const IoTs = require('io-ts');
 export const KbnMonaco = require('@kbn/monaco');
 export const MonacoBarePluginApi = require('@kbn/monaco').BarePluginApi;
+export const KbnDi = require('@kbn/core-di-browser');
 export const React = require('react');
 export const ReactDom = require('react-dom');
 export const ReactDomServer = require('react-dom/server');

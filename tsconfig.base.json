@@ -288,6 +288,8 @@
       "@kbn/core-deprecations-server-internal/*": ["packages/core/deprecations/core-deprecations-server-internal/*"],
       "@kbn/core-deprecations-server-mocks": ["packages/core/deprecations/core-deprecations-server-mocks"],
       "@kbn/core-deprecations-server-mocks/*": ["packages/core/deprecations/core-deprecations-server-mocks/*"],
+      "@kbn/core-di-browser": ["packages/core/di/core-di-browser"],
+      "@kbn/core-di-browser/*": ["packages/core/di/core-di-browser/*"],
       "@kbn/core-di-common": ["packages/core/di/core-di-common"],
       "@kbn/core-di-common/*": ["packages/core/di/core-di-common/*"],
       "@kbn/core-di-common-internal": ["packages/core/di/core-di-common-internal"],

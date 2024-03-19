@@ -26,6 +26,7 @@ webpack_cli(
     "//packages/kbn-i18n",
     "//packages/kbn-i18n-react",
     "//packages/kbn-monaco",
+    "//packages/core/di/core-di-browser:kbn-core-di-browser",
     "//packages/kbn-datemath",
     "//packages/kbn-analytics",
     "//packages/kbn-es-query",

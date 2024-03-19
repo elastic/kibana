@@ -3619,6 +3619,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-di-browser@link:packages/core/di/core-di-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-di-common-internal@link:packages/core/di/core-di-common-internal":
   version "0.0.0"
   uid ""

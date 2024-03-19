@@ -6,6 +6,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { di, serviceIdentifiers } from '@kbn/core-di-browser';
 import { Query } from '@kbn/es-query';
 import type { DateRange } from '../../../../../../common/types';
 import { convertDataViewIntoLensIndexPattern } from '../../../../../data_views_service/loader';
@@ -98,3 +99,8 @@ export const createFormulaPublicApi = (): FormulaPublicApi => {
     },
   };
 };
+
+// Should live in a service-specific loader layer
+di.provide(async (container) => {
+  container.bind(serviceIdentifiers.formula).toDynamicValue(createFormulaPublicApi);
+});
