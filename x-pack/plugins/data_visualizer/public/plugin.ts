@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceStart, CoreSetup, CoreStart } from '@kbn/core/public';
+import type {
+  AnalyticsServiceStart,
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -34,6 +39,7 @@ import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_ho
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables';
 import { setStartServices } from './kibana_services';
 import { IndexDataVisualizerLocatorDefinition } from './application/index_data_visualizer/locator';
+import type { ConfigSchema } from '../common/app';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -72,6 +78,12 @@ export class DataVisualizerPlugin
       DataVisualizerStartDependencies
     >
 {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+    const displayFileBeatConfig = initializerContext.config.get().displayFileBeatConfig ?? true;
+    // eslint-disable-next-line no-console
+    console.log('displayFileBeatConfig', displayFileBeatConfig);
+  }
+
   public setup(
     core: CoreSetup<DataVisualizerStartDependencies, DataVisualizerPluginStart>,
     plugins: DataVisualizerSetupDependencies
