@@ -50,7 +50,7 @@ export interface FetchSeriesProps<T extends ValueAggregationMap> {
   start: number;
   end: number;
   filter?: QueryDslQueryContainer[];
-  groupByFields?: string[];
+  groupByFields: string[];
   aggs: T;
   unit: 'ms' | 'rpm' | '%';
 }
@@ -64,7 +64,7 @@ export async function fetchSeries<T extends ValueAggregationMap>({
   start,
   end,
   filter,
-  groupByFields = [],
+  groupByFields,
   aggs,
   unit,
 }: FetchSeriesProps<T>): Promise<Array<ApmFetchedTimeseries<T>>> {

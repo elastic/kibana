@@ -25,7 +25,6 @@ export async function getTransactionFailureRate({
   filter,
   transactionType,
   transactionName,
-  groupByFields = [],
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -35,7 +34,6 @@ export async function getTransactionFailureRate({
   filter: QueryDslQueryContainer[];
   transactionType?: string;
   transactionName?: string;
-  groupByFields?: string[];
 }) {
   return (
     await fetchSeries({
@@ -52,7 +50,7 @@ export async function getTransactionFailureRate({
         ...termQuery(TRANSACTION_TYPE, transactionType),
         ...termQuery(TRANSACTION_NAME, transactionName),
       ],
-      groupByFields: ['transaction.type', ...groupByFields],
+      groupByFields: ['transaction.type', 'transaction.name'],
       aggs: {
         ...getOutcomeAggregation(ApmDocumentType.TransactionMetric),
         value: {

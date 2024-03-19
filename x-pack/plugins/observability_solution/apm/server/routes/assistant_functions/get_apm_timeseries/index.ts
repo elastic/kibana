@@ -83,7 +83,6 @@ export const getApmTimeseriesRt = t.type({
         ]),
       }),
       t.partial({
-        groupByFields: t.array(t.string),
         filter: t.string,
         offset: t.string,
         'service.environment': t.string,
@@ -142,7 +141,6 @@ export async function getApmTimeseries({
           end,
           bucketSize,
           intervalString,
-          groupByFields: stat.groupByFields,
           filter: [
             ...rangeQuery(start, end),
             ...termQuery(SERVICE_NAME, stat['service.name']),

@@ -166,7 +166,6 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
         stats: [
           {
             title: 'Latency',
-            groupByFields: ['transaction.name'],
             'service.name': query['service.name'],
             'service.environment': query['service.environment'],
             timeseries: {
@@ -178,7 +177,6 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
           },
           {
             title: 'Throughput',
-            groupByFields: ['transaction.name'],
             'service.name': query['service.name'],
             'service.environment': query['service.environment'],
             timeseries: {
@@ -189,7 +187,6 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
           },
           {
             title: 'Failure rate',
-            groupByFields: ['transaction.name'],
             'service.name': query['service.name'],
             'service.environment': query['service.environment'],
             timeseries: {
@@ -210,7 +207,6 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
         stats: [
           {
             title: 'Exit span latency',
-            groupByFields: ['transaction.name'],
             'service.name': query['service.name'],
             'service.environment': query['service.environment'],
             timeseries: {
@@ -219,7 +215,6 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
           },
           {
             title: 'Exit span failure rate',
-            groupByFields: ['transaction.name'],
             'service.name': query['service.name'],
             'service.environment': query['service.environment'],
             timeseries: {

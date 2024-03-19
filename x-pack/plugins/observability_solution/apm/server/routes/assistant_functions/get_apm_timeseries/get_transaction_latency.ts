@@ -28,7 +28,6 @@ export async function getTransactionLatency({
   transactionType,
   transactionName,
   latencyAggregationType,
-  groupByFields = [],
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -39,7 +38,6 @@ export async function getTransactionLatency({
   transactionType?: string;
   transactionName?: string;
   latencyAggregationType: LatencyAggregationType;
-  groupByFields?: string[];
 }) {
   return (
     await fetchSeries({
@@ -55,7 +53,7 @@ export async function getTransactionLatency({
         ...termQuery(TRANSACTION_TYPE, transactionType),
         ...termQuery(TRANSACTION_NAME, transactionName)
       ),
-      groupByFields: ['transaction.type', ...groupByFields],
+      groupByFields: ['transaction.type', 'transaction.name'],
       aggs: {
         ...getLatencyAggregation(
           latencyAggregationType,
