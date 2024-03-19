@@ -41,8 +41,8 @@ import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { useDarkMode, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 
-import type { CategorizedApiKey } from './api_keys_grid_page';
-import { ApiKeyBadge, ApiKeyStatus, TimeToolTip } from './api_keys_grid_page';
+import type { CategorizedApiKey } from './api_keys_table';
+import { ApiKeyBadge, ApiKeyStatus, TimeToolTip } from './api_keys_table';
 import type { ApiKeyRoleDescriptors } from '../../../../common/model';
 import { DocLink } from '../../../components/doc_link';
 import { FormField } from '../../../components/form_field';
