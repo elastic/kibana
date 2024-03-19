@@ -76,7 +76,7 @@ export const ElasticsearchOverview = () => {
     }
   }, [hash]);
   const embeddableConsole = useMemo(
-    () => consolePlugin?.renderEmbeddableConsole?.() ?? <></>,
+    () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
 
