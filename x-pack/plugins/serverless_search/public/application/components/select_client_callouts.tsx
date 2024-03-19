@@ -13,10 +13,10 @@ import { FileUploadCallout } from './file_upload_callout';
 
 export const SelectClientCallouts: React.FC = () => (
   <EuiFlexGroup gutterSize="s">
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem>
       <ConnectorsCallout />
     </EuiFlexItem>
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem>
       <FileUploadCallout />
     </EuiFlexItem>
   </EuiFlexGroup>
