@@ -30,10 +30,7 @@ import {
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import { PanelNotificationsAction } from './actions';
-import {
-  ApiActionStorage,
-  type DynamicActionStorageApi,
-} from './embeddables/embeddable_action_storage';
+import { ApiActionStorage, type DynamicActionStorageApi } from './embeddables/api_action_storage';
 import { HasDynamicActions } from './embeddables/interfaces/has_dynamic_actions';
 import { EnhancedEmbeddable } from './types';
 

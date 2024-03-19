@@ -9,7 +9,7 @@ import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugi
 import { of } from '@kbn/kibana-utils-plugin/public';
 import { UiActionsEnhancedSerializedEvent } from '@kbn/ui-actions-enhanced-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import { ApiActionStorage, DynamicActionStorageApi } from './embeddable_action_storage';
+import { ApiActionStorage, DynamicActionStorageApi } from './api_action_storage';
 // use real const to make test fail in case someone accidentally changes it
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { DynamicActionsSerializedState } from '../plugin';

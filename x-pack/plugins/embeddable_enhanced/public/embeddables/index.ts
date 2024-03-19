@@ -6,4 +6,4 @@
  */
 
 export * from './is_enhanced_embeddable';
-export * from './embeddable_action_storage';
+export * from './api_action_storage';
