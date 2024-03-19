@@ -64,7 +64,7 @@ export type CsvPagingStrategy = 'pit' | 'scroll';
  * @deprecated
  */
 export interface BaseParams {
-  browserTimezone: string; // to format dates in the user's time zone
+  browserTimezone?: string; // to format dates in the user's time zone
   objectType: string;
   title: string;
   version: string; // to handle any state migrations

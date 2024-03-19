@@ -210,6 +210,7 @@ export class ReportingPublicPlugin
             application,
             usesUiCapabilities,
             theme: core.theme,
+            version: this.kibanaVersion,
           })
         );
 
@@ -223,6 +224,7 @@ export class ReportingPublicPlugin
               application,
               usesUiCapabilities,
               theme: core.theme,
+              version: this.kibanaVersion,
             })
           );
         }

@@ -28,7 +28,6 @@ import { BaseParams } from '@kbn/reporting-common/types';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 import { ErrorUrlTooLongPanel } from '@kbn/reporting-public/share/share_context_menu/reporting_panel_content/components';
 import { JobAppParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
-import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
 
 interface ReportingSharingData {
@@ -57,10 +56,12 @@ export interface ReportingModalProps {
   onClick: () => void;
   theme: ThemeServiceSetup;
   jobProviderOptions?: JobParamsProviderOptions;
-  getJobParams?: JobAppParamsPDFV2 | JobParamsCSV | JobParamsPNGV2;
+  getJobParams?: JobAppParamsPDFV2 | JobParamsPNGV2;
   objectType: string;
   isDisabled: boolean;
   warnings: string[];
+  columns?: string[];
+  version: string;
 }
 
 type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
@@ -70,8 +71,18 @@ export type Props = ReportingModalProps & { intl: InjectedIntl };
 type AllowedImageExportType = 'pngV2' | 'printablePdfV2' | 'csv';
 
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
-  const { apiClient, intl, toasts, theme, onClose, objectId, jobProviderOptions, objectType } =
-    props;
+  const {
+    apiClient,
+    intl,
+    toasts,
+    theme,
+    onClose,
+    objectId,
+    jobProviderOptions,
+    objectType,
+    columns,
+    version,
+  } = props;
   const isSaved = Boolean(objectId);
   const [isStale, setIsStale] = useState(false);
   const [createReportingJob, setCreatingReportJob] = useState(false);
@@ -114,7 +125,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     [props.getJobParams, objectType]
   );
 
-  const getJobParams = useCallback(
+  const getJobParamHelper = useCallback(
     (shareableUrl?: boolean) => {
       return { ...getJobsParams(selectedRadio, jobProviderOptions) };
     },
@@ -126,12 +137,12 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       if (getJobsParams(selectedRadio, jobProviderOptions) !== undefined) {
         const relativePath = apiClient.getReportingPublicJobPath(
           selectedRadio,
-          apiClient.getDecoratedJobParams(getJobParams(true) as unknown as AppParams)
+          apiClient.getDecoratedJobParams(getJobParamHelper(true) as unknown as AppParams)
         );
         return setAbsoluteUrl(url.resolve(window.location.href, relativePath));
       }
     },
-    [apiClient, getJobParams, selectedRadio, getJobsParams, jobProviderOptions]
+    [apiClient, selectedRadio, getJobsParams, jobProviderOptions, getJobParamHelper]
   );
 
   const markAsStale = useCallback(() => {
@@ -145,62 +156,75 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   }, [markAsStale, getAbsoluteReportGenerationUrl]);
 
   const generateReportingJob = () => {
-    const decoratedJobParams = apiClient.getDecoratedJobParams(
-      getJobParams() as unknown as AppParams
-    );
-    setCreatingReportJob(true);
-    return apiClient
-      .createReportingJob(selectedRadio, decoratedJobParams)
-      .then(() => {
-        toasts.addSuccess({
-          title: intl.formatMessage(
-            {
-              id: 'xpack.reporting.modalContent.successfullyQueuedReportNotificationTitle',
-              defaultMessage: 'Queued report for {objectType}',
+    const decoratedJobParams =
+      selectedRadio !== 'csv'
+        ? apiClient.getDecoratedJobParams(getJobParamHelper() as unknown as AppParams)
+        : {
+            title: props.getJobParams?.title,
+            columns: columns as string[] | undefined,
+            searchSource: {
+              addGlobalTimeFilter: true,
+              absoluteTime: !absoluteUrl,
             },
-            { objectType }
-          ),
-          text: toMountPoint(
-            <FormattedMessage
-              id="xpack.reporting.modalContent.successfullyQueuedReportNotificationDescription"
-              defaultMessage="Track its progress in {path}."
-              values={{
-                path: (
-                  <a href={apiClient.getManagementLink()}>
-                    <FormattedMessage
-                      id="xpack.reporting.modalContent.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-                      defaultMessage="Stack Management &gt; Reporting"
-                    />
-                  </a>
-                ),
-              }}
-            />,
-            { theme$: theme.theme$ }
-          ),
-          'data-test-subj': 'queueReportSuccess',
-        });
-        if (onClose) {
-          onClose();
-        }
-        if (isMounted()) {
-          setCreatingReportJob(false);
-        }
-      })
-      .catch((error) => {
-        toasts.addError(error, {
-          title: intl!.formatMessage({
-            id: 'xpack.reporting.modalContent.notification.reportingErrorTitle',
-            defaultMessage: 'Unable to create report',
-          }),
-          toastMessage: (
-            // eslint-disable-next-line react/no-danger
-            <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
-          ) as unknown as string,
-        });
-        if (isMounted()) {
-          setCreatingReportJob(false);
-        }
-      });
+            objectType,
+            version,
+          };
+    setCreatingReportJob(true);
+    return (
+      apiClient
+        // @ts-ignore
+        .createReportingJob(selectedRadio, decoratedJobParams)
+        .then(() => {
+          toasts.addSuccess({
+            title: intl.formatMessage(
+              {
+                id: 'share.modalContent.successfullyQueuedReportNotificationTitle',
+                defaultMessage: 'Queued report for {objectType}',
+              },
+              { objectType }
+            ),
+            text: toMountPoint(
+              <FormattedMessage
+                id="share.modalContent.successfullyQueuedReportNotificationDescription"
+                defaultMessage="Track its progress in {path}."
+                values={{
+                  path: (
+                    <a href={apiClient.getManagementLink()}>
+                      <FormattedMessage
+                        id="share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                        defaultMessage="Stack Management &gt; Reporting"
+                      />
+                    </a>
+                  ),
+                }}
+              />,
+              { theme$: theme.theme$ }
+            ),
+            'data-test-subj': 'queueReportSuccess',
+          });
+          if (onClose) {
+            onClose();
+          }
+          if (isMounted()) {
+            setCreatingReportJob(false);
+          }
+        })
+        .catch((error) => {
+          toasts.addError(error, {
+            title: intl.formatMessage({
+              id: 'share.modalContent.notification.reportingErrorTitle',
+              defaultMessage: 'Unable to create report',
+            }),
+            toastMessage: (
+              // eslint-disable-next-line react/no-danger
+              <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
+            ) as unknown as string,
+          });
+          if (isMounted()) {
+            setCreatingReportJob(false);
+          }
+        })
+    );
   };
 
   const renderCopyURLButton = ({
@@ -309,7 +333,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
             ]}
             onChange={(id) => {
               setSelectedRadio(id as Exclude<AllowedImageExportType, 'printablePdf'>);
-              getJobParams();
+              getJobsParams(selectedRadio);
             }}
             name="image reporting radio group"
             idSelected={selectedRadio}

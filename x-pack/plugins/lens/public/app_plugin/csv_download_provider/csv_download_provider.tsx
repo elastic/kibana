@@ -101,6 +101,7 @@ interface DownloadPanelShareOpts {
   reportingApiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   theme: CoreSetup['theme'];
+  version: string;
 }
 
 export const downloadCsvShareProvider = ({
@@ -109,6 +110,7 @@ export const downloadCsvShareProvider = ({
   reportingApiClient,
   toasts,
   theme,
+  version,
 }: DownloadPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({ objectType, sharingData, onClose }: ShareContext) => {
     if ('lens' !== objectType) {
@@ -132,7 +134,6 @@ export const downloadCsvShareProvider = ({
       {
         shareMenuItem: {
           name: panelTitle,
-          icon: 'document',
           disabled: !csvEnabled,
           sortOrder: 1,
         },
@@ -150,6 +151,8 @@ export const downloadCsvShareProvider = ({
               isDisabled={!csvEnabled}
               warnings={getWarnings(activeData)}
               theme={theme}
+              columns={columnsSorting}
+              version={version}
               onClick={async () => {
                 await downloadCSVs({
                   title,

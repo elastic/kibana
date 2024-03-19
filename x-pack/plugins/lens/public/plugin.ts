@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  HttpStart,
-  IToasts,
-} from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup, CoreStart, HttpStart } from '@kbn/core/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
@@ -161,7 +155,6 @@ export interface LensPluginSetupDependencies {
   uiActionsEnhanced: AdvancedUiActionsSetup;
   share?: SharePluginSetup;
   contentManagement: ContentManagementPublicSetup;
-  toasts: IToasts;
 }
 
 export interface LensPluginStartDependencies {
@@ -328,7 +321,6 @@ export class LensPlugin {
       uiActionsEnhanced,
       share,
       contentManagement,
-      toasts,
     }: LensPluginSetupDependencies
   ) {
     const startServices = createStartServicesGetter(core.getStartServices);
@@ -410,8 +402,9 @@ export class LensPlugin {
           uiSettings: core.uiSettings,
           formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
           reportingApiClient,
-          toasts,
+          toasts: core.notifications.toasts,
           theme: core.theme,
+          version: share.kibanaVersion,
         })
       );
     }
