@@ -139,7 +139,7 @@ export type SingleMetricViewerEmbeddableServices = [
 export interface AnomalyChartsCustomOutput {
   entityFields?: MlEntityField[];
   severity?: number;
-  indexPatterns?: DataView[];
+  indexPatterns: DataView[];
 }
 export type AnomalyChartsEmbeddableOutput = EmbeddableOutput & AnomalyChartsCustomOutput;
 export interface EditAnomalyChartsPanelContext {

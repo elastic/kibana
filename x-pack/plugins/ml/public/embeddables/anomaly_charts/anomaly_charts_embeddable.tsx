@@ -9,9 +9,10 @@ import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+import { Subject, Subscription, type BehaviorSubject } from 'rxjs';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { IContainer } from '@kbn/embeddable-plugin/public';
+import { embeddableOutputToSubject } from '@kbn/embeddable-plugin/public';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import { EmbeddableAnomalyChartsContainer } from './embeddable_anomaly_charts_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
@@ -42,9 +43,7 @@ export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
   public readonly type: string = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
 
   // API
-  public entityFields = new BehaviorSubject<MlEntityField[] | undefined>(
-    this.getOutput().entityFields
-  );
+  public entityFields: BehaviorSubject<MlEntityField[] | undefined>;
 
   private apiSubscriptions = new Subscription();
 
@@ -55,10 +54,10 @@ export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
   ) {
     super(initialInput, services[2].anomalyDetectorService, services[1].data.dataViews, parent);
 
-    this.apiSubscriptions.add(
-      this.getOutput$().subscribe((output) => {
-        this.entityFields.next(output.entityFields);
-      })
+    this.entityFields = embeddableOutputToSubject<MlEntityField[], AnomalyChartsEmbeddableOutput>(
+      this.apiSubscriptions,
+      this,
+      'entityFields'
     );
   }
 
