@@ -12,7 +12,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { EuiDataGridControlColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
 /**
  * User configurable state of data grid, persisted in saved search
