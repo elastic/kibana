@@ -19,5 +19,8 @@
     "@kbn/cases-components",
     "@kbn/actions-plugin",
     "@kbn/safer-lodash-set",
+    "@kbn/cases-common-constants",
+    "@kbn/cases-common-schema",
+    "@kbn/cases-common-api",
   ]
 }

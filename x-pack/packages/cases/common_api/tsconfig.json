@@ -18,5 +18,6 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/securitysolution-io-ts-utils",
+    "@kbn/cases-common-constants",
   ]
 }

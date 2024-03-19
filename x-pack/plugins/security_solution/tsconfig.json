@@ -188,5 +188,7 @@
     "@kbn/core-ui-settings-server",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-http-server-mocks",
+    "@kbn/cases-common-constants",
+    "@kbn/cases-common-types",
   ]
 }

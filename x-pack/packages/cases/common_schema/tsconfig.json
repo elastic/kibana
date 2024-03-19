@@ -16,5 +16,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/cases-common-constants",
+    "@kbn/cases-common-api",
   ]
 }

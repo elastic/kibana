@@ -25,6 +25,8 @@
     "@kbn/core-plugins-server",
     "@kbn/i18n",
     "@kbn/config",
+    "@kbn/solution-nav-es",
+    "@kbn/solution-nav-oblt",
   ],
   "exclude": [
     "target/**/*",
