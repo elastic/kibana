@@ -15,6 +15,7 @@ import { debounce } from 'lodash';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
 import { useServicesContext } from '../../../contexts';
+import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
 
 export interface EditorProps {
   initialTextValue: string;
@@ -24,24 +25,9 @@ interface QueryParams {
   load_from: string;
 }
 
-const DEFAULT_INPUT_VALUE = `# Click the Variables button, above, to create your own variables.
-GET \${exampleVariable1} // _search
-{
-  "query": {
-    "\${exampleVariable2}": {} // match_all
-  }
-}`;
-
 export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const {
-    services: {
-      history,
-      notifications,
-      settings: settingsService,
-      http,
-      autocompleteInfo,
-      storage,
-    },
+    services: { notifications },
   } = useServicesContext();
   const [value, setValue] = useState(initialTextValue);
 
@@ -67,6 +53,12 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
         if (/https?:\/\/api\.github\.com/.test(url)) {
           loadFrom.headers = { Accept: 'application/vnd.github.v3.raw' };
         }
+
+        // Fire and forget.
+        $.ajax(loadFrom).done((data) => {
+          // when we load data from another Api we also must pass history
+          setValue(`${initialTextValue}\n ${data}`);
+        });
       }
 
       // If we have a data URI instead of HTTP, LZ-decode it. This enables
@@ -109,15 +101,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
     return () => {
       window.removeEventListener('hashchange', onHashChange);
     };
-  }, [
-    notifications.toasts,
-    initialTextValue,
-    history,
-    settingsService,
-    http,
-    autocompleteInfo,
-    storage,
-  ]);
+  }, [notifications.toasts, initialTextValue]);
 
   return (
     <div
