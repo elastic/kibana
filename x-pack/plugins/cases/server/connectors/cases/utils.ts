@@ -78,3 +78,20 @@ export const buildRequiredCustomFieldsForRequest = (
         })
     : [];
 };
+
+export const constructRequiredKibanaPrivileges = (owner: string): string[] => {
+  /**
+   * Kibana features privileges are defined in
+   * x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
+   */
+  return [
+    `cases:${owner}/createCase`,
+    `cases:${owner}/updateCase`,
+    `cases:${owner}/deleteCase`,
+    `cases:${owner}/pushCase`,
+    `cases:${owner}/createComment`,
+    `cases:${owner}/updateComment`,
+    `cases:${owner}/deleteComment`,
+    `cases:${owner}/findConfigurations`,
+  ];
+};

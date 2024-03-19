@@ -20,15 +20,6 @@ import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { APP_ID } from '../common/constants';
-import {
-  createCaseCommentSavedObjectType,
-  caseConfigureSavedObjectType,
-  caseConnectorMappingsSavedObjectType,
-  createCaseSavedObjectType,
-  createCaseUserActionSavedObjectType,
-  casesTelemetrySavedObjectType,
-  casesOracleSavedObjectType,
-} from './saved_object_types';
 
 import type { CasesClient } from './client';
 import type {
@@ -52,6 +43,7 @@ import { registerInternalAttachments } from './internal_attachments';
 import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
+import { registerSavedObjects } from './saved_object_types';
 
 export class CasePlugin
   implements
@@ -103,26 +95,12 @@ export class CasePlugin
       plugins.features.registerKibanaFeature(getCasesKibanaFeature());
     }
 
-    core.savedObjects.registerType(
-      createCaseCommentSavedObjectType({
-        migrationDeps: {
-          persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
-          lensEmbeddableFactory: this.lensEmbeddableFactory,
-        },
-      })
-    );
-
-    core.savedObjects.registerType(caseConfigureSavedObjectType);
-    core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
-    core.savedObjects.registerType(createCaseSavedObjectType(core, this.logger));
-    core.savedObjects.registerType(
-      createCaseUserActionSavedObjectType({
-        persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
-      })
-    );
-
-    core.savedObjects.registerType(casesTelemetrySavedObjectType);
-    core.savedObjects.registerType(casesOracleSavedObjectType);
+    registerSavedObjects({
+      core,
+      logger: this.logger,
+      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+      lensEmbeddableFactory: this.lensEmbeddableFactory,
+    });
 
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
       APP_ID,
@@ -167,7 +145,7 @@ export class CasePlugin
       return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
 
-    registerConnectorTypes({ actions: plugins.actions, getCasesClient, getSpaceId });
+    registerConnectorTypes({ actions: plugins.actions, core, getCasesClient, getSpaceId });
 
     return {
       attachmentFramework: {

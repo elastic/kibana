@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -45,6 +46,7 @@ describe('CasesConnector', () => {
   const mockExecute = jest.fn();
   const getCasesClient = jest.fn().mockResolvedValue({ foo: 'bar' });
   const getSpaceId = jest.fn().mockReturnValue('default');
+  const getUnsecuredSavedObjectsClient = jest.fn();
   // 1ms delay before retrying
   const nextBackOff = jest.fn().mockReturnValue(1);
 
@@ -52,7 +54,7 @@ describe('CasesConnector', () => {
     create: () => ({ nextBackOff }),
   };
 
-  const casesParams = { getCasesClient, getSpaceId };
+  const casesParams = { getCasesClient, getSpaceId, getUnsecuredSavedObjectsClient };
   const connectorParams = {
     configurationUtilities: actionsConfigMock.create(),
     config: {},
@@ -85,7 +87,7 @@ describe('CasesConnector', () => {
 
   it('creates the CasesConnectorExecutor correctly', async () => {
     await connector.run({
-      alerts: [],
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
       groupingBy,
       owner,
       rule,
@@ -105,7 +107,7 @@ describe('CasesConnector', () => {
 
   it('executes the CasesConnectorExecutor correctly', async () => {
     await connector.run({
-      alerts: [],
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
       groupingBy,
       owner,
       rule,
@@ -115,7 +117,7 @@ describe('CasesConnector', () => {
     });
 
     expect(mockExecute).toBeCalledWith({
-      alerts: [],
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
       groupingBy,
       owner,
       rule,
@@ -127,7 +129,7 @@ describe('CasesConnector', () => {
 
   it('creates the cases client correctly', async () => {
     await connector.run({
-      alerts: [],
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
       groupingBy,
       owner,
       rule,
@@ -144,7 +146,7 @@ describe('CasesConnector', () => {
 
     await expect(() =>
       connector.run({
-        alerts: [],
+        alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
         groupingBy,
         owner,
         rule,
@@ -164,7 +166,7 @@ describe('CasesConnector', () => {
 
     await expect(() =>
       connector.run({
-        alerts: [],
+        alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
         groupingBy,
         owner,
         rule,
@@ -184,7 +186,7 @@ describe('CasesConnector', () => {
 
     await expect(() =>
       connector.run({
-        alerts: [],
+        alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
         groupingBy,
         owner,
         rule,
@@ -199,6 +201,28 @@ describe('CasesConnector', () => {
     );
   });
 
+  it('throws a CasesConnectorError when the executor throws a Boom error', async () => {
+    mockExecute.mockRejectedValue(
+      new Boom.Boom('Server error', { statusCode: 403, message: 'my error message' })
+    );
+
+    await expect(() =>
+      connector.run({
+        alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        reopenClosedCases,
+        maximumCasesToOpen,
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Forbidden: Server error"`);
+
+    expect(logger.error.mock.calls[0][0]).toBe(
+      '[CasesConnector][run] Execution of case connector failed. Message: Forbidden: Server error. Status code: 403'
+    );
+  });
+
   it('retries correctly', async () => {
     mockExecute
       .mockRejectedValueOnce(new CasesConnectorError('Conflict error', 409))
@@ -206,7 +230,7 @@ describe('CasesConnector', () => {
       .mockResolvedValue({});
 
     await connector.run({
-      alerts: [],
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
       groupingBy,
       owner,
       rule,
@@ -227,7 +251,7 @@ describe('CasesConnector', () => {
 
     await expect(() =>
       connector.run({
-        alerts: [],
+        alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
         groupingBy,
         owner,
         rule,
@@ -243,5 +267,22 @@ describe('CasesConnector', () => {
 
     expect(nextBackOff).toBeCalledTimes(0);
     expect(mockExecute).toBeCalledTimes(0);
+  });
+
+  it('does not execute with no alerts', async () => {
+    await connector.run({
+      alerts: [],
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      reopenClosedCases,
+      maximumCasesToOpen,
+    });
+
+    expect(getCasesClient).not.toBeCalled();
+    expect(CasesConnectorExecutorMock).not.toBeCalled();
+    expect(mockExecute).not.toBeCalled();
+    expect(nextBackOff).not.toBeCalled();
   });
 });

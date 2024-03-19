@@ -982,13 +982,20 @@ export class CasesConnectorExecutor {
     const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = casesUnderAlertLimit.map(
       ({ theCase, alerts }) => ({
         caseId: theCase.id,
-        attachments: alerts.map((alert) => ({
-          type: AttachmentType.alert,
-          alertId: alert._id,
-          index: alert._index,
-          rule: { id: rule.id, name: rule.name },
-          owner: theCase.owner,
-        })),
+        attachments: [
+          {
+            type: AttachmentType.alert,
+            rule: { id: rule.id, name: rule.name },
+            /**
+             * Map traverses the array in ascending order.
+             * The order is guaranteed to be the same for
+             * both calls by the ECMA-262 spec.
+             */
+            alertId: alerts.map((alert) => alert._id),
+            index: alerts.map((alert) => alert._index),
+            owner: theCase.owner,
+          },
+        ],
       })
     );
 

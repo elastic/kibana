@@ -1,5 +1,8 @@
 {
-  "action": ["actionTypeId", "name"],
+  "action": [
+    "actionTypeId",
+    "name"
+  ],
   "action_task_params": [],
   "alert": [
     "actions",
@@ -69,7 +72,10 @@
     "updatedAt",
     "updatedBy"
   ],
-  "api_key_pending_invalidation": ["apiKeyId", "createdAt"],
+  "api_key_pending_invalidation": [
+    "apiKeyId",
+    "createdAt"
+  ],
   "apm-custom-dashboards": [
     "dashboardSavedObjectId",
     "kuery",
@@ -77,15 +83,40 @@
     "serviceNameFilterEnabled"
   ],
   "apm-indices": [],
-  "apm-server-schema": ["schemaJson"],
-  "apm-service-group": ["color", "description", "groupName", "kuery"],
+  "apm-server-schema": [
+    "schemaJson"
+  ],
+  "apm-service-group": [
+    "color",
+    "description",
+    "groupName",
+    "kuery"
+  ],
   "apm-telemetry": [],
   "app_search_telemetry": [],
-  "application_usage_daily": ["timestamp"],
+  "application_usage_daily": [
+    "timestamp"
+  ],
   "application_usage_totals": [],
-  "canvas-element": ["@created", "@timestamp", "content", "help", "image", "name"],
-  "canvas-workpad": ["@created", "@timestamp", "name"],
-  "canvas-workpad-template": ["help", "name", "tags", "template_key"],
+  "canvas-element": [
+    "@created",
+    "@timestamp",
+    "content",
+    "help",
+    "image",
+    "name"
+  ],
+  "canvas-workpad": [
+    "@created",
+    "@timestamp",
+    "name"
+  ],
+  "canvas-workpad-template": [
+    "help",
+    "name",
+    "tags",
+    "template_key"
+  ],
   "cases": [
     "assignees",
     "assignees.uid",
@@ -156,9 +187,23 @@
     "type",
     "updated_at"
   ],
-  "cases-configure": ["closure_type", "created_at", "owner"],
-  "cases-connector-mappings": ["owner"],
-  "cases-oracle": ["cases", "cases.id", "counter", "createdAt", "rules", "rules.id", "updatedAt"],
+  "cases-configure": [
+    "closure_type",
+    "created_at",
+    "owner"
+  ],
+  "cases-connector-mappings": [
+    "owner"
+  ],
+  "cases-oracle": [
+    "cases",
+    "cases.id",
+    "counter",
+    "createdAt",
+    "rules",
+    "rules.id",
+    "updatedAt"
+  ],
   "cases-telemetry": [],
   "cases-user-actions": [
     "action",
@@ -177,10 +222,19 @@
     "payload.connector.type",
     "type"
   ],
-  "cloud-security-posture-settings": ["rules"],
-  "config": ["buildNum"],
-  "config-global": ["buildNum"],
-  "connector_token": ["connectorId", "tokenType"],
+  "cloud-security-posture-settings": [
+    "rules"
+  ],
+  "config": [
+    "buildNum"
+  ],
+  "config-global": [
+    "buildNum"
+  ],
+  "connector_token": [
+    "connectorId",
+    "tokenType"
+  ],
   "core-usage-stats": [],
   "csp-rule-template": [
     "metadata",
@@ -219,7 +273,10 @@
     "title",
     "version"
   ],
-  "endpoint:user-artifact-manifest": ["artifacts", "schemaVersion"],
+  "endpoint:user-artifact-manifest": [
+    "artifacts",
+    "schemaVersion"
+  ],
   "enterprise_search_telemetry": [],
   "epm-packages": [
     "es_index_patterns",
@@ -258,8 +315,13 @@
     "package_name",
     "package_version"
   ],
-  "event-annotation-group": ["description", "title"],
-  "event_loop_delays_daily": ["lastUpdatedAt"],
+  "event-annotation-group": [
+    "description",
+    "title"
+  ],
+  "event_loop_delays_daily": [
+    "lastUpdatedAt"
+  ],
   "exception-list": [
     "_tags",
     "comments",
@@ -351,8 +413,16 @@
     "size",
     "user"
   ],
-  "file-upload-usage-collection-telemetry": ["file_upload", "file_upload.index_creation_count"],
-  "fileShare": ["created", "name", "token", "valid_until"],
+  "file-upload-usage-collection-telemetry": [
+    "file_upload",
+    "file_upload.index_creation_count"
+  ],
+  "fileShare": [
+    "created",
+    "name",
+    "token",
+    "valid_until"
+  ],
   "fleet-fleet-server-host": [
     "host_urls",
     "is_default",
@@ -362,7 +432,9 @@
     "proxy_id"
   ],
   "fleet-message-signing-keys": [],
-  "fleet-preconfiguration-deletion-record": ["id"],
+  "fleet-preconfiguration-deletion-record": [
+    "id"
+  ],
   "fleet-proxy": [
     "certificate",
     "certificate_authorities",
@@ -372,7 +444,10 @@
     "proxy_headers",
     "url"
   ],
-  "fleet-uninstall-tokens": ["policy_id", "token_plain"],
+  "fleet-uninstall-tokens": [
+    "policy_id",
+    "token_plain"
+  ],
   "graph-workspace": [
     "description",
     "kibanaSavedObjectMeta",
@@ -384,11 +459,24 @@
     "version",
     "wsState"
   ],
-  "guided-onboarding-guide-state": ["guideId", "isActive"],
+  "guided-onboarding-guide-state": [
+    "guideId",
+    "isActive"
+  ],
   "guided-onboarding-plugin-state": [],
-  "index-pattern": ["name", "title", "type"],
-  "infra-custom-dashboards": ["assetType", "dashboardIdList", "kuery"],
-  "infrastructure-monitoring-log-view": ["name"],
+  "index-pattern": [
+    "name",
+    "title",
+    "type"
+  ],
+  "infra-custom-dashboards": [
+    "assetType",
+    "dashboardIdList",
+    "kuery"
+  ],
+  "infrastructure-monitoring-log-view": [
+    "name"
+  ],
   "infrastructure-ui-source": [],
   "ingest-agent-policies": [
     "agent_features",
@@ -417,7 +505,13 @@
     "updated_at",
     "updated_by"
   ],
-  "ingest-download-sources": ["host", "is_default", "name", "proxy_id", "source_id"],
+  "ingest-download-sources": [
+    "host",
+    "is_default",
+    "name",
+    "proxy_id",
+    "source_id"
+  ],
   "ingest-outputs": [
     "allow_edit",
     "auth_type",
@@ -519,10 +613,27 @@
     "targetNamespace",
     "targetType"
   ],
-  "lens": ["description", "state", "title", "visualizationType"],
-  "lens-ui-telemetry": ["count", "date", "name", "type"],
-  "links": ["description", "links", "title"],
-  "maintenance-window": ["enabled", "events"],
+  "lens": [
+    "description",
+    "state",
+    "title",
+    "visualizationType"
+  ],
+  "lens-ui-telemetry": [
+    "count",
+    "date",
+    "name",
+    "type"
+  ],
+  "links": [
+    "description",
+    "links",
+    "title"
+  ],
+  "maintenance-window": [
+    "enabled",
+    "events"
+  ],
   "map": [
     "bounds",
     "description",
@@ -534,7 +645,11 @@
   ],
   "metrics-data-source": [],
   "metrics-explorer-view": [],
-  "ml-job": ["datafeed_id", "job_id", "type"],
+  "ml-job": [
+    "datafeed_id",
+    "job_id",
+    "type"
+  ],
   "ml-module": [
     "datafeeds",
     "defaultIndexPattern",
@@ -547,10 +662,24 @@
     "title",
     "type"
   ],
-  "ml-trained-model": ["job", "job.create_time", "job.job_id", "model_id"],
-  "monitoring-telemetry": ["reportedClusterUuids"],
-  "observability-onboarding-state": ["progress", "state", "type"],
-  "osquery-manager-usage-metric": ["count", "errors"],
+  "ml-trained-model": [
+    "job",
+    "job.create_time",
+    "job.job_id",
+    "model_id"
+  ],
+  "monitoring-telemetry": [
+    "reportedClusterUuids"
+  ],
+  "observability-onboarding-state": [
+    "progress",
+    "state",
+    "type"
+  ],
+  "osquery-manager-usage-metric": [
+    "count",
+    "errors"
+  ],
   "osquery-pack": [
     "created_at",
     "created_by",
@@ -598,8 +727,14 @@
     "updated_by",
     "version"
   ],
-  "policy-settings-protection-updates-note": ["note"],
-  "query": ["description", "title", "titleKeyword"],
+  "policy-settings-protection-updates-note": [
+    "note"
+  ],
+  "query": [
+    "description",
+    "title",
+    "titleKeyword"
+  ],
   "risk-engine-configuration": [
     "dataViewId",
     "enabled",
@@ -611,13 +746,34 @@
     "range.end",
     "range.start"
   ],
-  "rules-settings": ["flapping"],
-  "sample-data-telemetry": ["installCount", "unInstallCount"],
-  "search": ["description", "title"],
-  "search-session": ["created", "realmName", "realmType", "sessionId", "username"],
+  "rules-settings": [
+    "flapping"
+  ],
+  "sample-data-telemetry": [
+    "installCount",
+    "unInstallCount"
+  ],
+  "search": [
+    "description",
+    "title"
+  ],
+  "search-session": [
+    "created",
+    "realmName",
+    "realmType",
+    "sessionId",
+    "username"
+  ],
   "search-telemetry": [],
-  "security-rule": ["rule_id", "version"],
-  "security-solution-signals-migration": ["sourceIndex", "updated", "version"],
+  "security-rule": [
+    "rule_id",
+    "version"
+  ],
+  "security-solution-signals-migration": [
+    "sourceIndex",
+    "updated",
+    "version"
+  ],
   "siem-detection-engine-rule-actions": [
     "actions",
     "actions.actionRef",
@@ -728,8 +884,21 @@
     "updated",
     "updatedBy"
   ],
-  "siem-ui-timeline-note": ["created", "createdBy", "eventId", "note", "updated", "updatedBy"],
-  "siem-ui-timeline-pinned-event": ["created", "createdBy", "eventId", "updated", "updatedBy"],
+  "siem-ui-timeline-note": [
+    "created",
+    "createdBy",
+    "eventId",
+    "note",
+    "updated",
+    "updatedBy"
+  ],
+  "siem-ui-timeline-pinned-event": [
+    "created",
+    "createdBy",
+    "eventId",
+    "updated",
+    "updatedBy"
+  ],
   "slo": [
     "budgetingMethod",
     "description",
@@ -742,7 +911,9 @@
     "tags",
     "version"
   ],
-  "space": ["name"],
+  "space": [
+    "name"
+  ],
   "spaces-usage-stats": [],
   "synthetics-monitor": [
     "alert",
@@ -772,7 +943,11 @@
   ],
   "synthetics-param": [],
   "synthetics-privates-locations": [],
-  "tag": ["color", "description", "name"],
+  "tag": [
+    "color",
+    "description",
+    "name"
+  ],
   "task": [
     "attempts",
     "enabled",
@@ -788,13 +963,33 @@
   ],
   "telemetry": [],
   "threshold-explorer-view": [],
-  "ui-metric": ["count"],
-  "upgrade-assistant-ml-upgrade-operation": ["snapshotId"],
-  "upgrade-assistant-reindex-operation": ["indexName", "status"],
+  "ui-metric": [
+    "count"
+  ],
+  "upgrade-assistant-ml-upgrade-operation": [
+    "snapshotId"
+  ],
+  "upgrade-assistant-reindex-operation": [
+    "indexName",
+    "status"
+  ],
   "uptime-dynamic-settings": [],
-  "uptime-synthetics-api-key": ["apiKey"],
-  "url": ["accessDate", "createDate", "slug"],
-  "usage-counters": ["domainId"],
-  "visualization": ["description", "kibanaSavedObjectMeta", "title", "version"],
+  "uptime-synthetics-api-key": [
+    "apiKey"
+  ],
+  "url": [
+    "accessDate",
+    "createDate",
+    "slug"
+  ],
+  "usage-counters": [
+    "domainId"
+  ],
+  "visualization": [
+    "description",
+    "kibanaSavedObjectMeta",
+    "title",
+    "version"
+  ],
   "workplace_search_telemetry": []
 }
