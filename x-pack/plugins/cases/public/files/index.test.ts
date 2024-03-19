@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_FILE_SIZE } from '../../common/constants';
+import { MAX_FILE_SIZE } from '@kbn/cases-common-constants';
 import { createMockFilesSetup } from '@kbn/files-plugin/public/mocks';
 import { registerCaseFileKinds } from '.';
 import type { FilesConfig } from './types';

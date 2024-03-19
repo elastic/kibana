@@ -27,7 +27,10 @@ import type {
   User,
   CaseAssignees,
   CaseCustomFields,
-} from '../../../common/types/domain';
+  AttachmentRequest,
+  CasePostRequest,
+  UserActionFindRequest,
+} from '@kbn/cases-common-types';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {
   UserActionPersistedAttributes,
@@ -35,11 +38,6 @@ import type {
 } from '../../common/types/user_actions';
 import type { IndexRefresh } from '../types';
 import type { PatchCasesArgs } from '../cases/types';
-import type {
-  AttachmentRequest,
-  CasePostRequest,
-  UserActionFindRequest,
-} from '../../../common/types/api';
 
 export interface BuilderParameters {
   title: {

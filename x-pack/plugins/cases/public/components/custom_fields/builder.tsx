@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { CustomFieldTypes } from '@kbn/cases-common-types';
 import type { CustomFieldBuilderMap } from './types';
-import { CustomFieldTypes } from '../../../common/types/domain';
 import { configureTextCustomFieldFactory } from './text/configure_text_field';
 import { configureToggleCustomFieldFactory } from './toggle/configure_toggle_field';
 

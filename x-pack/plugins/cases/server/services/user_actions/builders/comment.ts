@@ -6,10 +6,10 @@
  */
 
 import { uniqBy } from 'lodash';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../../common/constants';
+import type { CommentUserAction } from '@kbn/cases-common-types';
+import { UserActionActions, UserActionTypes } from '@kbn/cases-common-types';
+import { CASE_COMMENT_SAVED_OBJECT } from '@kbn/cases-common-constants';
 import { extractPersistableStateReferencesFromSO } from '../../../attachment_framework/so_references';
-import type { CommentUserAction } from '../../../../common/types/domain';
-import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 import { getAttachmentSOExtractor } from '../../so_references';

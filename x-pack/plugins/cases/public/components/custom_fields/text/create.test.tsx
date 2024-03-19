@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { FormTestComponent } from '../../../common/test_utils';
 import { Create } from './create';
 import { customFieldsConfigurationMock } from '../../../containers/mock';
-import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../../common/constants';
+import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '@kbn/cases-common-constants';
 
 describe('Create ', () => {
   const onSubmit = jest.fn();

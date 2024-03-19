@@ -12,10 +12,10 @@ import type {
   CasesFindRequest,
   CasesStatusRequest,
   CasesMetricsRequest,
-} from '../../../common/types/api';
-import { getCasesFromAlertsUrl } from '../../../common/api';
+} from '@kbn/cases-common-types';
+import { getCasesFromAlertsUrl } from '@kbn/cases-common-api';
+import type { CasesFindResponseUI, CasesStatus, CasesMetrics } from '@kbn/cases-common-ui';
 import { bulkGetCases, getCases, getCasesMetrics, getCasesStatus } from '../../api';
-import type { CasesFindResponseUI, CasesStatus, CasesMetrics } from '../../../common/ui';
 import type { CasesPublicStart } from '../../types';
 
 export const createClientAPI = ({ http }: { http: HttpStart }): CasesPublicStart['api'] => {

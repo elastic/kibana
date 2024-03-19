@@ -7,9 +7,9 @@
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
-import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants/visualizations';
-import type { PersistableStateAttachmentPayload } from '../../../../common/types/domain';
-import { AttachmentType } from '../../../../common/types/domain';
+import type { PersistableStateAttachmentPayload } from '@kbn/cases-common-types';
+import { AttachmentType } from '@kbn/cases-common-types';
+import { LENS_ATTACHMENT_TYPE } from '@kbn/cases-common-constants';
 import type { LensProps } from '../types';
 
 export const isLensEmbeddable = (embeddable: IEmbeddable): embeddable is LensEmbeddable => {

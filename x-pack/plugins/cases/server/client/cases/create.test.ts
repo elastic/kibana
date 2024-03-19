@@ -12,7 +12,7 @@ import {
   MAX_TITLE_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
 import type { CasePostRequest } from '../../../common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
@@ -23,9 +23,9 @@ import {
   CaseStatuses,
   ConnectorTypes,
   CustomFieldTypes,
-} from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
 
-import type { CaseCustomFields } from '../../../common/types/domain';
+import type { CaseCustomFields } from '@kbn/cases-common-types';
 import { omit } from 'lodash';
 
 describe('create', () => {

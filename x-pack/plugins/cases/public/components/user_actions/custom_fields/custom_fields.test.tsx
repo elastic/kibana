@@ -13,11 +13,7 @@ import { getUserAction } from '../../../containers/mock';
 import { TestProviders } from '../../../common/mock';
 import { createCustomFieldsUserActionBuilder } from './custom_fields';
 import { getMockBuilderArgs } from '../mock';
-import {
-  CustomFieldTypes,
-  UserActionActions,
-  UserActionTypes,
-} from '../../../../common/types/domain';
+import { CustomFieldTypes, UserActionActions, UserActionTypes } from '@kbn/cases-common-types';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');

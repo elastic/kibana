@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UserActionFindResponse } from '../../../common/types/api';
-import { UserActionFindRequestRt, UserActionFindResponseRt } from '../../../common/types/api';
+import type { UserActionFindResponse } from '@kbn/cases-common-types';
+import { UserActionFindRequestRt, UserActionFindResponseRt } from '@kbn/cases-common-types';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import type { CasesClientArgs } from '../types';
 import type { UserActionFind } from './types';

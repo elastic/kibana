@@ -20,7 +20,7 @@ import {
 } from '../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors, actionTypes } from './__mock__';
-import { ConnectorTypes } from '../../../common/types/domain';
+import { ConnectorTypes } from '@kbn/cases-common-types';
 
 describe('Connectors', () => {
   let wrapper: ReactWrapper;

@@ -9,9 +9,9 @@ import {
   BULK_GET_USER_PROFILES_API_TAG,
   GET_CONNECTORS_CONFIGURE_API_TAG,
   SUGGEST_USER_PROFILES_API_TAG,
-} from '../constants';
-import { HttpApiTagOperation } from '../constants/types';
-import type { Owner } from '../constants/types';
+  HttpApiTagOperation,
+} from '@kbn/cases-common-constants';
+import type { Owner } from '@kbn/cases-common-constants';
 import { constructFilesHttpOperationTag } from '../files';
 
 export interface CasesApiTags {

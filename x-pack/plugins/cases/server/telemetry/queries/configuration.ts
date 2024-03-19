@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { Owner } from '../../../common/constants/types';
+import type { Owner } from '@kbn/cases-common-constants';
 import {
   CASE_CONFIGURE_SAVED_OBJECT,
   GENERAL_CASES_OWNER,
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
 import type { Buckets, CasesTelemetry, CollectTelemetryDataParams } from '../types';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 import { findValueInBuckets, getCustomFieldsTelemetry } from './utils';

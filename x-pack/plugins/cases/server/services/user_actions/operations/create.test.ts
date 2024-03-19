@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
+import { CASE_USER_ACTION_SAVED_OBJECT } from '@kbn/cases-common-constants';
 import { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import { createSavedObjectsSerializerMock } from '../../../client/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -38,7 +38,7 @@ import {
   patchNewCustomFieldConfAdded,
   patchCustomFieldConfRemoved,
 } from '../mocks';
-import { AttachmentType } from '../../../../common/types/domain';
+import { AttachmentType } from '@kbn/cases-common-types';
 
 describe('UserActionPersister', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();

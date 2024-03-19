@@ -6,6 +6,6 @@
  */
 
 import type * as rt from 'io-ts';
-import type { SingleFileAttachmentMetadataRt } from '../../../common/types/domain';
+import type { SingleFileAttachmentMetadataRt } from '@kbn/cases-common-types';
 
 export type DownloadableFile = rt.TypeOf<typeof SingleFileAttachmentMetadataRt> & { id: string };

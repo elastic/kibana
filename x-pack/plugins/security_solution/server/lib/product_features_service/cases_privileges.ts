@@ -12,7 +12,7 @@ import {
 import {
   CASES_CONNECTORS_CAPABILITY,
   GET_CONNECTORS_CONFIGURE_API_TAG,
-} from '@kbn/cases-plugin/common/constants';
+} from '@kbn/cases-common-constants';
 
 import { APP_ID } from '../../../common/constants';
 

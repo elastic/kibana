@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { CASES_URL } from '../../../../common/constants';
+import type { caseDomainV1, caseApiV1 } from '@kbn/cases-common-types';
+import { CASES_URL } from '@kbn/cases-common-constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import type { caseApiV1 } from '../../../../common/types/api';
-import type { caseDomainV1 } from '../../../../common/types/domain';
 
 export const postCaseRoute = createCasesRoute({
   method: 'post',

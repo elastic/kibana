@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { CasesConfigurationUICustomField, CaseUICustomField } from '../../../../common/ui';
-import type { SnakeToCamelCase } from '../../../../common/types';
-import type { CustomFieldsUserAction } from '../../../../common/types/domain';
+import type { CustomFieldsUserAction, SnakeToCamelCase } from '@kbn/cases-common-types';
+import type { CasesConfigurationUICustomField, CaseUICustomField } from '@kbn/cases-common-ui';
 import { createCommonUpdateUserActionBuilder } from '../common';
 import type { UserActionBuilder } from '../types';
 import * as i18n from '../translations';

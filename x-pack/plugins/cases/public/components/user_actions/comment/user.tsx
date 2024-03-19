@@ -10,9 +10,8 @@ import classNames from 'classnames';
 import styled from 'styled-components';
 import { EuiText } from '@elastic/eui';
 
-import type { UserCommentAttachment } from '../../../../common/types/domain';
+import type { UserCommentAttachment, SnakeToCamelCase } from '@kbn/cases-common-types';
 import { UserActionTimestamp } from '../timestamp';
-import type { SnakeToCamelCase } from '../../../../common/types';
 import { UserActionMarkdown } from '../markdown_form';
 import { UserActionContentToolbar } from '../content_toolbar';
 import type { UserActionBuilderArgs, UserActionBuilder } from '../types';

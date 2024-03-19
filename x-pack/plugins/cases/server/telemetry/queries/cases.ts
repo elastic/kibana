@@ -13,7 +13,7 @@ import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   OWNERS,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
 import type {
   CollectTelemetryDataParams,
   CasesTelemetry,

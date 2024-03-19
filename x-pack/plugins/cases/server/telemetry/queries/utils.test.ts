@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
 import type {
   AttachmentAggregationResult,
   AttachmentFrameworkAggsResult,

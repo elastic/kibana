@@ -21,7 +21,9 @@ import type {
   CaseStatuses,
   CustomFieldsConfiguration,
   ExternalReferenceAttachmentPayload,
-} from '../../common/types/domain';
+  AttachmentRequest,
+  CasesFindRequestSortFields,
+} from '@kbn/cases-common-types';
 import {
   ActionsAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
@@ -30,22 +32,22 @@ import {
   ExternalReferenceStorageType,
   PersistableStateAttachmentPayloadRt,
   UserCommentAttachmentPayloadRt,
-} from '../../common/types/domain';
+} from '@kbn/cases-common-types';
+import {
+  CASE_SAVED_OBJECT,
+  NO_ASSIGNEES_FILTERING_KEYWORD,
+  OWNER_FIELD,
+} from '@kbn/cases-common-constants';
+import { SEVERITY_EXTERNAL_TO_ESMODEL, STATUS_EXTERNAL_TO_ESMODEL } from '../common/constants';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesSearchParams } from './types';
 
 import { decodeWithExcessOrThrow } from '../common/runtime_types';
 import {
-  CASE_SAVED_OBJECT,
-  NO_ASSIGNEES_FILTERING_KEYWORD,
-  OWNER_FIELD,
-} from '../../common/constants';
-import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
 } from '../../common/utils/attachments';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
-import { SEVERITY_EXTERNAL_TO_ESMODEL, STATUS_EXTERNAL_TO_ESMODEL } from '../common/constants';
 import {
   getIDsAndIndicesAsArrays,
   isCommentRequestTypeAlert,
@@ -54,7 +56,6 @@ import {
   assertUnreachable,
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
-import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
 import type { ICasesCustomField } from '../custom_fields';
 import { casesCustomFields } from '../custom_fields';
 

@@ -13,7 +13,7 @@ import {
   HiddenField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { EuiSelectOption } from '@elastic/eui';
-import type { CustomFieldTypes } from '../../../common/types/domain';
+import type { CustomFieldTypes } from '@kbn/cases-common-types';
 import { builderMap } from './builder';
 
 interface FormFieldsProps {

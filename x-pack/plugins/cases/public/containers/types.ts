@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export * from '../../common/ui';
+export * from '@kbn/cases-common-ui';
 
 export type FeatureIdsResponse = estypes.SearchResponse<
   unknown,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CASE_SAVED_OBJECT } from '../../common/constants';
+import { CASE_SAVED_OBJECT } from '@kbn/cases-common-constants';
 import { CASE_REF_NAME } from './constants';
 import { findReferenceId, getCaseReferenceId } from './references';
 

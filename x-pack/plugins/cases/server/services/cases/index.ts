@@ -21,13 +21,13 @@ import type {
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { nodeBuilder } from '@kbn/es-query';
 
-import type { Case, CaseStatuses, User } from '../../../common/types/domain';
-import { caseStatuses } from '../../../common/types/domain';
+import type { Case, CaseStatuses, User } from '@kbn/cases-common-types';
+import { caseStatuses } from '@kbn/cases-common-types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
 import { decodeOrThrow } from '../../common/runtime_types';
 import type {
   SavedObjectFindOptionsKueryNode,

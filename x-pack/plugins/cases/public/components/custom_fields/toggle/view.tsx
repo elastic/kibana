@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiIcon } from '@elastic/eui';
-import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
+import type { CaseCustomFieldToggle } from '@kbn/cases-common-types';
 import type { CustomFieldType } from '../types';
 
 const ViewComponent: CustomFieldType<CaseCustomFieldToggle>['View'] = ({ customField }) => {

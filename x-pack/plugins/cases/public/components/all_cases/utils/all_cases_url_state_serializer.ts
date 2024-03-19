@@ -6,7 +6,7 @@
  */
 
 import { isEmpty, pick, isNumber } from 'lodash';
-import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../../../common/constants';
+import { NO_ASSIGNEES_FILTERING_KEYWORD } from '@kbn/cases-common-constants';
 import type { AllCasesURLQueryParams, AllCasesTableState } from '../types';
 
 export const allCasesUrlStateSerializer = (state: AllCasesTableState): AllCasesURLQueryParams => {

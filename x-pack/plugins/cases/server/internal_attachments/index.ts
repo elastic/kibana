@@ -6,9 +6,8 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { FileAttachmentMetadataRt } from '../../common/types/domain';
-import { LENS_ATTACHMENT_TYPE } from '../../common/constants/visualizations';
-import { FILE_ATTACHMENT_TYPE } from '../../common/constants';
+import { FileAttachmentMetadataRt } from '@kbn/cases-common-types';
+import { LENS_ATTACHMENT_TYPE, FILE_ATTACHMENT_TYPE } from '@kbn/cases-common-constants';
 
 import { decodeWithExcessOrThrow } from '../common/runtime_types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';

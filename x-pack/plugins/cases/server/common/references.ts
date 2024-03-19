@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { CASE_SAVED_OBJECT } from '../../common/constants';
+import { CASE_SAVED_OBJECT } from '@kbn/cases-common-constants';
 import { CASE_REF_NAME } from './constants';
 
 export const getCaseReferenceId = (references: SavedObjectReference[]): string | undefined => {

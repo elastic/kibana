@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CASE_SAVED_OBJECT } from '../../../../common/constants';
-import type { UserActionAction } from '../../../../common/types/domain';
-import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
+import type { UserActionAction } from '@kbn/cases-common-types';
+import { UserActionActions, UserActionTypes } from '@kbn/cases-common-types';
+import { CASE_SAVED_OBJECT } from '@kbn/cases-common-constants';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 

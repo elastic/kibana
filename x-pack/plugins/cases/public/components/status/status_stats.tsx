@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiDescriptionList, EuiLoadingSpinner } from '@elastic/eui';
-import type { CaseStatuses } from '../../../common/types/domain';
+import type { CaseStatuses } from '@kbn/cases-common-types';
 import { statuses } from './config';
 
 export interface Props {

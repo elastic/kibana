@@ -20,8 +20,8 @@ import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server'
 import type {
   PersistableStateAttachmentAttributes,
   UserCommentAttachmentAttributes,
-} from '../../../common/types/domain';
-import { AttachmentType } from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
+import { AttachmentType } from '@kbn/cases-common-types';
 import type { LensMarkdownNode, MarkdownNode } from '../../../common/utils/markdown_plugins/utils';
 import {
   isLensMarkdownNode,

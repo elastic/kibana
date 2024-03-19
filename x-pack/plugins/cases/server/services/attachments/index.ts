@@ -15,13 +15,13 @@ import type {
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression } from '@kbn/es-query';
-import { AttachmentAttributesRt, AttachmentType } from '../../../common/types/domain';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { AttachmentAttributesRt, AttachmentType } from '@kbn/cases-common-types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   FILE_ATTACHMENT_TYPE,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
+import { decodeOrThrow } from '../../common/runtime_types';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField } from '../../common/utils';
 import type { AggregationResponse } from '../../client/metrics/types';

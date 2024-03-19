@@ -12,7 +12,7 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 
-import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '@kbn/cases-common-constants';
 import type {
   FindConnectorMappingsArgs,
   PostConnectorMappingsArgs,

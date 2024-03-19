@@ -13,8 +13,8 @@ import {
   getFieldValidityAndErrorMessage,
   UseField,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ActionConnector } from '@kbn/cases-common-types';
 import { useKibana } from '../../../common/lib/kibana';
-import type { ActionConnector } from '../../../../common/types/domain';
 import { useGetIssues } from './use_get_issues';
 import * as i18n from './translations';
 

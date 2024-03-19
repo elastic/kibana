@@ -6,8 +6,8 @@
  */
 import { merge } from 'lodash';
 
-import type { SingleCaseMetricsResponse } from '../../../common/types/api';
-import { SingleCaseMetricsResponseRt, SingleCaseMetricsRequestRt } from '../../../common/types/api';
+import type { SingleCaseMetricsResponse } from '@kbn/cases-common-types';
+import { SingleCaseMetricsResponseRt, SingleCaseMetricsRequestRt } from '@kbn/cases-common-types';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';

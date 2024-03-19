@@ -23,8 +23,8 @@ import {
 } from './test_utils';
 import { createPersistableStateAttachmentTypeRegistryMock } from '../../attachment_framework/mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
-import type { ConnectorUserAction } from '../../../common/types/domain';
-import { UserActionActions } from '../../../common/types/domain';
+import type { ConnectorUserAction } from '@kbn/cases-common-types';
+import { UserActionActions } from '@kbn/cases-common-types';
 
 describe('transform', () => {
   const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();

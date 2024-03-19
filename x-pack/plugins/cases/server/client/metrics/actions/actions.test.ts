@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CaseMetricsFeature } from '../../../../common/types/api';
+import { CaseMetricsFeature } from '@kbn/cases-common-types';
 import { createCasesClientMock } from '../../mocks';
 import type { CasesClientArgs } from '../../types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createAttachmentServiceMock } from '../../../services/mocks';
 
 import { Actions } from './actions';
-import type { Case } from '../../../../common/types/domain';
+import type { Case } from '@kbn/cases-common-types';
 
 const clientMock = createCasesClientMock();
 const attachmentService = createAttachmentServiceMock();

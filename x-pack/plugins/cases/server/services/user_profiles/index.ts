@@ -14,13 +14,13 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { SuggestUserProfilesRequest } from '../../../common/types/api';
-import { SuggestUserProfilesRequestRt } from '../../../common/types/api';
+import type { SuggestUserProfilesRequest } from '@kbn/cases-common-types';
+import { SuggestUserProfilesRequestRt } from '@kbn/cases-common-types';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { LicensingService } from '../licensing';
-import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 
 const MAX_PROFILES_SIZE = 100;
 const MIN_PROFILES_SIZE = 0;

@@ -13,7 +13,7 @@ import type {
 import { EuiButtonIcon, EuiPopover, EuiContextMenu, EuiIcon, EuiTextColor } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
-import type { Owner } from '../../../common/constants/types';
+import type { Owner } from '@kbn/cases-common-constants';
 import * as i18n from './translations';
 
 import { constructFileKindIdByOwner } from '../../../common/files';

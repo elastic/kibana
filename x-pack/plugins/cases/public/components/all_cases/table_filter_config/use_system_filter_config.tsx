@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import type { CaseStatuses } from '../../../../common/types/domain';
-import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../../common/constants';
+import type { CaseStatuses } from '@kbn/cases-common-types';
+import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '@kbn/cases-common-constants';
 import { MultiSelectFilter, mapToMultiSelectOption } from '../multi_select_filter';
 import { SolutionFilter } from '../solution_filter';
 import { StatusFilter } from '../status_filter';

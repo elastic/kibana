@@ -9,9 +9,12 @@ import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { SnakeToCamelCase } from '../../../common/types';
-import type { UserActionAction, ConnectorUserAction } from '../../../common/types/domain';
-import { UserActionActions } from '../../../common/types/domain';
+import type {
+  UserActionAction,
+  ConnectorUserAction,
+  SnakeToCamelCase,
+} from '@kbn/cases-common-types';
+import { UserActionActions } from '@kbn/cases-common-types';
 import { UserActionTimestamp } from './timestamp';
 import type { UserActionBuilder, UserActionBuilderArgs } from './types';
 import { UserActionCopyLink } from './copy_link';

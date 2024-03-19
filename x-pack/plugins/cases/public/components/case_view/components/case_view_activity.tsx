@@ -10,14 +10,14 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
+import type { CaseSeverity, CaseStatuses } from '@kbn/cases-common-types';
+import type { CaseUICustomField, UseFetchAlertData } from '@kbn/cases-common-ui';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { useGetCaseUsers } from '../../../containers/use_get_case_users';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
-import type { CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
-import type { CaseUICustomField, UseFetchAlertData } from '../../../../common/ui/types';
 import type { CaseUI } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
 import type { CasesNavigation } from '../../links';

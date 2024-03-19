@@ -13,7 +13,7 @@ import {
   OwnerRt,
 } from './case';
 import { decodeOrThrow } from '../runtime_types';
-import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-common-types';
 
 describe('case types', () => {
   describe('getPartialCaseTransformedAttributesRt', () => {

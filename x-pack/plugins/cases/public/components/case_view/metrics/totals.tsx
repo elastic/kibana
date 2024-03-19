@@ -8,8 +8,8 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { CaseMetricsFeature } from '../../../../common/types/api';
-import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
+import { CaseMetricsFeature } from '@kbn/cases-common-types';
+import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '@kbn/cases-common-ui';
 import {
   ASSOCIATED_HOSTS_METRIC,
   ASSOCIATED_USERS_METRIC,

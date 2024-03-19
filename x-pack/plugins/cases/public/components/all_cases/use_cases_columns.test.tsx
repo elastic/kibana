@@ -17,7 +17,7 @@ import { connectors, useCaseConfigureResponse } from '../configure_cases/__mock_
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
 import { renderHook } from '@testing-library/react-hooks';
-import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
+import { CaseStatuses, CustomFieldTypes } from '@kbn/cases-common-types';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 

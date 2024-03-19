@@ -12,8 +12,8 @@ import { noop } from 'lodash/fp';
 
 import { noCreateCasesPermissions, TestProviders, createAppMockRenderer } from '../../common/mock';
 
-import { AttachmentType } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER, MAX_COMMENT_LENGTH } from '../../../common/constants';
+import { AttachmentType } from '@kbn/cases-common-types';
+import { SECURITY_SOLUTION_OWNER, MAX_COMMENT_LENGTH } from '@kbn/cases-common-constants';
 import { createAttachments } from '../../containers/api';
 import type { AddCommentProps, AddCommentRefObject } from '.';
 import { AddComment } from '.';

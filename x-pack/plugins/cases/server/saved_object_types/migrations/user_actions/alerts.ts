@@ -10,8 +10,8 @@ import type {
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import type { AlertAttachmentPayload } from '../../../../common/types/domain';
-import { AttachmentType } from '../../../../common/types/domain';
+import type { AlertAttachmentPayload } from '@kbn/cases-common-types';
+import { AttachmentType } from '@kbn/cases-common-types';
 import { GENERATED_ALERT } from '../constants';
 import { logError } from '../utils';
 import type { UserActionVersion800 } from './types';

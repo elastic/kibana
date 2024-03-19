@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AttachmentType } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { AttachmentType } from '@kbn/cases-common-types';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 import type { AttachmentUI } from '../../containers/types';
 import { isUserActionTypeSupported, getManualAlertIdsWithNoRuleId } from './helpers';
 

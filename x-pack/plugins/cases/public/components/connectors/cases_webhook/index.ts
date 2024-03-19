@@ -7,8 +7,8 @@
 
 import { lazy } from 'react';
 
+import { ConnectorTypes } from '@kbn/cases-common-types';
 import type { CaseConnector } from '../types';
-import { ConnectorTypes } from '../../../../common/types/domain';
 
 export const getCaseConnector = (): CaseConnector<null> => {
   return {

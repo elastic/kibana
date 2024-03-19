@@ -8,7 +8,7 @@
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
+import { MAX_DESCRIPTION_LENGTH } from '@kbn/cases-common-constants';
 import * as i18n from '../../common/translations';
 
 const { emptyField, maxLengthField } = fieldValidators;

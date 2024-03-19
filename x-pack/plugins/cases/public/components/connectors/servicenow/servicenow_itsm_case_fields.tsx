@@ -13,7 +13,7 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import type { ServiceNowITSMFieldsType } from '../../../../common/types/domain';
+import type { ServiceNowITSMFieldsType } from '@kbn/cases-common-types';
 import * as i18n from './translations';
 
 import type { ConnectorFieldsProps } from '../types';

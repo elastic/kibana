@@ -16,9 +16,9 @@ import {
   useEuiTheme,
   EuiBadge,
 } from '@elastic/eui';
+import type { CustomFieldTypes, CustomFieldsConfiguration } from '@kbn/cases-common-types';
 import * as i18n from '../translations';
 
-import type { CustomFieldTypes, CustomFieldsConfiguration } from '../../../../common/types/domain';
 import { builderMap } from '../builder';
 import { DeleteConfirmationModal } from '../delete_confirmation_modal';
 

@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { INTERNAL_CONNECTORS_URL } from '../../../../common/constants';
+import type { connectorApiV1 } from '@kbn/cases-common-types';
+import { INTERNAL_CONNECTORS_URL } from '@kbn/cases-common-constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import type { connectorApiV1 } from '../../../../common/types/api';
 
 export const getConnectorsRoute = createCasesRoute({
   method: 'get',

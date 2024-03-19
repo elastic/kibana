@@ -72,6 +72,10 @@
     "@kbn/index-management-plugin",
     "@kbn/rison",
     "@kbn/core-application-browser",
+    "@kbn/cases-common-constants",
+    "@kbn/cases-common-types",
+    "@kbn/cases-common-ui",
+    "@kbn/cases-common-api",
   ],
   "exclude": [
     "target/**/*",

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IsolateHostActionType } from '../../../../../common/types/domain';
-import type { SingleCaseMetricsResponse } from '../../../../../common/types/api';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../../../common/constants';
+import { IsolateHostActionType } from '@kbn/cases-common-types';
+import type { SingleCaseMetricsResponse } from '@kbn/cases-common-types';
+import { CASE_COMMENT_SAVED_OBJECT } from '@kbn/cases-common-constants';
 import type { AggregationBuilder, AggregationResponse } from '../../types';
 
 interface ActionsAggregation {

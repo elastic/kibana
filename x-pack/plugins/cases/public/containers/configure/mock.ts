@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { ConfigurationRequest } from '../../../common/types/api';
-import type { Configuration } from '../../../common/types/domain';
-import { ConnectorTypes } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import type { Configuration, ConfigurationRequest } from '@kbn/cases-common-types';
+import { ConnectorTypes } from '@kbn/cases-common-types';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 import type { CaseConnectorMapping } from './types';
 import type { CasesConfigurationUI } from '../types';
 import { customFieldsConfigurationMock } from '../mock';

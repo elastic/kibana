@@ -10,7 +10,7 @@ import { sortBy } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { CasesConfigurationUI } from '../../../common/ui';
+import type { CasesConfigurationUI } from '@kbn/cases-common-ui';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import * as i18n from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';

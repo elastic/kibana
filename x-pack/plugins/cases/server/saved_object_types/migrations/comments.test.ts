@@ -16,8 +16,8 @@ import {
   getLensVisualizations,
   parseCommentString,
 } from '../../../common/utils/markdown_plugins/utils';
-import type { PersistableStateAttachmentAttributes } from '../../../common/types/domain';
-import { AttachmentType } from '../../../common/types/domain';
+import type { PersistableStateAttachmentAttributes } from '@kbn/cases-common-types';
+import { AttachmentType } from '@kbn/cases-common-types';
 
 import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';

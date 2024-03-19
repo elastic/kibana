@@ -13,7 +13,8 @@ import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   FILE_ATTACHMENT_TYPE,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
+import type { Owner } from '@kbn/cases-common-constants';
 import type {
   CaseAggregationResult,
   Buckets,
@@ -30,7 +31,6 @@ import type {
   CustomFieldsTelemetry,
 } from '../types';
 import { buildFilter } from '../../client/utils';
-import type { Owner } from '../../../common/constants/types';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 
 export const getCountsAggregationQuery = (savedObjectType: string) => ({

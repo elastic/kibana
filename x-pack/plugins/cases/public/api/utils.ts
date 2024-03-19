@@ -8,11 +8,14 @@
 import { set } from '@kbn/safer-lodash-set';
 import { isArray, camelCase, isObject, omit, get } from 'lodash';
 import type {
+  Attachment,
+  Case,
+  Cases,
+  UserActions,
   AttachmentRequest,
   CaseResolveResponse,
   CasesFindResponse,
-} from '../../common/types/api';
-import type { Attachment, Case, Cases, UserActions } from '../../common/types/domain';
+} from '@kbn/cases-common-types';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,

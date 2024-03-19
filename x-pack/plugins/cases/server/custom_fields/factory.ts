@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CustomFieldTypes } from '../../common/types/domain';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
 import type { ICasesCustomField, CasesCustomFieldsMap } from './types';
 import { getCasesTextCustomField } from './text';
 import { getCasesToggleCustomField } from './toggle';

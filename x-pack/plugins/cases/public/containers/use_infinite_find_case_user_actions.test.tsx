@@ -8,7 +8,7 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useInfiniteFindCaseUserActions } from './use_infinite_find_case_user_actions';
-import type { CaseUserActionTypeWithAll } from '../../common/ui/types';
+import type { CaseUserActionTypeWithAll } from '@kbn/cases-common-ui';
 import { basicCase, findCaseUserActionsResponse } from './mock';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';

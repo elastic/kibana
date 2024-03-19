@@ -8,7 +8,7 @@
 import type { HttpStart } from '@kbn/core/public';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
-import { INTERNAL_SUGGEST_USER_PROFILES_URL, DEFAULT_USER_SIZE } from '../../../common/constants';
+import { INTERNAL_SUGGEST_USER_PROFILES_URL, DEFAULT_USER_SIZE } from '@kbn/cases-common-constants';
 
 export interface SuggestUserProfilesArgs {
   http: HttpStart;

@@ -11,7 +11,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createAttachmentServiceMock } from '../../../services/mocks';
 
 import { AlertsCount } from './count';
-import type { Case } from '../../../../common/types/domain';
+import type { Case } from '@kbn/cases-common-types';
 
 const clientMock = createCasesClientMock();
 const attachmentService = createAttachmentServiceMock();

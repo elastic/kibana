@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import React from 'react';
-import type { CaseSeverity } from '../../../common/types/domain';
+import type { CaseSeverity } from '@kbn/cases-common-types';
 import { severities } from '../severity/config';
 import type { MultiSelectFilterOption } from './multi_select_filter';
 import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';

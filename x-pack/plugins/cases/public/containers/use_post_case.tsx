@@ -6,7 +6,7 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import type { CasePostRequest } from '../../common/types/api';
+import type { CasePostRequest } from '@kbn/cases-common-types';
 import { postCase } from './api';
 import * as i18n from './translations';
 import { useCasesToast } from '../common/use_cases_toast';

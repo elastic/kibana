@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CaseAssignees } from '../../../common/types/domain';
+import type { CaseAssignees } from '@kbn/cases-common-types';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
 export interface NotifyAssigneesArgs {

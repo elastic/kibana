@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { AttachmentType, ExternalReferenceStorageType } from '../../../common/types/domain';
+import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-common-types';
 import type {
   UserCommentAttachmentPayload,
   FileAttachmentMetadata,
   AlertAttachmentPayload,
   PersistableStateAttachmentPayload,
   ExternalReferenceAttachmentPayload,
-} from '../../../common/types/domain';
-import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+} from '@kbn/cases-common-types';
+import { FILE_ATTACHMENT_TYPE } from '@kbn/cases-common-constants';
 import type { FileAttachmentRequest } from '../types';
 
 export const createUserRequests = (num: number): UserCommentAttachmentPayload[] => {

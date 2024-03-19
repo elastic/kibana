@@ -14,13 +14,13 @@ import type {
   CasesStatusResponse,
   CasesBulkGetResponse,
   CasesMetricsResponse,
-} from '../../common/types/api';
+} from '@kbn/cases-common-types';
 import {
   CasesFindResponseRt,
   CasesStatusResponseRt,
   CasesBulkGetResponseRt,
   CasesMetricsResponseRt,
-} from '../../common/types/api';
+} from '@kbn/cases-common-types';
 import { createToasterPlainError } from '../containers/utils';
 import { throwErrors } from '../../common';
 

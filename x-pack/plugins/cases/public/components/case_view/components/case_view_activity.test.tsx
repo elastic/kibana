@@ -38,8 +38,7 @@ import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_use
 import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
 import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesFeatures } from '../../../common/use_cases_features';
-import { ConnectorTypes, UserActionTypes } from '../../../../common/types/domain';
-import { CaseMetricsFeature } from '../../../../common/types/api';
+import { ConnectorTypes, UserActionTypes, CaseMetricsFeature } from '@kbn/cases-common-types';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';

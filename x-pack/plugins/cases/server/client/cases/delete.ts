@@ -9,16 +9,16 @@ import pMap from 'p-map';
 import { chunk } from 'lodash';
 import type { SavedObjectsBulkDeleteObject } from '@kbn/core/server';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
-import type { CasesDeleteRequest } from '../../../common/types/api';
-import { CasesDeleteRequestRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import type { CasesDeleteRequest } from '@kbn/cases-common-types';
+import { CasesDeleteRequestRt } from '@kbn/cases-common-types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_FILES_PER_CASE,
   MAX_DOCS_PER_PAGE,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
+import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import type { CasesClientArgs } from '..';
 import { createCaseError, createCaseErrorFromSOError, isSOError } from '../../common/error';
 import type { OwnerEntity } from '../../authorization';

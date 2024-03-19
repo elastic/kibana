@@ -22,8 +22,8 @@ import {
   UseField,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { OWNER_INFO } from '@kbn/cases-common-constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { OWNER_INFO } from '../../../common/constants';
 
 import * as i18n from './translations';
 

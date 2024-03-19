@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OWNER_INFO } from '../constants';
+import { OWNER_INFO } from '@kbn/cases-common-constants';
 import { getCaseOwnerByAppId, isValidOwner } from './owner';
 
 describe('owner utils', () => {

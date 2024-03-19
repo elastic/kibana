@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
-import { CaseStatuses } from '../../../common/types/domain';
+import { CaseStatuses } from '@kbn/cases-common-types';
 
 import type { MultiSelectFilterOption } from './multi_select_filter';
 import { MultiSelectFilter } from './multi_select_filter';

@@ -7,10 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { CASE_COMMENT_DETAILS_URL } from '../../../../common/constants';
+import type { attachmentDomainV1 } from '@kbn/cases-common-types';
+import { CASE_COMMENT_DETAILS_URL } from '@kbn/cases-common-constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import type { attachmentDomainV1 } from '../../../../common/types/domain';
 
 export const getCommentRoute = createCasesRoute({
   method: 'get',

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UserActionActions } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { UserActionActions } from '@kbn/cases-common-types';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';

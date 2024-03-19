@@ -13,7 +13,7 @@ import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createCategoryUserActionBuilder } from './category';
 import { getMockBuilderArgs } from './mock';
-import { UserActionActions } from '../../../common/types/domain';
+import { UserActionActions } from '@kbn/cases-common-types';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');

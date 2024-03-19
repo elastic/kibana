@@ -10,9 +10,9 @@ import * as api from '../api';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
 import { useGetCasesMetrics } from './use_get_cases_metrics';
-import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 import { useToasts } from '../common/lib/kibana';
-import { CaseMetricsFeature } from '../../common/types/api';
+import { CaseMetricsFeature } from '@kbn/cases-common-types';
 
 jest.mock('../api');
 jest.mock('../common/lib/kibana');

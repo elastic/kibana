@@ -11,10 +11,9 @@ import type { EuiCommentProps } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
-import type { AlertAttachment } from '../../../../common/types/domain';
+import type { AlertAttachment, SnakeToCamelCase } from '@kbn/cases-common-types';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
-import type { SnakeToCamelCase } from '../../../../common/types';
 import { MultipleAlertsCommentEvent, SingleAlertCommentEvent } from './alert_event';
 import { UserActionShowAlert } from './show_alert';
 import { ShowAlertTableLink } from './show_alert_table_link';

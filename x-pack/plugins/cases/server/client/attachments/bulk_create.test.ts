@@ -11,7 +11,7 @@ import {
   MAX_COMMENT_LENGTH,
   MAX_BULK_CREATE_ATTACHMENTS,
   MAX_USER_ACTIONS_PER_CASE,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
 import { bulkCreate } from './bulk_create';
 import { createUserActionServiceMock } from '../../services/mocks';
 

@@ -7,6 +7,8 @@
 
 import { useCallback, useMemo } from 'react';
 
+import type { CaseConnector } from '@kbn/cases-common-types';
+import { CaseStatuses } from '@kbn/cases-common-types';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import {
   getLicenseError,
@@ -15,8 +17,6 @@ import {
   getDeletedConnectorError,
   getCaseClosedInfo,
 } from './helpers';
-import type { CaseConnector } from '../../../common/types/domain';
-import { CaseStatuses } from '../../../common/types/domain';
 import type { ErrorMessage } from './callout/types';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { useGetActionLicense } from '../../containers/use_get_action_license';

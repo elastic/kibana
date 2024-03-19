@@ -7,9 +7,6 @@
 
 import type { SavedObject } from '@kbn/core/server';
 
-import { SECURITY_SOLUTION_OWNER } from '../common/constants';
-import { createCasesClientMock } from './client/mocks';
-import type { CaseSavedObjectTransformed } from './common/types/case';
 import type {
   ActionsAttachmentPayload,
   AlertAttachmentPayload,
@@ -17,7 +14,8 @@ import type {
   ConnectorMappings,
   UserActionAttributes,
   UserCommentAttachmentPayload,
-} from '../common/types/domain';
+  CasePostRequest,
+} from '@kbn/cases-common-types';
 import {
   UserActionActions,
   UserActionTypes,
@@ -25,8 +23,10 @@ import {
   CaseStatuses,
   ConnectorTypes,
   AttachmentType,
-} from '../common/types/domain';
-import type { CasePostRequest } from '../common/types/api';
+} from '@kbn/cases-common-types';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
+import { createCasesClientMock } from './client/mocks';
+import type { CaseSavedObjectTransformed } from './common/types/case';
 import type { CasesServerStart } from './types';
 
 const lensPersistableState = {

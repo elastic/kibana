@@ -12,13 +12,13 @@ import { i18n } from '@kbn/i18n';
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { NavigateToAppOptions } from '@kbn/core/public';
-import { getUICapabilities } from '../../../client/helpers/capabilities';
-import { convertToCamelCase } from '../../../api/utils';
 import {
   FEATURE_ID,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
-} from '../../../../common/constants';
+} from '@kbn/cases-common-constants';
+import { getUICapabilities } from '../../../client/helpers/capabilities';
+import { convertToCamelCase } from '../../../api/utils';
 import type { CasesPermissions } from '../../../../common';
 import type { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';

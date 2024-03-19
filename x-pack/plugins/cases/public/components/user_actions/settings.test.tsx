@@ -7,7 +7,7 @@
 
 import { EuiCommentList } from '@elastic/eui';
 import React from 'react';
-import { UserActionActions } from '../../../common/types/domain';
+import { UserActionActions } from '@kbn/cases-common-types';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { getUserAction } from '../../containers/mock';

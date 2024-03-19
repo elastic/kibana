@@ -13,7 +13,7 @@ import type {
   SavedObjectsExportTransformContext,
   SavedObjectsType,
 } from '@kbn/core/server';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_SAVED_OBJECT } from '@kbn/cases-common-constants';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { handleExport } from '../import_export/export';
 import { caseMigrations } from '../migrations';

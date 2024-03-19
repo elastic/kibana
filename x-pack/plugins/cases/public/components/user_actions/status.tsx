@@ -8,8 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
-import type { SnakeToCamelCase } from '../../../common/types';
-import type { StatusUserAction, CaseStatuses } from '../../../common/types/domain';
+import type { StatusUserAction, CaseStatuses, SnakeToCamelCase } from '@kbn/cases-common-types';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { statuses } from '../status';

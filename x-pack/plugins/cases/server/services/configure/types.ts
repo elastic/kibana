@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ConfigurationAttributes } from '../../../common/types/domain';
+import type { ConfigurationAttributes } from '@kbn/cases-common-types';
 import type { IndexRefresh } from '../types';
 import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 

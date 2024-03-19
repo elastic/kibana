@@ -8,8 +8,8 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { ServiceNowSIRFieldsType } from '../../../../common/types/domain';
-import { ConnectorTypes } from '../../../../common/types/domain';
+import type { ServiceNowSIRFieldsType } from '@kbn/cases-common-types';
+import { ConnectorTypes } from '@kbn/cases-common-types';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsPreviewProps } from '../types';
 import { ConnectorCard } from '../card';

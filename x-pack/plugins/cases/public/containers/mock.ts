@@ -16,7 +16,11 @@ import type {
   Cases,
   CaseConnector,
   Attachment,
-} from '../../common/types/domain';
+  CasesFindResponse,
+  CasesStatusResponse,
+  UserActionWithResponse,
+  SnakeToCamelCase,
+} from '@kbn/cases-common-types';
 import {
   CaseSeverity,
   CaseStatuses,
@@ -26,9 +30,9 @@ import {
   AttachmentType,
   ExternalReferenceStorageType,
   CustomFieldTypes,
-} from '../../common/types/domain';
-import type { ActionLicense, CaseUI, CasesStatus, UserActionUI } from './types';
-
+  CaseMetricsFeature,
+} from '@kbn/cases-common-types';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 import type {
   ResolvedCase,
   SingleCaseMetrics,
@@ -45,21 +49,15 @@ import type {
   AttachmentUI,
   CaseUICustomField,
   CasesConfigurationUICustomField,
-} from '../../common/ui/types';
-import { CaseMetricsFeature } from '../../common/types/api';
-import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import type { SnakeToCamelCase } from '../../common/types';
+} from '@kbn/cases-common-ui';
+import type { ActionLicense, CaseUI, CasesStatus, UserActionUI } from './types';
+
 import { covertToSnakeCase } from './utils';
 import type {
   ExternalReferenceAttachmentType,
   AttachmentViewObject,
   PersistableStateAttachmentType,
 } from '../client/attachment_framework/types';
-import type {
-  CasesFindResponse,
-  CasesStatusResponse,
-  UserActionWithResponse,
-} from '../../common/types/api';
 
 export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';

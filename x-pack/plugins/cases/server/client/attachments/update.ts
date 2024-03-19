@@ -7,13 +7,13 @@
 
 import Boom from '@hapi/boom';
 
-import { AttachmentPatchRequestRt } from '../../../common/types/api';
+import type { Case } from '@kbn/cases-common-types';
+import { AttachmentPatchRequestRt } from '@kbn/cases-common-types';
+import { CASE_SAVED_OBJECT } from '@kbn/cases-common-constants';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
-import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';

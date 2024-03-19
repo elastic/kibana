@@ -6,8 +6,8 @@
  */
 import { v1 as uuidv1 } from 'uuid';
 
-import type { Case } from '../../../common/types/domain';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import type { Case } from '@kbn/cases-common-types';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
 
 import {
   MAX_ASSIGNEES_FILTER_LENGTH,
@@ -16,7 +16,7 @@ import {
   MAX_DOCS_PER_PAGE,
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { mockCases } from '../../mocks';
 import {

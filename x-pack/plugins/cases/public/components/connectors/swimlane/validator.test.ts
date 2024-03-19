@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SwimlaneConnectorType } from '../../../../common/types/domain';
+import { SwimlaneConnectorType } from '@kbn/cases-common-types';
 import { swimlaneConnector as connector } from '../mock';
 import { isAnyRequiredFieldNotSet, connectorValidator } from './validator';
 

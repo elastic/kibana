@@ -7,8 +7,8 @@
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import { AttachmentRequestRt } from '../../../common/types/api';
-import type { Case } from '../../../common/types/domain';
+import type { Case } from '@kbn/cases-common-types';
+import { AttachmentRequestRt } from '@kbn/cases-common-types';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';

@@ -11,21 +11,27 @@ import { partition } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { Case, CustomFieldsConfiguration, User } from '../../../common/types/domain';
-import { CaseSeverity, UserActionTypes } from '../../../common/types/domain';
+import type {
+  Case,
+  CustomFieldsConfiguration,
+  User,
+  BulkCreateCasesRequest,
+  BulkCreateCasesResponse,
+  CasePostRequest,
+} from '@kbn/cases-common-types';
+import {
+  CaseSeverity,
+  UserActionTypes,
+  BulkCreateCasesResponseRt,
+  BulkCreateCasesRequestRt,
+} from '@kbn/cases-common-types';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
 import { createCaseError, isSODecoratedError, isSOError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
-import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
-import type {
-  BulkCreateCasesRequest,
-  BulkCreateCasesResponse,
-  CasePostRequest,
-} from '../../../common/types/api';
-import { BulkCreateCasesResponseRt, BulkCreateCasesRequestRt } from '../../../common/types/api';
 import { validateCustomFields } from './validators';
 import { normalizeCreateCaseRequest } from './utils';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';

@@ -58,7 +58,7 @@ import {
   AttachmentType,
   ConnectorTypes,
   CustomFieldTypes,
-} from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 
 jest.mock('../../containers/use_post_case');

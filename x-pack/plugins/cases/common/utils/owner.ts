@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OWNER_INFO } from '../constants';
+import { OWNER_INFO } from '@kbn/cases-common-constants';
 
 export const isValidOwner = (owner: string): owner is keyof typeof OWNER_INFO =>
   Object.keys(OWNER_INFO).includes(owner);

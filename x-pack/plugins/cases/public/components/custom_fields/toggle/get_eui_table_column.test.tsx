@@ -8,7 +8,7 @@ import React from 'react';
 
 import { screen } from '@testing-library/react';
 
-import { CustomFieldTypes } from '../../../../common/types/domain';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { getEuiTableColumn } from './get_eui_table_column';

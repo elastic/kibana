@@ -10,13 +10,13 @@ import { useLocation, useHistory } from 'react-router-dom';
 import deepEqual from 'react-fast-compare';
 import { isEmpty } from 'lodash';
 
-import type { FilterOptions, QueryParams } from '../../../common/ui/types';
+import { LOCAL_STORAGE_KEYS } from '@kbn/cases-common-constants';
+import type { FilterOptions, QueryParams } from '@kbn/cases-common-ui';
 import {
   DEFAULT_CASES_TABLE_STATE,
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_QUERY_PARAMS,
 } from '../../containers/constants';
-import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 import type { AllCasesTableState, AllCasesURLState } from './types';
 import { stringifyUrlParams } from './utils/stringify_url_params';
 import { allCasesUrlStateDeserializer } from './utils/all_cases_url_state_deserializer';

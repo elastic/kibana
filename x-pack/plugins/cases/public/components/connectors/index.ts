@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import type {
+  JiraFieldsType,
+  ServiceNowITSMFieldsType,
+  ServiceNowSIRFieldsType,
+  ResilientFieldsType,
+  SwimlaneFieldsType,
+} from '@kbn/cases-common-types';
 import type { CaseConnectorsRegistry } from './types';
 import { createCaseConnectorsRegistry } from './connectors_registry';
 import { getCaseConnector as getJiraCaseConnector } from './jira';
@@ -12,13 +19,6 @@ import { getCaseConnector as getSwimlaneCaseConnector } from './swimlane';
 import { getCaseConnector as getResilientCaseConnector } from './resilient';
 import { getCaseConnector as getCasesWebhookCaseConnector } from './cases_webhook';
 import { getServiceNowITSMCaseConnector, getServiceNowSIRCaseConnector } from './servicenow';
-import type {
-  JiraFieldsType,
-  ServiceNowITSMFieldsType,
-  ServiceNowSIRFieldsType,
-  ResilientFieldsType,
-  SwimlaneFieldsType,
-} from '../../../common/types/domain';
 
 export * from './types';
 

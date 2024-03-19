@@ -7,9 +7,8 @@
 
 import type { EuiCommentProps } from '@elastic/eui';
 
-import type { SnakeToCamelCase } from '../../../../common/types';
-import type { CommentUserAction } from '../../../../common/types/domain';
-import { UserActionActions, AttachmentType } from '../../../../common/types/domain';
+import type { CommentUserAction, SnakeToCamelCase } from '@kbn/cases-common-types';
+import { UserActionActions, AttachmentType } from '@kbn/cases-common-types';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { createCommonUpdateUserActionBuilder } from '../common';

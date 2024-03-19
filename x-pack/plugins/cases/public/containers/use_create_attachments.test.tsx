@@ -7,8 +7,8 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { AttachmentType } from '../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { AttachmentType } from '@kbn/cases-common-types';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 import { useCreateAttachments } from './use_create_attachments';
 import { basicCaseId } from './mock';
 import * as api from './api';

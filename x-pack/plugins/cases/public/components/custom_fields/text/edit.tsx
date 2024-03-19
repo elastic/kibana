@@ -25,9 +25,9 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import type { CaseCustomFieldText } from '../../../../common/types/domain';
-import { CustomFieldTypes } from '../../../../common/types/domain';
-import type { CasesConfigurationUICustomField } from '../../../../common/ui';
+import type { CaseCustomFieldText } from '@kbn/cases-common-types';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
+import type { CasesConfigurationUICustomField } from '@kbn/cases-common-ui';
 import type { CustomFieldType } from '../types';
 import { View } from './view';
 import {

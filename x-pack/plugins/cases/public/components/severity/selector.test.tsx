@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseSeverity } from '../../../common/types/domain';
+import { CaseSeverity } from '@kbn/cases-common-types';
 import { render } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';

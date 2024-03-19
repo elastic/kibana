@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CustomFieldTypes } from '../../common/types/domain';
+import type { CustomFieldTypes } from '@kbn/cases-common-types';
 
 export interface ICasesCustomField {
   isFilterable: boolean;

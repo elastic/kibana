@@ -8,15 +8,15 @@
 import type {
   ExternalReferenceAttachmentPayload,
   FileAttachmentMetadata,
-} from '../../../common/types/domain';
-import { FileAttachmentMetadataRt } from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
+import { FileAttachmentMetadataRt } from '@kbn/cases-common-types';
 
 import {
   compressionMimeTypes,
   IMAGE_MIME_TYPES,
   textMimeTypes,
   pdfMimeTypes,
-} from '../../../common/constants/mime_types';
+} from '@kbn/cases-common-constants';
 import * as i18n from './translations';
 
 export const isImage = (file: { mimeType?: string }) => file.mimeType?.startsWith('image/');

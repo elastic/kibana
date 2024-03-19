@@ -6,10 +6,9 @@
  */
 
 import { omit, merge } from 'lodash';
-import type { SnakeToCamelCase } from '../../../../common/types';
+import type { SnakeToCamelCase, AlertAttachment } from '@kbn/cases-common-types';
 import { getRuleId, getRuleInfo, getRuleName } from './alert';
 import type { Ecs } from '../../../containers/types';
-import type { AlertAttachment } from '../../../../common/types/domain';
 
 describe('rule getters', () => {
   describe.each([

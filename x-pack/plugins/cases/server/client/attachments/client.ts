@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { Case, Attachments, Attachment } from '../../../common/types/domain';
 import type {
+  Case,
+  Attachments,
+  Attachment,
   AlertResponse,
   AttachmentsFindResponse,
   BulkGetAttachmentsResponse,
-} from '../../../common/types/api';
+} from '@kbn/cases-common-types';
 import type { CasesClient } from '../client';
 
 import type { CasesClientInternal } from '../client_internal';

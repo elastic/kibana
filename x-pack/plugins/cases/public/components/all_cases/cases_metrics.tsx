@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import prettyMilliseconds from 'pretty-ms';
-import { CaseStatuses } from '../../../common/types/domain';
+import { CaseStatuses } from '@kbn/cases-common-types';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { StatusStats } from '../status/status_stats';
 import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';

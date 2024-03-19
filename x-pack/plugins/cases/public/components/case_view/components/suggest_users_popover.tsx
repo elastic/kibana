@@ -10,8 +10,8 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserProfilesPopover } from '@kbn/user-profile-components';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { MAX_ASSIGNEES_PER_CASE } from '@kbn/cases-common-constants';
 import { useIsUserTyping } from '../../../common/use_is_user_typing';
-import { MAX_ASSIGNEES_PER_CASE } from '../../../../common/constants';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import type { AssigneeWithProfile } from '../../user_profiles/types';

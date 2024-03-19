@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { ConnectorTypes } from '../../../common/types/domain';
+import { ConnectorTypes } from '@kbn/cases-common-types';
 import { ConnectorCard } from './card';
 import { createQueryWithMarkup } from '../../common/test_utils';
 

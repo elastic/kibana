@@ -9,7 +9,7 @@ import fs from 'fs';
 import mustache from 'mustache';
 import { join } from 'path';
 import { assertNever } from '@elastic/eui';
-import { CaseStatuses, CaseSeverity } from '../../../../../common/types/domain';
+import { CaseStatuses, CaseSeverity } from '@kbn/cases-common-types';
 import type { CaseSavedObjectTransformed } from '../../../../common/types/case';
 import { getTemplateFilePath } from '../utils';
 

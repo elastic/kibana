@@ -17,7 +17,7 @@ import {
   INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
-} from '../../common/constants';
+} from '@kbn/cases-common-constants';
 
 import {
   deleteCases,
@@ -80,7 +80,7 @@ import {
   ConnectorTypes,
   AttachmentType,
   CustomFieldTypes,
-} from '../../common/types/domain';
+} from '@kbn/cases-common-types';
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../common/lib/kibana');

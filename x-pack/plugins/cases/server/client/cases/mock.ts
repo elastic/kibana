@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
-import type { AlertAttachment, Attachment } from '../../../common/types/domain';
+import type {
+  AlertAttachment,
+  Attachment,
+  CaseUserActionsDeprecatedResponse,
+} from '@kbn/cases-common-types';
 import {
   AttachmentType,
   ConnectorTypes,
   ExternalReferenceStorageType,
   UserActionActions,
-} from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER, FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+} from '@kbn/cases-common-types';
+import { SECURITY_SOLUTION_OWNER, FILE_ATTACHMENT_TYPE } from '@kbn/cases-common-constants';
 
 export const updateUser = {
   updated_at: '2020-03-13T08:34:53.450Z',

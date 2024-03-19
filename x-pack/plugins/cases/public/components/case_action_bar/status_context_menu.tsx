@@ -8,8 +8,8 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
-import type { CaseStatuses } from '../../../common/types/domain';
-import { caseStatuses } from '../../../common/types/domain';
+import type { CaseStatuses } from '@kbn/cases-common-types';
+import { caseStatuses } from '@kbn/cases-common-types';
 import { StatusPopoverButton } from '../status';
 import { CHANGE_STATUS } from '../all_cases/translations';
 

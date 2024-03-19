@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type { ActionConnector, ActionTypeConnector } from '../../../../common/types/domain';
+import type {
+  ActionConnector,
+  ActionTypeConnector,
+  ConfigurationPatchRequest,
+  ConfigurationRequest,
+} from '@kbn/cases-common-types';
 
 import type { ApiProps, CasesConfigurationUI } from '../../types';
 import { casesConfigurationsMock } from '../mock';
 import { actionTypesMock, connectorsMock } from '../../../common/mock/connectors';
-import type { ConfigurationPatchRequest, ConfigurationRequest } from '../../../../common/types/api';
 
 export const getSupportedActionConnectors = async ({
   signal,

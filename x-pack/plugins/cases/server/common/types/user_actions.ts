@@ -6,11 +6,11 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { UserActionAttributes } from '../../../common/types/domain';
+import type { UserActionAttributes } from '@kbn/cases-common-types';
 import {
   UserActionAttributesRt,
   CaseUserActionWithoutReferenceIdsRt,
-} from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
 import type { User } from './user';
 
 interface UserActionCommonPersistedAttributes {

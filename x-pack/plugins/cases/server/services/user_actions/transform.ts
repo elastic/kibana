@@ -7,19 +7,15 @@
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 
-import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
-import { isCommentRequestTypePersistableState } from '../../../common/utils/attachments';
-import {
-  isConnectorUserAction,
-  isPushedUserAction,
-  isCreateCaseUserAction,
-  isCommentUserAction,
-} from '../../../common/utils/user_actions';
+import type {
+  UserActionAttributes,
+  CaseUserActionDeprecatedResponse,
+} from '@kbn/cases-common-types';
 import {
   CASE_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   NONE_CONNECTOR_ID,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
 import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,
@@ -27,6 +23,13 @@ import {
   EXTERNAL_REFERENCE_REF_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
+import { isCommentRequestTypePersistableState } from '../../../common/utils/attachments';
+import {
+  isConnectorUserAction,
+  isPushedUserAction,
+  isCreateCaseUserAction,
+  isCommentUserAction,
+} from '../../../common/utils/user_actions';
 import { findConnectorIdReference } from '../transform';
 import { isCommentRequestTypeExternalReferenceSO } from '../type_guards';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
@@ -37,7 +40,6 @@ import type {
   UserActionSavedObjectTransformed,
   UserActionTransformedAttributes,
 } from '../../common/types/user_actions';
-import type { UserActionAttributes } from '../../../common/types/domain';
 
 export function transformFindResponseToExternalModel(
   userActions: SavedObjectsFindResponse<UserActionPersistedAttributes>,

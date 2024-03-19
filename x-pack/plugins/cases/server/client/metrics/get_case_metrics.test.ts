@@ -8,7 +8,7 @@
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { getCaseMetrics } from './get_case_metrics';
-import { CaseMetricsFeature } from '../../../common/types/api';
+import { CaseMetricsFeature } from '@kbn/cases-common-types';
 import type { CasesClientMock } from '../mocks';
 import { createCasesClientMock } from '../mocks';
 import type { CasesClientArgs } from '../types';

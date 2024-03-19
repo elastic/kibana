@@ -22,9 +22,9 @@ import {
 } from '../../common/mock';
 import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
 
-import { SortFieldCase } from '../../../common/ui/types';
-import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { SortFieldCase } from '@kbn/cases-common-ui';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-common-types';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 import { getEmptyCellValue } from '../empty_value';
 import { useKibana } from '../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';

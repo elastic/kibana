@@ -13,8 +13,8 @@ import {
   OBSERVABILITY_OWNER,
   OWNERS,
   SECURITY_SOLUTION_OWNER,
-} from '../../common/constants';
-import type { Owner } from '../../common/constants/types';
+} from '@kbn/cases-common-constants';
+import type { Owner } from '@kbn/cases-common-constants';
 import { constructFileKindIdByOwner } from '../../common/files';
 import type { CaseFileKinds, FilesConfig } from './types';
 import * as i18n from './translations';

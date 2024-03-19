@@ -20,8 +20,8 @@ export type {
   CasePostRequest,
   GetRelatedCasesByAlertResponse,
   UserActionFindResponse,
-} from './types/api';
-export type { Case, Cases, RelatedCase } from './types/domain';
+} from '@kbn/cases-common-types';
+export type { Case, Cases, RelatedCase } from '@kbn/cases-common-types';
 export type {
   CaseUI,
   CasesUI,
@@ -31,9 +31,9 @@ export type {
   CasesPermissions,
   CasesCapabilities,
   CasesStatus,
-} from './ui/types';
+} from '@kbn/cases-common-ui';
 
-export { CaseSeverity } from './types/domain';
+export { CaseSeverity } from '@kbn/cases-common-types';
 
 export {
   APP_ID,
@@ -55,12 +55,20 @@ export {
   CASES_CONNECTORS_CAPABILITY,
   GET_CONNECTORS_CONFIGURE_API_TAG,
   CASES_SETTINGS_CAPABILITY,
-} from './constants';
+} from '@kbn/cases-common-constants';
 
-export type { AttachmentAttributes } from './types/domain';
-export { ConnectorTypes, AttachmentType, ExternalReferenceStorageType } from './types/domain';
-export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl, throwErrors } from './api';
+export type { AttachmentAttributes } from '@kbn/cases-common-types';
+export {
+  ConnectorTypes,
+  AttachmentType,
+  ExternalReferenceStorageType,
+} from '@kbn/cases-common-types';
+export {
+  getCasesFromAlertsUrl,
+  getCaseFindUserActionsUrl,
+  throwErrors,
+} from '@kbn/cases-common-api';
 export { createUICapabilities, type CasesUiCapabilities } from './utils/capabilities';
 export { getApiTags, type CasesApiTags } from './utils/api_tags';
-export { CaseMetricsFeature } from './types/api';
-export type { SingleCaseMetricsResponse, CasesMetricsResponse } from './types/api';
+export { CaseMetricsFeature } from '@kbn/cases-common-types';
+export type { SingleCaseMetricsResponse, CasesMetricsResponse } from '@kbn/cases-common-types';

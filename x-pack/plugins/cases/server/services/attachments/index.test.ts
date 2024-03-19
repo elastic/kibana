@@ -22,7 +22,7 @@ import {
   persistableStateAttachmentAttributesWithoutInjectedId,
 } from '../../attachment_framework/mocks';
 import { createAlertAttachment, createUserAttachment } from './test_utils';
-import { AttachmentType } from '../../../common/types/domain';
+import { AttachmentType } from '@kbn/cases-common-types';
 import { createErrorSO, createSOFindResponse } from '../test_utils';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../common';
 

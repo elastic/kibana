@@ -6,7 +6,7 @@
  */
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { ConnectorTypes } from '../../common/types/domain';
+import { ConnectorTypes } from '@kbn/cases-common-types';
 import { createESJiraConnector, createJiraConnector } from './test_utils';
 import {
   findConnectorIdReference,

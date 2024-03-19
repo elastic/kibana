@@ -1,0 +1,26 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/cases-components",
+    "@kbn/actions-plugin",
+    "@kbn/safer-lodash-set",
+    "@kbn/cases-common-constants",
+    "@kbn/cases-common-schema",
+    "@kbn/cases-common-api",
+  ]
+}

@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import type { SingleCaseMetricsFeature } from '../../common/ui';
+import type { SingleCaseMetricsFeature } from '@kbn/cases-common-ui';
 import { useGetCaseMetrics } from './use_get_case_metrics';
 import { basicCase } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
-import { CaseMetricsFeature } from '../../common/types/api';
+import { CaseMetricsFeature } from '@kbn/cases-common-types';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');

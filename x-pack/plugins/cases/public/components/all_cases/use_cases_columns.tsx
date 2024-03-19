@@ -26,9 +26,9 @@ import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-import type { ActionConnector } from '../../../common/types/domain';
-import { CaseSeverity } from '../../../common/types/domain';
-import type { CaseUI } from '../../../common/ui/types';
+import type { ActionConnector } from '@kbn/cases-common-types';
+import { CaseSeverity } from '@kbn/cases-common-types';
+import type { CaseUI } from '@kbn/cases-common-ui';
 import type { CasesColumnSelection } from './types';
 import { getEmptyCellValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';

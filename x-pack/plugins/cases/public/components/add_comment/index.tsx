@@ -23,7 +23,8 @@ import {
   UseField,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { AttachmentType } from '../../../common/types/domain';
+import { AttachmentType } from '@kbn/cases-common-types';
+import { MAX_COMMENT_LENGTH } from '@kbn/cases-common-constants';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { CaseUI } from '../../containers/types';
 import type { EuiMarkdownEditorRef } from '../markdown_editor';
@@ -36,7 +37,6 @@ import type { AddCommentFormSchema } from './schema';
 import { schema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { MAX_COMMENT_LENGTH } from '../../../common/constants';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;

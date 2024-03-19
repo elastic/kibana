@@ -13,7 +13,7 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
-} from '../../common/constants';
+} from '@kbn/cases-common-constants';
 import type { Verbs, OperationDetails } from './types';
 import { ReadOperations, WriteOperations } from './types';
 

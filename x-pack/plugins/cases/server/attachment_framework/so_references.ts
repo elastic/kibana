@@ -6,8 +6,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { AttachmentRequest } from '../../common/types/api';
-import type { PersistableStateAttachmentPayload } from '../../common/types/domain';
+import type { PersistableStateAttachmentPayload, AttachmentRequest } from '@kbn/cases-common-types';
 import { isCommentRequestTypePersistableState } from '../../common/utils/attachments';
 import type { PersistableStateAttachmentTypeRegistry } from './persistable_state_registry';
 

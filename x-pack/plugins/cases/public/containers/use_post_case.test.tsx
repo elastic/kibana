@@ -7,8 +7,8 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import * as api from './api';
-import { ConnectorTypes } from '../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { ConnectorTypes } from '@kbn/cases-common-types';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';

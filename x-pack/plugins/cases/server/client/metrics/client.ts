@@ -11,7 +11,7 @@ import type {
   SingleCaseMetricsResponse,
   CasesMetricsRequest,
   CasesMetricsResponse,
-} from '../../../common/types/api';
+} from '@kbn/cases-common-types';
 import type { CasesClient } from '../client';
 
 import type { CasesClientArgs } from '../types';

@@ -9,10 +9,10 @@ import React from 'react';
 
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 
+import { APP_OWNER } from '@kbn/cases-common-constants';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 
-import { APP_OWNER } from '../../../common/constants';
 import { getCasesLazy } from '../../client/ui/get_cases';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 import { Wrapper } from '../wrappers';

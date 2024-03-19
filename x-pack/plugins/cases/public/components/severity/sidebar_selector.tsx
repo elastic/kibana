@@ -7,7 +7,7 @@
 
 import { EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React from 'react';
-import type { CaseSeverity } from '../../../common/types/domain';
+import type { CaseSeverity } from '@kbn/cases-common-types';
 import { SeveritySelector } from './selector';
 import { SEVERITY_TITLE } from './translations';
 

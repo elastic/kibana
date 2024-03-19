@@ -14,10 +14,10 @@ import type {
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import type { CaseUserActionWithoutReferenceIds } from '../../../common/types/domain';
+import type { CaseUserActionWithoutReferenceIds } from '@kbn/cases-common-types';
 import type { UserActionEvent } from './types';
 
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 import { createSOFindResponse } from '../test_utils';
 import {
   casePayload,
@@ -49,7 +49,7 @@ import {
   UserActionTypes,
   CaseSeverity,
   CaseStatuses,
-} from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
 
 describe('CaseUserActionService', () => {
   const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();

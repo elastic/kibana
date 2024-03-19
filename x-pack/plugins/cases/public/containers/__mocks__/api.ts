@@ -39,14 +39,14 @@ import type {
   CaseUsers,
   ResolvedCase,
   CaseUserActionsStats,
-} from '../../../common/ui/types';
+} from '@kbn/cases-common-ui';
 import type {
   SingleCaseMetricsResponse,
   CasePostRequest,
   CasePatchRequest,
   AttachmentRequest,
-} from '../../../common/types/api';
-import { CaseStatuses } from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
+import { CaseStatuses } from '@kbn/cases-common-types';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import { userProfiles } from '../user_profiles/api.mock';

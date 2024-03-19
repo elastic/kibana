@@ -8,7 +8,7 @@
 import type { HTTPService } from '..';
 import { casesMetrics, casesStatus } from '../../containers/mock';
 import type { CasesMetrics, CasesStatus } from '../../containers/types';
-import type { CasesFindRequest, CasesMetricsRequest } from '../../../common/types/api';
+import type { CasesFindRequest, CasesMetricsRequest } from '@kbn/cases-common-types';
 
 export const getCasesStatus = async ({
   http,

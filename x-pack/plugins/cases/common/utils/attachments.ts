@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { AttachmentRequest } from '../types/api';
 import type {
   ExternalReferenceAttachmentPayload,
   PersistableStateAttachmentPayload,
-} from '../types/domain';
-import { AttachmentType } from '../types/domain';
+  AttachmentRequest,
+} from '@kbn/cases-common-types';
+import { AttachmentType } from '@kbn/cases-common-types';
 
 /**
  * A type narrowing function for external reference attachments.

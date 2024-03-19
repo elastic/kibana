@@ -8,7 +8,7 @@
 import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import { APP_ID } from '../../../common/constants';
+import { APP_ID } from '@kbn/cases-common-constants';
 import { useNavigation } from '../lib/kibana';
 import { TestProviders } from '../mock';
 import {

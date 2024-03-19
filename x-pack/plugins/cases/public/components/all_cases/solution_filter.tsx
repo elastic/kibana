@@ -9,7 +9,7 @@ import React from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 
-import { OWNER_INFO } from '../../../common/constants';
+import { OWNER_INFO } from '@kbn/cases-common-constants';
 import * as i18n from './translations';
 import type { Solution } from './types';
 import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FilterOptions } from '../../../../common/ui';
+import type { FilterOptions } from '@kbn/cases-common-ui';
 
 export interface FilterConfigState {
   key: string;

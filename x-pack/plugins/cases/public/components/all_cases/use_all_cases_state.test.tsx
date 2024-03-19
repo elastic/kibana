@@ -17,7 +17,7 @@ import { SortFieldCase } from '../../containers/types';
 import { stringifyUrlParams } from './utils/stringify_url_params';
 import { CaseSeverity } from '../../../common';
 import type { AllCasesTableState } from './types';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 

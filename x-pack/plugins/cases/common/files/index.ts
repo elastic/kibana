@@ -7,8 +7,8 @@
 
 import * as rt from 'io-ts';
 import { isEmpty } from 'lodash';
-import { OWNERS } from '../constants';
-import type { HttpApiTagOperation, Owner } from '../constants/types';
+import { OWNERS } from '@kbn/cases-common-constants';
+import type { HttpApiTagOperation, Owner } from '@kbn/cases-common-constants';
 
 /**
  * This type is only used to validate for deletion, it does not check all the fields that should exist in the file

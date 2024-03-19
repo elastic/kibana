@@ -8,9 +8,8 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { SnakeToCamelCase } from '../../../common/types';
-import type { TagsUserAction } from '../../../common/types/domain';
-import { UserActionActions } from '../../../common/types/domain';
+import type { TagsUserAction, SnakeToCamelCase } from '@kbn/cases-common-types';
+import { UserActionActions } from '@kbn/cases-common-types';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { Tags } from '../tags/tags';

@@ -12,6 +12,14 @@ import type {
 } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import type { AlertAttachmentAttributes, AttachmentTotals } from '@kbn/cases-common-types';
+import { AttachmentType, AlertAttachmentAttributesRt } from '@kbn/cases-common-types';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  MAX_ALERTS_PER_CASE,
+  MAX_DOCS_PER_PAGE,
+} from '@kbn/cases-common-constants';
 import { isSOError } from '../../../common/error';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type {
@@ -20,15 +28,7 @@ import type {
   AttachmentSavedObjectTransformed,
 } from '../../../common/types/attachments';
 import { AttachmentTransformedAttributesRt } from '../../../common/types/attachments';
-import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-  MAX_ALERTS_PER_CASE,
-  MAX_DOCS_PER_PAGE,
-} from '../../../../common/constants';
 import { buildFilter, combineFilters } from '../../../client/utils';
-import type { AlertAttachmentAttributes, AttachmentTotals } from '../../../../common/types/domain';
-import { AttachmentType, AlertAttachmentAttributesRt } from '../../../../common/types/domain';
 import type {
   AlertIdsAggsResult,
   BulkOptionalAttributes,

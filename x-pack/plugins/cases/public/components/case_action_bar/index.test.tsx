@@ -22,7 +22,7 @@ import {
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
-import { CaseMetricsFeature } from '../../../common/types/api';
+import { CaseMetricsFeature } from '@kbn/cases-common-types';
 
 jest.mock('../../containers/use_get_case_connectors');
 jest.mock('../case_view/use_on_refresh_case_view_page');

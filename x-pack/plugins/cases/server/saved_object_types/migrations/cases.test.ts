@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CaseAttributes, ExternalService } from '../../../common/types/domain';
-import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
+import type { CaseAttributes, ExternalService } from '@kbn/cases-common-types';
+import { CaseSeverity, CaseStatuses, ConnectorTypes } from '@kbn/cases-common-types';
 import type { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import { CASE_SAVED_OBJECT, NONE_CONNECTOR_ID } from '../../../common/constants';
+import { CASE_SAVED_OBJECT, NONE_CONNECTOR_ID } from '@kbn/cases-common-constants';
 import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
 import { getNoneCaseConnector } from '../../common/utils';
 import type { ESCaseConnectorWithId } from '../../services/test_utils';

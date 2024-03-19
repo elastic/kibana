@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { ActionTypeConnector } from '@kbn/cases-common-types';
+import { ConnectorTypes } from '@kbn/cases-common-types';
 import { mockedTestProvidersOwner } from '../../../common/mock';
-import type { ActionTypeConnector } from '../../../../common/types/domain';
-import { ConnectorTypes } from '../../../../common/types/domain';
 import type { ActionConnector } from '../../../containers/configure/types';
 import { connectorsMock, actionTypesMock } from '../../../common/mock/connectors';
 export { mappings } from '../../../containers/configure/mock';

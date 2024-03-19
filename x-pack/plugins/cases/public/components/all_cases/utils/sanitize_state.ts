@@ -6,8 +6,8 @@
  */
 
 import { CaseStatuses } from '@kbn/cases-components';
+import { SORT_ORDER_VALUES } from '@kbn/cases-common-ui';
 import { CaseSeverity } from '../../../../common';
-import { SORT_ORDER_VALUES } from '../../../../common/ui';
 import { DEFAULT_QUERY_PARAMS } from '../../../containers/constants';
 import type { AllCasesTableState } from '../types';
 import { CASES_TABLE_PER_PAGE_VALUES } from '../types';

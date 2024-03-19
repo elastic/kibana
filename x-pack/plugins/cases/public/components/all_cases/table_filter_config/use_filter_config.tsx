@@ -8,9 +8,9 @@
 import type { SetStateAction } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { merge, isEqual, isEmpty } from 'lodash';
+import { LOCAL_STORAGE_KEYS } from '@kbn/cases-common-constants';
+import type { CasesConfigurationUI, FilterOptions } from '@kbn/cases-common-ui';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
-import type { CasesConfigurationUI, FilterOptions } from '../../../../common/ui';
-import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 import type { FilterConfig, FilterConfigState } from './types';
 import { useCustomFieldsFilterConfig } from './use_custom_fields_filter_config';
 import { deflattenCustomFieldKey, isFlattenCustomField } from '../utils';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CustomFieldTypes, UserActionActions } from '../../../../common/types/domain';
+import { CustomFieldTypes, UserActionActions } from '@kbn/cases-common-types';
 import { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import type { UserActionParameters } from '../types';
 import { CustomFieldsUserActionBuilder } from './custom_fields';

@@ -11,20 +11,23 @@ import type {
   AlertAttachmentAttributes,
   Attachment,
   Attachments,
-} from '../../../common/types/domain';
-import { AttachmentType } from '../../../common';
-import type { AlertResponse, AttachmentsFindResponse } from '../../../common/types/api';
+  AlertResponse,
+  AttachmentsFindResponse,
+} from '@kbn/cases-common-types';
 import {
+  AttachmentRt,
+  AttachmentsRt,
   AlertResponseRt,
   FindAttachmentsQueryParamsRt,
   AttachmentsFindResponseRt,
-} from '../../../common/types/api';
+} from '@kbn/cases-common-types';
+import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '@kbn/cases-common-constants';
+import { AttachmentType } from '../../../common';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 
 import type { FindCommentsArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
 
-import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 import {
   defaultSortField,
@@ -37,7 +40,6 @@ import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { buildFilter, combineFilters } from '../utils';
 import { Operations } from '../../authorization';
-import { AttachmentRt, AttachmentsRt } from '../../../common/types/domain';
 
 const normalizeAlertResponse = (
   alerts: Array<SavedObject<AlertAttachmentAttributes>>

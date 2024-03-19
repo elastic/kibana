@@ -8,7 +8,7 @@
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { KueryNode } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
-import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_USER_ACTION_SAVED_OBJECT } from '@kbn/cases-common-constants';
 import { buildFilter } from '../../client/utils';
 import type {
   CasesTelemetry,

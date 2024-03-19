@@ -12,7 +12,7 @@ import * as api from './api';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
 import { useToasts } from '../common/lib/kibana/hooks';
-import { OWNERS } from '../../common/constants';
+import { OWNERS } from '@kbn/cases-common-constants';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana/hooks');

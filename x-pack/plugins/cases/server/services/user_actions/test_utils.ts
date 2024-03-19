@@ -16,14 +16,14 @@ import type {
   UserActionAction,
   CaseUserActionWithoutReferenceIds,
   ConnectorUserAction,
-} from '../../../common/types/domain';
-import { UserActionActions, CaseSeverity, CaseStatuses } from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
+import { UserActionActions, CaseSeverity, CaseStatuses } from '@kbn/cases-common-types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
 import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,

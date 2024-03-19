@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APP_ID, FEATURE_ID } from '../../../common/constants';
+import { APP_ID, FEATURE_ID } from '@kbn/cases-common-constants';
 import { useKibana } from '../../common/lib/kibana';
 import type { CasesPermissions } from '../../containers/types';
 import { allCasePermissions } from '../../utils/permissions';

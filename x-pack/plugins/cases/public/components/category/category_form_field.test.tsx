@@ -13,7 +13,7 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { CategoryFormField } from './category_form_field';
 import { categories } from '../../containers/mock';
-import { MAX_CATEGORY_LENGTH } from '../../../common/constants';
+import { MAX_CATEGORY_LENGTH } from '@kbn/cases-common-constants';
 import { FormTestComponent } from '../../common/test_utils';
 
 describe('Category', () => {

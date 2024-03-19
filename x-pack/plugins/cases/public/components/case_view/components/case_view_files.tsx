@@ -12,7 +12,7 @@ import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import type { CaseUI } from '../../../../common/ui/types';
+import type { CaseUI } from '@kbn/cases-common-ui';
 import type { CaseFilesFilteringOptions } from '../../../containers/use_get_case_files';
 
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';

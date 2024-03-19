@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GENERAL_CASES_OWNER } from '../../../common/constants';
+import { GENERAL_CASES_OWNER } from '@kbn/cases-common-constants';
 import { renderHook } from '@testing-library/react-hooks';
 import { useToasts } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';

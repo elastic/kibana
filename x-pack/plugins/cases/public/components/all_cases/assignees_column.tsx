@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { CaseUI } from '../../../common/ui/types';
+import type { CaseUI } from '@kbn/cases-common-ui';
 import { getEmptyCellValue } from '../empty_value';
 import { UserToolTip } from '../user_profiles/user_tooltip';
 import { useAssignees } from '../../containers/user_profiles/use_assignees';

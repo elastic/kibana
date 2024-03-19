@@ -7,13 +7,13 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { CaseConnector, ExternalService, User } from '../../../common/types/domain';
-import { UserActionTypes } from '../../../common/types/domain';
+import type { CaseConnector, ExternalService, User } from '@kbn/cases-common-types';
+import { UserActionTypes } from '@kbn/cases-common-types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   NONE_CONNECTOR_ID,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
 import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { getStatusConfiguration } from '@kbn/cases-components/src/status/config';
-import { CaseStatuses } from '../../../common/types/domain';
+import { CaseStatuses } from '@kbn/cases-common-types';
 import * as i18n from './translations';
 import type { Statuses } from './types';
 

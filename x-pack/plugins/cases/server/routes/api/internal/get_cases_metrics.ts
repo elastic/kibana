@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { metricsApiV1 } from '../../../../common/types/api';
+import type { metricsApiV1 } from '@kbn/cases-common-types';
 
-import { INTERNAL_CASE_METRICS_URL } from '../../../../common/constants';
+import { INTERNAL_CASE_METRICS_URL } from '@kbn/cases-common-constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 

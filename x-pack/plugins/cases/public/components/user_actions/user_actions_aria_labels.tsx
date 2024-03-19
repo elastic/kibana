@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UserActionTypes } from '../../../common/types/domain';
+import type { UserActionTypes } from '@kbn/cases-common-types';
 import * as i18n from './translations';
 
 export const getUserActionAriaLabel = (type: keyof typeof UserActionTypes) => {

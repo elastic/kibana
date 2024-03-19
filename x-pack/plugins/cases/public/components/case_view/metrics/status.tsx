@@ -9,8 +9,8 @@ import React, { useMemo } from 'react';
 import prettyMilliseconds from 'pretty-ms';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { CaseMetricsFeature } from '../../../../common/types/api';
-import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
+import { CaseMetricsFeature } from '@kbn/cases-common-types';
+import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '@kbn/cases-common-ui';
 import {
   CASE_CREATED,
   CASE_IN_PROGRESS_DURATION,

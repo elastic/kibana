@@ -13,7 +13,7 @@ import { EuiCallOut, EuiFlexItem, EuiLink, EuiPageBody, EuiPageSection } from '@
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type { CustomFieldConfiguration } from '../../../common/types/domain';
+import type { CustomFieldConfiguration } from '@kbn/cases-common-types';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';

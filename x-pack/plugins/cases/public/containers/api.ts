@@ -7,10 +7,9 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import type { CaseCustomField, User } from '../../common/types/domain';
-import { AttachmentType } from '../../common/types/domain';
-import type { Case, Cases } from '../../common';
 import type {
+  CaseCustomField,
+  User,
   AttachmentRequest,
   BulkCreateAttachmentsRequest,
   CasePatchRequest,
@@ -22,7 +21,29 @@ import type {
   UserActionFindResponse,
   SingleCaseMetricsResponse,
   CustomFieldPutRequest,
-} from '../../common/types/api';
+} from '@kbn/cases-common-types';
+import { AttachmentType } from '@kbn/cases-common-types';
+import {
+  CASE_REPORTERS_URL,
+  CASE_TAGS_URL,
+  CASES_URL,
+  INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  INTERNAL_GET_CASE_CATEGORIES_URL,
+  CASES_INTERNAL_URL,
+} from '@kbn/cases-common-constants';
+import {
+  getCaseCommentsUrl,
+  getCasesDeleteFileAttachmentsUrl,
+  getCaseDetailsUrl,
+  getCaseDetailsMetricsUrl,
+  getCasePushUrl,
+  getCaseFindUserActionsUrl,
+  getCaseCommentDeleteUrl,
+  getCaseConnectorsUrl,
+  getCaseUsersUrl,
+  getCaseUserActionStatsUrl,
+  getCustomFieldReplaceUrl,
+} from '@kbn/cases-common-api';
 import type {
   CaseConnectors,
   CaseUpdateRequest,
@@ -36,29 +57,9 @@ import type {
   CasesUI,
   FilterOptions,
   CaseUICustomField,
-} from '../../common/ui/types';
-import { SortFieldCase } from '../../common/ui/types';
-import {
-  getCaseCommentsUrl,
-  getCasesDeleteFileAttachmentsUrl,
-  getCaseDetailsUrl,
-  getCaseDetailsMetricsUrl,
-  getCasePushUrl,
-  getCaseFindUserActionsUrl,
-  getCaseCommentDeleteUrl,
-  getCaseConnectorsUrl,
-  getCaseUsersUrl,
-  getCaseUserActionStatsUrl,
-  getCustomFieldReplaceUrl,
-} from '../../common/api';
-import {
-  CASE_REPORTERS_URL,
-  CASE_TAGS_URL,
-  CASES_URL,
-  INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
-  INTERNAL_GET_CASE_CATEGORIES_URL,
-  CASES_INTERNAL_URL,
-} from '../../common/constants';
+} from '@kbn/cases-common-ui';
+import { SortFieldCase } from '@kbn/cases-common-ui';
+import type { Case, Cases } from '../../common';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
 import { KibanaServices } from '../common/lib/kibana';

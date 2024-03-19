@@ -14,15 +14,15 @@ import {
   MAX_TITLE_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
 import type { CasePostRequest } from '../../../common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { bulkCreate } from './bulk_create';
-import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
+import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '@kbn/cases-common-types';
 
-import type { CaseCustomFields } from '../../../common/types/domain';
+import type { CaseCustomFields } from '@kbn/cases-common-types';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');

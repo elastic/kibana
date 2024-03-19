@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { Case, CaseCustomField, Cases, User } from '../../../common/types/domain';
 import type {
+  Case,
+  CaseCustomField,
+  Cases,
+  User,
   CasePostRequest,
   CasesFindResponse,
   CaseResolveResponse,
@@ -20,7 +23,7 @@ import type {
   BulkCreateCasesRequest,
   BulkCreateCasesResponse,
   CasesSearchRequest,
-} from '../../../common/types/api';
+} from '@kbn/cases-common-types';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';

@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 
 export { caseMigrations } from './cases';
 export { configureMigrations } from './configuration';

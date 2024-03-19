@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { statsApiV1 } from '@kbn/cases-common-types';
+import { CASE_STATUS_URL } from '@kbn/cases-common-constants';
 import type { CaseRoute } from '../types';
 
-import { CASE_STATUS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import type { statsApiV1 } from '../../../../common/types/api';
 
 /**
  * @deprecated since version 8.1.0

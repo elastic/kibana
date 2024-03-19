@@ -11,7 +11,6 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { ToastInputFields } from '@kbn/core/public';
-import { builderMap as customFieldsBuilder } from '../components/custom_fields/builder';
 import {
   AttachmentType,
   CaseRt,
@@ -19,18 +18,10 @@ import {
   ConfigurationRt,
   ConfigurationsRt,
   UserActionsRt,
-} from '../../common/types/domain';
-import type {
-  CasePatchRequest,
-  CaseResolveResponse,
-  CaseUserActionStatsResponse,
-  SingleCaseMetricsResponse,
-} from '../../common/types/api';
-import {
   CaseResolveResponseRt,
   CaseUserActionStatsResponseRt,
   SingleCaseMetricsResponseRt,
-} from '../../common/types/api';
+} from '@kbn/cases-common-types';
 import type {
   Case,
   Cases,
@@ -38,9 +29,14 @@ import type {
   Configurations,
   User,
   UserActions,
-} from '../../common/types/domain';
-import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
-import { throwErrors } from '../../common/api';
+  CasePatchRequest,
+  CaseResolveResponse,
+  CaseUserActionStatsResponse,
+  SingleCaseMetricsResponse,
+} from '@kbn/cases-common-types';
+import { NO_ASSIGNEES_FILTERING_KEYWORD } from '@kbn/cases-common-constants';
+import { throwErrors } from '@kbn/cases-common-api';
+import { builderMap as customFieldsBuilder } from '../components/custom_fields/builder';
 import type { CaseUI, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
 import type { CustomFieldFactoryFilterOption } from '../components/custom_fields/types';

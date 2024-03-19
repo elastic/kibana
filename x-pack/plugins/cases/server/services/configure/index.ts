@@ -13,10 +13,10 @@ import type {
 } from '@kbn/core/server';
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { ConfigurationAttributes } from '../../../common/types/domain';
+import type { ConfigurationAttributes } from '@kbn/cases-common-types';
+import { CASE_CONFIGURE_SAVED_OBJECT } from '@kbn/cases-common-constants';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { decodeOrThrow } from '../../common/runtime_types';
-import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import {
   transformFieldsToESModel,
   transformESConnectorToExternalModel,

@@ -13,7 +13,7 @@ import type {
   AttachmentAttributes,
   ExternalReferenceSOAttachmentPayload,
   FileAttachmentMetadata,
-} from '../../common/types/domain';
+} from '@kbn/cases-common-types';
 
 /**
  * This structure holds the alert ID and index from an alert comment

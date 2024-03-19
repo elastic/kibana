@@ -7,15 +7,15 @@
 
 import type { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { ConnectorTypes } from '../../../common/types/domain';
-import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { ConnectorTypes } from '@kbn/cases-common-types';
+import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import type { ESCaseConnectorWithId } from '../../services/test_utils';
 import type { UnsanitizedConfigureConnector } from './configuration';
 import { createConnectorAttributeMigration, configureConnectorIdMigration } from './configuration';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
-import type { ConfigurationAttributes } from '../../../common/types/domain';
+import type { ConfigurationAttributes } from '@kbn/cases-common-types';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const create_7_14_0_configSchema = (connector?: ESCaseConnectorWithId) => ({

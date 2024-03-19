@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CasePostRequest } from '../../../../common/types/api';
-import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
-import { ConnectorTypes } from '../../../../common/types/domain';
+import type { CasePostRequest } from '@kbn/cases-common-types';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
+import { ConnectorTypes } from '@kbn/cases-common-types';
 
 export const newCase: CasePostRequest = {
   title: 'My new case',

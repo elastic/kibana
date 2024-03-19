@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CustomFieldTypes } from '../../../common/types/domain';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
 import { validateCustomFieldTypesInRequest } from './validators';
 
 describe('validators', () => {

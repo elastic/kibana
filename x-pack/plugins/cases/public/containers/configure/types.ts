@@ -14,7 +14,7 @@ import type {
   ConnectorMappingSource,
   ConnectorMappingActionType,
   CustomFieldsConfiguration,
-} from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
 
 export type {
   ActionConnector,

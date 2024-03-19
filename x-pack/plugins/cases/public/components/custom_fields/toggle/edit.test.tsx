@@ -12,7 +12,7 @@ import { FormTestComponent } from '../../../common/test_utils';
 import { Edit } from './edit';
 import { customFieldsMock, customFieldsConfigurationMock } from '../../../containers/mock';
 import userEvent from '@testing-library/user-event';
-import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
+import type { CaseCustomFieldToggle } from '@kbn/cases-common-types';
 
 describe('Edit ', () => {
   const onSubmit = jest.fn();

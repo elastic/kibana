@@ -15,13 +15,13 @@ import type {
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import type { UserActionType } from '../../../../common/types/domain';
+import type { UserActionType } from '@kbn/cases-common-types';
 import {
   UserActionActions,
   UserActionTypes,
   CaseStatuses,
   AttachmentType,
-} from '../../../../common/types/domain';
+} from '@kbn/cases-common-types';
 import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';
 import { getNoneCaseConnector } from '../../../common/utils';
 import { logError } from '../utils';

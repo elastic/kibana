@@ -6,7 +6,7 @@
  */
 
 import { EuiCommentList } from '@elastic/eui';
-import { CaseSeverity, UserActionActions } from '../../../common/types/domain';
+import { CaseSeverity, UserActionActions } from '@kbn/cases-common-types';
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';

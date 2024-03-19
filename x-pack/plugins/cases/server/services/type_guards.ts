@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ExternalReferenceSOAttachmentPayload } from '../../common/types/domain';
-import { AttachmentType, ExternalReferenceStorageType } from '../../common/types/domain';
+import type { ExternalReferenceSOAttachmentPayload } from '@kbn/cases-common-types';
+import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-common-types';
 import type { AttachmentRequestAttributes } from '../common/types/attachments';
 
 /**

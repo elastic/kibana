@@ -13,14 +13,14 @@ import type {
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
-import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
-import { UserActionTypes } from '../../../common/types/domain';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { UserActionTypes, CaseUserActionDeprecatedResponseRt } from '@kbn/cases-common-types';
+import type { CaseUserActionDeprecatedResponse } from '@kbn/cases-common-types';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
+import { decodeOrThrow } from '../../common/runtime_types';
 import { buildFilter, combineFilters } from '../../client/utils';
 import type {
   CaseConnectorActivity,
@@ -46,7 +46,6 @@ import type {
   UserActionSavedObjectTransformed,
 } from '../../common/types/user_actions';
 import { UserActionTransformedAttributesRt } from '../../common/types/user_actions';
-import { CaseUserActionDeprecatedResponseRt } from '../../../common/types/api';
 
 export class CaseUserActionService {
   private readonly _creator: UserActionPersister;

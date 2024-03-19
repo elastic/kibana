@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OWNERS } from '../constants';
+import { OWNERS } from '@kbn/cases-common-constants';
 import { getApiTags } from './api_tags';
 
 describe('api_tags', () => {

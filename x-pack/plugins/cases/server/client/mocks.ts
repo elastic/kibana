@@ -15,7 +15,8 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/act
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 
-import type { CasesSearchRequest } from '../../common/types/api';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-common-types';
+import type { CasesSearchRequest } from '@kbn/cases-common-types';
 import type { CasesClient, CasesClientInternal } from '.';
 import type { AttachmentsSubClient } from './attachments/client';
 import type { CasesSubClient } from './cases/client';
@@ -24,7 +25,6 @@ import type { CasesClientFactory } from './factory';
 import type { MetricsSubClient } from './metrics/client';
 import type { UserActionsSubClient } from './user_actions/client';
 
-import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
 import { SortFieldCase } from '../../public/containers/types';
 import {
   createExternalReferenceAttachmentTypeRegistryMock,

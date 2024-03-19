@@ -12,8 +12,8 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 
-import { CaseStatuses, CustomFieldTypes, CaseSeverity } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/constants';
+import { CaseStatuses, CustomFieldTypes, CaseSeverity } from '@kbn/cases-common-types';
+import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '@kbn/cases-common-constants';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/constants';

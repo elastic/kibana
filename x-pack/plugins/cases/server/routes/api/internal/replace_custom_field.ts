@@ -6,11 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { INTERNAL_PUT_CUSTOM_FIELDS_URL } from '../../../../common/constants';
+import type { customFieldDomainV1, customFieldsApiV1 } from '@kbn/cases-common-types';
+import { INTERNAL_PUT_CUSTOM_FIELDS_URL } from '@kbn/cases-common-constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import type { customFieldsApiV1 } from '../../../../common/types/api';
-import type { customFieldDomainV1 } from '../../../../common/types/domain';
 
 export const replaceCustomFieldRoute = createCasesRoute({
   method: 'put',

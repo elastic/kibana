@@ -7,7 +7,7 @@
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
-import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 import {
   flattenCaseSavedObject,
   transformNewComment,
@@ -36,14 +36,14 @@ import type {
   Case,
   CaseConnector,
   UserCommentAttachmentPayload,
-} from '../../common/types/domain';
+  AttachmentRequest,
+} from '@kbn/cases-common-types';
 import {
   ConnectorTypes,
   CaseSeverity,
   AttachmentType,
   CustomFieldTypes,
-} from '../../common/types/domain';
-import type { AttachmentRequest } from '../../common/types/api';
+} from '@kbn/cases-common-types';
 import {
   createAlertRequests,
   createExternalReferenceRequests,
