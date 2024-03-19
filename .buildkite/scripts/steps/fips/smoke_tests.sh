@@ -18,9 +18,9 @@ cd target
 download_artifact "kibana-ubi-fips-$FULL_VERSION-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 KIBANA_IP_ADDRESS="192.168.56.7"
 
-cd ..
-
 docker load <"kibana-ubi-fips-$FULL_VERSION-docker-image.tar.gz"
+
+cd ..
 
 node scripts/es snapshot \
   -E network.bind_host=127.0.0.1,192.168.56.1 \
