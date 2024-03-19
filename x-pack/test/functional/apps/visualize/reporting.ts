@@ -119,13 +119,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('TSVB Gauge: PNG file matches the baseline image', async function () {
+        log.debug('load saved visualization');
+        await PageObjects.visualize.loadSavedVisualization(
+          '[K7.6-eCommerce] Sold Products per Day',
+          { navigateToVisualize: false }
+        );
         if (await PageObjects.share.checkOldVersion()) {
-          log.debug('load saved visualization');
-          await PageObjects.visualize.loadSavedVisualization(
-            '[K7.6-eCommerce] Sold Products per Day',
-            { navigateToVisualize: false }
-          );
-
           log.debug('open png reporting panel');
           await PageObjects.reporting.openPngReportingPanel();
           log.debug('click generate report button');

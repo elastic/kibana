@@ -88,6 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       if (await PageObjects.share.checkOldVersion()) {
         await testSubjects.existOrFail('sharePanel-CSVReports');
       }
+      await PageObjects.share.closeShareModal();
     });
 
     after(async function () {

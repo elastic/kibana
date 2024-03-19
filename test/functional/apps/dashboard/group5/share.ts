@@ -86,6 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const sharedUrl = await getSharedUrl(mode);
         const { globalState, appState } = getStateFromUrl(sharedUrl);
+        await PageObjects.share.closeShareModal;
         expect(globalState).to.not.contain('filters');
         if (mode === 'snapshot') {
           expect(appState).to.contain('filters');

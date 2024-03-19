@@ -58,9 +58,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.clickShareMenu();
         // out of scope for this PR
         expect(await PageObjects.lens.isShareActionEnabled('csvDownload'));
+        await PageObjects.share.closeShareModal();
+        expect(await PageObjects.lens.isShareActionEnabled('permalinks'));
       }
-      await PageObjects.share.closeShareModal();
-      expect(await PageObjects.lens.isShareActionEnabled('permalinks'));
     });
 
     // REMOVE WHEN REDESIGN IS OVER

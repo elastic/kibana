@@ -85,7 +85,9 @@ export class SharePageObject extends FtrService {
 
   async getSharedUrl() {
     // REMOVE THIS LINE WHEN REDESIGN IS COMPLETED
-    await this.openPermaLinks();
+    if (await this.checkOldVersion()) {
+      await this.openPermaLinks();
+    }
     return await this.testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
   }
 

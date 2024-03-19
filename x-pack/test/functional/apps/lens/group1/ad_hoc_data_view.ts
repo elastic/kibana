@@ -190,13 +190,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be possible to download a visualization with adhoc dataViews', async () => {
-      await PageObjects.lens.setCSVDownloadDebugFlag(true);
-      await PageObjects.lens.openCSVDownloadShare();
+      if (await PageObjects.lens.checkOldShareVersion()) {
+        await PageObjects.lens.setCSVDownloadDebugFlag(true);
+        await PageObjects.lens.openCSVDownloadShare();
 
-      const csv = await PageObjects.lens.getCSVContent();
-      expect(csv).to.be.ok();
-      expect(Object.keys(csv!)).to.have.length(1);
-      await PageObjects.lens.setCSVDownloadDebugFlag(false);
+        const csv = await PageObjects.lens.getCSVContent();
+        expect(csv).to.be.ok();
+        expect(Object.keys(csv!)).to.have.length(1);
+        await PageObjects.lens.setCSVDownloadDebugFlag(false);
+      }
     });
 
     it('should navigate to discover correctly', async () => {

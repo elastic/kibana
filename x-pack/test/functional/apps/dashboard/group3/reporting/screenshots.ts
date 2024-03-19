@@ -111,11 +111,11 @@ export default function ({
       });
 
       it('downloads a PDF file', async function () {
-        // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-        // function is taking about 15 seconds per comparison in jenkins.
-        this.timeout(300000);
-        await PageObjects.dashboard.navigateToApp();
         if (await PageObjects.share.checkOldVersion()) {
+          // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
+          // function is taking about 15 seconds per comparison in jenkins.
+          this.timeout(300000);
+          await PageObjects.dashboard.navigateToApp();
           await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
           await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.checkUsePrintLayout();

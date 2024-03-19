@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
-  const PageObjects = getPageObjects(['common', 'reporting', 'dashboard']);
+  const PageObjects = getPageObjects(['common', 'reporting', 'dashboard', 'share']);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const reportingFunctional = getService('reportingFunctional');
@@ -35,24 +35,26 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     it('Allows users to navigate back to where a report was generated', async () => {
-      const dashboardTitle = 'Ecom Dashboard';
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
+      if (await PageObjects.share.checkOldVersion()) {
+        const dashboardTitle = 'Ecom Dashboard';
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
 
-      await PageObjects.reporting.openPdfReportingPanel();
-      await PageObjects.reporting.clickGenerateReportButton();
+        await PageObjects.reporting.openPdfReportingPanel();
+        await PageObjects.reporting.clickGenerateReportButton();
 
-      await PageObjects.common.navigateToApp('reporting');
-      await PageObjects.common.sleep(3000); // Wait an amount of time for auto-polling to refresh the jobs
+        await PageObjects.common.navigateToApp('reporting');
+        await PageObjects.common.sleep(3000); // Wait an amount of time for auto-polling to refresh the jobs
 
-      // We do not need to wait for the report to finish generating
-      await (await testSubjects.find('euiCollapsedItemActionsButton')).click();
-      await (await testSubjects.find('reportOpenInKibanaApp')).click();
+        // We do not need to wait for the report to finish generating
+        await (await testSubjects.find('euiCollapsedItemActionsButton')).click();
+        await (await testSubjects.find('reportOpenInKibanaApp')).click();
 
-      const [, dashboardWindowHandle] = await browser.getAllWindowHandles();
-      await browser.switchToWindow(dashboardWindowHandle);
+        const [, dashboardWindowHandle] = await browser.getAllWindowHandles();
+        await browser.switchToWindow(dashboardWindowHandle);
 
-      await PageObjects.dashboard.expectOnDashboard(dashboardTitle);
+        await PageObjects.dashboard.expectOnDashboard(dashboardTitle);
+      }
     });
   });
 };
