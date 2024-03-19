@@ -7,7 +7,7 @@
  */
 
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { PublishesWritableLocalUnifiedSearch } from '@kbn/presentation-publishing';
+import { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishing';
 import { EmbeddableInput } from '../embeddables';
 
 export type FilterableEmbeddableInput = EmbeddableInput & {
@@ -19,11 +19,8 @@ export type FilterableEmbeddableInput = EmbeddableInput & {
 };
 
 export type EmbeddableHasTimeRange = Pick<
-  PublishesWritableLocalUnifiedSearch,
-  | 'localTimeRange'
-  | 'setLocalTimeRange'
-  | 'getFallbackTimeRange'
-  | 'isCompatibleWithLocalUnifiedSearch'
+  PublishesWritableUnifiedSearch,
+  'timeRange$' | 'setTimeRange' | 'isCompatibleWithUnifiedSearch'
 >;
 
 /**

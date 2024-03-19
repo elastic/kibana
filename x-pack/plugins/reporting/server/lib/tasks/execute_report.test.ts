@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { KibanaShuttingDownError } from '@kbn/reporting-common';
+import { ReportDocument } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import type { ExportType, ReportingConfigType } from '@kbn/reporting-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
@@ -15,7 +17,6 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ExecuteReportTask } from '.';
 import type { ReportingCore } from '../..';
 import { createMockReportingCore } from '../../test_helpers';
-import type { SavedReport } from '../store';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -97,11 +98,18 @@ describe('Execute Report Task', () => {
       validLicenses: [],
     } as unknown as ExportType);
     const store = await mockReporting.getStore();
-    store.setReportError = jest.fn(() => Promise.resolve({} as any));
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
-    task._claimJob = jest.fn(() =>
-      Promise.resolve({ _id: 'test', jobtype: 'noop', status: 'pending' } as SavedReport)
+    store.setReportError = jest.fn(() =>
+      Promise.resolve({
+        _id: 'test',
+        jobtype: 'noop',
+        status: 'processing',
+      } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
     );
+    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the ExecuteReportTask instance
+      .spyOn(task, '_claimJob')
+      .mockResolvedValueOnce({ _id: 'test', jobtype: 'noop', status: 'pending' } as never);
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);
 

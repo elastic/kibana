@@ -21,5 +21,6 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/config-schema",
     "@kbn/i18n-react",
+    "@kbn/test-jest-helpers",
   ]
 }

@@ -94,7 +94,7 @@ describe('interpreter/functions#metric', () => {
     expect(() => fn(context, args)).toThrowErrorMatchingSnapshot();
   });
 
-  it('returns error if several metrics and colorFullBackground specified', () => {
+  it('ignores colorFullBackground setting if several metrics are specified', () => {
     args.colorFullBackground = true;
     args.metric.push({
       type: 'vis_dimension',
@@ -105,13 +105,13 @@ describe('interpreter/functions#metric', () => {
       },
     });
 
-    expect(() => fn(context, args)).toThrowErrorMatchingSnapshot();
+    expect(fn(context, args).value.visConfig.metric.colorFullBackground).toBeFalsy();
   });
 
-  it('returns error if data includes several rows and colorFullBackground specified', () => {
+  it('ignores colorFullBackground if data includes several rows', () => {
     args.colorFullBackground = true;
     context.rows.push({ 'col-0-1': 0 });
 
-    expect(() => fn(context, args)).toThrowErrorMatchingSnapshot();
+    expect(fn(context, args).value.visConfig.metric.colorFullBackground).toBeFalsy();
   });
 });

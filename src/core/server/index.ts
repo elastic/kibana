@@ -118,6 +118,18 @@ export type {
   UnauthorizedErrorHandler,
 } from '@kbn/core-elasticsearch-server';
 
+export type {
+  SecurityServiceSetup,
+  SecurityServiceStart,
+  CoreAuthenticationService,
+} from '@kbn/core-security-server';
+export type {
+  User,
+  UserRealm,
+  AuthenticatedUser,
+  AuthenticationProvider,
+} from '@kbn/core-security-common';
+
 export { CspConfig } from '@kbn/core-http-server-internal';
 export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 

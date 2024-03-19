@@ -11,6 +11,6 @@
  */
 export const DEV_TOOLS_FEATURE_ID = 'devTools';
 /**
- * UI Setting ID for enabling / disabling the docked console in Kibana
+ * UI Setting ID for enabling / disabling the persistent console in Kibana
  */
-export const ENABLE_DOCKED_CONSOLE_UI_SETTING_ID = 'devTools:enableDockedConsole';
+export const ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID = 'devTools:enablePersistentConsole';

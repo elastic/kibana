@@ -13,7 +13,6 @@ import { ESQL_LANG_ID } from './lib/constants';
 import type { CustomLangModuleType } from '../types';
 import type { ESQLWorker } from './worker/esql_worker';
 
-import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
 import { WorkerProxyService } from '../common/worker_proxy';
 import type { ESQLCallbacks } from './lib/ast/shared/types';
 import { ESQLAstAdapter } from './lib/monaco/esql_ast_provider';
@@ -28,10 +27,6 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
     workerProxyService.setup(ESQL_LANG_ID);
 
     monaco.languages.setTokensProvider(ESQL_LANG_ID, new ESQLTokensProvider());
-
-    // handle syntax errors via the diagnostic adapter
-    // but then enrich them via the separate validate function
-    new DiagnosticsAdapter(ESQL_LANG_ID, (...uris) => workerProxyService.getWorker(uris));
   },
   languageConfiguration: {
     brackets: [

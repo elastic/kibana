@@ -18,14 +18,20 @@ export class UiSettingsGlobalClient extends UiSettingsClientCommon {
     super(options);
   }
 
-  async setMany(changes: Record<string, any>) {
+  async setMany(
+    changes: Record<string, any>,
+    options: { validateKeys?: boolean } = { validateKeys: true }
+  ) {
     const registeredSettings = super.getRegistered();
-    Object.keys(changes).forEach((key) => {
-      if (!registeredSettings[key]) {
-        throw new SettingNotRegisteredError(key);
-      }
-    });
-    return super.setMany(changes);
+    if (options.validateKeys) {
+      Object.keys(changes).forEach((key) => {
+        if (!registeredSettings[key]) {
+          throw new SettingNotRegisteredError(key);
+        }
+      });
+    }
+
+    return super.setMany(changes, options);
   }
 
   async set(key: string, value: any) {

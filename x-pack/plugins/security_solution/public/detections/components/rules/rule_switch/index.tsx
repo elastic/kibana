@@ -14,6 +14,7 @@ import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useExecuteBulkAction } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { useRulesTableContextOptional } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
+import { ruleSwitchAriaLabel } from './translations';
 
 const StaticSwitch = styled(EuiSwitch)`
   .euiSwitch__thumb,
@@ -31,6 +32,7 @@ export interface RuleSwitchProps {
   isLoading?: boolean;
   startMlJobsIfNeeded?: () => Promise<void>;
   onChange?: (enabled: boolean) => void;
+  ruleName?: string;
 }
 
 /**
@@ -43,8 +45,10 @@ export const RuleSwitchComponent = ({
   enabled,
   startMlJobsIfNeeded,
   onChange,
+  ruleName,
 }: RuleSwitchProps) => {
   const [myIsLoading, setMyIsLoading] = useState(false);
+  const ariaLabel = ruleName ? ruleSwitchAriaLabel(ruleName, enabled) : undefined;
   const rulesTableContext = useRulesTableContextOptional();
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: !rulesTableContext });
@@ -93,6 +97,7 @@ export const RuleSwitchComponent = ({
             disabled={isDisabled}
             checked={enabled}
             onChange={onRuleStateChange}
+            aria-label={ariaLabel}
           />
         )}
       </EuiFlexItem>

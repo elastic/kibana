@@ -233,6 +233,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         advanced: { enabled: false },
         basic: { enabled: true },
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.azureBlobStorage.name', {
       defaultMessage: 'Azure Blob Storage',
@@ -568,6 +571,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
         enabled: true,
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.confluence.name', {
       defaultMessage: 'Confluence',
@@ -687,6 +693,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: true },
         basic: { enabled: true },
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
       },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.dropbox.name', {
@@ -934,7 +943,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     name: i18n.translate('searchConnectors.nativeConnectors.github.name', {
       defaultMessage: 'Github',
     }),
-    features: {},
+    features: {
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
     serviceType: 'github',
   },
   gmail: {
@@ -1058,6 +1071,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
         enabled: true,
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.gmail.name', {
       defaultMessage: 'Gmail',
@@ -1065,7 +1081,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     serviceType: 'gmail',
   },
   google_cloud_storage: {
-    features: {},
+    features: {
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
     configuration: {
       buckets: {
         default_value: null,
@@ -1358,6 +1378,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     },
     features: {
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
     },
@@ -1684,6 +1707,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         basic: { enabled: true },
       },
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
     },
@@ -2405,6 +2431,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         advanced: { enabled: false },
         basic: { enabled: true },
       },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.networkDrive.name', {
       defaultMessage: 'Network drive',
@@ -2531,6 +2560,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     }),
     features: {
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
     },
@@ -3066,37 +3098,14 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
-      max_concurrent_tasks: {
-        default_value: 2000,
-        depends_on: [],
-        display: DisplayType.NUMERIC,
-        label: i18n.translate(
-          'searchConnectors.nativeConnectors.outlook.max_concurrent_tasks.label',
-          {
-            defaultMessage: 'Maximum concurrent tasks',
-          }
-        ),
-        options: [],
-        order: 13,
-        required: false,
-        sensitive: false,
-        tooltip: i18n.translate(
-          'searchConnectors.nativeConnectors.outlook.max_concurrent_tasks.tooltip',
-          {
-            defaultMessage:
-              'This value denotes the number of tasks that run in parallel. It depends on the number of accounts in the Azure AD.',
-          }
-        ),
-        type: FieldType.INTEGER,
-        ui_restrictions: [],
-        validations: [],
-        value: '',
-      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: false },
         basic: { enabled: true },
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
       },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.outlook.name', {
@@ -3450,7 +3459,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     serviceType: 's3',
   },
   salesforce: {
-    features: {},
+    features: {
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
     configuration: {
       domain: {
         default_value: null,
@@ -3467,7 +3480,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           'searchConnectors.content.nativeConnectors.salesforce.domain.tooltip',
           {
             defaultMessage:
-              "The domain for your Salesforce instance. If your Salesforce URL is, the domain would be 'foo'.",
+              "The domain for your Salesforce instance. If your Salesforce URL is 'https://foo.salesforce.com', the domain would be 'foo'.",
           }
         ),
         type: FieldType.STRING,
@@ -3568,7 +3581,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       username: {
         default_value: null,
         depends_on: [],
-        display: DisplayType.TEXTAREA,
+        display: DisplayType.TEXTBOX,
         label: i18n.translate('searchConnectors.nativeConnectors.servicenow.username.label', {
           defaultMessage: 'Username',
         }),
@@ -3689,6 +3702,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: true },
         basic: { enabled: true },
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
       },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.servicenow.name', {

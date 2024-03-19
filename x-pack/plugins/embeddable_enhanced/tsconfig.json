@@ -15,6 +15,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/data-plugin",
     "@kbn/utility-types",
+    "@kbn/saved-objects-finder-plugin",
   ],
   "exclude": [
     "target/**/*",

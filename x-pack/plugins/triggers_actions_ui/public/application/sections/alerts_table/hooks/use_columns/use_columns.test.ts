@@ -330,4 +330,42 @@ describe('useColumn', () => {
       );
     });
   });
+
+  describe('onResetColumns', () => {
+    test('should restore visible columns defaults', () => {
+      const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
+      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+        useColumns({
+          defaultColumns,
+          featureIds,
+          id,
+          storageAlertsTable: localStorageAlertsTable,
+          storage,
+        })
+      );
+
+      expect(result.current.visibleColumns).toEqual([
+        'event.action',
+        '@timestamp',
+        'kibana.alert.duration.us',
+        'kibana.alert.reason',
+      ]);
+
+      act(() => {
+        result.current.onToggleColumn(defaultColumns[0].id);
+      });
+      expect(result.current.visibleColumns).not.toContain(['event.action']);
+
+      act(() => {
+        result.current.onResetColumns();
+      });
+
+      expect(result.current.visibleColumns).toEqual([
+        'event.action',
+        '@timestamp',
+        'kibana.alert.duration.us',
+        'kibana.alert.reason',
+      ]);
+    });
+  });
 });

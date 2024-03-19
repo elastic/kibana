@@ -16,17 +16,13 @@ export type PutConnectorNameAndDescriptionArgs = Partial<
   Pick<Connector, 'name' | 'description'>
 > & {
   connectorId: string;
-  indexName: string;
 };
 
-export type PutConnectorNameAndDescriptionResponse = Pick<Connector, 'name' | 'description'> & {
-  indexName: string;
-};
+export type PutConnectorNameAndDescriptionResponse = Pick<Connector, 'name' | 'description'>;
 
 export const putConnectorNameAndDescription = async ({
   connectorId,
   description = null,
-  indexName,
   name = '',
 }: PutConnectorNameAndDescriptionArgs) => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/name_and_description`;
@@ -34,7 +30,7 @@ export const putConnectorNameAndDescription = async ({
   await HttpLogic.values.http.put(route, {
     body: JSON.stringify({ description, name }),
   });
-  return { description, indexName, name };
+  return { description, name };
 };
 
 export const ConnectorNameAndDescriptionApiLogic = createApiLogic(

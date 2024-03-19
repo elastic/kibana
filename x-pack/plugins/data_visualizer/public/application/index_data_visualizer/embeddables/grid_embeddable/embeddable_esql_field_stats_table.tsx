@@ -14,7 +14,7 @@ import {
   getDefaultESQLDataVisualizerListState,
   useESQLDataVisualizerData,
 } from '../../hooks/esql/use_data_visualizer_esql_data';
-import {
+import type {
   ESQLDataVisualizerGridEmbeddableInput,
   ESQLDataVisualizerIndexBasedAppState,
 } from './types';

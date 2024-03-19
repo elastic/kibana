@@ -6,7 +6,7 @@
  */
 
 import { usePageUrlState } from '@kbn/ml-url-state';
-import { TimeSeriesExplorerAppState } from '../../../../common/types/locator';
+import type { TimeSeriesExplorerAppState } from '../../../../common/types/locator';
 import { ML_PAGES } from '../../../../common/constants/locator';
 
 interface TimeSeriesExplorerPageUrlState {

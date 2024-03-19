@@ -13,6 +13,7 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
   EuiLink,
+  EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -27,11 +28,13 @@ import {
   Forms,
   JsonEditorField,
   NumericField,
+  RadioGroupField,
 } from '../../../../shared_imports';
 import { UnitField, timeUnits } from '../../shared';
 import { DataRetention } from '../../../../../common';
 import { documentationService } from '../../../services/documentation';
 import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
+import { allowAutoCreateRadios } from '../../../../../common/constants';
 
 // Create or Form components with partial props that are common to all instances
 const UseField = getUseField({ component: Field });
@@ -132,12 +135,15 @@ function getFieldsMeta(esDocsBase: string) {
       title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.allowAutoCreateTitle', {
         defaultMessage: 'Allow auto create',
       }),
-      description: i18n.translate(
-        'xpack.idxMgmt.templateForm.stepLogistics.allowAutoCreateDescription',
-        {
-          defaultMessage:
-            'Indices can be automatically created even if auto-creation of indices is disabled via actions.auto_create_index.',
-        }
+      description: (
+        <FormattedMessage
+          id="xpack.idxMgmt.templateForm.stepLogistics.allowAutoCreateDescription"
+          defaultMessage="This setting overwrites the value of the {settingName} cluster setting. If set to {true} in a template, then indices can be automatically created using that template."
+          values={{
+            settingName: <EuiCode>action.auto_create_index</EuiCode>,
+            true: <EuiCode>true</EuiCode>,
+          }}
+        />
       ),
       testSubject: 'allowAutoCreateField',
     },
@@ -399,7 +405,14 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             <FormRow title={allowAutoCreate.title} description={allowAutoCreate.description}>
               <UseField
                 path="allowAutoCreate"
-                componentProps={{ 'data-test-subj': allowAutoCreate.testSubject }}
+                component={RadioGroupField}
+                componentProps={{
+                  'data-test-subj': allowAutoCreate.testSubject,
+                  euiFieldProps: {
+                    options: allowAutoCreateRadios,
+                    name: 'allowAutoCreate radio group',
+                  },
+                }}
               />
             </FormRow>
           )}

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import { useFieldStatsFlyoutContext } from '../../../../../components/field_stats_flyout';
 import { JobCreatorContext } from '../job_creator_context';
 import { WizardNav } from '../wizard_nav';
-import { WIZARD_STEPS, StepProps } from '../step_types';
+import type { StepProps } from '../step_types';
+import { WIZARD_STEPS } from '../step_types';
 import { SingleMetricView } from './components/single_metric_view';
 import { MultiMetricView } from './components/multi_metric_view';
 import { PopulationView } from './components/population_view';

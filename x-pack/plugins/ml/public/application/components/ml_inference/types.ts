@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
-import { ADD_INFERENCE_PIPELINE_STEPS } from './constants';
+import type { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
+import type { ADD_INFERENCE_PIPELINE_STEPS } from './constants';
 
 export type AddInferencePipelineSteps =
   typeof ADD_INFERENCE_PIPELINE_STEPS[keyof typeof ADD_INFERENCE_PIPELINE_STEPS];

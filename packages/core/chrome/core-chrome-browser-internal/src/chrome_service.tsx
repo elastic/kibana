@@ -34,7 +34,6 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   NavigationTreeDefinition,
   AppDeepLinkId,
-  CloudURLs,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type {
@@ -212,6 +211,11 @@ export class ChromeService {
       return `kbnVersion-${formattedVersionClass}`;
     };
 
+    const setChromeStyle = (style: ChromeStyle) => {
+      if (style === chromeStyle$.getValue()) return;
+      chromeStyle$.next(style);
+    };
+
     const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
     const bodyClasses$ = combineLatest([
       headerBanner$,
@@ -238,6 +242,7 @@ export class ChromeService {
       http,
       chromeBreadcrumbs$: breadcrumbs$,
       logger: this.logger,
+      setChromeStyle,
     });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start();
@@ -259,10 +264,6 @@ export class ChromeService {
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
 
-    const setChromeStyle = (style: ChromeStyle) => {
-      chromeStyle$.next(style);
-    };
-
     const validateChromeStyle = () => {
       const chromeStyle = chromeStyle$.getValue();
       if (chromeStyle !== 'project') {
@@ -282,12 +283,9 @@ export class ChromeService {
       LinkId extends AppDeepLinkId = AppDeepLinkId,
       Id extends string = string,
       ChildrenId extends string = Id
-    >(
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
-      deps: { cloudUrls: CloudURLs }
-    ) {
+    >(navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>) {
       validateChromeStyle();
-      projectNavigation.initNavigation(navigationTree$, deps);
+      projectNavigation.initNavigation(navigationTree$);
     }
 
     const setProjectBreadcrumbs = (
@@ -302,19 +300,9 @@ export class ChromeService {
       projectNavigation.setProjectHome(homeHref);
     };
 
-    const setProjectsUrl = (projectsUrl: string) => {
-      validateChromeStyle();
-      projectNavigation.setProjectsUrl(projectsUrl);
-    };
-
     const setProjectName = (projectName: string) => {
       validateChromeStyle();
       projectNavigation.setProjectName(projectName);
-    };
-
-    const setProjectUrl = (projectUrl: string) => {
-      validateChromeStyle();
-      projectNavigation.setProjectUrl(projectUrl);
     };
 
     const isIE = () => {
@@ -358,8 +346,11 @@ export class ChromeService {
     }
 
     const getHeaderComponent = () => {
+      const defaultChromeStyle = chromeStyle$.getValue();
+
       const HeaderComponent = () => {
         const isVisible = useObservable(this.isVisible$);
+        const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
 
         if (!isVisible) {
           return (
@@ -371,7 +362,7 @@ export class ChromeService {
         }
 
         // render header
-        if (chromeStyle$.getValue() === 'project') {
+        if (chromeStyle === 'project') {
           const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
           const projectBreadcrumbs$ = projectNavigation
             .getProjectBreadcrumbs$()
@@ -539,14 +530,15 @@ export class ChromeService {
       getIsSideNavCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
       project: {
         setHome: setProjectHome,
-        setProjectsUrl,
-        setProjectUrl,
+        setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
         setProjectName,
         initNavigation: initProjectNavigation,
         getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
+        updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
+        changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
       },
     };
   }

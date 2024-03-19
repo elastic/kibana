@@ -197,7 +197,7 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
       outputs: {
-        default: {
+        'test-id': {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
         },
@@ -228,7 +228,7 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
       outputs: {
-        default: {
+        'test-id': {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
         },
@@ -244,7 +244,7 @@ describe('getFullAgentPolicy', () => {
         },
         monitoring: {
           namespace: 'default',
-          use_output: 'default',
+          use_output: 'test-id',
           enabled: true,
           logs: true,
           metrics: false,
@@ -264,7 +264,7 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
       outputs: {
-        default: {
+        'test-id': {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
         },
@@ -280,7 +280,7 @@ describe('getFullAgentPolicy', () => {
         },
         monitoring: {
           namespace: 'default',
-          use_output: 'default',
+          use_output: 'test-id',
           enabled: true,
           logs: false,
           metrics: true,
@@ -358,7 +358,7 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy).toMatchSnapshot();
   });
 
-  it('should use "default" as the default policy id', async () => {
+  it('should use output id from default policy id', async () => {
     mockAgentPolicy({
       id: 'policy',
       status: 'active',
@@ -372,7 +372,7 @@ describe('getFullAgentPolicy', () => {
 
     const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
 
-    expect(agentPolicy?.outputs.default).toBeDefined();
+    expect(agentPolicy?.outputs['test-id']).toBeDefined();
   });
 
   it('should return the sourceURI from the agent policy', async () => {
@@ -387,7 +387,7 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
       outputs: {
-        default: {
+        'test-id': {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
         },
@@ -403,7 +403,7 @@ describe('getFullAgentPolicy', () => {
         },
         monitoring: {
           namespace: 'default',
-          use_output: 'default',
+          use_output: 'test-id',
           enabled: true,
           logs: false,
           metrics: true,
@@ -427,7 +427,7 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
       outputs: {
-        default: {
+        'test-id': {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
         },
@@ -440,7 +440,7 @@ describe('getFullAgentPolicy', () => {
       agent: {
         monitoring: {
           namespace: 'default',
-          use_output: 'default',
+          use_output: 'test-id',
           enabled: true,
           logs: false,
           metrics: true,
@@ -626,7 +626,7 @@ describe('getFullAgentPolicy', () => {
             },
           ],
           type: 'test-logs',
-          use_output: 'default',
+          use_output: 'test-id',
         },
         {
           data_stream: {
@@ -652,11 +652,11 @@ describe('getFullAgentPolicy', () => {
             },
           ],
           type: 'test-logs',
-          use_output: 'default',
+          use_output: 'test-id',
         },
       ],
       output_permissions: {
-        default: {
+        'test-id': {
           _elastic_agent_checks: {
             cluster: ['monitor'],
           },
@@ -679,7 +679,7 @@ describe('getFullAgentPolicy', () => {
         },
       },
       outputs: {
-        default: {
+        'test-id': {
           hosts: ['http://127.0.0.1:9201'],
           preset: 'balanced',
           type: 'elasticsearch',
@@ -818,6 +818,69 @@ ssl.test: 123
           "host.fr:3332",
         ],
         "type": "logstash",
+      }
+    `);
+  });
+
+  it('should work with kafka output', () => {
+    const policyOutput = transformOutputToFullPolicyOutput({
+      id: 'id123',
+      hosts: ['test:9999'],
+      topics: [
+        {
+          topic: 'test',
+        },
+        // Deprecated conditionnal topic
+        {
+          topic: 'deprecated',
+          when: { condition: 'test:100', type: 'equals' },
+        },
+      ],
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'test output',
+      type: 'kafka',
+      config_yaml: '',
+      client_id: 'Elastic',
+      version: '1.0.0',
+      compression: 'none',
+      auth_type: 'none',
+      connection_type: 'plaintext',
+      partition: 'random',
+      random: {
+        group_events: 1,
+      },
+      headers: [
+        {
+          key: '',
+          value: '',
+        },
+      ],
+      timeout: 30,
+      broker_timeout: 30,
+      required_acks: 1,
+    });
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "broker_timeout": 30,
+        "client_id": "Elastic",
+        "compression": "none",
+        "headers": Array [],
+        "hosts": Array [
+          "test:9999",
+        ],
+        "key": undefined,
+        "partition": Object {
+          "random": Object {
+            "group_events": 1,
+          },
+        },
+        "required_acks": 1,
+        "timeout": 30,
+        "topic": "test",
+        "type": "kafka",
+        "version": "1.0.0",
       }
     `);
   });

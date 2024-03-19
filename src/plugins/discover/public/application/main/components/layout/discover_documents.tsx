@@ -225,13 +225,10 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
+  // should be aligned with embeddable `showTimeCol` prop
   const showTimeCol = useMemo(
-    () =>
-      // for ES|QL we want to show the time column only when is on Document view
-      (!isTextBasedQuery || !columns?.length) &&
-      !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
-      !!dataView.timeFieldName,
-    [isTextBasedQuery, columns, uiSettings, dataView.timeFieldName]
+    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+    [uiSettings]
   );
 
   const columnTypes: DataTableColumnTypes | undefined = useMemo(

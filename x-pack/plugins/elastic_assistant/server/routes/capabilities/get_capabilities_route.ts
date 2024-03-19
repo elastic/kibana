@@ -13,12 +13,12 @@ import {
   GetCapabilitiesResponse,
   INTERNAL_API_ACCESS,
 } from '@kbn/elastic-assistant-common';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { CAPABILITIES } from '../../../common/constants';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 
 import { buildResponse } from '../../lib/build_response';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import { buildRouteValidationWithZod } from '../../schemas/common';
 
 /**
  * Get the assistant capabilities for the requesting plugin

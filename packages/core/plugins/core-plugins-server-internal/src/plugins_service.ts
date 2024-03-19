@@ -150,7 +150,6 @@ export class PluginsService
     const config = await firstValueFrom(this.config$);
     if (config.initialize) {
       await this.prebootPluginsSystem.setupPlugins(deps);
-      this.registerPluginStaticDirs(deps, this.prebootUiPluginInternalInfo);
     } else {
       this.log.info(
         'Skipping `setup` for `preboot` plugins since plugin initialization is disabled.'
@@ -166,7 +165,6 @@ export class PluginsService
     let contracts = new Map<PluginName, unknown>();
     if (config.initialize) {
       contracts = await this.standardPluginsSystem.setupPlugins(deps);
-      this.registerPluginStaticDirs(deps, this.standardUiPluginInternalInfo);
     } else {
       this.log.info(
         'Skipping `setup` for `standard` plugins since plugin initialization is disabled.'
@@ -441,23 +439,5 @@ export class PluginsService
       enabled: false,
       missingOrIncompatibleDependencies,
     };
-  }
-
-  private registerPluginStaticDirs(
-    deps: PluginsServiceSetupDeps | PluginsServicePrebootSetupDeps,
-    uiPluginInternalInfo: Map<PluginName, InternalPluginInfo>
-  ) {
-    for (const [pluginName, pluginInfo] of uiPluginInternalInfo) {
-      /**
-       * Serve UI from sha-scoped and not-sha-scoped paths to allow time for plugin code to migrate
-       * Eventually we only want to serve from the sha scoped path
-       */
-      [
-        deps.http.staticAssets.getPluginServerPath(pluginName, '{path*}'),
-        `/plugins/${pluginName}/assets/{path*}`,
-      ].forEach((path) => {
-        deps.http.registerStaticDir(path, pluginInfo.publicAssetsDir);
-      });
-    }
   }
 }
