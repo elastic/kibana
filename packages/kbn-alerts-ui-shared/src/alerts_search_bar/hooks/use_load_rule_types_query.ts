@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 import type { ToastsStart, HttpStart } from '@kbn/core/public';
-import { RULES_FEATURE_ID } from '../constants';
+import { ALERTS_FEATURE_ID } from '../constants';
 import { fetchRuleTypes } from '../apis/fetch_rule_types';
 
 export interface UseLoadRuleTypesQueryProps {
@@ -64,11 +64,11 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
   const hasAnyAuthorizedRuleType = filteredIndex.size > 0;
   const authorizedRuleTypes = [...filteredIndex.values()];
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
-    (ruleType) => ruleType.authorizedConsumers[RULES_FEATURE_ID]?.all
+    (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
   const authorizedToReadAnyRules =
     authorizedToCreateAnyRules ||
-    authorizedRuleTypes.some((ruleType) => ruleType.authorizedConsumers[RULES_FEATURE_ID]?.read);
+    authorizedRuleTypes.some((ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.read);
 
   return {
     ruleTypesState: {
