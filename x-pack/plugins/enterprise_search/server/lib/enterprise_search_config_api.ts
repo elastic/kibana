@@ -56,7 +56,6 @@ export const callEnterpriseSearchConfigAPI = async ({
         hasIncrementalSyncEnabled: config.hasIncrementalSyncEnabled,
         hasNativeConnectors: config.hasNativeConnectors,
         hasWebCrawler: config.hasWebCrawler,
-        showPlayground: config.showPlayground,
       },
       kibanaVersion: kibanaPackageJson.version,
     };
@@ -112,7 +111,6 @@ export const callEnterpriseSearchConfigAPI = async ({
         hasIncrementalSyncEnabled: config.hasIncrementalSyncEnabled,
         hasNativeConnectors: config.hasNativeConnectors,
         hasWebCrawler: config.hasWebCrawler,
-        showPlayground: config.showPlayground,
       },
       publicUrl: stripTrailingSlash(data?.settings?.external_url),
       readOnlyMode: !!data?.settings?.read_only_mode,

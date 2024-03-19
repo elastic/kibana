@@ -211,7 +211,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
       hasDefaultIngestPipeline: false,
       hasNativeConnectors: false,
       hasWebCrawler: false,
-      showPlayground: false,
       host: '',
     };
 
@@ -225,7 +224,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
         hasDefaultIngestPipeline: false,
         hasNativeConnectors: false,
         hasWebCrawler: false,
-        showPlayground: false,
       },
       kibanaVersion: '1.0.0',
     });
