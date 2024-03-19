@@ -82,6 +82,11 @@ export const APIKeysGridPage: FunctionComponent = () => {
     ]);
   }, [services.http, query, from, pageSize]);
 
+  const resetQueryOnError = () => {
+    setQuery(EuiSearchBar.Query.parse(''));
+    setFrom(0);
+  };
+
   const [createdApiKey, setCreatedApiKey] = useState<CreateAPIKeyResult>();
   const [openedApiKey, setOpenedApiKey] = useState<CategorizedApiKey>();
   const readOnly = !useCapabilities('api_keys').save;
@@ -118,7 +123,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
     return (
       <ApiKeysEmptyPrompt error={state.error}>
-        <EuiButton iconType="refresh" onClick={() => queryApiKeysAndAggregations()}>
+        <EuiButton iconType="refresh" onClick={() => resetQueryOnError()}>
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeys.retryButton"
             defaultMessage="Try again"
