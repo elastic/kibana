@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, Fragment, type ComponentProps, type FC } from 'react';
+import React, { useMemo, useCallback, Fragment, type ComponentProps, type FC } from 'react';
 import {
   EuiButton,
   EuiModal,
@@ -16,7 +16,6 @@ import {
   EuiModalHeaderTitle,
   EuiTabs,
   EuiTab,
-  EuiCopy,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -31,7 +30,7 @@ interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClo
   modalTitle?: string;
 }
 
-const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose }) => {
+const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle }) => {
   const { tabs, state, dispatch } = useModalContext();
 
   const selectedTabId = state.meta.selectedTabId;
@@ -42,9 +41,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose }) => {
 
   const {
     content: SelectedTabContent,
-    description: string,
-    modalActionBtn: { defaultMessage, handler, dataTestSubj, formattedMessageId, isCopy },
-    title,
+    modalActionBtn: { defaultMessage, handler, dataTestSubj, formattedMessageId },
   } = useMemo(() => {
     return tabs.find((obj) => obj.id === selectedTabId)!;
   }, [selectedTabId, tabs]);
@@ -68,35 +65,14 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose }) => {
     ));
   };
 
-  const tempHandler = useMemo(
-    () => (isCopy ? handler({ state: selectedTabState }) : ''),
-    [isCopy, handler, selectedTabState]
-  );
-
-  const renderButton = () => {
-    return isCopy ? (
-      <EuiCopy textToCopy={tempHandler}>
-        {(copy) => (
-          <EuiButton fill data-test-subj={dataTestSubj} data-share-url={state.url} onClick={copy}>
-            <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
-          </EuiButton>
-        )}
-      </EuiCopy>
-    ) : (
-      <EuiButton fill data-test-subj={dataTestSubj} data-share-url={state.url}>
-        <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
-      </EuiButton>
-    );
-  };
-
-  // const btnClickHandler = useCallback(() => {
-  //   handler!({ state: selectedTabState });
-  // }, [handler, selectedTabState]);
+  const btnClickHandler = useCallback(() => {
+    handler!({ state: selectedTabState });
+  }, [handler, selectedTabState]);
 
   return (
     <EuiModal onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <Fragment>
@@ -108,24 +84,14 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose }) => {
         </Fragment>
       </EuiModalBody>
       <EuiModalFooter>
-        {isCopy ? (
-          <EuiCopy textToCopy={tempHandler}>
-            {(copy) => (
-              <EuiButton
-                fill
-                data-test-subj={dataTestSubj}
-                data-share-url={state.url}
-                onClick={copy}
-              >
-                <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
-              </EuiButton>
-            )}
-          </EuiCopy>
-        ) : (
-          <EuiButton fill data-test-subj={dataTestSubj} data-share-url={state.url}>
-            <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
-          </EuiButton>
-        )}
+        <EuiButton
+          fill
+          data-test-subj={dataTestSubj}
+          data-share-url={state.url}
+          onClick={btnClickHandler}
+        >
+          <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
+        </EuiButton>
       </EuiModalFooter>
     </EuiModal>
   );
