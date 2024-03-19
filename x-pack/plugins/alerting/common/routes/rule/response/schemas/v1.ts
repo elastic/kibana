@@ -72,6 +72,7 @@ const actionSchema = schema.object({
   params: actionParamsSchema,
   frequency: schema.maybe(actionFrequencySchema),
   alerts_filter: schema.maybe(actionAlertsFilterSchema),
+  use_alert_data_for_template: schema.maybe(schema.boolean()),
 });
 
 export const ruleExecutionStatusSchema = schema.object({
