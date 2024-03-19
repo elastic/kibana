@@ -150,7 +150,7 @@ export class EmbeddableEnhancedPlugin
     serializeDynamicActions: () => DynamicActionsSerializedState;
   } {
     const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>(
-      state.enhancements
+      { dynamicActions: { events: [] }, ...(state.enhancements ?? {}) }
     );
     const api: DynamicActionStorageApi = {
       dynamicActionsState$,
@@ -192,7 +192,10 @@ export class EmbeddableEnhancedPlugin
     const enhancedEmbeddable = embeddable as EnhancedEmbeddable<E>;
 
     const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>(
-      embeddable.getInput().enhancements as DynamicActionsSerializedState['enhancements']
+      {
+        dynamicActions: { events: [] },
+        ...(embeddable.getInput().enhancements ?? {}),
+      }
     );
     const api = {
       dynamicActionsState$,
@@ -212,9 +215,10 @@ export class EmbeddableEnhancedPlugin
         )
       )
       .subscribe((input) => {
-        dynamicActionsState$.next(
-          input.enhancements as DynamicActionsSerializedState['enhancements']
-        );
+        dynamicActionsState$.next({
+          dynamicActions: { events: [] },
+          ...(input.enhancements ?? {}),
+        } as DynamicActionsSerializedState['enhancements']);
       });
 
     const storage = new ApiActionStorage(String(embeddable.runtimeId), embeddable.getTitle, api);
