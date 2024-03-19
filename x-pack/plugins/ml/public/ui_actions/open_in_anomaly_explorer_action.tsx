@@ -35,14 +35,11 @@ import type { MlCoreSetup } from '../plugin';
 import type { JobId } from '../shared';
 
 export interface AnomalyChartsFieldSelectionApi {
-  // Props from embeddable output
   entityFields: PublishingSubject<MlEntityField[] | undefined>;
 }
 
 export interface SwimLaneDrilldownApi {
-  // Props from embeddable input
   viewBy: PublishingSubject<string>;
-  // Props from embeddable output
   perPage: PublishingSubject<number>;
   fromPage: PublishingSubject<number>;
 }
