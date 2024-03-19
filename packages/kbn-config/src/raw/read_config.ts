@@ -55,10 +55,9 @@ const listEntries = (root: Record<string, any>): YamlEntry[] => {
 const mergeEntries = (entries: YamlEntry[]): Record<string, any> => {
   const root = {};
 
-  const mergeEntry = (entry: YamlEntry) => {
+  entries.forEach((entry) => {
     set(root, entry.path, entry.value);
-  };
-  entries.map(mergeEntry);
+  });
 
   return root;
 };
