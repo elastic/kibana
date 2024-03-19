@@ -9,27 +9,41 @@ import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const FileUploadCallout = () => (
-  <EuiCallOut
-    title={i18n.translate('xpack.serverlessSearch.selectClient.fileUploadCallout.title', {
-      defaultMessage: 'Upload your data from a file',
-    })}
-    size="m"
-  >
-    <p>
-      <FormattedMessage
-        id="xpack.serverlessSearch.selectClient.fileUploadCallout.description"
-        defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index."
-      />
-    </p>
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        <EuiButton color="primary" fill data-test-subj="fileupload-callout-cta" onClick={() => {}}>
-          {i18n.translate('xpack.serverlessSearch.selectClient.fileUploadCallout.cta', {
-            defaultMessage: 'Upload a file',
-          })}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiCallOut>
-);
+import { useKibanaServices } from '../hooks/use_kibana';
+import { FILE_UPLOAD_PATH } from '../constants';
+
+export const FileUploadCallout = () => {
+  const {
+    application: { navigateToUrl },
+    http,
+  } = useKibanaServices();
+  return (
+    <EuiCallOut
+      title={i18n.translate('xpack.serverlessSearch.selectClient.fileUploadCallout.title', {
+        defaultMessage: 'Upload your data from a file',
+      })}
+      size="m"
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.serverlessSearch.selectClient.fileUploadCallout.description"
+          defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index."
+        />
+      </p>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="primary"
+            fill
+            data-test-subj="fileupload-callout-cta"
+            onClick={() => navigateToUrl(http.basePath.prepend(FILE_UPLOAD_PATH))}
+          >
+            {i18n.translate('xpack.serverlessSearch.selectClient.fileUploadCallout.cta', {
+              defaultMessage: 'Upload a file',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiCallOut>
+  );
+};
