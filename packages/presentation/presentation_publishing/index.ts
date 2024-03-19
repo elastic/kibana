@@ -58,15 +58,12 @@ export {
   type PublishesDisabledActionIds,
 } from './interfaces/publishes_disabled_action_ids';
 export {
-  apiPublishesLocalUnifiedSearch,
-  apiPublishesPartialLocalUnifiedSearch,
-  apiPublishesWritableLocalUnifiedSearch,
-  useLocalFilters,
-  useLocalQuery,
-  useLocalTimeRange,
-  type PublishesLocalUnifiedSearch,
-  type PublishesWritableLocalUnifiedSearch,
-} from './interfaces/publishes_local_unified_search';
+  apiPublishesUnifiedSearch,
+  apiPublishesPartialUnifiedSearch,
+  apiPublishesWritableUnifiedSearch,
+  type PublishesUnifiedSearch,
+  type PublishesWritableUnifiedSearch,
+} from './interfaces/publishes_unified_search';
 export {
   apiPublishesPanelDescription,
   apiPublishesWritablePanelDescription,

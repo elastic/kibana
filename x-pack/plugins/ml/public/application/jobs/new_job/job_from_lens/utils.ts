@@ -81,7 +81,7 @@ export async function getJobsItemsFromEmbeddable(embeddable: LensApi, lens?: Len
     ? (embeddable.parentApi as DashboardAPI)
     : undefined;
 
-  const timeRange = embeddable.localTimeRange?.value ?? dashboardApi?.localTimeRange?.value;
+  const timeRange = embeddable.timeRange$?.value ?? dashboardApi?.timeRange$?.value;
   if (timeRange === undefined) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromLens.createJob.error.noTimeRange', {
@@ -104,8 +104,8 @@ export async function getJobsItemsFromEmbeddable(embeddable: LensApi, lens?: Len
     chartInfo: await getChartInfoFromVisualization(lens, vis),
     from: timeRange.from,
     to: timeRange.to,
-    query: (dashboardApi?.localQuery?.value as Query) ?? { query: '', language: 'kuery' },
-    filters: dashboardApi?.localFilters?.value ?? [],
+    query: (dashboardApi?.query$?.value as Query) ?? { query: '', language: 'kuery' },
+    filters: dashboardApi?.filters$?.value ?? [],
     dashboard: dashboardApi,
   };
 }

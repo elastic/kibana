@@ -24,7 +24,6 @@ import {
   distinctUntilChanged,
 } from 'rxjs';
 import { embeddableStart } from '../../../kibana_services';
-import { ContainerInput } from '../../containers';
 import { isFilterableEmbeddable } from '../../filterable_embeddable';
 import {
   EmbeddableInput,
@@ -200,55 +199,29 @@ export const legacyEmbeddableToApi = (
    * to tell when given a legacy embeddable what it's input could contain. All existing actions treat these as optional
    * so if the Embeddable is incapable of publishing unified search state (i.e. markdown) then it will just be ignored.
    */
-  const getTimeRange = () => {
-    if (!embeddable.isContainer && embeddable.getRoot().isContainer) {
-      return (
-        (embeddable.getRoot().getInput() as ContainerInput).panels[embeddable.id].explicitInput as {
-          timeRange?: TimeRange;
-        }
-      ).timeRange;
-    }
-    return embeddable.getInput().timeRange;
-  };
-  const localTimeRange = new BehaviorSubject<TimeRange | undefined>(getTimeRange());
-  const timeRangeSource =
-    !embeddable.isContainer && embeddable.getRoot().isContainer ? embeddable.getRoot() : embeddable;
-  timeRangeSource
-    .getInput$()
-    .pipe(
-      distinctUntilChanged((a, b) =>
-        isTimeRangeEqual(
-          (a as unknown as { timeRange: TimeRange }).timeRange,
-          (b as unknown as { timeRange: TimeRange }).timeRange
-        )
-      )
-    )
-    .subscribe(() => {
-      localTimeRange.next(getTimeRange());
-    });
-  const setLocalTimeRange = (timeRange?: TimeRange) => embeddable.updateInput({ timeRange });
-  const getFallbackTimeRange = () =>
-    (embeddable.parent?.getInput() as unknown as CommonLegacyInput)?.timeRange;
+  const timeRange$ = inputKeyToSubject<TimeRange | undefined>('timeRange', true);
+  const setTimeRange = (nextTimeRange?: TimeRange) =>
+    embeddable.updateInput({ timeRange: nextTimeRange });
 
-  const localFilters: BehaviorSubject<Filter[] | undefined> = new BehaviorSubject<
-    Filter[] | undefined
-  >(undefined);
-  const localQuery: BehaviorSubject<Query | AggregateQuery | undefined> = new BehaviorSubject<
+  const filters$: BehaviorSubject<Filter[] | undefined> = new BehaviorSubject<Filter[] | undefined>(
+    undefined
+  );
+  const query$: BehaviorSubject<Query | AggregateQuery | undefined> = new BehaviorSubject<
     Query | AggregateQuery | undefined
   >(undefined);
   // if this embeddable is a legacy filterable embeddable, publish changes to those filters to the panelFilters subject.
   if (isFilterableEmbeddable(embeddable)) {
     embeddable.untilInitializationFinished().then(() => {
-      localFilters.next(embeddable.getFilters());
-      localQuery.next(embeddable.getQuery());
+      filters$.next(embeddable.getFilters());
+      query$.next(embeddable.getQuery());
 
       subscriptions.add(
         embeddable.getInput$().subscribe(() => {
-          if (!compareFilters(embeddable.localFilters.getValue() ?? [], embeddable.getFilters())) {
-            localFilters.next(embeddable.getFilters());
+          if (!compareFilters(embeddable.filters$.getValue() ?? [], embeddable.getFilters())) {
+            filters$.next(embeddable.getFilters());
           }
-          if (!deepEqual(embeddable.localQuery.getValue() ?? [], embeddable.getQuery())) {
-            localQuery.next(embeddable.getQuery());
+          if (!deepEqual(embeddable.query$.getValue() ?? [], embeddable.getQuery())) {
+            query$.next(embeddable.getQuery());
           }
         })
       );
@@ -256,7 +229,7 @@ export const legacyEmbeddableToApi = (
   }
 
   const dataViews = outputKeyToSubject<DataView[]>('indexPatterns');
-  const isCompatibleWithLocalUnifiedSearch = () => {
+  const isCompatibleWithUnifiedSearch = () => {
     const isInputControl =
       isVisualizeEmbeddable(embeddable) &&
       (embeddable as unknown as VisualizeEmbeddable).getOutput().visTypeName ===
@@ -286,12 +259,11 @@ export const legacyEmbeddableToApi = (
       isEditingEnabled,
       getTypeDisplayName,
 
-      localTimeRange,
-      setLocalTimeRange,
-      localFilters,
-      localQuery,
-      getFallbackTimeRange,
-      isCompatibleWithLocalUnifiedSearch,
+      timeRange$,
+      setTimeRange,
+      filters$,
+      query$,
+      isCompatibleWithUnifiedSearch,
 
       dataViews,
       disabledActionIds,

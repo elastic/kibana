@@ -476,6 +476,24 @@ describe('<IndexDetailsPage />', () => {
       expect(tabContent).toEqual(JSON.stringify(testIndexMappings, null, 2));
     });
 
+    it('displays the mappings in the table view', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      await testBed.actions.mappings.clickToggleViewButton();
+      const tabContent = testBed.actions.mappings.getTreeViewContent();
+      expect(tabContent).toContain('@timestamp');
+    });
+
+    it('search bar is enabled in JSON view', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(true);
+    });
+
+    it('search bar is disabled in Tree view', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      await testBed.actions.mappings.clickToggleViewButton();
+      expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(false);
+    });
+
     it('sets the docs link href from the documentation service', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
       const docsLinkHref = testBed.actions.mappings.getDocsLinkHref();
