@@ -13,6 +13,6 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
 
 generate({
   rootDir: SECURITY_SOLUTION_ROOT,
-  sourceGlob: './**/*.schema.yaml',
+  sourceGlob: './**/rule_management/crud/**/*.schema.yaml',
   templateName: 'zod_api_client',
 });
