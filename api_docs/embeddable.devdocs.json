@@ -3039,10 +3039,10 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.Embeddable.localQuery",
+            "id": "def-public.Embeddable.query$",
             "type": "Object",
             "tags": [],
-            "label": "localQuery",
+            "label": "query$",
             "description": [],
             "signature": [
               "{ readonly value: ",
@@ -3931,10 +3931,10 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.Embeddable.localFilters",
+            "id": "def-public.Embeddable.filters$",
             "type": "Object",
             "tags": [],
-            "label": "localFilters",
+            "label": "filters$",
             "description": [],
             "signature": [
               "{ readonly value: ",
@@ -4868,10 +4868,10 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.Embeddable.localTimeRange",
+            "id": "def-public.Embeddable.timeRange$",
             "type": "Object",
             "tags": [],
-            "label": "localTimeRange",
+            "label": "timeRange$",
             "description": [],
             "signature": [
               "{ readonly value: ",
@@ -5768,10 +5768,10 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.Embeddable.setLocalTimeRange",
+            "id": "def-public.Embeddable.setTimeRange",
             "type": "Function",
             "tags": [],
-            "label": "setLocalTimeRange",
+            "label": "setTimeRange",
             "description": [],
             "signature": [
               "(timeRange: ",
@@ -5791,7 +5791,7 @@
             "children": [
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.Embeddable.setLocalTimeRange.$1",
+                "id": "def-public.Embeddable.setTimeRange.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "timeRange",
@@ -5806,7 +5806,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/presentation/presentation_publishing/interfaces/publishes_local_unified_search.ts",
+                "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -5927,32 +5927,10 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.Embeddable.getFallbackTimeRange",
+            "id": "def-public.Embeddable.isCompatibleWithUnifiedSearch",
             "type": "Function",
             "tags": [],
-            "label": "getFallbackTimeRange",
-            "description": [],
-            "signature": [
-              "(() => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              " | undefined) | undefined"
-            ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.Embeddable.isCompatibleWithLocalUnifiedSearch",
-            "type": "Function",
-            "tags": [],
-            "label": "isCompatibleWithLocalUnifiedSearch",
+            "label": "isCompatibleWithUnifiedSearch",
             "description": [],
             "signature": [
               "(() => boolean) | undefined"

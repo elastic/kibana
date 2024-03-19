@@ -16,18 +16,8 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGrouping = (
     caseId: 'mock-id-1',
     attachments: [
       {
-        alertId: 'alert-id-0',
-        index: 'alert-index-0',
-        owner: 'securitySolution',
-        rule: {
-          id: 'rule-test-id',
-          name: 'Test rule',
-        },
-        type: 'alert',
-      },
-      {
-        alertId: 'alert-id-2',
-        index: 'alert-index-2',
+        alertId: ['alert-id-0', 'alert-id-2'],
+        index: ['alert-index-0', 'alert-index-2'],
         owner: 'securitySolution',
         rule: {
           id: 'rule-test-id',
@@ -42,8 +32,8 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGrouping = (
     caseId: 'mock-id-2',
     attachments: [
       {
-        alertId: 'alert-id-1',
-        index: 'alert-index-1',
+        alertId: ['alert-id-1'],
+        index: ['alert-index-1'],
         owner: 'securitySolution',
         rule: {
           id: 'rule-test-id',
@@ -58,8 +48,8 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGrouping = (
     caseId: 'mock-id-3',
     attachments: [
       {
-        alertId: 'alert-id-3',
-        index: 'alert-index-3',
+        alertId: ['alert-id-3'],
+        index: ['alert-index-3'],
         owner: 'securitySolution',
         rule: {
           id: 'rule-test-id',
@@ -80,8 +70,8 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCo
     caseId: 'mock-id-1',
     attachments: [
       {
-        alertId: 'alert-id-1',
-        index: 'alert-index-1',
+        alertId: ['alert-id-1'],
+        index: ['alert-index-1'],
         owner: 'securitySolution',
         rule: {
           id: 'rule-test-id',
@@ -96,8 +86,8 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCo
     caseId: 'mock-id-2',
     attachments: [
       {
-        alertId: 'alert-id-3',
-        index: 'alert-index-3',
+        alertId: ['alert-id-3'],
+        index: ['alert-index-3'],
         owner: 'securitySolution',
         rule: {
           id: 'rule-test-id',
@@ -112,18 +102,8 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCo
     caseId: 'mock-id-4',
     attachments: [
       {
-        alertId: 'alert-id-0',
-        index: 'alert-index-0',
-        owner: 'securitySolution',
-        rule: {
-          id: 'rule-test-id',
-          name: 'Test rule',
-        },
-        type: 'alert',
-      },
-      {
-        alertId: 'alert-id-2',
-        index: 'alert-index-2',
+        alertId: ['alert-id-0', 'alert-id-2'],
+        index: ['alert-index-0', 'alert-index-2'],
         owner: 'securitySolution',
         rule: {
           id: 'rule-test-id',

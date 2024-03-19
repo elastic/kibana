@@ -8,6 +8,7 @@
 import type { ExclusiveUnion } from '@elastic/eui';
 import type { TypeOf } from '@kbn/config-schema';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type { DecoratedError } from '@kbn/core-saved-objects-server';
 import type {
   CasesConnectorConfigSchema,
   CasesConnectorSecretsSchema,
@@ -48,7 +49,14 @@ export interface OracleRecord {
   version: string;
 }
 
-export type OracleRecordError = { id?: string } & SavedObjectError;
+export type OracleSOError = SavedObjectError | DecoratedError;
+
+export interface OracleRecordError {
+  id?: string;
+  error: string;
+  message: string;
+  statusCode: number;
+}
 
 export interface OracleRecordCreateRequest {
   cases: Array<{ id: string }>;
@@ -56,7 +64,7 @@ export interface OracleRecordCreateRequest {
   grouping: Record<string, unknown>;
 }
 
-export type BulkGetOracleRecordsResponse = Array<OracleRecord | SavedObjectError>;
+export type BulkGetOracleRecordsResponse = Array<OracleRecord | OracleRecordError>;
 
 export type OracleRecordAttributes = Omit<OracleRecord, 'id' | 'version'>;
 
