@@ -23,7 +23,7 @@ import { AssistantAvatar } from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatActionsMenu } from './chat_actions_menu';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
-import type { FlyoutPositionMode } from './chat_flyout';
+import { FlyoutPositionMode } from './chat_flyout';
 
 // needed to prevent InlineTextEdit component from expanding container
 const minWidthClassName = css`
@@ -87,7 +87,11 @@ export function ChatHeader({
 
   const handleToggleFlyoutPositionMode = () => {
     if (flyoutPositionMode) {
-      onToggleFlyoutPositionMode?.(flyoutPositionMode === 'overlay' ? 'push' : 'overlay');
+      onToggleFlyoutPositionMode?.(
+        flyoutPositionMode === FlyoutPositionMode.OVERLAY
+          ? FlyoutPositionMode.PUSH
+          : FlyoutPositionMode.OVERLAY
+      );
     }
   };
 

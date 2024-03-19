@@ -35,7 +35,10 @@ const CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED = 34;
 
 const SIDEBAR_WIDTH = 400;
 
-export type FlyoutPositionMode = 'push' | 'overlay';
+export enum FlyoutPositionMode {
+  PUSH = 'push',
+  OVERLAY = 'overlay',
+}
 
 export function ChatFlyout({
   initialConversationId,
@@ -64,7 +67,7 @@ export function ChatFlyout({
   const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
 
   const [flyoutPositionMode, setFlyoutPositionMode] = useState<FlyoutPositionMode>(
-    initialFlyoutPositionMode || 'overlay'
+    initialFlyoutPositionMode || FlyoutPositionMode.OVERLAY
   );
 
   const [conversationsExpanded, setConversationsExpanded] = useState(false);
