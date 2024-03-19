@@ -82,7 +82,6 @@ import {
 } from '../../transforms';
 import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { bulkEditOperationsSchema } from './schemas';
-import { denormalizeActions } from '../../../../rules_client/lib/denormalize_actions';
 import {
   bulkEditDefaultActionsSchema,
   bulkEditSystemActionsSchema,
