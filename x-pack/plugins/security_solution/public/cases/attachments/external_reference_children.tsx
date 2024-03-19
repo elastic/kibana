@@ -7,12 +7,13 @@
 
 import React from 'react';
 
-import styled from 'styled-components';
-import { EuiMarkdownFormat } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiMarkdownFormat, useEuiTheme } from '@elastic/eui';
 import type { IExternalReferenceMetaDataProps } from './types';
 
-export const ContentWrapper = styled.div`
-  padding: ${({ theme }) => `${theme.eui?.euiSizeM} ${theme.eui?.euiSizeL}`};
+export const getContentWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
+  padding: ${`${euiTheme.size.m} ${euiTheme.size.l}`};
   text-overflow: ellipsis;
   word-break: break-word;
   display: -webkit-box;
@@ -22,10 +23,11 @@ export const ContentWrapper = styled.div`
 const AttachmentContentChildren = ({
   externalReferenceMetadata: { comment },
 }: IExternalReferenceMetaDataProps) => {
+  const { euiTheme } = useEuiTheme();
   return comment.trim().length > 0 ? (
-    <ContentWrapper>
+    <div css={getContentWrapperCss(euiTheme)}>
       <EuiMarkdownFormat grow={true}>{comment}</EuiMarkdownFormat>
-    </ContentWrapper>
+    </div>
   ) : null;
 };
 // eslint-disable-next-line import/no-default-export
