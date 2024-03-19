@@ -56,11 +56,11 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
     methodName,
     block,
     onFailureBlock,
+    onFailure = defaultOnFailure(methodName),
     accept = returnTrue,
     retryDelay = 502,
     retryCount,
   } = options;
-  const { onFailure = defaultOnFailure(methodName) } = options;
 
   const start = Date.now();
   const criticalWebDriverErrors = ['NoSuchSessionError', 'NoSuchWindowError'];
@@ -69,25 +69,26 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
   const addText = (str: string | undefined) => (str ? ` waiting for '${str}'` : '');
 
   while (true) {
-    if (retryCount) {
-      // Use retryCount as an optional condition
-      if (++attemptCounter > retryCount) {
-        onFailure(
-          lastError,
-          // optionally extend error message with description
-          `reached the limit of attempts${addText(description)}: ${
-            attemptCounter - 1
-          } out of ${retryCount}`
-        );
-      }
+    // Aborting if no retry attempts are left (opt-in)
+    if (retryCount && ++attemptCounter > retryCount) {
+      onFailure(
+        lastError,
+        // optionally extend error message with description
+        `reached the limit of attempts${addText(description)}: ${
+          attemptCounter - 1
+        } out of ${retryCount}`
+      );
     }
+    // Aborting if timeout is reached
     if (Date.now() - start > timeout) {
       onFailure(lastError, `reached timeout ${timeout} ms${addText(description)}`);
-      throw new Error('expected onFailure() option to throw an error');
-    } else if (lastError && criticalWebDriverErrors.includes(lastError.name)) {
-      // Aborting retry since WebDriver session is invalid or browser window is closed
+    }
+    // Aborting if WebDriver session is invalid or browser window is closed
+    if (lastError && criticalWebDriverErrors.includes(lastError.name)) {
       throw new Error('WebDriver session is invalid, retry was aborted');
-    } else if (lastError && onFailureBlock) {
+    }
+    // Run opt-in onFailureBlock before the next attempt
+    if (lastError && onFailureBlock) {
       const before = await runAttempt(onFailureBlock);
       if ('error' in before) {
         log.debug(`--- onRetryBlock error: ${before.error.message}`);
