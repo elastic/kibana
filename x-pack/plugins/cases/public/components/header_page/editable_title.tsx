@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { css } from '@emotion/react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiInlineEditTitle } from '@elastic/eui';
 
@@ -57,7 +58,15 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem grow={true} css={releasePhase && { overflow: 'hidden' }}>
+      <EuiFlexItem
+        grow={true}
+        css={
+          releasePhase &&
+          css`
+            overflow: hidden;
+          `
+        }
+      >
         <EuiInlineEditTitle
           defaultValue={title}
           readModeProps={{

@@ -15,16 +15,16 @@ import {
   mockDatasourceMap,
   mockDatasourceStates,
   renderWithReduxStore,
-} from '../../../mocks';
+} from '../../../../mocks';
 
 import {
   Visualization,
   FramePublicAPI,
   DatasourcePublicAPI,
   SuggestionRequest,
-} from '../../../types';
+} from '../../../../types';
 import { ChartSwitch, ChartSwitchProps } from './chart_switch';
-import { LensAppState, applyChanges } from '../../../state_management';
+import { LensAppState, applyChanges } from '../../../../state_management';
 
 describe('chart_switch', () => {
   function generateVisualization(id: string): jest.Mocked<Visualization> {

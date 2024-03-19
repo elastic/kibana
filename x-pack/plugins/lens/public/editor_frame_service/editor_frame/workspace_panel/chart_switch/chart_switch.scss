@@ -20,8 +20,17 @@
   }
 }
 
-.lnsChartSwitch__append {
-  display: inline-flex;
+.lnsChartSwitch__option {
+  .euiSelectableListItem__text {
+    flex-grow: 0;
+  }
+  .euiSelectableListItem__append {
+    margin-left: $euiSizeXS;
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: flex-end;
+  }
 }
 
 // Targeting img as this won't target normal EuiIcon's only the custom svgs's

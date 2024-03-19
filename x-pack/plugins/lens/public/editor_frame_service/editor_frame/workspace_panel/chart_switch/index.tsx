@@ -5,15 +5,5 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
-
-export const SectionWrapper = styled.div`
-  box-sizing: content-box;
-  max-width: 1175px;
-  width: 100%;
-`;
-
-export const Wrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
+export { ChartSwitch } from './chart_switch';
+export type { ChartSwitchProps } from './chart_switch';
