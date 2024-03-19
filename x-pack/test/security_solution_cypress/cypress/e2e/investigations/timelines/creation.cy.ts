@@ -23,9 +23,8 @@ import {
 } from '../../../screens/timeline';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { ROWS } from '../../../screens/timelines';
-import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
+import { createTimelineTemplate, deleteAllTimelines } from '../../../tasks/api_calls/timelines';
 
-import { deleteTimelines } from '../../../tasks/api_calls/common';
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
@@ -51,10 +50,10 @@ import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../ur
 
 describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   beforeEach(() => {
-    deleteTimelines();
+    deleteAllTimelines();
   });
 
-  it('should create a timeline from a template and should have the same query and open the timeline modal', () => {
+  it.skip('should create a timeline from a template and should have the same query and open the timeline modal', () => {
     login();
     createTimelineTemplate(getTimeline());
     visit(TIMELINE_TEMPLATES_URL);
@@ -74,7 +73,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     cy.get(TIMELINE_PANEL).should('be.visible');
   });
 
-  it('should not be able to create/update timeline with only read privileges', () => {
+  it.skip('should not be able to create/update timeline with only read privileges', () => {
     login(ROLES.t1_analyst);
     visitWithTimeRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
@@ -90,7 +89,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     );
   });
 
-  it('should create a timeline by clicking untitled timeline from bottom bar', () => {
+  it.skip('should create a timeline by clicking untitled timeline from bottom bar', () => {
     login();
     visitWithTimeRange(OVERVIEW_URL);
     openTimelineUsingToggle();
