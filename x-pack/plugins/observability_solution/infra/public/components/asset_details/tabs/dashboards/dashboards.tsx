@@ -31,7 +31,7 @@ import type {
 } from '../../../../../common/custom_dashboards';
 
 import { EmptyDashboards } from './empty_dashboards';
-import { EditDashboard, GotoDashboard, LinkDashboard, UnlinkDashboard } from './actions';
+import { EditDashboard, GotoDashboardLink, LinkDashboard, UnlinkDashboard } from './actions';
 import { useCustomDashboard } from '../../hooks/use_custom_dashboards';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
@@ -153,7 +153,7 @@ export function Dashboards() {
                       customDashboards={customDashboards}
                       assetType={asset.type}
                     />,
-                    <GotoDashboard currentDashboard={currentDashboard} />,
+                    <GotoDashboardLink currentDashboard={currentDashboard} />,
                     <EditDashboard
                       currentDashboard={currentDashboard}
                       onRefresh={reload}

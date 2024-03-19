@@ -10,7 +10,11 @@ import React from 'react';
 import type { DashboardItemWithTitle } from '../../../../../../common/custom_dashboards';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 
-export function GotoDashboard({ currentDashboard }: { currentDashboard: DashboardItemWithTitle }) {
+export function GotoDashboardLink({
+  currentDashboard,
+}: {
+  currentDashboard: DashboardItemWithTitle;
+}) {
   const {
     services: {
       dashboard: { locator: dashboardLocator },

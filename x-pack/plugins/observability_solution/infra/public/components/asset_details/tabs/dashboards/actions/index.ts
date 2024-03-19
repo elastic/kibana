@@ -6,8 +6,8 @@
  */
 
 import { LinkDashboard } from './link_dashboard';
-import { GotoDashboard } from './goto_dashboard';
+import { GotoDashboardLink } from './goto_dashboard_link';
 import { EditDashboard } from './edit_dashboard';
 import { UnlinkDashboard } from './unlink_dashboard';
 
-export { LinkDashboard, GotoDashboard, EditDashboard, UnlinkDashboard };
+export { LinkDashboard, GotoDashboardLink, EditDashboard, UnlinkDashboard };
