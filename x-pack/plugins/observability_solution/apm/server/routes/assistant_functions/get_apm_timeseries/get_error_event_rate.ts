@@ -6,6 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { ERROR_GROUP_NAME } from '../../../../common/es_fields/apm';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -40,7 +41,14 @@ export async function getErrorEventRate({
       rollupInterval: RollupInterval.None,
       intervalString,
       filter,
+      groupByFields: [ERROR_GROUP_NAME],
       aggs: {
+        sample: {
+          top_metrics: {
+            metrics: { field: ERROR_GROUP_NAME },
+            sort: '_score',
+          },
+        },
         value: {
           bucket_script: {
             buckets_path: {

@@ -53,7 +53,7 @@ export async function getTransactionThroughput({
         ...termQuery(TRANSACTION_TYPE, transactionType),
         ...termQuery(TRANSACTION_NAME, transactionName),
       ],
-      groupByFields: ['transaction.type', 'transaction.name'],
+      groupByFields: [TRANSACTION_TYPE, TRANSACTION_NAME],
       aggs: {
         value: {
           bucket_script: {

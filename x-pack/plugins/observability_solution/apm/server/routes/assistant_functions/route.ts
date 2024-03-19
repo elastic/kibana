@@ -195,6 +195,14 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
               'transaction.name': query['transaction.name'],
             },
           },
+          {
+            title: 'Error events',
+            'service.name': query['service.name'],
+            'service.environment': query['service.environment'],
+            timeseries: {
+              name: ApmTimeseriesType.errorEventRate,
+            },
+          },
         ],
       },
     });

@@ -81,7 +81,7 @@ export function AlertDetails() {
 
     const screenDescription = getScreenDescription(alertDetail);
 
-    setScreenContext({
+    return setScreenContext({
       screenDescription,
       data: [
         {
