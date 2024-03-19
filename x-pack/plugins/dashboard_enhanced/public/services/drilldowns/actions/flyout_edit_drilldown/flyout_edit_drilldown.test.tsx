@@ -39,7 +39,7 @@ function createAction(overlays = coreMock.createStart().overlays) {
   return new FlyoutEditDrilldownAction(params);
 }
 const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>({
-  dynamicActions: { events: [] },
+  dynamicActions: { events: [{} as any] },
 });
 
 const compatibleEmbeddableApi = {
@@ -90,14 +90,17 @@ describe('isCompatible', () => {
   });
 
   test('not compatible if no drilldowns', async () => {
+    const newDynamicActionsState$ = new BehaviorSubject<
+      DynamicActionsSerializedState['enhancements']
+    >({
+      dynamicActions: { events: [] },
+    });
+
     const embeddableApi = {
       ...compatibleEmbeddableApi,
-      enhancements: {
-        dynamicActions: new DynamicActionManager({
-          storage: new MemoryActionStorage(),
-          isCompatible: async () => true,
-          uiActions: uiActionsEnhancedPluginMock.createStartContract(),
-        }),
+      dynamicActionsState$: newDynamicActionsState$,
+      setDynamicActions: (newDynamicActions: DynamicActionsSerializedState['enhancements']) => {
+        newDynamicActionsState$.next(newDynamicActions);
       },
     };
     const action = createAction();

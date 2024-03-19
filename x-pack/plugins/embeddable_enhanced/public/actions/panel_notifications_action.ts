@@ -39,7 +39,7 @@ export const txtManyDrilldowns = (count: number) =>
 
 export const ACTION_PANEL_NOTIFICATIONS = 'ACTION_PANEL_NOTIFICATIONS';
 
-type PanelNotificationsActionApi = CanAccessViewMode & HasDynamicActions;
+export type PanelNotificationsActionApi = CanAccessViewMode & HasDynamicActions;
 
 const isApiCompatible = (api: unknown | null): api is PanelNotificationsActionApi =>
   apiHasDynamicActions(api) && apiCanAccessViewMode(api);
