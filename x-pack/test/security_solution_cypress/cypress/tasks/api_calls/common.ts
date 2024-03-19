@@ -113,27 +113,6 @@ export const deleteEndpointExceptionList = () => {
   });
 };
 
-export const deleteTimelines = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'siem-ui-timeline',
-              },
-            },
-          ],
-        },
-      },
-    },
-  });
-};
-
 export const deleteAllCasesItems = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_alerting_cases_\*`;
   rootRequest({
