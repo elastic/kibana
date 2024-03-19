@@ -18,6 +18,6 @@ steps:
   - command: .buildkite/scripts/steps/fips/smoke_tests.sh
     label: 'Smoke testing for FIPS'
     agents:
-      queue: n2-4-spot
+      queue: n2-4-virt
     timeout_in_minutes: 60
     soft_fail: true
