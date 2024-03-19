@@ -1,0 +1,58 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+{{! Import Kibana http service and errors}}
+import { KibanaServices, KibanaResponseError } from '../../../common/lib/kibana';
+
+{{! Import types from schema}}
+import type {
+  {{#each operations}}  
+    {{operationId}}Request,
+    {{operationId}}Response
+  {{/each}}
+} from './schema';
+
+{{! API client }}  
+const apiClient = {
+
+  http: KibanaServices.get().http,
+
+  {{#each operations}}
+    async {{operationId}}(params: {{operationId}}Request) {
+    
+      try {
+
+        const response = await this.http.fetch<{{operationId}}Response>('{{path}}', {
+          method: '{{method}}',
+          {{#if hasQueryParams}}
+          query: params.query,
+          {{/if}}
+          {{#if hasRequestBody}}
+          body: JSON.stringify(params.body),
+          {{/if}}
+        });
+
+        return response;
+
+      } catch(error) {
+
+        if (error instanceof KibanaResponseError) {
+          // handle Kibana response error
+        } else {
+          // handle other errors like network errors
+        }
+
+        throw error;
+
+      }
+
+    }
+  {{/each}}
+
+};
+
+export default apiClient;
