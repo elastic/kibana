@@ -11,7 +11,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
-
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -75,6 +75,7 @@ export const JobsListPage: FC<Props> = ({
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
   const I18nContext = coreStart.i18n.Context;
   const theme$ = coreStart.theme.theme$;
+  const chromeStyle = useObservable(coreStart.chrome.getChromeStyle$(), 'classic');
 
   const mlServices = useMemo(
     () => getMlGlobalServices(coreStart.http, data.dataViews, usageCollection),
@@ -141,7 +142,11 @@ export const JobsListPage: FC<Props> = ({
             }}
           >
             <ContextWrapper feature={PLUGIN_ID}>
-              <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
+              <EnabledFeaturesContextProvider
+                isServerless={isServerless}
+                mlFeatures={mlFeatures}
+                showMLNavMenu={chromeStyle === 'classic'}
+              >
                 <Router history={history}>
                   <EuiPageTemplate.Header
                     pageTitle={
