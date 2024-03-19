@@ -17,7 +17,7 @@ import { DESCRIPTION_INPUT, ADD_COMMENT_INPUT } from '../../../screens/create_ne
 import { getCase1 } from '../../../objects/case';
 import { getTimeline } from '../../../objects/timeline';
 import { createTimeline, deleteAllTimelines } from '../../../tasks/api_calls/timelines';
-import { deleteAllCasesItems, deleteTimelines } from '../../../tasks/api_calls/common';
+import { deleteAllCasesItems } from '../../../tasks/api_calls/common';
 import { createCase } from '../../../tasks/api_calls/cases';
 
 describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
