@@ -367,9 +367,10 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           )}
 
           <EuiFlexItem
-            grow={10}
+            grow={false}
             css={css`
               min-width: 600px;
+              height: 100%;
             `}
           >
             <EuiPanel>{isJSONVisible ? jsonBlock : treeViewBlock}</EuiPanel>
