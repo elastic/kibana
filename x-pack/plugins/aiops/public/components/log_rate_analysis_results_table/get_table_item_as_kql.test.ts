@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { finalSignificantItemGroups } from '../../../common/__mocks__/artificial_logs/final_significant_item_groups';
-import { significantTerms } from '../../../common/__mocks__/artificial_logs/significant_terms';
+import { finalSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups';
+import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
 
 import { getGroupTableItems } from './get_group_table_items';
 import { getTableItemAsKQL } from './get_table_item_as_kql';

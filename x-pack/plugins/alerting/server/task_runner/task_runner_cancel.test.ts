@@ -17,7 +17,6 @@ import {
   RuleAlertData,
 } from '../types';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
@@ -59,6 +58,7 @@ import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { TaskRunnerContext } from './types';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -531,6 +531,7 @@ describe('Task Runner Cancel', () => {
         claim_to_start_duration_ms: 0,
         persist_alerts_duration_ms: 0,
         prepare_rule_duration_ms: 0,
+        prepare_to_run_duration_ms: 0,
         process_alerts_duration_ms: 0,
         process_rule_duration_ms: 0,
         rule_type_run_duration_ms: 0,
