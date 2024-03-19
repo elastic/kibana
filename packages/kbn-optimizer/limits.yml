@@ -103,7 +103,7 @@ pageLoadAssetSize:
   navigation: 37269
   newsfeed: 42228
   noDataPage: 5000
-  observability: 115443
+  observability: 167673
   observabilityAIAssistant: 58230
   observabilityAIAssistantApp: 27680
   observabilityLogsExplorer: 46650
@@ -136,6 +136,7 @@ pageLoadAssetSize:
   serverlessSearch: 72995
   sessionView: 77750
   share: 71239
+  slo: 37039
   snapshotRestore: 79032
   spaces: 57868
   stackAlerts: 58316
