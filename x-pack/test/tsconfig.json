@@ -168,6 +168,7 @@
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/infra-forge",
     "@kbn/slo-plugin",
+    "@kbn/aiops-test-utils",
     "@kbn/observability-ai-assistant-app-plugin",
   ]
 }
