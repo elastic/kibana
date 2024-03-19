@@ -47,4 +47,4 @@ export ELASTICSEARCH_HOSTS="http://127.0.0.1:9200"
 export ELASTICSEARCH_USERNAME="kibana_system"
 export ELASTICSEARCH_PASSWORD="changeme"
 
-docker run -p 5601:5601 --rm --network=host docker.elastic.co/kibana-ci/kibana-ubi-fips:$FULL_VERSION-$BUILDKITE_COMMIT
+docker run -p 5601:5601 --rm docker.elastic.co/kibana-ci/kibana-ubi-fips:$FULL_VERSION-$BUILDKITE_COMMIT
