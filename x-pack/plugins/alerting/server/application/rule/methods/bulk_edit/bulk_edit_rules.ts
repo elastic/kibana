@@ -551,16 +551,15 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       ruleType.validate.params
     );
 
-    const { references, params: updatedParams } = await extractReferences(
+    const {
+      references,
+      params: updatedParams,
+      actions: actionsWithRefs,
+    } = await extractReferences(
       context,
       ruleType,
       updatedRuleActions as NormalizedAlertActionWithGeneratedValues[],
       validatedMutatedAlertTypeParams
-    );
-
-    const { actions: actionsWithRefs } = await denormalizeActions(
-      context,
-      updatedRuleActions as NormalizedAlertActionWithGeneratedValues[]
     );
 
     const ruleAttributes = transformRuleDomainToRuleAttributes({

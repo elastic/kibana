@@ -48,11 +48,10 @@ export const rewriteSystemActionsReq = (
 ): NormalizedSystemAction[] => {
   if (!actions) return [];
 
-  return actions.map(({ use_alert_data_for_template: useAlertDataForTemplate, ...action }) => {
+  return actions.map((action) => {
     return {
       id: action.id,
       params: action.params,
-      ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
       ...(action.uuid ? { uuid: action.uuid } : {}),
     };
   });

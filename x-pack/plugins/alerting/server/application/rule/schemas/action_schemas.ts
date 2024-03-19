@@ -60,7 +60,6 @@ export const systemActionDomainSchema = schema.object({
   actionTypeId: schema.string(),
   params: actionParamsSchema,
   uuid: schema.maybe(schema.string()),
-  useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
 
 export const actionAlertsFilterSchema = schema.object({

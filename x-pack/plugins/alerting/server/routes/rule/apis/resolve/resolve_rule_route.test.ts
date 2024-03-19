@@ -97,7 +97,7 @@ describe('resolveRuleRoute', () => {
     },
     actions: [
       {
-        group: (mockedRule.actions[0] as RuleAction).group,
+        group: mockedRule.actions[0].group,
         id: mockedRule.actions[0].id,
         params: mockedRule.actions[0].params,
         connector_type_id: mockedRule.actions[0].actionTypeId,

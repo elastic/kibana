@@ -307,19 +307,4 @@ describe('validateActions', () => {
       '"Failed to validate actions due to the following error: Action\'s alertsFilter days has invalid values: (111:[0,8]) "'
     );
   });
-
-  // TO DO talk to Christos
-  // it('should not throw an error on system actions that do not contain properties like frequency or group', async () => {
-  //   const res = await validateActions(
-  //     context as unknown as RulesClientContext,
-  //     ruleType,
-  //     {
-  //       ...data,
-  //       systemActions: [systemAction],
-  //     },
-  //     false
-  //   );
-
-  //   expect(res).toBe(undefined);
-  // });
 });

@@ -40,9 +40,7 @@ function getCorrespondingAction(
   if (!Array.isArray(actions)) {
     return null;
   } else {
-    return actions.find(
-      (action) => (action as unknown as RawRuleAction)?.actionRef === connectorRef
-    ) as unknown as RawRuleAction;
+    return actions.find((action) => action.actionRef === connectorRef) ?? null;
   }
 }
 

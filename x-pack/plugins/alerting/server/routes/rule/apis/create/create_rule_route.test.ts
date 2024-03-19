@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit, pick } from 'lodash';
+import { pick } from 'lodash';
 import { createRuleRoute } from './create_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
@@ -690,7 +690,7 @@ describe('createRuleRoute', () => {
       const [context, req, res] = mockHandlerArguments(
         { rulesClient, actionsClient },
         {
-          body: { ...ruleToCreate, actions: [omit(action, 'type'), omit(systemAction, 'type')] },
+          body: { ...ruleToCreate, actions: [action, systemAction] },
         },
         ['ok']
       );

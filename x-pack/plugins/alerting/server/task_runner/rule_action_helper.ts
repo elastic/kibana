@@ -11,7 +11,6 @@ import {
   parseDuration,
   RuleAction,
   RuleNotifyWhenTypeValues,
-  RuleSystemAction,
   ThrottledActions,
 } from '../../common';
 
@@ -133,26 +132,6 @@ export const getSummaryActionTimeBounds = (
       const scheduleMillis = parseDuration(ruleSchedule.interval);
       startDate = new Date(now - scheduleMillis);
     }
-  }
-
-  return { start: startDate.valueOf(), end: now.valueOf() };
-};
-
-export const getSummarySystemActionTimeBounds = (
-  action: RuleSystemAction,
-  ruleSchedule: IntervalSchedule,
-  previousStartedAt: Date | null
-): { start?: number; end?: number } => {
-  let startDate: Date;
-  const now = Date.now();
-
-  // If action is not throttled, set time bounds to previousStartedAt - now
-  // If previousStartedAt is null, use the rule schedule interval
-  if (previousStartedAt) {
-    startDate = previousStartedAt;
-  } else {
-    const scheduleMillis = parseDuration(ruleSchedule.interval);
-    startDate = new Date(now - scheduleMillis);
   }
 
   return { start: startDate.valueOf(), end: now.valueOf() };

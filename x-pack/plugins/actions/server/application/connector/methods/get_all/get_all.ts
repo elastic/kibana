@@ -9,6 +9,7 @@
  * Get all actions with in-memory connectors
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Logger } from '@kbn/core/server';
 import { connectorWithExtraFindDataSchema } from '../../schemas';
 import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector';
 import { GetAllParams, InjectExtraFindDataParams } from './types';
@@ -69,17 +70,21 @@ export async function getAll({
     connectors: mergedResult,
   });
 
+  validateConnectors(connectors, context.logger);
+
+  return connectors;
+}
+
+const validateConnectors = (connectors: ConnectorWithExtraFindData[], logger: Logger) => {
   connectors.forEach((connector) => {
     // Try to validate the connectors, but don't throw.
     try {
       connectorWithExtraFindDataSchema.validate(connector);
     } catch (e) {
-      context.logger.warn(`Error validating connector: ${connector.id}, ${e}`);
+      logger.warn(`Error validating connector: ${connector.id}, ${e}`);
     }
   });
-
-  return connectors;
-}
+};
 
 export async function getAllSystemConnectors({
   context,
@@ -114,11 +119,15 @@ export async function getAllSystemConnectors({
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  return await injectExtraFindData({
+  const connectors = await injectExtraFindData({
     kibanaIndices: context.kibanaIndices,
     scopedClusterClient: context.scopedClusterClient,
     connectors: transformedSystemConnectors,
   });
+
+  validateConnectors(connectors, context.logger);
+
+  return connectors;
 }
 
 async function injectExtraFindData({

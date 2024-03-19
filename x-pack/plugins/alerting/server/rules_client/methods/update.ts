@@ -38,7 +38,6 @@ import {
   ValidateScheduleLimitResult,
 } from '../../application/rule/methods/get_schedule_frequency';
 import { validateSystemActions } from '../../lib/validate_system_actions';
-import { denormalizeActions } from '../lib/denormalize_actions';
 import { transformRawActionsToDomainActions } from '../../application/rule/transforms';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { transformRawActionsToDomainSystemActions } from '../../application/rule/transforms/transform_raw_actions_to_domain_actions';
@@ -259,14 +258,11 @@ async function updateAlert<Params extends RuleTypeParams>(
 
   const allActions = [...data.actions, ...(data.systemActions ?? [])];
   // Extract saved object references for this rule
-  const { references, params: updatedParams } = await extractReferences(
-    context,
-    ruleType,
-    allActions,
-    validatedAlertTypeParams
-  );
-
-  const { actions: actionsWithRefs } = await denormalizeActions(context, allActions);
+  const {
+    references,
+    params: updatedParams,
+    actions: actionsWithRefs,
+  } = await extractReferences(context, ruleType, allActions, validatedAlertTypeParams);
 
   const username = await context.getUserName();
 

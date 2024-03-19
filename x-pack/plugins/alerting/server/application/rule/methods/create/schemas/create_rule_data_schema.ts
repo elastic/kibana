@@ -31,7 +31,6 @@ export const systemActionSchema = schema.object({
   actionTypeId: schema.maybe(schema.string()),
   params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
   uuid: schema.maybe(schema.string()),
-  useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
 
 export const createRuleDataSchema = schema.object({

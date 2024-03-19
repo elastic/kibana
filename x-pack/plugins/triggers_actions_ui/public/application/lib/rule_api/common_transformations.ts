@@ -9,19 +9,15 @@ import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import type { Rule, RuleUiAction, ResolvedRule, RuleLastRun } from '../../../types';
 
 const transformAction: RewriteRequestCase<RuleUiAction> = (action) => {
-  const {
-    uuid,
-    id,
-    connector_type_id: actionTypeId,
-    use_alert_data_for_template: useAlertDataForTemplate,
-    params,
-  } = action;
+  const { uuid, id, connector_type_id: actionTypeId, params } = action;
   return {
     ...('group' in action && action.group ? { group: action.group } : {}),
     id,
     params,
     actionTypeId,
-    ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
+    ...('useAlertDataForTemplate' in action && typeof action.useAlertDataForTemplate !== 'undefined'
+      ? { useAlertDataForTemplate: action.useAlertDataForTemplate }
+      : {}),
     ...('frequency' in action && action.frequency
       ? {
           frequency: {

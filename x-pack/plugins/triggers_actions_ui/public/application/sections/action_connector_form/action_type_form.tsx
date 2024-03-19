@@ -192,7 +192,7 @@ export const ActionTypeForm = ({
   const isSummaryAction = !isSystemAction && actionItem.frequency?.summary;
 
   const [useAadTemplateFields, setUseAadTemplateField] = useState<boolean>(
-    actionItem?.useAlertDataForTemplate ?? false
+    ('useAlertDataForTemplate' in actionItem && actionItem?.useAlertDataForTemplate) ?? false
   );
   const [storedActionParamsForAadToggle, setStoredActionParamsForAadToggle] = useState<
     Record<string, SavedObjectAttribute>

@@ -194,7 +194,7 @@ describe('bulkDeleteRulesRoute', () => {
       taskIdsFailedToBeDeleted: [],
     };
 
-    it('removes the type from the actions correctly before sending the response', async () => {
+    it('Merge actions and systemActions correctly before sending the response', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
       const actionsClient = actionsClientMock.create();

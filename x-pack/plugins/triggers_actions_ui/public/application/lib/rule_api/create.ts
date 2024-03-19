@@ -29,7 +29,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
   ...res,
   rule_type_id: ruleTypeId,
   actions: actions.map((action) => {
-    const { id, params, useAlertDataForTemplate } = action;
+    const { id, params } = action;
     return {
       ...('group' in action && action.group ? { group: action.group } : {}),
       id,
@@ -48,8 +48,9 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
             alerts_filter: action.alertsFilter,
           }
         : {}),
-      ...(typeof useAlertDataForTemplate !== 'undefined'
-        ? { use_alert_data_for_template: useAlertDataForTemplate }
+      ...('useAlertDataForTemplate' in action &&
+      typeof action.useAlertDataForTemplate !== 'undefined'
+        ? { use_alert_data_for_template: action.useAlertDataForTemplate }
         : {}),
     };
   }),

@@ -15,7 +15,6 @@ import {
   isSummaryActionOnInterval,
   isSummaryActionThrottled,
   getSummaryActionTimeBounds,
-  getSummarySystemActionTimeBounds,
 } from './rule_action_helper';
 
 const now = '2021-05-13T12:33:37.000Z';
@@ -152,17 +151,6 @@ describe('rule_action_helper', () => {
 
   describe('getSummaryActionsFromTaskState', () => {
     test('should remove the obsolete actions from the task instance', () => {
-      const result = getSummaryActionsFromTaskState({
-        actions: [mockSummaryAction],
-        summaryActions: {
-          '111-111': { date: new Date('01.01.2020').toISOString() },
-          '222-222': { date: new Date('01.01.2020').toISOString() },
-        },
-      });
-      expect(result).toEqual({ '111-111': { date: new Date('01.01.2020').toISOString() } });
-    });
-
-    test('should filtered out system actions', () => {
       const result = getSummaryActionsFromTaskState({
         actions: [mockSummaryAction],
         summaryActions: {
@@ -331,16 +319,6 @@ describe('rule_action_helper', () => {
           frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
         })
       ).toBe(false);
-    });
-  });
-
-  // Christos, I need to understand something here
-  describe('getSummarySystemActionTimeBounds', () => {
-    test('should return start and end action is a system action', () => {
-      expect(getSummarySystemActionTimeBounds(mockSystemAction, { interval: '1m' }, null)).toEqual({
-        start: 1620909157000,
-        end: 1620909217000,
-      });
     });
   });
 

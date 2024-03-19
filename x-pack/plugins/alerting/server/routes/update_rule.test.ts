@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit, pick } from 'lodash';
+import { pick } from 'lodash';
 import { updateRuleRoute } from './update_rule';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
@@ -88,7 +88,7 @@ describe('updateRuleRoute', () => {
     created_at: mockedAlert.createdAt,
     rule_type_id: mockedAlert.alertTypeId,
     actions: mockedAlert.actions.map(({ actionTypeId, alertsFilter, ...rest }) => ({
-      ...omit(rest, 'type'),
+      ...rest,
       connector_type_id: actionTypeId,
       alerts_filter: alertsFilter,
     })),

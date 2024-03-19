@@ -77,15 +77,12 @@ export const transformRuleActions = (
       };
     }),
     ...systemActions.map((sActions) => {
-      const { id, actionTypeId, params, uuid, useAlertDataForTemplate } = sActions;
+      const { id, actionTypeId, params, uuid } = sActions;
       return {
         id,
         params,
         uuid,
         connector_type_id: actionTypeId,
-        ...(useAlertDataForTemplate !== undefined && {
-          use_alert_data_for_template: useAlertDataForTemplate,
-        }),
       };
     }),
   ];

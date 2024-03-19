@@ -75,13 +75,10 @@ export const rewriteRule = ({
     });
   });
   (systemActions ?? []).forEach((systemAction) => {
-    const { actionTypeId, useAlertDataForTemplate, ...restSystemAction } = systemAction;
+    const { actionTypeId, ...restSystemAction } = systemAction;
     actionsTemp.push({
       ...restSystemAction,
       connector_type_id: actionTypeId,
-      ...(typeof useAlertDataForTemplate !== 'undefined'
-        ? { use_alert_data_for_template: useAlertDataForTemplate }
-        : {}),
     });
   });
   return {

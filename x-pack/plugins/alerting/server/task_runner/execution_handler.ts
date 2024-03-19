@@ -50,7 +50,6 @@ import {
   generateActionHash,
   getSummaryActionsFromTaskState,
   getSummaryActionTimeBounds,
-  getSummarySystemActionTimeBounds,
   isActionOnInterval,
   isSummaryAction,
   isSummaryActionOnInterval,
@@ -243,7 +242,6 @@ export class ExecutionHandler<
       const { actionTypeId } = action;
 
       ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
-
       if (ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
         ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
           actionTypeId,
@@ -457,13 +455,7 @@ export class ExecutionHandler<
     rule,
     bulkActions,
   }: RunSystemActionArgs<Params>): Promise<LogAction> {
-    const { start, end } = getSummarySystemActionTimeBounds(
-      action,
-      this.rule.schedule,
-      this.previousStartedAt
-    );
-
-    const ruleUrl = this.buildRuleUrl(spaceId, start, end);
+    const ruleUrl = this.buildRuleUrl(spaceId);
 
     const connectorAdapterActionParams = connectorAdapter.buildActionParams({
       alerts: summarizedAlerts,

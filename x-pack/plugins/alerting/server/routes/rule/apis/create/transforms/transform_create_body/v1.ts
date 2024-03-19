@@ -61,22 +61,14 @@ const transformCreateBodySystemActions = (
 
   actions
     .filter((action) => isSystemAction(action.id))
-    .forEach(
-      ({
-        frequency,
-        alerts_filter: alertsFilter,
-        use_alert_data_for_template: useAlertDataForTemplate,
-        ...action
-      }) => {
-        defaultActions.push({
-          id: action.id,
-          params: action.params,
-          actionTypeId: action.actionTypeId,
-          ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
-          ...(action.uuid ? { uuid: action.uuid } : {}),
-        });
-      }
-    );
+    .forEach((systemAction) => {
+      defaultActions.push({
+        id: systemAction.id,
+        params: systemAction.params,
+        actionTypeId: systemAction.actionTypeId,
+        ...(systemAction.uuid ? { uuid: systemAction.uuid } : {}),
+      });
+    });
 
   return defaultActions;
 };

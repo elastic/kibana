@@ -197,7 +197,7 @@ describe('bulkEnableRulesRoute', () => {
       taskIdsFailedToBeEnabled: [],
     };
 
-    it('removes the type from the actions correctly before sending the response', async () => {
+    it('Should merge actions and systemActions correctly before sending the response', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
       const actionsClient = actionsClientMock.create();

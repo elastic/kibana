@@ -35,8 +35,8 @@ const sampleRule: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] } =
   actions: [
     {
       group: 'default',
-      id: 'aaa',
-      actionTypeId: 'bbb',
+      id: '1001',
+      actionTypeId: '.test-system-action',
       params: {},
       frequency: {
         summary: false,
@@ -51,7 +51,6 @@ const sampleRule: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] } =
       id: 'ccc',
       actionTypeId: 'ddd',
       params: {},
-      useAlertDataForTemplate: true,
     },
   ],
   scheduledTaskId: 'xyz456',
@@ -98,21 +97,20 @@ describe('rewriteRule', () => {
               "kql": "test:1",
             },
           },
-          "connector_type_id": "bbb",
+          "connector_type_id": ".test-system-action",
           "frequency": Object {
             "notify_when": "onThrottleInterval",
             "summary": false,
             "throttle": "1m",
           },
           "group": "default",
-          "id": "aaa",
+          "id": "1001",
           "params": Object {},
         },
         Object {
           "connector_type_id": "ddd",
           "id": "ccc",
           "params": Object {},
-          "use_alert_data_for_template": true,
         },
       ]
     `);

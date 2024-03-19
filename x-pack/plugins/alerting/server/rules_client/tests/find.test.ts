@@ -126,11 +126,13 @@ describe('find()', () => {
             notifyWhen: 'onActiveAlert',
             actions: [
               {
+                actionTypeId: 'test-action-id',
                 group: 'default',
                 actionRef: 'action_0',
                 params: {
                   foo: true,
                 },
+                uuid: 100,
               },
             ],
           },
@@ -179,13 +181,13 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
-                "actionTypeId": undefined,
+                "actionTypeId": "test-action-id",
                 "group": "default",
                 "id": "1",
                 "params": Object {
                   "foo": true,
                 },
-                "uuid": undefined,
+                "uuid": 100,
               },
             ],
             "alertTypeId": "myType",

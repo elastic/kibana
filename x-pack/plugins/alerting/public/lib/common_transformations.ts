@@ -15,11 +15,7 @@ import {
 } from '../../common';
 
 function transformAction(input: AsApiContract<RuleAction>): RuleAction {
-  const {
-    connector_type_id: actionTypeId,
-    frequency,
-    ...rest
-  } = input as AsApiContract<RuleAction>;
+  const { connector_type_id: actionTypeId, frequency, ...rest } = input;
   return {
     actionTypeId,
     ...(frequency

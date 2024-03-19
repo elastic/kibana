@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit, pick } from 'lodash';
+import { pick } from 'lodash';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
@@ -96,7 +96,7 @@ describe('cloneRuleRoute', () => {
     },
     actions: [
       {
-        ...omit(ruleToClone.actions[0], 'type'),
+        ...ruleToClone.actions[0],
         connector_type_id: 'test',
         uuid: '123-456',
       },
