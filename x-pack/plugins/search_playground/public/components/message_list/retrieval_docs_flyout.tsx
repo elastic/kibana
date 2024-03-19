@@ -122,7 +122,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
                           }
                         )}
                       </code>
-                      <EuiBadge color="primary">{'search-workplace'}</EuiBadge>
+                      <EuiBadge color="primary">workplace_index</EuiBadge>
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>

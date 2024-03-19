@@ -24,9 +24,10 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
   const { watch } = useFormContext();
 
   return (
-    <EuiFlexGroup justifyContent="center">
+    <EuiFlexGroup justifyContent="center" className="eui-yScroll">
       <EuiFlexGroup
         css={{
+          height: 'fit-content',
           padding: `${euiTheme.size.xxl} ${euiTheme.size.l}`,
           maxWidth: maxWidthPage,
           boxSizing: 'content-box',

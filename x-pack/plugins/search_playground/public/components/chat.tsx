@@ -20,6 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { i18n } from '@kbn/i18n';
 
+import { useAutoBottomScroll } from '../hooks/use_auto_bottom_scroll';
 import { ChatSidebar } from './chat_sidebar';
 import { useChat } from '../hooks/use_chat';
 import { ChatForm, ChatFormFields, MessageRole, SummarizationModelName } from '../types';
@@ -43,6 +44,7 @@ export const Chat = () => {
   } = useFormContext<ChatForm>();
   const { messages, append, stop: stopRequest } = useChat();
   const selectedIndicesCount = watch(ChatFormFields.indices, []).length;
+  const messagesRef = useAutoBottomScroll([showStartPage]);
 
   const onSubmit = async (data: ChatForm) => {
     await append(
@@ -52,7 +54,7 @@ export const Chat = () => {
           prompt: data[ChatFormFields.prompt],
           indices: data[ChatFormFields.indices].join(),
           api_key: data[ChatFormFields.openAIKey],
-          citations: data[ChatFormFields.citations].toString(),
+          citations: data[ChatFormFields.citations],
           elasticsearchQuery: JSON.stringify(data[ChatFormFields.elasticsearchQuery]),
           summarization_model:
             data[ChatFormFields.summarizationModel] ?? SummarizationModelName.gpt3_5_turbo_1106,
@@ -95,14 +97,15 @@ export const Chat = () => {
         >
           <EuiFlexGroup direction="column" className="eui-fullHeight">
             {/* // Set scroll at the border of parent element*/}
-            <EuiFlexItem
-              grow={1}
+            <EuiFlexGroup
+              direction="column"
               className="eui-yScroll"
               css={{ paddingLeft: euiTheme.size.l, paddingRight: euiTheme.size.l }}
               tabIndex={0}
+              ref={messagesRef}
             >
               <MessageList messages={chatMessages} />
-            </EuiFlexItem>
+            </EuiFlexGroup>
 
             <EuiFlexItem
               grow={false}
