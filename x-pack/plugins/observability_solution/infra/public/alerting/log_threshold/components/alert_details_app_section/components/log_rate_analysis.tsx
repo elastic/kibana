@@ -263,6 +263,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
             barHighlightColorOverride={colorTransformer(Color.color1)}
             onAnalysisCompleted={onAnalysisCompleted}
             appDependencies={pick(services, [
+              'analytics',
               'application',
               'data',
               'executionContext',

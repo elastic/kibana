@@ -19757,6 +19757,23 @@
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetServerAgent.unhealthy_reason",
+            "type": "Array",
+            "tags": [],
+            "label": "unhealthy_reason",
+            "description": [
+              "\nUnhealthy reason: input, output, other"
+            ],
+            "signature": [
+              "UnhealthyReason",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
