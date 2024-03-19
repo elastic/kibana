@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
+  LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR,
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
   type WindowParameters,
@@ -185,7 +186,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   const barStyle = {
     rect: {
       opacity: 1,
-      fill: 'orange',
+      fill: LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR,
     },
   };
   const barStyleAccessor: BarStyleAccessor | undefined = documentCountStats?.changePoint
