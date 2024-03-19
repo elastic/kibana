@@ -582,7 +582,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   private async getIsSidebarEnabled(core: CoreSetup) {
     const [coreStart] = await core.getStartServices();
-    const chromeStyle = await lastValueFrom(coreStart.chrome.getChromeStyle$().pipe(take(1)));
+    const chromeStyle = await firstValueFrom(coreStart.chrome.getChromeStyle$());
     return chromeStyle === 'classic';
   }
 }
