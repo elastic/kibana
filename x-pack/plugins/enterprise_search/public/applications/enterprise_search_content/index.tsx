@@ -23,7 +23,7 @@ import { VersionMismatchPage } from '../shared/version_mismatch';
 import { ConnectorsRouter } from './components/connectors/connectors_router';
 import { CrawlersRouter } from './components/connectors/crawlers_router';
 import { NotFound } from './components/not_found';
-import { Playground } from './components/playground';
+import { Playground } from './components/playground/playground';
 import { SearchIndicesRouter } from './components/search_indices';
 import {
   CONNECTORS_PATH,
