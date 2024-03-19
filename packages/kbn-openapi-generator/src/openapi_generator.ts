@@ -61,7 +61,9 @@ export const generate = async (config: GeneratorConfig) => {
   const TemplateService = await initTemplateService();
   await Promise.all(
     parsedSources.map(async ({ sourcePath, parsedSchema }) => {
+      console.log({ sourcePath, parsedSchema });
       const generationContext = getGenerationContext(parsedSchema);
+      console.log({ generationContext });
 
       // If there are no operations or components to generate, skip this file
       const shouldGenerate =
@@ -80,7 +82,12 @@ export const generate = async (config: GeneratorConfig) => {
   // Format the output folder using prettier as the generator produces
   // unformatted code and fix any eslint errors
   console.log(`💅  Formatting output`);
-  const generatedArtifactsGlob = resolve(rootDir, './**/*.gen.ts');
+
+  const paths: Record<TemplateName, string> = {
+    zod_api_client: './**/*.api_client.gen.ts',
+    zod_operation_schema: './**/*.gen.ts',
+  };
+  const generatedArtifactsGlob = resolve(rootDir, paths[templateName]);
   await formatOutput(generatedArtifactsGlob);
   await fixEslint(generatedArtifactsGlob);
 };
