@@ -29,7 +29,6 @@ import {
 } from '@kbn/securitysolution-utils';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
-import { fieldSupportsMatches } from '@kbn/securitysolution-list-utils/src/helpers';
 import type {
   TrustedAppConditionEntry,
   NewTrustedApp,
@@ -172,7 +171,9 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
           value: (entry as TrustedAppConditionEntry).value,
         })
       ) {
-        if (fieldSupportsMatches(entry.field)) {
+        console.log('1st stage');
+        if (entry.field === ConditionEntryField.PATH) {
+          console.log('2nd stage');
           extraWarning = true;
           addResultToValidation(
             validation,
@@ -181,6 +182,7 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
             INPUT_ERRORS.wildcardWithWrongOperatorWarning(index)
           );
         } else {
+          console.log('3rd stage');
           addResultToValidation(
             validation,
             'entries',
@@ -220,6 +222,9 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
   }
 
   if (extraWarning) {
+    console.log('stage 4');
+    // for testing: if addResultToValidation is set to warnings instead of errors,
+    // callout shows up in tests
     addResultToValidation(
       validation,
       'entries',
@@ -289,6 +294,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       validateValues(item)
     );
 
+    console.log('validation results', validationResult.result.entries);
     const processChanged = useCallback(
       (updatedFormValues: ArtifactFormComponentProps['item']) => {
         const updatedValidationResult = validateValues(updatedFormValues);

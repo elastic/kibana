@@ -39,10 +39,6 @@ jest.mock('../../../../../common/hooks/use_license', () => {
   };
 });
 
-/* jest.mock('@kbn/securitysolution-list-utils/src/helpers', () => {
-  return fieldSupportsMatches
-  });*/
-
 describe('Trusted apps form', () => {
   const formPrefix = 'trustedApps-form';
   const generator = new EndpointDocGenerator('effected-policy-select');
@@ -536,21 +532,24 @@ describe('Trusted apps form', () => {
   });
 
   describe('and a wildcard value is used with the IS operator', () => {
-    it('shows warning callout and help text warning if the field is PATH', () => {
+    beforeEach(() => render());
+    it.only('shows warning callout and help text warning if the field is PATH', async () => {
       const propsItem: Partial<ArtifactFormComponentProps['item']> = {
         entries: [createEntry(ConditionEntryField.PATH, 'match', 'asdf*')],
       };
       formProps.item = { ...formProps.item, ...propsItem };
       render();
-      expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeTruthy();
-      expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongOperatorWarning(0)));
+
+      expect(renderResult.container.querySelectorAll('.euiCallOut--warning').length).toBe(1);
+      // expect(renderResult.container.getByTestId('wildcardWithWrongOperatorCallout'));
+      expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout'));
+      expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongOperatorWarning(0))).toBeTruthy();
     });
 
     it('shows a warning if field is HASH or SIGNATURE', () => {
-      render();
       setTextFieldValue(getConditionValue(getCondition()), 'somewildcard*');
       rerenderWithLatestProps();
-      expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongField(0)));
+      expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongField(0))).toBeTruthy();
     });
   });
 
