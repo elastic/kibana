@@ -13,7 +13,6 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
-  ALERT_ACTION_GROUP,
 } from '@kbn/rule-data-utils';
 import { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import {
@@ -26,8 +25,7 @@ import {
   AlertsClientError,
 } from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { asyncForEach } from '@kbn/std';
-import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
+import { ObservabilityLogsAlert } from '@kbn/alerts-as-data-utils';
 import {
   PublicAlertsClient,
   RecoveredAlertData,
@@ -84,10 +82,7 @@ export type LogThresholdRuleTypeState = RuleTypeState; // no specific state used
 export type LogThresholdAlertState = AlertState; // no specific state used
 export type LogThresholdAlertContext = AlertContext; // no specific instance context used
 
-export type LogThresholdAlert = Omit<
-  ObservabilityMetricsAlert,
-  'kibana.alert.evaluation.values'
-> & {
+export type LogThresholdAlert = Omit<ObservabilityLogsAlert, 'kibana.alert.evaluation.values'> & {
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
   'kibana.alert.evaluation.values'?: Array<number | null>;
 };
@@ -149,7 +144,7 @@ export const createLogThresholdExecutor =
           : {};
 
       if (actions && actions.length > 0) {
-        asyncForEach(actions, async (actionSet) => {
+        actions.forEach((actionSet) => {
           const { actionGroup, context: actionContext } = actionSet;
           const alertInstanceId = (actionContext.group || id) as string;
           const { uuid, start } = alertsClient.report({
@@ -179,7 +174,6 @@ export const createLogThresholdExecutor =
             [ALERT_EVALUATION_VALUE]: value,
             [ALERT_REASON]: reason,
             [ALERT_CONTEXT]: alertContext,
-            [ALERT_ACTION_GROUP]: actionGroup,
             ...flattenAdditionalContext(rootLevelContext),
           };
 
@@ -226,7 +220,8 @@ export const createLogThresholdExecutor =
       }
 
       const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
-      await processRecoveredAlerts({
+      processRecoveredAlerts({
+        alertsClient,
         basePath,
         recoveredAlerts,
         spaceId,
@@ -861,13 +856,20 @@ const getGroupedResults = async (query: object, esClient: ElasticsearchClient) =
   return compositeGroupBuckets;
 };
 
-const processRecoveredAlerts = async ({
+const processRecoveredAlerts = ({
+  alertsClient,
   basePath,
   recoveredAlerts,
   spaceId,
   startedAt,
   validatedParams,
 }: {
+  alertsClient: PublicAlertsClient<
+    LogThresholdAlert,
+    AlertState,
+    AlertContext,
+    LogThresholdActionGroups
+  >;
   basePath: IBasePath;
   recoveredAlerts: Array<
     RecoveredAlertData<LogThresholdAlert, AlertState, AlertContext, LogThresholdActionGroups>
@@ -902,20 +904,22 @@ const processRecoveredAlerts = async ({
     if (isRatioRuleParams(validatedParams)) {
       const { criteria } = validatedParams;
 
-      recoveredAlert.alert.setContext({
+      const context = {
         ...baseContext,
         numeratorConditions: createConditionsMessageForCriteria(getNumerator(criteria)),
         denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
         isRatio: true,
-      });
+      };
+      alertsClient.setAlertData({ id: recoveredAlertId, context });
     } else {
       const { criteria } = validatedParams;
 
-      recoveredAlert.alert.setContext({
+      const context = {
         ...baseContext,
         conditions: createConditionsMessageForCriteria(criteria),
         isRatio: false,
-      });
+      };
+      alertsClient.setAlertData({ id: recoveredAlertId, context });
     }
   }
 };
