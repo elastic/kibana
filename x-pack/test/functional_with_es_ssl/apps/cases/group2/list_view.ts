@@ -284,7 +284,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('filtering', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/178991
+    describe.skip('filtering', () => {
       const caseTitle = 'matchme';
       let caseIds: string[] = [];
       const profiles: UserProfile[] = [];
