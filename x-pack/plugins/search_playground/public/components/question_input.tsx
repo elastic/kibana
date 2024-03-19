@@ -30,12 +30,14 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
 
   return (
     <EuiFormControlLayout
+      // EUI Override: css property has less priority than basic styles
       style={{
         height: INPUT_HEIGHT,
       }}
       fullWidth
     >
       <EuiFieldText
+        // EUI Override: css property has less priority than basic styles
         style={{
           height: INPUT_HEIGHT,
           paddingRight: euiTheme.size.xxxxl,
