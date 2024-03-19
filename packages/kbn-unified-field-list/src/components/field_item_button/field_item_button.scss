@@ -68,6 +68,10 @@
   }
 }
 
+.unifiedFieldList__fieldPopover__fieldPopoverPanel .unifiedFieldListItemButton {
+  box-shadow: none;
+}
+
 .unifiedFieldListItemButton--missing {
   background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
   color: $euiColorDarkShade;
