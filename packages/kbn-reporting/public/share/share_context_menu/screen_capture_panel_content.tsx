@@ -7,34 +7,33 @@
  */
 
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import { PDF_JOB_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { ReportingPanelContent, ReportingPanelProps } from './reporting_panel_content';
 
-export type Props = ReportingPanelProps & { intl: InjectedIntl };
+export type Props = ReportingPanelProps;
+
 interface State {
   useCanvasLayout: boolean;
 }
 
-export class ScreenCapturePanelContentUi extends Component<Props, State> {
+export class ScreenCapturePanelContent extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
+
+    this.state = {
+      useCanvasLayout: false,
+    };
   }
 
   public render() {
     return (
       <ReportingPanelContent
+        {...this.props}
         layoutId={this.getLayout().id}
         getJobParams={this.getJobParams}
         options={this.renderOptions()}
-        apiClient={this.props.apiClient}
-        toasts={this.props.toasts}
-        uiSettings={this.props.uiSettings}
-        theme={this.props.theme}
-        requiresSavedState={false}
-        reportType={PDF_JOB_TYPE_V2}
       />
     );
   }
@@ -88,5 +87,3 @@ export class ScreenCapturePanelContentUi extends Component<Props, State> {
     };
   };
 }
-
-export const ScreenCapturePanelContent = injectI18n(ScreenCapturePanelContentUi);

@@ -7,6 +7,7 @@
  */
 
 import { CoreSetup } from '@kbn/core/public';
+import { BaseParams } from '@kbn/reporting-common/types';
 import { CSV_JOB_TYPE, JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import { JobAppParamsPDFV2, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import React from 'react';
@@ -73,7 +74,7 @@ export function getSharedComponents(
   return {
     ReportingPanelPDFV2(props: ApplicationProps) {
       const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
-      if (props.objectType === 'canvas') {
+      if (props.layoutOption === 'canvas') {
         return (
           <ScreenCapturePanelContent
             requiresSavedState={false}
@@ -117,7 +118,9 @@ export function getSharedComponents(
       );
     },
     ReportingModalCSV(props: ApplicationProps) {
-      const getJobParams = props.getJobParams as JobParamsCSV;
+      const getJobParams = props.getJobParams as (
+        forShareUrl?: boolean
+      ) => Omit<BaseParams, 'browserTimezone' | 'version'>;
       return (
         <CsvModalContent
           requiresSavedState={false}
