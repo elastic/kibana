@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { isEqual, uniq } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -22,6 +22,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ProgressControls } from '@kbn/aiops-components';
 import { useFetchStream } from '@kbn/ml-response-stream/client';
@@ -137,7 +138,11 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   onAnalysisCompleted,
   embeddingOrigin,
 }) => {
-  const { http } = useAiopsAppContext();
+  const { analytics, http } = useAiopsAppContext();
+
+  // Store the performance metric's start time using a ref
+  // to be able to track it across rerenders.
+  const analysisStartTime = useRef<number | undefined>(window.performance.now());
 
   const { clearAllRowState } = useLogRateAnalysisResultsTableRowContext();
 
@@ -232,13 +237,29 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           remainingFieldCandidates,
           significantItems: data.significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
         });
-      } else {
+      } else if (loaded > 0) {
+        // Reset all overrides.
         setOverrides(undefined);
+
+        // If provided call the `onAnalysisCompleted` callback with the analysis results.
         if (onAnalysisCompleted) {
           onAnalysisCompleted({
             analysisType,
             significantItems: data.significantItems,
             significantItemsGroups: data.significantItemsGroups,
+          });
+        }
+
+        // Track performance metric
+        if (analysisStartTime.current !== undefined) {
+          const analysisDuration = window.performance.now() - analysisStartTime.current;
+
+          // Set this to undefined so reporting the metric gets triggered only once.
+          analysisStartTime.current = undefined;
+
+          reportPerformanceMetricEvent(analytics, {
+            eventName: 'aiopsLogRateAnalysisCompleted',
+            duration: analysisDuration,
           });
         }
       }
