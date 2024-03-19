@@ -36,6 +36,7 @@ import type {
   CasesPublicSetupDependencies,
   CasesPublicStartDependencies,
 } from './types';
+import { getCasesConnectorType } from './components/connectors/cases';
 
 /**
  * @public
@@ -100,6 +101,8 @@ export class CasesUiPlugin
 
           const { renderApp } = await import('./application');
 
+          console.log('cases plugin setup', { plugins, pluginsStart });
+
           return renderApp({
             mountParams: params,
             coreStart,
@@ -127,6 +130,8 @@ export class CasesUiPlugin
 
   public start(core: CoreStart, plugins: CasesPublicStartDependencies): CasesPublicStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();
+
+    plugins.triggersActionsUi.actionTypeRegistry.register(getCasesConnectorType());
 
     KibanaServices.init({
       ...core,
