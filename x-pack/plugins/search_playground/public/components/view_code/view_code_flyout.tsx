@@ -21,11 +21,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { CreateApiKeyForm } from './create_api_key_form';
 
-interface VideCodeFlyoutProps {
+interface ViewCodeFlyoutProps {
   onClose: () => void;
 }
 
-export const VideCodeFlyout: React.FC<VideCodeFlyoutProps> = ({ onClose }) => {
+export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
   const steps = useMemo(
     () => [
       {

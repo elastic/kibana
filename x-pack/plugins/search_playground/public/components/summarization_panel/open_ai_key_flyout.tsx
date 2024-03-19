@@ -22,6 +22,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 
 export interface OpenAIKeyFlyOutProps {
@@ -64,7 +65,10 @@ export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({
             labelAppend={
               <EuiText size="xs">
                 <EuiLink target="_blank" href="https://platform.openai.com/api-keys">
-                  OpenAI API Keys
+                  <FormattedMessage
+                    id="xpack.searchPlayground.sidebar.openAIFlyOut.linkTitle"
+                    defaultMessage="OpenAI API Keys"
+                  />
                 </EuiLink>
               </EuiText>
             }
@@ -92,9 +96,10 @@ export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({
               data-telemetry-id="entSearchAIPlayground-addingOpenAIKey-cancel"
               onClick={onClose}
             >
-              {i18n.translate('xpack.searchPlayground.sidebar.openAIFlyOut.cancelButtonLabel', {
-                defaultMessage: 'Cancel',
-              })}
+              <FormattedMessage
+                id="xpack.searchPlayground.sidebar.openAIFlyOut.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem />
@@ -105,9 +110,10 @@ export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({
               fill
               onClick={handleSave}
             >
-              {i18n.translate('xpack.searchPlayground.sidebar.openAIFlyOut.saveButtonLabel', {
-                defaultMessage: 'Save',
-              })}
+              <FormattedMessage
+                id="xpack.searchPlayground.sidebar.openAIFlyOut.saveButtonLabel"
+                defaultMessage="Save"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

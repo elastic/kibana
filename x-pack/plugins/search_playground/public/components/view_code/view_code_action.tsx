@@ -10,7 +10,7 @@ import { EuiButton } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChatForm, ChatFormFields } from '../../types';
-import { VideCodeFlyout } from './vide_code_flyout';
+import { ViewCodeFlyout } from './view_code_flyout';
 
 export const ViewCodeAction: React.FC = () => {
   const { watch } = useFormContext<ChatForm>();
@@ -19,7 +19,7 @@ export const ViewCodeAction: React.FC = () => {
 
   return (
     <>
-      {showFlyout && <VideCodeFlyout onClose={() => setShowFlyout(false)} />}
+      {showFlyout && <ViewCodeFlyout onClose={() => setShowFlyout(false)} />}
       <EuiButton
         iconType="editorCodeBlock"
         color="primary"
