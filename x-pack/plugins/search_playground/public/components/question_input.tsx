@@ -8,9 +8,9 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiFieldText, EuiFormControlLayout, useEuiTheme } from '@elastic/eui';
+import { EuiTextArea, useEuiTheme } from '@elastic/eui';
 
-const INPUT_HEIGHT = 56;
+const MAX_HEIGHT = 200;
 
 interface QuestionInputProps {
   value: string;
@@ -26,24 +26,25 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
   isDisabled,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value);
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onChange(e.target.value);
+
+    e.target.style.height = 'auto';
+    e.target.style.height = `${e.target.scrollHeight}px`;
+  };
 
   return (
-    <EuiFormControlLayout
-      // EUI Override: css property has less priority than basic styles
-      style={{
-        height: INPUT_HEIGHT,
-      }}
-      fullWidth
-    >
-      <EuiFieldText
-        // EUI Override: css property has less priority than basic styles
+    <div css={{ position: 'relative' }}>
+      <EuiTextArea
+        className="eui-scrollBar"
         style={{
-          height: INPUT_HEIGHT,
-          paddingRight: euiTheme.size.xxxxl,
+          maxHeight: MAX_HEIGHT,
+          lineHeight: euiTheme.size.l,
+          padding: `${euiTheme.size.base} ${euiTheme.size.xxxxl} ${euiTheme.size.base} ${euiTheme.size.base}`,
         }}
-        controlOnly
+        autoFocus
         fullWidth
+        rows={1}
         placeholder={i18n.translate(
           'xpack.searchPlayground.chat.questionInput.askQuestionPlaceholder',
           {
@@ -53,17 +54,18 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
         value={value}
         onChange={handleChange}
         disabled={isDisabled}
+        resize="none"
       />
 
       <div
         css={{
           position: 'absolute',
           right: euiTheme.size.base,
-          top: euiTheme.size.m,
+          bottom: euiTheme.size.m,
         }}
       >
         {button}
       </div>
-    </EuiFormControlLayout>
+    </div>
   );
 };
