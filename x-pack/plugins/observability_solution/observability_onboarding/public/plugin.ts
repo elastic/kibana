@@ -18,6 +18,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -39,6 +40,7 @@ export interface ObservabilityOnboardingPluginSetupDeps {
 }
 
 export interface ObservabilityOnboardingPluginStartDeps {
+  cloudExperiments?: CloudExperimentsPluginStart;
   http: HttpStart;
   data: DataPublicPluginStart;
   observability: ObservabilityPublicStart;
@@ -97,10 +99,19 @@ export class ObservabilityOnboardingPlugin
 
           createCallApi(core);
 
+          const experimentalOnboardingFlowEnabled: boolean =
+            (await (
+              corePlugins as ObservabilityOnboardingPluginStartDeps
+            ).cloudExperiments?.getVariation(
+              'observability_onboarding.experimental_onboarding_flow_enabled',
+              false
+            )) ?? false;
+
           return renderApp({
             core: coreStart,
             deps: pluginSetupDeps,
             appMountParameters,
+            experimentalOnboardingFlowEnabled,
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
             config,
           });
