@@ -577,7 +577,9 @@ describe('IndexPattern', () => {
             },
             test3: {
               count: 30,
-              customDescription: 'test13 description',
+            },
+            test4: {
+              customDescription: 'test14 description',
             },
           },
         }).toMinimalSpec().fieldAttrs
