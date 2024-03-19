@@ -17,8 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should create rule successfully', async () => {
-      await testSubjects.clickWhenNotDisabled('logsExplorerToggleAlertsPopoverButton');
-      await testSubjects.click('logsExplorerCreateRuleMenuItem');
+      await testSubjects.clickWhenNotDisabled('observabilityLogsExplorerAlertsPopoverToggleButton');
+      await testSubjects.click('observabilityLogsExplorerCreateRuleMenuItem');
       await testSubjects.setValue('ruleNameInput', 'Test rule');
       await testSubjects.click('saveRuleButton');
       await testSubjects.click('confirmModalConfirmButton');
@@ -27,8 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should create SLO successfully', async () => {
-      await testSubjects.clickWhenNotDisabled('logsExplorerToggleAlertsPopoverButton');
-      await testSubjects.click('logsExplorerCreateSLOMenuItem');
+      await testSubjects.clickWhenNotDisabled('observabilityLogsExplorerAlertsPopoverToggleButton');
+      await testSubjects.click('observabilityLogsExplorerCreateSLOMenuItem');
       await testSubjects.setValue('customKqlIndicatorFormGoodQueryInput', '@timestamp >= 0');
       await testSubjects.setValue('sloFormNameInput', 'Test SLO');
       await testSubjects.click('sloFormSubmitButton');

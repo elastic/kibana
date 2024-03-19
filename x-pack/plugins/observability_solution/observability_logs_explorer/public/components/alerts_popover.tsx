@@ -191,7 +191,7 @@ export const AlertsPopover = () => {
         key="createRule"
         icon="bell"
         onClick={openAddRuleFlyout}
-        data-test-subj="logsExplorerCreateRuleMenuItem"
+        data-test-subj="observabilityLogsExplorerCreateRuleMenuItem"
       >
         <FormattedMessage
           id="xpack.observabilityLogsExplorer.alertsPopover.createRuleMenuItem"
@@ -207,7 +207,7 @@ export const AlertsPopover = () => {
         key="createSLO"
         icon="visGauge"
         onClick={openCreateSLOFlyout}
-        data-test-subj="logsExplorerCreateSLOMenuItem"
+        data-test-subj="observabilityLogsExplorerCreateSLOMenuItem"
       >
         <FormattedMessage
           id="xpack.observabilityLogsExplorer.alertsPopover.createSLOMenuItem"
@@ -226,7 +226,7 @@ export const AlertsPopover = () => {
       key="manageRules"
       icon="tableOfContents"
       {...manageRulesLinkProps}
-      data-test-subj="logsExplorerManageRulesMenuItem"
+      data-test-subj="observabilityLogsExplorerManageRulesMenuItem"
     >
       <FormattedMessage
         id="xpack.observabilityLogsExplorer.alertsPopover.manageRulesMenuItem"
@@ -243,12 +243,11 @@ export const AlertsPopover = () => {
       <EuiPopover
         button={
           <EuiButtonEmpty
-            data-test-subj="observabilityLogsExplorerAlertsPopoverAlertsButton"
+            data-test-subj="observabilityLogsExplorerAlertsPopoverToggleButton"
             onClick={togglePopover}
             iconType="arrowDown"
             iconSide="right"
             isLoading={canCreateRuleState.loading}
-            data-test-subj="logsExplorerToggleAlertsPopoverButton"
           >
             <FormattedMessage
               id="xpack.observabilityLogsExplorer.alertsPopover.buttonLabel"
