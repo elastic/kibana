@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const MAX_CUSTOM_FIELDS_LENGTH = 10;
+export const MAX_OTHER_FIELDS_LENGTH = 10;

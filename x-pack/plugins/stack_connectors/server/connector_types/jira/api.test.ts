@@ -73,7 +73,7 @@ describe('api', () => {
           parent: null,
           description: 'Incident description',
           summary: 'Incident title',
-          customFields: null,
+          otherFields: null,
         },
       });
       expect(externalService.updateIncident).not.toHaveBeenCalled();
@@ -91,7 +91,7 @@ describe('api', () => {
           labels: ['kibana', 'elastic'],
           priority: 'High',
           parent: null,
-          customFields: null,
+          otherFields: null,
         },
       });
       expect(externalService.updateIncident).not.toHaveBeenCalled();
@@ -139,16 +139,16 @@ describe('api', () => {
       });
     });
 
-    describe('customFields', () => {
-      test('it calls createIncident with customFields correctly', async () => {
-        const customFields = {
+    describe('otherFields', () => {
+      test('it calls createIncident with otherFields correctly', async () => {
+        const otherFields = {
           foo: 'bar',
           foobar1: true,
           foobar2: 2,
         };
         const params = {
           ...apiParams,
-          incident: { ...apiParams.incident, externalId: null, customFields },
+          incident: { ...apiParams.incident, externalId: null, otherFields },
         };
         await api.pushToService({ externalService, params, logger: mockedLogger });
 
@@ -160,7 +160,7 @@ describe('api', () => {
             parent: null,
             description: 'Incident description',
             summary: 'Incident title',
-            customFields,
+            otherFields,
           },
         });
         expect(externalService.updateIncident).not.toHaveBeenCalled();
@@ -223,7 +223,7 @@ describe('api', () => {
           parent: null,
           description: 'Incident description',
           summary: 'Incident title',
-          customFields: null,
+          otherFields: null,
         },
       });
       expect(externalService.createIncident).not.toHaveBeenCalled();
@@ -242,7 +242,7 @@ describe('api', () => {
           labels: ['kibana', 'elastic'],
           priority: 'High',
           parent: null,
-          customFields: null,
+          otherFields: null,
         },
       });
       expect(externalService.createIncident).not.toHaveBeenCalled();
@@ -290,16 +290,16 @@ describe('api', () => {
       });
     });
 
-    describe('customFields', () => {
-      test('it calls updateIncident with customFields correctly', async () => {
-        const customFields = {
+    describe('otherFields', () => {
+      test('it calls updateIncident with otherFields correctly', async () => {
+        const otherFields = {
           foo: 'bar',
           foobar1: true,
           foobar2: 2,
         };
         const params = {
           ...apiParams,
-          incident: { ...apiParams.incident, customFields },
+          incident: { ...apiParams.incident, otherFields },
         };
         await api.pushToService({ externalService, params, logger: mockedLogger });
 
@@ -312,7 +312,7 @@ describe('api', () => {
             parent: null,
             description: 'Incident description',
             summary: 'Incident title',
-            customFields,
+            otherFields,
           },
         });
         expect(externalService.createIncident).not.toHaveBeenCalled();

@@ -106,8 +106,8 @@ export const createExternalService = (
       fields = { ...fields, parent: { key: incident.parent } };
     }
 
-    if (incident.customFields) {
-      fields = { ...fields, ...incident.customFields };
+    if (incident.otherFields) {
+      fields = { ...fields, ...incident.otherFields };
     }
 
     return fields;

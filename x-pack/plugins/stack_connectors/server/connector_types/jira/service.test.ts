@@ -284,7 +284,7 @@ describe('Jira service', () => {
         issueType: '10006',
         priority: 'High',
         parent: 'RJ-107',
-        customFields: null,
+        otherFields: null,
       },
     };
 
@@ -358,7 +358,7 @@ describe('Jira service', () => {
           priority: 'High',
           issueType: null,
           parent: null,
-          customFields: null,
+          otherFields: null,
         },
       });
 
@@ -423,7 +423,7 @@ describe('Jira service', () => {
           priority: 'High',
           issueType: null,
           parent: null,
-          customFields: null,
+          otherFields: null,
         },
       });
 
@@ -509,9 +509,9 @@ describe('Jira service', () => {
       );
     });
 
-    describe('customFields', () => {
+    describe('otherFields', () => {
       test('it should call request with correct arguments', async () => {
-        const customFields = { foo0: 'bar', foo1: true, foo2: 2 };
+        const otherFields = { foo0: 'bar', foo1: true, foo2: 2 };
 
         requestMock.mockImplementation(() =>
           createAxiosResponse({
@@ -524,7 +524,7 @@ describe('Jira service', () => {
         );
 
         await service.createIncident({
-          incident: { ...incident.incident, customFields },
+          incident: { ...incident.incident, otherFields },
         });
 
         expect(requestMock).toHaveBeenCalledWith({
@@ -542,7 +542,7 @@ describe('Jira service', () => {
               labels: [],
               priority: { name: 'High' },
               parent: { key: 'RJ-107' },
-              ...customFields,
+              ...otherFields,
             },
           },
         });
@@ -560,7 +560,7 @@ describe('Jira service', () => {
         issueType: '10006',
         priority: 'High',
         parent: 'RJ-107',
-        customFields: null,
+        otherFields: null,
       },
     };
 
@@ -640,8 +640,8 @@ describe('Jira service', () => {
       );
     });
 
-    describe('customFields', () => {
-      const customFields = { foo0: 'bar', foo1: true, foo2: 2 };
+    describe('otherFields', () => {
+      const otherFields = { foo0: 'bar', foo1: true, foo2: 2 };
 
       test('it should call request with correct arguments', async () => {
         requestMock.mockImplementation(() =>
@@ -656,7 +656,7 @@ describe('Jira service', () => {
 
         await service.updateIncident({
           ...incident,
-          incident: { ...incident.incident, customFields },
+          incident: { ...incident.incident, otherFields },
         });
 
         expect(requestMock).toHaveBeenCalledWith({
@@ -674,7 +674,7 @@ describe('Jira service', () => {
               issuetype: { id: '10006' },
               project: { key: 'CK' },
               parent: { key: 'RJ-107' },
-              ...customFields,
+              ...otherFields,
             },
           },
         });

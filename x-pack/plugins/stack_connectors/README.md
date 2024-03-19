@@ -221,16 +221,16 @@ The [Jira user documentation `params`](https://www.elastic.co/guide/en/kibana/ma
 
 The following table describes the properties of the `incident` object.
 
-| Property     | Description                                                                                             | Type                                |
-| ------------ | ------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| summary      | The title of the issue.                                                                                 | string                              |
-| description  | The description of the issue.                                                                           | string _(optional)_                 |
-| externalId   | The ID of the issue in Jira. If present, the incident is updated. Otherwise, a new incident is created. | string _(optional)_                 |
-| issueType    | The ID of the issue type in Jira.                                                                       | string _(optional)_                 |
-| priority     | The name of the priority in Jira. Example: `Medium`.                                                    | string _(optional)_                 |
-| labels       | An array of labels. Labels cannot contain spaces.                                                       | string[] _(optional)_               |
-| parent       | The ID or key of the parent issue. Only for `Sub-task` issue types.                                     | string _(optional)_                 |
-| customFields | An object containing key-value pairs of custom fields created in Jira.                                  | Record<string, string> _(optional)_ |
+| Property    | Description                                                                                             | Type                                |
+| ----------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| summary     | The title of the issue.                                                                                 | string                              |
+| description | The description of the issue.                                                                           | string _(optional)_                 |
+| externalId  | The ID of the issue in Jira. If present, the incident is updated. Otherwise, a new incident is created. | string _(optional)_                 |
+| issueType   | The ID of the issue type in Jira.                                                                       | string _(optional)_                 |
+| priority    | The name of the priority in Jira. Example: `Medium`.                                                    | string _(optional)_                 |
+| labels      | An array of labels. Labels cannot contain spaces.                                                       | string[] _(optional)_               |
+| parent      | The ID or key of the parent issue. Only for `Sub-task` issue types.                                     | string _(optional)_                 |
+| otherFields | An object containing key-value pairs of any other fields in Jira without explicit properties.           | Record<string, string> _(optional)_ |
 
 #### `subActionParams (getIncident)`
 
