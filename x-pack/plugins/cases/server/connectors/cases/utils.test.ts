@@ -243,6 +243,12 @@ describe('utils', () => {
       expect(constructRequiredKibanaPrivileges('my-owner')).toEqual([
         'cases:my-owner/createCase',
         'cases:my-owner/updateCase',
+        'cases:my-owner/deleteCase',
+        'cases:my-owner/pushCase',
+        'cases:my-owner/createComment',
+        'cases:my-owner/updateComment',
+        'cases:my-owner/deleteComment',
+        'cases:my-owner/findConfigurations',
       ]);
     });
   });
