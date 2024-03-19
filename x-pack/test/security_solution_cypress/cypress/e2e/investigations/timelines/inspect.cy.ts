@@ -14,7 +14,6 @@ import { executeTimelineKQL, openTimelineInspectButton } from '../../../tasks/ti
 
 import { hostsUrl } from '../../../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/165688
 describe('Inspect', { tags: ['@ess', '@serverless'] }, () => {
   context('Timeline', () => {
     it('inspects the timeline', () => {

@@ -233,8 +233,8 @@
                 "pluginId": "@kbn/core-theme-browser",
                 "scope": "common",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.ThemeServiceStart",
-                "text": "ThemeServiceStart"
+                "section": "def-common.ThemeServiceSetup",
+                "text": "ThemeServiceSetup"
               },
               ">; fatalErrors: jest.Mocked<",
               {
@@ -243,6 +243,14 @@
                 "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
                 "section": "def-common.FatalErrorsSetup",
                 "text": "FatalErrorsSetup"
+              },
+              ">; security: jest.MockedObjectDeep<",
+              {
+                "pluginId": "@kbn/core-security-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityBrowserPluginApi",
+                "section": "def-common.SecurityServiceStart",
+                "text": "SecurityServiceStart"
               },
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }, any, any]>, [], any>; http: ",
               {
@@ -299,6 +307,14 @@
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
                 "section": "def-common.ThemeServiceSetup",
                 "text": "ThemeServiceSetup"
+              },
+              ">; security: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-security-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityBrowserPluginApi",
+                "section": "def-common.SecurityServiceSetup",
+                "text": "SecurityServiceSetup"
               },
               ">; plugins: { onSetup: jest.Mock<any, any, any>; onStart: jest.Mock<any, any, any>; }; }"
             ],
@@ -478,8 +494,8 @@
                 "pluginId": "@kbn/core-theme-browser",
                 "scope": "common",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.ThemeServiceStart",
-                "text": "ThemeServiceStart"
+                "section": "def-common.ThemeServiceSetup",
+                "text": "ThemeServiceSetup"
               },
               ">; fatalErrors: jest.Mocked<",
               {
@@ -488,6 +504,14 @@
                 "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
                 "section": "def-common.FatalErrorsSetup",
                 "text": "FatalErrorsSetup"
+              },
+              ">; security: jest.MockedObjectDeep<",
+              {
+                "pluginId": "@kbn/core-security-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityBrowserPluginApi",
+                "section": "def-common.SecurityServiceStart",
+                "text": "SecurityServiceStart"
               },
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }"
             ],

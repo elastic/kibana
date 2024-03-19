@@ -29,6 +29,7 @@ import { alertingAuthorizationFilterOpts } from '../common/constants';
 import { getAlertFromRaw } from '../lib/get_alert_from_raw';
 import type { IndexType, RulesClientContext } from '../types';
 import { formatLegacyActions } from '../lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export interface FindParams {
   options?: FindOptions;
@@ -133,7 +134,7 @@ export async function find<Params extends RuleTypeParams = never>(
         ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
         : authorizationFilter) ?? filterKueryNode,
     fields: fields ? includeFieldsRequiredForAuthentication(fields) : fields,
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
   });
 
   const siemRules: Rule[] = [];
@@ -149,7 +150,7 @@ export async function find<Params extends RuleTypeParams = never>(
       context.auditLogger?.log(
         ruleAuditEvent({
           action: RuleAuditAction.FIND,
-          savedObject: { type: 'alert', id },
+          savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
           error,
         })
       );
@@ -179,7 +180,7 @@ export async function find<Params extends RuleTypeParams = never>(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.FIND,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
       })
     )
   );

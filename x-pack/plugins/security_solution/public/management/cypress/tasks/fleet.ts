@@ -11,6 +11,7 @@ import type {
   GetInfoResponse,
   GetPackagePoliciesResponse,
   GetOneAgentPolicyResponse,
+  CreateAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   agentRouteService,
@@ -99,7 +100,30 @@ export const createAgentPolicyTask = (
   );
 };
 
-export const enableAgentTamperProtectionFeatureFlagInPolicy = (agentPolicyId: string) => {
+export const createAgentPolicyWithAgentTamperProtectionsEnabled = (
+  overwrite?: Record<string, unknown>
+) => {
+  return request<CreateAgentPolicyResponse>({
+    method: 'POST',
+    url: agentPolicyRouteService.getCreatePath(),
+    body: {
+      name: `With agent tamper protection enabled ${Math.random().toString(36).substring(2, 7)}`,
+      agent_features: [{ name: 'tamper_protection', enabled: true }],
+      is_protected: true,
+      description: 'test',
+      namespace: 'default',
+      monitoring_enabled: ['logs', 'metrics'],
+      inactivity_timeout: 1209600,
+    },
+    headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
+    ...(overwrite ?? {}),
+  });
+};
+
+export const enableAgentTamperProtectionFeatureFlagInPolicy = (
+  agentPolicyId: string,
+  overwrite?: Record<string, unknown>
+) => {
   return request<UpdateAgentPolicyResponse>({
     method: 'PUT',
     url: agentPolicyRouteService.getUpdatePath(agentPolicyId),
@@ -113,6 +137,7 @@ export const enableAgentTamperProtectionFeatureFlagInPolicy = (agentPolicyId: st
       inactivity_timeout: 1209600,
     },
     headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
+    ...(overwrite ?? {}),
   });
 };
 

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { sourcererSelectors } from '../../common/store';
 import { sourcererActions } from '../../common/store/actions';
 import { inputsActions } from '../../common/store/inputs';
@@ -25,7 +24,7 @@ import {
   ACTION_INVESTIGATE_IN_TIMELINE,
 } from '../../detections/components/alerts_table/translations';
 import type { DataProvider } from '../../timelines/components/timeline/data_providers/data_provider';
-import { useCreateTimeline } from '../../timelines/components/timeline/properties/use_create_timeline';
+import { useCreateTimeline } from '../../timelines/hooks/use_create_timeline';
 import {
   applyKqlFilterQuery,
   setActiveTabTimeline,
@@ -33,9 +32,11 @@ import {
   showTimeline,
   updateDataView,
   updateEqlOptions,
-} from '../../timelines/store/timeline/actions';
+} from '../../timelines/store/actions';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;
@@ -59,14 +60,12 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
   const { showAssistantOverlay } = useAssistantContext();
   const [isTimelineBottomBarVisible] = useShowTimeline();
   const { discoverStateContainer } = useDiscoverInTimelineContext();
+  const { dataViewId: timelineDataViewId } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const getDataViewsSelector = useMemo(
-    () => sourcererSelectors.getSourcererDataViewsSelector(),
-    []
-  );
-  const { defaultDataView, signalIndexName } = useDeepEqualSelector((state) =>
-    getDataViewsSelector(state)
-  );
+  const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
+
+  const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
+  const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
 
   const hasTemplateProviders =
     dataProviders && dataProviders.find((provider) => provider.type === 'template');
@@ -170,6 +169,7 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
                 alias: dataProviders[0].name,
                 key: 'query',
                 value: dataProviders[0].kqlQuery,
+                index: timelineDataViewId ?? undefined,
               },
               query: JSON.parse(dataProviders[0].kqlQuery),
             };
@@ -214,8 +214,9 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
     timeRange,
     keepDataView,
     dispatch,
-    clearTimeline,
     discoverStateContainer,
+    clearTimeline,
+    timelineDataViewId,
     defaultDataView.id,
     signalIndexName,
   ]);
@@ -225,6 +226,13 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
     ? ACTION_INVESTIGATE_IN_TIMELINE
     : ACTION_CANNOT_INVESTIGATE_IN_TIMELINE;
   const isDisabled = !isTimelineBottomBarVisible;
+
+  if (
+    (dataProviders?.[0]?.queryType === 'esql' || dataProviders?.[0]?.queryType === 'sql') &&
+    isEsqlTabInTimelineDisabled
+  ) {
+    return null;
+  }
 
   return asEmptyButton ? (
     <EuiButtonEmpty

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { monaco, XJsonLang } from '@kbn/monaco';
-import { CodeEditor, type CodeEditorProps } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, type CodeEditorProps } from '@kbn/code-editor';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 const { expandLiteralStrings } = XJson;

@@ -150,7 +150,6 @@ export class PluginsService
     const config = await firstValueFrom(this.config$);
     if (config.initialize) {
       await this.prebootPluginsSystem.setupPlugins(deps);
-      this.registerPluginStaticDirs(deps, this.prebootUiPluginInternalInfo);
     } else {
       this.log.info(
         'Skipping `setup` for `preboot` plugins since plugin initialization is disabled.'
@@ -166,7 +165,6 @@ export class PluginsService
     let contracts = new Map<PluginName, unknown>();
     if (config.initialize) {
       contracts = await this.standardPluginsSystem.setupPlugins(deps);
-      this.registerPluginStaticDirs(deps, this.standardUiPluginInternalInfo);
     } else {
       this.log.info(
         'Skipping `setup` for `standard` plugins since plugin initialization is disabled.'
@@ -327,6 +325,10 @@ export class PluginsService
     }
 
     // Add the plugins to the Plugin System if enabled and its dependencies are met
+    const disabledPlugins = [];
+    const disabledDependants = [];
+    const disabledDependantsCauses = new Set<string>();
+
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
       this.validatePluginDependencies(plugin, pluginEnableStatuses);
 
@@ -339,17 +341,26 @@ export class PluginsService
           this.standardPluginsSystem.addPlugin(plugin);
         }
       } else if (isEnabled) {
-        this.log.info(
-          `Plugin "${pluginName}" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [${pluginEnablement.missingOrIncompatibleDependencies.join(
-            ', '
-          )}]`
+        disabledDependants.push(pluginName);
+        pluginEnablement.missingOrIncompatibleDependencies.forEach((dependency) =>
+          disabledDependantsCauses.add(dependency)
         );
       } else {
-        this.log.info(`Plugin "${pluginName}" is disabled.`);
+        disabledPlugins.push(pluginName);
       }
     }
 
     this.log.debug(`Discovered ${pluginEnableStatuses.size} plugins.`);
+    if (disabledPlugins.length) {
+      this.log.info(`The following plugins are disabled: "${disabledPlugins}".`);
+    }
+    if (disabledDependants.length) {
+      this.log.info(
+        `Plugins "${disabledDependants}" have been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [${Array.from(
+          disabledDependantsCauses
+        )}].`
+      );
+    }
   }
 
   /** Throws an error if the plugin's dependencies are invalid. */
@@ -428,17 +439,5 @@ export class PluginsService
       enabled: false,
       missingOrIncompatibleDependencies,
     };
-  }
-
-  private registerPluginStaticDirs(
-    deps: PluginsServiceSetupDeps | PluginsServicePrebootSetupDeps,
-    uiPluginInternalInfo: Map<PluginName, InternalPluginInfo>
-  ) {
-    for (const [pluginName, pluginInfo] of uiPluginInternalInfo) {
-      deps.http.registerStaticDir(
-        `/plugins/${pluginName}/assets/{path*}`,
-        pluginInfo.publicAssetsDir
-      );
-    }
   }
 }

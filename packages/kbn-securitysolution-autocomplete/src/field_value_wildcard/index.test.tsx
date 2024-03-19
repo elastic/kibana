@@ -168,7 +168,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="valuesAutocompleteWildcard"] EuiComboBoxPill').at(0).text()
+      wrapper.find('[data-test-subj="valuesAutocompleteWildcard"] input').at(0).props().value
     ).toEqual('/opt/*/app.dmg');
   });
 

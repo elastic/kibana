@@ -299,7 +299,7 @@ export const useBulkActions = ({
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
                 : undefined,
-              toolTipPosition: 'right',
+              toolTipProps: { position: 'right' },
               icon: undefined,
             },
             {
@@ -311,7 +311,7 @@ export const useBulkActions = ({
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
                 : undefined,
-              toolTipPosition: 'right',
+              toolTipProps: { position: 'right' },
               icon: undefined,
             },
             {
@@ -337,7 +337,7 @@ export const useBulkActions = ({
               toolTipContent: !hasActionsPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
                 : undefined,
-              toolTipPosition: 'right',
+              toolTipProps: { position: 'right' },
               icon: undefined,
             },
             {
@@ -349,7 +349,7 @@ export const useBulkActions = ({
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
                 : undefined,
-              toolTipPosition: 'right',
+              toolTipProps: { position: 'right' },
               icon: undefined,
             },
             {
@@ -361,7 +361,7 @@ export const useBulkActions = ({
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
                 : undefined,
-              toolTipPosition: 'right',
+              toolTipProps: { position: 'right' },
               icon: undefined,
             },
             {
@@ -382,7 +382,7 @@ export const useBulkActions = ({
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
                 : undefined,
-              toolTipPosition: 'right',
+              toolTipProps: { position: 'right' },
               icon: undefined,
             },
             {
@@ -397,7 +397,7 @@ export const useBulkActions = ({
               'data-test-subj': 'deleteRuleBulk',
               disabled: isDeleteDisabled,
               onClick: handleDeleteAction,
-              toolTipPosition: 'right',
+              toolTipProps: { position: 'right' },
               icon: undefined,
             },
           ],
@@ -415,7 +415,7 @@ export const useBulkActions = ({
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
                 : undefined,
-              toolTipPosition: 'right',
+              toolTipProps: { position: 'right' },
             },
             {
               key: i18n.BULK_ACTION_DELETE_TAGS,
@@ -426,7 +426,7 @@ export const useBulkActions = ({
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
                 : undefined,
-              toolTipPosition: 'right',
+              toolTipProps: { position: 'right' },
             },
           ],
         },
@@ -443,7 +443,7 @@ export const useBulkActions = ({
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
                 : undefined,
-              toolTipPosition: 'right',
+              toolTipProps: { position: 'right' },
             },
             {
               key: i18n.BULK_ACTION_DELETE_INDEX_PATTERNS,
@@ -454,7 +454,7 @@ export const useBulkActions = ({
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
                 : undefined,
-              toolTipPosition: 'right',
+              toolTipProps: { position: 'right' },
             },
           ],
         },

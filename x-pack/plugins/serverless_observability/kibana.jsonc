@@ -20,9 +20,8 @@
       "serverless",
       "observability",
       "observabilityShared",
-      "kibanaReact",
       "management",
-      "cloud"
+      "discover",
     ],
     "optionalPlugins": [],
     "requiredBundles": []

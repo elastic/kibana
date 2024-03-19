@@ -9,58 +9,59 @@ import expect from '@kbn/expect';
 import fs from 'fs/promises';
 import path from 'path';
 
+import { ToolingLog } from '@kbn/tooling-log';
 import { BUNDLED_PACKAGE_DIR } from '../../config.base';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
+
+const BUNDLED_PACKAGE_FIXTURES_DIR = path.join(
+  path.dirname(__filename),
+  '../fixtures/bundled_packages'
+);
+
+export const bundlePackage = async (name: string) => {
+  try {
+    await fs.access(BUNDLED_PACKAGE_DIR);
+  } catch (error) {
+    await fs.mkdir(BUNDLED_PACKAGE_DIR);
+  }
+
+  await fs.copyFile(
+    path.join(BUNDLED_PACKAGE_FIXTURES_DIR, `${name}.zip`),
+    path.join(BUNDLED_PACKAGE_DIR, `${name}.zip`)
+  );
+};
+
+export const removeBundledPackages = async (log: ToolingLog) => {
+  try {
+    const files = await fs.readdir(BUNDLED_PACKAGE_DIR);
+
+    for (const file of files) {
+      const isFixtureFile = !!(await fs.readFile(path.join(BUNDLED_PACKAGE_FIXTURES_DIR, file)));
+
+      // Only remove fixture files - leave normal bundled packages in place
+      if (isFixtureFile) {
+        await fs.unlink(path.join(BUNDLED_PACKAGE_DIR, file));
+      }
+    }
+  } catch (error) {
+    log.error('Error removing bundled packages');
+    log.error(error);
+  }
+};
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const log = getService('log');
 
-  const BUNDLED_PACKAGE_FIXTURES_DIR = path.join(
-    path.dirname(__filename),
-    '../fixtures/bundled_packages'
-  );
-
-  const bundlePackage = async (name: string) => {
-    try {
-      await fs.access(BUNDLED_PACKAGE_DIR);
-    } catch (error) {
-      await fs.mkdir(BUNDLED_PACKAGE_DIR);
-    }
-
-    await fs.copyFile(
-      path.join(BUNDLED_PACKAGE_FIXTURES_DIR, `${name}.zip`),
-      path.join(BUNDLED_PACKAGE_DIR, `${name}.zip`)
-    );
-  };
-
-  const removeBundledPackages = async () => {
-    try {
-      const files = await fs.readdir(BUNDLED_PACKAGE_DIR);
-
-      for (const file of files) {
-        const isFixtureFile = !!(await fs.readFile(path.join(BUNDLED_PACKAGE_FIXTURES_DIR, file)));
-
-        // Only remove fixture files - leave normal bundled packages in place
-        if (isFixtureFile) {
-          await fs.unlink(path.join(BUNDLED_PACKAGE_DIR, file));
-        }
-      }
-    } catch (error) {
-      log.error('Error removing bundled packages');
-      log.error(error);
-    }
-  };
-
   describe('installing bundled packages', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
     afterEach(async () => {
-      await removeBundledPackages();
+      await removeBundledPackages(log);
     });
 
     describe('without registry', () => {

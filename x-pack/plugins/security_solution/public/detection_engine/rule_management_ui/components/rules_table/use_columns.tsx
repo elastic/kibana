@@ -10,6 +10,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } fro
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React, { useMemo } from 'react';
+import { RulesTableEmptyColumnName } from './rules_table_empty_column_name';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import {
   DEFAULT_RELATIVE_DATE_THRESHOLD,
@@ -32,7 +33,7 @@ import {
 import { IntegrationsPopover } from '../../../../detections/components/rules/related_integrations/integrations_popover';
 import { RuleStatusBadge } from '../../../../detections/components/rules/rule_execution_status';
 import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import type { Rule } from '../../../rule_management/logic';
@@ -96,6 +97,7 @@ const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): Ta
               (isMlRule(rule.type) && !hasMlPermissions)
             }
             isLoading={loadingIds.includes(rule.id)}
+            ruleName={rule.name}
           />
         </EuiToolTip>
       ),
@@ -187,7 +189,7 @@ const useRuleExecutionStatusColumn = ({
 
 const TAGS_COLUMN: TableColumn = {
   field: 'tags',
-  name: null,
+  name: <RulesTableEmptyColumnName name={i18n.COLUMN_TAGS} />,
   align: 'center',
   render: (tags: Rule['tags']) => {
     if (tags == null || tags.length === 0) {
@@ -216,7 +218,7 @@ const TAGS_COLUMN: TableColumn = {
 
 const INTEGRATIONS_COLUMN: TableColumn = {
   field: 'related_integrations',
-  name: null,
+  name: <RulesTableEmptyColumnName name={i18n.COLUMN_INTEGRATIONS} />,
   align: 'center',
   render: (integrations: Rule['related_integrations']) => {
     if (integrations == null || integrations.length === 0) {
@@ -432,24 +434,19 @@ export const useMonitoringColumns = ({
             title={i18n.COLUMN_GAP}
             customTooltip={
               <div style={{ maxWidth: '20px' }}>
-                <PopoverTooltip columnName={i18n.COLUMN_GAP}>
+                <PopoverTooltip columnName={i18n.COLUMN_GAP} anchorColor="subdued">
                   <EuiText style={{ width: 300 }}>
-                    <p>
-                      <FormattedMessage
-                        defaultMessage="Duration of most recent gap in Rule execution. Adjust Rule look-back or {seeDocs} for mitigating gaps."
-                        id="xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltip"
-                        values={{
-                          seeDocs: (
-                            <EuiLink
-                              href={`${docLinks.links.siem.troubleshootGaps}`}
-                              target="_blank"
-                            >
-                              {i18n.COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION}
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    </p>
+                    <FormattedMessage
+                      defaultMessage="Duration of most recent gap in Rule execution. Adjust Rule look-back or {seeDocs} for mitigating gaps."
+                      id="xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltip"
+                      values={{
+                        seeDocs: (
+                          <EuiLink href={`${docLinks.links.siem.troubleshootGaps}`} target="_blank">
+                            {i18n.COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
                   </EuiText>
                 </PopoverTooltip>
               </div>

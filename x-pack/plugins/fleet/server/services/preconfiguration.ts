@@ -81,7 +81,11 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
   const packagesToInstall = packages.map((pkg) =>
     pkg.version === PRECONFIGURATION_LATEST_KEYWORD
-      ? { name: pkg.name, prerelease: pkg.prerelease }
+      ? {
+          name: pkg.name,
+          prerelease: pkg.prerelease,
+          skipDataStreamRollover: pkg.skipDataStreamRollover,
+        }
       : pkg
   );
 
@@ -301,6 +305,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             }),
           }
     ),
+    // @ts-expect-error upgrade typescript v4.9.5
     packages: fulfilledPackages.map((pkg) => ('version' in pkg ? pkgToPkgKey(pkg) : pkg.name)),
     nonFatalErrors: [...rejectedPackages, ...rejectedPolicies],
   };

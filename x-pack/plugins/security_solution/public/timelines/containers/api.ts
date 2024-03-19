@@ -480,13 +480,20 @@ export const persistFavorite = async ({
   return decodeResponseFavoriteTimeline(response);
 };
 
-export const deleteTimelinesByIds = async (savedObjectIds: string[]) => {
+export const deleteTimelinesByIds = async (savedObjectIds: string[], searchIds?: string[]) => {
   let requestBody;
 
   try {
-    requestBody = JSON.stringify({
-      savedObjectIds,
-    });
+    if (searchIds) {
+      requestBody = JSON.stringify({
+        savedObjectIds,
+        searchIds,
+      });
+    } else {
+      requestBody = JSON.stringify({
+        savedObjectIds,
+      });
+    }
   } catch (err) {
     return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }

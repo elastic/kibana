@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const PageObjects = getPageObjects([
     'settings',
+    'svlCommonPage',
     'common',
     'header',
     'discover',
@@ -289,10 +290,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const checkInitialRuleParamsState = async (dataView: string, isViewInApp = false) => {
     if (isViewInApp) {
-      expect(await toasts.getToastCount()).to.be(0);
+      expect(await toasts.getCount()).to.be(0);
     } else {
-      expect(await toasts.getToastCount()).to.be(1);
-      expect((await toasts.getToastContent(1)).startsWith('Displayed documents may vary')).to.be(
+      expect(await toasts.getCount()).to.be(1);
+      expect((await toasts.getContentByIndex(1)).startsWith('Displayed documents may vary')).to.be(
         true
       );
     }
@@ -306,7 +307,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const checkUpdatedRuleParamsState = async () => {
-    expect(await toasts.getToastCount()).to.be(0);
+    expect(await toasts.getCount()).to.be(0);
     const queryString = await queryBar.getQueryString();
     const hasFilter = await filterBar.hasFilter('message.keyword', 'msg-1');
     expect(queryString).to.be.equal('message:msg-1');
@@ -340,9 +341,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
-  describe('Search source Alert', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/176882
+  describe.skip('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
+      await PageObjects.svlCommonPage.loginAsAdmin();
 
       log.debug('create source indices');
       await createSourceIndex();
@@ -378,9 +381,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // should not have data view selected by default
       const dataViewSelector = await testSubjects.find('selectDataViewExpression');
-      // TODO: Serverless Security has an existing data view by default
+      // TODO: Serverless Security and Search have an existing data view by default
       const dataViewSelectorText = await dataViewSelector.getVisibleText();
-      if (!dataViewSelectorText.includes('.alerts-security')) {
+      if (
+        !dataViewSelectorText.includes('.alerts-security') &&
+        !dataViewSelectorText.includes('default:all-data')
+      ) {
         expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW\nSelect a data view');
       }
 
@@ -444,6 +450,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should navigate to alert results via link provided in notification', async () => {
+      await PageObjects.settings.refreshDataViewFieldList(OUTPUT_DATA_VIEW);
       await openAlertResults(RULE_NAME);
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
     });
@@ -563,8 +570,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not display results after data view removal on clicking viewInApp link', async () => {
       await clickViewInApp(RULE_NAME);
 
-      expect(await toasts.getToastCount()).to.be.equal(1);
-      const content = await toasts.getToastContent(1);
+      expect(await toasts.getCount()).to.be.equal(1);
+      const content = await toasts.getContentByIndex(1);
       expect(content).to.equal(
         `Error fetching search source\nCould not locate that data view (id: ${sourceDataViewId}), click here to re-create it`
       );

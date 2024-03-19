@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { useWithShowEndpointResponder } from '../../../../hooks';
+import { useWithShowResponder } from '../../../../hooks';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { getEndpointDetailsPath, getEndpointListPath } from '../../../../common/routing';
 import type { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
@@ -36,7 +36,7 @@ export const useEndpointActionItems = (
   const { getAppUrl } = useAppUrl();
   const fleetAgentPolicies = useEndpointSelector(agentPolicies);
   const allCurrentUrlParams = useEndpointSelector(uiQueryParams);
-  const showEndpointResponseActionsConsole = useWithShowEndpointResponder();
+  const showEndpointResponseActionsConsole = useWithShowResponder();
   const {
     canAccessResponseConsole,
     canIsolateHost,
@@ -127,7 +127,12 @@ export const useEndpointActionItems = (
               key: 'consoleLink',
               onClick: (ev: React.MouseEvent) => {
                 ev.preventDefault();
-                showEndpointResponseActionsConsole(endpointMetadata);
+                showEndpointResponseActionsConsole({
+                  agentId: endpointMetadata.agent.id,
+                  agentType: 'endpoint',
+                  capabilities: endpointMetadata.Endpoint.capabilities ?? [],
+                  hostName: endpointMetadata.host.name,
+                });
               },
               children: (
                 <FormattedMessage

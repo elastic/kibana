@@ -13,6 +13,7 @@ import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { UserAtSpaceScenarios, Superuser } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -1505,6 +1506,7 @@ instanceStateValue: true
                               uuid: expectExpect.any(String),
                               tags: ['tag-A', 'tag-B'],
                             },
+                            consecutive_matches: 1,
                             duration: { us: 0 },
                             time_range: { gte: expectExpect.any(String) },
                             instance: { id: '1' },
@@ -1541,6 +1543,7 @@ instanceStateValue: true
                               uuid: expectExpect.any(String),
                               tags: ['tag-A', 'tag-B'],
                             },
+                            consecutive_matches: 1,
                             duration: { us: 0 },
                             time_range: { gte: expectExpect.any(String) },
                             instance: { id: '2' },
@@ -1593,6 +1596,7 @@ instanceStateValue: true
                               uuid: expectExpect.any(String),
                               tags: ['tag-A', 'tag-B'],
                             },
+                            consecutive_matches: expectExpect.any(Number),
                             duration: { us: expectExpect.any(Number) },
                             time_range: { gte: expectExpect.any(String) },
                             instance: { id: '1' },
@@ -1629,6 +1633,7 @@ instanceStateValue: true
                               uuid: expectExpect.any(String),
                               tags: ['tag-A', 'tag-B'],
                             },
+                            consecutive_matches: expectExpect.any(Number),
                             duration: { us: expectExpect.any(Number) },
                             time_range: { gte: expectExpect.any(String) },
                             instance: { id: '2' },
@@ -1729,6 +1734,7 @@ instanceStateValue: true
                         uuid: expectExpect.any(String),
                         tags: ['tag-A', 'tag-B'],
                       },
+                      consecutive_matches: 1,
                       duration: { us: 0 },
                       time_range: { gte: expectExpect.any(String) },
                       instance: { id: '1' },
@@ -1765,6 +1771,7 @@ instanceStateValue: true
                         uuid: expectExpect.any(String),
                         tags: ['tag-A', 'tag-B'],
                       },
+                      consecutive_matches: 1,
                       duration: { us: 0 },
                       time_range: { gte: expectExpect.any(String) },
                       instance: { id: '2' },
@@ -1916,7 +1923,7 @@ instanceStateValue: true
     expect(event?.kibana?.saved_objects).to.eql([
       {
         rel: 'primary',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: alertId,
         namespace: spaceId,
         type_id: ruleObject.alertInfo.ruleTypeId,

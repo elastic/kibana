@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { omit } from 'lodash';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { SavedObjectWithMetadata } from '../../../../common';
 
 export interface InspectProps {
@@ -70,7 +70,9 @@ export const Inspect: FC<InspectProps> = ({ object }) => {
             scrollBeyondLastLine: false,
             wordWrap: 'on',
             wrappingIndent: 'indent',
-            renderIndentGuides: false,
+            guides: {
+              indentation: false,
+            },
           }}
         />
       </EuiFlexItem>

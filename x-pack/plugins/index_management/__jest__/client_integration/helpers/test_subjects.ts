@@ -30,7 +30,7 @@ export type TestSubjects =
   | 'indexContextMenu'
   | 'indexManagementHeaderContent'
   | 'indexTable'
-  | 'indexTableIncludeHiddenIndicesToggle'
+  | 'checkboxToggles-includeHiddenIndices'
   | 'indexTableIndexNameLink'
   | 'indicesList'
   | 'indicesTab'
@@ -109,4 +109,9 @@ export type TestSubjects =
   | 'dataRetentionEnabledField.input'
   | 'enrichPoliciesInsuficientPrivileges'
   | 'dataRetentionDetail'
-  | 'createIndexSaveButton';
+  | 'createIndexSaveButton'
+  | 'createIndexMessage'
+  | 'indicesSearch'
+  | 'noIndicesMessage'
+  | 'clearIndicesSearch'
+  | 'componentTemplatesLink';

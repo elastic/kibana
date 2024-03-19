@@ -7,7 +7,6 @@
 
 import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab, EuiBetaBadge } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { Assistant } from '@kbn/elastic-assistant';
 import { isEmpty } from 'lodash/fp';
 import type { Ref, ReactElement, ComponentType, Dispatch, SetStateAction } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
@@ -15,9 +14,9 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
-import { useConversationStore } from '../../../../assistant/use_conversation_store';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
@@ -31,7 +30,7 @@ import {
   EqlEventsCountBadge,
   TimelineEventsCountBadge,
 } from '../../../../common/hooks/use_timeline_events_count';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions } from '../../../store';
 import type { CellValueElementProps } from '../cell_rendering';
 import {
   getActiveTabSelector,
@@ -44,7 +43,7 @@ import {
 import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { TIMELINE_CONVERSATION_TITLE } from '../../../../assistant/content/conversations/translations';
-import { initializeTimelineSettings } from '../../../store/timeline/actions';
+import { initializeTimelineSettings } from '../../../store/actions';
 import { DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW } from './translations';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
@@ -77,11 +76,6 @@ const tabWithSuspense = <P extends {}, R = {}>(
   return Comp;
 };
 
-const AssistantTabContainer = styled.div`
-  overflow-y: auto;
-  width: 100%;
-`;
-
 const QueryTab = tabWithSuspense(lazy(() => import('../query_tab_content')));
 const EqlTab = tabWithSuspense(lazy(() => import('../eql_tab_content')));
 const GraphTab = tabWithSuspense(lazy(() => import('../graph_tab_content')));
@@ -100,28 +94,10 @@ interface BasicTimelineTab {
   timelineDescription: string;
 }
 
-const AssistantTab: React.FC<{
-  shouldRefocusPrompt: boolean;
-  setConversationId: Dispatch<SetStateAction<string>>;
-}> = memo(({ shouldRefocusPrompt, setConversationId }) => (
-  <Suspense fallback={<EuiSkeletonText lines={10} />}>
-    <AssistantTabContainer>
-      <Assistant
-        conversationId={TIMELINE_CONVERSATION_TITLE}
-        embeddedLayout
-        setConversationId={setConversationId}
-        shouldRefocusPrompt={shouldRefocusPrompt}
-      />
-    </AssistantTabContainer>
-  </Suspense>
-));
-
-AssistantTab.displayName = 'AssistantTab';
-
 type ActiveTimelineTabProps = BasicTimelineTab & {
   activeTimelineTab: TimelineTabs;
   showTimeline: boolean;
-  setConversationId: Dispatch<SetStateAction<string>>;
+  setConversationTitle: Dispatch<SetStateAction<string>>;
 };
 
 const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
@@ -131,11 +107,11 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     rowRenderers,
     timelineId,
     timelineType,
-    setConversationId,
+    setConversationTitle,
     showTimeline,
   }) => {
-    const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
     const { hasAssistantPrivilege } = useAssistantAvailability();
+    const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -158,12 +134,32 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
       [activeTimelineTab]
     );
 
-    const { conversations } = useConversationStore();
-
-    const hasTimelineConversationStarted = useMemo(
-      () => conversations[TIMELINE_CONVERSATION_TITLE].messages.length > 0,
-      [conversations]
-    );
+    const getAssistantTab = useCallback(() => {
+      if (showTimeline) {
+        const AssistantTab = tabWithSuspense(lazy(() => import('../assistant_tab_content')));
+        return (
+          <HideShowContainer
+            $isVisible={activeTimelineTab === TimelineTabs.securityAssistant}
+            isOverflowYScroll={activeTimelineTab === TimelineTabs.securityAssistant}
+            data-test-subj={`timeline-tab-content-security-assistant`}
+            css={css`
+              overflow: hidden !important;
+            `}
+          >
+            {activeTimelineTab === TimelineTabs.securityAssistant ? (
+              <AssistantTab
+                setConversationTitle={setConversationTitle}
+                shouldRefocusPrompt={
+                  showTimeline && activeTimelineTab === TimelineTabs.securityAssistant
+                }
+              />
+            ) : null}
+          </HideShowContainer>
+        );
+      } else {
+        return null;
+      }
+    }, [activeTimelineTab, setConversationTitle, showTimeline]);
 
     /* Future developer -> why are we doing that
      * It is really expansive to re-render the QueryTab because the drag/drop
@@ -182,9 +178,9 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </HideShowContainer>
-        {isEsqlSettingEnabled && (
+        {showTimeline && isEsqlSettingEnabled && activeTimelineTab === TimelineTabs.esql && (
           <HideShowContainer
-            $isVisible={TimelineTabs.esql === activeTimelineTab}
+            $isVisible={true}
             data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
           >
             <EsqlTab timelineId={timelineId} />
@@ -219,26 +215,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         >
           {isGraphOrNotesTabs && getTab(activeTimelineTab)}
         </HideShowContainer>
-        {hasAssistantPrivilege && (
-          <HideShowContainer
-            $isVisible={activeTimelineTab === TimelineTabs.securityAssistant}
-            isOverflowYScroll={activeTimelineTab === TimelineTabs.securityAssistant}
-            data-test-subj={`timeline-tab-content-security-assistant`}
-            css={css`
-              overflow: hidden !important;
-            `}
-          >
-            {(activeTimelineTab === TimelineTabs.securityAssistant ||
-              hasTimelineConversationStarted) && (
-              <AssistantTab
-                setConversationId={setConversationId}
-                shouldRefocusPrompt={
-                  showTimeline && activeTimelineTab === TimelineTabs.securityAssistant
-                }
-              />
-            )}
-          </HideShowContainer>
-        )}
+        {hasAssistantPrivilege ? getAssistantTab() : null}
       </>
     );
   }
@@ -290,6 +267,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   sessionViewConfig,
   timelineDescription,
 }) => {
+  const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
   const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const dispatch = useDispatch();
@@ -316,7 +294,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   const isEnterprisePlus = useLicense().isEnterprise();
 
-  const [conversationId, setConversationId] = useState<string>(TIMELINE_CONVERSATION_TITLE);
+  const [conversationTitle, setConversationTitle] = useState<string>(TIMELINE_CONVERSATION_TITLE);
   const { reportAssistantInvoked } = useAssistantTelemetry();
 
   const allTimelineNoteIds = useMemo(() => {
@@ -369,11 +347,11 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     setActiveTab(TimelineTabs.securityAssistant);
     if (activeTab !== TimelineTabs.securityAssistant) {
       reportAssistantInvoked({
-        conversationId,
+        conversationId: conversationTitle,
         invokedBy: TIMELINE_CONVERSATION_TITLE,
       });
     }
-  }, [activeTab, conversationId, reportAssistantInvoked, setActiveTab]);
+  }, [activeTab, conversationTitle, reportAssistantInvoked, setActiveTab]);
 
   const setEsqlAsActiveTab = useCallback(() => {
     dispatch(
@@ -404,7 +382,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             <span>{i18n.QUERY_TAB}</span>
             {showTimeline && <TimelineEventsCountBadge />}
           </StyledEuiTab>
-          {isEsqlSettingEnabled && (
+          {!isEsqlTabInTimelineDisabled && isEsqlSettingEnabled && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.esql}`}
               onClick={setEsqlAsActiveTab}
@@ -507,7 +485,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
         timelineId={timelineId}
         timelineType={timelineType}
         timelineDescription={timelineDescription}
-        setConversationId={setConversationId}
+        setConversationTitle={setConversationTitle}
         showTimeline={showTimeline}
       />
     </>

@@ -20,6 +20,7 @@ import { getDeferred } from '../../../../mocks/utils';
 import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
 import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations';
 
 jest.mock('../../../../../common/experimental_features_service');
 
@@ -46,6 +47,7 @@ describe('When using the release action from response actions console', () => {
               consoleProps: {
                 'data-test-subj': 'test',
                 commands: getEndpointConsoleCommands({
+                  agentType: 'endpoint',
                   endpointAgentId: 'a.b.c',
                   endpointCapabilities: [...capabilities],
                   endpointPrivileges: {
@@ -74,7 +76,7 @@ describe('When using the release action from response actions console', () => {
     enterConsoleCommand(renderResult, 'release');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-      'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
+      UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'release')
     );
   });
 
@@ -216,12 +218,14 @@ describe('When using the release action from response actions console', () => {
 
     it('should display completion output if done (no additional API calls)', async () => {
       await render();
-
-      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
+      });
 
       await consoleManagerMockAccess.openRunningConsole();
-
-      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });

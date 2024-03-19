@@ -61,7 +61,7 @@ jest.mock(
   '../../../../detections/containers/detection_engine/alerts/use_host_isolation_status',
   () => {
     return {
-      useHostIsolationStatus: jest.fn().mockReturnValue({
+      useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
         loading: false,
         isIsolated: false,
         agentStatus: 'healthy',
@@ -116,7 +116,7 @@ jest.mock(
   }
 );
 jest.mock('../../../../detections/components/alerts_table/actions');
-jest.mock('../../../../explore/containers/risk_score', () => {
+jest.mock('../../../../entity_analytics/api/hooks/use_risk_score', () => {
   return {
     useRiskScore: jest.fn().mockReturnValue({
       loading: true,

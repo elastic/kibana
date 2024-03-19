@@ -1,0 +1,382 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<CodeEditor /> hint element should be tabable 1`] = `
+<div
+  aria-label="Code Editor"
+  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop).,false"
+  data-test-subj="codeEditorHint codeEditorHint--active"
+  id="1234"
+  role="button"
+  tabindex="0"
+/>
+`;
+
+exports[`<CodeEditor /> is rendered 1`] = `
+<CodeEditor
+  height={250}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  languageId="loglang"
+  onChange={[Function]}
+  value="
+[Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a notice!
+[Sun Mar 7 20:58:27 2004] [info] [client xx.xx.xx.xx] (104)Connection reset by peer: client stopped connection before send body completed
+[Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
+"
+>
+  <div
+    className="kibanaCodeEditor"
+    data-test-subj="kibanaCodeEditor"
+    onKeyDown={[Function]}
+  >
+    <EuiToolTip
+      content={
+        <React.Fragment>
+          <p>
+            <FormattedMessage
+              defaultMessage="Press {key} to start editing."
+              id="sharedUXPackages.codeEditor.startEditing"
+              values={
+                Object {
+                  "key": <strong>
+                    Enter
+                  </strong>,
+                }
+              }
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              defaultMessage="Press {key} to stop editing."
+              id="sharedUXPackages.codeEditor.stopEditing"
+              values={
+                Object {
+                  "key": <strong>
+                    Esc
+                  </strong>,
+                }
+              }
+            />
+          </p>
+        </React.Fragment>
+      }
+      delay="regular"
+      display="block"
+      position="top"
+    >
+      <EuiToolTipAnchor
+        display="block"
+        id="generated-id"
+        isVisible={false}
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onMouseOut={[Function]}
+        onMouseOver={[Function]}
+      >
+        <span
+          css="unknown styles"
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+        >
+          <Insertion
+            cache={
+              Object {
+                "insert": [Function],
+                "inserted": Object {
+                  "uuw4g3-euiToolTipAnchor-block": true,
+                },
+                "key": "css",
+                "nonce": undefined,
+                "registered": Object {},
+                "sheet": StyleSheet {
+                  "_alreadyInsertedOrderInsensitiveRule": true,
+                  "_insertTag": [Function],
+                  "before": null,
+                  "container": <head>
+                    <style
+                      data-emotion="css"
+                      data-s=""
+                    >
+                      
+                      .emotion-euiToolTipAnchor-block{display:block;}
+                    </style>
+                    <style
+                      data-emotion="css"
+                      data-s=""
+                    >
+                      
+                      .emotion-euiToolTipAnchor-block *[disabled]{pointer-events:none;}
+                    </style>
+                    <style
+                      data-styled="active"
+                      data-styled-version="5.1.0"
+                    />
+                  </head>,
+                  "ctr": 2,
+                  "insertionPoint": undefined,
+                  "isSpeedy": false,
+                  "key": "css",
+                  "nonce": undefined,
+                  "prepend": undefined,
+                  "tags": Array [
+                    <style
+                      data-emotion="css"
+                      data-s=""
+                    >
+                      
+                      .emotion-euiToolTipAnchor-block{display:block;}
+                    </style>,
+                    <style
+                      data-emotion="css"
+                      data-s=""
+                    >
+                      
+                      .emotion-euiToolTipAnchor-block *[disabled]{pointer-events:none;}
+                    </style>,
+                  ],
+                },
+              }
+            }
+            isStringTag={true}
+            serialized={
+              Object {
+                "map": undefined,
+                "name": "uuw4g3-euiToolTipAnchor-block",
+                "next": undefined,
+                "styles": "*[disabled]{pointer-events:none;};label:euiToolTipAnchor;;;display:block;label:block;;;",
+                "toString": [Function],
+              }
+            }
+          />
+          <span
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            <div
+              aria-label="Code Editor"
+              css={
+                Array [
+                  Object {
+                    "map": undefined,
+                    "name": "jym74u",
+                    "next": undefined,
+                    "styles": "
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    &:focus {
+      z-index: 6000;
+    }
+  ",
+                    "toString": [Function],
+                  },
+                  false,
+                ]
+              }
+              data-test-subj="codeEditorHint codeEditorHint--active"
+              id="1234"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
+          </span>
+        </span>
+      </EuiToolTipAnchor>
+    </EuiToolTip>
+    <Component>
+      <UseBug177756ReBroadcastMouseDown>
+        <div
+          style={
+            Object {
+              "display": "contents",
+            }
+          }
+        >
+          <MockedMonacoEditor
+            editorDidMount={[Function]}
+            editorWillMount={[Function]}
+            editorWillUnmount={[Function]}
+            height={250}
+            language="loglang"
+            onChange={[Function]}
+            options={
+              Object {
+                "bracketPairColorization.enabled": false,
+                "fontFamily": "Roboto Mono",
+                "fontSize": 12,
+                "lineHeight": 21,
+                "matchBrackets": "never",
+                "minimap": Object {
+                  "enabled": false,
+                },
+                "padding": Object {},
+                "renderLineHighlight": "none",
+                "scrollBeyondLastLine": false,
+                "scrollbar": Object {
+                  "alwaysConsumeMouseWheel": false,
+                  "useShadows": false,
+                },
+                "wordBasedSuggestions": false,
+                "wordWrap": "on",
+                "wrappingIndent": "indent",
+              }
+            }
+            theme="euiColors"
+            value="
+[Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a notice!
+[Sun Mar 7 20:58:27 2004] [info] [client xx.xx.xx.xx] (104)Connection reset by peer: client stopped connection before send body completed
+[Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
+"
+          >
+            <div>
+              <div />
+              <textarea
+                data-test-subj="monacoEditorTextarea"
+                editorWillUnmount={[Function]}
+                height={250}
+                language="loglang"
+                onChange={[Function]}
+                onKeyDown={[Function]}
+                options={
+                  Object {
+                    "bracketPairColorization.enabled": false,
+                    "fontFamily": "Roboto Mono",
+                    "fontSize": 12,
+                    "lineHeight": 21,
+                    "matchBrackets": "never",
+                    "minimap": Object {
+                      "enabled": false,
+                    },
+                    "padding": Object {},
+                    "renderLineHighlight": "none",
+                    "scrollBeyondLastLine": false,
+                    "scrollbar": Object {
+                      "alwaysConsumeMouseWheel": false,
+                      "useShadows": false,
+                    },
+                    "wordBasedSuggestions": false,
+                    "wordWrap": "on",
+                    "wrappingIndent": "indent",
+                  }
+                }
+                theme="euiColors"
+                value="
+[Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a notice!
+[Sun Mar 7 20:58:27 2004] [info] [client xx.xx.xx.xx] (104)Connection reset by peer: client stopped connection before send body completed
+[Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
+"
+              />
+            </div>
+          </MockedMonacoEditor>
+        </div>
+      </UseBug177756ReBroadcastMouseDown>
+    </Component>
+  </div>
+</CodeEditor>
+`;

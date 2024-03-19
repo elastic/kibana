@@ -31,7 +31,7 @@ export const TIMELINE_TOUR_DATA_PROVIDER_VISIBILITY_TITLE = i18n.translate(
 export const TIMELINE_TOUR_DATA_PROVIDER_VISIBILITY_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.timeline.tour.dataProviderToggle.description',
   {
-    defaultMessage: 'Click to expand or collapse the query builder',
+    defaultMessage: 'Click to expand or collapse the query builder.',
   }
 );
 
@@ -46,6 +46,13 @@ export const TIMELINE_TOUR_CHANGE_DATA_VIEW_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.tour.changeDataView.title',
   {
     defaultMessage: 'The Data view menu has moved',
+  }
+);
+
+export const TIMELINE_TOUR_ADD_TO_FAVORITES_STEP_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.tour.addToFavorites.title',
+  {
+    defaultMessage: 'A new and intuitive way to favorite your Timeline',
   }
 );
 

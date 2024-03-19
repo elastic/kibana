@@ -7,6 +7,7 @@
  */
 
 import type { PaletteRegistry, PaletteDefinition } from '@kbn/coloring';
+import { getActivePaletteName } from '@kbn/coloring';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { ChartsPluginSetup } from '../..';
 import type { LegacyColorsService } from '../legacy_colors';
@@ -29,7 +30,8 @@ export class PaletteService {
         }
         return {
           get: (name: string) => {
-            return this.palettes![name];
+            const paletteName = getActivePaletteName(name);
+            return this.palettes![paletteName];
           },
           getAll: () => {
             return Object.values(this.palettes!);

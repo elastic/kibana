@@ -72,15 +72,6 @@ describe(
   'Threshold rules',
   {
     tags: ['@ess', '@serverless'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForThresholdRuleEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     const rule = getNewThresholdRule();
@@ -163,6 +154,10 @@ describe(
 
       enablesAndPopulatesThresholdSuppression(5, 'h');
       fillDefineThresholdRuleAndContinue(rule);
+      // ensures duration displayed on define step in preview mode
+      cy.get(DEFINITION_DETAILS).within(() => {
+        getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '5h');
+      });
 
       fillAboutRuleMinimumAndContinue(rule);
       skipScheduleRuleAction();

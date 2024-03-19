@@ -12,9 +12,8 @@ import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { splitSizeAndUnits, DataStream } from '../../../common';
 import { timeUnits, extraTimeUnits } from '../constants/time_units';
 
-export const isFleetManaged = (dataStream: DataStream): boolean => {
-  // TODO check if the wording will change to 'fleet'
-  return Boolean(dataStream._meta?.managed && dataStream._meta?.managed_by === 'ingest-manager');
+export const isManaged = (dataStream: DataStream): boolean => {
+  return Boolean(dataStream._meta?.managed);
 };
 
 export const filterDataStreams = (
@@ -23,13 +22,13 @@ export const filterDataStreams = (
 ): DataStream[] => {
   return dataStreams.filter((dataStream: DataStream) => {
     // include all data streams that are neither hidden nor managed
-    if (!dataStream.hidden && !isFleetManaged(dataStream)) {
+    if (!dataStream.hidden && !isManaged(dataStream)) {
       return true;
     }
     if (dataStream.hidden && visibleTypes.includes('hidden')) {
       return true;
     }
-    return isFleetManaged(dataStream) && visibleTypes.includes('managed');
+    return isManaged(dataStream) && visibleTypes.includes('managed');
   });
 };
 

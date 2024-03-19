@@ -9,11 +9,10 @@
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 
+import { type Browser, TestSubjects } from '@kbn/ftr-common-functional-ui-services';
 import { Role } from './role';
 import { User } from './user';
 import { FtrService, FtrProviderContext } from '../../ftr_provider_context';
-import { Browser } from '../../../functional/services/common';
-import { TestSubjects } from '../../../functional/services/common';
 
 const TEST_USER_NAME = 'test_user';
 const TEST_USER_PASSWORD = 'changeme';
@@ -61,7 +60,10 @@ export class TestUser extends FtrService {
     });
 
     if (this.browser && this.testSubjects && !options?.skipBrowserRefresh) {
-      if (await this.testSubjects.exists('kibanaChrome', { allowHidden: true })) {
+      if (
+        (await this.browser.hasOpenWindow()) &&
+        (await this.testSubjects.exists('kibanaChrome', { allowHidden: true }))
+      ) {
         await this.browser.refresh();
         // accept alert if it pops up
         const alert = await this.browser.getAlert();

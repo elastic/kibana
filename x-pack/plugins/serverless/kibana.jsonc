@@ -13,10 +13,11 @@
       "plugin",
     ],
     "requiredPlugins": [
-      "kibanaReact",
       "cloud"
     ],
     "optionalPlugins": [],
-    "requiredBundles": []
+    "requiredBundles": [
+      "kibanaReact",
+    ]
   }
 }

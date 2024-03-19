@@ -11,23 +11,20 @@ import { visitWithTimeRange } from '../../../tasks/navigation';
 import { hostsUrl } from '../../../urls/navigation';
 import { TABLE_CELL } from '../../../screens/alerts_details';
 import { kqlSearch } from '../../../tasks/security_header';
-import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
-import { enableRiskEngine } from '../../../tasks/entity_analytics';
+import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
 describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
   describe('with legacy risk score', () => {
     before(() => {
-      // illegal_argument_exception: unknown setting [index.lifecycle.name]
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
     });
 
     beforeEach(() => {
       login();
-      deleteRiskEngineConfiguration();
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_hosts');
+      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
     });
 
     it('it renders risk column', () => {
@@ -41,18 +38,16 @@ describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('with new risk score', () => {
     before(() => {
-      // illegal_argument_exception: unknown setting [index.lifecycle.name]
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
     });
 
     beforeEach(() => {
       login();
-      enableRiskEngine();
+      mockRiskEngineEnabled();
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_scores_new');
-      deleteRiskEngineConfiguration();
+      cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
     });
 
     it('it renders risk column', () => {

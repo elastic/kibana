@@ -60,10 +60,10 @@ import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-import { StepAboutRuleToggleDetails } from '../../../../detections/components/rules/step_about_rule_details';
+import { StepAboutRuleToggleDetails } from '../../../rule_creation/components/step_about_rule_details';
 import { AlertsHistogramPanel } from '../../../../detections/components/alerts_kpis/alerts_histogram_panel';
 import { useUserData } from '../../../../detections/components/user_info';
-import { StepRuleActionsReadOnly } from '../../../../detections/components/rules/step_rule_actions';
+import { StepRuleActionsReadOnly } from '../../../rule_creation/components/step_rule_actions';
 import {
   buildAlertsFilter,
   buildAlertStatusFilter,
@@ -71,7 +71,7 @@ import {
   buildThreatMatchFilter,
 } from '../../../../detections/components/alerts_table/default_config';
 import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
-import { StepPanel } from '../../../../detections/components/rules/step_panel';
+import { StepPanel } from '../../../rule_creation/components/step_panel';
 import {
   getMachineLearningJobId,
   getStepsData,
@@ -161,6 +161,14 @@ const StyledFullHeightContainer = styled.div`
  */
 const StyledMinHeightTabContainer = styled.div`
   min-height: 800px;
+`;
+
+/**
+ * Wrapper for the About, Definition and Schedule sections.
+ * - Allows for overflow wrapping of extremely long text, that might otherwise break the layout.
+ */
+const RuleFieldsSectionWrapper = styled.div`
+  overflow-wrap: anywhere;
 `;
 
 type DetectionEngineComponentProps = PropsFromRedux;
@@ -605,6 +613,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           enabled={isExistingRule && (rule?.enabled ?? false)}
                           startMlJobsIfNeeded={startMlJobsIfNeeded}
                           onChange={handleOnChangeEnabledRule}
+                          ruleName={rule?.name}
                         />
                         <EuiFlexItem>{i18n.ENABLE_RULE}</EuiFlexItem>
                       </EuiFlexGroup>
@@ -648,50 +657,52 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               {ruleError}
               <LegacyUrlConflictCallOut rule={rule} spacesApi={spacesApi} />
               <EuiSpacer />
-              <EuiFlexGroup>
-                <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
-                  {rule !== null && (
-                    <StepAboutRuleToggleDetails
-                      loading={isLoading}
-                      stepData={aboutRuleData}
-                      stepDataDetails={modifiedAboutRuleDetailsData}
-                      rule={rule}
-                    />
-                  )}
-                </EuiFlexItem>
+              <RuleFieldsSectionWrapper>
+                <EuiFlexGroup>
+                  <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
+                    {rule !== null && (
+                      <StepAboutRuleToggleDetails
+                        loading={isLoading}
+                        stepData={aboutRuleData}
+                        stepDataDetails={modifiedAboutRuleDetailsData}
+                        rule={rule}
+                      />
+                    )}
+                  </EuiFlexItem>
 
-                <EuiFlexItem grow={1}>
-                  <EuiFlexGroup direction="column">
-                    <EuiFlexItem component="section" grow={1} data-test-subj="defineRule">
-                      <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
-                        {rule !== null && !isStartingJobs && (
-                          <RuleDefinitionSection
-                            rule={rule}
-                            isInteractive
-                            dataTestSubj="definitionRule"
-                          />
-                        )}
-                      </StepPanel>
-                    </EuiFlexItem>
-                    <EuiSpacer />
-                    <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
-                      <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                        {rule != null && <RuleScheduleSection rule={rule} />}
-                      </StepPanel>
-                    </EuiFlexItem>
-                    {hasActions && (
-                      <EuiFlexItem data-test-subj="actions" component="section" grow={1}>
-                        <StepPanel loading={isLoading} title={ruleI18n.ACTIONS}>
-                          <StepRuleActionsReadOnly
-                            addPadding={false}
-                            defaultValues={ruleActionsData}
-                          />
+                  <EuiFlexItem grow={1}>
+                    <EuiFlexGroup direction="column">
+                      <EuiFlexItem component="section" grow={1} data-test-subj="defineRule">
+                        <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
+                          {rule !== null && !isStartingJobs && (
+                            <RuleDefinitionSection
+                              rule={rule}
+                              isInteractive
+                              dataTestSubj="definitionRule"
+                            />
+                          )}
                         </StepPanel>
                       </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                      <EuiSpacer />
+                      <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
+                        <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
+                          {rule != null && <RuleScheduleSection rule={rule} />}
+                        </StepPanel>
+                      </EuiFlexItem>
+                      {hasActions && (
+                        <EuiFlexItem data-test-subj="actions" component="section" grow={1}>
+                          <StepPanel loading={isLoading} title={ruleI18n.ACTIONS}>
+                            <StepRuleActionsReadOnly
+                              addPadding={false}
+                              defaultValues={ruleActionsData}
+                            />
+                          </StepPanel>
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </RuleFieldsSectionWrapper>
               <EuiSpacer />
               <TabNavigation navTabs={pageTabs} />
               <EuiSpacer />

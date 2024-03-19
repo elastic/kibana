@@ -33,8 +33,8 @@ import {
 } from '../../../../common/containers/use_full_screen';
 import { detectionsTimelineIds } from '../../../containers/helpers';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineActions, timelineSelectors } from '../../../store';
+import { timelineDefaults } from '../../../store/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 const FullScreenButtonIcon = styled(EuiButtonIcon)`

@@ -31,7 +31,7 @@ import {
   MAX_USER_ACTIONS_PER_CASE,
 } from '../../../common/constants';
 import { Operations } from '../../authorization';
-import { createCaseError } from '../../common/error';
+import { createCaseError, isSOError } from '../../common/error';
 import {
   createAlertUpdateStatusRequest,
   flattenCaseSavedObject,
@@ -47,7 +47,7 @@ import {
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import type {
   Cases,
   Case,
@@ -58,7 +58,6 @@ import type {
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
 import { CasesPatchRequestRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../../common/api';
 import { CasesRt, CaseStatuses, AttachmentType } from '../../../common/types/domain';
 import { validateCustomFields } from './validators';
 
@@ -281,7 +280,7 @@ function partitionPatchRequest(
   for (const reqCase of patchReqCases) {
     const foundCase = casesMap.get(reqCase.id);
 
-    if (!foundCase || foundCase.error) {
+    if (!foundCase || isSOError(foundCase)) {
       nonExistingCases.push(reqCase);
     } else if (foundCase.version !== reqCase.version) {
       conflictedCases.push(reqCase);
@@ -341,7 +340,7 @@ export const update = async (
      * only for read.
      */
     const casesMap = myCases.saved_objects.reduce((acc, so) => {
-      acc.set(so.id, so);
+      acc.set(so.id, so as CaseSavedObjectTransformed);
       return acc;
     }, new Map<string, CaseSavedObjectTransformed>());
 

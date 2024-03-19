@@ -13,7 +13,6 @@ import { ESQL_LANG_ID } from './lib/constants';
 import type { CustomLangModuleType } from '../types';
 import type { ESQLWorker } from './worker/esql_worker';
 
-import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
 import { WorkerProxyService } from '../common/worker_proxy';
 import type { ESQLCallbacks } from './lib/ast/shared/types';
 import { ESQLAstAdapter } from './lib/monaco/esql_ast_provider';
@@ -28,10 +27,6 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
     workerProxyService.setup(ESQL_LANG_ID);
 
     monaco.languages.setTokensProvider(ESQL_LANG_ID, new ESQLTokensProvider());
-
-    // handle syntax errors via the diagnostic adapter
-    // but then enrich them via the separate validate function
-    new DiagnosticsAdapter(ESQL_LANG_ID, (...uris) => workerProxyService.getWorker(uris));
   },
   languageConfiguration: {
     brackets: [
@@ -91,7 +86,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
   },
   getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
     return {
-      triggerCharacters: [',', '(', '=', ' ', ''],
+      triggerCharacters: [',', '(', '=', ' ', '[', ''],
       async provideCompletionItems(
         model: monaco.editor.ITextModel,
         position: monaco.Position,
@@ -107,6 +102,27 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
             ...suggestion,
             range: undefined as unknown as monaco.IRange,
           })),
+        };
+      },
+    };
+  },
+
+  getCodeActionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CodeActionProvider => {
+    return {
+      async provideCodeActions(
+        model /** ITextModel*/,
+        range /** Range*/,
+        context /** CodeActionContext*/,
+        token /** CancellationToken*/
+      ) {
+        const astAdapter = new ESQLAstAdapter(
+          (...uris) => workerProxyService.getWorker(uris),
+          callbacks
+        );
+        const actions = await astAdapter.codeAction(model, range, context);
+        return {
+          actions,
+          dispose: () => {},
         };
       },
     };

@@ -34,7 +34,7 @@ import React, { type FC, useMemo, useState } from 'react';
 import { groupBy } from 'lodash';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useMlKibana } from '../contexts/kibana';
-import { ModelItem } from './models_list';
+import type { ModelItem } from './models_list';
 
 export interface AddModelFlyoutProps {
   modelDownloads: ModelItem[];
@@ -212,7 +212,7 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                   <EuiText color={'subdued'} size={'s'}>
                     <FormattedMessage
                       id="xpack.ml.trainedModels.addModelFlyout.e5Description"
-                      defaultMessage="E5 is an NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model performs best for non-English language documents and queries."
+                      defaultMessage="E5 is a third party NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model performs best for non-English language documents and queries."
                     />
                   </EuiText>
                 </p>

@@ -17,10 +17,15 @@ import type {
   Plugin as IPlugin,
 } from '@kbn/core/public';
 
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { NowProvider, QueryService } from '@kbn/data-plugin/public';
-import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
+import {
+  type DataPublicPluginStart,
+  FilterManager,
+  NowProvider,
+  QueryService,
+} from '@kbn/data-plugin/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type { FleetUiExtensionGetterOptions } from './management/pages/policy/view/ingest_manager_integration/types';
 import type {
   PluginSetup,
@@ -53,11 +58,13 @@ import { getLazyEndpointGenericErrorsListExtension } from './management/pages/po
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
+import { LazyCustomCriblExtension } from './security_integrations/cribl/components/lazy_custom_cribl_extension';
 
 import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
+import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -107,6 +114,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.telemetry = new TelemetryService();
     this.storage = new Storage(window.localStorage);
   }
+
   private appUpdater$ = new Subject<AppUpdater>();
 
   private storage = new Storage(localStorage);
@@ -208,6 +216,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         telemetry: this.telemetry.start(),
         customDataService,
         topValuesPopover: new TopValuesPopoverService(),
+        timelineFilterManager: new FilterManager(coreStart.uiSettings),
       };
       return services;
     };
@@ -217,10 +226,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: SOLUTION_NAME,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
-      // Initializing app as visible to make sure it appears on the Kibana home page, it is hidden when deepLinks update
-      navLinkStatus: AppNavLinkStatus.visible,
-      searchable: true,
       updater$: this.appUpdater$,
+      visibleIn: ['globalSearch', 'home', 'kibanaOverview'],
       euiIconType: APP_ICON_SOLUTION,
       mount: async (params: AppMountParameters) => {
         // required to show the alert table inside cases
@@ -256,7 +263,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       id: 'siem',
       appRoute: 'app/siem',
       title: 'SIEM',
-      navLinkStatus: 3,
+      visibleIn: [],
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
 
@@ -270,6 +277,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         return () => true;
       },
     });
+
+    plugins.cases?.attachmentFramework.registerExternalReference(
+      getExternalReferenceAttachmentEndpointRegular()
+    );
 
     return this.contract.getSetupContract();
   }
@@ -336,6 +347,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         package: 'endpoint',
         view: 'package-detail-assets',
         Component: LazyEndpointCustomAssetsExtension,
+      });
+
+      registerExtension({
+        package: 'endpoint',
+        view: 'endpoint-agent-tamper-protection',
+        Component: getLazyEndpointAgentTamperProtectionExtension(registerOptions),
+      });
+
+      registerExtension({
+        package: 'cribl',
+        view: 'package-policy-replace-define-step',
+        Component: LazyCustomCriblExtension,
       });
     }
 
@@ -479,6 +502,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ),
     };
   }
+
   /**
    * Lazily instantiate a `SecurityAppStore`. We lazily instantiate this because it requests large dynamic imports. We instantiate it once because each subPlugin needs to share the same reference.
    */

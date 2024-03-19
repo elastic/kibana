@@ -10,7 +10,7 @@ import { execSync } from 'child_process';
 import axios from 'axios';
 
 async function getPrProjects() {
-  const match = /^kibana-pr-([0-9]+)-(elasticsearch|security|observability)$/;
+  const match = /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability)$/;
   try {
     return (
       await Promise.all([
@@ -23,7 +23,7 @@ async function getPrProjects() {
       .flat()
       .filter((project) => project.name.match(match))
       .map((project) => {
-        const [, prNumber, projectType] = project.name.match(match);
+        const [, , prNumber, projectType] = project.name.match(match);
         return {
           id: project.id,
           name: project.name,

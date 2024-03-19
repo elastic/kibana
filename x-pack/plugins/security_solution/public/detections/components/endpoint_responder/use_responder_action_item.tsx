@@ -8,6 +8,8 @@
 import React, { useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { isTimelineEventItemAnAlert } from '../../../common/utils/endpoint_alert_check';
 import { getFieldValue } from '../host_isolation/helpers';
@@ -25,14 +27,26 @@ export const useResponderActionItem = (
     return isTimelineEventItemAnAlert(eventDetailsData || []);
   }, [eventDetailsData]);
 
-  const endpointId = useMemo(
+  const endpointId: string = useMemo(
     () => getFieldValue({ category: 'agent', field: 'agent.id' }, eventDetailsData),
+    [eventDetailsData]
+  );
+
+  const agentType: ResponseActionAgentType = useMemo(
+    () =>
+      eventDetailsData
+        ? isAlertFromSentinelOneEvent({ data: eventDetailsData })
+          ? 'sentinel_one'
+          : 'endpoint'
+        : 'endpoint',
     [eventDetailsData]
   );
 
   const { handleResponseActionsClick, isDisabled, tooltip } = useResponderActionData({
     endpointId,
     onClick,
+    agentType,
+    eventData: agentType !== 'endpoint' ? eventDetailsData : null,
   });
 
   return useMemo(() => {

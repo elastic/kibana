@@ -66,6 +66,34 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-common.CategoryCounts",
+        "type": "Interface",
+        "tags": [],
+        "label": "CategoryCounts",
+        "description": [],
+        "path": "packages/kbn-management/settings/types/category.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-common.CategoryCounts.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[category: string]: number",
+            "description": [],
+            "signature": [
+              "[category: string]:  number"
+            ],
+            "path": "packages/kbn-management/settings/types/category.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
         "id": "def-common.FieldDefinition",
         "type": "Interface",
         "tags": [],
@@ -448,6 +476,108 @@
               "{ values: string[] | number[]; labels: Record<string, string>; }"
             ],
             "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-common.SettingsCapabilities",
+        "type": "Interface",
+        "tags": [],
+        "label": "SettingsCapabilities",
+        "description": [],
+        "path": "packages/kbn-management/settings/types/capabilities.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-common.SettingsCapabilities.spaceSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "spaceSettings",
+            "description": [],
+            "signature": [
+              "SettingCapability"
+            ],
+            "path": "packages/kbn-management/settings/types/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-common.SettingsCapabilities.globalSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "globalSettings",
+            "description": [],
+            "signature": [
+              "SettingCapability"
+            ],
+            "path": "packages/kbn-management/settings/types/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-common.SettingsTabs",
+        "type": "Interface",
+        "tags": [],
+        "label": "SettingsTabs",
+        "description": [],
+        "path": "packages/kbn-management/settings/types/tab.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-common.SettingsTabs.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[id: string]: { name: string; fields: FieldDefinition<UiSettingsType, string | number | boolean | (string | number)[] | null | undefined>[]; categoryCounts: CategoryCounts; callOutTitle: string; callOutText: string; sections: RegistryEntry[]; isSavingEnabled: boolean; }",
+            "description": [],
+            "signature": [
+              "[id: string]:  { name: string; fields: ",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsType",
+                "text": "UiSettingsType"
+              },
+              ", string | number | boolean | (string | number)[] | null | undefined>[]; categoryCounts: ",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.CategoryCounts",
+                "text": "CategoryCounts"
+              },
+              "; callOutTitle: string; callOutText: string; sections: ",
+              {
+                "pluginId": "@kbn/management-settings-section-registry",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
+                "section": "def-common.RegistryEntry",
+                "text": "RegistryEntry"
+              },
+              "[]; isSavingEnabled: boolean; }"
+            ],
+            "path": "packages/kbn-management/settings/types/tab.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1499,7 +1629,7 @@
           "\nThis is a local type equivalent to {@link UiSettingsType} for flexibility."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"image\" | \"select\" | \"json\" | \"markdown\" | \"array\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"image\" | \"select\" | \"json\" | \"array\" | \"markdown\""
         ],
         "path": "packages/kbn-management/settings/types/setting_type.ts",
         "deprecated": false,

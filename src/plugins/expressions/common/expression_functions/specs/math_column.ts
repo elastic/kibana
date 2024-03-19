@@ -18,12 +18,14 @@ export type MathColumnArguments = MathArguments & {
   copyMetaFrom?: string | null;
 };
 
-export const mathColumn: ExpressionFunctionDefinition<
+export type ExpressionFunctionMathColumn = ExpressionFunctionDefinition<
   'mathColumn',
   Datatable,
   MathColumnArguments,
   Promise<Datatable>
-> = {
+>;
+
+export const mathColumn: ExpressionFunctionMathColumn = {
   name: 'mathColumn',
   type: 'datatable',
   inputTypes: ['datatable'],

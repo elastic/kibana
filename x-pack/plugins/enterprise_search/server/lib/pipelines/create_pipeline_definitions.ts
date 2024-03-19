@@ -36,6 +36,7 @@ export const createIndexPipelineDefinitions = async (
       version: 1,
     };
     await esClient.ingest.putPipeline(mlPipeline);
+    // @ts-expect-error pipeline._meta defined as mandatory
     result = { ...result, [mlPipeline.id]: mlPipeline };
     const customPipeline = {
       description: `Enterprise Search customizable ingest pipeline for the '${indexName}' index`,
@@ -44,6 +45,7 @@ export const createIndexPipelineDefinitions = async (
       version: 1,
     };
     await esClient.ingest.putPipeline(customPipeline);
+    // @ts-expect-error pipeline._meta defined as mandatory
     result = { ...result, [customPipeline.id]: customPipeline };
     const ingestPipeline = {
       _meta: {
@@ -78,6 +80,7 @@ export const createIndexPipelineDefinitions = async (
           set: {
             field: 'body',
             if: 'ctx?._extract_binary_content == true',
+            ignore_empty_value: true,
             on_failure: [
               {
                 append: {

@@ -84,6 +84,23 @@ module.exports = {
           presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
         },
       },
+      {
+        /**
+         * further process the modules exported by both monaco-editor and monaco-yaml, because;
+         * 1). they both use non-standard language APIs
+         * 2). monaco-yaml exports it's src as is see, https://www.npmjs.com/package/monaco-yaml#does-it-work-without-a-bundler
+         */
+        test: /(monaco-editor\/esm\/vs\/|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager).*(t|j)sx?$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            envName: process.env.NODE_ENV || 'development',
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+            plugins: [require.resolve('@babel/plugin-transform-numeric-separator')],
+          },
+        },
+      },
     ],
   },
 

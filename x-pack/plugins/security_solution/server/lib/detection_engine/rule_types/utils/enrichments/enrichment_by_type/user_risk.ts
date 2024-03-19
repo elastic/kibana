@@ -6,25 +6,15 @@
  */
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep } from 'lodash';
+import {
+  ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM,
+} from '../../../../../../../common/field_maps/field_names';
 import { getUserRiskIndex } from '../../../../../../../common/search_strategy/security_solution/risk_score/common';
 import { RiskScoreFields } from '../../../../../../../common/search_strategy/security_solution/risk_score/all';
 import { createSingleFieldMatchEnrichment } from '../create_single_field_match_enrichment';
-import type { CreateRiskEnrichment, GetIsRiskScoreAvailable } from '../types';
+import type { CreateRiskEnrichment } from '../types';
 import { getFieldValue } from '../utils/events';
-
-export const getIsUserRiskScoreAvailable: GetIsRiskScoreAvailable = async ({
-  services,
-  spaceId,
-  isNewRiskScoreModuleInstalled,
-}) => {
-  const isUserRiskScoreIndexExist = await services.scopedClusterClient.asCurrentUser.indices.exists(
-    {
-      index: getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled),
-    }
-  );
-
-  return isUserRiskScoreIndexExist;
-};
 
 export const createUserRiskEnrichments: CreateRiskEnrichment = async ({
   services,
@@ -56,10 +46,10 @@ export const createUserRiskEnrichments: CreateRiskEnrichment = async ({
       }
       const newEvent = cloneDeep(event);
       if (riskLevel) {
-        set(newEvent, '_source.user.risk.calculated_level', riskLevel);
+        set(newEvent, `_source.${ALERT_USER_RISK_SCORE_CALCULATED_LEVEL}`, riskLevel);
       }
       if (riskScore) {
-        set(newEvent, '_source.user.risk.calculated_score_norm', riskScore);
+        set(newEvent, `_source.${ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM}`, riskScore);
       }
       return newEvent;
     },

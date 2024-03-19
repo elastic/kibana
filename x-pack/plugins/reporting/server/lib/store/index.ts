@@ -12,7 +12,7 @@ export { IlmPolicyManager } from './ilm_policy_manager';
 
 export interface IReport {
   _id?: string;
-  jobtype: string;
-  created_by: string | false;
-  payload: { browserTimezone: string };
+  jobtype?: string;
+  created_by?: string | false;
+  payload?: { browserTimezone: string };
 }

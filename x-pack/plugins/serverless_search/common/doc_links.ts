@@ -10,7 +10,6 @@ import { DocLinks } from '@kbn/doc-links';
 class ESDocLinks {
   public apiIntro: string = '';
   public beats: string = '';
-  public connectors: string = '';
   public integrations: string = '';
   public kibanaFeedback: string = '';
   public kibanaRunApiInConsole: string = '';
@@ -19,6 +18,12 @@ class ESDocLinks {
   public roleDescriptors: string = '';
   public securityApis: string = '';
   public ingestionPipelines: string = '';
+  public dataStreams: string = '';
+  // Connectors links
+  public connectors: string = '';
+  public connectorClientAvailableConnectors: string = '';
+  public connectorsRunFromSource: string = '';
+  public connectorsRunWithDocker: string = '';
   // Client links
   public elasticsearchClients: string = '';
   // go
@@ -54,13 +59,22 @@ class ESDocLinks {
     this.integrations = newDocLinks.serverlessSearch.integrations;
     this.logstash = newDocLinks.serverlessSearch.integrationsLogstash;
     this.beats = newDocLinks.serverlessSearch.integrationsBeats;
-    this.connectors = newDocLinks.serverlessSearch.integrationsConnectorClient;
     this.kibanaFeedback = newDocLinks.kibana.feedback;
     this.kibanaRunApiInConsole = newDocLinks.console.serverlessGuide;
     this.metadata = newDocLinks.security.mappingRoles;
     this.roleDescriptors = newDocLinks.serverlessSecurity.apiKeyPrivileges;
     this.securityApis = newDocLinks.apis.securityApis;
     this.ingestionPipelines = newDocLinks.ingest.pipelines;
+    this.dataStreams = newDocLinks.elasticsearch.dataStreams;
+
+    // Connectors links
+    this.connectors = newDocLinks.serverlessSearch.integrationsConnectorClient;
+    this.connectorClientAvailableConnectors =
+      newDocLinks.serverlessSearch.integrationsConnectorClientAvailableConnectors;
+    this.connectorsRunFromSource =
+      newDocLinks.serverlessSearch.integrationsConnectorClientRunFromSource;
+    this.connectorsRunWithDocker =
+      newDocLinks.serverlessSearch.integrationsConnectorClientRunWithDocker;
 
     // Client links
     this.elasticsearchClients = newDocLinks.serverlessClients.clientLib;

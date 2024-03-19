@@ -54,15 +54,7 @@ export const LandingLinkIcon: React.FC<LandingLinkIconProps> = React.memo(functi
       data-test-subj="LandingItem"
     >
       <EuiFlexItem grow={false}>
-        <LandingLink
-          tabIndex={-1} // Prevents the icon from being tabbable
-          item={item}
-          urlState={urlState}
-          onLinkClick={onLinkClick}
-          external={false} // Never show the external icon
-        >
-          <EuiIcon aria-hidden="true" size="xl" type={landingIcon ?? ''} role="presentation" />
-        </LandingLink>
+        <EuiIcon aria-hidden="true" size="xl" type={landingIcon ?? ''} role="presentation" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiTitle size="xxs" css={styles.title}>

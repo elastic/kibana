@@ -6,14 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getRbacControl } from '../../../../../common/endpoint/service/response_actions/utils';
 import { UploadActionResult } from '../command_render_components/upload_action';
 import { ArgumentFileSelector } from '../../console_argument_selectors';
 import type { ParsedArgData } from '../../console/service/types';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
-  EndpointCapabilities,
   ConsoleResponseActionCommands,
+  EndpointCapabilities,
+  ResponseActionAgentType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY } from '../../../../../common/endpoint/service/response_actions/constants';
 import { GetFileActionResult } from '../command_render_components/get_file_action';
 import type { Command, CommandDefinition } from '../../console';
 import { IsolateActionResult } from '../command_render_components/isolate_action';
@@ -29,15 +32,12 @@ import {
 import type { EndpointPrivileges, ImmutableArray } from '../../../../../common/endpoint/types';
 import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
-  UPGRADE_ENDPOINT_FOR_RESPONDER,
+  UPGRADE_AGENT_FOR_RESPONDER,
 } from '../../../../common/translations';
 import { getCommandAboutInfo } from './get_command_about_info';
 
 import { validateUnitOfTime } from './utils';
-import {
-  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY,
-  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
-} from '../../../../../common/endpoint/service/response_actions/constants';
+import { CONSOLE_COMMANDS } from '../../../common/translations';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -73,39 +73,34 @@ const executeTimeoutValidator = (argData: ParsedArgData): true | string => {
   }
 };
 
-export const getRbacControl = ({
-  commandName,
-  privileges,
-}: {
-  commandName: ConsoleResponseActionCommands;
-  privileges: EndpointPrivileges;
-}): boolean => {
-  return Boolean(privileges[RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[commandName]]);
-};
-
-const capabilitiesAndPrivilegesValidator = (command: Command): true | string => {
-  const privileges = command.commandDefinition.meta.privileges;
-  const endpointCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
-  const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
-  const responderCapability = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
-  let errorMessage = '';
-  if (!responderCapability) {
-    errorMessage = errorMessage.concat(UPGRADE_ENDPOINT_FOR_RESPONDER);
-  }
-  if (responderCapability) {
-    if (!endpointCapabilities.includes(responderCapability)) {
-      errorMessage = errorMessage.concat(UPGRADE_ENDPOINT_FOR_RESPONDER);
+const capabilitiesAndPrivilegesValidator = (
+  agentType: ResponseActionAgentType
+): ((command: Command) => string | true) => {
+  return (command: Command) => {
+    const privileges = command.commandDefinition.meta.privileges;
+    const agentCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
+    const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
+    const responderCapability =
+      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
+    let errorMessage = '';
+    if (!responderCapability) {
+      errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
     }
-  }
-  if (getRbacControl({ commandName, privileges }) !== true) {
-    errorMessage = errorMessage.concat(INSUFFICIENT_PRIVILEGES_FOR_COMMAND);
-  }
+    if (responderCapability) {
+      if (!agentCapabilities.includes(responderCapability)) {
+        errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
+      }
+    }
+    if (!getRbacControl({ commandName, privileges })) {
+      errorMessage = errorMessage.concat(INSUFFICIENT_PRIVILEGES_FOR_COMMAND);
+    }
 
-  if (errorMessage.length) {
-    return errorMessage;
-  }
+    if (errorMessage.length) {
+      return errorMessage;
+    }
 
-  return true;
+    return true;
+  };
 };
 
 export const HELP_GROUPS = Object.freeze({
@@ -134,10 +129,12 @@ const COMMENT_ARG_ABOUT = i18n.translate(
 
 export const getEndpointConsoleCommands = ({
   endpointAgentId,
+  agentType,
   endpointCapabilities,
   endpointPrivileges,
 }: {
   endpointAgentId: string;
+  agentType: ResponseActionAgentType;
   endpointCapabilities: ImmutableArray<string>;
   endpointPrivileges: EndpointPrivileges;
 }): CommandDefinition[] => {
@@ -158,20 +155,19 @@ export const getEndpointConsoleCommands = ({
     {
       name: 'isolate',
       about: getCommandAboutInfo({
-        aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.isolate.about', {
-          defaultMessage: 'Isolate the host',
-        }),
+        aboutInfo: CONSOLE_COMMANDS.isolate.about,
         isSupported: doesEndpointSupportCommand('isolate'),
       }),
       RenderComponent: IsolateActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
       exampleUsage: 'isolate --comment "isolate this host"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
         comment: {
           required: false,
@@ -188,20 +184,20 @@ export const getEndpointConsoleCommands = ({
     {
       name: 'release',
       about: getCommandAboutInfo({
-        aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.release.about', {
-          defaultMessage: 'Release the host',
-        }),
+        aboutInfo: CONSOLE_COMMANDS.release.about,
+
         isSupported: doesEndpointSupportCommand('release'),
       }),
       RenderComponent: ReleaseActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
       exampleUsage: 'release --comment "release this host"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
         comment: {
           required: false,
@@ -216,25 +212,22 @@ export const getEndpointConsoleCommands = ({
       helpHidden: !getRbacControl({ commandName: 'release', privileges: endpointPrivileges }),
     },
     {
+      //
       name: 'kill-process',
       about: getCommandAboutInfo({
-        aboutInfo: i18n.translate(
-          'xpack.securitySolution.endpointConsoleCommands.killProcess.about',
-          {
-            defaultMessage: 'Kill/terminate a process',
-          }
-        ),
+        aboutInfo: CONSOLE_COMMANDS.killProcess.about,
         isSupported: doesEndpointSupportCommand('kill-process'),
       }),
       RenderComponent: KillProcessActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
       exampleUsage: 'kill-process --pid 123 --comment "kill this process"',
       exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         comment: {
@@ -246,21 +239,14 @@ export const getEndpointConsoleCommands = ({
           required: false,
           allowMultiples: false,
           exclusiveOr: true,
-          about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.pid.arg.comment', {
-            defaultMessage: 'A PID representing the process to kill',
-          }),
+          about: CONSOLE_COMMANDS.killProcess.args.pid.about,
           validate: pidValidator,
         },
         entityId: {
           required: false,
           allowMultiples: false,
           exclusiveOr: true,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.entityId.arg.comment',
-            {
-              defaultMessage: 'An entity id representing the process to kill',
-            }
-          ),
+          about: CONSOLE_COMMANDS.killProcess.args.entityId.about,
           validate: emptyArgumentValidator,
         },
       },
@@ -273,23 +259,19 @@ export const getEndpointConsoleCommands = ({
     {
       name: 'suspend-process',
       about: getCommandAboutInfo({
-        aboutInfo: i18n.translate(
-          'xpack.securitySolution.endpointConsoleCommands.suspendProcess.about',
-          {
-            defaultMessage: 'Temporarily suspend a process',
-          }
-        ),
+        aboutInfo: CONSOLE_COMMANDS.suspendProcess.about,
         isSupported: doesEndpointSupportCommand('suspend-process'),
       }),
       RenderComponent: SuspendProcessActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
       exampleUsage: 'suspend-process --pid 123 --comment "suspend this process"',
       exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         comment: {
@@ -301,24 +283,14 @@ export const getEndpointConsoleCommands = ({
           required: false,
           allowMultiples: false,
           exclusiveOr: true,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.suspendProcess.pid.arg.comment',
-            {
-              defaultMessage: 'A PID representing the process to suspend',
-            }
-          ),
+          about: CONSOLE_COMMANDS.suspendProcess.args.pid.about,
           validate: pidValidator,
         },
         entityId: {
           required: false,
           allowMultiples: false,
           exclusiveOr: true,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.suspendProcess.entityId.arg.comment',
-            {
-              defaultMessage: 'An entity id representing the process to suspend',
-            }
-          ),
+          about: CONSOLE_COMMANDS.suspendProcess.args.entityId.about,
           validate: emptyArgumentValidator,
         },
       },
@@ -333,9 +305,7 @@ export const getEndpointConsoleCommands = ({
     },
     {
       name: 'status',
-      about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.status.about', {
-        defaultMessage: 'Show host status information',
-      }),
+      about: CONSOLE_COMMANDS.status.about,
       RenderComponent: EndpointStatusActionResult,
       meta: {
         endpointId: endpointAgentId,
@@ -347,23 +317,19 @@ export const getEndpointConsoleCommands = ({
     {
       name: 'processes',
       about: getCommandAboutInfo({
-        aboutInfo: i18n.translate(
-          'xpack.securitySolution.endpointConsoleCommands.processes.about',
-          {
-            defaultMessage: 'Show all running processes',
-          }
-        ),
+        aboutInfo: CONSOLE_COMMANDS.processes.about,
         isSupported: doesEndpointSupportCommand('processes'),
       }),
       RenderComponent: GetProcessesActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
       exampleUsage: 'processes --comment "get the processes"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
         comment: {
           required: false,
@@ -380,31 +346,25 @@ export const getEndpointConsoleCommands = ({
     {
       name: 'get-file',
       about: getCommandAboutInfo({
-        aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.getFile.about', {
-          defaultMessage: 'Retrieve a file from the host',
-        }),
+        aboutInfo: CONSOLE_COMMANDS.getFile.about,
         isSupported: doesEndpointSupportCommand('processes'),
       }),
       RenderComponent: GetFileActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
       exampleUsage: 'get-file --path "/full/path/to/file.txt" --comment "Possible malware"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         path: {
           required: true,
           allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.getFile.pathArgAbout',
-            {
-              defaultMessage: 'The full file path to be retrieved',
-            }
-          ),
+          about: CONSOLE_COMMANDS.getFile.args.path.about,
           validate: (argData) => {
             return emptyArgumentValidator(argData);
           },
@@ -427,20 +387,19 @@ export const getEndpointConsoleCommands = ({
     {
       name: 'execute',
       about: getCommandAboutInfo({
-        aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.execute.about', {
-          defaultMessage: 'Execute a command on the host',
-        }),
+        aboutInfo: CONSOLE_COMMANDS.execute.about,
         isSupported: doesEndpointSupportCommand('execute'),
       }),
       RenderComponent: ExecuteActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
       exampleUsage: 'execute --command "ls -al" --timeout 2s --comment "Get list of all files"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         command: {
@@ -452,13 +411,7 @@ export const getEndpointConsoleCommands = ({
         timeout: {
           required: false,
           allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.execute.args.timeout.about',
-            {
-              defaultMessage:
-                'The timeout in units of time (h for hours, m for minutes, s for seconds) for the endpoint to wait for the script to complete. Example: 37m. If not given, it defaults to 4 hours.',
-            }
-          ),
+          about: CONSOLE_COMMANDS.execute.args.timeout.about,
           mustHaveValue: 'non-empty-string',
           validate: executeTimeoutValidator,
         },
@@ -485,43 +438,32 @@ export const getEndpointConsoleCommands = ({
     consoleCommands.push({
       name: 'upload',
       about: getCommandAboutInfo({
-        aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.upload.about', {
-          defaultMessage: 'Upload a file to the host',
-        }),
+        aboutInfo: CONSOLE_COMMANDS.upload.about,
         isSupported: doesEndpointSupportCommand('upload'),
       }),
       RenderComponent: UploadActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
       exampleUsage: 'upload --file --overwrite --comment "script to fix registry"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         file: {
           required: true,
           allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.upload.args.file.about',
-            {
-              defaultMessage: 'The file that will be sent to the host',
-            }
-          ),
+          about: CONSOLE_COMMANDS.upload.args.file.about,
           mustHaveValue: 'truthy',
           SelectorComponent: ArgumentFileSelector,
         },
         overwrite: {
           required: false,
           allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.upload.args.overwrite.about',
-            {
-              defaultMessage: 'Overwrite the file on the host if it already exists',
-            }
-          ),
+          about: CONSOLE_COMMANDS.upload.args.overwrite.about,
           mustHaveValue: false,
         },
         comment: {

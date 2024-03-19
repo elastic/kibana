@@ -2,32 +2,28 @@
 
 exports[`Inspector Data View component should render empty state 1`] = `
 <div
-  class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
+  class="euiPanel euiPanel--transparent euiEmptyPrompt emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
 >
   <div
-    class="euiEmptyPrompt__main"
+    class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
   >
     <div
-      class="euiEmptyPrompt__content"
+      class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
     >
-      <div
-        class="euiEmptyPrompt__contentInner"
+      <h2
+        class="euiTitle emotion-euiTitle-m"
       >
-        <h2
-          class="euiTitle emotion-euiTitle-m"
-        >
-          No data available
-        </h2>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiText emotion-euiText-m-euiTextColor-subdued"
-        >
-          <p>
-            The element did not provide any data.
-          </p>
-        </div>
+        No data available
+      </h2>
+      <div
+        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+      />
+      <div
+        class="euiText emotion-euiText-m-euiTextColor-subdued"
+      >
+        <p>
+          The element did not provide any data.
+        </p>
       </div>
     </div>
   </div>
@@ -152,6 +148,7 @@ exports[`Inspector Data View component should render loading state 1`] = `
           "_eventsCount": 0,
           "_maxListeners": undefined,
           "_tables": Object {},
+          Symbol(shapeMode): false,
           Symbol(kCapture): false,
         },
       }
@@ -176,27 +173,23 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiPopover emotion-euiPopover"
+        class="euiPopover emotion-euiPopover-inline-block"
         id="inspectorDownloadData"
       >
-        <div
-          class="euiPopover__anchor css-16vtueo-render"
+        <button
+          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+          type="button"
         >
-          <button
-            class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
-            type="button"
+          <span
+            class="emotion-euiButtonDisplayContent"
           >
+            Download CSV
             <span
-              class="emotion-euiButtonDisplayContent"
-            >
-              Download CSV
-              <span
-                color="inherit"
-                data-euiicon-type="arrowDown"
-              />
-            </span>
-          </button>
-        </div>
+              color="inherit"
+              data-euiicon-type="arrowDown"
+            />
+          </span>
+        </button>
       </div>
     </div>
   </div>,
@@ -224,30 +217,26 @@ Array [
               class="euiTableSortMobile"
             >
               <div
-                class="euiPopover emotion-euiPopover"
+                class="euiPopover emotion-euiPopover-inline-block"
               >
-                <div
-                  class="euiPopover__anchor css-16vtueo-render"
+                <button
+                  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-flush-right"
+                  type="button"
                 >
-                  <button
-                    class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-flush-right"
-                    type="button"
+                  <span
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                      class="eui-textTruncate euiButtonEmpty__text"
                     >
-                      <span
-                        class="eui-textTruncate euiButtonEmpty__text"
-                      >
-                        Sorting
-                      </span>
-                      <span
-                        color="inherit"
-                        data-euiicon-type="arrowDown"
-                      />
+                      Sorting
                     </span>
-                  </button>
-                </div>
+                    <span
+                      color="inherit"
+                      data-euiicon-type="arrowDown"
+                    />
+                  </span>
+                </button>
               </div>
             </div>
           </div>
@@ -339,31 +328,27 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
+              data-test-subj="tablePaginationPopoverButton"
+              type="button"
             >
-              <button
-                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
-                data-test-subj="tablePaginationPopoverButton"
-                type="button"
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
-                  <span
-                    class="eui-textTruncate euiButtonEmpty__text"
-                  >
-                    Rows per page: 20
-                  </span>
-                  <span
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
+                  Rows per page: 20
                 </span>
-              </button>
-            </div>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
           </div>
         </div>
         <div
@@ -481,32 +466,28 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
             id="inspectorTableChooser"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
+              data-test-subj="inspectorTableChooser"
+              type="button"
             >
-              <button
-                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
-                data-test-subj="inspectorTableChooser"
-                type="button"
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
-                  <span
-                    class="eui-textTruncate euiButtonEmpty__text"
-                  >
-                    Table 1
-                  </span>
-                  <span
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
+                  Table 1
                 </span>
-              </button>
-            </div>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -515,27 +496,23 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiPopover emotion-euiPopover"
+        class="euiPopover emotion-euiPopover-inline-block"
         id="inspectorDownloadData"
       >
-        <div
-          class="euiPopover__anchor css-16vtueo-render"
+        <button
+          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+          type="button"
         >
-          <button
-            class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
-            type="button"
+          <span
+            class="emotion-euiButtonDisplayContent"
           >
+            Download CSV
             <span
-              class="emotion-euiButtonDisplayContent"
-            >
-              Download CSV
-              <span
-                color="inherit"
-                data-euiicon-type="arrowDown"
-              />
-            </span>
-          </button>
-        </div>
+              color="inherit"
+              data-euiicon-type="arrowDown"
+            />
+          </span>
+        </button>
       </div>
     </div>
   </div>,
@@ -563,30 +540,26 @@ Array [
               class="euiTableSortMobile"
             >
               <div
-                class="euiPopover emotion-euiPopover"
+                class="euiPopover emotion-euiPopover-inline-block"
               >
-                <div
-                  class="euiPopover__anchor css-16vtueo-render"
+                <button
+                  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-flush-right"
+                  type="button"
                 >
-                  <button
-                    class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-flush-right"
-                    type="button"
+                  <span
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                      class="eui-textTruncate euiButtonEmpty__text"
                     >
-                      <span
-                        class="eui-textTruncate euiButtonEmpty__text"
-                      >
-                        Sorting
-                      </span>
-                      <span
-                        color="inherit"
-                        data-euiicon-type="arrowDown"
-                      />
+                      Sorting
                     </span>
-                  </button>
-                </div>
+                    <span
+                      color="inherit"
+                      data-euiicon-type="arrowDown"
+                    />
+                  </span>
+                </button>
               </div>
             </div>
           </div>
@@ -679,31 +652,27 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
+              data-test-subj="tablePaginationPopoverButton"
+              type="button"
             >
-              <button
-                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
-                data-test-subj="tablePaginationPopoverButton"
-                type="button"
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
-                  <span
-                    class="eui-textTruncate euiButtonEmpty__text"
-                  >
-                    Rows per page: 20
-                  </span>
-                  <span
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
+                  Rows per page: 20
                 </span>
-              </button>
-            </div>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
           </div>
         </div>
         <div

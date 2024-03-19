@@ -11,8 +11,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 
 import { useKibana } from '../utils/kibana_react';
-import { MaintenanceWindow } from '../pages/maintenance_windows/types';
-import { createMaintenanceWindow } from '../services/maintenance_windows_api/create';
+import { createMaintenanceWindow, CreateParams } from '../services/maintenance_windows_api/create';
 
 interface UseCreateMaintenanceWindowProps {
   onError?: (error: IHttpFetchError<KibanaServerError>) => void;
@@ -26,8 +25,8 @@ export function useCreateMaintenanceWindow(props?: UseCreateMaintenanceWindowPro
     notifications: { toasts },
   } = useKibana().services;
 
-  const mutationFn = (maintenanceWindow: MaintenanceWindow) => {
-    return createMaintenanceWindow({ http, maintenanceWindow });
+  const mutationFn = (createParams: CreateParams) => {
+    return createMaintenanceWindow({ http, createParams });
   };
 
   return useMutation(mutationFn, {

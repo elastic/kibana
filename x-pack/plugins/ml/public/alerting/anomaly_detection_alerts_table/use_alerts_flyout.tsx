@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   AlertsTableFlyoutBaseProps,
   AlertTableFlyoutComponent,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -14,7 +14,7 @@ import React from 'react';
 import { type EuiDataGridColumn, EuiDescriptionList, EuiPanel, EuiTitle } from '@elastic/eui';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { isDefined } from '@kbn/ml-is-defined';
-import { RegisterFormatter } from './render_cell_value';
+import type { RegisterFormatter } from './render_cell_value';
 
 const FlyoutHeader: AlertTableFlyoutComponent = ({ alert }: AlertsTableFlyoutBaseProps) => {
   const name = alert[ALERT_RULE_NAME];
@@ -31,7 +31,10 @@ export const getAlertFlyout =
       <EuiPanel>
         <EuiDescriptionList
           listItems={columns.map((column) => {
-            const value = get(alert, column.id)?.[0];
+            const alertFieldValue = get(alert, column.id);
+            const value = (
+              Array.isArray(alertFieldValue) ? alertFieldValue.at(-1) : alertFieldValue
+            ) as string;
 
             return {
               title: column.displayAsText as string,

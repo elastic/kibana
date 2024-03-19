@@ -150,8 +150,6 @@ export async function installYarnDeps(log, opts = undefined) {
     offline: opts?.offline,
     quiet: opts?.quiet,
     env: {
-      SASS_BINARY_SITE:
-        'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-sass',
       RE2_DOWNLOAD_MIRROR:
         'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2',
     },

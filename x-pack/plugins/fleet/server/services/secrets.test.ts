@@ -27,6 +27,7 @@ import {
   diffOutputSecretPaths,
   extractAndWriteSecrets,
   extractAndUpdateSecrets,
+  extractAndUpdateOutputSecrets,
 } from './secrets';
 
 describe('secrets', () => {
@@ -1018,9 +1019,11 @@ describe('secrets', () => {
       it('returns single secret reference for required secret', async () => {
         const mockPackagePolicy = {
           vars: {
-            'pkg-secret-1': {
-              value: 'pkg-secret-1-val',
+            'pkg-secret-1': {},
+            'pkg-secret-2': {
+              value: 'pkg-secret-2-val',
             },
+            'dot-notation.stream.pkg-secret-3': {},
           },
           inputs: [],
         } as unknown as NewPackagePolicy;
@@ -1198,6 +1201,7 @@ describe('secrets', () => {
               value: 'pkg-secret-1-val',
             },
             'pkg-secret-2': {},
+            'dot-notation.pkg-secret-3': {},
           },
           inputs: [],
         } as unknown as PackagePolicy;
@@ -1355,6 +1359,85 @@ describe('secrets', () => {
 
         expect(result.secretsToDelete).toHaveLength(2);
       });
+    });
+  });
+
+  describe('extractAndUpdateOutputSecrets', () => {
+    const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+    esClientMock.transport.request.mockImplementation(async (req) => {
+      return {
+        id: uuidv4(),
+      };
+    });
+
+    beforeEach(() => {
+      esClientMock.transport.request.mockClear();
+    });
+
+    it('should delete secret if type changed from kafka to remote es', async () => {
+      const result = await extractAndUpdateOutputSecrets({
+        oldOutput: {
+          id: 'id1',
+          name: 'kafka to remote es',
+          is_default: false,
+          is_default_monitoring: false,
+          type: 'kafka',
+          secrets: {
+            password: {
+              id: 'pass',
+            },
+          },
+        },
+        outputUpdate: {
+          name: 'kafka to remote es',
+          type: 'remote_elasticsearch',
+          hosts: ['http://192.168.178.216:9200'],
+          is_default: false,
+          is_default_monitoring: false,
+          preset: 'balanced',
+          config_yaml: '',
+          secrets: {
+            service_token: 'token1',
+          },
+          proxy_id: null,
+        },
+        esClient: esClientMock,
+      });
+
+      expect(result.secretsToDelete).toEqual([{ id: 'pass' }]);
+    });
+
+    it('should delete secret if type changed from remote es to kafka', async () => {
+      const result = await extractAndUpdateOutputSecrets({
+        oldOutput: {
+          id: 'id2',
+          name: 'remote es to kafka',
+          is_default: false,
+          is_default_monitoring: false,
+          type: 'remote_elasticsearch',
+          secrets: {
+            service_token: {
+              id: 'token',
+            },
+          },
+        },
+        outputUpdate: {
+          name: 'remote es to kafka',
+          type: 'kafka',
+          is_default: false,
+          is_default_monitoring: false,
+          preset: 'balanced',
+          config_yaml: '',
+          secrets: {
+            password: 'pass',
+          },
+          proxy_id: null,
+        },
+        esClient: esClientMock,
+      });
+
+      expect(result.secretsToDelete).toEqual([{ id: 'token' }]);
     });
   });
 });

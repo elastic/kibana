@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo, useEffect, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
 import { firstValueFrom } from 'rxjs';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { EuiSpacer, EuiSelect, EuiFormRow, EuiAccordion, EuiCodeBlock } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import {
+  EuiAccordion,
+  EuiCode,
+  EuiCodeBlock,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSelect,
+  EuiText,
+} from '@elastic/eui';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { i18n } from '@kbn/i18n';
@@ -21,9 +30,14 @@ import type { InferrerType } from '.';
 interface Props {
   inferrer: InferrerType;
   data: ReturnType<typeof useIndexInput>;
+  disableIndexSelection: boolean;
 }
 
-export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) => {
+export const InferenceInputFormIndexControls: FC<Props> = ({
+  inferrer,
+  data,
+  disableIndexSelection,
+}) => {
   const {
     dataViewListItems,
     fieldNames,
@@ -40,14 +54,25 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
   return (
     <>
       <EuiFormRow label="Index" fullWidth>
-        <EuiSelect
-          options={dataViewListItems}
-          value={selectedDataViewId}
-          onChange={(e) => setSelectedDataViewId(e.target.value)}
-          hasNoInitialSelection={true}
-          disabled={runningState === RUNNING_STATE.RUNNING}
-          fullWidth
-        />
+        {disableIndexSelection ? (
+          <EuiText grow={false}>
+            <EuiCode>
+              {dataViewListItems.find((item) => item.value === selectedDataViewId)?.text}
+            </EuiCode>
+          </EuiText>
+        ) : (
+          <EuiSelect
+            options={dataViewListItems}
+            value={selectedDataViewId}
+            onChange={(e) => {
+              inferrer.setSelectedDataViewId(e.target.value);
+              setSelectedDataViewId(e.target.value);
+            }}
+            hasNoInitialSelection={true}
+            disabled={runningState === RUNNING_STATE.RUNNING}
+            fullWidth
+          />
+        )}
       </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiFormRow
@@ -59,7 +84,9 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
         <EuiSelect
           options={fieldNames}
           value={selectedField}
-          onChange={(e) => setSelectedField(e.target.value)}
+          onChange={(e) => {
+            setSelectedField(e.target.value);
+          }}
           hasNoInitialSelection={true}
           disabled={runningState === RUNNING_STATE.RUNNING}
           fullWidth
@@ -79,7 +106,14 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
           }
         )}
       >
-        <EuiCodeBlock language="json" fontSize="s" paddingSize="s" lineNumbers isCopyable={true}>
+        <EuiCodeBlock
+          language="json"
+          fontSize="s"
+          paddingSize="s"
+          lineNumbers
+          isCopyable={true}
+          overflowHeight={300}
+        >
           {JSON.stringify(pipeline, null, 2)}
         </EuiCodeBlock>
       </EuiAccordion>
@@ -87,7 +121,13 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
   );
 };
 
-export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
+export function useIndexInput({
+  inferrer,
+  defaultSelectedDataViewId,
+}: {
+  inferrer: InferrerType;
+  defaultSelectedDataViewId?: string;
+}) {
   const {
     services: {
       data: {
@@ -100,7 +140,9 @@ export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
   const [dataViewListItems, setDataViewListItems] = useState<
     Array<{ value: string; text: string }>
   >([]);
-  const [selectedDataViewId, setSelectedDataViewId] = useState<string | undefined>(undefined);
+  const [selectedDataViewId, setSelectedDataViewId] = useState<string | undefined>(
+    defaultSelectedDataViewId
+  );
   const [selectedDataView, setSelectedDataView] = useState<DataView | null>(null);
   const [fieldNames, setFieldNames] = useState<Array<{ value: string; text: string }>>([]);
   const selectedField = useObservable(inferrer.getInputField$(), inferrer.getInputField());
@@ -197,11 +239,20 @@ export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
           }));
         setFieldNames(tempFieldNames);
 
-        const fieldName = tempFieldNames.length === 1 ? tempFieldNames[0].value : undefined;
+        const defaultSelectedField = inferrer.getInputField();
+
+        const fieldName =
+          defaultSelectedField &&
+          tempFieldNames.find((field) => field.value === defaultSelectedField)
+            ? defaultSelectedField
+            : tempFieldNames[0].value;
+        // Only set a field if it's the default field
+        // if (inferrer.getInputField() === DEFAULT_INPUT_FIELD) {
         inferrer.setInputField(fieldName);
+        // }
       }
     },
-    [selectedDataView, inferrer]
+    [selectedDataView, inferrer] // defaultSelectedField
   );
 
   useEffect(

@@ -69,6 +69,7 @@ export const GuideFilters = ({
         <EuiButton
           onClick={onSelectFilter}
           data-filter-id="search"
+          data-test-subj="guide-filter-search"
           color="text"
           css={[filterButtonCss, activeFilter === 'search' && activeFilterFill]}
         >
@@ -82,6 +83,7 @@ export const GuideFilters = ({
         <EuiButton
           onClick={onSelectFilter}
           data-filter-id="observability"
+          data-test-subj="guide-filter-observability"
           color="text"
           css={[filterButtonCss, activeFilter === 'observability' && activeFilterFill]}
         >
@@ -95,6 +97,7 @@ export const GuideFilters = ({
         <EuiButton
           onClick={onSelectFilter}
           data-filter-id="security"
+          data-test-subj="guide-filter-security"
           color="text"
           css={[filterButtonCss, activeFilter === 'security' && activeFilterFill]}
         >

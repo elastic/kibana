@@ -19,8 +19,8 @@ import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { TimelineKPIs } from './kpis';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { useKibana } from '../../../../common/lib/kibana';
-import { timelineSelectors } from '../../../store/timeline';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineSelectors } from '../../../store';
+import { timelineDefaults } from '../../../store/defaults';
 import { combineQueries } from '../../../../common/lib/kuery';
 import {
   endSelector,

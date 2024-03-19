@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { CUMULATIVE_SUM_ID, CUMULATIVE_SUM_NAME } from '@kbn/lens-formula-docs';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { FormBasedLayer } from '../../../types';
 import {
@@ -35,18 +36,16 @@ const ofName = buildLabelFunction((name?: string) => {
 
 export type CumulativeSumIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
-    operationType: 'cumulative_sum';
+    operationType: typeof CUMULATIVE_SUM_ID;
   };
 
 export const cumulativeSumOperation: OperationDefinition<
   CumulativeSumIndexPatternColumn,
   'fullReference'
 > = {
-  type: 'cumulative_sum',
+  type: CUMULATIVE_SUM_ID,
   priority: 1,
-  displayName: i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
-    defaultMessage: 'Cumulative sum',
-  }),
+  displayName: CUMULATIVE_SUM_NAME,
   input: 'fullReference',
   selectionStyle: 'field',
   requiredReferences: [
@@ -127,22 +126,6 @@ export const cumulativeSumOperation: OperationDefinition<
     return checkForDateHistogram(layer, opName)?.join(', ');
   },
   filterable: true,
-  documentation: {
-    section: 'calculation',
-    signature: i18n.translate('xpack.lens.indexPattern.cumulative_sum.signature', {
-      defaultMessage: 'metric: number',
-    }),
-    description: i18n.translate('xpack.lens.indexPattern.cumulativeSum.documentation.markdown', {
-      defaultMessage: `
-Calculates the cumulative sum of a metric over time, adding all previous values of a series to each value. To use this function, you need to configure a date histogram dimension as well.
-
-This calculation will be done separately for separate series defined by filters or top values dimensions.
-
-Example: Visualize the received bytes accumulated over time:
-\`cumulative_sum(sum(bytes))\`
-      `,
-    }),
-  },
   quickFunctionDocumentation: i18n.translate(
     'xpack.lens.indexPattern.cumulativeSum.documentation.quick',
     {

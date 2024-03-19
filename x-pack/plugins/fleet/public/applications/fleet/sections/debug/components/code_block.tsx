@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 
 /**
  * A read-only code block with various default settings suitable for displaying API responses, etc

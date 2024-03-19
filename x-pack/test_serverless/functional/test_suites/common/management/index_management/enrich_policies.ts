@@ -20,6 +20,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const ENRICH_POLICY_NAME = 'test-policy-1';
 
   describe('Enrich policies tab', function () {
+    // TimeoutError:  Waiting for element to be located By(css selector, [data-test-subj="kibana-chrome"])
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       log.debug('Creating required index and enrich policy');
       try {
@@ -50,7 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
 
       log.debug('Navigating to the enrich policies tab');
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('indexManagement');
 
       // Navigate to the enrich policies tab

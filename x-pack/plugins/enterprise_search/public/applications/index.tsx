@@ -15,16 +15,17 @@ import { Store } from 'redux';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { AuthenticatedUser } from '@kbn/security-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
 import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/types';
-import { PluginsStart, ClientData } from '../plugin';
+import { PluginsStart, ClientData, ESConfig } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
-import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
+import { mountFlashMessagesLogic } from './shared/flash_messages';
 import { getCloudEnterpriseSearchHost } from './shared/get_cloud_enterprise_search_host/get_cloud_enterprise_search_host';
 import { mountHttpLogic } from './shared/http';
 import { mountKibanaLogic } from './shared/kibana';
@@ -49,7 +50,7 @@ export const renderApp = (
     params: AppMountParameters;
     plugins: PluginsStart;
   },
-  { config, data }: { config: ClientConfigType; data: ClientData }
+  { config, data, esConfig }: { config: ClientConfigType; data: ClientData; esConfig: ESConfig }
 ) => {
   const {
     access,
@@ -65,7 +66,7 @@ export const renderApp = (
     workplaceSearch,
   } = data;
   const { history } = params;
-  const { application, chrome, http, uiSettings } = core;
+  const { application, chrome, http, notifications, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
   const { charts, cloud, guidedOnboarding, lens, security, share, ml } = plugins;
 
@@ -105,6 +106,8 @@ export const renderApp = (
     charts,
     cloud,
     config,
+    console: plugins.console,
+    esConfig,
     data: plugins.data,
     guidedOnboarding,
     history,
@@ -116,7 +119,7 @@ export const renderApp = (
     productFeatures,
     renderHeaderActions: (HeaderActions) =>
       params.setHeaderActionMenu(
-        HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store) : undefined
+        HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
       ),
     security,
     setBreadcrumbs: chrome.setBreadcrumbs,
@@ -135,11 +138,11 @@ export const renderApp = (
     http,
     readOnlyMode,
   });
-  const unmountFlashMessagesLogic = mountFlashMessagesLogic();
+  const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
 
   ReactDOM.render(
     <I18nProvider>
-      <KibanaThemeProvider theme$={params.theme$}>
+      <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
         <KibanaContextProvider services={{ ...core, ...plugins }}>
           <CloudContext>
             <Provider store={store}>
@@ -155,7 +158,6 @@ export const renderApp = (
                   searchOAuth={searchOAuth}
                   workplaceSearch={workplaceSearch}
                 />
-                <Toasts />
               </Router>
             </Provider>
           </CloudContext>
@@ -184,13 +186,18 @@ export const renderApp = (
 export const renderHeaderActions = (
   HeaderActions: React.FC,
   store: Store,
+  params: AppMountParameters,
   kibanaHeaderEl: HTMLElement
 ) => {
   ReactDOM.render(
-    <Provider store={store}>
-      <HeaderActions />
-    </Provider>,
+    <I18nProvider>
+      <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
+        <Provider store={store}>
+          <HeaderActions />
+        </Provider>
+      </KibanaThemeProvider>
+    </I18nProvider>,
     kibanaHeaderEl
   );
-  return () => ReactDOM.unmountComponentAtNode(kibanaHeaderEl);
+  return () => ReactDOM.render(<></>, kibanaHeaderEl);
 };

@@ -34,6 +34,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = moment(baseTime).add(5, 'minutes');
   const end = moment(baseTime).add(10, 'minutes');
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177534
   registry.when(
     'Time range metadata when there are multiple APM Server versions',
     { config: 'basic', archives: [] },
@@ -112,23 +113,48 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           });
 
-          const allHasSummaryField = response.body.sources.every((source) => {
-            if (source.documentType === 'transactionEvent') {
-              return true;
-            }
-
-            return source.hasDurationSummaryField;
-          });
+          const allHasSummaryField = response.body.sources
+            .filter(
+              (source) =>
+                source.documentType === ApmDocumentType.TransactionMetric &&
+                source.rollupInterval !== RollupInterval.OneMinute
+            )
+            .every((source) => {
+              return source.hasDurationSummaryField;
+            });
 
           expect(allHasSummaryField).to.eql(true);
         });
 
-        it('does not have latency data for synth-java-legacy service', async () => {
+        it('does not support transaction.duration.summary when the field is not supported by all APM server versions', async () => {
+          const response = await apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/time_range_metadata',
+            params: {
+              query: {
+                start: startLegacy.toISOString(),
+                end: end.toISOString(),
+                enableContinuousRollups: true,
+                enableServiceTransactionMetrics: true,
+                useSpanName: false,
+                kuery: '',
+              },
+            },
+          });
+
+          const allHasSummaryField = response.body.sources.every((source) => {
+            return source.hasDurationSummaryField;
+          });
+
+          expect(allHasSummaryField).to.eql(false);
+        });
+
+        it('does not have latency data for synth-java-legacy', async () => {
           const res = await getLatencyChartForService({
             serviceName: 'synth-java-legacy',
             start,
             end,
             apmApiClient,
+            useDurationSummary: true,
           });
 
           expect(res.body.currentPeriod.latencyTimeseries.map(({ y }) => y)).to.eql([
@@ -147,6 +173,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             start,
             end,
             apmApiClient,
+            useDurationSummary: true,
           });
 
           expect(res.body.currentPeriod.latencyTimeseries.map(({ y }) => y)).to.eql([
@@ -169,11 +196,13 @@ function getLatencyChartForService({
   start,
   end,
   apmApiClient,
+  useDurationSummary,
 }: {
   serviceName: string;
   start: moment.Moment;
   end: moment.Moment;
   apmApiClient: ApmApiClient;
+  useDurationSummary: boolean;
 }) {
   return apmApiClient.readUser({
     endpoint: `GET /internal/apm/services/{serviceName}/transactions/charts/latency`,
@@ -189,7 +218,7 @@ function getLatencyChartForService({
         documentType: ApmDocumentType.TransactionMetric,
         rollupInterval: RollupInterval.OneMinute,
         bucketSizeInSeconds: 60,
-        useDurationSummary: true,
+        useDurationSummary,
       },
     },
   });
@@ -227,8 +256,9 @@ function generateTraceDataForService({
     );
 
   const apmPipeline = (base: Readable) => {
-    // @ts-expect-error
-    const defaultPipeline: NodeJS.ReadableStream = synthtrace.getDefaultPipeline()(base);
+    const defaultPipeline = synthtrace.getDefaultPipeline()(
+      base
+    ) as unknown as NodeJS.ReadableStream;
 
     return pipeline(
       defaultPipeline,

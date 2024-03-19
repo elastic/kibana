@@ -9,6 +9,7 @@
 import { Filter, Query, TimeRange } from '../filters';
 
 export interface ExecutionContextSearch {
+  now?: number;
   filters?: Filter[];
   query?: Query | Query[];
   timeRange?: TimeRange;

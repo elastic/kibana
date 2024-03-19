@@ -97,10 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         await transform.table.filterWithSearchString(transformConfigWithPivot.id, 1);
 
         await transform.testExecution.logTestStep('should show the actions popover');
-        await transform.table.assertTransformRowActionsButtonEnabled(
-          transformConfigWithPivot.id,
-          true
-        );
+        await transform.table.assertTransformRowActionsEnabled(transformConfigWithPivot.id, true);
         await transform.table.assertTransformRowActions(transformConfigWithPivot.id, false);
 
         await transform.testExecution.logTestStep('should have the edit action enabled');
@@ -158,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
         await transform.testExecution.logTestStep(
           'should have the retention policy switch enabled'
         );
-        await transform.editFlyout.assertTransformEditFlyoutRetentionPolicySwitchEnabled(true);
+        await transform.editFlyout.assertTransformEditFlyoutRetentionPolicySwitchEnabled(false);
 
         await transform.testExecution.logTestStep(
           'should have the advanced settings inputs enabled'

@@ -6,7 +6,6 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { MaintenanceWindow } from '../../pages/maintenance_windows/types';
 import { archiveMaintenanceWindow } from './archive';
 
 const http = httpServiceMock.createStartContract();
@@ -28,7 +27,7 @@ describe('archiveMaintenanceWindow', () => {
     };
     http.post.mockResolvedValueOnce(apiResponse);
 
-    const maintenanceWindow: MaintenanceWindow = {
+    const maintenanceWindow = {
       title: 'test',
       duration: 1,
       rRule: {

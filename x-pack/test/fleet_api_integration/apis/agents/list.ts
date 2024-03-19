@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { type Agent, FLEET_ELASTIC_AGENT_PACKAGE } from '@kbn/fleet-plugin/common';
+import { type Agent, FLEET_ELASTIC_AGENT_PACKAGE, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { testUsers } from '../test_users';
@@ -17,10 +17,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   let elasticAgentpkgVersion: string;
-  // Failing: See https://github.com/elastic/kibana/issues/170690
-  // Failing: See https://github.com/elastic/kibana/issues/170690
-  // Failing: See https://github.com/elastic/kibana/issues/170690
-  describe.skip('fleet_list_agent', () => {
+
+  describe('fleet_list_agent', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       const getPkRes = await supertest
@@ -48,10 +46,24 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it.skip('should return a 200 if a user with the fleet all try to access the list', async () => {
-      await supertest
+    it('should return a 200 if a user with the fleet all try to access the list', async () => {
+      await supertestWithoutAuth
         .get(`/api/fleet/agents`)
         .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
+        .expect(200);
+    });
+
+    it('should return a 200 if a user with the fleet read try to access the list', async () => {
+      await supertestWithoutAuth
+        .get(`/api/fleet/agents`)
+        .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+        .expect(200);
+    });
+
+    it('should return a 200 if a user with the fleet agents read try to access the list', async () => {
+      await supertestWithoutAuth
+        .get(`/api/fleet/agents`)
+        .auth(testUsers.fleet_agents_read_only.username, testUsers.fleet_agents_read_only.password)
         .expect(200);
     });
 
@@ -65,12 +77,6 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return the list of agents when requesting as admin', async () => {
       const { body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200);
 
-      expect(apiResponse).to.have.keys('page', 'total', 'items', 'list');
-      expect(apiResponse.total).to.eql(4);
-    });
-
-    it('should return the list of agents when requesting as a user with fleet read permissions', async () => {
-      const { body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200);
       expect(apiResponse).to.have.keys('page', 'total', 'items', 'list');
       expect(apiResponse.total).to.eql(4);
     });
@@ -89,11 +95,11 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     });
 
-    it('should return a 400 when given an invalid "kuery" value', async () => {
+    it('with enableStrictKQLValidation should return a 400 when given an invalid "kuery" value', async () => {
       await supertest.get(`/api/fleet/agents?kuery='test%3A'`).expect(400);
     });
 
-    it('should return 400 if passed kuery has non existing parameters', async () => {
+    it('with enableStrictKQLValidation should return 400 if passed kuery has non existing parameters', async () => {
       await supertest
         .get(`/api/fleet/agents?kuery=fleet-agents.non_existent_parameter:healthy`)
         .set('kbn-xsrf', 'xxxx')
@@ -159,6 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
             dataset: 'elastic_agent.elastic_agent',
           },
           elastic_agent: { id: 'agent1', process: 'elastic_agent' },
+          component: { id: 'component1' },
           system: {
             process: {
               memory: {
@@ -179,6 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
         document: {
           '@timestamp': new Date(now - 1 * 60 * 1000).toISOString(),
           elastic_agent: { id: 'agent1', process: 'elastic_agent' },
+          component: { id: 'component2' },
           data_stream: {
             namespace: 'default',
             type: 'metrics',
@@ -231,6 +239,54 @@ export default function ({ getService }: FtrProviderContext) {
         inactive: 0,
         offline: 4,
         online: 0,
+        unenrolled: 0,
+        unenrolling: 0,
+        updating: 0,
+      });
+    });
+
+    it('should return correct status summary if showUpgradeable is provided', async () => {
+      await es.update({
+        id: 'agent1',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            policy_revision_idx: 1,
+            last_checkin: new Date().toISOString(),
+            status: 'online',
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+          },
+        },
+      });
+      // 1 agent inactive
+      await es.update({
+        id: 'agent4',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            policy_id: 'policy-inactivity-timeout',
+            policy_revision_idx: 1,
+            last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
+            status: 'online',
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+          },
+        },
+      });
+
+      const { body: apiResponse } = await supertest
+        .get('/api/fleet/agents?getStatusSummary=true&perPage=5&showUpgradeable=true')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      expect(apiResponse.statusSummary).to.eql({
+        degraded: 0,
+        enrolling: 0,
+        error: 0,
+        inactive: 0,
+        offline: 0,
+        online: 2,
         unenrolled: 0,
         unenrolling: 0,
         updating: 0,

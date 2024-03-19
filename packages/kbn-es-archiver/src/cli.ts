@@ -18,11 +18,10 @@ import readline from 'readline';
 import Fs from 'fs';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { RunWithCommands } from '@kbn/dev-cli-runner';
+import { FlagsReader, RunWithCommands } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { readConfigFile, KbnClient, EsVersion } from '@kbn/test';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-
 import { EsArchiver } from './es_archiver';
 
 const resolveConfigPath = (v: string) => Path.resolve(process.cwd(), v);
@@ -202,12 +201,20 @@ export function runCli() {
           WARNING: If the indices exist already they will be deleted!
 
           $ node scripts/es_archiver load my_test_data --config ../config.js
+
+          The same with overrides for batch size and concurrency default values:
+
+          $ node scripts/es_archiver load my_test_data --config ../config.js --batch-size 300 --concurrency 2
+
       `,
       flags: {
         boolean: ['use-create', 'docs-only'],
+        string: ['batch-size', 'concurrency'],
         help: `
           --use-create       use create instead of index for loading documents
           --docs-only        load only documents, not indices
+          --batch-size       the "high water mark"; the number of records processed per bulk request
+          --concurrency      number of bulk requests made by the api
         `,
       },
       async run({ flags, esArchiver, statsMeta }) {
@@ -221,17 +228,16 @@ export function runCli() {
 
         statsMeta.set('esArchiverPath', path);
 
-        const useCreate = flags['use-create'];
-        if (typeof useCreate !== 'boolean') {
-          throw createFlagError('--use-create does not take a value');
-        }
+        const flagsReader = new FlagsReader(flags);
 
-        const docsOnly = flags['docs-only'];
-        if (typeof docsOnly !== 'boolean') {
-          throw createFlagError('--docs-only does not take a value');
-        }
-
-        await esArchiver.load(path, { useCreate, docsOnly });
+        await esArchiver.load(path, {
+          useCreate: flagsReader.boolean('use-create'),
+          docsOnly: flagsReader.boolean('docs-only'),
+          performance: {
+            batchSize: flagsReader.number('batch-size'),
+            concurrency: flagsReader.number('concurrency'),
+          },
+        });
       },
     })
     .command({

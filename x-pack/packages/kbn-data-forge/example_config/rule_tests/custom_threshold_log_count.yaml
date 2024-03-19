@@ -1,0 +1,27 @@
+---
+elasticsearch:
+  installKibanaUser: false
+
+kibana:
+  installAssets: false
+
+indexing:
+  dataset: "fake_hosts"
+  scenario: "custom_threshold_log_count"
+  eventsPerCycle: 50
+  concurrency: 5
+
+# Conditions: count logs < 100 in the last minute
+schedule:
+  # Start events at 100 rate
+  - template: "good"
+    start: "now-30m"
+    end: "now-1m"
+    eventsPerCycle: 100
+    randomness: 0.1
+  # Step change to events at 10 rate
+  - template: "good"
+    start: "now-1m"
+    end: "now+20m"
+    eventsPerCycle: 10
+

@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+// Schema constants
+export * from './impl/schemas';
+
+export { defaultAssistantFeatures } from './impl/capabilities';
+export type { AssistantFeatures } from './impl/capabilities';
+
 export { getAnonymizedValue } from './impl/data_anonymization/get_anonymized_value';
 
 export {
@@ -15,3 +21,9 @@ export {
 } from './impl/data_anonymization/helpers';
 
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
+export {
+  replaceAnonymizedValuesWithOriginalValues,
+  replaceOriginalValuesWithUuidValues,
+} from './impl/data_anonymization/helpers';
+
+export * from './constants';

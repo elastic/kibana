@@ -42,6 +42,7 @@ import { useWithArtifactSubmitData } from '../hooks/use_with_artifact_submit_dat
 import { useIsArtifactAllowedPerPolicyUsage } from '../hooks/use_is_artifact_allowed_per_policy_usage';
 import { useGetArtifact } from '../../../hooks/artifacts';
 import type { PolicyData } from '../../../../../common/endpoint/types';
+import { ArtifactConfirmModal } from './artifact_confirm_modal';
 
 export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutEditTitle: i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditTitle', {
@@ -207,11 +208,12 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         ..._labels,
       };
     }, [_labels]);
-    // TODO:PT Refactor internal/external state into the `useEithArtifactSucmitData()` hook
+    // TODO:PT Refactor internal/external state into the `useWithArtifactSubmitData()` hook
     const [externalIsSubmittingData, setExternalIsSubmittingData] = useState<boolean>(false);
     const [externalSubmitHandlerError, setExternalSubmitHandlerError] = useState<
       IHttpFetchError | undefined
     >(undefined);
+    const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
 
     const isEditFlow = urlParams.show === 'edit';
     const formMode: ArtifactFormComponentProps['mode'] = isEditFlow ? 'edit' : 'create';
@@ -270,11 +272,12 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     }, [isSubmittingData, onClose, setUrlParams, urlParams]);
 
     const handleFormComponentOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
-      ({ item: updatedItem, isValid }) => {
+      ({ item: updatedItem, isValid, confirmModalLabels }) => {
         if (isMounted()) {
           setFormState({
             item: updatedItem,
             isValid,
+            confirmModalLabels,
           });
         }
       },
@@ -316,10 +319,42 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
               setExternalIsSubmittingData(false);
             }
           });
+      } else if (formState.confirmModalLabels) {
+        setShowConfirmModal(true);
       } else {
         submitData(formState.item).then(handleSuccess);
       }
-    }, [formMode, formState.item, handleSuccess, isMounted, submitData, submitHandler]);
+    }, [
+      formMode,
+      formState.item,
+      formState.confirmModalLabels,
+      handleSuccess,
+      isMounted,
+      submitData,
+      submitHandler,
+    ]);
+
+    const confirmModalOnSuccess = useCallback(
+      () => submitData(formState.item).then(handleSuccess),
+      [submitData, formState.item, handleSuccess]
+    );
+
+    const confirmModal = useMemo(() => {
+      if (formState.confirmModalLabels) {
+        const { title, body, confirmButton, cancelButton } = formState.confirmModalLabels;
+        return (
+          <ArtifactConfirmModal
+            title={title}
+            body={body}
+            confirmButton={confirmButton}
+            cancelButton={cancelButton}
+            onSuccess={confirmModalOnSuccess}
+            onCancel={() => setShowConfirmModal(false)}
+            data-test-subj="artifactConfirmModal"
+          />
+        );
+      }
+    }, [formState, confirmModalOnSuccess]);
 
     // If we don't have the actual Artifact data yet for edit (in initialization phase - ex. came in with an
     // ID in the url that was not in the list), then retrieve it now
@@ -342,7 +377,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
       isMounted,
     ]);
 
-    // If we got an error while trying ot retrieve the item for edit, then show a toast message
+    // If we got an error while trying to retrieve the item for edit, then show a toast message
     useEffect(() => {
       if (isEditFlow && error) {
         toasts.addWarning(labels.flyoutEditItemLoadFailure(error?.body?.message || error.message));
@@ -363,7 +398,6 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
             <h2>{isEditFlow ? labels.flyoutEditTitle : labels.flyoutCreateTitle}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-
         {!isInitializing && showExpiredLicenseBanner && (
           <EuiCallOut
             title={labels.flyoutDowngradedLicenseTitle}
@@ -375,7 +409,6 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
             {labels.flyoutDowngradedLicenseDocsInfo(securitySolution)}
           </EuiCallOut>
         )}
-
         <EuiFlyoutBody>
           {isInitializing && <ManagementPageLoader data-test-subj={getTestId('loader')} />}
 
@@ -391,7 +424,6 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
             />
           )}
         </EuiFlyoutBody>
-
         {!isInitializing && (
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
@@ -420,6 +452,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
             </EuiFlexGroup>
           </EuiFlyoutFooter>
         )}
+        {showConfirmModal && confirmModal}
       </EuiFlyout>
     );
   }

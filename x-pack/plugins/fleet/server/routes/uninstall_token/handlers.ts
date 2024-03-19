@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { CustomHttpResponseOptions, ResponseError } from '@kbn/core-http-server';
 
-import { appContextService } from '../../services';
+import { appContextService, agentPolicyService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import type {
   GetUninstallTokensMetadataRequestSchema,
@@ -16,6 +16,7 @@ import type {
 } from '../../types/rest_spec/uninstall_token';
 import { defaultFleetErrorHandler } from '../../errors';
 import type { GetUninstallTokenResponse } from '../../../common/types/rest_spec/uninstall_token';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 
 const UNINSTALL_TOKEN_SERVICE_UNAVAILABLE_ERROR: CustomHttpResponseOptions<ResponseError> = {
   statusCode: 500,
@@ -31,10 +32,44 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
     return response.customError(UNINSTALL_TOKEN_SERVICE_UNAVAILABLE_ERROR);
   }
 
-  try {
-    const { page = 1, perPage = 20, policyId } = request.query;
+  const { page = 1, perPage = 20, policyId, search } = request.query;
 
-    const body = await uninstallTokenService.getTokenMetadata(policyId?.trim(), page, perPage);
+  if (policyId && search) {
+    return response.badRequest({
+      body: {
+        message: 'Query parameters `policyId` and `search` cannot be used at the same time.',
+      },
+    });
+  }
+
+  try {
+    const fleetContext = await context.fleet;
+    const soClient = fleetContext.internalSoClient;
+
+    const { items: managedPolicies } = await agentPolicyService.list(soClient, {
+      fields: ['id'],
+      perPage: SO_SEARCH_LIMIT,
+      kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
+    });
+
+    const managedPolicyIds = managedPolicies.map((policy) => policy.id);
+
+    let policyIdSearchTerm: string | undefined;
+    let policyNameSearchTerm: string | undefined;
+    if (search) {
+      policyIdSearchTerm = search.trim();
+      policyNameSearchTerm = search.trim();
+    } else if (policyId) {
+      policyIdSearchTerm = policyId.trim();
+    }
+
+    const body = await uninstallTokenService.getTokenMetadata(
+      policyIdSearchTerm,
+      policyNameSearchTerm,
+      page,
+      perPage,
+      managedPolicyIds.length > 0 ? managedPolicyIds : undefined
+    );
 
     return response.ok({ body });
   } catch (error) {

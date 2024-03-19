@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
@@ -23,7 +23,7 @@ import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
  */
 export const EntitiesOverview: React.FC = () => {
   const { eventId, getFieldsData, indexName, scopeId } = useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
   const hostName = getField(getFieldsData('host.name'));
   const userName = getField(getFieldsData('user.name'));
 
@@ -68,11 +68,13 @@ export const EntitiesOverview: React.FC = () => {
         {userName || hostName ? (
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
             {userName && (
-              <EuiFlexItem>
-                <UserEntityOverview userName={userName} />
-              </EuiFlexItem>
+              <>
+                <EuiFlexItem>
+                  <UserEntityOverview userName={userName} />
+                </EuiFlexItem>
+                <EuiSpacer size="s" />
+              </>
             )}
-            <EuiSpacer size="s" />
             {hostName && (
               <EuiFlexItem>
                 <HostEntityOverview hostName={hostName} />

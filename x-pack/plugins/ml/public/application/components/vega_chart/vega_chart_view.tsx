@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, FC } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useEffect } from 'react';
 
 // There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
 // @ts-ignore

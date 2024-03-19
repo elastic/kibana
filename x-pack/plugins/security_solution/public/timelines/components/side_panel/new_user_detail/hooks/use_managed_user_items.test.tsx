@@ -6,18 +6,11 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../../../../common/mock';
+import { mockGlobalState, TestProviders, createMockStore } from '../../../../../common/mock';
 import { useManagedUserItems } from './use_managed_user_items';
 import { mockEntraUserFields, mockOktaUserFields } from '../__mocks__';
 import { UserAssetTableType } from '../../../../../explore/users/store/model';
 import React from 'react';
-import { createStore } from '../../../../../common/store';
 
 const mockState = {
   ...mockGlobalState,
@@ -37,8 +30,7 @@ const mockState = {
   },
 };
 
-const { storage } = createSecuritySolutionStorageMock();
-const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const mockStore = createMockStore(mockState);
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders store={mockStore}>{children}</TestProviders>

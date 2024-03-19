@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Case, Cases, User } from '../../../common/types/domain';
+import type { Case, CaseCustomField, Cases, User } from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CasesFindResponse,
@@ -34,6 +34,8 @@ import type { PushParams } from './push';
 import { push } from './push';
 import { update } from './update';
 import { bulkCreate } from './bulk_create';
+import type { ReplaceCustomFieldArgs } from './replace_custom_field';
+import { replaceCustomField } from './replace_custom_field';
 
 /**
  * API for interacting with the cases entities.
@@ -96,6 +98,10 @@ export interface CasesSubClient {
    * Retrieves the cases ID and title that have the requested alert attached to them
    */
   getCasesByAlertID(params: CasesByAlertIDParams): Promise<GetRelatedCasesByAlertResponse>;
+  /**
+   * Replace custom field with specific customFieldId and CaseId
+   */
+  replaceCustomField(params: ReplaceCustomFieldArgs): Promise<CaseCustomField>;
 }
 
 /**
@@ -122,6 +128,8 @@ export const createCasesSubClient = (
     getCategories: (params: AllCategoriesFindRequest) => getCategories(params, clientArgs),
     getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
     getCasesByAlertID: (params: CasesByAlertIDParams) => getCasesByAlertID(params, clientArgs),
+    replaceCustomField: (params: ReplaceCustomFieldArgs) =>
+      replaceCustomField(params, clientArgs, casesClient),
   };
 
   return Object.freeze(casesSubClient);

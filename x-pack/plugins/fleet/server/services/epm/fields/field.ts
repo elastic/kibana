@@ -7,8 +7,8 @@
 
 import { safeLoad } from 'js-yaml';
 
-import type { PackageInfo } from '../../../types';
-import { getAssetsData } from '../packages/assets';
+import type { PackageInstallContext } from '../../../../common/types';
+import { getAssetsDataFromAssetsMap } from '../packages/assets';
 
 // This should become a copy of https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/mapping/field.go#L39
 export interface Field {
@@ -289,18 +289,58 @@ export const isFields = (path: string) => {
   return path.includes('/fields/');
 };
 
+export const filterForTransformAssets = (transformName: string) => {
+  return function isTransformAssets(path: string) {
+    return path.includes(`/transform/${transformName}`);
+  };
+};
+
+function combineFilter(...filters: Array<(path: string) => boolean>) {
+  return function filterAsset(path: string) {
+    return filters.every((filter) => filter(path));
+  };
+}
+
 /**
  * loadFieldsFromYaml
  *
  * Gets all field files, optionally filtered by dataset, extracts .yml files, merges them together
  */
 
-export const loadFieldsFromYaml = (
-  pkg: Pick<PackageInfo, 'version' | 'name' | 'type'>,
+export const loadDatastreamsFieldsFromYaml = (
+  packageInstallContext: PackageInstallContext,
   datasetName?: string
 ): Field[] => {
   // Fetch all field definition files
-  const fieldDefinitionFiles = getAssetsData(pkg, isFields, datasetName);
+  const fieldDefinitionFiles = getAssetsDataFromAssetsMap(
+    packageInstallContext.packageInfo,
+    packageInstallContext.assetsMap,
+    isFields,
+    datasetName
+  );
+  return fieldDefinitionFiles.reduce<Field[]>((acc, file) => {
+    // Make sure it is defined as it is optional. Should never happen.
+    if (file.buffer) {
+      const tmpFields = safeLoad(file.buffer.toString());
+      // safeLoad() returns undefined for empty files, we don't want that
+      if (tmpFields) {
+        acc = acc.concat(tmpFields);
+      }
+    }
+    return acc;
+  }, []);
+};
+
+export const loadTransformFieldsFromYaml = (
+  packageInstallContext: PackageInstallContext,
+  transformName: string
+): Field[] => {
+  // Fetch all field definition files
+  const fieldDefinitionFiles = getAssetsDataFromAssetsMap(
+    packageInstallContext.packageInfo,
+    packageInstallContext.assetsMap,
+    combineFilter(isFields, filterForTransformAssets(transformName))
+  );
   return fieldDefinitionFiles.reduce<Field[]>((acc, file) => {
     // Make sure it is defined as it is optional. Should never happen.
     if (file.buffer) {

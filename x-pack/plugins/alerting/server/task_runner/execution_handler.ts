@@ -9,7 +9,11 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
 import { ALERT_UUID, getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
-import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
+import {
+  createTaskRunError,
+  isEphemeralTaskRejectedDueToCapacityError,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server';
 import {
   ExecuteOptions as EnqueueExecutionOptions,
   ExecutionResponseItem,
@@ -23,8 +27,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { AlertHit, parseDuration, CombinedSummarizedAlerts, ThrottledActions } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
-import { Executable, ExecutionHandlerOptions, RuleTaskInstance } from './types';
-import { TaskRunnerContext } from './task_runner_factory';
+import { Executable, ExecutionHandlerOptions, RuleTaskInstance, TaskRunnerContext } from './types';
 import {
   transformActionParams,
   TransformActionParamsOptions,
@@ -51,6 +54,7 @@ import {
   isSummaryActionOnInterval,
   isSummaryActionThrottled,
 } from './rule_action_helper';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 enum Reasons {
   MUTED = 'muted',
@@ -314,6 +318,7 @@ export class ExecutionHandler<
             actionParams: action.params,
             flapping: executableAlert.getFlapping(),
             ruleUrl: ruleUrl?.absoluteUrl,
+            consecutiveMatches: executableAlert.getActiveCount(),
           };
 
           if (executableAlert.isAlertAsData()) {
@@ -359,10 +364,18 @@ export class ExecutionHandler<
 
       if (!!bulkActions.length) {
         for (const c of chunk(bulkActions, CHUNK_SIZE)) {
-          const response = await this.actionsClient!.bulkEnqueueExecution(c);
-          if (response.errors) {
+          let enqueueResponse;
+          try {
+            enqueueResponse = await this.actionsClient!.bulkEnqueueExecution(c);
+          } catch (e) {
+            if (e.statusCode === 404) {
+              throw createTaskRunError(e, TaskErrorSource.USER);
+            }
+            throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+          }
+          if (enqueueResponse.errors) {
             bulkActionsResponse = bulkActionsResponse.concat(
-              response.items.filter(
+              enqueueResponse.items.filter(
                 (i) => i.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR
               )
             );
@@ -554,13 +567,13 @@ export class ExecutionHandler<
       consumer: ruleConsumer,
       source: asSavedObjectExecutionSource({
         id: ruleId,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
       }),
       executionId,
       relatedSavedObjects: [
         {
           id: ruleId,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           namespace: namespace.namespace,
           typeId: this.ruleType.id,
         },
@@ -729,7 +742,13 @@ export class ExecutionHandler<
         executionUuid: this.executionId,
       };
     }
-    const alerts = await this.alertsClient.getSummarizedAlerts!(options);
+
+    let alerts;
+    try {
+      alerts = await this.alertsClient.getSummarizedAlerts!(options);
+    } catch (e) {
+      throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+    }
 
     /**
      * We need to remove all new alerts with maintenance windows retrieved from

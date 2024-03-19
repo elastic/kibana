@@ -19,6 +19,7 @@ describe('generateAgentSelection', () => {
     expect(newAgentSelection).toEqual({
       agents: [],
       allAgentsSelected: false,
+      offlineAgentsSelected: false,
       platformsSelected: [],
       policiesSelected: [],
     });
@@ -47,6 +48,7 @@ describe('generateAgentSelection', () => {
     expect(newAgentSelection).toEqual({
       agents: [],
       allAgentsSelected: false,
+      offlineAgentsSelected: false,
       platformsSelected: platformOptions.map(({ value: { id } }) => id),
       policiesSelected: policyOptions.map(({ value: { id } }) => id),
     });

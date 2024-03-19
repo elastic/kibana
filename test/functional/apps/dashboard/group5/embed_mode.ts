@@ -24,7 +24,8 @@ export default function ({
   const screenshot = getService('screenshots');
   const log = getService('log');
 
-  describe('embed mode', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/176882
+  describe.skip('embed mode', () => {
     /*
      * Note: The baseline images used in all of the screenshot tests in this test suite were taken directly from the CI environment
      * in order to overcome a known issue with the pixel density of fonts being significantly different when running locally versus
@@ -56,8 +57,7 @@ export default function ({
       await browser.setWindowSize(1300, 900);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/163207
-    describe.skip('default URL params', () => {
+    describe('default URL params', () => {
       it('hides the chrome', async () => {
         const globalNavShown = await globalNav.exists();
         expect(globalNavShown).to.be(true);

@@ -15,7 +15,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Dictionary } from '@kbn/ml-url-state';
 import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
@@ -62,7 +61,6 @@ export function getDocumentCountStatsSplitLabel(
 export interface LogRateAnalysisContentProps {
   /** The data view to analyze. */
   dataView: DataView;
-  setGlobalState?: (params: Dictionary<unknown>) => void;
   /** Timestamp for the start of the range for initial analysis */
   initialAnalysisStart?: number | WindowParameters;
   timeRange?: { min: Moment; max: Moment };
@@ -77,14 +75,13 @@ export interface LogRateAnalysisContentProps {
   /** Optional callback that exposes data of the completed analysis */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
   /** Optional callback that exposes current window parameters */
-  onWindowParametersChange?: (wp?: WindowParameters) => void;
+  onWindowParametersChange?: (wp?: WindowParameters, replace?: boolean) => void;
   /** Identifier to indicate the plugin utilizing the component */
   embeddingOrigin: string;
 }
 
 export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   dataView,
-  setGlobalState,
   initialAnalysisStart: incomingInitialAnalysisStart,
   timeRange,
   esSearchQuery = DEFAULT_SEARCH_QUERY,
@@ -126,7 +123,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     windowParametersTouched.current = true;
 
     if (onWindowParametersChange) {
-      onWindowParametersChange(windowParameters);
+      onWindowParametersChange(windowParameters, true);
     }
   }, [onWindowParametersChange, windowParameters]);
 
@@ -150,7 +147,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     dataView,
     'log_rate_analysis',
     searchQuery,
-    setGlobalState,
+    undefined,
     currentSelectedSignificantItem,
     currentSelectedGroup,
     undefined,

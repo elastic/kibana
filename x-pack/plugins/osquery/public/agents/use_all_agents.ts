@@ -18,11 +18,12 @@ import { useOsqueryPolicies } from './use_osquery_policies';
 interface RequestOptions {
   perPage?: number;
   page?: number;
+  agentIds?: string[];
 }
 
 // TODO: break out the paginated vs all cases into separate hooks
 export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage: 9000 }) => {
-  const { perPage } = opts;
+  const { perPage, agentIds } = opts;
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
@@ -32,18 +33,20 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
     agents: Agent[];
     groups: ReturnType<typeof processAggregations>;
     total: number;
-  }>(
-    ['agents', osqueryPolicies, searchValue, perPage],
-    () => {
+  }>({
+    queryKey: ['agents', osqueryPolicies, searchValue, perPage, agentIds],
+    queryFn: () => {
       let kuery = '';
 
       if (osqueryPolicies?.length) {
         kuery = `(${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')})`;
 
         if (searchValue) {
-          kuery += ` and (local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*)`;
+          kuery += ` and (local_metadata.host.hostname.keyword:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}* or policy_id: *${searchValue}* or local_metadata.os.platform: *${searchValue}* or policy_name:${searchValue} )`;
         } else {
-          kuery += ` and (status:online)`;
+          kuery += ` and (status:online ${
+            agentIds?.length ? `or local_metadata.elastic.agent.id:(${agentIds.join(' or ')})` : ''
+          })`;
         }
       }
 
@@ -55,18 +58,16 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
         },
       });
     },
-    {
-      enabled: isFetched && !!osqueryPolicies?.length,
-      onSuccess: () => setErrorToast(),
-      onError: (error) =>
-        // @ts-expect-error update types
-        setErrorToast(error?.body, {
-          title: i18n.translate('xpack.osquery.agents.fetchError', {
-            defaultMessage: 'Error while fetching agents',
-          }),
-          // @ts-expect-error update types
-          toastMessage: error?.body?.error,
+    enabled: isFetched && !!osqueryPolicies?.length,
+    onSuccess: () => setErrorToast(),
+    onError: (error) =>
+      // @ts-expect-error update types
+      setErrorToast(error?.body, {
+        title: i18n.translate('xpack.osquery.agents.fetchError', {
+          defaultMessage: 'Error while fetching agents',
         }),
-    }
-  );
+        // @ts-expect-error update types
+        toastMessage: error?.body?.error,
+      }),
+  });
 };

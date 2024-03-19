@@ -18,10 +18,10 @@ import {
   getVisibilityToggleLabel,
 } from '../action_labels';
 import { ESSearchSource } from '../../../../../../classes/sources/es_search_source';
-import { isVectorLayer, IVectorLayer } from '../../../../../../classes/layers/vector_layer';
+import { hasVectorLayerMethod } from '../../../../../../classes/layers/vector_layer';
 import { SCALING_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../../../common/constants';
 import { RemoveLayerConfirmModal } from '../../../../../../components/remove_layer_confirm_modal';
-import { isLayerGroup, LayerGroup } from '../../../../../../classes/layers/layer_group';
+import { isLayerGroup } from '../../../../../../classes/layers/layer_group';
 
 export interface Props {
   cloneLayer: (layerId: string) => void;
@@ -71,10 +71,10 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   }
 
   async _loadFeatureEditing() {
-    if (!isVectorLayer(this.props.layer)) {
+    if (!hasVectorLayerMethod(this.props.layer, 'supportsFeatureEditing')) {
       return;
     }
-    const supportsFeatureEditing = (this.props.layer as IVectorLayer).supportsFeatureEditing();
+    const supportsFeatureEditing = this.props.layer.supportsFeatureEditing();
     const isFeatureEditingEnabled = await this._getIsFeatureEditingEnabled();
     if (
       !this._isMounted ||
@@ -87,7 +87,10 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   }
 
   async _getIsFeatureEditingEnabled(): Promise<boolean> {
-    const vectorLayer = this.props.layer as IVectorLayer;
+    if (!hasVectorLayerMethod(this.props.layer, 'hasJoins')) {
+      return false;
+    }
+
     const source = this.props.layer.getSource();
     if (!(source instanceof ESSearchSource)) {
       return false;
@@ -95,9 +98,9 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
 
     if (
       (source as ESSearchSource).getSyncMeta().scalingType === SCALING_TYPES.CLUSTERS ||
-      vectorLayer.isPreviewLayer() ||
-      !vectorLayer.isVisible() ||
-      vectorLayer.hasJoins()
+      this.props.layer.isPreviewLayer() ||
+      !this.props.layer.isVisible() ||
+      this.props.layer.hasJoins()
     ) {
       return false;
     }
@@ -211,10 +214,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           this.props.cloneLayer(this.props.layer.getId());
         },
       });
-      if (
-        isLayerGroup(this.props.layer) &&
-        (this.props.layer as LayerGroup).getChildren().length > 0
-      ) {
+      if (isLayerGroup(this.props.layer) && this.props.layer.getChildren().length > 0) {
         actionItems.push({
           name: i18n.translate('xpack.maps.layerTocActions.ungroupLayerTitle', {
             defaultMessage: 'Ungroup layers',
@@ -283,7 +283,6 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           closePopover={this._closePopover}
           panelPaddingSize="none"
           anchorPosition="leftUp"
-          anchorClassName="mapLayTocActions__popoverAnchor"
         >
           <EuiContextMenu
             initialPanelId={0}

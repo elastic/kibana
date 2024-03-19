@@ -24,7 +24,6 @@ import {
 
 export const openAddFilterPopover = () => {
   cy.get(GLOBAL_SEARCH_BAR_SUBMIT_BUTTON).should('be.enabled');
-  cy.get(GLOBAL_SEARCH_BAR_ADD_FILTER).should('be.visible');
   cy.get(GLOBAL_SEARCH_BAR_ADD_FILTER).click();
 };
 
@@ -53,8 +52,6 @@ export const removeKqlFilter = () => {
 };
 
 export const fillAddFilterForm = ({ key, operator, value }: SearchBarFilter) => {
-  cy.get(ADD_FILTER_FORM_FIELD_INPUT).should('exist');
-  cy.get(ADD_FILTER_FORM_FIELD_INPUT).should('be.visible');
   cy.get(ADD_FILTER_FORM_FIELD_INPUT).type(`${key}{downarrow}{enter}`);
 
   cy.get(ADD_FILTER_FORM_OPERATOR_FIELD).type(`${operator}{downarrow}{enter}`);

@@ -776,7 +776,7 @@ export function Detail() {
             <SettingsPage packageInfo={packageInfo} theme$={services.theme.theme$} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
-            <AssetsPage packageInfo={packageInfo} />
+            <AssetsPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_configs}>
             <Configs packageInfo={packageInfo} />

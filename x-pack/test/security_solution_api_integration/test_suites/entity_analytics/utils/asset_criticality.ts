@@ -15,10 +15,11 @@ import {
   ASSET_CRITICALITY_URL,
   ASSET_CRITICALITY_PRIVILEGES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
+import type { AssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import querystring from 'querystring';
-import { routeWithNamespace } from '../../detections_response/utils';
+import { routeWithNamespace, waitFor } from '../../../../common/utils/security_solution';
 
 export const getAssetCriticalityIndex = (namespace?: string) =>
   `.asset-criticality.asset-criticality-${namespace ?? 'default'}`;
@@ -123,3 +124,51 @@ export const assetCriticalityRouteHelpersFactoryNoAuth = (
       .send()
       .expect(200),
 });
+
+/**
+ * Function to read asset criticality records from ES. By default, it reads from the asset criticality index in the default space, but this can be overridden with the
+ * `index` parameter.
+ *
+ * @param {string[]} index - the index or indices to read criticality from.
+ * @param {number} size - the size parameter of the query
+ */
+export const readAssetCriticality = async (
+  es: Client,
+  index: string[] = [getAssetCriticalityIndex()],
+  size: number = 1000
+): Promise<AssetCriticalityRecord[]> => {
+  const results = await es.search({
+    index,
+    size,
+  });
+  return results.hits.hits.map((hit) => hit._source as AssetCriticalityRecord);
+};
+
+/**
+ * Function to read asset criticality from ES and wait for them to be
+ * present/readable. By default, it reads from the asset criticality index in the
+ * default space, but this can be overridden with the `index` parameter.
+ *
+ * @param {string[]} index - the index or indices to read asset criticality from.
+ * @param {number} docCount - the number of asset criticality docs to wait for. Defaults to 1.
+ */
+export const waitForAssetCriticalityToBePresent = async ({
+  es,
+  log,
+  index = [getAssetCriticalityIndex()],
+  docCount = 1,
+}: {
+  es: Client;
+  log: ToolingLog;
+  index?: string[];
+  docCount?: number;
+}): Promise<void> => {
+  await waitFor(
+    async () => {
+      const criticalities = await readAssetCriticality(es, index, docCount + 10);
+      return criticalities.length >= docCount;
+    },
+    'waitForAssetCriticalityToBePresent',
+    log
+  );
+};

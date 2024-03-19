@@ -327,6 +327,7 @@ describe('utils', () => {
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
         warningMessages: [],
+        suppressedAlertsCount: 0,
       };
       const combinedResults = combineConcurrentResults(existingResult, []);
       expect(combinedResults).toEqual(expectedResult);
@@ -368,6 +369,96 @@ describe('utils', () => {
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
         warningMessages: [],
+        suppressedAlertsCount: 0,
+      };
+
+      const combinedResults = combineConcurrentResults(existingResult, [newResult]);
+      expect(combinedResults).toEqual(expectedResult);
+    });
+
+    test('it should combine correctly suppressed alerts count when existing result does not have it', () => {
+      const existingResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        enrichmentTimes: [],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 3,
+        createdSignals: [],
+        errors: [],
+        warningMessages: [],
+      };
+      const newResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        enrichmentTimes: [],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 0,
+        createdSignals: [],
+        errors: [],
+        warningMessages: [],
+        suppressedAlertsCount: 10,
+      };
+      const expectedResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        warning: false,
+        searchAfterTimes: ['0'],
+        bulkCreateTimes: ['0'],
+        enrichmentTimes: ['0'],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 3,
+        createdSignals: [],
+        errors: [],
+        warningMessages: [],
+        suppressedAlertsCount: 10,
+      };
+
+      const combinedResults = combineConcurrentResults(existingResult, [newResult]);
+      expect(combinedResults).toEqual(expectedResult);
+    });
+
+    test('it should combine correctly suppressed alerts count', () => {
+      const existingResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        enrichmentTimes: [],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 3,
+        createdSignals: [],
+        errors: [],
+        warningMessages: [],
+        suppressedAlertsCount: 11,
+      };
+      const newResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        enrichmentTimes: [],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 0,
+        createdSignals: [],
+        errors: [],
+        warningMessages: [],
+        suppressedAlertsCount: 10,
+      };
+      const expectedResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        warning: false,
+        searchAfterTimes: ['0'],
+        bulkCreateTimes: ['0'],
+        enrichmentTimes: ['0'],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 3,
+        createdSignals: [],
+        errors: [],
+        warningMessages: [],
+        suppressedAlertsCount: 21,
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
@@ -423,6 +514,7 @@ describe('utils', () => {
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
         warningMessages: [],
+        suppressedAlertsCount: 0,
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult1, newResult2]);
@@ -478,6 +570,7 @@ describe('utils', () => {
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
         warningMessages: [],
+        suppressedAlertsCount: 0,
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult2, newResult1]); // two array elements are flipped
@@ -533,6 +626,7 @@ describe('utils', () => {
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
         warningMessages: [],
+        suppressedAlertsCount: 0,
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult1, newResult2]);

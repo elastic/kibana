@@ -14,7 +14,7 @@ import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/serv
 import { loggerMock } from '@kbn/logging-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import { ConcurrentInstallOperationError } from '../../../errors';
+import { ConcurrentInstallOperationError, PackageSavedObjectConflictError } from '../../../errors';
 
 import type { Installation } from '../../../../common';
 
@@ -22,7 +22,7 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
 
 import { appContextService } from '../../app_context';
 import { createAppContextStartContractMock } from '../../../mocks';
-import { saveArchiveEntries } from '../archive/storage';
+import { saveArchiveEntriesFromAssetsMap } from '../archive/storage';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 
@@ -31,6 +31,7 @@ jest.mock('../kibana/assets/install');
 jest.mock('../kibana/index_pattern/install');
 jest.mock('./install');
 jest.mock('./get');
+jest.mock('./install_index_template_pipeline');
 
 jest.mock('../archive/storage');
 jest.mock('../elasticsearch/ilm/install');
@@ -41,7 +42,8 @@ import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
 
 import { MAX_TIME_COMPLETE_INSTALL } from '../../../../common/constants';
 
-import { installIndexTemplatesAndPipelines, restartInstallation } from './install';
+import { restartInstallation } from './install';
+import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 
 import { _installPackage } from './_install_package';
 
@@ -69,6 +71,9 @@ describe('_installPackage', () => {
     soClient.update.mockImplementation(async (type, id, attributes) => {
       return { id, attributes } as any;
     });
+    soClient.get.mockImplementation(async (type, id) => {
+      return { id, attributes: {} } as any;
+    });
 
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
@@ -78,7 +83,7 @@ describe('_installPackage', () => {
       esReferences: [],
       installedIlms: [],
     });
-    jest.mocked(saveArchiveEntries).mockResolvedValue({
+    jest.mocked(saveArchiveEntriesFromAssetsMap).mockResolvedValue({
       saved_objects: [],
     });
     jest.mocked(restartInstallation).mockReset();
@@ -103,18 +108,21 @@ describe('_installPackage', () => {
       savedObjectsImporter: jest.fn(),
       esClient,
       logger: loggerMock.create(),
-      paths: [],
-      packageInfo: {
-        title: 'title',
-        name: 'xyz',
-        version: '4.5.6',
-        description: 'test',
-        type: 'integration',
-        categories: ['cloud', 'custom'],
-        format_version: 'string',
-        release: 'experimental',
-        conditions: { kibana: { version: 'x.y.z' } },
-        owner: { github: 'elastic/fleet' },
+      packageInstallContext: {
+        assetsMap: new Map(),
+        paths: [],
+        packageInfo: {
+          title: 'title',
+          name: 'xyz',
+          version: '4.5.6',
+          description: 'test',
+          type: 'integration',
+          categories: ['cloud', 'custom'],
+          format_version: 'string',
+          release: 'experimental',
+          conditions: { kibana: { version: 'x.y.z' } },
+          owner: { github: 'elastic/fleet' },
+        },
       },
       installType: 'install',
       installSource: 'registry',
@@ -132,7 +140,6 @@ describe('_installPackage', () => {
       createAppContextStartContractMock({
         internal: {
           disableILMPolicies: true,
-          disableProxies: false,
           fleetServerStandalone: false,
           onlyAllowAgentUpgradeToKnownVersions: false,
           retrySetupOnBoot: false,
@@ -160,18 +167,21 @@ describe('_installPackage', () => {
       savedObjectsImporter: jest.fn(),
       esClient,
       logger: loggerMock.create(),
-      paths: [],
-      packageInfo: {
-        title: 'title',
-        name: 'xyz',
-        version: '4.5.6',
-        description: 'test',
-        type: 'integration',
-        categories: ['cloud', 'custom'],
-        format_version: 'string',
-        release: 'experimental',
-        conditions: { kibana: { version: 'x.y.z' } },
-        owner: { github: 'elastic/fleet' },
+      packageInstallContext: {
+        assetsMap: new Map(),
+        paths: [],
+        packageInfo: {
+          title: 'title',
+          name: 'xyz',
+          version: '4.5.6',
+          description: 'test',
+          type: 'integration',
+          categories: ['cloud', 'custom'],
+          format_version: 'string',
+          release: 'experimental',
+          conditions: { kibana: { version: 'x.y.z' } },
+          owner: { github: 'elastic/fleet' },
+        },
       },
       installType: 'install',
       installSource: 'registry',
@@ -190,7 +200,6 @@ describe('_installPackage', () => {
     appContextService.start(
       createAppContextStartContractMock({
         internal: {
-          disableProxies: false,
           disableILMPolicies: false,
           fleetServerStandalone: false,
           onlyAllowAgentUpgradeToKnownVersions: false,
@@ -219,18 +228,21 @@ describe('_installPackage', () => {
       savedObjectsImporter: jest.fn(),
       esClient,
       logger: loggerMock.create(),
-      paths: [],
-      packageInfo: {
-        title: 'title',
-        name: 'xyz',
-        version: '4.5.6',
-        description: 'test',
-        type: 'integration',
-        categories: ['cloud', 'custom'],
-        format_version: 'string',
-        release: 'experimental',
-        conditions: { kibana: { version: 'x.y.z' } },
-        owner: { github: 'elastic/fleet' },
+      packageInstallContext: {
+        packageInfo: {
+          title: 'title',
+          name: 'xyz',
+          version: '4.5.6',
+          description: 'test',
+          type: 'integration',
+          categories: ['cloud', 'custom'],
+          format_version: 'string',
+          release: 'experimental',
+          conditions: { kibana: { version: 'x.y.z' } },
+          owner: { github: 'elastic/fleet' },
+        } as any,
+        assetsMap: new Map(),
+        paths: [],
       },
       installType: 'install',
       installSource: 'registry',
@@ -242,7 +254,6 @@ describe('_installPackage', () => {
   });
 
   describe('when package is stuck in `installing`', () => {
-    afterEach(() => {});
     const mockInstalledPackageSo: SavedObject<Installation> = {
       id: 'mocked-package',
       attributes: {
@@ -266,7 +277,6 @@ describe('_installPackage', () => {
         createAppContextStartContractMock({
           internal: {
             disableILMPolicies: true,
-            disableProxies: false,
             fleetServerStandalone: false,
             onlyAllowAgentUpgradeToKnownVersions: false,
             retrySetupOnBoot: false,
@@ -288,12 +298,15 @@ describe('_installPackage', () => {
           savedObjectsImporter: jest.fn(),
           esClient,
           logger: loggerMock.create(),
-          paths: [],
-          packageInfo: {
-            name: mockInstalledPackageSo.attributes.name,
-            version: mockInstalledPackageSo.attributes.version,
-            title: mockInstalledPackageSo.attributes.name,
-          } as any,
+          packageInstallContext: {
+            paths: [],
+            assetsMap: new Map(),
+            packageInfo: {
+              name: mockInstalledPackageSo.attributes.name,
+              version: mockInstalledPackageSo.attributes.version,
+              title: mockInstalledPackageSo.attributes.name,
+            } as any,
+          },
           installedPkg: {
             ...mockInstalledPackageSo,
             attributes: {
@@ -319,12 +332,15 @@ describe('_installPackage', () => {
               savedObjectsImporter: jest.fn(),
               esClient,
               logger: loggerMock.create(),
-              paths: [],
-              packageInfo: {
-                name: mockInstalledPackageSo.attributes.name,
-                version: mockInstalledPackageSo.attributes.version,
-                title: mockInstalledPackageSo.attributes.name,
-              } as any,
+              packageInstallContext: {
+                paths: [],
+                assetsMap: new Map(),
+                packageInfo: {
+                  name: mockInstalledPackageSo.attributes.name,
+                  version: mockInstalledPackageSo.attributes.version,
+                  title: mockInstalledPackageSo.attributes.name,
+                } as any,
+              },
               installedPkg: {
                 ...mockInstalledPackageSo,
                 attributes: {
@@ -345,12 +361,15 @@ describe('_installPackage', () => {
             savedObjectsImporter: jest.fn(),
             esClient,
             logger: loggerMock.create(),
-            paths: [],
-            packageInfo: {
-              name: mockInstalledPackageSo.attributes.name,
-              version: mockInstalledPackageSo.attributes.version,
-              title: mockInstalledPackageSo.attributes.name,
-            } as any,
+            packageInstallContext: {
+              paths: [],
+              assetsMap: new Map(),
+              packageInfo: {
+                name: mockInstalledPackageSo.attributes.name,
+                version: mockInstalledPackageSo.attributes.version,
+                title: mockInstalledPackageSo.attributes.name,
+              } as any,
+            },
             installedPkg: {
               ...mockInstalledPackageSo,
               attributes: {
@@ -365,5 +384,56 @@ describe('_installPackage', () => {
         });
       });
     });
+  });
+
+  it('surfaces saved object conflicts error', () => {
+    appContextService.start(
+      createAppContextStartContractMock({
+        internal: {
+          disableILMPolicies: false,
+          fleetServerStandalone: false,
+          onlyAllowAgentUpgradeToKnownVersions: false,
+          retrySetupOnBoot: false,
+          registry: {
+            kibanaVersionCheckEnabled: true,
+            capabilities: [],
+            excludePackages: [],
+          },
+        },
+      })
+    );
+
+    mockedInstallKibanaAssetsAndReferences.mockRejectedValueOnce(
+      new PackageSavedObjectConflictError('test')
+    );
+
+    expect(
+      _installPackage({
+        savedObjectsClient: soClient,
+        // @ts-ignore
+        savedObjectsImporter: jest.fn(),
+        esClient,
+        logger: loggerMock.create(),
+        packageInstallContext: {
+          packageInfo: {
+            title: 'title',
+            name: 'xyz',
+            version: '4.5.6',
+            description: 'test',
+            type: 'integration',
+            categories: ['cloud', 'custom'],
+            format_version: 'string',
+            release: 'experimental',
+            conditions: { kibana: { version: 'x.y.z' } },
+            owner: { github: 'elastic/fleet' },
+          } as any,
+          assetsMap: new Map(),
+          paths: [],
+        },
+        installType: 'install',
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+      })
+    ).rejects.toThrowError(PackageSavedObjectConflictError);
   });
 });

@@ -644,6 +644,17 @@
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbncodeeditor",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/code-editor'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

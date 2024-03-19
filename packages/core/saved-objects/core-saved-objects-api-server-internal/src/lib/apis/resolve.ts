@@ -24,35 +24,21 @@ export const performResolve = async <T>(
   { type, id, options }: PerformCreateParams<T>,
   apiExecutionContext: ApiExecutionContext
 ): Promise<SavedObjectsResolveResponse<T>> => {
-  const {
-    registry,
-    helpers,
-    allowedTypes,
-    client,
-    migrator,
-    serializer,
-    extensions = {},
-  } = apiExecutionContext;
-  const { common: commonHelper } = helpers;
-  const { securityExtension, encryptionExtension } = extensions;
+  const { common: commonHelper } = apiExecutionContext.helpers;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
-  const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
-    registry,
-    allowedTypes,
-    client,
-    migrator,
-    serializer,
-    getIndexForType: commonHelper.getIndexForType.bind(commonHelper),
-    incrementCounterInternal: (t, i, counterFields, opts = {}) =>
-      incrementCounterInternal(
-        { type: t, id: i, counterFields, options: opts },
-        apiExecutionContext
-      ),
-    encryptionExtension,
-    securityExtension,
-    objects: [{ type, id }],
-    options: { ...options, namespace },
-  });
+  const { resolved_objects: bulkResults } = await internalBulkResolve<T>(
+    {
+      objects: [{ type, id }],
+      options: { ...options, namespace },
+      incrementCounterInternal: (t, i, counterFields, opts = {}) =>
+        incrementCounterInternal(
+          { type: t, id: i, counterFields, options: opts },
+          apiExecutionContext
+        ),
+    },
+    apiExecutionContext
+  );
+
   const [result] = bulkResults;
   if (isBulkResolveError(result)) {
     throw result.error;

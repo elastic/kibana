@@ -207,7 +207,7 @@ describe('DatatableComponent', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="dataGridRowCell"]').first().simulate('focus');
+    wrapper.find('[data-test-subj="dataGridRowCell"]').first().simulate('mouseEnter');
 
     await waitForWrapperUpdate(wrapper);
 
@@ -248,7 +248,7 @@ describe('DatatableComponent', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="dataGridRowCell"]').at(1).simulate('focus');
+    wrapper.find('[data-test-subj="dataGridRowCell"]').at(1).simulate('mouseEnter');
 
     await waitForWrapperUpdate(wrapper);
 
@@ -324,7 +324,7 @@ describe('DatatableComponent', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="dataGridRowCell"]').at(0).simulate('focus');
+    wrapper.find('[data-test-subj="dataGridRowCell"]').at(0).simulate('mouseEnter');
 
     await waitForWrapperUpdate(wrapper);
 
@@ -365,7 +365,7 @@ describe('DatatableComponent', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="dataGridRowCell"]').first().simulate('focus');
+    wrapper.find('[data-test-subj="dataGridRowCell"]').first().simulate('mouseEnter');
 
     await waitForWrapperUpdate(wrapper);
 

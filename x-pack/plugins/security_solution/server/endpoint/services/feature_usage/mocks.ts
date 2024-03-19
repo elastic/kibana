@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getResponseActionFeatureKey } from './feature_keys';
 import type { FeatureUsageService } from './service';
 import type { PolicyData } from '../../../../common/endpoint/types';
 
@@ -13,6 +14,7 @@ export function createFeatureUsageServiceMock() {
     setup: jest.fn(),
     start: jest.fn(),
     notifyUsage: jest.fn(),
+    getResponseActionFeatureKey: jest.fn(getResponseActionFeatureKey),
   } as unknown as jest.Mocked<FeatureUsageService>;
 }
 

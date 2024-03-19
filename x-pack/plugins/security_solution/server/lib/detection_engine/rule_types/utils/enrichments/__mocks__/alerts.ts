@@ -68,6 +68,14 @@ import {
   ALERT_RULE_TIMELINE_TITLE,
   ALERT_RULE_INDICES,
   ALERT_RULE_TIMESTAMP_OVERRIDE,
+  ALERT_HOST_CRITICALITY,
+  ALERT_USER_CRITICALITY,
+  LEGACY_ALERT_HOST_CRITICALITY,
+  LEGACY_ALERT_USER_CRITICALITY,
+  ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM,
+  ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM,
 } from '../../../../../../../common/field_maps/field_names';
 
 export const createAlert = (
@@ -194,6 +202,14 @@ export const createAlert = (
       rule_name_override: undefined,
       timestamp_override: undefined,
     },
+    [LEGACY_ALERT_HOST_CRITICALITY]: undefined,
+    [LEGACY_ALERT_USER_CRITICALITY]: undefined,
+    [ALERT_HOST_CRITICALITY]: undefined,
+    [ALERT_USER_CRITICALITY]: undefined,
+    [ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL]: undefined,
+    [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
+    [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: undefined,
+    [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
     ...data,
   },
 });

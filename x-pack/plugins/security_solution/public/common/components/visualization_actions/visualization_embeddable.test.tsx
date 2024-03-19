@@ -12,18 +12,9 @@ import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_me
 import { VisualizationEmbeddable } from './visualization_embeddable';
 import * as inputActions from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../mock';
-import { createStore } from '../../store';
-import type { State } from '../../store';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
-import { getRiskScoreDonutAttributes } from './lens_attributes/common/risk_scores/risk_score_donut';
-import { TOTAL_LABEL } from '../../../overview/components/entity_analytics/common/translations';
+import { getRiskScoreDonutAttributes } from '../../../entity_analytics/lens_attributes/risk_score_donut';
 
 jest.mock('./lens_embeddable');
 jest.mock('../page/use_refetch_by_session', () => ({
@@ -37,11 +28,6 @@ const mockRefetchByRestartingSession = jest.fn();
 const mockRefetchByDeletingSession = jest.fn();
 const mockSetQuery = jest.spyOn(inputActions, 'setQuery');
 const mockDeleteQuery = jest.spyOn(inputActions, 'deleteOneQuery');
-const state: State = {
-  ...mockGlobalState,
-};
-const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 describe('VisualizationEmbeddable', () => {
   describe('when isDonut = false', () => {
@@ -60,7 +46,7 @@ describe('VisualizationEmbeddable', () => {
         refetchByDeletingSession: mockRefetchByDeletingSession,
       });
       res = render(
-        <TestProviders store={store}>
+        <TestProviders>
           <VisualizationEmbeddable
             id="testId"
             lensAttributes={kpiHostMetricLensAttributes}
@@ -122,7 +108,7 @@ describe('VisualizationEmbeddable', () => {
         },
       },
     };
-    const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const mockStore = createMockStore(mockState);
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -178,12 +164,12 @@ describe('VisualizationEmbeddable', () => {
         refetchByRestartingSession: mockRefetchByRestartingSession,
       });
       res = render(
-        <TestProviders store={store}>
+        <TestProviders>
           <VisualizationEmbeddable
             getLensAttributes={getRiskScoreDonutAttributes}
             id="testId"
             isDonut={true}
-            label={TOTAL_LABEL}
+            label={'Total'}
             timerange={{ from: '2022-10-27T23:00:00.000Z', to: '2022-11-04T10:46:16.204Z' }}
           />
         </TestProviders>

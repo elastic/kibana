@@ -18,18 +18,16 @@ import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
-import {
-  PivotAggsConfigDict,
-  PivotGroupByConfigDict,
-  PIVOT_SUPPORTED_GROUP_BY_AGGS,
-} from '../../../../common';
-import { SearchItems } from '../../../../hooks/use_search_items';
+import type { PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../common';
+import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';
+import type { SearchItems } from '../../../../hooks/use_search_items';
 
 import { getAggNameConflictToastMessages } from './common';
 import { StepDefineForm } from './step_define_form';
 
 import { MlSharedContext } from '../../../../__mocks__/shared_context';
 import { getMlSharedImports } from '../../../../../shared_imports';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
@@ -81,6 +79,7 @@ describe('Transform: <DefinePivotForm />', () => {
     const services = {
       ...startMock,
       data: dataPluginMock.createStartContract(),
+      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       appName: 'the-test-app',
       storage: createMockStorage(),
     };

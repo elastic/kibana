@@ -43,7 +43,10 @@ export const ingestPipelineTabOnClick = async (
     });
 
   if (!dashboardFound) {
-    const installPackage = () => services.http!.post('/api/fleet/epm/packages/elasticsearch');
+    const installPackage = () =>
+      services.http!.post('/api/fleet/epm/packages/elasticsearch', {
+        headers: { 'Elastic-Api-Version': '2023-10-31' },
+      });
 
     const ref = services.overlays!.openModal(
       toMountPoint(

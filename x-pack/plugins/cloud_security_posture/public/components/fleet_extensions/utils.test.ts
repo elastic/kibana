@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { PackageInfo } from '@kbn/fleet-plugin/common';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 
 import {
   getMaxPackageName,
@@ -11,9 +13,10 @@ import {
   getPosturePolicy,
   getCspmCloudShellDefaultValue,
   isBelowMinVersion,
+  getDefaultAwsCredentialsType,
+  getDefaultAzureCredentialsType,
 } from './utils';
 import { getMockPolicyAWS, getMockPolicyK8s, getMockPolicyEKS } from './mocks';
-import type { PackageInfo } from '@kbn/fleet-plugin/common';
 
 describe('getPosturePolicy', () => {
   for (const [name, getPolicy, expectedVars] of [
@@ -22,7 +25,11 @@ describe('getPosturePolicy', () => {
     ['cloudbeat/cis_k8s', getMockPolicyK8s, null],
   ] as const) {
     it(`updates package policy with hidden vars for ${name}`, () => {
-      const inputVars = getPostureInputHiddenVars(name, {} as any);
+      const inputVars = getPostureInputHiddenVars(
+        name,
+        {} as PackageInfo,
+        SetupTechnology.AGENT_BASED
+      );
       const policy = getPosturePolicy(getPolicy(), name, inputVars);
 
       const enabledInputs = policy.inputs.filter(
@@ -278,5 +285,132 @@ describe('isBelowMinVersion', () => {
     } catch (error) {
       expect(error).toBeDefined();
     }
+  });
+});
+
+describe('getDefaultAwsCredentialsType', () => {
+  let packageInfo: PackageInfo;
+
+  beforeEach(() => {
+    packageInfo = {
+      policy_templates: [
+        {
+          name: 'cspm',
+          inputs: [
+            {
+              vars: [
+                {
+                  name: 'cloud_formation_template',
+                  default: 'http://example.com/cloud_formation_template',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+  });
+
+  it('should return "direct_access_key" for agentless', () => {
+    const setupTechnology = SetupTechnology.AGENTLESS;
+    const result = getDefaultAwsCredentialsType(packageInfo, setupTechnology);
+
+    expect(result).toBe('direct_access_keys');
+  });
+
+  it('should return "assume_role" for agent-based, when cloudformation is not available', () => {
+    const setupTechnology = SetupTechnology.AGENT_BASED;
+    packageInfo = {
+      policy_templates: [
+        {
+          name: 'cspm',
+          inputs: [
+            {
+              vars: [
+                {
+                  name: 'cloud_shell',
+                  default: 'http://example.com/cloud_shell',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+
+    const result = getDefaultAwsCredentialsType({} as PackageInfo, setupTechnology);
+
+    expect(result).toBe('assume_role');
+  });
+
+  it('should return "cloud_formation" for agent-based, when cloudformation is available', () => {
+    const setupTechnology = SetupTechnology.AGENT_BASED;
+
+    const result = getDefaultAwsCredentialsType(packageInfo, setupTechnology);
+
+    expect(result).toBe('cloud_formation');
+  });
+});
+
+describe('getDefaultAzureCredentialsType', () => {
+  let packageInfo: PackageInfo;
+
+  beforeEach(() => {
+    packageInfo = {
+      policy_templates: [
+        {
+          name: 'cspm',
+          inputs: [
+            {
+              vars: [
+                {
+                  name: 'arm_template_url',
+                  default: 'http://example.com/arm_template_url',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+  });
+
+  it('should return "service_principal_with_client_secret" for agentless', () => {
+    const setupTechnology = SetupTechnology.AGENTLESS;
+    const result = getDefaultAzureCredentialsType(packageInfo, setupTechnology);
+
+    expect(result).toBe('service_principal_with_client_secret');
+  });
+
+  it('shold return "arm_template" for agent-based, when arm_template is available', () => {
+    const setupTechnology = SetupTechnology.AGENT_BASED;
+    const result = getDefaultAzureCredentialsType(packageInfo, setupTechnology);
+
+    expect(result).toBe('arm_template');
+  });
+
+  it('should return "managed_identity" for agent-based, when arm_template is not available', () => {
+    const setupTechnology = SetupTechnology.AGENT_BASED;
+    packageInfo = {
+      policy_templates: [
+        {
+          name: 'cspm',
+          inputs: [
+            {
+              vars: [
+                {
+                  name: 'cloud_shell',
+                  default: 'http://example.com/cloud_shell',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+
+    const result = getDefaultAzureCredentialsType(packageInfo, setupTechnology);
+
+    expect(result).toBe('managed_identity');
   });
 });

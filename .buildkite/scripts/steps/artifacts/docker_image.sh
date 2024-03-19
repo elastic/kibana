@@ -26,7 +26,7 @@ if docker manifest inspect $KIBANA_IMAGE &> /dev/null; then
   exit 1
 fi
 
-echo "--- Build images"
+echo "--- Build Kibana"
 node scripts/build \
   --debug \
   --release \
@@ -36,9 +36,9 @@ node scripts/build \
   --docker-tag="$KIBANA_IMAGE_TAG" \
   --skip-docker-ubuntu \
   --skip-docker-ubi \
+  --skip-docker-fips \
   --skip-docker-cloud \
-  --skip-docker-contexts \
-  --skip-cdn-assets
+  --skip-docker-contexts
 
 echo "--- Tag images"
 docker rmi "$KIBANA_IMAGE"
@@ -88,14 +88,38 @@ fi
 echo "--- Build dependencies report"
 node scripts/licenses_csv_report "--csv=target/dependencies-$GIT_ABBREV_COMMIT.csv"
 
-echo "--- Upload artifacts"
+echo "--- Upload CDN assets"
 cd target
+gcloud auth activate-service-account --key-file <(echo "$GCS_SA_CDN_KEY")
+
+CDN_ASSETS_FOLDER=$(mktemp -d)
+tar -xf "kibana-$BASE_VERSION-cdn-assets.tar.gz" -C "$CDN_ASSETS_FOLDER" --strip=1
+
+gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_BUCKET/$GIT_ABBREV_COMMIT"
+gcloud auth revoke "$GCS_SA_CDN_EMAIL"
+
+echo "--- Validate CDN assets"
+(
+  shopt -s globstar
+  THREADS=$(grep -c ^processor /proc/cpuinfo)
+  i=0
+  cd $CDN_ASSETS_FOLDER
+  for CDN_ASSET in **/*; do
+    ((i=(i+1)%THREADS)) || wait
+    if [[ -f "$CDN_ASSET" ]]; then
+      echo -n "Testing $CDN_ASSET..."
+      curl -I --write-out '%{http_code}\n' --fail --silent --output /dev/null "$GCS_SA_CDN_URL/$CDN_ASSET"
+    fi
+  done
+)
+
+echo "--- Upload archives"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-aarch64.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image-aarch64.tar.gz"
+buildkite-agent artifact upload "kibana-$BASE_VERSION-cdn-assets.tar.gz"
 buildkite-agent artifact upload "dependencies-$GIT_ABBREV_COMMIT.csv"
-cd -
 
 # This part is related with updating the configuration of kibana-controller,
 # so that new stack instances contain the latest and greatest image of kibana,
@@ -110,10 +134,9 @@ steps:
     build:
       env:
         SERVICE_COMMIT_HASH: "$GIT_ABBREV_COMMIT"
-        SERVICE: kibana-controller
-        NAMESPACE: kibana-ci
-        IMAGE_NAME: kibana-serverless
+        SERVICE: kibana
         REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/dev.yaml
+        DRY_RUN: "${DRY_RUN:-false}"
 EOF
 
 else

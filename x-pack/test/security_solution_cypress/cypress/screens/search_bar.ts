@@ -20,9 +20,6 @@ export const GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON = (localSearchBarSelector: strin
 export const ADD_FILTER_FORM_FIELD_INPUT =
   '[data-test-subj="filterFieldSuggestionList"] input[data-test-subj="comboBoxSearchInput"]';
 
-export const ADD_FILTER_FORM_FIELD_OPTION = (value: string) =>
-  `[data-test-subj="comboBoxOptionsList filterFieldSuggestionList-optionsList"] button[title="${value}"]`;
-
 export const ADD_FILTER_FORM_OPERATOR_FIELD =
   '[data-test-subj="filterOperatorList"] input[data-test-subj="comboBoxSearchInput"]';
 
@@ -37,6 +34,8 @@ export const GLOBAL_SEARCH_BAR_FILTER_ITEM_AT = (value: number) => `#popoverFor_
 export const GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE = '#popoverFor_filter0 button[title^="Delete"]';
 
 export const GLOBAL_SEARCH_BAR_PINNED_FILTER = '.globalFilterItem-isPinned';
+
+export const GLOBAL_SEARCH_BAR_EDIT_FILTER_MENU_ITEM = '[data-test-subj="editFilter"]';
 
 export const LOCAL_KQL_INPUT = `[data-test-subj="unifiedQueryInput"] textarea`;
 

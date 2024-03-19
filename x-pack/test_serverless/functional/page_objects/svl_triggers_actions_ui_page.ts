@@ -6,10 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type {
-  CustomCheerio,
-  CustomCheerioStatic,
-} from '../../../../test/functional/services/lib/web_element_wrapper/custom_cheerio_api';
+import type { CustomCheerio, CustomCheerioStatic } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const ENTER_KEY = '\uE007';

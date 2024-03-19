@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, ChangeEvent } from 'react';
+import type { FC, ChangeEvent } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiButtonIcon,
@@ -29,12 +30,13 @@ import {
 import { parseUrlState } from '@kbn/ml-url-state';
 
 import { useMlKibana } from '../../../contexts/kibana';
+import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
 
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { TIME_RANGE_TYPE } from './constants';
-import { Job } from '../../../../../common/types/anomaly_detection_jobs';
+import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.
@@ -68,10 +70,10 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
   const {
     services: {
       http,
-      notifications,
       data: { dataViews },
     },
   } = useMlKibana();
+  const { displayErrorToast } = useToastNotificationService();
   const [expandedUrlIndex, setExpandedUrlIndex] = useState<number | null>(null);
 
   const onLabelChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
@@ -161,11 +163,8 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
         const testUrl = await getTestUrl(job, customUrl, timefieldName, undefined, isPartialDFAJob);
         openCustomUrlWindow(testUrl, customUrl, http.basePath.get());
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error obtaining URL for test:', error);
-
-        const { toasts } = notifications;
-        toasts.addDanger(
+        displayErrorToast(
+          error,
           i18n.translate(
             'xpack.ml.customUrlEditorList.obtainingUrlToTestConfigurationErrorMessage',
             {

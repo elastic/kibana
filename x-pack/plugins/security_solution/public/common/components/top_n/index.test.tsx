@@ -11,16 +11,8 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 import '../../mock/match_media';
 import { mockBrowserFields } from '../../containers/source/mock';
-import {
-  mockGlobalState,
-  TestProviders,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-  mockIndexPattern,
-} from '../../mock';
+import { mockGlobalState, TestProviders, mockIndexPattern, createMockStore } from '../../mock';
 import type { State } from '../../store';
-import { createStore } from '../../store';
 
 import type { Props } from './top_n';
 import { StatefulTopN } from '.';
@@ -42,7 +34,7 @@ jest.mock('react-router-dom', () => {
 
 jest.mock('../link_to');
 jest.mock('../../lib/kibana');
-jest.mock('../../../timelines/store/timeline/actions');
+jest.mock('../../../timelines/store/actions');
 jest.mock('../visualization_actions/actions');
 jest.mock('../visualization_actions/lens_embeddable');
 const field = 'process.name';
@@ -149,8 +141,7 @@ const state: State = {
   },
 };
 
-const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const store = createMockStore(state);
 
 const testProps = {
   browserFields: mockBrowserFields,
@@ -372,6 +363,7 @@ describe('StatefulTopN', () => {
           const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
           expect(props.defaultView).toEqual('alert');
         });
+        wrapper.unmount();
       });
     });
   });

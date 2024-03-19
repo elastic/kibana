@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { DocumentMigrator, type VersionedTransformer } from './document_migrator';
+export { DocumentMigrator } from './document_migrator';

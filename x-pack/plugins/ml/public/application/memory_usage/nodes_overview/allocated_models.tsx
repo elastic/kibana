@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -16,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type {
   AllocatedModel,
@@ -118,6 +119,12 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       truncateText: false,
       'data-test-subj': 'mlAllocatedModelsTableAllocation',
       render: (v: AllocatedModel) => {
+        if (
+          v.node.number_of_allocations === undefined ||
+          v.node.threads_per_allocation === undefined
+        ) {
+          return '-';
+        }
         return `${v.node.number_of_allocations} * ${v.node.threads_per_allocation}`;
       },
     },

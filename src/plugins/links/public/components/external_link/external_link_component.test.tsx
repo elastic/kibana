@@ -9,7 +9,7 @@
 import React from 'react';
 
 import userEvent from '@testing-library/user-event';
-import { createEvent, fireEvent, render, screen } from '@testing-library/react';
+import { createEvent, fireEvent, render, screen, within } from '@testing-library/react';
 import { LinksEmbeddable, LinksContext } from '../../embeddable/links_embeddable';
 import { mockLinksPanel } from '../../../common/mocks';
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
@@ -37,7 +37,7 @@ describe('external link component', () => {
     jest.clearAllMocks();
   });
 
-  test('by default opens in new tab', async () => {
+  test('by default opens in new tab and renders external icon', async () => {
     render(
       <LinksContext.Provider value={links}>
         <ExternalLinkComponent
@@ -51,8 +51,25 @@ describe('external link component', () => {
     expect(onRender).toBeCalledTimes(1);
     const link = await screen.findByTestId('externalLink--foo');
     expect(link).toBeInTheDocument();
-    await userEvent.click(link);
+    const externalIcon = within(link).getByText('External link');
+    expect(externalIcon.getAttribute('data-euiicon-type')).toBe('popout');
+    userEvent.click(link);
     expect(window.open).toHaveBeenCalledWith('https://example.com', '_blank');
+  });
+
+  test('renders external icon even when `openInNewTab` setting is `false`', async () => {
+    const linkInfo = {
+      ...defaultLinkInfo,
+      options: { ...DEFAULT_URL_DRILLDOWN_OPTIONS, openInNewTab: false },
+    };
+    render(
+      <LinksContext.Provider value={links}>
+        <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} onRender={onRender} />
+      </LinksContext.Provider>
+    );
+    const link = await screen.findByTestId('externalLink--foo');
+    const externalIcon = within(link).getByText('External link');
+    expect(externalIcon?.getAttribute('data-euiicon-type')).toBe('popout');
   });
 
   test('modified click does not trigger event.preventDefault', async () => {
@@ -86,7 +103,7 @@ describe('external link component', () => {
     );
     expect(onRender).toBeCalledTimes(1);
     const link = await screen.findByTestId('externalLink--foo');
-    await userEvent.click(link);
+    userEvent.click(link);
     expect(coreServices.application.navigateToUrl).toBeCalledTimes(1);
     expect(coreServices.application.navigateToUrl).toBeCalledWith('https://example.com');
   });

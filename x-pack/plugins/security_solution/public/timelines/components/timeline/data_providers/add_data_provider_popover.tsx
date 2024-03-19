@@ -26,7 +26,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
 import { addContentToTimeline, getDisplayValue } from './helpers';
 import { DataProviderType } from './data_provider';
-import { timelineSelectors } from '../../../store/timeline';
+import { timelineSelectors } from '../../../store';
 import { ADD_FIELD_LABEL, ADD_TEMPLATE_FIELD_LABEL } from './translations';
 
 interface AddDataProviderPopoverProps {

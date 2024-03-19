@@ -8,9 +8,12 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
-import { INSIGHTS_HEADER_TEST_ID } from './test_ids';
+import {
+  INSIGHTS_HEADER_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
+  CORRELATIONS_TEST_ID,
+} from './test_ids';
 import { TestProviders } from '../../../../common/mock';
-import { useRiskScore } from '../../../../explore/containers/risk_score';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
@@ -20,6 +23,7 @@ import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { InsightsSection } from './insights_section';
 import { useAlertPrevalence } from '../../../../common/containers/alerts/use_alert_prevalence';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 
 jest.mock('../../../../common/containers/alerts/use_alert_prevalence');
 
@@ -69,7 +73,7 @@ const mockUseUserDetails = useObservedUserDetails as jest.Mock;
 jest.mock('../../../../explore/users/containers/users/observed_details');
 
 const mockUseRiskScore = useRiskScore as jest.Mock;
-jest.mock('../../../../explore/containers/risk_score');
+jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 
 const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
 jest.mock('../../../../common/containers/use_first_last_seen');
@@ -133,5 +137,25 @@ describe('<InsightsSection />', () => {
     expect(wrapper.getByTestId(INSIGHTS_HEADER_TEST_ID)).toBeInTheDocument();
     expect(wrapper.getAllByRole('button')[0]).toHaveAttribute('aria-expanded', 'true');
     expect(wrapper.getAllByRole('button')[0]).not.toHaveAttribute('disabled');
+  });
+
+  it('should not render threat intel and correlations insights component when document is not signal', () => {
+    const getFieldsData = (field: string) => {
+      switch (field) {
+        case 'event.kind':
+          return 'metric';
+      }
+    };
+    const contextValue = {
+      eventId: 'some_Id',
+      getFieldsData,
+      documentIsSignal: false,
+    } as unknown as RightPanelContext;
+
+    const { getByTestId, queryByTestId } = renderInsightsSection(contextValue, false);
+
+    expect(getByTestId(INSIGHTS_HEADER_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(INSIGHTS_THREAT_INTELLIGENCE_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(CORRELATIONS_TEST_ID)).not.toBeInTheDocument();
   });
 });

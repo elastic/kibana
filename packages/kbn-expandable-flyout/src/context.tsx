@@ -6,26 +6,58 @@
  * Side Public License, v 1.
  */
 
-import { createContext, useContext } from 'react';
-import { type ExpandableFlyoutContextValue } from './types';
+import React, { createContext, memo, useContext, useMemo } from 'react';
 
-export type { ExpandableFlyoutContextValue };
+export interface ExpandableFlyoutContext {
+  /**
+   * Unique key to be used as url parameter to store the state of the flyout
+   */
+  urlKey: string | undefined;
+}
 
-export const ExpandableFlyoutContext = createContext<ExpandableFlyoutContextValue | undefined>(
+export const ExpandableFlyoutContext = createContext<ExpandableFlyoutContext | undefined>(
   undefined
 );
 
-/**
- * Retrieve context's properties
- */
-export const useExpandableFlyoutContext = (): ExpandableFlyoutContextValue => {
-  const contextValue = useContext(ExpandableFlyoutContext);
+export interface ExpandableFlyoutContextProviderProps {
+  /**
+   * Unique key to be used as url parameter to store the state of the flyout
+   */
+  urlKey: string | undefined;
+  /**
+   * React components to render
+   */
+  children: React.ReactNode;
+}
 
-  if (!contextValue) {
+/**
+ * Context used to share the value of the urlKey to the rest of the expandable flyout's code
+ */
+export const ExpandableFlyoutContextProvider = memo<ExpandableFlyoutContextProviderProps>(
+  ({ urlKey, children }) => {
+    const contextValue = useMemo(
+      () => ({
+        urlKey,
+      }),
+      [urlKey]
+    );
+
+    return (
+      <ExpandableFlyoutContext.Provider value={contextValue}>
+        {children}
+      </ExpandableFlyoutContext.Provider>
+    );
+  }
+);
+
+ExpandableFlyoutContextProvider.displayName = 'ExpandableFlyoutContextProvider';
+
+export const useExpandableFlyoutContext = () => {
+  const context = useContext(ExpandableFlyoutContext);
+  if (context === undefined) {
     throw new Error(
       'ExpandableFlyoutContext can only be used within ExpandableFlyoutContext provider'
     );
   }
-
-  return contextValue;
+  return context;
 };

@@ -79,9 +79,11 @@ const AnnotationEditorControls = ({
   }, [isQueryBased]);
 
   const update = useCallback(
-    <T extends EventAnnotationConfig>(newAnnotation: Partial<T> | undefined) =>
-      newAnnotation &&
-      onAnnotationChange(sanitizeProperties({ ...currentAnnotation, ...newAnnotation })),
+    <T extends EventAnnotationConfig>(newAnnotation: Partial<T> | undefined) => {
+      if (!newAnnotation) return;
+
+      onAnnotationChange(sanitizeProperties({ ...currentAnnotation, ...newAnnotation }));
+    },
     [currentAnnotation, onAnnotationChange]
   );
 

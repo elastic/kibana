@@ -15,13 +15,11 @@
       "data",
       "discover",
       "fieldFormats",
-      "esUiShared",
       "home",
       "management",
       "licensing",
       "uiActions",
       "taskManager",
-      "embeddable",
       "screenshotMode",
       "share",
       "features"
@@ -33,8 +31,9 @@
       "screenshotting"
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "discover"
+      "embeddable",
+      "esUiShared",
+      "kibanaReact"
     ]
   }
 }

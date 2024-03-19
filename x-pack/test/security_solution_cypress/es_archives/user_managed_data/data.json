@@ -1,0 +1,220 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "IYAoRo0BywOJt6WJ-NXN",
+    "data_stream": "logs-entityanalytics_okta.user-default",
+    "index": ".ds-logs-entityanalytics_okta.user-default-000001",
+    "source": {
+      "agent": {
+        "name": "docker-fleet-server",
+        "id": "62489a87-bbb5-44d1-9dd5-63c508de884b",
+        "type": "filebeat",
+        "ephemeral_id": "ea069592-b9bb-4e85-bf22-ec67bdb10394",
+        "version": "8.12.0"
+      },
+      "elastic_agent": {
+        "id": "62489a87-bbb5-44d1-9dd5-63c508de884b",
+        "version": "8.12.0",
+        "snapshot": true
+      },
+      "entityanalytics_okta": {
+        "user": {
+          "_links": {
+            "self": {
+              "href": "https://dev-36006609.okta.com/api/v1/users/00udojsvifqsBhoxR5d7"
+            }
+          },
+          "type": {
+            "id": "otyf1r6hlGf9AXhZ95d6"
+          }
+        }
+      },
+      "labels": {
+        "identity_source": "entity-analytics-entityanalytics_okta.user-73e543b5-2de4-41f8-9e7f-a9d1dbd1857c"
+      },
+      "tags": [
+        "forwarded",
+        "entityanalytics_okta-user"
+      ],
+      "input": {
+        "type": "entity-analytics"
+      },
+      "@timestamp": "2024-01-26T14:24:56.744Z",
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "related": {
+        "user": [
+          "00udojsvifqsBhoxR5d7",
+          "user1@gmail.com",
+          "test",
+          "123"
+        ]
+      },
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "entityanalytics_okta.user"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2024-01-26T14:25:06Z",
+        "kind": "asset",
+        "action": "user-modified",
+        "category": [
+          "iam"
+        ],
+        "type": [
+          "user",
+          "info"
+        ],
+        "dataset": "entityanalytics_okta.user"
+      },
+      "asset": {
+        "last_updated": "2023-12-06T13:45:09.000Z",
+        "last_seen": "2023-12-06T13:45:09.000Z",
+        "last_status_change_date": "2023-12-06T13:45:09.000Z",
+        "id": "00udojsvifqsBhoxR5d7",
+        "category": "entity",
+        "type": "okta_user",
+        "create_date": "2023-12-06T13:44:23.000Z",
+        "status": "ACTIVE"
+      },
+      "user": {
+        "profile": {
+          "last_name": "123",
+          "first_name": "test",
+          "status": "ACTIVE"
+        },
+        "name": "user1",
+        "id": "00udojsvifqsBhoxR5d7",
+        "account": {
+          "change_date": "2023-12-06T13:45:09.000Z",
+          "password_change_date": "2023-12-06T13:45:09.000Z",
+          "activated_date": "2023-12-06T13:44:23.000Z",
+          "create_date": "2023-12-06T13:44:23.000Z",
+          "status": {
+            "password_expired": false,
+            "deprovisioned": false,
+            "locked_out": false,
+            "recovery": false,
+            "suspended": false
+          }
+        },
+        "email": "user1@gmail.com"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "uYSkRo0Bc35HUGZSHMQR",
+    "data_stream": "logs-entityanalytics_entra_id.user-default",
+    "index": ".ds-logs-entityanalytics_entra_id.user-default",
+    "source": {
+      "agent": {
+        "name": "ingest-linux-1",
+        "id": "adb765aa-365b-4f27-8111-bca5bf3d51d3",
+        "type": "filebeat",
+        "ephemeral_id": "3228f5dd-b26b-4eae-b8ff-1d3941688e0a",
+        "version": "8.12.0"
+      },
+      "elastic_agent": {
+        "id": "adb765aa-365b-4f27-8111-bca5bf3d51d3",
+        "version": "8.12.0",
+        "snapshot": true
+      },
+      "labels": {
+        "identity_source": "entity-analytics-entityanalytics_entra_id.entity-297a838e-1c2d-42f1-8c47-c576bc5424d3"
+      },
+      "tags": [
+        "users-entities",
+        "forwarded",
+        "entityanalytics_entra_id-entity"
+      ],
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "ingest-linux-1",
+          "id": "8765304135675025125"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "n1-standard-1"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "region": "us-central1",
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "input": {
+        "type": "entity-analytics"
+      },
+      "@timestamp": "2024-01-29T08:39:39.340Z",
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "related": {
+        "user": [
+          "user1@elastic.co",
+          "user1_elastic.co#EXT#@azure2elasticsearch.onmicrosoft.com",
+          "user1",
+          "b6bcbd11-7e2b-4d6a-9dbe-f3c487c6cf7a"
+        ]
+      },
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "entityanalytics_entra_id.user"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2024-01-29T08:39:49Z",
+        "kind": "asset",
+        "action": "user-modified",
+        "category": [
+          "iam"
+        ],
+        "type": [
+          "user",
+          "info"
+        ],
+        "dataset": "entityanalytics_entra_id.user"
+      },
+      "asset": {
+        "id": "b6bcbd11-7e2b-4d6a-9dbe-f3c487c6cf7a",
+        "category": "entity",
+        "type": "microsoft_entra_id_user",
+        "group": [
+          {
+            "name": "obs-integrations",
+            "id": "ee4d999c-57f2-4213-adac-6192582b8649"
+          }
+        ]
+      },
+      "user": {
+        "full_name": "user1 Test",
+        "name": "user1",
+        "last_name": "Test",
+        "id": "b6bcbd11-7e2b-4d6a-9dbe-f3c487c6cf7a",
+        "first_name": "user1",
+        "job_title": "user1@elastic.co",
+        "email": "user1@elastic.co",
+        "group": [
+          {
+            "name": "obs-integrations",
+            "id": "ee4d999c-57f2-4213-adac-6192582b8649"
+          }
+        ]
+      }
+    }
+  }
+}

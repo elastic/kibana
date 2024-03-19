@@ -19,7 +19,6 @@
     "@kbn/management-settings-types",
     "@kbn/management-settings-field-definition",
     "@kbn/monaco",
-    "@kbn/kibana-react-plugin",
     "@kbn/management-settings-utilities",
     "@kbn/i18n-react",
     "@kbn/i18n",
@@ -30,5 +29,6 @@
     "@kbn/core-i18n-browser",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-ui-settings-browser",
+    "@kbn/code-editor",
   ]
 }

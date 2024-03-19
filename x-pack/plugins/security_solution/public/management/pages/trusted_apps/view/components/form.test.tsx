@@ -430,7 +430,9 @@ describe('Trusted apps form', () => {
       expect(renderResult.getByTestId('policy-id-0-checkbox')).toBeChecked();
     });
     it("allows the user to set the trusted app entry to 'Global' in the edit option", () => {
-      const globalButtonInput = renderResult.getByTestId('globalPolicy') as HTMLButtonElement;
+      const globalButtonInput = renderResult.getByTestId(
+        'trustedApps-form-effectedPolicies-global'
+      ) as HTMLButtonElement;
       act(() => {
         fireEvent.click(globalButtonInput);
       });
@@ -526,6 +528,16 @@ describe('Trusted apps form', () => {
       rerenderWithLatestProps();
       expect(renderResult.getByText(INPUT_ERRORS.invalidHash(0)));
       expect(renderResult.getByText(INPUT_ERRORS.mustHaveValue(1)));
+    });
+  });
+
+  describe('and a wildcard value is used with the IS operator', () => {
+    beforeEach(() => render());
+    it('shows callout warning and help text warning', () => {
+      setTextFieldValue(getConditionValue(getCondition()), 'somewildcard*');
+      rerenderWithLatestProps();
+      expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeTruthy();
+      expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongOperatorWarning(0)));
     });
   });
 

@@ -9,6 +9,7 @@ import { SavedObjectReference } from '@kbn/core/types';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { AttributeService } from '@kbn/embeddable-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { MapAttributes } from '../common/content_management';
 import { MAP_EMBEDDABLE_NAME, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getCoreOverlays, getEmbeddableService } from './kibana_services';
@@ -28,6 +29,8 @@ type MapDoc = MapAttributes & {
 };
 export interface MapUnwrapMetaInfo {
   sharingSavedObjectProps: SharingSavedObjectProps;
+  // Is this map managed by the system?
+  managed: boolean;
 }
 
 export type MapAttributeService = AttributeService<
@@ -36,6 +39,17 @@ export type MapAttributeService = AttributeService<
   MapByReferenceInput,
   MapUnwrapMetaInfo
 >;
+
+export const savedObjectToEmbeddableAttributes = (
+  savedObject: SavedObjectCommon<MapAttributes>
+) => {
+  const { attributes } = injectReferences(savedObject);
+
+  return {
+    ...attributes,
+    references: savedObject.references,
+  };
+};
 
 let mapAttributeService: MapAttributeService | null = null;
 
@@ -88,12 +102,8 @@ export function getMapAttributeService(): MapAttributeService {
         throw savedObject.error;
       }
 
-      const { attributes } = injectReferences(savedObject);
       return {
-        attributes: {
-          ...attributes,
-          references: savedObject.references,
-        },
+        attributes: savedObjectToEmbeddableAttributes(savedObject),
         metaInfo: {
           sharingSavedObjectProps: {
             aliasTargetId,
@@ -101,6 +111,7 @@ export function getMapAttributeService(): MapAttributeService {
             aliasPurpose,
             sourceId: savedObjectId,
           },
+          managed: Boolean(savedObject.managed),
         },
       };
     },

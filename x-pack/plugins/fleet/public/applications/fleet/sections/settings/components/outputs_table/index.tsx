@@ -164,5 +164,5 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
     ];
   }, [deleteOutput, getHref]);
 
-  return <EuiBasicTable columns={columns} items={outputs} />;
+  return <EuiBasicTable columns={columns} items={outputs} data-test-subj="settingsOutputsTable" />;
 };

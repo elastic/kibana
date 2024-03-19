@@ -10,10 +10,12 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 
 import { docLinks } from '../../doc_links';
 
+import { INDEX_NAME_PLACEHOLDER } from './constants';
+
 import { ingestKeysToJSON } from './helpers';
 
 export const javascriptDefinition: LanguageDefinition = {
-  buildSearchQuery: ({ indexName }) => `// Let's search!
+  buildSearchQuery: ({ indexName = INDEX_NAME_PLACEHOLDER }) => `// Let's search!
 const searchResult = await client.search({
   index: '${indexName}',
   q: 'snow'
@@ -37,7 +39,11 @@ const client = new Client({
   },
   iconType: 'javascript.svg',
   id: Languages.JAVASCRIPT,
-  ingestData: ({ indexName, ingestPipeline, extraIngestDocumentValues }) => {
+  ingestData: ({
+    indexName = INDEX_NAME_PLACEHOLDER,
+    ingestPipeline,
+    extraIngestDocumentValues,
+  }) => {
     const ingestDocumentKeys = ingestPipeline ? ingestKeysToJSON(extraIngestDocumentValues) : '';
     return `// Sample data books
 const dataset = [

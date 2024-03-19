@@ -48,6 +48,9 @@ export const mockKibanaProps: KibanaLogicProps = {
     },
   },
   data: dataPluginMock.createStartContract(),
+  esConfig: {
+    elasticsearch_host: 'https://your_deployment_url',
+  },
   guidedOnboarding: {},
   history: mockHistory,
   isSidebarEnabled: true,
@@ -70,6 +73,7 @@ export const mockKibanaProps: KibanaLogicProps = {
     hasIncrementalSyncEnabled: true,
     hasNativeConnectors: true,
     hasWebCrawler: true,
+    showAIPlayground: false,
   },
   renderHeaderActions: jest.fn(),
   security: securityMock.createStart(),

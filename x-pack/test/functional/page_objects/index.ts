@@ -33,7 +33,8 @@ import { LogstashPageObject } from './logstash_page';
 import { MaintenanceWindowsPageProvider } from './maintenance_windows_page';
 import { MonitoringPageObject } from './monitoring_page';
 import { NavigationalSearchPageObject } from './navigational_search';
-import { ObservabilityLogExplorerPageObject } from './observability_log_explorer';
+import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
+import { DatasetQualityPageObject } from './dataset_quality';
 import { ObservabilityPageProvider } from './observability_page';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { ReportingPageObject } from './reporting_page';
@@ -50,6 +51,7 @@ import { UpgradeAssistantPageObject } from './upgrade_assistant_page';
 import { UptimePageObject } from './uptime_page';
 import { UserProfilePageProvider } from './user_profile_page';
 import { WatcherPageObject } from './watcher_page';
+import { SearchProfilerPageProvider } from './search_profiler_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -81,12 +83,14 @@ export const pageObjects = {
   maps: GisPageObject,
   monitoring: MonitoringPageObject,
   navigationalSearch: NavigationalSearchPageObject,
-  observabilityLogExplorer: ObservabilityLogExplorerPageObject,
+  observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
+  datasetQuality: DatasetQualityPageObject,
   observability: ObservabilityPageProvider,
   remoteClusters: RemoteClustersPageProvider,
   reporting: ReportingPageObject,
   roleMappings: RoleMappingsPageProvider,
   rollup: RollupPageObject,
+  searchProfiler: SearchProfilerPageProvider,
   searchSessionsManagement: SearchSessionsPageProvider,
   security: SecurityPageObject,
   shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,

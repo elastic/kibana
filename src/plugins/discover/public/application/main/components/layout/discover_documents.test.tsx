@@ -11,7 +11,6 @@ import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DataDocuments$ } from '../../services/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
@@ -23,8 +22,11 @@ import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverAppState } from '../../services/discover_app_state_container';
+import { DiscoverCustomization, DiscoverCustomizationProvider } from '../../../../customizations';
+import { createCustomizationService } from '../../../../customizations/customization_service';
+import { DiscoverGrid } from '../../../../components/discover_grid';
 
-setHeaderActionMenuMounter(jest.fn());
+const customisationService = createCustomizationService();
 
 async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   const services = discoverServiceMock;
@@ -50,9 +52,11 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
 
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
-      <DiscoverMainProvider value={stateContainer}>
-        <DiscoverDocuments {...props} />
-      </DiscoverMainProvider>
+      <DiscoverCustomizationProvider value={customisationService}>
+        <DiscoverMainProvider value={stateContainer}>
+          <DiscoverDocuments {...props} />
+        </DiscoverMainProvider>
+      </DiscoverCustomizationProvider>
     </KibanaContextProvider>
   );
   await act(async () => {
@@ -99,5 +103,43 @@ describe('Discover documents layout', () => {
     );
 
     expect(container.appState.getState().grid?.columns?.someField.width).toEqual(206);
+  });
+
+  test('should render customisations', async () => {
+    const customCellRenderer = {
+      content: () => <span className="custom-renderer-test">Test</span>,
+    };
+
+    const customGridColumnsConfiguration = {
+      content: () => ({
+        id: 'content',
+        displayText: <span className="custom-column-test">Column</span>,
+      }),
+    };
+
+    const customControlColumnsConfiguration = () => ({
+      leadingControlColumns: [],
+      trailingControlColumns: [],
+    });
+
+    const customization: DiscoverCustomization = {
+      id: 'data_table',
+      customCellRenderer,
+      customGridColumnsConfiguration,
+      customControlColumnsConfiguration,
+    };
+
+    customisationService.set(customization);
+    const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
+    const discoverGridComponent = component.find(DiscoverGrid);
+    expect(discoverGridComponent.exists()).toBeTruthy();
+
+    expect(discoverGridComponent.prop('externalCustomRenderers')).toEqual(customCellRenderer);
+    expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toEqual(
+      customGridColumnsConfiguration
+    );
+    expect(discoverGridComponent.prop('customControlColumnsConfiguration')).toEqual(
+      customControlColumnsConfiguration
+    );
   });
 });

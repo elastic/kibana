@@ -990,7 +990,7 @@ describe('FormBased Data Panel', () => {
       expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         DOCUMENT_FIELD_NAME,
       ]);
-      expect(wrapper.find(EuiCallOut).length).toEqual(3);
+      expect(wrapper.find(EuiCallOut).length).toEqual(2);
     });
 
     it('should toggle type if clicked again', async () => {

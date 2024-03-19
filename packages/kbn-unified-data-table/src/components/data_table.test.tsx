@@ -24,7 +24,10 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { servicesMock } from '../../__mocks__/services';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { testLeadingControlColumn } from '../../__mocks__/external_control_columns';
+import {
+  testLeadingControlColumn,
+  testTrailingControlColumns,
+} from '../../__mocks__/external_control_columns';
 
 const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
 jest.mock('@kbn/cell-actions', () => ({
@@ -308,7 +311,7 @@ describe('UnifiedDataTable', () => {
         columns: ['message'],
       });
 
-      expect(component.find(EuiDataGrid).prop('sorting')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
         Object {
           "columns": Array [
             Object {
@@ -332,7 +335,7 @@ describe('UnifiedDataTable', () => {
         columns: ['bytes', 'message'],
       });
 
-      expect(component.find(EuiDataGrid).prop('sorting')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
         Object {
           "columns": Array [
             Object {
@@ -359,18 +362,24 @@ describe('UnifiedDataTable', () => {
         onUpdateRowHeight: jest.fn(),
       });
 
-      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
           "additionalControls": null,
           "showColumnSelector": false,
           "showDisplaySelector": Object {
             "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
+              headerRowHeight="custom"
+              headerRowHeightLines={1}
+              onChangeRowHeight={[Function]}
+              onChangeRowHeightLines={[Function]}
               onChangeSampleSize={[MockFunction]}
+              rowHeight="custom"
+              rowHeightLines={3}
               sampleSize={150}
             />,
             "allowDensity": false,
             "allowResetButton": false,
-            "allowRowHeight": true,
+            "allowRowHeight": false,
           },
           "showFullScreenSelector": true,
           "showSortSelector": true,
@@ -385,13 +394,23 @@ describe('UnifiedDataTable', () => {
         onUpdateRowHeight: jest.fn(),
       });
 
-      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
           "additionalControls": null,
           "showColumnSelector": false,
           "showDisplaySelector": Object {
+            "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
+              headerRowHeight="custom"
+              headerRowHeightLines={1}
+              onChangeRowHeight={[Function]}
+              onChangeRowHeightLines={[Function]}
+              rowHeight="custom"
+              rowHeightLines={3}
+              sampleSize={200}
+            />,
             "allowDensity": false,
-            "allowRowHeight": true,
+            "allowResetButton": false,
+            "allowRowHeight": false,
           },
           "showFullScreenSelector": true,
           "showSortSelector": true,
@@ -406,7 +425,7 @@ describe('UnifiedDataTable', () => {
         onUpdateSampleSize: undefined,
       });
 
-      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
           "additionalControls": null,
           "showColumnSelector": false,
@@ -415,6 +434,69 @@ describe('UnifiedDataTable', () => {
           "showSortSelector": true,
         }
       `);
+    });
+  });
+
+  describe('customControlColumnsConfiguration', () => {
+    const customControlColumnsConfiguration = jest.fn();
+    it('should be able to customise the leading control column', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        expandedDoc: {
+          id: 'test',
+          raw: {
+            _index: 'test_i',
+            _id: 'test',
+          },
+          flattened: { test: jest.fn() },
+        },
+        setExpandedDoc: jest.fn(),
+        renderDocumentView: jest.fn(),
+        externalControlColumns: [testLeadingControlColumn],
+        customControlColumnsConfiguration: customControlColumnsConfiguration.mockImplementation(
+          () => {
+            return {
+              leadingControlColumns: [testLeadingControlColumn, testTrailingControlColumns[0]],
+              trailingControlColumns: [],
+            };
+          }
+        ),
+      });
+
+      expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
+      expect(
+        findTestSubject(component, 'test-trailing-column-popover-button').exists()
+      ).toBeTruthy();
+    });
+
+    it('should be able to customise the trailing control column', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        expandedDoc: {
+          id: 'test',
+          raw: {
+            _index: 'test_i',
+            _id: 'test',
+          },
+          flattened: { test: jest.fn() },
+        },
+        setExpandedDoc: jest.fn(),
+        renderDocumentView: jest.fn(),
+        externalControlColumns: [testLeadingControlColumn],
+        customControlColumnsConfiguration: customControlColumnsConfiguration.mockImplementation(
+          () => {
+            return {
+              leadingControlColumns: [],
+              trailingControlColumns: [testLeadingControlColumn, testTrailingControlColumns[0]],
+            };
+          }
+        ),
+      });
+
+      expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
+      expect(
+        findTestSubject(component, 'test-trailing-column-popover-button').exists()
+      ).toBeTruthy();
     });
   });
 

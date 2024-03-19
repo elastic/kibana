@@ -137,7 +137,7 @@ describe('useLensSuggestions', () => {
       currentSuggestion: allSuggestionsMock[0],
       isOnHistogramMode: true,
       histogramQuery: {
-        esql: 'from the-data-view | limit 100 | EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats rows = count(*) by timestamp | rename timestamp as `@timestamp every 30 minute`',
+        esql: 'from the-data-view | limit 100 | EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp | rename timestamp as `@timestamp every 30 minute`',
       },
       suggestionUnsupported: false,
     });

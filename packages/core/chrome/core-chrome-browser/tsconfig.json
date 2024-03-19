@@ -19,7 +19,8 @@
     "@kbn/deeplinks-ml",
     "@kbn/deeplinks-management",
     "@kbn/deeplinks-search",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/core-application-browser"
   ],
   "exclude": [
     "target/**/*",

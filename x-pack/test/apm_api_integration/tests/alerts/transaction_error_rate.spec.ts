@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const synthtraceEsClient = getService('synthtraceEsClient');
 
   registry.when('transaction error rate alert', { config: 'basic', archives: [] }, () => {
-    before(async () => {
+    before(() => {
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -66,13 +66,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .success(),
           ];
         });
-      await synthtraceEsClient.index(events);
+      return synthtraceEsClient.index(events);
     });
 
     after(async () => {
       await synthtraceEsClient.clean();
     });
 
+    // FLAKY: https://github.com/elastic/kibana/issues/177104
     describe('create rule without kql query', () => {
       let ruleId: string;
       let actionId: string;
@@ -196,11 +197,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
+    // FLAKY: https://github.com/elastic/kibana/issues/177108
     describe('create rule with kql query', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
 
-      before(async () => {
+      beforeEach(async () => {
         const createdRule = await createApmRule({
           supertest,
           ruleTypeId: ApmRuleType.TransactionErrorRate,
@@ -232,7 +234,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         alerts = await waitForAlertsForRule({ es, ruleId });
       });
 
-      after(async () => {
+      afterEach(async () => {
         await cleanupRuleAndAlertState({ es, supertest, logger });
       });
 

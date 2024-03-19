@@ -9,3 +9,4 @@
 export * from './builtin_action_groups_types';
 export * from './rule_type';
 export * from './action_group_types';
+export * from './alert_type';

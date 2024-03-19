@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-} from '../../../common/mock';
-import { createStore } from '../../../common/store';
+import { createMockStore } from '../../../common/mock';
 import { createFilterInDiscoverCellActionFactory } from './filter_in';
 import type { SecurityCellActionExecutionContext } from '../../types';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
@@ -30,8 +24,7 @@ jest.mock('@kbn/ui-actions-plugin/public', () => ({
   addFilterOut: () => {},
 }));
 
-const { storage } = createSecuritySolutionStorageMock();
-const mockStore = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const mockStore = createMockStore();
 
 describe('createFilterInDiscoverCellActionFactory', () => {
   const createFilterInCellAction = createFilterInDiscoverCellActionFactory({

@@ -9,9 +9,9 @@ import { EuiCode, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import type { MissingPrivileges } from '../../../../common/entity_analytics/risk_engine';
 import { useKibana } from '../../../common/lib/kibana';
 import { CommaSeparatedValues } from '../../../detections/components/callouts/missing_privileges_callout/comma_separated_values';
-import type { MissingPrivileges } from './use_missing_risk_engine_privileges';
 
 export const MISSING_PRIVILEGES_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageTitle',

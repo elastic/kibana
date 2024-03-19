@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('displays _source viewer in doc viewer', async function () {
       await dataGrid.clickRowToggle();
       await PageObjects.discover.isShowingDocViewer();
-      await PageObjects.discover.clickDocViewerTab(1);
+      await PageObjects.discover.clickDocViewerTab('doc_view_source');
       await PageObjects.discover.expectSourceViewerToExist();
     });
 

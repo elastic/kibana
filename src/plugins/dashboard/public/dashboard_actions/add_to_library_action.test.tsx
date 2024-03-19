@@ -5,182 +5,69 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import {
-  EmbeddableInput,
-  ErrorEmbeddable,
-  IContainer,
-  isErrorEmbeddable,
-  ReferenceOrValueEmbeddable,
-  ViewMode,
-} from '@kbn/embeddable-plugin/public';
-import {
-  ContactCardEmbeddable,
-  ContactCardEmbeddableFactory,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
-} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { type Query, type AggregateQuery, Filter } from '@kbn/es-query';
 
-import { buildMockDashboard } from '../mocks';
+import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 import { pluginServices } from '../services/plugin_services';
-import { AddToLibraryAction } from './add_to_library_action';
-import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
+import { AddToLibraryAction, AddPanelToLibraryActionApi } from './add_to_library_action';
 
-const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-  .fn()
-  .mockReturnValue(embeddableFactory);
-let container: DashboardContainer;
-let embeddable: ContactCardEmbeddable & ReferenceOrValueEmbeddable;
+describe('Add to library action', () => {
+  let action: AddToLibraryAction;
+  let context: { embeddable: AddPanelToLibraryActionApi };
 
-const defaultCapabilities = {
-  advancedSettings: {},
-  visualize: { save: true },
-  maps: { save: true },
-  navLinks: {},
-};
+  beforeEach(() => {
+    action = new AddToLibraryAction();
+    context = {
+      embeddable: {
+        linkToLibrary: jest.fn(),
+        canLinkToLibrary: jest.fn().mockResolvedValue(true),
 
-Object.defineProperty(pluginServices.getServices().application, 'capabilities', {
-  value: defaultCapabilities,
-});
-
-beforeEach(async () => {
-  pluginServices.getServices().application.capabilities = defaultCapabilities;
-
-  container = buildMockDashboard();
-
-  const contactCardEmbeddable = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Kibanana',
+        viewMode: new BehaviorSubject<ViewMode>('edit'),
+        panelTitle: new BehaviorSubject<string | undefined>('A very compatible API'),
+      },
+    };
   });
 
-  if (isErrorEmbeddable(contactCardEmbeddable)) {
-    throw new Error('Failed to create embeddable');
-  } else {
-    embeddable = embeddablePluginMock.mockRefOrValEmbeddable<
-      ContactCardEmbeddable,
-      ContactCardEmbeddableInput
-    >(contactCardEmbeddable, {
-      mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: contactCardEmbeddable.id },
-      mockedByValueInput: { firstName: 'Kibanana', id: contactCardEmbeddable.id },
+  it('is compatible when api meets all conditions', async () => {
+    expect(await action.isCompatible(context)).toBe(true);
+  });
+
+  it('is incompatible when context lacks necessary functions', async () => {
+    const emptyContext = {
+      embeddable: {},
+    };
+    expect(await action.isCompatible(emptyContext)).toBe(false);
+  });
+
+  it('is incompatible when view mode is view', async () => {
+    (context.embeddable as PublishesViewMode).viewMode = new BehaviorSubject<ViewMode>('view');
+    expect(await action.isCompatible(context)).toBe(false);
+  });
+
+  it('is incompatible when canLinkToLibrary returns false', async () => {
+    context.embeddable.canLinkToLibrary = jest.fn().mockResolvedValue(false);
+    expect(await action.isCompatible(context)).toBe(false);
+  });
+
+  it('calls the linkToLibrary method on execute', async () => {
+    action.execute(context);
+    expect(context.embeddable.linkToLibrary).toHaveBeenCalled();
+  });
+
+  it('shows a toast with a title from the API when successful', async () => {
+    await action.execute(context);
+    expect(pluginServices.getServices().notifications.toasts.addSuccess).toHaveBeenCalledWith({
+      'data-test-subj': 'addPanelToLibrarySuccess',
+      title: "Panel 'A very compatible API' was added to the library",
     });
-    embeddable.updateInput({ viewMode: ViewMode.EDIT });
-  }
-});
-
-test('Add to library is incompatible with Error Embeddables', async () => {
-  const action = new AddToLibraryAction();
-  const errorEmbeddable = new ErrorEmbeddable(
-    'Wow what an awful error',
-    { id: ' 404' },
-    embeddable.getRoot() as IContainer
-  );
-  expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
-});
-
-test('Add to library is incompatible with ES|QL Embeddables', async () => {
-  const action = new AddToLibraryAction();
-  const mockGetFilters = jest.fn(async () => [] as Filter[]);
-  const mockGetQuery = jest.fn(async () => undefined as Query | AggregateQuery | undefined);
-  const filterableEmbeddable = embeddablePluginMock.mockFilterableEmbeddable(embeddable, {
-    getFilters: () => mockGetFilters(),
-    getQuery: () => mockGetQuery(),
   });
-  mockGetQuery.mockResolvedValue({ esql: 'from logstash-* | limit 10' } as AggregateQuery);
-  expect(await action.isCompatible({ embeddable: filterableEmbeddable })).toBe(false);
-});
 
-test('Add to library is incompatible on visualize embeddable without visualize save permissions', async () => {
-  pluginServices.getServices().application.capabilities = {
-    ...defaultCapabilities,
-    visualize: { save: false },
-  };
-  const action = new AddToLibraryAction();
-  expect(await action.isCompatible({ embeddable })).toBe(false);
-});
-
-test('Add to library is compatible when embeddable on dashboard has value type input', async () => {
-  const action = new AddToLibraryAction();
-  embeddable.updateInput(await embeddable.getInputAsValueType());
-  expect(await action.isCompatible({ embeddable })).toBe(true);
-});
-
-test('Add to library is not compatible when embeddable input is by reference', async () => {
-  const action = new AddToLibraryAction();
-  embeddable.updateInput(await embeddable.getInputAsRefType());
-  expect(await action.isCompatible({ embeddable })).toBe(false);
-});
-
-test('Add to library is not compatible when view mode is set to view', async () => {
-  const action = new AddToLibraryAction();
-  embeddable.updateInput(await embeddable.getInputAsRefType());
-  embeddable.updateInput({ viewMode: ViewMode.VIEW });
-  expect(await action.isCompatible({ embeddable })).toBe(false);
-});
-
-test('Add to library is not compatible when embeddable is not in a dashboard container', async () => {
-  let orphanContactCard = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Orphan',
+  it('shows a danger toast when the link operation is unsuccessful', async () => {
+    context.embeddable.linkToLibrary = jest.fn().mockRejectedValue(new Error('Oh dang'));
+    await action.execute(context);
+    expect(pluginServices.getServices().notifications.toasts.addDanger).toHaveBeenCalledWith({
+      'data-test-subj': 'addPanelToLibraryError',
+      title: 'An error was encountered adding panel A very compatible API to the library',
+    });
   });
-  orphanContactCard = embeddablePluginMock.mockRefOrValEmbeddable<
-    ContactCardEmbeddable,
-    ContactCardEmbeddableInput
-  >(orphanContactCard, {
-    mockedByReferenceInput: { savedObjectId: 'test', id: orphanContactCard.id },
-    mockedByValueInput: { firstName: 'Kibanana', id: orphanContactCard.id },
-  });
-  const action = new AddToLibraryAction();
-  expect(await action.isCompatible({ embeddable: orphanContactCard })).toBe(false);
-});
-
-test('Add to library replaces embeddableId and retains panel count', async () => {
-  const dashboard = embeddable.getRoot() as IContainer;
-  const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
-  const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
-
-  const action = new AddToLibraryAction();
-  await action.execute({ embeddable });
-  expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount);
-
-  const newPanelId = Object.keys(container.getInput().panels).find(
-    (key) => !originalPanelKeySet.has(key)
-  );
-  expect(newPanelId).toBeDefined();
-  const newPanel = container.getInput().panels[newPanelId!];
-  expect(newPanel.type).toEqual(embeddable.type);
-});
-
-test('Add to library returns reference type input', async () => {
-  const complicatedAttributes = {
-    attribute1: 'The best attribute',
-    attribute2: 22,
-    attribute3: ['array', 'of', 'strings'],
-    attribute4: { nestedattribute: 'hello from the nest' },
-  };
-
-  embeddable = embeddablePluginMock.mockRefOrValEmbeddable<ContactCardEmbeddable>(embeddable, {
-    mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: embeddable.id },
-    mockedByValueInput: { attributes: complicatedAttributes, id: embeddable.id } as EmbeddableInput,
-  });
-  const dashboard = embeddable.getRoot() as IContainer;
-  const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
-  const action = new AddToLibraryAction();
-  await action.execute({ embeddable });
-  const newPanelId = Object.keys(container.getInput().panels).find(
-    (key) => !originalPanelKeySet.has(key)
-  );
-  expect(newPanelId).toBeDefined();
-  const newPanel = container.getInput().panels[newPanelId!];
-  expect(newPanel.type).toEqual(embeddable.type);
-  expect((newPanel.explicitInput as unknown as { attributes: unknown }).attributes).toBeUndefined();
-  expect(newPanel.explicitInput.savedObjectId).toBe('testSavedObjectId');
 });

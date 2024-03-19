@@ -24,7 +24,7 @@ import styled from 'styled-components';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions } from '../../../store';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
@@ -226,12 +226,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
           <EuiTitle>
             <h3>{NOTES}</h3>
           </EuiTitle>
-          <NotePreviews
-            eventIdToNoteIds={eventIdToNoteIds}
-            notes={notes}
-            timelineId={timelineId}
-            showTimelineDescription
-          />
+          <NotePreviews notes={notes} timelineId={timelineId} showTimelineDescription />
           <EuiSpacer size="s" />
           {!isImmutable && kibanaSecuritySolutionsPrivileges.crud === true && (
             <AddNote

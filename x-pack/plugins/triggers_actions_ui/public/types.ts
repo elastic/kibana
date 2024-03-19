@@ -51,6 +51,7 @@ import {
   AlertingFrameworkHealth,
   RuleNotifyWhenType,
   RuleTypeParams,
+  RuleTypeMetaData,
   ActionVariable,
   RuleLastRun,
   MaintenanceWindow,
@@ -127,6 +128,7 @@ export type {
   AlertingFrameworkHealth,
   RuleNotifyWhenType,
   RuleTypeParams,
+  RuleTypeMetaData,
   ResolvedRule,
   SanitizedRule,
   RuleStatusDropdownProps,
@@ -216,6 +218,14 @@ export type BulkOperationAttributesWithoutHttp =
   | BulkOperationAttributesByFilter;
 
 export type BulkOperationAttributes = BulkOperationAttributesWithoutHttp & {
+  http: HttpSetup;
+};
+
+export type BulkDisableParamsWithoutHttp = BulkOperationAttributesWithoutHttp & {
+  untrack: boolean;
+};
+
+export type BulkDisableParams = BulkDisableParamsWithoutHttp & {
   http: HttpSetup;
 };
 
@@ -410,10 +420,14 @@ export interface IErrorObject {
 export enum EditConnectorTabs {
   Configuration = 'configuration',
   Test = 'test',
+  Rules = 'rules',
 }
 
-export interface RuleEditProps<MetaData = Record<string, any>> {
-  initialRule: Rule;
+export interface RuleEditProps<
+  Params extends RuleTypeParams = RuleTypeParams,
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+> {
+  initialRule: Rule<Params>;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
@@ -425,14 +439,27 @@ export interface RuleEditProps<MetaData = Record<string, any>> {
   ruleType?: RuleType<string, string>;
 }
 
-export interface RuleAddProps<MetaData = Record<string, any>> {
+export interface RuleAddProps<
+  Params extends RuleTypeParams = RuleTypeParams,
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+> {
+  /**
+   * ID of the feature this rule should be created for.
+   *
+   * Notes:
+   * - The feature needs to be registered using `featuresPluginSetup.registerKibanaFeature()` API during your plugin's setup phase.
+   * - The user needs to have permission to access the feature in order to create the rule.
+   * */
   consumer: string;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
   ruleTypeId?: string;
+  /**
+   * Determines whether the user should be able to change the rule type in the UI.
+   */
   canChangeTrigger?: boolean;
-  initialValues?: Partial<Rule>;
+  initialValues?: Partial<Rule<Params>>;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
   hideGrouping?: boolean;
@@ -445,8 +472,8 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   useRuleProducer?: boolean;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
-export interface RuleDefinitionProps {
-  rule: Rule;
+export interface RuleDefinitionProps<Params extends RuleTypeParams = RuleTypeParams> {
+  rule: Rule<Params>;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onEditRule: () => Promise<void>;
@@ -690,6 +717,7 @@ export interface AlertsTableConfigurationRegistry {
   cases?: {
     featureId: string;
     owner: string[];
+    appId?: string;
     syncAlerts?: boolean;
   };
   columns: EuiDataGridColumn[];
@@ -708,6 +736,7 @@ export interface AlertsTableConfigurationRegistry {
   };
   useFieldBrowserOptions?: UseFieldBrowserOptions;
   showInspectButton?: boolean;
+  ruleTypeIds?: string[];
   useFetchPageContext?: PreFetchPageContext;
 }
 
@@ -782,14 +811,14 @@ export interface ConnectorServices {
 }
 
 export interface RulesListFilters {
-  actionTypes: string[];
-  ruleExecutionStatuses: string[];
-  ruleLastRunOutcomes: string[];
-  ruleParams: Record<string, string | number | object>;
-  ruleStatuses: RuleStatus[];
-  searchText: string;
-  tags: string[];
-  types: string[];
+  actionTypes?: string[];
+  ruleExecutionStatuses?: string[];
+  ruleLastRunOutcomes?: string[];
+  ruleParams?: Record<string, string | number | object>;
+  ruleStatuses?: RuleStatus[];
+  searchText?: string;
+  tags?: string[];
+  types?: string[];
   kueryNode?: KueryNode;
 }
 

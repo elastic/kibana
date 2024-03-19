@@ -7,7 +7,7 @@
 
 import { createSelector } from 'reselect';
 
-import { getTimelineByIdSelector } from '../../../../store/timeline/selectors';
+import { getTimelineByIdSelector } from '../../../../store/selectors';
 
 /**
  * This selector combines all the selectors used by the Timeline `StatefulBody`,

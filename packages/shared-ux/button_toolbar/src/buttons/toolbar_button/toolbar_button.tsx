@@ -23,7 +23,7 @@ type ButtonRenderStyle = 'standard' | 'iconButton';
 interface ToolbarButtonCommonProps
   extends Pick<
     EuiButtonPropsForButton,
-    'onClick' | 'iconType' | 'size' | 'data-test-subj' | 'isDisabled' | 'aria-label'
+    'onClick' | 'onBlur' | 'iconType' | 'size' | 'data-test-subj' | 'isDisabled' | 'aria-label'
   > {
   /**
    * Render style of the toolbar button

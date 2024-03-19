@@ -19,6 +19,8 @@ jest.mock('@kbn/repo-info', () => ({
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
+import { GlobalConfigService } from '../services/global_config_service';
+
 import {
   callEnterpriseSearchConfigAPI,
   warnMismatchedVersions,
@@ -37,6 +39,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
   };
   const mockDependencies = {
     config: mockConfig,
+    globalConfigService: new GlobalConfigService(),
     request: mockRequest,
     log: loggingSystemMock.create().get(),
   } as any;
@@ -208,6 +211,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
       hasDefaultIngestPipeline: false,
       hasNativeConnectors: false,
       hasWebCrawler: false,
+      showAIPlayground: false,
       host: '',
     };
 
@@ -221,6 +225,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
         hasDefaultIngestPipeline: false,
         hasNativeConnectors: false,
         hasWebCrawler: false,
+        showAIPlayground: false,
       },
       kibanaVersion: '1.0.0',
     });

@@ -17,6 +17,11 @@ export enum SearchType {
   esqlQuery = 'esqlQuery',
 }
 
+export interface SourceField {
+  label: string;
+  searchPath: string;
+}
+
 export interface CommonRuleParams {
   size: number;
   thresholdComparator?: string;
@@ -29,6 +34,7 @@ export interface CommonRuleParams {
   termSize?: number;
   termField?: string | string[];
   excludeHitsFromPreviousRun: boolean;
+  sourceFields?: SourceField[];
 }
 
 export interface CommonEsQueryRuleParams extends RuleTypeParams, CommonRuleParams {}

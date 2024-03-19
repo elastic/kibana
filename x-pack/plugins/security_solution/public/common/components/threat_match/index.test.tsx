@@ -80,8 +80,12 @@ describe('ThreatMatchComponent', () => {
     );
 
     expect(wrapper.find('EuiFlexGroup[data-test-subj="itemEntryContainer"]')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="entryField"]').text()).toEqual('Search');
-    expect(wrapper.find('[data-test-subj="threatEntryField"]').text()).toEqual('Search');
+    expect(wrapper.find('[data-test-subj="entryField"] input').props().placeholder).toEqual(
+      'Search'
+    );
+    expect(wrapper.find('[data-test-subj="threatEntryField"] input').props().placeholder).toEqual(
+      'Search'
+    );
   });
 
   test('it displays "Search" for "listItems" that are passed in', async () => {
@@ -108,7 +112,9 @@ describe('ThreatMatchComponent', () => {
       </ThemeProvider>
     );
     expect(wrapper.find('EuiFlexGroup[data-test-subj="itemEntryContainer"]')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="entryField"]').at(0).text()).toEqual('Search');
+    expect(wrapper.find('[data-test-subj="entryField"] input').at(0).props().placeholder).toEqual(
+      'Search'
+    );
 
     wrapper.unmount();
   });
@@ -171,10 +177,18 @@ describe('ThreatMatchComponent', () => {
 
     await waitFor(() => {
       expect(wrapper.find('EuiFlexGroup[data-test-subj="itemEntryContainer"]')).toHaveLength(2);
-      expect(wrapper.find('[data-test-subj="entryField"]').at(0).text()).toEqual('Search');
-      expect(wrapper.find('[data-test-subj="threatEntryField"]').at(0).text()).toEqual('Search');
-      expect(wrapper.find('[data-test-subj="entryField"]').at(1).text()).toEqual('Search');
-      expect(wrapper.find('[data-test-subj="threatEntryField"]').at(1).text()).toEqual('Search');
+      expect(wrapper.find('[data-test-subj="entryField"] input').at(0).props().placeholder).toEqual(
+        'Search'
+      );
+      expect(
+        wrapper.find('[data-test-subj="threatEntryField"] input').at(0).props().placeholder
+      ).toEqual('Search');
+      expect(wrapper.find('[data-test-subj="entryField"] input').at(1).props().placeholder).toEqual(
+        'Search'
+      );
+      expect(
+        wrapper.find('[data-test-subj="threatEntryField"] input').at(1).props().placeholder
+      ).toEqual('Search');
     });
   });
 
@@ -208,10 +222,18 @@ describe('ThreatMatchComponent', () => {
 
     await waitFor(() => {
       expect(wrapper.find('EuiFlexGroup[data-test-subj="entriesContainer"]')).toHaveLength(2);
-      expect(wrapper.find('[data-test-subj="entryField"]').at(0).text()).toEqual('Search');
-      expect(wrapper.find('[data-test-subj="threatEntryField"]').at(0).text()).toEqual('Search');
-      expect(wrapper.find('[data-test-subj="entryField"]').at(1).text()).toEqual('Search');
-      expect(wrapper.find('[data-test-subj="threatEntryField"]').at(1).text()).toEqual('Search');
+      expect(wrapper.find('[data-test-subj="entryField"] input').at(0).props().placeholder).toEqual(
+        'Search'
+      );
+      expect(
+        wrapper.find('[data-test-subj="threatEntryField"] input').at(0).props().placeholder
+      ).toEqual('Search');
+      expect(wrapper.find('[data-test-subj="entryField"] input').at(1).props().placeholder).toEqual(
+        'Search'
+      );
+      expect(
+        wrapper.find('[data-test-subj="threatEntryField"] input').at(1).props().placeholder
+      ).toEqual('Search');
     });
   });
 

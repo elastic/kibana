@@ -16,6 +16,7 @@ export class DashboardAddPanelService extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
   private readonly browser = this.ctx.getService('browser');
+  private readonly toasts = this.ctx.getService('toasts');
 
   async clickOpenAddPanel() {
     this.log.debug('DashboardAddPanel.clickOpenAddPanel');
@@ -77,6 +78,10 @@ export class DashboardAddPanelService extends FtrService {
     await this.testSubjects.click(`createNew-${type}`);
   }
 
+  async clickAddNewPanelFromUIActionLink(type: string) {
+    await this.testSubjects.click(`create-action-${type}`);
+  }
+
   async addEveryEmbeddableOnCurrentPage() {
     this.log.debug('addEveryEmbeddableOnCurrentPage');
     const itemList = await this.testSubjects.find('savedObjectsFinderTable');
@@ -91,7 +96,7 @@ export class DashboardAddPanelService extends FtrService {
           continue;
         }
         await button.click();
-        await this.common.closeToastIfExists();
+
         embeddableList.push(name);
       }
     });
@@ -101,7 +106,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickPagerNextButton() {
     // Clear all toasts that could hide pagination controls
-    await this.common.clearAllToasts();
+    await this.toasts.dismissAll();
 
     const addPanel = await this.testSubjects.find('dashboardAddPanel');
 
@@ -226,20 +231,39 @@ export class DashboardAddPanelService extends FtrService {
     return this.addEmbeddable(vizName, 'Visualization');
   }
 
-  async addEmbeddable(embeddableName: string, embeddableType: string) {
+  async addEmbeddable(
+    embeddableName: string,
+    embeddableType?: string,
+    closePanelWhenComplete: boolean = true
+  ) {
     this.log.debug(
       `DashboardAddPanel.addEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
     );
     await this.ensureAddPanelIsShowing();
-    await this.savedObjectsFinder.toggleFilter(embeddableType);
-    await this.savedObjectsFinder.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
+    await this.savedObjectsFinder.filterEmbeddableNames(
+      `${embeddableType ? 'type:(' + embeddableType + ') ' : ''}"${embeddableName.replace(
+        '-',
+        ' '
+      )}"`
+    );
     await this.testSubjects.click(`savedObjectTitle${embeddableName.split(' ').join('-')}`);
     await this.testSubjects.exists('addObjectToDashboardSuccess');
-    await this.closeAddPanel();
+    if (closePanelWhenComplete) {
+      await this.closeAddPanel();
+    }
 
     // close "Added successfully" toast
-    await this.common.clearAllToasts();
+    await this.toasts.dismissAll();
     return embeddableName;
+  }
+
+  async addEmbeddables(embeddables: Array<{ name: string; type?: string }>) {
+    const addedEmbeddables: string[] = [];
+    for (const { name, type } of embeddables) {
+      addedEmbeddables.push(await this.addEmbeddable(name, type, false));
+    }
+    await this.closeAddPanel();
+    return addedEmbeddables;
   }
 
   async panelAddLinkExists(name: string) {

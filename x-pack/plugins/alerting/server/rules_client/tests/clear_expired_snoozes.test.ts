@@ -12,6 +12,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
@@ -25,6 +26,7 @@ import { getBeforeSetup, mockedDateString } from './lib';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RuleSnooze } from '../../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -71,6 +73,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 describe('clearExpiredSnoozes()', () => {
@@ -113,7 +116,7 @@ describe('clearExpiredSnoozes()', () => {
     ]);
     await rulesClient.clearExpiredSnoozes({ rule: { ...attributes, id } });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       '1',
       {
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -158,7 +161,7 @@ describe('clearExpiredSnoozes()', () => {
     ]);
     await rulesClient.clearExpiredSnoozes({ rule: { ...attributes, id } });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       '1',
       {
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -208,7 +211,7 @@ describe('clearExpiredSnoozes()', () => {
 function setupTestWithSnoozeSchedule(snoozeSchedule: RuleSnooze) {
   const rule = {
     id: '1',
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
       name: 'name',
       consumer: 'myApp',

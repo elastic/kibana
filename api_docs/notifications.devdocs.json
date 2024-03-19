@@ -17,10 +17,10 @@
     "objects": [],
     "start": {
       "parentPluginId": "notifications",
-      "id": "def-server.NotificationsPluginStart",
+      "id": "def-server.NotificationsServerStart",
       "type": "Type",
       "tags": [],
-      "label": "NotificationsPluginStart",
+      "label": "NotificationsServerStart",
       "description": [],
       "signature": [
         "EmailServiceStart"

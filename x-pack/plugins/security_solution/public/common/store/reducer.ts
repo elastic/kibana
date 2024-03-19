@@ -19,7 +19,7 @@ import { sourcererReducer, sourcererModel } from './sourcerer';
 import type { HostsPluginReducer } from '../../explore/hosts/store';
 import type { NetworkPluginReducer } from '../../explore/network/store';
 import type { UsersPluginReducer } from '../../explore/users/store';
-import type { TimelinePluginReducer } from '../../timelines/store/timeline';
+import type { TimelinePluginReducer } from '../../timelines/store';
 
 import type { SecuritySubPlugins } from '../../app/types';
 import type { ManagementPluginReducer } from '../../management';
@@ -55,11 +55,13 @@ export const createInitialState = (
     defaultDataView,
     kibanaDataViews,
     signalIndexName,
+    signalIndexMappingOutdated,
     enableExperimental,
   }: {
     defaultDataView: SourcererModel['defaultDataView'];
     kibanaDataViews: SourcererModel['kibanaDataViews'];
     signalIndexName: SourcererModel['signalIndexName'];
+    signalIndexMappingOutdated: SourcererModel['signalIndexMappingOutdated'];
     enableExperimental: ExperimentalFeatures;
   },
   dataTableState: DataTableState,
@@ -115,6 +117,7 @@ export const createInitialState = (
       defaultDataView,
       kibanaDataViews: kibanaDataViews.map((dataView) => ({ ...initDataView, ...dataView })),
       signalIndexName,
+      signalIndexMappingOutdated,
     },
     globalUrlParam: initialGlobalUrlParam,
     dataTable: dataTableState.dataTable,

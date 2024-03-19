@@ -7,7 +7,7 @@
 
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import { AlertInstanceState } from '../../../common/types/alerts';
-import { AlertsFactory } from '../../alerts';
+import { RulesFactory } from '../../rules';
 import { CommonAlertState, CommonAlertFilter, RulesByType } from '../../../common/types/alerts';
 import { RULES } from '../../../common/constants';
 
@@ -18,7 +18,7 @@ export async function fetchStatus(
   filters: CommonAlertFilter[] = []
 ): Promise<RulesByType> {
   const rulesByType = await Promise.all(
-    (alertTypes || RULES).map(async (type) => AlertsFactory.getByType(type, rulesClient))
+    (alertTypes || RULES).map(async (type) => RulesFactory.getByType(type, rulesClient))
   );
   if (!rulesByType.length) return {};
 

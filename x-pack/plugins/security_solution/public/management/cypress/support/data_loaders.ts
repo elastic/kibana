@@ -169,12 +169,13 @@ export const dataLoaders = (
       endpointPackageVersion?: string;
       agentPolicyName?: string;
     }) => {
-      const { kbnClient } = await stackServicesPromise;
+      const { kbnClient, log } = await stackServicesPromise;
       return indexFleetEndpointPolicy(
         kbnClient,
         policyName,
         endpointPackageVersion,
-        agentPolicyName
+        agentPolicyName,
+        log
       );
     },
 
@@ -390,7 +391,7 @@ ${s1Info.status}
     createEndpointHost: async (
       options: Omit<CreateAndEnrollEndpointHostCIOptions, 'log' | 'kbnClient'>
     ): Promise<CreateAndEnrollEndpointHostCIResponse> => {
-      const { kbnClient, log } = await stackServicesPromise;
+      const { kbnClient, log, esClient } = await stackServicesPromise;
 
       let retryAttempt = 0;
       const attemptCreateEndpointHost =
@@ -403,6 +404,7 @@ ${s1Info.status}
                   ...options,
                   log,
                   kbnClient,
+                  esClient,
                 })
               : await createAndEnrollEndpointHost({
                   useClosestVersionMatch: true,

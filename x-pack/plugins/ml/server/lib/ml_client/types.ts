@@ -8,7 +8,7 @@
 import type { TransportRequestOptionsWithMeta } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { searchProvider } from './search';
+import type { searchProvider } from './search';
 
 type OrigMlClient = ElasticsearchClient['ml'];
 export interface UpdateTrainedModelDeploymentRequest {

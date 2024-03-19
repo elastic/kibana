@@ -226,6 +226,7 @@ export const POLICY_MANAGED_BY_ES: PolicyFromES = {
   modifiedDate: Date.now().toString(),
   policy: {
     name: POLICY_NAME,
+    deprecated: true,
     phases: {
       hot: {
         min_age: '0ms',

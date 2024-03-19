@@ -59,7 +59,7 @@ export const ProductSelector: React.FC = () => {
         </EuiPageTemplate.Section>
 
         <EuiPageTemplate.Section color="subdued">
-          <ApiKeyPanel user={user} />
+          <ApiKeyPanel />
           <EuiSpacer size="xl" />
           <EuiTitle>
             <h4>

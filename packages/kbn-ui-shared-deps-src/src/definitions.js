@@ -99,6 +99,7 @@ const externals = {
   classnames: '__kbnSharedDeps__.Classnames',
   '@tanstack/react-query': '__kbnSharedDeps__.ReactQuery',
   '@tanstack/react-query-devtools': '__kbnSharedDeps__.ReactQueryDevtools',
+  '@kbn/code-editor': '__kbnSharedDeps__.KbnCodeEditor',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

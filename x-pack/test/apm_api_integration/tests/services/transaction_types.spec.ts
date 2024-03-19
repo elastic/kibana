@@ -52,6 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177521
   registry.when('Transaction types when data is loaded', { config: 'basic', archives: [] }, () => {
     before(async () => {
       const interval = timerange(new Date(start).getTime(), new Date(end).getTime() - 1).interval(

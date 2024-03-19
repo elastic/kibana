@@ -41,6 +41,11 @@ export const dashboardAddToLibraryActionStrings = {
       defaultMessage: `Panel {panelTitle} was added to the library`,
       values: { panelTitle },
     }),
+  getErrorMessage: (panelTitle?: string) =>
+    i18n.translate('dashboard.panel.addToLibrary.errorMessage', {
+      defaultMessage: `An error was encountered adding panel {panelTitle} to the library`,
+      values: { panelTitle },
+    }),
 };
 
 export const dashboardClonePanelActionStrings = {
@@ -87,7 +92,12 @@ export const dashboardUnlinkFromLibraryActionStrings = {
     }),
   getSuccessMessage: (panelTitle: string) =>
     i18n.translate('dashboard.panel.unlinkFromLibrary.successMessage', {
-      defaultMessage: `Panel {panelTitle} is no longer connected to the library`,
+      defaultMessage: `Panel {panelTitle} is no longer connected to the library.`,
+      values: { panelTitle },
+    }),
+  getFailureMessage: (panelTitle: string) =>
+    i18n.translate('dashboard.panel.unlinkFromLibrary.failureMessage', {
+      defaultMessage: `An error occured while unlinking {panelTitle} from the library.`,
       values: { panelTitle },
     }),
 };
@@ -112,6 +122,13 @@ export const dashboardReplacePanelActionStrings = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.removePanel.replacePanel', {
       defaultMessage: 'Replace panel',
+    }),
+  getFlyoutHeader: (panelName?: string) =>
+    i18n.translate('dashboard.panel.replacePanel.flyoutHeader', {
+      defaultMessage: 'Replace panel {panelName} with:',
+      values: {
+        panelName: `'${panelName}'`,
+      },
     }),
   getSuccessMessage: (savedObjectName?: string) =>
     savedObjectName

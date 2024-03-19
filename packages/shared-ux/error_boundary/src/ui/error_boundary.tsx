@@ -41,7 +41,7 @@ class ErrorBoundaryInternal extends React.Component<
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: Partial<React.ErrorInfo>) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     const { name, isFatal } = this.props.services.errorService.registerError(error, errorInfo);
     this.setState(() => {
       return { error, errorInfo, componentName: name, isFatal };

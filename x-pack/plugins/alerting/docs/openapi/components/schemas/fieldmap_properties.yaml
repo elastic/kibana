@@ -1,0 +1,47 @@
+title: Field map objects in the get rule types response 
+type: object
+properties:
+  array:
+    type: boolean
+    description: Indicates whether the field is an array.
+  dynamic:
+    type: boolean
+    description: Indicates whether it is a dynamic field mapping.
+  format:
+    type: string
+    description: >
+      Indicates the format of the field.
+      For example, if the `type` is `date_range`, the `format` can be `epoch_millis||strict_date_optional_time`.
+  ignore_above:
+    type: integer
+    description: Specifies the maximum length of a string field. Longer strings are not indexed or stored.
+  index:
+    type: boolean
+    description: Indicates whether field values are indexed.
+  path:
+    type: string
+    description: TBD
+  properties:
+    type: object
+    description: >
+      Details about the object properties.
+      This property is applicable when `type` is `object`.
+    additionalProperties:
+      type: object
+      properties:
+        type:
+          type: string
+          description: The data type for each object property. 
+  required:
+    type: boolean
+    description: Indicates whether the field is required.
+  scaling_factor:
+    type: integer
+    description: >
+      The scaling factor to use when encoding values.
+      This property is applicable when `type` is `scaled_float`.
+      Values will be multiplied by this factor at index time and rounded to the closest long value. 
+  type:
+    type: string
+    description: Specifies the data type for the field.
+    example: scaled_float

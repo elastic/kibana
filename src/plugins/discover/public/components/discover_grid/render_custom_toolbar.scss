@@ -2,7 +2,7 @@
   padding: $euiSizeS $euiSizeS $euiSizeXS;
 }
 
-.dscGridToolbarControlButton .euiDataGrid__controlBtn {
+.dscGridToolbarControlButton .euiDataGridToolbarControl {
   block-size: $euiSizeXL;
   border: $euiBorderThin;
   border-radius: $euiBorderRadiusSmall;
@@ -13,10 +13,7 @@
     block-size: $euiSize;
   }
 
-  // cancel default background and font changes
-  &.euiDataGrid__controlBtn--active {
-    font-weight: $euiFontWeightMedium;
-  }
+  // cancel default background changes
   &:active, &:focus {
     background: transparent;
   }

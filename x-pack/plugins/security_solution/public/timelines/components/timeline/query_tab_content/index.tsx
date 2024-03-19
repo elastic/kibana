@@ -22,12 +22,11 @@ import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
-import { FilterManager } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store';
 import type { CellValueElementProps } from '../cell_rendering';
 import type { Direction, TimelineItem } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers';
@@ -44,22 +43,20 @@ import type {
   RowRenderer,
   ToggleDetailPanel,
 } from '../../../../../common/types/timeline';
-import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineDefaults } from '../../../store/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
-import type { TimelineModel } from '../../../store/timeline/model';
+import type { TimelineModel } from '../../../store/model';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
-import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { getDefaultControlColumn } from '../body/control_columns';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 const QueryTabHeaderContainer = styled.div`
@@ -158,7 +155,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   columns,
   dataProviders,
   end,
-  expandedDetail,
   filters,
   timelineId,
   isLive,
@@ -192,20 +188,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const { uiSettings } = useKibana().services;
+  const { uiSettings, timelineFilterManager } = useKibana().services;
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
-
-  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const currentTimeline = useDeepEqualSelector((state) =>
-    getManageTimeline(state, timelineId ?? TimelineId.active)
-  );
-
-  const activeFilterManager = currentTimeline.filterManager;
-  const filterManager = useMemo(
-    () => activeFilterManager ?? new FilterManager(uiSettings),
-    [activeFilterManager, uiSettings]
-  );
 
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const kqlQuery: {
@@ -269,11 +254,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   useEffect(() => {
     dispatch(
       timelineActions.initializeTimelineSettings({
-        filterManager,
         id: timelineId,
       })
     );
-  }, [dispatch, filterManager, timelineId]);
+  }, [dispatch, timelineId]);
 
   const [
     isQueryLoading,
@@ -296,15 +280,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
-
-    if (
-      expandedDetail[TimelineTabs.query]?.panelView &&
-      timelineId === TimelineId.active &&
-      showExpandedDetails
-    ) {
-      activeTimeline.toggleExpandedDetail({});
-    }
-  }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
+  }, [onEventClosed, timelineId]);
 
   useEffect(() => {
     dispatch(
@@ -362,7 +338,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               <EuiFlexItem data-test-subj="timeline-date-picker-container">
                 <QueryTabHeaderContainer data-test-subj="timelineHeader">
                   <QueryTabHeader
-                    filterManager={filterManager}
+                    filterManager={timelineFilterManager}
                     show={show && activeTab === TimelineTabs.query}
                     showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
                     status={status}

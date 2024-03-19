@@ -22,8 +22,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { DEFAULT_DARK_MODE } from '../../../../common/constants';
-import { useUiSetting } from '../../lib/kibana';
+import { useDarkMode } from '../../lib/kibana';
 
 export const defaultChartHeight = '100%';
 export const defaultChartWidth = '100%';
@@ -113,7 +112,7 @@ const theme: PartialTheme = {
   },
 };
 export const useThemes = (): { baseTheme: Theme; theme: PartialTheme } => {
-  const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
+  const isDarkMode = useDarkMode();
   // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
   const baseTheme = isDarkMode ? LEGACY_DARK_THEME : LEGACY_LIGHT_THEME;
   return {

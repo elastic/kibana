@@ -34,6 +34,17 @@ const mockUseValidChanelId = jest.fn().mockImplementation(() => ({
   },
   error: null,
 }));
+const testBlock = {
+  blocks: [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: "Hello, Assistant to the Regional Manager Dwight! *Michael Scott* wants to know where you'd like to take the Paper Company investors to dinner tonight.\n",
+      },
+    },
+  ],
+};
 const mockUseSubAction = jest.fn<Result, [UseSubActionParams<unknown>]>(mockUseValidChanelId);
 
 const mockToasts = { danger: jest.fn(), warning: jest.fn() };
@@ -85,8 +96,8 @@ describe('SlackParamsFields renders', () => {
         />
       </IntlProvider>
     );
-    expect(screen.getByTestId('webApiTextArea')).toBeInTheDocument();
-    expect(screen.getByTestId('webApiTextArea')).toHaveValue('some text');
+    expect(screen.getByTestId('webApiTextTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('webApiTextTextArea')).toHaveValue('some text');
     rerender(
       <IntlProvider locale="en">
         <SlackParamsFields
@@ -128,8 +139,8 @@ describe('SlackParamsFields renders', () => {
         />
       </IntlProvider>
     );
-    expect(screen.getByTestId('webApiTextArea')).toBeInTheDocument();
-    expect(screen.getByTestId('webApiTextArea')).toHaveValue('some text');
+    expect(screen.getByTestId('webApiTextTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('webApiTextTextArea')).toHaveValue('some text');
 
     rerender(
       <IntlProvider locale="en">
@@ -150,10 +161,35 @@ describe('SlackParamsFields renders', () => {
     expect(editAction).not.toHaveBeenCalled();
   });
 
-  test('all params fields is rendered for postMessage call', async () => {
+  test('default to text field when no existing subaction params', async () => {
     render(
       <IntlProvider locale="en">
         <SlackParamsFields
+          actionParams={{}}
+          errors={{ message: [] }}
+          editAction={() => {}}
+          index={0}
+          defaultMessage="default message"
+          messageVariables={[]}
+        />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('webApiTextTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('webApiTextTextArea')).toHaveValue('');
+  });
+
+  test('correctly renders params fields for postMessage subaction', async () => {
+    render(
+      <IntlProvider locale="en">
+        <SlackParamsFields
+          actionConnector={
+            {
+              id: 'connector-id',
+              actionTypeId: '.slack_api',
+              config: {},
+            } as ActionConnector
+          }
           actionParams={{
             subAction: 'postMessage',
             subActionParams: { channels: ['general'], text: 'some text' },
@@ -167,11 +203,72 @@ describe('SlackParamsFields renders', () => {
       </IntlProvider>
     );
 
-    expect(screen.getByTestId('webApiTextArea')).toBeInTheDocument();
-    expect(screen.getByTestId('webApiTextArea')).toHaveValue('some text');
+    expect(screen.getByTestId('slackMessageTypeChangeButton')).toBeInTheDocument();
+    expect(screen.getByTestId('webApiTextTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('webApiTextTextArea')).toHaveValue('some text');
   });
 
-  test('Show the Channel label when using the old attribute "channels" in subActionParams', async () => {
+  test('correctly renders params fields for postBlockkit subaction', async () => {
+    render(
+      <IntlProvider locale="en">
+        <SlackParamsFields
+          actionConnector={
+            {
+              id: 'connector-id',
+              actionTypeId: '.slack_api',
+              config: {},
+            } as ActionConnector
+          }
+          actionParams={{
+            subAction: 'postBlockkit',
+            subActionParams: { channels: ['general'], text: JSON.stringify(testBlock) },
+          }}
+          errors={{ message: [] }}
+          editAction={() => {}}
+          index={0}
+          defaultMessage="default message"
+          messageVariables={[]}
+        />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('slackMessageTypeChangeButton')).toBeInTheDocument();
+    expect(screen.getByTestId('webApiBlock')).toBeInTheDocument();
+  });
+
+  test('should toggle subaction when button group clicked', async () => {
+    const mockEditFunc = jest.fn();
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <SlackParamsFields
+          actionConnector={
+            {
+              id: 'connector-id',
+              actionTypeId: '.slack_api',
+              config: {},
+            } as ActionConnector
+          }
+          actionParams={{
+            subAction: 'postMessage',
+            subActionParams: { channels: ['general'], text: 'some text' },
+          }}
+          errors={{ message: [] }}
+          editAction={mockEditFunc}
+          index={0}
+          defaultMessage="default message"
+          messageVariables={[]}
+        />
+      </IntlProvider>
+    );
+
+    getByTestId('blockkit').click();
+    expect(mockEditFunc).toBeCalledWith('subAction', 'postBlockkit', 0);
+
+    getByTestId('text').click();
+    expect(mockEditFunc).toBeCalledWith('subAction', 'postMessage', 0);
+  });
+
+  test('show the Channel label when using the old attribute "channels" in subActionParams', async () => {
     const mockEditFunc = jest.fn();
     const WrappedComponent = () => {
       return (
@@ -203,7 +300,7 @@ describe('SlackParamsFields renders', () => {
     expect(getByTestId('slackApiChannelId')).toHaveValue('old channel name');
   });
 
-  test('Show the Channel ID label when using the new attribute "channelIds" in subActionParams', async () => {
+  test('show the Channel ID label when using the new attribute "channelIds" in subActionParams', async () => {
     const mockEditFunc = jest.fn();
     const WrappedComponent: React.FunctionComponent = () => {
       return (
@@ -235,7 +332,7 @@ describe('SlackParamsFields renders', () => {
     expect(getByTestId('slackApiChannelId')).toHaveValue('channel-id-xxx');
   });
 
-  test('Channel id subActionParams should be validated', async () => {
+  test('channel id in subActionParams should be validated', async () => {
     const mockEditFunc = jest.fn();
     mockUseValidChanelId.mockImplementation(() => ({
       isLoading: false,
@@ -301,7 +398,7 @@ describe('SlackParamsFields renders', () => {
     });
   });
 
-  test('Channel id work with combobox when allowedChannels pass in the config attributes', async () => {
+  test('channel id work with combobox when allowedChannels pass in the config attributes', async () => {
     const mockEditFunc = jest.fn();
     const WrappedComponent = () => {
       return (

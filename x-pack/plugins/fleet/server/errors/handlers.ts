@@ -42,6 +42,7 @@ import {
   AgentRequestInvalidError,
   PackagePolicyRequestError,
   FleetNotFoundError,
+  PackageSavedObjectConflictError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -98,6 +99,9 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 409;
   }
   if (error instanceof ConcurrentInstallOperationError) {
+    return 409;
+  }
+  if (error instanceof PackageSavedObjectConflictError) {
     return 409;
   }
   if (error instanceof PackagePolicyNameExistsError) {

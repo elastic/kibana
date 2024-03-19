@@ -31,5 +31,9 @@
     "@kbn/core-theme-browser-mocks",
     "@kbn/core-i18n-browser",
     "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-ui-settings-common",
+    "@kbn/management-settings-section-registry",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-chrome-browser",
   ]
 }

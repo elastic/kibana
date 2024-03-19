@@ -10,10 +10,12 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 
 import { docLinks } from '../../doc_links';
 
+import { INDEX_NAME_PLACEHOLDER } from './constants';
+
 import { ingestKeysToJSON } from './helpers';
 
 export const goDefinition: LanguageDefinition = {
-  buildSearchQuery: ({ indexName }) => `searchResp, err := es.Search(
+  buildSearchQuery: ({ indexName = INDEX_NAME_PLACEHOLDER }) => `searchResp, err := es.Search(
   es.Search.WithContext(context.Background()),
   es.Search.WithIndex("${indexName}"),
   es.Search.WithQuery("snow"),
@@ -58,7 +60,11 @@ if err != nil {
   },
   iconType: 'go.svg',
   id: Languages.GO,
-  ingestData: ({ indexName, ingestPipeline, extraIngestDocumentValues }) => {
+  ingestData: ({
+    indexName = INDEX_NAME_PLACEHOLDER,
+    ingestPipeline,
+    extraIngestDocumentValues,
+  }) => {
     const ingestDocumentKeys = ingestPipeline ? ingestKeysToJSON(extraIngestDocumentValues) : '';
     return `buf := bytes.NewBufferString(\`
 {"index":{"_id":"9780553351927"}}

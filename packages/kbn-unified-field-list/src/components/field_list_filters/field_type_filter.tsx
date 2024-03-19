@@ -49,7 +49,7 @@ const popoverTitleStyle = css`
 `;
 const filterButtonStyle = css`
   &,
-  & .euiFilterButton__textShift {
+  & .euiFilterButton__text {
     min-width: 0;
     line-height: 1;
   }

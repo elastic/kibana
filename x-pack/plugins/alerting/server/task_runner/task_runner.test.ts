@@ -18,8 +18,12 @@ import {
   RuleAction,
   RuleAlertData,
 } from '../types';
-import { ConcreteTaskInstance, isUnrecoverableError } from '@kbn/task-manager-plugin/server';
-import { TaskRunnerContext } from './task_runner_factory';
+import {
+  ConcreteTaskInstance,
+  isUnrecoverableError,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server';
+import { TaskRunnerContext } from './types';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
@@ -82,6 +86,8 @@ import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -301,7 +307,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       4,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
     );
 
     testAlertingEventLogCalls({ status: 'ok' });
@@ -383,7 +389,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         5,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
+        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
       );
 
       testAlertingEventLogCalls({
@@ -471,7 +477,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       6,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
     );
 
     testAlertingEventLogCalls({
@@ -828,7 +834,7 @@ describe('Task Runner', () => {
       mockMaintenanceWindows
     );
 
-    alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery.mockResolvedValue({
+    alertsClient.persistAlerts.mockResolvedValue({
       alertIds: [],
       maintenanceWindowIds: ['test-id-1', 'test-id-2'],
     });
@@ -849,12 +855,7 @@ describe('Task Runner', () => {
     await taskRunner.run();
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
-    expect(alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery).toHaveBeenLastCalledWith({
-      executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-      maintenanceWindows: mockMaintenanceWindows,
-      ruleId: '1',
-      spaceId: 'default',
-    });
+    expect(alertsClient.persistAlerts).toHaveBeenLastCalledWith(mockMaintenanceWindows);
 
     expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith(['test-id-1']);
     expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith([
@@ -925,7 +926,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         6,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":2,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":2,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
+        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":2,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":2,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
       );
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     }
@@ -1370,7 +1371,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         6,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
+        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
       );
 
       testAlertingEventLogCalls({
@@ -1497,7 +1498,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         6,
-        `ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}`
+        `ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}`
       );
 
       testAlertingEventLogCalls({
@@ -1877,11 +1878,11 @@ describe('Task Runner', () => {
       inMemoryMetrics,
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
-    rulesClient.getAlertFromRaw.mockReturnValue({
-      ...(mockedRuleTypeSavedObject as Rule),
-      schedule: { interval: '30s' },
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: { ...mockedRawRuleSO.attributes, schedule: { interval: '30s' } },
     });
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual(
@@ -1941,13 +1942,14 @@ describe('Task Runner', () => {
     expect(loggerMeta?.tags).toEqual(['test', '1', 'rule-run-failed']);
     expect(loggerMeta?.error?.stack_trace).toBeDefined();
     expect(logger.error).toBeCalledTimes(1);
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
   });
 
   test('recovers gracefully when the Rule Task Runner throws an exception when loading rule to prepare for run', async () => {
     const taskRunError = new Error(GENERIC_ERROR_MESSAGE);
 
     // used in loadIndirectParams() which is called to load rule data
-    rulesClient.getAlertFromRaw.mockImplementation(() => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockImplementation(() => {
       throw taskRunError;
     });
 
@@ -1959,8 +1961,6 @@ describe('Task Runner', () => {
       inMemoryMetrics,
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
-
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     const runnerResult = await taskRunner.run();
 
@@ -2101,7 +2101,10 @@ describe('Task Runner', () => {
 
   test('reschedules for smaller interval if es connectivity error encountered and schedule interval is greater than connectivity retry', async () => {
     rulesClient.getAlertFromRaw.mockImplementation(() => {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('alert', '1');
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(
+        RULE_SAVED_OBJECT_TYPE,
+        '1'
+      );
     });
 
     const taskRunner = new TaskRunner({
@@ -2632,7 +2635,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       4,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
     );
 
     testAlertingEventLogCalls({
@@ -2745,11 +2748,11 @@ describe('Task Runner', () => {
       inMemoryMetrics,
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
-    rulesClient.getAlertFromRaw.mockReturnValue({
-      ...(mockedRuleTypeSavedObject as Rule),
-      schedule: { interval: '50s' },
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: { ...mockedRawRuleSO.attributes, schedule: { interval: '50s' } },
     });
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     await taskRunner.run();
     expect(
@@ -2944,6 +2947,7 @@ describe('Task Runner', () => {
               maintenanceWindowIds: [],
               flapping: false,
               pendingRecoveredCount: 0,
+              activeCount: 1,
             },
             state: {
               duration: '0',
@@ -3114,6 +3118,7 @@ describe('Task Runner', () => {
               maintenanceWindowIds: [],
               flapping: false,
               pendingRecoveredCount: 0,
+              activeCount: 1,
             },
             state: {
               duration: '0',
@@ -3131,6 +3136,7 @@ describe('Task Runner', () => {
               maintenanceWindowIds: [],
               flapping: false,
               pendingRecoveredCount: 0,
+              activeCount: 1,
             },
             state: {
               duration: '0',
@@ -3322,6 +3328,7 @@ describe('Task Runner', () => {
 
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ error });
+    expect(getErrorSource(result.error as Error)).toBe(TaskErrorSource.FRAMEWORK);
   });
 
   function testAlertingEventLogCalls({
@@ -3391,6 +3398,7 @@ describe('Task Runner', () => {
           claim_to_start_duration_ms: 0,
           persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
+          prepare_to_run_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,
           rule_type_run_duration_ms: 0,
@@ -3408,6 +3416,7 @@ describe('Task Runner', () => {
           numberOfNewAlerts: newAlerts,
           numberOfRecoveredAlerts: recoveredAlerts,
           numberOfTriggeredActions: triggeredActions,
+          numberOfDelayedAlerts: 0,
           totalSearchDurationMs: 23423,
           hasReachedAlertLimit,
           triggeredActionsStatus: 'partial',
@@ -3425,6 +3434,7 @@ describe('Task Runner', () => {
           claim_to_start_duration_ms: 0,
           persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
+          prepare_to_run_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,
           rule_type_run_duration_ms: 0,
@@ -3444,6 +3454,7 @@ describe('Task Runner', () => {
           numberOfNewAlerts: newAlerts,
           numberOfRecoveredAlerts: recoveredAlerts,
           numberOfTriggeredActions: triggeredActions,
+          numberOfDelayedAlerts: 0,
           totalSearchDurationMs: 23423,
           hasReachedAlertLimit,
           triggeredActionsStatus: 'complete',
@@ -3457,6 +3468,7 @@ describe('Task Runner', () => {
           claim_to_start_duration_ms: 0,
           persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
+          prepare_to_run_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,
           rule_type_run_duration_ms: 0,

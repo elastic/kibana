@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
-import { InferenceModelTypes } from './types';
+import type { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
+import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
+import type { InferenceModelTypes } from './types';
 import type { AddInferencePipelineFormErrors } from './types';
 
 const INVALID_PIPELINE_NAME_ERROR = i18n.translate(
@@ -46,6 +48,18 @@ const INFERENCE_CONFIG_MODEL_TYPE_ERROR = i18n.translate(
     defaultMessage: 'Inference configuration inference type must match model type.',
   }
 );
+const PROCESSOR_REQUIRED = i18n.translate(
+  'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.configure.processorRequiredError',
+  {
+    defaultMessage: 'At least one processor is required to create the pipeline.',
+  }
+);
+const INFERENCE_PROCESSOR_REQUIRED = i18n.translate(
+  'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.configure.inferenceProcessorRequiredError',
+  {
+    defaultMessage: "An inference processor specifying 'model_id' is required.",
+  }
+);
 
 const VALID_PIPELINE_NAME_REGEX = /^[\w\-]+$/;
 export const isValidPipelineName = (input: string): boolean => {
@@ -75,7 +89,7 @@ export const validateInferencePipelineConfigurationStep = (
 
 export const validateInferenceConfig = (
   inferenceConfig: IngestInferenceProcessor['inference_config'],
-  modelType?: InferenceModelTypes
+  modelType?: InferenceModelTypes | SupportedPytorchTasksType
 ) => {
   const inferenceConfigKeys = Object.keys(inferenceConfig ?? {});
   let error;
@@ -111,6 +125,34 @@ export const validateFieldMap = (
       return error;
     } else {
       error = FIELD_MAP_REQUIRED_FIELDS_ERROR;
+    }
+  }
+
+  return error;
+};
+
+export const validatePipelineProcessors = (
+  pipelineProcessors: estypes.IngestPipeline,
+  taskType?: SupportedPytorchTasksType
+) => {
+  const { processors } = pipelineProcessors;
+  let error;
+  // Must have at least one processor
+  if (!Array.isArray(processors) || (Array.isArray(processors) && processors.length < 1)) {
+    error = PROCESSOR_REQUIRED;
+  }
+
+  const inferenceProcessor = processors?.find(
+    (processor) => processor.inference && processor.inference.model_id
+  );
+
+  if (inferenceProcessor === undefined) {
+    error = INFERENCE_PROCESSOR_REQUIRED;
+  } else {
+    // If populated, inference config must have the correct model type
+    const inferenceConfig = inferenceProcessor.inference?.inference_config;
+    if (taskType && inferenceConfig) {
+      error = validateInferenceConfig(inferenceConfig, taskType);
     }
   }
 

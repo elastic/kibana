@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { EndpointActionsClient } from './endpoint_actions_client';
+export * from './endpoint/endpoint_actions_client';
+export * from './sentinelone/sentinel_one_actions_client';
+export * from './get_response_actions_client';
+
+export * from './lib/types';

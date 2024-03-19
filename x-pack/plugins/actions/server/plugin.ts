@@ -585,7 +585,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       getUnsecuredActionsClient,
       inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>
-        renderActionParameterTemplates(actionTypeRegistry, ...args),
+        renderActionParameterTemplates(this.logger, actionTypeRegistry, ...args),
     };
   }
 
@@ -743,6 +743,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 }
 
 export function renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
+  logger: Logger,
   actionTypeRegistry: ActionTypeRegistry | undefined,
   actionTypeId: string,
   actionId: string,
@@ -751,8 +752,8 @@ export function renderActionParameterTemplates<Params extends ActionTypeParams =
 ): Params {
   const actionType = actionTypeRegistry?.get(actionTypeId);
   if (actionType?.renderParameterTemplates) {
-    return actionType.renderParameterTemplates(params, variables, actionId) as Params;
+    return actionType.renderParameterTemplates(logger, params, variables, actionId) as Params;
   } else {
-    return renderMustacheObject(params, variables);
+    return renderMustacheObject(logger, params, variables);
   }
 }

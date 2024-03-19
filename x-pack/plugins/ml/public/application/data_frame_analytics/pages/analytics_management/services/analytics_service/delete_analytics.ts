@@ -9,22 +9,15 @@ import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { ml } from '../../../../../services/ml_api_service';
-import { ToastNotificationService } from '../../../../../services/toast_notification_service';
+import type { ToastNotificationService } from '../../../../../services/toast_notification_service';
 import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
-import {
-  isDataFrameAnalyticsFailed,
-  DataFrameAnalyticsListRow,
-} from '../../components/analytics_list/common';
+import type { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';
 
 export const deleteAnalytics = async (
   analyticsConfig: DataFrameAnalyticsListRow['config'],
-  analyticsStats: DataFrameAnalyticsListRow['stats'],
   toastNotificationService: ToastNotificationService
 ) => {
   try {
-    if (isDataFrameAnalyticsFailed(analyticsStats.state)) {
-      await ml.dataFrameAnalytics.stopDataFrameAnalytics(analyticsConfig.id, true);
-    }
     await ml.dataFrameAnalytics.deleteDataFrameAnalytics(analyticsConfig.id);
     toastNotificationService.displaySuccessToast(
       i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsSuccessMessage', {
@@ -46,16 +39,12 @@ export const deleteAnalytics = async (
 
 export const deleteAnalyticsAndDestIndex = async (
   analyticsConfig: DataFrameAnalyticsListRow['config'],
-  analyticsStats: DataFrameAnalyticsListRow['stats'],
   deleteDestIndex: boolean,
   deleteDestDataView: boolean,
   toastNotificationService: ToastNotificationService
 ) => {
   const destinationIndex = analyticsConfig.dest.index;
   try {
-    if (isDataFrameAnalyticsFailed(analyticsStats.state)) {
-      await ml.dataFrameAnalytics.stopDataFrameAnalytics(analyticsConfig.id, true);
-    }
     const status = await ml.dataFrameAnalytics.deleteDataFrameAnalyticsAndDestIndex(
       analyticsConfig.id,
       deleteDestIndex,

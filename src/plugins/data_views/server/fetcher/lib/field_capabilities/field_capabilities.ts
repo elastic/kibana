@@ -24,6 +24,8 @@ interface FieldCapabilitiesParams {
   indexFilter?: QueryDslQueryContainer;
   fields?: string[];
   expandWildcards?: ExpandWildcard;
+  fieldTypes?: string[];
+  includeEmptyFields?: boolean;
 }
 
 /**
@@ -45,6 +47,8 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     metaFields = [],
     fields,
     expandWildcards,
+    fieldTypes,
+    includeEmptyFields,
   } = params;
   const esFieldCaps = await callFieldCapsApi({
     callCluster,
@@ -53,6 +57,8 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     indexFilter,
     fields,
     expandWildcards,
+    fieldTypes,
+    includeEmptyFields,
   });
   const fieldCapsArr = readFieldCapsResponse(esFieldCaps.body);
   const fieldsFromFieldCapsByName = keyBy(fieldCapsArr, 'name');
@@ -60,7 +66,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
     // not all meta fields are provided, so remove and manually add
     .filter((name) => !fieldsFromFieldCapsByName[name].metadata_field)
-    .concat(fieldCapsArr.length ? metaFields : [])
+    .concat(fieldCapsArr.length ? metaFields : []) // empty field lists should stay empty
     .reduce<{ names: string[]; map: Map<string, string> }>(
       (agg, value) => {
         // This is intentionally using a Map to be highly optimized with very large indexes AND be safe for user provided data

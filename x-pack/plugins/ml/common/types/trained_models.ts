@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DeploymentState, TrainedModelType } from '@kbn/ml-trained-models-utils';
 import type {
   DataFrameAnalyticsConfig,
   FeatureImportanceBaseline,
   TotalFeatureImportance,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
+import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import type { XOR } from './common';
 import type { MlSavedObjectType } from './saved_objects';
 
@@ -113,12 +113,54 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
   version: string;
   inference_config?: Record<string, any>;
   indices?: Array<Record<IndexName, IndicesIndexState | null>>;
+  /**
+   * Whether the model has inference services
+   */
+  hasInferenceServices?: boolean;
+  /**
+   * Inference services associated with the model
+   */
+  inference_apis?: InferenceAPIConfigResponse[];
 };
 
 export interface PipelineDefinition {
   processors?: Array<Record<string, any>>;
   description?: string;
 }
+
+export type InferenceServiceSettings =
+  | {
+      service: 'elser';
+      service_settings: {
+        num_allocations: number;
+        num_threads: number;
+        model_id: string;
+      };
+    }
+  | {
+      service: 'openai';
+      service_settings: {
+        api_key: string;
+        organization_id: string;
+        url: string;
+      };
+    }
+  | {
+      service: 'hugging_face';
+      service_settings: {
+        api_key: string;
+        url: string;
+      };
+    };
+
+export type InferenceAPIConfigResponse = {
+  // Refers to a deployment id
+  model_id: string;
+  task_type: 'sparse_embedding' | 'text_embedding';
+  task_settings: {
+    model?: string;
+  };
+} & InferenceServiceSettings;
 
 export interface ModelPipelines {
   model_id: string;
@@ -203,8 +245,8 @@ export interface AllocatedModel {
     number_of_pending_requests: number;
     start_time: number;
     throughput_last_minute: number;
-    number_of_allocations: number;
-    threads_per_allocation: number;
+    number_of_allocations?: number;
+    threads_per_allocation?: number;
     error_count?: number;
   };
 }

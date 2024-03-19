@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiCommentProps } from '@elastic/eui';
+import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { UserActionTypes } from '../../../common/types/domain';
 import type {
@@ -36,7 +36,7 @@ export interface UserActionTreeProps {
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   actionsNavigation?: ActionsNavigation;
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
-  onShowAlertDetails: (alertId: string, index: string) => void;
+  onShowAlertDetails?: (alertId: string, index: string) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   statusActionButton: JSX.Element | null;
   useFetchAlertData: UseFetchAlertData;
@@ -76,9 +76,10 @@ export interface UserActionBuilderArgs {
   handleSaveComment: ({ id, version }: { id: string; version: string }, content: string) => void;
   handleDeleteComment: (id: string, successToasterTitle: string) => void;
   handleManageQuote: (quote: string) => void;
-  onShowAlertDetails: (alertId: string, index: string) => void;
+  onShowAlertDetails?: (alertId: string, index: string) => void;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
+  euiTheme?: EuiThemeComputed<{}>;
 }
 
 export type UserActionBuilder = (args: UserActionBuilderArgs) => {

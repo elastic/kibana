@@ -23,7 +23,7 @@ import type { inputsModel } from '../../common/store';
 import type { RunTimeMappings } from '../../common/store/sourcerer/model';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
-import { timelineActions } from '../store/timeline';
+import { timelineActions } from '../store';
 import { detectionsTimelineIds } from './helpers';
 import { getInspectResponse } from '../../helpers';
 import type {
@@ -176,7 +176,6 @@ export const useTimelineEventsHandler = ({
       clearSignalsState();
 
       if (id === TimelineId.active) {
-        activeTimeline.setExpandedDetail({});
         activeTimeline.setActivePage(newActivePage);
       }
       setActivePage(newActivePage);
@@ -245,7 +244,6 @@ export const useTimelineEventsHandler = ({
                     refreshedAt: Date.now(),
                   };
                   if (id === TimelineId.active) {
-                    activeTimeline.setExpandedDetail({});
                     activeTimeline.setPageName(pageName);
                     if (request.language === 'eql') {
                       activeTimeline.setEqlRequest(request as TimelineEqlRequestOptionsInput);

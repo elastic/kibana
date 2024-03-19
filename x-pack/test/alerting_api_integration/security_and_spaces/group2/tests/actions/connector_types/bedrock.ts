@@ -15,6 +15,11 @@ import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock
 import { PassThrough } from 'stream';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -26,7 +31,7 @@ const secrets = {
 };
 
 const defaultConfig = {
-  defaultModel: 'anthropic.claude-v2',
+  defaultModel: 'anthropic.claude-v2:1',
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -268,6 +273,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             message:
               'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
             retry: false,
+            errorSource: TaskErrorSource.FRAMEWORK,
           });
         });
 
@@ -285,6 +291,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.USER,
             service_message: `Sub action "invalidAction" is not registered. Connector id: ${bedrockActionId}. Connector name: Amazon Bedrock. Connector type: .bedrock`,
           });
         });
@@ -378,12 +385,12 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                   subActionParams: {
                     messages: [
                       {
-                        role: 'user',
-                        content: 'Hello world',
-                      },
-                      {
                         role: 'system',
                         content: 'Be a good chatbot',
+                      },
+                      {
+                        role: 'user',
+                        content: 'Hello world',
                       },
                       {
                         role: 'assistant',
@@ -401,7 +408,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
 
             expect(simulator.requestData).to.eql({
               prompt:
-                '\n\nHuman:Hello world\n\nHuman:Be a good chatbot\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
+                'Be a good chatbot\n\nHuman:Hello world\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
               max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
               temperature: 0.5,
               stop_sequences: ['\n\nHuman:'],
@@ -420,20 +427,16 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               supertest
                 .post(`/internal/elastic_assistant/actions/connector/${bedrockActionId}/_execute`)
                 .set('kbn-xsrf', 'foo')
+                .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+                .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
                 .on('error', reject)
                 .send({
-                  params: {
-                    subAction: 'invokeStream',
-                    subActionParams: {
-                      messages: [
-                        {
-                          role: 'user',
-                          content: 'Hello world',
-                        },
-                      ],
-                    },
-                  },
-                  assistantLangChain: false,
+                  subAction: 'invokeStream',
+                  message: 'Hello world',
+                  isEnabledKnowledgeBase: false,
+                  isEnabledRAGAlerts: false,
+                  llmType: 'bedrock',
+                  replacements: [],
                 })
                 .pipe(passThrough);
               const responseBuffer: Uint8Array[] = [];
@@ -544,6 +547,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: bedrockActionId,
+            errorSource: TaskErrorSource.FRAMEWORK,
             message:
               'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
             retry: false,
@@ -574,6 +578,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             connector_id: bedrockActionId,
             message: 'an error occurred while running the action',
             retry: true,
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Status code: 422. Message: API Error: Unprocessable Entity - Malformed input request: extraneous key [ooooo] is not permitted, please reformat your input and try again.',
           });

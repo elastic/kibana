@@ -41,7 +41,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
     const contextFilteredQuickPrompts = useMemo(() => {
       const registeredPromptContextTitles = Object.values(promptContexts).map((pc) => pc.category);
       // If KB is enabled, include KNOWLEDGE_BASE_CATEGORY so KB dependent quick prompts are shown
-      if (knowledgeBase.assistantLangChain) {
+      if (knowledgeBase.isEnabledKnowledgeBase) {
         registeredPromptContextTitles.push(KNOWLEDGE_BASE_CATEGORY);
       }
       return allQuickPrompts.filter((quickPrompt) => {
@@ -54,7 +54,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
           });
         }
       });
-    }, [allQuickPrompts, knowledgeBase.assistantLangChain, promptContexts]);
+    }, [allQuickPrompts, knowledgeBase.isEnabledKnowledgeBase, promptContexts]);
 
     // Overflow state
     const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);

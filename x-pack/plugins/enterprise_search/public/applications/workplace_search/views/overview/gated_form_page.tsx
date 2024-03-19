@@ -23,9 +23,7 @@ import { SendWorkplaceSearchTelemetry } from '../../../shared/telemetry';
 
 import { WorkplaceSearchGate } from './gated_form';
 
-export const WorkplaceSearchGatePage: React.FC<
-  Omit<PageTemplateProps, 'useEndpointHeaderActions'>
-> = ({ isLoading }) => {
+export const WorkplaceSearchGatePage: React.FC<PageTemplateProps> = ({ isLoading }) => {
   return (
     <EnterpriseSearchPageTemplateWrapper
       restrictWidth
@@ -59,7 +57,7 @@ export const WorkplaceSearchGatePage: React.FC<
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
       }}
       isLoading={isLoading}
-      useEndpointHeaderActions
+      hideEmbeddedConsole
     >
       <SendWorkplaceSearchTelemetry action="viewed" metric="Workplace Search Gate form" />
 

@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
 import {
   checkAAD,
@@ -81,7 +82,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: createdRule.id,
       });
     });
@@ -183,7 +184,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: createdRule.id,
       });
     });
@@ -229,7 +230,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: createdRule.id,
       });
     });
@@ -275,7 +276,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: createdRule.id,
       });
     });
@@ -340,7 +341,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: createdRule.id,
       });
     });
@@ -417,7 +418,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: createdRule.id,
       });
     });

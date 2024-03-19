@@ -7,35 +7,36 @@
 
 import {
   EuiBadge,
-  type EuiBasicTableColumn,
   EuiEmptyPrompt,
   EuiIcon,
   EuiInMemoryTable,
   EuiToolTip,
   type DefaultItemAction,
+  type EuiBasicTableColumn,
 } from '@elastic/eui';
-import React, { type FC, useMemo } from 'react';
+import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import { FilterStateStore, type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
-import { type Filter, FilterStateStore } from '@kbn/es-query';
-import { NoChangePointsWarning } from './no_change_points_warning';
+import { useTableState } from '@kbn/ml-in-memory-table';
+import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
-import { useCommonChartProps } from './use_common_chart_props';
+import type { FieldConfig, SelectedChangePoint } from './change_point_detection_context';
 import {
-  type ChangePointAnnotation,
-  FieldConfig,
-  SelectedChangePoint,
   useChangePointDetectionContext,
+  type ChangePointAnnotation,
 } from './change_point_detection_context';
 import { type ChartComponentProps } from './chart_component';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { NoChangePointsWarning } from './no_change_points_warning';
+import { useCommonChartProps } from './use_common_chart_props';
 
 export interface ChangePointsTableProps {
   annotations: ChangePointAnnotation[];
   fieldConfig: FieldConfig;
   isLoading: boolean;
-  onSelectionChange: (update: SelectedChangePoint[]) => void;
+  onSelectionChange?: (update: SelectedChangePoint[]) => void;
+  onRenderComplete?: () => void;
 }
 
 function getFilterConfig(
@@ -68,31 +69,62 @@ function getFilterConfig(
   };
 }
 
+const pageSizeOptions = [5, 10, 15];
+
 export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   isLoading,
   annotations,
   fieldConfig,
   onSelectionChange,
+  onRenderComplete,
 }) => {
   const {
     fieldFormats,
     data: {
       query: { filterManager },
     },
+    embeddingOrigin,
   } = useAiopsAppContext();
   const { dataView } = useDataSource();
 
+  const chartLoadingCount = useRef<number>(0);
+
+  const { onTableChange, pagination, sorting } = useTableState<ChangePointAnnotation>(
+    annotations ?? [],
+    'p_value',
+    'asc',
+    {
+      pageIndex: 0,
+      pageSize: 10,
+      pageSizeOptions,
+    }
+  );
+
   const dateFormatter = useMemo(() => fieldFormats.deserialize({ id: 'date' }), [fieldFormats]);
 
-  const defaultSorting = {
-    sort: {
-      field: 'p_value',
-      // Lower p_value indicates a bigger change point, hence the asc sorting
-      direction: 'asc' as const,
-    },
-  };
+  useEffect(() => {
+    // Reset loading counter on pagination or sort change
+    chartLoadingCount.current = 0;
+  }, [pagination.pageIndex, pagination.pageSize, sorting.sort]);
 
-  const hasActions = fieldConfig.splitField !== undefined;
+  /**
+   * Callback to track render of each chart component
+   * to report when all charts on the current page are ready.
+   */
+  const onChartRenderCompleteCallback = useCallback(
+    (isLoadingChart: boolean) => {
+      if (!onRenderComplete) return;
+      if (!isLoadingChart) {
+        chartLoadingCount.current++;
+      }
+      if (chartLoadingCount.current === pagination.pageSize) {
+        onRenderComplete();
+      }
+    },
+    [onRenderComplete, pagination.pageSize]
+  );
+
+  const hasActions = fieldConfig.splitField !== undefined && embeddingOrigin !== 'cases';
 
   const { bucketInterval } = useChangePointDetectionContext();
 
@@ -131,6 +163,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             annotation={annotation}
             fieldConfig={fieldConfig}
             interval={bucketInterval.expression}
+            onRenderComplete={onChartRenderCompleteCallback.bind(null, false)}
           />
         );
       },
@@ -190,70 +223,83 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             truncateText: false,
             sortable: true,
           },
-          {
-            name: i18n.translate('xpack.aiops.changePointDetection.actionsColumn', {
-              defaultMessage: 'Actions',
-            }),
-            actions: [
-              {
-                name: i18n.translate(
-                  'xpack.aiops.changePointDetection.actions.filterForValueAction',
-                  {
-                    defaultMessage: 'Filter for value',
-                  }
-                ),
-                description: i18n.translate(
-                  'xpack.aiops.changePointDetection.actions.filterForValueAction',
-                  {
-                    defaultMessage: 'Filter for value',
-                  }
-                ),
-                icon: 'plusInCircle',
-                color: 'primary',
-                type: 'icon',
-                onClick: (item) => {
-                  filterManager.addFilters(
-                    getFilterConfig(dataView.id!, item as Required<ChangePointAnnotation>, false)!
-                  );
+          ...(hasActions
+            ? [
+                {
+                  name: i18n.translate('xpack.aiops.changePointDetection.actionsColumn', {
+                    defaultMessage: 'Actions',
+                  }),
+                  actions: [
+                    {
+                      name: i18n.translate(
+                        'xpack.aiops.changePointDetection.actions.filterForValueAction',
+                        {
+                          defaultMessage: 'Filter for value',
+                        }
+                      ),
+                      description: i18n.translate(
+                        'xpack.aiops.changePointDetection.actions.filterForValueAction',
+                        {
+                          defaultMessage: 'Filter for value',
+                        }
+                      ),
+                      icon: 'plusInCircle',
+                      color: 'primary',
+                      type: 'icon',
+                      onClick: (item) => {
+                        filterManager.addFilters(
+                          getFilterConfig(
+                            dataView.id!,
+                            item as Required<ChangePointAnnotation>,
+                            false
+                          )!
+                        );
+                      },
+                      isPrimary: true,
+                      'data-test-subj': 'aiopsChangePointFilterForValue',
+                    },
+                    {
+                      name: i18n.translate(
+                        'xpack.aiops.changePointDetection.actions.filterOutValueAction',
+                        {
+                          defaultMessage: 'Filter out value',
+                        }
+                      ),
+                      description: i18n.translate(
+                        'xpack.aiops.changePointDetection.actions.filterOutValueAction',
+                        {
+                          defaultMessage: 'Filter out value',
+                        }
+                      ),
+                      icon: 'minusInCircle',
+                      color: 'primary',
+                      type: 'icon',
+                      onClick: (item) => {
+                        filterManager.addFilters(
+                          getFilterConfig(
+                            dataView.id!,
+                            item as Required<ChangePointAnnotation>,
+                            true
+                          )!
+                        );
+                      },
+                      isPrimary: true,
+                      'data-test-subj': 'aiopsChangePointFilterOutValue',
+                    },
+                  ] as Array<DefaultItemAction<ChangePointAnnotation>>,
                 },
-                isPrimary: true,
-                'data-test-subj': 'aiopsChangePointFilterForValue',
-              },
-              {
-                name: i18n.translate(
-                  'xpack.aiops.changePointDetection.actions.filterOutValueAction',
-                  {
-                    defaultMessage: 'Filter out value',
-                  }
-                ),
-                description: i18n.translate(
-                  'xpack.aiops.changePointDetection.actions.filterOutValueAction',
-                  {
-                    defaultMessage: 'Filter out value',
-                  }
-                ),
-                icon: 'minusInCircle',
-                color: 'primary',
-                type: 'icon',
-                onClick: (item) => {
-                  filterManager.addFilters(
-                    getFilterConfig(dataView.id!, item as Required<ChangePointAnnotation>, true)!
-                  );
-                },
-                isPrimary: true,
-                'data-test-subj': 'aiopsChangePointFilterOutValue',
-              },
-            ] as Array<DefaultItemAction<ChangePointAnnotation>>,
-          },
+              ]
+            : []),
         ]
       : []),
   ];
 
-  const selectionValue = useMemo<EuiTableSelectionType<ChangePointAnnotation>>(() => {
+  const selectionValue = useMemo<EuiTableSelectionType<ChangePointAnnotation> | undefined>(() => {
+    if (!onSelectionChange) return;
     return {
       selectable: (item) => true,
       onSelectionChange: (selection) => {
-        onSelectionChange(
+        onSelectionChange!(
           selection.map((s) => {
             return {
               ...s,
@@ -273,8 +319,11 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       data-test-subj={`aiopsChangePointResultsTable ${isLoading ? 'loading' : 'loaded'}`}
       items={annotations}
       columns={columns}
-      pagination={{ pageSizeOptions: [5, 10, 15] }}
-      sorting={defaultSorting}
+      pagination={
+        pagination.pageSizeOptions![0] > pagination!.totalItemCount ? undefined : pagination
+      }
+      sorting={sorting}
+      onTableChange={onTableChange}
       hasActions={hasActions}
       rowProps={(item) => ({
         'data-test-subj': `aiopsChangePointResultsTableRow row-${item.id}`,
@@ -300,7 +349,12 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   );
 };
 
-export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotation }) => {
+export const MiniChartPreview: FC<ChartComponentProps> = ({
+  fieldConfig,
+  annotation,
+  onRenderComplete,
+  onLoading,
+}) => {
   const {
     lens: { EmbeddableComponent },
   } = useAiopsAppContext();
@@ -314,12 +368,36 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotat
     bucketInterval: bucketInterval.expression,
   });
 
+  const chartWrapperRef = useRef<HTMLDivElement>(null);
+
+  const renderCompleteListener = useCallback(
+    (event: Event) => {
+      if (event.target === chartWrapperRef.current) return;
+      if (onRenderComplete) {
+        onRenderComplete();
+      }
+    },
+    [onRenderComplete]
+  );
+
+  useEffect(() => {
+    if (!chartWrapperRef.current) {
+      throw new Error('Reference to the chart wrapper is not set');
+    }
+    const chartWrapper = chartWrapperRef.current;
+    chartWrapper.addEventListener('renderComplete', renderCompleteListener);
+    return () => {
+      chartWrapper.removeEventListener('renderComplete', renderCompleteListener);
+    };
+  }, [renderCompleteListener]);
+
   return (
-    <div data-test-subj={'aiopChangePointPreviewChart'}>
+    <div data-test-subj={'aiopChangePointPreviewChart'} ref={chartWrapperRef}>
       <EmbeddableComponent
         id={`mini_changePointChart_${annotation.group ? annotation.group.value : annotation.label}`}
         style={{ height: 80 }}
         timeRange={timeRange}
+        noPadding
         query={query}
         filters={filters}
         // @ts-ignore
@@ -329,6 +407,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotat
           type: 'aiops_change_point_detection_chart',
           name: 'Change point detection',
         }}
+        onLoad={onLoading}
       />
     </div>
   );

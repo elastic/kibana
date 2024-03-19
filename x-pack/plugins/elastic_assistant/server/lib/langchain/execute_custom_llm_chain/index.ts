@@ -16,7 +16,7 @@ import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/con
 import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
 import { APMTracer } from '../tracers/apm_tracer';
-import { getApplicableTools } from '../tools';
+import { AssistantToolParams } from '../../../types';
 
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
@@ -30,7 +30,8 @@ export const callAgentExecutor = async ({
   alertsIndexPattern,
   allow,
   allowReplacement,
-  assistantLangChain,
+  isEnabledKnowledgeBase,
+  assistantTools = [],
   connectorId,
   elserId,
   esClient,
@@ -42,6 +43,7 @@ export const callAgentExecutor = async ({
   replacements,
   request,
   size,
+  telemetry,
   traceOptions,
 }: AgentExecutorParams): AgentExecutorResponse => {
   const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
@@ -62,6 +64,7 @@ export const callAgentExecutor = async ({
     esClient,
     KNOWLEDGE_BASE_INDEX_PATTERN,
     logger,
+    telemetry,
     elserId,
     kbResource
   );
@@ -71,11 +74,12 @@ export const callAgentExecutor = async ({
   // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
   const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
 
-  const tools: Tool[] = getApplicableTools({
+  // Fetch any applicable tools that the source plugin may have registered
+  const assistantToolParams: AssistantToolParams = {
     allow,
     allowReplacement,
     alertsIndexPattern,
-    assistantLangChain,
+    isEnabledKnowledgeBase,
     chain,
     esClient,
     modelExists,
@@ -83,7 +87,8 @@ export const callAgentExecutor = async ({
     replacements,
     request,
     size,
-  });
+  };
+  const tools: Tool[] = assistantTools.flatMap((tool) => tool.getTool(assistantToolParams) ?? []);
 
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
@@ -100,7 +105,7 @@ export const callAgentExecutor = async ({
   let traceData;
 
   // Wrap executor call with an APM span for instrumentation
-  await withAssistantSpan(DEFAULT_AGENT_EXECUTOR_ID, async (span) => {
+  const langChainResponse = await withAssistantSpan(DEFAULT_AGENT_EXECUTOR_ID, async (span) => {
     if (span?.transaction?.ids['transaction.id'] != null && span?.ids['trace.id'] != null) {
       traceData = {
         // Transactions ID since this span is the parent
@@ -122,7 +127,7 @@ export const callAgentExecutor = async ({
 
   return {
     connector_id: connectorId,
-    data: llm.getActionResultData(), // the response from the actions framework
+    data: langChainResponse.output, // the response from the actions framework
     trace_data: traceData,
     replacements,
     status: 'ok',

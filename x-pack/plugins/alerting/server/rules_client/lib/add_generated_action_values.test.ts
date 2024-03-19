@@ -7,12 +7,63 @@
 
 import { addGeneratedActionValues } from './add_generated_action_values';
 import { RuleAction } from '../../../common';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core-saved-objects-api-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { AlertingAuthorization } from '../../authorization';
+import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
+import { ConstructorOptions } from '../rules_client';
 
 jest.mock('uuid', () => ({
   v4: () => '111-222',
 }));
 
 describe('addGeneratedActionValues()', () => {
+  const taskManager = taskManagerMock.createStart();
+  const ruleTypeRegistry = ruleTypeRegistryMock.create();
+  const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+
+  const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
+  const authorization = alertingAuthorizationMock.create();
+  const actionsAuthorization = actionsAuthorizationMock.create();
+  const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+
+  const kibanaVersion = 'v7.10.0';
+  const logger = loggingSystemMock.create().get();
+
+  const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+    taskManager,
+    ruleTypeRegistry,
+    unsecuredSavedObjectsClient,
+    authorization: authorization as unknown as AlertingAuthorization,
+    actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
+    spaceId: 'default',
+    namespace: 'default',
+    getUserName: jest.fn(),
+    createAPIKey: jest.fn(),
+    logger,
+    internalSavedObjectsRepository,
+    encryptedSavedObjectsClient: encryptedSavedObjects,
+    getActionsClient: jest.fn(),
+    getEventLogClient: jest.fn(),
+    kibanaVersion,
+    maxScheduledPerMinute: 10000,
+    minimumScheduleInterval: { value: '1m', enforce: false },
+    isAuthenticationTypeAPIKey: jest.fn(),
+    getAuthenticationAPIKey: jest.fn(),
+    getAlertIndicesAlias: jest.fn(),
+    alertsService: null,
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+  };
+
   const mockAction: RuleAction = {
     id: '1',
     group: 'default',
@@ -42,25 +93,40 @@ describe('addGeneratedActionValues()', () => {
   };
 
   test('adds uuid', async () => {
-    const actionWithGeneratedValues = addGeneratedActionValues([mockAction]);
+    const actionWithGeneratedValues = await addGeneratedActionValues([mockAction], {
+      ...rulesClientParams,
+      fieldsToExcludeFromPublicApi: [],
+      minimumScheduleIntervalInMs: 0,
+    });
     expect(actionWithGeneratedValues[0].uuid).toBe('111-222');
   });
 
   test('adds DSL', async () => {
-    const actionWithGeneratedValues = addGeneratedActionValues([mockAction]);
+    const actionWithGeneratedValues = await addGeneratedActionValues([mockAction], {
+      ...rulesClientParams,
+      fieldsToExcludeFromPublicApi: [],
+      minimumScheduleIntervalInMs: 0,
+    });
     expect(actionWithGeneratedValues[0].alertsFilter?.query?.dsl).toBe(
       '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"test":"testValue"}}],"minimum_should_match":1}},{"match_phrase":{"foo":"bar "}}],"should":[],"must_not":[]}}'
     );
   });
 
   test('throws error if KQL is not valid', async () => {
-    expect(() =>
-      addGeneratedActionValues([
+    expect(async () =>
+      addGeneratedActionValues(
+        [
+          {
+            ...mockAction,
+            alertsFilter: { query: { kql: 'foo:bar:1', filters: [] } },
+          },
+        ],
         {
-          ...mockAction,
-          alertsFilter: { query: { kql: 'foo:bar:1', filters: [] } },
-        },
-      ])
-    ).toThrowErrorMatchingInlineSnapshot('"Error creating DSL query: invalid KQL"');
+          ...rulesClientParams,
+          fieldsToExcludeFromPublicApi: [],
+          minimumScheduleIntervalInMs: 0,
+        }
+      )
+    ).rejects.toThrowErrorMatchingSnapshot('"Error creating DSL query: invalid KQL"');
   });
 });

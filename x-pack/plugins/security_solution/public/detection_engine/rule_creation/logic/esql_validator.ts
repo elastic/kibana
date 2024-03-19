@@ -15,7 +15,7 @@ import { securitySolutionQueryClient } from '../../../common/containers/query_cl
 import type { ValidationError, ValidationFunc } from '../../../shared_imports';
 import { isEsqlRule } from '../../../../common/detection_engine/utils';
 import type { DefineStepRule } from '../../../detections/pages/detection_engine/rules/types';
-import type { FieldValueQueryBar } from '../../../detections/components/rules/query_bar';
+import type { FieldValueQueryBar } from '../../rule_creation_ui/components/query_bar';
 import * as i18n from './translations';
 import { getEsqlQueryConfig } from './get_esql_query_config';
 export type FieldType = 'string';

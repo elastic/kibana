@@ -13,6 +13,7 @@ export const PostFleetServerHostRequestSchema = {
     name: schema.string(),
     host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
     is_default: schema.boolean({ defaultValue: false }),
+    is_internal: schema.maybe(schema.boolean()),
     proxy_id: schema.nullable(schema.string()),
   }),
 };
@@ -27,6 +28,7 @@ export const PutFleetServerHostRequestSchema = {
     name: schema.maybe(schema.string()),
     host_urls: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
     is_default: schema.maybe(schema.boolean({ defaultValue: false })),
+    is_internal: schema.maybe(schema.boolean()),
     proxy_id: schema.nullable(schema.string()),
   }),
 };

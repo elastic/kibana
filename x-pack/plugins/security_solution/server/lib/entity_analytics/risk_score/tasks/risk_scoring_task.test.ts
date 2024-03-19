@@ -10,7 +10,6 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-
 import type { RiskScoreService } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
 import { riskScoringTaskMock } from './risk_scoring_task.mock';

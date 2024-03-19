@@ -40,6 +40,7 @@ import {
   getCaseUserActionsStats,
   deleteFileAttachments,
   getCategories,
+  replaceCustomField,
 } from './api';
 
 import {
@@ -64,6 +65,7 @@ import {
   basicPushSnake,
   getCaseUserActionsStatsResponse,
   basicFileMock,
+  customFieldsMock,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
@@ -84,7 +86,8 @@ const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../common/lib/kibana');
 
 const fetchMock = jest.fn();
-mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
+const postMock = jest.fn();
+mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock, post: postMock } });
 
 describe('Cases API', () => {
   describe('deleteCases', () => {
@@ -1051,22 +1054,43 @@ describe('Cases API', () => {
 
   describe('getFeatureIds', () => {
     beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(['siem', 'observability']);
+      postMock.mockClear();
+      postMock.mockResolvedValue({
+        consumer: {
+          buckets: [{ key: 'observability', doc_count: 1 }],
+        },
+        producer: {
+          buckets: [],
+        },
+        ruleTypeIds: {
+          buckets: [{ key: 'apm.threshold', doc_count: 1 }],
+        },
+      });
     });
 
     it('should be called with correct check url, method, signal', async () => {
       const resp = await getFeatureIds({
-        query: { registrationContext: ['security', 'observability.logs'] },
+        query: { ids: { values: ['alert_id_1', 'alert_id_2'] } },
         signal: abortCtrl.signal,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(`${BASE_RAC_ALERTS_API_PATH}/_feature_ids`, {
-        query: { registrationContext: ['security', 'observability.logs'] },
+      expect(postMock).toHaveBeenCalledWith(`${BASE_RAC_ALERTS_API_PATH}/find`, {
+        body: '{"aggs":{"consumer":{"terms":{"field":"kibana.alert.rule.consumer","size":100}},"producer":{"terms":{"field":"kibana.alert.rule.producer","size":100}},"ruleTypeIds":{"terms":{"field":"kibana.alert.rule.rule_type_id","size":100}}},"query":{"ids":{"values":["alert_id_1","alert_id_2"]}}}',
+        method: 'POST',
         signal: abortCtrl.signal,
       });
 
-      expect(resp).toEqual(['siem', 'observability']);
+      expect(resp).toEqual({
+        consumer: {
+          buckets: [{ key: 'observability', doc_count: 1 }],
+        },
+        producer: {
+          buckets: [],
+        },
+        ruleTypeIds: {
+          buckets: [{ key: 'apm.threshold', doc_count: 1 }],
+        },
+      });
     });
   });
 
@@ -1128,6 +1152,42 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await getCaseConnectors(basicCase.id, abortCtrl.signal);
       expect(resp).toEqual({ 'servicenow-1': connectorCamelCase });
+    });
+  });
+
+  describe('replaceCustomField', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(customFieldsMock[0]);
+    });
+
+    const data = {
+      caseId: basicCase.id,
+      customFieldId: customFieldsMock[0].key,
+      request: {
+        value: 'this is an updated custom field',
+        caseVersion: basicCase.version,
+      },
+    };
+
+    it('should be called with correct check url, method, signal', async () => {
+      await replaceCustomField({ ...data, signal: abortCtrl.signal });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${basicCase.id}/custom_fields/${customFieldsMock[0].key}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            ...data.request,
+          }),
+          signal: abortCtrl.signal,
+        }
+      );
+    });
+
+    it('should return correct response', async () => {
+      const resp = await replaceCustomField({ ...data, signal: abortCtrl.signal });
+      expect(resp).toEqual(customFieldsMock[0]);
     });
   });
 });

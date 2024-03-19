@@ -21,7 +21,12 @@ import {
   fetchAgentPolicy,
   getOrCreateDefaultAgentPolicy,
 } from '../common/fleet_services';
-import { installSentinelOneAgent, S1Client } from './common';
+import {
+  createDetectionEngineSentinelOneRuleIfNeeded,
+  createSentinelOneStackConnectorIfNeeded,
+  installSentinelOneAgent,
+  S1Client,
+} from './common';
 import { createVm, generateVmName, getMultipassVmCountNotice } from '../common/vm_services';
 import { createKbnClient } from '../common/stack_services';
 
@@ -111,6 +116,9 @@ const runCli: RunFn = async ({ log, flags }) => {
     s1Client,
   });
 
+  log.info(`SentinelOne Agent Status:
+${s1Info.status}`);
+
   const {
     id: agentPolicyId,
     agents = 0,
@@ -157,17 +165,20 @@ const runCli: RunFn = async ({ log, flags }) => {
       agentPolicyId,
     });
   } else {
-    log.info(
+    log.debug(
       `No host VM created for Fleet agent policy [${agentPolicyName}]. It already shows to have [${agents}] enrolled`
     );
   }
+
+  await Promise.all([
+    createSentinelOneStackConnectorIfNeeded({ kbnClient, log, s1ApiToken, s1Url }),
+    createDetectionEngineSentinelOneRuleIfNeeded(kbnClient, log),
+  ]);
 
   log.info(`Done!
 
 ${hostVm.info()}
 ${agentPolicyVm ? `${agentPolicyVm.info()}\n` : ''}
 ${await getMultipassVmCountNotice(2)}
-SentinelOne Agent Status:
-${s1Info.status}
 `);
 };

@@ -12,6 +12,7 @@ servers:
 paths:
   /internal/asset_criticality:
     post:
+      operationId: AssetCriticalityCreateRecord
       summary: Create Criticality Record
       requestBody:
         required: true

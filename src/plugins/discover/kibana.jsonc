@@ -17,7 +17,6 @@
       "urlForwarding",
       "navigation",
       "uiActions",
-      "savedObjects",
       "savedObjectsFinder",
       "savedObjectsManagement",
       "savedSearch",
@@ -38,10 +37,9 @@
       "savedObjectsTaggingOss",
       "lens",
       "noDataPage",
-      "globalSearch",
-      "serverless"
+      "globalSearch"
     ],
-    "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch"],
+    "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch", "savedObjects"],
     "extraPublicDirs": ["common"]
   }
 }

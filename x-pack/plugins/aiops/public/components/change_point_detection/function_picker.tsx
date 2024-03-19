@@ -7,7 +7,8 @@
 
 import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { fnOperationTypeMapping } from './constants';
 
 interface FunctionPickerProps {

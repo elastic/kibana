@@ -107,7 +107,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [AppIds.REPORTING]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.reportingDescription', {
-      defaultMessage: 'Manage generated PDF, PNG and CSV reports.',
+      defaultMessage: 'Manage generated CSV reports.',
     }),
     icon: 'visPie',
   },
@@ -133,5 +133,13 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
       defaultMessage: 'Control project behavior, such as date display and default sorting.',
     }),
     icon: 'gear',
+  },
+
+  [AppIds.ROLES]: {
+    category: appCategories.OTHER,
+    description: i18n.translate('management.landing.withCardNavigation.rolesDescription', {
+      defaultMessage: 'Allow custom roles to be created for users.',
+    }),
+    icon: 'usersRolesApp',
   },
 };

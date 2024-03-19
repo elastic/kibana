@@ -27,7 +27,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
       label={i18n.translate('xpack.stackConnectors.components.webhook.bodyFieldLabel', {
         defaultMessage: 'Body',
       })}
-      aria-label={i18n.translate(
+      ariaLabel={i18n.translate(
         'xpack.stackConnectors.components.webhook.bodyCodeEditorAriaLabel',
         {
           defaultMessage: 'Code editor',
@@ -42,6 +42,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
           editAction('body', '', index);
         }
       }}
+      dataTestSubj="actionJsonEditor"
     />
   );
 };

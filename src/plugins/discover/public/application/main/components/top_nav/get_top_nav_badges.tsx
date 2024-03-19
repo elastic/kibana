@@ -8,6 +8,8 @@
 
 import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
 import { getTopNavUnsavedChangesBadge } from '@kbn/unsaved-changes-badge';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
+import { i18n } from '@kbn/i18n';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import type { TopNavCustomization } from '../../../../customizations';
 import { onSaveSearch } from './on_save_search';
@@ -38,18 +40,34 @@ export const getTopNavBadges = ({
   const defaultBadges = topNavCustomization?.defaultBadges;
   const entries = [...(topNavCustomization?.getBadges?.() ?? [])];
 
+  const isManaged = stateContainer.savedSearchState.getState().managed;
+
   if (hasUnsavedChanges && !defaultBadges?.unsavedChangesBadge?.disabled) {
     entries.push({
       data: getTopNavUnsavedChangesBadge({
         onRevert: stateContainer.actions.undoSavedSearchChanges,
-        onSave: async () => {
-          await saveSearch();
-        },
+        onSave: !isManaged
+          ? async () => {
+              await saveSearch();
+            }
+          : undefined,
         onSaveAs: async () => {
           await saveSearch(true);
         },
       }),
       order: defaultBadges?.unsavedChangesBadge?.order ?? 100,
+    });
+  }
+
+  if (isManaged) {
+    entries.push({
+      data: getManagedContentBadge(
+        i18n.translate('discover.topNav.managedContentLabel', {
+          defaultMessage:
+            'This saved search is managed by Elastic. Changes here must be saved to a new saved search.',
+        })
+      ),
+      order: 101,
     });
   }
 

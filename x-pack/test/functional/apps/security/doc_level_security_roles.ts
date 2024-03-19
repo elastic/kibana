@@ -20,6 +20,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('dls', function () {
+    const customUserName = 'userEast';
+    const customRole = 'myroleEast';
+
     before('initialize tests', async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/security/dlstest');
@@ -33,8 +36,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.security.clickElasticsearchRoles();
     });
 
-    it('should add new role myroleEast', async function () {
-      await PageObjects.security.addRole('myroleEast', {
+    it(`should add new role ${customRole}`, async function () {
+      await PageObjects.security.addRole(customRole, {
         elasticsearch: {
           indices: [
             {
@@ -47,29 +50,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       const roles = keyBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);
-      expect(roles).to.have.key('myroleEast');
-      expect(roles.myroleEast.reserved).to.be(false);
+      expect(roles).to.have.key(customRole);
+      expect(roles[customRole].reserved).to.be(false);
       await screenshot.take('Security_Roles');
     });
 
-    it('should add new user userEAST ', async function () {
+    it(`should add new user ${customUserName}`, async function () {
       await PageObjects.security.createUser({
-        username: 'userEast',
+        username: customUserName,
         password: 'changeme',
         confirm_password: 'changeme',
         full_name: 'dls EAST',
         email: 'dlstest@elastic.com',
-        roles: ['kibana_admin', 'myroleEast'],
+        roles: ['kibana_admin', customRole],
       });
       const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
-      expect(users.userEast.roles).to.eql(['kibana_admin', 'myroleEast']);
-      expect(users.userEast.reserved).to.be(false);
+      expect(users[customUserName].roles).to.eql(['kibana_admin', customRole]);
+      expect(users[customUserName].reserved).to.be(false);
     });
 
     it('user East should only see EAST doc', async function () {
       await PageObjects.security.forceLogout();
-      await PageObjects.security.login('userEast', 'changeme');
+      await PageObjects.security.login(customUserName, 'changeme');
       await PageObjects.common.navigateToApp('discover');
       await retry.try(async () => {
         const hitCount = await PageObjects.discover.getHitCount();
@@ -82,8 +85,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after('logout', async () => {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
-      await security.user.delete('userEast');
-      await security.role.delete('myroleEast');
+      await security.user.delete(customUserName);
+      await security.role.delete(customRole);
       await security.testUser.restoreDefaults();
     });
   });

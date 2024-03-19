@@ -354,6 +354,22 @@ describe('ruleType Params validate()', () => {
     expect(onValidate()).not.toThrow();
   });
 
+  it('fails for invalid sourceFields', async () => {
+    // no array that has more than 5 elements
+    const sourceField = { label: 'test', searchPath: 'test' };
+    params.sourceFields = [
+      sourceField,
+      sourceField,
+      sourceField,
+      sourceField,
+      sourceField,
+      sourceField,
+    ];
+    expect(onValidate()).toThrow(
+      '[sourceFields]: array size is [6], but cannot be greater than [5]'
+    );
+  });
+
   describe('esqlQuery search type', () => {
     beforeEach(() => {
       params = { ...DefaultParams, searchType: 'esqlQuery', esqlQuery: { esql: 'from test' } };

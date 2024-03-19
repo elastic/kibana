@@ -27,6 +27,7 @@ import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
 } from '../../mocks';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 
 describe('When using `getActionList()', () => {
   let esClient: ElasticsearchClientMock;
@@ -89,7 +90,9 @@ describe('When using `getActionList()', () => {
       endDate: undefined,
       data: [
         {
+          action: '123',
           agents: ['agent-a'],
+          agentType: 'endpoint',
           hosts: { 'agent-a': { name: 'Host-agent-a' } },
           command: 'kill-process',
           completedAt: '2022-04-30T16:08:47.449Z',
@@ -108,6 +111,24 @@ describe('When using `getActionList()', () => {
               completedAt: '2022-04-30T16:08:47.449Z',
               isCompleted: true,
               wasSuccessful: true,
+            },
+          },
+          outputs: {
+            'agent-a': {
+              content: {
+                code: 'ra_get-file_success_done',
+                contents: [
+                  {
+                    file_name: 'bad_file.txt',
+                    path: '/some/path/bad_file.txt',
+                    sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
+                    size: 1234,
+                    type: 'file',
+                  },
+                ],
+                zip_size: 123,
+              },
+              type: 'json',
             },
           },
         },
@@ -152,7 +173,9 @@ describe('When using `getActionList()', () => {
       endDate: undefined,
       data: [
         {
+          action: '123',
           agents: ['agent-a'],
+          agentType: 'endpoint',
           hosts: { 'agent-a': { name: 'Host-agent-a' } },
           command: 'kill-process',
           completedAt: '2022-04-30T16:08:47.449Z',
@@ -246,7 +269,9 @@ describe('When using `getActionList()', () => {
       statuses: undefined,
       data: [
         {
+          action: '123',
           agents: ['agent-a', 'agent-b', 'agent-x'],
+          agentType: 'endpoint',
           hosts: {
             'agent-a': { name: 'Host-agent-a' },
             'agent-b': { name: 'Host-agent-b' },
@@ -284,6 +309,7 @@ describe('When using `getActionList()', () => {
               errors: undefined,
             },
           },
+          outputs: {},
         },
       ],
       total: 1,
@@ -301,6 +327,7 @@ describe('When using `getActionList()', () => {
       esClient,
       logger,
       metadataService: endpointAppContextService.getEndpointMetadataService(),
+      agentTypes: ['endpoint'] as ResponseActionAgentType[],
       elasticAgentIds: ['123'],
       pageSize: 20,
       startDate: 'now-10d',
@@ -320,16 +347,6 @@ describe('When using `getActionList()', () => {
                   bool: {
                     filter: [
                       {
-                        term: {
-                          input_type: 'endpoint',
-                        },
-                      },
-                      {
-                        term: {
-                          type: 'INPUT_ACTION',
-                        },
-                      },
-                      {
                         range: {
                           '@timestamp': {
                             gte: 'now-10d',
@@ -346,6 +363,11 @@ describe('When using `getActionList()', () => {
                       {
                         terms: {
                           'data.command': ['isolate', 'unisolate', 'get-file'],
+                        },
+                      },
+                      {
+                        terms: {
+                          input_type: ['endpoint'],
                         },
                       },
                       {
@@ -415,16 +437,6 @@ describe('When using `getActionList()', () => {
                 {
                   bool: {
                     filter: [
-                      {
-                        term: {
-                          input_type: 'endpoint',
-                        },
-                      },
-                      {
-                        term: {
-                          type: 'INPUT_ACTION',
-                        },
-                      },
                       {
                         range: {
                           '@timestamp': {

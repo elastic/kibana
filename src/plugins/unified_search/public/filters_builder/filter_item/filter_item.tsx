@@ -105,22 +105,26 @@ export function FilterItem({
   const conditionalOperationType = getBooleanRelationType(filter);
   const { euiTheme } = useEuiTheme();
   let field: DataViewField | undefined;
-  let operator: Operator | undefined;
   let params: Filter['meta']['params'];
   const isMaxNesting = isMaxFilterNesting(path);
   if (!conditionalOperationType) {
     field = getFieldFromFilter(filter, dataView!);
     if (field) {
-      operator = getOperatorFromFilter(filter);
       params = getFilterParams(filter);
     }
   }
+  const [operator, setOperator] = useState<Operator | undefined>(() => {
+    if (!conditionalOperationType && field) {
+      return getOperatorFromFilter(filter);
+    }
+  });
   const [multiValueFilterParams, setMultiValueFilterParams] = useState<
     Array<Filter | boolean | string | number>
   >(Array.isArray(params) ? params : []);
 
   const onHandleField = useCallback(
     (selectedField: DataViewField) => {
+      setOperator(undefined);
       dispatch({
         type: 'updateFilter',
         payload: { dest: { path, index }, field: selectedField },
@@ -131,12 +135,21 @@ export function FilterItem({
 
   const onHandleOperator = useCallback(
     (selectedOperator: Operator) => {
+      const preservedParams =
+        params && selectedOperator.getParamsFromPrevOperator?.(operator, params);
+      setMultiValueFilterParams(Array.isArray(preservedParams) ? preservedParams : []);
+      setOperator(selectedOperator);
       dispatch({
         type: 'updateFilter',
-        payload: { dest: { path, index }, field, operator: selectedOperator },
+        payload: {
+          dest: { path, index },
+          field,
+          operator: selectedOperator,
+          params: params && selectedOperator.getParamsFromPrevOperator?.(operator, params),
+        },
       });
     },
-    [dispatch, path, index, field]
+    [dispatch, path, index, field, operator, params]
   );
 
   const onHandleParamsChange = useCallback(

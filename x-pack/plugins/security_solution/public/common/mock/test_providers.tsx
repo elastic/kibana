@@ -13,34 +13,27 @@ import type { DropResult, ResponderProvided } from '@hello-pangea/dnd';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import type { Store } from 'redux';
-import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 import type { Capabilities } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { TestProvider as ExpandableFlyoutTestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { useKibana } from '../lib/kibana';
 import { UpsellingProvider } from '../components/upselling_provider';
 import { MockAssistantProvider } from './mock_assistant_provider';
 import { ConsoleManager } from '../../management/components/console';
-import type { State } from '../store';
-import { createStore } from '../store';
-import { mockGlobalState } from './global_state';
 import {
   createKibanaContextProviderMock,
   createStartServicesMock,
 } from '../lib/kibana/kibana_react.mock';
 import type { FieldHook } from '../../shared_imports';
-import { SUB_PLUGINS_REDUCER } from './utils';
-import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
+import { localStorageMock } from './mock_local_storage';
 import { ASSISTANT_FEATURE_ID, CASES_FEATURE_ID } from '../../../common/constants';
 import { UserPrivilegesProvider } from '../components/user_privileges/user_privileges_context';
 import { MockDiscoverInTimelineContext } from '../components/discover_in_timeline/mocks/discover_in_timeline_provider';
-
-const state: State = mockGlobalState;
-
+import { createMockStore } from './create_store';
 interface Props {
   children?: React.ReactNode;
   store?: Store;
@@ -48,19 +41,18 @@ interface Props {
   cellActions?: Action[];
 }
 
-export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
+export const kibanaMock = createStartServicesMock();
 
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock(),
 });
 window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
-const { storage } = createSecuritySolutionStorageMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
 export const TestProvidersComponent: React.FC<Props> = ({
   children,
-  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
+  store = createMockStore(),
   onDragEnd = jest.fn(),
   cellActions = [],
 }) => {
@@ -69,6 +61,11 @@ export const TestProvidersComponent: React.FC<Props> = ({
       queries: {
         retry: false,
       },
+    },
+    logger: {
+      log: jest.fn(),
+      warn: jest.fn(),
+      error: () => {},
     },
   });
 
@@ -81,7 +78,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
               <QueryClientProvider client={queryClient}>
                 <MockDiscoverInTimelineContext>
                   <MockAssistantProvider>
-                    <ExpandableFlyoutProvider>
+                    <ExpandableFlyoutTestProvider>
                       <ConsoleManager>
                         <CellActionsProvider
                           getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
@@ -89,7 +86,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
                           <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
                         </CellActionsProvider>
                       </ConsoleManager>
-                    </ExpandableFlyoutProvider>
+                    </ExpandableFlyoutTestProvider>
                   </MockAssistantProvider>
                 </MockDiscoverInTimelineContext>
               </QueryClientProvider>
@@ -113,7 +110,7 @@ const UpsellingProviderMock = ({ children }: React.PropsWithChildren<{}>) => {
  */
 const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
   children,
-  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
+  store = createMockStore(),
   onDragEnd = jest.fn(),
   cellActions = [],
 }) => {

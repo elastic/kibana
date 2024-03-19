@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiSelectableMessage, EuiIcon, EuiSpacer } from '@elastic/eui';
+import React, { useMemo } from 'react';
 
+import { EuiIcon, EuiSelectableMessage, EuiSpacer } from '@elastic/eui';
+
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListStrings } from './options_list_strings';
 
 export const OptionsListPopoverEmptyMessage = ({
@@ -16,17 +18,35 @@ export const OptionsListPopoverEmptyMessage = ({
 }: {
   showOnlySelected: boolean;
 }) => {
+  const optionsList = useOptionsList();
+
+  const searchString = optionsList.select((state) => state.componentState.searchString);
+  const fieldSpec = optionsList.select((state) => state.componentState.field);
+  const searchTechnique = optionsList.select((state) => state.explicitInput.searchTechnique);
+
+  const noResultsMessage = useMemo(() => {
+    if (showOnlySelected) {
+      return OptionsListStrings.popover.getSelectionsEmptyMessage();
+    }
+    if (!searchString.valid && fieldSpec && searchTechnique) {
+      return OptionsListStrings.popover.getInvalidSearchMessage(fieldSpec.type);
+    }
+    return OptionsListStrings.popover.getEmptyMessage();
+  }, [showOnlySelected, fieldSpec, searchString.valid, searchTechnique]);
+
   return (
     <EuiSelectableMessage
+      tabIndex={0}
       data-test-subj={`optionsList-control-${
         showOnlySelected ? 'selectionsEmptyMessage' : 'noSelectionsMessage'
       }`}
     >
-      <EuiIcon type="minusInCircle" />
+      <EuiIcon
+        type={searchString.valid ? 'minusInCircle' : 'alert'}
+        color={searchString.valid ? 'default' : 'danger'}
+      />
       <EuiSpacer size="xs" />
-      {showOnlySelected
-        ? OptionsListStrings.popover.getSelectionsEmptyMessage()
-        : OptionsListStrings.popover.getEmptyMessage()}
+      {noResultsMessage}
     </EuiSelectableMessage>
   );
 };

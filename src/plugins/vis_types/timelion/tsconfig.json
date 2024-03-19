@@ -32,6 +32,7 @@
     "@kbn/std",
     "@kbn/timelion-grammar",
     "@kbn/visualization-utils",
+    "@kbn/code-editor",
   ],
   "exclude": [
     "target/**/*",

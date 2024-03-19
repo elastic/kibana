@@ -31,7 +31,7 @@ image::management/connectors/images/servicenow-itom-connector-oauth.png[{sn-itom
 [[servicenow-itom-connector-configuration]]
 ==== Connector configuration
 
-{sn-itom} connectors have a name and the following configuration properties:
+{sn-itom} connectors have the following configuration properties:
 
 Client ID::
 The client identifier assigned to your OAuth application.

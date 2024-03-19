@@ -41,8 +41,8 @@ export default function ({ getService }: FtrProviderContext) {
         ..._monitors[0],
         locations: [
           {
-            id: 'localhost',
-            label: 'Local Synthetics Service',
+            id: 'dev',
+            label: 'Dev Service',
             isServiceManaged: true,
           },
         ],
@@ -111,8 +111,8 @@ export default function ({ getService }: FtrProviderContext) {
         }),
         locations: [
           {
-            id: 'localhost',
-            label: 'Local Synthetics Service',
+            id: 'dev',
+            label: 'Dev Service',
             isServiceManaged: true,
           },
         ],

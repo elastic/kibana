@@ -41,7 +41,7 @@ function fromExcludedClickTarget(event: Event) {
 
 export function FlyoutContainer({
   isOpen,
-  groupLabel,
+  label,
   handleClose,
   isFullscreen,
   panelRef,
@@ -51,9 +51,9 @@ export function FlyoutContainer({
   isInlineEditing,
 }: {
   isOpen: boolean;
-  handleClose: () => boolean;
+  handleClose: () => void;
   children: React.ReactElement | null;
-  groupLabel: string;
+  label: string;
   isFullscreen?: boolean;
   panelRef?: (el: HTMLDivElement) => void;
   panelContainerRef?: (el: HTMLDivElement) => void;
@@ -63,11 +63,8 @@ export function FlyoutContainer({
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
 
   const closeFlyout = useCallback(() => {
-    const canClose = handleClose();
-    if (canClose) {
-      setFocusTrapIsEnabled(false);
-    }
-    return canClose;
+    setFocusTrapIsEnabled(false);
+    handleClose();
   }, [handleClose]);
 
   useEffect(() => {
@@ -138,12 +135,7 @@ export function FlyoutContainer({
                     id="lnsDimensionContainerTitle"
                     className="lnsDimensionContainer__headerTitle"
                   >
-                    {i18n.translate('xpack.lens.configure.configurePanelTitle', {
-                      defaultMessage: '{groupLabel}',
-                      values: {
-                        groupLabel,
-                      },
-                    })}
+                    {label}
                   </h2>
                 </EuiTitle>
               </EuiFlexItem>

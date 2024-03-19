@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
+import { get, identity } from 'lodash';
 import {
   ScriptedRangeFilter,
   RangeFilter,
@@ -21,11 +21,28 @@ export function getRangeDisplayValue(
   { meta: { params } }: RangeFilter | ScriptedRangeFilter,
   formatter?: FieldFormat
 ) {
-  const left = params?.gte ?? params?.gt ?? -Infinity;
-  const right = params?.lte ?? params?.lt ?? Infinity;
-  if (!formatter) return `${left} to ${right}`;
-  const convert = formatter.getConverterFor('text');
-  return `${convert(left)} to ${convert(right)}`;
+  const convert = formatter ? formatter.getConverterFor('text') : identity;
+  const { gte, gt, lte, lt } = params || {};
+
+  const left = gte ?? gt;
+  const right = lte ?? lt;
+
+  if (left !== undefined && right !== undefined) {
+    return `${convert(left)} to ${convert(right)}`;
+  }
+  if (gte !== undefined) {
+    return `≥ ${convert(gte)}`;
+  }
+  if (gt !== undefined) {
+    return `> ${convert(gt)}`;
+  }
+  if (lte !== undefined) {
+    return `≤ ${convert(lte)}`;
+  }
+  if (lt !== undefined) {
+    return `< ${convert(lt)}`;
+  }
+  return '-';
 }
 
 const getFirstRangeKey = (filter: RangeFilter) =>

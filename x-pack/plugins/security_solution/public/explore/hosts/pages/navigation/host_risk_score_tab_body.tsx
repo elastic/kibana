@@ -8,21 +8,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import { EnableRiskScore } from '../../../components/risk_score/enable_risk_score';
+import { HostRiskScoreQueryId } from '../../../../entity_analytics/common/utils';
+import { useRiskScoreKpi } from '../../../../entity_analytics/api/hooks/use_risk_score_kpi';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { EnableRiskScore } from '../../../../entity_analytics/components/enable_risk_score';
 import type { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../../common/components/page/manage_query';
-import { HostRiskScoreTable } from '../../components/host_risk_score_table';
+import { HostRiskScoreTable } from '../../../../entity_analytics/components/host_risk_score_table';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { hostsModel, hostsSelectors } from '../../store';
 import type { State } from '../../../../common/store';
-import {
-  HostRiskScoreQueryId,
-  useRiskScore,
-  useRiskScoreKpi,
-} from '../../../containers/risk_score';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
-import { RiskScoresNoDataDetected } from '../../../components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
+import { RiskScoresNoDataDetected } from '../../../../entity_analytics/components/risk_score_onboarding/risk_score_no_data_detected';
 import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 import { RiskScoreUpdatePanel } from '../../../../entity_analytics/components/risk_score_update_panel';
 

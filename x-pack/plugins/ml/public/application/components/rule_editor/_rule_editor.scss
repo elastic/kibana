@@ -41,7 +41,7 @@
 
   // SASSTODO: Dangerous EUI overwrite
   .scope-field-checkbox {
-    margin-right: $euiSizeXS / 2;
+    margin-right: calc($euiSizeXS / 2);
 
     .euiCheckbox {
       margin-top: $euiSizeXS;

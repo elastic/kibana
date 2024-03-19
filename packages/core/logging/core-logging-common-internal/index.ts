@@ -22,3 +22,4 @@ export {
   ROOT_CONTEXT_NAME,
   DEFAULT_APPENDER_NAME,
 } from './src';
+export type { BrowserLoggingConfig, BrowserRootLoggerConfig } from './src/browser_config';

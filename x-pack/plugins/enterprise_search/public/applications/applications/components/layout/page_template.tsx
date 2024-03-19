@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
+
+import { useValues } from 'kea';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
+import { KibanaLogic } from '../../../shared/kibana';
 import { SetEnterpriseSearchApplicationsChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { useEnterpriseSearchApplicationNav } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
+import { SearchApplicationHeaderDocsAction } from '../search_application/header_docs_action';
 
 export type EnterpriseSearchApplicationsPageTemplateProps = Omit<
   PageTemplateProps,
@@ -36,6 +40,14 @@ export const EnterpriseSearchApplicationsPageTemplate: React.FC<
     pageTemplateProps.isEmptyState,
     hasSchemaConflicts
   );
+  const { renderHeaderActions } = useValues(KibanaLogic);
+  useLayoutEffect(() => {
+    renderHeaderActions(SearchApplicationHeaderDocsAction);
+
+    return () => {
+      renderHeaderActions();
+    };
+  }, []);
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}

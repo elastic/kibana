@@ -91,13 +91,13 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           ],
         },
         {
-          name: 'Case Settings',
+          name: 'Case settings',
           privilegeGroups: [
             {
               groupType: 'independent',
               privileges: [
                 {
-                  name: 'Edit Case Settings',
+                  name: 'Edit case settings',
                   id: 'cases_settings',
                   includeIn: 'all',
                   cases: {

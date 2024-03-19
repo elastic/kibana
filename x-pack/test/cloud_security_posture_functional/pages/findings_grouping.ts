@@ -8,12 +8,20 @@
 import expect from '@kbn/expect';
 import Chance from 'chance';
 import { asyncForEach } from '@kbn/std';
+import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '@kbn/cloud-security-posture-plugin/common/constants';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
+  const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
 
@@ -116,12 +124,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const ruleName1 = data[0].rule.name;
 
+  const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
+    const cspBenchmarkRules = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
+      type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
+    });
+    const requestedBenchmarkRules = cspBenchmarkRules.saved_objects.filter(
+      (cspBenchmarkRule) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
+    );
+    expect(requestedBenchmarkRules.length).greaterThan(0);
+
+    return requestedBenchmarkRules.map((item) => item.attributes);
+  };
+
   describe('Findings Page - Grouping', function () {
     this.tags(['cloud_security_posture_findings_grouping']);
     let findings: typeof pageObjects.findings;
-    // let groupSelector: ReturnType<typeof findings.groupSelector>;
 
     before(async () => {
+      await kibanaServer.savedObjects.clean({
+        types: ['cloud-security-posture-settings'],
+      });
       findings = pageObjects.findings;
 
       // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
@@ -196,7 +218,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('3 groups');
+        expect(groupCount).to.be('3 resources');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
@@ -204,12 +226,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('groups findings by rule name and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
+        await groupSelector.setValue('None');
+        await groupSelector.openDropDown();
         await groupSelector.setValue('Rule name');
 
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('4 groups');
+        expect(groupCount).to.be('4 rules');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
@@ -260,13 +284,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       it('groups findings by cloud account and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
-
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('None');
+        await groupSelector.openDropDown();
         await groupSelector.setValue('Cloud account');
 
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('3 groups');
+        expect(groupCount).to.be('2 cloud accounts');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
@@ -315,12 +341,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       it('groups findings by Kubernetes cluster and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('None');
+        await groupSelector.openDropDown();
         await groupSelector.setValue('Kubernetes cluster');
 
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('3 groups');
+        expect(groupCount).to.be('2 kubernetes clusters');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
@@ -368,6 +397,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('SearchBar', () => {
       it('add filter', async () => {
         const groupSelector = await findings.groupSelector();
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('None');
+        await groupSelector.openDropDown();
         await groupSelector.setValue('Resource');
 
         // Filter bar uses the field's customLabel in the DataView
@@ -380,7 +412,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await groupRow.getVisibleText()).to.contain(data[0].resource.name);
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('1 group');
+        expect(groupCount).to.be('1 resource');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('1 finding');
@@ -393,7 +425,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const grouping = await findings.findingsGrouping();
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('3 groups');
+        expect(groupCount).to.be('3 resources');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
@@ -409,7 +441,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await groupRow.getVisibleText()).to.contain(data[0].resource.name);
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('1 group');
+        expect(groupCount).to.be('1 resource');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('1 finding');
@@ -417,7 +449,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await queryBar.setQuery('');
         await queryBar.submitQuery();
 
-        expect(await grouping.getGroupCount()).to.be('3 groups');
+        expect(await grouping.getGroupCount()).to.be('3 resources');
         expect(await grouping.getUnitCount()).to.be('4 findings');
       });
     });
@@ -432,6 +464,79 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await latestFindingsTable.hasColumnValue('rule.name', data[0].rule.name)).to.be(
           true
         );
+      });
+    });
+    describe('Default Grouping - support muting rules', async () => {
+      it('groups findings by resource after muting rule', async () => {
+        const findingsCount = data.length;
+        const resourceGroupCount = Array.from(new Set(data.map((obj) => obj.resource.name))).length;
+
+        const finding = data[0];
+        const rule = (await getCspBenchmarkRules('cis_k8s'))[0];
+        const modifiedFinding = {
+          ...finding,
+          resource: {
+            ...finding.resource,
+            name: 'foo',
+          },
+          rule: {
+            name: 'Upper case rule name1',
+            id: rule.metadata.id,
+            section: 'Upper case section1',
+            benchmark: {
+              id: rule.metadata.benchmark.id,
+              posture_type: rule.metadata.benchmark.posture_type,
+              name: rule.metadata.benchmark.name,
+              version: rule.metadata.benchmark.version,
+              rule_number: rule.metadata.benchmark.rule_number,
+            },
+            type: 'process',
+          },
+        };
+
+        await findings.index.add([modifiedFinding]);
+
+        await findings.navigateToLatestFindingsPage();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        const groupSelector = await findings.groupSelector();
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('Resource');
+
+        const grouping = await findings.findingsGrouping();
+
+        const groupCount = await grouping.getGroupCount();
+        expect(groupCount).to.be(`${resourceGroupCount + 1} resources`);
+
+        const unitCount = await grouping.getUnitCount();
+        expect(unitCount).to.be(`${findingsCount + 1} findings`);
+
+        await supertest
+          .post(`/internal/cloud_security_posture/rules/_bulk_action`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            action: 'mute',
+            rules: [
+              {
+                benchmark_id: modifiedFinding.rule.benchmark.id,
+                benchmark_version: modifiedFinding.rule.benchmark.version,
+                rule_number: modifiedFinding.rule.benchmark.rule_number || '',
+                rule_id: modifiedFinding.rule.id,
+              },
+            ],
+          })
+          .expect(200);
+
+        await findings.navigateToLatestFindingsPage();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        const groupCountAfterMute = await grouping.getGroupCount();
+        expect(groupCountAfterMute).to.be(`${resourceGroupCount} resources`);
+
+        const unitCountAfterMute = await grouping.getUnitCount();
+        expect(unitCountAfterMute).to.be(`${findingsCount} findings`);
       });
     });
   });

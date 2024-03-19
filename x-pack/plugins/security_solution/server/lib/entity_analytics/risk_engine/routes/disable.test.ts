@@ -7,7 +7,7 @@
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { riskEngineDisableRoute } from './disable';
-
+import { riskEnginePrivilegesMock } from './risk_engine_privileges.mock';
 import { RISK_ENGINE_DISABLE_URL } from '../../../../../common/constants';
 import {
   serverMock,
@@ -48,9 +48,13 @@ describe('risk score disable route', () => {
 
   describe('when task manager is available', () => {
     beforeEach(() => {
-      getStartServicesMock = jest
-        .fn()
-        .mockResolvedValue([{}, { taskManager: mockTaskManagerStart }]);
+      getStartServicesMock = jest.fn().mockResolvedValue([
+        {},
+        {
+          taskManager: mockTaskManagerStart,
+          security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
+        },
+      ]);
       riskEngineDisableRoute(server.router, getStartServicesMock);
     });
 
@@ -84,7 +88,13 @@ describe('risk score disable route', () => {
 
   describe('when task manager is unavailable', () => {
     beforeEach(() => {
-      getStartServicesMock = jest.fn().mockResolvedValueOnce([{}, { taskManager: undefined }]);
+      getStartServicesMock = jest.fn().mockResolvedValue([
+        {},
+        {
+          taskManager: undefined,
+          security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
+        },
+      ]);
       riskEngineDisableRoute(server.router, getStartServicesMock);
     });
 

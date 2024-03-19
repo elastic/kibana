@@ -146,7 +146,9 @@ describe('When on the host isolation exceptions entry form', () => {
     });
 
     it('should show policy as selected when user clicks on it', async () => {
-      userEvent.click(renderResult.getByTestId('perPolicy'));
+      userEvent.click(
+        renderResult.getByTestId('hostIsolationExceptions-form-effectedPolicies-perPolicy')
+      );
       await clickOnEffectedPolicy(renderResult, testIdPrefix);
 
       await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
@@ -154,20 +156,26 @@ describe('When on the host isolation exceptions entry form', () => {
 
     it('should retain the previous policy selection when switching from per-policy to global', async () => {
       // move to per-policy and select the first
-      userEvent.click(renderResult.getByTestId('perPolicy'));
+      userEvent.click(
+        renderResult.getByTestId('hostIsolationExceptions-form-effectedPolicies-perPolicy')
+      );
       await clickOnEffectedPolicy(renderResult, testIdPrefix);
 
       await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
 
       // move back to global
-      userEvent.click(renderResult.getByTestId('globalPolicy'));
+      userEvent.click(
+        renderResult.getByTestId('hostIsolationExceptions-form-effectedPolicies-global')
+      );
 
       expect(
         renderResult.queryByTestId(`${testIdPrefix}-effectedPolicies-policiesSelectable`)
       ).toBeFalsy();
 
       // move back to per-policy
-      userEvent.click(renderResult.getByTestId('perPolicy'));
+      userEvent.click(
+        renderResult.getByTestId('hostIsolationExceptions-form-effectedPolicies-perPolicy')
+      );
       await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
     });
   });

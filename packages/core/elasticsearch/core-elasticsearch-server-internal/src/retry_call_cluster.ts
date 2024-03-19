@@ -8,7 +8,6 @@
 
 import { defer, throwError, iif, timer } from 'rxjs';
 import { concatMap, retryWhen } from 'rxjs/operators';
-import type { Logger } from '@kbn/logging';
 
 const retryResponseStatuses = [
   503, // ServiceUnavailable
@@ -60,7 +59,6 @@ export const retryCallCluster = <T extends Promise<unknown>>(apiCaller: () => T)
  */
 export const migrationRetryCallCluster = <T extends Promise<unknown>>(
   apiCaller: () => T,
-  log: Logger,
   delay: number = 2500
 ): T => {
   const previousErrors: string[] = [];
@@ -70,7 +68,6 @@ export const migrationRetryCallCluster = <T extends Promise<unknown>>(
         errors.pipe(
           concatMap((error) => {
             if (!previousErrors.includes(error.message)) {
-              log.warn(`Unable to connect to Elasticsearch. Error: ${error.message}`);
               previousErrors.push(error.message);
             }
             return iif(

@@ -74,3 +74,11 @@ export const getSupportedAggs = (field: DataViewField) => {
   if (field.aggregatable) return SUPPORTED_AGGS.AGGREGATABLE;
   return SUPPORTED_AGGS.DEFAULT;
 };
+
+export const getESQLSupportedAggs = (
+  field: { name: string; type: string },
+  aggregatable = true
+) => {
+  if (aggregatable) return SUPPORTED_AGGS.AGGREGATABLE;
+  return SUPPORTED_AGGS.DEFAULT;
+};

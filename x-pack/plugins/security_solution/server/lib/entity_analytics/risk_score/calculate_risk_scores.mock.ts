@@ -9,7 +9,8 @@ import {
   ALERT_RISK_SCORE,
   ALERT_RULE_NAME,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
+import { RiskCategories, RiskLevels } from '../../../../common/entity_analytics/risk_engine';
+import type { RiskScore } from '../../../../common/entity_analytics/risk_engine';
 import type {
   CalculateRiskScoreAggregations,
   CalculateScoresResponse,
@@ -23,7 +24,6 @@ const buildRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): Ris
     value: {
       score: 20,
       normalized_score: 30.0,
-      level: 'Unknown',
       notes: [],
       category_1_score: 30,
       category_1_count: 1,
@@ -88,11 +88,15 @@ const buildResponseMock = (
         '@timestamp': '2021-08-19T20:55:59.000Z',
         id_field: 'host.name',
         id_value: 'hostname',
-        calculated_level: 'Unknown',
+        criticality_level: 'high_impact',
+        criticality_modifier: 1.5,
+        calculated_level: RiskLevels.unknown,
         calculated_score: 20,
         calculated_score_norm: 30,
         category_1_score: 30,
         category_1_count: 12,
+        category_2_score: 0,
+        category_2_count: 0,
         notes: [],
         inputs: [
           {
@@ -111,8 +115,12 @@ const buildResponseMock = (
   ...overrides,
 });
 
+const buildResponseWithOneScoreMock = () =>
+  buildResponseMock({ scores: { host: [{} as RiskScore] } });
+
 export const calculateRiskScoresMock = {
   buildResponse: buildResponseMock,
+  buildResponseWithOneScore: buildResponseWithOneScoreMock,
   buildAggregationResponse: buildAggregationResponseMock,
   buildRiskScoreBucket: buildRiskScoreBucketMock,
 };

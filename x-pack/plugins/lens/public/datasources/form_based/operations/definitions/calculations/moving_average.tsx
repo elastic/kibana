@@ -9,6 +9,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import {
+  MOVING_AVERAGE_NAME,
+  MOVING_AVERAGE_ID,
+  MOVING_AVERAGE_WINDOW_DEFAULT_VALUE,
+} from '@kbn/lens-formula-docs';
 import { useDebounceWithOptions } from '../../../../../shared_components';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { FormBasedLayer } from '../../../types';
@@ -37,11 +42,9 @@ const ofName = buildLabelFunction((name?: string) => {
   });
 });
 
-const WINDOW_DEFAULT_VALUE = 5;
-
 export type MovingAverageIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
-    operationType: 'moving_average';
+    operationType: typeof MOVING_AVERAGE_ID;
     params: {
       window: number;
     };
@@ -51,11 +54,9 @@ export const movingAverageOperation: OperationDefinition<
   MovingAverageIndexPatternColumn,
   'fullReference'
 > = {
-  type: 'moving_average',
+  type: MOVING_AVERAGE_ID,
   priority: 1,
-  displayName: i18n.translate('xpack.lens.indexPattern.movingAverage', {
-    defaultMessage: 'Moving average',
-  }),
+  displayName: MOVING_AVERAGE_NAME,
   input: 'fullReference',
   selectionStyle: 'full',
   requiredReferences: [
@@ -65,7 +66,12 @@ export const movingAverageOperation: OperationDefinition<
     },
   ],
   operationParams: [
-    { name: 'window', type: 'number', required: false, defaultValue: WINDOW_DEFAULT_VALUE },
+    {
+      name: 'window',
+      type: 'number',
+      required: false,
+      defaultValue: MOVING_AVERAGE_WINDOW_DEFAULT_VALUE,
+    },
   ],
   getPossibleOperation: (indexPattern) => {
     if (hasDateField(indexPattern)) {
@@ -86,7 +92,7 @@ export const movingAverageOperation: OperationDefinition<
   },
   buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
     const metric = layer.columns[referenceIds[0]];
-    const window = columnParams?.window ?? WINDOW_DEFAULT_VALUE;
+    const window = columnParams?.window ?? MOVING_AVERAGE_WINDOW_DEFAULT_VALUE;
 
     return {
       label: ofName(metric?.label, previousColumn?.timeScale, previousColumn?.timeShift),
@@ -135,28 +141,6 @@ export const movingAverageOperation: OperationDefinition<
   },
   timeScalingMode: 'optional',
   filterable: true,
-  documentation: {
-    section: 'calculation',
-    signature: i18n.translate('xpack.lens.indexPattern.moving_average.signature', {
-      defaultMessage: 'metric: number, [window]: number',
-    }),
-    description: i18n.translate('xpack.lens.indexPattern.movingAverage.documentation.markdown', {
-      defaultMessage: `
-Calculates the moving average of a metric over time, averaging the last n-th values to calculate the current value. To use this function, you need to configure a date histogram dimension as well.
-The default window value is {defaultValue}.
-
-This calculation will be done separately for separate series defined by filters or top values dimensions.
-
-Takes a named parameter \`window\` which specifies how many last values to include in the average calculation for the current value.
-
-Example: Smooth a line of measurements:
-\`moving_average(sum(bytes), window=5)\`
-      `,
-      values: {
-        defaultValue: WINDOW_DEFAULT_VALUE,
-      },
-    }),
-  },
   quickFunctionDocumentation: i18n.translate(
     'xpack.lens.indexPattern.movingAverage.documentation.quick',
     {

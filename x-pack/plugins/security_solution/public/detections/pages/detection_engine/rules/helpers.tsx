@@ -37,7 +37,7 @@ import type {
   ActionsStepRule,
 } from './types';
 import { DataSourceType, GroupByOptions } from './types';
-import { severityOptions } from '../../../components/rules/step_about_rule/data';
+import { severityOptions } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import type { RuleAction, RuleResponse } from '../../../../../common/api/detection_engine';
 

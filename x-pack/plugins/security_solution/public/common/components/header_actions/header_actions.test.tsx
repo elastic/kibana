@@ -12,7 +12,7 @@ import { mockTriggersActionsUi } from '../../mock/mock_triggers_actions_ui_plugi
 import type { ColumnHeaderOptions, HeaderActionProps } from '../../../../common/types';
 import { TimelineTabs } from '../../../../common/types';
 import { HeaderActions } from './header_actions';
-import { timelineActions } from '../../../timelines/store/timeline';
+import { timelineActions } from '../../../timelines/store';
 import { getColumnHeader } from '../../../timelines/components/timeline/body/column_headers/helpers';
 
 jest.mock('../../../timelines/components/row_renderers_browser', () => ({

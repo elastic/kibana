@@ -74,7 +74,7 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   }
 
   async validate(key: string, value: unknown) {
-    if (!value) {
+    if (value == null) {
       throw new ValidationBadValueError();
     }
     const definition = this.defaults[key];

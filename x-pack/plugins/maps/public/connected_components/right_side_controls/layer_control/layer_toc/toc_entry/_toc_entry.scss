@@ -81,7 +81,6 @@
   flex-grow: 1;
 }
 
-.mapLayTocActions__popoverAnchor,
 .mapLayTocActions__tooltipAnchor {
   max-width: 100%;
 }
@@ -129,7 +128,7 @@
   background-color: $euiColorEmptyShade;
   border: $euiBorderThin;
   color: $euiTextColor;
-  border-radius: $euiBorderRadius / 2;
+  border-radius: calc($euiBorderRadius / 2);
   height: $euiSize;
   width: $euiSizeXL;
   line-height: $euiSize;
