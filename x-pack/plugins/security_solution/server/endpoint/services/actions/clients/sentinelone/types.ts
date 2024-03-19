@@ -25,10 +25,18 @@ export type SentinelOneConnectorExecuteOptions<
   params: SentinelOneConnectorExecuteParams<P> & Record<string, unknown>;
 };
 
+export interface SentinelOneActionRequestCommonMeta {
+  /** The S1 agent id */
+  agentId: string;
+  /** The S1 agent assigned UUID */
+  agentUUID: string;
+  /** The host name */
+  hostName: string;
+}
+
 /**
  * Metadata capture for the isolation actions (`isolate` and `release`)
  */
 export interface SentinelOneIsolationRequestMeta {
-  /** The ISO date string when the request was sent to SentinelOne for delivery to their agent */
   sentAt: string;
 }

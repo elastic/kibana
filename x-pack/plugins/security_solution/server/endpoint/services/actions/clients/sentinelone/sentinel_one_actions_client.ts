@@ -22,7 +22,11 @@ import type {
   ProcessPendingActionsMethodOptions,
 } from '../../..';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
-import type { SentinelOneConnectorExecuteOptions, SentinelOneIsolationRequestMeta } from './types';
+import type {
+  SentinelOneConnectorExecuteOptions,
+  SentinelOneIsolationRequestMeta,
+  SentinelOneActionRequestCommonMeta,
+} from './types';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
 import type {
@@ -87,17 +91,24 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = SentinelOneActionRequestCommonMeta
   >(
     actionRequest: Omit<ResponseActionsClientWriteActionRequestToEndpointIndexOptions, 'hosts'>
   ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
-    const agentId = actionRequest.endpoint_ids[0];
-    const agentDetails = await this.getAgentDetails(agentId);
+    const agentUUID = actionRequest.endpoint_ids[0];
+    const agentDetails = await this.getAgentDetails(agentUUID);
 
     return super.writeActionRequestToEndpointIndex<TParameters, TOutputContent, TMeta>({
       ...actionRequest,
       hosts: {
-        [agentId]: { name: agentDetails.computerName },
+        [agentUUID]: { name: agentDetails.computerName },
+      },
+      meta: {
+        // Add common meta data
+        agentUUID,
+        agentId: agentDetails.id,
+        hostName: agentDetails.computerName,
+        ...(actionRequest.meta ?? {}),
       },
     });
   }
@@ -142,14 +153,16 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return actionSendResponse;
   }
 
-  private async getAgentDetails(id: string): Promise<SentinelOneGetAgentsResponse['data'][number]> {
+  private async getAgentDetails(
+    agentUUID: string
+  ): Promise<SentinelOneGetAgentsResponse['data'][number]> {
     const { id: connectorId } = await this.getConnector();
     const executeOptions: SentinelOneConnectorExecuteOptions<SentinelOneGetAgentsParams> = {
       actionId: connectorId,
       params: {
         subAction: SUB_ACTION.GET_AGENTS,
         subActionParams: {
-          uuid: id,
+          uuid: agentUUID,
         },
       },
     };
@@ -161,19 +174,21 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         executeOptions
       )) as ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
 
-      this.log.debug(`Response for SentinelOne agent id [${id}] returned:\n${stringify(response)}`);
+      this.log.debug(
+        `Response for SentinelOne agent id [${agentUUID}] returned:\n${stringify(response)}`
+      );
 
       s1ApiResponse = response.data;
     } catch (err) {
       throw new ResponseActionsClientError(
-        `Error while attempting to retrieve SentinelOne host with agent id [${id}]`,
+        `Error while attempting to retrieve SentinelOne host with agent id [${agentUUID}]`,
         500,
         err
       );
     }
 
     if (!s1ApiResponse || !s1ApiResponse.data[0]) {
-      throw new ResponseActionsClientError(`SentinelOne agent id [${id}] not found`, 404);
+      throw new ResponseActionsClientError(`SentinelOne agent id [${agentUUID}] not found`, 404);
     }
 
     return s1ApiResponse.data[0];
@@ -208,9 +223,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       ...actionRequest,
       ...this.getMethodOptions(options),
       command: 'isolate',
-      meta: {
-        sentAt: new Date().toISOString(),
-      },
     };
 
     if (!reqIndexOptions.error) {
@@ -273,9 +285,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       ...actionRequest,
       ...this.getMethodOptions(options),
       command: 'unisolate',
-      meta: {
-        sentAt: new Date().toISOString(),
-      },
     };
 
     if (!reqIndexOptions.error) {
@@ -335,4 +344,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     //   return;
     // }
   }
+
+  // getIsolateResponse()
+  // From Index: logs-sentinel_one.activity-default
+  // Use:
+  //    sentinel_one.activity.agent.id              = The ID (internal to sentinelone) of the host
+  //    sentinel_one.activity.site.id               = the side id the host is in
+  //    sentinel_one.activity.updated_at            = When the entry in the activity log was added. Sync with when action was sent
+  //    sentinel_one.activity.type                  = For request, type is 61.... For response type is 1001
+  //    sentinel_one.activity.description.primary   = includes text that has the host name
 }
