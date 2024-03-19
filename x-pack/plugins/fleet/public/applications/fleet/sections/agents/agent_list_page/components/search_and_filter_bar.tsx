@@ -108,7 +108,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                 showAgentActivityTour={showAgentActivityTour}
               />
             </EuiFlexItem>
-            {authz.fleet.allAgents && !cloud?.isServerlessEnabled ? (
+            {authz.fleet.allAgents && authz.fleet.allSettings && !cloud?.isServerlessEnabled ? (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={
@@ -127,7 +127,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                 </EuiToolTip>
               </EuiFlexItem>
             ) : null}
-            {authz.fleet.allAgents ? (
+            {authz.fleet.allAgents && authz.fleet.readSettings ? (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={

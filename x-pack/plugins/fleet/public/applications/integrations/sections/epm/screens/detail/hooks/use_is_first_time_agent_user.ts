@@ -24,7 +24,6 @@ export const useIsFirstTimeAgentUserQuery = (): UseIsFirstTimeAgentUserResponse 
       full: true,
     },
     {
-      // TODO fix
       enabled: authz.fleet.readAgentPolicies,
     }
   );
@@ -51,7 +50,7 @@ export const useIsFirstTimeAgentUserQuery = (): UseIsFirstTimeAgentUserResponse 
   );
 
   return {
-    isLoading: areAgentPoliciesLoading || areAgentsLoading,
+    isLoading: authz.fleet.readAgentPolicies && (areAgentPoliciesLoading || areAgentsLoading),
     isFirstTimeAgentUser: !authz.fleet.readAgentPolicies && agents?.data?.total === 0,
   };
 };
