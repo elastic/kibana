@@ -19,13 +19,13 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
   EuiEmptyPrompt,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { Index } from '../../../../../../common';
 import { useAppContext } from '../../../../app_context';
 import { DocumentFieldsSearch } from '../../../../components/mappings_editor/components/document_fields/document_fields_search';
@@ -43,7 +43,6 @@ import { DocumentFields } from '../../../../components/mappings_editor/component
 import { deNormalize } from '../../../../components/mappings_editor/lib';
 import { updateIndexMappings } from '../../../../services/api';
 import { notificationService } from '../../../../services/notification';
-import { i18n } from '@kbn/i18n';
 import { NormalizedFields } from '../../../../components/mappings_editor/types';
 export const DetailsPageMappingsContent: FunctionComponent<{
   index: Index;
@@ -115,6 +114,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const addFieldButtonOnClick = useCallback(() => {
     hideAddFieldComponent(!addFieldComponent);
+
     // reset unsaved mappings and change status to create field
     dispatch({
       type: 'editor.replaceMappings',
@@ -127,7 +127,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         },
       },
     });
-  }, [dispatch]);
+  }, [dispatch, addFieldComponent, state]);
 
   const updateMappings = useCallback(async () => {
     const { error } = await updateIndexMappings(indexName, deNormalize(state.fields));
@@ -135,12 +135,11 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       notificationService.showSuccessToast(
         i18n.translate('xpack.idxMgmt.indexDetails.mappings.successfullyUpdatedIndexMappings', {
           defaultMessage: 'Index Mapping was successfully updated',
-          values: { indexName },
         })
       );
       refetchMapping();
     }
-  }, [state.fields]);
+  }, [state.fields, indexName, refetchMapping]);
 
   const pendingFieldListId = useGeneratedHtmlId({
     prefix: 'pendingFieldListId',

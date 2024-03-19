@@ -29,7 +29,6 @@ import {
   testIndexSettings,
   testIndexStats,
 } from './mocks';
-import { MappingField } from '../index_template_wizard/template_form.helpers';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
@@ -547,7 +546,7 @@ describe('<IndexDetailsPage />', () => {
         ]);
         await testBed.actions.mappings.clickSaveMappingsButton();
 
-        //Add field button is available again
+        // Add field button is available again
         expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
 
         expect(httpSetup.put).toHaveBeenCalledWith(`${API_BASE_PATH}/mapping/${testIndexName}`, {
@@ -560,7 +559,7 @@ describe('<IndexDetailsPage />', () => {
           requestOptions
         );
 
-        //refresh mappings api calls
+        // refresh mappings api calls
         expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
         const tabContent = testBed.actions.mappings.getCodeBlockContent();
         expect(tabContent).toEqual(JSON.stringify({ mappings: mockIndexMappingResponse }, null, 2));

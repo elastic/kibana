@@ -10,7 +10,6 @@ import { RouteDependencies } from '../types';
 import { registerDataStreamRoutes } from './api/data_streams';
 import { registerIndicesRoutes } from './api/indices';
 import { registerTemplateRoutes } from './api/templates';
-import { registerMappingRoute, registerUpdateMappingRoute } from './api/mapping';
 import { registerSettingsRoutes } from './api/settings';
 import { registerStatsRoute } from './api/stats';
 import { registerComponentTemplateRoutes } from './api/component_templates';

@@ -42,7 +42,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
     mappings: {
       addNewMappingFieldNameAndType: (mappingFields?: MappingField[]) => Promise<void>;
       clickAddFieldButton: () => Promise<void>;
-      clickSaveMappingsButton:() => Promise<void>;
+      clickSaveMappingsButton: () => Promise<void>;
       getCodeBlockContent: () => string;
       getDocsLinkHref: () => string;
       isErrorDisplayed: () => boolean;
@@ -229,8 +229,8 @@ export const setup = async ({
       });
       component.update();
     },
-    addNewMappingFieldNameAndType : async (mappingFields?: MappingField[]) => {
-      const { component , find, form, exists} = testBed;
+    addNewMappingFieldNameAndType: async (mappingFields?: MappingField[]) => {
+      const { form } = testBed;
       if (mappingFields) {
         for (const field of mappingFields) {
           const { name, type } = field;
@@ -245,15 +245,14 @@ export const setup = async ({
           });
 
           await act(async () => {
-            expect(exists('createFieldForm.addButton')).toBe(true)
+            expect(exists('createFieldForm.addButton')).toBe(true);
             find('createFieldForm.addButton').simulate('click');
           });
 
           component.update();
         }
       }
-    }
-
+    },
   };
 
   const settings = {

@@ -154,8 +154,8 @@ export const MappingsEditor = React.memo(
 
     const dispatch = useDispatch();
     const onSearchChange = useCallback(
-      (value: string) => {
-        dispatch({ type: 'search:update', value });
+      (searchValue: string) => {
+        dispatch({ type: 'search:update', value: searchValue });
       },
       [dispatch]
     );

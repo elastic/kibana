@@ -6,7 +6,7 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import {  IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   API_BASE_PATH,
   INTERNAL_API_BASE_PATH,
@@ -432,7 +432,7 @@ export function createIndex(indexName: string) {
     }),
   });
 }
-export function updateIndexMappings(indexName: string, newFields:Fields) {
+export function updateIndexMappings(indexName: string, newFields: Fields) {
   return sendRequest({
     path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
     method: 'put',
