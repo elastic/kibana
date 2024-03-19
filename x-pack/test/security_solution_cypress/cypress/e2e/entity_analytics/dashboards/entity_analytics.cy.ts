@@ -184,7 +184,8 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
         cy.get(HOSTS_TABLE_ROWS).should('have.length', 1);
       });
 
-      describe('With alerts data', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/178914
+      describe.skip('With alerts data', () => {
         before(() => {
           createRule(getNewRule());
         });
