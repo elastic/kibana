@@ -137,7 +137,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
         </EuiButtonEmpty>
 
         <EuiButton
-          data-test-subj="mlsingleMetricViewerInitializerConfirmButton"
+          data-test-subj="mlSingleMetricViewerInitializerConfirmButton"
           isDisabled={!isPanelTitleValid}
           onClick={onCreate.bind(null, {
             functionDescription,
