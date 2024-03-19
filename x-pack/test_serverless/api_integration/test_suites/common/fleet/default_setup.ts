@@ -39,7 +39,7 @@ export async function expectDefaultElasticsearchOutput({ getService }: FtrProvid
       `/api/fleet/outputs/${defaultElasticsearchOutputId}`
     );
     if (status === 200 && body.item.hosts.length > 0) {
-      defaultEsOutputUrl = body.item.hosts;
+      defaultEsOutputUrl = body.item.hosts[0];
       return true;
     } else {
       throw new Error(
@@ -47,7 +47,7 @@ export async function expectDefaultElasticsearchOutput({ getService }: FtrProvid
       );
     }
   });
-  return defaultEsOutputUrl[0];
+  return defaultEsOutputUrl;
 }
 
 export const kbnServerArgs = [
