@@ -5,7 +5,15 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useObservabilityAIAssistantAppService } from '../../hooks/use_observability_ai_assistant_app_service';
 import { nonNullable } from '../../utils/non_nullable';
@@ -15,28 +23,26 @@ const starterPromptClassName = css`
   min-width: calc(50% - 8px);
 `;
 
-export function StarterPrompts({
-  userPrompts,
-  onSelectPrompt,
-}: {
-  userPrompts: string[];
-  onSelectPrompt: (prompt: string) => void;
-}) {
+const starterPromptInnerClassName = css`
+  text-align: center !important;
+`;
+
+export function StarterPrompts({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => void }) {
   const service = useObservabilityAIAssistantAppService();
+
+  const contexts = service.getScreenContexts();
 
   const starterPrompts = useMemo(
     () => [
       ...new Set(
-        service
-          .getScreenContexts()
+        contexts
           .reverse()
           .flatMap((context) => context.starterPrompts)
           .filter(nonNullable)
-          .filter((prompt) => !userPrompts.includes(prompt))
           .slice(0, 4)
       ),
     ],
-    [service, userPrompts]
+    [contexts]
   );
 
   const handleSelectPrompt = (prompt: string) => {
@@ -45,10 +51,22 @@ export function StarterPrompts({
 
   return (
     <EuiFlexGroup direction="row" gutterSize="m" wrap>
-      {starterPrompts.map((prompt) => (
+      {starterPrompts.map(({ prompt, title, icon }) => (
         <EuiFlexItem key={prompt} className={starterPromptClassName}>
-          <EuiPanel paddingSize="s" onClick={() => handleSelectPrompt(prompt)}>
-            {prompt}
+          <EuiPanel
+            paddingSize="m"
+            hasShadow={false}
+            hasBorder
+            onClick={() => handleSelectPrompt(prompt)}
+            className={starterPromptInnerClassName}
+          >
+            <EuiSpacer size="s" />
+            <EuiIcon type={icon} size="xl" />
+            <EuiSpacer size="s" />
+            <EuiTitle size="xs">
+              <h2>{title}</h2>
+            </EuiTitle>
+            <EuiText size="s">{prompt}</EuiText>
           </EuiPanel>
         </EuiFlexItem>
       ))}

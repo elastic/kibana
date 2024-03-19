@@ -78,6 +78,13 @@ export const renderApp = ({
 
   const PresentationContextProvider = plugins.presentationUtil?.ContextProvider ?? React.Fragment;
 
+  const unregisterPrompts = plugins.observabilityAIAssistant.service.setScreenContext({
+    starterPrompts: [
+      { title: 'Getting started', icon: 'bullseye', prompt: 'What is an SLO?' },
+      { title: 'Getting started', icon: 'questionInCircle', prompt: 'Can you create an SLO?' },
+    ],
+  });
+
   ReactDOM.render(
     <PresentationContextProvider>
       <EuiErrorBoundary>
@@ -132,6 +139,7 @@ export const renderApp = ({
     // via the ExploratoryView app, which uses search sessions. Therefore on unmounting we need to clear
     // these sessions.
     plugins.data.search.session.clear();
+    unregisterPrompts();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

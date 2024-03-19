@@ -92,7 +92,7 @@ export function WelcomeMessage({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <StarterPrompts userPrompts={[]} onSelectPrompt={onSelectPrompt} />
+          <StarterPrompts onSelectPrompt={onSelectPrompt} />
 
           <EuiSpacer size="l" />
           <Disclaimer />

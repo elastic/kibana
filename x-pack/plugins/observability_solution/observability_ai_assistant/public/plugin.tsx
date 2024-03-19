@@ -10,6 +10,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Logger } from '@kbn/logging';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import React, { type ComponentType, lazy, type Ref } from 'react';
+import { i18n } from '@kbn/i18n';
 import { registerTelemetryEventTypes } from './analytics';
 import { ObservabilityAIAssistantChatServiceContext } from './context/observability_ai_assistant_chat_service_context';
 import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_context';
@@ -41,6 +42,7 @@ export class ObservabilityAIAssistantPlugin
 {
   logger: Logger;
   service?: ObservabilityAIAssistantService;
+  clearScreenContext?: () => void;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -63,6 +65,66 @@ export class ObservabilityAIAssistantPlugin
       coreStart,
       enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
     }));
+
+    this.clearScreenContext = service.setScreenContext({
+      starterPrompts: [
+        {
+          title: i18n.translate(
+            'xpack.observabilityAiAssistant.starterPrompts.doIHaveAlerts.title',
+            { defaultMessage: 'Alerts' }
+          ),
+          prompt: i18n.translate(
+            'xpack.observabilityAiAssistant.starterPrompts.doIHaveAlerts.prompt',
+            {
+              defaultMessage: 'Do I have any alerts?',
+            }
+          ),
+          icon: 'bell',
+        },
+        {
+          title: i18n.translate(
+            'xpack.observabilityAiAssistant.starterPrompts.howCanICreateANewRule.title',
+            {
+              defaultMessage: 'Rule creation',
+            }
+          ),
+          prompt: i18n.translate(
+            'xpack.observabilityAiAssistant.starterPrompts.howCanICreateANewRule.prompt',
+            {
+              defaultMessage: 'How can I create a new rule?',
+            }
+          ),
+          icon: 'createSingleMetricJob',
+        },
+        {
+          title: i18n.translate(
+            'xpack.observabilityAiAssistant.starterPrompts.whatAreCases.title',
+            {
+              defaultMessage: 'Cases',
+            }
+          ),
+          prompt: i18n.translate(
+            'xpack.observabilityAiAssistant.starterPrompts.whatAreCases.prompt',
+            {
+              defaultMessage: 'What are cases?',
+            }
+          ),
+          icon: 'casesApp',
+        },
+        {
+          title: i18n.translate('xpack.observabilityAiAssistant.starterPrompts.whatAreSlos.title', {
+            defaultMessage: 'SLOs',
+          }),
+          prompt: i18n.translate(
+            'xpack.observabilityAiAssistant.starterPrompts.whatAreSlos.prompt',
+            {
+              defaultMessage: 'What are SLOs?',
+            }
+          ),
+          icon: 'bullseye',
+        },
+      ],
+    });
 
     const withProviders = <P extends {}, R = {}>(
       Component: ComponentType<P>,
@@ -110,5 +172,9 @@ export class ObservabilityAIAssistantPlugin
       getContextualInsightMessages,
       createScreenContextAction,
     };
+  }
+
+  stop() {
+    this.clearScreenContext?.();
   }
 }

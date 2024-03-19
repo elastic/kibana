@@ -87,7 +87,62 @@ export const renderApp = ({
   const PresentationContextProvider = plugins.presentationUtil?.ContextProvider ?? React.Fragment;
 
   const clearScreenContext = plugins.observabilityAIAssistant.service.setScreenContext({
-    starterPrompts: ['Do I have any alerts?', 'How can I create a new rule?', 'What are cases?'],
+    starterPrompts: [
+      {
+        title: i18n.translate(
+          'xpack.observability.aiAssistant.starterPrompts.doIHaveAlerts.title',
+          {
+            defaultMessage: 'Alerting',
+          }
+        ),
+        prompt: i18n.translate(
+          'xpack.observability.aiAssistant.starterPrompts.doIHaveAlerts.prompt',
+          {
+            defaultMessage: 'Do I have any alerts?',
+          }
+        ),
+        icon: 'bell',
+      },
+      {
+        title: i18n.translate(
+          'xpack.observability.aiAssistant.starterPrompts.howCanICreateANewRule.title',
+          {
+            defaultMessage: 'Rule creation',
+          }
+        ),
+        prompt: i18n.translate(
+          'xpack.observability.aiAssistant.starterPrompts.howCanICreateANewRule.prompt',
+          {
+            defaultMessage: 'How can I create a new rule?',
+          }
+        ),
+        icon: 'createSingleMetricJob',
+      },
+      {
+        title: i18n.translate('xpack.observability.aiAssistant.starterPrompts.whatAreCases.title', {
+          defaultMessage: 'Cases',
+        }),
+        prompt: i18n.translate(
+          'xpack.observability.aiAssistant.starterPrompts.whatAreCases.prompt',
+          {
+            defaultMessage: 'What are cases?',
+          }
+        ),
+        icon: 'casesApp',
+      },
+      {
+        title: i18n.translate('xpack.observability.aiAssistant.starterPrompts.whatAreSlos.title', {
+          defaultMessage: 'SLOs',
+        }),
+        prompt: i18n.translate(
+          'xpack.observability.aiAssistant.starterPrompts.whatAreSlos.prompt',
+          {
+            defaultMessage: 'What are SLOs?',
+          }
+        ),
+        icon: 'bullseye',
+      },
+    ],
   });
 
   ReactDOM.render(

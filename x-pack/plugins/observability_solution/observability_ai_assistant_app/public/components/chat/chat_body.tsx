@@ -37,13 +37,11 @@ import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { useLicense } from '../../hooks/use_license';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
-import { nonNullable } from '../../utils/non_nullable';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
-import { StarterPrompts } from './starter_prompts';
 import { WelcomeMessage } from './welcome_message';
 
 const fullHeightClassName = css`
@@ -356,54 +354,30 @@ export function ChatBody({
                   }
                 />
               ) : (
-                <>
-                  <ChatTimeline
-                    messages={messages}
-                    knowledgeBase={knowledgeBase}
-                    chatService={chatService}
-                    currentUser={currentUser}
-                    chatState={state}
-                    hasConnector={!!connectors.connectors?.length}
-                    onEdit={(editedMessage, newMessage) => {
-                      setStickToBottom(true);
-                      const indexOf = messages.indexOf(editedMessage);
-                      next(messages.slice(0, indexOf).concat(newMessage));
-                    }}
-                    onFeedback={handleFeedback}
-                    onRegenerate={(message) => {
-                      next(reverseToLastUserMessage(messages, message));
-                    }}
-                    onSendTelemetry={(eventWithPayload) =>
-                      chatService.sendAnalyticsEvent(eventWithPayload)
-                    }
-                    onStopGenerating={() => {
-                      stop();
-                    }}
-                    onActionClick={handleActionClick}
-                  />
-
-                  {!isLoading ? (
-                    <>
-                      <StarterPrompts
-                        userPrompts={messages
-                          .filter((message) => message.message.role === MessageRole.User)
-                          .map((message) => message.message.content)
-                          .filter(nonNullable)}
-                        onSelectPrompt={(message) =>
-                          next(
-                            messages.concat([
-                              {
-                                '@timestamp': new Date().toISOString(),
-                                message: { content: message, role: MessageRole.User },
-                              },
-                            ])
-                          )
-                        }
-                      />
-                      <EuiSpacer size="l" />
-                    </>
-                  ) : null}
-                </>
+                <ChatTimeline
+                  messages={messages}
+                  knowledgeBase={knowledgeBase}
+                  chatService={chatService}
+                  currentUser={currentUser}
+                  chatState={state}
+                  hasConnector={!!connectors.connectors?.length}
+                  onEdit={(editedMessage, newMessage) => {
+                    setStickToBottom(true);
+                    const indexOf = messages.indexOf(editedMessage);
+                    next(messages.slice(0, indexOf).concat(newMessage));
+                  }}
+                  onFeedback={handleFeedback}
+                  onRegenerate={(message) => {
+                    next(reverseToLastUserMessage(messages, message));
+                  }}
+                  onSendTelemetry={(eventWithPayload) =>
+                    chatService.sendAnalyticsEvent(eventWithPayload)
+                  }
+                  onStopGenerating={() => {
+                    stop();
+                  }}
+                  onActionClick={handleActionClick}
+                />
               )}
             </EuiPanel>
           </div>

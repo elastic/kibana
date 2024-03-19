@@ -75,6 +75,69 @@ export class ObservabilityAIAssistantAppPlugin
           >,
         ]);
 
+        const clearScreenContext = this.appService?.setScreenContext({
+          starterPrompts: [
+            {
+              title: i18n.translate(
+                'xpack.observabilityAiAssistant.app.starterPrompts.doIHaveAlerts.title',
+                { defaultMessage: 'Alerts' }
+              ),
+              prompt: i18n.translate(
+                'xpack.observabilityAiAssistant.app.starterPrompts.doIHaveAlerts.prompt',
+                {
+                  defaultMessage: 'Do I have any alerts?',
+                }
+              ),
+              icon: 'bell',
+            },
+            {
+              title: i18n.translate(
+                'xpack.observabilityAiAssistant.app.starterPrompts.howCanICreateANewRule.title',
+                {
+                  defaultMessage: 'Rule creation',
+                }
+              ),
+              prompt: i18n.translate(
+                'xpack.observabilityAiAssistant.app.starterPrompts.howCanICreateANewRule.prompt',
+                {
+                  defaultMessage: 'How can I create a new rule?',
+                }
+              ),
+              icon: 'createSingleMetricJob',
+            },
+            {
+              title: i18n.translate(
+                'xpack.observabilityAiAssistant.app.starterPrompts.whatAreCases.title',
+                {
+                  defaultMessage: 'Cases',
+                }
+              ),
+              prompt: i18n.translate(
+                'xpack.observabilityAiAssistant.app.starterPrompts.whatAreCases.prompt',
+                {
+                  defaultMessage: 'What are cases?',
+                }
+              ),
+              icon: 'casesApp',
+            },
+            {
+              title: i18n.translate(
+                'xpack.observabilityAiAssistant.app.starterPrompts.whatAreSlos.title',
+                {
+                  defaultMessage: 'SLOs',
+                }
+              ),
+              prompt: i18n.translate(
+                'xpack.observabilityAiAssistant.app.starterPrompts.whatAreSlos.prompt',
+                {
+                  defaultMessage: 'What are SLOs?',
+                }
+              ),
+              icon: 'bullseye',
+            },
+          ],
+        });
+
         ReactDOM.render(
           <Application
             {...appMountParameters}
@@ -86,6 +149,7 @@ export class ObservabilityAIAssistantAppPlugin
         );
 
         return () => {
+          clearScreenContext?.();
           ReactDOM.unmountComponentAtNode(appMountParameters.element);
         };
       },
