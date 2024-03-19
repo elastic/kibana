@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
 
-  describe('', () => {
+  describe('data_view_field_editor_example', () => {
     it('finds a data view', async () => {
       await testSubjects.existOrFail('dataViewTitle');
     });
