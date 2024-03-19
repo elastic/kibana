@@ -6169,6 +6169,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/slo-plugin@link:x-pack/plugins/observability_solution/slo":
+  version "0.0.0"
+  uid ""
+
 "@kbn/slo-schema@link:x-pack/packages/kbn-slo-schema":
   version "0.0.0"
   uid ""
