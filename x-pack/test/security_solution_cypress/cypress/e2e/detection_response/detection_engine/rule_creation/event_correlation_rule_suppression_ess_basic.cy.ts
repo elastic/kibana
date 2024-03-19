@@ -53,9 +53,6 @@ describe(
       visit(CREATE_RULE_URL);
       startBasicLicense();
     });
-    after(() => {
-      cy.task('esArchiverUnload', 'auditbeat_multiple');
-    });
 
     it('can not create rule with rule execution suppression on basic license for non-sequence based alerts', () => {
       selectEqlRuleType();
