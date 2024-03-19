@@ -136,10 +136,8 @@ export type CreateMessage = Omit<Message, 'id'> & {
   id?: Message['id'];
 };
 
-export interface ChatRequest {
+export interface ChatRequest extends Pick<ChatRequestOptions, 'options' | 'data'> {
   messages: Message[];
-  options?: RequestOptions;
-  data?: Record<string, string>;
 }
 
 export interface UseChatOptions {
