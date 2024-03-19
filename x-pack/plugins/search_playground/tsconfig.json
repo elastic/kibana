@@ -25,7 +25,8 @@
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/navigation-plugin",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/share-plugin"
   ],
   "exclude": [
     "target/**/*",
