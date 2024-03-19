@@ -13,9 +13,8 @@ import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-c
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
-import { BaseParamsV2 } from '@kbn/reporting-common/types';
+import type { ExportPanelShareOpts } from '.';
 import { checkLicense } from '../..';
-import { ExportPanelShareOpts } from '.';
 import { CsvModalContent } from './csv_export_modal';
 
 export const reportingCsvShareProvider = ({
@@ -76,6 +75,7 @@ export const reportingCsvShareProvider = ({
     const licenseHasCsvReporting = licenseCheck.showLinks;
     const licenseDisabled = !licenseCheck.enableLinks;
 
+    // TODO: add abstractions in ExportTypeRegistry to use here?
     let capabilityHasCsvReporting = false;
     if (usesUiCapabilities) {
       capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;
@@ -84,7 +84,7 @@ export const reportingCsvShareProvider = ({
     }
 
     if (licenseHasCsvReporting && capabilityHasCsvReporting) {
-      const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
+      const panelTitle = i18n.translate('reporting.share.contextMenu.csvReportsButtonLabel', {
         defaultMessage: 'Export',
       });
 
@@ -93,23 +93,21 @@ export const reportingCsvShareProvider = ({
           name: panelTitle,
           toolTipContent: licenseToolTipContent,
           disabled: licenseDisabled,
-          ['data-test-subj']: 'CSVDownload',
+          ['data-test-subj']: 'CSVReports',
         },
         panel: {
           id: 'csvReportingPanel',
           title: panelTitle,
           content: (
             <CsvModalContent
-              onClose={() => {
-                onClose();
-              }}
               requiresSavedState={false}
               apiClient={apiClient}
               toasts={toasts}
               uiSettings={uiSettings}
-              reportType={sharingData.isTextBased ? CSV_JOB_TYPE_V2 : CSV_JOB_TYPE}
+              reportType={reportType}
               objectId={objectId}
-              getJobParams={getJobParams as unknown as BaseParamsV2}
+              getJobParams={getJobParams}
+              onClose={onClose}
               theme={theme}
               objectType={objectType}
             />

@@ -23,9 +23,8 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import url from 'url';
 
-import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
-import { BaseParamsV2 } from '@kbn/reporting-common/types';
 import { i18n } from '@kbn/i18n';
+import { BaseParams } from '@kbn/reporting-common/types';
 import { ErrorUrlTooLongPanel } from './reporting_panel_content/components';
 import { getMaxUrlLength } from './reporting_panel_content/constants';
 import { ReportingAPIClient } from '../..';
@@ -36,7 +35,7 @@ export interface CsvModalProps {
   uiSettings: IUiSettingsClient;
   reportType: string;
   requiresSavedState: boolean; // Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
-  getJobParams: JobParamsCSV | BaseParamsV2;
+  getJobParams: (forShareUrl?: boolean) => Omit<BaseParams, 'browserTimezone' | 'version'>;
   objectId?: string;
   isDirty?: boolean;
   onClose?: () => void;
@@ -58,7 +57,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
     () => () => {
       const relativePath = apiClient.getReportingPublicJobPath(
         reportType,
-        apiClient.getDecoratedJobParams(getJobParams)
+        apiClient.getDecoratedJobParams(getJobParams())
       );
       return setAbsoluteUrl(url.resolve(window.location.href, relativePath));
     },
@@ -69,13 +68,13 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
     const reportingUrl = new URL(window.location.origin);
     reportingUrl.pathname = apiClient.getReportingPublicJobPath(
       reportType,
-      apiClient.getDecoratedJobParams(getJobParams)
+      apiClient.getDecoratedJobParams(getJobParams())
     );
     setAbsoluteUrl(reportingUrl.toString());
   }, [getAbsoluteReportGenerationUrl, apiClient, getJobParams, reportType]);
 
   const generateReportingJob = () => {
-    const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams);
+    const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
     setCreatingReportJob(true);
     return apiClient
       .createReportingJob(reportType, decoratedJobParams)

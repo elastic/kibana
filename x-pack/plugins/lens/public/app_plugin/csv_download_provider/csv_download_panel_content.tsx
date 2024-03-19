@@ -24,13 +24,13 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import type { JobAppParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { BaseParams } from '@kbn/reporting-common/types';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 import {
   ErrorUnsavedWorkPanel,
   ErrorUrlTooLongPanel,
 } from '@kbn/reporting-public/share/share_context_menu/reporting_panel_content/components';
+import { JobAppParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 
 interface ReportingSharingData {
   title: string;
