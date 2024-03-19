@@ -19,7 +19,7 @@ import {
   IconChartVerticalBullet,
 } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { TableSuggestion, Visualization } from '../../types';
+import type { TableSuggestion, Visualization, VisualizationSuggestion } from '../../types';
 import { gaugeTitlesByType, GaugeVisualizationState } from './constants';
 
 const isNotNumericMetric = (table: TableSuggestion) =>
@@ -52,7 +52,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
     return [];
   }
 
-  const baseSuggestion = {
+  const baseSuggestion: VisualizationSuggestion<GaugeVisualizationState> = {
     state: {
       ...state,
       shape: state?.shape ?? GaugeShapes.HORIZONTAL_BULLET,
@@ -70,7 +70,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
     incomplete: state?.metricAccessor === undefined,
   };
 
-  const suggestions = isGauge
+  const suggestions: Array<VisualizationSuggestion<GaugeVisualizationState>> = isGauge
     ? [
         {
           ...baseSuggestion,
@@ -81,6 +81,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
             ...state,
             shape: GaugeShapes.VERTICAL_BULLET,
           },
+          score: 1,
         },
         {
           ...baseSuggestion,
@@ -91,6 +92,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
             ...state,
             shape: GaugeShapes.HORIZONTAL_BULLET,
           },
+          score: 1,
         },
         {
           ...baseSuggestion,
@@ -101,6 +103,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
             ...state,
             shape: GaugeShapes.ARC,
           },
+          score: 0.1,
         },
         {
           ...baseSuggestion,
@@ -121,6 +124,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
             ...state,
             shape: GaugeShapes.CIRCLE,
           },
+          score: 0.1,
         },
       ].filter((s) => s.state.shape !== state?.shape)
     : [
