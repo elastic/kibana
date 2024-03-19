@@ -26,7 +26,7 @@ export const OTHER_FIELDS_LENGTH_ERROR = (length: number) =>
   });
 
 export const OTHER_FIELDS_PROPERTY_ERROR = (properties: string) =>
-  i18n.translate('xpack.stackConnectors.jira.schema.otherFieldsLengthError', {
+  i18n.translate('xpack.stackConnectors.jira.schema.otherFieldsPropertyError', {
     values: { properties },
     defaultMessage: 'The following properties cannot be defined inside otherFields: {properties}.',
   });
