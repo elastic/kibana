@@ -10952,8 +10952,8 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesLocalUnifiedSearch",
-            "text": "PublishesLocalUnifiedSearch"
+            "section": "def-common.PublishesUnifiedSearch",
+            "text": "PublishesUnifiedSearch"
           },
           " & Partial<",
           {

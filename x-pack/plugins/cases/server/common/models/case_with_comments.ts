@@ -42,7 +42,7 @@ import {
   getAlertInfoFromComments,
   getIDsAndIndicesAsArrays,
 } from '../utils';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { decodeOrThrow } from '../runtime_types';
 import type { AttachmentRequest, AttachmentPatchRequest } from '../../../common/types/api';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
