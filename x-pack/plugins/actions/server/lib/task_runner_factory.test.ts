@@ -29,7 +29,6 @@ import {
   isRetryableError,
   isUnrecoverableError,
 } from '@kbn/task-manager-plugin/server/task_running';
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 const executeParamsFields = [
@@ -109,9 +108,15 @@ const services = {
   savedObjectsClient: savedObjectsClientMock.create(),
 };
 
+const unsecuredServices = {
+  log: jest.fn(),
+  savedObjectsClient: savedObjectsRepositoryMock.create(),
+};
+
 const actionExecutorInitializerParams = {
   logger: loggingSystemMock.create().get(),
   getServices: jest.fn().mockReturnValue(services),
+  getUnsecuredServices: jest.fn().mockReturnValue(unsecuredServices),
   actionTypeRegistry,
   getActionsAuthorizationWithRequest: jest.fn().mockReturnValue(actionsAuthorizationMock.create()),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
@@ -133,7 +138,7 @@ describe('Task Runner Factory', () => {
     jest.resetAllMocks();
     jest.clearAllMocks();
     actionExecutorInitializerParams.getServices.mockReturnValue(services);
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
+    mockedActionExecutor.getActionInfo.mockResolvedValueOnce(mockActionInfo);
   });
 
   test(`throws an error if factory isn't initialized`, () => {
@@ -1130,11 +1135,7 @@ describe('Task Runner Factory', () => {
       '3',
       { namespace: 'namespace-test' }
     );
-    expect(mockedActionExecutor.getActionInfoInternal).toHaveBeenCalledWith(
-      '9',
-      expect.any(CoreKibanaRequest),
-      'test'
-    );
+    expect(mockedActionExecutor.getActionInfo).toHaveBeenCalledWith('9', 'test');
 
     expect(result).toEqual({
       data: {
@@ -1166,7 +1167,7 @@ describe('Task Runner Factory', () => {
   test("loadIndirectParams returns error when it can't fetch the actionInfo", async () => {
     jest.resetAllMocks();
     const error = new Error('test');
-    mockedActionExecutor.getActionInfoInternal.mockRejectedValueOnce(error);
+    mockedActionExecutor.getActionInfo.mockRejectedValueOnce(error);
 
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
@@ -1193,14 +1194,14 @@ describe('Task Runner Factory', () => {
     const result = await taskRunner.loadIndirectParams();
 
     expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
-    expect(mockedActionExecutor.getActionInfoInternal).toHaveBeenCalledTimes(1);
+    expect(mockedActionExecutor.getActionInfo).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ error });
   });
 
   test('throws error if it cannot fetch task or action data', async () => {
     jest.resetAllMocks();
     const error = new Error('test');
-    mockedActionExecutor.getActionInfoInternal.mockRejectedValueOnce(error);
+    mockedActionExecutor.getActionInfo.mockRejectedValueOnce(error);
 
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
