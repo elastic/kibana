@@ -91,7 +91,7 @@ const { ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
   let serverCloseTimer;
   const delayServerClose = () => {
     clearTimeout(serverCloseTimer);
-    serverCloseTimer = setTimeout(() => server.close(), 1000);
+    serverCloseTimer = setTimeout(() => server.close(), 5000);
   };
   server.on('request', delayServerClose);
   server.on('listening', delayServerClose);

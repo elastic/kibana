@@ -2964,7 +2964,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       username: {
         default_value: null,
         depends_on: [],
-        display: DisplayType.TEXTAREA,
+        display: DisplayType.TEXTBOX,
         label: i18n.translate('searchConnectors.nativeConnectors.servicenow.username.label', {
           defaultMessage: 'Username',
         }),
