@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './is_enhanced_embeddable';
 export * from './api_action_storage';
