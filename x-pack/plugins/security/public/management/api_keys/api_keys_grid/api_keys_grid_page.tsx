@@ -34,6 +34,7 @@ import { useCapabilities } from '../../../components/use_capabilities';
 import { useAuthentication } from '../../../components/use_current_user';
 import type { CreateAPIKeyResult } from '../api_keys_api_client';
 import { APIKeysAPIClient } from '../api_keys_api_client';
+import moment from 'moment';
 
 const parseSearchBarQuery = (query: Query): QueryContainer => {
   let parsedQuery = query;
@@ -43,6 +44,14 @@ const parseSearchBarQuery = (query: Query): QueryContainer => {
     parsedQuery = EuiSearchBar.Query.parse(`${subQuery} (metadata.managed:true OR Alerting*)`);
   } else if (query.text.includes('type:rest') || query.text.includes('type:cross_cluster')) {
     parsedQuery = EuiSearchBar.Query.parse(`${query.text} -metadata.managed:true -Alerting*`);
+  }
+
+  if (query.text.includes('expired:true')) {
+    const subQuery = query.text.replace('expired:true', '');
+    parsedQuery = EuiSearchBar.Query.parse(`${subQuery} expiration<=${moment.now()}`);
+  } else if (query.text.includes('expired:false')) {
+    const subQuery = query.text.replace('expired:false', '');
+    parsedQuery = EuiSearchBar.Query.parse(`${subQuery} expiration>${moment.now()}`);
   }
 
   parsedQuery = parsedQuery.addSimpleFieldValue('invalidated', false);

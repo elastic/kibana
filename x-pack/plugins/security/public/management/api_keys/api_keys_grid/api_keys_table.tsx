@@ -204,21 +204,19 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   if (expired > 0) {
     filters.push({
       type: 'field_value_toggle_group',
-      field: 'expiration',
+      field: 'expired',
       items: [
         {
-          value: 'now+1m/m',
+          value: false,
           name: i18n.translate('xpack.security.management.apiKeys.table.activeFilter', {
             defaultMessage: 'Active',
           }),
-          operator: 'gt',
         },
         {
-          value: 'now',
+          value: true,
           name: i18n.translate('xpack.security.management.apiKeys.table.expiredFilter', {
             defaultMessage: 'Expired',
           }),
-          operator: 'lte',
         },
       ],
     });
@@ -240,13 +238,6 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         box={{
           incremental: true,
           placeholder: 'Search...',
-          schema: {
-            fields: {
-              expiration: {
-                type: 'date',
-              },
-            },
-          },
         }}
         filters={filters}
         onChange={onSearchChange}
