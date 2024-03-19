@@ -6,181 +6,57 @@
  * Side Public License, v 1.
  */
 
-import { Capabilities } from '@kbn/core-capabilities-common';
-import React, { useState } from 'react';
-import { IModalTabDeclaration, TabbedModal } from '@kbn/shared-ux-tabbed-modal';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { copyToClipboard } from '@elastic/eui';
-import { LocatorPublic, AnonymousAccessServiceContract } from '../../common';
-import { ShareMenuItem, UrlParamExtension, BrowserUrlService } from '../types';
-import { LinkModal } from './link_modal';
-import { EmbedModal } from './embed_modal';
+import React, { type FC } from 'react';
+import { TabbedModal } from '@kbn/shared-ux-tabbed-modal';
 
-export interface ModalTabActionHandler {
-  id: string;
-  dataTestSubj: string;
-  formattedMessageId: string;
-  defaultMessage: string;
-}
+import { ShareTabsContext, useShareTabsContext, type IShareContext } from './context';
+import { linkTab, embedTab } from './tabs';
 
-export interface ShareContextTabProps {
-  allowEmbed: boolean;
-  allowShortUrl: boolean;
-  objectId?: string;
-  objectType: string;
-  shareableUrl?: string;
-  shareableUrlForSavedObject?: string;
-  shareableUrlLocatorParams?: {
-    locator: LocatorPublic<any>;
-    params: any;
-  };
-  shareMenuItems: ShareMenuItem[];
-  sharingData: any;
-  onClose: () => void;
-  embedUrlParamExtensions?: UrlParamExtension[];
-  anonymousAccess?: AnonymousAccessServiceContract;
-  showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
-  urlService: BrowserUrlService;
-  snapshotShareWarning?: string;
-  objectTypeTitle?: string;
-  disabledShareUrl?: boolean;
-  isDirty: boolean;
-  isEmbedded: boolean;
-}
+export const ShareMenuV2: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
+  return (
+    <ShareTabsContext.Provider value={shareContext}>
+      <ShareMenuTabs />
+    </ShareTabsContext.Provider>
+  );
+};
 
 // this file is intended to replace share_context_menu
-export const ShareMenuTabs = ({
-  allowEmbed,
-  shareMenuItems,
-  urlService,
-  onClose,
-  objectType,
-  embedUrlParamExtensions,
-  objectId,
-  isDirty,
-  isEmbedded,
-}: ShareContextTabProps) => {
-  const [linkData, setLinkData] = useState<string | undefined>(undefined);
-  const [embedData, setEmbedData] = useState<{} | undefined>(undefined);
+export const ShareMenuTabs = () => {
+  const shareContext = useShareTabsContext();
 
-  const getTabs = () => {
-    const tabs: Array<
-      IModalTabDeclaration<{
-        shortUrlCache: string;
-        url: string;
-        urlParams(urlParams: any): unknown;
-        id: string;
-        dataTestSubj: string;
-        defaultMessage: string;
-        handler: () => string;
-      }>
-    > = [];
+  if (!shareContext) {
+    return null;
+  }
+
+  const { shareMenuItems, allowEmbed, objectType, onClose } = shareContext;
+
+  const tabs = [linkTab, allowEmbed ? embedTab : null].filter(Boolean);
+
+  shareMenuItems.forEach(({ shareMenuItem, panel }) => {
     tabs.push({
-      id: 'link',
-      name: i18n.translate('share.contextMenu.permalinksTab', {
-        defaultMessage: 'Links',
-      }),
-      // do not break functional tests
-      'data-test-subj': 'Permalinks',
+      ...shareMenuItem,
+      id: panel.id.toString(),
       modalActionBtn: {
-        id: 'link',
-        dataTestSubj: 'copyShareUrlButton',
-        formattedMessageId: 'share.link.copyLinkButton',
-        defaultMessage: 'Copy link',
-        handler: ({ state }) => copyToClipboard(state.shortUrlCache),
+        id: 'export',
+        dataTestSubj: 'generateExportButton',
+        formattedMessageId: 'share.link.generateExportButton',
+        defaultMessage: 'Generate export',
       },
-      title: `Share this ${objectType}`,
-      description: (
-        <FormattedMessage
-          id="share.dashboard.link.description"
-          defaultMessage="Share a direct link to this search."
-        />
-      ),
-      content: () => (
-        <LinkModal
-          objectType={objectType}
-          objectId={objectId}
-          isDirty={isDirty}
-          isEmbedded={isEmbedded}
-          onClose={onClose}
-          urlService={urlService}
-        />
-      ),
-      reducer(state, action) {
+      reducer({ state, action }) {
         switch (action.type) {
           default:
             return state;
         }
       },
     });
+  });
 
-    shareMenuItems.map(({ shareMenuItem, panel }) => {
-      tabs.push({
-        ...shareMenuItem,
-        id: panel.id.toString(),
-        title: `Share this ${objectType}`,
-        modalActionBtn: {
-          id: 'export',
-          dataTestSubj: 'generateExportButton',
-          formattedMessageId: 'share.link.generateExportButton',
-          defaultMessage: 'Generate export',
-        },
-        reducer(state, action) {
-          switch (action.type) {
-            default:
-              return state;
-          }
-        },
-      });
-    });
-
-    if (allowEmbed) {
-      tabs.push({
-        id: 'embed',
-        name: i18n.translate('share.contextMenu.embedCodeTab', {
-          defaultMessage: 'Embed',
-        }),
-        description: (
-          <FormattedMessage
-            id="share.dashboard.embed.description"
-            defaultMessage="Embed this dashboard into another webpage. Select which menu items to include in the embeddable view."
-          />
-        ),
-        title: `Share this ${objectType}`,
-        modalActionBtn: {
-          id: 'embed',
-          dataTestSubj: 'copyEmbedUrlButton',
-          formattedMessageId: 'share.link.copyEmbedCodeButton',
-          defaultMessage: 'Copy Embed',
-          handler: ({ state }) => {
-            copyToClipboard(state.url);
-          },
-        },
-        content: ({ state, dispatch }) => {
-          const onChange = (shareUrl: string) => {
-            dispatch({
-              type: '1',
-              payload: shareUrl,
-            });
-          };
-          return <EmbedModal urlParamExtensions={embedUrlParamExtensions} onChange={onChange} />;
-        },
-        reducer(state, action) {
-          switch (action.type) {
-            case String(1):
-              return {
-                ...state,
-                url: action.payload,
-              };
-            default:
-              return state;
-          }
-        },
-      });
-    }
-    return tabs;
-  };
-
-  return <TabbedModal onClose={onClose} tabs={getTabs()} selectedTabId="link" />;
+  return (
+    <TabbedModal
+      modalTitle={`Share this ${objectType}`}
+      onClose={onClose}
+      tabs={tabs}
+      selectedTabId="link"
+    />
+  );
 };

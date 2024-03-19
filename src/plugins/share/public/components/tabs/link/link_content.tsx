@@ -11,23 +11,21 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { format as formatUrl, parse as parseUrl } from 'url';
-import type { LocatorPublic } from '../../common';
-import { BrowserUrlService } from '../types';
+import { IShareContext } from '../../context';
 
-interface LinkProps {
-  objectType: string;
-  objectId?: string;
-  isDirty: boolean;
-  isEmbedded: boolean;
-  shareableUrlForSavedObject?: string;
-  shareableUrl?: string;
-  onClose: () => void;
-  urlService: BrowserUrlService;
-  shareableUrlLocatorParams?: {
-    locator: LocatorPublic<any>;
-    params: any;
-  };
-}
+type LinkProps = Pick<
+  IShareContext,
+  | 'objectType'
+  | 'objectId'
+  | 'isDirty'
+  | 'isEmbedded'
+  | 'urlService'
+  | 'shareableUrl'
+  | 'shareableUrlForSavedObject'
+  | 'shareableUrlLocatorParams'
+> & {
+  setDashboardLink: (url: string) => void;
+};
 
 interface UrlParams {
   [extensionName: string]: {
@@ -35,7 +33,7 @@ interface UrlParams {
   };
 }
 
-export const LinkModal = ({
+export const LinkContent = ({
   objectType,
   objectId,
   isDirty,
@@ -44,11 +42,16 @@ export const LinkModal = ({
   shareableUrlForSavedObject,
   urlService,
   shareableUrlLocatorParams,
+  setDashboardLink,
 }: LinkProps) => {
   const isMounted = useMountedState();
   const [url, setUrl] = useState<string>('');
   const [urlParams] = useState<UrlParams | undefined>(undefined);
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
+
+  // useEffect(() => {
+  //   setDashboardLink(url);
+  // }, [setDashboardLink, url]);
 
   const isNotSaved = useCallback(() => {
     return objectId === undefined || objectId === '' || isDirty;
@@ -67,19 +70,19 @@ export const LinkModal = ({
 
   const getUrlParamExtensions = useCallback(
     (tempUrl: string): string => {
-      return urlParams
-        ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
-            const urlParam = urlParams[key];
-            return urlParam
-              ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
-                  const isQueryParamEnabled = urlParam[queryParam];
-                  return isQueryParamEnabled
-                    ? queryAccumulator + `&${queryParam}=true`
-                    : queryAccumulator;
-                }, urlAccumulator)
-              : urlAccumulator;
-          }, tempUrl)
-        : tempUrl;
+      if (!urlParams) return tempUrl;
+
+      return Object.keys(urlParams).reduce((urlAccumulator, key) => {
+        const urlParam = urlParams[key];
+        return urlParam
+          ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
+              const isQueryParamEnabled = urlParam[queryParam];
+              return isQueryParamEnabled
+                ? queryAccumulator + `&${queryParam}=true`
+                : queryAccumulator;
+            }, urlAccumulator)
+          : urlAccumulator;
+      }, tempUrl);
     },
     [urlParams]
   );
@@ -168,19 +171,6 @@ export const LinkModal = ({
     isMounted();
     setUrlHelper();
   }, [isMounted, setUrlHelper]);
-
-  // const renderButtons = () => {
-  //   const { formattedMessageId, defaultMessage, dataTestSubj } = action;
-  //   return (
-  //     <EuiCopy textToCopy={shortUrlCache ?? url}>
-  //       {(copy) => (
-  //         <EuiButton fill data-test-subj={dataTestSubj} onClick={copy}>
-  //           <FormattedMessage id={formattedMessageId} defaultMessage={defaultMessage} />
-  //         </EuiButton>
-  //       )}
-  //     </EuiCopy>
-  //   );
-  // };
 
   return (
     <EuiForm>
