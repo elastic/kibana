@@ -3,4 +3,4 @@ steps:
     label: ES|QL Grammar Sync
     timeout_in_minutes: 10
     agents:
-      queue: kibana-default
+      queue: n2-2-spot
