@@ -6,12 +6,11 @@
  */
 
 import { get } from 'lodash';
-import { mean } from 'd3-array';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import dateMath from '@kbn/datemath';
-import type { DocumentCountStatsChangePoint } from '@kbn/aiops-utils';
+import { getExtendedChangePoint, type DocumentCountStatsChangePoint } from '@kbn/aiops-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
@@ -183,29 +182,6 @@ export const processDocumentCountStats = (
     return acc;
   }, {});
 
-  const bucketKeys = Object.keys(buckets);
-  const bucketValues = Object.values(buckets);
-  const meanValue = Math.round(mean(bucketValues) ?? 0);
-  const cpIndex = bucketKeys.findIndex((d) => +d === changePointBase?.key);
-  const cpValue = changePointBase ? buckets[changePointBase.key] : 0;
-
-  let lIndex = cpIndex - 1;
-  let uIndex = cpIndex + 1;
-
-  while (
-    lIndex >= 0 &&
-    Math.abs(bucketValues[lIndex] - meanValue) > Math.abs(bucketValues[lIndex] - cpValue)
-  ) {
-    lIndex--;
-  }
-
-  while (
-    uIndex < bucketValues.length &&
-    Math.abs(bucketValues[uIndex] - meanValue) > Math.abs(bucketValues[uIndex] - cpValue)
-  ) {
-    uIndex++;
-  }
-
   const lastDocTimeStamp: string = Object.values(body.hits.hits[0]?.fields ?? [[]])[0][0];
   const lastDocTimeStampMs =
     lastDocTimeStamp === undefined ? undefined : dateMath.parse(lastDocTimeStamp)?.valueOf();
@@ -221,8 +197,7 @@ export const processDocumentCountStats = (
       ? {
           changePoint: {
             ...changePointBase,
-            lower: +bucketKeys[lIndex],
-            upper: +bucketKeys[uIndex],
+            ...getExtendedChangePoint(buckets, changePointBase?.key),
           },
         }
       : {}),

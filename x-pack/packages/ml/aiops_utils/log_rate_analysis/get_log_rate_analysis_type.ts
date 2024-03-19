@@ -9,7 +9,7 @@ import { median } from 'd3-array';
 
 import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from './log_rate_analysis_type';
 import type { LogRateHistogramItem } from './log_rate_histogram_item';
-import type { WindowParameters } from './log_rate_analysis/window_parameters';
+import type { WindowParameters } from './window_parameters';
 
 /**
  * Identify the log rate analysis type based on the baseline/deviation

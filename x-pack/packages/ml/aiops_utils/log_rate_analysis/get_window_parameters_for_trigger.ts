@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DocumentCountStatsChangePoint } from '../types';
+import type { DocumentCountStatsChangePoint } from './types';
 import { getWindowParameters } from './get_window_parameters';
 import type { WindowParameters } from './window_parameters';
 
@@ -19,14 +19,14 @@ export function getWindowParametersForTrigger(
   if (
     typeof startRange === 'number' &&
     changePoint &&
-    startRange >= changePoint.lower &&
-    startRange <= changePoint.upper
+    startRange >= changePoint.startTs &&
+    startRange <= changePoint.endTs
   ) {
     return getWindowParameters(
-      changePoint.lower + interval,
+      changePoint.startTs + interval,
       timeRangeEarliest,
       timeRangeLatest + interval,
-      changePoint.upper,
+      changePoint.endTs,
       interval
     );
   } else if (typeof startRange === 'number') {

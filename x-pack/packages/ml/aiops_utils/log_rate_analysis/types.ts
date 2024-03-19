@@ -47,7 +47,7 @@ export interface SimpleHierarchicalTreeNode {
 
 export interface DocumentCountStatsChangePoint {
   key: number;
-  lower: number;
-  upper: number;
+  startTs: number;
+  endTs: number;
   type: string;
 }
