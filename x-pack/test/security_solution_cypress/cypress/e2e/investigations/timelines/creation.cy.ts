@@ -53,7 +53,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     deleteAllTimelines();
   });
 
-  it.skip('should create a timeline from a template and should have the same query and open the timeline modal', () => {
+  it('should create a timeline from a template and should have the same query and open the timeline modal', () => {
     login();
     createTimelineTemplate(getTimeline());
     visit(TIMELINE_TEMPLATES_URL);
@@ -73,7 +73,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     cy.get(TIMELINE_PANEL).should('be.visible');
   });
 
-  it.skip('should not be able to create/update timeline with only read privileges', () => {
+  it('should not be able to create/update timeline with only read privileges', () => {
     login(ROLES.t1_analyst);
     visitWithTimeRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
@@ -89,7 +89,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     );
   });
 
-  it.skip('should create a timeline by clicking untitled timeline from bottom bar', () => {
+  it('should create a timeline by clicking untitled timeline from bottom bar', () => {
     login();
     visitWithTimeRange(OVERVIEW_URL);
     openTimelineUsingToggle();
