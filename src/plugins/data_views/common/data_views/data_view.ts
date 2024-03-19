@@ -11,7 +11,7 @@ import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
-import { cloneDeep, each, mapValues, omit, pickBy, reject } from 'lodash';
+import { cloneDeep, each, mapValues, pick, pickBy, reject } from 'lodash';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
 import type {
@@ -181,7 +181,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
     if (dataViewSpec.fieldAttrs) {
       // removes `count` props (popularity scores) from `fieldAttrs`
       dataViewSpec.fieldAttrs = pickBy(
-        mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => omit(fieldAttrs, 'count')),
+        mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => pick(fieldAttrs, 'customLabel')),
         (trimmedFieldAttrs) => Object.keys(trimmedFieldAttrs).length > 0
       );
 
