@@ -7,17 +7,18 @@
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-type FlyoutPositionMode = 'push' | 'overlay';
+enum FlyoutPositionMode {
+  PUSH = 'push',
+  OVERLAY = 'overlay',
+}
 
 interface FlyoutState {
-  conversationId: string;
   flyoutPositionMode: FlyoutPositionMode;
   isOpen: boolean;
 }
 
 export const defaultFlyoutState: FlyoutState = {
-  conversationId: '',
-  flyoutPositionMode: 'overlay',
+  flyoutPositionMode: FlyoutPositionMode.OVERLAY,
   isOpen: false,
 };
 

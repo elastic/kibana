@@ -41,14 +41,12 @@ export enum FlyoutPositionMode {
 }
 
 export function ChatFlyout({
-  initialConversationId,
   initialTitle,
   initialMessages,
   initialFlyoutPositionMode,
   isOpen,
   onClose,
 }: {
-  initialConversationId?: string;
   initialTitle: string;
   initialMessages: Message[];
   initialFlyoutPositionMode?: FlyoutPositionMode;
@@ -64,7 +62,7 @@ export function ChatFlyout({
 
   const knowledgeBase = useKnowledgeBase();
 
-  const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
 
   const [flyoutPositionMode, setFlyoutPositionMode] = useState<FlyoutPositionMode>(
     initialFlyoutPositionMode || FlyoutPositionMode.OVERLAY
