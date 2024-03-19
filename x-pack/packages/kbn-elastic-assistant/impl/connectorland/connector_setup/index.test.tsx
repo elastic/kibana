@@ -65,11 +65,11 @@ describe('useConnectorSetup', () => {
       ).toEqual([
         {
           username: 'You',
-          timestamp: 'at: 3/18/2024, 11:59:18 AM',
+          timestamp: `at: ${new Date('2024-03-18T18:59:18.174Z').toLocaleString()}`,
         },
         {
           username: 'Assistant',
-          timestamp: 'at: 3/19/2024, 11:59:18 AM',
+          timestamp: `at: ${new Date('2024-03-19T18:59:18.174Z').toLocaleString()}`,
         },
       ]);
 
