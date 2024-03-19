@@ -194,6 +194,9 @@ export class AuthenticationService {
       }
 
       const isAuthRoute = request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW);
+      const isLogoutRoute =
+        request.route.path === '/api/security/logout' ||
+        request.route.path === '/api/v1/security/logout';
 
       // If users can eventually re-login we want to redirect them directly to the page they tried
       // to access initially, but we only want to do that for routes that aren't part of the various
@@ -212,8 +215,9 @@ export class AuthenticationService {
       }
 
       // Now we are only dealing with authentication flow errors or 401 errors in non-authentication routes.
+      // Additionally, if logout fails for any reason, we also want to show an error page.
       // At this point we redirect users to the login page if it's available, or render a dedicated unauthenticated error page.
-      if (!isLoginPageAvailable) {
+      if (!isLoginPageAvailable || isLogoutRoute) {
         const customBrandingValue = await customBranding.getBrandingFor(request, {
           unauthenticated: true,
         });
