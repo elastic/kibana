@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
-import { PrePackagedRulesPrompt } from '../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
 import type { Rule } from '../../../rule_management/logic';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { EuiBasicTableOnChange } from '../../../../detections/pages/detection_engine/rules/types';
@@ -236,7 +235,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       {shouldShowLoadingOverlay && (
         <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
       )}
-      {isTableEmpty && <PrePackagedRulesPrompt />}
       {isDeleteConfirmationVisible && (
         <EuiConfirmModal
           title={

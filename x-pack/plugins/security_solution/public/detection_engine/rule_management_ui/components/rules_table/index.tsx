@@ -7,7 +7,10 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { PrePackagedRulesPrompt } from '../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
+import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
+import { AiRulesMonitoringPage } from '../../../rule_monitoring/pages/ai_rules_monitoring/ai_rules_monitoring_page';
 import { RulesManagementTour } from './rules_table/guided_onboarding/rules_management_tour';
 import { useSyncRulesTableSavedState } from './rules_table/use_sync_rules_table_saved_state';
 import { RulesTables } from './rules_tables';
@@ -23,30 +26,59 @@ import { UpgradePrebuiltRulesTableContextProvider } from './upgrade_prebuilt_rul
  *   * Delete
  *   * Import/Export
  */
-export const AllRules = React.memo(() => {
+export function AllRules(): JSX.Element {
   useSyncRulesTableSavedState();
   const [{ tabName }] = useRouteSpy();
+  const { data: ruleManagementFilters } = useRuleManagementFilters();
+  const hasNoRules =
+    ruleManagementFilters?.rules_summary.custom_count === 0 &&
+    ruleManagementFilters?.rules_summary.prebuilt_installed_count === 0;
 
-  if (tabName !== AllRulesTabs.updates) {
+  if (hasNoRules) {
     return (
       <>
-        <RulesManagementTour />
         <RulesTableToolbar />
         <EuiSpacer />
-        <RulesTables selectedTab={tabName as AllRulesTabs} />
-      </>
-    );
-  } else {
-    return (
-      <>
-        <UpgradePrebuiltRulesTableContextProvider>
-          <RulesTableToolbar />
-          <EuiSpacer />
-          <UpgradePrebuiltRulesTable />
-        </UpgradePrebuiltRulesTableContextProvider>
+        <PrePackagedRulesPrompt />
       </>
     );
   }
-});
+
+  switch (tabName) {
+    case AllRulesTabs.management:
+    case AllRulesTabs.monitoring:
+      return (
+        <>
+          <RulesManagementTour />
+          <RulesTableToolbar />
+          <EuiSpacer />
+          <RulesTables selectedTab={tabName} />
+        </>
+      );
+
+    case AllRulesTabs.updates:
+      return (
+        <>
+          <UpgradePrebuiltRulesTableContextProvider>
+            <RulesTableToolbar />
+            <EuiSpacer />
+            <UpgradePrebuiltRulesTable />
+          </UpgradePrebuiltRulesTableContextProvider>
+        </>
+      );
+
+    case AllRulesTabs.aiMonitoring:
+      return (
+        <>
+          <RulesTableToolbar />
+          <EuiSpacer />
+          <AiRulesMonitoringPage />
+        </>
+      );
+
+    default:
+      return <div>{'Not found'}</div>;
+  }
+}
 
 AllRules.displayName = 'AllRules';

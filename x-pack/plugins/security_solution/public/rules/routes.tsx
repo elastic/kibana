@@ -48,7 +48,7 @@ const RulesSubRoutes = [
     exact: true,
   },
   {
-    path: `/rules/:tabName(${AllRulesTabs.management}|${AllRulesTabs.monitoring}|${AllRulesTabs.updates})`,
+    path: `/rules/:tabName(${AllRulesTabs.management}|${AllRulesTabs.monitoring}|${AllRulesTabs.aiMonitoring}|${AllRulesTabs.updates})`,
     main: RulesPage,
     exact: true,
   },
