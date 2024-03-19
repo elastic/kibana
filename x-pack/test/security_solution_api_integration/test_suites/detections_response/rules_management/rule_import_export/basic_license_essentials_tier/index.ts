@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Rules Management - Rule Import & Export APIs', function () {
     loadTestFile(require.resolve('./export_rules'));
     loadTestFile(require.resolve('./import_rules'));
+    loadTestFile(require.resolve('./import_rules_with_overwrite'));
   });
 }

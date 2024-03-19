@@ -110,7 +110,11 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
       }}
       panelPaddingSize="none"
       button={
-        <EuiToolTip content={labelPopoverDisabled ? undefined : buttonLabel} delay="long">
+        <EuiToolTip
+          content={labelPopoverDisabled ? undefined : buttonLabel}
+          delay="long"
+          display="block"
+        >
           <ToolbarButton
             size="s"
             css={css`

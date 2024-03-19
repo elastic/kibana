@@ -7,6 +7,8 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { REDUX_ID_FOR_MEMORY_STORAGE } from '../constants';
+import { useExpandableFlyoutContext } from '../context';
 import {
   closeLeftPanelAction,
   closePanelsAction,
@@ -29,6 +31,10 @@ export type { ExpandableFlyoutApi };
 export const useExpandableFlyoutApi = () => {
   const dispatch = useDispatch();
 
+  const { urlKey } = useExpandableFlyoutContext();
+  // if no urlKey is provided, we are in memory storage mode and use the reserved word 'memory'
+  const id = urlKey || REDUX_ID_FOR_MEMORY_STORAGE;
+
   const openPanels = useCallback(
     ({
       right,
@@ -38,39 +44,43 @@ export const useExpandableFlyoutApi = () => {
       right?: FlyoutPanelProps;
       left?: FlyoutPanelProps;
       preview?: FlyoutPanelProps;
-    }) => dispatch(openPanelsAction({ right, left, preview })),
-    [dispatch]
+    }) => dispatch(openPanelsAction({ right, left, preview, id })),
+    [dispatch, id]
   );
 
   const openRightPanel = useCallback(
-    (panel: FlyoutPanelProps) => dispatch(openRightPanelAction(panel)),
-    [dispatch]
+    (panel: FlyoutPanelProps) => dispatch(openRightPanelAction({ right: panel, id })),
+    [dispatch, id]
   );
 
   const openLeftPanel = useCallback(
-    (panel: FlyoutPanelProps) => dispatch(openLeftPanelAction(panel)),
-    [dispatch]
+    (panel: FlyoutPanelProps) => dispatch(openLeftPanelAction({ left: panel, id })),
+    [dispatch, id]
   );
 
   const openPreviewPanel = useCallback(
-    (panel: FlyoutPanelProps) => dispatch(openPreviewPanelAction(panel)),
-    [dispatch]
+    (panel: FlyoutPanelProps) => dispatch(openPreviewPanelAction({ preview: panel, id })),
+    [dispatch, id]
   );
 
-  const closeRightPanel = useCallback(() => dispatch(closeRightPanelAction()), [dispatch]);
+  const closeRightPanel = useCallback(
+    () => dispatch(closeRightPanelAction({ id })),
+    [dispatch, id]
+  );
 
-  const closeLeftPanel = useCallback(() => dispatch(closeLeftPanelAction()), [dispatch]);
+  const closeLeftPanel = useCallback(() => dispatch(closeLeftPanelAction({ id })), [dispatch, id]);
 
-  const closePreviewPanel = useCallback(() => dispatch(closePreviewPanelAction()), [dispatch]);
+  const closePreviewPanel = useCallback(
+    () => dispatch(closePreviewPanelAction({ id })),
+    [dispatch, id]
+  );
 
   const previousPreviewPanel = useCallback(
-    () => dispatch(previousPreviewPanelAction()),
-    [dispatch]
+    () => dispatch(previousPreviewPanelAction({ id })),
+    [dispatch, id]
   );
 
-  const closePanels = useCallback(() => {
-    dispatch(closePanelsAction());
-  }, [dispatch]);
+  const closePanels = useCallback(() => dispatch(closePanelsAction({ id })), [dispatch, id]);
 
   const api: ExpandableFlyoutApi = useMemo(
     () => ({

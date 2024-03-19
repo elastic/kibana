@@ -18,10 +18,10 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import type { PluginsSetup, PluginsStart } from './plugin';
 import { CasePlugin } from './plugin';
 import type { ConfigType } from './config';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
+import type { CasesServerSetupDependencies, CasesServerStartDependencies } from './types';
 
 function getConfig(overrides = {}) {
   return {
@@ -37,8 +37,8 @@ describe('Cases Plugin', () => {
   let plugin: CasePlugin;
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
-  let pluginsSetup: jest.Mocked<PluginsSetup>;
-  let pluginsStart: jest.Mocked<PluginsStart>;
+  let pluginsSetup: jest.Mocked<CasesServerSetupDependencies>;
+  let pluginsStart: jest.Mocked<CasesServerStartDependencies>;
 
   beforeEach(() => {
     context = coreMock.createPluginInitializerContext<ConfigType>(getConfig());

@@ -19,6 +19,7 @@ import React, { createRef, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { context } from '@kbn/kibana-react-plugin/public';
 
 import {
   EuiCallOut,
@@ -55,7 +56,6 @@ import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_n
 import { TimeSeriesExplorerPage } from './timeseriesexplorer_page';
 
 import { ml } from '../services/ml_api_service';
-import { mlFieldFormatService } from '../services/field_format_service';
 import { mlForecastService } from '../services/forecast_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from '../services/results_service';
@@ -136,6 +136,11 @@ export class TimeSeriesExplorer extends React.Component {
    * Subject for listening brush time range selection.
    */
   contextChart$ = new Subject();
+
+  /**
+   * Access ML services in react context.
+   */
+  static contextType = context;
 
   /**
    * Returns field names that don't have a selection yet.
@@ -447,9 +452,13 @@ export class TimeSeriesExplorer extends React.Component {
                 stateUpdate.contextAggregationInterval,
                 bounds
               );
+
               if (
-                focusRange === undefined ||
-                this.previousSelectedForecastId !== this.props.selectedForecastId
+                // If the user's focus range is not defined (i.e. no 'zoom' parameter restored from the appState URL),
+                // then calculate the default focus range to use
+                zoom === undefined &&
+                (focusRange === undefined ||
+                  this.previousSelectedForecastId !== this.props.selectedForecastId)
               ) {
                 focusRange = calculateDefaultFocusRange(
                   autoZoomDuration,
@@ -687,7 +696,7 @@ export class TimeSeriesExplorer extends React.Component {
       appStateHandler(APP_STATE_ACTION.SET_DETECTOR_INDEX, detectorId);
     }
     // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
-    mlFieldFormatService.populateFormats([jobId]);
+    this.context.services.mlServices.mlFieldFormatService.populateFormats([jobId]);
   }
 
   componentDidMount() {

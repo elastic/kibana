@@ -54,3 +54,12 @@ export enum HostRiskScoreQueryId {
   OVERVIEW_RISKY_HOSTS = 'OverviewRiskyHosts',
   HOSTS_BY_RISK = 'HostsByRisk',
 }
+
+/**
+ *
+ * @returns risk score rounded with 2 digits after the decimal separator
+ * @example
+ * formatRiskScore(10.555) // '10.56'
+ */
+export const formatRiskScore = (riskScore: number) =>
+  (Math.round(riskScore * 100) / 100).toFixed(2);

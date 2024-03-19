@@ -48,6 +48,11 @@ export const AlertSummaryWidgetFullSize = ({
       },
     },
   ];
+  const chartData = activeAlerts.map((alert) => alert.doc_count);
+  const domain = {
+    max: Math.max(...chartData) * 1.1, // add 10% headroom
+    min: Math.min(...chartData) * 0.9, // add 10% floor
+  };
 
   return (
     <EuiPanel
@@ -96,6 +101,7 @@ export const AlertSummaryWidgetFullSize = ({
               gridLine={{ visible: true }}
               integersOnly
               ticks={4}
+              domain={domain}
             />
             <Axis
               id="right"

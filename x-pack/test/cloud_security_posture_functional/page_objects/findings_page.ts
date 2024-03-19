@@ -106,7 +106,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
   const createNotInstalledObject = (notInstalledSubject: string) => ({
     getElement() {
-      return testSubjects.find(notInstalledSubject);
+      return testSubjects.find(notInstalledSubject, 15 * 1000);
     },
 
     async navigateToAction(actionTestSubject: string) {

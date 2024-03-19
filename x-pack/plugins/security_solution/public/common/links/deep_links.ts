@@ -6,29 +6,36 @@
  */
 
 import type { Subject, Subscription } from 'rxjs';
-import { AppNavLinkStatus } from '@kbn/core/public';
-import type { AppDeepLink, AppUpdater } from '@kbn/core/public';
+import type { AppDeepLink, AppUpdater, AppDeepLinkLocations } from '@kbn/core/public';
 import { appLinks$ } from './links';
 import type { AppLinkItems } from './types';
 
 export type DeepLinksFormatter = (appLinks: AppLinkItems) => AppDeepLink[];
 
 const defaultDeepLinksFormatter: DeepLinksFormatter = (appLinks) =>
-  appLinks.map((appLink) => ({
-    id: appLink.id,
-    path: appLink.path,
-    title: appLink.title,
-    searchable: !appLink.globalSearchDisabled,
-    ...(appLink.globalNavPosition != null
-      ? { navLinkStatus: AppNavLinkStatus.visible, order: appLink.globalNavPosition }
-      : { navLinkStatus: AppNavLinkStatus.hidden }),
-    ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
-    ...(appLink.links && appLink.links?.length
-      ? {
-          deepLinks: defaultDeepLinksFormatter(appLink.links),
-        }
-      : {}),
-  }));
+  appLinks.map((appLink) => {
+    const visibleIn: Set<AppDeepLinkLocations> = new Set(appLink.visibleIn ?? []);
+    if (!appLink.globalSearchDisabled) {
+      visibleIn.add('globalSearch');
+    }
+    if (appLink.globalNavPosition != null) {
+      visibleIn.add('sideNav');
+    }
+    const deepLink: AppDeepLink = {
+      id: appLink.id,
+      path: appLink.path,
+      title: appLink.title,
+      visibleIn: Array.from(visibleIn),
+      ...(appLink.globalNavPosition != null ? { order: appLink.globalNavPosition } : {}),
+      ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
+      ...(appLink.links && appLink.links?.length
+        ? {
+            deepLinks: defaultDeepLinksFormatter(appLink.links),
+          }
+        : {}),
+    };
+    return deepLink;
+  });
 
 /**
  * Registers any change in appLinks to be updated in app deepLinks
@@ -39,7 +46,6 @@ export const registerDeepLinksUpdater = (
 ): Subscription => {
   return appLinks$.subscribe((appLinks) => {
     appUpdater$.next(() => ({
-      navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent main security link to switch to visible after update
       deepLinks: formatter(appLinks),
     }));
   });

@@ -43,7 +43,7 @@ export const createLogsExplorerControllerFactory =
     customizations?: LogsExplorerCustomizations;
     initialState?: InitialState;
   }): Promise<LogsExplorerController> => {
-    const { data, dataViews, discover } = plugins;
+    const { data, dataViews } = plugins;
 
     const datasetsClient = new DatasetsService().start({
       http: core.http,
@@ -59,7 +59,7 @@ export const createLogsExplorerControllerFactory =
     });
     const discoverServices: LogsExplorerDiscoverServices = {
       data: customData,
-      history: () => customMemoryHistory,
+      history: customMemoryHistory,
       uiSettings: customUiSettings,
       filterManager: customData.query.filterManager,
       timefilter: customData.query.timefilter.timefilter,
@@ -70,7 +70,8 @@ export const createLogsExplorerControllerFactory =
 
     const machine = createLogsExplorerControllerStateMachine({
       datasetsClient,
-      plugins: { dataViews, discover },
+      dataViews,
+      events: customizations.events,
       initialContext,
       query: discoverServices.data.query,
       toasts: core.notifications.toasts,

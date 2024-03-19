@@ -7,6 +7,7 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
 import { stringify } from '../../utils/stringify';
 import { getResponseActionsClient } from '../../services';
 import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
@@ -374,9 +375,16 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 
       const { action: actionId, ...data } = action;
 
+      // `action` is deprecated, but still returned in order to ensure backwards compatibility
+      const legacyResponseData = responseActionsWithLegacyActionProperty.includes(command)
+        ? {
+            action: actionId ?? data.id ?? '',
+          }
+        : {};
+
       return res.ok({
         body: {
-          action: actionId,
+          ...legacyResponseData,
           data,
         },
       });

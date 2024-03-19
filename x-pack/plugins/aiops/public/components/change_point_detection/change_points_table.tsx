@@ -14,7 +14,7 @@ import {
   type DefaultItemAction,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { FilterStateStore, type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,9 +22,8 @@ import { useTableState } from '@kbn/ml-in-memory-table';
 import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
+import type { FieldConfig, SelectedChangePoint } from './change_point_detection_context';
 import {
-  FieldConfig,
-  SelectedChangePoint,
   useChangePointDetectionContext,
   type ChangePointAnnotation,
 } from './change_point_detection_context';
@@ -398,6 +397,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({
         id={`mini_changePointChart_${annotation.group ? annotation.group.value : annotation.label}`}
         style={{ height: 80 }}
         timeRange={timeRange}
+        noPadding
         query={query}
         filters={filters}
         // @ts-ignore

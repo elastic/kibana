@@ -91,15 +91,15 @@ export function defineCommonRoutes({
   ]) {
     router.get(
       { path, validate: false },
-      createLicensedRouteHandler((context, request, response) => {
+      createLicensedRouteHandler(async (context, request, response) => {
         if (path === '/api/security/v1/me') {
           logger.warn(
             `The "${basePath.serverBasePath}${path}" endpoint is deprecated and will be removed in the next major version.`,
             { tags: ['deprecation'] }
           );
         }
-
-        return response.ok({ body: getAuthenticationService().getCurrentUser(request)! });
+        const { security: coreSecurity } = await context.core;
+        return response.ok({ body: coreSecurity.authc.getCurrentUser()! });
       })
     );
   }
@@ -157,8 +157,6 @@ export function defineCommonRoutes({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const { providerType, providerName, currentURL, params } = request.body;
-      logger.info(`Logging in with provider "${providerName}" (${providerType})`);
-
       const redirectURL = parseNext(currentURL, basePath.serverBasePath);
       const authenticationResult = await getAuthenticationService().login(request, {
         provider: { name: providerName },

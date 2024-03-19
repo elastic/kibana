@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { significantTerms } from '../../../../common/__mocks__/artificial_logs/significant_terms';
+import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
 
 import { getShouldClauses, getFrequentItemSetsAggFields } from './fetch_frequent_item_sets';
 
@@ -15,18 +15,23 @@ describe('getShouldClauses', () => {
 
     expect(shouldClauses).toEqual([
       {
-        terms: {
-          user: ['Peter'],
+        term: {
+          user: 'Peter',
         },
       },
       {
-        terms: {
-          response_code: ['500'],
+        term: {
+          response_code: '500',
         },
       },
       {
-        terms: {
-          url: ['home.php', 'login.php'],
+        term: {
+          url: 'home.php',
+        },
+      },
+      {
+        term: {
+          url: 'login.php',
         },
       },
     ]);

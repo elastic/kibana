@@ -43,7 +43,12 @@ export type ObservabilityOverviewLinkId =
   | 'rules'
   | 'slos';
 
-export type MetricsLinkId = 'inventory' | 'metrics-explorer' | 'hosts' | 'settings';
+export type MetricsLinkId =
+  | 'inventory'
+  | 'metrics-explorer'
+  | 'hosts'
+  | 'settings'
+  | 'assetDetails';
 
 export type ApmLinkId =
   | 'services'
@@ -54,7 +59,7 @@ export type ApmLinkId =
   | 'settings'
   | 'storage-explorer';
 
-export type SyntheticsLinkId = 'overview' | 'management';
+export type SyntheticsLinkId = 'certificates' | 'overview';
 
 export type LinkId =
   | LogsLinkId

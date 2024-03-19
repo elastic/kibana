@@ -87,4 +87,4 @@ const workerConfig = (languages) => ({
   },
 });
 
-module.exports = workerConfig(['default', 'json', 'painless', 'xjson', 'esql', 'yaml']);
+module.exports = workerConfig(['default', 'json', 'painless', 'xjson', 'esql', 'yaml', 'console']);

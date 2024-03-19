@@ -6,36 +6,24 @@
  * Side Public License, v 1.
  */
 
-import type { ANTLRErrorListener, Recognizer, RecognitionException } from 'antlr4ts';
-import type { EditorError } from '../../../types';
-import { createError } from '../ast/ast_errors';
+import type { Recognizer, RecognitionException } from 'antlr4';
+import { ANTLRErrorListener } from '../../../common/error_listener';
+import { getPosition } from '../ast/ast_position_utils';
 
-export class ESQLErrorListener implements ANTLRErrorListener<any> {
-  private errors: EditorError[] = [];
-
+export class ESQLErrorListener extends ANTLRErrorListener {
   syntaxError(
-    recognizer: Recognizer<any, any>,
+    recognizer: Recognizer<any>,
     offendingSymbol: any,
     line: number,
     column: number,
     message: string,
     error: RecognitionException | undefined
   ): void {
-    const higherLevelError = error ? createError(error) : undefined;
-    const textMessage =
-      higherLevelError?.text && higherLevelError.text !== error?.message
-        ? higherLevelError.text
-        : `SyntaxError: ${message}`;
+    const textMessage = `SyntaxError: ${message}`;
 
-    let endColumn = column + 1;
-    let startColumn = column;
-
-    if (higherLevelError) {
-      startColumn = higherLevelError.location.min + 1;
-      endColumn = higherLevelError.location.max + 1;
-    } else if (offendingSymbol?._text) {
-      endColumn = column + offendingSymbol._text.length;
-    }
+    const tokenPosition = getPosition(offendingSymbol);
+    const startColumn = tokenPosition?.min + 1 || column;
+    const endColumn = tokenPosition?.max + 1 || column + 1;
 
     this.errors.push({
       startLineNumber: line,
@@ -45,9 +33,5 @@ export class ESQLErrorListener implements ANTLRErrorListener<any> {
       message: textMessage,
       severity: 8, // monaco.MarkerSeverity.Error,
     });
-  }
-
-  getErrors(): EditorError[] {
-    return this.errors;
   }
 }

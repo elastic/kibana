@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiTitle } from '@elastic/eui';
 import d3 from 'd3';

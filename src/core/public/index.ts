@@ -109,11 +109,12 @@ export type {
   TelemetryCounterType,
 } from '@kbn/analytics-client';
 
-export { AppNavLinkStatus, AppStatus } from '@kbn/core-application-browser';
+export { AppStatus } from '@kbn/core-application-browser';
 export type {
   ApplicationSetup,
   ApplicationStart,
   App,
+  AppDeepLinkLocations,
   AppMount,
   AppUnmount,
   AppMountParameters,
@@ -196,6 +197,18 @@ export type {
 } from '@kbn/core-http-browser';
 
 export type { IHttpFetchError } from '@kbn/core-http-browser';
+
+export type {
+  AuthenticatedUser,
+  User,
+  AuthenticationProvider,
+  UserRealm,
+} from '@kbn/core-security-common';
+export type {
+  SecurityServiceSetup,
+  SecurityServiceStart,
+  CoreAuthenticationService,
+} from '@kbn/core-security-browser';
 
 export type {
   OverlayStart,

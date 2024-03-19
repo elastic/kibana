@@ -25,7 +25,7 @@ import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/ty
 import { PluginsStart, ClientData, ESConfig } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
-import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
+import { mountFlashMessagesLogic } from './shared/flash_messages';
 import { getCloudEnterpriseSearchHost } from './shared/get_cloud_enterprise_search_host/get_cloud_enterprise_search_host';
 import { mountHttpLogic } from './shared/http';
 import { mountKibanaLogic } from './shared/kibana';
@@ -66,7 +66,7 @@ export const renderApp = (
     workplaceSearch,
   } = data;
   const { history } = params;
-  const { application, chrome, http, uiSettings } = core;
+  const { application, chrome, http, notifications, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
   const { charts, cloud, guidedOnboarding, lens, security, share, ml } = plugins;
 
@@ -138,7 +138,7 @@ export const renderApp = (
     http,
     readOnlyMode,
   });
-  const unmountFlashMessagesLogic = mountFlashMessagesLogic();
+  const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
 
   ReactDOM.render(
     <I18nProvider>
@@ -158,7 +158,6 @@ export const renderApp = (
                   searchOAuth={searchOAuth}
                   workplaceSearch={workplaceSearch}
                 />
-                <Toasts />
               </Router>
             </Provider>
           </CloudContext>

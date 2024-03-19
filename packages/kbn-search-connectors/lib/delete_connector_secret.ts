@@ -7,10 +7,10 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { ConnectorsAPIUpdateResponse } from '../types/connectors_api';
+import { Result } from '@elastic/elasticsearch/lib/api/types';
 
 export const deleteConnectorSecret = async (client: ElasticsearchClient, id: string) => {
-  return await client.transport.request<ConnectorsAPIUpdateResponse>({
+  return await client.transport.request<Result>({
     method: 'DELETE',
     path: `/_connector/_secret/${id}`,
   });

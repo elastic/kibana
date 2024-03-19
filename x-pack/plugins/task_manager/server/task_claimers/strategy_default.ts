@@ -8,6 +8,7 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
+import type { estypes } from '@elastic/elasticsearch';
 import apm from 'elastic-apm-node';
 import minimatch from 'minimatch';
 import { Subject, Observable, from, of } from 'rxjs';
@@ -17,7 +18,7 @@ import { groupBy, pick } from 'lodash';
 import { asOk } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { TaskClaimerOpts, ClaimOwnershipResult } from '.';
-import { ConcreteTaskInstance } from '../task';
+import { ConcreteTaskInstance, TaskPriority } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { isLimited, TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
 import { TaskClaim, asTaskClaimEvent, startTaskTimer } from '../task_events';
@@ -104,11 +105,12 @@ export function claimAvailableTasksDefault(
 async function executeClaimAvailableTasks(
   opts: OwnershipClaimingOpts
 ): Promise<ClaimOwnershipResult> {
-  const { taskStore, size, taskTypes, events$ } = opts;
+  const { taskStore, size, taskTypes, events$, definitions } = opts;
   const { updated: tasksUpdated, version_conflicts: tasksConflicted } =
     await markAvailableTasksAsClaimed(opts);
 
-  const docs = tasksUpdated > 0 ? await sweepForClaimedTasks(taskStore, taskTypes, size) : [];
+  const docs =
+    tasksUpdated > 0 ? await sweepForClaimedTasks(taskStore, taskTypes, size, definitions) : [];
 
   emitEvents(
     events$,
@@ -166,7 +168,7 @@ async function markAvailableTasksAsClaimed({
     shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
   );
 
-  const sort: NonNullable<SearchOpts['sort']> = [SortByRunAtAndRetryAt];
+  const sort: NonNullable<SearchOpts['sort']> = getClaimSort(definitions);
   const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
   const script = updateFieldsAndMarkAsFailed({
     fieldUpdates: {
@@ -206,7 +208,8 @@ async function markAvailableTasksAsClaimed({
 async function sweepForClaimedTasks(
   taskStore: TaskStore,
   taskTypes: Set<string>,
-  size: number
+  size: number,
+  definitions: TaskTypeDictionary
 ): Promise<ConcreteTaskInstance[]> {
   const claimedTasksQuery = tasksClaimedByOwner(
     taskStore.taskManagerId,
@@ -215,7 +218,7 @@ async function sweepForClaimedTasks(
   const { docs } = await taskStore.fetch({
     query: claimedTasksQuery,
     size,
-    sort: SortByRunAtAndRetryAt,
+    sort: getClaimSort(definitions),
     seq_no_primary_term: true,
   });
 
@@ -252,4 +255,39 @@ function accumulateClaimOwnershipResults(
     return res;
   }
   return prev;
+}
+
+function getClaimSort(definitions: TaskTypeDictionary): estypes.SortCombinations[] {
+  // Sort by descending priority, then by ascending runAt/retryAt time
+  return [
+    {
+      _script: {
+        type: 'number',
+        order: 'desc',
+        script: {
+          lang: 'painless',
+          // Use priority if explicitly specified in task definition, otherwise default to 50 (Normal)
+          source: `
+            String taskType = doc['task.taskType'].value;
+            if (params.priority_map.containsKey(taskType)) {
+              return params.priority_map[taskType];
+            } else {
+              return ${TaskPriority.Normal};
+            }
+          `,
+          params: {
+            priority_map: definitions
+              .getAllDefinitions()
+              .reduce<Record<string, TaskPriority>>((acc, taskDefinition) => {
+                if (taskDefinition.priority) {
+                  acc[taskDefinition.type] = taskDefinition.priority;
+                }
+                return acc;
+              }, {}),
+          },
+        },
+      },
+    },
+    SortByRunAtAndRetryAt,
+  ];
 }

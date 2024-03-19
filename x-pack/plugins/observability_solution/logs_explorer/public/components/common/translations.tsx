@@ -259,10 +259,10 @@ export const actionsHeaderTooltipExpandAction = i18n.translate(
   { defaultMessage: 'Expand log details' }
 );
 
-export const actionsHeaderTooltipMalformedAction = (
+export const actionsHeaderTooltipDegradedAction = (
   <FormattedMessage
-    id="xpack.logsExplorer.dataTable.controlColumn.actions.button.malformedDoc"
-    defaultMessage="Access to malformed doc with {ignoredProperty} field"
+    id="xpack.logsExplorer.dataTable.controlColumn.actions.button.degradedDoc"
+    defaultMessage="Access to degraded doc with {ignoredProperty} field"
     values={{
       ignoredProperty: (
         <EuiCode language="json" transparentBackground>
@@ -278,16 +278,16 @@ export const actionsHeaderTooltipStacktraceAction = i18n.translate(
   { defaultMessage: 'Access to available stacktraces based on:' }
 );
 
-export const malformedDocButtonLabelWhenPresent = i18n.translate(
-  'xpack.logsExplorer.dataTable.controlColumn.actions.button.malformedDocPresent',
+export const degradedDocButtonLabelWhenPresent = i18n.translate(
+  'xpack.logsExplorer.dataTable.controlColumn.actions.button.degradedDocPresent',
   {
     defaultMessage:
       "This document couldn't be parsed correctly. Not all fields are properly populated",
   }
 );
 
-export const malformedDocButtonLabelWhenNotPresent = i18n.translate(
-  'xpack.logsExplorer.dataTable.controlColumn.actions.button.malformedDocNotPresent',
+export const degradedDocButtonLabelWhenNotPresent = i18n.translate(
+  'xpack.logsExplorer.dataTable.controlColumn.actions.button.degradedDocNotPresent',
   {
     defaultMessage: 'All fields in this document were parsed correctly',
   }

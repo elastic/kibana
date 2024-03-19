@@ -48,6 +48,15 @@ const HIDDEN_PROPERTIES = [
     and will therefore always show a diff. It adds no value to display it to the user.
   */
   'updated_at',
+
+  /*
+    These values make sense only for installed prebuilt rules. 
+    They are not present in the prebuilt rule package.
+    So, showing them in the diff doesn't add value.
+  */
+  'updated_by',
+  'created_at',
+  'created_by',
 ];
 
 const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>

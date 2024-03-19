@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExamplesList } from '../../../examples_list';
 import { DocumentStatsTable } from './document_stats';

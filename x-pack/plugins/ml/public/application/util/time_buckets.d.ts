@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 
 export interface TimeRangeBounds {
   min?: Moment;
