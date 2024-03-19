@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import { AbstractDataView } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 
-export const getValidFilters = (dataView: DataView, filters: Filter[]): Filter[] => {
+export const getValidFilters = (dataView: AbstractDataView, filters: Filter[]): Filter[] => {
   return filters.map((filter) => {
     const meta = { ...filter.meta };
 

@@ -11,7 +11,7 @@ import {
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewLazy } from '@kbn/data-views-plugin/public';
 import { DiscoverServices } from '../../../build_services';
 
 export const updateFiltersReferences = ({
@@ -19,8 +19,8 @@ export const updateFiltersReferences = ({
   nextDataView,
   services: { uiActions },
 }: {
-  prevDataView: DataView;
-  nextDataView: DataView;
+  prevDataView: DataViewLazy;
+  nextDataView: DataViewLazy;
   services: DiscoverServices;
 }) => {
   const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);

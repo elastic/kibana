@@ -96,7 +96,7 @@ export const buildStateSubscribe =
         appState.update({ index: nextDataView.id }, true);
         return;
       }
-      savedSearch.searchSource.setField('index', nextDataView);
+      savedSearch.searchSource.setField('index', await services.dataViews.toDataView(nextDataView));
       dataState.reset(savedSearch);
       setDataView(nextDataView);
       savedSearchDataView = nextDataView;

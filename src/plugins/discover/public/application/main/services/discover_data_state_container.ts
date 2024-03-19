@@ -12,7 +12,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewLazy } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -163,7 +163,7 @@ export function getDataStateContainer({
   getAppState: () => DiscoverAppState;
   getInternalState: () => InternalState;
   getSavedSearch: () => SavedSearch;
-  setDataView: (dataView: DataView) => void;
+  setDataView: (dataView: DataViewLazy) => void;
 }): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
@@ -298,7 +298,9 @@ export function getDataStateContainer({
 
   const fetchQuery = async (resetQuery?: boolean) => {
     const query = getAppState().query;
-    const currentDataView = getSavedSearch().searchSource.getField('index');
+    const savedSearchDataView = getSavedSearch().searchSource.getField('index');
+    const currentDataView =
+      savedSearchDataView && (await services.dataViews.toDataViewLazy(savedSearchDataView));
 
     if (isTextBasedQuery(query)) {
       const nextDataView = await getDataViewByTextBasedQueryLang(query, currentDataView, services);

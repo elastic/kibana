@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import { COMPARE_ALL_OPTIONS, FilterCompareOptions } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewLazy, DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
@@ -32,7 +32,7 @@ export interface UpdateParams {
   /**
    * The next data view to be used
    */
-  nextDataView?: DataView | undefined;
+  nextDataView?: DataViewLazy | undefined;
   /**
    * The next AppState that should be used for updating the saved search
    */
@@ -110,7 +110,7 @@ export interface DiscoverSavedSearchContainer {
    * Updates the current state of the saved search
    * @param params
    */
-  update: (params: UpdateParams) => SavedSearch;
+  update: (params: UpdateParams) => Promise<SavedSearch>;
   /**
    * Passes filter manager filters to saved search filters
    * @param params
@@ -195,17 +195,19 @@ export function getSavedSearchContainer({
     return nextSavedSearch;
   };
 
-  const update = ({ nextDataView, nextState, useFilterAndQueryServices }: UpdateParams) => {
+  const update = async ({ nextDataView, nextState, useFilterAndQueryServices }: UpdateParams) => {
     addLog('[savedSearch] update', { nextDataView, nextState });
 
     const previousSavedSearch = getState();
     const dataView = nextDataView
       ? nextDataView
-      : previousSavedSearch.searchSource.getField('index')!;
+      : await services.dataViews.toDataViewLazy(
+          previousSavedSearch.searchSource.getField('index')!
+        );
 
     const nextSavedSearch = updateSavedSearch({
       savedSearch: { ...previousSavedSearch },
-      dataView,
+      dataView: await services.dataViews.toDataView(dataView),
       state: nextState || {},
       globalStateContainer,
       services,

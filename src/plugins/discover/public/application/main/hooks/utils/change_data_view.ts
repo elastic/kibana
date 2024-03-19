@@ -7,7 +7,7 @@
  */
 
 import { SortOrder } from '@kbn/saved-search-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewLazy } from '@kbn/data-views-plugin/common';
 import {
   MODIFY_COLUMNS_ON_SWITCH,
   SORT_DEFAULT_ORDER_SETTING,
@@ -23,7 +23,7 @@ import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state'
  * Function executed when switching data view in the UI
  */
 export async function changeDataView(
-  id: string | DataView,
+  id: string | DataViewLazy,
   {
     services,
     internalState,
@@ -38,19 +38,19 @@ export async function changeDataView(
   const { dataViews, uiSettings } = services;
   const dataView = internalState.getState().dataView;
   const state = appState.getState();
-  let nextDataView: DataView | null = null;
+  let nextDataView: DataViewLazy | null = null;
   internalState.transitions.setIsDataViewLoading(true);
 
   try {
-    nextDataView = typeof id === 'string' ? await dataViews.get(id, false) : id;
+    nextDataView = typeof id === 'string' ? await dataViews.getDataViewLazy(id) : id;
   } catch (e) {
     //
   }
 
   if (nextDataView && dataView) {
     const nextAppState = getDataViewAppState(
-      dataView,
-      nextDataView,
+      await services.dataViews.toDataView(dataView),
+      await services.dataViews.toDataView(nextDataView),
       uiSettings.get(DEFAULT_COLUMNS_SETTING, []),
       state.columns || [],
       (state.sort || []) as SortOrder[],

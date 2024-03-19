@@ -60,7 +60,9 @@ export const loadSavedSearch = async (
   let nextSavedSearch = savedSearchId
     ? await savedSearchContainer.load(savedSearchId)
     : await savedSearchContainer.new(
-        await getStateDataView(params, { services, appState, internalStateContainer })
+        await services.dataViews.toDataView(
+          await getStateDataView(params, { services, appState, internalStateContainer })
+        )
       );
 
   // Cleaning up the previous state
@@ -100,11 +102,16 @@ export const loadSavedSearch = async (
         stateDataView &&
         (dataViewDifferentToAppState || !savedSearchDataViewId)
       ) {
-        nextSavedSearch.searchSource.setField('index', stateDataView);
+        nextSavedSearch.searchSource.setField(
+          'index',
+          await services.dataViews.toDataView(stateDataView)
+        );
       }
     }
-    nextSavedSearch = savedSearchContainer.update({
-      nextDataView: nextSavedSearch.searchSource.getField('index'),
+    nextSavedSearch = await savedSearchContainer.update({
+      nextDataView:
+        nextSavedSearch.searchSource.getField('index') &&
+        (await services.dataViews.toDataViewLazy(nextSavedSearch.searchSource.getField('index')!)),
       nextState: appState,
     });
   }
@@ -132,9 +139,11 @@ export const loadSavedSearch = async (
  * @param savedSearch
  * @param deps
  */
-function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps) {
+async function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps) {
   const { dataStateContainer, internalStateContainer, services, setDataView } = deps;
-  const savedSearchDataView = savedSearch.searchSource.getField('index')!;
+  const savedSearchDataView = await services.dataViews.toDataViewLazy(
+    savedSearch.searchSource.getField('index')!
+  );
 
   setDataView(savedSearchDataView);
   if (!savedSearchDataView.isPersisted()) {

@@ -31,7 +31,30 @@ export async function getESQLAdHocDataview(
   indexPattern: string,
   dataViewsService: DataViewsPublicPluginStart
 ) {
+  const fld = await dataViewsService.getFieldsForWildcard({
+    pattern: indexPattern,
+    fields: ['@timestamp'],
+  });
+
   return await dataViewsService.create({
+    timeFieldName: fld.length > 0 ? '@timestamp' : undefined,
+    title: indexPattern,
+    type: ESQL_TYPE,
+    id: await sha256(`esql-${indexPattern}`),
+  });
+}
+
+export async function getESQLAdHocDataviewLazy(
+  indexPattern: string,
+  dataViewsService: DataViewsPublicPluginStart
+) {
+  const fld = await dataViewsService.getFieldsForWildcard({
+    pattern: indexPattern,
+    fields: ['@timestamp'],
+  });
+
+  return await dataViewsService.createDataViewLazy({
+    timeFieldName: fld.length > 0 ? '@timestamp' : undefined,
     title: indexPattern,
     type: ESQL_TYPE,
     id: await sha256(`esql-${indexPattern}`),

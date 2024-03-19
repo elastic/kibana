@@ -7,16 +7,16 @@
  */
 import type { AggregateQuery } from '@kbn/es-query';
 import {
-  getESQLAdHocDataview,
+  getESQLAdHocDataviewLazy,
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
 } from '@kbn/esql-utils';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewLazy } from '@kbn/data-views-plugin/common';
 import { DiscoverServices } from '../../../build_services';
 
 export async function getDataViewByTextBasedQueryLang(
   query: AggregateQuery,
-  currentDataView: DataView | undefined,
+  currentDataView: DataViewLazy | undefined,
   services: DiscoverServices
 ) {
   let indexPatternFromQuery = '';
@@ -33,12 +33,7 @@ export async function getDataViewByTextBasedQueryLang(
     currentDataView?.isPersisted() ||
     indexPatternFromQuery !== currentDataView?.getIndexPattern()
   ) {
-    const dataViewObj = await getESQLAdHocDataview(indexPatternFromQuery, services.dataViews);
-
-    if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
-      dataViewObj.timeFieldName = '@timestamp';
-    }
-    return dataViewObj;
+    return await getESQLAdHocDataviewLazy(indexPatternFromQuery, services.dataViews);
   }
   return currentDataView;
 }

@@ -11,31 +11,31 @@ import {
   createStateContainerReactHelpers,
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
-import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
+import { DataViewLazy, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 
 export interface InternalState {
-  dataView: DataView | undefined;
+  dataView: DataViewLazy | undefined;
   isDataViewLoading: boolean;
   savedDataViews: DataViewListItem[];
-  adHocDataViews: DataView[];
+  adHocDataViews: DataViewLazy[];
   expandedDoc: DataTableRecord | undefined;
   customFilters: Filter[];
 }
 
 export interface InternalStateTransitions {
-  setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
+  setDataView: (state: InternalState) => (dataView: DataViewLazy) => InternalState;
   setIsDataViewLoading: (state: InternalState) => (isLoading: boolean) => InternalState;
   setSavedDataViews: (state: InternalState) => (dataView: DataViewListItem[]) => InternalState;
-  setAdHocDataViews: (state: InternalState) => (dataViews: DataView[]) => InternalState;
+  setAdHocDataViews: (state: InternalState) => (dataViews: DataViewLazy[]) => InternalState;
   appendAdHocDataViews: (
     state: InternalState
-  ) => (dataViews: DataView | DataView[]) => InternalState;
+  ) => (dataViews: DataViewLazy | DataViewLazy[]) => InternalState;
   removeAdHocDataViewById: (state: InternalState) => (id: string) => InternalState;
   replaceAdHocDataViewWithId: (
     state: InternalState
-  ) => (id: string, dataView: DataView) => InternalState;
+  ) => (id: string, dataView: DataViewLazy) => InternalState;
   setExpandedDoc: (
     state: InternalState
   ) => (dataView: DataTableRecord | undefined) => InternalState;
@@ -61,7 +61,7 @@ export function getInternalStateContainer() {
       customFilters: [],
     },
     {
-      setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
+      setDataView: (prevState: InternalState) => (nextDataView: DataViewLazy) => ({
         ...prevState,
         dataView: nextDataView,
       }),
@@ -73,17 +73,17 @@ export function getInternalStateContainer() {
         ...prevState,
         savedDataViews: nextDataViewList,
       }),
-      setAdHocDataViews: (prevState: InternalState) => (newAdHocDataViewList: DataView[]) => ({
+      setAdHocDataViews: (prevState: InternalState) => (newAdHocDataViewList: DataViewLazy[]) => ({
         ...prevState,
         adHocDataViews: newAdHocDataViewList,
       }),
       appendAdHocDataViews:
-        (prevState: InternalState) => (dataViewsAdHoc: DataView | DataView[]) => {
+        (prevState: InternalState) => (dataViewsAdHoc: DataViewLazy | DataViewLazy[]) => {
           // check for already existing data views
           const concatList = (
             Array.isArray(dataViewsAdHoc) ? dataViewsAdHoc : [dataViewsAdHoc]
           ).filter((dataView) => {
-            return !prevState.adHocDataViews.find((el: DataView) => el.id === dataView.id);
+            return !prevState.adHocDataViews.find((el: DataViewLazy) => el.id === dataView.id);
           });
           if (!concatList.length) {
             return prevState;
@@ -98,7 +98,7 @@ export function getInternalStateContainer() {
         adHocDataViews: prevState.adHocDataViews.filter((dataView) => dataView.id !== id),
       }),
       replaceAdHocDataViewWithId:
-        (prevState: InternalState) => (prevId: string, newDataView: DataView) => ({
+        (prevState: InternalState) => (prevId: string, newDataView: DataViewLazy) => ({
           ...prevState,
           adHocDataViews: prevState.adHocDataViews.map((dataView) =>
             dataView.id === prevId ? newDataView : dataView

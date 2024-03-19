@@ -7,7 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type {
+  DataView,
+  DataViewLazy,
+  DataViewListItem,
+  DataViewSpec,
+} from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DiscoverInternalStateContainer } from '../services/discover_internal_state_container';
@@ -20,7 +25,7 @@ interface DataViewData {
   /**
    * Loaded data view (might be default data view if requested was not found)
    */
-  loaded: DataView;
+  loaded: DataViewLazy;
   /**
    * Id of the requested data view
    */
@@ -55,7 +60,7 @@ export async function loadDataView({
   if (dataViewSpec) {
     const isPersisted = dataViewList.find(({ id: currentId }) => currentId === dataViewSpec.id);
     if (!isPersisted) {
-      const createdAdHocDataView = await dataViews.create(dataViewSpec);
+      const createdAdHocDataView = await dataViews.createDataViewLazy(dataViewSpec);
       return {
         list: dataViewList || [],
         loaded: createdAdHocDataView,
@@ -67,10 +72,10 @@ export async function loadDataView({
     fetchId = dataViewSpec.id!;
   }
 
-  let fetchedDataView: DataView | null = null;
+  let fetchedDataView: DataViewLazy | null = null;
   // try to fetch adhoc data view first
   try {
-    fetchedDataView = fetchId ? await dataViews.get(fetchId) : null;
+    fetchedDataView = fetchId ? await dataViews.getDataViewLazy(fetchId) : null;
     if (fetchedDataView && !fetchedDataView.isPersisted()) {
       return {
         list: dataViewList || [],
@@ -85,13 +90,10 @@ export async function loadDataView({
     // eslint-disable-next-line no-empty
   } catch (e) {}
 
-  let defaultDataView: DataView | null = null;
+  let defaultDataView: DataViewLazy | null = null;
   if (!fetchedDataView) {
     try {
-      defaultDataView = await dataViews.getDefaultDataView({
-        displayErrors: false,
-        refreshFields: true,
-      });
+      defaultDataView = await dataViews.getDefaultDataViewLazy();
     } catch (e) {
       //
     }
@@ -115,6 +117,7 @@ export function resolveDataView(
   ip: DataViewData,
   savedSearch: SavedSearch | undefined,
   toastNotifications: ToastsStart,
+  dataViewToDataViewLazy: (dataView: DataView) => Promise<DataViewLazy>,
   isTextBasedQuery?: boolean
 ) {
   const { loaded: loadedDataView, stateVal, stateValFound } = ip;
@@ -123,7 +126,7 @@ export function resolveDataView(
 
   if (ownDataView && !stateVal) {
     // the given saved search has its own data view, and no data view was specified in the URL
-    return ownDataView;
+    return dataViewToDataViewLazy(ownDataView);
   }
 
   // no warnings for text based mode
@@ -148,7 +151,7 @@ export function resolveDataView(
         }),
         'data-test-subj': 'dscDataViewNotFoundShowSavedWarning',
       });
-      return ownDataView;
+      return dataViewToDataViewLazy(ownDataView);
     }
     toastNotifications.addWarning({
       title: warningTitle,
@@ -194,10 +197,11 @@ export const loadAndResolveDataView = async (
     dataViewSpec,
     dataViewList: savedDataViews,
   });
-  const nextDataView = resolveDataView(
+  const nextDataView = await resolveDataView(
     nextDataViewData,
     savedSearch,
     services.toastNotifications,
+    services.dataViews.toDataViewLazy,
     isTextBasedQuery
   );
   return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };

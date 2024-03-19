@@ -58,7 +58,8 @@ export function AlertsPopover({
 }: AlertsPopoverProps) {
   const dataView = stateContainer.internalState.getState().dataView;
   const query = stateContainer.appState.getState().query;
-  const dateFields = dataView?.fields.getByType('date');
+  // const dateFields = dataView?.fields.getByType('date');
+  const dateFields = (await dataView?.getFields()).filter((field) => field.type === 'date');
   const timeField = dataView?.timeFieldName || dateFields?.[0]?.name;
 
   const { triggersActionsUi } = services;

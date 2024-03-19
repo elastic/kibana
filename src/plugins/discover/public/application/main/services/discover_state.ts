@@ -19,7 +19,7 @@ import {
   noSearchSessionStorageCapabilityMessage,
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
-import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewLazy, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
@@ -86,7 +86,7 @@ export interface LoadParams {
   /**
    * the data view to use, if undefined, the saved search's data view will be used
    */
-  dataView?: DataView;
+  dataView?: DataViewLazy;
   /**
    * Custom initial app state for loading a saved search
    */
@@ -158,17 +158,17 @@ export interface DiscoverStateContainer {
      * Used by the Data View Picker
      * @param pattern
      */
-    createAndAppendAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<DataView>;
+    createAndAppendAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<DataViewLazy>;
     /**
      * Triggered when a new data view is created
      * @param dataView
      */
-    onDataViewCreated: (dataView: DataView) => Promise<void>;
+    onDataViewCreated: (dataView: DataViewLazy) => Promise<void>;
     /**
      * Triggered when a new data view is edited
      * @param dataView
      */
-    onDataViewEdited: (dataView: DataView) => Promise<void>;
+    onDataViewEdited: (dataView: DataViewLazy) => Promise<void>;
     /**
      * Triggered when a saved search is opened in the savedObject finder
      * @param savedSearchId
@@ -187,12 +187,12 @@ export interface DiscoverStateContainer {
      * Triggered when the user selects a different data view in the data view picker
      * @param id - id of the data view
      */
-    onChangeDataView: (id: string | DataView) => Promise<void>;
+    onChangeDataView: (id: string | DataViewLazy) => Promise<void>;
     /**
      * Set the currently selected data view
      * @param dataView
      */
-    setDataView: (dataView: DataView) => void;
+    setDataView: (dataView: DataViewLazy) => void;
     /**
      * Undo changes made to the saved search, e.g. when the user triggers the "Reset search" button
      */
@@ -201,7 +201,7 @@ export interface DiscoverStateContainer {
      * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
      * This is to prevent duplicate ids messing with our system
      */
-    updateAdHocDataViewId: () => Promise<DataView | undefined>;
+    updateAdHocDataViewId: () => Promise<DataViewLazy | undefined>;
   };
 }
 
@@ -265,7 +265,7 @@ export function getDiscoverStateContainer({
    */
   const internalStateContainer = getInternalStateContainer();
 
-  const pauseAutoRefreshInterval = async (dataView: DataView) => {
+  const pauseAutoRefreshInterval = async (dataView: DataViewLazy) => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
       const state = globalStateContainer.get();
       if (state?.refreshInterval && !state.refreshInterval.pause) {
@@ -276,10 +276,12 @@ export function getDiscoverStateContainer({
       }
     }
   };
-  const setDataView = (dataView: DataView) => {
+  const setDataView = async (dataView: DataViewLazy) => {
     internalStateContainer.transitions.setDataView(dataView);
     pauseAutoRefreshInterval(dataView);
-    savedSearchContainer.getState().searchSource.setField('index', dataView);
+    savedSearchContainer
+      .getState()
+      .searchSource.setField('index', await services.dataViews.toDataView(dataView));
   };
 
   const dataStateContainer = getDataStateContainer({
@@ -303,7 +305,10 @@ export function getDiscoverStateContainer({
   const updateAdHocDataViewId = async () => {
     const prevDataView = internalStateContainer.getState().dataView;
     if (!prevDataView || prevDataView.isPersisted()) return;
-    const newDataView = await services.dataViews.create({ ...prevDataView.toSpec(), id: uuidv4() });
+    const newDataView = await services.dataViews.createDataViewLazy({
+      ...prevDataView.toSpec(),
+      id: uuidv4(),
+    });
     services.dataViews.clearInstanceCache(prevDataView.id);
 
     updateFiltersReferences({
@@ -334,7 +339,7 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const onDataViewCreated = async (nextDataView: DataView) => {
+  const onDataViewCreated = async (nextDataView: DataViewLazy) => {
     if (!nextDataView.isPersisted()) {
       internalStateContainer.transitions.appendAdHocDataViews(nextDataView);
     } else {
@@ -345,12 +350,12 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const onDataViewEdited = async (editedDataView: DataView) => {
+  const onDataViewEdited = async (editedDataView: DataViewLazy) => {
     if (editedDataView.isPersisted()) {
       // Clear the current data view from the cache and create a new instance
       // of it, ensuring we have a new object reference to trigger a re-render
       services.dataViews.clearInstanceCache(editedDataView.id);
-      setDataView(await services.dataViews.create(editedDataView.toSpec(), true));
+      setDataView(await services.dataViews.createDataViewLazy(await editedDataView.toSpec()));
     } else {
       await updateAdHocDataViewId();
     }
@@ -430,10 +435,7 @@ export function getDiscoverStateContainer({
   };
 
   const createAndAppendAdHocDataView = async (dataViewSpec: DataViewSpec) => {
-    const newDataView = await services.dataViews.create(dataViewSpec);
-    if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
-      newDataView.timeFieldName = '@timestamp';
-    }
+    const newDataView = await services.dataViews.createDataViewLazy(dataViewSpec);
     internalStateContainer.transitions.appendAdHocDataViews(newDataView);
 
     await onChangeDataView(newDataView);
@@ -457,7 +459,7 @@ export function getDiscoverStateContainer({
   /**
    * Function e.g. triggered when user changes data view in the sidebar
    */
-  const onChangeDataView = async (id: string | DataView) => {
+  const onChangeDataView = async (id: string | DataViewLazy) => {
     await changeDataView(id, {
       services,
       internalState: internalStateContainer,

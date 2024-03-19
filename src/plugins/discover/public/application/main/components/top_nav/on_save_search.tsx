@@ -171,7 +171,7 @@ export async function onSaveSearch({
 
   const saveModal = (
     <SaveSearchObjectModal
-      isTimeBased={dataView?.isTimeBased() ?? false}
+      isTimeBased={(await dataView?.isTimeBased()) ?? false}
       services={services}
       title={savedSearch.title ?? ''}
       showCopyOnSave={!!savedSearch.id}
