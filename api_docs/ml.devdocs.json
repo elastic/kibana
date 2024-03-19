@@ -2165,11 +2165,15 @@
         "label": "AlertingService",
         "description": [],
         "signature": [
-          "{ preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string) => Promise<{ payload: ",
+          "{ preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string, state?: ",
+          "AnomalyDetectionRuleState",
+          " | undefined) => Promise<{ payload: ",
           "AnomalyDetectionAlertPayload",
           "; context: ",
           "AnomalyDetectionAlertContext",
-          "; name: string; isHealthy: boolean; } | undefined>; }"
+          "; name: string; isHealthy: boolean; stateUpdate: ",
+          "AnomalyDetectionRuleState",
+          "; } | undefined>; }"
         ],
         "path": "x-pack/plugins/ml/server/shared.ts",
         "deprecated": false,
@@ -2470,11 +2474,15 @@
           "section": "def-common.KibanaRequest",
           "text": "KibanaRequest"
         },
-        "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string) => Promise<{ payload: ",
+        "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string, state?: ",
+        "AnomalyDetectionRuleState",
+        " | undefined) => Promise<{ payload: ",
         "AnomalyDetectionAlertPayload",
         "; context: ",
         "AnomalyDetectionAlertContext",
-        "; name: string; isHealthy: boolean; } | undefined>; }; } & ",
+        "; name: string; isHealthy: boolean; stateUpdate: ",
+        "AnomalyDetectionRuleState",
+        "; } | undefined>; }; } & ",
         "TrainedModelsProvider"
       ],
       "path": "x-pack/plugins/ml/server/plugin.ts",

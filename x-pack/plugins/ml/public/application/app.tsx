@@ -100,6 +100,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
 
   const services: StartServices = useMemo(() => {
     return {
+      ...coreStart,
       cases: deps.cases,
       charts: deps.charts,
       contentManagement: deps.contentManagement,
@@ -124,7 +125,6 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
       uiActions: deps.uiActions,
       unifiedSearch: deps.unifiedSearch,
       usageCollection: deps.usageCollection,
-      ...coreStart,
       mlServices: getMlGlobalServices(coreStart.http, deps.data.dataViews, deps.usageCollection),
     };
   }, [deps, coreStart]);

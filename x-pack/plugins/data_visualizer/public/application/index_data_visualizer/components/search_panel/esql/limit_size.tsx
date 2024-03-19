@@ -12,6 +12,7 @@ import type { ESQLDefaultLimitSizeOption } from '../../../embeddables/grid_embed
 
 const options = [
   {
+    'data-test-subj': 'dvESQLLimitSize-5000',
     value: '5000',
     text: i18n.translate('xpack.dataVisualizer.searchPanel.esql.limitSizeOptionLabel', {
       defaultMessage: '{limit} rows',
@@ -19,6 +20,7 @@ const options = [
     }),
   },
   {
+    'data-test-subj': 'dvESQLLimitSize-10000',
     value: '10000',
     text: i18n.translate('xpack.dataVisualizer.searchPanel.esql.limitSizeOptionLabel', {
       defaultMessage: '{limit} rows',
@@ -26,6 +28,7 @@ const options = [
     }),
   },
   {
+    'data-test-subj': 'dvESQLLimitSize-100000',
     value: '100000',
     text: i18n.translate('xpack.dataVisualizer.searchPanel.esql.limitSizeOptionLabel', {
       defaultMessage: '{limit} rows',
@@ -33,6 +36,7 @@ const options = [
     }),
   },
   {
+    'data-test-subj': 'dvESQLLimitSize-1000000',
     value: '1000000',
     text: i18n.translate('xpack.dataVisualizer.searchPanel.esql.limitSizeOptionLabel', {
       defaultMessage: '{limit} rows',
@@ -40,6 +44,7 @@ const options = [
     }),
   },
   {
+    'data-test-subj': 'dvESQLLimitSize-none',
     value: 'none',
     text: i18n.translate('xpack.dataVisualizer.searchPanel.esql.analyzeAll', {
       defaultMessage: 'Analyze all',
@@ -62,6 +67,7 @@ export const ESQLDefaultLimitSizeSelect = ({
 
   return (
     <EuiSelect
+      data-test-subj="dvESQLLimitSizeSelect"
       id={basicSelectId}
       options={options}
       value={limitSize}
