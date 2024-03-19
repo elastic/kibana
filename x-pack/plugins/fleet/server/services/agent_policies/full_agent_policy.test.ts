@@ -197,7 +197,7 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
       outputs: {
-        default: {
+        'test-id': {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
         },
@@ -228,7 +228,7 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
       outputs: {
-        default: {
+        'test-id': {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
         },
@@ -244,7 +244,7 @@ describe('getFullAgentPolicy', () => {
         },
         monitoring: {
           namespace: 'default',
-          use_output: 'default',
+          use_output: 'test-id',
           enabled: true,
           logs: true,
           metrics: false,
@@ -264,7 +264,7 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
       outputs: {
-        default: {
+        'test-id': {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
         },
@@ -280,7 +280,7 @@ describe('getFullAgentPolicy', () => {
         },
         monitoring: {
           namespace: 'default',
-          use_output: 'default',
+          use_output: 'test-id',
           enabled: true,
           logs: false,
           metrics: true,
@@ -358,7 +358,7 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy).toMatchSnapshot();
   });
 
-  it('should use "default" as the default policy id', async () => {
+  it('should use output id from default policy id', async () => {
     mockAgentPolicy({
       id: 'policy',
       status: 'active',
@@ -372,7 +372,7 @@ describe('getFullAgentPolicy', () => {
 
     const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
 
-    expect(agentPolicy?.outputs.default).toBeDefined();
+    expect(agentPolicy?.outputs['test-id']).toBeDefined();
   });
 
   it('should return the sourceURI from the agent policy', async () => {
@@ -387,7 +387,7 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
       outputs: {
-        default: {
+        'test-id': {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
         },
@@ -403,7 +403,7 @@ describe('getFullAgentPolicy', () => {
         },
         monitoring: {
           namespace: 'default',
-          use_output: 'default',
+          use_output: 'test-id',
           enabled: true,
           logs: false,
           metrics: true,
@@ -427,7 +427,7 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
       outputs: {
-        default: {
+        'test-id': {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
         },
@@ -440,7 +440,7 @@ describe('getFullAgentPolicy', () => {
       agent: {
         monitoring: {
           namespace: 'default',
-          use_output: 'default',
+          use_output: 'test-id',
           enabled: true,
           logs: false,
           metrics: true,
@@ -626,7 +626,7 @@ describe('getFullAgentPolicy', () => {
             },
           ],
           type: 'test-logs',
-          use_output: 'default',
+          use_output: 'test-id',
         },
         {
           data_stream: {
@@ -652,11 +652,11 @@ describe('getFullAgentPolicy', () => {
             },
           ],
           type: 'test-logs',
-          use_output: 'default',
+          use_output: 'test-id',
         },
       ],
       output_permissions: {
-        default: {
+        'test-id': {
           _elastic_agent_checks: {
             cluster: ['monitor'],
           },
@@ -679,7 +679,7 @@ describe('getFullAgentPolicy', () => {
         },
       },
       outputs: {
-        default: {
+        'test-id': {
           hosts: ['http://127.0.0.1:9201'],
           preset: 'balanced',
           type: 'elasticsearch',

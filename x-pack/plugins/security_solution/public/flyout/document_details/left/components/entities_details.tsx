@@ -14,7 +14,7 @@ import { UserDetails } from './user_details';
 import { HostDetails } from './host_details';
 import { ENTITIES_DETAILS_TEST_ID } from './test_ids';
 
-export const ENTITIES_TAB_ID = 'entities-details';
+export const ENTITIES_TAB_ID = 'entity';
 
 /**
  * Entities displayed in the document details expandable flyout left section under the Insights tab
