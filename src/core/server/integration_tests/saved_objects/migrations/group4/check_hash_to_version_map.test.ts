@@ -13,7 +13,7 @@
 import crypto from 'crypto';
 import { mapValues } from 'lodash';
 import {
-  getVirtualVersionMap,
+  getLatestMappingsVirtualVersionMap,
   HASH_TO_VERSION_MAP,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { buildTypesMappings } from '@kbn/core-saved-objects-migration-server-internal';
@@ -25,7 +25,7 @@ describe('transition from md5 hashes to model versions', () => {
     const typeRegistry = await getCurrentVersionTypeRegistry({ oss: false });
     const mappingProperties = buildTypesMappings(typeRegistry.getAllTypes());
     const hashes = md5Values(mappingProperties);
-    const versions = getVirtualVersionMap(typeRegistry.getAllTypes());
+    const versions = getLatestMappingsVirtualVersionMap(typeRegistry.getAllTypes());
 
     const currentHashToVersionMap = Object.entries(hashes).reduce<Record<string, string>>(
       (acc, [type, hash]) => {
