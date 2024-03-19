@@ -17,9 +17,6 @@ export class DashboardPageLinks extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly comboBox = this.ctx.getService('comboBox');
 
-  private readonly header = this.ctx.getPageObject('header');
-  private readonly settings = this.ctx.getPageObject('settings');
-
   /* -----------------------------------------------------------
     Links panel
     ----------------------------------------------------------- */
