@@ -20,13 +20,13 @@ export async function expectDefaultFleetServer({ getService }: FtrProviderContex
       `/api/fleet/fleet_server_hosts/${defaultFleetServerHostId}`
     );
     if (status === 200 && body.item.host_urls.length > 0) {
-      defaultFleetServerHostUrl = body.item.host_urls;
+      defaultFleetServerHostUrl = body.item.host_urls[0];
       return true;
     } else {
       throw new Error(`Expected default Fleet Server id ${defaultFleetServerHostId} to exist`);
     }
   });
-  return defaultFleetServerHostUrl[0];
+  return defaultFleetServerHostUrl;
 }
 
 export async function expectDefaultElasticsearchOutput({ getService }: FtrProviderContext) {
