@@ -19,15 +19,13 @@ import { css, keyframes } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { Conversation, Message } from '@kbn/observability-ai-assistant-plugin/common';
 import {
-  MessageRole,
-  type Feedback,
-  VisualizeESQLUserIntention,
-  ObservabilityAIAssistantTelemetryEventType,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import {
   ChatActionClickType,
   ChatState,
+  MessageRole,
+  ObservabilityAIAssistantTelemetryEventType,
+  VisualizeESQLUserIntention,
   type ChatActionClickPayload,
+  type Feedback,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -40,7 +38,7 @@ import { useLicense } from '../../hooks/use_license';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
-import { FlyoutWidthMode } from './chat_flyout';
+import { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
@@ -97,25 +95,25 @@ const PADDING_AND_BORDER = 32;
 export function ChatBody({
   connectors,
   currentUser,
-  flyoutWidthMode,
+  flyoutPositionMode,
   initialConversationId,
   initialMessages,
   initialTitle,
   knowledgeBase,
   showLinkToConversationsApp,
   onConversationUpdate,
-  onToggleFlyoutWidthMode,
+  onToggleFlyoutPositionMode,
 }: {
   connectors: ReturnType<typeof useGenAIConnectors>;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
-  flyoutWidthMode?: FlyoutWidthMode;
+  flyoutPositionMode?: FlyoutPositionMode;
   initialTitle?: string;
   initialMessages?: Message[];
   initialConversationId?: string;
   knowledgeBase: UseKnowledgeBaseResult;
   showLinkToConversationsApp: boolean;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
-  onToggleFlyoutWidthMode?: (flyoutWidthMode: FlyoutWidthMode) => void;
+  onToggleFlyoutPositionMode?: (flyoutPositionMode: FlyoutPositionMode) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -362,9 +360,7 @@ export function ChatBody({
                   onSendTelemetry={(eventWithPayload) =>
                     chatService.sendAnalyticsEvent(eventWithPayload)
                   }
-                  onStopGenerating={() => {
-                    stop();
-                  }}
+                  onStopGenerating={stop}
                   onActionClick={handleActionClick}
                 />
               )}
@@ -468,16 +464,15 @@ export function ChatBody({
               ? conversation.value.conversation.id
               : undefined
           }
-          flyoutWidthMode={flyoutWidthMode}
+          flyoutPositionMode={flyoutPositionMode}
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}
-          showLinkToConversationsApp={showLinkToConversationsApp}
           title={title}
           onCopyConversation={handleCopyConversation}
           onSaveTitle={(newTitle) => {
             saveTitle(newTitle);
           }}
-          onToggleFlyoutWidthMode={onToggleFlyoutWidthMode}
+          onToggleFlyoutPositionMode={onToggleFlyoutPositionMode}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
