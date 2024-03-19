@@ -14,6 +14,7 @@ import {
   getCspmCloudShellDefaultValue,
   isBelowMinVersion,
   getDefaultAwsCredentialsType,
+  getDefaultAzureCredentialsType,
 } from './utils';
 import { getMockPolicyAWS, getMockPolicyK8s, getMockPolicyEKS } from './mocks';
 
@@ -348,5 +349,68 @@ describe('getDefaultAwsCredentialsType', () => {
     const result = getDefaultAwsCredentialsType(packageInfo, setupTechnology);
 
     expect(result).toBe('cloud_formation');
+  });
+});
+
+describe('getDefaultAzureCredentialsType', () => {
+  let packageInfo: PackageInfo;
+
+  beforeEach(() => {
+    packageInfo = {
+      policy_templates: [
+        {
+          name: 'cspm',
+          inputs: [
+            {
+              vars: [
+                {
+                  name: 'arm_template_url',
+                  default: 'http://example.com/arm_template_url',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+  });
+
+  it('should return "service_principal_with_client_secret" for agentless', () => {
+    const setupTechnology = SetupTechnology.AGENTLESS;
+    const result = getDefaultAzureCredentialsType(packageInfo, setupTechnology);
+
+    expect(result).toBe('service_principal_with_client_secret');
+  });
+
+  it('shold return "arm_template" for agent-based, when arm_template is available', () => {
+    const setupTechnology = SetupTechnology.AGENT_BASED;
+    const result = getDefaultAzureCredentialsType(packageInfo, setupTechnology);
+
+    expect(result).toBe('arm_template');
+  });
+
+  it('should return "managed_identity" for agent-based, when arm_template is not available', () => {
+    const setupTechnology = SetupTechnology.AGENT_BASED;
+    packageInfo = {
+      policy_templates: [
+        {
+          name: 'cspm',
+          inputs: [
+            {
+              vars: [
+                {
+                  name: 'cloud_shell',
+                  default: 'http://example.com/cloud_shell',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+
+    const result = getDefaultAzureCredentialsType(packageInfo, setupTechnology);
+
+    expect(result).toBe('managed_identity');
   });
 });
