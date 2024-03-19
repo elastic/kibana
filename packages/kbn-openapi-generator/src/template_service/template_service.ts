@@ -12,7 +12,11 @@ import { GenerationContext } from '../parser/get_generation_context';
 import { registerHelpers } from './register_helpers';
 import { registerTemplates } from './register_templates';
 
-export const AVAILABLE_TEMPLATES = ['zod_operation_schema', 'zod_api_client'] as const;
+export const AVAILABLE_TEMPLATES = [
+  'zod_operation_schema',
+  'zod_api_method',
+  'zod_api_client',
+] as const;
 
 export type TemplateName = typeof AVAILABLE_TEMPLATES[number];
 

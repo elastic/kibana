@@ -5,54 +5,28 @@
  * 2.0.
  */
 
-{{! Import Kibana http service and errors}}
-import { KibanaServices, KibanaResponseError } from '../../../common/lib/kibana';
+import type { HttpFetchOptions } from '@kbn/core-http-browser';
+{{#each files}}
+import { {{methods}} } from '{{file}}';
+{{/each}}
 
-{{! Import types from schema}}
-import type {
-  {{#each operations}}  
-    {{operationId}}Request,
-    {{operationId}}Response
-  {{/each}}
-} from './schema';
+interface HttpClient {
+  fetch<T>(url: string, options: HttpFetchOptions): Promise<T>;
+}
 
-{{! API client }}  
-const apiClient = {
+export class ApiClient<TClient extends HttpClient> {
 
-  http: KibanaServices.get().http,
+  private client: TClient;
 
-  {{#each operations}}
-    async {{operationId}}(params: {{operationId}}Request) {
-    
-      try {
+  constructor(client: TClient) {
+    this.client = client;
+  }
 
-        const response = await this.http.fetch<{{operationId}}Response>('{{path}}', {
-          method: '{{method}}',
-          {{#if hasQueryParams}}
-          query: params.query,
-          {{/if}}
-          {{#if hasRequestBody}}
-          body: JSON.stringify(params.body),
-          {{/if}}
-        });
+  {{#each files}}
+  public async {{methods}}(params, signal) {
+    return {{methods}}(this.client, params, signal);
+  }
 
-        return response;
-
-      } catch(error) {
-
-        if (error instanceof KibanaResponseError) {
-          // handle Kibana response error
-        } else {
-          // handle other errors like network errors
-        }
-
-        throw error;
-
-      }
-
-    }
   {{/each}}
 
-};
-
-export default apiClient;
+}

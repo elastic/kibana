@@ -8,4 +8,5 @@
 
 export * from './src/openapi_linter';
 export * from './src/openapi_generator';
+export * from './src/openapi_api_client_generator';
 export * from './src/cli';

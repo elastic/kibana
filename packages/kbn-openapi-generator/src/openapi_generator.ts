@@ -19,7 +19,7 @@ import { getGeneratedFilePath } from './lib/get_generated_file_path';
 import { removeGenArtifacts } from './lib/remove_gen_artifacts';
 import { lint } from './openapi_linter';
 import { getGenerationContext } from './parser/get_generation_context';
-import type { OpenApiDocument } from './parser/openapi_types';
+import type { NormalizedOperation, OpenApiDocument } from './parser/openapi_types';
 import { initTemplateService, TemplateName } from './template_service/template_service';
 
 export interface GeneratorConfig {
@@ -29,8 +29,16 @@ export interface GeneratorConfig {
   skipLinting?: boolean;
 }
 
+const paths: Record<TemplateName, string> = {
+  zod_operation_schema: '.gen.ts',
+  zod_api_method: '.api_method.gen.ts',
+  zod_api_client: '',
+};
+
 export const generate = async (config: GeneratorConfig) => {
   const { rootDir, sourceGlob, templateName, skipLinting } = config;
+
+  const extension = paths[templateName];
 
   if (!skipLinting) {
     await lint({
@@ -55,15 +63,13 @@ export const generate = async (config: GeneratorConfig) => {
   );
 
   console.log(`🧹  Cleaning up any previously generated artifacts`);
-  await removeGenArtifacts(rootDir);
+  // await removeGenArtifacts(rootDir);
 
   console.log(`🪄   Generating new artifacts`);
   const TemplateService = await initTemplateService();
-  await Promise.all(
+  const contexts = await Promise.all(
     parsedSources.map(async ({ sourcePath, parsedSchema }) => {
-      console.log({ sourcePath, parsedSchema });
       const generationContext = getGenerationContext(parsedSchema);
-      console.log({ generationContext });
 
       // If there are no operations or components to generate, skip this file
       const shouldGenerate =
@@ -74,8 +80,12 @@ export const generate = async (config: GeneratorConfig) => {
 
       const result = TemplateService.compileTemplate(templateName, generationContext);
 
+      const generatedFilePath = getGeneratedFilePath(sourcePath, extension);
+
       // Write the generation result to disk
-      await fs.writeFile(getGeneratedFilePath(sourcePath), result);
+      await fs.writeFile(generatedFilePath, result);
+
+      return generationContext;
     })
   );
 
@@ -83,11 +93,16 @@ export const generate = async (config: GeneratorConfig) => {
   // unformatted code and fix any eslint errors
   console.log(`💅  Formatting output`);
 
-  const paths: Record<TemplateName, string> = {
-    zod_api_client: './**/*.api_client.gen.ts',
-    zod_operation_schema: './**/*.gen.ts',
-  };
-  const generatedArtifactsGlob = resolve(rootDir, paths[templateName]);
+  const generatedArtifactsGlob = resolve(rootDir, `./**/*${extension}`);
   await formatOutput(generatedArtifactsGlob);
   await fixEslint(generatedArtifactsGlob);
+
+  return {
+    operations: contexts.reduce((acc, context) => {
+      if (context) {
+        return acc.concat(context.operations);
+      }
+      return acc;
+    }, [] as NormalizedOperation[]),
+  };
 };
