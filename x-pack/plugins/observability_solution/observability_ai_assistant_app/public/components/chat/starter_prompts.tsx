@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -32,18 +32,15 @@ export function StarterPrompts({ onSelectPrompt }: { onSelectPrompt: (prompt: st
 
   const contexts = service.getScreenContexts();
 
-  const starterPrompts = useMemo(
-    () => [
-      ...new Set(
-        contexts
-          .reverse()
-          .flatMap((context) => context.starterPrompts)
-          .filter(nonNullable)
-          .slice(0, 4)
-      ),
-    ],
-    [contexts]
-  );
+  const starterPrompts = [
+    ...new Set(
+      contexts
+        .reverse()
+        .flatMap((context) => context.starterPrompts)
+        .filter(nonNullable)
+        .slice(0, 4)
+    ),
+  ];
 
   const handleSelectPrompt = (prompt: string) => {
     onSelectPrompt(prompt);

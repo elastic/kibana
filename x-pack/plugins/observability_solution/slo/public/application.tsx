@@ -20,6 +20,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 
+import { i18n } from '@kbn/i18n';
 import { PluginContext } from './context/plugin_context';
 
 import { SloPublicPluginsStart } from './types';
@@ -80,8 +81,24 @@ export const renderApp = ({
 
   const unregisterPrompts = plugins.observabilityAIAssistant.service.setScreenContext({
     starterPrompts: [
-      { title: 'Getting started', icon: 'bullseye', prompt: 'What is an SLO?' },
-      { title: 'Getting started', icon: 'questionInCircle', prompt: 'Can you create an SLO?' },
+      {
+        title: i18n.translate('xpack.slo.starterPrompts.whatAreSlos.title', {
+          defaultMessage: 'Getting started',
+        }),
+        prompt: i18n.translate('xpack.slo.starterPrompts.whatAreSlos.prompt', {
+          defaultMessage: 'What are SLOs?',
+        }),
+        icon: 'bullseye',
+      },
+      {
+        title: i18n.translate('xpack.slo.starterPrompts.canYouCreateAnSlo.title', {
+          defaultMessage: 'Getting started',
+        }),
+        prompt: i18n.translate('xpack.slo.starterPrompts.canYouCreateAnSlo.prompt', {
+          defaultMessage: 'Can you create an SLO?',
+        }),
+        icon: 'questionInCircle',
+      },
     ],
   });
 

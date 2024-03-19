@@ -42,7 +42,6 @@ export class ObservabilityAIAssistantPlugin
 {
   logger: Logger;
   service?: ObservabilityAIAssistantService;
-  clearScreenContext?: () => void;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -66,7 +65,7 @@ export class ObservabilityAIAssistantPlugin
       enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
     }));
 
-    this.clearScreenContext = service.setScreenContext({
+    service.setScreenContext({
       starterPrompts: [
         {
           title: i18n.translate(
@@ -172,9 +171,5 @@ export class ObservabilityAIAssistantPlugin
       getContextualInsightMessages,
       createScreenContextAction,
     };
-  }
-
-  stop() {
-    this.clearScreenContext?.();
   }
 }
