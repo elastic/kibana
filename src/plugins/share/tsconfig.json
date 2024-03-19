@@ -6,7 +6,6 @@
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/utility-types",
     "@kbn/i18n",
@@ -21,6 +20,7 @@
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/core-capabilities-common",
     "@kbn/react-kibana-mount",
+    "@kbn/share-modal",
   ],
   "exclude": [
     "target/**/*",
