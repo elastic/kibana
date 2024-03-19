@@ -101,11 +101,13 @@ export class ObservabilityOnboardingPlugin
           createCallApi(core);
 
           const experimentalOnboardingFlowEnabled =
-            await isExperimentalOnboardingEnabled(
-              isServerless,
-              (corePlugins as ObservabilityOnboardingPluginStartDeps)
-                .cloudExperiments
-            );
+            isServerless &&
+            !!(await (
+              corePlugins as ObservabilityOnboardingPluginStartDeps
+            ).cloudExperiments?.getVariation(
+              'observability_onboarding.experimental_onboarding_flow_enabled',
+              false
+            ));
 
           return renderApp({
             core: coreStart,
@@ -131,24 +133,11 @@ export class ObservabilityOnboardingPlugin
     };
   }
   public start(
-    core: CoreStart,
-    plugins: ObservabilityOnboardingPluginStartDeps
+    _core: CoreStart,
+    _plugins: ObservabilityOnboardingPluginStartDeps
   ) {
     return {
       locators: this.locators,
     };
   }
-}
-
-async function isExperimentalOnboardingEnabled(
-  isServerless: boolean,
-  cloudExperiments?: CloudExperimentsPluginStart
-): Promise<boolean> {
-  return (
-    isServerless &&
-    !!cloudExperiments?.getVariation(
-      'observability_onboarding.experimental_onboarding_flow_enabled',
-      false
-    )
-  );
 }
