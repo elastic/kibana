@@ -3097,6 +3097,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/aiops-test-utils@link:x-pack/packages/ml/aiops_test_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/aiops-utils@link:x-pack/packages/ml/aiops_utils":
   version "0.0.0"
   uid ""
@@ -6166,6 +6170,10 @@
   uid ""
 
 "@kbn/shared-ux-utility@link:packages/kbn-shared-ux-utility":
+  version "0.0.0"
+  uid ""
+
+"@kbn/slo-plugin@link:x-pack/plugins/observability_solution/slo":
   version "0.0.0"
   uid ""
 
