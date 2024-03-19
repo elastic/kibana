@@ -41,7 +41,19 @@ git -P diff
 git diff --exit-code --quiet "$destination_file"
 
 if [ $? -ne 0 ]; then
-  echo "Differences found. Building ANTLR stuff."
+  echo "Differences found. Checking for existing PR..."
+  PR_TITLE='[ES|QL] Update lexer grammar'
+  PR_BODY='This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch.'
+ 
+  # Check if a PR already exists
+  pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "kibanamachine"  --limit 1 --json title -q ".[].title")
+
+  if [ "$pr_search_result" == "$PR_TITLE" ]; then
+    echo "PR already exists. Exiting."
+    exit
+  fi
+
+  echo "No existing PR found. Proceeding with the update."
 
   # Bootstrap Kibana
   yarn kbn bootstrap || exit
@@ -63,7 +75,7 @@ if [ $? -ne 0 ]; then
   echo "Changes committed. Creating pull request."
 
   # Create a PR
-  gh pr create --draft --title '[ES|QL] Update lexer grammar' --body 'This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch.' --base main --head "$BRANCH_NAME" --label 'release_note:skip' || exit
+  gh pr create --draft --title "$PR_TITLE" --body "$PR_BODY" --base main --head "$BRANCH_NAME" --label 'release_note:skip' || exit
 
 else
   echo "No differences found. Our work is done here."
