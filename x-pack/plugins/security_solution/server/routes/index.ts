@@ -77,6 +77,7 @@ import {
   assetCriticalityPrivilegesRoute,
 } from '../lib/entity_analytics/asset_criticality/routes';
 import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
+import { registerUserProfileSettingsRoutes } from '../lib/user_profile_settings/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -181,4 +182,12 @@ export const initRoutes = (
 
   // Security Integrations
   getFleetManagedIndexTemplatesRoute(router);
+
+  if (config.experimentalFeatures.securitySolutionUserProfileEnabled) {
+    registerUserProfileSettingsRoutes({
+      router,
+      logger,
+      getStartServices,
+    });
+  }
 };

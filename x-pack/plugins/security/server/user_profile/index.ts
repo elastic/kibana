@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+export { UserSettingsNamespaceRegistrationService } from './user_profile_namespace_registration_service';
+
+export { getUserSettingNamespaceRegistrationService } from './user_profile_namespace_registration_service';
+
 export { UserProfileService } from './user_profile_service';
 
 export type {

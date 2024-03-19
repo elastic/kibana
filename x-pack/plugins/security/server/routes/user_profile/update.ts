@@ -12,6 +12,7 @@ import { IMAGE_FILE_TYPES } from '../../../common/constants';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { flattenObject } from '../../lib';
 import { getPrintableSessionId } from '../../session_management';
+import { getUserSettingNamespaceRegistrationService } from '../../user_profile/user_profile_namespace_registration_service';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 /** User profile data keys that are allowed to be updated by Cloud users */
@@ -32,6 +33,8 @@ export function defineUpdateUserProfileDataRoute({
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
+      const namespaceRegisterationService = getUserSettingNamespaceRegistrationService();
+      const registeredNamespaces = namespaceRegisterationService.getRegisteredNamespaces();
       const session = await getSession().get(request);
       if (session.error) {
         logger.warn('User profile requested without valid session.');
@@ -72,11 +75,20 @@ export function defineUpdateUserProfileDataRoute({
 
       const keysToUpdate = Object.keys(flattenObject(userProfileData));
 
+      logger.error(`Is Cloud user: ${currentUser?.elastic_cloud_user} `);
+      logger.error(JSON.stringify({ registeredNamespaces }, undefined, 2));
       if (currentUser?.elastic_cloud_user) {
         // We only allow specific user profile data to be updated by Elastic Cloud SSO users.
-        const isUpdateAllowed = keysToUpdate.every((key) =>
+        const keyToUpdateCheck = keysToUpdate.every((key) =>
           ALLOWED_KEYS_UPDATE_CLOUD.includes(key)
         );
+
+        const isUpdateAllowed = Object.keys(userProfileData.userSettings || {}).every((key) =>
+          [...registeredNamespaces, 'darkMode'].includes(key)
+        );
+
+        logger.error(JSON.stringify({ isUpdateAllowed, registeredNamespaces }, undefined, 2));
+
         if (keysToUpdate.length === 0 || !isUpdateAllowed) {
           logger.warn(
             `Elastic Cloud SSO users aren't allowed to update profiles in Kibana. (sid: ${getPrintableSessionId(

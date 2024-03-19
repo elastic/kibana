@@ -12,6 +12,7 @@ import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { useSecuritySolutionUserSettings } from '../../../common/hooks/use_user_settings';
 import { EXPANDABLE_FLYOUT_URL_KEY } from '../../../common/hooks/use_url_state';
 import { SecuritySolutionFlyout } from '../../../flyout';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
@@ -54,6 +55,8 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
+    const { userSettings } = useSecuritySolutionUserSettings();
+    console.log({ userSettings });
     const [routeProps] = useRouteSpy();
     const isPreview = routeProps?.pageName === SecurityPageName.rulesCreate;
 
