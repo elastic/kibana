@@ -19,9 +19,7 @@ source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBas
 destination_file="./packages/kbn-monaco/src/esql/antlr/esql_lexer.g4"
 
 # Copy the file
-cp "$source_file" "$destination_file"
-
-antlr
+cp "$source_file" "$destination_file" || exit
 
 # Insert the license header
 echo -e "${license_header}\n\n$(cat ${destination_file})" > ${destination_file}
@@ -36,6 +34,7 @@ options { caseInsensitive = true; }' "$destination_file" || exit
 echo "File copied and modified successfully. Checking for differences."
 
 # Check for differences
+git -P diff
 git diff --exit-code --quiet "$destination_file"
 
 if [ $? -ne 0 ]; then
