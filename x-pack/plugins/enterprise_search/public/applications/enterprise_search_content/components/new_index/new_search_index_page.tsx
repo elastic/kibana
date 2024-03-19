@@ -49,7 +49,7 @@ function getTitle(
         Boolean(serviceType) && connectorTypes.find((item) => item.serviceType === serviceType);
       return connector
         ? i18n.translate('xpack.enterpriseSearch.content.new_index.connectorTitleWithServiceType', {
-            defaultMessage: 'New {name} search index',
+            defaultMessage: 'New {name} connector',
             values: {
               name: connector.name,
             },

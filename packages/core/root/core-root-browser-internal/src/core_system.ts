@@ -36,9 +36,9 @@ import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
 import { PluginsService } from '@kbn/core-plugins-browser-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
+import { SecurityService } from '@kbn/core-security-browser-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
-
 import {
   LOAD_SETUP_DONE,
   LOAD_START_DONE,
@@ -104,6 +104,7 @@ export class CoreSystem {
   private readonly coreContext: CoreContext;
   private readonly executionContext: ExecutionContextService;
   private readonly customBranding: CustomBrandingService;
+  private readonly security: SecurityService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: CoreSystemParams) {
@@ -128,6 +129,7 @@ export class CoreSystem {
       // Stop Core before rendering any fatal errors into the DOM
       this.stop();
     });
+    this.security = new SecurityService(this.coreContext);
     this.theme = new ThemeService();
     this.notifications = new NotificationsService();
     this.http = new HttpService();
@@ -235,6 +237,7 @@ export class CoreSystem {
         fatalErrors: this.fatalErrorsSetup,
         executionContext,
       });
+      const security = this.security.setup();
       this.chrome.setup({ analytics });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const settings = this.settings.setup({ http, injectedMetadata });
@@ -256,6 +259,7 @@ export class CoreSystem {
         settings,
         executionContext,
         customBranding,
+        security,
       };
 
       // Services that do not expose contracts at setup
@@ -280,6 +284,7 @@ export class CoreSystem {
   public async start() {
     try {
       const analytics = this.analytics.start();
+      const security = this.security.start();
       const injectedMetadata = await this.injectedMetadata.start();
       const uiSettings = await this.uiSettings.start();
       const settings = await this.settings.start();
@@ -354,6 +359,7 @@ export class CoreSystem {
         fatalErrors,
         deprecations,
         customBranding,
+        security,
       };
 
       await this.plugins.start(core);
@@ -416,6 +422,7 @@ export class CoreSystem {
     this.deprecations.stop();
     this.theme.stop();
     this.analytics.stop();
+    this.security.stop();
     this.rootDomElement.textContent = '';
   }
 
