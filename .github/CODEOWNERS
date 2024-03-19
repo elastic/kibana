@@ -1168,6 +1168,8 @@ x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-
 /.bazelversion @elastic/kibana-operations
 /WORKSPACE.bazel @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
+/.buildkite/scripts/steps/esql_grammar_sync.sh @elastic/kibana-visualizations
+/.buildkite/pipelines/esql_grammar_sync.yml @elastic/kibana-visualizations
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
 /catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
