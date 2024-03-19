@@ -7,8 +7,11 @@ source .buildkite/scripts/steps/artifacts/env.sh
 
 .buildkite/scripts/bootstrap.sh
 
+echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
+trap 'docker logout docker.elastic.co' EXIT
+
 # temporary adding this to get screenshots
-is_test_execution_step
+# is_test_execution_step
 
 echo "--- Smoke Testing for FIPS"
 
