@@ -62,7 +62,7 @@ export const PermissionsError: React.FunctionComponent<{
             <p data-test-subj="missingPrivilegesPromptMessage">
               {requiredFleetRole ? (
                 <FormattedMessage
-                  id="xpack.fleet.permissionDeniedErrorMessage"
+                  id="xpack.fleet.pagePermissionDeniedErrorMessage"
                   defaultMessage="You are not authorized to access that page. It requires the {roleName} Kibana privilege for Fleet."
                   values={{
                     roleName: <EuiCode>{requiredFleetRole}</EuiCode>,
