@@ -6,60 +6,14 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import { ENVIRONMENT_ALL } from '@kbn/exploratory-view-plugin/public';
-import { SerializableRecord } from '@kbn/utility-types';
-import React, { useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
+import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
 import { useKibana } from '../../../../utils/kibana_react';
-import { TimeRange } from '../../types';
+import { TimeRange, Group } from '../../../../../common/custom_threshold_rule/types';
+import { generateSourceLink } from '../../../../../common/custom_threshold_rule/helpers/get_alert_source_links';
+import { APM_APP_LOCATOR_ID } from '../../../../../common/custom_threshold_rule/get_apm_app_url';
 
-const HOST_NAME = 'host.name';
-const CONTAINER_ID = 'container.id';
-const KUBERNETES_POD_ID = 'kubernetes.pod.id';
-const AWS_EC2_INSTANCE = 'cloud.instance.id';
-const AWS_S3_BUCKET = 'aws.s3.instance.id';
-const AWS_RDS_DATABASES = 'aws.rds.instance.id';
-const AWS_SQS_QUEUE = 'aws.sqs.instance.id';
-const SERVICE_NAME = 'service.name';
-const SERVICE_ENVIRONMENT = 'service.environment';
-const TRANSACTION_TYPE = 'transaction.type';
-const TRANSACTION_NAME = 'transaction.name';
-
-const METRICS_DETAILS_PATH = '/app/metrics/detail';
-
-const infraSources = [
-  HOST_NAME,
-  CONTAINER_ID,
-  KUBERNETES_POD_ID,
-  AWS_EC2_INSTANCE,
-  AWS_S3_BUCKET,
-  AWS_RDS_DATABASES,
-  AWS_SQS_QUEUE,
-];
-
-const apmSources = [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME];
-
-const APM_APP_LOCATOR_ID = 'APM_LOCATOR';
-
-const getApmLocatorParams = (params: SerializableRecord) => {
-  return {
-    serviceName: params.serviceName,
-    serviceOverviewTab: params.serviceOverviewTab,
-    query: {
-      environment: params.environment,
-      transactionType: params.transactionType,
-      transactionName: params.transactionName,
-      rangeFrom: params.rangeFrom,
-      rangeTo: params.rangeTo,
-    },
-  };
-};
-
-interface GroupItem {
-  field: string;
-  value: string;
-}
-
-export function Groups({ groups, timeRange }: { groups: GroupItem[]; timeRange: TimeRange }) {
+export function Groups({ groups, timeRange }: { groups: Group[]; timeRange: TimeRange }) {
   const {
     http: {
       basePath: { prepend },
@@ -69,100 +23,31 @@ export function Groups({ groups, timeRange }: { groups: GroupItem[]; timeRange: 
     },
   } = useKibana().services;
 
-  const apmLocator = useMemo(() => {
-    const baseLocator = locators.get(APM_APP_LOCATOR_ID);
-    if (!baseLocator) return;
+  const [sourceLinks, setSourceLinks] = useState<Record<string, string | undefined>>({});
 
-    return {
-      ...baseLocator,
-      getRedirectUrl: (params: SerializableRecord) =>
-        baseLocator.getRedirectUrl(getApmLocatorParams(params)),
-      navigate: (params: SerializableRecord) => baseLocator.navigate(getApmLocatorParams(params)),
-    };
-  }, [locators]);
+  const serviceName = groups.find((group) => group.field === SERVICE_NAME)?.value;
 
-  const infraSourceLinks: Record<string, string> = {
-    [HOST_NAME]: prepend(`${METRICS_DETAILS_PATH}/host`),
-    [CONTAINER_ID]: prepend(`${METRICS_DETAILS_PATH}/container`),
-    [KUBERNETES_POD_ID]: prepend(`${METRICS_DETAILS_PATH}/pod`),
-    [AWS_EC2_INSTANCE]: prepend(`${METRICS_DETAILS_PATH}/awsEC2`),
-    [AWS_S3_BUCKET]: prepend(`${METRICS_DETAILS_PATH}/awsS3`),
-    [AWS_RDS_DATABASES]: prepend(`${METRICS_DETAILS_PATH}/awsRDS`),
-    [AWS_SQS_QUEUE]: prepend(`${METRICS_DETAILS_PATH}/awsSQS`),
-  };
+  useEffect(() => {
+    if (!groups) return;
 
-  const hostTimeRange = `assetDetails=(dateRange:(from:'${timeRange.from}',to:'${timeRange.to}'))`;
-  const infraTimeRange = `_a=(time:(from:'${timeRange.from}',to:'${timeRange.to}',interval:>=1m))`;
+    let links: Record<string, string | undefined> = {};
 
-  const generateInfraSourceLink = ({ field, value }: GroupItem) => {
-    const link =
-      field === HOST_NAME
-        ? `${infraSourceLinks[field]}/${value}?${hostTimeRange}`
-        : `${infraSourceLinks[field]}/${value}?${infraTimeRange}`;
-
-    return (
-      <EuiLink
-        data-test-subj="o11yCustomThresholdAlertDetailsInfraSourceLink"
-        href={link}
-        target="_blank"
-      >
-        {value}
-      </EuiLink>
-    );
-  };
-
-  const generateApmSourceLink = ({ field, value }: GroupItem) => {
-    const serviceName = groups.find((group) => group.field === SERVICE_NAME)?.value;
-
-    let apmLocatorPayload: SerializableRecord = {
-      serviceName,
-      environment: ENVIRONMENT_ALL,
-      rangeFrom: timeRange.from,
-      rangeTo: timeRange.to,
-    };
-
-    if (field === TRANSACTION_NAME) {
-      apmLocatorPayload = {
-        ...apmLocatorPayload,
-        serviceOverviewTab: 'transactions',
-        transactionName: value,
+    groups.map((group) => {
+      const link = generateSourceLink(
+        group,
+        timeRange,
+        prepend,
+        serviceName,
+        locators.get(APM_APP_LOCATOR_ID)
+      );
+      links = {
+        ...links,
+        [group.field]: link,
       };
-    } else if (field === TRANSACTION_TYPE) {
-      apmLocatorPayload = {
-        ...apmLocatorPayload,
-        transactionType: value,
-      };
-    } else if (field === SERVICE_ENVIRONMENT) {
-      apmLocatorPayload = {
-        ...apmLocatorPayload,
-        environment: value,
-      };
-    }
+    });
 
-    return (
-      <EuiLink
-        data-test-subj="o11yCustomThresholdAlertDetailsApmSourceLink"
-        href={apmLocator?.getRedirectUrl(apmLocatorPayload)}
-        target="_blank"
-      >
-        {value}
-      </EuiLink>
-    );
-  };
-
-  const generateNoSourceLink = ({ value }: GroupItem) => {
-    return <strong>{value}</strong>;
-  };
-
-  const generateSourceLink = ({ field, value }: GroupItem) => {
-    if (infraSources.includes(field)) {
-      return generateInfraSourceLink({ field, value });
-    } else if (apmSources.includes(field)) {
-      return generateApmSourceLink({ field, value });
-    } else {
-      return generateNoSourceLink({ field, value });
-    }
-  };
+    setSourceLinks(links);
+  }, [groups, locators, prepend, serviceName, timeRange]);
 
   return (
     <>
@@ -170,7 +55,18 @@ export function Groups({ groups, timeRange }: { groups: GroupItem[]; timeRange: 
         groups.map((group) => {
           return (
             <span key={group.field}>
-              {group.field}: {generateSourceLink(group)}
+              {group.field}:{' '}
+              {sourceLinks[group.field] ? (
+                <EuiLink
+                  data-test-subj="o11yCustomThresholdAlertSourceLink"
+                  href={sourceLinks[group.field]}
+                  target="_blank"
+                >
+                  {group.value}
+                </EuiLink>
+              ) : (
+                <strong>{group.value}</strong>
+              )}
               <br />
             </span>
           );
