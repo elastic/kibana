@@ -112,7 +112,11 @@
     "@kbn/presentation-publishing",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/unified-data-table",
-    "@kbn/shared-ux-markdown"
+    "@kbn/shared-ux-markdown",
+    "@kbn/screenshotting-plugin",
+    "@kbn/reporting-common",
+    "@kbn/reporting-public",
+    "@kbn/reporting-export-types-pdf-common"
   ],
   "exclude": ["target/**/*"]
 }
