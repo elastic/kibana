@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import {
   ALERT_REASON,
-  ALERT_ACTION_GROUP,
   ALERT_EVALUATION_VALUES,
   ALERT_EVALUATION_THRESHOLD,
 } from '@kbn/rule-data-utils';
@@ -107,7 +106,7 @@ export const createInventoryMetricThresholdExecutor =
 
     const esClient = services.scopedClusterClient.asCurrentUser;
 
-    const { savedObjectsClient, alertFactory: baseAlertFactory, alertsClient } = services;
+    const { savedObjectsClient, alertsClient } = services;
 
     if (!alertsClient) {
       throw new AlertsClientError();
@@ -134,7 +133,6 @@ export const createInventoryMetricThresholdExecutor =
           id: UNGROUPED_FACTORY_KEY,
           payload: {
             [ALERT_REASON]: reason,
-            [ALERT_ACTION_GROUP]: actionGroup,
           },
           context: {
             alertDetailsUrl: await getAlertUrl(
@@ -196,7 +194,7 @@ export const createInventoryMetricThresholdExecutor =
     );
 
     let scheduledActionsCount = 0;
-    const alertLimit = baseAlertFactory.alertLimit.getValue();
+    const alertLimit = alertsClient.getAlertLimitValue();
     let hasReachedLimit = false;
     const inventoryItems = Object.keys(first(results)!);
     for (const group of inventoryItems) {
