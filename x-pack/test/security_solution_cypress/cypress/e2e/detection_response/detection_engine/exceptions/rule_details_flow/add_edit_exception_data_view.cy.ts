@@ -56,7 +56,7 @@ describe(
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'exceptions');
+      cy.task('esArchiverUnload', { archiveName: 'exceptions' });
     });
 
     beforeEach(() => {
@@ -74,7 +74,7 @@ describe(
     });
 
     afterEach(() => {
-      cy.task('esArchiverUnload', 'exceptions_2');
+      cy.task('esArchiverUnload', { archiveName: 'exceptions_2' });
     });
 
     it('Creates an exception item and close all matching alerts', () => {

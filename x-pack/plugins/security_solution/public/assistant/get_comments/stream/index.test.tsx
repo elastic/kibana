@@ -15,10 +15,10 @@ jest.mock('./use_stream');
 
 const content = 'Test Content';
 const testProps = {
-  amendMessage: jest.fn(),
+  refetchCurrentConversation: jest.fn(),
   content,
   index: 1,
-  isLastComment: true,
+  isControlsEnabled: true,
   connectorTypeTitle: 'OpenAI',
   regenerateMessage: jest.fn(),
   transformMessage: jest.fn(),

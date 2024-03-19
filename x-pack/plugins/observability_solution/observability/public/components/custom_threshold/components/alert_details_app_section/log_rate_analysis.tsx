@@ -202,6 +202,7 @@ export function LogRateAnalysis({
             barHighlightColorOverride={colorTransformer(Color.color1)}
             onAnalysisCompleted={onAnalysisCompleted}
             appDependencies={pick(services, [
+              'analytics',
               'application',
               'data',
               'executionContext',
