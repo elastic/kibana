@@ -73,11 +73,11 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
     >
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiTitle size="xs">
-          <p>
+          <h4>
             {i18n.translate('xpack.searchPlayground.chat.message.assistant.title', {
               defaultMessage: 'Summary',
             })}
-          </p>
+          </h4>
         </EuiTitle>
         {!!retrievalDocs?.length && (
           <>
