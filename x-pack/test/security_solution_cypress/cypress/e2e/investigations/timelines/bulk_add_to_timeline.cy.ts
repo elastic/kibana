@@ -9,6 +9,7 @@ import { getNewRule } from '../../../objects/rule';
 import { SELECTED_ALERTS } from '../../../screens/alerts';
 import { SERVER_SIDE_EVENT_COUNT } from '../../../screens/timeline';
 import { selectAllAlerts, selectFirstPageAlerts } from '../../../tasks/alerts';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { createRule } from '../../../tasks/api_calls/rules';
 import {
   bulkInvestigateSelectedEventsInTimeline,
@@ -33,6 +34,7 @@ describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () =
 
   context('Alerts', () => {
     beforeEach(() => {
+      deleteAlertsAndRules();
       createRule(getNewRule());
       login();
       visitWithTimeRange(ALERTS_URL);

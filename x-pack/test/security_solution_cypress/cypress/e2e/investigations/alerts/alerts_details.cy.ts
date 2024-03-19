@@ -70,10 +70,9 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
 
     beforeEach(() => {
       deleteAlertsAndRules();
-      createRule(getNewRule());
+      createRule({ ...getUnmappedRule(), investigation_fields: { field_names: ['event.kind'] } });
       login();
       disableExpandableFlyout();
-      createRule({ ...getUnmappedRule(), investigation_fields: { field_names: ['event.kind'] } });
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
@@ -189,6 +188,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
     const ARCHIVED_RULE_NAME = 'Endpoint Security';
 
     before(() => {
+      deleteAlertsAndRules();
       // It just imports an alert without a rule but rule details page should work anyway
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     });

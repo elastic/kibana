@@ -56,8 +56,8 @@ describe.skip('Detection response view', { tags: ['@ess', '@serverless'] }, () =
 
   beforeEach(() => {
     deleteAlertsAndRules();
-    login();
     createRule(getNewRule());
+    login();
     visit(DETECTION_AND_RESPONSE_URL);
   });
 

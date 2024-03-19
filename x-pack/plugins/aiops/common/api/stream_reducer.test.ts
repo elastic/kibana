@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { significantTerms } from '../__mocks__/artificial_logs/significant_terms';
-import { finalSignificantItemGroups } from '../__mocks__/artificial_logs/final_significant_item_groups';
+import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
+import { finalSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups';
 
 import {
   addSignificantItemsAction,

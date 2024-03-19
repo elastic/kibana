@@ -34,9 +34,6 @@ describe('timeline overview search', { tags: ['@ess', 'serverless'] }, () => {
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId) => favoriteTimeline({ timelineId, timelineType: 'default' }));
     createTimeline();
-  });
-
-  beforeEach(() => {
     login();
     visit(TIMELINES_URL);
     cy.get(TIMELINES_OVERVIEW_SEARCH).clear();
