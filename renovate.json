@@ -522,7 +522,7 @@
         "team:enterprise-search-frontend",
         "team:kibana-presentation",
         "team:kibana-data-discovery",
-        "team:platform-deployment-management",
+        "team:kibana-management",
         "team:kibana-gis",
         "team:security-solution"
       ],

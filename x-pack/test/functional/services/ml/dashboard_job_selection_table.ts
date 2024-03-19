@@ -18,6 +18,7 @@ export function MachineLearningDashboardJobSelectionTableProvider({
 }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   return {
     async assertJobSelectionTableExists(): Promise<void> {
@@ -67,6 +68,33 @@ export function MachineLearningDashboardJobSelectionTableProvider({
         await retry.tryForTime(5 * 1000, async () => {
           await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
           await this.assertRowCheckboxCheckedState(jobId, expectCheckedState);
+        });
+      }
+    },
+
+    async assertRowRadioButtonCheckedState(jobId: string, expectedCheckState: boolean) {
+      const actualCheckState = await this.getRowRadioButtonCheckedState(jobId);
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Table row for job '${jobId}' check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async getRowRadioButtonCheckedState(jobId: string): Promise<boolean> {
+      const radioButtonInput = await find.byCssSelector(
+        `[data-test-subj="${jobId}-radio-button"] > input#${jobId}`
+      );
+      const radioButtonChecked = await radioButtonInput.getAttribute('checked');
+      return radioButtonChecked === 'true';
+    },
+
+    async setRowRadioButtonState(jobId: string, expectCheckedState: boolean) {
+      const subj = this.rowSelector(jobId, `${jobId}-radio-button`);
+      const checkedState = await this.getRowRadioButtonCheckedState(jobId);
+      if (checkedState !== expectCheckedState) {
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
+          await this.assertRowRadioButtonCheckedState(jobId, expectCheckedState);
         });
       }
     },
