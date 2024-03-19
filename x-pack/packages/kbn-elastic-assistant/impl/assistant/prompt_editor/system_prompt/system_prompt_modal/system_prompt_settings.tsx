@@ -24,7 +24,7 @@ import { keyBy } from 'lodash/fp';
 import { css } from '@emotion/react';
 import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { AIConnector } from '../../../../connectorland/connector_selector';
-import { Conversation, Prompt } from '../../../../..';
+import { Conversation, Prompt, useAssistantContext } from '../../../../..';
 import * as i18n from './translations';
 import { ConversationMultiSelector } from './conversation_multi_selector/conversation_multi_selector';
 import { SystemPromptSelector } from './system_prompt_selector/system_prompt_selector';
@@ -60,11 +60,19 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
     setConversationsSettingsBulkActions,
     defaultConnector,
   }) => {
+    const { applicationService } = useAssistantContext();
+
     // Prompt
     const promptContent = useMemo(
       () => selectedSystemPrompt?.content ?? '',
       [selectedSystemPrompt?.content]
     );
+
+    let currentAppId: string | undefined;
+    applicationService?.currentAppId$.subscribe((appId) => {
+      // setCurrentAppId(appId);
+      currentAppId = appId;
+    });
 
     const handlePromptContentChange = useCallback(
       (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -252,6 +260,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
               id: systemPrompt ?? '',
               content: '',
               name: systemPrompt ?? '',
+              consumer: currentAppId ?? '',
               promptType: 'system',
             }
           : systemPrompt;
@@ -270,7 +279,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
 
         onSelectedSystemPromptChange(newSelectedSystemPrompt);
       },
-      [onSelectedSystemPromptChange, setUpdatedSystemPromptSettings]
+      [currentAppId, onSelectedSystemPromptChange, setUpdatedSystemPromptSettings]
     );
 
     const onSystemPromptDeleted = useCallback(

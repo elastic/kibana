@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
+import { useAssistantContext } from '../../../assistant_context';
 import * as i18n from './translations';
 import { QuickPrompt } from '../types';
 
@@ -42,16 +43,25 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
     onQuickPromptSelectionChange,
     selectedQuickPrompt,
   }) => {
+    const { applicationService } = useAssistantContext();
+
+    let currentAppId: string | undefined;
+    applicationService?.currentAppId$.subscribe((appId) => {
+      // setCurrentAppId(appId);
+      currentAppId = appId;
+    });
     // Form options
     const [options, setOptions] = useState<QuickPromptSelectorOption[]>(
-      quickPrompts.map((qp) => ({
-        value: {
-          isDefault: qp.isDefault ?? false,
-        },
-        label: qp.title,
-        'data-test-subj': qp.title,
-        color: qp.color,
-      }))
+      quickPrompts
+        .filter((p) => p.consumer === '')
+        .map((qp) => ({
+          value: {
+            isDefault: qp.isDefault ?? false,
+          },
+          label: qp.title,
+          'data-test-subj': qp.title,
+          color: qp.color,
+        }))
     );
     const selectedOptions = useMemo<QuickPromptSelectorOption[]>(() => {
       return selectedQuickPrompt

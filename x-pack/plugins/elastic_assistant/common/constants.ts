@@ -7,6 +7,7 @@
 
 export const PLUGIN_ID = 'elasticAssistant';
 export const PLUGIN_NAME = 'elasticAssistant';
+export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 
 export const BASE_PATH = '/internal/elastic_assistant';
 
@@ -29,3 +30,5 @@ export const PROMPTS_TABLE_MAX_PAGE_SIZE = 100;
 
 // Capabilities
 export const CAPABILITIES = `${BASE_PATH}/capabilities`;
+
+export const LOCAL_STORAGE_KEY = `elasticAssistant`;

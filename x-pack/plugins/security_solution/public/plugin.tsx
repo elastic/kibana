@@ -65,6 +65,7 @@ import { PluginContract } from './plugin_contract';
 import { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
+import { getBaseConversations } from './assistant/tools';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -364,6 +365,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     // Not using await to prevent blocking start execution
     this.registerAppLinks(core, plugins);
+
+    plugins.elasticAssistant.registerDefaultConversations(APP_UI_ID, getBaseConversations());
 
     return this.contract.getStartContract();
   }

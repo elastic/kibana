@@ -33,6 +33,7 @@
       "share",
       "usageCollection",
       "spaces",
+      //"elasticAssistant",
       "triggersActionsUi",
       "savedObjectsTaggingOss",
       "lens",

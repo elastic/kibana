@@ -35,8 +35,19 @@ interface QuickPromptsProps {
  */
 export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
   ({ setInput, setIsSettingsModalVisible, trackPrompt }) => {
-    const { allQuickPrompts, knowledgeBase, promptContexts, setSelectedSettingsTab } =
-      useAssistantContext();
+    const {
+      allQuickPrompts,
+      knowledgeBase,
+      promptContexts,
+      setSelectedSettingsTab,
+      applicationService,
+    } = useAssistantContext();
+
+    let currentAppId: string | undefined;
+    applicationService?.currentAppId$.subscribe((appId) => {
+      // setCurrentAppId(appId);
+      currentAppId = appId;
+    });
 
     const contextFilteredQuickPrompts = useMemo(() => {
       const registeredPromptContextTitles = Object.values(promptContexts).map((pc) => pc.category);
@@ -45,6 +56,9 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
         registeredPromptContextTitles.push(KNOWLEDGE_BASE_CATEGORY);
       }
       return allQuickPrompts.filter((quickPrompt) => {
+        if (quickPrompt.consumer !== currentAppId) {
+          return false;
+        }
         // Return quick prompt as match if it has no categories, otherwise ensure category exists in registered prompt contexts
         if (quickPrompt.categories == null || quickPrompt.categories.length === 0) {
           return true;
@@ -54,7 +68,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
           });
         }
       });
-    }, [allQuickPrompts, knowledgeBase.isEnabledKnowledgeBase, promptContexts]);
+    }, [allQuickPrompts, currentAppId, knowledgeBase.isEnabledKnowledgeBase, promptContexts]);
 
     // Overflow state
     const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);

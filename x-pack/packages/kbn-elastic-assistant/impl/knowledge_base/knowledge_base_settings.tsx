@@ -47,7 +47,7 @@ interface Props {
  */
 export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
   ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }) => {
-    const { http } = useAssistantContext();
+    const { http, applicationService } = useAssistantContext();
     const {
       data: kbStatus,
       isLoading,
@@ -55,6 +55,12 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
     const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http });
     const { mutate: deleteKB, isLoading: isDeletingUpKB } = useDeleteKnowledgeBase({ http });
+
+    let currentAppId: string | undefined;
+    applicationService?.currentAppId$.subscribe((appId) => {
+      // setCurrentAppId(appId);
+      currentAppId = appId;
+    });
 
     // Resource enabled state
     const isElserEnabled = kbStatus?.elser_exists ?? false;
@@ -302,11 +308,12 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
         </EuiFlexGroup>
 
         <EuiSpacer size="s" />
-
-        <AlertsSettings
-          knowledgeBase={knowledgeBase}
-          setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
-        />
+        {currentAppId === 'securitySolutionUI' ? (
+          <AlertsSettings
+            knowledgeBase={knowledgeBase}
+            setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
+          />
+        ) : null}
       </>
     );
   }

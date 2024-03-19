@@ -22,6 +22,7 @@ import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/publ
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
+import type { ElasticAssistantPublicPluginStart } from '@kbn/elastic-assistant-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
@@ -174,6 +175,7 @@ export interface DiscoverSetupPlugins {
  * @internal
  */
 export interface DiscoverStartPlugins {
+  elasticAssistant?: ElasticAssistantPublicPluginStart;
   dataViews: DataViewsServicePublic;
   dataViewEditor: DataViewEditorStart;
   uiActions: UiActionsStart;
@@ -428,6 +430,27 @@ export class DiscoverPlugin
         })
       );
     }
+
+    plugins.elasticAssistant?.registerDefaultConversations('discover', {
+      ['Discover summary']: {
+        id: '',
+        title: 'Discover summary',
+        category: 'assistant',
+        consumer: 'discover',
+        isDefault: true,
+        messages: [],
+        replacements: [],
+      },
+      ['Welcome']: {
+        id: '',
+        title: 'Welcome',
+        category: 'assistant',
+        consumer: 'discover',
+        isDefault: true,
+        messages: [],
+        replacements: [],
+      },
+    });
 
     return {
       locator: this.locator,

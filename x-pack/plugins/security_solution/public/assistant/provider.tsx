@@ -47,12 +47,15 @@ const LOCAL_CONVERSATIONS_MIGRATION_STATUS_TOAST_TITLE = i18n.translate(
  */
 export const AssistantProvider: React.FC = ({ children }) => {
   const {
-    http,
-    notifications,
-    storage,
-    triggersActionsUi: { actionTypeRegistry },
-    docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-  } = useKibana().services;
+    services: {
+      application,
+      http,
+      notifications,
+      storage,
+      triggersActionsUi: { actionTypeRegistry },
+      docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
+    },
+  } = useKibana();
   const basePath = useBasePath();
 
   const baseConversations = useBaseConversations();
@@ -153,6 +156,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
       setDefaultAllowReplacement={setDefaultAllowReplacement} // remove
       title={ASSISTANT_TITLE}
       toasts={toasts}
+      applicationService={application}
     >
       {children}
     </ElasticAssistantProvider>

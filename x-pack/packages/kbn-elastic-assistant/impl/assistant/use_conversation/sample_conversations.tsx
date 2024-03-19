@@ -13,6 +13,7 @@ export const WELCOME_CONVERSATION: Conversation = {
   id: '',
   title: WELCOME_CONVERSATION_TITLE,
   category: 'assistant',
+  consumer: 'security',
   messages: [
     {
       role: 'assistant',

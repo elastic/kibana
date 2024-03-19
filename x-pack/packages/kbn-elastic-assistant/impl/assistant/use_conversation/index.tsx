@@ -25,6 +25,7 @@ export const DEFAULT_CONVERSATION_STATE: Conversation = {
   messages: [],
   replacements: [],
   category: 'assistant',
+  consumer: 'security',
   title: i18n.DEFAULT_CONVERSATION_TITLE,
 };
 
@@ -154,6 +155,7 @@ export const useConversation = (): UseConversation => {
           conversation: {
             apiConfig,
             category: 'assistant',
+            consumer: 'security',
             title: conversation.title,
             replacements: conversation.replacements,
             excludeFromLastConversationStorage: conversation.excludeFromLastConversationStorage,

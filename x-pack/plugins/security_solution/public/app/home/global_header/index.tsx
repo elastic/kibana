@@ -26,7 +26,6 @@ import { timelineSelectors } from '../../../timelines/store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getScopeFromPath, showSourcererByPath } from '../../../common/containers/sourcerer';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
-import { AssistantHeaderLink } from '../../../assistant/header_link';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
@@ -94,7 +93,6 @@ export const GlobalHeader = React.memo(() => {
             {showSourcerer && !showTimeline && (
               <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
             )}
-            <AssistantHeaderLink />
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
       </EuiHeaderSection>

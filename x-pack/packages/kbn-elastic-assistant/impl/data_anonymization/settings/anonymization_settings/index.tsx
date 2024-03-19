@@ -14,6 +14,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import { euiThemeVars } from '@kbn/ui-theme';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
@@ -26,7 +27,7 @@ import { AnonymizedStat } from '../../../data_anonymization_editor/stats/anonymi
 import * as i18n from './translations';
 
 const StatFlexItem = styled(EuiFlexItem)`
-  margin-right: ${({ theme }) => theme.eui.euiSizeL};
+  margin-right: ${() => euiThemeVars.euiSizeL};
 `;
 
 export interface Props {

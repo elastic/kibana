@@ -89,6 +89,7 @@ export const useAssistantOverlay = (
     registerPromptContext,
     showAssistantOverlay: assistantContextShowOverlay,
     unRegisterPromptContext,
+    applicationService,
   } = useAssistantContext();
 
   // proxy show / hide calls to assistant context, using our internal prompt context id:
@@ -104,6 +105,11 @@ export const useAssistantOverlay = (
     },
     [assistantContextShowOverlay, conversationTitle, promptContextId]
   );
+  let currentAppId: string | undefined;
+  applicationService?.currentAppId$.subscribe((appId) => {
+    // setCurrentAppId(appId);
+    currentAppId = appId;
+  });
 
   useEffect(() => {
     unRegisterPromptContext(promptContextId); // a noop if the current prompt context id is not registered
@@ -113,6 +119,7 @@ export const useAssistantOverlay = (
       description: _description,
       getPromptContext: _getPromptContext,
       id: promptContextId,
+      consumer: currentAppId ?? '',
       suggestedUserPrompt: _suggestedUserPrompt,
       tooltip: _tooltip,
     };
@@ -126,6 +133,7 @@ export const useAssistantOverlay = (
     _getPromptContext,
     _suggestedUserPrompt,
     _tooltip,
+    currentAppId,
     promptContextId,
     registerPromptContext,
     unRegisterPromptContext,

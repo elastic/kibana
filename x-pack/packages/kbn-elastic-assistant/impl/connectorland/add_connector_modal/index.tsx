@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { ActionType } from '@kbn/actions-plugin/common';
-import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import {
   ActionConnector,
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import { ActionTypeSelectorModal } from '../connector_selector_inline/action_type_selector_modal';
 interface Props {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -38,12 +38,14 @@ export const AddConnectorModal: React.FC<Props> = React.memo(
         onSelect={onSelectActionType}
       />
     ) : (
-      <ConnectorAddModal
-        actionType={selectedActionType}
-        actionTypeRegistry={actionTypeRegistry}
-        onClose={onClose}
-        postSaveEventHandler={onSaveConnector}
-      />
+      <Suspense fallback={'Loading..'}>
+        <ConnectorAddModal
+          actionType={selectedActionType}
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          postSaveEventHandler={onSaveConnector}
+        />
+      </Suspense>
     )
 );
 

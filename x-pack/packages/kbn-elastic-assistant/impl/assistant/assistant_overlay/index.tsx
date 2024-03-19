@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiModal } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import useEvent from 'react-use/lib/useEvent';
 // eslint-disable-next-line @kbn/eslint/module_migration
@@ -18,7 +19,7 @@ import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 const StyledEuiModal = styled(EuiModal)`
-  ${({ theme }) => `margin-top: ${theme.eui.euiSizeXXL};`}
+  ${() => `margin-top: ${euiThemeVars.euiSizeXXL};`}
   min-width: 95vw;
   min-height: 25vh;
 `;

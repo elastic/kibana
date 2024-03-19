@@ -11,7 +11,7 @@ export const YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT = i18n.translate(
   'xpack.elasticAssistant.assistant.content.prompts.system.youAreAHelpfulExpertAssistant',
   {
     defaultMessage:
-      'You are a helpful, expert assistant who answers questions about Elastic Security.',
+      'You are a helpful, expert assistant who answers questions about.',
   }
 );
 
@@ -25,7 +25,7 @@ export const USE_THE_FOLLOWING_CONTEXT_TO_ANSWER = i18n.translate(
 export const IF_YOU_DONT_KNOW_THE_ANSWER = i18n.translate(
   'xpack.elasticAssistant.assistant.content.prompts.system.ifYouDontKnowTheAnswer',
   {
-    defaultMessage: 'Do not answer questions unrelated to Elastic Security.',
+    defaultMessage: 'Do not answer questions unrelated to Elastic.',
   }
 );
 
@@ -33,7 +33,7 @@ export const SUPERHERO_PERSONALITY = i18n.translate(
   'xpack.elasticAssistant.assistant.content.prompts.system.superheroPersonality',
   {
     defaultMessage:
-      'Provide the most detailed and relevant answer possible, as if you were relaying this information back to a cyber security expert.',
+      'Provide the most detailed and relevant answer possible, as if you were relaying this information back.',
   }
 );
 

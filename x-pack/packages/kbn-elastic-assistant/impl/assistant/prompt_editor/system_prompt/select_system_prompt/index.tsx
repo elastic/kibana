@@ -62,9 +62,14 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   setIsSettingsModalVisible,
   showTitles = false,
 }) => {
-  const { setSelectedSettingsTab } = useAssistantContext();
+  const { setSelectedSettingsTab, applicationService } = useAssistantContext();
   const { setApiConfig } = useConversation();
 
+  let currentAppId: string | undefined;
+  applicationService?.currentAppId$.subscribe((appId) => {
+    // setCurrentAppId(appId);
+    currentAppId = appId;
+  });
   const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);
   const handleOnBlur = useCallback(() => setIsOpenLocal(false), []);
 
@@ -106,8 +111,12 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
 
   // SuperSelect State/Actions
   const options = useMemo(
-    () => getOptions({ prompts: allSystemPrompts, showTitles }),
-    [allSystemPrompts, showTitles]
+    () =>
+      getOptions({
+        prompts: allSystemPrompts.filter((o) => o.consumer === currentAppId),
+        showTitles,
+      }),
+    [allSystemPrompts, currentAppId, showTitles]
   );
 
   const onChange = useCallback(

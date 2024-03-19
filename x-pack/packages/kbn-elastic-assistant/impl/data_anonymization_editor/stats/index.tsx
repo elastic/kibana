@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { AllowedStat } from './allowed_stat';
 import { AnonymizedStat } from './anonymized_stat';
@@ -17,7 +18,7 @@ import { getStats } from '../get_stats';
 import { AvailableStat } from './available_stat';
 
 const StatFlexItem = styled(EuiFlexItem)`
-  margin-right: ${({ theme }) => theme.eui.euiSizeL};
+  margin-right: ${() => euiThemeVars.euiSizeL};
 `;
 
 interface Props {

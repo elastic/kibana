@@ -36,6 +36,7 @@ export interface PromptContext {
    * `category` helps the Elastic AI Assistant display the most relevant user prompts
    */
   category: PromptContextCategory;
+  consumer: string;
 
   /**
    * The Elastic AI Assistant will display this **short**, static description

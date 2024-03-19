@@ -18,7 +18,7 @@ import {
 import { css } from '@emotion/react';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AIConnector } from '../../connectorland/connector_selector';
-import { Conversation } from '../../..';
+import { Conversation, useAssistantContext } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConversationSelector } from '../conversations/conversation_selector';
 import { AssistantSettingsButton } from '../settings/assistant_settings_button';
@@ -65,6 +65,14 @@ export const AssistantHeader: React.FC<Props> = ({
   conversations,
   refetchConversationsState,
 }) => {
+  const { applicationService } = useAssistantContext();
+
+  // const [currentAppId, setCurrentAppId] = useState<string | undefined>();
+  let currentAppId: string | undefined;
+  applicationService?.currentAppId$.subscribe((appId) => {
+    // setCurrentAppId(appId);
+    currentAppId = appId;
+  });
   const showAnonymizedValuesChecked = useMemo(
     () =>
       currentConversation.replacements != null &&
@@ -97,7 +105,7 @@ export const AssistantHeader: React.FC<Props> = ({
             docLinks={docLinks}
             selectedConversation={currentConversation}
             onChange={onConversationChange}
-            title={title}
+            title={`${title} ${currentAppId}`}
           />
         </EuiFlexItem>
 

@@ -44,7 +44,13 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
     selectedQuickPrompt,
     setUpdatedQuickPromptSettings,
   }) => {
-    const { basePromptContexts } = useAssistantContext();
+    const { basePromptContexts, applicationService } = useAssistantContext();
+
+    let currentAppId: string | undefined;
+    applicationService?.currentAppId$.subscribe((appId) => {
+      // setCurrentAppId(appId);
+      currentAppId = appId;
+    });
 
     // Prompt
     const prompt = useMemo(() => selectedQuickPrompt?.prompt ?? '', [selectedQuickPrompt?.prompt]);
@@ -146,6 +152,7 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
               title: quickPrompt ?? '',
               prompt: '',
               color: DEFAULT_COLOR,
+              consumer: currentAppId ?? '',
               categories: [],
             }
           : quickPrompt;
@@ -164,7 +171,7 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
 
         onSelectedQuickPromptChange(newSelectedQuickPrompt);
       },
-      [onSelectedQuickPromptChange, setUpdatedQuickPromptSettings]
+      [currentAppId, onSelectedQuickPromptChange, setUpdatedQuickPromptSettings]
     );
 
     const onQuickPromptDeleted = useCallback(
