@@ -30,3 +30,5 @@ export const SERVER_SIDE_EVENT_COUNT =
 
 export const EVENT_VIEWER_CHECKBOX =
   '[data-test-subj="dataGridHeaderCell-checkbox-control-column"]';
+
+export const SELECT_ALL_EVENTS_CHECKBOX = '[data-test-subj="select-all-events"]';
