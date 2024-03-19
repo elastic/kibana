@@ -50,6 +50,7 @@ export const ShareMenu = () => {
             layoutOption="canvas"
             onClose={onClose}
             objectId={workpad.id}
+            objectType="canvas"
           />
         )
       : null;

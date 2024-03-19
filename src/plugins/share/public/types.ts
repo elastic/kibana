@@ -84,7 +84,7 @@ export interface ShareMenuItem {
  * */
 export interface ShareMenuProvider {
   readonly id: string;
-
+  kibanaVersion: string;
   getShareMenuItems: (context: ShareContext) => ShareMenuItem[];
 }
 

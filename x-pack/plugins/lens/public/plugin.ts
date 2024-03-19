@@ -10,7 +10,7 @@ import type {
   CoreSetup,
   CoreStart,
   HttpStart,
-  ToastsSetup,
+  IToasts,
 } from '@kbn/core/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -161,7 +161,7 @@ export interface LensPluginSetupDependencies {
   uiActionsEnhanced: AdvancedUiActionsSetup;
   share?: SharePluginSetup;
   contentManagement: ContentManagementPublicSetup;
-  toasts: ToastsSetup;
+  toasts: IToasts;
 }
 
 export interface LensPluginStartDependencies {
@@ -400,11 +400,10 @@ export class LensPlugin {
 
     if (share) {
       this.locator = share.url.locators.create(new LensAppLocatorDefinition());
-      // WIP get the kibana version
       const reportingApiClient = new ReportingAPIClient(
         core.http,
         core.uiSettings,
-        core.http.toString()
+        share.kibanaVersion
       );
       share.register(
         downloadCsvShareProvider({

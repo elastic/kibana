@@ -32,7 +32,7 @@ import { BaseParams } from '@kbn/reporting-common/types';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { ReportingAPIClient } from '../..';
 import { JobParamsProviderOptions } from '.';
-import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './reporting_panel_content/components';
+import { ErrorUrlTooLongPanel } from './reporting_panel_content/components';
 import { getMaxUrlLength } from './reporting_panel_content/constants';
 
 export interface ReportingModalProps {
@@ -275,23 +275,33 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     }
     return (
       <>
-        {isUnsaved && <ErrorUnsavedWorkPanel />}
-        <EuiCopy textToCopy={absoluteUrl} anchorClassName="eui-displayBlock">
-          {(copy) => (
-            <EuiButtonEmpty
-              iconType="copy"
-              disabled={isUnsaved}
-              flush="both"
-              onClick={copy}
-              data-test-subj="shareReportingCopyURL"
-            >
+        {isUnsaved && (
+          <EuiToolTip
+            content={
               <FormattedMessage
-                id="xpack.reporting.modalContent.copyUrlButtonLabel"
-                defaultMessage="Post URL  "
+                id="share.modalContent.unsavedStateErrorText"
+                defaultMessage="Save your work before copying this URL."
               />
-            </EuiButtonEmpty>
-          )}
-        </EuiCopy>
+            }
+          >
+            <EuiCopy textToCopy={absoluteUrl}>
+              {(copy) => (
+                <EuiButtonEmpty
+                  iconType="copy"
+                  disabled={isUnsaved}
+                  flush="both"
+                  onClick={copy}
+                  data-test-subj="shareReportingCopyURL"
+                >
+                  <FormattedMessage
+                    id="share.modalContent.copyUrlButtonLabel"
+                    defaultMessage="Post URL"
+                  />
+                </EuiButtonEmpty>
+              )}
+            </EuiCopy>
+          </EuiToolTip>
+        )}
         <EuiToolTip
           content={
             isSaved ? (

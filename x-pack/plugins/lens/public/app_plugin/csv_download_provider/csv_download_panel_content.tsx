@@ -17,7 +17,7 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
+import type { IToasts, IUiSettingsClient, ThemeServiceSetup } from '@kbn/core/public';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import url from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -26,11 +26,10 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import { BaseParams } from '@kbn/reporting-common/types';
 import { ReportingAPIClient } from '@kbn/reporting-public';
-import {
-  ErrorUnsavedWorkPanel,
-  ErrorUrlTooLongPanel,
-} from '@kbn/reporting-public/share/share_context_menu/reporting_panel_content/components';
+import { ErrorUrlTooLongPanel } from '@kbn/reporting-public/share/share_context_menu/reporting_panel_content/components';
 import { JobAppParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
 
 interface ReportingSharingData {
   title: string;
@@ -48,7 +47,7 @@ interface JobParamsProviderOptions {
 }
 export interface ReportingModalProps {
   apiClient: ReportingAPIClient;
-  toasts: ToastsSetup;
+  toasts: IToasts;
   uiSettings: IUiSettingsClient;
   reportType?: string;
   requiresSavedState: boolean; // Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
@@ -58,7 +57,7 @@ export interface ReportingModalProps {
   onClick: () => void;
   theme: ThemeServiceSetup;
   jobProviderOptions?: JobParamsProviderOptions;
-  getJobParams?: JobAppParamsPDFV2;
+  getJobParams?: JobAppParamsPDFV2 | JobParamsCSV | JobParamsPNGV2;
   objectType: string;
   isDisabled: boolean;
   warnings: string[];
@@ -68,20 +67,11 @@ type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
 
 export type Props = ReportingModalProps & { intl: InjectedIntl };
 
-type AllowedImageExportType = 'pngV2' | 'printablePdfV2' | 'printablePdf' | 'csv';
+type AllowedImageExportType = 'pngV2' | 'printablePdfV2' | 'csv';
 
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
-  const {
-    apiClient,
-    intl,
-    toasts,
-    theme,
-    onClose,
-    objectId,
-    jobProviderOptions,
-    objectType,
-    isDisabled,
-  } = props;
+  const { apiClient, intl, toasts, theme, onClose, objectId, jobProviderOptions, objectType } =
+    props;
   const isSaved = Boolean(objectId);
   const [isStale, setIsStale] = useState(false);
   const [createReportingJob, setCreatingReportJob] = useState(false);
@@ -120,23 +110,8 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         // single locator for PNG V2
         return { ...baseParams, locatorParams };
       }
-
-      // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
-      // Replace hashes with original RISON values.
-      const relativeUrl = opts?.shareableUrl.replace(
-        window.location.origin + apiClient.getServerBasePath(),
-        ''
-      );
-
-      if (type === 'printablePdf') {
-        // multi URL for PDF
-        return { ...baseParams, relativeUrls: [relativeUrl] };
-      }
-
-      // single URL for PNG
-      return { ...baseParams, relativeUrl };
     },
-    [apiClient, props.getJobParams, objectType]
+    [props.getJobParams, objectType]
   );
 
   const getJobParams = useCallback(
@@ -171,7 +146,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
 
   const generateReportingJob = () => {
     const decoratedJobParams = apiClient.getDecoratedJobParams(
-      getJobParams(false) as unknown as AppParams
+      getJobParams() as unknown as AppParams
     );
     setCreatingReportJob(true);
     return apiClient
@@ -238,7 +213,33 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       if (exceedsMaxLength) {
         return <ErrorUrlTooLongPanel isUnsaved />;
       }
-      return <ErrorUnsavedWorkPanel />;
+      return (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="share.modalContent.unsavedStateErrorText"
+              defaultMessage="Save your work before copying this URL."
+            />
+          }
+        >
+          <EuiCopy textToCopy={absoluteUrl}>
+            {(copy) => (
+              <EuiButtonEmpty
+                iconType="copy"
+                disabled={isUnsaved}
+                flush="both"
+                onClick={copy}
+                data-test-subj="shareReportingCopyURL"
+              >
+                <FormattedMessage
+                  id="share.modalContent.copyUrlButtonLabel"
+                  defaultMessage="Post URL"
+                />
+              </EuiButtonEmpty>
+            )}
+          </EuiCopy>
+        </EuiToolTip>
+      );
     } else if (exceedsMaxLength) {
       return <ErrorUrlTooLongPanel isUnsaved={false} />;
     }
@@ -300,38 +301,22 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     <>
       <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
         <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
-          {objectType === 'lens' && !isDisabled ? (
-            <EuiRadioGroup
-              options={[
-                { id: 'printablePdfV2', label: 'PDF' },
-                { id: 'pngV2', label: 'PNG', 'data-test-subj': 'pngReportOption' },
-                { id: 'csv', label: 'CSV', 'data-test-subj': 'csvReportOption' },
-              ]}
-              onChange={(id) => {
-                setSelectedRadio(id as Exclude<AllowedImageExportType, 'printablePdf'>);
-              }}
-              name="image reporting radio group"
-              idSelected={selectedRadio}
-              legend={{
-                children: <span>File type</span>,
-              }}
-            />
-          ) : (
-            <EuiRadioGroup
-              options={[
-                { id: 'printablePdfV2', label: 'PDF' },
-                { id: 'pngV2', label: 'PNG', 'data-test-subj': 'pngReportOption' },
-              ]}
-              onChange={(id) => {
-                setSelectedRadio(id as Exclude<AllowedImageExportType, 'printablePdf'>);
-              }}
-              name="image reporting radio group"
-              idSelected={selectedRadio}
-              legend={{
-                children: <span>File type</span>,
-              }}
-            />
-          )}
+          <EuiRadioGroup
+            options={[
+              { id: 'printablePdfV2', label: 'PDF' },
+              { id: 'pngV2', label: 'PNG', 'data-test-subj': 'pngReportOption' },
+              { id: 'csv_searchsource', label: 'CSV', 'data-test-subj': 'csvReportOption' },
+            ]}
+            onChange={(id) => {
+              setSelectedRadio(id as Exclude<AllowedImageExportType, 'printablePdf'>);
+              getJobParams();
+            }}
+            name="image reporting radio group"
+            idSelected={selectedRadio}
+            legend={{
+              children: <span>File type</span>,
+            }}
+          />
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}

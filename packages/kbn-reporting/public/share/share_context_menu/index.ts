@@ -24,6 +24,7 @@ export interface ExportPanelShareOpts {
   license: ILicense;
   application: ApplicationStart;
   theme: ThemeServiceSetup;
+  version: string;
 }
 
 export type ExportModalShareOpts = ExportPanelShareOpts;

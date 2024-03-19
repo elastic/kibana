@@ -24,6 +24,7 @@ export const reportingScreenshotShareProvider = ({
   application,
   usesUiCapabilities,
   theme,
+  version,
 }: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
@@ -55,7 +56,8 @@ export const reportingScreenshotShareProvider = ({
     if (!licenseHasScreenshotReporting) {
       return [];
     }
-    const isSupportedType = ['dashboard', 'visualization', 'lens'].includes(objectType);
+    // for lens png pdf and csv are combined into one modal
+    const isSupportedType = ['dashboard', 'visualization'].includes(objectType);
 
     if (!isSupportedType) {
       return [];
@@ -123,6 +125,7 @@ export const reportingScreenshotShareProvider = ({
 
   return {
     id: 'screenCaptureReports',
+    kibanaVersion: version,
     getShareMenuItems,
   };
 };
