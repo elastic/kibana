@@ -7,10 +7,9 @@
 
 export { getLogRateAnalysisType } from './get_log_rate_analysis_type';
 export { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from './log_rate_analysis_type';
-export { type LogRateHistogramItem } from './log_rate_histogram_item';
-export { type DocumentCountStatsChangePoint } from './types';
-export {
-  getSnappedWindowParameters,
-  getWindowParameters,
-  type WindowParameters,
-} from './window_parameters';
+export type { LogRateHistogramItem } from './log_rate_histogram_item';
+export type { DocumentCountStatsChangePoint } from './types';
+export type { WindowParameters } from './log_rate_analysis/window_parameters';
+export { getSnappedWindowParameters } from './log_rate_analysis/get_snapped_window_parameters';
+export { getWindowParameters } from './log_rate_analysis/get_window_parameters';
+export { getWindowParametersForTrigger } from './log_rate_analysis/get_window_parameters_for_trigger';

@@ -26,7 +26,7 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   getLogRateAnalysisType,
   getSnappedWindowParameters,
-  getWindowParameters,
+  getWindowParametersForTrigger,
   type DocumentCountStatsChangePoint,
   type LogRateAnalysisType,
   type LogRateHistogramItem,
@@ -40,37 +40,6 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DualBrush, DualBrushAnnotation } from '../..';
 
 import { BrushBadge } from './brush_badge';
-
-function getWindowParametersForTrigger(
-  startRange: number | WindowParameters,
-  interval: number,
-  timeRangeEarliest: number,
-  timeRangeLatest: number,
-  changePoint?: DocumentCountStatsChangePoint
-) {
-  if (
-    typeof startRange === 'number' &&
-    changePoint &&
-    startRange >= changePoint.lower &&
-    startRange <= changePoint.upper
-  ) {
-    return getWindowParameters(
-      changePoint.lower + interval,
-      timeRangeEarliest,
-      timeRangeLatest + interval,
-      changePoint.upper,
-      interval
-    );
-  } else if (typeof startRange === 'number') {
-    return getWindowParameters(
-      startRange + interval / 2,
-      timeRangeEarliest,
-      timeRangeLatest + interval
-    );
-  }
-
-  return startRange;
-}
 
 declare global {
   interface Window {
