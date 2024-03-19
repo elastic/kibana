@@ -173,19 +173,6 @@ const LinksEditor = ({
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={LinksStrings.editor.panelEditor.getTechnicalPreviewTooltip()}>
-              {/* The EuiBadge needs an empty title to prevent the default tooltip */}
-              <EuiBadge
-                color="hollow"
-                tabIndex={0}
-                title=""
-                aria-label={LinksStrings.editor.panelEditor.getTechnicalPreviewTooltip()}
-              >
-                {LinksStrings.editor.panelEditor.getTechnicalPreviewLabel()}
-              </EuiBadge>
-            </EuiToolTip>
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
