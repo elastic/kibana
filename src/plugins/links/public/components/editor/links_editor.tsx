@@ -10,7 +10,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useMountedState from 'react-use/lib/useMountedState';
 
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -28,7 +27,6 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
