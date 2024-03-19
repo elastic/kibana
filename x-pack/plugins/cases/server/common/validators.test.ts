@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createUserActionServiceMock } from '../../server/services/mocks';
-import { MAX_ASSIGNEES_PER_CASE, MAX_USER_ACTIONS_PER_CASE } from '../constants';
+import { MAX_ASSIGNEES_PER_CASE, MAX_USER_ACTIONS_PER_CASE } from '../../common/constants';
+import { createUserActionServiceMock } from '../services/mocks';
 import { areTotalAssigneesInvalid, validateMaxUserActions } from './validators';
 
 describe('validators', () => {
