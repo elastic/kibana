@@ -232,6 +232,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.base_url (string)',
         'xpack.cloud.cname (string)',
         'xpack.cloud.deployment_url (string)',
+        'xpack.cloud.deployments_url (string)',
         'xpack.cloud.is_elastic_staff_owned (boolean)',
         'xpack.cloud.trial_end_date (string)',
         'xpack.cloud_integrations.chat.chatURL (string)',
