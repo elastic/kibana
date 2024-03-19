@@ -13,7 +13,7 @@ import {
 } from '../../../tasks/timelines';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
+import { deleteAllTimelines } from '../../../tasks/api_calls/timelines';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
@@ -25,7 +25,7 @@ import { closeToast } from '../../../tasks/common/toast';
 describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
-    deleteTimelines();
+    deleteAllTimelines();
     cy.intercept({
       method: 'POST',
       path: '/api/timeline/_export?file_name=timelines_export.ndjson',

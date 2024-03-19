@@ -16,7 +16,7 @@ import {
   TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP,
   TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON,
 } from '../../../screens/timeline';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
+import { deleteAllTimelines } from '../../../tasks/api_calls/timelines';
 import { waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 
@@ -29,7 +29,7 @@ import { hostsUrl } from '../../../urls/navigation';
 
 describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
-    deleteTimelines();
+    deleteAllTimelines();
     login();
     visitWithTimeRange(hostsUrl('allHosts'), {
       visitOptions: {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { deleteTimelines } from '../../../../tasks/api_calls/common';
 import { GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON } from '../../../../screens/date_picker';
 import {
   setStartDate,
@@ -44,7 +43,7 @@ describe(
   () => {
     beforeEach(() => {
       login();
-      deleteTimelines();
+      deleteAllTimelines();
       visitWithTimeRange(ALERTS_URL);
       openActiveTimeline();
       cy.window().then((win) => {

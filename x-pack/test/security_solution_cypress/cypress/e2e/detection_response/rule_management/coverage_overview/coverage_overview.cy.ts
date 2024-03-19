@@ -196,7 +196,9 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
       deleteAlertsAndRules();
       deletePrebuiltRulesAssets();
       preventPrebuiltRulesPackageInstallation();
+      cy.pause();
       createAndInstallMockedPrebuiltRules(prebuiltRules);
+
       createRule(
         getNewRule({
           rule_id: 'enabled_custom_rule',

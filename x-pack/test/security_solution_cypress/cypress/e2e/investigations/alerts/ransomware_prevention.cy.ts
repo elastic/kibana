@@ -12,7 +12,7 @@ import { ALERTS_URL } from '../../../urls/navigation';
 import { ALERTS_HISTOGRAM_SERIES, ALERT_RULE_NAME, MESSAGE } from '../../../screens/alerts';
 import { TIMELINE_VIEW_IN_ANALYZER } from '../../../screens/timeline';
 import { selectAlertsHistogram } from '../../../tasks/alerts';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
+import { deleteAllTimelines } from '../../../tasks/api_calls/timelines';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { getTimeline } from '../../../objects/timeline';
 
@@ -49,7 +49,7 @@ describe('Ransomware Prevention Alerts', { tags: ['@ess', '@serverless'] }, () =
 
   describe('Ransomware in Timelines', function () {
     beforeEach(() => {
-      deleteTimelines();
+      deleteAllTimelines();
       login();
       createTimeline({ ...getTimeline(), query: 'event.code: "ransomware"' }).then((response) => {
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId');
