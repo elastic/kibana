@@ -33,11 +33,7 @@ function uploadTriggerStep(commitSha: string) {
     },
   };
 
-  if (IS_DRY_RUN) {
-    console.log('Dry run: skipping upload of GPCTL trigger step. Step definition:', triggerStep);
-  } else {
-    buildkite.uploadSteps([triggerStep]);
-  }
+  buildkite.uploadSteps([triggerStep]);
 }
 
 main()

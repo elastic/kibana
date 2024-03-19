@@ -50,7 +50,8 @@ const telemetrySenderStartSpy = jest.spyOn(SecuritySolutionPlugin.prototype, 'st
 const mockedAxiosGet = jest.spyOn(axios, 'get');
 const mockedAxiosPost = jest.spyOn(axios, 'post');
 
-describe('telemetry tasks', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/178918
+describe.skip('telemetry tasks', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let taskManagerPlugin: TaskManagerStartContract;
@@ -112,7 +113,8 @@ describe('telemetry tasks', () => {
     await cleanupMockedEndpointAlerts(kibanaServer.coreStart.elasticsearch.client.asInternalUser);
   });
 
-  describe('detection-rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/178591
+  describe.skip('detection-rules', () => {
     it('should execute when scheduled', async () => {
       await mockAndScheduleDetectionRulesTask();
 
