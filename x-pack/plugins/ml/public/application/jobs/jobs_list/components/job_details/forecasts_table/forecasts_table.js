@@ -21,7 +21,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { withKibana, context } from '@kbn/kibana-react-plugin/public';
+import { context } from '@kbn/kibana-react-plugin/public';
 import { timeFormatter } from '@kbn/ml-date-utils';
 
 import { FORECAST_REQUEST_STATE } from '../../../../../../../common/constants/states';
@@ -38,7 +38,7 @@ const MAX_FORECASTS = 500;
 /**
  * Table component for rendering the lists of forecasts run on an ML job.
  */
-export class ForecastsTableUI extends Component {
+export class ForecastsTable extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -93,7 +93,7 @@ export class ForecastsTableUI extends Component {
         application: { navigateToUrl },
         share,
       },
-    } = this.props.kibana;
+    } = this.context;
 
     // Creates the link to the Single Metric Viewer.
     // Set the total time range from the start of the job data to the end of the forecast,
@@ -344,8 +344,6 @@ export class ForecastsTableUI extends Component {
     );
   }
 }
-ForecastsTableUI.propTypes = {
+ForecastsTable.propTypes = {
   job: PropTypes.object.isRequired,
 };
-
-export const ForecastsTable = withKibana(ForecastsTableUI);

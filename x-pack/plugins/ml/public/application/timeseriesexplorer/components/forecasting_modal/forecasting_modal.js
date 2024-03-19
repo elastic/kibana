@@ -55,7 +55,7 @@ function getDefaultState() {
   };
 }
 
-export class ForecastingModalUI extends Component {
+export class ForecastingModal extends Component {
   static propTypes = {
     isDisabled: PropTypes.bool,
     job: PropTypes.object,
@@ -556,5 +556,3 @@ export class ForecastingModalUI extends Component {
     );
   }
 }
-
-export const ForecastingModal = ForecastingModalUI;

@@ -41,14 +41,14 @@ export interface Interval {
   expression: string;
 }
 
-export interface ChartDataPoint {
+interface ChartDataPoint {
   date: Date;
   value: number | null;
   upper?: number | null;
   lower?: number | null;
 }
 
-export interface FocusData {
+interface FocusData {
   focusChartData: ChartDataPoint[];
   anomalyRecords: MlAnomalyRecordDoc[];
   scheduledEvents: any;
