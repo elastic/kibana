@@ -8,12 +8,17 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['observabilityLogsExplorer']);
+  const PageObjects = getPageObjects(['observabilityLogsExplorer', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
 
   describe('Alerts dropdown menu', () => {
     before(async () => {
+      await PageObjects.svlCommonPage.login();
       await PageObjects.observabilityLogsExplorer.navigateTo();
+    });
+
+    after(async () => {
+      await PageObjects.svlCommonPage.forceLogout();
     });
 
     it('should create rule successfully', async () => {
