@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Subject, mergeMap, lastValueFrom, take } from 'rxjs';
+import { Subject, mergeMap, firstValueFrom } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
