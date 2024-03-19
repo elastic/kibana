@@ -15,7 +15,7 @@ import { ReportingAPIClient } from '@kbn/reporting-public';
 import { CoreSetup, ToastsSetup } from '@kbn/core/public';
 import { FormatFactory } from '../../../common/types';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
-import { ReportingModalContent } from './csv_download_panel_content';
+import { ReportingModalContent } from './export_modal_content';
 
 declare global {
   interface Window {

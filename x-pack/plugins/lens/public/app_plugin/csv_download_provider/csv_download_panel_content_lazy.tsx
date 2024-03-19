@@ -8,10 +8,10 @@
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import * as React from 'react';
 import { FC, lazy, Suspense } from 'react';
-import type { ReportingModalProps } from './csv_download_panel_content';
+import type { ReportingModalProps } from './export_modal_content';
 
 const LazyComponent = lazy(() =>
-  import('./csv_download_panel_content').then(({ ReportingModalContent }) => ({
+  import('./export_modal_content').then(({ ReportingModalContent }) => ({
     default: DownloadPanelContent,
   }))
 );
