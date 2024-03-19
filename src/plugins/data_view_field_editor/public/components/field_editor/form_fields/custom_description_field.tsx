@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { TypeField } from './type_field';
+import React from 'react';
 
-export { CustomLabelField } from './custom_label_field';
+import { UseField, TextAreaField } from '../../../shared_imports';
 
-export { CustomDescriptionField } from './custom_description_field';
-
-export { PopularityField } from './popularity_field';
-
-export { ScriptField } from './script_field';
-
-export { FormatField } from './format_field';
+export const CustomDescriptionField = () => {
+  return <UseField path="customDescription" component={TextAreaField} />;
+};
