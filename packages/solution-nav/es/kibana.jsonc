@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/solution-nav-es",
-  "owner": "@elastic/enterprise-search-frontend"
+  "owner": "@elastic/appex-sharedux"
 }
