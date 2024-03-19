@@ -11,22 +11,21 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { format as formatUrl, parse as parseUrl } from 'url';
-import { AnonymousAccessState, LocatorPublic } from '../../common';
-import { UrlParamExtension } from '../types';
+import { AnonymousAccessState } from '../../../../common';
 
-interface EmbedProps {
-  urlParamExtensions?: UrlParamExtension[];
-  shareableUrlLocatorParams?:
-    | {
-        locator: LocatorPublic<any>;
-        params: any;
-      }
-    | undefined;
-  shareableUrlForSavedObject?: string;
-  shareableUrl?: string;
-  isEmbedded?: boolean;
-  onChange: (optionId: string) => void;
-}
+import { type IShareContext } from '../../context';
+
+type EmbedProps = Pick<
+  IShareContext,
+  | 'shareableUrlLocatorParams'
+  | 'shareableUrlForSavedObject'
+  | 'shareableUrl'
+  | 'isEmbedded'
+  | 'embedUrlParamExtensions'
+> & {
+  onChange: (url: string) => void;
+};
+
 interface UrlParams {
   [extensionName: string]: {
     [queryParam: string]: boolean;
@@ -38,8 +37,8 @@ export enum ExportUrlAsType {
   EXPORT_URL_AS_SNAPSHOT = 'snapshot',
 }
 
-export const EmbedModal = ({
-  urlParamExtensions,
+export const EmbedContent = ({
+  embedUrlParamExtensions: urlParamExtensions,
   shareableUrlForSavedObject,
   shareableUrl,
   isEmbedded,
@@ -56,7 +55,7 @@ export const EmbedModal = ({
 
   useEffect(() => {
     onChange(url);
-  }, [url]);
+  }, [url, onChange]);
 
   const getUrlParamExtensions = useCallback(
     (tempUrl: string): string => {

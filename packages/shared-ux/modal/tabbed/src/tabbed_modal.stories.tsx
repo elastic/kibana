@@ -108,7 +108,6 @@ export const NonTrivialExample = (params: TabbedModalStorybookParams) => {
   }> = {
     id: 'order',
     name: 'order',
-    title: 'Pizza of choice',
     initialState: {
       checkboxIdToSelectedMap: {
         [checkboxGroupItemId2]: true,

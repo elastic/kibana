@@ -27,7 +27,7 @@ interface IDispatchAction {
 export type IModalTabState = Record<string, unknown>;
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type IModalMetaState = {
+export type IModalMetaState = {
   selectedTabId: string | null;
 };
 
@@ -43,13 +43,12 @@ interface IModalTabActionBtn<S> extends CommonProps {
   dataTestSubj: string;
   defaultMessage: string;
   formattedMessageId: string;
-  handler: (args: { state: S }) => string;
+  handler: (args: { state: S }) => void;
   isCopy?: boolean;
 }
 
 export interface IModalTabDeclaration<S extends IModalTabState> extends EuiTabProps {
   id: string;
-  title?: string;
   name: string;
   initialState?: Partial<S>;
   reducer?: IReducer<S>;
