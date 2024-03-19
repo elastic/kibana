@@ -28,101 +28,105 @@ export default class esql_parser extends Parser {
 	public static readonly INLINESTATS = 8;
 	public static readonly KEEP = 9;
 	public static readonly LIMIT = 10;
-	public static readonly MV_EXPAND = 11;
-	public static readonly RENAME = 12;
-	public static readonly ROW = 13;
-	public static readonly SHOW = 14;
-	public static readonly SORT = 15;
-	public static readonly STATS = 16;
-	public static readonly WHERE = 17;
-	public static readonly UNKNOWN_CMD = 18;
-	public static readonly LINE_COMMENT = 19;
-	public static readonly MULTILINE_COMMENT = 20;
-	public static readonly WS = 21;
-	public static readonly EXPLAIN_WS = 22;
-	public static readonly EXPLAIN_LINE_COMMENT = 23;
-	public static readonly EXPLAIN_MULTILINE_COMMENT = 24;
-	public static readonly PIPE = 25;
-	public static readonly STRING = 26;
-	public static readonly INTEGER_LITERAL = 27;
-	public static readonly DECIMAL_LITERAL = 28;
-	public static readonly BY = 29;
-	public static readonly AND = 30;
-	public static readonly ASC = 31;
-	public static readonly ASSIGN = 32;
-	public static readonly COMMA = 33;
-	public static readonly DESC = 34;
-	public static readonly DOT = 35;
-	public static readonly FALSE = 36;
-	public static readonly FIRST = 37;
-	public static readonly LAST = 38;
-	public static readonly LP = 39;
-	public static readonly IN = 40;
-	public static readonly IS = 41;
-	public static readonly LIKE = 42;
-	public static readonly NOT = 43;
-	public static readonly NULL = 44;
-	public static readonly NULLS = 45;
-	public static readonly OR = 46;
-	public static readonly PARAM = 47;
-	public static readonly RLIKE = 48;
-	public static readonly RP = 49;
-	public static readonly TRUE = 50;
-	public static readonly EQ = 51;
-	public static readonly CIEQ = 52;
-	public static readonly NEQ = 53;
-	public static readonly LT = 54;
-	public static readonly LTE = 55;
-	public static readonly GT = 56;
-	public static readonly GTE = 57;
-	public static readonly PLUS = 58;
-	public static readonly MINUS = 59;
-	public static readonly ASTERISK = 60;
-	public static readonly SLASH = 61;
-	public static readonly PERCENT = 62;
-	public static readonly OPENING_BRACKET = 63;
-	public static readonly CLOSING_BRACKET = 64;
-	public static readonly UNQUOTED_IDENTIFIER = 65;
-	public static readonly QUOTED_IDENTIFIER = 66;
-	public static readonly EXPR_LINE_COMMENT = 67;
-	public static readonly EXPR_MULTILINE_COMMENT = 68;
-	public static readonly EXPR_WS = 69;
-	public static readonly METADATA = 70;
-	public static readonly FROM_UNQUOTED_IDENTIFIER = 71;
-	public static readonly FROM_LINE_COMMENT = 72;
-	public static readonly FROM_MULTILINE_COMMENT = 73;
-	public static readonly FROM_WS = 74;
-	public static readonly ID_PATTERN = 75;
-	public static readonly PROJECT_LINE_COMMENT = 76;
-	public static readonly PROJECT_MULTILINE_COMMENT = 77;
-	public static readonly PROJECT_WS = 78;
-	public static readonly AS = 79;
-	public static readonly RENAME_LINE_COMMENT = 80;
-	public static readonly RENAME_MULTILINE_COMMENT = 81;
-	public static readonly RENAME_WS = 82;
-	public static readonly ON = 83;
-	public static readonly WITH = 84;
-	public static readonly ENRICH_POLICY_NAME = 85;
-	public static readonly ENRICH_LINE_COMMENT = 86;
-	public static readonly ENRICH_MULTILINE_COMMENT = 87;
-	public static readonly ENRICH_WS = 88;
-	public static readonly ENRICH_FIELD_LINE_COMMENT = 89;
-	public static readonly ENRICH_FIELD_MULTILINE_COMMENT = 90;
-	public static readonly ENRICH_FIELD_WS = 91;
-	public static readonly MVEXPAND_LINE_COMMENT = 92;
-	public static readonly MVEXPAND_MULTILINE_COMMENT = 93;
-	public static readonly MVEXPAND_WS = 94;
-	public static readonly INFO = 95;
-	public static readonly FUNCTIONS = 96;
+	public static readonly META = 11;
+	public static readonly MV_EXPAND = 12;
+	public static readonly RENAME = 13;
+	public static readonly ROW = 14;
+	public static readonly SHOW = 15;
+	public static readonly SORT = 16;
+	public static readonly STATS = 17;
+	public static readonly WHERE = 18;
+	public static readonly UNKNOWN_CMD = 19;
+	public static readonly LINE_COMMENT = 20;
+	public static readonly MULTILINE_COMMENT = 21;
+	public static readonly WS = 22;
+	public static readonly EXPLAIN_WS = 23;
+	public static readonly EXPLAIN_LINE_COMMENT = 24;
+	public static readonly EXPLAIN_MULTILINE_COMMENT = 25;
+	public static readonly PIPE = 26;
+	public static readonly STRING = 27;
+	public static readonly INTEGER_LITERAL = 28;
+	public static readonly DECIMAL_LITERAL = 29;
+	public static readonly BY = 30;
+	public static readonly AND = 31;
+	public static readonly ASC = 32;
+	public static readonly ASSIGN = 33;
+	public static readonly COMMA = 34;
+	public static readonly DESC = 35;
+	public static readonly DOT = 36;
+	public static readonly FALSE = 37;
+	public static readonly FIRST = 38;
+	public static readonly LAST = 39;
+	public static readonly LP = 40;
+	public static readonly IN = 41;
+	public static readonly IS = 42;
+	public static readonly LIKE = 43;
+	public static readonly NOT = 44;
+	public static readonly NULL = 45;
+	public static readonly NULLS = 46;
+	public static readonly OR = 47;
+	public static readonly PARAM = 48;
+	public static readonly RLIKE = 49;
+	public static readonly RP = 50;
+	public static readonly TRUE = 51;
+	public static readonly EQ = 52;
+	public static readonly CIEQ = 53;
+	public static readonly NEQ = 54;
+	public static readonly LT = 55;
+	public static readonly LTE = 56;
+	public static readonly GT = 57;
+	public static readonly GTE = 58;
+	public static readonly PLUS = 59;
+	public static readonly MINUS = 60;
+	public static readonly ASTERISK = 61;
+	public static readonly SLASH = 62;
+	public static readonly PERCENT = 63;
+	public static readonly OPENING_BRACKET = 64;
+	public static readonly CLOSING_BRACKET = 65;
+	public static readonly UNQUOTED_IDENTIFIER = 66;
+	public static readonly QUOTED_IDENTIFIER = 67;
+	public static readonly EXPR_LINE_COMMENT = 68;
+	public static readonly EXPR_MULTILINE_COMMENT = 69;
+	public static readonly EXPR_WS = 70;
+	public static readonly METADATA = 71;
+	public static readonly FROM_UNQUOTED_IDENTIFIER = 72;
+	public static readonly FROM_LINE_COMMENT = 73;
+	public static readonly FROM_MULTILINE_COMMENT = 74;
+	public static readonly FROM_WS = 75;
+	public static readonly ID_PATTERN = 76;
+	public static readonly PROJECT_LINE_COMMENT = 77;
+	public static readonly PROJECT_MULTILINE_COMMENT = 78;
+	public static readonly PROJECT_WS = 79;
+	public static readonly AS = 80;
+	public static readonly RENAME_LINE_COMMENT = 81;
+	public static readonly RENAME_MULTILINE_COMMENT = 82;
+	public static readonly RENAME_WS = 83;
+	public static readonly ON = 84;
+	public static readonly WITH = 85;
+	public static readonly ENRICH_POLICY_NAME = 86;
+	public static readonly ENRICH_LINE_COMMENT = 87;
+	public static readonly ENRICH_MULTILINE_COMMENT = 88;
+	public static readonly ENRICH_WS = 89;
+	public static readonly ENRICH_FIELD_LINE_COMMENT = 90;
+	public static readonly ENRICH_FIELD_MULTILINE_COMMENT = 91;
+	public static readonly ENRICH_FIELD_WS = 92;
+	public static readonly MVEXPAND_LINE_COMMENT = 93;
+	public static readonly MVEXPAND_MULTILINE_COMMENT = 94;
+	public static readonly MVEXPAND_WS = 95;
+	public static readonly INFO = 96;
 	public static readonly SHOW_LINE_COMMENT = 97;
 	public static readonly SHOW_MULTILINE_COMMENT = 98;
 	public static readonly SHOW_WS = 99;
-	public static readonly COLON = 100;
-	public static readonly SETTING = 101;
-	public static readonly SETTING_LINE_COMMENT = 102;
-	public static readonly SETTTING_MULTILINE_COMMENT = 103;
-	public static readonly SETTING_WS = 104;
-	public static readonly UNQUOTED_ID_PATTERN = 105;
+	public static readonly FUNCTIONS = 100;
+	public static readonly META_LINE_COMMENT = 101;
+	public static readonly META_MULTILINE_COMMENT = 102;
+	public static readonly META_WS = 103;
+	public static readonly COLON = 104;
+	public static readonly SETTING = 105;
+	public static readonly SETTING_LINE_COMMENT = 106;
+	public static readonly SETTTING_MULTILINE_COMMENT = 107;
+	public static readonly SETTING_WS = 108;
+	public static readonly UNQUOTED_ID_PATTERN = 109;
 	public static readonly EOF = Token.EOF;
 	public static readonly RULE_singleStatement = 0;
 	public static readonly RULE_query = 1;
@@ -181,7 +185,7 @@ export default class esql_parser extends Parser {
                                                             "'from'", "'grok'", 
                                                             "'inlinestats'", 
                                                             "'keep'", "'limit'", 
-                                                            "'mv_expand'", 
+                                                            "'meta'", "'mv_expand'", 
                                                             "'rename'", 
                                                             "'row'", "'show'", 
                                                             "'sort'", "'stats'", 
@@ -224,7 +228,9 @@ export default class esql_parser extends Parser {
                                                             null, null, 
                                                             null, null, 
                                                             null, null, 
-                                                            "'info'", "'functions'", 
+                                                            "'info'", null, 
+                                                            null, null, 
+                                                            "'functions'", 
                                                             null, null, 
                                                             null, "':'" ];
 	public static readonly symbolicNames: (string | null)[] = [ null, "DISSECT", 
@@ -233,7 +239,7 @@ export default class esql_parser extends Parser {
                                                              "FROM", "GROK", 
                                                              "INLINESTATS", 
                                                              "KEEP", "LIMIT", 
-                                                             "MV_EXPAND", 
+                                                             "META", "MV_EXPAND", 
                                                              "RENAME", "ROW", 
                                                              "SHOW", "SORT", 
                                                              "STATS", "WHERE", 
@@ -293,10 +299,13 @@ export default class esql_parser extends Parser {
                                                              "MVEXPAND_LINE_COMMENT", 
                                                              "MVEXPAND_MULTILINE_COMMENT", 
                                                              "MVEXPAND_WS", 
-                                                             "INFO", "FUNCTIONS", 
-                                                             "SHOW_LINE_COMMENT", 
+                                                             "INFO", "SHOW_LINE_COMMENT", 
                                                              "SHOW_MULTILINE_COMMENT", 
                                                              "SHOW_WS", 
+                                                             "FUNCTIONS", 
+                                                             "META_LINE_COMMENT", 
+                                                             "META_MULTILINE_COMMENT", 
+                                                             "META_WS", 
                                                              "COLON", "SETTING", 
                                                              "SETTING_LINE_COMMENT", 
                                                              "SETTTING_MULTILINE_COMMENT", 
@@ -452,14 +461,14 @@ export default class esql_parser extends Parser {
 				this.fromCommand();
 				}
 				break;
-			case 13:
+			case 14:
 				this.enterOuterAlt(localctx, 3);
 				{
 				this.state = 118;
 				this.rowCommand();
 				}
 				break;
-			case 14:
+			case 15:
 				this.enterOuterAlt(localctx, 4);
 				{
 				this.state = 119;
@@ -520,21 +529,21 @@ export default class esql_parser extends Parser {
 				this.keepCommand();
 				}
 				break;
-			case 15:
+			case 16:
 				this.enterOuterAlt(localctx, 5);
 				{
 				this.state = 126;
 				this.sortCommand();
 				}
 				break;
-			case 16:
+			case 17:
 				this.enterOuterAlt(localctx, 6);
 				{
 				this.state = 127;
 				this.statsCommand();
 				}
 				break;
-			case 17:
+			case 18:
 				this.enterOuterAlt(localctx, 7);
 				{
 				this.state = 128;
@@ -548,7 +557,7 @@ export default class esql_parser extends Parser {
 				this.dropCommand();
 				}
 				break;
-			case 12:
+			case 13:
 				this.enterOuterAlt(localctx, 9);
 				{
 				this.state = 130;
@@ -576,7 +585,7 @@ export default class esql_parser extends Parser {
 				this.enrichCommand();
 				}
 				break;
-			case 11:
+			case 12:
 				this.enterOuterAlt(localctx, 13);
 				{
 				this.state = 134;
@@ -691,7 +700,7 @@ export default class esql_parser extends Parser {
 				this.state = 147;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la===43) {
+				if (_la===44) {
 					{
 					this.state = 146;
 					this.match(esql_parser.NOT);
@@ -707,7 +716,7 @@ export default class esql_parser extends Parser {
 				this.state = 156;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la===33) {
+				while (_la===34) {
 					{
 					{
 					this.state = 152;
@@ -736,7 +745,7 @@ export default class esql_parser extends Parser {
 				this.state = 164;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la===43) {
+				if (_la===44) {
 					{
 					this.state = 163;
 					this.match(esql_parser.NOT);
@@ -832,7 +841,7 @@ export default class esql_parser extends Parser {
 				this.state = 183;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la===43) {
+				if (_la===44) {
 					{
 					this.state = 182;
 					this.match(esql_parser.NOT);
@@ -853,7 +862,7 @@ export default class esql_parser extends Parser {
 				this.state = 190;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la===43) {
+				if (_la===44) {
 					{
 					this.state = 189;
 					this.match(esql_parser.NOT);
@@ -967,7 +976,7 @@ export default class esql_parser extends Parser {
 				this.state = 206;
 				(localctx as ArithmeticUnaryContext)._operator = this._input.LT(1);
 				_la = this._input.LA(1);
-				if(!(_la===58 || _la===59)) {
+				if(!(_la===59 || _la===60)) {
 				    (localctx as ArithmeticUnaryContext)._operator = this._errHandler.recoverInline(this);
 				}
 				else {
@@ -1005,7 +1014,7 @@ export default class esql_parser extends Parser {
 						this.state = 211;
 						(localctx as ArithmeticBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
-						if(!(((((_la - 60)) & ~0x1F) === 0 && ((1 << (_la - 60)) & 7) !== 0))) {
+						if(!(((((_la - 61)) & ~0x1F) === 0 && ((1 << (_la - 61)) & 7) !== 0))) {
 						    (localctx as ArithmeticBinaryContext)._operator = this._errHandler.recoverInline(this);
 						}
 						else {
@@ -1028,7 +1037,7 @@ export default class esql_parser extends Parser {
 						this.state = 214;
 						(localctx as ArithmeticBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
-						if(!(_la===58 || _la===59)) {
+						if(!(_la===59 || _la===60)) {
 						    (localctx as ArithmeticBinaryContext)._operator = this._errHandler.recoverInline(this);
 						}
 						else {
@@ -1137,26 +1146,26 @@ export default class esql_parser extends Parser {
 			this.state = 241;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case 60:
+			case 61:
 				{
 				this.state = 232;
 				this.match(esql_parser.ASTERISK);
 				}
 				break;
-			case 26:
 			case 27:
 			case 28:
-			case 36:
-			case 39:
-			case 43:
+			case 29:
+			case 37:
+			case 40:
 			case 44:
-			case 47:
-			case 50:
-			case 58:
+			case 45:
+			case 48:
+			case 51:
 			case 59:
-			case 63:
-			case 65:
+			case 60:
+			case 64:
 			case 66:
+			case 67:
 				{
 				{
 				this.state = 233;
@@ -1164,7 +1173,7 @@ export default class esql_parser extends Parser {
 				this.state = 238;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la===33) {
+				while (_la===34) {
 					{
 					{
 					this.state = 234;
@@ -1180,7 +1189,7 @@ export default class esql_parser extends Parser {
 				}
 				}
 				break;
-			case 49:
+			case 50:
 				break;
 			default:
 				break;
@@ -1380,14 +1389,14 @@ export default class esql_parser extends Parser {
 			this.state = 277;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case 70:
+			case 71:
 				this.enterOuterAlt(localctx, 1);
 				{
 				this.state = 275;
 				this.metadataOption();
 				}
 				break;
-			case 63:
+			case 64:
 				this.enterOuterAlt(localctx, 2);
 				{
 				this.state = 276;
@@ -1610,7 +1619,7 @@ export default class esql_parser extends Parser {
 			{
 			this.state = 309;
 			_la = this._input.LA(1);
-			if(!(_la===66 || _la===71)) {
+			if(!(_la===67 || _la===72)) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
@@ -1731,7 +1740,7 @@ export default class esql_parser extends Parser {
 			{
 			this.state = 327;
 			_la = this._input.LA(1);
-			if(!(_la===65 || _la===66)) {
+			if(!(_la===66 || _la===67)) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
@@ -1789,7 +1798,7 @@ export default class esql_parser extends Parser {
 			{
 			this.state = 331;
 			_la = this._input.LA(1);
-			if(!(_la===66 || _la===105)) {
+			if(!(_la===67 || _la===109)) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
@@ -1890,7 +1899,7 @@ export default class esql_parser extends Parser {
 				this.state = 348;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la===33) {
+				while (_la===34) {
 					{
 					{
 					this.state = 344;
@@ -1918,7 +1927,7 @@ export default class esql_parser extends Parser {
 				this.state = 359;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la===33) {
+				while (_la===34) {
 					{
 					{
 					this.state = 355;
@@ -1946,7 +1955,7 @@ export default class esql_parser extends Parser {
 				this.state = 370;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la===33) {
+				while (_la===34) {
 					{
 					{
 					this.state = 366;
@@ -2070,7 +2079,7 @@ export default class esql_parser extends Parser {
 				this.state = 390;
 				localctx._ordering = this._input.LT(1);
 				_la = this._input.LA(1);
-				if(!(_la===31 || _la===34)) {
+				if(!(_la===32 || _la===35)) {
 				    localctx._ordering = this._errHandler.recoverInline(this);
 				}
 				else {
@@ -2090,7 +2099,7 @@ export default class esql_parser extends Parser {
 				this.state = 394;
 				localctx._nullOrdering = this._input.LT(1);
 				_la = this._input.LA(1);
-				if(!(_la===37 || _la===38)) {
+				if(!(_la===38 || _la===39)) {
 				    localctx._nullOrdering = this._errHandler.recoverInline(this);
 				}
 				else {
@@ -2461,7 +2470,7 @@ export default class esql_parser extends Parser {
 			{
 			this.state = 453;
 			_la = this._input.LA(1);
-			if(!(_la===36 || _la===50)) {
+			if(!(_la===37 || _la===51)) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
@@ -2533,11 +2542,11 @@ export default class esql_parser extends Parser {
 			this.state = 460;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la===58 || _la===59) {
+			if (_la===59 || _la===60) {
 				{
 				this.state = 459;
 				_la = this._input.LA(1);
-				if(!(_la===58 || _la===59)) {
+				if(!(_la===59 || _la===60)) {
 				this._errHandler.recoverInline(this);
 				}
 				else {
@@ -2576,11 +2585,11 @@ export default class esql_parser extends Parser {
 			this.state = 465;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la===58 || _la===59) {
+			if (_la===59 || _la===60) {
 				{
 				this.state = 464;
 				_la = this._input.LA(1);
-				if(!(_la===58 || _la===59)) {
+				if(!(_la===59 || _la===60)) {
 				this._errHandler.recoverInline(this);
 				}
 				else {
@@ -2643,7 +2652,7 @@ export default class esql_parser extends Parser {
 			{
 			this.state = 471;
 			_la = this._input.LA(1);
-			if(!(((((_la - 51)) & ~0x1F) === 0 && ((1 << (_la - 51)) & 125) !== 0))) {
+			if(!(((((_la - 52)) & ~0x1F) === 0 && ((1 << (_la - 52)) & 125) !== 0))) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
@@ -2911,7 +2920,7 @@ export default class esql_parser extends Parser {
 		return true;
 	}
 
-	public static readonly _serializedATN: number[] = [4,1,105,511,2,0,7,0,
+	public static readonly _serializedATN: number[] = [4,1,109,511,2,0,7,0,
 	2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,7,7,2,8,7,8,2,9,7,9,
 	2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,2,14,7,14,2,15,7,15,2,16,7,16,2,
 	17,7,17,2,18,7,18,2,19,7,19,2,20,7,20,2,21,7,21,2,22,7,22,2,23,7,23,2,24,
@@ -2951,9 +2960,9 @@ export default class esql_parser extends Parser {
 	1,49,1,49,5,49,497,8,49,10,49,12,49,500,9,49,3,49,502,8,49,1,50,1,50,1,
 	50,3,50,507,8,50,1,50,1,50,1,50,0,3,2,10,16,51,0,2,4,6,8,10,12,14,16,18,
 	20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,
-	68,70,72,74,76,78,80,82,84,86,88,90,92,94,96,98,100,0,9,1,0,58,59,1,0,60,
-	62,2,0,66,66,71,71,1,0,65,66,2,0,66,66,105,105,2,0,31,31,34,34,1,0,37,38,
-	2,0,36,36,50,50,2,0,51,51,53,57,536,0,102,1,0,0,0,2,105,1,0,0,0,4,120,1,
+	68,70,72,74,76,78,80,82,84,86,88,90,92,94,96,98,100,0,9,1,0,59,60,1,0,61,
+	63,2,0,67,67,72,72,1,0,66,67,2,0,67,67,109,109,2,0,32,32,35,35,1,0,38,39,
+	2,0,37,37,51,51,2,0,52,52,54,58,536,0,102,1,0,0,0,2,105,1,0,0,0,4,120,1,
 	0,0,0,6,135,1,0,0,0,8,137,1,0,0,0,10,168,1,0,0,0,12,195,1,0,0,0,14,202,
 	1,0,0,0,16,208,1,0,0,0,18,228,1,0,0,0,20,230,1,0,0,0,22,245,1,0,0,0,24,
 	248,1,0,0,0,26,261,1,0,0,0,28,263,1,0,0,0,30,277,1,0,0,0,32,279,1,0,0,0,
@@ -2965,7 +2974,7 @@ export default class esql_parser extends Parser {
 	0,0,82,457,1,0,0,0,84,460,1,0,0,0,86,465,1,0,0,0,88,469,1,0,0,0,90,471,
 	1,0,0,0,92,473,1,0,0,0,94,476,1,0,0,0,96,484,1,0,0,0,98,486,1,0,0,0,100,
 	506,1,0,0,0,102,103,3,2,1,0,103,104,5,0,0,1,104,1,1,0,0,0,105,106,6,1,-1,
-	0,106,107,3,4,2,0,107,113,1,0,0,0,108,109,10,1,0,0,109,110,5,25,0,0,110,
+	0,106,107,3,4,2,0,107,113,1,0,0,0,108,109,10,1,0,0,109,110,5,26,0,0,110,
 	112,3,6,3,0,111,108,1,0,0,0,112,115,1,0,0,0,113,111,1,0,0,0,113,114,1,0,
 	0,0,114,3,1,0,0,0,115,113,1,0,0,0,116,121,3,92,46,0,117,121,3,28,14,0,118,
 	121,3,22,11,0,119,121,3,96,48,0,120,116,1,0,0,0,120,117,1,0,0,0,120,118,
@@ -2975,22 +2984,22 @@ export default class esql_parser extends Parser {
 	132,136,3,72,36,0,133,136,3,98,49,0,134,136,3,74,37,0,135,122,1,0,0,0,135,
 	123,1,0,0,0,135,124,1,0,0,0,135,125,1,0,0,0,135,126,1,0,0,0,135,127,1,0,
 	0,0,135,128,1,0,0,0,135,129,1,0,0,0,135,130,1,0,0,0,135,131,1,0,0,0,135,
-	132,1,0,0,0,135,133,1,0,0,0,135,134,1,0,0,0,136,7,1,0,0,0,137,138,5,17,
-	0,0,138,139,3,10,5,0,139,9,1,0,0,0,140,141,6,5,-1,0,141,142,5,43,0,0,142,
+	132,1,0,0,0,135,133,1,0,0,0,135,134,1,0,0,0,136,7,1,0,0,0,137,138,5,18,
+	0,0,138,139,3,10,5,0,139,9,1,0,0,0,140,141,6,5,-1,0,141,142,5,44,0,0,142,
 	169,3,10,5,7,143,169,3,14,7,0,144,169,3,12,6,0,145,147,3,14,7,0,146,148,
-	5,43,0,0,147,146,1,0,0,0,147,148,1,0,0,0,148,149,1,0,0,0,149,150,5,40,0,
-	0,150,151,5,39,0,0,151,156,3,14,7,0,152,153,5,33,0,0,153,155,3,14,7,0,154,
+	5,44,0,0,147,146,1,0,0,0,147,148,1,0,0,0,148,149,1,0,0,0,149,150,5,41,0,
+	0,150,151,5,40,0,0,151,156,3,14,7,0,152,153,5,34,0,0,153,155,3,14,7,0,154,
 	152,1,0,0,0,155,158,1,0,0,0,156,154,1,0,0,0,156,157,1,0,0,0,157,159,1,0,
-	0,0,158,156,1,0,0,0,159,160,5,49,0,0,160,169,1,0,0,0,161,162,3,14,7,0,162,
-	164,5,41,0,0,163,165,5,43,0,0,164,163,1,0,0,0,164,165,1,0,0,0,165,166,1,
-	0,0,0,166,167,5,44,0,0,167,169,1,0,0,0,168,140,1,0,0,0,168,143,1,0,0,0,
+	0,0,158,156,1,0,0,0,159,160,5,50,0,0,160,169,1,0,0,0,161,162,3,14,7,0,162,
+	164,5,42,0,0,163,165,5,44,0,0,164,163,1,0,0,0,164,165,1,0,0,0,165,166,1,
+	0,0,0,166,167,5,45,0,0,167,169,1,0,0,0,168,140,1,0,0,0,168,143,1,0,0,0,
 	168,144,1,0,0,0,168,145,1,0,0,0,168,161,1,0,0,0,169,178,1,0,0,0,170,171,
-	10,4,0,0,171,172,5,30,0,0,172,177,3,10,5,5,173,174,10,3,0,0,174,175,5,46,
+	10,4,0,0,171,172,5,31,0,0,172,177,3,10,5,5,173,174,10,3,0,0,174,175,5,47,
 	0,0,175,177,3,10,5,4,176,170,1,0,0,0,176,173,1,0,0,0,177,180,1,0,0,0,178,
 	176,1,0,0,0,178,179,1,0,0,0,179,11,1,0,0,0,180,178,1,0,0,0,181,183,3,14,
-	7,0,182,184,5,43,0,0,183,182,1,0,0,0,183,184,1,0,0,0,184,185,1,0,0,0,185,
-	186,5,42,0,0,186,187,3,88,44,0,187,196,1,0,0,0,188,190,3,14,7,0,189,191,
-	5,43,0,0,190,189,1,0,0,0,190,191,1,0,0,0,191,192,1,0,0,0,192,193,5,48,0,
+	7,0,182,184,5,44,0,0,183,182,1,0,0,0,183,184,1,0,0,0,184,185,1,0,0,0,185,
+	186,5,43,0,0,186,187,3,88,44,0,187,196,1,0,0,0,188,190,3,14,7,0,189,191,
+	5,44,0,0,190,189,1,0,0,0,190,191,1,0,0,0,191,192,1,0,0,0,192,193,5,49,0,
 	0,193,194,3,88,44,0,194,196,1,0,0,0,195,181,1,0,0,0,195,188,1,0,0,0,196,
 	13,1,0,0,0,197,203,3,16,8,0,198,199,3,16,8,0,199,200,3,90,45,0,200,201,
 	3,16,8,0,201,203,1,0,0,0,202,197,1,0,0,0,202,198,1,0,0,0,203,15,1,0,0,0,
@@ -2999,81 +3008,81 @@ export default class esql_parser extends Parser {
 	1,0,0,212,217,3,16,8,3,213,214,10,1,0,0,214,215,7,0,0,0,215,217,3,16,8,
 	2,216,210,1,0,0,0,216,213,1,0,0,0,217,220,1,0,0,0,218,216,1,0,0,0,218,219,
 	1,0,0,0,219,17,1,0,0,0,220,218,1,0,0,0,221,229,3,54,27,0,222,229,3,44,22,
-	0,223,229,3,20,10,0,224,225,5,39,0,0,225,226,3,10,5,0,226,227,5,49,0,0,
+	0,223,229,3,20,10,0,224,225,5,40,0,0,225,226,3,10,5,0,226,227,5,50,0,0,
 	227,229,1,0,0,0,228,221,1,0,0,0,228,222,1,0,0,0,228,223,1,0,0,0,228,224,
-	1,0,0,0,229,19,1,0,0,0,230,231,3,48,24,0,231,241,5,39,0,0,232,242,5,60,
-	0,0,233,238,3,10,5,0,234,235,5,33,0,0,235,237,3,10,5,0,236,234,1,0,0,0,
+	1,0,0,0,229,19,1,0,0,0,230,231,3,48,24,0,231,241,5,40,0,0,232,242,5,61,
+	0,0,233,238,3,10,5,0,234,235,5,34,0,0,235,237,3,10,5,0,236,234,1,0,0,0,
 	237,240,1,0,0,0,238,236,1,0,0,0,238,239,1,0,0,0,239,242,1,0,0,0,240,238,
 	1,0,0,0,241,232,1,0,0,0,241,233,1,0,0,0,241,242,1,0,0,0,242,243,1,0,0,0,
-	243,244,5,49,0,0,244,21,1,0,0,0,245,246,5,13,0,0,246,247,3,24,12,0,247,
-	23,1,0,0,0,248,253,3,26,13,0,249,250,5,33,0,0,250,252,3,26,13,0,251,249,
+	243,244,5,50,0,0,244,21,1,0,0,0,245,246,5,14,0,0,246,247,3,24,12,0,247,
+	23,1,0,0,0,248,253,3,26,13,0,249,250,5,34,0,0,250,252,3,26,13,0,251,249,
 	1,0,0,0,252,255,1,0,0,0,253,251,1,0,0,0,253,254,1,0,0,0,254,25,1,0,0,0,
-	255,253,1,0,0,0,256,262,3,10,5,0,257,258,3,44,22,0,258,259,5,32,0,0,259,
+	255,253,1,0,0,0,256,262,3,10,5,0,257,258,3,44,22,0,258,259,5,33,0,0,259,
 	260,3,10,5,0,260,262,1,0,0,0,261,256,1,0,0,0,261,257,1,0,0,0,262,27,1,0,
-	0,0,263,264,5,6,0,0,264,269,3,42,21,0,265,266,5,33,0,0,266,268,3,42,21,
+	0,0,263,264,5,6,0,0,264,269,3,42,21,0,265,266,5,34,0,0,266,268,3,42,21,
 	0,267,265,1,0,0,0,268,271,1,0,0,0,269,267,1,0,0,0,269,270,1,0,0,0,270,273,
 	1,0,0,0,271,269,1,0,0,0,272,274,3,30,15,0,273,272,1,0,0,0,273,274,1,0,0,
 	0,274,29,1,0,0,0,275,278,3,32,16,0,276,278,3,34,17,0,277,275,1,0,0,0,277,
-	276,1,0,0,0,278,31,1,0,0,0,279,280,5,70,0,0,280,285,3,42,21,0,281,282,5,
-	33,0,0,282,284,3,42,21,0,283,281,1,0,0,0,284,287,1,0,0,0,285,283,1,0,0,
-	0,285,286,1,0,0,0,286,33,1,0,0,0,287,285,1,0,0,0,288,289,5,63,0,0,289,290,
-	3,32,16,0,290,291,5,64,0,0,291,35,1,0,0,0,292,293,5,4,0,0,293,294,3,24,
-	12,0,294,37,1,0,0,0,295,297,5,16,0,0,296,298,3,24,12,0,297,296,1,0,0,0,
-	297,298,1,0,0,0,298,301,1,0,0,0,299,300,5,29,0,0,300,302,3,24,12,0,301,
+	276,1,0,0,0,278,31,1,0,0,0,279,280,5,71,0,0,280,285,3,42,21,0,281,282,5,
+	34,0,0,282,284,3,42,21,0,283,281,1,0,0,0,284,287,1,0,0,0,285,283,1,0,0,
+	0,285,286,1,0,0,0,286,33,1,0,0,0,287,285,1,0,0,0,288,289,5,64,0,0,289,290,
+	3,32,16,0,290,291,5,65,0,0,291,35,1,0,0,0,292,293,5,4,0,0,293,294,3,24,
+	12,0,294,37,1,0,0,0,295,297,5,17,0,0,296,298,3,24,12,0,297,296,1,0,0,0,
+	297,298,1,0,0,0,298,301,1,0,0,0,299,300,5,30,0,0,300,302,3,24,12,0,301,
 	299,1,0,0,0,301,302,1,0,0,0,302,39,1,0,0,0,303,304,5,8,0,0,304,307,3,24,
-	12,0,305,306,5,29,0,0,306,308,3,24,12,0,307,305,1,0,0,0,307,308,1,0,0,0,
+	12,0,305,306,5,30,0,0,306,308,3,24,12,0,307,305,1,0,0,0,307,308,1,0,0,0,
 	308,41,1,0,0,0,309,310,7,2,0,0,310,43,1,0,0,0,311,316,3,48,24,0,312,313,
-	5,35,0,0,313,315,3,48,24,0,314,312,1,0,0,0,315,318,1,0,0,0,316,314,1,0,
+	5,36,0,0,313,315,3,48,24,0,314,312,1,0,0,0,315,318,1,0,0,0,316,314,1,0,
 	0,0,316,317,1,0,0,0,317,45,1,0,0,0,318,316,1,0,0,0,319,324,3,50,25,0,320,
-	321,5,35,0,0,321,323,3,50,25,0,322,320,1,0,0,0,323,326,1,0,0,0,324,322,
+	321,5,36,0,0,321,323,3,50,25,0,322,320,1,0,0,0,323,326,1,0,0,0,324,322,
 	1,0,0,0,324,325,1,0,0,0,325,47,1,0,0,0,326,324,1,0,0,0,327,328,7,3,0,0,
-	328,49,1,0,0,0,329,330,5,75,0,0,330,51,1,0,0,0,331,332,7,4,0,0,332,53,1,
-	0,0,0,333,376,5,44,0,0,334,335,3,86,43,0,335,336,5,65,0,0,336,376,1,0,0,
-	0,337,376,3,84,42,0,338,376,3,86,43,0,339,376,3,80,40,0,340,376,5,47,0,
-	0,341,376,3,88,44,0,342,343,5,63,0,0,343,348,3,82,41,0,344,345,5,33,0,0,
+	328,49,1,0,0,0,329,330,5,76,0,0,330,51,1,0,0,0,331,332,7,4,0,0,332,53,1,
+	0,0,0,333,376,5,45,0,0,334,335,3,86,43,0,335,336,5,66,0,0,336,376,1,0,0,
+	0,337,376,3,84,42,0,338,376,3,86,43,0,339,376,3,80,40,0,340,376,5,48,0,
+	0,341,376,3,88,44,0,342,343,5,64,0,0,343,348,3,82,41,0,344,345,5,34,0,0,
 	345,347,3,82,41,0,346,344,1,0,0,0,347,350,1,0,0,0,348,346,1,0,0,0,348,349,
-	1,0,0,0,349,351,1,0,0,0,350,348,1,0,0,0,351,352,5,64,0,0,352,376,1,0,0,
-	0,353,354,5,63,0,0,354,359,3,80,40,0,355,356,5,33,0,0,356,358,3,80,40,0,
+	1,0,0,0,349,351,1,0,0,0,350,348,1,0,0,0,351,352,5,65,0,0,352,376,1,0,0,
+	0,353,354,5,64,0,0,354,359,3,80,40,0,355,356,5,34,0,0,356,358,3,80,40,0,
 	357,355,1,0,0,0,358,361,1,0,0,0,359,357,1,0,0,0,359,360,1,0,0,0,360,362,
-	1,0,0,0,361,359,1,0,0,0,362,363,5,64,0,0,363,376,1,0,0,0,364,365,5,63,0,
-	0,365,370,3,88,44,0,366,367,5,33,0,0,367,369,3,88,44,0,368,366,1,0,0,0,
+	1,0,0,0,361,359,1,0,0,0,362,363,5,65,0,0,363,376,1,0,0,0,364,365,5,64,0,
+	0,365,370,3,88,44,0,366,367,5,34,0,0,367,369,3,88,44,0,368,366,1,0,0,0,
 	369,372,1,0,0,0,370,368,1,0,0,0,370,371,1,0,0,0,371,373,1,0,0,0,372,370,
-	1,0,0,0,373,374,5,64,0,0,374,376,1,0,0,0,375,333,1,0,0,0,375,334,1,0,0,
+	1,0,0,0,373,374,5,65,0,0,374,376,1,0,0,0,375,333,1,0,0,0,375,334,1,0,0,
 	0,375,337,1,0,0,0,375,338,1,0,0,0,375,339,1,0,0,0,375,340,1,0,0,0,375,341,
 	1,0,0,0,375,342,1,0,0,0,375,353,1,0,0,0,375,364,1,0,0,0,376,55,1,0,0,0,
-	377,378,5,10,0,0,378,379,5,27,0,0,379,57,1,0,0,0,380,381,5,15,0,0,381,386,
-	3,60,30,0,382,383,5,33,0,0,383,385,3,60,30,0,384,382,1,0,0,0,385,388,1,
+	377,378,5,10,0,0,378,379,5,28,0,0,379,57,1,0,0,0,380,381,5,16,0,0,381,386,
+	3,60,30,0,382,383,5,34,0,0,383,385,3,60,30,0,384,382,1,0,0,0,385,388,1,
 	0,0,0,386,384,1,0,0,0,386,387,1,0,0,0,387,59,1,0,0,0,388,386,1,0,0,0,389,
 	391,3,10,5,0,390,392,7,5,0,0,391,390,1,0,0,0,391,392,1,0,0,0,392,395,1,
-	0,0,0,393,394,5,45,0,0,394,396,7,6,0,0,395,393,1,0,0,0,395,396,1,0,0,0,
-	396,61,1,0,0,0,397,398,5,9,0,0,398,403,3,46,23,0,399,400,5,33,0,0,400,402,
+	0,0,0,393,394,5,46,0,0,394,396,7,6,0,0,395,393,1,0,0,0,395,396,1,0,0,0,
+	396,61,1,0,0,0,397,398,5,9,0,0,398,403,3,46,23,0,399,400,5,34,0,0,400,402,
 	3,46,23,0,401,399,1,0,0,0,402,405,1,0,0,0,403,401,1,0,0,0,403,404,1,0,0,
 	0,404,63,1,0,0,0,405,403,1,0,0,0,406,407,5,2,0,0,407,412,3,46,23,0,408,
-	409,5,33,0,0,409,411,3,46,23,0,410,408,1,0,0,0,411,414,1,0,0,0,412,410,
-	1,0,0,0,412,413,1,0,0,0,413,65,1,0,0,0,414,412,1,0,0,0,415,416,5,12,0,0,
-	416,421,3,68,34,0,417,418,5,33,0,0,418,420,3,68,34,0,419,417,1,0,0,0,420,
+	409,5,34,0,0,409,411,3,46,23,0,410,408,1,0,0,0,411,414,1,0,0,0,412,410,
+	1,0,0,0,412,413,1,0,0,0,413,65,1,0,0,0,414,412,1,0,0,0,415,416,5,13,0,0,
+	416,421,3,68,34,0,417,418,5,34,0,0,418,420,3,68,34,0,419,417,1,0,0,0,420,
 	423,1,0,0,0,421,419,1,0,0,0,421,422,1,0,0,0,422,67,1,0,0,0,423,421,1,0,
-	0,0,424,425,3,46,23,0,425,426,5,79,0,0,426,427,3,46,23,0,427,69,1,0,0,0,
+	0,0,424,425,3,46,23,0,425,426,5,80,0,0,426,427,3,46,23,0,427,69,1,0,0,0,
 	428,429,5,1,0,0,429,430,3,18,9,0,430,432,3,88,44,0,431,433,3,76,38,0,432,
 	431,1,0,0,0,432,433,1,0,0,0,433,71,1,0,0,0,434,435,5,7,0,0,435,436,3,18,
-	9,0,436,437,3,88,44,0,437,73,1,0,0,0,438,439,5,11,0,0,439,440,3,44,22,0,
-	440,75,1,0,0,0,441,446,3,78,39,0,442,443,5,33,0,0,443,445,3,78,39,0,444,
+	9,0,436,437,3,88,44,0,437,73,1,0,0,0,438,439,5,12,0,0,439,440,3,44,22,0,
+	440,75,1,0,0,0,441,446,3,78,39,0,442,443,5,34,0,0,443,445,3,78,39,0,444,
 	442,1,0,0,0,445,448,1,0,0,0,446,444,1,0,0,0,446,447,1,0,0,0,447,77,1,0,
-	0,0,448,446,1,0,0,0,449,450,3,48,24,0,450,451,5,32,0,0,451,452,3,54,27,
+	0,0,448,446,1,0,0,0,449,450,3,48,24,0,450,451,5,33,0,0,451,452,3,54,27,
 	0,452,79,1,0,0,0,453,454,7,7,0,0,454,81,1,0,0,0,455,458,3,84,42,0,456,458,
 	3,86,43,0,457,455,1,0,0,0,457,456,1,0,0,0,458,83,1,0,0,0,459,461,7,0,0,
-	0,460,459,1,0,0,0,460,461,1,0,0,0,461,462,1,0,0,0,462,463,5,28,0,0,463,
+	0,460,459,1,0,0,0,460,461,1,0,0,0,461,462,1,0,0,0,462,463,5,29,0,0,463,
 	85,1,0,0,0,464,466,7,0,0,0,465,464,1,0,0,0,465,466,1,0,0,0,466,467,1,0,
-	0,0,467,468,5,27,0,0,468,87,1,0,0,0,469,470,5,26,0,0,470,89,1,0,0,0,471,
+	0,0,467,468,5,28,0,0,468,87,1,0,0,0,469,470,5,27,0,0,470,89,1,0,0,0,471,
 	472,7,8,0,0,472,91,1,0,0,0,473,474,5,5,0,0,474,475,3,94,47,0,475,93,1,0,
-	0,0,476,477,5,63,0,0,477,478,3,2,1,0,478,479,5,64,0,0,479,95,1,0,0,0,480,
-	481,5,14,0,0,481,485,5,95,0,0,482,483,5,14,0,0,483,485,5,96,0,0,484,480,
-	1,0,0,0,484,482,1,0,0,0,485,97,1,0,0,0,486,487,5,3,0,0,487,490,5,85,0,0,
-	488,489,5,83,0,0,489,491,3,46,23,0,490,488,1,0,0,0,490,491,1,0,0,0,491,
-	501,1,0,0,0,492,493,5,84,0,0,493,498,3,100,50,0,494,495,5,33,0,0,495,497,
+	0,0,476,477,5,64,0,0,477,478,3,2,1,0,478,479,5,65,0,0,479,95,1,0,0,0,480,
+	481,5,15,0,0,481,485,5,96,0,0,482,483,5,15,0,0,483,485,5,100,0,0,484,480,
+	1,0,0,0,484,482,1,0,0,0,485,97,1,0,0,0,486,487,5,3,0,0,487,490,5,86,0,0,
+	488,489,5,84,0,0,489,491,3,46,23,0,490,488,1,0,0,0,490,491,1,0,0,0,491,
+	501,1,0,0,0,492,493,5,85,0,0,493,498,3,100,50,0,494,495,5,34,0,0,495,497,
 	3,100,50,0,496,494,1,0,0,0,497,500,1,0,0,0,498,496,1,0,0,0,498,499,1,0,
 	0,0,499,502,1,0,0,0,500,498,1,0,0,0,501,492,1,0,0,0,501,502,1,0,0,0,502,
-	99,1,0,0,0,503,504,3,46,23,0,504,505,5,32,0,0,505,507,1,0,0,0,506,503,1,
+	99,1,0,0,0,503,504,3,46,23,0,504,505,5,33,0,0,505,507,1,0,0,0,506,503,1,
 	0,0,0,506,507,1,0,0,0,507,508,1,0,0,0,508,509,3,46,23,0,509,101,1,0,0,0,
 	50,113,120,135,147,156,164,168,176,178,183,190,195,202,208,216,218,228,
 	238,241,253,261,269,273,277,285,297,301,307,316,324,348,359,370,375,386,
