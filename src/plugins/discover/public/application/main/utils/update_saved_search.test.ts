@@ -99,7 +99,7 @@ describe('updateSavedSearch', () => {
     });
   });
 
-  it('should not set time range is timeRestore is enabled', async () => {
+  it('should not set time range if timeRestore is not enabled', async () => {
     const savedSearch: SavedSearch = {
       ...savedSearchMock,
       searchSource: savedSearchMock.searchSource.createCopy(),
