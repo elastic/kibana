@@ -55,7 +55,6 @@ export type SuccessfulRunResult = {
    */
   state: Record<string, unknown>;
   taskRunError?: DecoratedError;
-  skipAttempts?: number;
   shouldValidate?: boolean;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
@@ -341,11 +340,6 @@ export interface TaskInstance {
    */
   enabled?: boolean;
 
-  /**
-   * Indicates the number of skipped executions.
-   */
-  numSkippedRuns?: number;
-
   /*
    * Optionally override the timeout defined in the task type for this specific task instance
    */
@@ -362,6 +356,10 @@ export interface TaskInstanceWithDeprecatedFields extends TaskInstance {
    * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
    * */
   interval?: string;
+  /**
+   * Indicates the number of skipped executions.
+   */
+  numSkippedRuns?: number;
 }
 
 /**
@@ -383,6 +381,11 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * @deprecated This field has been moved under schedule (deprecated) with version 7.6.0
    */
   interval?: string;
+
+  /**
+   *  @deprecated removed with version 8.14.0
+   */
+  numSkippedRuns?: number;
 
   /**
    * The saved object version from the Elasticsearch document.
