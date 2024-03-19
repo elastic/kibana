@@ -14,14 +14,7 @@ import {
   EuiCard,
 } from '@elastic/eui';
 import React, { MouseEventHandler, ReactNode, useMemo } from 'react';
-import styled from 'styled-components';
-
-const EmptyPrompt = styled(EuiEmptyPrompt)`
-  align-self: center; /* Corrects horizontal centering in IE11 */
-  max-width: 60em;
-`;
-
-EmptyPrompt.displayName = 'EmptyPrompt';
+import { css } from '@emotion/react';
 
 interface EmptyPageActions {
   icon?: IconType;
@@ -102,11 +95,15 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
   );
 
   return (
-    <EmptyPrompt
+    <EuiEmptyPrompt
       iconType="casesApp"
       title={<h2>{title}</h2>}
       body={message && <p>{message}</p>}
       actions={<EuiFlexGroup justifyContent="center">{renderActions}</EuiFlexGroup>}
+      css={css`
+        align-self: center; /* Corrects horizontal centering in IE11 */
+        max-width: 60em;
+      `}
       {...rest}
     />
   );

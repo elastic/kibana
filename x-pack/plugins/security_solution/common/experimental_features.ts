@@ -77,9 +77,19 @@ export const allowedExperimentalValues = Object.freeze({
   automatedProcessActionsEnabled: false,
 
   /**
-   * Enables the ability to send Response actions to SentinelOne
+   * Enables the ability to send Response actions to SentinelOne and persist the results
+   * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
+   * response actions in Response Console.
+   *
+   * Release: v8.13.0
    */
   responseActionsSentinelOneV1Enabled: false,
+
+  /**
+   * Enables use of SentinelOne response actions that complete asynchronously as well as support
+   * for more response actions.
+   */
+  responseActionsSentinelOneV2Enabled: false,
 
   /**
    * Enables top charts on Alerts Page
@@ -158,11 +168,6 @@ export const allowedExperimentalValues = Object.freeze({
    * and associated callout in the UI
    */
   riskEnginePrivilegesRouteEnabled: true,
-
-  /**
-   * Enables alerts suppression for indicator match rules
-   */
-  alertSuppressionForIndicatorMatchRuleEnabled: false,
 
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
