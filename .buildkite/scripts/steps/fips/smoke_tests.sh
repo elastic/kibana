@@ -3,6 +3,8 @@
 set -euo pipefail
 
 source "$(dirname "$0")/../../common/util.sh"
+source .buildkite/scripts/steps/artifacts/env.sh
+
 .buildkite/scripts/bootstrap.sh
 
 # temporary adding this to get screenshots
@@ -13,12 +15,12 @@ echo "--- Smoke Testing for FIPS"
 mkdir -p target
 cd target
 
-download_artifact "kibana-ubi-fips-$KIBANA_PKG_VERSION*-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+download_artifact "kibana-ubi-fips-$FULL_VERSION-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 KIBANA_IP_ADDRESS="192.168.56.7"
 
 cd ..
 
-docker load <"kibana-ubi-fips-$KIBANA_PKG_VERSION*-docker-image.tar.gz"
+docker load <"kibana-ubi-fips-$FULL_VERSION-docker-image.tar.gz"
 
 node scripts/es snapshot \
   -E network.bind_host=127.0.0.1,192.168.56.1 \
@@ -45,4 +47,4 @@ export ELASTICSEARCH_HOSTS="http://192.168.56.1:9200"
 export ELASTICSEARCH_USERNAME="kibana_system"
 export ELASTICSEARCH_PASSWORD="changeme"
 
-docker run -p 5601:5601 --rm --network=host docker.elastic.co/kibana-ci/kibana-ubi-fips:$KIBANA_PKG_VERSION-$BUILDKITE_COMMIT
+docker run -p 5601:5601 --rm --network=host docker.elastic.co/kibana-ci/kibana-ubi-fips:$FULL_VERSION-$BUILDKITE_COMMIT
