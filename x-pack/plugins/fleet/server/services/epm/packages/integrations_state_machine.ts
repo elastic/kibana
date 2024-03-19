@@ -23,19 +23,25 @@ export async function handleStateMachine(
   startState: string,
   definition: StateMachineDefinition<string>
 ) {
-  await handleState(startState, definition);
+  await handleState(startState, definition, definition.context);
 }
 
-async function handleState(currentStateName: string, definition: StateMachineDefinition<string>) {
+async function handleState(
+  currentStateName: string,
+  definition: StateMachineDefinition<string>,
+  context: any
+) {
   const logger = appContextService.getLogger();
-  const { states, context } = definition;
+  const { states } = definition;
   const currentState = states[currentStateName];
   let currentStatus = 'pending';
   let stateResult;
+  let updatedContext;
 
   if (typeof currentState.onTransitionTo === 'function') {
     try {
       stateResult = await currentState.onTransitionTo.call(undefined, context);
+      updatedContext = { ...context, ...stateResult };
       currentStatus = 'success';
     } catch (error) {
       currentStatus = 'failed';
@@ -47,18 +53,18 @@ async function handleState(currentStateName: string, definition: StateMachineDef
     currentStatus = 'failed';
   }
   logger.debug(
-    `state: ${currentStateName} - status ${currentStatus} - stateResult: ${stateResult} - nextState: ${currentState.nextState}`
+    `Executed state: ${currentStateName} with status: ${currentStatus} - nextState: ${currentState.nextState}`
   );
   if (typeof currentState.onPostTransition === 'function') {
     try {
-      await currentState.onPostTransition.call(undefined, context);
+      await currentState.onPostTransition.call(undefined, updatedContext);
       logger.debug(`Executing post transition function: ${currentState.onPostTransition.name}`);
     } catch (error) {
       logger.warn(`Error during execution of post transition function: ${error.message}`);
     }
   }
   if (currentStatus === 'success' && currentState?.nextState && currentState?.nextState !== 'end') {
-    handleState(currentState.nextState, definition);
+    handleState(currentState.nextState, definition, updatedContext);
   } else {
     return;
   }

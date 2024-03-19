@@ -62,13 +62,13 @@ describe('handleStateMachine', () => {
     expect(mockEventState2).toHaveBeenCalledTimes(1);
     expect(mockEventState3).toHaveBeenCalledTimes(1);
     expect(mockContract.logger?.debug).toHaveBeenCalledWith(
-      'state: state1 - status success - stateResult: undefined - nextState: state2'
+      'Executed state: state1 with status: success - nextState: state2'
     );
     expect(mockContract.logger?.debug).toHaveBeenCalledWith(
-      'state: state2 - status success - stateResult: undefined - nextState: state3'
+      'Executed state: state2 with status: success - nextState: state3'
     );
     expect(mockContract.logger?.debug).toHaveBeenCalledWith(
-      'state: state3 - status success - stateResult: undefined - nextState: end'
+      'Executed state: state3 with status: success - nextState: end'
     );
   });
 
@@ -100,9 +100,11 @@ describe('handleStateMachine', () => {
     );
   });
 
-  it('should call the onTransition function with the provided data', async () => {
-    const mockEventState1 = jest.fn();
-    const mockEventState2 = jest.fn();
+  it('should call the onTransition function with context data and the return value is saved for the next iteration', async () => {
+    const mockEventState1 = jest.fn().mockReturnValue({ arrayData: ['test1', 'test2'] });
+    const mockEventState2 = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve({ promiseData: {} }));
     const mockEventState3 = jest.fn();
     const contextData = { testData: 'test' };
     const testDefinition = getTestDefinition(
@@ -114,17 +116,24 @@ describe('handleStateMachine', () => {
 
     await handleStateMachine('state1', testDefinition);
     expect(mockEventState1).toHaveBeenCalledWith({ testData: 'test' });
-    expect(mockEventState2).toHaveBeenCalledWith({ testData: 'test' });
-    expect(mockEventState3).toHaveBeenCalledWith({ testData: 'test' });
+    expect(mockEventState2).toHaveBeenCalledWith({
+      testData: 'test',
+      arrayData: ['test1', 'test2'],
+    });
+    expect(mockEventState3).toHaveBeenCalledWith({
+      testData: 'test',
+      arrayData: ['test1', 'test2'],
+      promiseData: {},
+    });
 
     expect(mockContract.logger?.debug).toHaveBeenCalledWith(
-      'state: state1 - status success - stateResult: undefined - nextState: state2'
+      'Executed state: state1 with status: success - nextState: state2'
     );
     expect(mockContract.logger?.debug).toHaveBeenCalledWith(
-      'state: state2 - status success - stateResult: undefined - nextState: state3'
+      'Executed state: state2 with status: success - nextState: state3'
     );
     expect(mockContract.logger?.debug).toHaveBeenCalledWith(
-      'state: state3 - status success - stateResult: undefined - nextState: end'
+      'Executed state: state3 with status: success - nextState: end'
     );
   });
 
