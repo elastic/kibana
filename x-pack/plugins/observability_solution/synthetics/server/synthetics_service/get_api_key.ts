@@ -19,9 +19,9 @@ import { checkHasPrivileges } from './authentication/check_has_privilege';
 
 export const syntheticsIndex = 'synthetics-*';
 
-export const getServiceApiKeyPrivileges = (isServerless?: boolean) => {
+export const getServiceApiKeyPrivileges = (isServerless: boolean) => {
   const cluster: SecurityClusterPrivilege[] = ['monitor', 'read_pipeline'];
-  if (!isServerless) cluster.push('read_ilm');
+  if (isServerless === false) cluster.push('read_ilm');
   return {
     cluster,
     indices: [
