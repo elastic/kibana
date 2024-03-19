@@ -65,11 +65,11 @@ describe('useConnectorSetup', () => {
       ).toEqual([
         {
           username: 'You',
-          timestamp: 'at: 7/17/2023, 1:00:36 PM',
+          timestamp: 'at: 3/18/2024, 11:59:18 AM',
         },
         {
           username: 'Assistant',
-          timestamp: 'at: 7/17/2023, 1:00:40 PM',
+          timestamp: 'at: 3/19/2024, 11:59:18 AM',
         },
       ]);
 

@@ -14,7 +14,6 @@ import {
   ConversationResponse,
 } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import moment from 'moment';
 import { getConversation } from './get_conversation';
 import { CreateMessageSchema } from './types';
 
@@ -96,7 +95,7 @@ export const transformToCreateScheme = (
     exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
     is_default: isDefault,
     messages: messages?.map((message) => ({
-      '@timestamp': moment(message.timestamp).toISOString(),
+      '@timestamp': message.timestamp,
       content: message.content,
       is_error: message.isError,
       reader: message.reader,

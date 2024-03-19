@@ -24,7 +24,7 @@ const currentConversation = {
     {
       role: user,
       content: 'Hello {name}',
-      timestamp: '2022-01-01',
+      timestamp: '2024-03-19T18:59:18.174Z',
       isError: false,
     },
   ],
@@ -66,5 +66,10 @@ describe('getComments', () => {
       },
     });
     expect(result[0].eventColor).toEqual('danger');
+  });
+
+  it('It transforms message timestamp from server side ISO format to local date string', () => {
+    const result = getComments(testProps);
+    expect(result[0].timestamp).toEqual('at: 3/19/2024, 11:59:18 AM');
   });
 });

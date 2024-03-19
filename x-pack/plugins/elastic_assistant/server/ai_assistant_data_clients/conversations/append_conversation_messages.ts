@@ -8,7 +8,6 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { ConversationResponse, Message } from '@kbn/elastic-assistant-common';
-import moment from 'moment';
 import { getConversation } from './get_conversation';
 
 export interface AppendConversationMessagesParams {
@@ -96,7 +95,7 @@ export const transformToUpdateScheme = (updatedAt: string, messages: Message[]) 
   return {
     updated_at: updatedAt,
     messages: messages?.map((message) => ({
-      '@timestamp': moment(message.timestamp).toISOString(),
+      '@timestamp': message.timestamp,
       content: message.content,
       is_error: message.isError,
       reader: message.reader,
