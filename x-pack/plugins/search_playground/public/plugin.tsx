@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, Plugin, CoreStart, AppMountParameters } from '@kbn/core/public';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { CREATE_INDEX_LOCATOR_ID, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { PlaygroundToolbar, PlaygroundProvider, Playground } from './embeddable';
 import {
   AppPluginStartDependencies,
@@ -18,7 +18,9 @@ export class SearchPlaygroundPlugin
   implements Plugin<SearchPlaygroundPluginSetup, SearchPlaygroundPluginStart>
 {
   public setup(core: CoreSetup): SearchPlaygroundPluginSetup {
-    return {};
+    return {
+      createIndexLocatorId: CREATE_INDEX_LOCATOR_ID,
+    };
 
     core.application.register({
       id: PLUGIN_ID,
@@ -31,8 +33,6 @@ export class SearchPlaygroundPlugin
         return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
       },
     });
-
-    return {};
   }
 
   public start(core: CoreStart, deps: AppPluginStartDependencies): SearchPlaygroundPluginStart {

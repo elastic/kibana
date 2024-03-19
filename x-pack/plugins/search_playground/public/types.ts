@@ -16,14 +16,16 @@ import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { HttpStart } from '@kbn/core-http-browser';
 import React from 'react';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
 import type { Toolbar } from './components/toolbar';
 
 export * from '../common/types';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchPlaygroundPluginSetup {}
+export interface SearchPlaygroundPluginSetup {
+  createIndexLocatorId: string;
+}
 export interface SearchPlaygroundPluginStart {
   PlaygroundProvider: React.FC<React.ComponentProps<typeof PlaygroundProviderComponent>>;
   PlaygroundToolbar: React.FC<React.ComponentProps<typeof Toolbar>>;
@@ -35,8 +37,9 @@ export interface AppPluginStartDependencies {
 }
 
 export interface AppServicesContext {
-  security: SecurityPluginStart;
   http: HttpStart;
+  security: SecurityPluginStart;
+  share: SharePluginStart;
 }
 
 export enum ChatFormFields {

@@ -5,23 +5,14 @@
  * 2.0.
  */
 
-import React, { createContext } from 'react';
+import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ChatForm } from '../types';
 
-export interface PlaygroundProviderProps {
-  navigateToIndexPage: () => void;
-}
-
-export const ChatContext = createContext<{ navigateToIndexPage?: () => void }>({});
-
 const queryClient = new QueryClient({});
 
-export const PlaygroundProvider: React.FC<PlaygroundProviderProps> = ({
-  navigateToIndexPage,
-  children,
-}) => {
+export const PlaygroundProvider: React.FC = ({ children }) => {
   const form = useForm<ChatForm>({
     defaultValues: {
       prompt: 'You are an assistant for question-answering tasks.',
@@ -29,10 +20,8 @@ export const PlaygroundProvider: React.FC<PlaygroundProviderProps> = ({
   });
 
   return (
-    <ChatContext.Provider value={{ navigateToIndexPage }}>
-      <QueryClientProvider client={queryClient}>
-        <FormProvider {...form}>{children}</FormProvider>
-      </QueryClientProvider>
-    </ChatContext.Provider>
+    <QueryClientProvider client={queryClient}>
+      <FormProvider {...form}>{children}</FormProvider>
+    </QueryClientProvider>
   );
 };

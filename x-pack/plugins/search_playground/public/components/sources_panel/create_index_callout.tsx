@@ -8,11 +8,30 @@
 import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { useChatContext } from '../../hooks/use_chat_context';
+import React, { useCallback, useMemo } from 'react';
+import { useKibana } from '../../hooks/use_kibana';
+import { CREATE_INDEX_LOCATOR_ID } from '../../../common';
 
 export const CreateIndexCallout: React.FC = () => {
-  const { navigateToIndexPage } = useChatContext();
+  const {
+    services: { application, share },
+  } = useKibana();
+  const createIndexLocator = useMemo(() => {
+    const locator = share.url.locators.get(CREATE_INDEX_LOCATOR_ID);
+
+    if (!locator) {
+      throw new Error(`Create index locator not registered`);
+    }
+
+    return locator;
+  }, [share.url.locators]);
+  const handleNavigateToIndex = useCallback(async () => {
+    const createIndexUrl = await createIndexLocator?.getUrl({});
+
+    if (createIndexUrl) {
+      application?.navigateToUrl(createIndexUrl);
+    }
+  }, [application, createIndexLocator]);
 
   return (
     <EuiCallOut
@@ -36,7 +55,7 @@ export const CreateIndexCallout: React.FC = () => {
         iconType="plusInCircle"
         fill
         size="s"
-        onClick={navigateToIndexPage}
+        onClick={handleNavigateToIndex}
       >
         <FormattedMessage
           id="xpack.searchPlayground.sources.createIndexCallout."

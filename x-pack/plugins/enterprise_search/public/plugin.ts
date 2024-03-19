@@ -18,15 +18,19 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
-import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
+import {
+  SearchPlaygroundPluginSetup,
+  SearchPlaygroundPluginStart,
+} from '@kbn/search-playground/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
 import {
   ANALYTICS_PLUGIN,
@@ -41,6 +45,10 @@ import {
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
+import {
+  CreatIndexLocatorDefinition,
+  CreatIndexLocatorParams,
+} from '../common/locators/create_index_locator';
 import { ClientConfigType, InitialAppData } from '../common/types';
 
 import { docLinks } from './applications/shared/doc_links';
@@ -57,6 +65,8 @@ interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
   security: SecurityPluginSetup;
+  searchPlayground: SearchPlaygroundPluginSetup;
+  share: SharePluginSetup;
 }
 
 export interface PluginsStart {
@@ -145,7 +155,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (!config.ui?.enabled) {
       return;
     }
-    const { cloud } = plugins;
+    const { cloud, share, searchPlayground } = plugins;
 
     core.application.register({
       appRoute: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
@@ -321,6 +331,10 @@ export class EnterpriseSearchPlugin implements Plugin {
       title: SEARCH_EXPERIENCES_PLUGIN.NAME,
       visibleIn: [],
     });
+
+    share.url.locators.create<CreatIndexLocatorParams>(
+      new CreatIndexLocatorDefinition(searchPlayground.createIndexLocatorId)
+    );
 
     if (config.canDeployEntSearch) {
       core.application.register({
