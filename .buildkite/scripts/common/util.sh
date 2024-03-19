@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/vault_fns.sh"
+
 checks-reporter-with-killswitch() {
   if [ "$CHECKS_REPORTER_ACTIVE" == "true" ] ; then
     yarn run github-checks-reporter "$@"
