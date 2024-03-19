@@ -7,12 +7,10 @@
 
 import { ObservabilityConfig } from '..';
 import { rulesRouteRepository } from './rules/route';
-import { sloRouteRepository } from './slo/route';
 
 export function getObservabilityServerRouteRepository(config: ObservabilityConfig) {
   const repository = {
     ...rulesRouteRepository,
-    ...sloRouteRepository,
   };
   return repository;
 }
