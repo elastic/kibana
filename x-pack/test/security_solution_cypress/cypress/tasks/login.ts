@@ -56,7 +56,6 @@ export const login = (role?: SecurityRoleName): void => {
     } else {
       testRole = role;
     }
-
     cy.task('getSessionCookie', testRole).then((cookie) => {
       cy.setCookie('sid', cookie as string);
     });
