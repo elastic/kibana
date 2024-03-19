@@ -196,19 +196,6 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
         'z-index': zIndexNode,
       },
     },
-    // {
-    //   selector: 'node.event-node-border',
-    //   style: {
-    //     ghost: 'no',
-    //     shape: 'star',
-    //     'background-color': '#FFF9E8',
-    //     'border-color': '#FEC514',
-    //     'border-width': 2,
-    //     'background-image': 'none',
-    //     width: '160px',
-    //     // padding: '10px', // Adjust as needed for visual appearance
-    //   },
-    // },
     {
       selector: 'node.event-node',
       style: {
@@ -294,12 +281,6 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
       selector: 'node.hover',
       style: {
         'border-width': getBorderWidth,
-      },
-    },
-    {
-      selector: 'node.event-node.hover',
-      style: {
-        'border-width': 0,
       },
     },
     {
