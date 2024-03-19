@@ -37,6 +37,4 @@ export interface SentinelOneActionRequestCommonMeta {
 /**
  * Metadata capture for the isolation actions (`isolate` and `release`)
  */
-export interface SentinelOneIsolationRequestMeta {
-  sentAt: string;
-}
+export type SentinelOneIsolationRequestMeta = SentinelOneActionRequestCommonMeta;

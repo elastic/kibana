@@ -11,7 +11,7 @@ import {
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
-import { once } from 'lodash';
+import { groupBy, once } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
   SentinelOneGetAgentsResponse,
@@ -21,7 +21,10 @@ import type {
   CommonResponseActionMethodOptions,
   ProcessPendingActionsMethodOptions,
 } from '../../..';
-import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
+} from '../../../../../../common/endpoint/service/response_actions/constants';
 import type {
   SentinelOneConnectorExecuteOptions,
   SentinelOneIsolationRequestMeta,
@@ -34,6 +37,7 @@ import type {
   LogsEndpointAction,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
+  LogsEndpointActionResponse,
 } from '../../../../../../common/endpoint/types';
 import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
 import type {
@@ -42,6 +46,8 @@ import type {
   ResponseActionsClientValidateRequestResponse,
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
+
+const SENTINEL_ONE_ACTIVITY_INDEX = 'logs-sentinel_one.activity-default';
 
 export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: ActionsClient;
@@ -339,10 +345,83 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     abortSignal,
     addToQueue,
   }: ProcessPendingActionsMethodOptions): Promise<void> {
-    // TODO:PT implement resolving of pending S1 actions
-    // if (abortSignal.aborted) {
-    //   return;
-    // }
+    if (abortSignal.aborted) {
+      return;
+    }
+
+    for await (const pendingActions of this.fetchAllPendingActions()) {
+      if (abortSignal.aborted) {
+        return;
+      }
+
+      const pendingActionsByType = groupBy(pendingActions, 'EndpointActions.data.command');
+
+      for (const [actionType, typePendingActions] of Object.entries(pendingActionsByType)) {
+        if (abortSignal.aborted) {
+          return;
+        }
+
+        switch (actionType as ResponseActionsApiCommandNames) {
+          case 'isolate':
+            addToQueue(
+              ...(await this.checkPendingIsolateActions(
+                typePendingActions as Array<
+                  LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>
+                >
+              ))
+            );
+            break;
+
+          case 'unisolate':
+            addToQueue(
+              ...(await this.checkPendingReleaseActions(
+                typePendingActions as Array<
+                  LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>
+                >
+              ))
+            );
+            break;
+        }
+      }
+    }
+  }
+
+  /**
+   * Checks if the provided Isolate actions are complete and if so, then it builds the Response
+   * document for them and returns it. (NOTE: the response is NOT written to ES - only returned)
+   * @param actionRequests
+   * @private
+   */
+  private async checkPendingIsolateActions(
+    actionRequests: Array<LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>>
+  ): Promise<LogsEndpointActionResponse[]> {
+    const completedResponses: LogsEndpointActionResponse[] = [];
+    const searchResults = this.options.esClient.search({
+      index: SENTINEL_ONE_ACTIVITY_INDEX,
+      query: {
+        // TODO:PT implement
+      },
+      sort: [{ 'sentinel_one.activity.updated_at': { order: 'desc' } }],
+      size: 1, // We only need the first response after the date that the request was sent
+    });
+
+    return completedResponses;
+  }
+
+  /**
+   * Checks if the provided Release actions are complete and if so, then it builds the Response
+   * document for them and returns it. (NOTE: the response is NOT written to ES - only returned)
+   * @param actionRequests
+   * @private
+   */
+  private async checkPendingReleaseActions(
+    actionRequests: Array<LogsEndpointAction<undefined, {}, SentinelOneIsolationRequestMeta>>
+  ): Promise<LogsEndpointActionResponse[]> {
+    const completedResponses: LogsEndpointActionResponse[] = [];
+
+    // TODO:PT implement
+
+    return completedResponses;
   }
 
   // getIsolateResponse()
