@@ -19,7 +19,6 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
@@ -288,11 +287,28 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
             >
               <FormattedMessage
                 id="xpack.reporting.modalContent.copyUrlButtonLabel"
-                defaultMessage="Copy POST URL  "
+                defaultMessage="Post URL  "
               />
             </EuiButtonEmpty>
           )}
         </EuiCopy>
+        <EuiToolTip
+          content={
+            isSaved ? (
+              <FormattedMessage
+                id="reporting.modalContent.postUrl"
+                defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
+              />
+            ) : (
+              <FormattedMessage
+                id="reporting.modalContent.postUrl"
+                defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher.  Unsaved changes: URL may change if you upgrade Kibana"
+              />
+            )
+          }
+        >
+          <EuiIcon type="questionInCircle" />
+        </EuiToolTip>
       </>
     );
   };
@@ -310,7 +326,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
           >
             <FormattedMessage
               id="xpack.reporting.modalContent.generateButtonLabel"
-              defaultMessage="Generate report"
+              defaultMessage="Generate export"
             />
           </EuiButton>
         </EuiToolTip>
@@ -325,14 +341,17 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       >
         <FormattedMessage
           id="xpack.reporting.generateReportButtonLabel"
-          defaultMessage="Generate report"
+          defaultMessage="Generate export"
         />
       </EuiButton>
     );
   return (
     <>
       <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
-        <EuiText size="s">Exports can take a few minutes to generate.</EuiText>
+        <FormattedMessage
+          id="reporting.share.imageExport"
+          defaultMessage="Exports can take a few minutes to generate."
+        />
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
           <EuiRadioGroup
@@ -346,15 +365,19 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
             name="image reporting radio group"
             idSelected={selectedRadio}
             legend={{
-              children: <span>File type</span>,
+              children: (
+                <FormattedMessage id="reporting.share.fileType" defaultMessage="File type" />
+              ),
             }}
           />
         </EuiFlexGroup>
         <EuiSpacer size="m" />
+      </EuiForm>
+      <EuiModalFooter>
         {renderOptions()}
         {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
-      </EuiForm>
-      <EuiModalFooter>{saveWarningMessageWithButton}</EuiModalFooter>
+        {saveWarningMessageWithButton}
+      </EuiModalFooter>
     </>
   );
 };
