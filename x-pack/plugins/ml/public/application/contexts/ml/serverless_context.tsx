@@ -28,14 +28,14 @@ export const EnabledFeaturesContext = createContext({
 
 interface Props {
   isServerless: boolean;
-  showMLNavMenu: boolean;
   mlFeatures: MlFeatures;
+  showMLNavMenu?: boolean;
 }
 
 export const EnabledFeaturesContextProvider: FC<Props> = ({
   children,
   isServerless,
-  showMLNavMenu,
+  showMLNavMenu = true,
   mlFeatures,
 }) => {
   const features: EnabledFeatures = {
