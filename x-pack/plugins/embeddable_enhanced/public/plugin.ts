@@ -55,7 +55,7 @@ export interface SerializedReactEmbeddableDynamicActions {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupContract {}
 
-export interface EmbeddableEnhancedPluginStart {
+export interface StartContract {
   initializeReactEmbeddableDynamicActions: (
     uuid: string,
     getTitle: () => string | undefined,
@@ -76,8 +76,7 @@ export interface DynamicActionsSerializedState {
 }
 
 export class EmbeddableEnhancedPlugin
-  implements
-    Plugin<SetupContract, EmbeddableEnhancedPluginStart, SetupDependencies, StartDependencies>
+  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
 {
   constructor(protected readonly context: PluginInitializerContext) {}
 
@@ -92,7 +91,7 @@ export class EmbeddableEnhancedPlugin
     return {};
   }
 
-  public start(core: CoreStart, plugins: StartDependencies): EmbeddableEnhancedPluginStart {
+  public start(core: CoreStart, plugins: StartDependencies): StartContract {
     this.uiActions = plugins.uiActionsEnhanced;
 
     return {
@@ -184,6 +183,9 @@ export class EmbeddableEnhancedPlugin
     };
   }
 
+  /**
+   * TODO: Remove this entire enhanceEmbeddableWithDynamicActions method once the embeddable refactor work is complete
+   */
   private enhanceEmbeddableWithDynamicActions<E extends IEmbeddable>(
     embeddable: E
   ): EnhancedEmbeddable<E> {
@@ -199,6 +201,9 @@ export class EmbeddableEnhancedPlugin
       },
     };
 
+    /**
+     * Keep the dynamicActionsState$ publishing subject in sync with changes to the embeddable's input.
+     */
     embeddable
       .getInput$()
       .pipe(
@@ -245,7 +250,7 @@ export class EmbeddableEnhancedPlugin
     dynamicActions.start().catch((error) => {
       /* eslint-disable no-console */
 
-      console.log('Failed to start embeddable dynamic actions', dynamicActions, error);
+      console.log('Failed to start embeddable dynamic actions', dynamicActions);
       console.error(error);
       /* eslint-enable */
     });
