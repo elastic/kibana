@@ -91,7 +91,7 @@ export function HeaderTitle({ isLoading, slo }: Props) {
         >
           <p>
             <FormattedMessage
-              id="xpack.observability.slo.sloDetails.headerTitle.calloutDescription"
+              id="xpack.slo.sloDetails.headerTitle.calloutDescription"
               defaultMessage="This is a remote SLO which belongs to another Kibana instance. it is fetched from the remote cluster: {remoteName}."
               values={{ remoteName: <strong>{slo.remoteName}</strong> }}
             />
