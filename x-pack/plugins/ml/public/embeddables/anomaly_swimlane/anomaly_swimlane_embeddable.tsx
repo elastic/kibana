@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+import { Subject, Subscription, type BehaviorSubject } from 'rxjs';
 import type {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
@@ -43,9 +43,9 @@ export class AnomalySwimlaneEmbeddable extends AnomalyDetectionEmbeddable<
   public readonly type: string = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
 
   // API
-  public viewBy = new BehaviorSubject<string | undefined>(this.getInput().viewBy);
-  public perPage = new BehaviorSubject<number | undefined>(this.getOutput().perPage);
-  public fromPage = new BehaviorSubject<number | undefined>(this.getOutput().fromPage);
+  public viewBy: BehaviorSubject<string | undefined>;
+  public perPage: BehaviorSubject<number | undefined>;
+  public fromPage: BehaviorSubject<number | undefined>;
 
   private apiSubscriptions = new Subscription();
 
