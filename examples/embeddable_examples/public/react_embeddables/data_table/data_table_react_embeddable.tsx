@@ -8,18 +8,16 @@
 
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { CellActionsProvider } from '@kbn/cell-actions';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { getUnifiedDataTable } from '@kbn/discover-plugin/public';
 import {
   initializeReactEmbeddableTitles,
-  initializeReactEmbeddableUuid,
   ReactEmbeddableFactory,
-  RegisterReactEmbeddable,
   registerReactEmbeddableFactory,
-  useReactEmbeddableApiHandle,
-  useReactEmbeddableUnsavedChanges,
 } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useClosestCompatibleApi } from '@kbn/presentation-containers';
 import {
   apiPublishesDataViews,
@@ -27,7 +25,8 @@ import {
   useBatchedPublishingSubjects,
   useClosestDataViewsSubject,
 } from '@kbn/presentation-publishing';
-import { DataLoadingState } from '@kbn/unified-data-table';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
 import React, { useEffect } from 'react';
 import { EmbeddableExamplesStartDependencies } from '../../plugin';
 import { apiPublishesSelectedFields } from '../field_list/publishes_selected_fields';
@@ -44,22 +43,21 @@ export const registerDataTableFactory = (
   services: EmbeddableExamplesStartDependencies
 ) => {
   const discoverTableFactory: ReactEmbeddableFactory<DataTableSerializedState, DataTableApi> = {
+    type: DATA_TABLE_ID,
     deserializeState: (state) => {
       return state.rawState as DataTableSerializedState;
     },
-    getComponent: async (initialState, maybeId) => {
+    buildEmbeddable: async (initialState, buildApi) => {
       // initialize embeddable state
-      const uuid = initializeReactEmbeddableUuid(maybeId);
       const { titlesApi, titleComparators, serializeTitles } =
         initializeReactEmbeddableTitles(initialState);
 
       // initialize required async services
       const promises = [
-        getUnifiedDataTable(),
         services.dataViews.getDefault(),
         initializeDataTableQueries(services.data),
       ] as const;
-      const [DataTable, defaultDataView, dataTableQueryService] = await Promise.all(promises);
+      const [defaultDataView, dataTableQueryService] = await Promise.all(promises);
       if (!defaultDataView) {
         throw new Error(
           i18n.translate('embeddableExamples.dataTable.noDataViewError', {
@@ -68,91 +66,103 @@ export const registerDataTableFactory = (
         );
       }
 
-      // Create the React Embeddable component
-      return RegisterReactEmbeddable((apiRef) => {
-        const { unsavedChanges, resetUnsavedChanges } = useReactEmbeddableUnsavedChanges(
-          uuid,
-          discoverTableFactory,
-          titleComparators
-        );
+      // initialize services
+      const storage = new Storage(localStorage);
+      const fullServices = {
+        ...services,
+        storage,
+        theme: core.theme,
+        uiSettings: core.uiSettings,
+        toastNotifications: core.notifications.toasts,
+      };
 
-        // publish this embeddable's API.
-        const thisApi = useReactEmbeddableApiHandle(
-          {
-            type: DATA_TABLE_ID,
-            ...titlesApi,
-            unsavedChanges,
-            forceRefresh: dataTableQueryService.forceRefresh,
-            dataLoading: dataTableQueryService.queryLoading$,
-            resetUnsavedChanges,
-            serializeState: async () => {
-              return {
-                rawState: serializeTitles(),
-              };
-            },
+      const api = buildApi(
+        {
+          ...titlesApi,
+          forceRefresh: dataTableQueryService.forceRefresh,
+          dataLoading: dataTableQueryService.queryLoading$,
+          serializeState: () => {
+            return {
+              rawState: serializeTitles(),
+            };
           },
-          apiRef,
-          uuid
-        );
+        },
+        titleComparators
+      );
 
-        // inherit state
-        const dataViews$ = useClosestDataViewsSubject(thisApi, defaultDataView);
-        const unifiedSearchProvider = useClosestCompatibleApi(
-          thisApi,
-          apiPublishesLocalUnifiedSearch
-        );
-        const fieldsProvider = useClosestCompatibleApi(thisApi, apiPublishesSelectedFields);
+      // Create the React Embeddable component
+      return {
+        api,
+        Component: () => {
+          // inherit state
+          const dataViews$ = useClosestDataViewsSubject(api, defaultDataView);
+          const unifiedSearchProvider = useClosestCompatibleApi(
+            api,
+            apiPublishesLocalUnifiedSearch
+          );
+          const fieldsProvider = useClosestCompatibleApi(api, apiPublishesSelectedFields);
 
-        // start the query service.
-        dataTableQueryService.setProviders(dataViews$, unifiedSearchProvider);
+          // start the query service.
+          dataTableQueryService.setProviders(dataViews$, unifiedSearchProvider);
 
-        // unwrap publishing subjects into reactive state
-        const [inheritedFields, rows, loading, dataViews] = useBatchedPublishingSubjects(
-          fieldsProvider?.selectedFields,
-          dataTableQueryService.rows$,
-          thisApi.dataLoading,
-          dataViews$
-        );
+          // unwrap publishing subjects into reactive state
+          const [inheritedFields, rows, loading, dataViews] = useBatchedPublishingSubjects(
+            fieldsProvider?.selectedFields,
+            dataTableQueryService.rows$,
+            api.dataLoading,
+            dataViews$
+          );
 
-        // run on destroy functions on unmount
-        useEffect(() => {
-          return () => {
-            dataTableQueryService.onDestroy();
-          };
-        }, []);
+          // run on destroy functions on unmount
+          useEffect(() => {
+            return () => {
+              dataTableQueryService.onDestroy();
+            };
+          }, []);
 
-        return (
-          <>
-            <EuiScreenReaderOnly>
-              <span id="dataTableReactEmbeddableAria">
-                {i18n.translate('embeddableExamples.dataTable.ariaLabel', {
-                  defaultMessage: 'Data table',
-                })}
-              </span>
-            </EuiScreenReaderOnly>
-            <div
-              css={css`
-                width: 100%;
-              `}
-            >
-              <DataTable
-                ariaLabelledBy="dataTableReactEmbeddableAria"
-                columns={inheritedFields ?? []}
-                dataView={dataViews[0]}
-                onFilter={() => {}}
-                onSetColumns={() => {}}
-                loadingState={loading ? DataLoadingState.loading : DataLoadingState.loaded}
-                showTimeCol={true}
-                useNewFieldsApi={true}
-                sort={[]}
-                rows={rows}
-                sampleSizeState={100}
-              />
-            </div>
-          </>
-        );
-      });
+          return (
+            <>
+              <EuiScreenReaderOnly>
+                <span id="dataTableReactEmbeddableAria">
+                  {i18n.translate('embeddableExamples.dataTable.ariaLabel', {
+                    defaultMessage: 'Data table',
+                  })}
+                </span>
+              </EuiScreenReaderOnly>
+              <div
+                css={css`
+                  width: 100%;
+                `}
+              >
+                <KibanaRenderContextProvider theme={core.theme} i18n={core.i18n}>
+                  <KibanaContextProvider services={fullServices}>
+                    <CellActionsProvider
+                      getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
+                    >
+                      <UnifiedDataTable
+                        sort={[]}
+                        rows={rows}
+                        showTimeCol={true}
+                        onFilter={() => {}}
+                        sampleSizeState={100}
+                        useNewFieldsApi={true}
+                        onSetColumns={() => {}}
+                        dataView={dataViews[0]}
+                        columns={inheritedFields ?? []}
+                        ariaLabelledBy="dataTableReactEmbeddableAria"
+                        loadingState={loading ? DataLoadingState.loading : DataLoadingState.loaded}
+                        services={fullServices}
+                      />
+                    </CellActionsProvider>
+                  </KibanaContextProvider>
+                </KibanaRenderContextProvider>
+              </div>
+            </>
+          );
+        },
+      };
     },
   };
-  registerReactEmbeddableFactory(DATA_TABLE_ID, discoverTableFactory);
+
+  registerReactEmbeddableFactory(discoverTableFactory);
 };

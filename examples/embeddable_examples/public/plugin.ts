@@ -11,6 +11,7 @@ import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -50,6 +51,7 @@ export interface EmbeddableExamplesStartDependencies {
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViews: DataViewsPublicPluginStart;
   embeddable: EmbeddableStart;
+  discover: DiscoverStart;
   uiActions: UiActionsStart;
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
