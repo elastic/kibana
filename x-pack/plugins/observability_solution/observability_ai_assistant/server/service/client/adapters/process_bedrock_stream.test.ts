@@ -11,6 +11,7 @@ import { Logger } from '@kbn/logging';
 import { concatenateChatCompletionChunks } from '../../../../common/utils/concatenate_chat_completion_chunks';
 import { processBedrockStream } from './process_bedrock_stream';
 import { MessageRole } from '../../../../common';
+import { rejectTokenCountEvents } from '../../util/reject_token_count_events';
 
 describe('processBedrockStream', () => {
   const encode = (completion: string, stop?: string) => {
@@ -39,6 +40,7 @@ describe('processBedrockStream', () => {
       await lastValueFrom(
         of(encode('This'), encode(' is'), encode(' some normal'), encode(' text')).pipe(
           processBedrockStream({ logger: getLoggerMock() }),
+          rejectTokenCountEvents(),
           concatenateChatCompletionChunks()
         )
       )
@@ -81,6 +83,7 @@ describe('processBedrockStream', () => {
               },
             ],
           }),
+          rejectTokenCountEvents(),
           concatenateChatCompletionChunks()
         )
       )
@@ -124,6 +127,7 @@ describe('processBedrockStream', () => {
               },
             ],
           }),
+          rejectTokenCountEvents(),
           concatenateChatCompletionChunks()
         )
       )
@@ -141,36 +145,38 @@ describe('processBedrockStream', () => {
   });
 
   it('throws an error if the XML cannot be parsed', async () => {
-    expect(
-      async () =>
-        await lastValueFrom(
-          of(
-            encode('<function_calls><invoke'),
-            encode('><tool_name>my_tool</tool><parameters'),
-            encode('><my_param>my_value</my_param'),
-            encode('></parameters></invoke'),
-            encode('>', '</function_calls>')
-          ).pipe(
-            processBedrockStream({
-              logger: getLoggerMock(),
-              functions: [
-                {
-                  name: 'my_tool',
-                  description: '',
-                  parameters: {
-                    properties: {
-                      my_param: {
-                        type: 'string',
-                      },
+    async function fn() {
+      return lastValueFrom(
+        of(
+          encode('<function_calls><invoke'),
+          encode('><tool_name>my_tool</tool><parameters'),
+          encode('><my_param>my_value</my_param'),
+          encode('></parameters></invoke'),
+          encode('>', '</function_calls>')
+        ).pipe(
+          processBedrockStream({
+            logger: getLoggerMock(),
+            functions: [
+              {
+                name: 'my_tool',
+                description: '',
+                parameters: {
+                  properties: {
+                    my_param: {
+                      type: 'string',
                     },
                   },
                 },
-              ],
-            }),
-            concatenateChatCompletionChunks()
-          )
+              },
+            ],
+          }),
+          rejectTokenCountEvents(),
+          concatenateChatCompletionChunks()
         )
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      );
+    }
+
+    await expect(fn).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Unexpected close tag
       Line: 0
       Column: 49
@@ -205,6 +211,7 @@ describe('processBedrockStream', () => {
                 },
               ],
             }),
+            rejectTokenCountEvents(),
             concatenateChatCompletionChunks()
           )
         )
@@ -238,6 +245,7 @@ describe('processBedrockStream', () => {
               },
             ],
           }),
+          rejectTokenCountEvents(),
           concatenateChatCompletionChunks()
         )
       )

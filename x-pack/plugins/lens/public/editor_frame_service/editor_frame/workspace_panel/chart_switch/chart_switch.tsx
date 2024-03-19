@@ -14,9 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelectable,
-  EuiIconTip,
   EuiSelectableOption,
-  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,9 +26,9 @@ import {
   VisualizationMap,
   DatasourceMap,
   Suggestion,
-} from '../../../types';
-import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
-import { showMemoizedErrorNotification } from '../../../lens_ui_errors';
+} from '../../../../types';
+import { getSuggestions, switchToSuggestion } from '../../suggestion_helpers';
+import { showMemoizedErrorNotification } from '../../../../lens_ui_errors';
 import {
   insertLayer,
   removeLayers,
@@ -41,8 +39,9 @@ import {
   selectActiveDatasourceId,
   selectVisualization,
   selectDatasourceStates,
-} from '../../../state_management';
-import { generateId } from '../../../id_generator/id_generator';
+} from '../../../../state_management';
+import { generateId } from '../../../../id_generator/id_generator';
+import { ChartOptionAppend } from './chart_option_append';
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -317,8 +316,8 @@ export const ChartSwitch = memo(function ChartSwitch({
                 .sort((a, b) => {
                   return (a.fullLabel || a.label).localeCompare(b.fullLabel || b.label);
                 })
-                .map(
-                  (v): SelectableEntry => ({
+                .map((v): SelectableEntry => {
+                  return {
                     'aria-label': v.fullLabel || v.label,
                     className: 'lnsChartSwitch__option',
                     isGroupLabel: false,
@@ -331,50 +330,16 @@ export const ChartSwitch = memo(function ChartSwitch({
                     ),
                     append:
                       v.selection.dataLoss !== 'nothing' || v.showExperimentalBadge ? (
-                        <EuiFlexGroup
-                          gutterSize="xs"
-                          responsive={false}
-                          alignItems="center"
-                          className="lnsChartSwitch__append"
-                        >
-                          {v.selection.dataLoss !== 'nothing' ? (
-                            <EuiFlexItem grow={false}>
-                              <EuiIconTip
-                                aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
-                                  defaultMessage: 'Warning',
-                                })}
-                                type="warning"
-                                color="warning"
-                                content={i18n.translate(
-                                  'xpack.lens.chartSwitch.dataLossDescription',
-                                  {
-                                    defaultMessage:
-                                      'Selecting this visualization type will remove incompatible configuration options and multiple layers, if present',
-                                  }
-                                )}
-                                iconProps={{
-                                  className: 'lnsChartSwitch__chartIcon',
-                                  'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
-                                }}
-                              />
-                            </EuiFlexItem>
-                          ) : null}
-                          {v.showExperimentalBadge ? (
-                            <EuiFlexItem grow={false}>
-                              <EuiBadge color="hollow">
-                                <FormattedMessage
-                                  id="xpack.lens.chartSwitch.experimentalLabel"
-                                  defaultMessage="Technical preview"
-                                />
-                              </EuiBadge>
-                            </EuiFlexItem>
-                          ) : null}
-                        </EuiFlexGroup>
+                        <ChartOptionAppend
+                          dataLoss={v.selection.dataLoss}
+                          showExperimentalBadge={v.showExperimentalBadge}
+                          id={v.selection.subVisualizationId}
+                        />
                       ) : null,
                     // Apparently checked: null is not valid for TS
                     ...(subVisualizationId === v.id && { checked: 'on' }),
-                  })
-                )
+                  };
+                })
             );
           }),
         visualizationsLookup: lookup,

@@ -7,12 +7,15 @@
 
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import type { ToolingLog } from '@kbn/tooling-log';
+
 /**
+ * Copied from x-pack/test/security_solution_api_integration/test_suites/detections_response/utils/retry.ts
+ *
  * Retry wrapper for async supertests, with a maximum number of retries.
  * You can pass in a function that executes a supertest test, and make assertions
  * on the response. If the test fails, it will retry the test the number of retries
  * that are passed in.
- * 
+ *
  * Example usage:
  * ```ts
   const fleetResponse = await retry<InstallPackageResponse>({
@@ -45,10 +48,10 @@ export const retry = async <T>({
   test,
   retryService,
   utilityName,
-  retries = 2,
+  retries = 3,
   timeout = 30000,
   retryDelay = 200,
-  log,
+  logger,
 }: {
   test: () => Promise<T>;
   utilityName: string;
@@ -56,7 +59,7 @@ export const retry = async <T>({
   retries?: number;
   timeout?: number;
   retryDelay?: number;
-  log: ToolingLog;
+  logger: ToolingLog;
 }): Promise<T> => {
   let retryAttempt = 0;
   const response = await retryService.tryForTime(
@@ -65,23 +68,16 @@ export const retry = async <T>({
       if (retryAttempt > retries) {
         // Log error message if we reached the maximum number of retries
         // but don't throw an error, return it to break the retry loop.
-        const errorMessage = `Reached maximum number of retries for test: ${
+        const errorMessage = `Reached maximum number of retries for test ${utilityName}: ${
           retryAttempt - 1
         }/${retries}`;
-        log?.error(errorMessage);
-        return new Error(JSON.stringify(errorMessage));
+        logger.error(errorMessage);
+        return new Error(errorMessage);
       }
 
       retryAttempt = retryAttempt + 1;
 
-      // Catch the error thrown by the test and log it, then throw it again
-      // to cause `tryForTime` to retry.
-      try {
-        return await test();
-      } catch (error) {
-        log.error(`Retrying ${utilityName}: ${error}`);
-        throw error;
-      }
+      return await test();
     },
     undefined,
     retryDelay
