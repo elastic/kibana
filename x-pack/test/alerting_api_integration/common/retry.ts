@@ -72,7 +72,7 @@ export const retry = async <T>({
           retryAttempt - 1
         }/${retries}`;
         logger.error(errorMessage);
-        return new Error(JSON.stringify(errorMessage));
+        return new Error(errorMessage);
       }
 
       retryAttempt = retryAttempt + 1;
