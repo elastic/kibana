@@ -71,6 +71,7 @@ export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
     label: gaugeTitlesByType.horizontalBullet,
     groupLabel: groupLabelForGauge,
     showExperimentalBadge: true,
+    sortOrder: 10,
   },
   [GaugeShapes.VERTICAL_BULLET]: {
     id: GaugeShapes.VERTICAL_BULLET,
@@ -78,6 +79,7 @@ export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
     label: gaugeTitlesByType.verticalBullet,
     groupLabel: groupLabelForGauge,
     showExperimentalBadge: true,
+    sortOrder: 10,
   },
   [GaugeShapes.ARC]: {
     id: GaugeShapes.ARC,
@@ -85,6 +87,7 @@ export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
     label: gaugeTitlesByType.arc,
     groupLabel: groupLabelForGauge,
     showExperimentalBadge: true,
+    sortOrder: 9,
   },
   [GaugeShapes.MAJOR_ARC]: {
     id: GaugeShapes.MAJOR_ARC,
@@ -92,6 +95,7 @@ export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
     label: gaugeTitlesByType.majorArc,
     groupLabel: groupLabelForGauge,
     showExperimentalBadge: true,
+    sortOrder: 8,
   },
   [GaugeShapes.CIRCLE]: {
     id: GaugeShapes.CIRCLE,
@@ -99,6 +103,7 @@ export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
     label: gaugeTitlesByType.circle,
     groupLabel: groupLabelForGauge,
     showExperimentalBadge: true,
+    sortOrder: 7,
   },
 };
 
