@@ -236,4 +236,6 @@ export function SloItemActions({
   );
 }
 
-const NOT_AVAILABLE_FOR_REMOTE = i18n.translate('xpack.slo..', { defaultMessage: '' });
+const NOT_AVAILABLE_FOR_REMOTE = i18n.translate('xpack.slo.item.actions.notAvailable', {
+  defaultMessage: 'This action is not available for remote SLOs',
+});

@@ -12,7 +12,7 @@ export const SLO_DETAIL_PATH = '/:sloId' as const;
 export const SLO_CREATE_PATH = '/create' as const;
 export const SLO_EDIT_PATH = '/edit/:sloId' as const;
 export const SLOS_OUTDATED_DEFINITIONS_PATH = '/outdated-definitions' as const;
-export const SLO_SETTINGS_PATH = '/slos/settings' as const;
+export const SLO_SETTINGS_PATH = '/settings' as const;
 
 export const paths = {
   slos: `${SLOS_BASE_PATH}${SLOS_PATH}`,

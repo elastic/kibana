@@ -34,7 +34,9 @@ export function SloRemoteBadge({ slo }: { slo: SLOWithSummaryResponse }) {
             e.stopPropagation();
           }}
         >
-          {i18n.translate('xpack.slo.sloRemoteBadge.', { defaultMessage: '' })}
+          {i18n.translate('xpack.slo.sloCardItemBadges.remoteBadgeLabel', {
+            defaultMessage: 'Remote',
+          })}
         </EuiBadge>
       </EuiToolTip>
     </EuiFlexItem>

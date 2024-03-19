@@ -87,7 +87,9 @@ export function SloGroupBy({ onStateChange, state, loading }: Props) {
 
   if (hasRemoteEnabled) {
     groupByOptions.push({
-      label: i18n.translate('xpack.slo.sloGroupBy.', { defaultMessage: '' }),
+      label: i18n.translate('xpack.slo.list.groupBy.remoteCluster', {
+        defaultMessage: 'Remote cluster',
+      }),
       checked: groupBy === 'remoteCluster',
       value: 'remoteCluster',
       onClick: () => {

@@ -37,7 +37,7 @@ export function HeaderTitle({ isLoading, slo }: Props) {
   const sloDetailsUrl = slo.kibanaUrl
     ? (
         slo.kibanaUrl +
-        paths.observability.sloDetails(
+        paths.sloDetails(
           slo.id,
           ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined,
           slo.remoteName
@@ -84,7 +84,11 @@ export function HeaderTitle({ isLoading, slo }: Props) {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       {slo.remoteName && (
-        <EuiCallOut title={i18n.translate('xpack.slo.headerTitle.', { defaultMessage: '' })}>
+        <EuiCallOut
+          title={i18n.translate('xpack.slo.sloDetails.headerTitle.calloutMessage', {
+            defaultMessage: 'Remote SLO',
+          })}
+        >
           <p>
             <FormattedMessage
               id="xpack.observability.slo.sloDetails.headerTitle.calloutDescription"
@@ -98,7 +102,9 @@ export function HeaderTitle({ isLoading, slo }: Props) {
             color="primary"
             target="_blank"
           >
-            {i18n.translate('xpack.slo.headerTitle.', { defaultMessage: '' })}
+            {i18n.translate('xpack.slo.headerTitle.linkButtonButtonLabel', {
+              defaultMessage: 'View remote SLO details',
+            })}
           </EuiButton>
         </EuiCallOut>
       )}

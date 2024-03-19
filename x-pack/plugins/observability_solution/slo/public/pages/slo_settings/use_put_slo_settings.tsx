@@ -30,18 +30,22 @@ export function usePutSloSettings() {
     ['putSloSettings'],
     ({ settings }) => {
       const body = JSON.stringify(settings);
-      return http.put<SloSettings>(`/internal/observability/slo/settings`, { body });
+      return http.put<SloSettings>(`/internal/slo/settings`, { body });
     },
     {
       onSuccess: (data, { settings }) => {
         toasts.addSuccess({
-          title: i18n.translate('xpack.slo.usePutSloSettings.', { defaultMessage: '' }),
+          title: i18n.translate('xpack.slo.settings.successNotification', {
+            defaultMessage: 'Success updated slo settings',
+          }),
         });
-        navigateToUrl(http.basePath.prepend(paths.observability.slos));
+        navigateToUrl(http.basePath.prepend(paths.slos));
       },
       onError: (error, { settings }, context) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
-          title: i18n.translate('xpack.slo.usePutSloSettings.', { defaultMessage: '' }),
+          title: i18n.translate('xpack.slo.settings.errorNotification', {
+            defaultMessage: 'Something went wrong while updating settings',
+          }),
         });
       },
     }

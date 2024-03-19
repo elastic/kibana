@@ -589,7 +589,7 @@ const getPreviewData = createSloServerRoute({
 });
 
 const getSloSettingsRoute = createSloServerRoute({
-  endpoint: 'GET /internal/observability/slo/settings',
+  endpoint: 'GET /internal/slo/settings',
   options: {
     tags: ['access:slo_read'],
     access: 'internal',
@@ -603,7 +603,7 @@ const getSloSettingsRoute = createSloServerRoute({
 });
 
 const putSloSettings = createSloServerRoute({
-  endpoint: 'PUT /internal/observability/slo/settings',
+  endpoint: 'PUT /internal/slo/settings',
   options: {
     tags: ['access:slo_write'],
     access: 'internal',

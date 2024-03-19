@@ -22,7 +22,9 @@ export function SloSettingsPage() {
   useBreadcrumbs([
     {
       href: basePath.prepend(paths.slosSettings),
-      text: i18n.translate('xpack.slo.sloSettingsPage.', { defaultMessage: '' }),
+      text: i18n.translate('xpack.slo.breadcrumbs.slosSettingsText', {
+        defaultMessage: 'SLOs Settings',
+      }),
     },
   ]);
 
@@ -30,7 +32,9 @@ export function SloSettingsPage() {
     <ObservabilityPageTemplate
       data-test-subj="slosSettingsPage"
       pageHeader={{
-        pageTitle: i18n.translate('xpack.slo.sloSettingsPage.', { defaultMessage: '' }),
+        pageTitle: i18n.translate('xpack.slo.pageHeader.title.', {
+          defaultMessage: 'SLOs Settings',
+        }),
         rightSideItems: [],
       }}
     >

@@ -58,16 +58,16 @@ export const routes = {
     params: {},
     exact: true,
   },
-  [SLO_DETAIL_PATH]: {
+  [SLO_SETTINGS_PATH]: {
     handler: () => {
-      return <SloDetailsPage />;
+      return <SloSettingsPage />;
     },
     params: {},
     exact: true,
   },
-  [SLO_SETTINGS_PATH]: {
+  [SLO_DETAIL_PATH]: {
     handler: () => {
-      return <SloSettingsPage />;
+      return <SloDetailsPage />;
     },
     params: {},
     exact: true,

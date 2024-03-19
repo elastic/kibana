@@ -13,7 +13,7 @@ export const useGetSettings = () => {
   const { http } = useKibana().services;
 
   const { data: currentSettings } = useFetcher(() => {
-    return http?.get<SloSettings>('/internal/observability/slo/settings');
+    return http?.get<SloSettings>('/internal/slo/settings');
   }, [http]);
   return (
     currentSettings ?? {

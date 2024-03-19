@@ -58,10 +58,26 @@ export function SettingsForm() {
   return (
     <EuiForm component="form">
       <EuiDescribedFormGroup
-        title={<h3>{i18n.translate('xpack.slo.settingsForm.', { defaultMessage: '' })}</h3>}
-        description={<p>{i18n.translate('xpack.slo.settingsForm.', { defaultMessage: '' })}</p>}
+        title={
+          <h3>
+            {i18n.translate('xpack.slo.settingsForm.h3.sourceSettingsLabel', {
+              defaultMessage: 'Source settings',
+            })}
+          </h3>
+        }
+        description={
+          <p>
+            {i18n.translate('xpack.slo.settingsForm.p.fetchSlosFromAllLabel', {
+              defaultMessage: 'Fetch Slos from all remote clusters.',
+            })}
+          </p>
+        }
       >
-        <EuiFormRow label={i18n.translate('xpack.slo.settingsForm.', { defaultMessage: '' })}>
+        <EuiFormRow
+          label={i18n.translate('xpack.slo.settingsForm.euiFormRow.useAllRemoteClustersLabel', {
+            defaultMessage: 'Use all remote clusters',
+          })}
+        >
           <EuiSwitch
             label=""
             checked={useAllRemoteClusters}
@@ -70,10 +86,27 @@ export function SettingsForm() {
         </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
-        title={<h3>{i18n.translate('xpack.slo.settingsForm.', { defaultMessage: '' })}</h3>}
-        description={<p>{i18n.translate('xpack.slo.settingsForm.', { defaultMessage: '' })}</p>}
+        title={
+          <h3>
+            {i18n.translate('xpack.slo.settingsForm.h3.remoteSettingsLabel', {
+              defaultMessage: 'Remote clusters',
+            })}
+          </h3>
+        }
+        description={
+          <p>
+            {i18n.translate('xpack.slo.settingsForm.select.fetchSlosFromAllLabel', {
+              defaultMessage: 'Select remote clusters to fetch SLOs from.',
+            })}
+          </p>
+        }
       >
-        <EuiFormRow label={i18n.translate('xpack.slo.settingsForm.', { defaultMessage: '' })}>
+        <EuiFormRow
+          label={i18n.translate(
+            'xpack.slo.settingsForm.euiFormRow.select.selectRemoteClustersLabel',
+            { defaultMessage: 'Select remote clusters' }
+          )}
+        >
           <EuiComboBox
             options={data?.map((cluster) => ({ label: cluster.name, value: cluster.name })) || []}
             selectedOptions={selectedRemoteClusters.map((cluster) => ({
@@ -101,7 +134,9 @@ export function SettingsForm() {
                 selectedRemoteClusters,
               })}
             >
-              {i18n.translate('xpack.slo.settingsForm.', { defaultMessage: '' })}
+              {i18n.translate('xpack.slo.settingsForm.euiButtonEmpty.cancelLabel', {
+                defaultMessage: 'Cancel',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -116,7 +151,9 @@ export function SettingsForm() {
                 selectedRemoteClusters,
               })}
             >
-              {i18n.translate('xpack.slo.settingsForm.', { defaultMessage: '' })}
+              {i18n.translate('xpack.slo.settingsForm.applyButtonEmptyLabel', {
+                defaultMessage: 'Apply',
+              })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
