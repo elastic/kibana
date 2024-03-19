@@ -11,6 +11,7 @@ import { PrePackagedRulesPrompt } from '../../../../detections/components/rules/
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
 import { AiRulesMonitoringPage } from '../../../rule_monitoring/pages/ai_rules_monitoring/ai_rules_monitoring_page';
+import { AiRulesMonitoringProvider } from '../../../rule_monitoring/pages/ai_rules_monitoring/ai_rules_monitoring_context';
 import { RulesManagementTour } from './rules_table/guided_onboarding/rules_management_tour';
 import { useSyncRulesTableSavedState } from './rules_table/use_sync_rules_table_saved_state';
 import { RulesTables } from './rules_tables';
@@ -70,9 +71,11 @@ export function AllRules(): JSX.Element {
     case AllRulesTabs.aiMonitoring:
       return (
         <>
-          <RulesTableToolbar />
-          <EuiSpacer />
-          <AiRulesMonitoringPage />
+          <AiRulesMonitoringProvider>
+            <RulesTableToolbar />
+            <EuiSpacer />
+            <AiRulesMonitoringPage />
+          </AiRulesMonitoringProvider>
         </>
       );
 
