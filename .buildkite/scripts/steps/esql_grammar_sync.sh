@@ -1,6 +1,8 @@
 #!/bin/bash
 
-git config --global user.name kibanamachine
+KIBANA_MACHINE_USERNAME="kibanamachine"
+
+git config --global user.name "$KIBANA_MACHINE_USERNAME"
 git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
 cd "$PARENT_DIR" || exit
@@ -37,7 +39,6 @@ options { caseInsensitive = true; }' "$destination_file" || exit
 echo "File copied and modified successfully. Checking for differences."
 
 # Check for differences
-git -P diff
 git diff --exit-code --quiet "$destination_file"
 
 if [ $? -ne 0 ]; then
@@ -46,7 +47,7 @@ if [ $? -ne 0 ]; then
   PR_BODY='This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch.'
  
   # Check if a PR already exists
-  pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "kibanamachine"  --limit 1 --json title -q ".[].title")
+  pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME"  --limit 1 --json title -q ".[].title")
 
   if [ "$pr_search_result" == "$PR_TITLE" ]; then
     echo "PR already exists. Exiting."
