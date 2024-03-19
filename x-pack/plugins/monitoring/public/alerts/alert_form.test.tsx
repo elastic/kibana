@@ -70,7 +70,7 @@ const initLegacyShims = () => {
   } as any);
 };
 
-const ALERTS_FEATURE_ID = 'alerts';
+const RULES_FEATURE_ID = 'alerts';
 const validationMethod = (): ValidationResult => ({ errors: {} });
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -134,7 +134,7 @@ describe('alert_form', () => {
         name: 'test',
         ruleTypeId: ruleType.id,
         params: {},
-        consumer: ALERTS_FEATURE_ID,
+        consumer: RULES_FEATURE_ID,
         schedule: {
           interval: '1m',
         },
@@ -221,7 +221,7 @@ describe('alert_form', () => {
           name: 'test',
           alertTypeId: ruleType.id,
           params: {},
-          consumer: ALERTS_FEATURE_ID,
+          consumer: RULES_FEATURE_ID,
           schedule: {
             interval: '1m',
           },
