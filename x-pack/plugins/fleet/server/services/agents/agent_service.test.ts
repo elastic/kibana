@@ -21,6 +21,7 @@ import { FleetUnauthorizedError } from '../../errors';
 
 import { getAuthzFromRequest } from '../security';
 import type { FleetAuthz } from '../../../common';
+import { createFleetAuthzMock } from '../../../common/mocks';
 
 import type { AgentClient } from './agent_service';
 import { AgentServiceImpl } from './agent_service';
@@ -53,8 +54,13 @@ describe('AgentService', () => {
             fleet: {
               all: false,
               setup: false,
+              readAgents: false,
               readEnrollmentTokens: false,
               readAgentPolicies: false,
+              allAgentPolicies: false,
+              allAgents: false,
+              allSettings: false,
+              readSettings: false,
             },
             integrations: {
               readPackageInfo: false,
@@ -121,28 +127,7 @@ describe('AgentService', () => {
       );
 
       beforeEach(() =>
-        mockGetAuthzFromRequest.mockReturnValue(
-          Promise.resolve({
-            fleet: {
-              all: true,
-              setup: true,
-              readEnrollmentTokens: true,
-              readAgentPolicies: true,
-            },
-            integrations: {
-              readPackageInfo: true,
-              readInstalledPackages: true,
-              installPackages: true,
-              upgradePackages: true,
-              uploadPackages: true,
-              removePackages: true,
-              readPackageSettings: true,
-              writePackageSettings: true,
-              readIntegrationPolicies: true,
-              writeIntegrationPolicies: true,
-            },
-          })
-        )
+        mockGetAuthzFromRequest.mockReturnValue(Promise.resolve(createFleetAuthzMock()))
       );
 
       expectApisToCallServicesSuccessfully(mockEsClient, mockSoClient, agentClient);

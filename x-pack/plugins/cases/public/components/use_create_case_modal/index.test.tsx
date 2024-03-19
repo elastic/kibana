@@ -19,7 +19,8 @@ jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const onCaseCreated = jest.fn();
 
-describe('useCreateCaseModal', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174205
+describe.skip('useCreateCaseModal', () => {
   let navigateToApp: jest.Mock;
 
   beforeEach(() => {

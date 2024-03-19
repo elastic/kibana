@@ -15,7 +15,7 @@ import {
   PUBLIC_ROUTES,
   REPORTING_MANAGEMENT_HOME,
   buildKibanaPath,
-  getRedirectAppPath,
+  REPORTING_REDIRECT_APP,
 } from '@kbn/reporting-common';
 import { BaseParams, JobId, ManagementLinkFn, ReportApiJSON } from '@kbn/reporting-common/types';
 import rison from '@kbn/rison';
@@ -83,7 +83,7 @@ export class ReportingAPIClient implements IReportingAPI {
     const path = buildKibanaPath({
       basePath: this.http.basePath.serverBasePath,
       spaceId: job.spaceId,
-      appPath: getRedirectAppPath(),
+      appPath: REPORTING_REDIRECT_APP,
     });
 
     const href = `${path}?${searchParams}`;
