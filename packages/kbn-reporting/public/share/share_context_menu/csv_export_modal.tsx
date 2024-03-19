@@ -9,13 +9,9 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCopy,
-  EuiForm,
   EuiModalBody,
   EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiSpacer,
 } from '@elastic/eui';
 import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
@@ -168,28 +164,13 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
 
   return (
     <>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <FormattedMessage id="xpack.reporting.csvModalHeader" defaultMessage="Download CSV" />
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
       <EuiModalBody>
-        <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
-          {!isSaved && (
-            <EuiCallOut
-              size="s"
-              title="CSV reports can take a few minutes to generate based upon the size of your report"
-              iconType="iInCircle"
-            />
-          )}
-          <EuiSpacer size="m" />
-          {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
-        </EuiForm>
+        <EuiSpacer size="m" />
+        <FormattedMessage id="share.csv.message" defaultMessage="Export a CSV of this search." />
+        <EuiSpacer size="m" />
+        {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={props.onClose} data-test-subj="share.doneButton">
-          <FormattedMessage id="xpack.reporting.links.doneButton" defaultMessage="Done" />
-        </EuiButtonEmpty>
         <EuiButton
           disabled={Boolean(createReportingJob)}
           fill
@@ -199,7 +180,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
         >
           <FormattedMessage
             id="xpack.reporting.generateButtonLabel"
-            defaultMessage="Download CSV"
+            defaultMessage="Generate CSV"
           />
         </EuiButton>
       </EuiModalFooter>
