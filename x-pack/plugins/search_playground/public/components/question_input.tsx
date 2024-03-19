@@ -7,10 +7,10 @@
 
 import React from 'react';
 
-import { css } from '@emotion/react';
-
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiFieldText, EuiFormControlLayout, useEuiTheme } from '@elastic/eui';
+
+const INPUT_HEIGHT = 56;
 
 interface QuestionInputProps {
   value: string;
@@ -25,16 +25,23 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
   button,
   isDisabled,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value);
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" css={{ position: 'relative' }}>
-      <input
-        className="euiFieldText euiFieldText--fullWidth"
+    <EuiFormControlLayout
+      style={{
+        height: INPUT_HEIGHT,
+      }}
+      fullWidth
+    >
+      <EuiFieldText
         style={{
-          padding: '20px 76px 20px 20px',
-          height: '56px',
+          height: INPUT_HEIGHT,
+          paddingRight: euiTheme.size.xxxxl,
         }}
+        controlOnly
+        fullWidth
         placeholder={i18n.translate(
           'xpack.searchPlayground.chat.questionInput.askQuestionPlaceholder',
           {
@@ -46,15 +53,15 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
         disabled={isDisabled}
       />
 
-      <EuiFlexItem
-        grow={false}
-        css={css`
-          position: absolute;
-          right: 16px;
-        `}
+      <div
+        css={{
+          position: 'absolute',
+          right: euiTheme.size.base,
+          top: euiTheme.size.m,
+        }}
       >
         {button}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </div>
+    </EuiFormControlLayout>
   );
 };
