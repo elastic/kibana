@@ -100,7 +100,7 @@ export const renderApp = (
     user = null;
   }
 
-  const connectorTypes = plugins.searchConnectors.getConnectorTypes();
+  const connectorTypes = plugins.searchConnectors?.getConnectorTypes() || [];
 
   const unmountKibanaLogic = mountKibanaLogic({
     application,
