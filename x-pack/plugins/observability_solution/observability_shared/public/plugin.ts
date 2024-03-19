@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
@@ -31,14 +31,13 @@ import {
   TopNFunctionsLocatorDefinition,
 } from './locators/profiling/topn_functions_locator';
 import { updateGlobalNavigation } from './services/update_global_navigation';
-
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
 
 export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   setIsSidebarEnabled: (isEnabled: boolean) => void;
   embeddable: EmbeddableStart;

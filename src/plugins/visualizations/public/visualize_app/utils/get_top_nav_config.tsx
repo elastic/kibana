@@ -609,7 +609,7 @@ export const getTopNavConfig = (
                       savedVis.managed
                         ? i18n.translate('visualizations.topNavMenu.mustCopyOnSave', {
                             defaultMessage:
-                              'This visualization is managed by Elastic. Changes here must be saved to a new visualization.',
+                              'Elastic manages this visualization. Save any changes to a new visualization.',
                           })
                         : undefined
                     }

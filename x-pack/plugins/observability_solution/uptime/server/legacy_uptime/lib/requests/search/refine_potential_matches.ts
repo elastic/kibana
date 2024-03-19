@@ -99,6 +99,7 @@ export const summaryPingsToSummary = (summaryPings: Ping[]): MonitorSummary => {
         status: summaryPings.some((p) => (p.summary?.down ?? 0) > 0) ? 'down' : 'up',
       },
       summaryPings,
+      // @ts-expect-error upgrade typescript v4.9.5
       tls: latest.tls,
       // easier to ensure to use '' for an empty geo name in terms of types
       observer: {

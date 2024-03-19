@@ -24,6 +24,7 @@ const LOG_RATE_ANALYSYS_DATA_GENERATOR = {
   ARTIFICIAL_LOGS_WITH_SPIKE_TEXTFIELD: 'artificial_logs_with_spike_textfield',
   ARTIFICIAL_LOGS_WITH_DIP: 'artificial_logs_with_dip',
   ARTIFICIAL_LOGS_WITH_DIP_TEXTFIELD: 'artificial_logs_with_dip_textfield',
+  LARGE_ARRAYS: 'large_arrays',
 } as const;
 export type LogRateAnalysisDataGenerator =
   typeof LOG_RATE_ANALYSYS_DATA_GENERATOR[keyof typeof LOG_RATE_ANALYSYS_DATA_GENERATOR];
@@ -272,14 +273,10 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
         case 'artificial_logs_with_dip_zerodocsfallback':
         case 'artificial_logs_with_dip_textfield_zerodocsfallback':
           try {
-            const indexExists = await es.indices.exists({
+            await es.indices.delete({
               index: dataGenerator,
+              ignore_unavailable: true,
             });
-            if (indexExists) {
-              await es.indices.delete({
-                index: dataGenerator,
-              });
-            }
           } catch (e) {
             log.info(`Could not delete index '${dataGenerator}' in before() callback`);
           }
@@ -324,6 +321,10 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           });
           break;
 
+        case 'large_arrays':
+          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/large_arrays');
+          break;
+
         default:
           log.error(`Unsupported data generator '${dataGenerator}`);
       }
@@ -356,6 +357,10 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           } catch (e) {
             log.error(`Error deleting index '${dataGenerator}' in after() callback`);
           }
+          break;
+
+        case 'large_arrays':
+          await esArchiver.unload('x-pack/test/functional/es_archives/large_arrays');
           break;
 
         default:

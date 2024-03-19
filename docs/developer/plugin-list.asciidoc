@@ -613,7 +613,7 @@ Index Management by running this series of requests in Console:
 |This service is exposed from the Index Management setup contract and can be used to add content to the indices list and the index details page.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/infra/README.md[infra]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/infra/README.md[infra]
 |This is the home of the infra plugin, which aims to provide a solution for
 the infrastructure monitoring use-case within Kibana.
 
@@ -651,7 +651,7 @@ using the CURL scripts in the scripts folder.
 |This plugin is home to the <LogsExplorer /> component and related types. It implements several of the underlying concepts that the Observability Logs Explorer app builds upon.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/logs_shared/README.md[logsShared]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_shared/README.md[logsShared]
 |Exposes the shared components and APIs to access and visualize logs.
 
 
@@ -684,12 +684,16 @@ Elastic.
 |The Notifications plugin provides a set of services to help Solutions and plugins send notifications to users.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability/README.md[observability]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability/README.md[observability]
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant/README.md[observabilityAIAssistant]
 |This document gives an overview of the features of the Observability AI Assistant at the time of writing, and how to use them. At a high level, the Observability AI Assistant offers contextual insights, and a chat functionality that we enrich with function calling, allowing the LLM to hook into the user's data. We also allow the LLM to store things it considers new information as embeddings into Elasticsearch, and query this knowledge base when it decides it needs more information, using ELSER.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant_app/README.md[observabilityAIAssistantApp]
+|This app registers defaults functions. It exists as a separate plugin to avoid cyclical dependencies.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_logs_explorer/README.md[observabilityLogsExplorer]
@@ -788,6 +792,10 @@ It leverages universal configuration and other APIs in the serverless plugin to 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/session_view/README.md[sessionView]
 |Session View is meant to provide a visualization into what is going on in a particular Linux environment where the agent is running. It looks likes a terminal emulator; however, it is a tool for introspecting process activity and understanding user and service behaviour in your Linux servers and infrastructure. It is a time-ordered series of process executions displayed in a tree over time.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/slo/README.md[slo]
+|A Kibana plugin
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/snapshot_restore/README.md[snapshotRestore]

@@ -55,13 +55,21 @@ const saveApmIndicesRoute = createApmServerRoute({
       span: t.string,
       transaction: t.string,
       metric: t.string,
+      // Keeping this one here for backward compatibility
+      sourcemap: t.string,
     } as SaveApmIndicesBodySchema),
   }),
   handler: async (resources): Promise<SavedObject<{}>> => {
     const { params, context } = resources;
     const { body } = params;
     const savedObjectsClient = (await context.core).savedObjects.client;
-    return await saveApmIndices(savedObjectsClient, body);
+    const indices = { ...body };
+    if (indices.sourcemap) {
+      // Delete this as we stopped supporting it from 8.7.
+      delete indices.sourcemap;
+    }
+
+    return await saveApmIndices(savedObjectsClient, indices);
   },
 });
 

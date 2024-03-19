@@ -4769,7 +4769,7 @@
                 "section": "def-common.ExecutionContract",
                 "text": "ExecutionContract"
               },
-              "<Input, Output, unknown>"
+              "<Input, Output, object>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -10039,7 +10039,7 @@
                 "section": "def-common.ExecutionContract",
                 "text": "ExecutionContract"
               },
-              "<Input, Output, unknown>"
+              "<Input, Output, object>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -26737,7 +26737,7 @@
                 "section": "def-common.ExecutionContract",
                 "text": "ExecutionContract"
               },
-              "<Input, Output, unknown>"
+              "<Input, Output, object>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -34517,7 +34517,7 @@
                 "section": "def-common.ExecutionContract",
                 "text": "ExecutionContract"
               },
-              "<Input, Output, unknown>"
+              "<Input, Output, object>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,

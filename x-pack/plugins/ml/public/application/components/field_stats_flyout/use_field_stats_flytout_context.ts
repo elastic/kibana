@@ -6,7 +6,7 @@
  */
 
 import { createContext, useContext } from 'react';
-import { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 interface MLJobWizardFieldStatsFlyoutProps {
   isFlyoutVisible: boolean;
   setIsFlyoutVisible: (v: boolean) => void;

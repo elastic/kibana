@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { MouseEvent, useState } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiBadgeProps } from '@elastic/eui/src/components/badge/badge';
@@ -61,6 +61,9 @@ const TagsList = ({
               onClick={() => {
                 onClick(tag);
               }}
+              onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
+                e.stopPropagation(); // stops propagation of metric onElementClick
+              }}
               onClickAriaLabel={getFilterLabel(tag)}
               color={color}
               className="eui-textTruncate"
@@ -98,6 +101,9 @@ const TagsList = ({
               onClick={() => {
                 setToDisplay(tags.length);
               }}
+              onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
+                e.stopPropagation(); // stops propagation of metric onElementClick
+              }}
               onClickAriaLabel={EXPAND_TAGS_LABEL}
             >
               +{tags.length - toDisplay}
@@ -112,6 +118,9 @@ const TagsList = ({
               color={color}
               onClick={() => {
                 setToDisplay(3);
+              }}
+              onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
+                e.stopPropagation(); // stops propagation of metric onElementClick
               }}
               onClickAriaLabel={COLLAPSE_TAGS_LABEL}
             >

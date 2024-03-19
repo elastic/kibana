@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import {
   EuiBadge,

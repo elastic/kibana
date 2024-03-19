@@ -11,17 +11,18 @@ import type { HttpFetchQuery } from '@kbn/core/public';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
-  REPORTING_MANAGEMENT_HOME,
-  buildKibanaPath,
-  getRedirectAppPath,
   INTERNAL_ROUTES,
   PUBLIC_ROUTES,
+  REPORTING_MANAGEMENT_HOME,
+  buildKibanaPath,
+  REPORTING_REDIRECT_APP,
 } from '@kbn/reporting-common';
 import { BaseParams, JobId, ManagementLinkFn, ReportApiJSON } from '@kbn/reporting-common/types';
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
-import { Job, add } from '.';
+import { Job } from '.';
+import { jobCompletionNotifications } from './job_completion_notifications';
 
 /*
  * For convenience, apps do not have to provide the browserTimezone and Kibana version.
@@ -66,6 +67,7 @@ interface IReportingAPI {
  */
 export class ReportingAPIClient implements IReportingAPI {
   private http: HttpSetup;
+  private addPendingJobId = jobCompletionNotifications().addPendingJobId;
 
   constructor(
     http: HttpSetup,
@@ -81,7 +83,7 @@ export class ReportingAPIClient implements IReportingAPI {
     const path = buildKibanaPath({
       basePath: this.http.basePath.serverBasePath,
       spaceId: job.spaceId,
-      appPath: getRedirectAppPath(),
+      appPath: REPORTING_REDIRECT_APP,
     });
 
     const href = `${path}?${searchParams}`;
@@ -182,7 +184,7 @@ export class ReportingAPIClient implements IReportingAPI {
         body: JSON.stringify({ jobParams: jobParamsRison }),
       }
     );
-    add(resp.job.id);
+    this.addPendingJobId(resp.job.id);
     return new Job(resp.job);
   }
 

@@ -1451,39 +1451,6 @@
     "functions": [
       {
         "parentPluginId": "@kbn/reporting-public",
-        "id": "def-public.add",
-        "type": "Function",
-        "tags": [],
-        "label": "add",
-        "description": [],
-        "signature": [
-          "(jobId: string) => void"
-        ],
-        "path": "packages/kbn-reporting/public/job_completion_notifications.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/reporting-public",
-            "id": "def-public.add.$1",
-            "type": "string",
-            "tags": [],
-            "label": "jobId",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "packages/kbn-reporting/public/job_completion_notifications.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-public",
         "id": "def-public.checkLicense",
         "type": "Function",
         "tags": [],
@@ -1585,34 +1552,18 @@
       },
       {
         "parentPluginId": "@kbn/reporting-public",
-        "id": "def-public.remove",
+        "id": "def-public.jobCompletionNotifications",
         "type": "Function",
         "tags": [],
-        "label": "remove",
+        "label": "jobCompletionNotifications",
         "description": [],
         "signature": [
-          "(jobId: string) => void"
+          "() => { getPendingJobIds: () => string[]; addPendingJobId: (jobId: string) => void; setPendingJobIds: (jobIds: string[]) => void; }"
         ],
         "path": "packages/kbn-reporting/public/job_completion_notifications.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/reporting-public",
-            "id": "def-public.remove.$1",
-            "type": "string",
-            "tags": [],
-            "label": "jobId",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "packages/kbn-reporting/public/job_completion_notifications.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },

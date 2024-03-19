@@ -86,6 +86,7 @@ export function ExpressionWrapper({
           interactive={interactive}
           searchContext={searchContext}
           searchSessionId={searchSessionId}
+          // @ts-expect-error upgrade typescript v4.9.5
           onData$={onData$}
           onRender$={onRender$}
           inspectorAdapters={lensInspector.adapters}
