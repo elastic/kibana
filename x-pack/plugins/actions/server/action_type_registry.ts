@@ -94,9 +94,9 @@ export class ActionTypeRegistry {
     );
 
     return (
-      inMemoryConnector?.isSystemAction ||
       actionTypeEnabled ||
-      (!actionTypeEnabled && inMemoryConnector?.isPreconfigured === true)
+      (!actionTypeEnabled &&
+        (inMemoryConnector?.isPreconfigured === true || inMemoryConnector?.isSystemAction))
     );
   }
 

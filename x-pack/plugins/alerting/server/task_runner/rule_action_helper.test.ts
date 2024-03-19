@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { RuleAction, RuleSystemAction } from '../types';
+import { RuleAction } from '../types';
 import {
   generateActionHash,
   getSummaryActionsFromTaskState,
@@ -52,13 +52,6 @@ const mockSummaryAction: RuleAction = {
     throttle: '1d',
   },
   uuid: '111-111',
-};
-
-const mockSystemAction: RuleSystemAction = {
-  id: '1',
-  actionTypeId: '.test',
-  params: {},
-  uuid: '123-456',
 };
 
 describe('rule_action_helper', () => {

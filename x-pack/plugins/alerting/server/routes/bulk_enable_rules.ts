@@ -10,8 +10,6 @@ import { IRouter } from '@kbn/core/server';
 import { verifyAccessAndContext, handleDisabledApiKeysError } from './lib';
 import { ILicenseState, RuleTypeDisabledError } from '../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { transformRuleToRuleResponseV1 } from './rule/transforms';
-import { Rule } from '../application/rule/types';
 
 export const bulkEnableRulesRoute = ({
   router,
@@ -42,10 +40,9 @@ export const bulkEnableRulesRoute = ({
             const resultBody = {
               body: {
                 ...bulkEnableResults,
-                rules: bulkEnableResults.rules.map((rule) => {
-                  // TODO (http-versioning): Remove this cast, this enables us to move forward
-                  // without fixing all of other solution types
-                  return transformRuleToRuleResponseV1(rule as Rule);
+                // TODO We need to fix this API to return snake case like every other API
+                rules: bulkEnableResults.rules.map(({ actions, systemActions, ...rule }) => {
+                  return { ...rule, actions: [...actions, ...(systemActions ?? [])] };
                 }),
               },
             };

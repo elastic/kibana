@@ -40,6 +40,7 @@ export const useLoadActionTypes = ({
       const queryResult = await loadActionTypes({
         http,
         featureId: GenerativeAIForSecurityConnectorFeatureId,
+        includeSystemActions: false,
       });
       const sortedData = queryResult.sort((a, b) => a.name.localeCompare(b.name));
 
