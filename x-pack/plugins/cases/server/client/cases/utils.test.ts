@@ -32,16 +32,16 @@ import {
   fillMissingCustomFields,
   normalizeCreateCaseRequest,
 } from './utils';
-import type { CaseCustomFields, CustomFieldsConfiguration } from '../../../common/types/domain';
+import type { CaseCustomFields, CustomFieldsConfiguration } from '@kbn/cases-common-types';
 import {
   CaseStatuses,
   CustomFieldTypes,
   UserActionActions,
   CaseSeverity,
   ConnectorTypes,
-} from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
 import { flattenCaseSavedObject } from '../../common/utils';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 import { casesConnectors } from '../../connectors';
 import { userProfiles, userProfilesMap } from '../user_profiles.mock';
 import { mappings, mockCases } from '../../mocks';

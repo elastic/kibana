@@ -7,7 +7,7 @@
 
 import { isEmptyString } from '@kbn/es-ui-shared-plugin/static/validators/string';
 import { isString } from 'lodash';
-import type { CustomFieldConfiguration } from '../../../common/types/domain';
+import type { CustomFieldConfiguration } from '@kbn/cases-common-types';
 
 export const addOrReplaceCustomField = <T extends { key: string }>(
   customFields: T[],

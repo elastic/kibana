@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CasesStatusRequest, CasesStatusResponse } from '../../../common/types/api';
-import { CasesStatusRequestRt, CasesStatusResponseRt } from '../../../common/types/api';
+import type { CasesStatusRequest, CasesStatusResponse } from '@kbn/cases-common-types';
+import { CasesStatusRequestRt, CasesStatusResponseRt } from '@kbn/cases-common-types';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';

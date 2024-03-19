@@ -9,9 +9,8 @@ import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 
-import type { SnakeToCamelCase } from '../../../common/types';
-import type { PushedUserAction } from '../../../common/types/domain';
-import { UserActionActions } from '../../../common/types/domain';
+import type { PushedUserAction, SnakeToCamelCase } from '@kbn/cases-common-types';
+import { UserActionActions } from '@kbn/cases-common-types';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';

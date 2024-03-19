@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { UserActionMarkdown } from './markdown_form';
-import { MAX_COMMENT_LENGTH } from '../../../common/constants';
+import { MAX_COMMENT_LENGTH } from '@kbn/cases-common-constants';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');

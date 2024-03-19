@@ -12,8 +12,8 @@ import { FormTestComponent } from '../../../common/test_utils';
 import { Edit } from './edit';
 import { customFieldsMock, customFieldsConfigurationMock } from '../../../containers/mock';
 import userEvent from '@testing-library/user-event';
-import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../../common/constants';
-import type { CaseCustomFieldText } from '../../../../common/types/domain';
+import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '@kbn/cases-common-constants';
+import type { CaseCustomFieldText } from '@kbn/cases-common-types';
 import { POPULATED_WITH_DEFAULT } from '../translations';
 
 describe('Edit ', () => {

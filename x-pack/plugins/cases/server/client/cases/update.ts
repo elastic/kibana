@@ -17,6 +17,29 @@ import type {
 
 import { nodeBuilder } from '@kbn/es-query';
 
+import type {
+  Cases,
+  Case,
+  CaseAttributes,
+  User,
+  CaseAssignees,
+  AttachmentAttributes,
+  CustomFieldsConfiguration,
+  CasePatchRequest,
+  CasesPatchRequest,
+} from '@kbn/cases-common-types';
+import {
+  CasesRt,
+  CaseStatuses,
+  AttachmentType,
+  CasesPatchRequestRt,
+} from '@kbn/cases-common-types';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  MAX_USER_ACTIONS_PER_CASE,
+} from '@kbn/cases-common-constants';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { AlertService, CasesService, CaseUserActionService } from '../../services';
 import type { UpdateAlertStatusRequest } from '../alerts/types';
 import type { CasesClient, CasesClientArgs } from '..';
@@ -24,12 +47,6 @@ import type { OwnerEntity } from '../../authorization';
 import type { PatchCasesArgs } from '../../services/cases/types';
 import type { UserActionEvent, UserActionsDict } from '../../services/user_actions/types';
 
-import type { CasePatchRequest, CasesPatchRequest } from '../../../common/types/api';
-import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-  MAX_USER_ACTIONS_PER_CASE,
-} from '../../../common/constants';
 import { Operations } from '../../authorization';
 import { createCaseError, isSOError } from '../../common/error';
 import {
@@ -44,21 +61,9 @@ import {
   getClosedInfoForUpdate,
   getDurationForUpdate,
 } from './utils';
-import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
-import type {
-  Cases,
-  Case,
-  CaseAttributes,
-  User,
-  CaseAssignees,
-  AttachmentAttributes,
-  CustomFieldsConfiguration,
-} from '../../../common/types/domain';
-import { CasesPatchRequestRt } from '../../../common/types/api';
-import { CasesRt, CaseStatuses, AttachmentType } from '../../../common/types/domain';
 import { validateCustomFields } from './validators';
 
 /**

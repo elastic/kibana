@@ -11,8 +11,12 @@ import {
   constructFilesHttpOperationTag,
   constructOwnerFromFileKind,
 } from '.';
-import { APP_ID, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../constants';
-import { HttpApiTagOperation } from '../constants/types';
+import {
+  APP_ID,
+  OBSERVABILITY_OWNER,
+  SECURITY_SOLUTION_OWNER,
+  HttpApiTagOperation,
+} from '@kbn/cases-common-constants';
 
 describe('files index', () => {
   describe('constructFilesHttpOperationTag', () => {

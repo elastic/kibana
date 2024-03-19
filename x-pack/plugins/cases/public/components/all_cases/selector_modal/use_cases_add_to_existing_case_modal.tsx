@@ -6,8 +6,8 @@
  */
 
 import { useCallback } from 'react';
+import { CaseStatuses } from '@kbn/cases-common-types';
 import { useApplication } from '../../../common/lib/kibana/use_application';
-import { CaseStatuses } from '../../../../common/types/domain';
 import type { AllCasesSelectorModalProps } from '.';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import type { CaseUI } from '../../../containers/types';

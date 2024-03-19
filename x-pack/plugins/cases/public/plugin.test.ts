@@ -20,7 +20,7 @@ import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import type { CasesPublicStartDependencies, CasesPublicSetupDependencies } from './types';
 import { CasesUiPlugin } from './plugin';
-import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
+import { ALLOWED_MIME_TYPES } from '@kbn/cases-common-constants';
 
 function getConfig(overrides = {}) {
   return {

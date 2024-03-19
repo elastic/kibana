@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseStatuses } from '../../../common/types/domain';
+import { CaseStatuses } from '@kbn/cases-common-types';
 import { basicCase } from '../../containers/mock';
 import { getStatusDate, getStatusTitle } from './helpers';
 

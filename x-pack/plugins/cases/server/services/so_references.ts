@@ -15,13 +15,13 @@ import type {
   AttachmentAttributes,
   AttachmentAttributesNoSO,
   AttachmentPatchAttributes,
-} from '../../common/types/domain';
+} from '@kbn/cases-common-types';
+import { EXTERNAL_REFERENCE_REF_NAME } from '../common/constants';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import {
   injectPersistableReferencesToSO,
   extractPersistableStateReferencesFromSO,
 } from '../attachment_framework/so_references';
-import { EXTERNAL_REFERENCE_REF_NAME } from '../common/constants';
 import type {
   AttachmentPersistedAttributes,
   AttachmentRequestAttributes,

@@ -18,18 +18,14 @@ import type {
   AttachmentAttributes,
   Case,
   ConfigurationAttributes,
-} from '../../../common/types/domain';
-import {
-  CaseRt,
-  CaseStatuses,
-  UserActionTypes,
-  AttachmentType,
-} from '../../../common/types/domain';
+  ExternalServiceResponse,
+} from '@kbn/cases-common-types';
+import { CaseRt, CaseStatuses, UserActionTypes, AttachmentType } from '@kbn/cases-common-types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   OWNER_FIELD,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
 
 import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
 import { createCaseError } from '../../common/error';
@@ -44,7 +40,6 @@ import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
 import { decodeOrThrow } from '../../common/runtime_types';
-import type { ExternalServiceResponse } from '../../../common/types/api';
 
 /**
  * Returns true if the case should be closed based on the configuration settings.

@@ -7,9 +7,9 @@
 
 import { addOrReplaceCustomField, customFieldSerializer } from './utils';
 import { customFieldsConfigurationMock, customFieldsMock } from '../../containers/mock';
-import type { CustomFieldConfiguration } from '../../../common/types/domain';
-import { CustomFieldTypes } from '../../../common/types/domain';
-import type { CaseUICustomField } from '../../../common/ui';
+import type { CustomFieldConfiguration } from '@kbn/cases-common-types';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
+import type { CaseUICustomField } from '@kbn/cases-common-ui';
 
 describe('utils ', () => {
   describe('addOrReplaceCustomField ', () => {

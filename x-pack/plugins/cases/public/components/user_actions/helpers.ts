@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash';
 
-import { AttachmentType } from '../../../common/types/domain';
+import { AttachmentType } from '@kbn/cases-common-types';
 import type { AttachmentUI } from '../../containers/types';
 import { SUPPORTED_ACTION_TYPES } from './constants';
 import type { SupportedUserActionTypes } from './types';

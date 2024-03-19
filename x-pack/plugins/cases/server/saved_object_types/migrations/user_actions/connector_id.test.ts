@@ -17,7 +17,7 @@ import { migrationMocks } from '@kbn/core/server/mocks';
 import {
   CASE_USER_ACTION_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,
-} from '../../../../common/constants';
+} from '@kbn/cases-common-constants';
 import {
   createConnectorObject,
   createExternalService,

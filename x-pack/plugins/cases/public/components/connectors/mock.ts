@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SwimlaneConnectorType } from '../../../common/types/domain';
+import { SwimlaneConnectorType } from '@kbn/cases-common-types';
 
 export const connector = {
   id: '123',

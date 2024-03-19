@@ -11,7 +11,7 @@ import {
   IMAGE_MIME_TYPES,
   pdfMimeTypes,
   textMimeTypes,
-} from '../../../common/constants/mime_types';
+} from '@kbn/cases-common-constants';
 import { basicFileMock } from '../../containers/mock';
 import { isImage, isValidFileExternalReferenceMetadata, parseMimeType } from './utils';
 

@@ -14,9 +14,9 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { NONE_CONNECTOR_ID } from '../../../common/constants';
-import type { CaseCustomFields, ExternalService } from '../../../common/types/domain';
-import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
+import type { CaseCustomFields, ExternalService } from '@kbn/cases-common-types';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-common-types';
+import { NONE_CONNECTOR_ID } from '@kbn/cases-common-constants';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,

@@ -13,11 +13,11 @@ import {
   basicCaseStatusFeatures,
 } from '../../../containers/mock';
 import { CaseViewMetrics } from '.';
-import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
+import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '@kbn/cases-common-ui';
 import { TestProviders } from '../../../common/mock';
 import { useGetCaseMetrics } from '../../../containers/use_get_case_metrics';
 import { useCasesFeatures } from '../../../common/use_cases_features';
-import { CaseMetricsFeature } from '../../../../common/types/api';
+import { CaseMetricsFeature } from '@kbn/cases-common-types';
 
 jest.mock('../../../containers/use_get_case_metrics');
 jest.mock('../../../common/use_cases_features');

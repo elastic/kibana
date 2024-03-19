@@ -11,7 +11,7 @@ import {
   GENERAL_CASES_OWNER,
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
 import { getUICapabilities } from './capabilities';
 import type { CasesPermissions } from '../../../common';
 

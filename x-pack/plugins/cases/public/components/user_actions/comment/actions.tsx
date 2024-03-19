@@ -8,10 +8,9 @@
 import React from 'react';
 import classNames from 'classnames';
 
-import type { ActionsAttachment } from '../../../../common/types/domain';
+import type { ActionsAttachment, SnakeToCamelCase } from '@kbn/cases-common-types';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
-import type { SnakeToCamelCase } from '../../../../common/types';
 import { UserActionCopyLink } from '../copy_link';
 import { ScrollableMarkdown } from '../../markdown_editor';
 import { HostIsolationCommentEvent } from './host_isolation_event';

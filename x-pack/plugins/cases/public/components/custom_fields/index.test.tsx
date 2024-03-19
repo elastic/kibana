@@ -12,8 +12,8 @@ import { screen } from '@testing-library/react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { customFieldsConfigurationMock } from '../../containers/mock';
-import { CustomFieldTypes } from '../../../common/types/domain';
-import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
+import { MAX_CUSTOM_FIELDS_PER_CASE } from '@kbn/cases-common-constants';
 import { CustomFields } from '.';
 import * as i18n from './translations';
 

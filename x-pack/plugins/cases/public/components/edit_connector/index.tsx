@@ -11,8 +11,8 @@ import React, { useCallback, useState } from 'react';
 import { EuiText, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 
-import type { CaseUI, CaseConnectors } from '../../../common/ui/types';
-import type { ActionConnector, CaseConnector } from '../../../common/types/domain';
+import type { ActionConnector, CaseConnector } from '@kbn/cases-common-types';
+import type { CaseUI, CaseConnectors } from '@kbn/cases-common-ui';
 import * as i18n from './translations';
 import { getConnectorById } from '../utils';
 import { usePushToService } from '../use_push_to_service';

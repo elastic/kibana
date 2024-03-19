@@ -12,8 +12,8 @@ import type {
   SavedObjectsCreatePointInTimeFinderOptions,
 } from '@kbn/core/server';
 
-import { CASE_COMMENT_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
-import type { AttachmentAttributes } from '@kbn/cases-plugin/common';
+import { CASE_COMMENT_SAVED_OBJECT } from '@kbn/cases-common-constants';
+import type { AttachmentAttributes } from '@kbn/cases-common-types';
 
 export interface GetCasesOptions {
   savedObjectsClient: SavedObjectsClientContract;

@@ -6,7 +6,7 @@
  */
 
 import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import type { PersistableStateAttachmentPayload } from '../../common/types/domain';
+import type { PersistableStateAttachmentPayload } from '@kbn/cases-common-types';
 
 export type PersistableStateAttachmentState = Pick<
   PersistableStateAttachmentPayload,

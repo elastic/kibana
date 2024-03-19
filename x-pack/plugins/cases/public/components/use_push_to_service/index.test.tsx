@@ -18,8 +18,8 @@ import { CLOSED_CASE_PUSH_ERROR_ID } from './callout/types';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
-import { CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
-import type { CaseConnector } from '../../../common/types/domain';
+import { CaseStatuses, ConnectorTypes } from '@kbn/cases-common-types';
+import type { CaseConnector } from '@kbn/cases-common-types';
 
 jest.mock('../../containers/use_get_action_license', () => {
   return {

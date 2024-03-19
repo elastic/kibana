@@ -6,11 +6,8 @@
  */
 
 import { partition } from 'lodash';
-import type { BulkGetAttachmentsResponse } from '../../../common/types/api';
-import {
-  BulkGetAttachmentsRequestRt,
-  BulkGetAttachmentsResponseRt,
-} from '../../../common/types/api';
+import type { AttachmentAttributes, BulkGetAttachmentsResponse } from '@kbn/cases-common-types';
+import { BulkGetAttachmentsRequestRt, BulkGetAttachmentsResponseRt } from '@kbn/cases-common-types';
 import { flattenCommentSavedObjects } from '../../common/utils';
 import { createCaseError, generateCaseErrorResponse } from '../../common/error';
 import type { CasesClientArgs } from '../types';
@@ -21,7 +18,6 @@ import type { CasesClient } from '../client';
 import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
 import { partitionByCaseAssociation } from '../../common/partitioning';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
-import type { AttachmentAttributes } from '../../../common/types/domain';
 
 type AttachmentSavedObjectWithErrors = Array<SOWithErrors<AttachmentAttributes>>;
 

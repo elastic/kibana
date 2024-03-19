@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { FindCaseUserActions, CaseUserActionTypeWithAll } from '../../common/ui/types';
+import type { FindCaseUserActions, CaseUserActionTypeWithAll } from '@kbn/cases-common-ui';
 import { findCaseUserActions } from './api';
 import type { ServerError } from '../types';
 import { useCasesToast } from '../common/use_cases_toast';

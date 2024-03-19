@@ -7,9 +7,8 @@
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { AttachmentRequest } from '../../../common/types/api';
-import { BulkCreateAttachmentsRequestRt } from '../../../common/types/api';
-import type { Case } from '../../../common/types/domain';
+import type { Case, AttachmentRequest } from '@kbn/cases-common-types';
+import { BulkCreateAttachmentsRequestRt } from '@kbn/cases-common-types';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 
 import { CaseCommentModel } from '../../common/models';

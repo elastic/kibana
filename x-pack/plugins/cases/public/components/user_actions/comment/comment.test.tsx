@@ -12,7 +12,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-import { UserActionActions } from '../../../../common/types/domain';
+import { UserActionActions } from '@kbn/cases-common-types';
 import {
   alertComment,
   basicCase,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CaseUserActionStatsResponse } from '../../../common/types/api';
-import { CaseUserActionStatsResponseRt } from '../../../common/types/api';
+import type { CaseUserActionStatsResponse } from '@kbn/cases-common-types';
+import { CaseUserActionStatsResponseRt } from '@kbn/cases-common-types';
 import { decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';

@@ -15,14 +15,14 @@ import type {
 import type {
   CaseUserActionWithoutReferenceIds,
   AttachmentAttributesWithoutRefs,
-} from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
   SAVED_OBJECT_TYPES,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
 import { defaultSortField } from '../../common/utils';
 import { createCaseError } from '../../common/error';
 import type { CasePersistedAttributes } from '../../common/types/case';

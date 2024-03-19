@@ -10,9 +10,10 @@ import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { AttachmentType } from '@kbn/cases-common-types';
+import { OWNER_INFO } from '@kbn/cases-common-constants';
 import { isValidOwner } from '../../common/utils/owner';
 import type { CaseUI } from '../../common';
-import { AttachmentType } from '../../common/types/domain';
 import { useKibana, useToasts } from './lib/kibana';
 import { generateCaseViewPath } from './navigation';
 import type { CaseAttachmentsWithoutOwner, ServerError } from '../types';
@@ -22,7 +23,6 @@ import {
   CASE_SUCCESS_TOAST,
   VIEW_CASE,
 } from './translations';
-import { OWNER_INFO } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
 
 const LINE_CLAMP = 3;

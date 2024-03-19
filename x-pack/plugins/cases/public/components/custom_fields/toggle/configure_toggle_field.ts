@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CustomFieldFactory } from '../types';
-import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
+import type { CaseCustomFieldToggle } from '@kbn/cases-common-types';
 
-import { CustomFieldTypes } from '../../../../common/types/domain';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
+import type { CustomFieldFactory } from '../types';
 import * as i18n from '../translations';
 import { getEuiTableColumn } from './get_eui_table_column';
 import { Edit } from './edit';

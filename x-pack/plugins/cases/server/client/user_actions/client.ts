@@ -11,7 +11,7 @@ import type {
   GetCaseConnectorsResponse,
   GetCaseUsersResponse,
   UserActionFindResponse,
-} from '../../../common/types/api';
+} from '@kbn/cases-common-types';
 import type { CasesClientArgs } from '../types';
 import { get } from './get';
 import { getConnectors } from './connectors';

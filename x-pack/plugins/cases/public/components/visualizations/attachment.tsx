@@ -8,7 +8,7 @@
 import React from 'react';
 
 import deepEqual from 'fast-deep-equal';
-import { LENS_ATTACHMENT_TYPE } from '../../../common/constants/visualizations';
+import { LENS_ATTACHMENT_TYPE } from '@kbn/cases-common-constants';
 import * as i18n from './translations';
 
 import type {

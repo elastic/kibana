@@ -12,9 +12,8 @@ import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable } from '@elastic/eui';
 import classnames from 'classnames';
 import styled from 'styled-components';
 
+import type { CasesFindResponseUI, CaseUI } from '@kbn/cases-common-ui';
 import { LinkButton } from '../links';
-
-import type { CasesFindResponseUI, CaseUI } from '../../../common/ui/types';
 
 import * as i18n from './translations';
 import { useCreateCaseNavigation } from '../../common/navigation';

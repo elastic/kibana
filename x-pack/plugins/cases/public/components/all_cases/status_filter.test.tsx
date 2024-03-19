@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { CaseStatuses } from '../../../common/types/domain';
+import { CaseStatuses } from '@kbn/cases-common-types';
 import { StatusFilter } from './status_filter';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import * as i18n from './translations';

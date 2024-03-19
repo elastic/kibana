@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { SnakeToCamelCase } from '../../../common/types';
-import type { ConnectorUserAction } from '../../../common/types/domain';
-import { NONE_CONNECTOR_ID } from '../../../common/constants';
+import type { ConnectorUserAction, SnakeToCamelCase } from '@kbn/cases-common-types';
+import { NONE_CONNECTOR_ID } from '@kbn/cases-common-constants';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';

@@ -8,7 +8,7 @@
 import type React from 'react';
 import type { EuiTableComputedColumnType } from '@elastic/eui';
 
-import type { CaseCustomField, CustomFieldTypes } from '../../../common/types/domain';
+import type { CaseCustomField, CustomFieldTypes } from '@kbn/cases-common-types';
 import type {
   CasesConfigurationUICustomField,
   CaseUI,

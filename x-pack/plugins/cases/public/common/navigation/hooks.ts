@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 
-import { APP_ID, CASES_CONFIGURE_PATH, CASES_CREATE_PATH } from '../../../common/constants';
+import { APP_ID, CASES_CONFIGURE_PATH, CASES_CREATE_PATH } from '@kbn/cases-common-constants';
 import { useNavigation } from '../lib/kibana';
 import type { ICasesDeepLinkId } from './deep_links';
 import type { CaseViewPathParams, CaseViewPathSearchParams } from './paths';

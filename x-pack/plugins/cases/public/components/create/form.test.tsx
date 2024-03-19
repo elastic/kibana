@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { act, render, within, fireEvent, waitFor } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
-import { NONE_CONNECTOR_ID } from '../../../common/constants';
+import { NONE_CONNECTOR_ID } from '@kbn/cases-common-constants';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';

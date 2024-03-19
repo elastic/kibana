@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
-import { CaseUserActionsDeprecatedResponseRt } from '../../../common/types/api';
+import type { CaseUserActionsDeprecatedResponse } from '@kbn/cases-common-types';
+import { CaseUserActionsDeprecatedResponseRt } from '@kbn/cases-common-types';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';

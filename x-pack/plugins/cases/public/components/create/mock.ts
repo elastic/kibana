@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CaseSeverity, ConnectorTypes } from '../../../common/types/domain';
-import type { CasePostRequest } from '../../../common/types/api';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { CaseSeverity, ConnectorTypes } from '@kbn/cases-common-types';
+import type { CasePostRequest } from '@kbn/cases-common-types';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 import { choices } from '../connectors/mock';
 
 export const sampleTags = ['coke', 'pepsi'];

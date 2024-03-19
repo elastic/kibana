@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import type { CaseUI } from '../../../common/ui/types';
+import type { CaseUI } from '@kbn/cases-common-ui';
 import { CreateCaseModal } from './create_case_modal';
 
 export interface UseCreateCaseModalProps {

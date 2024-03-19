@@ -15,7 +15,7 @@ import { AttachmentActionType } from '../../client/attachment_framework/types';
 import { createAppMockRenderer } from '../../common/mock';
 import { basicCase, basicFileMock } from '../../containers/mock';
 import { getFileType } from './file_type';
-import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+import { FILE_ATTACHMENT_TYPE } from '@kbn/cases-common-constants';
 
 describe('getFileType', () => {
   const fileType = getFileType();

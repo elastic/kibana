@@ -16,8 +16,8 @@ import { customFieldsConfigurationMock } from '../../containers/mock';
 import {
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
-} from '../../../common/constants';
-import { CustomFieldTypes } from '../../../common/types/domain';
+} from '@kbn/cases-common-constants';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
 
 import * as i18n from './translations';
 

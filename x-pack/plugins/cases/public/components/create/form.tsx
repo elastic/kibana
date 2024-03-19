@@ -17,8 +17,7 @@ import styled, { css } from 'styled-components';
 
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-import type { ActionConnector } from '../../../common/types/domain';
-import type { CasePostRequest } from '../../../common/types/api';
+import type { ActionConnector, CasePostRequest } from '@kbn/cases-common-types';
 import { Title } from './title';
 import { Description, fieldName as descriptionFieldName } from './description';
 import { Tags } from './tags';

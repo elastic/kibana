@@ -14,11 +14,11 @@ import type {
   CaseUserProfile,
   UserActionAction,
   UserActionType,
-} from '../../../../common/types/domain';
-import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
+} from '@kbn/cases-common-types';
+import { UserActionActions, UserActionTypes } from '@kbn/cases-common-types';
+import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '@kbn/cases-common-constants';
 import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
 import { UserActionPersistedAttributesRt } from '../../../common/types/user_actions';
-import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
 import { arraysDifference } from '../../../client/utils';
 import { isUserActionType } from '../../../../common/utils/user_actions';
 import { decodeOrThrow } from '../../../common/runtime_types';

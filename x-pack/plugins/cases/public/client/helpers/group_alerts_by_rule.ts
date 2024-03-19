@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AlertAttachmentPayload } from '../../../common/types/domain';
+import type { AlertAttachmentPayload } from '@kbn/cases-common-types';
+import { AttachmentType } from '@kbn/cases-common-types';
 import type { Ecs } from '../../../common';
-import { AttachmentType } from '../../../common/types/domain';
 import { getRuleIdFromEvent } from './get_rule_id_from_event';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 

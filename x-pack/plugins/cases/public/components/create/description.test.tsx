@@ -13,7 +13,7 @@ import { Description } from './description';
 import { schema } from './schema';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
+import { MAX_DESCRIPTION_LENGTH } from '@kbn/cases-common-constants';
 import { FormTestComponent } from '../../common/test_utils';
 import type { FormSchema } from '@kbn/index-management-plugin/public/shared_imports';
 

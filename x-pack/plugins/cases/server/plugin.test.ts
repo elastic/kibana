@@ -20,7 +20,7 @@ import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { CasePlugin } from './plugin';
 import type { ConfigType } from './config';
-import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
+import { ALLOWED_MIME_TYPES } from '@kbn/cases-common-constants';
 import type { CasesServerSetupDependencies, CasesServerStartDependencies } from './types';
 
 function getConfig(overrides = {}) {

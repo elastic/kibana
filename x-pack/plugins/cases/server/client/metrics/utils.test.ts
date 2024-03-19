@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CasesMetricsFeatureField } from '../../../common/types/api';
-import { CaseMetricsFeature } from '../../../common/types/api';
+import type { CasesMetricsFeatureField } from '@kbn/cases-common-types';
+import { CaseMetricsFeature } from '@kbn/cases-common-types';
 import { createMockClient, createMockClientArgs } from './test_utils/client';
 import { buildHandlers } from './utils';
 

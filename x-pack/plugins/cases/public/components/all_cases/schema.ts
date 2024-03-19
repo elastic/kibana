@@ -7,7 +7,7 @@
 
 import { isLeft } from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
-import { CaseSeverityRt, CaseStatusRt } from '../../../common/types/domain';
+import { CaseSeverityRt, CaseStatusRt } from '@kbn/cases-common-types';
 
 export const AllCasesURLQueryParamsRt = rt.exact(
   rt.partial({

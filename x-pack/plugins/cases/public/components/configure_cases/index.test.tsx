@@ -30,8 +30,8 @@ import {
   useActionTypesResponse,
   usePersistConfigurationMockResponse,
 } from './__mock__';
-import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
+import type { CustomFieldsConfiguration } from '@kbn/cases-common-types';
+import { ConnectorTypes, CustomFieldTypes } from '@kbn/cases-common-types';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';

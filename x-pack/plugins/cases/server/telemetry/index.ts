@@ -15,13 +15,13 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
-import { collectTelemetryData } from './collect_telemetry_data';
 import {
   CASE_TELEMETRY_SAVED_OBJECT,
   CASES_TELEMETRY_TASK_NAME,
   CASE_TELEMETRY_SAVED_OBJECT_ID,
   SAVED_OBJECT_TYPES,
-} from '../../common/constants';
+} from '@kbn/cases-common-constants';
+import { collectTelemetryData } from './collect_telemetry_data';
 import type { CasesTelemetry } from './types';
 import { casesSchema } from './schema';
 

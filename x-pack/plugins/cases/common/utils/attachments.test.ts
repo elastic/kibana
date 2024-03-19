@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AttachmentAttributes } from '../types/domain';
-import { AttachmentType } from '../types/domain';
+import type { AttachmentAttributes } from '@kbn/cases-common-types';
+import { AttachmentType } from '@kbn/cases-common-types';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,

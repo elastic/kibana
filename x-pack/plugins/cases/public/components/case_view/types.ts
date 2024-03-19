@@ -5,10 +5,10 @@
  * 2.0.
  */
 import type { MutableRefObject } from 'react';
+import type { UseFetchAlertData } from '@kbn/cases-common-ui';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import type { CasesNavigation } from '../links';
 import type { CaseViewRefreshPropInterface, CaseUI } from '../../../common';
-import type { UseFetchAlertData } from '../../../common/ui';
 
 export interface CaseViewBaseProps {
   onComponentInitialized?: () => void;

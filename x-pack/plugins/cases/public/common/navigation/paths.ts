@@ -14,7 +14,7 @@ import {
   CASE_VIEW_PATH,
   CASE_VIEW_COMMENT_PATH,
   CASE_VIEW_TAB_PATH,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 
 export const DEFAULT_BASE_PATH = '/cases';

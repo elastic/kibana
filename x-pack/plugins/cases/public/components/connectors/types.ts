@@ -8,10 +8,10 @@
 import type { IconType } from '@elastic/eui';
 import type React from 'react';
 
-import type { ConnectorTypeFields } from '../../../common/types/domain';
+import type { ConnectorTypeFields } from '@kbn/cases-common-types';
 import type { CaseActionConnector } from '../types';
 
-export type { ConnectorMappingTarget } from '../../../common/types/domain';
+export type { ConnectorMappingTarget } from '@kbn/cases-common-types';
 
 export interface ConnectorConfiguration {
   name: string;

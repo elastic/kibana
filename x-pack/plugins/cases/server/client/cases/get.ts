@@ -6,16 +6,20 @@
  */
 
 import type { SavedObject, SavedObjectsResolveResponse } from '@kbn/core/server';
-import type { AttachmentTotals, Case, CaseAttributes, User } from '../../../common/types/domain';
 import type {
+  AttachmentTotals,
+  Case,
+  CaseAttributes,
+  User,
   AllCategoriesFindRequest,
   AllReportersFindRequest,
   AllTagsFindRequest,
   CaseResolveResponse,
   CasesByAlertIDRequest,
   GetRelatedCasesByAlertResponse,
-} from '../../../common/types/api';
+} from '@kbn/cases-common-types';
 import {
+  CaseRt,
   AllCategoriesFindRequestRt,
   AllReportersFindRequestRt,
   AllTagsFindRequestRt,
@@ -25,7 +29,7 @@ import {
   GetRelatedCasesByAlertResponseRt,
   GetReportersResponseRt,
   GetTagsResponseRt,
-} from '../../../common/types/api';
+} from '@kbn/cases-common-types';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
 import { countAlertsForID, flattenCaseSavedObject, countUserAttachments } from '../../common/utils';
@@ -37,7 +41,6 @@ import type {
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
 } from '../../common/types/case';
-import { CaseRt } from '../../../common/types/domain';
 
 /**
  * Parameters for finding cases IDs using an alert ID

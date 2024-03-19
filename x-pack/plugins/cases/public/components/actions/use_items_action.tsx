@@ -7,7 +7,7 @@
 
 import { useCallback, useState } from 'react';
 import { difference, isEqual } from 'lodash';
-import type { CaseUpdateRequest } from '../../../common/ui';
+import type { CaseUpdateRequest } from '@kbn/cases-common-ui';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
 import type { CasesUI, CaseUI } from '../../../common';
 import { useCasesContext } from '../cases_context/use_cases_context';

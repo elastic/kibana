@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { PersistableStateAttachment } from '../../../../common/types/domain';
+import type { PersistableStateAttachment, SnakeToCamelCase } from '@kbn/cases-common-types';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
-import type { SnakeToCamelCase } from '../../../../common/types';
 import { createRegisteredAttachmentUserActionBuilder } from './registered_attachments';
 
 type BuilderArgs = Pick<

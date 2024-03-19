@@ -3285,6 +3285,26 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cases-common-api@link:x-pack/packages/cases/common_api":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cases-common-constants@link:x-pack/packages/cases/common_constants":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cases-common-schema@link:x-pack/packages/cases/common_schema":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cases-common-types@link:x-pack/packages/cases/common_types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cases-common-ui@link:x-pack/packages/cases/common_ui":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cases-components@link:packages/kbn-cases-components":
   version "0.0.0"
   uid ""

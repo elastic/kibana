@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_DOCS_PER_PAGE, MAX_USER_ACTIONS_PER_PAGE } from '../../../common/constants';
+import { MAX_DOCS_PER_PAGE, MAX_USER_ACTIONS_PER_PAGE } from '@kbn/cases-common-constants';
 import { createMockClient } from '../metrics/test_utils/client';
 import { createCasesClientMockArgs } from '../mocks';
 import { find } from './find';

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MAX_DELETE_IDS_LENGTH, MAX_FILES_PER_CASE } from '../../../common/constants';
+import { MAX_DELETE_IDS_LENGTH, MAX_FILES_PER_CASE } from '@kbn/cases-common-constants';
 import type { FindFileArgs } from '@kbn/files-plugin/server';
 import { createFileServiceMock } from '@kbn/files-plugin/server/mocks';
 import type { FileJSON } from '@kbn/shared-ux-file-types';

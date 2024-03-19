@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
+import { MAX_ASSIGNEES_PER_CASE } from '@kbn/cases-common-constants';
 
 export * from '../../common/translations';
 

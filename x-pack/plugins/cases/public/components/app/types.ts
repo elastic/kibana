@@ -6,7 +6,7 @@
  */
 
 import type { MutableRefObject } from 'react';
-import type { CaseViewRefreshPropInterface, UseFetchAlertData } from '../../../common/ui/types';
+import type { CaseViewRefreshPropInterface, UseFetchAlertData } from '@kbn/cases-common-ui';
 import type { CasesNavigation } from '../links';
 import type { CasesTimelineIntegration } from '../timeline_context';
 

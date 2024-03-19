@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AttachmentType } from '../../../../common/types/domain';
+import { AttachmentType } from '@kbn/cases-common-types';
 import type { AttachmentUI } from '../../../containers/types';
 
 export const getManualAlertIds = (comments: AttachmentUI[]): string[] => {

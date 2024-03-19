@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_USER_ACTION_SAVED_OBJECT } from '@kbn/cases-common-constants';
 import { buildFilter } from '../../client/utils';
 import type {
   CasesTelemetry,

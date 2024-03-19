@@ -12,7 +12,7 @@ import {
   UseField,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash';
-import { CaseSeverity } from '../../../common/types/domain';
+import { CaseSeverity } from '@kbn/cases-common-types';
 import { SeveritySelector } from '../severity/selector';
 import { SEVERITY_TITLE } from '../severity/translations';
 

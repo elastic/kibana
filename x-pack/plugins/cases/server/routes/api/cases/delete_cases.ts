@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { CASES_URL } from '../../../../common/constants';
+import { CASES_URL } from '@kbn/cases-common-constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 

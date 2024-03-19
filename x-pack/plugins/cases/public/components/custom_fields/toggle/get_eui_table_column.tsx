@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiIcon } from '@elastic/eui';
 
-import type { CaseCustomField } from '../../../../common/types/domain';
+import type { CaseCustomField } from '@kbn/cases-common-types';
 import type { CustomFieldEuiTableColumn } from '../types';
 
 export const getEuiTableColumn = ({ label }: { label: string }): CustomFieldEuiTableColumn => ({

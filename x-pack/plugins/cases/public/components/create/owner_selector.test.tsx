@@ -9,7 +9,7 @@ import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
 
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { OBSERVABILITY_OWNER, OWNER_INFO } from '../../../common/constants';
+import { OBSERVABILITY_OWNER, OWNER_INFO } from '@kbn/cases-common-constants';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import { FormTestComponent } from '../../common/test_utils';
 import type { AppMockRenderer } from '../../common/mock';

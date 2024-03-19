@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import type { CasePostRequest } from '../../../common/types/api';
-import { createCaseSavedObjectResponse } from '../test_utils';
-import { transformSavedObjectToExternalModel } from '../cases/transform';
-import { alertComment, comment } from '../../mocks';
-import type { UserActionsDict } from './types';
 import {
   CaseSeverity,
   CaseStatuses,
   ConnectorTypes,
   CustomFieldTypes,
-} from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
+import type { CasePostRequest } from '@kbn/cases-common-types';
+import { CASE_SAVED_OBJECT } from '@kbn/cases-common-constants';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { createCaseSavedObjectResponse } from '../test_utils';
+import { transformSavedObjectToExternalModel } from '../cases/transform';
+import { alertComment, comment } from '../../mocks';
+import type { UserActionsDict } from './types';
 import type { PatchCasesArgs } from '../cases/types';
 
 export const casePayload: CasePostRequest = {

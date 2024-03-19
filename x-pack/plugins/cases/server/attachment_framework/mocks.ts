@@ -11,7 +11,7 @@ import type {
   ExternalReferenceNoSOAttachmentAttributes,
   PersistableStateAttachmentAttributes,
   PersistableStateAttachmentPayload,
-} from '../../common/types/domain';
+} from '@kbn/cases-common-types';
 import {
   AttachmentType,
   ExternalReferenceStorageType,

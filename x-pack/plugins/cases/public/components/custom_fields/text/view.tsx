@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiText } from '@elastic/eui';
-import type { CaseCustomFieldText } from '../../../../common/types/domain';
+import type { CaseCustomFieldText } from '@kbn/cases-common-types';
 import type { CustomFieldType } from '../types';
 
 const ViewComponent: CustomFieldType<CaseCustomFieldText>['View'] = ({ customField }) => {

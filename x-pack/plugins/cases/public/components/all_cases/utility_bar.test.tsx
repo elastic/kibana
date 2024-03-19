@@ -9,7 +9,7 @@ import { act, waitFor, screen, waitForElementToBeRemoved } from '@testing-librar
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
-import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import { MAX_DOCS_PER_PAGE } from '@kbn/cases-common-constants';
 import {
   noCasesPermissions,
   onlyDeleteCasesPermission,

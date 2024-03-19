@@ -11,11 +11,11 @@ import { EuiProgress } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import deepEqual from 'react-fast-compare';
 
-import type { CaseUI, FilterOptions, CasesUI } from '../../../common/ui/types';
+import type { CaseStatuses } from '@kbn/cases-common-types';
+import type { CaseUI, FilterOptions, CasesUI } from '@kbn/cases-common-ui';
+import { SortFieldCase } from '@kbn/cases-common-ui';
 import type { EuiBasicTableOnChange } from './types';
 
-import { SortFieldCase } from '../../../common/ui/types';
-import type { CaseStatuses } from '../../../common/types/domain';
 import { useCasesColumns } from './use_cases_columns';
 import { CasesTableFilters } from './table_filters';
 import { CASES_TABLE_PER_PAGE_VALUES } from './types';

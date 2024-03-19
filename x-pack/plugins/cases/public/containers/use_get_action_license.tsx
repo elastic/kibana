@@ -6,10 +6,10 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { ConnectorTypes } from '@kbn/cases-common-types';
 import { useToasts } from '../common/lib/kibana';
 import { getActionLicense } from './api';
 import * as i18n from './translations';
-import { ConnectorTypes } from '../../common/types/domain';
 import { casesQueriesKeys } from './constants';
 import type { ServerError } from '../types';
 

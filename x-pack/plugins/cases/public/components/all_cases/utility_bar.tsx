@@ -20,10 +20,10 @@ import {
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
+import { MAX_DOCS_PER_PAGE } from '@kbn/cases-common-constants';
+import type { CasesUI } from '@kbn/cases-common-ui';
 import * as i18n from './translations';
-import type { CasesUI } from '../../../common/ui/types';
 import type { CasesColumnSelection } from './types';
-import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import { useRefreshCases } from './use_on_refresh_cases';
 import { useBulkActions } from './use_bulk_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';

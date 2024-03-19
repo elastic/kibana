@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypes } from '../../common/types/domain';
+import { ConnectorTypes } from '@kbn/cases-common-types';
 import type { ICasesConnector, CasesConnectorsMap } from './types';
 import { getCaseConnector as getJiraCaseConnector } from './jira';
 import { getCaseConnector as getResilientCaseConnector } from './resilient';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { STACK_APP_ID } from '../../common/constants';
+import { STACK_APP_ID } from '@kbn/cases-common-constants';
 import { useApplication } from './lib/kibana/use_application';
 
 export const useIsMainApplication = () => {

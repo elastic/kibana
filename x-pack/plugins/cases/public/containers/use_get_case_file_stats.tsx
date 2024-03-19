@@ -12,7 +12,7 @@ import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 import { useQuery } from '@tanstack/react-query';
 
-import type { Owner } from '../../common/constants/types';
+import type { Owner } from '@kbn/cases-common-constants';
 import type { ServerError } from '../types';
 
 import { constructFileKindIdByOwner } from '../../common/files';

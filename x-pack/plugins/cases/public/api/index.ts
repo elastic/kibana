@@ -15,14 +15,14 @@ import type {
   CasesBulkGetResponse,
   CasesMetricsRequest,
   CasesMetricsResponse,
-} from '../../common/types/api';
-import type { CasesStatus, CasesMetrics, CasesFindResponseUI } from '../../common/ui';
+} from '@kbn/cases-common-types';
 import {
   CASE_FIND_URL,
   INTERNAL_CASE_METRICS_URL,
   CASE_STATUS_URL,
   INTERNAL_BULK_GET_CASES_URL,
-} from '../../common/constants';
+} from '@kbn/cases-common-constants';
+import type { CasesStatus, CasesMetrics, CasesFindResponseUI } from '@kbn/cases-common-ui';
 import { convertAllCasesToCamel, convertToCamelCase } from './utils';
 import {
   decodeCasesBulkGetResponse,

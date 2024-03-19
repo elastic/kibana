@@ -8,9 +8,9 @@
 import { useQuery } from '@tanstack/react-query';
 import type { HttpSetup } from '@kbn/core/public';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { ActionConnector } from '@kbn/cases-common-types';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import type { ServerError } from '../../../types';
-import type { ActionConnector } from '../../../../common/types/domain';
 import { connectorsQueriesKeys } from '../constants';
 import { getSeverity } from './api';
 import * as i18n from './translations';

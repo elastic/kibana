@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_ASSIGNEES_PER_CASE, MAX_USER_ACTIONS_PER_CASE } from '../../common/constants';
+import { MAX_ASSIGNEES_PER_CASE, MAX_USER_ACTIONS_PER_CASE } from '@kbn/cases-common-constants';
 import { createUserActionServiceMock } from '../services/mocks';
 import { areTotalAssigneesInvalid, validateMaxUserActions } from './validators';
 

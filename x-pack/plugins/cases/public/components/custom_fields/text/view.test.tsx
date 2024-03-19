@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { CustomFieldTypes } from '../../../../common/types/domain';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
 import { View } from './view';
 
 describe('View ', () => {

@@ -18,7 +18,8 @@ import type {
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
-import { APP_ID } from '../common/constants';
+import { APP_ID } from '@kbn/cases-common-constants';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
 import {
   createCaseCommentSavedObjectType,
   caseConfigureSavedObjectType,
@@ -45,7 +46,6 @@ import { getInternalRoutes } from './routes/api/get_internal_routes';
 import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import { UserProfileService } from './services';
-import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
 import { registerInternalAttachments } from './internal_attachments';
 import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';

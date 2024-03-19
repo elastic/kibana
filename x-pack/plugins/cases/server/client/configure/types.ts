@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CaseConnector } from '../../../common/types/domain';
+import type { CaseConnector } from '@kbn/cases-common-types';
 import type { IndexRefresh } from '../../services/types';
 
 export interface MappingsArgs {

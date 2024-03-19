@@ -17,12 +17,12 @@ import { isFunction, mapValues } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
-import { AttachmentType } from '../../../common/types/domain';
+import { AttachmentType } from '@kbn/cases-common-types';
 import type {
   PersistableStateAttachmentAttributes,
   UserCommentAttachmentAttributes,
-} from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
+import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
 
 interface MigrationLogMeta extends LogMeta {
   migrations: {

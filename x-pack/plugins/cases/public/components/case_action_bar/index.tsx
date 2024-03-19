@@ -8,9 +8,9 @@
 import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiButtonEmpty } from '@elastic/eui';
-import type { CaseStatuses } from '../../../common/types/domain';
-import type { CaseUI } from '../../../common/ui/types';
-import { CaseMetricsFeature } from '../../../common/types/api';
+import type { CaseStatuses } from '@kbn/cases-common-types';
+import { CaseMetricsFeature } from '@kbn/cases-common-types';
+import type { CaseUI } from '@kbn/cases-common-ui';
 import { ActionBarStatusItem } from './action_bar_status_item';
 import * as i18n from '../case_view/translations';
 import { Actions } from './actions';

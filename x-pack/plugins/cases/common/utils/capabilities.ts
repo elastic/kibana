@@ -13,7 +13,7 @@ import {
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
   CASES_SETTINGS_CAPABILITY,
-} from '../constants';
+} from '@kbn/cases-common-constants';
 
 export interface CasesUiCapabilities {
   all: readonly string[];

@@ -6,7 +6,7 @@
  */
 
 import { euiLightVars } from '@kbn/ui-theme';
-import { CaseSeverity } from '../../../common/types/domain';
+import { CaseSeverity } from '@kbn/cases-common-types';
 import { CRITICAL, HIGH, LOW, MEDIUM } from './translations';
 
 export const severities = {

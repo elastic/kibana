@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UserActionType } from '../../../common/types/domain';
+import type { UserActionType } from '@kbn/cases-common-types';
 import { CreateCaseUserActionBuilder } from './builders/create_case';
 import { TitleUserActionBuilder } from './builders/title';
 import { CommentUserActionBuilder } from './builders/comment';

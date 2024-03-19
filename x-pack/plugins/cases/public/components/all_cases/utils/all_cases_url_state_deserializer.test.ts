@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CustomFieldTypes } from '../../../../common/types/domain';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
 import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
 
 import { allCasesUrlStateDeserializer } from './all_cases_url_state_deserializer';

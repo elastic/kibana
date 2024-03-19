@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import AllCasesSelectorModal from '.';
 import type { CaseUI } from '../../../../common';
-import { CaseStatuses } from '../../../../common/types/domain';
+import { CaseStatuses } from '@kbn/cases-common-types';
 import type { AppMockRenderer } from '../../../common/mock';
 import { allCasesPermissions, createAppMockRenderer } from '../../../common/mock';
 import { useCasesToast } from '../../../common/use_cases_toast';

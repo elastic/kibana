@@ -8,15 +8,16 @@
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
-import type { UserActionFindRequestTypes } from '../../../../common/types/api';
-import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
-import { defaultSortField } from '../../../common/utils';
-import { decodeOrThrow } from '../../../common/runtime_types';
+import type { UserActionType, UserActionFindRequestTypes } from '@kbn/cases-common-types';
+import { UserActionActions, UserActionTypes, AttachmentType } from '@kbn/cases-common-types';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
-} from '../../../../common/constants';
+} from '@kbn/cases-common-constants';
+import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
+import { defaultSortField } from '../../../common/utils';
+import { decodeOrThrow } from '../../../common/runtime_types';
 
 import type { FindOptions, ServiceContext } from '../types';
 import { transformFindResponseToExternalModel, transformToExternalModel } from '../transform';
@@ -28,12 +29,6 @@ import type {
 } from '../../../common/types/user_actions';
 import { bulkDecodeSOAttributes } from '../../utils';
 import { UserActionTransformedAttributesRt } from '../../../common/types/user_actions';
-import type { UserActionType } from '../../../../common/types/domain';
-import {
-  UserActionActions,
-  UserActionTypes,
-  AttachmentType,
-} from '../../../../common/types/domain';
 
 export class UserActionFinder {
   constructor(private readonly context: ServiceContext) {}

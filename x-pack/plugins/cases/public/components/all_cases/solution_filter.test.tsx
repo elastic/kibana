@@ -11,7 +11,7 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/constants';
+import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '@kbn/cases-common-constants';
 
 import { SolutionFilter } from './solution_filter';
 import userEvent from '@testing-library/user-event';

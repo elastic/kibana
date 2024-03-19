@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CASE_SAVED_OBJECT } from '../../../../../common/constants';
-import type { CasesMetricsResponse } from '../../../../../common/types/api';
+import type { CasesMetricsResponse } from '@kbn/cases-common-types';
+import { CASE_SAVED_OBJECT } from '@kbn/cases-common-constants';
 import type { AggregationBuilder, AggregationResponse } from '../../types';
 
 export class AverageDuration implements AggregationBuilder<CasesMetricsResponse> {

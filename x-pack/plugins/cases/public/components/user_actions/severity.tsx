@@ -7,8 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import React from 'react';
-import type { SnakeToCamelCase } from '../../../common/types';
-import type { SeverityUserAction } from '../../../common/types/domain';
+import type { SeverityUserAction, SnakeToCamelCase } from '@kbn/cases-common-types';
 import { SET_SEVERITY_TO } from '../create/translations';
 import { createCommonUpdateUserActionBuilder } from './common';
 import type { UserActionBuilder } from './types';

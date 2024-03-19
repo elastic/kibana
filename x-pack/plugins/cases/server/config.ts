@@ -7,7 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
+import { ALLOWED_MIME_TYPES } from '@kbn/cases-common-constants';
 
 export const ConfigSchema = schema.object({
   markdownPlugins: schema.object({

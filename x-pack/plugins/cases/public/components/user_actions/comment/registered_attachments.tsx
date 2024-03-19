@@ -16,6 +16,7 @@ import { memoize, partition } from 'lodash';
 
 import { EuiCallOut, EuiCode, EuiLoadingSpinner, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 
+import type { Attachment, SnakeToCamelCase } from '@kbn/cases-common-types';
 import type {
   AttachmentType,
   AttachmentViewObject,
@@ -25,9 +26,7 @@ import type {
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { UserActionTimestamp } from '../timestamp';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
-import type { Attachment } from '../../../../common/types/domain';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
-import type { SnakeToCamelCase } from '../../../../common/types';
 import {
   ATTACHMENT_NOT_REGISTERED_ERROR,
   DEFAULT_EVENT_ATTACHMENT_TITLE,

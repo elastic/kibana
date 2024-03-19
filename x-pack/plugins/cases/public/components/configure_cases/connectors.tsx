@@ -17,13 +17,13 @@ import {
 
 import styled from 'styled-components';
 
+import type { ActionTypeConnector } from '@kbn/cases-common-types';
+import { ConnectorTypes } from '@kbn/cases-common-types';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import * as i18n from './translations';
 
 import type { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
-import type { ActionTypeConnector } from '../../../common/types/domain';
-import { ConnectorTypes } from '../../../common/types/domain';
 import { DeprecatedCallout } from '../connectors/deprecated_callout';
 import { isDeprecatedConnector } from '../utils';
 import { useApplicationCapabilities } from '../../common/lib/kibana';

@@ -6,11 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { BulkGetAttachmentsRequestRt } from '../../../../common/types/api/attachment/v1';
+import { BulkGetAttachmentsRequestRt } from '@kbn/cases-common-types';
+import type { attachmentApiV1 } from '@kbn/cases-common-types';
+import { INTERNAL_BULK_GET_ATTACHMENTS_URL } from '@kbn/cases-common-constants';
 import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
-import type { attachmentApiV1 } from '../../../../common/types/api';
 
-import { INTERNAL_BULK_GET_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { escapeHatch } from '../utils';

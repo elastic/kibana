@@ -17,7 +17,7 @@ import {
   caseConfigurationResponseMock,
   casesConfigurationsMock,
 } from './mock';
-import { ConnectorTypes } from '../../../common/types/domain';
+import { ConnectorTypes } from '@kbn/cases-common-types';
 import { KibanaServices } from '../../common/lib/kibana';
 import { actionTypesMock, connectorsMock } from '../../common/mock/connectors';
 

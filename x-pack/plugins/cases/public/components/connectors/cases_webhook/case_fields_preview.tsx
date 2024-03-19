@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { ConnectorTypes } from '../../../../common/types/domain';
+import { ConnectorTypes } from '@kbn/cases-common-types';
 import type { ConnectorFieldsPreviewProps } from '../types';
 import { ConnectorCard } from '../card';
 import * as i18n from './translations';

@@ -10,9 +10,9 @@ import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import type { FilterConfig, FilterConfigRenderParams } from './types';
 import { useFilterConfig } from './use_filter_config';
-import type { FilterOptions } from '../../../../common/ui';
+import type { FilterOptions } from '@kbn/cases-common-ui';
 import { CUSTOM_FIELD_KEY_PREFIX } from '../constants';
-import { CustomFieldTypes } from '../../../../common/types/domain';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
 
 const emptyFilterOptions: FilterOptions = {
   search: '',

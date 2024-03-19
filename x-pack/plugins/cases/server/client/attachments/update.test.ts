@@ -7,7 +7,7 @@
 
 import { comment, actionComment } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
-import { MAX_COMMENT_LENGTH, MAX_USER_ACTIONS_PER_CASE } from '../../../common/constants';
+import { MAX_COMMENT_LENGTH, MAX_USER_ACTIONS_PER_CASE } from '@kbn/cases-common-constants';
 import { update } from './update';
 import { createUserActionServiceMock } from '../../services/mocks';
 

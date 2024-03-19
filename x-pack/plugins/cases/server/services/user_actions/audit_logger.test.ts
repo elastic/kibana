@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UserActionActions } from '../../../common/types/domain';
+import { UserActionActions } from '@kbn/cases-common-types';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { UserActionAuditLogger } from './audit_logger';

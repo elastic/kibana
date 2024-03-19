@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { CASES_TELEMETRY_TASK_NAME } from '../../common/constants';
+import { CASES_TELEMETRY_TASK_NAME } from '@kbn/cases-common-constants';
 
 const MINUTES_ON_HALF_DAY = 60 * 12;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CaseMetricsFeature, SingleCaseMetricsResponse } from '../../../common/types/api';
+import type { CaseMetricsFeature, SingleCaseMetricsResponse } from '@kbn/cases-common-types';
 import { BaseHandler } from './base_handler';
 import type { SingleCaseBaseHandlerCommonOptions } from './types';
 

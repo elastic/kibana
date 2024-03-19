@@ -25,7 +25,7 @@ import {
 } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
-import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses, ConnectorTypes } from '@kbn/cases-common-types';
 
 describe('case transforms', () => {
   describe('transformUpdateResponseToExternalModel', () => {

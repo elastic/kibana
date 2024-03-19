@@ -13,7 +13,7 @@ import {
   createPersistableStateRequests,
   createUserRequests,
 } from '../test_utils';
-import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '../../../../common/constants';
+import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '@kbn/cases-common-constants';
 
 describe('PersistableStateAndExternalReferencesLimiter', () => {
   const caseId = 'test-id';

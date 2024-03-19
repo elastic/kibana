@@ -14,7 +14,7 @@ import { readCasesPermissions, createAppMockRenderer } from '../../../common/moc
 import { CustomFields } from './custom_fields';
 import { customFieldsMock, customFieldsConfigurationMock } from '../../../containers/mock';
 import userEvent from '@testing-library/user-event';
-import { CustomFieldTypes } from '../../../../common/types/domain';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
 
 describe('Case View Page files tab', () => {
   const onSubmit = jest.fn();

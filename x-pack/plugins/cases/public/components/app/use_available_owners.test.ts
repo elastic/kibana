@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { APP_ID, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { APP_ID, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 import { useKibana } from '../../common/lib/kibana';
 import {
   allCasesCapabilities,

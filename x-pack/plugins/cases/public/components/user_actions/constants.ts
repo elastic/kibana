@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { UserActionTypes } from '../../../common/types/domain';
+import { UserActionTypes } from '@kbn/cases-common-types';
 import type { SupportedUserActionTypes } from './types';
 
 export const DRAFT_COMMENT_STORAGE_ID = 'xpack.cases.commentDraft';

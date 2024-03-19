@@ -20,9 +20,9 @@ import type { UploadedFile } from '@kbn/shared-ux-file-upload/src/file_upload';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { FileUpload } from '@kbn/shared-ux-file-upload';
 
-import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+import { FILE_ATTACHMENT_TYPE } from '@kbn/cases-common-constants';
+import type { Owner } from '@kbn/cases-common-constants';
 import { constructFileKindIdByOwner } from '../../../common/files';
-import type { Owner } from '../../../common/constants/types';
 
 import { AttachmentType, ExternalReferenceStorageType } from '../../../common';
 import { useCasesToast } from '../../common/use_cases_toast';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { AttachmentRequest } from '../../../../common/types/api';
-import { AttachmentType } from '../../../../common/types/domain';
+import { AttachmentType } from '@kbn/cases-common-types';
+import type { AttachmentRequest } from '@kbn/cases-common-types';
+import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '@kbn/cases-common-constants';
 import type { AttachmentService } from '../../../services';
-import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '../../../../common/constants';
 import { isFileAttachmentRequest, isPersistableStateOrExternalReference } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
 

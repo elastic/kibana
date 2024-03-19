@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { CustomFieldsConfiguration, CaseCustomFields } from '../../../common/types/domain';
-import { CustomFieldTypes } from '../../../common/types/domain';
-import type { CasesSearchRequest } from '../../../common/types/api';
-import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
+import type {
+  CustomFieldsConfiguration,
+  CaseCustomFields,
+  CasesSearchRequest,
+} from '@kbn/cases-common-types';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
+import { MAX_CUSTOM_FIELDS_PER_CASE } from '@kbn/cases-common-constants';
 import {
   validateCustomFieldKeysAgainstConfiguration,
   validateCustomFieldTypesInRequest,

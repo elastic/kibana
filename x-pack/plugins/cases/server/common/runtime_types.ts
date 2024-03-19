@@ -13,7 +13,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { exactCheck } from '@kbn/securitysolution-io-ts-utils/src/exact_check';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils/src/format_errors';
-import { throwErrors } from '../../common/api';
+import { throwErrors } from '@kbn/cases-common-api';
 
 type ErrorFactory = (message: string) => Error;
 

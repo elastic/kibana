@@ -16,10 +16,10 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
+import type { CustomFieldsConfiguration } from '@kbn/cases-common-types';
+import { MAX_CUSTOM_FIELDS_PER_CASE } from '@kbn/cases-common-constants';
 import * as i18n from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import { CustomFieldsList } from './custom_fields_list';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 

@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { SingleCaseMetricsFeature } from '../../common/ui';
+import type { SingleCaseMetricsFeature } from '@kbn/cases-common-ui';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useLicense } from './use_license';
 

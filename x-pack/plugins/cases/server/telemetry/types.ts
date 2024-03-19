@@ -7,7 +7,7 @@
 
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import type { Owner } from '../../common/constants/types';
+import type { Owner } from '@kbn/cases-common-constants';
 
 export type BucketKeyString = Omit<Bucket, 'key'> & { key: string };
 

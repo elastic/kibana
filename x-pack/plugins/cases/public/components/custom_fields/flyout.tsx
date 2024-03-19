@@ -17,10 +17,10 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
+import type { CustomFieldConfiguration } from '@kbn/cases-common-types';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
 import type { CustomFieldFormState } from './form';
 import { CustomFieldsForm } from './form';
-import type { CustomFieldConfiguration } from '../../../common/types/domain';
-import { CustomFieldTypes } from '../../../common/types/domain';
 
 import * as i18n from './translations';
 

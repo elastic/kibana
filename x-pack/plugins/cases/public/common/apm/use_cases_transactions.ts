@@ -7,7 +7,7 @@
 
 import type { Transaction } from '@elastic/apm-rum';
 import { useCallback } from 'react';
-import { AttachmentType } from '../../../common/types/domain';
+import { AttachmentType } from '@kbn/cases-common-types';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useStartTransaction } from './use_start_transaction';
 

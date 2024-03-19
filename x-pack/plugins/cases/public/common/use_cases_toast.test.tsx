@@ -15,7 +15,7 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import type { SupportedCaseAttachment } from '../types';
 import { getByTestId, queryByTestId, screen } from '@testing-library/react';
-import { OWNER_INFO } from '../../common/constants';
+import { OWNER_INFO } from '@kbn/cases-common-constants';
 import { useApplication } from './lib/kibana/use_application';
 
 jest.mock('./lib/kibana');

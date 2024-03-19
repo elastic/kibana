@@ -6,8 +6,8 @@
  */
 
 import { merge } from 'lodash';
-import type { SingleCaseMetricsResponse } from '../../../../common/types/api';
-import { CaseMetricsFeature } from '../../../../common/types/api';
+import type { SingleCaseMetricsResponse } from '@kbn/cases-common-types';
+import { CaseMetricsFeature } from '@kbn/cases-common-types';
 import { Operations } from '../../../authorization';
 import { createCaseError } from '../../../common/error';
 import { SingleCaseAggregationHandler } from '../single_case_aggregation_handler';

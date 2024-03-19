@@ -25,11 +25,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import type { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
+import type { CasesFeatures, CasesPermissions } from '@kbn/cases-common-ui';
 import type { StartServices } from '../../types';
 import type { ReleasePhase } from '../../components/types';
 
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CasesProvider } from '../../components/cases_context';
 import { createStartServicesMock } from '../lib/kibana/kibana_react.mock';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';

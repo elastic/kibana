@@ -14,8 +14,8 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash';
 import React, { memo } from 'react';
-import { MAX_CATEGORY_LENGTH } from '../../../common/constants';
-import type { CaseUI } from '../../../common/ui';
+import { MAX_CATEGORY_LENGTH } from '@kbn/cases-common-constants';
+import type { CaseUI } from '@kbn/cases-common-ui';
 import { CategoryComponent } from './category_component';
 import { CATEGORY, EMPTY_CATEGORY_VALIDATION_MSG, MAX_LENGTH_ERROR } from './translations';
 

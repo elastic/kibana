@@ -7,8 +7,8 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
-import type { AttachmentAttributes } from '../../../common/types/domain';
-import { AttachmentAttributesRt, AttachmentPatchAttributesRt } from '../../../common/types/domain';
+import type { AttachmentAttributes } from '@kbn/cases-common-types';
+import { AttachmentAttributesRt, AttachmentPatchAttributesRt } from '@kbn/cases-common-types';
 import type { User } from './user';
 
 interface AttachmentCommonPersistedAttributes {

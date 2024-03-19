@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
 import type { ValidFeatureId } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 import type { CaseUI } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
 import { getManualAlertIds } from './helpers';

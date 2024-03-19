@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectorResilientTypeFields } from '../../../common/types/domain';
+import type { ConnectorResilientTypeFields } from '@kbn/cases-common-types';
 import type { Format } from './types';
 
 export const format: Format = (theCase, alerts) => {

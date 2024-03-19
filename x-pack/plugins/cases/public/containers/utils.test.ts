@@ -15,7 +15,7 @@ import {
 } from './utils';
 
 import type { CaseUI } from './types';
-import { CustomFieldTypes } from '../../common/types/domain';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
 
 const caseBeforeUpdate = {
   comments: [

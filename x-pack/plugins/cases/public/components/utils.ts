@@ -12,12 +12,12 @@ import type {
   ValidationConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { ConnectorTypeFields } from '../../common/types/domain';
-import { ConnectorTypes } from '../../common/types/domain';
+import type { ConnectorTypeFields } from '@kbn/cases-common-types';
+import { ConnectorTypes } from '@kbn/cases-common-types';
+import type { CaseUser, CaseUsers } from '@kbn/cases-common-ui';
 import type { CasesPublicStartDependencies } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import type { CaseActionConnector } from './types';
-import type { CaseUser, CaseUsers } from '../../common/ui/types';
 import { convertToCaseUserWithProfileInfo } from './user_profiles/user_converter';
 import type { CaseUserWithProfileInfo } from './user_profiles/types';
 

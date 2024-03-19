@@ -10,7 +10,7 @@ import pReflect from 'p-reflect';
 import type { File } from '@kbn/files-plugin/common';
 import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
 import { bulkDeleteFileAttachments, retrieveFilesIgnoringNotFound } from './bulk_delete';
-import { MAX_DELETE_FILES } from '../../../common/constants';
+import { MAX_DELETE_FILES } from '@kbn/cases-common-constants';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 
 describe('bulk_delete', () => {

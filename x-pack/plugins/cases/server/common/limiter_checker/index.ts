@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 
 import type { FileServiceStart } from '@kbn/files-plugin/server';
-import type { AttachmentRequest } from '../../../common/types/api';
+import type { AttachmentRequest } from '@kbn/cases-common-types';
 import type { AttachmentService } from '../../services';
 import type { Limiter } from './types';
 import { AlertLimiter } from './limiters/alerts';

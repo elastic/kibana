@@ -8,7 +8,7 @@
 import React, { memo, Suspense } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-import type { ConnectorTypeFields } from '../../../common/types/domain';
+import type { ConnectorTypeFields } from '@kbn/cases-common-types';
 import type { CaseActionConnector } from '../types';
 import { getCaseConnectors } from '.';
 

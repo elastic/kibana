@@ -6,7 +6,7 @@
  */
 
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import type { CaseStatuses } from '../../../common/types/domain';
+import type { CaseStatuses } from '@kbn/cases-common-types';
 
 export type Statuses = Record<
   CaseStatuses,

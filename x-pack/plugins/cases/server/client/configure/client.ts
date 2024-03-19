@@ -18,24 +18,24 @@ import type {
   ConfigurationAttributes,
   Configurations,
   ConnectorMappings,
-} from '../../../common/types/domain';
-import type {
   ConfigurationPatchRequest,
   ConfigurationRequest,
   ConnectorMappingResponse,
   GetConfigurationFindRequest,
-} from '../../../common/types/api';
+} from '@kbn/cases-common-types';
 import {
+  ConfigurationRt,
+  ConfigurationsRt,
   ConfigurationPatchRequestRt,
   ConfigurationRequestRt,
   GetConfigurationFindRequestRt,
   FindActionConnectorResponseRt,
-} from '../../../common/types/api';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+} from '@kbn/cases-common-types';
 import {
   MAX_CONCURRENT_SEARCHES,
   MAX_SUPPORTED_CONNECTORS_RETURNED,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
 import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';
@@ -46,7 +46,6 @@ import { combineAuthorizedAndOwnerFilter } from '../utils';
 import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
-import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
 import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
 import { validateCustomFieldTypesInRequest } from './validators';
 

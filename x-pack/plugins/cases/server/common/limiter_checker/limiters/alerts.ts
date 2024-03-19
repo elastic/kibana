@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { AttachmentRequest } from '../../../../common/types/api';
+import type { AlertAttachmentPayload, AttachmentRequest } from '@kbn/cases-common-types';
+import { AttachmentType } from '@kbn/cases-common-types';
+import { CASE_COMMENT_SAVED_OBJECT, MAX_ALERTS_PER_CASE } from '@kbn/cases-common-constants';
 import type { AttachmentService } from '../../../services';
-import type { AlertAttachmentPayload } from '../../../../common/types/domain';
-import { AttachmentType } from '../../../../common/types/domain';
-import { CASE_COMMENT_SAVED_OBJECT, MAX_ALERTS_PER_CASE } from '../../../../common/constants';
 import { isCommentRequestTypeAlert } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
 

@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { MAX_BULK_GET_CASES } from '../../../common/constants';
+import { MAX_BULK_GET_CASES } from '@kbn/cases-common-constants';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { bulkGet } from './bulk_get';

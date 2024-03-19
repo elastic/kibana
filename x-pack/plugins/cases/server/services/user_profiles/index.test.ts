@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_SUGGESTED_PROFILES } from '../../../common/constants';
+import { MAX_SUGGESTED_PROFILES } from '@kbn/cases-common-constants';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { UserProfileService } from '.';
 

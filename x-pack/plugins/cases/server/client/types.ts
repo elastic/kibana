@@ -14,7 +14,7 @@ import type { IBasePath } from '@kbn/core-http-browser';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
-import type { CasesSearchRequest } from '../../common/types/api';
+import type { CasesSearchRequest } from '@kbn/cases-common-types';
 import type { Authorization } from '../authorization/authorization';
 import type {
   CaseConfigureService,

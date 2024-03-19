@@ -11,7 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import { noop } from 'lodash';
-import { DEFAULT_USER_SIZE, SEARCH_DEBOUNCE_MS } from '../../../common/constants';
+import { DEFAULT_USER_SIZE, SEARCH_DEBOUNCE_MS } from '@kbn/cases-common-constants';
 import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import type { ServerError } from '../../types';

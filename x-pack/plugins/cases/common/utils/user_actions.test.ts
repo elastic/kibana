@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { UserActionTypes } from '../types/domain';
+import { UserActionTypes } from '@kbn/cases-common-types';
 import {
   isConnectorUserAction,
   isTitleUserAction,

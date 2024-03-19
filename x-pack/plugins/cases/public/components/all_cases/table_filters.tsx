@@ -8,8 +8,8 @@
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { mergeWith, isEqual } from 'lodash';
+import type { CaseStatuses } from '@kbn/cases-common-types';
 import { MoreFiltersSelectable } from './table_filter_config/more_filters_selectable';
-import type { CaseStatuses } from '../../../common/types/domain';
 import type { FilterOptions } from '../../containers/types';
 import * as i18n from './translations';
 import { useGetTags } from '../../containers/use_get_tags';

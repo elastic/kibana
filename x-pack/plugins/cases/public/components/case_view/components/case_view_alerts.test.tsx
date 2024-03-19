@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
-import { OBSERVABILITY_OWNER } from '../../../../common/constants';
+import { OBSERVABILITY_OWNER } from '@kbn/cases-common-constants';
 import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';

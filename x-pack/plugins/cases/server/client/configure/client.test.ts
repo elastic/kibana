@@ -15,10 +15,10 @@ import { createCasesClientInternalMock, createCasesClientMockArgs } from '../moc
 import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_SUPPORTED_CONNECTORS_RETURNED,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
 import { ConnectorTypes } from '../../../common';
-import { CustomFieldTypes } from '../../../common/types/domain';
-import type { ConfigurationRequest } from '../../../common/types/api';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
+import type { ConfigurationRequest } from '@kbn/cases-common-types';
 
 describe('client', () => {
   const clientArgs = createCasesClientMockArgs();

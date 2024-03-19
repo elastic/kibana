@@ -17,7 +17,7 @@ import { schema } from './schema';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { useGetTags } from '../../containers/use_get_tags';
-import { MAX_LENGTH_PER_TAG } from '../../../common/constants';
+import { MAX_LENGTH_PER_TAG } from '@kbn/cases-common-constants';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_tags');

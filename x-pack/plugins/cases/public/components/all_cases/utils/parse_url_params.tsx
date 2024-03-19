@@ -8,10 +8,10 @@
 import { safeDecode } from '@kbn/rison';
 import { isPlainObject } from 'lodash';
 import type { CaseStatuses } from '@kbn/cases-components';
+import { SortFieldCase } from '@kbn/cases-common-ui';
 import type { CaseSeverity } from '../../../../common';
 import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
 import { stringToIntegerWithDefault } from '.';
-import { SortFieldCase } from '../../../../common/ui';
 import { LEGACY_SUPPORTED_STATE_KEYS, ALL_CASES_STATE_URL_KEY } from '../constants';
 import { AllCasesURLQueryParamsRt, validateSchema } from '../schema';
 import type { AllCasesURLQueryParams } from '../types';

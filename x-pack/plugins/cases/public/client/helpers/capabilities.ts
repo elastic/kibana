@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { CasesPermissions } from '../../../common';
 import {
   CASES_CONNECTORS_CAPABILITY,
   CASES_SETTINGS_CAPABILITY,
@@ -14,7 +13,8 @@ import {
   PUSH_CASES_CAPABILITY,
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
+import type { CasesPermissions } from '../../../common';
 
 export const getUICapabilities = (
   featureCapabilities?: Partial<Record<string, boolean | Record<string, boolean>>>

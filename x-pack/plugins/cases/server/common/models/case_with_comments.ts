@@ -17,16 +17,18 @@ import type {
   AttachmentAttributes,
   Case,
   UserCommentAttachmentPayload,
-} from '../../../common/types/domain';
+  AttachmentRequest,
+  AttachmentPatchRequest,
+} from '@kbn/cases-common-types';
 import {
   CaseRt,
   CaseStatuses,
   UserActionActions,
   UserActionTypes,
   AttachmentType,
-} from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
 
-import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '@kbn/cases-common-constants';
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
@@ -43,7 +45,6 @@ import {
   getIDsAndIndicesAsArrays,
 } from '../utils';
 import { decodeOrThrow } from '../runtime_types';
-import type { AttachmentRequest, AttachmentPatchRequest } from '../../../common/types/api';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
 type CommentRequestWithId = Array<{ id: string } & AttachmentRequest>;

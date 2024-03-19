@@ -6,8 +6,8 @@
  */
 
 import { isEmpty } from 'lodash';
-import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../../../common/constants';
-import type { QueryParams, FilterOptions, CasesConfigurationUI } from '../../../../common/ui';
+import { NO_ASSIGNEES_FILTERING_KEYWORD } from '@kbn/cases-common-constants';
+import type { QueryParams, FilterOptions, CasesConfigurationUI } from '@kbn/cases-common-ui';
 import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
 import type { AllCasesURLQueryParams, AllCasesURLState } from '../types';
 import { sanitizeState } from './sanitize_state';

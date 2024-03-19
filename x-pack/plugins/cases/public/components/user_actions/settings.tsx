@@ -6,8 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import type { SnakeToCamelCase } from '../../../common/types';
-import type { SettingsUserAction } from '../../../common/types/domain';
+import type { SettingsUserAction, SnakeToCamelCase } from '@kbn/cases-common-types';
 import type { UserActionBuilder } from './types';
 
 import { createCommonUpdateUserActionBuilder } from './common';

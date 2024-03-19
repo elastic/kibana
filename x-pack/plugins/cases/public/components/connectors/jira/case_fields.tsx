@@ -13,7 +13,7 @@ import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hoo
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 import { isEmpty } from 'lodash';
-import type { JiraFieldsType } from '../../../../common/types/domain';
+import type { JiraFieldsType } from '@kbn/cases-common-types';
 import * as i18n from './translations';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsProps } from '../types';

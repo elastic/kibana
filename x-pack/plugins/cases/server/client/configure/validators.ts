@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { CustomFieldTypes } from '../../../common/types/domain';
+import type { CustomFieldTypes } from '@kbn/cases-common-types';
 
 /**
  * Throws an error if the request tries to change the type of existing custom fields.

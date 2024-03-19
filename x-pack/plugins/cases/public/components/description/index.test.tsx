@@ -14,7 +14,7 @@ import { basicCase } from '../../containers/mock';
 import { Description } from '.';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, noUpdateCasesPermissions } from '../../common/mock';
-import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
+import { MAX_DESCRIPTION_LENGTH } from '@kbn/cases-common-constants';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');

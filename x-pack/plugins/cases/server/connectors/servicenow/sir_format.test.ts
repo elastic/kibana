@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Case } from '../../../common/types/domain';
+import type { Case } from '@kbn/cases-common-types';
 import { format } from './sir_format';
 
 describe('SIR formatter', () => {

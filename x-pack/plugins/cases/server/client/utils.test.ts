@@ -21,8 +21,8 @@ import {
   convertSortField,
 } from './utils';
 import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
-import type { CustomFieldsConfiguration } from '../../common/types/domain';
-import { CaseSeverity, CaseStatuses, CustomFieldTypes } from '../../common/types/domain';
+import type { CustomFieldsConfiguration } from '@kbn/cases-common-types';
+import { CaseSeverity, CaseStatuses, CustomFieldTypes } from '@kbn/cases-common-types';
 
 describe('utils', () => {
   describe('buildFilter', () => {

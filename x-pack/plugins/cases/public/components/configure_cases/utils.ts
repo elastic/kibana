@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ConnectorTypeFields } from '../../../common/types/domain';
-import { ConnectorTypes } from '../../../common/types/domain';
+import type { ConnectorTypeFields } from '@kbn/cases-common-types';
+import { ConnectorTypes } from '@kbn/cases-common-types';
 import type {
   ConnectorMappingSource,
   ConnectorMappingActionType,

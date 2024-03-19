@@ -15,7 +15,7 @@ import { createAppMockRenderer } from '../../common/mock';
 import type { AssigneesFilterPopoverProps } from './assignees_filter';
 import { AssigneesFilterPopover } from './assignees_filter';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
-import { MAX_ASSIGNEES_FILTER_LENGTH } from '../../../common/constants';
+import { MAX_ASSIGNEES_FILTER_LENGTH } from '@kbn/cases-common-constants';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 
 jest.mock('../../containers/user_profiles/use_suggest_user_profiles');

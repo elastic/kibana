@@ -7,7 +7,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 
-import type { CaseConnector } from '../../common/types/domain';
+import type { CaseConnector } from '@kbn/cases-common-types';
 import { pushCase } from './api';
 import * as i18n from './translations';
 import { useCasesToast } from '../common/use_cases_toast';

@@ -6,11 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CASE_COMMENTS_URL } from '../../../../common/constants';
+import type { caseDomainV1, attachmentApiV1 } from '@kbn/cases-common-types';
+import { CASE_COMMENTS_URL } from '@kbn/cases-common-constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import type { caseDomainV1 } from '../../../../common/types/domain';
-import type { attachmentApiV1 } from '../../../../common/types/api';
 
 export const postCommentRoute = createCasesRoute({
   method: 'post',

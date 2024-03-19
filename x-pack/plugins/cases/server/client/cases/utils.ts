@@ -23,13 +23,11 @@ import type {
   CustomFieldsConfiguration,
   ExternalService,
   User,
-} from '../../../common/types/domain';
-import { CaseStatuses, UserActionTypes, AttachmentType } from '../../../common/types/domain';
-import type {
   CasePostRequest,
   CaseRequestCustomFields,
   CaseUserActionsDeprecatedResponse,
-} from '../../../common/types/api';
+} from '@kbn/cases-common-types';
+import { CaseStatuses, UserActionTypes, AttachmentType } from '@kbn/cases-common-types';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';

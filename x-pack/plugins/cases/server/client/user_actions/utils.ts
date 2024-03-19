@@ -7,10 +7,11 @@
 
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
 import type {
+  UserActionAttributes,
+  UserActions,
   CaseUserActionDeprecatedResponse,
   CaseUserActionsDeprecatedResponse,
-} from '../../../common/types/api';
-import type { UserActionAttributes, UserActions } from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
 
 export const extractAttributes = (
   userActions: SavedObjectsFindResponse<CaseUserActionDeprecatedResponse>

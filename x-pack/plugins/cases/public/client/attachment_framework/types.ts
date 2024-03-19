@@ -10,7 +10,7 @@ import type { EuiCommentProps, IconType, EuiButtonProps } from '@elastic/eui';
 import type {
   ExternalReferenceAttachmentPayload,
   PersistableStateAttachmentPayload,
-} from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
 import type { CaseUI } from '../../containers/types';
 
 export enum AttachmentActionType {

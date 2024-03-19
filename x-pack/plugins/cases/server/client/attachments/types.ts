@@ -10,7 +10,7 @@ import type {
   AttachmentPatchRequest,
   AttachmentRequest,
   FindAttachmentsQueryParams,
-} from '../../../common/types/api';
+} from '@kbn/cases-common-types';
 
 /**
  * The arguments needed for creating a new attachment to a case.

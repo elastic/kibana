@@ -6,7 +6,7 @@
  */
 
 import type { UserProfile } from '@kbn/user-profile-components';
-import type { User } from '../../../common/types/domain';
+import type { User } from '@kbn/cases-common-types';
 import type { AuthenticatedElasticUser } from '../../common/lib/kibana';
 import type { FilterMode as RecentCasesFilterMode } from './types';
 

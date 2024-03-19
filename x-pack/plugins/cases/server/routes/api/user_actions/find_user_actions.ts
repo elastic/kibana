@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { userActionApiV1 } from '../../../../common/types/api';
+import type { userActionApiV1 } from '@kbn/cases-common-types';
 
-import { CASE_FIND_USER_ACTIONS_URL } from '../../../../common/constants';
+import { CASE_FIND_USER_ACTIONS_URL } from '@kbn/cases-common-constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 

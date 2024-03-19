@@ -6,8 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { MAX_ASSIGNEES_PER_CASE, MAX_USER_ACTIONS_PER_CASE } from '../../common/constants';
-import type { CaseAssignees } from '../../common/types/domain';
+import type { CaseAssignees } from '@kbn/cases-common-types';
+import { MAX_ASSIGNEES_PER_CASE, MAX_USER_ACTIONS_PER_CASE } from '@kbn/cases-common-constants';
 import type { CaseUserActionService } from '../services';
 
 export const areTotalAssigneesInvalid = (assignees?: CaseAssignees): boolean => {

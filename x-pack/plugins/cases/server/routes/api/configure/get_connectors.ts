@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../common/constants';
+import { CASE_CONFIGURE_CONNECTORS_URL } from '@kbn/cases-common-constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 

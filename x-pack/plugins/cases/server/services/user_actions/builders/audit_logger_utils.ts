@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UserActionAction as Action } from '../../../../common/types/domain';
+import type { UserActionAction as Action } from '@kbn/cases-common-types';
 
 const actionsToVerbs: Record<Action, string> = {
   add: 'added',

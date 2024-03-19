@@ -7,7 +7,7 @@
 import React, { Suspense, lazy } from 'react';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+import { FILE_ATTACHMENT_TYPE } from '@kbn/cases-common-constants';
 import type {
   AttachmentViewObject,
   ExternalReferenceAttachmentType,

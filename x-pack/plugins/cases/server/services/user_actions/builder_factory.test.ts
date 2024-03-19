@@ -12,7 +12,7 @@ import {
   ConnectorTypes,
   UserActionActions,
   UserActionTypes,
-} from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import {
   externalReferenceAttachmentES,

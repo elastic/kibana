@@ -14,8 +14,8 @@ import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technica
 import type { MgetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { CaseStatuses } from '../../../common/types/domain';
-import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
+import { CaseStatuses } from '@kbn/cases-common-types';
+import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '@kbn/cases-common-constants';
 import { createCaseError } from '../../common/error';
 import type { AlertInfo } from '../../common/types';
 import type {

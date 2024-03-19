@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CustomFieldTypes } from '../../../common/types/domain';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
 import {
   MAX_CATEGORY_LENGTH,
   MAX_DESCRIPTION_LENGTH,
@@ -16,7 +16,7 @@ import {
   MAX_USER_ACTIONS_PER_CASE,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
-} from '../../../common/constants';
+} from '@kbn/cases-common-constants';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { update } from './update';

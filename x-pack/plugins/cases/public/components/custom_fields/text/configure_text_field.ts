@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CustomFieldFactory } from '../types';
-import type { CaseCustomFieldText } from '../../../../common/types/domain';
+import type { CaseCustomFieldText } from '@kbn/cases-common-types';
 
-import { CustomFieldTypes } from '../../../../common/types/domain';
+import { CustomFieldTypes } from '@kbn/cases-common-types';
+import type { CustomFieldFactory } from '../types';
 import * as i18n from '../translations';
 import { getEuiTableColumn } from './get_eui_table_column';
 import { Edit } from './edit';

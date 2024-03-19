@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { SnakeToCamelCase } from '../../../common/types';
-import type { TitleUserAction } from '../../../common/types/domain';
+import type { TitleUserAction, SnakeToCamelCase } from '@kbn/cases-common-types';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';

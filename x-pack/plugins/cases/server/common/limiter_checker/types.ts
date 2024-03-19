@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentRequest } from '../../../common/types/api';
+import type { AttachmentRequest } from '@kbn/cases-common-types';
 
 export interface Limiter {
   readonly limit: number;

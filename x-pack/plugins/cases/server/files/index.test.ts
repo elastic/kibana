@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_FILE_SIZE, MAX_IMAGE_FILE_SIZE } from '../../common/constants';
+import { MAX_FILE_SIZE, MAX_IMAGE_FILE_SIZE } from '@kbn/cases-common-constants';
 import { createFilesSetupMock } from '@kbn/files-plugin/server/mocks';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { createMaxCallback, registerCaseFileKinds } from '.';

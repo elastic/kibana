@@ -6,8 +6,8 @@
  */
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { ConnectorMappingResponse } from '../../../common/types/api';
-import { ConnectorMappingResponseRt } from '../../../common/types/api';
+import type { ConnectorMappingResponse } from '@kbn/cases-common-types';
+import { ConnectorMappingResponseRt } from '@kbn/cases-common-types';
 import { decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';

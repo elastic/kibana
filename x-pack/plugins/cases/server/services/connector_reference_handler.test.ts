@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NONE_CONNECTOR_ID } from '../../common/constants';
+import { NONE_CONNECTOR_ID } from '@kbn/cases-common-constants';
 import { ConnectorReferenceHandler } from './connector_reference_handler';
 
 describe('ConnectorReferenceHandler', () => {

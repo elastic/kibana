@@ -13,10 +13,10 @@ import {
   MAX_IMAGE_FILE_SIZE,
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
-} from '../../common/constants';
-import type { Owner } from '../../common/constants/types';
-import { HttpApiTagOperation } from '../../common/constants/types';
-import { IMAGE_MIME_TYPES } from '../../common/constants/mime_types';
+  HttpApiTagOperation,
+  IMAGE_MIME_TYPES,
+} from '@kbn/cases-common-constants';
+import type { Owner } from '@kbn/cases-common-constants';
 import type { FilesConfig } from './types';
 import { constructFileKindIdByOwner, constructFilesHttpOperationTag } from '../../common/files';
 

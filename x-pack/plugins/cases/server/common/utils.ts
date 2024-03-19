@@ -23,7 +23,11 @@ import type {
   Case,
   User,
   UserCommentAttachmentPayload,
-} from '../../common/types/domain';
+  AttachmentRequest,
+  AttachmentsFindResponse,
+  CasePostRequest,
+  CasesFindResponse,
+} from '@kbn/cases-common-types';
 import {
   AttachmentType,
   ExternalReferenceSOAttachmentPayloadRt,
@@ -31,15 +35,15 @@ import {
   CaseSeverity,
   CaseStatuses,
   ConnectorTypes,
-} from '../../common/types/domain';
-import { isValidOwner } from '../../common/utils/owner';
+} from '@kbn/cases-common-types';
 import {
   CASE_VIEW_COMMENT_PATH,
   CASE_VIEW_PATH,
   CASE_VIEW_TAB_PATH,
   GENERAL_CASES_OWNER,
   OWNER_INFO,
-} from '../../common/constants';
+} from '@kbn/cases-common-constants';
+import { isValidOwner } from '../../common/utils/owner';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import type { AlertInfo, FileAttachmentRequest } from './types';
 
@@ -50,12 +54,6 @@ import {
 } from '../../common/utils/markdown_plugins/utils';
 import { dedupAssignees } from '../client/cases/utils';
 import type { CaseSavedObjectTransformed, CaseTransformedAttributes } from './types/case';
-import type {
-  AttachmentRequest,
-  AttachmentsFindResponse,
-  CasePostRequest,
-  CasesFindResponse,
-} from '../../common/types/api';
 
 /**
  * Default sort field for querying saved objects.

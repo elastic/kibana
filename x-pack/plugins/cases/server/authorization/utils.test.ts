@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OWNER_FIELD } from '../../common/constants';
+import { OWNER_FIELD } from '@kbn/cases-common-constants';
 import { nodeBuilder } from '@kbn/es-query';
 import {
   combineFilterWithAuthorizationFilter,

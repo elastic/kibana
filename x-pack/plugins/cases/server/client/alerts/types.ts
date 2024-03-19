@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CaseStatuses } from '../../../common/types/domain';
+import type { CaseStatuses } from '@kbn/cases-common-types';
 import type { AlertInfo } from '../../common/types';
 
 interface Alert {

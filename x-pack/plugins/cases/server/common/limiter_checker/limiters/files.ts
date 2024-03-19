@@ -6,9 +6,9 @@
  */
 
 import type { FileServiceStart } from '@kbn/files-plugin/server';
-import { AttachmentType } from '../../../../common/types/domain';
-import type { AttachmentRequest } from '../../../../common/types/api';
-import { MAX_FILES_PER_CASE } from '../../../../common/constants';
+import { AttachmentType } from '@kbn/cases-common-types';
+import type { AttachmentRequest } from '@kbn/cases-common-types';
+import { MAX_FILES_PER_CASE } from '@kbn/cases-common-constants';
 import { isFileAttachmentRequest } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
 

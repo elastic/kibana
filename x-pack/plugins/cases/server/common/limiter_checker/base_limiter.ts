@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentType } from '../../../common/types/domain';
-import type { AttachmentRequest } from '../../../common/types/api';
+import type { AttachmentType, AttachmentRequest } from '@kbn/cases-common-types';
 import type { Limiter } from './types';
 
 interface LimiterParams {

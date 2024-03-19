@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SnakeToCamelCase } from '../types';
 import type {
   CategoryUserAction,
   CommentUserAction,
@@ -17,8 +16,9 @@ import type {
   TagsUserAction,
   TitleUserAction,
   UserActionType,
-} from '../types/domain';
-import { UserActionTypes } from '../types/domain';
+  SnakeToCamelCase,
+} from '@kbn/cases-common-types';
+import { UserActionTypes } from '@kbn/cases-common-types';
 
 type SnakeCaseOrCamelCaseUserAction<
   T extends 'snakeCase' | 'camelCase',

@@ -9,7 +9,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
-import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-common-constants';
 import { useGetTags } from './use_get_tags';
 import { useToasts } from '../common/lib/kibana';
 

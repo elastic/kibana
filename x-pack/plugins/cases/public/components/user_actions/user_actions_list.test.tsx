@@ -15,7 +15,7 @@ import { basicCase, caseUserActions, getUserAction } from '../../containers/mock
 import { UserActionsList } from './user_actions_list';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { UserActionActions } from '../../../common/types/domain';
+import { UserActionActions } from '@kbn/cases-common-types';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { getMockBuilderArgs } from './mock';
 

@@ -10,9 +10,9 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createBrowserHistory } from 'history';
 
+import { APP_ID, APP_PATH } from '@kbn/cases-common-constants';
+import type { CasesUiConfigType } from '@kbn/cases-common-ui';
 import { KibanaServices } from './common/lib/kibana';
-import type { CasesUiConfigType } from '../common/ui/types';
-import { APP_ID, APP_PATH } from '../common/constants';
 import { APP_TITLE, APP_DESC } from './common/translations';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';

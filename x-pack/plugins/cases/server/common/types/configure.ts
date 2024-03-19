@@ -8,12 +8,12 @@
 import * as rt from 'io-ts';
 
 import type { SavedObject } from '@kbn/core/server';
-import type { ConfigurationAttributes } from '../../../common/types/domain';
+import type { ConfigurationAttributes } from '@kbn/cases-common-types';
 import {
   ConfigurationActivityFieldsRt,
   ConfigurationAttributesRt,
   ConfigurationBasicWithoutOwnerRt,
-} from '../../../common/types/domain';
+} from '@kbn/cases-common-types';
 import type { ConnectorPersisted } from './connectors';
 import type { User } from './user';
 
