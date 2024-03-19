@@ -18,7 +18,6 @@ import { CustomThresholdLocators } from './custom_threshold/custom_threshold_exe
 import { observabilityFeatureId } from '../../../common';
 import { ObservabilityConfig } from '../..';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../common/constants';
-import { sloBurnRateRuleType } from './slo_burn_rate';
 import { thresholdRuleType } from './custom_threshold/register_custom_threshold_rule_type';
 
 export function registerRuleTypes(
@@ -29,8 +28,6 @@ export function registerRuleTypes(
   ruleDataService: IRuleDataService,
   locators: CustomThresholdLocators
 ) {
-  alertingPlugin.registerType(sloBurnRateRuleType(basePath, locators.alertsLocator));
-
   const ruleDataClientThreshold = ruleDataService.initializeIndex({
     feature: observabilityFeatureId,
     registrationContext: THRESHOLD_RULE_REGISTRATION_CONTEXT,
