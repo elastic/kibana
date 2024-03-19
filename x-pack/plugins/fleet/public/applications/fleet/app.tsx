@@ -145,8 +145,12 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   useBreadcrumbs('base');
   const core = useStartServices();
   const { notifications } = core;
-
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
+  const authz = useAuthz();
+  const hasAnyFleetReadPrivileges =
+    authz.fleet.readEnrollmentTokens ||
+    authz.fleet.readAgents ||
+    authz.fleet.readAgentPolicies ||
+    authz.fleet.readSettings;
 
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
   const [permissionsError, setPermissionsError] = useState<string>();
@@ -179,9 +183,8 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
                 }),
               });
             }
-            if (!hasFleetAllPrivileges) {
-              // TODO add condition
-              // setPermissionsError('MISSING_PRIVILEGES');
+            if (!hasAnyFleetReadPrivileges) {
+              setPermissionsError('MISSING_PRIVILEGES');
             }
           } catch (err) {
             setInitializationError(err);
@@ -194,7 +197,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
         setPermissionsError('REQUEST_ERROR');
       }
     })();
-  }, [notifications.toasts, hasFleetAllPrivileges]);
+  }, [notifications.toasts, hasAnyFleetReadPrivileges]);
 
   if (isPermissionsLoading || permissionsError) {
     return (

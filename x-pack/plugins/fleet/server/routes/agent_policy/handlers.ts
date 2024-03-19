@@ -117,7 +117,6 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     });
 
     const body: GetAgentPoliciesResponse = {
-      // Todo sanitize items for readAgents only permissions
       items: !fleetContext.authz.fleet.readAgentPolicies
         ? items.map(sanitizeItemForReadAgentOnly)
         : items,
