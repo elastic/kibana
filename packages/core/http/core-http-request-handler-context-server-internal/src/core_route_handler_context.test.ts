@@ -193,3 +193,42 @@ describe('#deprecations', () => {
     });
   });
 });
+
+describe('#security', () => {
+  describe('#authc', () => {
+    test('only creates one instance', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      const authc1 = context.security.authc;
+      const authc2 = context.security.authc;
+
+      expect(authc1).toBe(authc2);
+    });
+
+    describe('getCurrentUser', () => {
+      test('calls coreStart.security.authc.getCurrentUser with the correct parameters', () => {
+        const request = httpServerMock.createKibanaRequest();
+        const coreStart = createCoreRouteHandlerContextParamsMock();
+        const context = new CoreRouteHandlerContext(coreStart, request);
+
+        context.security.authc.getCurrentUser();
+        expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledTimes(1);
+        expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledWith(request);
+      });
+
+      test('returns the result of coreStart.security.authc.getCurrentUser', () => {
+        const request = httpServerMock.createKibanaRequest();
+        const coreStart = createCoreRouteHandlerContextParamsMock();
+        const context = new CoreRouteHandlerContext(coreStart, request);
+
+        const stubUser: any = Symbol.for('stubUser');
+        coreStart.security.authc.getCurrentUser.mockReturnValue(stubUser);
+
+        const user = context.security.authc.getCurrentUser();
+        expect(user).toBe(stubUser);
+      });
+    });
+  });
+});
