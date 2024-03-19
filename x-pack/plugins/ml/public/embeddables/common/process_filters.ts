@@ -6,13 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  Filter,
-  fromKueryExpression,
-  luceneStringToDsl,
-  Query,
-  toElasticsearchQuery,
-} from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { getDefaultQuery } from '@kbn/data-plugin/public';
 
 export function processFilters(

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { LayerDescriptor } from '@kbn/maps-plugin/common';
+import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import type { Aggregation, Field, SplitField } from '@kbn/ml-anomaly-utils';
 import { SplitCards, useAnimateSplit } from '../split_cards';
 import { MlEmbeddedMapComponent } from '../../../../../../../components/ml_embedded_map';

@@ -12,8 +12,7 @@ import type { AgentPolicy, NewAgentPolicy } from '../../../../../types';
 import { SetupTechnology } from '../../../../../types';
 import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
-
-export const AGENTLESS_POLICY_ID = 'agentless';
+import { AGENTLESS_POLICY_ID } from '../../../../../../../../common/constants';
 
 export const useAgentlessPolicy = () => {
   const { agentless: agentlessExperimentalFeatureEnabled } = ExperimentalFeaturesService.get();

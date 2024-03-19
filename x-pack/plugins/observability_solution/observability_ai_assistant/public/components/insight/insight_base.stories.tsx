@@ -14,7 +14,7 @@ import { InsightBase as Component, InsightBaseProps } from './insight_base';
 import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
 import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
-import { FeedbackButtons } from '../feedback_buttons';
+import { FeedbackButtons } from '../buttons/feedback_buttons';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StartChatButton } from '../buttons/start_chat_button';
 import { ActionsMenu } from './actions_menu';

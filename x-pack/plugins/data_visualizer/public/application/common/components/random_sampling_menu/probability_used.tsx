@@ -9,7 +9,7 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { Props } from '../document_count_content/document_count_content';
+import type { Props } from '../document_count_content/document_count_content';
 
 export const ProbabilityUsedMessage = ({
   samplingProbability,

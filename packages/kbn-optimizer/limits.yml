@@ -90,7 +90,7 @@ pageLoadAssetSize:
   licensing: 29004
   links: 44490
   lists: 22900
-  logsExplorer: 55000
+  logsExplorer: 60000
   logsShared: 281060
   logstash: 53548
   management: 46112
@@ -103,8 +103,9 @@ pageLoadAssetSize:
   navigation: 37269
   newsfeed: 42228
   noDataPage: 5000
-  observability: 115443
-  observabilityAIAssistant: 25000
+  observability: 167673
+  observabilityAIAssistant: 58230
+  observabilityAIAssistantApp: 27680
   observabilityLogsExplorer: 46650
   observabilityOnboarding: 19573
   observabilityShared: 72039
@@ -135,6 +136,7 @@ pageLoadAssetSize:
   serverlessSearch: 72995
   sessionView: 77750
   share: 71239
+  slo: 37039
   snapshotRestore: 79032
   spaces: 57868
   stackAlerts: 58316
