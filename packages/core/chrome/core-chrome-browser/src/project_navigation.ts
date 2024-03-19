@@ -41,7 +41,6 @@ export type AppId =
   | ManagementApp
   | SearchApp
   | ObservabilityApp
-  | ObservabilityApp
   | SecurityApp
   | FleetApp
   | SharedApp;
