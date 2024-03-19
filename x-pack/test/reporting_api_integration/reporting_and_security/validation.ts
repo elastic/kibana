@@ -36,7 +36,8 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllReports();
     });
 
-    describe('printablePdfV2', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/178924
+    describe.skip('printablePdfV2', () => {
       it('allows width and height to have decimal', async () => {
         const downloadReportPath = await reportingAPI.postJobJSON(
           '/api/reporting/generate/printablePdfV2',
