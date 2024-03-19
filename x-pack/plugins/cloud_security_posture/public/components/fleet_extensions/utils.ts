@@ -244,7 +244,7 @@ export const getDefaultAzureCredentialsType = (
   return 'managed_identity';
 };
 
-const getDefaultGcpHiddenVars = (
+export const getDefaultGcpHiddenVars = (
   packageInfo: PackageInfo,
   setupTechnology?: SetupTechnology
 ): Record<string, PackagePolicyConfigRecordEntry> => {
