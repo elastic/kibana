@@ -196,12 +196,8 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
         await application.navigateToUrl(anomalyExplorerUrl!);
       }
     },
-    async isCompatible({ embeddable }: EmbeddableApiContext) {
-      if (!isApiCompatible(embeddable)) return false;
-      return (
-        apiIsOfType(embeddable, ANOMALY_SWIMLANE_EMBEDDABLE_TYPE) ||
-        apiIsOfType(embeddable, ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE)
-      );
+    async isCompatible(context: EmbeddableApiContext) {
+      return isSwimLaneEmbeddableContext(context) || isAnomalyChartsEmbeddableContext(context);
     },
   });
 }
