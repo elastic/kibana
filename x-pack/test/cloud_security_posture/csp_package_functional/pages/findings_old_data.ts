@@ -12,7 +12,7 @@ import { addIndexBulkDocs, deleteIndices } from '../../common/utils/index_api_he
 import { FINDINGS_INDEX, FINDINGS_LATEST_INDEX } from '../../common/utils/indices';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getPageObjects, getService }:FunctionalFtrProviderContext) {
+export default function ({ getPageObjects, getService }: FunctionalFtrProviderContext) {
   const es = getService('es');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
@@ -70,15 +70,14 @@ export default function ({ getPageObjects, getService }:FunctionalFtrProviderCon
     });
 
     after(async () => {
-      await deleteIndices(es, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX])
+      await deleteIndices(es, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
     });
 
     describe('Findings page with old data', () => {
       it('returns no Findings KSPM', async () => {
         // Prepare mocked findings
-        await deleteIndices(es, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX])
+        await deleteIndices(es, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
         await addIndexBulkDocs(es, dataOldKspm, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
-
 
         await findings.navigateToLatestFindingsPage();
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -86,7 +85,7 @@ export default function ({ getPageObjects, getService }:FunctionalFtrProviderCon
       });
       it('returns no Findings CSPM', async () => {
         // Prepare mocked findings
-        await deleteIndices(es, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX])
+        await deleteIndices(es, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
         await addIndexBulkDocs(es, dataOldCspm, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
 
         await findings.navigateToLatestFindingsPage();

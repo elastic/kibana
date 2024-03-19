@@ -6,7 +6,10 @@
  */
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { CspSetupStatus, IndexDetails } from '@kbn/cloud-security-posture-plugin/common/types_old';
+import type {
+  CspSetupStatus,
+  IndexDetails,
+} from '@kbn/cloud-security-posture-plugin/common/types_old';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -18,7 +21,7 @@ import {
   createUser,
   createCSPOnlyRole,
   deleteRole,
-  deleteUser
+  deleteUser,
 } from '../../common/utils/security_user_helpers';
 import { deleteIndices } from '../../common/utils/index_api_helpers';
 import { createPackagePolicy } from '../../common/utils/csp_package_helpers';
@@ -37,7 +40,6 @@ const assertIndexStatus = (
     `expected ${indexName} status to be ${expectedStatus} but got  ${actualValue} instead`
   );
 };
-
 
 export default function (providerContext: ApiIntegrationFtrProviderContext) {
   const { getService } = providerContext;

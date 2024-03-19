@@ -6,13 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import type {FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
-import { VULNERABILITIES_INDEX_DEFAULT_NS, VULNERABILITIES_LATEST_INDEX } from '../../common/utils/indices';
+import type { FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
+import {
+  VULNERABILITIES_INDEX_DEFAULT_NS,
+  VULNERABILITIES_LATEST_INDEX,
+} from '../../common/utils/indices';
 import { vulnerabilitiesLatestMock } from '../fixtures/vulnerabilities_latest_mock';
 import { addIndexBulkDocs, deleteIndices } from '../../common/utils/index_api_helpers';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getPageObjects, getService }:FunctionalFtrProviderContext) {
+export default function ({ getPageObjects, getService }: FunctionalFtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
@@ -36,8 +39,11 @@ export default function ({ getPageObjects, getService }:FunctionalFtrProviderCon
       await findings.waitForPluginInitialized();
 
       // Prepare mocked findings
-      await deleteIndices(es, [VULNERABILITIES_INDEX_DEFAULT_NS, VULNERABILITIES_LATEST_INDEX,]);
-      await addIndexBulkDocs(es, vulnerabilitiesLatestMock, [VULNERABILITIES_INDEX_DEFAULT_NS, VULNERABILITIES_LATEST_INDEX]);
+      await deleteIndices(es, [VULNERABILITIES_INDEX_DEFAULT_NS, VULNERABILITIES_LATEST_INDEX]);
+      await addIndexBulkDocs(es, vulnerabilitiesLatestMock, [
+        VULNERABILITIES_INDEX_DEFAULT_NS,
+        VULNERABILITIES_LATEST_INDEX,
+      ]);
 
       await findings.navigateToLatestVulnerabilitiesPage();
       await retry.waitFor(

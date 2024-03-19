@@ -228,6 +228,7 @@ enabled:
   - x-pack/test/cases_api_integration/security_and_spaces/config_trial.ts
   - x-pack/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/test/cases_api_integration/spaces_only/config.ts
+  - x-pack/test/cloud_security_posture_api/config.ts
   - x-pack/test/cloud_security_posture/csp_package_functional/config.ts
   - x-pack/test/cloud_security_posture_functional/config.ts
   - x-pack/test/cloud_security_posture/csp_package_api_integration/config.ts

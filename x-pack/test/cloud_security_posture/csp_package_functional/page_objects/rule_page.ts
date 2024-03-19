@@ -10,7 +10,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import type {FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
+import type { FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
 
 export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
 export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';
@@ -26,7 +26,7 @@ export const RULE_NUMBER_FILTER_SEARCH_FIELD = 'rule-number-search-input';
 export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
 export const TAKE_ACTION_BUTTON = 'csp:take_action';
 
-export function RulePagePageProvider({ getService, getPageObjects }:FunctionalFtrProviderContext) {
+export function RulePagePageProvider({ getService, getPageObjects }: FunctionalFtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');

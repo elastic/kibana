@@ -21,7 +21,7 @@ import { addIndexDocs, deleteExistingIndexByQuery } from '../../common/utils/ind
 const chance = new Chance();
 
 // eslint-disable-next-line import/no-default-export
-export default function (providerContext: ApiIntegrationFtrProviderContext ) {
+export default function (providerContext: ApiIntegrationFtrProviderContext) {
   const { getService } = providerContext;
 
   const retry = getService('retry');
@@ -85,7 +85,6 @@ export default function (providerContext: ApiIntegrationFtrProviderContext ) {
       log.debug('CSP plugin is initialized');
     });
 
-
   describe('GET /internal/cloud_security_posture/benchmarks', () => {
     describe('Get Benchmark API', async () => {
       beforeEach(async () => {
@@ -103,7 +102,7 @@ export default function (providerContext: ApiIntegrationFtrProviderContext ) {
         const cspmFinding1 = getMockFinding(benchmarkRules[0], 'passed');
         const cspmFinding2 = getMockFinding(benchmarkRules[1], 'failed');
 
-        await addIndexDocs(es, [cspmFinding1, cspmFinding2], LATEST_FINDINGS_INDEX_DEFAULT_NS );
+        await addIndexDocs(es, [cspmFinding1, cspmFinding2], LATEST_FINDINGS_INDEX_DEFAULT_NS);
 
         const { body: benchmarksBeforeMute } = await supertest
           .get('/internal/cloud_security_posture/benchmarks')
@@ -157,7 +156,7 @@ export default function (providerContext: ApiIntegrationFtrProviderContext ) {
         const kspmFinding1 = getMockFinding(benchmarkRules[0], 'passed');
         const kspmFinding2 = getMockFinding(benchmarkRules[1], 'failed');
 
-        await addIndexDocs(es, [kspmFinding1, kspmFinding2], LATEST_FINDINGS_INDEX_DEFAULT_NS );
+        await addIndexDocs(es, [kspmFinding1, kspmFinding2], LATEST_FINDINGS_INDEX_DEFAULT_NS);
         const { body: benchmarksBeforeMute } = await supertest
           .get('/internal/cloud_security_posture/benchmarks')
           .set(ELASTIC_HTTP_VERSION_HEADER, '2')

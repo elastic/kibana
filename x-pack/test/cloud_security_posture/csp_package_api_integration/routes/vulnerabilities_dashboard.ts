@@ -11,9 +11,13 @@ import { EcsEvent } from '@elastic/ecs';
 import type { ApiIntegrationFtrProviderContext } from '../../common/ftr_provider_context';
 import {
   vulnerabilitiesLatestMock,
-  vulnerabilitiesLatestStatsMock ,
+  vulnerabilitiesLatestStatsMock,
 } from '../fixtures/vulnerabilities_latest_mock';
-import { addIndexDocs, deleteExistingIndex, deleteExistingIndexByQuery } from '../../common/utils/index_api_helpers';
+import {
+  addIndexDocs,
+  deleteExistingIndex,
+  deleteExistingIndexByQuery,
+} from '../../common/utils/index_api_helpers';
 
 export interface CnvmStatistics {
   criticalCount?: number;
@@ -127,7 +131,6 @@ export default function ({ getService }: ApiIntegrationFtrProviderContext) {
       log.debug('CSP plugin is initialized');
     });
 
- 
   describe('Vulnerability Dashboard API', async () => {
     beforeEach(async () => {
       await waitForPluginInitialized();
@@ -137,7 +140,7 @@ export default function ({ getService }: ApiIntegrationFtrProviderContext) {
 
     afterEach(async () => {
       await deleteExistingIndexByQuery(es, VULNERABILITIES_LATEST_INDEX);
-      await deleteExistingIndexByQuery(es, BENCHMARK_SCORES_INDEX );
+      await deleteExistingIndexByQuery(es, BENCHMARK_SCORES_INDEX);
     });
 
     it('responds with a 200 status code and matching data mock', async () => {

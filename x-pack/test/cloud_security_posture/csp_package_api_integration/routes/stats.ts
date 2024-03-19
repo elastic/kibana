@@ -85,7 +85,11 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
 
         await waitForPluginInitialized();
 
-        await addIndexDocs(es, getBenchmarkScoreMockData('cspm', true),  BENCHMARK_SCORE_INDEX_DEFAULT_NS);
+        await addIndexDocs(
+          es,
+          getBenchmarkScoreMockData('cspm', true),
+          BENCHMARK_SCORE_INDEX_DEFAULT_NS
+        );
         await addIndexDocs(es, [findingsMockData[1]], LATEST_FINDINGS_INDEX_DEFAULT_NS);
       });
 
@@ -131,7 +135,11 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
 
         await waitForPluginInitialized();
 
-        await addIndexDocs(es, getBenchmarkScoreMockData('kspm', true),  BENCHMARK_SCORE_INDEX_DEFAULT_NS);
+        await addIndexDocs(
+          es,
+          getBenchmarkScoreMockData('kspm', true),
+          BENCHMARK_SCORE_INDEX_DEFAULT_NS
+        );
         await addIndexDocs(es, [findingsMockData[10]], LATEST_FINDINGS_INDEX_DEFAULT_NS);
       });
 
@@ -197,11 +205,17 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
         await waitForPluginInitialized();
       });
       it('should calculate cspm benchmarks posture score based only on enabled rules', async () => {
-       
-        await addIndexDocs(es, getBenchmarkScoreMockData('cspm', true),  BENCHMARK_SCORE_INDEX_DEFAULT_NS);   
-        await addIndexDocs(es, getBenchmarkScoreMockData('cspm', false),  BENCHMARK_SCORE_INDEX_DEFAULT_NS);
+        await addIndexDocs(
+          es,
+          getBenchmarkScoreMockData('cspm', true),
+          BENCHMARK_SCORE_INDEX_DEFAULT_NS
+        );
+        await addIndexDocs(
+          es,
+          getBenchmarkScoreMockData('cspm', false),
+          BENCHMARK_SCORE_INDEX_DEFAULT_NS
+        );
         await addIndexDocs(es, [findingsMockData[1]], LATEST_FINDINGS_INDEX_DEFAULT_NS);
-    
 
         const { body: res }: { body: ComplianceDashboardDataV2 } = await kibanaHttpClient
           .get(`/internal/cloud_security_posture/stats/cspm`)
@@ -221,9 +235,16 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
       });
 
       it('should calculate kspm benchmarks posture score based only on enabled rules', async () => {
-
-        await addIndexDocs(es, getBenchmarkScoreMockData('kspm', true),  BENCHMARK_SCORE_INDEX_DEFAULT_NS);   
-        await addIndexDocs(es, getBenchmarkScoreMockData('kspm', false),  BENCHMARK_SCORE_INDEX_DEFAULT_NS);
+        await addIndexDocs(
+          es,
+          getBenchmarkScoreMockData('kspm', true),
+          BENCHMARK_SCORE_INDEX_DEFAULT_NS
+        );
+        await addIndexDocs(
+          es,
+          getBenchmarkScoreMockData('kspm', false),
+          BENCHMARK_SCORE_INDEX_DEFAULT_NS
+        );
         await addIndexDocs(es, [findingsMockData[0]], LATEST_FINDINGS_INDEX_DEFAULT_NS);
 
         const { body: res }: { body: ComplianceDashboardDataV2 } = await kibanaHttpClient

@@ -9,11 +9,14 @@ import { asyncForEach } from '@kbn/std';
 import expect from '@kbn/expect';
 import type { FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
 import { vulnerabilitiesLatestMock } from '../fixtures/vulnerabilities_latest_mock';
-import { VULNERABILITIES_INDEX_DEFAULT_NS, VULNERABILITIES_LATEST_INDEX } from '../../common/utils/indices';
+import {
+  VULNERABILITIES_INDEX_DEFAULT_NS,
+  VULNERABILITIES_LATEST_INDEX,
+} from '../../common/utils/indices';
 import { deleteIndices, addIndexBulkDocs } from '../../common/utils/index_api_helpers';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getPageObjects, getService }:FunctionalFtrProviderContext) {
+export default function ({ getPageObjects, getService }: FunctionalFtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const es = getService('es');
@@ -39,15 +42,18 @@ export default function ({ getPageObjects, getService }:FunctionalFtrProviderCon
       await findings.waitForPluginInitialized();
 
       // Prepare mocked findings
-      await deleteIndices(es, [VULNERABILITIES_INDEX_DEFAULT_NS, VULNERABILITIES_LATEST_INDEX,]);
-      await addIndexBulkDocs(es, vulnerabilitiesLatestMock, [VULNERABILITIES_INDEX_DEFAULT_NS, VULNERABILITIES_LATEST_INDEX]);
+      await deleteIndices(es, [VULNERABILITIES_INDEX_DEFAULT_NS, VULNERABILITIES_LATEST_INDEX]);
+      await addIndexBulkDocs(es, vulnerabilitiesLatestMock, [
+        VULNERABILITIES_INDEX_DEFAULT_NS,
+        VULNERABILITIES_LATEST_INDEX,
+      ]);
 
       await findings.navigateToLatestVulnerabilitiesPage();
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
-      await deleteIndices(es, [VULNERABILITIES_INDEX_DEFAULT_NS, VULNERABILITIES_LATEST_INDEX,]);
+      await deleteIndices(es, [VULNERABILITIES_INDEX_DEFAULT_NS, VULNERABILITIES_LATEST_INDEX]);
     });
 
     describe('Default Grouping', async () => {

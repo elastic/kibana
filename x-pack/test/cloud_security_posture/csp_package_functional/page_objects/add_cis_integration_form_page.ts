@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type {FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
+import type { FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
 
 export function AddCisIntegrationFormPageProvider({
   getService,
   getPageObjects,
-}:FunctionalFtrProviderContext) {
+}: FunctionalFtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
   const browser = getService('browser');

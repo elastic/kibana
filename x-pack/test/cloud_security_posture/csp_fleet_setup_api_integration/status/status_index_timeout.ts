@@ -15,8 +15,6 @@ import { deleteIndices } from '../../common/utils/index_api_helpers';
 import { createPackagePolicy } from '../../common/utils/csp_package_helpers';
 import { INDEX_ARRAY } from '../../common/utils/indices';
 
-
-
 const currentTimeMinusFourHours = new Date(Date.now() - 21600000).toISOString();
 const currentTimeMinusTenMinutes = new Date(Date.now() - 600000).toISOString();
 

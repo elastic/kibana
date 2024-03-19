@@ -18,11 +18,11 @@ import { FINDINGS_INDEX, FINDINGS_LATEST_INDEX } from '../../common/utils/indice
 import { createPackagePolicy } from '../../common/utils/csp_package_helpers';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getPageObjects, getService }:FunctionalFtrProviderContext) {
+export default function ({ getPageObjects, getService }: FunctionalFtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const es = getService("es");
+  const es = getService('es');
   const pageObjects = getPageObjects([
     'common',
     'cloudPostureDashboard',
@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }:FunctionalFtrProviderCon
         'kspm'
       );
       await rule.waitForPluginInitialized();
-      
+
       await addIndexBulkDocs(es, k8sFindingsMock, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
 
       await rule.navigateToRulePage('cis_k8s', '1.0.1');

@@ -10,14 +10,16 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import type {FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
+import type { FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
 
-
-export function CspDashboardPageProvider({ getService, getPageObjects }:FunctionalFtrProviderContext) {
+export function CspDashboardPageProvider({
+  getService,
+  getPageObjects,
+}: FunctionalFtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
-  
+
   const supertest = getService('supertest');
   const log = getService('log');
 
@@ -36,7 +38,6 @@ export function CspDashboardPageProvider({ getService, getPageObjects }:Function
       log.debug('CSP plugin is initialized');
     });
 
-  
   const dashboard = {
     getDashboardPageHeader: () => testSubjects.find('cloud-posture-dashboard-page-header'),
 

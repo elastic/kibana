@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { SecurityService } from 'test/common/services/security/security';
-
-
+import { SecurityService } from '../../../../../test/common/services/security/security';
 
 export const createUser = async (security: SecurityService, userName: string, roleName: string) => {
   await security.user.create(userName, {
@@ -51,4 +49,3 @@ export const deleteRole = async (security: SecurityService, roleName: string) =>
 export const deleteUser = async (security: SecurityService, userName: string) => {
   await security.user.delete(userName);
 };
-

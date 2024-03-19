@@ -12,7 +12,7 @@ import { addIndexDocs, deleteExistingIndex } from '../../common/utils/index_api_
 import { FINDINGS_LATEST_INDEX } from '../../common/utils/indices';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getPageObjects, getService }:FunctionalFtrProviderContext) {
+export default function ({ getPageObjects, getService }: FunctionalFtrProviderContext) {
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'cloudPostureDashboard']);
   const chance = new Chance();
@@ -47,7 +47,7 @@ export default function ({ getPageObjects, getService }:FunctionalFtrProviderCon
       await cspDashboard.waitForPluginInitialized();
 
       await addIndexDocs(es, data, FINDINGS_LATEST_INDEX);
-      
+
       await cspDashboard.navigateToComplianceDashboardPage();
 
       await retry.waitFor(
@@ -57,7 +57,7 @@ export default function ({ getPageObjects, getService }:FunctionalFtrProviderCon
     });
 
     after(async () => {
-      await deleteExistingIndex(es,  FINDINGS_LATEST_INDEX)
+      await deleteExistingIndex(es, FINDINGS_LATEST_INDEX);
     });
 
     describe('Kubernetes Dashboard', () => {

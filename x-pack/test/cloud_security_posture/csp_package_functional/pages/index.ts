@@ -8,7 +8,7 @@
 import type { FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ loadTestFile }:FunctionalFtrProviderContext) {
+export default function ({ loadTestFile }: FunctionalFtrProviderContext) {
   describe('Cloud Security Posture', function () {
     // loadTestFile(require.resolve('./rules'));
     loadTestFile(require.resolve('./findings_onboarding'));

@@ -19,7 +19,7 @@ import { addIndexBulkDocs, deleteIndices } from '../../common/utils/index_api_he
 import { FINDINGS_INDEX, FINDINGS_LATEST_INDEX } from '../../common/utils/indices';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getPageObjects, getService }:FunctionalFtrProviderContext) {
+export default function ({ getPageObjects, getService }: FunctionalFtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const supertest = getService('supertest');
@@ -154,7 +154,7 @@ export default function ({ getPageObjects, getService }:FunctionalFtrProviderCon
       await findings.waitForPluginInitialized();
 
       // Prepare mocked findings
-     
+
       await addIndexBulkDocs(es, data, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
 
       await findings.navigateToLatestFindingsPage();
@@ -165,7 +165,7 @@ export default function ({ getPageObjects, getService }:FunctionalFtrProviderCon
       const groupSelector = await findings.groupSelector();
       await groupSelector.openDropDown();
       await groupSelector.setValue('None');
-      await deleteIndices(es, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX])
+      await deleteIndices(es, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
     });
 
     describe('Default Grouping', async () => {

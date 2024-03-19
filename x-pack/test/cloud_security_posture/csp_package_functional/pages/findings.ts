@@ -18,7 +18,7 @@ import { deleteIndices, addIndexBulkDocs } from '../../common/utils/index_api_he
 import { FINDINGS_INDEX, FINDINGS_LATEST_INDEX } from '../../common/utils/indices';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getPageObjects, getService }:FunctionalFtrProviderContext) {
+export default function ({ getPageObjects, getService }: FunctionalFtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
@@ -140,7 +140,6 @@ export default function ({ getPageObjects, getService }:FunctionalFtrProviderCon
       await deleteIndices(es, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
       await addIndexBulkDocs(es, data, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
 
-
       await findings.navigateToLatestFindingsPage();
       await retry.waitFor(
         'Findings table to be loaded',
@@ -150,7 +149,7 @@ export default function ({ getPageObjects, getService }:FunctionalFtrProviderCon
     });
 
     afterEach(async () => {
-      await deleteIndices(es, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX])
+      await deleteIndices(es, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/174472
@@ -351,7 +350,6 @@ export default function ({ getPageObjects, getService }:FunctionalFtrProviderCon
         };
 
         await addIndexBulkDocs(es, [modifiedFinding], [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
-      
 
         await findings.navigateToLatestFindingsPage();
         await retry.waitFor(

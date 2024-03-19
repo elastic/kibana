@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type {FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
+import type { FunctionalFtrProviderContext } from '../../common/ftr_provider_context';
 
 // Defined in CSP plugin
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings-default';
@@ -17,7 +17,7 @@ export const VULNERABILITIES_INDEX_DEFAULT_NS =
 export const LATEST_VULNERABILITIES_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.vulnerabilities_latest-default';
 
-export function FindingsPageProvider({ getService, getPageObjects }:FunctionalFtrProviderContext) {
+export function FindingsPageProvider({ getService, getPageObjects }: FunctionalFtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');

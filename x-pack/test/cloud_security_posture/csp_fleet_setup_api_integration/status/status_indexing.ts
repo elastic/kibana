@@ -17,7 +17,6 @@ import { addIndexDocs, deleteIndices } from '../../common/utils/index_api_helper
 import { createPackagePolicy } from '../../common/utils/csp_package_helpers';
 import { INDEX_ARRAY } from '../../common/utils/indices';
 
-
 export default function (providerContext: ApiIntegrationFtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');

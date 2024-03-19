@@ -13,7 +13,7 @@ import { addIndexBulkDocs, deleteIndices } from '../../common/utils/index_api_he
 import { FINDINGS_INDEX, FINDINGS_LATEST_INDEX } from '../../common/utils/indices';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getPageObjects, getService }:FunctionalFtrProviderContext) {
+export default function ({ getPageObjects, getService }: FunctionalFtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const es = getService('es');
@@ -21,7 +21,7 @@ export default function ({ getPageObjects, getService }:FunctionalFtrProviderCon
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
 
   // We need to use a dataset for the tests to run
-  const data = FINDINGS_WITH_RULES
+  const data = FINDINGS_WITH_RULES;
 
   const ruleName1 = data[0].rule.name;
 
@@ -38,12 +38,12 @@ export default function ({ getPageObjects, getService }:FunctionalFtrProviderCon
       // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
       await findings.waitForPluginInitialized();
       // Prepare mocked findings
-      await deleteIndices(es, [ FINDINGS_INDEX, FINDINGS_LATEST_INDEX])
+      await deleteIndices(es, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
       await addIndexBulkDocs(es, data, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
     });
 
     after(async () => {
-      await deleteIndices(es,[FINDINGS_INDEX, FINDINGS_LATEST_INDEX])
+      await deleteIndices(es, [FINDINGS_INDEX, FINDINGS_LATEST_INDEX]);
       await findings.detectionRuleApi.remove();
     });
 
