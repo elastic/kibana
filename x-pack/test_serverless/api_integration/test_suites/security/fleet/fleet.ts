@@ -16,33 +16,19 @@ export default function (ctx: FtrProviderContext) {
   const svlCommonApi = ctx.getService('svlCommonApi');
   const supertest = ctx.getService('supertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/178779
-  describe.skip('fleet', function () {
+  describe('fleet', function () {
     let defaultFleetServerHostUrl: string = '';
     let defaultEsOutputUrl: string = '';
+
     before(async () => {
-      const { body, status } = await supertest
-        .get('/api/fleet/fleet_server_hosts')
-        .set(svlCommonApi.getInternalRequestHeader());
-
-      expect(status).toBe(200);
-
-      defaultFleetServerHostUrl =
-        body.items.find((item: any) => item.is_default)?.host_urls?.[0] ?? '';
+      defaultFleetServerHostUrl = await expectDefaultFleetServer(ctx);
       expect(defaultFleetServerHostUrl).not.toBe('');
-    });
-    before(async () => {
-      const { body, status } = await supertest
-        .get('/api/fleet/outputs')
-        .set(svlCommonApi.getInternalRequestHeader());
 
-      expect(status).toBe(200);
-      defaultEsOutputUrl = body.items.find((item: any) => item.is_default)?.hosts?.[0] ?? '';
+      defaultEsOutputUrl = await expectDefaultElasticsearchOutput(ctx);
       expect(defaultEsOutputUrl).not.toBe('');
     });
-    it('rejects request to create a new fleet server hosts if host url is different from default', async () => {
-      await expectDefaultFleetServer(ctx);
 
+    it('rejects request to create a new fleet server hosts if host url is different from default', async () => {
       const { body, status } = await supertest
         .post('/api/fleet/fleet_server_hosts')
         .set(svlCommonApi.getInternalRequestHeader())
@@ -61,8 +47,6 @@ export default function (ctx: FtrProviderContext) {
     });
 
     it('accepts request to create a new fleet server hosts if host url is same as default', async () => {
-      await expectDefaultFleetServer(ctx);
-
       const { body, status } = await supertest
         .post('/api/fleet/fleet_server_hosts')
         .set(svlCommonApi.getInternalRequestHeader())
@@ -81,8 +65,6 @@ export default function (ctx: FtrProviderContext) {
     });
 
     it('rejects request to create a new elasticsearch output if host is different from default', async () => {
-      await expectDefaultElasticsearchOutput(ctx);
-
       const { body, status } = await supertest
         .post('/api/fleet/outputs')
         .set(svlCommonApi.getInternalRequestHeader())
@@ -101,8 +83,6 @@ export default function (ctx: FtrProviderContext) {
     });
 
     it('accepts request to create a new elasticsearch output if host url is same as default', async () => {
-      await expectDefaultElasticsearchOutput(ctx);
-
       const { body, status } = await supertest
         .post('/api/fleet/outputs')
         .set(svlCommonApi.getInternalRequestHeader())
