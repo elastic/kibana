@@ -3097,6 +3097,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/aiops-test-utils@link:x-pack/packages/ml/aiops_test_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/aiops-utils@link:x-pack/packages/ml/aiops_utils":
   version "0.0.0"
   uid ""
@@ -6165,11 +6169,23 @@
   version "0.0.0"
   uid ""
 
+"@kbn/slo-plugin@link:x-pack/plugins/observability_solution/slo":
+  version "0.0.0"
+  uid ""
+
 "@kbn/slo-schema@link:x-pack/packages/kbn-slo-schema":
   version "0.0.0"
   uid ""
 
 "@kbn/snapshot-restore-plugin@link:x-pack/plugins/snapshot_restore":
+  version "0.0.0"
+  uid ""
+
+"@kbn/solution-nav-es@link:packages/solution-nav/es":
+  version "0.0.0"
+  uid ""
+
+"@kbn/solution-nav-oblt@link:packages/solution-nav/oblt":
   version "0.0.0"
   uid ""
 

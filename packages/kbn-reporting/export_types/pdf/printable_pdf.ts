@@ -19,7 +19,6 @@ import {
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
-  REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
 import { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
 import {
@@ -27,7 +26,7 @@ import {
   PDF_JOB_TYPE,
   TaskPayloadPDF,
 } from '@kbn/reporting-export-types-pdf-common';
-import { ExportType, decryptJobHeaders } from '@kbn/reporting-server';
+import { ExportType, REPORTING_TRANSACTION_TYPE, decryptJobHeaders } from '@kbn/reporting-server';
 
 import { getCustomLogo } from './get_custom_logo';
 import { getFullUrls } from './get_full_urls';
