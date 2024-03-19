@@ -27,8 +27,6 @@ export const configSchema = schema.object({
   hasWebCrawler: schema.boolean({ defaultValue: true }),
   host: schema.maybe(schema.string()),
   isCloud: schema.boolean({ defaultValue: false }),
-  // Temp Feature Flag for AI Playground page
-  showPlayground: schema.boolean({ defaultValue: false }),
   ssl: schema.object({
     certificateAuthorities: schema.maybe(
       schema.oneOf([schema.arrayOf(schema.string(), { minSize: 1 }), schema.string()])
