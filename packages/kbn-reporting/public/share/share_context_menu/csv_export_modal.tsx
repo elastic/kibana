@@ -13,6 +13,8 @@ import {
   EuiModalBody,
   EuiModalFooter,
   EuiSpacer,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
@@ -23,7 +25,8 @@ import url from 'url';
 
 import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import { BaseParamsV2 } from '@kbn/reporting-common/types';
-import { ErrorUrlTooLongPanel, ErrorUnsavedWorkPanel } from './reporting_panel_content/components';
+import { i18n } from '@kbn/i18n';
+import { ErrorUrlTooLongPanel } from './reporting_panel_content/components';
 import { getMaxUrlLength } from './reporting_panel_content/constants';
 import { ReportingAPIClient } from '../..';
 
@@ -80,20 +83,20 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
         toasts.addSuccess({
           title: intl.formatMessage(
             {
-              id: 'xpack.reporting.modalContent.successfullyQueuedReportNotificationTitle',
+              id: 'share.modalContent.successfullyQueuedReportNotificationTitle',
               defaultMessage: 'Queued report for {objectType}',
             },
             { objectType }
           ),
           text: toMountPoint(
             <FormattedMessage
-              id="xpack.reporting.modalContent.successfullyQueuedReportNotificationDescription"
+              id="share.modalContent.successfullyQueuedReportNotificationDescription"
               defaultMessage="Track its progress in {path}."
               values={{
                 path: (
                   <a href={apiClient.getManagementLink()}>
                     <FormattedMessage
-                      id="xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                      id="share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
                       defaultMessage="Stack Management &gt; Reporting"
                     />
                   </a>
@@ -114,7 +117,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
       .catch((error) => {
         toasts.addError(error, {
           title: intl.formatMessage({
-            id: 'xpack.reporting.modalContent.notification.reportingErrorTitle',
+            id: 'share.modalContent.notification.reportingErrorTitle',
             defaultMessage: 'Unable to create report',
           }),
           toastMessage: (
@@ -139,9 +142,46 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
     } else if (exceedsMaxLength) {
       return <ErrorUrlTooLongPanel isUnsaved={false} />;
     }
-    return (
+    return isUnsaved ? (
       <>
-        {isUnsaved && <ErrorUnsavedWorkPanel />}
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="share.modalContent.unsavedStateErrorText"
+              defaultMessage="Save your work before copying this URL."
+            />
+          }
+        >
+          <EuiCopy textToCopy={absoluteUrl}>
+            {(copy) => (
+              <EuiButtonEmpty
+                iconType="copy"
+                disabled={isUnsaved}
+                flush="both"
+                onClick={copy}
+                data-test-subj="shareReportingCopyURL"
+              >
+                <FormattedMessage
+                  id="share.modalContent.copyUrlButtonLabel"
+                  defaultMessage="Post URL"
+                />
+              </EuiButtonEmpty>
+            )}
+          </EuiCopy>
+        </EuiToolTip>
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="share.modalContent.howToCallGenerationDescription"
+              defaultMessage="Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher."
+            />
+          }
+        >
+          <EuiIcon type="questionInCircle" />
+        </EuiToolTip>
+      </>
+    ) : (
+      <>
         <EuiCopy textToCopy={absoluteUrl} anchorClassName="eui-displayBlock">
           {(copy) => (
             <EuiButtonEmpty
@@ -152,12 +192,15 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
               data-test-subj="shareReportingCopyURL"
             >
               <FormattedMessage
-                id="xpack.reporting.modalContent.copyUrlButtonLabel"
-                defaultMessage="Copy POST URL  "
+                id="share.modalContent.copyUrlButtonLabel"
+                defaultMessage="Post URL  "
               />
             </EuiButtonEmpty>
           )}
         </EuiCopy>
+        <EuiToolTip content="Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.">
+          <EuiIcon type="questionInCircle" />
+        </EuiToolTip>
       </>
     );
   };
@@ -167,22 +210,35 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
       <EuiModalBody>
         <EuiSpacer size="m" />
         <FormattedMessage id="share.csv.message" defaultMessage="Export a CSV of this search." />
-        <EuiSpacer size="m" />
-        {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButton
-          disabled={Boolean(createReportingJob)}
-          fill
-          onClick={() => generateReportingJob()}
-          data-test-subj="generateReportButton"
-          isLoading={Boolean(createReportingJob)}
-        >
-          <FormattedMessage
-            id="xpack.reporting.generateButtonLabel"
-            defaultMessage="Generate CSV"
-          />
-        </EuiButton>
+        {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
+        {!isSaved ? (
+          <EuiToolTip
+            content={i18n.translate('reporting.share.panelContent.unsavedStateErrorTitle', {
+              defaultMessage: 'Unsaved work',
+            })}
+          >
+            <EuiButton
+              disabled={Boolean(createReportingJob)}
+              onClick={() => generateReportingJob()}
+              data-test-subj="generateReportButton"
+              isLoading={Boolean(createReportingJob)}
+            >
+              <FormattedMessage id="share.generateButtonLabel" defaultMessage="Generate CSV" />
+            </EuiButton>
+          </EuiToolTip>
+        ) : (
+          <EuiButton
+            disabled={Boolean(createReportingJob)}
+            fill
+            onClick={() => generateReportingJob()}
+            data-test-subj="generateReportButton"
+            isLoading={Boolean(createReportingJob)}
+          >
+            <FormattedMessage id="share.generateButtonLabel" defaultMessage="Generate CSV" />
+          </EuiButton>
+        )}
       </EuiModalFooter>
     </>
   );
