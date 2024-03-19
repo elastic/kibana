@@ -16,15 +16,10 @@ export const CreateIndexCallout: React.FC = () => {
   const {
     services: { application, share },
   } = useKibana();
-  const createIndexLocator = useMemo(() => {
-    const locator = share.url.locators.get(CREATE_INDEX_LOCATOR_ID);
-
-    if (!locator) {
-      throw new Error(`Create index locator not registered`);
-    }
-
-    return locator;
-  }, [share.url.locators]);
+  const createIndexLocator = useMemo(
+    () => share.url.locators.get(CREATE_INDEX_LOCATOR_ID),
+    [share.url.locators]
+  );
   const handleNavigateToIndex = useCallback(async () => {
     const createIndexUrl = await createIndexLocator?.getUrl({});
 
