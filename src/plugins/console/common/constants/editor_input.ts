@@ -6,10 +6,25 @@
  * Side Public License, v 1.
  */
 
-export const DEFAULT_INPUT_VALUE = `# Click the Variables button, above, to create your own variables.
-GET \${exampleVariable1} // _search
+export const DEFAULT_INPUT_VALUE = `# Welcome to the Dev Tools Console!
+#
+# You can use Console to explore the Elasticsearch API. See the Elasticsearch API reference to learn more: https://www.elastic.co/guide/en/elasticsearch/reference/current/rest-apis.html
+#
+# Here are a few examples to get you started.
+
+
+# Create an index
+PUT /my-index
+
+
+# Add a document to my-index
+POST /my-index/_doc
 {
-  "query": {
-    "\${exampleVariable2}": {} // match_all
-  }
-}`;
+    "id": "park_rocky-mountain",
+    "title": "Rocky Mountain",
+    "description": "Bisected north to south by the Continental Divide, this portion of the Rockies has ecosystems varying from over 150 riparian lakes to montane and subalpine forests to treeless alpine tundra."
+}
+
+
+# Perform a search in my-index
+GET /my-index/_search?q="rocky mountain"`;
