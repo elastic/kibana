@@ -25,21 +25,21 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
     }
 
     public async assertElserPanelsExist(): Promise<void> {
-      const [first, second] = await testSubjects.findAll(
-        'mlAddTrainedModelFlyoutChooseModelPanels'
-      );
-
-      expect(first).to.be.ok();
-      expect(second).to.be.ok();
+      await retry.tryForTime(3_000, async () => {
+        await testSubjects.existOrFail('mlAddTrainedModelFlyoutModelPanel-elser-.elser_model_2');
+        await testSubjects.existOrFail(
+          'mlAddTrainedModelFlyoutModelPanel-elser-.elser_model_2_linux-x86_64'
+        );
+      });
     }
 
     public async assertE5PanelsExist(): Promise<void> {
-      const [, , third, fourth] = await testSubjects.findAll(
-        'mlAddTrainedModelFlyoutChooseModelPanels'
-      );
-
-      expect(third).to.be.ok();
-      expect(fourth).to.be.ok();
+      await retry.tryForTime(3_000, async () => {
+        await testSubjects.existOrFail('mlAddTrainedModelFlyoutModelPanel-elser-.elser_model_2');
+        await testSubjects.existOrFail(
+          'mlAddTrainedModelFlyoutModelPanel-e5-.multilingual-e5-small_linux-x86_64'
+        );
+      });
     }
 
     public async assertDownloadButtonExists(): Promise<void> {

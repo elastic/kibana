@@ -268,15 +268,23 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                               <EuiText size={'s'}>
                                 <b>
                                   {model.os === 'Linux' && model.arch === 'amd64' ? (
-                                    <FormattedMessage
-                                      id="xpack.ml.trainedModels.addModelFlyout.intelLinuxLabel"
-                                      defaultMessage="Intel and Linux optimized"
-                                    />
+                                    <div
+                                      data-test-subj={`mlAddTrainedModelFlyoutModelPanel-${modelName}-${model.model_id}`}
+                                    >
+                                      <FormattedMessage
+                                        id="xpack.ml.trainedModels.addModelFlyout.intelLinuxLabel"
+                                        defaultMessage="Intel and Linux optimized"
+                                      />
+                                    </div>
                                   ) : (
-                                    <FormattedMessage
-                                      id="xpack.ml.trainedModels.addModelFlyout.crossPlatformLabel"
-                                      defaultMessage="Cross platform"
-                                    />
+                                    <div
+                                      data-test-subj={`mlAddTrainedModelFlyoutModelPanel-${modelName}-${model.model_id}`}
+                                    >
+                                      <FormattedMessage
+                                        id="xpack.ml.trainedModels.addModelFlyout.crossPlatformLabel"
+                                        defaultMessage="Cross platform"
+                                      />
+                                    </div>
                                   )}
                                 </b>
                               </EuiText>
