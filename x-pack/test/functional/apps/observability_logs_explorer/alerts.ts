@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from 'expect';
 import { FtrProviderContext } from './config';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -24,6 +25,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('confirmModalConfirmButton');
       await testSubjects.waitForDeleted('saveRuleButton');
       await testSubjects.waitForDeleted('confirmModalConfirmButton');
+      const toastTitle = await testSubjects.getVisibleText('euiToastHeader__title');
+      expect(toastTitle).toMatch(/created/i);
     });
 
     it('should create SLO successfully', async () => {
@@ -33,6 +36,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('sloFormNameInput', 'Test SLO');
       await testSubjects.click('sloFormSubmitButton');
       await testSubjects.waitForDeleted('sloFormSubmitButton');
+      const toastTitle = await testSubjects.getVisibleText('euiToastHeader__title');
+      expect(toastTitle).toMatch(/created/i);
     });
   });
 }
