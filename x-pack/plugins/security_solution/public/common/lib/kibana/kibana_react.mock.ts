@@ -14,6 +14,8 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
+
 import {
   DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_APP_TIME_RANGE,
@@ -121,6 +123,7 @@ export const createStartServicesMock = (
   const guidedOnboarding = guidedOnboardingMock.createStart();
   const cloud = cloudMock.createStart();
   const mockSetHeaderActionMenu = jest.fn();
+  const mockTimelineFilterManager = createFilterManagerMock();
 
   return {
     ...core,
@@ -219,6 +222,7 @@ export const createStartServicesMock = (
     uiActions: uiActionsPluginMock.createStartContract(),
     savedSearch: savedSearchPluginMock.createStartContract(),
     setHeaderActionMenu: mockSetHeaderActionMenu,
+    timelineFilterManager: mockTimelineFilterManager,
   } as unknown as StartServices;
 };
 

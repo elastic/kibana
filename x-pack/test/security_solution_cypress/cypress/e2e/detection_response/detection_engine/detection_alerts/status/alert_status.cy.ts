@@ -44,7 +44,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => 
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_multiple');
+    cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
   });
 
   context('Opening alerts', { tags: ['@ess', '@serverless'] }, () => {

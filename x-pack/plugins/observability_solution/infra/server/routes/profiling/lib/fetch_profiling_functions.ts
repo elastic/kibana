@@ -20,7 +20,7 @@ export async function fetchProfilingFunctions(
   const startSecs = from / 1000;
   const endSecs = to / 1000;
 
-  return await profilingDataAccess.services.fetchFunction({
+  return await profilingDataAccess.services.fetchFunctions({
     core: coreRequestContext,
     esClient: coreRequestContext.elasticsearch.client.asCurrentUser,
     startIndex,
