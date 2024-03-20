@@ -195,7 +195,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.only('Jira - Executor', () => {
+    describe('Jira - Executor', () => {
       let simulatedActionId: string;
       let proxyServer: httpProxy | undefined;
       let proxyHaveBeenCalled = false;
