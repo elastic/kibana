@@ -179,7 +179,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
     const dataViewSpec = this.toSpec(false);
 
     if (dataViewSpec.fieldAttrs) {
-      // removes everything (`count`, `customDescription`) except for `customLabel` from `fieldAttrs`
+      // removes everything (`count`, `customDescription`) from `fieldAttrs` except for `customLabel`
       dataViewSpec.fieldAttrs = pickBy(
         mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => pick(fieldAttrs, 'customLabel')),
         (trimmedFieldAttrs) => Object.keys(trimmedFieldAttrs).length > 0
