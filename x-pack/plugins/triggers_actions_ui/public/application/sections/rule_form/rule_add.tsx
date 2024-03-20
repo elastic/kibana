@@ -91,7 +91,8 @@ const RuleAdd = <
       ...(initialValues ? initialValues : {}),
     };
   }, [ruleTypeId, consumer, initialValues]);
-  const [{ rule }, dispatch] = useReducer(getRuleReducer(actionTypeRegistry), {
+  const ruleReducer = useMemo(() => getRuleReducer(actionTypeRegistry), [actionTypeRegistry]);
+  const [{ rule }, dispatch] = useReducer(ruleReducer, {
     rule: initialRule,
   });
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });

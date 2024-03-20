@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useReducer, useState, useEffect, useCallback } from 'react';
+import React, { useReducer, useState, useEffect, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import {
@@ -114,7 +114,8 @@ export const RuleEdit = <
   ...props
 }: RuleEditProps<Params, MetaData>) => {
   const onSaveHandler = onSave ?? reloadRules;
-  const [{ rule }, dispatch] = useReducer(getRuleReducer<Rule>(actionTypeRegistry), {
+  const ruleReducer = useMemo(() => getRuleReducer<Rule>(actionTypeRegistry), [actionTypeRegistry]);
+  const [{ rule }, dispatch] = useReducer(ruleReducer, {
     rule: cloneAndMigrateRule(initialRule),
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);

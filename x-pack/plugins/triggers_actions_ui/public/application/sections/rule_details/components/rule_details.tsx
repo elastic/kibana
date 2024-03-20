@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   EuiPageHeader,
@@ -109,7 +109,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const [{}, dispatch] = useReducer(getRuleReducer(actionTypeRegistry), { rule });
+  const ruleReducer = useMemo(() => getRuleReducer(actionTypeRegistry), [actionTypeRegistry]);
+  const [{}, dispatch] = useReducer(ruleReducer, { rule });
   const setInitialRule = (value: Rule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
   };
