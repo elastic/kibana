@@ -63,17 +63,19 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
         });
       }
     }
-    
+
     public async open() {
-        await retry.tryForTime(fiveSeconds, async () => {
-          await testSubjects.click('mlModelsAddTrainedModelButton');
-          await this.assertOpen(true);
-        });
+      await retry.tryForTime(3_000, async () => {
+        await testSubjects.click('mlModelsAddTrainedModelButton');
+        await this.assertOpen(true);
+      });
     }
 
     public async close(): Promise<void> {
-      await testSubjects.click('euiFlyoutCloseButton');
-      await this.assertOpen(false);
+      await retry.tryForTime(3_000, async () => {
+        await testSubjects.click('euiFlyoutCloseButton');
+        await this.assertOpen(false);
+      });
     }
 
     public async assertFlyoutTabs(tabs: AddModelFlyoutTabId[]): Promise<void> {
