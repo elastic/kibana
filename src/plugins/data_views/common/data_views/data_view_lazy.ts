@@ -599,4 +599,17 @@ export class DataViewLazy extends AbstractDataView {
       else fieldObject.spec.count = newCount;
     }
   }
+
+  public setFieldCustomDescription(
+    fieldName: string,
+    customDescription: string | undefined | null
+  ) {
+    const newCustomDescription: string | undefined =
+      customDescription === null ? undefined : customDescription;
+    this.setFieldCustomDescriptionInternal(fieldName, customDescription);
+    const fieldObject = this.fieldCache.get(fieldName);
+    if (fieldObject) {
+      fieldObject.spec.customDescription = newCustomDescription;
+    }
+  }
 }
