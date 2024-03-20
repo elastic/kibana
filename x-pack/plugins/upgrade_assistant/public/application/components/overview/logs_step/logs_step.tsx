@@ -161,9 +161,7 @@ const LogsStep = ({
           </EuiCallOut>
         )}
 
-        {privilegesMissing.cluster && privilegesMissing.index && (
-          <EuiSpacer />
-        )}
+        {privilegesMissing.cluster && privilegesMissing.index && <EuiSpacer />}
 
         {privilegesMissing.index && (
           <EuiCallOut
@@ -253,7 +251,7 @@ export const getLogsStep = ({
 
   const requiredPrivileges = [
     `index.${DEPRECATION_LOGS_INDEX}`,
-    ...APP_LOGS_COUNT_PRIVILEGES.map(privilege => `cluster.${privilege}`),
+    ...APP_LOGS_COUNT_PRIVILEGES.map((privilege) => `cluster.${privilege}`),
   ];
 
   return {

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { API_BASE_PATH, DEPRECATION_LOGS_INDEX, APP_LOGS_COUNT_PRIVILEGES } from '../../common/constants';
+import {
+  API_BASE_PATH,
+  DEPRECATION_LOGS_INDEX,
+  APP_LOGS_COUNT_PRIVILEGES,
+} from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { Privileges } from '../shared_imports';
 import { RouteDependencies } from '../types';
@@ -20,7 +24,9 @@ const extractMissingIndexPrivileges = (
     return privileges;
   }, []);
 
-const extractMissingClusterPrivileges = (privilegesObject: { [key: string]: boolean } = {}): string[] =>
+const extractMissingClusterPrivileges = (
+  privilegesObject: { [key: string]: boolean } = {}
+): string[] =>
   Object.keys(privilegesObject).reduce((privileges: string[], privilegeName: string): string[] => {
     if (!privilegesObject[privilegeName]) {
       privileges.push(privilegeName);
@@ -55,18 +61,21 @@ export function registerAppRoutes({
       }
 
       try {
-        const { has_all_requested: hasAllPrivileges, index, cluster } =
-          await client.asCurrentUser.security.hasPrivileges({
-            body: {
-              cluster: [...APP_LOGS_COUNT_PRIVILEGES],
-              index: [
-                {
-                  names: [DEPRECATION_LOGS_INDEX],
-                  privileges: ['read'],
-                },
-              ],
-            },
-          });
+        const {
+          has_all_requested: hasAllPrivileges,
+          index,
+          cluster,
+        } = await client.asCurrentUser.security.hasPrivileges({
+          body: {
+            cluster: [...APP_LOGS_COUNT_PRIVILEGES],
+            index: [
+              {
+                names: [DEPRECATION_LOGS_INDEX],
+                privileges: ['read'],
+              },
+            ],
+          },
+        });
 
         if (!hasAllPrivileges) {
           privilegesResult.missingPrivileges.index = extractMissingIndexPrivileges(index);

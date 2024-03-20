@@ -134,7 +134,6 @@ describe('Overview - Logs Step', () => {
         isDeprecationLogIndexingEnabled: true,
         isDeprecationLoggingEnabled: true,
       });
-
     });
 
     test('warns the user of missing index privileges', async () => {
