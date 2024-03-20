@@ -32,7 +32,7 @@ import {
 } from '../../../../tasks/sourcerer';
 import { openTimelineUsingToggle } from '../../../../tasks/security_main';
 import { SOURCERER } from '../../../../screens/sourcerer';
-import { createTimeline, deleteAllTimelines } from '../../../../tasks/api_calls/timelines';
+import { createTimeline, deleteTimelines } from '../../../../tasks/api_calls/timelines';
 import { getTimeline, getTimelineModifiedSourcerer } from '../../../../objects/timeline';
 import { closeTimeline, openTimelineById } from '../../../../tasks/timeline';
 
@@ -95,7 +95,7 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'
   describe('Alerts checkbox', () => {
     beforeEach(() => {
       login();
-      deleteAllTimelines();
+      deleteTimelines();
       createTimeline(getTimeline()).then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
       );

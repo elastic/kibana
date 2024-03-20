@@ -14,7 +14,7 @@ import {
   TIMELINE_QUERY,
   NOTE_CARD_CONTENT,
 } from '../../../screens/timeline';
-import { deleteAllTimelines } from '../../../tasks/api_calls/timelines';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { addNoteToTimeline } from '../../../tasks/api_calls/notes';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 
@@ -35,7 +35,7 @@ describe('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     visit(TIMELINES_URL);
-    deleteAllTimelines();
+    deleteTimelines();
     createTimeline(defaultTimeline)
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId: string) => {

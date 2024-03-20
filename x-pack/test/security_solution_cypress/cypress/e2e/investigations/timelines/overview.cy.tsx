@@ -21,7 +21,7 @@ import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
   createTimeline,
-  deleteAllTimelines,
+  deleteTimelines,
   favoriteTimeline,
 } from '../../../tasks/api_calls/timelines';
 
@@ -29,7 +29,7 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 
 describe('timeline overview search', { tags: ['@ess', 'serverless'] }, () => {
   beforeEach(() => {
-    deleteAllTimelines();
+    deleteTimelines();
     createTimeline(getFavoritedTimeline())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId) => favoriteTimeline({ timelineId, timelineType: 'default' }));

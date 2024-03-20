@@ -18,7 +18,7 @@ import {
   MARKDOWN_INVESTIGATE_BUTTON,
 } from '../../../screens/timeline';
 import { MODAL_CONFIRMATION_BTN } from '../../../screens/alerts_detection_rules';
-import { createTimeline, deleteAllTimelines } from '../../../tasks/api_calls/timelines';
+import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';
 import { visitTimeline } from '../../../tasks/navigation';
@@ -29,7 +29,7 @@ const link = 'https://www.elastic.co/';
 
 describe('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(function () {
-    deleteAllTimelines();
+    deleteTimelines();
 
     createTimeline(getTimelineNonValidQuery())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)

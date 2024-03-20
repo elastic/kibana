@@ -39,7 +39,7 @@ import { TIMELINE_QUERY, TIMELINE_TITLE } from '../../../screens/timeline';
 import { OVERVIEW_CASE_DESCRIPTION, OVERVIEW_CASE_NAME } from '../../../screens/overview';
 
 import { goToCaseDetails, goToCreateNewCase } from '../../../tasks/all_cases';
-import { createTimeline, deleteAllTimelines } from '../../../tasks/api_calls/timelines';
+import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { openCaseTimeline } from '../../../tasks/case_details';
 import {
   attachTimeline,
@@ -58,7 +58,7 @@ import { deleteAllCasesItems } from '../../../tasks/api_calls/common';
 // Tracked by https://github.com/elastic/security-team/issues/7696
 describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
-    deleteAllTimelines();
+    deleteTimelines();
     deleteAllCasesItems();
     createTimeline(getCase1().timeline).then((response) =>
       cy

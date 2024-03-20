@@ -25,11 +25,11 @@ import {
   refreshTimelinesUntilTimeLinePresent,
 } from '../../../tasks/timeline';
 import { TIMELINES_URL } from '../../../urls/navigation';
-import { deleteAllTimelines } from '../../../tasks/api_calls/timelines';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 describe('Open timeline modal', { tags: ['@serverless', '@ess'] }, () => {
   beforeEach(function () {
-    deleteAllTimelines();
+    deleteTimelines();
     login();
     visit(TIMELINES_URL);
     createTimeline(getTimeline())

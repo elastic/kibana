@@ -14,7 +14,7 @@ import { ALERTS_HISTOGRAM_SERIES, ALERT_RULE_NAME, MESSAGE } from '../../../scre
 import { TIMELINE_QUERY, TIMELINE_VIEW_IN_ANALYZER } from '../../../screens/timeline';
 import { selectAlertsHistogram } from '../../../tasks/alerts';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
-import { deleteAllTimelines } from '../../../tasks/api_calls/timelines';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
@@ -50,7 +50,7 @@ describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () =>
 
   describe('Ransomware in Timelines', () => {
     beforeEach(() => {
-      deleteAllTimelines();
+      deleteTimelines();
       login();
       visitWithTimeRange(TIMELINES_URL);
     });

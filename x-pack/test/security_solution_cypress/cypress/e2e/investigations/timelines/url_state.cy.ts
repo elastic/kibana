@@ -16,13 +16,13 @@ import { getNewRule } from '../../../objects/rule';
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { TIMELINES_URL } from '../../../urls/navigation';
-import { deleteAllTimelines } from '../../../tasks/api_calls/timelines';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
   let timelineSavedObjectId: string | null = null;
   beforeEach(function () {
     login();
-    deleteAllTimelines();
+    deleteTimelines();
     visit(TIMELINES_URL);
     createTimeline(getTimeline()).then((response) => {
       timelineSavedObjectId = response.body.data.persistTimeline.timeline.savedObjectId;

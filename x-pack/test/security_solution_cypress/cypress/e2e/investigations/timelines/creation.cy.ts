@@ -23,7 +23,7 @@ import {
 } from '../../../screens/timeline';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { ROWS } from '../../../screens/timelines';
-import { createTimelineTemplate, deleteAllTimelines } from '../../../tasks/api_calls/timelines';
+import { createTimelineTemplate, deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
@@ -50,7 +50,7 @@ import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../ur
 
 describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   beforeEach(() => {
-    deleteAllTimelines();
+    deleteTimelines();
   });
 
   it('should create a timeline from a template and should have the same query and open the timeline modal', () => {

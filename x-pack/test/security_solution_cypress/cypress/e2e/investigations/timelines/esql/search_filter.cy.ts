@@ -27,7 +27,7 @@ import {
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
-import { deleteAllTimelines } from '../../../../tasks/api_calls/timelines';
+import { deleteTimelines } from '../../../../tasks/api_calls/timelines';
 import { openActiveTimeline, createNewTimeline, goToEsqlTab } from '../../../../tasks/timeline';
 
 const DEFAULT_DATE = '~ 15 minutes ago';
@@ -44,7 +44,7 @@ describe(
   () => {
     beforeEach(() => {
       login();
-      deleteAllTimelines();
+      deleteTimelines();
       visitWithTimeRange(ALERTS_URL);
       openActiveTimeline();
       cy.window().then((win) => {
