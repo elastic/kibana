@@ -47,12 +47,12 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
 
     public async assertOpen(expectOpen: boolean): Promise<void> {
       if (expectOpen) {
-        await retry.tryForTime(3_000, async () => {
-          await testSubjects.existOrFail('mlAddTrainedModelFlyout');
+        await testSubjects.existOrFail('mlAddTrainedModelFlyout', {
+          timeout: 3_000,
         });
       } else {
-        await retry.tryForTime(3_000, async () => {
-          await testSubjects.missingOrFail('mlAddTrainedModelFlyout');
+        await testSubjects.missingOrFail('mlAddTrainedModelFlyout', {
+          timeout: 3_000,
         });
       }
     }
