@@ -25,16 +25,14 @@ import {
   useUiSettings,
 } from '../../contexts/kibana';
 import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
 import { mlJobService } from '../../services/job_service';
-import { mlForecastService } from '../../services/forecast_service';
+import { useForecastService } from '../../services/forecast_service';
+import { useTimeSeriesExplorerService } from '../../util/time_series_explorer_service';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer/timeseriesexplorer_constants';
-import {
-  createTimeSeriesJobData,
-  getAutoZoomDuration,
-  validateJobSelection,
-} from '../../timeseriesexplorer/timeseriesexplorer_utils';
+import { validateJobSelection } from '../../timeseriesexplorer/timeseriesexplorer_utils';
 import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
 import { TimeseriesexplorerNoJobsFound } from '../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
 import { useTableInterval } from '../../components/controls/select_interval';
@@ -117,6 +115,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
     },
   } = useMlKibana();
   const { toasts } = useNotifications();
+  const mlForecastService = useForecastService();
   const toastNotificationService = useToastNotificationService();
   const [timeSeriesExplorerUrlState, setTimeSeriesExplorerUrlState] =
     useTimeSeriesExplorerUrlState();
@@ -127,6 +126,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   const refresh = useRefresh();
   const previousRefresh = usePrevious(refresh?.lastRefresh ?? 0);
+  const timeSeriesExplorerService = useTimeSeriesExplorerService();
 
   // We cannot simply infer bounds from the globalState's `time` attribute
   // with `moment` since it can contain custom strings such as `now-15m`.
@@ -176,7 +176,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
     : timeSeriesExplorerUrlState?.mlTimeSeriesExplorer?.zoom;
 
   const selectedJob = selectedJobId !== undefined ? mlJobService.getJob(selectedJobId) : undefined;
-  const timeSeriesJobs = createTimeSeriesJobData(mlJobService.jobs);
+  const timeSeriesJobs = mlJobService.jobs.filter(isTimeSeriesViewJob);
 
   const viewableDetector = selectedJob ? getViewableDetectors(selectedJob)[0]?.index ?? 0 : 0;
 
@@ -189,7 +189,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   let autoZoomDuration: number | undefined;
   if (selectedJobId !== undefined && selectedJob !== undefined) {
-    autoZoomDuration = getAutoZoomDuration(timeSeriesJobs, selectedJob);
+    autoZoomDuration = timeSeriesExplorerService.getAutoZoomDuration(selectedJob);
   }
 
   const appStateHandler = useCallback(
