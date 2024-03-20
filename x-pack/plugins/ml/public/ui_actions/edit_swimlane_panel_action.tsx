@@ -10,10 +10,7 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
-import {
-  isAnomalyChartsEmbeddableContext,
-  isSwimLaneEmbeddableContext,
-} from './open_in_anomaly_explorer_action';
+import { isSwimLaneEmbeddableContext } from './open_in_anomaly_explorer_action';
 
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 
@@ -61,8 +58,7 @@ export function createEditSwimlanePanelAction(getStartServices: MlCoreSetup['get
     },
     async isCompatible(context: EmbeddableApiContext) {
       return (
-        isAnomalyChartsEmbeddableContext(context) &&
-        context.embeddable.viewMode?.getValue() === 'edit'
+        isSwimLaneEmbeddableContext(context) && context.embeddable.viewMode?.getValue() === 'edit'
       );
     },
   });
