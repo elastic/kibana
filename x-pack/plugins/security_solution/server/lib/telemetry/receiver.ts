@@ -847,8 +847,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
 
     let response = null;
-    while (fetchMore) {
-      try {
+    try {
+      while (fetchMore) {
         response = await this.esClient().search(query);
         const numOfHits = response?.hits.hits.length;
 
@@ -860,27 +860,30 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         }
 
         fetchMore = numOfHits > 0 && numOfHits < 1_000;
-      } catch (e) {
-        tlog(this.logger, e);
-        fetchMore = false;
+        if (response == null) {
+          await this.closePointInTime(pitId);
+          return;
+        }
+
+        const alerts: TelemetryEvent[] = response.hits.hits.flatMap((h) =>
+          h._source != null ? ([h._source] as TelemetryEvent[]) : []
+        );
+
+        if (response?.pit_id != null) {
+          pitId = response?.pit_id;
+        }
+
+        tlog(this.logger, `Prebuilt rule alerts to return: ${alerts.length}`);
+
+        yield alerts;
       }
-
-      if (response == null) {
-        await this.closePointInTime(pitId);
-        return;
-      }
-
-      const alerts: TelemetryEvent[] = response.hits.hits.flatMap((h) =>
-        h._source != null ? ([h._source] as TelemetryEvent[]) : []
-      );
-
-      if (response?.pit_id != null) {
-        pitId = response?.pit_id;
-      }
-
-      tlog(this.logger, `Prebuilt rule alerts to return: ${alerts.length}`);
-
-      yield alerts;
+    } catch (e) {
+      // to keep backward compatibility with the previous implementation, silent return
+      // once we start using `paginate` this error should be managed downstream
+      tlog(this.logger, e);
+      return;
+    } finally {
+      await this.closePointInTime(pitId);
     }
   }
 
