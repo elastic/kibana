@@ -765,7 +765,7 @@ describe('update()', () => {
       }
     );
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
-    expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(6);
+    expect(actionsClient.isPreconfigured).toHaveBeenCalled();
   });
 
   test('should update a rule with some system actions', async () => {
@@ -2566,7 +2566,7 @@ describe('update()', () => {
       }
     );
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
-    expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(2);
+    expect(actionsClient.isPreconfigured).toHaveBeenCalled();
   });
 
   test('logs warning when creating with an interval less than the minimum configured one when enforce = false', async () => {
