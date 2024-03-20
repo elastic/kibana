@@ -87,8 +87,8 @@ main () {
   git config --global user.name "$KIBANA_MACHINE_USERNAME"
   git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
-  PR_TITLE='[ES|QL] Update lexer grammar'
-  PR_BODY='This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch.'
+  PR_TITLE='[ES|QL] Update grammars'
+  PR_BODY='This PR updates the ES|QL grammars (lexer and parser) to match the latest version in Elasticsearch.'
 
   # Check if a PR already exists
   pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME"  --limit 1 --json title -q ".[].title")
@@ -122,7 +122,7 @@ main () {
   git push --set-upstream origin "$BRANCH_NAME"
 
   # Create a PR
-  gh pr create --draft --title '[ES|QL] Update lexer grammar' --body 'This PR updates the ES|QL lexer grammar to match the latest version in Elasticsearch.' --base main --head "$BRANCH_NAME" --label 'release_note:skip' --label 'Team:Visualizations' || exit
+  gh pr create --draft --title "$PR_TITLE" --body "$PR_BODY" --base main --head "$BRANCH_NAME" --label 'release_note:skip' --label 'Team:Visualizations' || exit
 }
 
 main
