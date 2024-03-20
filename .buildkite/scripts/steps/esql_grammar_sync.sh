@@ -76,7 +76,7 @@ main () {
   # Check for differences
   git diff --exit-code --quiet "$destination_file"
 
-  if [ $? -e 0 ]; then
+  if [ $? -eq 0 ]; then
     echo "No differences found. Our work is done here."
     exit
   fi
