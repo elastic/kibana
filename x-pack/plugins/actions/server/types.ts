@@ -242,3 +242,7 @@ export interface ConnectorToken extends SavedObjectAttributes {
   createdAt: string;
   updatedAt?: string;
 }
+
+// This unallowlist should only contain connector types that require a request or API key for
+// execution.
+export const UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS = ['.index'];

@@ -228,6 +228,45 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         `Error: "not_allowed" feature is not allow-listed for UnsecuredActionsClient access.`
       );
     });
+
+    it('should not allow executing action from unallowed connector types', async () => {
+      const testStart = new Date().toISOString();
+      const { body: result } = await supertest
+        .post(`/api/execute_unsecured_action`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          requesterId: 'background_task',
+          id: 'preconfigured-es-index-action',
+          params: {
+            documents: [{ test: 'test' }],
+            indexOverride: null,
+          },
+          spaceId: 'default',
+        })
+        .expect(200);
+      expect(result.status).to.eql('success');
+      expect(result.result).to.eql({
+        actionId: 'preconfigured-es-index-action',
+        status: 'error',
+        message: 'Cannot execute unsecured ".index" action - execution of this type is not allowed',
+        retry: false,
+        errorSource: 'user',
+      });
+
+      const query = getEventLogExecuteQuery(testStart, 'preconfigured-es-index-action');
+      await retry.try(async () => {
+        const searchResult = await es.search(query);
+        expect((searchResult.hits.total as SearchTotalHits).value).to.eql(1);
+
+        const hit = searchResult.hits.hits[0];
+        // @ts-expect-error _source: unknown
+        expect(hit?._source?.event?.outcome).to.eql('failure');
+        // @ts-expect-error _source: unknown
+        expect(hit?._source?.message).to.eql(
+          `action execution failure: .index:preconfigured-es-index-action: preconfigured_es_index_action`
+        );
+      });
+    });
   });
 
   function getEventLogExecuteQuery(start: string, actionId: string) {

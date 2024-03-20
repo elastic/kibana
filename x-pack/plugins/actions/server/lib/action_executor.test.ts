@@ -16,6 +16,7 @@ import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spac
 import { ActionType as ConnectorType } from '../types';
 import { actionsAuthorizationMock, actionsMock } from '../mocks';
 import {
+  asBackgroundTaskExecutionSource,
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
 } from './action_execution_source';
@@ -298,6 +299,11 @@ describe('Action Executor', () => {
           id: '573891ae-8c48-49cb-a197-0cd5ec34a88b',
           type: 'alert',
         }),
+      },
+      {
+        name: `background_task`,
+        sourceType: `background_task`,
+        source: asBackgroundTaskExecutionSource({ taskId: 'task:123', taskType: 'taskType' }),
       },
     ]) {
       test(`successfully ${label} with ${executionSource.name} source`, async () => {
@@ -1211,6 +1217,44 @@ describe('Action Executor', () => {
       expect(loggerMock.warn).toBeCalledWith(
         'action execution failure: test:1: 1: returned unexpected result "invalid-status"'
       );
+    });
+
+    test(`${label} with action type in UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS list`, async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+        ...connectorSavedObject,
+        attributes: {
+          ...connectorSavedObject.attributes,
+          actionTypeId: '.index',
+        },
+      });
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+      if (executeUnsecure) {
+        const result = await actionExecutor.executeUnsecured(executeUnsecuredParams);
+        expect(result).toEqual({
+          actionId: CONNECTOR_ID,
+          errorSource: 'user',
+          message:
+            'Cannot execute unsecured ".index" action - execution of this type is not allowed',
+          retry: false,
+          status: 'error',
+        });
+        expect(connectorType.executor).not.toHaveBeenCalled();
+      } else {
+        await actionExecutor.execute(executeParams);
+
+        expect(connectorType.executor).toHaveBeenCalledWith({
+          actionId: CONNECTOR_ID,
+          services: expect.anything(),
+          config: {
+            bar: true,
+          },
+          secrets: {
+            baz: true,
+          },
+          params: { foo: true },
+          logger: loggerMock,
+        });
+      }
     });
   }
 });

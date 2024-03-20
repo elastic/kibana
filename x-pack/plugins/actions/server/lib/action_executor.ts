@@ -34,6 +34,7 @@ import {
   InMemoryConnector,
   RawAction,
   Services,
+  UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS,
   UnsecuredServices,
   ValidatorServices,
 } from '../types';
@@ -80,7 +81,7 @@ export interface ExecuteOptions<Source = unknown> {
 
 type ExecuteHelperOptions<Source = unknown> = Omit<ExecuteOptions<Source>, 'request'> & {
   currentUser?: AuthenticatedUser | null;
-  ensureAuthorizedFn?: (connectorTypeId: string) => Promise<void>;
+  checkCanExecuteFn?: (connectorTypeId: string) => Promise<void>;
   executeLabel: string;
   namespace: { namespace?: string };
   request?: KibanaRequest;
@@ -147,7 +148,7 @@ export class ActionExecutor {
       actionId,
       consumer,
       currentUser,
-      ensureAuthorizedFn: async (connectorTypeId: string) => {
+      checkCanExecuteFn: async (connectorTypeId: string) => {
         /**
          * Ensures correct permissions for execution and
          * performs authorization checks for system actions.
@@ -191,10 +192,18 @@ export class ActionExecutor {
     return await this.executeHelper({
       actionExecutionId,
       actionId,
-      ensureAuthorizedFn: async (connectorTypeId: string) => {
+      checkCanExecuteFn: async (connectorTypeId: string) => {
+        let errorMessage: string | null = null;
+        if (UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS.includes(connectorTypeId)) {
+          errorMessage = `Cannot execute unsecured "${connectorTypeId}" action - execution of this type is not allowed`;
+        }
+
         // We don't allow execute system actions in unsecured manner because they require a request
         if (actionTypeRegistry.isSystemActionType(connectorTypeId)) {
-          const errorMessage = `Cannot execute unsecured system action`;
+          errorMessage = `Cannot execute unsecured system action`;
+        }
+
+        if (errorMessage) {
           throw new ActionExecutionError(errorMessage, ActionExecutionErrorReason.Authorization, {
             actionId,
             status: 'error',
@@ -343,7 +352,7 @@ export class ActionExecutor {
     actionId,
     consumer,
     currentUser,
-    ensureAuthorizedFn,
+    checkCanExecuteFn,
     executeLabel,
     executionId,
     isEphemeral,
@@ -475,8 +484,8 @@ export class ActionExecutor {
 
         let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
-          if (ensureAuthorizedFn) {
-            await ensureAuthorizedFn(actionTypeId);
+          if (checkCanExecuteFn) {
+            await checkCanExecuteFn(actionTypeId);
           }
 
           rawResult = await actionType.executor({
