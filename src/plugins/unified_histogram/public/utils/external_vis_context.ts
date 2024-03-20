@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { pick } from 'lodash';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { UnifiedHistogramVisContext } from '../types';
 import { removeTablesFromLensAttributes } from './lens_vis_from_table';
@@ -24,22 +23,19 @@ export const exportVisContext = (
   }
 
   try {
-    const visContextWithoutTables = visContext
+    const lightweightVisContext = visContext
       ? {
-          ...visContext,
-          attributes: removeTablesFromLensAttributes(visContext?.attributes),
+          suggestionType: visContext.suggestionType,
+          requestData: visContext.requestData,
+          attributes: removeTablesFromLensAttributes(visContext.attributes),
         }
       : undefined;
 
-    const visContextWithoutTablesAndUndefinedValues = visContextWithoutTables
-      ? JSON.parse(JSON.stringify(visContextWithoutTables))
+    const visContextWithoutUndefinedValues = lightweightVisContext
+      ? JSON.parse(JSON.stringify(lightweightVisContext))
       : undefined;
 
-    return pick(visContextWithoutTablesAndUndefinedValues, [
-      'attributes',
-      'requestData',
-      'suggestionType',
-    ]);
+    return visContextWithoutUndefinedValues;
   } catch {
     return undefined;
   }
