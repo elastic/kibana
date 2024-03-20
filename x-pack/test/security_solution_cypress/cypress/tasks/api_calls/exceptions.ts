@@ -100,7 +100,7 @@ export const updateExceptionListItem = (
     failOnStatusCode: false,
   });
 
-export const deleteExceptionList = (listId: string, namespaceType: string) =>
+export const deleteExceptionList = (listId: string, namespaceType: string = 'default') =>
   rootRequest({
     method: 'DELETE',
     url: `/api/exception_lists?list_id=${listId}&namespace_type=${namespaceType}`,
