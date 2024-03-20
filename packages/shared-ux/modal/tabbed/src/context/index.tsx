@@ -93,12 +93,12 @@ const modalMetaReducer: IReducer<IModalMetaState> = (state, action) => {
 export type IModalContextProviderProps<Tabs extends Array<IModalTabDeclaration<IModalTabState>>> =
   PropsWithChildren<{
     tabs: Tabs;
-    selectedTabId: Tabs[number]['id'];
+    defaultSelectedTabId: Tabs[number]['id'];
   }>;
 
 export function ModalContextProvider<T extends Array<IModalTabDeclaration<IModalTabState>>>({
   tabs,
-  selectedTabId,
+  defaultSelectedTabId,
   children,
 }: IModalContextProviderProps<T>) {
   const modalTabDefinitions = useRef<IModalContext['tabs']>([]);
@@ -106,7 +106,7 @@ export function ModalContextProvider<T extends Array<IModalTabDeclaration<IModal
   const initialModalState = useRef<IModalContext['state']>({
     // instantiate state with default meta information
     meta: {
-      selectedTabId,
+      selectedTabId: defaultSelectedTabId,
     },
   });
 
@@ -121,22 +121,24 @@ export function ModalContextProvider<T extends Array<IModalTabDeclaration<IModal
     [tabs]
   );
 
-  const combineReducers = useCallback(
-    function (reducers: Record<string, IReducer<IModalTabState>>) {
-      return (state: IModalContext['state'], action: IDispatchAction) => {
-        const newState = { ...state };
+  const combineReducers = useCallback(function (
+    reducers: Record<string, IReducer<IModalTabState>>
+  ) {
+    return (state: IModalContext['state'], action: IDispatchAction) => {
+      const newState = { ...state };
 
-        if (/^meta_/i.test(action.type)) {
-          newState.meta = modalMetaReducer(newState.meta, action);
-        } else {
-          newState[selectedTabId] = reducers[selectedTabId](newState[selectedTabId], action);
-        }
+      if (/^meta_/i.test(action.type)) {
+        newState.meta = modalMetaReducer(newState.meta, action);
+      } else {
+        const selectedTabId = state.meta.selectedTabId!;
 
-        return newState;
-      };
-    },
-    [selectedTabId]
-  );
+        newState[selectedTabId] = reducers[selectedTabId](newState[selectedTabId], action);
+      }
+
+      return newState;
+    };
+  },
+  []);
 
   const createInitialState = useCallback((state: IModalContext['state']) => {
     return state;
