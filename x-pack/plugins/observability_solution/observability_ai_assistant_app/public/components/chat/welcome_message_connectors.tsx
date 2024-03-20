@@ -76,7 +76,7 @@ export function WelcomeMessageConnectors({
           'xpack.observabilityAiAssistant.initialSetupPanel.setupConnector.description2',
           {
             defaultMessage:
-              'Start working with the Elastic AI Assistant by setting up a connector for your AI provider. The OpenAI model needs to support function calls. We strongly recommend using GPT4.',
+              'Start working with the Elastic AI Assistant by setting up a connector for your AI provider. The model needs to support function calls. When using OpenAI or Azure, we recommend using GPT4.',
           }
         )}
         <EuiIconTip

@@ -447,6 +447,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group4.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group5.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group6.ts
+  - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_map_only.ts
   - x-pack/performance/journeys_e2e/flight_dashboard.ts
