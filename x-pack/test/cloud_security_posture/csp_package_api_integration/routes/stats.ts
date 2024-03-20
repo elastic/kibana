@@ -27,6 +27,7 @@ import {
 } from '../fixtures/benchmark_score_mock';
 import { findingsMockData } from '../fixtures/findings_mock';
 import { addIndexDocs, deleteExistingIndexByQuery } from '../../common/utils/index_api_helpers';
+import { setupCSPPackage } from '../../common/utils/csp_package_helpers';
 
 const removeRealtimeCalculatedFields = (trends: PostureTrend[]) => {
   return trends.map((trend: PostureTrend) => {
@@ -63,27 +64,16 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  /**
-   * Initilization of the Cloud Security Package Plugin is *required* before indexing findings
-   */
-  const waitForPluginInitialized = (): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Check CSP plugin is initialized');
-      const response = await supertest
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
-    });
-
   describe('GET /internal/cloud_security_posture/stats', () => {
     describe('CSPM Compliance Dashboard Stats API', async () => {
       beforeEach(async () => {
         await deleteExistingIndexByQuery(es, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
         await deleteExistingIndexByQuery(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+        /**
+         * Initilization of the Cloud Security Package Plugin is *required* before indexing findings
+         */
 
-        await waitForPluginInitialized();
+        await setupCSPPackage(retry, log, supertest);
 
         await addIndexDocs(
           es,
@@ -133,14 +123,14 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
         await deleteExistingIndexByQuery(es, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
         await deleteExistingIndexByQuery(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
 
-        await waitForPluginInitialized();
+        await setupCSPPackage(retry, log, supertest);
 
         await addIndexDocs(
           es,
           getBenchmarkScoreMockData('kspm', true),
           BENCHMARK_SCORE_INDEX_DEFAULT_NS
         );
-        await addIndexDocs(es, [findingsMockData[10]], LATEST_FINDINGS_INDEX_DEFAULT_NS);
+        await addIndexDocs(es, [findingsMockData[0]], LATEST_FINDINGS_INDEX_DEFAULT_NS);
       });
 
       it('should return KSPM clusters V1 ', async () => {
@@ -202,7 +192,7 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
         await deleteExistingIndexByQuery(es, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
         await deleteExistingIndexByQuery(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
 
-        await waitForPluginInitialized();
+        await setupCSPPackage(retry, log, supertest);
       });
       it('should calculate cspm benchmarks posture score based only on enabled rules', async () => {
         await addIndexDocs(

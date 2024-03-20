@@ -12,8 +12,9 @@ import {
 } from '@kbn/core-http-common';
 import type { ApiIntegrationFtrProviderContext } from '../../common/ftr_provider_context';
 import { MockTelemetryFindings, telemetryFindingsMock } from '../fixtures/telemetry_findings_mock';
-
-const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
+import { deleteExistingIndexByQuery } from '../../common/utils/index_api_helpers';
+import { FINDINGS_LATEST_INDEX } from '../../common/utils/indices';
+import { setupCSPPackage } from '../../common/utils/csp_package_helpers';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: ApiIntegrationFtrProviderContext) {
@@ -22,49 +23,34 @@ export default function ({ getService }: ApiIntegrationFtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  /**
-   * required before indexing findings
-   */
-  const waitForPluginInitialized = (): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Check CSP plugin is initialized');
-      const response = await supertest
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
+  const addTelemetryIndexBulkDocs = async (mockTelemetryFindings: MockTelemetryFindings[]) => {
+    const operations = mockTelemetryFindings.flatMap((doc) => [
+      { index: { _index: FINDINGS_LATEST_INDEX } },
+      doc,
+    ]);
+
+    const response = await es.bulk({
+      refresh: 'wait_for',
+      index: FINDINGS_LATEST_INDEX,
+      operations,
     });
-
-  const index = {
-    remove: () =>
-      es.deleteByQuery({
-        index: FINDINGS_INDEX,
-        query: { match_all: {} },
-        refresh: true,
-      }),
-    add: async (mockTelemetryFindings: MockTelemetryFindings[]) => {
-      const operations = mockTelemetryFindings.flatMap((doc) => [
-        { index: { _index: FINDINGS_INDEX } },
-        doc,
-      ]);
-
-      const response = await es.bulk({ refresh: 'wait_for', index: FINDINGS_INDEX, operations });
-      expect(response.errors).to.eql(false);
-    },
+    expect(response.errors).to.eql(false);
   };
 
   describe('Verify cloud_security_posture telemetry payloads', async () => {
     before(async () => {
-      await waitForPluginInitialized();
+      /**
+       * required before indexing findings
+       */
+      await setupCSPPackage(retry, log, supertest);
     });
 
     afterEach(async () => {
-      await index.remove();
+      await deleteExistingIndexByQuery(es, FINDINGS_LATEST_INDEX);
     });
 
     it('includes only KSPM findings', async () => {
-      await index.add(telemetryFindingsMock.kspmFindings);
+      await addTelemetryIndexBulkDocs(telemetryFindingsMock.kspmFindings);
 
       const {
         body: [{ stats: apiResponse }],
@@ -95,6 +81,7 @@ export default function ({ getService }: ApiIntegrationFtrProviderContext) {
           pods_count: 0,
         },
       ]);
+
       expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.resources_stats).to.eql([
         {
           account_id: 'my-k8s-cluster-5555',
@@ -118,7 +105,7 @@ export default function ({ getService }: ApiIntegrationFtrProviderContext) {
     });
 
     it('includes only CSPM findings', async () => {
-      await index.add(telemetryFindingsMock.cspmFindings);
+      await addTelemetryIndexBulkDocs(telemetryFindingsMock.cspmFindings);
 
       const {
         body: [{ stats: apiResponse }],
@@ -164,8 +151,8 @@ export default function ({ getService }: ApiIntegrationFtrProviderContext) {
     });
 
     it('includes CSPM and KSPM findings', async () => {
-      await index.add(telemetryFindingsMock.kspmFindings);
-      await index.add(telemetryFindingsMock.cspmFindings);
+      await addTelemetryIndexBulkDocs(telemetryFindingsMock.kspmFindings);
+      await addTelemetryIndexBulkDocs(telemetryFindingsMock.cspmFindings);
 
       const {
         body: [{ stats: apiResponse }],
@@ -243,7 +230,7 @@ export default function ({ getService }: ApiIntegrationFtrProviderContext) {
     });
 
     it(`'includes only KSPM findings without posture_type'`, async () => {
-      await index.add(telemetryFindingsMock.kspmFindingsNoPostureType);
+      await addTelemetryIndexBulkDocs(telemetryFindingsMock.kspmFindingsNoPostureType);
 
       const {
         body: [{ stats: apiResponse }],
@@ -298,8 +285,8 @@ export default function ({ getService }: ApiIntegrationFtrProviderContext) {
     });
 
     it('includes KSPM findings without posture_type and CSPM findings as well', async () => {
-      await index.add(telemetryFindingsMock.kspmFindingsNoPostureType);
-      await index.add(telemetryFindingsMock.cspmFindings);
+      await addTelemetryIndexBulkDocs(telemetryFindingsMock.kspmFindingsNoPostureType);
+      await addTelemetryIndexBulkDocs(telemetryFindingsMock.cspmFindings);
 
       const {
         body: [{ stats: apiResponse }],
