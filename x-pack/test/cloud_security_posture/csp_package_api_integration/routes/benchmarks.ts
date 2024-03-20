@@ -8,15 +8,14 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import {
-  CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
+import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '@kbn/cloud-security-posture-plugin/common/constants';
 import expect from '@kbn/expect';
 import Chance from 'chance';
 import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { ApiIntegrationFtrProviderContext } from '../../common/ftr_provider_context';
 import { addIndexDocs, deleteExistingIndexByQuery } from '../../common/utils/index_api_helpers';
+import { FINDINGS_LATEST_INDEX } from '../../common/utils/indices';
+import { setupCSPPackage } from '../../common/utils/csp_package_helpers';
 
 const chance = new Chance();
 
@@ -71,28 +70,17 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
     },
   });
 
-  /**
-   * required before indexing findings
-   */
-  const waitForPluginInitialized = (): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Check CSP plugin is initialized');
-      const response = await supertest
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
-    });
-
   describe('GET /internal/cloud_security_posture/benchmarks', () => {
     describe('Get Benchmark API', async () => {
       beforeEach(async () => {
-        await deleteExistingIndexByQuery(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+        await deleteExistingIndexByQuery(es, FINDINGS_LATEST_INDEX);
         await kibanaServer.savedObjects.clean({
           types: ['cloud-security-posture-settings'],
         });
-        await waitForPluginInitialized();
+        /**
+         * required before indexing findings
+         */
+        await setupCSPPackage(retry, log, supertest);
       });
 
       it('Verify cspm benchmark score is updated when muting rules', async () => {
@@ -102,7 +90,7 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
         const cspmFinding1 = getMockFinding(benchmarkRules[0], 'passed');
         const cspmFinding2 = getMockFinding(benchmarkRules[1], 'failed');
 
-        await addIndexDocs(es, [cspmFinding1, cspmFinding2], LATEST_FINDINGS_INDEX_DEFAULT_NS);
+        await addIndexDocs(es, [cspmFinding1, cspmFinding2], FINDINGS_LATEST_INDEX);
 
         const { body: benchmarksBeforeMute } = await supertest
           .get('/internal/cloud_security_posture/benchmarks')
@@ -156,7 +144,7 @@ export default function (providerContext: ApiIntegrationFtrProviderContext) {
         const kspmFinding1 = getMockFinding(benchmarkRules[0], 'passed');
         const kspmFinding2 = getMockFinding(benchmarkRules[1], 'failed');
 
-        await addIndexDocs(es, [kspmFinding1, kspmFinding2], LATEST_FINDINGS_INDEX_DEFAULT_NS);
+        await addIndexDocs(es, [kspmFinding1, kspmFinding2], FINDINGS_LATEST_INDEX);
         const { body: benchmarksBeforeMute } = await supertest
           .get('/internal/cloud_security_posture/benchmarks')
           .set(ELASTIC_HTTP_VERSION_HEADER, '2')

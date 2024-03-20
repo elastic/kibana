@@ -21,6 +21,7 @@ import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common
 // eslint-disable @kbn/imports/no_boundary_crossing
 import { generateBenchmarkRuleTags } from '@kbn/cloud-security-posture-plugin/common/utils/detection_rules';
 import type { ApiIntegrationFtrProviderContext } from '../../common/ftr_provider_context';
+import { setupCSPPackage } from '../../common/utils/csp_package_helpers';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: ApiIntegrationFtrProviderContext) {
@@ -79,24 +80,13 @@ export default function ({ getService }: ApiIntegrationFtrProviderContext) {
     return detectionRule;
   };
 
-  /**
-   * required before indexing findings
-   */
-  const waitForPluginInitialized = (): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Check CSP plugin is initialized');
-      const response = await supertest
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
-    });
-
   // Failing: See https://github.com/elastic/kibana/issues/174204
   describe.skip('Verify update csp rules states API', async () => {
     before(async () => {
-      await waitForPluginInitialized();
+      /**
+       * required before indexing findings
+       */
+      await setupCSPPackage(retry, log, supertest);
     });
 
     beforeEach(async () => {

@@ -18,6 +18,7 @@ import {
   deleteExistingIndex,
   deleteExistingIndexByQuery,
 } from '../../common/utils/index_api_helpers';
+import { setupCSPPackage } from '../../common/utils/csp_package_helpers';
 
 export interface CnvmStatistics {
   criticalCount?: number;
@@ -117,23 +118,12 @@ export default function ({ getService }: ApiIntegrationFtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  /**
-   * required before indexing findings
-   */
-  const waitForPluginInitialized = (): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Check CSP plugin is initialized');
-      const response = await supertest
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
-    });
-
   describe('Vulnerability Dashboard API', async () => {
     beforeEach(async () => {
-      await waitForPluginInitialized();
+      /**
+       * required before indexing findings
+       */
+      await setupCSPPackage(retry, log, supertest);
       await addIndexDocs(es, vulnerabilitiesLatestStatsMock, BENCHMARK_SCORES_INDEX);
       await addIndexDocs(es, vulnerabilitiesLatestMock, VULNERABILITIES_LATEST_INDEX);
     });
