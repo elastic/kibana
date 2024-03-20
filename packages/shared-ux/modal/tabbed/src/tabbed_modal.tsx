@@ -66,7 +66,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle }) => {
   };
 
   const btnClickHandler = useCallback(() => {
-    handler!({ state: selectedTabState });
+    handler({ state: selectedTabState });
   }, [handler, selectedTabState]);
 
   return (
@@ -99,11 +99,11 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle }) => {
 
 export function TabbedModal<T extends Array<IModalTabDeclaration<IModalTabState>>>({
   tabs,
-  selectedTabId,
+  defaultSelectedTabId,
   ...rest
 }: Omit<IModalContextProviderProps<T>, 'children'> & ITabbedModalInner) {
   return (
-    <ModalContextProvider tabs={tabs} selectedTabId={selectedTabId}>
+    <ModalContextProvider tabs={tabs} defaultSelectedTabId={defaultSelectedTabId}>
       <TabbedModalInner {...rest} />
     </ModalContextProvider>
   );
