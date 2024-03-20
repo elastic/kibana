@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { fields } from '../../../../common/__mocks__/artificial_logs/fields';
-import { filteredFrequentItemSets } from '../../../../common/__mocks__/artificial_logs/filtered_frequent_item_sets';
-import { significantTerms } from '../../../../common/__mocks__/artificial_logs/significant_terms';
+import { fields } from '@kbn/aiops-test-utils/artificial_logs/fields';
+import { filteredFrequentItemSets } from '@kbn/aiops-test-utils/artificial_logs/filtered_frequent_item_sets';
+import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
 
 import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 

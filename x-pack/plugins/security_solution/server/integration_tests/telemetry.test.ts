@@ -50,7 +50,8 @@ const telemetrySenderStartSpy = jest.spyOn(SecuritySolutionPlugin.prototype, 'st
 const mockedAxiosGet = jest.spyOn(axios, 'get');
 const mockedAxiosPost = jest.spyOn(axios, 'post');
 
-describe('telemetry tasks', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/178918
+describe.skip('telemetry tasks', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let taskManagerPlugin: TaskManagerStartContract;
