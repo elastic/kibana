@@ -206,6 +206,8 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         // @ts-expect-error _source: unknown
         expect(hit?._source?.kibana?.space_ids).to.eql(['default']);
       });
+
+      webhookServer.close();
     });
 
     it('should not allow executing email action from unallowed requester', async () => {
