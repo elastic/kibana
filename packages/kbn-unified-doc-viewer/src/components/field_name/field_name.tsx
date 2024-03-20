@@ -58,7 +58,7 @@ export function FieldName({
           </EuiToolTip>
         </EuiFlexItem>
 
-        {fieldMapping?.customDescription ? (
+        {fieldMapping?.description ? (
           <EuiFlexItem grow={false}>
             <FieldDescriptionIconButton field={fieldMapping} />
           </EuiFlexItem>

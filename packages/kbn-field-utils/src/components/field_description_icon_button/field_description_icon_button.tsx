@@ -23,7 +23,7 @@ export const FieldDescriptionIconButton: React.FC<FieldDescriptionIconButtonProp
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  if (!field?.customDescription) {
+  if (!field?.description) {
     return null;
   }
 

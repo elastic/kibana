@@ -153,7 +153,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {field.customDescription ? (
+      {field.description ? (
         <>
           <EuiSpacer size="xs" />
           <FieldDescription field={field} />

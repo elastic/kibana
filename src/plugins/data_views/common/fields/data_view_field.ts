@@ -9,6 +9,7 @@
 import { KbnFieldType, getKbnFieldType } from '@kbn/field-types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DataViewFieldBase } from '@kbn/es-query';
+import { EcsFlat } from '@elastic/ecs';
 import type { RuntimeFieldSpec } from '../types';
 import { FieldSpec, DataView } from '..';
 import {
@@ -141,6 +142,15 @@ export class DataViewField implements DataViewFieldBase {
 
   public get customDescription() {
     return this.spec.customDescription;
+  }
+
+  public get description() {
+    console.log('test');
+    if (this.spec.customDescription) {
+      return this.spec.customDescription;
+    }
+    const { description } = EcsFlat[this.name as keyof typeof EcsFlat] ?? {};
+    return description || '';
   }
 
   /**
