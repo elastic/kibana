@@ -13,13 +13,12 @@ import type { ESTermQuery } from '../../../../../common/typed_json';
 import type { inputsModel } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { createFilter } from '../../../../common/containers/helpers';
-import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
+import { getLimitedPaginationOptions } from '../../../components/paginated_table/helpers';
 import type { networkModel } from '../../store';
 import { networkSelectors } from '../../store';
 import type {
   FlowTargetSourceDest,
   NetworkTopNFlowEdges,
-  PageInfoPaginated,
 } from '../../../../../common/search_strategy';
 import { NetworkQueries } from '../../../../../common/search_strategy';
 import type { InspectResponse } from '../../../../types';
@@ -33,7 +32,6 @@ export interface NetworkTopNFlowArgs {
   inspect: InspectResponse;
   isInspected: boolean;
   loadPage: (newActivePage: number) => void;
-  pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   networkTopNFlow: NetworkTopNFlowEdges[];
   totalCount: number;
@@ -70,16 +68,15 @@ export const useNetworkTopNFlow = ({
   const [networkTopNFlowRequest, setTopNFlowRequest] =
     useState<NetworkTopNFlowRequestOptionsInput | null>(null);
 
-  const wrappedLoadMore = useCallback(
+  const loadPage = useCallback(
     (newActivePage: number) => {
       setTopNFlowRequest((prevRequest) => {
         if (!prevRequest) {
           return prevRequest;
         }
-
         return {
           ...prevRequest,
-          pagination: generateTablePaginationOptions(newActivePage, limit),
+          pagination: getLimitedPaginationOptions(newActivePage, limit),
         };
       });
     },
@@ -94,15 +91,7 @@ export const useNetworkTopNFlow = ({
     inspect,
   } = useSearchStrategy<NetworkQueries.topNFlow>({
     factoryQueryType: NetworkQueries.topNFlow,
-    initialResult: {
-      edges: [],
-      // totalCount: -1,
-      // pageInfo: {
-      //   activePage: 0,
-      //   fakeTotalCount: 0,
-      //   showMorePagesIndicator: false,
-      // },
-    },
+    initialResult: { edges: [] },
     errorMessage: i18n.FAIL_NETWORK_TOP_N_FLOW,
     abort: skip,
   });
@@ -134,12 +123,7 @@ export const useNetworkTopNFlow = ({
         response: [...inspect.response, ...inspectTotalCount.response],
       },
       isInspected: false,
-      loadPage: wrappedLoadMore,
-      pageInfo: {
-        activePage,
-        fakeTotalCount: 0,
-        showMorePagesIndicator: false,
-      },
+      loadPage,
       refetch,
       startDate,
       totalCount: responseTotalCount.totalCount,
@@ -150,11 +134,9 @@ export const useNetworkTopNFlow = ({
       inspectTotalCount,
       refetch,
       response.edges,
-      // response.pageInfo,
-      activePage,
       responseTotalCount.totalCount,
       startDate,
-      wrappedLoadMore,
+      loadPage,
     ]
   );
 
@@ -167,7 +149,7 @@ export const useNetworkTopNFlow = ({
         filterQuery: createFilter(filterQuery),
         flowTarget,
         ip,
-        pagination: generateTablePaginationOptions(activePage, limit),
+        pagination: getLimitedPaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
           from: startDate,

@@ -6,6 +6,11 @@
  */
 
 import type {
+  AggregationsAggregationContainer,
+  AggregationsTopHitsAggregation,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type {
   NetworkTopNFlowCountRequestOptions,
   NetworkTopNFlowRequestOptions,
 } from '../../../../../../common/api/search_strategy';
@@ -22,7 +27,7 @@ export const buildTopNFlowQuery = ({
   pagination,
   timerange: { from, to },
   ip,
-}: NetworkTopNFlowRequestOptions) => {
+}: NetworkTopNFlowRequestOptions): ISearchRequestParams => {
   const querySize = pagination?.querySize ?? 10;
 
   const filter = [...createQueryFilterClauses(filterQuery), getTimeRangeFilter(from, to)];
@@ -32,10 +37,7 @@ export const buildTopNFlowQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     body: {
-      aggregations: {
-        ...getCountAgg(flowTarget),
-        ...getFlowTargetAggs(sort, flowTarget, querySize),
-      },
+      aggregations: getFlowTargetAggs(sort, flowTarget, querySize),
       query: {
         bool: ip
           ? {
@@ -73,7 +75,7 @@ export const buildTopNFlowCountQuery = ({
   flowTarget,
   timerange: { from, to },
   ip,
-}: NetworkTopNFlowCountRequestOptions) => {
+}: NetworkTopNFlowCountRequestOptions): ISearchRequestParams => {
   const filter = [...createQueryFilterClauses(filterQuery), getTimeRangeFilter(from, to)];
   const dslQuery = {
     allow_no_indices: true,
@@ -114,19 +116,17 @@ const getTimeRangeFilter = (from: string, to: string) => ({
   },
 });
 
-const getCountAgg = (flowTarget: FlowTargetSourceDest) => ({
-  top_n_flow_count: {
-    cardinality: {
-      field: `${flowTarget}.ip`,
-    },
-  },
+const getCountAgg = (
+  flowTarget: FlowTargetSourceDest
+): Record<string, AggregationsAggregationContainer> => ({
+  top_n_flow_count: { cardinality: { field: `${flowTarget}.ip` } },
 });
 
 const getFlowTargetAggs = (
   sort: NetworkTopNFlowRequestOptions['sort'],
   flowTarget: FlowTargetSourceDest,
   querySize: number
-) => ({
+): Record<string, AggregationsAggregationContainer> => ({
   [flowTarget]: {
     terms: {
       field: `${flowTarget}.ip`,
@@ -179,7 +179,7 @@ const getFlowTargetAggs = (
                 },
               ],
               size: 1,
-            },
+            } as AggregationsTopHitsAggregation,
           },
         },
       },
@@ -201,7 +201,7 @@ const getFlowTargetAggs = (
                 },
               ],
               size: 1,
-            },
+            } as AggregationsTopHitsAggregation,
           },
         },
       },

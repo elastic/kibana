@@ -20,3 +20,30 @@ export const generateTablePaginationOptions = (
     querySize: isBucketSort ? limit : limit + cursorStart,
   };
 };
+
+export const getLimitedPaginationOptions = (
+  activePage: number,
+  limit: number
+): PaginationInputPaginatedInput => {
+  const cursorStart = activePage * limit;
+  return {
+    activePage,
+    cursorStart,
+    querySize: limit + cursorStart,
+    fakePossibleCount: 0, // TODO: remove this
+  };
+};
+
+export const getLimitedPaginationTotalCount = ({
+  activePage,
+  limit,
+  totalCount,
+}: {
+  activePage: number;
+  limit: number;
+  totalCount: number;
+}): number => {
+  const fakePossibleCount =
+    4 <= activePage && activePage > 0 ? limit * (activePage + 2) : limit * 5;
+  return fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+};

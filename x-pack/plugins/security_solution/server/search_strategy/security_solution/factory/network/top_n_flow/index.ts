@@ -34,27 +34,12 @@ export const networkTopNFlow: SecuritySolutionFactory<NetworkQueries.topNFlow> =
     options,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkTopNFlowStrategyResponse> => {
-    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    // const totalCount = getOr(0, 'aggregations.top_n_flow_count.value', response.rawResponse);
+    const { cursorStart, querySize } = options.pagination;
     const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);
-    // const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const edges = networkTopNFlowEdges.splice(cursorStart, querySize - cursorStart);
-    const inspect = {
-      dsl: [inspectStringifyObject(buildTopNFlowQuery(options))],
-    };
-    // const showMorePagesIndicator = totalCount > fakeTotalCount;
 
-    return {
-      ...response,
-      edges,
-      // inspect,
-      // pageInfo: {
-      //   activePage: activePage ?? 0,
-      //   fakeTotalCount,
-      //   showMorePagesIndicator,
-      // },
-      // totalCount,
-    };
+    const inspect = { dsl: [inspectStringifyObject(buildTopNFlowQuery(options))] };
+    return { ...response, inspect, edges };
   },
 };
 
@@ -64,20 +49,9 @@ export const networkTopNFlowCount: SecuritySolutionFactory<NetworkQueries.topNFl
     options,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkTopNFlowCountStrategyResponse> => {
-    // const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.top_n_flow_count.value', response.rawResponse);
-    // const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);
-    // const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
-    // const edges = networkTopNFlowEdges.splice(cursorStart, querySize - cursorStart);
-    // const inspect = {
-    //   dsl: [inspectStringifyObject(buildTopNFlowQuery(options))],
-    // };
-    // const showMorePagesIndicator = totalCount > fakeTotalCount;
+    const totalCount = getOr(0, 'rawResponse.aggregations.top_n_flow_count.value', response);
 
-    return {
-      ...response,
-      // inspect,
-      totalCount,
-    };
+    const inspect = { dsl: [inspectStringifyObject(buildTopNFlowCountQuery(options))] };
+    return { ...response, inspect, totalCount };
   },
 };
