@@ -3451,6 +3451,18 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.SLO_ALERTS_TABLE_CONFIG_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SLO_ALERTS_TABLE_CONFIG_ID",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.sloFeatureId",
         "type": "string",
         "tags": [],
@@ -4949,6 +4961,33 @@
           "\"service.version\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SLO_ALERTS_TABLE_CONFIG_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SLO_ALERTS_TABLE_CONFIG_ID",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SLO_ALERTS_TABLE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SLO_ALERTS_TABLE_ID",
+        "description": [],
+        "signature": [
+          "\"xpack.observability.slo.sloDetails.alertTable\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
