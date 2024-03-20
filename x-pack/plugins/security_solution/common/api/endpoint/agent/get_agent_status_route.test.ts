@@ -8,21 +8,13 @@
 import { EndpointAgentStatusRequestSchema } from './get_agent_status_route';
 
 describe('Agent status api route schema', () => {
-  it('should optionally accept `agentType`', () => {
-    expect(() =>
-      EndpointAgentStatusRequestSchema.query.validate({
-        agentIds: '1',
-      })
-    ).not.toThrow();
-  });
-
   it('should error if unknown `agentType` is used', () => {
     expect(() =>
       EndpointAgentStatusRequestSchema.query.validate({
         agentIds: '1',
         agentType: 'foo',
       })
-    ).toThrow(/\[agentType\]: types that failed validation/);
+    ).toThrow(/\[agentType]: types that failed validation/);
   });
 
   it.each([
@@ -37,7 +29,7 @@ describe('Agent status api route schema', () => {
     ],
   ])('should error if %s are used for `agentIds`', (_, validateOptions) => {
     expect(() => EndpointAgentStatusRequestSchema.query.validate(validateOptions)).toThrow(
-      /\[agentIds\]:/
+      /\[agentIds]:/
     );
   });
 
@@ -48,6 +40,7 @@ describe('Agent status api route schema', () => {
     expect(() =>
       EndpointAgentStatusRequestSchema.query.validate({
         agentIds: agentIdsValue,
+        agentType: 'endpoint',
       })
     ).not.toThrow();
   });
