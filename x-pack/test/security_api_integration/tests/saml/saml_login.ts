@@ -894,7 +894,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('Post-authentication', () => {
+    describe('Post-authentication failures', () => {
       it('correctly handles unexpected post-authentication errors', async () => {
         const samlAuthenticationResponse = await supertest
           .post('/api/security/saml/callback')
