@@ -54,7 +54,6 @@ export function registerMlUiActions(
 
   // Register actions
   uiActions.registerAction(editSwimlanePanelAction);
-  uiActions.registerAction(openInExplorerAction);
   uiActions.registerAction(applyInfluencerFiltersAction);
   uiActions.registerAction(applyEntityFieldFilterAction);
   uiActions.registerAction(applyTimeRangeSelectionAction);

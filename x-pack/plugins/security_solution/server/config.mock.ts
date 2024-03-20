@@ -24,6 +24,8 @@ export const createMockConfig = (): ConfigType => {
     packagerTaskInterval: '60s',
     packagerTaskTimeout: '5m',
     packagerTaskPackagePolicyUpdateBatchSize: 10,
+    completeExternalResponseActionsTaskInterval: '60s',
+    completeExternalResponseActionsTaskTimeout: '20m',
     prebuiltRulesPackageVersion: '',
     alertMergeStrategy: 'missingFields',
     alertIgnoreFields: [],
