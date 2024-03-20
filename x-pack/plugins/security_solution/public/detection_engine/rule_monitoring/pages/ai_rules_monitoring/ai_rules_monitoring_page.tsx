@@ -5,14 +5,35 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import React, { useState } from 'react';
+import { css } from '@emotion/css';
+import type { OnTimeChangeProps } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingChart,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiSuperDatePicker,
+  EuiText,
+} from '@elastic/eui';
 import { useAiRulesMonitoringContext } from './ai_rules_monitoring_context';
 
 export function AiRulesMonitoringPage(): JSX.Element {
-  const { isLoading, hasConnector, connectorPrompt } = useAiRulesMonitoringContext();
+  const { isInitialLoading, isFetching, hasConnector, connectorPrompt, result, refetch } =
+    useAiRulesMonitoringContext();
 
-  if (isLoading) {
+  const [start, setStart] = useState('now-1d');
+  const [end, setEnd] = useState('now');
+
+  const onTimeChange = ({ start: newStart, end: newEnd }: OnTimeChangeProps) => {
+    setStart(newStart);
+    setEnd(newEnd);
+  };
+
+  if (isInitialLoading) {
     return (
       <EuiFlexGroup justifyContent="center">
         <EuiLoadingSpinner size="xxl" />
@@ -32,5 +53,57 @@ export function AiRulesMonitoringPage(): JSX.Element {
     );
   }
 
-  return <>{'all is set'}</>;
+  return (
+    <>
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiSuperDatePicker
+            isLoading={isFetching}
+            start={start}
+            end={end}
+            onTimeChange={onTimeChange}
+            showUpdateButton={false}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton isLoading={isFetching} onClick={refetch} disabled={isFetching}>
+            {'Analyze'}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xxl" />
+      <EuiFlexGroup direction="column" alignItems="stretch">
+        <EuiFlexItem>
+          <EuiPanel
+            className={css`
+              min-height: 150px;
+            `}
+          >
+            {isFetching && (
+              <EuiLoadingChart
+                className={css`
+                  position: relative;
+                  top: 50px;
+                  left: 50%;
+                  transform: translateX(-50%);
+                `}
+                size="l"
+              />
+            )}
+            {!isFetching && (
+              <EuiText
+                color="subdued"
+                className={css`
+                  white-space: pre-line;
+                  overflow: scroll;
+                `}
+              >
+                {`${result}`}
+              </EuiText>
+            )}
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
 }

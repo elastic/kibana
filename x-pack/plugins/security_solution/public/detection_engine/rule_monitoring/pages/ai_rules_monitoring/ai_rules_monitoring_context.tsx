@@ -13,13 +13,17 @@ import type { ApiConfig } from '@kbn/elastic-assistant-common';
 import { useConnectorSetup } from '@kbn/elastic-assistant/impl/connectorland/connector_setup';
 import { useFetchCurrentUserConversations } from '@kbn/elastic-assistant';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { useFetchAiRuleMonitoringResultQuery } from '../../api/hooks/use_fetch_ai_rule_monitoring_result_query';
 
 // export interface AiRulesMonitoringProviderProps {}
 
 export interface UseAiRulesMonitoring {
-  isLoading: boolean;
+  isInitialLoading: boolean;
+  isFetching: boolean;
   hasConnector: boolean;
   connectorPrompt: React.ReactElement;
+  result?: string;
+  refetch: () => void;
 }
 
 const AiRulesMonitoringContext = React.createContext<UseAiRulesMonitoring | undefined>(undefined);
@@ -27,19 +31,31 @@ const AiRulesMonitoringContext = React.createContext<UseAiRulesMonitoring | unde
 export function AiRulesMonitoringProvider({
   children,
 }: PropsWithChildren<{}>): JSX.Element | undefined {
-  const { isLoading, apiConfig, refresh } = useApiConfig();
+  const { isLoading: isApiConfigLoading, apiConfig, refresh } = useApiConfig();
   const { prompt: connectorPrompt } = useConnectorSetup({
     conversation: RULE_MONITORING_CONVERSATION,
     onConversationUpdate: refresh,
   });
 
+  const {
+    isFetching: isAiResponseFetching,
+    data,
+    refetch,
+  } = useFetchAiRuleMonitoringResultQuery(apiConfig?.connectorId ?? '', {
+    initialData: HINT_TEXT,
+    enabled: Boolean(apiConfig?.connectorId),
+  });
+
   const value = useMemo(
     () => ({
-      isLoading,
+      isInitialLoading: isApiConfigLoading,
+      isFetching: isAiResponseFetching,
       hasConnector: Boolean(apiConfig),
       connectorPrompt,
+      result: data,
+      refetch,
     }),
-    [isLoading, connectorPrompt, apiConfig]
+    [isApiConfigLoading, isAiResponseFetching, connectorPrompt, apiConfig, data, refetch]
   );
 
   return (
@@ -104,3 +120,9 @@ function convertFetchConversationsResponseToMap(
     return map;
   }, {});
 }
+
+const HINT_TEXT = `AI Rule Monitoring is a Generative AI tool to help you analyze Rule Monitoring data collected for your running rules. It might be challenging to analyze Detection Rule Monitoring dashboard or dig deep into rule execution logs to get insight on what is wrong.
+
+We prepare rule monitoring data to be analyzed by AI of your choice. It helps to get insight on your current cluster health and spot potential problems impacting your protection if some rules are not running correctly.
+
+Nothing is processed without your explicit concern. To perform analysis select a desired time range you want to analyze and press "Analyze" button.`;
