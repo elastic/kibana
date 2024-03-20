@@ -10,7 +10,6 @@ import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
 import { VIEW_MODE } from '.';
 
 export interface DiscoverGridSettings extends SerializableRecord {
@@ -19,6 +18,17 @@ export interface DiscoverGridSettings extends SerializableRecord {
 
 export interface DiscoverGridSettingsColumn extends SerializableRecord {
   width?: number;
+}
+
+export interface VisContextUnmapped {
+  attributes: unknown;
+  requestData: {
+    dataViewId?: string;
+    timeField?: string;
+    timeInterval?: string;
+    breakdownField?: string;
+  };
+  suggestionType: string;
 }
 
 /** @internal **/
@@ -46,7 +56,7 @@ export interface SavedSearchAttributes {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
-  visContext?: UnifiedHistogramVisContext;
+  visContext?: VisContextUnmapped; // UnifiedHistogramVisContext (can't be referenced here directly due to circular dependency)
 }
 
 /** @internal **/
@@ -78,7 +88,7 @@ export interface SavedSearch {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
-  visContext?: UnifiedHistogramVisContext;
+  visContext?: VisContextUnmapped; // UnifiedHistogramVisContext (can't be referenced here directly due to circular dependency)
 
   // Whether or not this saved search is managed by the system
   managed: boolean;

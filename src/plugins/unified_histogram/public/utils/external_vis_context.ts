@@ -41,6 +41,24 @@ export const exportVisContext = (
   }
 };
 
+export function canImportVisContext(
+  visContext: unknown | undefined
+): visContext is UnifiedHistogramVisContext {
+  return (
+    !!visContext &&
+    typeof visContext === 'object' &&
+    'requestData' in visContext &&
+    'attributes' in visContext &&
+    'suggestionType' in visContext &&
+    !!visContext.requestData &&
+    !!visContext.attributes &&
+    !!visContext.suggestionType &&
+    typeof visContext.requestData === 'object' &&
+    typeof visContext.attributes === 'object' &&
+    typeof visContext.suggestionType === 'string'
+  );
+}
+
 export const isSuggestionAndVisContextCompatible = (
   suggestion: Suggestion | undefined,
   externalVisContext: UnifiedHistogramVisContext | undefined

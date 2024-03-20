@@ -12,6 +12,7 @@ import {
   UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
   UnifiedHistogramVisContext,
+  canImportVisContext,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
@@ -232,8 +233,8 @@ export const useDiscoverHistogram = ({
   const {
     dataView: textBasedDataView,
     query: textBasedQuery,
-    externalVisContext: textBasedExternalVisContext,
     columns: textBasedColumns,
+    savedSearchVisContext,
   } = useObservable(textBasedFetchComplete$, initialTextBasedProps);
 
   useEffect(() => {
@@ -355,7 +356,11 @@ export const useDiscoverHistogram = ({
     withDefaultActions: histogramCustomization?.withDefaultActions,
     disabledActions: histogramCustomization?.disabledActions,
     isChartLoading: isSuggestionLoading,
-    externalVisContext: isPlainRecord ? textBasedExternalVisContext : undefined, // visContext should be in sync with current query
+    // visContext should be in sync with current query
+    externalVisContext:
+      isPlainRecord && canImportVisContext(savedSearchVisContext)
+        ? savedSearchVisContext
+        : undefined,
     onVisContextChanged: isPlainRecord ? onVisContextChanged : undefined,
   };
 };
@@ -480,7 +485,7 @@ function getUnifiedHistogramPropsForTextBased({
   const nextProps = {
     dataView: savedSearch.searchSource.getField('index')!,
     query: savedSearch.searchSource.getField('query'),
-    externalVisContext: savedSearch.visContext,
+    savedSearchVisContext: savedSearch.visContext,
     columns,
   };
 
