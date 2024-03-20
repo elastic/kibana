@@ -1063,7 +1063,9 @@ describe('AuthenticationService', () => {
         mockReturnedValue = { type: 'render' as any, body: 'body' };
         mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
         mockOnPreResponseToolkit.render.mockReturnValue(mockReturnedValue);
+      });
 
+      it('when login page is unavailable', async () => {
         mockSetupAuthenticationParams.config = createConfig(
           ConfigSchema.validate({
             authc: {
@@ -1073,9 +1075,6 @@ describe('AuthenticationService', () => {
           loggingSystemMock.create().get(),
           { isTLSEnabled: false }
         );
-      });
-
-      it('when login page is unavailable', async () => {
         const mockRenderUnauthorizedPage = jest
           .requireMock('./unauthenticated_page')
           .renderUnauthenticatedPage.mockReturnValue('rendered-view');
@@ -1086,8 +1085,12 @@ describe('AuthenticationService', () => {
 
         await expect(
           onPreResponseHandler(
-            httpServerMock.createKibanaRequest({ path: '/app/some', query: { param: 'one two' } }),
-            { statusCode: 401 },
+            httpServerMock.createKibanaRequest({
+              path: '/app/some',
+              query: { param: 'one two' },
+              routeTags: [ROUTE_TAG_AUTH_FLOW],
+            }),
+            { statusCode: 500 },
             mockOnPreResponseToolkit
           )
         ).resolves.toBe(mockReturnedValue);
@@ -1102,7 +1105,71 @@ describe('AuthenticationService', () => {
         expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
           basePath: mockSetupAuthenticationParams.http.basePath,
           staticAssets: expect.any(Object),
-          originalURL: '/mock-server-basepath/app/some',
+          originalURL: '/mock-server-basepath/',
+          customBranding: undefined,
+        });
+      });
+
+      it('when login page is available', async () => {
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate({
+            authc: {
+              selector: { enabled: true },
+            },
+          }),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({
+              path: '/app/some',
+              query: { param: 'one two' },
+              routeTags: [ROUTE_TAG_AUTH_FLOW],
+            }),
+            { statusCode: 500 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: '<div/>',
+          headers: {
+            'Content-Security-Policy': CspConfig.DEFAULT.header,
+            Refresh:
+              '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
+          },
+        });
+      });
+
+      it('when logout redirect fails', async () => {
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+        const mockRenderUnauthorizedPage = jest
+          .requireMock('./unauthenticated_page')
+          .renderUnauthenticatedPage.mockReturnValue('rendered-view');
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({
+              path: '/api/security/logout',
+              routeTags: [ROUTE_TAG_AUTH_FLOW],
+            }),
+            { statusCode: 500 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
+          basePath: mockSetupAuthenticationParams.http.basePath,
+          staticAssets: expect.any(Object),
+          originalURL: '/mock-server-basepath/',
+          customBranding: undefined,
         });
       });
     });
