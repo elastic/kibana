@@ -75,7 +75,7 @@ const navTree: NavigationTreeDefinition = {
           ],
         },
         {
-          link: 'observability-overview:slos',
+          link: 'slo',
         },
         {
           id: 'aiops',
