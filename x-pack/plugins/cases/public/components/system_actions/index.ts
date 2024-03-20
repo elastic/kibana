@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getConnectorType as getCasesConnectorType } from './cases';
+export { getConnectorType as getCasesConnectorType } from './cases/cases';

@@ -67,7 +67,7 @@ export interface CasesPublicSetupDependencies {
   serverless?: ServerlessPluginSetup;
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
-  triggerActionsUi: TriggersActionsSetup;
+  triggersActionsUi: TriggersActionsSetup;
 }
 
 export interface CasesPublicStartDependencies {

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export const TIME_WINDOW_SIZE = 7;
+export const DEFAULT_TIME_WINDOW_SIZE = 7;
 
-export const TIME_WINDOW_UNIT = 'd';
+export const DEFAULT_TIME_WINDOW_UNIT = 'd';

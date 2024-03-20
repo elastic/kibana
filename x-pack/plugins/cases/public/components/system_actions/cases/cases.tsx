@@ -29,28 +29,22 @@ export function getConnectorType(): ConnectorTypeModel<
     validateParams: async (
       actionParams: CasesActionParams
     ): Promise<GenericValidationResult<unknown>> => {
-      return { errors: {} };
-      // const translations = await import('./translations');
-      // const errors = {
-      //   'subActionParams.incident.summary': new Array<string>(),
-      //   'subActionParams.incident.labels': new Array<string>(),
-      // };
-      // const validationResult = {
-      //   errors,
-      // };
-      // if (
-      //   actionParams.subActionParams &&
-      //   actionParams.subActionParams.incident &&
-      //   !actionParams.subActionParams.incident.summary?.length
-      // ) {
-      //   errors['subActionParams.incident.summary'].push(translations.SUMMARY_REQUIRED);
-      // }
-      // if (actionParams.subActionParams?.incident?.labels?.length) {
-      //   // Jira do not allows empty spaces on labels. If the label includes a whitespace show an error.
-      //   if (actionParams.subActionParams.incident.labels.some((label) => label.match(/\s/g)))
-      //     errors['subActionParams.incident.labels'].push(translations.LABELS_WHITE_SPACES);
-      // }
-      // return validationResult;
+      const translations = await import('./translations');
+      const errors = {
+        'subActionParams.timeWindow.size': new Array<string>(),
+      };
+      const validationResult = {
+        errors,
+      };
+      if (
+        (actionParams.subActionParams &&
+          actionParams.subActionParams.timeWindow &&
+          parseInt(actionParams.subActionParams.timeWindow[0], 10) == 0) ||
+        Number.isNaN(parseInt(actionParams.subActionParams.timeWindow[0], 10))
+      ) {
+        errors['subActionParams.timeWindow.size'].push(translations.TIME_WINDOW_SIZE_ERROR);
+      }
+      return validationResult;
     },
     actionParamsFields: lazy(() => import('./cases_params')),
   };

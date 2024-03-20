@@ -36,7 +36,7 @@ import type {
   CasesPublicSetupDependencies,
   CasesPublicStartDependencies,
 } from './types';
-import { getCasesConnectorType } from './components/connectors/cases';
+import { getCasesConnectorType } from './components/system_actions';
 
 /**
  * @public
@@ -101,8 +101,6 @@ export class CasesUiPlugin
 
           const { renderApp } = await import('./application');
 
-          console.log('cases plugin setup', { plugins, pluginsStart });
-
           return renderApp({
             mountParams: params,
             coreStart,
@@ -115,6 +113,10 @@ export class CasesUiPlugin
         },
       });
     }
+
+    plugins.triggersActionsUi.actionTypeRegistry.register(getCasesConnectorType());
+
+    console.log('cases plugin setup', { plugins });
 
     return {
       attachmentFramework: {
@@ -131,7 +133,7 @@ export class CasesUiPlugin
   public start(core: CoreStart, plugins: CasesPublicStartDependencies): CasesPublicStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();
 
-    plugins.triggersActionsUi.actionTypeRegistry.register(getCasesConnectorType());
+    // plugins.triggersActionsUi.actionTypeRegistry.register(getCasesConnectorType());
 
     KibanaServices.init({
       ...core,
@@ -161,6 +163,8 @@ export class CasesUiPlugin
       history: createBrowserHistory(),
       storage: this.storage,
     });
+
+    console.log('cases plugin start', { plugins });
 
     return {
       api: createClientAPI({ http: core.http }),
