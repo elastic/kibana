@@ -45,26 +45,27 @@ export class FindSLO {
 }
 
 function mergeSloWithSummary(sloList: SLO[], sloSummaryList: SLOSummary[]): SLOWithSummary[] {
-  return [
-    ...sloSummaryList
-      .filter((sloSummary) => sloList.some((s) => s.id === sloSummary.id))
-      .map((sloSummary) => ({
-        ...sloList.find((s) => s.id === sloSummary.id)!,
-        instanceId: sloSummary.instanceId,
-        summary: sloSummary.summary,
-        groupings: sloSummary.groupings,
-      })),
-    ...sloSummaryList
-      .filter((sloSummary) => sloSummary.remoteName)
-      .map((remoteSloSummary) => ({
-        ...remoteSloSummary.unsafeSlo!,
-        instanceId: remoteSloSummary.instanceId,
-        summary: remoteSloSummary.summary,
-        groupings: remoteSloSummary.groupings,
-        remoteName: remoteSloSummary.remoteName,
-        kibanaUrl: remoteSloSummary.kibanaUrl,
-      })),
-  ];
+  const localSummaryList = sloSummaryList
+    .filter((sloSummary) => sloList.some((s) => s.id === sloSummary.id))
+    .map((sloSummary) => ({
+      ...sloList.find((s) => s.id === sloSummary.id)!,
+      instanceId: sloSummary.instanceId,
+      summary: sloSummary.summary,
+      groupings: sloSummary.groupings,
+    }));
+
+  const remoteSummaryList = sloSummaryList
+    .filter((sloSummary) => sloSummary.remoteName)
+    .map((remoteSloSummary) => ({
+      ...remoteSloSummary.unsafeSlo!,
+      instanceId: remoteSloSummary.instanceId,
+      summary: remoteSloSummary.summary,
+      groupings: remoteSloSummary.groupings,
+      remoteName: remoteSloSummary.remoteName,
+      kibanaUrl: remoteSloSummary.kibanaUrl,
+    }));
+
+  return [...localSummaryList, ...remoteSummaryList];
 }
 
 function toPagination(params: FindSLOParams): Pagination {
