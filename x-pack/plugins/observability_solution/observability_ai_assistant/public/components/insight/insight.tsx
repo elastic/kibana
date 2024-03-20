@@ -25,6 +25,7 @@ import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
+import { useFlyoutState } from '../../hooks/use_flyout_state';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StartChatButton } from '../buttons/start_chat_button';
@@ -54,6 +55,8 @@ function ChatContent({
   const chatService = useObservabilityAIAssistantChatService();
 
   const initialMessagesRef = useRef(initialMessages);
+
+  const { flyoutState } = useFlyoutState();
 
   const { messages, next, state, stop } = useChat({
     service,
@@ -114,6 +117,7 @@ function ChatContent({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <StartChatButton
+                  disabled={flyoutState.isOpen}
                   onClick={() => {
                     service.conversations.openNewConversation({
                       messages,
