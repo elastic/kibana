@@ -16,13 +16,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
-import { paths } from '../../../../common/locators/paths';
 import { SloRemoteBadge } from '../../slos/components/card_view/slo_remote_badge';
 import { SLOGroupings } from '../../slos/components/common/slo_groupings';
 import { SloStatusBadge } from '../../../components/slo/slo_status_badge';
+import { createSloDetailsUrl } from '../../../utils/slo/create_slo_details_url';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
@@ -34,16 +34,7 @@ export function HeaderTitle({ isLoading, slo }: Props) {
     return <EuiSkeletonText lines={1} data-test-subj="loadingTitle" />;
   }
 
-  const sloDetailsUrl = slo.kibanaUrl
-    ? (
-        slo.kibanaUrl +
-        paths.sloDetails(
-          slo.id,
-          ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined,
-          slo.remoteName
-        )
-      ).replace(/\/\//g, '/')
-    : undefined;
+  const sloDetailsUrl = createSloDetailsUrl(slo);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
