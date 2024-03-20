@@ -175,7 +175,7 @@ export async function createRule<Params extends RuleParams = never>(
     params: updatedParams,
     actions: actionsWithRefs,
   } = await withSpan({ name: 'extractReferences', type: 'rules' }, () =>
-    extractReferences(context, ruleType, allActions, validatedAlertTypeParams)
+    extractReferences(context, ruleType, allActions, validatedRuleTypeParams)
   );
 
   const createTime = Date.now();
