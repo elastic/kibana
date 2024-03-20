@@ -42,6 +42,12 @@ export interface Message {
   };
 }
 
+export interface TokenCount {
+  prompt: number;
+  completion: number;
+  total: number;
+}
+
 export interface Conversation {
   '@timestamp': string;
   user: {
@@ -52,6 +58,7 @@ export interface Conversation {
     id: string;
     title: string;
     last_updated: string;
+    token_count?: TokenCount;
   };
   messages: Message[];
   labels: Record<string, string>;
@@ -61,11 +68,13 @@ export interface Conversation {
 }
 
 export type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
-  conversation: { title: string };
+  conversation: { title: string; token_count?: TokenCount };
 };
 
 export type ConversationCreateRequest = ConversationRequestBase;
-export type ConversationUpdateRequest = ConversationRequestBase & { conversation: { id: string } };
+export type ConversationUpdateRequest = ConversationRequestBase & {
+  conversation: { id: string };
+};
 
 export interface KnowledgeBaseEntry {
   '@timestamp': string;
