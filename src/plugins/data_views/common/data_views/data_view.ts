@@ -264,7 +264,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
       throw new CharacterNotAllowedInField('*', name);
     }
 
-    const { type, script, customLabel, format, popularity } = runtimeField;
+    const { type, script, customLabel, customDescription, format, popularity } = runtimeField;
 
     if (type === 'composite') {
       return this.addCompositeRuntimeField(name, runtimeField);
@@ -277,6 +277,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
       { type, script },
       {
         customLabel,
+        customDescription,
         format,
         popularity,
       }
@@ -376,6 +377,27 @@ export class DataView extends AbstractDataView implements DataViewBase {
   }
 
   /**
+   * Set field custom description
+   * @param fieldName name of field to set custom label on
+   * @param customDescription custom description value. If undefined, custom description is removed
+   */
+
+  public setFieldCustomDescription(
+    fieldName: string,
+    customDescription: string | undefined | null
+  ) {
+    const fieldObject = this.fields.getByName(fieldName);
+    const newCustomDescription: string | undefined =
+      customDescription === null ? undefined : customDescription;
+
+    if (fieldObject) {
+      fieldObject.customDescription = newCustomDescription;
+    }
+
+    this.setFieldCustomDescriptionInternal(fieldName, customDescription);
+  }
+
+  /**
    * Set field count
    * @param fieldName name of field to set count on
    * @param count count value. If undefined, count is removed
@@ -427,6 +449,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
       // Every child field gets the complete runtime field script for consumption by searchSource
       this.updateOrAddRuntimeField(`${name}.${subFieldName}`, subField.type, runtimeFieldSpec, {
         customLabel: subField.customLabel,
+        customDescription: subField.customDescription,
         format: subField.format,
         popularity: subField.popularity,
       })
@@ -469,6 +492,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
 
     // Apply configuration to the field
     this.setFieldCustomLabel(fieldName, config.customLabel);
+    this.setFieldCustomDescription(fieldName, config.customDescription);
 
     if (config.popularity || config.popularity === null) {
       this.setFieldCount(fieldName, config.popularity);

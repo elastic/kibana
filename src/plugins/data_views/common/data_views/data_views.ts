@@ -742,6 +742,7 @@ export class DataViewsService {
       collector[field.name] = {
         ...field,
         customLabel: fieldAttrs?.[field.name]?.customLabel,
+        customDescription: fieldAttrs?.[field.name]?.customDescription,
         count: fieldAttrs?.[field.name]?.count,
       };
       return collector;
@@ -925,6 +926,7 @@ export class DataViewsService {
         searchable: true,
         readFromDocValues: false,
         customLabel: fieldAttrs?.[name]?.customLabel,
+        customDescription: fieldAttrs?.[name]?.customDescription,
         count: fieldAttrs?.[name]?.count,
       };
 

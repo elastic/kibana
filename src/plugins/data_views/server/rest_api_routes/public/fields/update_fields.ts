@@ -13,6 +13,7 @@ import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { DataViewsService } from '../../../../common';
 import { handleErrors } from '../util/handle_errors';
 import { serializedFieldFormatSchema } from '../../../../common/schemas';
+import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../../../../common/constants';
 import { dataViewSpecSchema } from '../../schema';
 import { DataViewSpecRestResponse } from '../../route_types';
 import type {
@@ -60,6 +61,11 @@ export const updateFields = async ({
       dataView.setFieldCustomLabel(fieldName, field.customLabel);
     }
 
+    if (field.customDescription !== undefined) {
+      changeCount++;
+      dataView.setFieldCustomDescription(fieldName, field.customDescription);
+    }
+
     if (field.count !== undefined) {
       changeCount++;
       dataView.setFieldCount(fieldName, field.count);
@@ -85,6 +91,7 @@ export const updateFields = async ({
 
 interface FieldUpdateType {
   customLabel?: string | null;
+  customDescription?: string | null;
   count?: number | null;
   format?: SerializedFieldFormat | null;
 }
@@ -95,6 +102,14 @@ const fieldUpdateSchema = schema.object({
       schema.string({
         minLength: 1,
         maxLength: 1_000,
+      })
+    )
+  ),
+  customDescription: schema.maybe(
+    schema.nullable(
+      schema.string({
+        minLength: 1,
+        maxLength: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
       })
     )
   ),
