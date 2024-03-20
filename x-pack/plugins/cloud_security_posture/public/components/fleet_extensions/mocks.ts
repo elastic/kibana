@@ -244,7 +244,7 @@ const getPolicyMock = (
       {
         type: CLOUDBEAT_AZURE,
         policy_template: 'cspm',
-        enabled: false,
+        enabled: type === CLOUDBEAT_AZURE,
         streams: [
           {
             enabled: type === CLOUDBEAT_AZURE,
