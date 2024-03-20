@@ -26,7 +26,7 @@ import {
 } from './get_aws_credentials_form_options';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
-import { SetupFormat, useAwsCredentialsForm } from './hooks';
+import { useAwsCredentialsForm } from './hooks';
 import { AWS_ORGANIZATION_ACCOUNT } from '../policy_template_form';
 import { AwsCredentialsType } from '../../../../common/types_old';
 import { AwsInputVarFields } from './aws_input_var_fields';
@@ -38,6 +38,21 @@ import {
 interface AWSSetupInfoContentProps {
   info: ReactNode;
 }
+
+export type SetupFormat = typeof AWS_SETUP_FORMAT.CLOUD_FORMATION | typeof AWS_SETUP_FORMAT.MANUAL;
+
+export const AWS_SETUP_FORMAT = {
+  CLOUD_FORMATION: 'cloud_formation',
+  MANUAL: 'manual',
+};
+
+export const AWS_CREDENTIALS_TYPE = {
+  ASSUME_ROLE: 'assume_role',
+  DIRECT_ACCESS_KEYS: 'direct_access_keys',
+  TEMPORARY_KEYS: 'temporary_keys',
+  SHARED_CREDENTIALS: 'shared_credentials',
+  CLOUD_FORMATION: 'cloud_formation',
+} as const;
 export const AWSSetupInfoContent = ({ info }: AWSSetupInfoContentProps) => {
   return (
     <>
@@ -60,12 +75,12 @@ export const AWSSetupInfoContent = ({ info }: AWSSetupInfoContentProps) => {
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
-    id: 'cloud_formation',
+    id: AWS_SETUP_FORMAT.CLOUD_FORMATION,
     label: 'CloudFormation',
     testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUDFORMATION,
   },
   {
-    id: 'manual',
+    id: AWS_SETUP_FORMAT.MANUAL,
     label: i18n.translate('xpack.csp.awsIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
@@ -243,10 +258,10 @@ export const AwsCredentialsForm = ({
         }
       />
       <EuiSpacer size="l" />
-      {setupFormat === 'cloud_formation' && (
+      {setupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION && (
         <CloudFormationSetup hasCloudFormationTemplate={hasCloudFormationTemplate} input={input} />
       )}
-      {setupFormat === 'manual' && (
+      {setupFormat === AWS_SETUP_FORMAT.MANUAL && (
         <>
           <AwsCredentialTypeSelector
             label={i18n.translate('xpack.csp.awsIntegration.awsCredentialTypeSelectorLabel', {
