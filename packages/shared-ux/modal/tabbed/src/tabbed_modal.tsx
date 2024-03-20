@@ -27,10 +27,11 @@ import {
 } from './context';
 
 interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
+  modalWidth?: number;
   modalTitle?: string;
 }
 
-const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle }) => {
+const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWidth }) => {
   const { tabs, state, dispatch } = useModalContext();
 
   const selectedTabId = state.meta.selectedTabId;
@@ -70,7 +71,11 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle }) => {
   }, [handler, selectedTabState]);
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal
+      onClose={onClose}
+      style={{ ...(modalWidth ? { width: modalWidth } : {}) }}
+      maxWidth={true}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>

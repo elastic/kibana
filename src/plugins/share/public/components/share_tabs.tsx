@@ -53,9 +53,10 @@ export const ShareMenuTabs = () => {
 
   return (
     <TabbedModal
-      modalTitle={`Share this ${objectType}`}
-      onClose={onClose}
       tabs={tabs}
+      modalWidth={483}
+      onClose={onClose}
+      modalTitle={`Share this ${objectType}`}
       defaultSelectedTabId="link"
     />
   );
