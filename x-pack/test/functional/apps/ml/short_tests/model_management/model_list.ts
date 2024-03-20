@@ -149,9 +149,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('the add trained model flyout should display elements on Manual Download tab correctly', async () => {
         await ml.testExecution.logTestStep('Open the Add Trained Model Flyout');
-        await ml.trainedModelsFlyout.assertOpen(true);
+        await ml.trainedModelsFlyout.open(true);
 
-        await ml.testExecution.logTestStep('Assert the Click to Download tab exists');
+        await ml.testExecution.logTestStep('Assert the Manual Download tab exists');
         const manualDownloadTab: AddModelFlyoutTabId = 'manualDownload';
         await ml.trainedModelsFlyout.assertFlyoutTabs([manualDownloadTab]);
 
@@ -528,7 +528,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.commonUI.waitForRefreshButtonEnabled();
 
         await ml.testExecution.logTestStep('Open the Add Trained Model Flyout');
-        await ml.trainedModelsFlyout.assertOpen(true);
+        await ml.trainedModelsFlyout.open(true);
       });
 
       after(async () => {

@@ -55,9 +55,6 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
     public async assertOpen(expectOpen: boolean): Promise<void> {
       if (expectOpen) {
         await retry.tryForTime(fiveSeconds, async () => {
-          await testSubjects.click('mlModelsAddTrainedModelButton');
-        });
-        await retry.tryForTime(fiveSeconds, async () => {
           await testSubjects.existOrFail('mlAddTrainedModelFlyout');
         });
       } else {
@@ -65,6 +62,13 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
           await testSubjects.missingOrFail('mlAddTrainedModelFlyout');
         });
       }
+    }
+    
+    public async open() {
+        await retry.tryForTime(fiveSeconds, async () => {
+          await testSubjects.click('mlModelsAddTrainedModelButton');
+          await this.assertOpen(true);
+        });
     }
 
     public async close(): Promise<void> {
