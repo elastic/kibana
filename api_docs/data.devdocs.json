@@ -13667,6 +13667,59 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataView.setFieldCustomDescription",
+            "type": "Function",
+            "tags": [],
+            "label": "setFieldCustomDescription",
+            "description": [
+              "\nSet field custom description"
+            ],
+            "signature": [
+              "(fieldName: string, customDescription: string | null | undefined) => void"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataView.setFieldCustomDescription.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [
+                  "name of field to set custom label on"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataView.setFieldCustomDescription.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "customDescription",
+                "description": [
+                  "custom description value. If undefined, custom description is removed"
+                ],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataView.setFieldCount",
             "type": "Function",
             "tags": [],
@@ -19971,6 +20024,59 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataView.setFieldCustomDescription",
+            "type": "Function",
+            "tags": [],
+            "label": "setFieldCustomDescription",
+            "description": [
+              "\nSet field custom description"
+            ],
+            "signature": [
+              "(fieldName: string, customDescription: string | null | undefined) => void"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataView.setFieldCustomDescription.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [
+                  "name of field to set custom label on"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataView.setFieldCustomDescription.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "customDescription",
+                "description": [
+                  "custom description value. If undefined, custom description is removed"
+                ],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataView.setFieldCount",
             "type": "Function",
             "tags": [],
@@ -20132,7 +20238,7 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
+              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -20366,6 +20472,38 @@
             "label": "customLabel",
             "description": [
               "\nSets custom label for field, or unsets if passed undefined."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.customDescription",
+            "type": "string",
+            "tags": [],
+            "label": "customDescription",
+            "description": [
+              "\nReturns custom description if set, otherwise undefined."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.customDescription",
+            "type": "string",
+            "tags": [],
+            "label": "customDescription",
+            "description": [
+              "\nSets custom description for field, or unsets if passed undefined."
             ],
             "signature": [
               "string | undefined"
@@ -20819,7 +20957,7 @@
                 "section": "def-common.IFieldSubType",
                 "text": "IFieldSubType"
               },
-              " | undefined; customLabel: string | undefined; defaultFormatter: string | undefined; }"
+              " | undefined; customLabel: string | undefined; customDescription: string | undefined; defaultFormatter: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -25310,7 +25448,7 @@
           "\nField attributes that are stored on the data view"
         ],
         "signature": [
-          "{ customLabel?: string | undefined; count?: number | undefined; }"
+          "{ customLabel?: string | undefined; customDescription?: string | undefined; count?: number | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -25350,7 +25488,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
+          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
