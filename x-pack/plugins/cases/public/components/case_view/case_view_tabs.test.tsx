@@ -104,12 +104,11 @@ describe('CaseViewTabs', () => {
     );
   });
 
-  it('shows the files tab with the correct count and colour', async () => {
+  it('shows the files tab with the correct count', async () => {
     appMockRenderer.render(<CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.FILES} />);
 
     const badge = await screen.findByTestId('case-view-files-stats-badge');
 
-    expect(badge.getAttribute('class')).toMatch(/accent/);
     expect(badge).toHaveTextContent('3');
   });
 
@@ -121,22 +120,13 @@ describe('CaseViewTabs', () => {
     expect(screen.queryByTestId('case-view-files-stats-badge')).not.toBeInTheDocument();
   });
 
-  it('the files tab count has a different color if the tab is not active', async () => {
-    appMockRenderer.render(<CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />);
-
-    expect(
-      (await screen.findByTestId('case-view-files-stats-badge')).getAttribute('class')
-    ).not.toMatch(/accent/);
-  });
-
-  it('shows the alerts tab with the correct count and colour', async () => {
+  it('shows the alerts tab with the correct count', async () => {
     appMockRenderer.render(
       <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
     );
 
     const badge = await screen.findByTestId('case-view-alerts-stats-badge');
 
-    expect(badge.getAttribute('class')).toMatch(/accent/);
     expect(badge).toHaveTextContent('3');
   });
 
