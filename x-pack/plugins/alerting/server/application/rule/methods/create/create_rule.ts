@@ -119,10 +119,10 @@ export async function createRule<Params extends RuleParams = never>(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(data.alertTypeId);
 
-  // Throws an error if alert type isn't registered
+  // Throws an error if rule type isn't registered
   const ruleType = context.ruleTypeRegistry.get(data.alertTypeId);
 
-  const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
+  const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   const username = await context.getUserName();
 
   let createdAPIKey = null;

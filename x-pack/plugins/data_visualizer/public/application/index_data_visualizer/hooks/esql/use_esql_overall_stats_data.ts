@@ -13,8 +13,8 @@ import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchOptions } from '@kbn/data-plugin/common';
+import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { OMIT_FIELDS } from '../../../../../common/constants';
-import type { TimeBucketsInterval } from '../../../../../common/services/time_buckets';
 import type {
   DataStatsFetchProgress,
   DocumentCountStats,
