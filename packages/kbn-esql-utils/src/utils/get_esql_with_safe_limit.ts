@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ESQL_SAFE_LIMIT } from '@kbn/unified-field-list/src/constants';
-
-export function getESQLWithSafeLimit(esql: string): string {
+export function getESQLWithSafeLimit(esql: string, limit: number): string {
   if (!esql.trim().toLowerCase().startsWith('from')) {
     return esql;
   }
@@ -28,7 +26,7 @@ export function getESQLWithSafeLimit(esql: string): string {
   return parts
     .map((part, i) => {
       if (i === index) {
-        return `${part.trim()} | LIMIT ${ESQL_SAFE_LIMIT}`;
+        return `${part.trim()} | LIMIT ${limit}`;
       }
       return part;
     })
