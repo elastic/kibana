@@ -1,7 +1,7 @@
 - name: find docker image
   find:
     paths: /packages/
-    patterns: kibana-ubi-fips-[0-9]*-docker-image.tar.gz
+    patterns: kibana-ubi-fips-8.14.0-SNAPSHOT-docker-image.tar.gz
   register: kibana_docker
 
 - name: load image
