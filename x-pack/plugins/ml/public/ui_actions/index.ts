@@ -53,7 +53,6 @@ export function registerMlUiActions(
   const categorizationADJobAction = createCategorizationADJobAction(core.getStartServices);
 
   // Register actions
-  uiActions.registerAction(editSwimlanePanelAction);
   uiActions.registerAction(applyInfluencerFiltersAction);
   uiActions.registerAction(applyEntityFieldFilterAction);
   uiActions.registerAction(applyTimeRangeSelectionAction);

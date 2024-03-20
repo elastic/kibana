@@ -10,42 +10,24 @@ import { i18n } from '@kbn/i18n';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type {
-  EmbeddableApiContext,
-  HasParentApi,
-  HasType,
-  PublishesUnifiedSearch,
-  PublishingSubject,
-} from '@kbn/presentation-publishing';
-import { apiHasType, apiIsOfType } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiIsOfType } from '@kbn/presentation-publishing';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { ML_APP_LOCATOR } from '../../common/constants/locator';
 import type { ExplorerAppState } from '../../common/types/locator';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
-import type {
-  AnomalyExplorerChartsEmbeddableType,
-  AnomalySwimLaneEmbeddableType,
-} from '../embeddables';
+import type { MlEmbeddableBaseApi } from '../embeddables';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
 } from '../embeddables';
+import type { AnomalyChartsEmbeddableApi } from '../embeddables/anomaly_charts/types';
+import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
-import type { JobId } from '../shared';
-
-export interface AnomalyChartsFieldSelectionApi {
-  entityFields: PublishingSubject<MlEntityField[] | undefined>;
-}
-
-export interface SwimLaneDrilldownApi {
-  viewBy: PublishingSubject<string>;
-  perPage: PublishingSubject<number>;
-  fromPage: PublishingSubject<number>;
-}
 
 export interface OpenInAnomalyExplorerSwimLaneActionContext extends EmbeddableApiContext {
-  embeddable: OpenInAnomalyExplorerFromSwimLaneActionApi;
+  embeddable: AnomalySwimLaneEmbeddableApi;
   /**
    * Optional data provided by swim lane selection
    */
@@ -53,25 +35,12 @@ export interface OpenInAnomalyExplorerSwimLaneActionContext extends EmbeddableAp
 }
 
 export interface OpenInAnomalyExplorerAnomalyChartsActionContext extends EmbeddableApiContext {
-  embeddable: OpenInAnomalyExplorerFromAnomalyChartActionApi;
+  embeddable: AnomalyChartsEmbeddableApi;
   /**
    * Optional fields selected using anomaly charts
    */
   data?: MlEntityField[];
 }
-
-export type OpenInAnomalyExplorerBaseActionApi = Partial<
-  HasParentApi<PublishesUnifiedSearch> & PublishesUnifiedSearch & { jobIds: JobId[] }
->;
-
-export type OpenInAnomalyExplorerFromSwimLaneActionApi = HasType<AnomalySwimLaneEmbeddableType> &
-  OpenInAnomalyExplorerBaseActionApi &
-  SwimLaneDrilldownApi;
-
-export type OpenInAnomalyExplorerFromAnomalyChartActionApi =
-  HasType<AnomalyExplorerChartsEmbeddableType> &
-    OpenInAnomalyExplorerBaseActionApi &
-    AnomalyChartsFieldSelectionApi;
 
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
 
@@ -93,17 +62,17 @@ export function isAnomalyChartsEmbeddableContext(
   );
 }
 
-export const isApiCompatible = (api: unknown | null): api is OpenInAnomalyExplorerBaseActionApi =>
-  Boolean(apiHasType(api));
-
-const getTimeRange = (embeddable: OpenInAnomalyExplorerBaseActionApi): TimeRange | undefined => {
+const getTimeRange = (embeddable: MlEmbeddableBaseApi): TimeRange | undefined => {
   return embeddable.timeRange$?.getValue() ?? embeddable.parentApi?.timeRange$?.getValue();
 };
 
 export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<EmbeddableApiContext>({
+  return createAction<
+    OpenInAnomalyExplorerSwimLaneActionContext | OpenInAnomalyExplorerAnomalyChartsActionContext
+  >({
     id: 'open-in-anomaly-explorer',
     type: OPEN_IN_ANOMALY_EXPLORER_ACTION,
+    order: 40,
     getIconType(): string {
       return 'visTable';
     },
