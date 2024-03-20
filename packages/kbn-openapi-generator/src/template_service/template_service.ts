@@ -8,7 +8,10 @@
 
 import Handlebars from 'handlebars';
 import { resolve } from 'path';
-import { SchemaTypesGenerationContext } from '../parser/get_generation_context';
+import {
+  SchemaTypesGenerationContext,
+  ApiClientGenerationContext,
+} from '../parser/get_generation_context';
 import { registerHelpers } from './register_helpers';
 import { registerTemplates } from './register_templates';
 
@@ -21,7 +24,10 @@ export const AVAILABLE_TEMPLATES = [
 export type TemplateName = typeof AVAILABLE_TEMPLATES[number];
 
 export interface ITemplateService {
-  compileTemplate: (templateName: TemplateName, context: SchemaTypesGenerationContext) => string;
+  compileTemplate: (
+    templateName: TemplateName,
+    context: SchemaTypesGenerationContext | ApiClientGenerationContext
+  ) => string;
 }
 
 /**
@@ -35,7 +41,7 @@ export const initTemplateService = async (): Promise<ITemplateService> => {
   const templates = await registerTemplates(resolve(__dirname, './templates'), handlebars);
 
   return {
-    compileTemplate: (templateName: TemplateName, context: SchemaTypesGenerationContext) => {
+    compileTemplate: (templateName: TemplateName, context: SchemaTypesGenerationContext | ApiClientGenerationContext) => {
       return handlebars.compile(templates[templateName])(context);
     },
   };
