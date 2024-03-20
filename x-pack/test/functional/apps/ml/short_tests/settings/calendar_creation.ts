@@ -161,9 +161,9 @@ export default function ({ getService }: FtrProviderContext) {
       automatedConfig.groups = ['automated'];
       multiMetricConfig.groups = ['multi-metric'];
 
-      // @ts-expect-error not full interface
       await asyncForEach(
         [automatedConfig, multiMetricConfig],
+        // @ts-expect-error not full interface
         async (config) => await ml.api.createAnomalyDetectionJob(config)
       );
     }
