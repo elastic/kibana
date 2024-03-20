@@ -40,9 +40,6 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
       <>
         <ReactQueryDevtools initialIsOpen={false} />
         <EuiFlyout
-          css={css`
-            z-index: ${euiTheme.levels.flyout};
-          `}
           onClose={handleCancel}
           tour-step="create-case-flyout"
           data-test-subj="create-case-flyout"
