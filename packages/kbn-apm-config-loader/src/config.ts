@@ -78,15 +78,8 @@ export class ApmConfiguration {
   }
 
   public getConfig(serviceName: string): AgentConfigOptions {
-    const { servicesOverrides = {} } = this.getConfigFromKibanaConfig();
-
-    if (process.env.ELASTIC_APM_KIBANA_FRONTEND_ACTIVE === 'false') {
-      merge(servicesOverrides, {
-        'kibana-frontend': {
-          active: false,
-        },
-      });
-    }
+    const kibanaConfig = this.getConfigFromKibanaConfig();
+    const { servicesOverrides = {} } = merge(kibanaConfig, this.getConfigFromEnv(kibanaConfig))
 
     let baseConfig = {
       ...this.getBaseConfig(),
@@ -149,6 +142,15 @@ export class ApmConfiguration {
 
     if (process.env.ELASTIC_APM_ACTIVE === 'true') {
       config.active = true;
+    }
+
+    if (process.env.ELASTIC_APM_KIBANA_FRONTEND_ACTIVE === 'false') {
+      // @ts-ignore
+      config.servicesOverrides = {
+        'kibana-frontend': {
+          active: false,
+        },
+      }
     }
 
     if (process.env.ELASTIC_APM_CONTEXT_PROPAGATION_ONLY === 'true') {
