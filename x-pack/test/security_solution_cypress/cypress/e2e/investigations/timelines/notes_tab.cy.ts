@@ -21,46 +21,30 @@ import { MODAL_CONFIRMATION_BTN } from '../../../screens/alerts_detection_rules'
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
-import {
-  addNotesToTimeline,
-  goToNotesTab,
-  openTimelineById,
-  refreshTimelinesUntilTimeLinePresent,
-} from '../../../tasks/timeline';
+import { visitTimeline } from '../../../tasks/navigation';
+import { addNotesToTimeline, goToNotesTab } from '../../../tasks/timeline';
 
-import { TIMELINES_URL } from '../../../urls/navigation';
+import { deleteTimelines } from '../../../tasks/api_calls/common';
 
 const text = 'system_indices_superuser';
 const link = 'https://www.elastic.co/';
 
-describe.skip('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    login();
-    visit(TIMELINES_URL);
+describe('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
+  beforeEach(function () {
+    deleteTimelines();
 
     createTimeline(getTimelineNonValidQuery())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
-      .then((timelineId: string) =>
-        refreshTimelinesUntilTimeLinePresent(timelineId)
-          // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
-          // request responses and indeterminism since on clicks to activates URL's.
-          .then(() => cy.wrap(timelineId).as('timelineId'))
-      );
-  });
-
-  beforeEach(function () {
-    login();
-    visit(TIMELINES_URL);
-    openTimelineById(this?.timelineId as string);
+      .then((timelineId: string) => {
+        login();
+        visitTimeline(timelineId);
+      });
     goToNotesTab();
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(1000);
   });
 
   it('should render mockdown', () => {
     addNotesToTimeline(getTimelineNonValidQuery().notes);
-    cy.get(NOTES_TEXT_AREA).should('exist');
+    cy.get(NOTES_TEXT_AREA).should('be.visible');
   });
 
   it('should contain notes', () => {
@@ -80,7 +64,7 @@ describe.skip('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
 
   it('should be able to render code blocks', () => {
     addNotesToTimeline(`\`code\``);
-    cy.get(NOTES_CODE_BLOCK).should('exist');
+    cy.get(NOTES_CODE_BLOCK).should('be.visible');
   });
 
   it('should render the right author', () => {

@@ -17,6 +17,8 @@ export const savedSearchMock = {
   id: 'the-saved-search-id',
   title: 'A saved search',
   searchSource: createSearchSourceMock({ index: dataViewMock }),
+  columns: ['default_column'],
+  sort: [],
 } as unknown as SavedSearch;
 
 export const savedSearchMockWithTimeField = {

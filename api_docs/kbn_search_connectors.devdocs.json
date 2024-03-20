@@ -5286,7 +5286,7 @@
             "label": "rule",
             "description": [],
             "signature": [
-              "\">\" | \"<\" | \"contains\" | \"equals\" | \"regex\" | \"ends_with\" | \"starts_with\""
+              "\"<\" | \">\" | \"contains\" | \"equals\" | \"regex\" | \"ends_with\" | \"starts_with\""
             ],
             "path": "packages/kbn-search-connectors/types/connectors.ts",
             "deprecated": false,
@@ -6729,7 +6729,7 @@
             "section": "def-common.SyncStatus",
             "text": "SyncStatus"
           },
-          "; metadata: Record<string, unknown>; created_at: string; job_type: ",
+          "; created_at: string; metadata: Record<string, unknown>; job_type: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -6894,7 +6894,7 @@
         "label": "FilteringRuleRule",
         "description": [],
         "signature": [
-          "\">\" | \"<\" | \"contains\" | \"equals\" | \"regex\" | \"ends_with\" | \"starts_with\""
+          "\"<\" | \">\" | \"contains\" | \"equals\" | \"regex\" | \"ends_with\" | \"starts_with\""
         ],
         "path": "packages/kbn-search-connectors/types/connectors.ts",
         "deprecated": false,
