@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import {} from '@kbn/rule-data-utils';
 import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
 import type {
   LEGACY_ALERT_HOST_CRITICALITY,
@@ -15,6 +16,8 @@ import type {
   ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM,
   ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
   ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM,
+  ALERT_RULE_RULE_CHILDREN_IDS,
+  ALERT_RULE_RULE_PARENT_ID,
 } from '../../../../../field_maps/field_names';
 import type {
   Ancestor8120,
@@ -46,6 +49,8 @@ export interface BaseFields8130 extends BaseFields8120 {
   [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: number | undefined;
   [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: string | undefined;
   [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: number | undefined;
+  [ALERT_RULE_RULE_CHILDREN_IDS]: string[] | undefined;
+  [ALERT_RULE_RULE_PARENT_ID]: string | undefined;
 }
 
 export interface WrappedFields8130<T extends BaseFields8130> {
