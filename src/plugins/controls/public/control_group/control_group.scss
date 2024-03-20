@@ -3,8 +3,14 @@ $mediumControl: $euiSize * 25;
 $largeControl: $euiSize * 50;
 $controlMinWidth: $euiSize * 14;
 
-.controlGroup {
+.controlsWrapper {
+  display: flex;
+  align-items: center;
   min-height: $euiSize * 4;
+
+  .controlGroup--endButtonGroup {
+    align-self: end;
+  }
 }
 
 .controlsWrapper--twoLine {

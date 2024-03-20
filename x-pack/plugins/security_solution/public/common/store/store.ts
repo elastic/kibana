@@ -234,7 +234,6 @@ const sanitizeDataView = (dataView: SourcererDataView) => {
 const sanitizeTimelineModel = (timeline: TimelineModel) => {
   return {
     ...timeline,
-    filterManager: 'filterManager',
     footerText: 'footerText',
     loadingText: 'loadingText',
   };

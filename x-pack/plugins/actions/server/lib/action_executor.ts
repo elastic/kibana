@@ -59,7 +59,6 @@ export interface ActionExecutorContext {
 export interface TaskInfo {
   scheduled: Date;
   attempts: number;
-  numSkippedRuns?: number;
 }
 
 export interface ExecuteOptions<Source = unknown> {
@@ -104,7 +103,6 @@ export class ActionExecutor {
     source,
     isEphemeral,
     taskInfo,
-    actionInfo: actionInfoFromTaskRunner,
     executionId,
     consumer,
     relatedSavedObjects,
@@ -137,9 +135,7 @@ export class ActionExecutor {
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
         const authorization = getActionsAuthorizationWithRequest(request);
 
-        const actionInfo =
-          actionInfoFromTaskRunner ||
-          (await this.getActionInfoInternal(actionId, request, namespace.namespace));
+        const actionInfo = await this.getActionInfoInternal(actionId, request, namespace.namespace);
 
         const { actionTypeId, name, config, secrets } = actionInfo;
 
