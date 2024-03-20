@@ -17,7 +17,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const correctPrivileges = {
     applications: [],
-    cluster: ['monitor', 'read_ilm', 'read_pipeline'],
+    cluster: ['monitor', 'read_pipeline', 'read_ilm'],
     indices: [
       {
         allow_restricted_indices: false,
