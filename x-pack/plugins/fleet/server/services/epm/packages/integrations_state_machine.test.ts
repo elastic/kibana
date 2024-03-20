@@ -105,7 +105,7 @@ describe('handleStateMachine', () => {
     const mockEventState2 = jest
       .fn()
       .mockImplementation(() => Promise.resolve({ promiseData: {} }));
-    const mockEventState3 = jest.fn();
+    const mockEventState3 = jest.fn().mockReturnValue({ lastData: ['test3'] });
     const contextData = { testData: 'test' };
     const testDefinition = getTestDefinition(
       mockEventState1,
@@ -135,6 +135,91 @@ describe('handleStateMachine', () => {
     expect(mockContract.logger?.debug).toHaveBeenCalledWith(
       'Executed state: state3 with status: success - nextState: end'
     );
+  });
+
+  it('should save the return data from transitions also when return type is function', async () => {
+    const mockEventState1 = jest.fn().mockReturnValue({ arrayData: ['test1', 'test2'] });
+    const state2Result = () => {
+      return {
+        innerData: 'test',
+      };
+    };
+    const mockEventState2 = jest.fn().mockImplementation(() => {
+      return state2Result;
+    });
+    const mockEventState3 = jest.fn();
+    const contextData = { testData: 'test' };
+    const testDefinition = getTestDefinition(
+      mockEventState1,
+      mockEventState2,
+      mockEventState3,
+      contextData
+    );
+
+    await handleStateMachine('state1', testDefinition);
+    expect(mockEventState1).toHaveBeenCalledWith({ testData: 'test' });
+    expect(mockEventState2).toHaveBeenCalledWith({
+      testData: 'test',
+      arrayData: ['test1', 'test2'],
+      state2Result,
+    });
+    expect(mockEventState3).toHaveBeenCalledWith({
+      testData: 'test',
+      arrayData: ['test1', 'test2'],
+      state2Result,
+    });
+
+    expect(mockContract.logger?.debug).toHaveBeenCalledWith(
+      'Executed state: state1 with status: success - nextState: state2'
+    );
+    expect(mockContract.logger?.debug).toHaveBeenCalledWith(
+      'Executed state: state2 with status: success - nextState: state3'
+    );
+    expect(mockContract.logger?.debug).toHaveBeenCalledWith(
+      'Executed state: state3 with status: success - nextState: end'
+    );
+  });
+
+  it.skip('should return updated context data', async () => {
+    const mockEventState1 = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve({ promiseData: {} }));
+    const state2Result = () => {
+      return {
+        innerData: 'test',
+      };
+    };
+    const mockEventState2 = jest.fn().mockImplementation(() => {
+      return state2Result;
+    });
+    const mockEventState3 = jest.fn().mockReturnValue({ lastData: ['test3'] });
+    const contextData = { testData: 'test' };
+    const testDefinition = getTestDefinition(
+      mockEventState1,
+      mockEventState2,
+      mockEventState3,
+      contextData
+    );
+
+    const updatedContext = await handleStateMachine('state1', testDefinition);
+    expect(mockEventState1).toHaveBeenCalledWith({ testData: 'test' });
+    expect(mockEventState2).toHaveBeenCalledWith({
+      testData: 'test',
+      promiseData: {},
+      state2Result,
+    });
+    expect(mockEventState3).toHaveBeenCalledWith({
+      testData: 'test',
+      promiseData: {},
+      state2Result,
+    });
+
+    expect(updatedContext).toEqual({
+      testData: 'test',
+      promiseData: {},
+      state2Result,
+      lastData: ['test3'],
+    });
   });
 
   it('should execute postTransition function after the transition is complete', async () => {

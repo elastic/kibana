@@ -36,12 +36,17 @@ async function handleState(
   const currentState = states[currentStateName];
   let currentStatus = 'pending';
   let stateResult;
-  let updatedContext;
-
+  let updatedContext = { ...context };
   if (typeof currentState.onTransitionTo === 'function') {
     try {
-      stateResult = await currentState.onTransitionTo.call(undefined, context);
-      updatedContext = { ...context, ...stateResult };
+      stateResult = await currentState.onTransitionTo.call(undefined, updatedContext);
+      // check if is a function/promise
+      if (typeof stateResult === 'function') {
+        const promiseName = `${currentStateName}Result`;
+        updatedContext[promiseName] = stateResult;
+      } else {
+        updatedContext = { ...updatedContext, ...stateResult };
+      }
       currentStatus = 'success';
     } catch (error) {
       currentStatus = 'failed';
@@ -64,7 +69,7 @@ async function handleState(
     }
   }
   if (currentStatus === 'success' && currentState?.nextState && currentState?.nextState !== 'end') {
-    handleState(currentState.nextState, definition, updatedContext);
+    await handleState(currentState.nextState, definition, updatedContext);
   } else {
     return;
   }
