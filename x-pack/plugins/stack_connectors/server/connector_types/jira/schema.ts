@@ -45,11 +45,11 @@ const incidentSchemaObject = {
   otherFields: schema.nullable(
     schema.recordOf(
       schema.string({
-        validate: validateOtherFieldsKeys,
+        validate: (value) => validateOtherFieldsKeys(value),
       }),
       schema.any(),
       {
-        validate: validateOtherFieldsLength,
+        validate: (value) => validateOtherFieldsLength(value),
       }
     )
   ),
