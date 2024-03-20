@@ -41,7 +41,10 @@ export const initTemplateService = async (): Promise<ITemplateService> => {
   const templates = await registerTemplates(resolve(__dirname, './templates'), handlebars);
 
   return {
-    compileTemplate: (templateName: TemplateName, context: SchemaTypesGenerationContext | ApiClientGenerationContext) => {
+    compileTemplate: (
+      templateName: TemplateName,
+      context: SchemaTypesGenerationContext | ApiClientGenerationContext
+    ) => {
       return handlebars.compile(templates[templateName])(context);
     },
   };

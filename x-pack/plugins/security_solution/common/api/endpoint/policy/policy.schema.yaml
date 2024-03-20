@@ -6,8 +6,8 @@ paths:
   /api/endpoint/policy/summaries:
     get:
       summary: Get Agent Policy Summary schema
-      operationId: GetAgentPolicySummary
-      x-codegen-enabled: true
+      operationId: getAgentPolicySummary
+      x-codegen-enabled: false
       parameters:
         - name: query
           in: query
@@ -33,7 +33,7 @@ paths:
     get:
       summary: Get Policy Response schema
       operationId: GetPolicyResponse
-      x-codegen-enabled: true
+      x-codegen-enabled: false
       parameters:
         - name: query
           in: query

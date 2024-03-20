@@ -8,10 +8,15 @@
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
 {{#each this}}
 {{#if operation.requestBody}}
-import type { {{capitalize (camelCase @key)}}RequestBody } from '{{paths.schemaTypesRelativePath}}';
-{{/if}}
-{{#if operation.requestQuery}}
-import type { {{capitalize (camelCase @key)}}RequestQuery } from '{{paths.schemaTypesRelativePath}}';
+  {{#if operation.requestQuery}}
+    import type { {{capitalize (camelCase @key)}}RequestBody, {{capitalize (camelCase @key)}}RequestQuery } from '{{paths.schemaTypesRelativePath}}';
+  {{else}}
+    import type { {{capitalize (camelCase @key)}}RequestBody } from '{{paths.schemaTypesRelativePath}}';
+  {{/if}}
+{{else}}
+  {{#if operation.requestQuery}}
+    import type { {{capitalize (camelCase @key)}}RequestQuery } from '{{paths.schemaTypesRelativePath}}';
+  {{/if}}
 {{/if}}
 import { {{@key}} } from '{{paths.apiMethodRelativePath}}';
 {{/each}}
@@ -29,9 +34,11 @@ export class ApiClient<TClient extends HttpClient> {
   }
 
   {{#each this}}
+  {{#if operation.description}}
  /*
   * {{operation.description}}
   */
+  {{/if}}
   public async {{@key}}(
   {{#if operation.requestBody}}
   params: {{capitalize (camelCase @key)}}RequestBody, 
@@ -54,5 +61,4 @@ export class ApiClient<TClient extends HttpClient> {
   }
 
   {{/each}}
-
 }

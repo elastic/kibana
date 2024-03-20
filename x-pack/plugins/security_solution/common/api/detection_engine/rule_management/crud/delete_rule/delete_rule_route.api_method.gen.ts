@@ -5,24 +5,21 @@
  * 2.0.
  */
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
-import type {
-    DeleteRuleRequestQuery,
-  DeleteRuleResponse
-} from './delete_rule_route.gen';
+import type { DeleteRuleRequestQuery, DeleteRuleResponse } from './delete_rule_route.gen';
 
 interface HttpClient {
   fetch<T>(url: string, options: HttpFetchOptions): Promise<T>;
 }
 
 export const deleteRule = async <TClient extends HttpClient>(
-  client: TClient, 
+  client: TClient,
   query: DeleteRuleRequestQuery,
   signal?: AbortSignal
 ) => {
   return client.fetch<DeleteRuleResponse>('/api/detection_engine/rules', {
-    method: 'delete', 
+    method: 'delete',
     version: '2023-10-31',
     query,
-    signal
+    signal,
   });
-}  
+};

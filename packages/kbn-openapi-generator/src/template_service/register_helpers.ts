@@ -7,7 +7,7 @@
  */
 
 import type Handlebars from '@kbn/handlebars';
-import { snakeCase, camelCase, capitalize } from 'lodash';
+import { snakeCase, camelCase } from 'lodash';
 
 export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   handlebarsInstance.registerHelper('concat', (...args) => {
@@ -29,6 +29,9 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
       return false;
     }
     return array.includes(value);
+  });
+  handlebarsInstance.registerHelper('and', (value1, value2) => {
+    return value1 && value2;
   });
   handlebarsInstance.registerHelper('or', (...args) => {
     // Last arguments is the handlebars context, so we ignore it

@@ -5,24 +5,21 @@
  * 2.0.
  */
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
-import type {
-    ReadRuleRequestQuery,
-  ReadRuleResponse
-} from './read_rule_route.gen';
+import type { ReadRuleRequestQuery, ReadRuleResponse } from './read_rule_route.gen';
 
 interface HttpClient {
   fetch<T>(url: string, options: HttpFetchOptions): Promise<T>;
 }
 
 export const readRule = async <TClient extends HttpClient>(
-  client: TClient, 
+  client: TClient,
   query: ReadRuleRequestQuery,
   signal?: AbortSignal
 ) => {
   return client.fetch<ReadRuleResponse>('/api/detection_engine/rules', {
-    method: 'get', 
+    method: 'get',
     version: '2023-10-31',
     query,
-    signal
+    signal,
   });
-}  
+};
