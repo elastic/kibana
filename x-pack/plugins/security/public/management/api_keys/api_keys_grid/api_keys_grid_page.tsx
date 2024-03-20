@@ -39,6 +39,13 @@ import { APIKeysAPIClient } from '../api_keys_api_client';
 const parseSearchBarQuery = (query: Query): QueryContainer => {
   let parsedQuery = query;
 
+  if (parsedQuery.hasSimpleFieldClause('owner')) {
+    const ownerQueryValue = parsedQuery.getSimpleFieldClause('owner')!.value;
+    parsedQuery = parsedQuery
+      .removeSimpleFieldClauses('owner')
+      .addSimpleFieldValue('username', `${ownerQueryValue}`);
+  }
+
   if (query.text.includes('type:managed')) {
     const subQuery = query.text.replace('type:managed', '');
     parsedQuery = EuiSearchBar.Query.parse(`${subQuery} (metadata.managed:true OR Alerting*)`);

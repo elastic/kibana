@@ -238,6 +238,26 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         box={{
           incremental: true,
           placeholder: 'Search...',
+          schema: {
+            strict: true,
+            fields: {
+              name: {
+                type: 'string',
+              },
+              type: {
+                type: 'string',
+              },
+              username: {
+                type: 'string',
+              },
+              owner: {
+                type: 'string',
+              },
+              expired: {
+                type: 'boolean',
+              },
+            },
+          },
         }}
         filters={filters}
         onChange={onSearchChange}
