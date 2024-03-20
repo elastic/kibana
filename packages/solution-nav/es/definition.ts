@@ -26,14 +26,7 @@ const navTree: NavigationTreeDefinition = {
       breadcrumbStatus: 'hidden',
       children: [
         {
-          id: 'search_getting_started',
-          title: i18n.translate('navigation.searchNav.gettingStarted', {
-            defaultMessage: 'Home',
-          }),
-          link: 'dev_tools:console',
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
-          },
+          link: 'home',
         },
         {
           id: 'dev_tools',
@@ -85,69 +78,45 @@ const navTree: NavigationTreeDefinition = {
               title: i18n.translate('navigation.searchNav.content.indices', {
                 defaultMessage: 'Indices',
               }),
-              link: 'management:index_management',
-              breadcrumbStatus:
-                'hidden' /* management sub-pages set their breadcrumbs themselves */,
               renderAs: 'accordion',
               children: [
                 {
-                  title: i18n.translate('navigation.searchNav.content.indices.searchGithub', {
-                    defaultMessage: 'search-github',
-                  }),
-                  link: 'management:ingest_pipelines',
+                  title: i18n.translate(
+                    'navigation.searchNav.content.indices.searchGithub.overview',
+                    {
+                      defaultMessage: 'Overview',
+                    }
+                  ),
+                  link: 'management:index_management',
                   breadcrumbStatus:
                     'hidden' /* management sub-pages set their breadcrumbs themselves */,
-                  renderAs: 'accordion',
-                  children: [
+                },
+                {
+                  title: i18n.translate(
+                    'navigation.searchNav.content.indices.searchGithub.documents',
                     {
-                      title: i18n.translate(
-                        'navigation.searchNav.content.indices.searchGithub.overview',
-                        {
-                          defaultMessage: 'Overview',
-                        }
-                      ),
-                      link: 'management:ingest_pipelines',
-                      breadcrumbStatus:
-                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
-                      renderAs: 'item',
-                    },
+                      defaultMessage: 'Documents',
+                    }
+                  ),
+                  link: 'management:index_management',
+                },
+                {
+                  title: i18n.translate(
+                    'navigation.searchNav.content.indices.searchGithub.indexMappings',
                     {
-                      title: i18n.translate(
-                        'navigation.searchNav.content.indices.searchGithub.documents',
-                        {
-                          defaultMessage: 'Documents',
-                        }
-                      ),
-                      link: 'management:ingest_pipelines',
-                      breadcrumbStatus:
-                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
-                      renderAs: 'item',
-                    },
+                      defaultMessage: 'Index Mappings',
+                    }
+                  ),
+                  link: 'management:index_management',
+                },
+                {
+                  title: i18n.translate(
+                    'navigation.searchNav.content.indices.searchGithub.pipelines',
                     {
-                      title: i18n.translate(
-                        'navigation.searchNav.content.indices.searchGithub.indexMappings',
-                        {
-                          defaultMessage: 'Index Mappings',
-                        }
-                      ),
-                      link: 'management:ingest_pipelines',
-                      breadcrumbStatus:
-                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
-                      renderAs: 'item',
-                    },
-                    {
-                      title: i18n.translate(
-                        'navigation.searchNav.content.indices.searchGithub.pipelines',
-                        {
-                          defaultMessage: 'Pipelines',
-                        }
-                      ),
-                      link: 'management:ingest_pipelines',
-                      breadcrumbStatus:
-                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
-                      renderAs: 'item',
-                    },
-                  ],
+                      defaultMessage: 'Pipelines',
+                    }
+                  ),
+                  link: 'management:ingest_pipelines',
                 },
               ],
             },
@@ -156,16 +125,12 @@ const navTree: NavigationTreeDefinition = {
                 defaultMessage: 'Connectors',
               }),
               link: 'management:triggersActionsConnectors',
-              breadcrumbStatus:
-                'hidden' /* management sub-pages set their breadcrumbs themselves */,
             },
             {
               title: i18n.translate('navigation.searchNav.content.webCrawlers', {
                 defaultMessage: 'Web crawlers',
               }),
               link: 'management:triggersActionsConnectors',
-              breadcrumbStatus:
-                'hidden' /* management sub-pages set their breadcrumbs themselves */,
             },
           ],
         },
@@ -180,64 +145,33 @@ const navTree: NavigationTreeDefinition = {
                 defaultMessage: 'AI playground',
               }),
               link: 'management:api_keys',
-              breadcrumbStatus:
-                'hidden' /* management sub-pages set their breadcrumbs themselves */,
             },
             {
               title: i18n.translate('navigation.searchNav.apps.searchApplications', {
                 defaultMessage: 'Search applications',
               }),
-              link: 'management:index_management',
-              breadcrumbStatus:
-                'hidden' /* management sub-pages set their breadcrumbs themselves */,
               renderAs: 'accordion',
               children: [
                 {
-                  title: i18n.translate('navigation.searchNav.apps.searchApplications.test', {
-                    defaultMessage: 'Test',
+                  title: i18n.translate(
+                    'navigation.searchNav.apps.searchApplications.docsExplorer',
+                    {
+                      defaultMessage: 'Docs explorer',
+                    }
+                  ),
+                  link: 'home',
+                },
+                {
+                  title: i18n.translate('navigation.searchNav.apps.searchApplications.content', {
+                    defaultMessage: 'Content',
                   }),
-                  link: 'management:ingest_pipelines',
-                  breadcrumbStatus:
-                    'hidden' /* management sub-pages set their breadcrumbs themselves */,
-                  renderAs: 'accordion',
-                  children: [
-                    {
-                      title: i18n.translate(
-                        'navigation.searchNav.apps.searchApplications.docsExplorer',
-                        {
-                          defaultMessage: 'Docs explorer',
-                        }
-                      ),
-                      link: 'management:ingest_pipelines',
-                      breadcrumbStatus:
-                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
-                      renderAs: 'item',
-                    },
-                    {
-                      title: i18n.translate(
-                        'navigation.searchNav.apps.searchApplications.content',
-                        {
-                          defaultMessage: 'Content',
-                        }
-                      ),
-                      link: 'management:ingest_pipelines',
-                      breadcrumbStatus:
-                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
-                      renderAs: 'item',
-                    },
-                    {
-                      title: i18n.translate(
-                        'navigation.searchNav.apps.searchApplications.connect',
-                        {
-                          defaultMessage: 'Connect',
-                        }
-                      ),
-                      link: 'management:ingest_pipelines',
-                      breadcrumbStatus:
-                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
-                      renderAs: 'item',
-                    },
-                  ],
+                  link: 'home',
+                },
+                {
+                  title: i18n.translate('navigation.searchNav.apps.searchApplications.connect', {
+                    defaultMessage: 'Connect',
+                  }),
+                  link: 'home',
                 },
               ],
             },
@@ -245,9 +179,7 @@ const navTree: NavigationTreeDefinition = {
               title: i18n.translate('navigation.searchNav.apps.behavioralAnalytics', {
                 defaultMessage: 'Behavioral analytics',
               }),
-              link: 'management:api_keys',
-              breadcrumbStatus:
-                'hidden' /* management sub-pages set their breadcrumbs themselves */,
+              link: 'ml:logRateAnalysis',
             },
           ],
         },
@@ -261,17 +193,13 @@ const navTree: NavigationTreeDefinition = {
               title: i18n.translate('navigation.searchNav.entsearch.appSearch', {
                 defaultMessage: 'App Search',
               }),
-              link: 'management:api_keys',
-              breadcrumbStatus:
-                'hidden' /* management sub-pages set their breadcrumbs themselves */,
+              link: 'home',
             },
             {
               title: i18n.translate('navigation.searchNav.entsearch.workplaceSearch', {
                 defaultMessage: 'Workplace Search',
               }),
-              link: 'management:api_keys',
-              breadcrumbStatus:
-                'hidden' /* management sub-pages set their breadcrumbs themselves */,
+              link: 'home',
             },
           ],
         },
@@ -292,7 +220,7 @@ const navTree: NavigationTreeDefinition = {
           title: i18n.translate('navigation.searchNav.management.trainedModels', {
             defaultMessage: 'Trained models',
           }),
-          link: 'fleet',
+          link: 'home',
         },
         {
           link: 'management',
