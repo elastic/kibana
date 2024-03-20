@@ -145,7 +145,6 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   public get description() {
-    console.log('test');
     if (this.spec.customDescription) {
       return this.spec.customDescription;
     }
