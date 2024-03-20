@@ -17,7 +17,7 @@ import {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDisabledActionIds,
-  PublishesLocalUnifiedSearch,
+  PublishesUnifiedSearch,
   HasParentApi,
   HasUniqueId,
   PublishesViewMode,
@@ -49,7 +49,7 @@ export type LegacyEmbeddableAPI = HasType &
   PublishesDataLoading &
   HasInspectorAdapters &
   PublishesBlockingError &
-  PublishesLocalUnifiedSearch &
+  PublishesUnifiedSearch &
   PublishesDisabledActionIds &
   PublishesWritablePanelTitle &
   PublishesWritablePanelDescription &

@@ -8,6 +8,7 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButtonEmpty, EuiBadge, EuiText, EuiLoadingSpinner, EuiLink } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
@@ -63,7 +64,7 @@ export const RULE_NAME_COLUMN: TableColumn = {
 
 const TAGS_COLUMN: TableColumn = {
   field: 'tags',
-  name: null,
+  name: <RulesTableEmptyColumnName name={i18n.COLUMN_TAGS} />,
   align: 'center',
   render: (tags: RuleResponse['tags']) => {
     if (tags == null || tags.length === 0) {
@@ -92,7 +93,7 @@ const TAGS_COLUMN: TableColumn = {
 
 const INTEGRATIONS_COLUMN: TableColumn = {
   field: 'related_integrations',
-  name: null,
+  name: <RulesTableEmptyColumnName name={i18n.COLUMN_INTEGRATIONS} />,
   align: 'center',
   render: (integrations: RuleResponse['related_integrations']) => {
     if (integrations == null || integrations.length === 0) {
@@ -111,7 +112,7 @@ const createInstallButtonColumn = (
   isDisabled: boolean
 ): TableColumn => ({
   field: 'rule_id',
-  name: '',
+  name: <RulesTableEmptyColumnName name={i18n.INSTALL_RULE_BUTTON} />,
   render: (ruleId: RuleSignatureId, record: Rule) => {
     const isRuleInstalling = loadingRules.includes(ruleId);
     const isInstallButtonDisabled = isRuleInstalling || isDisabled;

@@ -3039,10 +3039,10 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.Embeddable.localQuery",
+            "id": "def-public.Embeddable.query$",
             "type": "Object",
             "tags": [],
-            "label": "localQuery",
+            "label": "query$",
             "description": [],
             "signature": [
               "{ readonly value: ",
@@ -3931,10 +3931,10 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.Embeddable.localFilters",
+            "id": "def-public.Embeddable.filters$",
             "type": "Object",
             "tags": [],
-            "label": "localFilters",
+            "label": "filters$",
             "description": [],
             "signature": [
               "{ readonly value: ",
@@ -4868,10 +4868,10 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.Embeddable.localTimeRange",
+            "id": "def-public.Embeddable.timeRange$",
             "type": "Object",
             "tags": [],
-            "label": "localTimeRange",
+            "label": "timeRange$",
             "description": [],
             "signature": [
               "{ readonly value: ",
@@ -5768,10 +5768,10 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.Embeddable.setLocalTimeRange",
+            "id": "def-public.Embeddable.setTimeRange",
             "type": "Function",
             "tags": [],
-            "label": "setLocalTimeRange",
+            "label": "setTimeRange",
             "description": [],
             "signature": [
               "(timeRange: ",
@@ -5791,7 +5791,7 @@
             "children": [
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.Embeddable.setLocalTimeRange.$1",
+                "id": "def-public.Embeddable.setTimeRange.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "timeRange",
@@ -5806,7 +5806,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/presentation/presentation_publishing/interfaces/publishes_local_unified_search.ts",
+                "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -5927,32 +5927,10 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.Embeddable.getFallbackTimeRange",
+            "id": "def-public.Embeddable.isCompatibleWithUnifiedSearch",
             "type": "Function",
             "tags": [],
-            "label": "getFallbackTimeRange",
-            "description": [],
-            "signature": [
-              "(() => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              " | undefined) | undefined"
-            ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.Embeddable.isCompatibleWithLocalUnifiedSearch",
-            "type": "Function",
-            "tags": [],
-            "label": "isCompatibleWithLocalUnifiedSearch",
+            "label": "isCompatibleWithUnifiedSearch",
             "description": [],
             "signature": [
               "(() => boolean) | undefined"
@@ -7697,6 +7675,213 @@
               "<I, O, E, T>"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/default_embeddable_factory_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.embeddableInputToSubject",
+        "type": "Function",
+        "tags": [],
+        "label": "embeddableInputToSubject",
+        "description": [],
+        "signature": [
+          "<T extends unknown = unknown, LegacyInput extends ",
+          "CommonLegacyInput",
+          " = ",
+          "CommonLegacyInput",
+          ">(subscription: ",
+          "Subscription",
+          ", embeddable: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<LegacyInput, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          ", any>, key: keyof LegacyInput, useExplicitInput?: boolean) => ",
+          "BehaviorSubject",
+          "<T | undefined>"
+        ],
+        "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.embeddableInputToSubject.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "subscription",
+            "description": [],
+            "signature": [
+              "Subscription"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.embeddableInputToSubject.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.IEmbeddable",
+                "text": "IEmbeddable"
+              },
+              "<LegacyInput, ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              ", any>"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.embeddableInputToSubject.$3",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "keyof LegacyInput"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.embeddableInputToSubject.$4",
+            "type": "boolean",
+            "tags": [],
+            "label": "useExplicitInput",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.embeddableOutputToSubject",
+        "type": "Function",
+        "tags": [],
+        "label": "embeddableOutputToSubject",
+        "description": [],
+        "signature": [
+          "<T extends unknown = unknown, LegacyOutput extends ",
+          "CommonLegacyOutput",
+          " = ",
+          "CommonLegacyOutput",
+          ">(subscription: ",
+          "Subscription",
+          ", embeddable: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<",
+          "CommonLegacyInput",
+          ", LegacyOutput, any>, key: keyof LegacyOutput) => ",
+          "BehaviorSubject",
+          "<T | undefined>"
+        ],
+        "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.embeddableOutputToSubject.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "subscription",
+            "description": [],
+            "signature": [
+              "Subscription"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.embeddableOutputToSubject.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.IEmbeddable",
+                "text": "IEmbeddable"
+              },
+              "<",
+              "CommonLegacyInput",
+              ", LegacyOutput, any>"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.embeddableOutputToSubject.$3",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "keyof LegacyOutput"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
