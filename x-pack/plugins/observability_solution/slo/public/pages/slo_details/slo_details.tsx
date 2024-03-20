@@ -35,7 +35,7 @@ import { HeaderControl } from './components/header_control';
 import { paths } from '../../../common/locators/paths';
 import type { SloDetailsPathParams } from './types';
 import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
-import { useGetInstanceIdQueryParam } from './hooks/use_get_instance_id_query_param';
+import { useGetQueryParams } from './hooks/use_get_query_params';
 import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
 
 export function SloDetailsPage() {
@@ -52,7 +52,7 @@ export function SloDetailsPage() {
   const hasRightLicense = hasAtLeast('platinum');
 
   const { sloId } = useParams<SloDetailsPathParams>();
-  const { instanceId: sloInstanceId, remoteName } = useGetInstanceIdQueryParam();
+  const { instanceId: sloInstanceId, remoteName } = useGetQueryParams();
   const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(getAutoRefreshState());
   const { isLoading, data: slo } = useFetchSloDetails({

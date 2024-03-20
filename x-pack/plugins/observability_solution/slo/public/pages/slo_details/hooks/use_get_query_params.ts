@@ -11,7 +11,7 @@ import { useLocation } from 'react-router-dom';
 export const INSTANCE_SEARCH_PARAM = 'instanceId';
 export const REMOTE_NAME_PARAM = 'remoteName';
 
-export function useGetInstanceIdQueryParam() {
+export function useGetQueryParams() {
   const { search } = useLocation();
   const searchParams = new URLSearchParams(search);
 
