@@ -25,12 +25,12 @@ export const paths = {
   sloEdit: (sloId: string) => `${SLOS_BASE_PATH}${SLOS_PATH}/edit/${encodeURIComponent(sloId)}`,
   sloEditWithEncodedForm: (sloId: string, encodedParams: string) =>
     `${SLOS_BASE_PATH}${SLOS_PATH}/edit/${encodeURIComponent(sloId)}?_a=${encodedParams}`,
-  sloDetails: (sloId: string, instanceId?: string, remoteName?: string) =>
-    !!instanceId
+  sloDetails: (sloId: string, instanceId?: string, remoteName?: string) => {
+    const additionalArgs = remoteName ? `&remoteName=${remoteName}` : '';
+    return !!instanceId
       ? `${SLOS_BASE_PATH}${SLOS_PATH}/${encodeURIComponent(sloId)}?instanceId=${encodeURIComponent(
           instanceId
-        )}${remoteName ? `&remoteName=${remoteName}` : ''}`
-      : `${SLOS_BASE_PATH}${SLOS_PATH}/${encodeURIComponent(sloId)}${
-          remoteName ? `?remoteName=${remoteName}` : ''
-        }`,
+        )}${additionalArgs}`
+      : `${SLOS_BASE_PATH}${SLOS_PATH}/${encodeURIComponent(sloId)}${additionalArgs}`;
+  },
 };
