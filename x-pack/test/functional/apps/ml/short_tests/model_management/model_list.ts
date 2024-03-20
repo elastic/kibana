@@ -181,9 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('should attempt to delete the model');
         await ml.trainedModels.clickBulkDelete();
 
-        await ml.testExecution.logTestStep(
-          'assert the action is banned, specifically checking the error message'
-        );
+        await ml.testExecution.logTestStep('assert the action is banned');
         await ml.trainedModelsTable.assertSpaceAwareWarningMessage();
 
         await ml.testExecution.logTestStep('close the eui modal');

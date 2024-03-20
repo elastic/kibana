@@ -27,7 +27,6 @@ export function TrainedModelsProvider({ getService }: FtrProviderContext, mlComm
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const browser = getService('browser');
-  const find = getService('find');
 
   class TestModelFactory {
     public static createAssertionInstance(modelType: ModelType) {
@@ -157,7 +156,10 @@ export function TrainedModelsProvider({ getService }: FtrProviderContext, mlComm
     },
 
     async clickBulkDelete() {
-      await find.clickByButtonText('Delete');
+      await retry.tryForTime(3_000, async () => {
+        await testSubjects.click('mlTrainedModelsDeleteSelectedModelsButton');
+        await testSubjects.existOrFail('mlDeleteSpaceAwareItemCheckModalOverlay');
+      });
     },
   };
 }

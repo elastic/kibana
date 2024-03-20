@@ -650,7 +650,11 @@ export const ModelsList: FC<Props> = ({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton color="danger" onClick={setModelsToDelete.bind(null, selectedModels)}>
+          <EuiButton
+            color="danger"
+            onClick={setModelsToDelete.bind(null, selectedModels)}
+            data-test-subj="mlTrainedModelsDeleteSelectedModelsButton"
+          >
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.deleteModelsButtonLabel"
               defaultMessage="Delete"
