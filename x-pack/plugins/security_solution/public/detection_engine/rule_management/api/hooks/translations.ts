@@ -27,3 +27,10 @@ export const ACTIONS_FETCH_ERROR_DESCRIPTION = i18n.translate(
     defaultMessage: 'Viewing actions is not available',
   }
 );
+
+export const RULES_SOURCES_FETCH_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.actions.rulesSourcesFetchError',
+  {
+    defaultMessage: 'Failed to fetch rules sources',
+  }
+);

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFormRow, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useBulkGetRulesSources } from '../../../../../rule_management/api/hooks/use_bulk_get_sources';
+import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import * as i18n from '../../../../../../detections/pages/detection_engine/rules/translations';
 
-import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
 import { useFetchIndex } from '../../../../../../common/containers/source';
-import { useKibana } from '../../../../../../common/lib/kibana';
 
 import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
@@ -29,6 +29,9 @@ import {
 } from '../../../../../../shared_imports';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
+import { useRulesTableContext } from '../../rules_table/rules_table_context';
+import { useGetAllIndexPatternsFromSources } from '../use_get_all_index_patterns_from_sources';
+
 const CommonUseField = getUseField({ component: Field });
 
 type InvestigationFieldsEditActions =
@@ -95,15 +98,25 @@ const InvestigationFieldsFormComponent = ({
     schema,
   });
 
+  const rulesTableContext = useRulesTableContext();
+  const {
+    state: { filterOptions, isAllSelected, selectedRuleIds },
+  } = rulesTableContext;
+  const queryOrIds = useMemo(
+    () =>
+      isAllSelected ? { query: convertRulesFilterToKQL(filterOptions) } : { ids: selectedRuleIds },
+    [filterOptions, isAllSelected, selectedRuleIds]
+  );
+  const { data: sources } = useBulkGetRulesSources(queryOrIds);
+  const { indexPatterns: sourcePatterns } = useGetAllIndexPatternsFromSources(sources);
+
   const { indexHelpText, indexLabel, formTitle } = getFormConfig(editAction);
 
   const [{ overwrite }] = useFormData({
     form,
     watch: ['overwrite'],
   });
-  const { uiSettings } = useKibana().services;
-  const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
-  const [_, { indexPatterns }] = useFetchIndex(defaultPatterns, false);
+  const [_, { indexPatterns }] = useFetchIndex(sourcePatterns, false);
   const fieldOptions = indexPatterns.fields.map((field) => ({
     label: field.name,
   }));

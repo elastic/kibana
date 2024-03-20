@@ -1,0 +1,48 @@
+openapi: 3.0.0
+info:
+  title: Get Rules Sources API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/rules/_bulk_get_sources:
+    summary: Returns rules sources
+    post:
+      operationId: BulkGetRulesSources
+      x-codegen-enabled: true
+      summary: Get rules sources
+      description: Returns rules sources.
+      tags:
+        - Bulk API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              x-inline: true
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: Query to filter rules
+                ids:
+                  type: array
+                  description: Array of rule IDs
+                  minItems: 1
+                  items:
+                    type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  indexPatterns:
+                    type: array
+                    description: Array of index patterns
+                    items:
+                      type: string
+                  dataViewIds:
+                    type: array
+                    description: Array of data view ids
+                    items:
+                      type: string

@@ -41,6 +41,7 @@ import {
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
+  DETECTION_ENGINE_RULES_BULK_GET_SOURCES,
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
@@ -326,6 +327,11 @@ export interface BulkActionErrorResponse {
   attributes?: BulkActionAttributes;
 }
 
+export interface BulkGetRulesSourcesResponse {
+  indexPatterns?: string[];
+  dataViewIds?: string[];
+}
+
 export type QueryOrIds = { query: string; ids?: undefined } | { query?: undefined; ids: string[] };
 type PlainBulkAction = {
   type: Exclude<
@@ -401,6 +407,33 @@ export async function bulkExportRules(queryOrIds: QueryOrIds): Promise<BulkExpor
     version: '2023-10-31',
     body: JSON.stringify(params),
   });
+}
+
+/**
+ * Bulk get rules sources selected by a filter query
+ *
+ * @param queryOrIds filter query to select rules to perform bulk action with or rule ids to select rules to perform bulk action with
+ *
+ * @throws An error if response is not OK
+ */
+export async function bulkGetRulesSources(
+  queryOrIds: QueryOrIds,
+  signal?: AbortSignal
+): Promise<BulkGetRulesSourcesResponse> {
+  const params = {
+    query: queryOrIds.query,
+    ids: queryOrIds.ids,
+  };
+
+  return KibanaServices.get().http.fetch<BulkGetRulesSourcesResponse>(
+    DETECTION_ENGINE_RULES_BULK_GET_SOURCES,
+    {
+      method: 'POST',
+      version: '2023-10-31',
+      body: JSON.stringify(params),
+      signal,
+    }
+  );
 }
 
 export interface CreatePrepackagedRulesResponse {
