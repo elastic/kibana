@@ -26,7 +26,7 @@ import { addNotesToTimeline, goToNotesTab } from '../../../tasks/timeline';
 
 import { deleteTimelines } from '../../../tasks/api_calls/common';
 
-const systemIndicesSuperuserName = 'system_indices_superuser';
+const systemIndicesSuperUserName = 'system_indices_superuser';
 const serverlessCloudUserName = Cypress.env('ELASTICSEARCH_USERNAME');
 const isCloudServerless = Cypress.env('CLOUD_SERVERLESS');
 
