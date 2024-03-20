@@ -82,11 +82,10 @@ export class DefaultAlertService {
       },
     });
 
-    const { actions, systemActions = [], ...alert } = data?.[0];
-    if (!alert) {
+    if (data.length === 0) {
       return;
     }
-
+    const { actions = [], systemActions = [], ...alert } = data[0];
     return { ...alert, actions: [...actions, ...systemActions], ruleTypeId: alert.alertTypeId };
   }
   async createDefaultAlertIfNotExist(ruleType: DefaultRuleType, name: string, interval: string) {
@@ -96,10 +95,9 @@ export class DefaultAlertService {
     }
 
     const actions = await this.getAlertActions(ruleType);
-
     const rulesClient = (await this.context.alerting)?.getRulesClient();
     const {
-      actions: actionsFromRules,
+      actions: actionsFromRules = [],
       systemActions = [],
       ...newAlert
     } = await rulesClient.create<{}>({
@@ -115,6 +113,7 @@ export class DefaultAlertService {
         throttle: null,
       },
     });
+
     return {
       ...newAlert,
       actions: [...actionsFromRules, ...systemActions],

@@ -141,7 +141,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     (async () => {
       let loadedConnectors: ActionConnector[] = [];
       try {
-        loadedConnectors = await loadConnectors({ http });
+        loadedConnectors = await loadConnectors({ http, includeSystemActions: true });
       } catch (err) {
         loadedConnectors = [];
       }

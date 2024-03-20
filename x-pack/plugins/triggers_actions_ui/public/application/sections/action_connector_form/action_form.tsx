@@ -179,7 +179,7 @@ export const ActionForm = ({
           await loadActionTypes({
             http,
             featureId,
-            includeSystemActions: ruleTypeId?.startsWith('example.'),
+            includeSystemActions: true,
           })
         ).sort((a, b) => a.name.localeCompare(b.name));
         const index: ActionTypeIndex = {};
@@ -206,8 +206,12 @@ export const ActionForm = ({
     (async () => {
       try {
         setIsLoadingConnectors(true);
-        const loadedConnectors = await loadConnectors({ http });
-        setConnectors(loadedConnectors.filter((connector) => !connector.isMissingSecrets));
+        const loadedConnectors = await loadConnectors({ http, includeSystemActions: true });
+        setConnectors(
+          loadedConnectors.filter(
+            (connector) => !connector.isMissingSecrets || connector.isSystemAction
+          )
+        );
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(

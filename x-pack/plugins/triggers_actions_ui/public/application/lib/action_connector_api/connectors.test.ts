@@ -20,7 +20,7 @@ describe('loadAllActions', () => {
     expect(result).toEqual([]);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/internal/actions/connectors",
+        "/api/actions/connectors",
       ]
     `);
   });

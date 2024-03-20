@@ -509,7 +509,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       context,
       operations,
       rule: ruleDomain,
-      ruleActions: ruleActions as RuleDomain['actions'], // TODO (http-versioning) Remove this cast once we fix injectReferencesIntoActions
+      ruleActions,
       ruleType,
     });
 
@@ -643,7 +643,7 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
   context: RulesClientContext;
   operations: BulkEditOperation[];
   rule: RuleDomain<Params>;
-  ruleActions: RuleDomain['actions'];
+  ruleActions: RuleDomain['actions'] | RuleDomain['systemActions'];
   ruleType: RuleType;
 }) {
   const actionsClient = await context.getActionsClient();

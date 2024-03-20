@@ -37,7 +37,7 @@ const rewriteBodyReq: RewriteRequestCase<ActionType> = ({
 export async function loadActionTypes({
   http,
   featureId,
-  includeSystemActions = true,
+  includeSystemActions = false,
 }: {
   http: HttpSetup;
   featureId?: string;
