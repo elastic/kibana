@@ -17,6 +17,7 @@ export interface AnomalySwimLaneComponentApi {
   viewBy: PublishingSubject<string>;
   perPage: PublishingSubject<number>;
   fromPage: PublishingSubject<number>;
+  interval: PublishingSubject<number | undefined>;
   updateUserInput: (input: AnomalySwimlaneEmbeddableUserInput) => void;
 }
 

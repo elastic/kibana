@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
 import { isSwimLaneEmbeddableContext } from './open_in_anomaly_explorer_action';
@@ -18,8 +19,10 @@ export type EditSwimlanePanelActionContext = EmbeddableApiContext & {
   embeddable: AnomalySwimLaneEmbeddableApi;
 };
 
-export function createEditSwimlanePanelAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<EditSwimlanePanelActionContext>({
+export function createEditSwimlanePanelAction(
+  getStartServices: MlCoreSetup['getStartServices']
+): UiActionsActionDefinition<EditSwimlanePanelActionContext> {
+  return {
     id: 'edit-anomaly-swimlane',
     type: EDIT_SWIMLANE_PANEL_ACTION,
     order: 50,
@@ -61,5 +64,5 @@ export function createEditSwimlanePanelAction(getStartServices: MlCoreSetup['get
         isSwimLaneEmbeddableContext(context) && context.embeddable.viewMode?.getValue() === 'edit'
       );
     },
-  });
+  };
 }

@@ -12,7 +12,7 @@ import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsOfType } from '@kbn/presentation-publishing';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { ML_APP_LOCATOR } from '../../common/constants/locator';
 import type { ExplorerAppState } from '../../common/types/locator';
@@ -66,10 +66,12 @@ const getTimeRange = (embeddable: MlEmbeddableBaseApi): TimeRange | undefined =>
   return embeddable.timeRange$?.getValue() ?? embeddable.parentApi?.timeRange$?.getValue();
 };
 
-export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<
-    OpenInAnomalyExplorerSwimLaneActionContext | OpenInAnomalyExplorerAnomalyChartsActionContext
-  >({
+export function createOpenInExplorerAction(
+  getStartServices: MlCoreSetup['getStartServices']
+): UiActionsActionDefinition<
+  OpenInAnomalyExplorerSwimLaneActionContext | OpenInAnomalyExplorerAnomalyChartsActionContext
+> {
+  return {
     id: 'open-in-anomaly-explorer',
     type: OPEN_IN_ANOMALY_EXPLORER_ACTION,
     order: 40,
@@ -168,5 +170,5 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
     async isCompatible(context: EmbeddableApiContext) {
       return isSwimLaneEmbeddableContext(context) || isAnomalyChartsEmbeddableContext(context);
     },
-  });
+  };
 }

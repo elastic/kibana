@@ -49,6 +49,7 @@ export class AnomalySwimlaneEmbeddable extends AnomalyDetectionEmbeddable<
   public swimlaneType: BehaviorSubject<SwimlaneType | undefined>;
   public perPage: BehaviorSubject<number | undefined>;
   public fromPage: BehaviorSubject<number | undefined>;
+  public interval: BehaviorSubject<number | undefined>;
 
   private apiSubscriptions = new Subscription();
 
@@ -81,6 +82,12 @@ export class AnomalySwimlaneEmbeddable extends AnomalyDetectionEmbeddable<
       this.apiSubscriptions,
       this,
       'fromPage'
+    );
+
+    this.interval = embeddableOutputToSubject<number, AnomalySwimlaneEmbeddableOutput>(
+      this.apiSubscriptions,
+      this,
+      'interval'
     );
   }
 
