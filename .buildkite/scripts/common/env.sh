@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo '--- Setup environment vars'
+
 export CI=true
 
 KIBANA_DIR=$(pwd)
